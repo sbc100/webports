@@ -61,13 +61,19 @@ def DownloadSDK(platform, base_url, version):
   # Pick target directory.
   script_dir = os.path.abspath(os.path.dirname(__file__))
   parent_dir = os.path.split(script_dir)[0]
-  if sys.platform == 'win32':
-    cygwin_dir = os.path.join(parent_dir, 'third_party', 'cygwin', 'bin')
   toolchain_dir = os.path.join(parent_dir, 'toolchain')
   target = os.path.join(toolchain_dir, platform)
 
   tgz_dir = os.path.join(script_dir)
   tgz_filename = os.path.join(tgz_dir, path)
+
+  # Drop old versions on mac/linux.
+  if sys.platform not in ['win32', 'cygwin']:
+    print 'Cleaning up old SDKs...'
+    cmd = 'rm -rf "%s/native_client_sdk_*"' % target
+    p = subprocess.Popen(cmd, shell=True)
+    p.communicate()
+    assert p.returncode == 0
 
   print 'Downloading "%s" to "%s"...' % (url, tgz_filename)
   sys.stdout.flush()
@@ -81,18 +87,22 @@ def DownloadSDK(platform, base_url, version):
   if sys.platform in ['win32', 'cygwin']:
     cmd = tgz_filename + ' /S'
   else:
-    cmd = 'tar xfzv "%s" && ( mv sdk/nacl-sdk/* "%s" || mv */* "%s" )' % (
-        path, target.replace('\\', '/'), target.replace('\\', '/')),
+    cmd = (
+        'tar xfzv "%s" && '
+        'cd ../ && rm -f toolchain && '
+        'ln -fs build_tools/native_client_sdk_*/toolchain .'
+    ) % path
   p = subprocess.Popen(cmd, shell=True)
   p.communicate()
   assert p.returncode == 0
   os.chdir(old_cwd)
 
   # Clean up: remove the sdk tgz/exe.
+  time.sleep(2)  # Wait for windows.
   os.remove(tgz_filename)
 
   print 'Install complete.'
-  
+
 
 PLATFORM_COLLAPSE = {
     'win32': 'win',
