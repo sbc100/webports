@@ -41,6 +41,8 @@ set -o errexit
 (cd scripts/ffmpeg-0.5; ./nacl-ffmpeg-0.5.sh)
 (cd scripts/Mesa-7.6; ./nacl-Mesa-7.6.sh)
 (cd scripts/libmodplug-0.8.7; ./nacl-libmodplug-0.8.7.sh)
+(cd scripts/memory_filesys; ./nacl-memory_filesys.sh)
+(cd scripts/nethack-3.4.3; ./nacl-nethack-3.4.3.sh)
 #(cd scripts/OpenSceneGraph-2.9.7; ./nacl-OpenSceneGraph-2.9.7.sh)
 
 exit 0

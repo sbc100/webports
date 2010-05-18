@@ -26,6 +26,8 @@ source scripts/common.sh
 Remove ${NACL_PACKAGES_TARBALLS}
 # remove all downloaded, extracted, patched sources in the repository
 Remove ${NACL_PACKAGES_REPOSITORY}
+# remove all published binaries
+Remove ${NACL_PACKAGES_PUBLISH}
 # remove all installed headers, libraries, man pages, etc. in sdk usr
 Remove ${NACL_SDK_USR}
 # re-populate with empty directories

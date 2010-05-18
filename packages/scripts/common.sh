@@ -34,9 +34,10 @@ readonly NACL_SDK_BASE=${NACL_SDK_BASE:-\
 ${NACL_NATIVE_CLIENT_SDK}/toolchain/${OS_SUBDIR_SHORT}_x86}
 
 # packages subdirectories
+readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES}/publish
 readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES}/repository
-readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES}/tarballs
 readonly NACL_PACKAGES_SCRIPTS=${NACL_PACKAGES}/scripts
+readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES}/tarballs
 
 # sha1check python script
 readonly SHA1CHECK=${NACL_PACKAGES_SCRIPTS}/sha1check.py
@@ -226,6 +227,7 @@ DefaultPreInstallStep() {
   MakeDir ${NACL_SDK_USR_LIB}
   MakeDir ${NACL_PACKAGES_REPOSITORY}
   MakeDir ${NACL_PACKAGES_TARBALLS}
+  MakeDir ${NACL_PACKAGES_PUBLISH}
   Remove ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
