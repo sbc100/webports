@@ -85,12 +85,16 @@ def DownloadSDK(platform, base_url, version):
   old_cwd = os.getcwd()
   os.chdir(tgz_dir)
   if sys.platform in ['win32', 'cygwin']:
-    cmd = tgz_filename + ' /S'
+    cmd = tgz_filename + (
+        ' /S /D=c:\\native_client_sdk&& '
+        'cd .. && '
+        r'c:\native_client_sdk\third_party\cygwin\ln.exe -fsn '
+        'c:/native_client_sdk/toolchain toolchain')
   else:
     cmd = (
         'tar xfzv "%s" && '
-        'cd ../ && rm -f toolchain && '
-        'ln -fs build_tools/native_client_sdk_*/toolchain .'
+        'cd .. && rm -f toolchain && '
+        'ln -fsn build_tools/native_client_sdk_*/toolchain toolchain'
     ) % path
   p = subprocess.Popen(cmd, shell=True)
   p.communicate()
