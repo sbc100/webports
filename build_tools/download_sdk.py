@@ -88,7 +88,7 @@ def DownloadSDK(platform, base_url, version):
     cmd = tgz_filename + (
         ' /S /D=c:\\native_client_sdk&& '
         'cd .. && '
-        r'c:\native_client_sdk\third_party\cygwin\ln.exe -fsn '
+        r'c:\native_client_sdk\third_party\cygwin\bin\ln.exe -fsn '
         'c:/native_client_sdk/toolchain toolchain')
   else:
     cmd = (
