@@ -1,5 +1,5 @@
 vars = {
-  "compiler_version": "2270",
+  "sdk_version": "latest",
 }
 
 deps = {
@@ -8,8 +8,8 @@ deps = {
 hooks = [
   {
     "pattern": ".",
-    "action": ["python", "src/build_tools/download_compilers.py",
-               "-v", Var("compiler_version")],
+    "action": ["python", "src/build_tools/download_sdk.py",
+               "-v", Var("sdk_version")],
   }
 ]
 
