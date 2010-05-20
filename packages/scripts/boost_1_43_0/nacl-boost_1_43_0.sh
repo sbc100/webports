@@ -32,17 +32,6 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
-CustomInstallStep() {
-  # copy libs and headers manually
-  ChangeDir ${NACL_SDK_USR_INCLUDE}
-  Remove ${PACKAGE_NAME}
-  MakeDir ${PACKAGE_NAME}
-  readonly TARGET=${NACL_SDK_USR_INCLUDE}/${PACKAGE_NAME}
-  readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  ChangeDir ${THIS_PACKAGE_PATH}
-  tar cf - --exclude='asio' --exclude='asio.hpp' --exclude='mpi' --exclude='mpi.hpp' --exclude='python' --exclude='python.hpp' ./boost | ( cd ${TARGET}; tar xfp -)
-}
-
 CustomPackageInstall() {
    DefaultPreInstallStep
    DefaultDownloadStep
@@ -50,7 +39,7 @@ CustomPackageInstall() {
    DefaultPatchStep
    CustomConfigureStep
    DefaultBuildStep
-   CustomInstallStep
+   DefaultInstallStep
    DefaultCleanUpStep
 }
 
