@@ -1,7 +1,7 @@
 diff -Naur OpenSceneGraph-2.9.7/Makefile OpenSceneGraph-2.9.7.nacl/Makefile
 --- OpenSceneGraph-2.9.7/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/Makefile	2010-05-19 11:16:13.000000000 -0600
-@@ -0,0 +1,14 @@
++++ OpenSceneGraph-2.9.7.nacl/Makefile	2010-05-19 15:35:29.000000000 -0600
+@@ -0,0 +1,25 @@
 +export CXXFLAGS = -O3
 +
 +.PHONY: all clean
@@ -16,9 +16,20 @@ diff -Naur OpenSceneGraph-2.9.7/Makefile OpenSceneGraph-2.9.7.nacl/Makefile
 +	cd src/osg && $(MAKE) clean
 +	cd src/osgUtil && $(MAKE) clean
 +	cd src/OpenThreads && $(MAKE) clean
++
++install:
++	@echo Installing OpenSceneGraph
++	$(shell cd $(NACL_INCLUDE); \
++			rm -rf osg; rm -rf osgUtil; rm -rf OpenThreads; \
++			cp -r $(PACKAGE_PATH)/include/osg osg; \
++			cp -r $(PACKAGE_PATH)/include/osgUtil osgUtil; \
++			cp -r $(PACKAGE_PATH)/include/OpenThreads OpenThreads)
++	cd src/osg && $(MAKE) install
++	cd src/osgUtil && $(MAKE) install
++	cd src/OpenThreads && $(MAKE) install
 diff -Naur OpenSceneGraph-2.9.7/include/OpenThreads/Config OpenSceneGraph-2.9.7.nacl/include/OpenThreads/Config
 --- OpenSceneGraph-2.9.7/include/OpenThreads/Config	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/include/OpenThreads/Config	2010-05-19 11:11:46.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/include/OpenThreads/Config	2010-05-19 12:54:26.000000000 -0600
 @@ -0,0 +1,42 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 2008 Robert Osfield 
 + *
@@ -64,7 +75,7 @@ diff -Naur OpenSceneGraph-2.9.7/include/OpenThreads/Config OpenSceneGraph-2.9.7.
 +#endif
 diff -Naur OpenSceneGraph-2.9.7/include/osg/Config OpenSceneGraph-2.9.7.nacl/include/osg/Config
 --- OpenSceneGraph-2.9.7/include/osg/Config	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/include/osg/Config	2010-05-19 11:12:00.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/include/osg/Config	2010-05-19 12:54:26.000000000 -0600
 @@ -0,0 +1,48 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 2008-2009 Robert Osfield
 + *
@@ -116,8 +127,8 @@ diff -Naur OpenSceneGraph-2.9.7/include/osg/Config OpenSceneGraph-2.9.7.nacl/inc
 +#endif
 diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/Makefile OpenSceneGraph-2.9.7.nacl/src/OpenThreads/Makefile
 --- OpenSceneGraph-2.9.7/src/OpenThreads/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/Makefile	2010-05-19 10:11:18.000000000 -0600
-@@ -0,0 +1,37 @@
++++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/Makefile	2010-05-19 15:35:07.000000000 -0600
+@@ -0,0 +1,41 @@
 +OSG_ROOT = ../..
 +
 +INCLUDE = -I$(OSG_ROOT)/include
@@ -142,6 +153,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/Makefile OpenSceneGraph-2.9.7.na
 +clean:
 +	rm -rf $(OBJ_DIR) $(LIB_OPENTHREADS)
 +
++install:
++	$(shell cd $(PKG_CONFIG_LIBDIR); rm -f $(LIB_OPENTHREADS))
++	cp -f $(LIB_OPENTHREADS) $(PKG_CONFIG_LIBDIR)
++
 +$(OBJ_DIR):
 +	mkdir $(OBJ_DIR)
 +	mkdir $(OBJ_DIR)/common
@@ -157,7 +172,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/Makefile OpenSceneGraph-2.9.7.na
 +	cd $(OBJ_DIR) && $(AR) rcs ../$(LIB_OPENTHREADS) $(COMMON_OBJ_FILES)
 diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/common/Version.in OpenSceneGraph-2.9.7.nacl/src/OpenThreads/common/Version.in
 --- OpenSceneGraph-2.9.7/src/OpenThreads/common/Version.in	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/common/Version.in	2010-05-19 11:13:23.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/common/Version.in	2010-05-19 12:54:26.000000000 -0600
 @@ -0,0 +1,38 @@
 +/* -*-c++-*- OpenThreads library, Copyright (C) 2002 - 2007  The Open Thread Group
 + *
@@ -199,7 +214,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/common/Version.in OpenSceneGraph
 +#endif
 diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThread.c++
 --- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++	2009-11-20 03:27:43.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThread.c++	2010-05-19 11:13:23.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThread.c++	2010-05-19 12:54:26.000000000 -0600
 @@ -45,6 +45,7 @@
  #endif
  
@@ -336,7 +351,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  
 diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadBarrier.c++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadBarrier.c++
 --- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadBarrier.c++	2009-07-13 10:14:43.000000000 -0600
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadBarrier.c++	2010-05-19 11:13:23.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadBarrier.c++	2010-05-19 12:54:26.000000000 -0600
 @@ -21,6 +21,7 @@
  #include <unistd.h>
  #include <OpenThreads/Barrier>
@@ -361,7 +376,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadBarrier.c++ Open
      }
 diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCleanup.h OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCleanup.h
 --- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCleanup.h	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCleanup.h	2010-05-19 11:13:23.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCleanup.h	2010-05-19 12:54:26.000000000 -0600
 @@ -0,0 +1,28 @@
 +#ifndef _PTHREADCLEANUP_H_
 +#define _PTHREADCLEANUP_H_
@@ -393,7 +408,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCleanup.h OpenSc
 +#endif
 diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCondition.c++
 --- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++	2007-09-07 09:26:18.000000000 -0600
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCondition.c++	2010-05-19 11:13:23.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCondition.c++	2010-05-19 12:54:26.000000000 -0600
 @@ -26,6 +26,7 @@
  #include <stdio.h>
  
@@ -432,7 +447,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++ Op
  
 diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadPrivateData.h OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadPrivateData.h
 --- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadPrivateData.h	2007-09-25 03:45:44.000000000 -0600
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadPrivateData.h	2010-05-19 11:13:23.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadPrivateData.h	2010-05-19 12:54:26.000000000 -0600
 @@ -25,6 +25,8 @@
  
  namespace OpenThreads {
@@ -453,7 +468,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadPrivateData.h Op
      static int nextId;
 diff -Naur OpenSceneGraph-2.9.7/src/osg/GLExtensions.cpp OpenSceneGraph-2.9.7.nacl/src/osg/GLExtensions.cpp
 --- OpenSceneGraph-2.9.7/src/osg/GLExtensions.cpp	2010-02-10 05:44:59.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/GLExtensions.cpp	2010-05-19 11:12:31.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/osg/GLExtensions.cpp	2010-05-19 12:54:26.000000000 -0600
 @@ -27,9 +27,32 @@
  #include <set>
  
@@ -738,7 +753,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/GLExtensions.cpp OpenSceneGraph-2.9.7.na
 -}
 diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.cpp OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.cpp
 --- OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.cpp	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.cpp	2010-05-19 11:13:02.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.cpp	2010-05-19 12:54:26.000000000 -0600
 @@ -0,0 +1,211 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield 
 + * Copyright (C) 2003-2005 3Dlabs Inc. Ltd.
@@ -953,7 +968,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.cpp OpenSceneGraph-2.9.7
 +#endif  // OSG_GLES2_LIBRARY_STATIC
 diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.h OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.h
 --- OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.h	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.h	2010-05-19 11:13:02.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.h	2010-05-19 12:54:26.000000000 -0600
 @@ -0,0 +1,33 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield 
 + * Copyright (C) 2003-2005 3Dlabs Inc. Ltd.
@@ -990,8 +1005,8 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.h OpenSceneGraph-2.9.7.n
 +#endif
 diff -Naur OpenSceneGraph-2.9.7/src/osg/Makefile OpenSceneGraph-2.9.7.nacl/src/osg/Makefile
 --- OpenSceneGraph-2.9.7/src/osg/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/Makefile	2010-05-19 11:20:40.000000000 -0600
-@@ -0,0 +1,157 @@
++++ OpenSceneGraph-2.9.7.nacl/src/osg/Makefile	2010-05-19 15:33:10.000000000 -0600
+@@ -0,0 +1,161 @@
 +OSG_ROOT = ../..
 +
 +INCLUDE = -I$(OSG_ROOT)/include
@@ -1141,6 +1156,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/Makefile OpenSceneGraph-2.9.7.nacl/src/o
 +clean:
 +	rm -rf $(OBJ_DIR) $(LIB_OSG)
 +
++install:
++	$(shell cd $(PKG_CONFIG_LIBDIR); rm -f $(LIB_OSG))
++	cp -f $(LIB_OSG) $(PKG_CONFIG_LIBDIR)
++
 +$(OBJ_DIR):
 +	mkdir $(OBJ_DIR)
 +
@@ -1151,7 +1170,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/Makefile OpenSceneGraph-2.9.7.nacl/src/o
 +	cd $(OBJ_DIR) && $(AR) rcs ../$(LIB_OSG) $(OBJ_FILES)
 diff -Naur OpenSceneGraph-2.9.7/src/osg/Notify.cpp OpenSceneGraph-2.9.7.nacl/src/osg/Notify.cpp
 --- OpenSceneGraph-2.9.7/src/osg/Notify.cpp	2010-02-12 04:45:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/Notify.cpp	2010-05-19 11:12:50.000000000 -0600
++++ OpenSceneGraph-2.9.7.nacl/src/osg/Notify.cpp	2010-05-19 12:54:26.000000000 -0600
 @@ -219,7 +219,7 @@
  
  void osg::StandardNotifyHandler::notify(osg::NotifySeverity severity, const char *message)
@@ -1174,8 +1193,8 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/Notify.cpp OpenSceneGraph-2.9.7.nacl/src
  void osg::WinDebugNotifyHandler::notify(osg::NotifySeverity severity, const char *message)
 diff -Naur OpenSceneGraph-2.9.7/src/osgUtil/Makefile OpenSceneGraph-2.9.7.nacl/src/osgUtil/Makefile
 --- OpenSceneGraph-2.9.7/src/osgUtil/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osgUtil/Makefile	2010-05-19 11:19:13.000000000 -0600
-@@ -0,0 +1,60 @@
++++ OpenSceneGraph-2.9.7.nacl/src/osgUtil/Makefile	2010-05-19 15:34:32.000000000 -0600
+@@ -0,0 +1,64 @@
 +OSG_ROOT = ../..
 +
 +INCLUDE = -I$(OSG_ROOT)/include
@@ -1227,6 +1246,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/osgUtil/Makefile OpenSceneGraph-2.9.7.nacl/s
 +
 +clean:
 +	rm -rf $(OBJ_DIR) $(LIB_OSGUTIL)
++
++install:
++	$(shell cd $(PKG_CONFIG_LIBDIR); rm -f $(LIB_OSGUTIL))
++	cp -f $(LIB_OSGUTIL) $(PKG_CONFIG_LIBDIR)
 +
 +$(OBJ_DIR):
 +	mkdir $(OBJ_DIR)

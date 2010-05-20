@@ -49,20 +49,20 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
   export NACL_INCLUDE=${NACL_SDK_USR_INCLUDE}
+  export PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
 CustomInstallStep() {
   # copy libs and headers manually
   ChangeDir ${NACL_SDK_USR_INCLUDE}
-  Remove ${PACKAGE_NAME}
-  MakeDir ${PACKAGE_NAME}
-  MakeDir ${PACKAGE_NAME}/osg
-  MakeDir ${PACKAGE_NAME}/osgUtil
+  Remove osg
+  Remove osgUtil
+  Remove OpenThreads
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp -R ${THIS_PACKAGE_PATH}/include/osg ${PACKAGE_NAME}/osg
-  cp -R ${THIS_PACKAGE_PATH}/include/osgUtil ${PACKAGE_NAME}/osgUtil
-  cp -R ${THIS_PACKAGE_PATH}/include/OpenThreads ${PACKAGE_NAME}/OpenThreads
+  cp -R ${THIS_PACKAGE_PATH}/include/osg osg
+  cp -R ${THIS_PACKAGE_PATH}/include/osgUtil osgUtil
+  cp -R ${THIS_PACKAGE_PATH}/include/OpenThreads OpenThreads
   ChangeDir ${NACL_SDK_USR_LIB}
   cp ${THIS_PACKAGE_PATH}/src/osg/libosg.a .
   cp ${THIS_PACKAGE_PATH}/src/osgUtil/libosgUtil.a .
@@ -76,7 +76,7 @@ CustomPackageInstall() {
    DefaultPatchStep
    CustomConfigureStep
    DefaultBuildStep
-   CustomInstallStep
+   DefaultInstallStep
    DefaultCleanUpStep
 }
 
