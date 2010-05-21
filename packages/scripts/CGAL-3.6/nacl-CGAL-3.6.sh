@@ -25,12 +25,17 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  export NACL_INCLUDE=${NACL_SDK_USR_INCLUDE}
-  export PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  export LIB_CGAL=libCGAL.a
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+}
+
+CustomInstallStep() {
+  Remove ${NACL_SDK_USR_LIB}/${LIB_CGAL}
+  install --mode=644 ${LIB_CGAL} ${NACL_SDK_USR_LIB}/${LIB_CGAL}
+  Remove ${NACL_SDK_USR_INCLUDE}/CGAL
+  ChangeDir include
+  tar cf - --exclude='Geomview_stream.h' CGAL | \
+    ( ChangeDir ${NACL_SDK_USR_INCLUDE} ; tar xfp - )
 }
 
 CustomPackageInstall() {
@@ -40,7 +45,7 @@ CustomPackageInstall() {
    DefaultPatchStep
    CustomConfigureStep
    DefaultBuildStep
-   DefaultInstallStep
+   CustomInstallStep
    DefaultCleanUpStep
 }
 

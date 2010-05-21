@@ -45,28 +45,30 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  export NACL_INCLUDE=${NACL_SDK_USR_INCLUDE}
-  export PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  export LIB_OSG=libosg.a
+  export LIB_OSGUTIL=libosgUtil.a
+  export LIB_OPENTHREADS=libOpenThreads.a
+
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
 CustomInstallStep() {
-  # copy libs and headers manually
-  ChangeDir ${NACL_SDK_USR_INCLUDE}
-  Remove osg
-  Remove osgUtil
-  Remove OpenThreads
+  Remove ${NACL_SDK_USR_INCLUDE}/osg
+  Remove ${NACL_SDK_USR_INCLUDE}/osgUtil
+  Remove ${NACL_SDK_USR_INCLUDE}/OpenThreads
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp -R ${THIS_PACKAGE_PATH}/include/osg osg
-  cp -R ${THIS_PACKAGE_PATH}/include/osgUtil osgUtil
-  cp -R ${THIS_PACKAGE_PATH}/include/OpenThreads OpenThreads
-  ChangeDir ${NACL_SDK_USR_LIB}
-  cp ${THIS_PACKAGE_PATH}/src/osg/libosg.a .
-  cp ${THIS_PACKAGE_PATH}/src/osgUtil/libosgUtil.a .
-  cp ${THIS_PACKAGE_PATH}/src/OpenThreads/libOpenThreads.a .
+  cp -R include/osg ${NACL_SDK_USR_INCLUDE}/osg
+  cp -R include/osgUtil ${NACL_SDK_USR_INCLUDE}/osgUtil
+  cp -R include/OpenThreads ${NACL_SDK_USR_INCLUDE}/OpenThreads
+  Remove ${NACL_SDK_USR_LIB}/libosg.a
+  Remove ${NACL_SDK_USR_LIB}/libosgUtil.a
+  Remove ${NACL_SDK_USR_LIB}/libOpenThreads.a
+  echo ${NACL_SDK_USR_INCLUDE}
+  echo ${NACLCXX}
+  install --mode=644 ${LIB_OSG} ${NACL_SDK_USR_LIB}/${LIB_OSG}
+  install --mode=644 ${LIB_OSGUTIL} ${NACL_SDK_USR_LIB}/${LIB_OSGUTIL}
+  install --mode=644 ${LIB_OPENTHREADS} ${NACL_SDK_USR_LIB}/${LIB_OPENTHREADS}
 }
 
 CustomPackageInstall() {
@@ -76,7 +78,7 @@ CustomPackageInstall() {
    DefaultPatchStep
    CustomConfigureStep
    DefaultBuildStep
-   DefaultInstallStep
+   CustomInstallStep
    DefaultCleanUpStep
 }
 

@@ -25,11 +25,12 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  export NACL_INCLUDE=${NACL_SDK_USR_INCLUDE}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+}
+
+CustomInstallStep() {
+  Remove ${NACL_SDK_USR_INCLUDE}/boost
+  tar cf - --exclude='asio.hpp' --exclude='asio' --exclude='mpi.hpp' --exclude='mpi' --exclude='python.hpp' --exclude='python' boost | ( ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -)
 }
 
 CustomPackageInstall() {
@@ -39,7 +40,7 @@ CustomPackageInstall() {
    DefaultPatchStep
    CustomConfigureStep
    DefaultBuildStep
-   DefaultInstallStep
+   CustomInstallStep
    DefaultCleanUpStep
 }
 
