@@ -1,6 +1,6 @@
 diff -Naur nethack-3.4.3-orig/include/config.h nethack-3.4.3/include/config.h
 --- nethack-3.4.3-orig/include/config.h	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/include/config.h	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/include/config.h	2010-05-24 12:46:49.484393000 -0700
 @@ -169,7 +169,7 @@
  
  #ifdef UNIX
@@ -12,7 +12,7 @@ diff -Naur nethack-3.4.3-orig/include/config.h nethack-3.4.3/include/config.h
  /* #define COMPRESS "/usr/local/bin/gzip" */	/* FSF gzip compression */
 diff -Naur nethack-3.4.3-orig/include/config1.h nethack-3.4.3/include/config1.h
 --- nethack-3.4.3-orig/include/config1.h	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/include/config1.h	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/include/config1.h	2010-05-24 12:46:49.489389000 -0700
 @@ -144,7 +144,7 @@
  #  else
  #   define NHSTDC
@@ -24,7 +24,7 @@ diff -Naur nethack-3.4.3-orig/include/config1.h nethack-3.4.3/include/config1.h
  #  undef __HIDE_FORBIDDEN_NAMES /* need non-ANSI library support functions */
 diff -Naur nethack-3.4.3-orig/include/system.h nethack-3.4.3/include/system.h
 --- nethack-3.4.3-orig/include/system.h	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/include/system.h	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/include/system.h	2010-05-24 12:46:49.496391000 -0700
 @@ -422,7 +422,7 @@
  E unsigned int	FDECL(strlen, (char *));
  #  else
@@ -36,7 +36,7 @@ diff -Naur nethack-3.4.3-orig/include/system.h nethack-3.4.3/include/system.h
  # endif /* MICRO */
 diff -Naur nethack-3.4.3-orig/include/unixconf.h nethack-3.4.3/include/unixconf.h
 --- nethack-3.4.3-orig/include/unixconf.h	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/include/unixconf.h	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/include/unixconf.h	2010-05-24 12:46:49.503422000 -0700
 @@ -34,7 +34,7 @@
  /* define any of the following that are appropriate */
  #define SVR4		/* use in addition to SYSV for System V Release 4 */
@@ -105,7 +105,7 @@ diff -Naur nethack-3.4.3-orig/include/unixconf.h nethack-3.4.3/include/unixconf.
  
 diff -Naur nethack-3.4.3-orig/src/options.c nethack-3.4.3/src/options.c
 --- nethack-3.4.3-orig/src/options.c	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/src/options.c	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/src/options.c	2010-05-24 12:46:49.530399000 -0700
 @@ -557,6 +557,7 @@
  # endif
  	}
@@ -116,7 +116,7 @@ diff -Naur nethack-3.4.3-orig/src/options.c nethack-3.4.3/src/options.c
  	/* detect whether a "vt" terminal can handle alternate charsets */
 diff -Naur nethack-3.4.3-orig/sys/share/unixtty.c nethack-3.4.3/sys/share/unixtty.c
 --- nethack-3.4.3-orig/sys/share/unixtty.c	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/share/unixtty.c	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/sys/share/unixtty.c	2010-05-24 12:46:49.538397000 -0700
 @@ -168,8 +168,10 @@
  static void
  setctty()
@@ -229,7 +229,7 @@ diff -Naur nethack-3.4.3-orig/sys/share/unixtty.c nethack-3.4.3/sys/share/unixtt
  void
 diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makefile.src
 --- nethack-3.4.3-orig/sys/unix/Makefile.src	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/unix/Makefile.src	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/sys/unix/Makefile.src	2010-05-24 12:46:49.548406000 -0700
 @@ -152,7 +152,39 @@
  # CFLAGS = -g -I../include
  
@@ -295,7 +295,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  # If USE_XPM is defined in config.h, you will also need -lXpm here.
 diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.top nethack-3.4.3/sys/unix/Makefile.top
 --- nethack-3.4.3-orig/sys/unix/Makefile.top	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/unix/Makefile.top	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/sys/unix/Makefile.top	2010-05-24 12:46:49.553395000 -0700
 @@ -14,7 +14,7 @@
  # MAKE = make
  
@@ -318,7 +318,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.top nethack-3.4.3/sys/unix/Makef
  # end of configuration
 diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.utl nethack-3.4.3/sys/unix/Makefile.utl
 --- nethack-3.4.3-orig/sys/unix/Makefile.utl	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/unix/Makefile.utl	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/sys/unix/Makefile.utl	2010-05-24 12:47:17.555382000 -0700
 @@ -15,7 +15,7 @@
  
  # if you are using gcc as your compiler,
@@ -328,7 +328,14 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.utl nethack-3.4.3/sys/unix/Makef
  #
  #	For Bull DPX/2 systems at B.O.S. 2.0 or higher use the following:
  #
-@@ -95,17 +95,17 @@
+@@ -89,23 +89,23 @@
+ # flags for debugging:
+ # CFLAGS = -g -I../include
+ 
+-CFLAGS = -O -I../include
++CFLAGS = -O -I../include -DPOSIX_TYPES
+ LFLAGS =
+ 
  LIBS =
   
  # If you are cross-compiling, you must use this:
@@ -354,7 +361,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.utl nethack-3.4.3/sys/unix/Makef
  # and similar systems, they may differ
 diff -Naur nethack-3.4.3-orig/sys/unix/unixmain.c nethack-3.4.3/sys/unix/unixmain.c
 --- nethack-3.4.3-orig/sys/unix/unixmain.c	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/unix/unixmain.c	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/sys/unix/unixmain.c	2010-05-24 12:46:49.563387000 -0700
 @@ -49,6 +49,7 @@
  int argc;
  char *argv[];
@@ -365,7 +372,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/unixmain.c nethack-3.4.3/sys/unix/unixmai
  	register char *dir;
 diff -Naur nethack-3.4.3-orig/win/tty/termcap.c nethack-3.4.3/win/tty/termcap.c
 --- nethack-3.4.3-orig/win/tty/termcap.c	2003-12-07 15:39:14.000000000 -0800
-+++ nethack-3.4.3/win/tty/termcap.c	2010-05-23 22:16:38.000000000 -0700
++++ nethack-3.4.3/win/tty/termcap.c	2010-05-24 12:46:49.573448000 -0700
 @@ -108,6 +108,7 @@
  # if defined(TOS) && defined(__GNUC__)
  	if (!term)
