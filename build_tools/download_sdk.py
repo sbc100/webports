@@ -70,7 +70,7 @@ def DownloadSDK(platform, base_url, version):
   # Drop old versions on mac/linux.
   if sys.platform not in ['win32', 'cygwin']:
     print 'Cleaning up old SDKs...'
-    cmd = 'rm -rf "%s/native_client_sdk_*"' % target
+    cmd = 'rm -rf "%s"/native_client_sdk_*' % tgz_dir
     p = subprocess.Popen(cmd, shell=True)
     p.communicate()
     assert p.returncode == 0
