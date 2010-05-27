@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that be
 # found in the LICENSE file.
 #
+# Environment variable NACL_PACKAGES_BITSIZE should be unset or set to "32"
+# for a 32-bit build.  It should be set to "64" for a 64-bit build.
 
 set -o nounset
 set -o errexit
@@ -26,6 +28,17 @@ else
   readonly OS_SUBDIR_SHORT="win"
 fi
 
+# Get the desired bit size.
+readonly NACL_PACKAGES_BITSIZE=${NACL_PACKAGES_BITSIZE:-"32"}
+if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
+  readonly NACL_BIT_SPEC=""
+elif [ $NACL_PACKAGES_BITSIZE = "64" ] ; then
+  readonly NACL_BIT_SPEC="64"
+else
+  echo "Unknown value for NACL_PACKAGES_BITSIZE: '$NACL_PACKAGES_BITSIZE'" 1>&2
+  exit 1
+fi
+
 # locate default nacl_sdk toolchain
 # TODO: x86 only at the moment
 readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
@@ -43,11 +56,11 @@ readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES}/tarballs
 readonly SHA1CHECK=${NACL_PACKAGES_SCRIPTS}/sha1check.py
 
 readonly NACL_BIN_PATH=${NACL_SDK_BASE}/bin
-readonly NACLCC=${NACL_SDK_BASE}/bin/nacl-gcc
-readonly NACLCXX=${NACL_SDK_BASE}/bin/nacl-g++
-readonly NACLAR=${NACL_SDK_BASE}/bin/nacl-ar
-readonly NACLRANLIB=${NACL_SDK_BASE}/bin/nacl-ranlib
-readonly NACLLD=${NACL_SDK_BASE}/bin/nacl-ld
+readonly NACLCC=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-gcc
+readonly NACLCXX=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-g++
+readonly NACLAR=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ar
+readonly NACLRANLIB=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ranlib
+readonly NACLLD=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ld
 
 # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
 readonly NACL_SDK_GCC_SPECS_PATH=${NACL_SDK_BASE}/lib/gcc/nacl64/4.4.3
