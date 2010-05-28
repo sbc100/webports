@@ -8,7 +8,8 @@
 #
 # usage:  nacl-clean-all.sh
 #
-# This script removes all packages installed for Native Client.
+# This script removes all packages installed for Native Client and
+# deletes all object files for both 32-bit and 64-bit.
 # Use nacl-install-all.sh to re-install all packages.
 #
 # TODO: if files other than those made by nacl-install-all.sh are
@@ -20,20 +21,13 @@
 readonly PACKAGE_NAME=
 readonly URL=
 
-source scripts/common.sh
-
-# remove all tarballs
-Remove ${NACL_PACKAGES_TARBALLS}
-# remove all downloaded, extracted, patched sources in the repository
-Remove ${NACL_PACKAGES_REPOSITORY}
-# remove all published binaries
-Remove ${NACL_PACKAGES_PUBLISH}
-# remove all installed headers, libraries, man pages, etc. in sdk usr
-Remove ${NACL_SDK_USR}
-# re-populate with empty directories
-DefaultPreInstallStep
-# remove specs file that adds include & lib paths to nacl-gcc
-Remove ${NACL_SDK_BASE}/lib/gcc/nacl/4.2.2/specs
-# remove the installed.txt file that lists which packages are installed
-Remove ${NACL_PACKAGES}/installed.txt
+code_dir=`dirname $0`
+if ! "${code_dir}"/nacl-clean-all-bitsize.sh 32 ; then
+  echo "Error cleaning for 32-bits." 1>&2
+  exit 1
+fi
+if ! "${code_dir}"/nacl-clean-all-bitsize.sh 64 ; then
+  echo "Error cleaning for 64-bits." 1>&2
+  exit 1
+fi
 exit 0
