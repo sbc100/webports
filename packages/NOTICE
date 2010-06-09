@@ -1,6 +1,8 @@
 ======================================================================
 repository/ImageMagick-6.5.4-10 is licensed as follows
   (Cf. repository/ImageMagick-6.5.4-10/LICENSE):
+repository64/ImageMagick-6.5.4-10 is licensed as follows
+  (Cf. repository64/ImageMagick-6.5.4-10/LICENSE):
 ======================================================================
 The authoratitive ImageMagick license can be found at
 http://www.imagemagick.org/script/license.php and ImageMagick notices at
@@ -105,6 +107,8 @@ To apply the ImageMagick License to your work, attach the following boilerplate 
 ======================================================================
 repository/ImageMagick-6.5.4-10/www/Magick++ is licensed as follows
   (Cf. repository/ImageMagick-6.5.4-10/www/Magick++/COPYING):
+repository64/ImageMagick-6.5.4-10/www/Magick++ is licensed as follows
+  (Cf. repository64/ImageMagick-6.5.4-10/www/Magick++/COPYING):
 ======================================================================
 
 Copyright 1999, 2000, 2001 Bob Friesenhahn <bfriesen@simple.dallas.tx.us>
@@ -133,6 +137,8 @@ with Magick++ or the use or other dealings in Magick++.
 ======================================================================
 repository/Mesa-7.6/docs is licensed as follows
   (Cf. repository/Mesa-7.6/docs/COPYING):
+repository64/Mesa-7.6/docs is licensed as follows
+  (Cf. repository64/Mesa-7.6/docs/COPYING):
 ======================================================================
 
 Some parts of Mesa are copyrighted under the GNU LGPL.  See the
@@ -629,6 +635,8 @@ That's all there is to it!
 ======================================================================
 repository/OpenSceneGraph-2.9.7 is licensed as follows
   (Cf. repository/OpenSceneGraph-2.9.7/LICENSE.txt):
+repository64/OpenSceneGraph-2.9.7 is licensed as follows
+  (Cf. repository64/OpenSceneGraph-2.9.7/LICENSE.txt):
 ======================================================================
                 OpenSceneGraph Public License, Version 0.0
                 ==========================================
@@ -1214,6 +1222,8 @@ That's all there is to it!
 ======================================================================
 repository/OpenSceneGraph-2.9.7/Xcode/Packaging/Resources is licensed as follows
   (Cf. repository/OpenSceneGraph-2.9.7/Xcode/Packaging/Resources/LICENSE.txt):
+repository64/OpenSceneGraph-2.9.7/Xcode/Packaging/Resources is licensed as follows
+  (Cf. repository64/OpenSceneGraph-2.9.7/Xcode/Packaging/Resources/LICENSE.txt):
 ======================================================================
                 OpenSceneGraph Public License, Version 0.0
                 ==========================================
@@ -1301,6 +1311,12 @@ repository/libpng-1.2.40/contrib/gregbook is licensed as follows
   (Cf. repository/libpng-1.2.40/contrib/gregbook/COPYING):
 repository/x264-snapshot-20091023-2245 is licensed as follows
   (Cf. repository/x264-snapshot-20091023-2245/COPYING):
+repository64/OpenSceneGraph-2.9.7/src/osgPlugins/3ds/lib3ds is licensed as follows
+  (Cf. repository64/OpenSceneGraph-2.9.7/src/osgPlugins/3ds/lib3ds/COPYING):
+repository64/libpng-1.2.40/contrib/gregbook is licensed as follows
+  (Cf. repository64/libpng-1.2.40/contrib/gregbook/COPYING):
+repository64/x264-snapshot-20091023-2245 is licensed as follows
+  (Cf. repository64/x264-snapshot-20091023-2245/COPYING):
 ======================================================================
       GNU GENERAL PUBLIC LICENSE
          Version 2, June 1991
@@ -1648,6 +1664,8 @@ Public License instead of this License.
 ======================================================================
 repository/OpenSceneGraph-2.9.7/src/osgPlugins/lwo is licensed as follows
   (Cf. repository/OpenSceneGraph-2.9.7/src/osgPlugins/lwo/COPYING):
+repository64/OpenSceneGraph-2.9.7/src/osgPlugins/lwo is licensed as follows
+  (Cf. repository64/OpenSceneGraph-2.9.7/src/osgPlugins/lwo/COPYING):
 ======================================================================
     GNU LESSER GENERAL PUBLIC LICENSE
          Version 2.1, February 1999
@@ -2157,6 +2175,8 @@ That's all there is to it!
 ======================================================================
 repository/OpenSceneGraph-2.9.7/src/osgPlugins/vrml is licensed as follows
   (Cf. repository/OpenSceneGraph-2.9.7/src/osgPlugins/vrml/LICENSE.txt):
+repository64/OpenSceneGraph-2.9.7/src/osgPlugins/vrml is licensed as follows
+  (Cf. repository64/OpenSceneGraph-2.9.7/src/osgPlugins/vrml/LICENSE.txt):
 ======================================================================
     GNU LESSER GENERAL PUBLIC LICENSE
          Version 2.1, February 1999
@@ -2666,6 +2686,8 @@ That's all there is to it!
 ======================================================================
 repository/OpenSceneGraph-2.9.7/src/osgPlugins/x is licensed as follows
   (Cf. repository/OpenSceneGraph-2.9.7/src/osgPlugins/x/LICENSE):
+repository64/OpenSceneGraph-2.9.7/src/osgPlugins/x is licensed as follows
+  (Cf. repository64/OpenSceneGraph-2.9.7/src/osgPlugins/x/LICENSE):
 ======================================================================
           GNU LESSER GENERAL PUBLIC LICENSE
                Version 2.1, February 1999
@@ -3175,6 +3197,8 @@ That's all there is to it!
 ======================================================================
 repository/cairo-1.8.8 is licensed as follows
   (Cf. repository/cairo-1.8.8/COPYING):
+repository64/cairo-1.8.8 is licensed as follows
+  (Cf. repository64/cairo-1.8.8/COPYING):
 ======================================================================
 Cairo is free software.
 
@@ -3214,6 +3238,8 @@ opening comment of each file for copyright and licensing information.
 ======================================================================
 repository/cairo-1.8.8 is licensed as follows
   (Cf. repository/cairo-1.8.8/COPYING-LGPL-2.1):
+repository64/cairo-1.8.8 is licensed as follows
+  (Cf. repository64/cairo-1.8.8/COPYING-LGPL-2.1):
 ======================================================================
 
                   GNU LESSER GENERAL PUBLIC LICENSE
@@ -3729,6 +3755,8 @@ That's all there is to it!
 ======================================================================
 repository/cairo-1.8.8 is licensed as follows
   (Cf. repository/cairo-1.8.8/COPYING-MPL-1.1):
+repository64/cairo-1.8.8 is licensed as follows
+  (Cf. repository64/cairo-1.8.8/COPYING-MPL-1.1):
 ======================================================================
                           MOZILLA PUBLIC LICENSE
                                 Version 1.1
@@ -4205,6 +4233,8 @@ EXHIBIT A -Mozilla Public License.
 ======================================================================
 repository/expat-2.0.1 is licensed as follows
   (Cf. repository/expat-2.0.1/COPYING):
+repository64/expat-2.0.1 is licensed as follows
+  (Cf. repository64/expat-2.0.1/COPYING):
 ======================================================================
 Copyright (c) 1998, 1999, 2000 Thai Open Source Software Center Ltd
                                and Clark Cooper
@@ -4234,6 +4264,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ======================================================================
 repository/faac-1.28 is licensed as follows
   (Cf. repository/faac-1.28/COPYING):
+repository64/faac-1.28 is licensed as follows
+  (Cf. repository64/faac-1.28/COPYING):
 ======================================================================
     GNU LIBRARY GENERAL PUBLIC LICENSE
          Version 2, June 1991
@@ -4723,6 +4755,8 @@ That's all there is to it!
 ======================================================================
 repository/faac-1.28/libfaac/kiss_fft is licensed as follows
   (Cf. repository/faac-1.28/libfaac/kiss_fft/COPYING):
+repository64/faac-1.28/libfaac/kiss_fft is licensed as follows
+  (Cf. repository64/faac-1.28/libfaac/kiss_fft/COPYING):
 ======================================================================
 Copyright (c) 2003-2004 Mark Borgerding
 
@@ -4741,6 +4775,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 ======================================================================
 repository/faad2-2.7 is licensed as follows
   (Cf. repository/faad2-2.7/COPYING):
+repository64/faad2-2.7 is licensed as follows
+  (Cf. repository64/faad2-2.7/COPYING):
 ======================================================================
 
 Any non-GPL usage of this software or parts of this software is strictly
@@ -5098,6 +5134,8 @@ Public License instead of this License.
 ======================================================================
 repository/ffmpeg-0.5 is licensed as follows
   (Cf. repository/ffmpeg-0.5/COPYING.GPL):
+repository64/ffmpeg-0.5 is licensed as follows
+  (Cf. repository64/ffmpeg-0.5/COPYING.GPL):
 ======================================================================
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
@@ -5444,6 +5482,8 @@ Public License instead of this License.
 ======================================================================
 repository/ffmpeg-0.5 is licensed as follows
   (Cf. repository/ffmpeg-0.5/COPYING.LGPL):
+repository64/ffmpeg-0.5 is licensed as follows
+  (Cf. repository64/ffmpeg-0.5/COPYING.LGPL):
 ======================================================================
                   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999
@@ -5953,6 +5993,8 @@ That's all there is to it!
 ======================================================================
 repository/flac-1.2.1 is licensed as follows
   (Cf. repository/flac-1.2.1/COPYING.FDL):
+repository64/flac-1.2.1 is licensed as follows
+  (Cf. repository64/flac-1.2.1/COPYING.FDL):
 ======================================================================
   GNU Free Documentation License
     Version 1.2, November 2002
@@ -6357,6 +6399,8 @@ to permit their use in free software.
 ======================================================================
 repository/flac-1.2.1 is licensed as follows
   (Cf. repository/flac-1.2.1/COPYING.GPL):
+repository64/flac-1.2.1 is licensed as follows
+  (Cf. repository64/flac-1.2.1/COPYING.GPL):
 ======================================================================
       GNU GENERAL PUBLIC LICENSE
          Version 2, June 1991
@@ -6704,6 +6748,8 @@ Public License instead of this License.
 ======================================================================
 repository/flac-1.2.1 is licensed as follows
   (Cf. repository/flac-1.2.1/COPYING.LGPL):
+repository64/flac-1.2.1 is licensed as follows
+  (Cf. repository64/flac-1.2.1/COPYING.LGPL):
 ======================================================================
     GNU LESSER GENERAL PUBLIC LICENSE
          Version 2.1, February 1999
@@ -7213,6 +7259,8 @@ That's all there is to it!
 ======================================================================
 repository/flac-1.2.1 is licensed as follows
   (Cf. repository/flac-1.2.1/COPYING.Xiph):
+repository64/flac-1.2.1 is licensed as follows
+  (Cf. repository64/flac-1.2.1/COPYING.Xiph):
 ======================================================================
 Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
 
@@ -7248,6 +7296,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ======================================================================
 repository/fontconfig-2.7.3 is licensed as follows
   (Cf. repository/fontconfig-2.7.3/COPYING):
+repository64/fontconfig-2.7.3 is licensed as follows
+  (Cf. repository64/fontconfig-2.7.3/COPYING):
 ======================================================================
 fontconfig/COPYING
 
@@ -7276,6 +7326,8 @@ PERFORMANCE OF THIS SOFTWARE.
 ======================================================================
 repository/freetype-2.1.10/docs is licensed as follows
   (Cf. repository/freetype-2.1.10/docs/LICENSE.TXT):
+repository64/freetype-2.1.10/docs is licensed as follows
+  (Cf. repository64/freetype-2.1.10/docs/LICENSE.TXT):
 ======================================================================
 
 The  FreeType 2  font  engine is  copyrighted  work and  cannot be  used
@@ -7311,6 +7363,8 @@ src/pcf/readme).
 ======================================================================
 repository/gsl-1.9 is licensed as follows
   (Cf. repository/gsl-1.9/COPYING):
+repository64/gsl-1.9 is licensed as follows
+  (Cf. repository64/gsl-1.9/COPYING):
 ======================================================================
       GNU GENERAL PUBLIC LICENSE
          Version 2, June 1991
@@ -7658,6 +7712,8 @@ Public License instead of this License.
 ======================================================================
 repository/lame-398-2 is licensed as follows
   (Cf. repository/lame-398-2/COPYING):
+repository64/lame-398-2 is licensed as follows
+  (Cf. repository64/lame-398-2/COPYING):
 ======================================================================
     GNU LIBRARY GENERAL PUBLIC LICENSE
          Version 2, June 1991
@@ -8146,6 +8202,8 @@ That's all there is to it!
 ======================================================================
 repository/lame-398-2 is licensed as follows
   (Cf. repository/lame-398-2/LICENSE):
+repository64/lame-398-2 is licensed as follows
+  (Cf. repository64/lame-398-2/LICENSE):
 ======================================================================
 Can I use LAME in my commercial program?
 
@@ -8173,6 +8231,8 @@ GPL unless you obtain such permission from the MPG123 project (www.mpg123.de).
 ======================================================================
 repository/libmodplug-0.8.7 is licensed as follows
   (Cf. repository/libmodplug-0.8.7/COPYING):
+repository64/libmodplug-0.8.7 is licensed as follows
+  (Cf. repository64/libmodplug-0.8.7/COPYING):
 ======================================================================
 ModPlug-XMMS and libmodplug are now in the public domain.
 
@@ -8181,6 +8241,8 @@ ModPlug-XMMS and libmodplug are now in the public domain.
 ======================================================================
 repository/libogg-1.1.4 is licensed as follows
   (Cf. repository/libogg-1.1.4/COPYING):
+repository64/libogg-1.1.4 is licensed as follows
+  (Cf. repository64/libogg-1.1.4/COPYING):
 ======================================================================
 Copyright (c) 2002, Xiph.org Foundation
 
@@ -8216,6 +8278,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ======================================================================
 repository/libpng-1.2.40 is licensed as follows
   (Cf. repository/libpng-1.2.40/LICENSE):
+repository64/libpng-1.2.40 is licensed as follows
+  (Cf. repository64/libpng-1.2.40/LICENSE):
 ======================================================================
 
 This copy of the libpng notices is provided for your convenience.  In case of
@@ -8334,6 +8398,8 @@ September 10, 2009
 ======================================================================
 repository/libpng-1.2.40/contrib/gregbook is licensed as follows
   (Cf. repository/libpng-1.2.40/contrib/gregbook/LICENSE):
+repository64/libpng-1.2.40/contrib/gregbook is licensed as follows
+  (Cf. repository64/libpng-1.2.40/contrib/gregbook/LICENSE):
 ======================================================================
   ---------------------------------------------------------------------------
 
@@ -8391,6 +8457,8 @@ repository/libpng-1.2.40/contrib/gregbook is licensed as follows
 ======================================================================
 repository/libtheora-1.1.1 is licensed as follows
   (Cf. repository/libtheora-1.1.1/COPYING):
+repository64/libtheora-1.1.1 is licensed as follows
+  (Cf. repository64/libtheora-1.1.1/COPYING):
 ======================================================================
 Copyright (C) 2002-2009 Xiph.org Foundation
 
@@ -8426,6 +8494,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ======================================================================
 repository/libtheora-1.1.1 is licensed as follows
   (Cf. repository/libtheora-1.1.1/LICENSE):
+repository64/libtheora-1.1.1 is licensed as follows
+  (Cf. repository64/libtheora-1.1.1/LICENSE):
 ======================================================================
 Please see the file COPYING for the copyright license for this software.
 
@@ -8451,6 +8521,8 @@ with the VP3 video format, consisting of a backward-compatible superset.
 ======================================================================
 repository/libvorbis-1.2.3 is licensed as follows
   (Cf. repository/libvorbis-1.2.3/COPYING):
+repository64/libvorbis-1.2.3 is licensed as follows
+  (Cf. repository64/libvorbis-1.2.3/COPYING):
 ======================================================================
 Copyright (c) 2002-2008 Xiph.org Foundation
 
@@ -8486,6 +8558,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ======================================================================
 repository/pixman-0.16.2 is licensed as follows
   (Cf. repository/pixman-0.16.2/COPYING):
+repository64/pixman-0.16.2 is licensed as follows
+  (Cf. repository64/pixman-0.16.2/COPYING):
 ======================================================================
 The following is the 'standard copyright' agreed upon by most contributors,
 and is currently the canonical license, though a modification is currently
@@ -8532,6 +8606,8 @@ DEALINGS IN THE SOFTWARE.
 ======================================================================
 repository/speex-1.2rc1 is licensed as follows
   (Cf. repository/speex-1.2rc1/COPYING):
+repository64/speex-1.2rc1 is licensed as follows
+  (Cf. repository64/speex-1.2rc1/COPYING):
 ======================================================================
 Copyright 2002-2008  Xiph.org Foundation
 Copyright 2002-2008  Jean-Marc Valin
@@ -8574,6 +8650,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ======================================================================
 repository/zlib-1.2.3/contrib/dotzlib is licensed as follows
   (Cf. repository/zlib-1.2.3/contrib/dotzlib/LICENSE_1_0.txt):
+repository64/zlib-1.2.3/contrib/dotzlib is licensed as follows
+  (Cf. repository64/zlib-1.2.3/contrib/dotzlib/LICENSE_1_0.txt):
 ======================================================================
 Boost Software License - Version 1.0 - August 17th, 2003
 
