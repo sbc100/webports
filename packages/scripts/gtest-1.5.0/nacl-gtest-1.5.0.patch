@@ -1,6 +1,6 @@
 diff -Naur gtest-1.5.0/Makefile gtest-1.5.0.nacl/Makefile
 --- gtest-1.5.0/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ gtest-1.5.0.nacl/Makefile	2010-07-07 14:40:50.000000000 -0600
++++ gtest-1.5.0.nacl/Makefile	2010-07-08 09:49:37.000000000 -0600
 @@ -0,0 +1,26 @@
 +CXXFLAGS = -O0 -g
 +INCLUDE = -Iinclude -I.
@@ -30,7 +30,7 @@ diff -Naur gtest-1.5.0/Makefile gtest-1.5.0.nacl/Makefile
 +	cd $(OBJ_DIR) && $(AR) rcs ../$(LIB_GTEST) $(OBJ_FILES)
 diff -Naur gtest-1.5.0/include/gtest/gtest.h gtest-1.5.0.nacl/include/gtest/gtest.h
 --- gtest-1.5.0/include/gtest/gtest.h	2010-04-15 16:02:03.000000000 -0600
-+++ gtest-1.5.0.nacl/include/gtest/gtest.h	2010-07-07 14:40:51.000000000 -0600
++++ gtest-1.5.0.nacl/include/gtest/gtest.h	2010-07-08 09:49:37.000000000 -0600
 @@ -56,7 +56,6 @@
  
  #include <gtest/internal/gtest-internal.h>
@@ -41,7 +41,7 @@ diff -Naur gtest-1.5.0/include/gtest/gtest.h gtest-1.5.0.nacl/include/gtest/gtes
  #include <gtest/gtest_prod.h>
 diff -Naur gtest-1.5.0/include/gtest/internal/gtest-port.h gtest-1.5.0.nacl/include/gtest/internal/gtest-port.h
 --- gtest-1.5.0/include/gtest/internal/gtest-port.h	2010-04-15 16:02:02.000000000 -0600
-+++ gtest-1.5.0.nacl/include/gtest/internal/gtest-port.h	2010-07-07 14:40:53.000000000 -0600
++++ gtest-1.5.0.nacl/include/gtest/internal/gtest-port.h	2010-07-08 09:49:37.000000000 -0600
 @@ -222,14 +222,13 @@
  #endif  // __CYGWIN__
  
@@ -83,7 +83,7 @@ diff -Naur gtest-1.5.0/include/gtest/internal/gtest-port.h gtest-1.5.0.nacl/incl
  // Allows a controller thread to pause execution of newly created
 diff -Naur gtest-1.5.0/src/gtest-death-test.cc gtest-1.5.0.nacl/src/gtest-death-test.cc
 --- gtest-1.5.0/src/gtest-death-test.cc	2010-04-15 16:02:04.000000000 -0600
-+++ gtest-1.5.0.nacl/src/gtest-death-test.cc	2010-07-07 14:40:53.000000000 -0600
++++ gtest-1.5.0.nacl/src/gtest-death-test.cc	2010-07-08 09:49:38.000000000 -0600
 @@ -34,6 +34,8 @@
  #include <gtest/gtest-death-test.h>
  #include <gtest/internal/gtest-port.h>
@@ -95,7 +95,7 @@ diff -Naur gtest-1.5.0/src/gtest-death-test.cc gtest-1.5.0.nacl/src/gtest-death-
  #if GTEST_OS_MAC
 diff -Naur gtest-1.5.0/src/gtest-filepath.cc gtest-1.5.0.nacl/src/gtest-filepath.cc
 --- gtest-1.5.0/src/gtest-filepath.cc	2010-04-15 16:02:04.000000000 -0600
-+++ gtest-1.5.0.nacl/src/gtest-filepath.cc	2010-07-07 14:40:53.000000000 -0600
++++ gtest-1.5.0.nacl/src/gtest-filepath.cc	2010-07-08 09:49:38.000000000 -0600
 @@ -96,21 +96,6 @@
  #endif
  }
@@ -120,41 +120,55 @@ diff -Naur gtest-1.5.0/src/gtest-filepath.cc gtest-1.5.0.nacl/src/gtest-filepath
  // FilePath("dir/file"). If a case-insensitive extension is not
 diff -Naur gtest-1.5.0/src/gtest-internal-inl.h gtest-1.5.0.nacl/src/gtest-internal-inl.h
 --- gtest-1.5.0/src/gtest-internal-inl.h	2010-04-15 16:02:04.000000000 -0600
-+++ gtest-1.5.0.nacl/src/gtest-internal-inl.h	2010-07-07 14:40:54.000000000 -0600
-@@ -154,10 +154,8 @@
++++ gtest-1.5.0.nacl/src/gtest-internal-inl.h	2010-07-08 09:49:39.000000000 -0600
+@@ -67,13 +67,6 @@
+ 
+ namespace testing {
+ 
+-// Declares the flags.
+-//
+-// We don't want the users to modify this flag in the code, but want
+-// Google Test's own unit tests to be able to access it. Therefore we
+-// declare it here as opposed to in gtest.h.
+-GTEST_DECLARE_bool_(death_test_use_fork);
+-
+ namespace internal {
+ 
+ // The value of GetTestTypeId() as seen from within the Google Test
+@@ -154,10 +147,7 @@
      break_on_failure_ = GTEST_FLAG(break_on_failure);
      catch_exceptions_ = GTEST_FLAG(catch_exceptions);
      color_ = GTEST_FLAG(color);
 -    death_test_style_ = GTEST_FLAG(death_test_style);
-     death_test_use_fork_ = GTEST_FLAG(death_test_use_fork);
+-    death_test_use_fork_ = GTEST_FLAG(death_test_use_fork);
      filter_ = GTEST_FLAG(filter);
 -    internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
      list_tests_ = GTEST_FLAG(list_tests);
      output_ = GTEST_FLAG(output);
      print_time_ = GTEST_FLAG(print_time);
-@@ -174,10 +172,8 @@
+@@ -174,10 +164,7 @@
      GTEST_FLAG(break_on_failure) = break_on_failure_;
      GTEST_FLAG(catch_exceptions) = catch_exceptions_;
      GTEST_FLAG(color) = color_;
 -    GTEST_FLAG(death_test_style) = death_test_style_;
-     GTEST_FLAG(death_test_use_fork) = death_test_use_fork_;
+-    GTEST_FLAG(death_test_use_fork) = death_test_use_fork_;
      GTEST_FLAG(filter) = filter_;
 -    GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
      GTEST_FLAG(list_tests) = list_tests_;
      GTEST_FLAG(output) = output_;
      GTEST_FLAG(print_time) = print_time_;
-@@ -193,10 +189,8 @@
+@@ -193,10 +180,7 @@
    bool break_on_failure_;
    bool catch_exceptions_;
    String color_;
 -  String death_test_style_;
-   bool death_test_use_fork_;
+-  bool death_test_use_fork_;
    String filter_;
 -  String internal_run_death_test_;
    bool list_tests_;
    String output_;
    bool print_time_;
-@@ -699,18 +693,6 @@
+@@ -699,18 +683,6 @@
    void AddTestInfo(Test::SetUpTestCaseFunc set_up_tc,
                     Test::TearDownTestCaseFunc tear_down_tc,
                     TestInfo * test_info) {
@@ -175,7 +189,7 @@ diff -Naur gtest-1.5.0/src/gtest-internal-inl.h gtest-1.5.0.nacl/src/gtest-inter
                  test_info->test_case_comment(),
 diff -Naur gtest-1.5.0/src/gtest.cc gtest-1.5.0.nacl/src/gtest.cc
 --- gtest-1.5.0/src/gtest.cc	2010-04-15 16:02:04.000000000 -0600
-+++ gtest-1.5.0.nacl/src/gtest.cc	2010-07-07 14:40:55.000000000 -0600
++++ gtest-1.5.0.nacl/src/gtest.cc	2010-07-08 09:49:40.000000000 -0600
 @@ -57,7 +57,9 @@
  #include <limits.h>
  #include <sched.h>
@@ -200,3 +214,14 @@ diff -Naur gtest-1.5.0/src/gtest.cc gtest-1.5.0.nacl/src/gtest.cc
          ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
          ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
          ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
+diff -Naur gtest-1.5.0/src/gtest_main.cc gtest-1.5.0.nacl/src/gtest_main.cc
+--- gtest-1.5.0/src/gtest_main.cc	2010-04-15 16:02:04.000000000 -0600
++++ gtest-1.5.0.nacl/src/gtest_main.cc	2010-07-08 10:14:13.000000000 -0600
+@@ -33,7 +33,6 @@
+ 
+ int main(int argc, char **argv) {
+   std::cout << "Running main() from gtest_main.cc\n";
+-
+   testing::InitGoogleTest(&argc, argv);
+   return RUN_ALL_TESTS();
+ }

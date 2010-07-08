@@ -36,7 +36,7 @@ CustomInstallStep() {
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   (ChangeDir include; tar cf - --exclude='gtest-death-test.h' --exclude='gtest-death-test-internal.h' gtest | (ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -))
   Remove ${NACL_SDK_USR_LIB}/${LIB_GTEST}
-  install --mode=644 ${LIB_GTEST} ${NACL_SDK_USR_LIB}/${LIB_GTEST}
+  install -m 644 ${LIB_GTEST} ${NACL_SDK_USR_LIB}/${LIB_GTEST}
 }
 
 CustomPackageInstall() {

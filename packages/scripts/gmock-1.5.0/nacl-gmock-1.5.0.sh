@@ -36,7 +36,7 @@ CustomInstallStep() {
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   (ChangeDir include; tar cf - gmock | (ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -))
   Remove ${NACL_SDK_USR_LIB}/${LIB_GMOCK}
-  install --mode=644 ${LIB_GMOCK} ${NACL_SDK_USR_LIB}/${LIB_GMOCK}
+  install -m 644 ${LIB_GMOCK} ${NACL_SDK_USR_LIB}/${LIB_GMOCK}
 }
 
 CustomPackageInstall() {
