@@ -27,6 +27,8 @@ else
   exit 1
 fi
 
+(cd scripts/libtommath-0.41; ./nacl-libtommath-0.41.sh)
+(cd scripts/libtomcrypt-1.17; ./nacl-libtomcrypt-1.17.sh)
 (cd scripts/zlib-1.2.3; ./nacl-zlib-1.2.3.sh)
 (cd scripts/jpeg-6b; ./nacl-jpeg-6b.sh)
 (cd scripts/libpng-1.2.40; ./nacl-libpng-1.2.40.sh)

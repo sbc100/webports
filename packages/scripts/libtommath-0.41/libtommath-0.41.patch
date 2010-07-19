@@ -1,0 +1,33 @@
+diff -Naur libtommath-0.41/bn_mp_read_radix.c libtommath-0.41.nacl/bn_mp_read_radix.c
+--- libtommath-0.41/bn_mp_read_radix.c	2007-03-10 15:45:11.000000000 -0800
++++ libtommath-0.41.nacl/bn_mp_read_radix.c	2010-07-16 11:45:57.000000000 -0700
+@@ -48,7 +48,7 @@
+      * this allows numbers like 1AB and 1ab to represent the same  value
+      * [e.g. in hex]
+      */
+-    ch = (char) ((radix < 36) ? toupper (*str) : *str);
++    ch = (char) ((radix < 36) ? toupper ((int)*str) : *str);
+     for (y = 0; y < 64; y++) {
+       if (ch == mp_s_rmap[y]) {
+          break;
+diff -Naur libtommath-0.41/makefile libtommath-0.41.nacl/makefile
+--- libtommath-0.41/makefile	2007-03-10 15:45:11.000000000 -0800
++++ libtommath-0.41.nacl/makefile	2010-07-16 11:45:34.000000000 -0700
+@@ -87,7 +87,7 @@
+ 
+ $(LIBNAME):  $(OBJECTS)
+ 	$(AR) $(ARFLAGS) $@ $(OBJECTS)
+-	ranlib $@
++	$(RANLIB) $@
+ 
+ #make a profiled library (takes a while!!!)
+ #
+@@ -119,7 +119,7 @@
+ 	install -g $(GROUP) -o $(USER) $(HEADERS) $(DESTDIR)$(INCPATH)
+ 
+ test: $(LIBNAME) demo/demo.o
+-	$(CC) $(CFLAGS) demo/demo.o $(LIBNAME) -o test
++	$(CC) $(CFLAGS) demo/demo.o $(LIBNAME) -o test.nexe
+ 	
+ mtest: test	
+ 	cd mtest ; $(CC) $(CFLAGS) mtest.c -o mtest
