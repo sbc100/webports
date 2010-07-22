@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <!--
+  Copyright (c) 2010 The Native Client SDK Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+  -->
+<head>
+  <title>Duality!</title>
+  
+  <script type="text/javascript">
+    // Global application objects.
+    proc_one = null;
+    proc_two = null;
+
+    // Indicates the shared state of the two application objects.
+    shared_object = 'UNINITIALIZED';
+    
+    // Indicates whether our nacls have loaded.
+    status_one_text = 'NO-STATUS';
+    status_two_text = 'NO-STATUS';
+    
+
+    // Updates the status field for |process| to indicate that it has loaded
+    // successfully.
+    function moduleDidLoad(process) {
+      if(process == 1) {
+        proc_one = document.getElementById('process_one');
+      } else {
+        proc_two = document.getElementById('process_two');
+      }
+    
+      updateStatus('LOADED', process);
+    }
+
+    // If the page loads before the Native Client module loads, then set the
+    // status message indicating that the module is still loading.  Otherwise,
+    // do not change the status message.
+    // TODO(mlinck) populate
+    function pageDidLoad() {
+      if (proc_one == null) {
+        updateStatus('LOADING...', 1);
+      } else {
+        updateStatus('LOADED', 1);
+      }
+     
+      if (proc_two == null) {
+        updateStatus('LOADING...', 2);
+      } else {
+        updateStatus('LOADED', 2);
+      }
+    }
+
+    // Tells |process| to read from the global status.
+    function readGlobal(process) {
+      var proc;
+
+      if(process == 1) {
+        proc = proc_one;
+      } else {
+        proc = proc_two;
+      }
+
+      alert("Process " + process + " says " + proc.say_hello());
+    }
+    
+    // Tells |process| to write to the global status.
+    function writeGlobal(process) {
+      var proc;
+
+      if(process == 1) {
+        proc = proc_one;
+      } else {
+        proc = proc_two;
+      }
+
+      alert("Process " + process + " says " + proc.SayHello());
+    }
+    
+    // Tells |process| to read |user_string| from its input.
+    function readInput(user_string, process) {
+      alert("Reading input " + user_string + " into process: " + process);
+    }
+
+    // figures out which status field is to be updated and then updates it.
+    function updateStatus(message, process) {
+      var status_field;
+
+      if (process == 1) {
+        status_field = document.getElementById('status_one_field');
+      } else {
+        status_field = document.getElementById('status_two_field');
+      }
+
+      
+      if (status_field) {
+        status_field.innerHTML = message;
+      } else {
+      //  alert("updatestatus could not find status field");
+      }
+    }
+  </script>
+</head>
+<body onload="pageDidLoad()">
+<!-- First draw the content... -->
+<h1>Example of Shared Memory and Events</h1>
+<p>
+  If this module is working, you should be able to enter text in either
+  text field.  Each text field is controlled by a separate NaCl process
+  so there are actually 2 processes running concurrently.  Editing either
+  textfield and clicking "Write", writes the content to a shared object.
+  "Read" reads the state of the shared object into the process.  The point
+  of this page is to illustrate inter-process communication and event
+  handling in NaCl.
+</p>
+
+
+
+<h3>Process 1 Controls</h3>
+<input type="text" size="15" id="process_1_textfield"
+       value="#undef" onchange="readInput(this.value, 1)" />
+
+<button onclick="readGlobal(1)">Read</button>
+<button onclick="writeGlobal(1)">Write</button>
+
+
+<h3>Process 2 Controls</h3>
+<input type="text" size="15" id="process_2_textfield"
+       value="#undef" onchange="readInput(this.value, 2)" />
+
+<button onclick="readGlobal(2)">Read</button>
+<button onclick="writeGlobal(2)">Write</button>
+
+
+
+<h3>Global State (No Process)</h3>
+<div id="global_state_field">UNINITALIZED</div>
+
+
+<!-- ... then load modules -->
+<embed name="nacl_module_one"
+       id="process_one"
+       width=0 
+       height=0
+       type="application/x-nacl-srpc"/>
+
+<script type="text/javascript">
+  var nexes = 'x86-32: duality_x86_32.nexe\n'
+            + 'x86-64: duality_x86_64.nexe\n'
+            + 'ARM: duality_arm.nexe ';
+
+  document.getElementById('process_one').nexes = nexes;
+
+  moduleDidLoad(1);
+</script>
+
+<embed name="nacl_module_two"
+       id="process_two"
+       width=0 
+       height=0
+       type="application/x-nacl-srpc"/>
+
+<script type="text/javascript">
+  var nexes = 'x86-32: duality_x86_32.nexe\n'
+            + 'x86-64: duality_x86_64.nexe\n'
+            + 'ARM: duality_arm.nexe ';
+
+  document.getElementById('process_two').nexes = nexes;
+
+  moduleDidLoad(2);
+</script>
+
+<h2>Status</h2>
+Have our NaCl Modules loaded?
+<br><br>
+Module 1:
+<div id="status_one_field">UNINITIALIZED</div>
+<br>
+Module 2:
+<div id="status_two_field">UNINITIALIZED</div>
+</body>
+</html>
