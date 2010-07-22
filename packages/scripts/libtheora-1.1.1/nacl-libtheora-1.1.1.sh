@@ -53,7 +53,8 @@ CustomConfigureStep() {
     --with-http=off \
     --with-html=off \
     --with-ftp=off \
-    --with-x=no
+    --with-x=no \
+    --${NACL_OPTION}-asm
 }
 
 

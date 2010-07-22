@@ -38,7 +38,7 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ./configure \
-    --cross-prefix=nacl- \
+    --cross-prefix=${NACL_CROSS_PREFIX} \
     --disable-asm \
     --disable-pthread \
     --prefix=${NACL_SDK_USR} \

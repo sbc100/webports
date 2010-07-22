@@ -33,7 +33,6 @@ CustomConfigureStep() {
   MakeDir ${PACKAGE_NAME}-build
   cd ${PACKAGE_NAME}-build
   PERL=/bin/true \
-  # TODO: re-enable mmx & sse2 when nacl64-gcc is ready
   ../configure \
     --host=nacl \
     --disable-shared \
@@ -45,8 +44,8 @@ CustomConfigureStep() {
     --with-html=off \
     --with-ftp=off \
     --with-x=no \
-    --disable-mmx \
-    --disable-sse2
+    --${NACL_OPTION}-mmx \
+    --${NACL_OPTION}-sse2
 }
 
 

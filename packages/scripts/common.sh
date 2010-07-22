@@ -39,6 +39,15 @@ else
   exit 1
 fi
 
+# configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
+# TODO: Currently only x86-32 will encourage MMX, SSE & SSE2 intrinsics
+#       and handcoded assembly.
+if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
+  readonly NACL_OPTION="enable"
+else
+  readonly NACL_OPTION="disable"
+fi
+
 # locate default nacl_sdk toolchain
 # TODO: x86 only at the moment
 readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
@@ -61,12 +70,13 @@ readonly NACLCXX=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-g++
 readonly NACLAR=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ar
 readonly NACLRANLIB=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ranlib
 readonly NACLLD=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ld
+readonly NACL_CROSS_PREFIX=nacl${NACL_BIT_SPEC}-
 
 # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
 readonly NACL_SDK_GCC_SPECS_PATH=${NACL_SDK_BASE}/lib/gcc/nacl64/4.4.3
 
 # NACL_SDK_USR is where the headers, libraries, etc. will be installed
-readonly NACL_SDK_USR=${NACL_SDK_BASE}/nacl/usr
+readonly NACL_SDK_USR=${NACL_SDK_BASE}/nacl${NACL_BIT_SPEC}/usr
 readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
 readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
 
@@ -221,7 +231,7 @@ PatchSpecFile() {
   local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_USR_INCLUDE/ /\ /}
   local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_USR_LIB/ /\ /}
   # have nacl-gcc dump specs file & add include & lib search paths
-  ${NACL_SDK_BASE}/bin/nacl-gcc -dumpspecs |\
+  ${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-gcc -dumpspecs |\
     sed "/*cpp:/{
       N
       s|$| -I${SED_SAFE_SPACES_USR_INCLUDE}|
@@ -287,6 +297,10 @@ DefaultConfigureStep() {
     --with-http=off \
     --with-html=off \
     --with-ftp=off \
+    --${NACL_OPTION}-mmx \
+    --${NACL_OPTION}-sse \
+    --${NACL_OPTION}-sse2 \
+    --${NACL_OPTION}-asm \
     --with-x=no
 }
 

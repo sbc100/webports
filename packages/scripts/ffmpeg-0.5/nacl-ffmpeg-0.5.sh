@@ -18,7 +18,6 @@ readonly PACKAGE_NAME=ffmpeg-0.5
 
 source ../common.sh
 
-
 CustomExtractStep() {
   Banner "Untaring ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
@@ -34,7 +33,7 @@ CustomConfigureStep() {
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ../configure \
-    --cross-prefix=nacl- \
+    --cross-prefix=${NACL_CROSS_PREFIX} \
     --enable-gpl \
     --enable-static \
     --enable-cross-compile \
