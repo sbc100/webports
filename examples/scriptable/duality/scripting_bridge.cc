@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#include "examples/srpc/duality/scripting_bridge.h"
+#include "examples/scriptable/duality/scripting_bridge.h"
 
 #include <string.h>
 
-ScriptingBridge::ScriptingBridge(NPP npp, Scriptable * scriptable_instance)
-    : npp_(npp),
-      scriptable_instance_(scriptable_instance) {
+ScriptingBridge::ScriptingBridge(Scriptable * scriptable_instance)
+    : scriptable_instance_(scriptable_instance) {
   printf("Duality: ScriptingBridge::Constructor was called!\n");
   fflush(stdout);
 }
@@ -53,7 +52,6 @@ bool ScriptingBridge::HasPropertyCallback(NPObject* object,
 void ScriptingBridge::Init() {
   printf("Duality: ScriptingBridge::Init was called!\n");
   fflush(stdout);
-  scriptable_instance_->Init();
 }
 
 void ScriptingBridge::InvalidateCallback(NPObject* object) {

@@ -6,12 +6,15 @@
 #include <string.h>
 
 #include <nacl/nacl_npapi.h>
-#include <examples/srpc/duality/scriptable.h>
+#include <examples/scriptable/duality/scriptable.h>
 
 #include <map>
 
 
-Scriptable::Scriptable() : method_table_(NULL), property_table_(NULL) {
+Scriptable::Scriptable()
+    : method_table_(NULL),
+      property_table_(NULL),
+      npp_(NULL) {
   printf("Duality: Scriptable() was called!\n");
   fflush(stdout);
 }
@@ -27,9 +30,10 @@ Scriptable::~Scriptable() {
   }
 }
 
-void Scriptable::Init() {
-  printf("Duality: Scriptable::Init() was called!\n");
+void Scriptable::Init(NPP npp) {
+  printf("Duality: Scriptable::Init was called!\n");
   fflush(stdout);
+  npp_ = npp;
   if (method_table_ == NULL) {
     method_table_ = new IdentifierToMethodMap();
   }

@@ -2,29 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#ifndef EXAMPLES_SRPC_DUALITY_DUALITY_H_
-#define EXAMPLES_SRPC_DUALITY_DUALITY_H_
+#ifndef EXAMPLES_SCRIPTABLE_DUALITY_PRINT_NUMBER_H_
+#define EXAMPLES_SCRIPTABLE_DUALITY_PRINT_NUMBER_H_
 
-#include <examples/srpc/duality/scriptable.h>
+#include <examples/scriptable/duality/scriptable.h>
 
 #include <nacl/nacl_srpc.h>
 
 #include <string>
 
 // Extends Scriptable and adds the plugin's specific functionality.
-class Duality : public Scriptable {
+class PrintNumber : public Scriptable {
  public:
-  Duality();
-  virtual ~Duality();
+  PrintNumber();
+  virtual ~PrintNumber();
 
-  static bool SayHello(Scriptable * instance,
-                       const NPVariant* args,
-                       uint32_t arg_count,
-                       NPVariant* result);
-
-  static NaClSrpcError HelloWorld(NaClSrpcChannel *channel,
-                                  NaClSrpcArg **in_args,
-                                  NaClSrpcArg **out_args);
+  static bool Print42(Scriptable * instance,
+                      const NPVariant* args,
+                      uint32_t arg_count,
+                      NPVariant* result);
 
  private:
   // Populates the method table with our specific interface.
@@ -34,4 +30,4 @@ class Duality : public Scriptable {
   virtual void InitializePropertyTable() {}
 };
 
-#endif  // EXAMPLES_SRPC_DUALITY_DUALITY_H_
+#endif  // EXAMPLES_SCRIPTABLE_DUALITY_PRINT_NUMBER_H_

@@ -11,8 +11,8 @@
 #include <nacl/nacl_npapi.h>
 #include <nacl/npupp.h>
 
-#include <examples/srpc/duality/duality.h>
-#include <examples/srpc/duality/scripting_bridge.h>
+#include <examples/scriptable/duality/say_hello.h>
+#include <examples/scriptable/duality/scripting_bridge.h>
 
 struct NaClContext {
   NPP npp;
@@ -93,7 +93,7 @@ NPObject *NPP_GetScriptableInstance(NPP instance) {
   if (NULL == nacl_context->npobject) {
     nacl_context->npobject =
         NPN_CreateObject(instance,
-                         ScriptingBridge::GetNPSimpleClass<Duality>());
+                         ScriptingBridge::GetNPSimpleClass<SayHello>());
   }
   if (NULL != nacl_context->npobject) {
     NPN_RetainObject(nacl_context->npobject);

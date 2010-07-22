@@ -20,7 +20,7 @@ class Scriptable {
   virtual ~Scriptable();
 
   // Ensures that members are initialized.
-  virtual void Init();
+  virtual void Init(NPP npp);
 
   bool GetProperty(NPIdentifier name, NPVariant *result);
 
@@ -54,6 +54,8 @@ class Scriptable {
   typedef std::map<NPIdentifier, Method> IdentifierToMethodMap;
   typedef std::map<NPIdentifier, Property> IdentifierToPropertyMap;
 
+  const NPP npp() const { return npp_; }
+
   // Implemented by the final class.
   virtual void InitializeMethodTable() = 0;
   // Implemented by the final class.
@@ -61,6 +63,9 @@ class Scriptable {
 
   IdentifierToMethodMap * method_table_;
   IdentifierToPropertyMap * property_table_;
+
+ private:
+  NPP npp_;
 };
 
 #endif  // EXAMPLES_SRPC_DUALITY_SCRIPTABLE_H_

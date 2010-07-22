@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#ifndef EXAMPLES_SRPC_DUALITY_SCRIPTING_BRIDGE_H_
-#define EXAMPLES_SRPC_DUALITY_SCRIPTING_BRIDGE_H_
+#ifndef EXAMPLES_SCRIPTABLE_DUALITY_SCRIPTING_BRIDGE_H_
+#define EXAMPLES_SCRIPTABLE_DUALITY_SCRIPTING_BRIDGE_H_
 
-#include <examples/srpc/duality/scriptable.h>
+#include <examples/scriptable/duality/scriptable.h>
 
 #include <nacl/nacl_npapi.h>
 
@@ -16,8 +16,14 @@
 // provide NaCl scriptability.
 class ScriptingBridge : public NPObject {
  public:
-  explicit ScriptingBridge(NPP npp, Scriptable * scriptable_instance);
+  explicit ScriptingBridge(Scriptable * scriptable_instance);
   virtual ~ScriptingBridge();
+
+  // Creates the plugin-side instance of NPObject.
+  // Called by NPN_CreateObject, declared in npruntime.h
+  // Documentation URL: https://developer.mozilla.org/en/NPClass
+  template<typename ScriptableType>
+  static NPObject* AllocateCallback(NPP npp, NPClass* npclass);
 
   // Called by NPP_GetScriptableInstance to get the scripting interface for
   // a plugin object of ScriptableType. The browser may dereference the
@@ -28,12 +34,6 @@ class ScriptingBridge : public NPObject {
   static NPClass* GetNPSimpleClass();
 
  private:
-
-  // Creates the plugin-side instance of NPObject.
-  // Called by NPN_CreateObject, declared in npruntime.h
-  // Documentation URL: https://developer.mozilla.org/en/NPClass
-  template<typename ScriptableType>
-  static NPObject* AllocateCallback(NPP npp, NPClass* npclass);
 
   // Cleans up the plugin-side instance of an NPObject.
   // Called by NPN_ReleaseObject, declared in npruntime.h
@@ -110,8 +110,6 @@ class ScriptingBridge : public NPObject {
   static ScriptingBridge * ToInstance(NPObject * object);
 
 
-  NPP npp_;
-
   Scriptable * scriptable_instance_;
 };
 
@@ -142,10 +140,13 @@ NPObject* ScriptingBridge::AllocateCallback(NPP npp, NPClass* npclass) {
   printf("Duality: ScriptingBridge::Allocate was called!\n");
   fflush(stdout);
   ScriptableType* scriptable_object = new ScriptableType();
-  ScriptingBridge* bridge = new ScriptingBridge(npp, scriptable_object);
+  ScriptingBridge* bridge = new ScriptingBridge(scriptable_object);
   bridge->Init();
+  scriptable_object->Init(npp);
+  printf("Duality: ScriptingBridge::Allocate returning a bridge!\n");
+  fflush(stdout);
   return bridge;
 }
 
 
-#endif  // EXAMPLES_SRPC_DUALITY_SCRIPTING_BRIDGE_H_
+#endif  // EXAMPLES_SCRIPTABLE_DUALITY_SCRIPTING_BRIDGE_H_

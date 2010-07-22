@@ -4,7 +4,8 @@
 
 # Makefile for the Duality (IMC) example.
 
-CCFILES = duality.cc \
+CCFILES = say_hello.cc \
+	  print_number.cc \
 	  npp_gate.cc \
 	  loader.cc \
 	  scripting_bridge.cc \
