@@ -31,3 +31,15 @@ diff -Naur libtommath-0.41/makefile libtommath-0.41.nacl/makefile
  	
  mtest: test	
  	cd mtest ; $(CC) $(CFLAGS) mtest.c -o mtest
+diff -Naur libtommath-0.41/tommath.h libtommath-0.41.nacl/tommath.h
+--- libtommath-0.41/tommath.h	2007-03-10 15:45:11.000000000 -0800
++++ libtommath-0.41.nacl/tommath.h	2010-07-23 11:04:12.000000000 -0700
+@@ -46,7 +46,7 @@
+ 
+ 
+ /* detect 64-bit mode if possible */
+-#if defined(__x86_64__) 
++#if defined(__x86_64__) && !defined(__native_client__)
+    #if !(defined(MP_64BIT) && defined(MP_16BIT) && defined(MP_8BIT))
+       #define MP_64BIT
+    #endif

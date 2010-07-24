@@ -13,7 +13,7 @@
 
 readonly URL=http://build.chromium.org/mirror/nacl/crypt-1.17.tar.bz2
 #readonly URL=http://libtomcrypt.googlecode.com/files/crypt-1.17.tar.bz2
-readonly PATCH_FILE=
+readonly PATCH_FILE=libtomcrypt-1.17/libtomcrypt-1.17.patch
 readonly PACKAGE_NAME=libtomcrypt-1.17
 
 source ../common.sh
@@ -57,7 +57,7 @@ CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   CustomExtractStep
-  # No patch step needed.
+  DefaultPatchStep
   CustomBuildStep
   CustomInstallStep
   DefaultCleanUpStep
