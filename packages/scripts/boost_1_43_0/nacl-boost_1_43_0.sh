@@ -30,7 +30,7 @@ CustomConfigureStep() {
 
 CustomInstallStep() {
   Remove ${NACL_SDK_USR_INCLUDE}/boost
-  tar cf - --exclude='asio.hpp' --exclude='asio' --exclude='mpi.hpp' --exclude='mpi' --exclude='python.hpp' --exclude='python' boost | ( ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -)
+  tar cf - --exclude='asio.hpp' --exclude='asio' --exclude='mpi.hpp' --exclude='mpi' --exclude='python.hpp' boost | ( ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -)
 }
 
 CustomPackageInstall() {
