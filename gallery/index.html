@@ -1,0 +1,179 @@
+<!--
+Copyright 2010, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<!DOCTYPE html PUBLIC
+    "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="http://code.google.com/css/codesite.css" rel="stylesheet" type="text/css" />
+<title>Native Client Examples</title>
+</head>
+
+<body>
+<h2>Native Client Examples</h2>
+<script type="text/javascript">
+
+  /* pluginExists looks for a plugin where 'name' is contained in the pluginName */
+  function pluginExists(name) {
+     var plugins = navigator["plugins"];
+     for (var index=0; index < plugins.length; index++) {
+        var plugin = plugins[index];
+        var plugin_name = plugin["name"];
+        if(plugin_name.indexOf(name) != -1) {
+           return true;
+        }
+     }
+     return false;
+  }
+
+  var appVersion = navigator['appVersion'];
+  var versionPatt = /Chrome\/(\d+)\.(\d+)\.(\d+)\.(\d+)/;
+  var result = appVersion.match(versionPatt);
+  var validBrowser = false;
+  if(result == null) {
+     document.write("<H1>This non-Chrome browser does NOT support native-client apps.<BR></H1>"); 
+  }
+  else { //then we have a Chrome browswer, check version and/or plugin
+     var chromeVersion = result[1];
+     if( chromeVersion >= 7) {
+        document.write("Chrome version ",chromeVersion, " supports native client by default.<BR>");
+        validBrowser = true;
+     } 
+     else if( chromeVersion == 6 ) {
+        var found_nacl = pluginExists("Native Client");
+        if(found_nacl) {
+           document.write("Native Client plugin located in Chrome version ",chromeVersion,".<BR>");
+           validBrowser = true;
+        }
+        else {
+           document.write("<H1>ERROR: Native Client plugin missing!<BR></H1>");
+           validBrowser = false;
+        }
+     }
+     else { 
+        document.write("Chrome nacl cannot run in version ", chromeVersion,
+                       ". You need version 7 or version 6 with --enable-nacl!<BR>");
+        validBrowser = false;
+     }
+  }
+</script>
+<p>This page lists the current Native Client (NaCl) examples, some of which are included with the
+<a href="http://code.google.com/p/nativeclient-sdk">download file</a>.</p>
+<p>Run these examples using Chromium or Dev-channel version of Google Chrome
+with the <code>--enable-nacl</code> flags. Refer to
+<a href="http://code.google.com/p/nativeclient-sdk/wiki/GettingStarted#Running_the_SDK_examples">Running Examples</a>
+for further information.</p>
+<table>
+<tbody>
+<tr>
+  <td style="width: 75%;"><b>Hello World</b>
+    <p><b>Overview: </b>The Hello World example combines HTML, JavaScript, and C++
+    (the C++ is compiled to create a .nexe file). The .nexe code responds to button
+    click events and calls the browser to show alert panels.</p>
+    <p></p>
+    <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/hello_world">View source</a>
+  </td>
+  <td style="width: 25%;">
+    <a href="hello_world/hello_world.html"><IMG src="hello_world/hello.png" 
+             width=100% alt="screenshot of Hello World nacl plugin"></a>
+  </td>
+</tr>
+<tr>
+  <td style="width: 75%;"><b>Pi Generator</b>
+    <p><b>Overview: </b>The Pi Generator example combines HTML, JavaScript, and C++
+    (the C++ is compiled to create a .nexe file). The .nexe code creates a thread
+    that estimate pi using the Monte Carlo method while randomly putting
+    1,000,000,000 points inside a 2D square that shares two sides with a quarter
+    circle. The 2D square is generated using the Pepper 2D API. Pepper is an
+    extension of the NPAPI or Netscape Plugin Application Programming API.</p>
+    <p></p>
+    <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/pi_generator">View source</a>
+  </td>
+  <td style="width: 25%;">
+    <a href="pi_generator/pi_generator.html" target="_blank">
+       <IMG src="pi_generator/montecarlopi.png" width=100%
+        alt="screenshot of Monte Carlo pi generator"></a>
+  </td>
+</tr>
+<tr>
+  <td style="width: 75%;"><b>Sine Wave Synthesizer</b>
+    <p><b>Overview: </b>The Sine Wave Synthesizer example combines HTML, JavaScript, and C++
+    (the C++ is compiled to create a .nexe file). It synthesizes and plays
+    a sine wave.  You can enter the frequency of the sine wave.  It uses
+    Pepper Audio API to play the tone.</p>
+    <p></p>
+    <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/sine_synth">View source</a>
+  </td>
+  <td style="width: 25%;">
+    <a href="sine_synth/sine_synth.html">
+       <IMG src="sine_synth/sinewave.png" width=100%
+        alt="screenshot of sine synth application">
+       </a>
+  </td>
+</tr>
+<tr>
+  <td style="width: 75%;"><b>Tumbler</b>
+    <p><b>Overview: </b> The Tumbler example combines HTML, JavaScript, and C++
+    (the C++ is compiled to create a .nexe file). The .nexe code uses the Pepper 3D
+    API to create a 3 dimensional cube that can be rotated using the left mouse button.</p>
+    <p></p>
+    <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/tumbler">View source</a>
+  </td>
+  <td style="width: 25%;">
+    <a href="tumbler/tumbler.html">
+     <IMG src="tumbler/tumbler.png" width=100%
+      alt="screenshot of tumbler application">
+     </a>
+  </td>
+</tr>
+<tr>
+  <td style="width: 75%;"><b>Life</b>
+    <p><b>Overview: </b> The Life example combines HTML and C++
+    (the C++ is compiled to create a .nexe file). The .nexe code implements the Life 
+    cellular automaton invented by British mathematiciaion John Horton Conway. 
+    Use the mouse to paint extra life into the simulation.</p>
+    <p></p>
+    <a href="http://code.google.com/p/naclports/source/browse/#svn/trunk/src/examples/graphics/life">View source</a>
+  </td>
+  <td style="width: 25%;">
+    <a href="life/life.html">
+     <IMG src="life/life.png" width=100%
+      alt"screenshot of Conway's life nacl application"
+    </a>
+  </td>
+</tr>
+
+</tbody> 
+</table> 
+</body> 
+</html>
