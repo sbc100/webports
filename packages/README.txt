@@ -17,7 +17,7 @@ to add the required extra paths.)
 
 The source code & build out for each package is placed in:
 
-  native_client_sdk/packages/repository
+  naclports/packages/repository
 
 NOTE:  These external libraries each have their own licenses for use.
 Please read and understand these licenses before using these packages

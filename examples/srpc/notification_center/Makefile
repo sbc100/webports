@@ -4,11 +4,10 @@
 
 # Makefile for notification_center.
 
+NACLPORTS_ROOT ?= ../../..
 
 SERVER_CCFILES = notification_center.cc \
-		 srpcpp/method_container.cc \
-		 srpcpp/method_descriptor.cc \
-		 srpcpp/listener_config.cc
+                 srpcpp/listener_config.cc
 
 CLIENT_CCFILES = nc_client.cc
 
@@ -18,22 +17,22 @@ SERVER_OBJECTS_X86_64 = $(SERVER_CCFILES:%.cc=%_x86_64.o)
 CLIENT_OBJECTS_X86_32 = $(CLIENT_CCFILES:%.cc=%_x86_32.o)
 CLIENT_OBJECTS_X86_64 = $(CLIENT_CCFILES:%.cc=%_x86_64.o)
 
-NACL_SDK_ROOT = ../../..
-
 CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror
-INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACL_ROOT)
+INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
 LDFLAGS = -lsrpc \
-	  -lpthread \
+          -lpthread \
           -lgoogle_nacl_imc \
-	  -lgoogle_nacl_npruntime \
-$(ARCH_FLAGS)
+          -lgoogle_nacl_npruntime \
+          $(ARCH_FLAGS)
 OPT_FLAGS = -O2
 
-all: nc_client_x86_32.nexe nc_client_x86_64.nexe notification_center_x86_32.nexe notification_center_x86_64.nexe
-
+# The check_variables target is in nacl_build.mk.
+all: check_variables \
+     nc_client_x86_32.nexe nc_client_x86_64.nexe \
+     notification_center_x86_32.nexe notification_center_x86_64.nexe
 
 # nacl_build.mk has rules to build .o files from .cc files.
--include nacl_build.mk
+-include $(NACLPORTS_ROOT)/common_build_scripts/nacl_build.mk
 
 nc_client_x86_32.nexe: $(CLIENT_OBJECTS_X86_32)
 	$(CPP) $^ $(LDFLAGS) -m32 -o $@
@@ -52,8 +51,3 @@ clean:
 	    $(SERVER_OBJECTS_X86_32) $(SERVER_OBJECTS_X86_64) \
 	    nc_client_x86_32.nexe nc_client_x86_64.nexe \
 	    notification_center_x86_32.nexe notification_center_x86_64.nexe
-
-# This target is used by the SDK build system to produce a pre-built version
-# of the .nexe.  You do not need to call this target.
-install_prebuilt: nc_client_x86_32.nexe nc_client_x86_64.nexe notification_center_x86_32.nexe notification_center_x86_64.nexe
-	-$(RM) $(CLIENT_OBJECTS_X86_32) $(CLIENT_OBJECTS_X86_64) $(SERVER_OBJECTS_X86_32) $(SERVER_OBJECTS_X86_64)

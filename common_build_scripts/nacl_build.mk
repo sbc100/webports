@@ -37,8 +37,6 @@ ifneq (, $(findstring Linux, $(OS)))
   TARGET = x86
 endif
 
-NACL_SDK_ROOT ?= .
-
 NACL_TOOLCHAIN_DIR = toolchain/$(PLATFORM)_$(TARGET)
 
 CC = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/nacl-gcc

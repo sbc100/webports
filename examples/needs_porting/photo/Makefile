@@ -15,8 +15,6 @@ CCFILES = loader.cc \
 
 OBJECTS = $(CCFILES:%.cc=%.o)
 
-NACL_SDK_ROOT = ../../..
-
 CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACL_ROOT)
 LDFLAGS = -lgoogle_nacl_imc \
