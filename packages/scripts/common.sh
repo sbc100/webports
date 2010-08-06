@@ -80,6 +80,22 @@ readonly NACL_SDK_USR=${NACL_SDK_BASE}/nacl${NACL_BIT_SPEC}/usr
 readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
 readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
 
+######################################################################
+# Always run
+######################################################################
+
+CheckPatchVersion() {
+  # refuse patch 2.6
+  if [ "`patch --version | sed q`" = "patch 2.6" ]; then
+    echo "patch 2.6 is incompatible with these scripts."
+    echo "Please install either version 2.5.9 (or earlier)"
+    echo "or version 2.6.1 (or later.)"
+    exit -1
+  fi
+}
+
+CheckPatchVersion
+
 
 ######################################################################
 # Helper functions
@@ -335,3 +351,4 @@ DefaultPackageInstall() {
   DefaultInstallStep
   DefaultCleanUpStep
 }
+
