@@ -21,11 +21,12 @@
     }
   }
 
+  // use a 10ms update interval to drive frame rate
   function moduleDidLoad() {
     life = document.getElementById('life');
     if (life != null) {
       updateStatus('SUCCESS');
-      updateInterval = setInterval("life.update()", 300);
+      updateInterval = setInterval("life.update()", 10);
     }
   }
 
