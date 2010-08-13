@@ -53,7 +53,7 @@ fi
 readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
 readonly NACL_NATIVE_CLIENT=${NACL_TOP}/native_client
 readonly NACL_SDK_BASE=${NACL_SDK_BASE:-\
-${NACL_NATIVE_CLIENT_SDK}/toolchain/${OS_SUBDIR_SHORT}_x86}
+${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86}
 
 # packages subdirectories
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES}/publish${NACL_BIT_SPEC}
@@ -79,6 +79,12 @@ readonly NACL_SDK_GCC_SPECS_PATH=${NACL_SDK_BASE}/lib/gcc/nacl64/4.4.3
 readonly NACL_SDK_USR=${NACL_SDK_BASE}/nacl${NACL_BIT_SPEC}/usr
 readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
 readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
+
+# NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
+# the gcc specs file.  It has a gcc spec-file conditional for ${NACL_BIT_SPEC}
+readonly NACL_SDK_MULTIARCH_USR=${NACL_SDK_BASE}/\%\(nacl_arch\)/usr
+readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
+readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
 
 ######################################################################
 # Always run
@@ -244,10 +250,13 @@ AddToInstallFile() {
 
 PatchSpecFile() {
   # fix up spaces so gcc sees entire path
-  local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_USR_INCLUDE/ /\ /}
-  local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_USR_LIB/ /\ /}
+  local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
+  local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
   # have nacl-gcc dump specs file & add include & lib search paths
   ${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-gcc -dumpspecs |\
+    awk '/\*cpp:/ {\
+      printf("*nacl_arch:\n%%{m64:nacl64; m32:nacl; :nacl64}\n\n", $1); } \
+      { print $0; }' |\
     sed "/*cpp:/{
       N
       s|$| -I${SED_SAFE_SPACES_USR_INCLUDE}|
