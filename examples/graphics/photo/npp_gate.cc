@@ -131,7 +131,7 @@ NPError NPP_NewStream(NPP instance,
                       NPMIMEType type,
                       NPStream* stream,
                       NPBool seekable,
-                      uint16* stype) {
+                      uint16_t* stype) {
   *stype = NP_ASFILEONLY;
   return NPERR_NO_ERROR;
 }
