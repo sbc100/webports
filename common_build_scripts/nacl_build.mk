@@ -42,23 +42,28 @@ NACL_TOOLCHAIN_DIR = toolchain/$(PLATFORM)_$(TARGET)
 CC = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/nacl-gcc
 CPP = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/nacl-g++
 
-%_x86_32.o: %.c
+OBJDIR ?= .
+
+$(OBJDIR)/%_x86_32.o:: %.c
 	$(CC) $(CFLAGS) -m32 $(INCLUDES) $(OPT_FLAGS) -c -o $@ $<
 
-%_x86_32.o: %.cc
+$(OBJDIR)/%_x86_32.o:: %.cc
 	$(CPP) $(CFLAGS) -m32 $(INCLUDES) $(OPT_FLAGS) -c -o $@ $<
 
-%_x86_32.o: %.cpp
+$(OBJDIR)/%_x86_32.o:: %.cpp
 	$(CPP) $(CFLAGS) -m32 $(INCLUDES) $(OPT_FLAGS) -c -o $@ $<
 
-%_x86_64.o: %.c
+$(OBJDIR)/%_x86_64.o:: %.c
 	$(CC) $(CFLAGS) -m64 $(INCLUDES) $(OPT_FLAGS) -c -o $@ $<
 
-%_x86_64.o: %.cc
+$(OBJDIR)/%_x86_64.o:: %.cc
 	$(CPP) $(CFLAGS) -m64 $(INCLUDES) $(OPT_FLAGS) -c -o $@ $<
 
-%_x86_64.o: %.cpp
+$(OBJDIR)/%_x86_64.o:: %.cpp
 	$(CPP) $(CFLAGS) -m64 $(INCLUDES) $(OPT_FLAGS) -c -o $@ $<
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
 # Make sure certain variables are defined.  This rule is set as a dependency
 # for all the .nexe builds in the examples.

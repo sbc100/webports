@@ -8,6 +8,11 @@
 
 NACLPORTS_ROOT = ../../..
 
+# $(OBJDIR) is an optional variable in nacl_build.mk, it is the directory
+# that holds all the .o's.  Note that a rule to create this dir is built into
+# common_build_scripts/nacl_build.mk
+OBJDIR = obj
+
 CFILES = nacl_file.c
 CCFILES = loader.cc \
           npn_bridge.cc \
@@ -17,8 +22,10 @@ CCFILES = loader.cc \
           surface.cc
 CARPE_FILES = default.css slider.js
 
-OBJECTS_X86_32 = $(CFILES:%.c=%_x86_32.o) $(CCFILES:%.cc=%_x86_32.o)
-OBJECTS_X86_64 = $(CFILES:%.c=%_x86_64.o) $(CCFILES:%.cc=%_x86_64.o)
+OBJECTS_X86_32 = $(patsubst %,${OBJDIR}/%,$(CFILES:%.c=%_x86_32.o))
+OBJECTS_X86_32 += $(patsubst %,${OBJDIR}/%,$(CCFILES:%.cc=%_x86_32.o))
+OBJECTS_X86_64 = $(patsubst %,${OBJDIR}/%,$(CFILES:%.c=%_x86_64.o))
+OBJECTS_X86_64 += $(patsubst %,${OBJDIR}/%,$(CCFILES:%.cc=%_x86_64.o))
 
 CFLAGS = -flax-vector-conversions -DXP_UNIX \
          -Wall -Wno-long-long -pthread -Werror
@@ -63,11 +70,10 @@ PACKAGES = $(LIB_JPEG_32) \
            $(BOOST_SMART_PTR_64) \
            $(CARPE_FILES)
 
+NACL_MODULES = photo_x86_32.nexe photo_x86_64.nexe
+
 # The check_variables target is in nacl_build.mk.
-# Note: photo uses a bunch of SSE/SSE2 instructions that might not be
-# available in the 64-bit builds.
-# TODO(dspringer): make a version that will build in 64-bit.
-all_photo: check_variables $(PACKAGES) photo_x86_32.nexe photo_x86_64.nexe
+all_photo: $(OBJDIR) check_variables $(PACKAGES) $(NACL_MODULES)
 
 photo_x86_32.nexe: $(OBJECTS_X86_32)
 	$(CPP) -m32 $^ $(LDFLAGS) -o $@
@@ -76,8 +82,7 @@ photo_x86_64.nexe: $(OBJECTS_X86_64)
 	$(CPP) -m64 $^ $(LDFLAGS) -o $@
 
 clean:
-	-$(RM) $(OBJECTS_X86_32) $(OBJECTS_X86_64) \
-	    photo_x86_32.nexe photo_x86_64.nexe
+	-rm -rf $(OBJDIR) $(NACL_MODULES)
 
 # Build the required packages.
 $(LIB_JPEG_32):
