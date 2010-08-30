@@ -25,12 +25,15 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
+  export LIB_BOOST_DATETIME=libboost_datetime.a
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
 CustomInstallStep() {
   Remove ${NACL_SDK_USR_INCLUDE}/boost
-  tar cf - --exclude='asio.hpp' --exclude='asio' --exclude='mpi.hpp' --exclude='mpi' --exclude='python.hpp' boost | ( ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -)
+  tar cf - --exclude='asio.hpp' --exclude='asio' --exclude='mpi.hpp' --exclude='mpi' boost | ( ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -)
+  Remove ${NACL_SDK_USR_LIB}/${LIB_BOOST_DATETIME}
+  install -m 644 ${LIB_BOOST_DATETIME} ${NACL_SDK_USR_LIB}/${LIB_BOOST_DATETIME}
 }
 
 CustomPackageInstall() {

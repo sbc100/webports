@@ -1,7 +1,7 @@
 diff -Naur boost_1_43_0/Makefile boost_1_43_0.nacl/Makefile
 --- boost_1_43_0/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ boost_1_43_0.nacl/Makefile	2010-05-21 11:19:57.000000000 -0600
-@@ -0,0 +1,17 @@
++++ boost_1_43_0.nacl/Makefile	2010-08-27 13:20:45.000000000 -0600
+@@ -0,0 +1,39 @@
 +CXXFLAGS = -c -pthread
 +DEFINES = \
 +		  -DBOOST_HAS_GETTIMEOFDAY \
@@ -13,15 +13,37 @@ diff -Naur boost_1_43_0/Makefile boost_1_43_0.nacl/Makefile
 +
 +NACL_SDK_USR_INCLUDE = ../../../toolchain/$(OS_PREFIX)_x86/nacl/usr/include
 +
-+all:
++DATETIME_OBJ_FILES = \
++       libs/date_time/src/gregorian/date_generators.o \
++			 libs/date_time/src/gregorian/greg_month.o \
++			 libs/date_time/src/gregorian/greg_weekday.o \
++			 libs/date_time/src/gregorian/gregorian_types.o \
++			 libs/date_time/src/posix_time/posix_time_types.o
++
++OBJ_DIR = obj
++										
++LIB_BOOST_DATETIME = libboost_datetime.a
++
++all: $(LIB_BOOST_DATETIME)
 +	$(CXX) $(CXXFLAGS) $(INCLUDE) $(DEFINES) test.cpp
 +
 +clean:
 +	@echo clean boost
 +	rm -f *.o
++	rm -rf $(OBJ_DIR) $(LIB_BOOST_DATETIME)
++
++$(OBJ_DIR):
++	mkdir -p $(OBJ_DIR)/libs/date_time/src/gregorian
++	mkdir -p $(OBJ_DIR)/libs/date_time/src/posix_time
++
++$(DATETIME_OBJ_FILES): %.o: %.cpp $(OBJ_DIR)
++	$(CXX) -c $(INCLUDE) $(CXXFLAGS) $< -o $(OBJ_DIR)/$@
++
++$(LIB_BOOST_DATETIME): $(OBJ_DIR) $(DATETIME_OBJ_FILES)
++	cd $(OBJ_DIR) && $(AR) rcs ../$(LIB_BOOST_DATETIME) $(DATETIME_OBJ_FILES)
 diff -Naur boost_1_43_0/boost/smart_ptr/detail/yield_k.hpp boost_1_43_0.nacl/boost/smart_ptr/detail/yield_k.hpp
 --- boost_1_43_0/boost/smart_ptr/detail/yield_k.hpp	2009-03-02 09:22:16.000000000 -0700
-+++ boost_1_43_0.nacl/boost/smart_ptr/detail/yield_k.hpp	2010-05-20 17:00:35.000000000 -0600
++++ boost_1_43_0.nacl/boost/smart_ptr/detail/yield_k.hpp	2010-08-27 13:20:45.000000000 -0600
 @@ -111,6 +111,7 @@
      }
      else
@@ -42,7 +64,7 @@ diff -Naur boost_1_43_0/boost/smart_ptr/detail/yield_k.hpp boost_1_43_0.nacl/boo
  
 diff -Naur boost_1_43_0/boost/thread/pthread/condition_variable.hpp boost_1_43_0.nacl/boost/thread/pthread/condition_variable.hpp
 --- boost_1_43_0/boost/thread/pthread/condition_variable.hpp	2010-04-01 09:04:15.000000000 -0600
-+++ boost_1_43_0.nacl/boost/thread/pthread/condition_variable.hpp	2010-05-20 17:00:35.000000000 -0600
++++ boost_1_43_0.nacl/boost/thread/pthread/condition_variable.hpp	2010-08-27 13:20:45.000000000 -0600
 @@ -23,7 +23,7 @@
      inline bool condition_variable::timed_wait(unique_lock<mutex>& m,boost::system_time const& wait_until)
      {
@@ -54,7 +76,7 @@ diff -Naur boost_1_43_0/boost/thread/pthread/condition_variable.hpp boost_1_43_0
          {
 diff -Naur boost_1_43_0/boost/thread/pthread/mutex.hpp boost_1_43_0.nacl/boost/thread/pthread/mutex.hpp
 --- boost_1_43_0/boost/thread/pthread/mutex.hpp	2010-04-01 09:04:15.000000000 -0600
-+++ boost_1_43_0.nacl/boost/thread/pthread/mutex.hpp	2010-05-20 17:00:35.000000000 -0600
++++ boost_1_43_0.nacl/boost/thread/pthread/mutex.hpp	2010-08-27 13:20:45.000000000 -0600
 @@ -182,7 +182,7 @@
  
          bool timed_lock(system_time const & abs_time)
@@ -66,7 +88,7 @@ diff -Naur boost_1_43_0/boost/thread/pthread/mutex.hpp boost_1_43_0.nacl/boost/t
              {
 diff -Naur boost_1_43_0/boost/thread/pthread/recursive_mutex.hpp boost_1_43_0.nacl/boost/thread/pthread/recursive_mutex.hpp
 --- boost_1_43_0/boost/thread/pthread/recursive_mutex.hpp	2010-04-01 09:04:15.000000000 -0600
-+++ boost_1_43_0.nacl/boost/thread/pthread/recursive_mutex.hpp	2010-05-20 17:00:35.000000000 -0600
++++ boost_1_43_0.nacl/boost/thread/pthread/recursive_mutex.hpp	2010-08-27 13:20:45.000000000 -0600
 @@ -232,7 +232,7 @@
  
          bool timed_lock(system_time const & abs_time)
@@ -78,7 +100,7 @@ diff -Naur boost_1_43_0/boost/thread/pthread/recursive_mutex.hpp boost_1_43_0.na
              {
 diff -Naur boost_1_43_0/bootstrap.log boost_1_43_0.nacl/bootstrap.log
 --- boost_1_43_0/bootstrap.log	1969-12-31 17:00:00.000000000 -0700
-+++ boost_1_43_0.nacl/bootstrap.log	2010-05-21 11:13:23.000000000 -0600
++++ boost_1_43_0.nacl/bootstrap.log	2010-08-27 13:20:45.000000000 -0600
 @@ -0,0 +1,9 @@
 ++ cd ./tools/jam/src
 ++ ./build.sh gcc
@@ -91,7 +113,7 @@ diff -Naur boost_1_43_0/bootstrap.log boost_1_43_0.nacl/bootstrap.log
 +./bootstrap/jam0 -f build.jam --toolset=gcc --toolset-root= clean
 diff -Naur boost_1_43_0/test.cpp boost_1_43_0.nacl/test.cpp
 --- boost_1_43_0/test.cpp	1969-12-31 17:00:00.000000000 -0700
-+++ boost_1_43_0.nacl/test.cpp	2010-05-20 17:00:35.000000000 -0600
++++ boost_1_43_0.nacl/test.cpp	2010-08-27 13:20:45.000000000 -0600
 @@ -0,0 +1,115 @@
 +#include <boost/aligned_storage.hpp>
 +#include <boost/any.hpp>
@@ -210,7 +232,7 @@ diff -Naur boost_1_43_0/test.cpp boost_1_43_0.nacl/test.cpp
 +}
 diff -Naur boost_1_43_0/tools/jam/src/bootstrap/jam0 boost_1_43_0.nacl/tools/jam/src/bootstrap/jam0
 --- boost_1_43_0/tools/jam/src/bootstrap/jam0	1969-12-31 17:00:00.000000000 -0700
-+++ boost_1_43_0.nacl/tools/jam/src/bootstrap/jam0	2010-05-21 11:13:23.000000000 -0600
++++ boost_1_43_0.nacl/tools/jam/src/bootstrap/jam0	2010-08-27 13:20:45.000000000 -0600
 @@ -0,0 +1,1163 @@
 +ELF          >     @     @       xA         @ 8  @ % $       @       @ @     @ @     À      À                   tš     tšB     tšB                                          @       @     ”›     ”›                           B       B      >      ˆ‡                   ðÙ     ðÙB     ðÙB     €      €                           @      @                            Påtd   |p     |pB     |pB     ä
 +      ä
