@@ -333,7 +333,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.utl nethack-3.4.3/sys/unix/Makef
  # CFLAGS = -g -I../include
  
 -CFLAGS = -O -I../include
-+CFLAGS = -O -I../include -DPOSIX_TYPES -DSTRCMPI
++CFLAGS = -O -I../include -DPOSIX_TYPES -DSTRCMPI -DSTRNCMPI
  LFLAGS =
  
  LIBS =
