@@ -78,21 +78,19 @@
     } else {
       naclGalObj.chromeVersion = result[1];
       //then we have a Chrome browswer, check version and/or plugin
-      if (naclGalObj.chromeVersion >= 7) {
-        // I think we are guaranteed to be nacl-enabled for version 7...but
-        // we can revisit this and use the logic below if needed to always 
-        // check for the Native Client plugin.
-        naclGalObj.browserSupportMessage = "Google Chrome version " + 
-          naclGalObj.chromeVersion + " supports native client by default.";
-        naclGalObj.validBrowser = true;
-      } else if (naclGalObj.chromeVersion == 6) {
+      if (naclGalObj.chromeVersion >= 6) {
         var found_nacl = pluginExists("Native Client");
         if (found_nacl) {
           naclGalObj.browserSupportMessage = "Native Client plugin located"
             + " in Google Chrome version " + naclGalObj.chromeVersion + ".";
           naclGalObj.validBrowser = true;
         } else {
-          naclGalObj.browserSupportMessage = "Native Client plugin missing!";
+          naclGalObj.browserSupportMessage = "Native Client plugin missing!<BR>"
+          + "To run NativeClient modules you need to quit Google Chrome and"
+          + " restart it from the command line with the --enable-nacl flag.<BR>"
+          + "For more information see "
+          + '<a href="http://code.google.com/p/nativeclient-sdk/wiki/HowTo_RunModules#Step_2:_Launch_the_browser_with_--enable-nacl">'
+          + "Launch the browser with --enable-nacl</a>."
           naclGalObj.validBrowser = false;
         }
       } else { 
