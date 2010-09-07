@@ -52,8 +52,9 @@ fi
 # TODO: x86 only at the moment
 readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
 readonly NACL_NATIVE_CLIENT=${NACL_TOP}/native_client
-readonly NACL_SDK_BASE=${NACL_SDK_BASE:-\
+readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-\
 ${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86}
+readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
 # packages subdirectories
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES}/publish${NACL_BIT_SPEC}
@@ -64,25 +65,25 @@ readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES}/tarballs
 # sha1check python script
 readonly SHA1CHECK=${NACL_PACKAGES_SCRIPTS}/sha1check.py
 
-readonly NACL_BIN_PATH=${NACL_SDK_BASE}/bin
-readonly NACLCC=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-gcc
-readonly NACLCXX=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-g++
-readonly NACLAR=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ar
-readonly NACLRANLIB=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ranlib
-readonly NACLLD=${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-ld
+readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
+readonly NACLCC=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-gcc
+readonly NACLCXX=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-g++
+readonly NACLAR=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-ar
+readonly NACLRANLIB=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-ranlib
+readonly NACLLD=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-ld
 readonly NACL_CROSS_PREFIX=nacl${NACL_BIT_SPEC}-
 
 # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
-readonly NACL_SDK_GCC_SPECS_PATH=${NACL_SDK_BASE}/lib/gcc/nacl64/4.4.3
+readonly NACL_SDK_GCC_SPECS_PATH=${NACL_TOOLCHAIN_ROOT}/lib/gcc/nacl64/4.4.3
 
 # NACL_SDK_USR is where the headers, libraries, etc. will be installed
-readonly NACL_SDK_USR=${NACL_SDK_BASE}/nacl${NACL_BIT_SPEC}/usr
+readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/nacl${NACL_BIT_SPEC}/usr
 readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
 readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
 
 # NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
 # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_BIT_SPEC}
-readonly NACL_SDK_MULTIARCH_USR=${NACL_SDK_BASE}/\%\(nacl_arch\)/usr
+readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
 readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
 readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
 
@@ -253,7 +254,7 @@ PatchSpecFile() {
   local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
   local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
   # have nacl-gcc dump specs file & add include & lib search paths
-  ${NACL_SDK_BASE}/bin/nacl${NACL_BIT_SPEC}-gcc -dumpspecs |\
+  ${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-gcc -dumpspecs |\
     awk '/\*cpp:/ {\
       printf("*nacl_arch:\n%%{m64:nacl64; m32:nacl; :nacl64}\n\n", $1); } \
       { print $0; }' |\

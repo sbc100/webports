@@ -46,7 +46,7 @@ Remove ${NACL_SDK_USR}
 # re-populate with empty directories
 DefaultPreInstallStep
 # remove specs file that adds include & lib paths to nacl-gcc
-Remove ${NACL_SDK_BASE}/lib/gcc/nacl/4.2.2/specs
+Remove ${NACL_TOOLCHAIN_ROOT}/lib/gcc/nacl/4.2.2/specs
 # remove the installed.txt file that lists which packages are installed
 Remove ${NACL_PACKAGES}/installed.txt
 exit 0
