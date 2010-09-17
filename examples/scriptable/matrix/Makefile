@@ -56,12 +56,12 @@ clean:
 	    matrix_x86_32.nexe matrix_x86_64.nexe
 
 # Build the required packages.
-$(BOOST_UBLAS):
+$(BOOST_UBLAS_32):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
 	export NACL_PACKAGES_BITSIZE=32; \
 	./nacl-boost_1_43_0.sh)
 
-$(BOOST_UBLAS):
+$(BOOST_UBLAS_64):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
 	export NACL_PACKAGES_BITSIZE=64; \
 	./nacl-boost_1_43_0.sh)
