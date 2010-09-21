@@ -33,7 +33,7 @@ OPT_FLAGS = -O2
 BOOST_UBLAS_32 = \
   $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl/usr/include/boost/numeric/ublas/matrix.hpp
 BOOST_UBLAS_64 = \
-  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl/usr/include/boost/numeric/ublas/matrix.hpp
+  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl64/usr/include/boost/numeric/ublas/matrix.hpp
 
 PACKAGES = $(BOOST_UBLAS_32) $(BOOST_UBLAS_64)
 
