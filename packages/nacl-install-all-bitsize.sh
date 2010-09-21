@@ -27,6 +27,7 @@ else
   exit 1
 fi
 
+(cd scripts/fftw-3.2.2; ./nacl-fftw-3.2.2.sh)
 (cd scripts/libtommath-0.41; ./nacl-libtommath-0.41.sh)
 (cd scripts/libtomcrypt-1.17; ./nacl-libtomcrypt-1.17.sh)
 (cd scripts/zlib-1.2.3; ./nacl-zlib-1.2.3.sh)
