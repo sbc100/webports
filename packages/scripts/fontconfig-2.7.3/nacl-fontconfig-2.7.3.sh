@@ -55,6 +55,7 @@ CustomConfigureStep() {
   ../configure \
     --host=nacl \
     --disable-shared \
+    --disable-docs \
     --prefix=${NACL_SDK_USR} \
     --exec-prefix=${NACL_SDK_USR} \
     --libdir=${NACL_SDK_USR_LIB} \
