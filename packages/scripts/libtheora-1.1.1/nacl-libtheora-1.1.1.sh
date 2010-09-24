@@ -8,7 +8,7 @@
 #
 # usage:  nacl-libtheora-1.1.1.sh
 #
-# this script downloads, patches, and builds libtheora for Native Client 
+# this script downloads, patches, and builds libtheora for Native Client
 #
 
 readonly URL=http://build.chromium.org/mirror/nacl/libtheora-1.1.1.tar.bz2
@@ -37,6 +37,9 @@ CustomConfigureStep() {
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
+  # Turn off doxygen (it doesn't exist on Mac & Linux, and has an error on
+  # Windows).
+  export HAVE_DOXYGEN="false"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build
