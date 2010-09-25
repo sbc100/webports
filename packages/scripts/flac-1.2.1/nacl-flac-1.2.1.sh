@@ -49,6 +49,7 @@ CustomConfigureStep() {
     --disable-oggtest \
     --disable-xmms-plugin \
     --without-metaflac-test-files \
+    --disable-asm-optimizations \
     --with-http=off \
     --with-html=off \
     --with-ftp=off \
