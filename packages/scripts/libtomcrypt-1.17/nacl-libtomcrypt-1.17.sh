@@ -45,9 +45,8 @@ CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME} to ${NACL_SDK_USR}"
   ChangeDir ${NACL_SDK_USR_INCLUDE}
   Remove ${PACKAGE_NAME}
-  MakeDir ${PACKAGE_NAME}
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp ${THIS_PACKAGE_PATH}/src/headers/*.h ${PACKAGE_NAME}/
+  cp ${THIS_PACKAGE_PATH}/src/headers/*.h ./
   ChangeDir ${NACL_SDK_USR_LIB}
   cp ${THIS_PACKAGE_PATH}/*.a .
 }
