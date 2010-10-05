@@ -26,7 +26,7 @@
      * successfully.
      */
     function moduleDidLoad() {
-      proc_one = document.getElementById('button1');
+      proc_one = document.getElementById('matrix_module_id');
       var status_field = document.getElementById('status_field');
       updateStatus(status_field, 'LOADED');
     }
@@ -223,22 +223,21 @@
 <button onclick="invertMatrix(document.forms[0])">Invert Matrix</button>
 <button onclick="transpose(document.forms[0])">Transpose Matrix</button>
 
-<!-- ... then load modules -->
-<embed name="nacl_module_one"
-       id="button1"
-       width=0 
-       height=0
-       type="application/x-nacl-srpc"/>
+  <!-- Load the published .nexe.  This includes the 'nexes' attribute which
+  shows how to load multi-architecture modules.  Each entry in the
+  table is a key-value pair: the key is the runtime ('x86-32',
+  'x86-64', etc.); the value is a URL for the desired NaCl module.
+  -->
+  <embed name="nacl_module"
+         id="matrix_module_id"
+         width=0 height=0
+         nexes="ARM: matrix_arm.nexe
+                x86-32: matrix_x86_32.nexe
+                x86-64: matrix_x86_64.nexe"
+         type="application/x-ppapi-nacl-srpc"
+         onload="moduleDidLoad();" />
+</p>
 
-<script type="text/javascript">
-  var nexes = 'x86-32: matrix_x86_32.nexe\n'
-            + 'x86-64: matrix_x86_64.nexe\n'
-            + 'ARM: matrix_arm.nexe ';
-
-  document.getElementById('button1').nexes = nexes;
-
-  moduleDidLoad();
-</script>
 
 <h2>Status</h2>
 Has our NaCl Module loaded?

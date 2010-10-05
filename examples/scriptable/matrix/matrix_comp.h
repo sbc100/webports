@@ -6,29 +6,48 @@
 #define EXAMPLES_SCRIPTABLE_MATRIX_MATRIX_COMP_H_
 
 #include <string>
-#include "examples/scriptable/matrix/scriptable.h"
+#include <vector>
+#include <ppapi/cpp/scriptable_object.h>
+#include <ppapi/cpp/var.h>
 
-// Extends Scriptable and adds the plugin's specific functionality.
-class MatrixCompute : public Scriptable {
- public:
-  MatrixCompute();
-  virtual ~MatrixCompute();
+namespace {
+  const char* kComputeAnswer = "ComputeAnswer";
+  const char* kComputeUsingArray = "ComputeUsingArray";
+};
 
-  static bool ComputeAnswer(Scriptable* instance,
-                      const NPVariant* args,
-                      uint32_t arg_count,
-                      NPVariant* result);
-
-  static bool ComputeUsingArray(Scriptable* instance,
-                      const NPVariant* args,
-                      uint32_t arg_count,
-                      NPVariant* result);
+// Extends pp::ScriptableObject and adds the plugin's specific functionality.
+class MatrixScriptableObject : public pp::ScriptableObject {
  private:
-  // Populates the method table with our specific interface.
-  virtual void InitializeMethodTable();
-  // Populates the propert table with our specific interface.
-  // Since this class has no visible properties the function does nothing.
-  virtual void InitializePropertyTable() {}
+  static std::string ComputeAnswer(const std::vector<pp::Var>& args);
+  static std::string ComputeUsingArray(const std::vector<pp::Var>& args);
+ public:
+  MatrixScriptableObject();
+  virtual ~MatrixScriptableObject();
+
+ private:
+  virtual bool HasMethod(const pp::Var& method, pp::Var* exception) {
+    if (!method.is_string()) {
+       return false;
+    }
+    std::string method_name = method.AsString();
+    bool has_method = method_name == kComputeAnswer ||
+        method_name == kComputeUsingArray;
+    return has_method;
+  }
+  virtual pp::Var Call(const pp::Var& method,
+                       const std::vector<pp::Var>& args,
+                       pp::Var* exception) {
+    if (!method.is_string()) {
+      return pp::Var();
+    }
+    std::string method_name = method.AsString();
+    if (method_name == kComputeAnswer)
+      return pp::Var(ComputeAnswer(args));
+    else if (method_name == kComputeUsingArray)
+      return pp::Var(ComputeUsingArray(args));
+    return pp::Var();
+  }
+
 };
 
 #endif  // EXAMPLES_SCRIPTABLE_MATRIX_MATRIX_COMP_H_
