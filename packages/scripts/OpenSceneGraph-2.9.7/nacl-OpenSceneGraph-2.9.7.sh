@@ -64,10 +64,11 @@ CustomInstallStep() {
   Remove ${NACL_SDK_USR_LIB}/libosg.a
   Remove ${NACL_SDK_USR_LIB}/libosgUtil.a
   Remove ${NACL_SDK_USR_LIB}/libOpenThreads.a
-  echo ${NACL_SDK_USR_INCLUDE}
-  echo ${NACLCXX}
+  echo "install -m 644 ${LIB_OSG} ${NACL_SDK_USR_LIB}/${LIB_OSG}"
   install -m 644 ${LIB_OSG} ${NACL_SDK_USR_LIB}/${LIB_OSG}
+  echo "install -m 644 ${LIB_OSGUTIL} ${NACL_SDK_USR_LIB}/${LIB_OSGUTIL}"
   install -m 644 ${LIB_OSGUTIL} ${NACL_SDK_USR_LIB}/${LIB_OSGUTIL}
+  echo "install -m 644 ${LIB_OPENTHREADS} ${NACL_SDK_USR_LIB}/${LIB_OPENTHREADS}"
   install -m 644 ${LIB_OPENTHREADS} ${NACL_SDK_USR_LIB}/${LIB_OPENTHREADS}
 }
 
