@@ -44,7 +44,8 @@ CustomConfigureStep() {
     --prefix=${NACL_SDK_USR} \
     --exec-prefix=${NACL_SDK_USR} \
     --libdir=${NACL_SDK_USR_LIB} \
-    --extra-ldflags='-lnosys -lm'"
+    --extra-ldflags='-lnosys -lm' \
+    --host=x86-nacl-linux"
 
   ./configure \
     --cross-prefix=${NACL_CROSS_PREFIX} \
@@ -53,7 +54,8 @@ CustomConfigureStep() {
     --prefix=${NACL_SDK_USR} \
     --exec-prefix=${NACL_SDK_USR} \
     --libdir=${NACL_SDK_USR_LIB} \
-    --extra-ldflags="-lnosys -lm"
+    --extra-ldflags="-lnosys -lm" \
+    --host=x86-nacl-linux
 }
 
 
