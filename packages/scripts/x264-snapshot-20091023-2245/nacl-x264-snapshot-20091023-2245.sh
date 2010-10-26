@@ -12,7 +12,7 @@
 #
 
 readonly URL=http://build.chromium.org/mirror/nacl/x264-snapshot-20091023-2245.tar.bz2
-Ereadonly URL=http://downloads.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20091023-2245.tar.bz2
+#readonly URL=http://downloads.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20091023-2245.tar.bz2
 readonly PATCH_FILE=x264-snapshot-20091023-2245/nacl-x264-snapshot-20091023-2245.patch
 readonly PACKAGE_NAME=x264-snapshot-20091023-2245
 
@@ -37,6 +37,15 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  echo "  ./configure \
+    --cross-prefix=${NACL_CROSS_PREFIX} \
+    --disable-asm \
+    --disable-pthread \
+    --prefix=${NACL_SDK_USR} \
+    --exec-prefix=${NACL_SDK_USR} \
+    --libdir=${NACL_SDK_USR_LIB} \
+    --extra-ldflags='-lnosys -lm'"
+
   ./configure \
     --cross-prefix=${NACL_CROSS_PREFIX} \
     --disable-asm \

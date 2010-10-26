@@ -30,7 +30,7 @@ Remove ${PACKAGE_NAME}-build-local
 MakeDir ${PACKAGE_NAME}-build-local
 cd ${PACKAGE_NAME}-build-local
 Banner "Configuring ${PACKAGE_NAME} for esidl Web IDL compiler"
-../configure --prefix=${NACL_SDK_BASE} --disable-java --disable-cplusplus --disable-npapi
+../configure --prefix=${NACL_TOOLCHAIN_ROOT} --disable-java --disable-cplusplus --disable-npapi
 make -j4
 make install
 cd ..

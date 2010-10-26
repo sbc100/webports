@@ -64,40 +64,20 @@ CustomInstallStep() {
   Remove ${NACL_SDK_USR_LIB}/libosg.a
   Remove ${NACL_SDK_USR_LIB}/libosgUtil.a
   Remove ${NACL_SDK_USR_LIB}/libOpenThreads.a
-  if [ -e ${NACL_SDK_USR_LIB} ] ; then
-    echo "${NACL_SDK_USR_LIB} exists..."
-  else
-    echo "${NACL_SDK_USR_LIB} DOES NOT EXIST!"
-  fi
-  echo "install -m 644 ${LIB_OSG} ${NACL_SDK_USR_LIB}/${LIB_OSG}"
-  if install -m 644 ${LIB_OSG} ${NACL_SDK_USR_LIB}/${LIB_OSG}; then
-    echo "install ${LIB_OSG} succeeded"
-  else
-    echo "install ${LIB_OSG} failed"
-  fi
-  echo "install -m 644 ${LIB_OSGUTIL} ${NACL_SDK_USR_LIB}/${LIB_OSGUTIL}"
-  if install -m 644 ${LIB_OSGUTIL} ${NACL_SDK_USR_LIB}/${LIB_OSGUTIL}; then
-    echo "install ${LIB_OSGUTIL} succeeded"
-  else
-    echo "install ${LIB_OSGUTIL} failed"
-  fi
-  echo "install -m 644 ${LIB_OPENTHREADS} ${NACL_SDK_USR_LIB}/${LIB_OPENTHREADS}"
-  if install -m 644 ${LIB_OPENTHREADS} ${NACL_SDK_USR_LIB}/${LIB_OPENTHREADS}; then
-    echo "install ${LIB_OPENTHREADS} succeeded"
-  else
-    echo "install ${LIB_OPENTHREADS} failed"
-  fi
+  install -m 644 ${LIB_OSG} ${NACL_SDK_USR_LIB}/${LIB_OSG}
+  install -m 644 ${LIB_OSGUTIL} ${NACL_SDK_USR_LIB}/${LIB_OSGUTIL}
+  install -m 644 ${LIB_OPENTHREADS} ${NACL_SDK_USR_LIB}/${LIB_OPENTHREADS}
 }
 
 CustomPackageInstall() {
-   DefaultPreInstallStep
-   CustomDownloadStep
-   CustomExtractStep
-   DefaultPatchStep
-   CustomConfigureStep
-   DefaultBuildStep
-   CustomInstallStep
-   DefaultCleanUpStep
+  DefaultPreInstallStep
+  CustomDownloadStep
+  CustomExtractStep
+  DefaultPatchStep
+  CustomConfigureStep
+  DefaultBuildStep
+  CustomInstallStep
+  DefaultCleanUpStep
 }
 
 CustomPackageInstall

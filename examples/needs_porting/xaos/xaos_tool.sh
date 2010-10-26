@@ -30,8 +30,8 @@ else
   readonly OS_SUBDIR="windows"
 fi
 
-#readonly NACL_SDK_BASE=/usr/local/nacl-sdk/
-readonly NACL_SDK_BASE=\
+#readonly NACL_TOOLCHAIN_ROOT=/usr/local/nacl-sdk/
+readonly NACL_TOOLCHAIN_ROOT=\
 ${SAVE_PWD}/../../../native_client/src/third_party/nacl_sdk/$OS_SUBDIR/sdk/nacl-sdk/
 
 readonly URL_XAOS=http://build.chromium.org/mirror/nacl/XaoS-3.4.tar.gz
@@ -46,11 +46,11 @@ readonly PATCH_XAOS=${SAVE_PWD}/XaoS-3.4.patch
 # TODO: the dimensions need a little bit of more work in the xaos patch
 readonly NACL_DIM_W=800
 readonly NACL_DIM_H=600
-readonly NACLCC=${NACL_SDK_BASE}/bin/nacl-gcc
-readonly NACLAR=${NACL_SDK_BASE}/bin/nacl-ar
-readonly NACLRANLIB=${NACL_SDK_BASE}/bin/nacl-ranlib
-readonly DIR_AV_LIB=${NACL_SDK_BASE}/nacl/lib
-readonly DIR_AV_INCLUDE=${NACL_SDK_BASE}/nacl/include
+readonly NACLCC=${NACL_TOOLCHAIN_ROOT}/bin/nacl-gcc
+readonly NACLAR=${NACL_TOOLCHAIN_ROOT}/bin/nacl-ar
+readonly NACLRANLIB=${NACL_TOOLCHAIN_ROOT}/bin/nacl-ranlib
+readonly DIR_AV_LIB=${NACL_TOOLCHAIN_ROOT}/nacl/lib
+readonly DIR_AV_INCLUDE=${NACL_TOOLCHAIN_ROOT}/nacl/include
 
 
 ######################################################################
