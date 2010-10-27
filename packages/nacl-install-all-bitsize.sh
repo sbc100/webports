@@ -35,8 +35,6 @@ RunInstallScript() {
     echo "nacports nacl-install-all: Install $1 succeeded"
   else
     echo "nacports nacl-install-all: Install FAILED for $1"
-    cd $CURRENT_DIR
-    exit 1
   fi
   cd $CURRENT_DIR
 }
