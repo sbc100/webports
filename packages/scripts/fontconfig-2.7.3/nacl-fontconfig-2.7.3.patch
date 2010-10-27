@@ -23,11 +23,11 @@ diff -uNr fontconfig-2.7.3/Makefile.in fontconfig-2.7.3.nacl/Makefile.in
 +
 +@SET_MAKE@
 +
-+# 
++#
 +#  fontconfig/Makefile.am
-+# 
++#
 +#  Copyright © 2003 Keith Packard
-+# 
++#
 +#  Permission to use, copy, modify, distribute, and sell this software and its
 +#  documentation for any purpose is hereby granted without fee, provided that
 +#  the above copyright notice appear in all copies and that both that
@@ -37,7 +37,7 @@ diff -uNr fontconfig-2.7.3/Makefile.in fontconfig-2.7.3.nacl/Makefile.in
 +#  specific, written prior permission.  Keith Packard makes no
 +#  representations about the suitability of this software for any purpose.  It
 +#  is provided "as is" without express or implied warranty.
-+# 
++#
 +#  THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 +#  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
 +#  EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -379,7 +379,7 @@ diff -uNr fontconfig-2.7.3/Makefile.in fontconfig-2.7.3.nacl/Makefile.in
 +stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 +	@rm -f stamp-h1
 +	cd $(top_builddir) && $(SHELL) ./config.status config.h
-+$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
++$(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 +	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 +	rm -f stamp-h1
 +	touch $@
@@ -2119,7 +2119,7 @@ diff -uNr fontconfig-2.7.3/aclocal.m4 fontconfig-2.7.3.nacl/aclocal.m4
 +# Invoke $ECHO with all args, space-separated.
 +func_echo_all ()
 +{
-+    $ECHO "$*" 
++    $ECHO "$*"
 +}
 +
 +case "$ECHO" in
@@ -9045,7 +9045,7 @@ diff -uNr fontconfig-2.7.3/aclocal.m4 fontconfig-2.7.3.nacl/aclocal.m4
 +# included after everything else.  This provides aclocal with the
 +# AC_DEFUNs it wants, but when m4 processes it, it doesn't do anything
 +# because those macros already exist, or will be overwritten later.
-+# We use AC_DEFUN over AU_DEFUN for compatibility with aclocal-1.6. 
++# We use AC_DEFUN over AU_DEFUN for compatibility with aclocal-1.6.
 +#
 +# Anytime we withdraw an AC_DEFUN or AU_DEFUN, remember to add it here.
 +# Yes, that means every name once taken will need to remain here until
@@ -9118,7 +9118,7 @@ diff -uNr fontconfig-2.7.3/aclocal.m4 fontconfig-2.7.3.nacl/aclocal.m4
 +m4_ifndef([_LT_PROG_CXX],		[AC_DEFUN([_LT_PROG_CXX])])
 +
 +# pkg.m4 - Macros to locate and utilise pkg-config.            -*- Autoconf -*-
-+# 
++#
 +# Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
 +#
 +# This program is free software; you can redistribute it and/or modify
@@ -9161,7 +9161,7 @@ diff -uNr fontconfig-2.7.3/aclocal.m4 fontconfig-2.7.3.nacl/aclocal.m4
 +		AC_MSG_RESULT([no])
 +		PKG_CONFIG=""
 +	fi
-+		
++
 +fi[]dnl
 +])# PKG_PROG_PKG_CONFIG
 +
@@ -9240,7 +9240,7 @@ diff -uNr fontconfig-2.7.3/aclocal.m4 fontconfig-2.7.3.nacl/aclocal.m4
 +        _PKG_SHORT_ERRORS_SUPPORTED
 +        if test $_pkg_short_errors_supported = yes; then
 +	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "$2" 2>&1`
-+        else 
++        else
 +	        $1[]_PKG_ERRORS=`$PKG_CONFIG --print-errors "$2" 2>&1`
 +        fi
 +	# Put the nasty error message in config.log where it belongs
@@ -10280,11 +10280,11 @@ diff -uNr fontconfig-2.7.3/conf.d/Makefile.in fontconfig-2.7.3.nacl/conf.d/Makef
 +
 +@SET_MAKE@
 +
-+# 
++#
 +#  fontconfig/conf.d/Makefile.am
-+# 
++#
 +#  Copyright © 2005 Keith Packard
-+# 
++#
 +#  Permission to use, copy, modify, distribute, and sell this software and its
 +#  documentation for any purpose is hereby granted without fee, provided that
 +#  the above copyright notice appear in all copies and that both that
@@ -10294,7 +10294,7 @@ diff -uNr fontconfig-2.7.3/conf.d/Makefile.in fontconfig-2.7.3.nacl/conf.d/Makef
 +#  specific, written prior permission.  Keith Packard makes no
 +#  representations about the suitability of this software for any purpose.  It
 +#  is provided "as is" without express or implied warranty.
-+# 
++#
 +#  THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 +#  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
 +#  EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -30755,7 +30755,7 @@ diff -uNr fontconfig-2.7.3/doc/Makefile.in fontconfig-2.7.3.nacl/doc/Makefile.in
 +	fcstrset.sgml \
 +	fcvalue.sgml
 +
-+man5_MANS = fonts-conf.5 
++man5_MANS = fonts-conf.5
 +man3_MANS = $(DOCMAN3)
 +edit_sgml_SOURCES = edit-sgml.c
 +DOC_FILES = $(TXT) $(PDF) $(HTML_FILES)
@@ -30816,7 +30816,7 @@ diff -uNr fontconfig-2.7.3/doc/Makefile.in fontconfig-2.7.3.nacl/doc/Makefile.in
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+edit-sgml$(EXEEXT): $(edit_sgml_OBJECTS) $(edit_sgml_DEPENDENCIES) 
++edit-sgml$(EXEEXT): $(edit_sgml_OBJECTS) $(edit_sgml_DEPENDENCIES)
 +	@rm -f edit-sgml$(EXEEXT)
 +	$(LINK) $(edit_sgml_OBJECTS) $(edit_sgml_LDADD) $(LIBS)
 +
@@ -31366,11 +31366,11 @@ diff -uNr fontconfig-2.7.3/doc/version.sgml fontconfig-2.7.3.nacl/doc/version.sg
 --- fontconfig-2.7.3/doc/version.sgml	1970-01-01 03:00:00.000000000 +0300
 +++ fontconfig-2.7.3.nacl/doc/version.sgml	2010-05-09 02:12:10.576913200 +0400
 @@ -0,0 +1,24 @@
-+<!--  
++<!--
 +   fontconfig/doc/version.sgml.in
-+  
++
 +   Copyright © 2003 Keith Packard
-+  
++
 +   Permission to use, copy, modify, distribute, and sell this software and its
 +   documentation for any purpose is hereby granted without fee, provided that
 +   the above copyright notice appear in all copies and that both that
@@ -31380,7 +31380,7 @@ diff -uNr fontconfig-2.7.3/doc/version.sgml fontconfig-2.7.3.nacl/doc/version.sg
 +   specific, written prior permission.  Keith Packard makes no
 +   representations about the suitability of this software for any purpose.  It
 +   is provided "as is" without express or implied warranty.
-+  
++
 +   THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 +   INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
 +   EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -31686,7 +31686,7 @@ diff -uNr fontconfig-2.7.3/fc-arch/Makefile.in fontconfig-2.7.3.nacl/fc-arch/Mak
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-arch$(EXEEXT): $(fc_arch_OBJECTS) $(fc_arch_DEPENDENCIES) 
++fc-arch$(EXEEXT): $(fc_arch_OBJECTS) $(fc_arch_DEPENDENCIES)
 +	@rm -f fc-arch$(EXEEXT)
 +	$(LINK) $(fc_arch_OBJECTS) $(fc_arch_LDADD) $(LIBS)
 +
@@ -31933,7 +31933,7 @@ diff -uNr fontconfig-2.7.3/fc-arch/Makefile.in fontconfig-2.7.3.nacl/fc-arch/Mak
 +	./fc-arch${EXEEXT} $(ARCHITECTURE) < $(STMPL) > $(TARG).tmp && \
 +	mv $(TARG).tmp $(TARG)
 +
-+$(ALIAS_FILES): 
++$(ALIAS_FILES):
 +	touch $(ALIAS_FILES)
 +
 +# Tell versions [3.59,3.63) of GNU make to not export all variables.
@@ -31960,11 +31960,11 @@ diff -uNr fontconfig-2.7.3/fc-cache/Makefile.in fontconfig-2.7.3.nacl/fc-cache/M
 +
 +@SET_MAKE@
 +
-+# 
++#
 +#  fontconfig/fc-cache/Makefile.am
-+# 
++#
 +#  Copyright © 2003 Keith Packard
-+# 
++#
 +#  Permission to use, copy, modify, distribute, and sell this software and its
 +#  documentation for any purpose is hereby granted without fee, provided that
 +#  the above copyright notice appear in all copies and that both that
@@ -31974,7 +31974,7 @@ diff -uNr fontconfig-2.7.3/fc-cache/Makefile.in fontconfig-2.7.3.nacl/fc-cache/M
 +#  specific, written prior permission.  Keith Packard makes no
 +#  representations about the suitability of this software for any purpose.  It
 +#  is provided "as is" without express or implied warranty.
-+# 
++#
 +#  THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 +#  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
 +#  EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -32294,7 +32294,7 @@ diff -uNr fontconfig-2.7.3/fc-cache/Makefile.in fontconfig-2.7.3.nacl/fc-cache/M
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-cache$(EXEEXT): $(fc_cache_OBJECTS) $(fc_cache_DEPENDENCIES) 
++fc-cache$(EXEEXT): $(fc_cache_OBJECTS) $(fc_cache_DEPENDENCIES)
 +	@rm -f fc-cache$(EXEEXT)
 +	$(LINK) $(fc_cache_OBJECTS) $(fc_cache_LDADD) $(LIBS)
 +
@@ -32598,7 +32598,7 @@ diff -uNr fontconfig-2.7.3/fc-cache/Makefile.in fontconfig-2.7.3.nacl/fc-cache/M
 +@OS_WIN32_FALSE@uninstall-local:
 +@OS_WIN32_FALSE@	-$(RM) -rf "$(DESTDIR)$(fc_cachedir)"
 +
-+@USEDOCBOOK_TRUE@${man_MANS}: ${SGML}	
++@USEDOCBOOK_TRUE@${man_MANS}: ${SGML}
 +@USEDOCBOOK_TRUE@	$(RM) $@
 +@USEDOCBOOK_TRUE@	$(DOC2MAN) ${SGML}
 +@USEDOCBOOK_TRUE@	$(RM) manpage.*
@@ -32922,7 +32922,7 @@ diff -uNr fontconfig-2.7.3/fc-case/Makefile.in fontconfig-2.7.3.nacl/fc-case/Mak
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-case$(EXEEXT): $(fc_case_OBJECTS) $(fc_case_DEPENDENCIES) 
++fc-case$(EXEEXT): $(fc_case_OBJECTS) $(fc_case_DEPENDENCIES)
 +	@rm -f fc-case$(EXEEXT)
 +	$(LINK) $(fc_case_OBJECTS) $(fc_case_LDADD) $(LIBS)
 +
@@ -33167,7 +33167,7 @@ diff -uNr fontconfig-2.7.3/fc-case/Makefile.in fontconfig-2.7.3.nacl/fc-case/Mak
 +	rm -f $(TARG)
 +	./fc-case$(EXEEXT) $(SCASEFOLDING) < $(STMPL) > $(TARG)
 +
-+$(ALIAS_FILES): 
++$(ALIAS_FILES):
 +	touch $(ALIAS_FILES)
 +
 +# Tell versions [3.59,3.63) of GNU make to not export all variables.
@@ -33194,11 +33194,11 @@ diff -uNr fontconfig-2.7.3/fc-cat/Makefile.in fontconfig-2.7.3.nacl/fc-cat/Makef
 +
 +@SET_MAKE@
 +
-+# 
++#
 +#  fontconfig/fc-cat/Makefile.am
-+# 
++#
 +#  Copyright © 2003 Keith Packard
-+# 
++#
 +#  Permission to use, copy, modify, distribute, and sell this software and its
 +#  documentation for any purpose is hereby granted without fee, provided that
 +#  the above copyright notice appear in all copies and that both that
@@ -33208,7 +33208,7 @@ diff -uNr fontconfig-2.7.3/fc-cat/Makefile.in fontconfig-2.7.3.nacl/fc-cat/Makef
 +#  specific, written prior permission.  Keith Packard makes no
 +#  representations about the suitability of this software for any purpose.  It
 +#  is provided "as is" without express or implied warranty.
-+# 
++#
 +#  THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 +#  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
 +#  EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -33528,7 +33528,7 @@ diff -uNr fontconfig-2.7.3/fc-cat/Makefile.in fontconfig-2.7.3.nacl/fc-cat/Makef
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-cat$(EXEEXT): $(fc_cat_OBJECTS) $(fc_cat_DEPENDENCIES) 
++fc-cat$(EXEEXT): $(fc_cat_OBJECTS) $(fc_cat_DEPENDENCIES)
 +	@rm -f fc-cat$(EXEEXT)
 +	$(LINK) $(fc_cat_OBJECTS) $(fc_cat_LDADD) $(LIBS)
 +
@@ -33823,7 +33823,7 @@ diff -uNr fontconfig-2.7.3/fc-cat/Makefile.in fontconfig-2.7.3.nacl/fc-cat/Makef
 +	uninstall-binPROGRAMS uninstall-man uninstall-man1
 +
 +
-+@USEDOCBOOK_TRUE@${man_MANS}: ${SGML}	
++@USEDOCBOOK_TRUE@${man_MANS}: ${SGML}
 +@USEDOCBOOK_TRUE@	$(RM) $@
 +@USEDOCBOOK_TRUE@	$(DOC2MAN) ${SGML}
 +@USEDOCBOOK_TRUE@	$(RM) manpage.*
@@ -34138,7 +34138,7 @@ diff -uNr fontconfig-2.7.3/fc-glyphname/Makefile.in fontconfig-2.7.3.nacl/fc-gly
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-glyphname$(EXEEXT): $(fc_glyphname_OBJECTS) $(fc_glyphname_DEPENDENCIES) 
++fc-glyphname$(EXEEXT): $(fc_glyphname_OBJECTS) $(fc_glyphname_DEPENDENCIES)
 +	@rm -f fc-glyphname$(EXEEXT)
 +	$(LINK) $(fc_glyphname_OBJECTS) $(fc_glyphname_LDADD) $(LIBS)
 +
@@ -34383,7 +34383,7 @@ diff -uNr fontconfig-2.7.3/fc-glyphname/Makefile.in fontconfig-2.7.3.nacl/fc-gly
 +	rm -f $(TARG)
 +	./fc-glyphname$(EXEEXT) $(SGLYPHNAME) < $(STMPL) > $(TARG)
 +
-+$(ALIAS_FILES): 
++$(ALIAS_FILES):
 +	touch $(ALIAS_FILES)
 +
 +# Tell versions [3.59,3.63) of GNU make to not export all variables.
@@ -34933,7 +34933,7 @@ diff -uNr fontconfig-2.7.3/fc-lang/Makefile.in fontconfig-2.7.3.nacl/fc-lang/Mak
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-lang$(EXEEXT): $(fc_lang_OBJECTS) $(fc_lang_DEPENDENCIES) 
++fc-lang$(EXEEXT): $(fc_lang_OBJECTS) $(fc_lang_DEPENDENCIES)
 +	@rm -f fc-lang$(EXEEXT)
 +	$(LINK) $(fc_lang_OBJECTS) $(fc_lang_LDADD) $(LIBS)
 +
@@ -35179,7 +35179,7 @@ diff -uNr fontconfig-2.7.3/fc-lang/Makefile.in fontconfig-2.7.3.nacl/fc-lang/Mak
 +	./fc-lang${EXEEXT} -d ${srcdir} $(ORTH) < $(STMPL) > $(TARG).tmp && \
 +	mv $(TARG).tmp $(TARG)
 +
-+$(ALIAS_FILES): 
++$(ALIAS_FILES):
 +	touch $(ALIAS_FILES)
 +#	^-------------- Add new orth files here
 +
@@ -35207,11 +35207,11 @@ diff -uNr fontconfig-2.7.3/fc-list/Makefile.in fontconfig-2.7.3.nacl/fc-list/Mak
 +
 +@SET_MAKE@
 +
-+# 
++#
 +#  fontconfig/fc-list/Makefile.am
-+# 
++#
 +#  Copyright © 2003 Keith Packard
-+# 
++#
 +#  Permission to use, copy, modify, distribute, and sell this software and its
 +#  documentation for any purpose is hereby granted without fee, provided that
 +#  the above copyright notice appear in all copies and that both that
@@ -35221,7 +35221,7 @@ diff -uNr fontconfig-2.7.3/fc-list/Makefile.in fontconfig-2.7.3.nacl/fc-list/Mak
 +#  specific, written prior permission.  Keith Packard makes no
 +#  representations about the suitability of this software for any purpose.  It
 +#  is provided "as is" without express or implied warranty.
-+# 
++#
 +#  THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 +#  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
 +#  EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -35541,7 +35541,7 @@ diff -uNr fontconfig-2.7.3/fc-list/Makefile.in fontconfig-2.7.3.nacl/fc-list/Mak
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-list$(EXEEXT): $(fc_list_OBJECTS) $(fc_list_DEPENDENCIES) 
++fc-list$(EXEEXT): $(fc_list_OBJECTS) $(fc_list_DEPENDENCIES)
 +	@rm -f fc-list$(EXEEXT)
 +	$(LINK) $(fc_list_OBJECTS) $(fc_list_LDADD) $(LIBS)
 +
@@ -35873,11 +35873,11 @@ diff -uNr fontconfig-2.7.3/fc-match/Makefile.in fontconfig-2.7.3.nacl/fc-match/M
 +
 +@SET_MAKE@
 +
-+# 
++#
 +#  fontconfig/fc-match/Makefile.am
-+# 
++#
 +#  Copyright © 2003 Keith Packard
-+# 
++#
 +#  Permission to use, copy, modify, distribute, and sell this software and its
 +#  documentation for any purpose is hereby granted without fee, provided that
 +#  the above copyright notice appear in all copies and that both that
@@ -35887,7 +35887,7 @@ diff -uNr fontconfig-2.7.3/fc-match/Makefile.in fontconfig-2.7.3.nacl/fc-match/M
 +#  specific, written prior permission.  Keith Packard makes no
 +#  representations about the suitability of this software for any purpose.  It
 +#  is provided "as is" without express or implied warranty.
-+# 
++#
 +#  THE AUTHOR(S) DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
 +#  INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
 +#  EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -36207,7 +36207,7 @@ diff -uNr fontconfig-2.7.3/fc-match/Makefile.in fontconfig-2.7.3.nacl/fc-match/M
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-match$(EXEEXT): $(fc_match_OBJECTS) $(fc_match_DEPENDENCIES) 
++fc-match$(EXEEXT): $(fc_match_OBJECTS) $(fc_match_DEPENDENCIES)
 +	@rm -f fc-match$(EXEEXT)
 +	$(LINK) $(fc_match_OBJECTS) $(fc_match_LDADD) $(LIBS)
 +
@@ -36873,7 +36873,7 @@ diff -uNr fontconfig-2.7.3/fc-query/Makefile.in fontconfig-2.7.3.nacl/fc-query/M
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-query$(EXEEXT): $(fc_query_OBJECTS) $(fc_query_DEPENDENCIES) 
++fc-query$(EXEEXT): $(fc_query_OBJECTS) $(fc_query_DEPENDENCIES)
 +	@rm -f fc-query$(EXEEXT)
 +	$(LINK) $(fc_query_OBJECTS) $(fc_query_LDADD) $(LIBS)
 +
@@ -37539,7 +37539,7 @@ diff -uNr fontconfig-2.7.3/fc-scan/Makefile.in fontconfig-2.7.3.nacl/fc-scan/Mak
 +	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 +	echo " rm -f" $$list; \
 +	rm -f $$list
-+fc-scan$(EXEEXT): $(fc_scan_OBJECTS) $(fc_scan_DEPENDENCIES) 
++fc-scan$(EXEEXT): $(fc_scan_OBJECTS) $(fc_scan_DEPENDENCIES)
 +	@rm -f fc-scan$(EXEEXT)
 +	$(LINK) $(fc_scan_OBJECTS) $(fc_scan_LDADD) $(LIBS)
 +
@@ -48970,7 +48970,7 @@ diff -uNr fontconfig-2.7.3/src/Makefile.in fontconfig-2.7.3.nacl/src/Makefile.in
 +top_builddir = @top_builddir@
 +top_srcdir = @top_srcdir@
 +@OS_WIN32_TRUE@export_symbols = -export-symbols fontconfig.def
-+@OS_WIN32_FALSE@fontconfig_def_dependency = 
++@OS_WIN32_FALSE@fontconfig_def_dependency =
 +@OS_WIN32_TRUE@fontconfig_def_dependency = fontconfig.def
 +
 +# Microsoft import library install/uninstall
@@ -49095,7 +49095,7 @@ diff -uNr fontconfig-2.7.3/src/Makefile.in fontconfig-2.7.3.nacl/src/Makefile.in
 +	  echo "rm -f \"$${dir}/so_locations\""; \
 +	  rm -f "$${dir}/so_locations"; \
 +	done
-+libfontconfig.la: $(libfontconfig_la_OBJECTS) $(libfontconfig_la_DEPENDENCIES) 
++libfontconfig.la: $(libfontconfig_la_OBJECTS) $(libfontconfig_la_DEPENDENCIES)
 +	$(libfontconfig_la_LINK) -rpath $(libdir) $(libfontconfig_la_OBJECTS) $(libfontconfig_la_LIBADD) $(LIBS)
 +
 +mostlyclean-compile:
@@ -49363,7 +49363,7 @@ diff -uNr fontconfig-2.7.3/src/Makefile.in fontconfig-2.7.3.nacl/src/Makefile.in
 +
 +# gcc import library install/uninstall
 +
-+@OS_WIN32_TRUE@install-libtool-import-lib: 
++@OS_WIN32_TRUE@install-libtool-import-lib:
 +@OS_WIN32_TRUE@	$(INSTALL) .libs/libfontconfig.dll.a $(DESTDIR)$(libdir)
 +@OS_WIN32_TRUE@	$(INSTALL) fontconfig.def $(DESTDIR)$(libdir)/fontconfig.def
 +
@@ -49623,7 +49623,7 @@ diff -uNr fontconfig-2.7.3/test/Makefile.in fontconfig-2.7.3.nacl/test/Makefile.
 +TESTS = run-test.sh
 +TESTDATA = 4x6.pcf 8x16.pcf out.expected fonts.conf.in
 +EXTRA_DIST = $(check_SCRIPTS) $(TESTDATA)
-+CLEANFILES = 
++CLEANFILES =
 +all: all-am
 +
 +.SUFFIXES:
@@ -49944,7 +49944,7 @@ Dummy "compiler" - will produce working but useless executables...
 diff -uNr fontconfig-2.7.3/pseudo-gcc fontconfig-2.7.3.nacl/pseudo-gcc
 --- fontconfig-2.7.3/pseudo-gcc	1970-01-01 03:00:00.000000000 +0300
 +++ fontconfig-2.7.3.nacl/pseudo-gcc	2010-05-09 02:42:18.469513200 +0400
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,15 @@
 +#/bin/sh
 +nextout="n"
 +out=""
@@ -49958,7 +49958,8 @@ diff -uNr fontconfig-2.7.3/pseudo-gcc fontconfig-2.7.3.nacl/pseudo-gcc
 +    out="$option"
 +  fi
 +done
-+cp -ai /bin/true "$out"
++real_true=`which true`
++cp -ai $real_true "$out"
 
 ######################################################################
 Autogenerated files: out "compiler" creates non-working "programs"...
@@ -49969,19 +49970,19 @@ diff -uNr fontconfig-2.7.3/fc-arch/Makefile.am fontconfig-2.7.3.nacl/fc-arch/Mak
 +++ fontconfig-2.7.3.nacl/fc-arch/Makefile.am	2010-05-09 18:11:56.064348400 +0400
 @@ -42,9 +42,7 @@
  EXTRA_DIST=$(TMPL)
- 
+
  $(TARG):fc-arch${EXEEXT} $(STMPL) ${top_srcdir}/src/fcint.h ../config.h
 -	rm -f $(TARG)
 -	./fc-arch${EXEEXT} $(ARCHITECTURE) < $(STMPL) > $(TARG).tmp && \
 -	mv $(TARG).tmp $(TARG)
 +	touch $(TARG)
- 
+
  ALIAS_FILES = fcalias.h fcaliastail.h
- 
+
 @@ -53,4 +51,4 @@
- $(ALIAS_FILES): 
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
- 
+
 -CLEANFILES=$(TARG) $(ALIAS_FILES)
 +CLEANFILES = $(ALIAS_FILES)
 diff -uNr fontconfig-2.7.3/fc-arch/Makefile.in fontconfig-2.7.3.nacl/fc-arch/Makefile.in
@@ -49995,17 +49996,17 @@ diff -uNr fontconfig-2.7.3/fc-arch/Makefile.in fontconfig-2.7.3.nacl/fc-arch/Mak
 +CLEANFILES = $(ALIAS_FILES)
  all: $(BUILT_SOURCES)
  	$(MAKE) $(AM_MAKEFLAGS) all-am
- 
+
 @@ -533,9 +533,7 @@
  .PRECIOUS: $(TARG)
- 
+
  $(TARG):fc-arch${EXEEXT} $(STMPL) ${top_srcdir}/src/fcint.h ../config.h
 -	rm -f $(TARG)
 -	./fc-arch${EXEEXT} $(ARCHITECTURE) < $(STMPL) > $(TARG).tmp && \
 -	mv $(TARG).tmp $(TARG)
 +	touch $(TARG)
- 
- $(ALIAS_FILES): 
+
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
 diff -uNr fontconfig-2.7.3/fontconfig-2.7.3-build/fc-arch/fcarch.h fontconfig-2.7.3.nacl/fontconfig-2.7.3-build/fc-arch/fcarch.h
 --- fontconfig-2.7.3/fontconfig-2.7.3-build/fc-arch/fcarch.h	1970-01-01 03:00:00.000000000 +0300
@@ -50039,21 +50040,21 @@ diff -uNr fontconfig-2.7.3/fc-case/Makefile.am fontconfig-2.7.3.nacl/fc-case/Mak
 +++ fontconfig-2.7.3.nacl/fc-case/Makefile.am	2010-05-09 18:11:49.371948400 +0400
 @@ -49,8 +49,7 @@
  EXTRA_DIST=$(TMPL) $(CASEFOLDING)
- 
+
  $(TARG): $(STMPL) fc-case$(EXEEXT) $(SCASEFOLDING)
 -	rm -f $(TARG)
 -	./fc-case$(EXEEXT) $(SCASEFOLDING) < $(STMPL) > $(TARG)
 +	touch $(TARG)
- 
+
  ALIAS_FILES = fcalias.h fcaliastail.h
- 
+
 @@ -59,5 +58,5 @@
- $(ALIAS_FILES): 
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
- 
+
 -CLEANFILES=$(TARG) $(ALIAS_FILES)
 +CLEANFILES = $(ALIAS_FILES)
- 
+
 diff -uNr fontconfig-2.7.3/fc-case/Makefile.in fontconfig-2.7.3.nacl/fc-case/Makefile.in
 --- fontconfig-2.7.3/fc-case/Makefile.in	2010-05-09 18:12:40.695948400 +0400
 +++ fontconfig-2.7.3.nacl/fc-case/Makefile.in	2010-05-09 18:10:50.949948400 +0400
@@ -50065,16 +50066,16 @@ diff -uNr fontconfig-2.7.3/fc-case/Makefile.in fontconfig-2.7.3.nacl/fc-case/Mak
 +CLEANFILES = $(ALIAS_FILES)
  all: $(BUILT_SOURCES)
  	$(MAKE) $(AM_MAKEFLAGS) all-am
- 
+
 @@ -544,8 +544,7 @@
- 
- 
+
+
  $(TARG): $(STMPL) fc-case$(EXEEXT) $(SCASEFOLDING)
 -	rm -f $(TARG)
 -	./fc-case$(EXEEXT) $(SCASEFOLDING) < $(STMPL) > $(TARG)
 +	touch $(TARG)
- 
- $(ALIAS_FILES): 
+
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
 diff -uNr fontconfig-2.7.3/fontconfig-2.7.3-build/fc-case/fccase.h fontconfig-2.7.3.nacl/fontconfig-2.7.3-build/fc-case/fccase.h
 --- fontconfig-2.7.3/fontconfig-2.7.3-build/fc-case/fccase.h	1970-01-01 03:00:00.000000000 +0300
@@ -50389,21 +50390,21 @@ diff -uNr fontconfig-2.7.3/fc-glyphname/Makefile.am fontconfig-2.7.3.nacl/fc-gly
 +++ fontconfig-2.7.3.nacl/fc-glyphname/Makefile.am	2010-05-09 18:11:37.796748400 +0400
 @@ -42,8 +42,7 @@
  EXTRA_DIST=$(TMPL) $(GLYPHNAME)
- 
+
  $(TARG): $(STMPL) fc-glyphname$(EXEEXT) $(SGLYPHNAME)
 -	rm -f $(TARG)
 -	./fc-glyphname$(EXEEXT) $(SGLYPHNAME) < $(STMPL) > $(TARG)
 +	touch $(TARG)
- 
+
  ALIAS_FILES = fcalias.h fcaliastail.h
- 
+
 @@ -52,5 +51,5 @@
- $(ALIAS_FILES): 
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
- 
+
 -CLEANFILES=$(TARG) $(ALIAS_FILES)
 +CLEANFILES = $(ALIAS_FILES)
- 
+
 diff -uNr fontconfig-2.7.3/fc-glyphname/Makefile.in fontconfig-2.7.3.nacl/fc-glyphname/Makefile.in
 --- fontconfig-2.7.3/fc-glyphname/Makefile.in	2010-05-09 18:12:40.727148400 +0400
 +++ fontconfig-2.7.3.nacl/fc-glyphname/Makefile.in	2010-05-09 18:11:01.277148400 +0400
@@ -50415,16 +50416,16 @@ diff -uNr fontconfig-2.7.3/fc-glyphname/Makefile.in fontconfig-2.7.3.nacl/fc-gly
 +CLEANFILES = $(ALIAS_FILES)
  all: $(BUILT_SOURCES)
  	$(MAKE) $(AM_MAKEFLAGS) all-am
- 
+
 @@ -535,8 +535,7 @@
- 
- 
+
+
  $(TARG): $(STMPL) fc-glyphname$(EXEEXT) $(SGLYPHNAME)
 -	rm -f $(TARG)
 -	./fc-glyphname$(EXEEXT) $(SGLYPHNAME) < $(STMPL) > $(TARG)
 +	touch $(TARG)
- 
- $(ALIAS_FILES): 
+
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
 diff -uNr fontconfig-2.7.3/fontconfig-2.7.3-build/fc-glyphname/fcglyphname.h fontconfig-2.7.3.nacl/fontconfig-2.7.3-build/fc-glyphname/fcglyphname.h
 --- fontconfig-2.7.3/fontconfig-2.7.3-build/fc-glyphname/fcglyphname.h	1970-01-01 03:00:00.000000000 +0300
@@ -51216,22 +51217,22 @@ diff -uNr fontconfig-2.7.3/fc-lang/Makefile.am fontconfig-2.7.3.nacl/fc-lang/Mak
 +++ fontconfig-2.7.3.nacl/fc-lang/Makefile.am	2010-05-09 18:11:25.082748400 +0400
 @@ -39,9 +39,7 @@
  EXTRA_DIST=$(TMPL) $(ORTH)
- 
+
  $(TARG):$(ORTH) fc-lang${EXEEXT} $(STMPL)
 -	rm -f $(TARG)
 -	./fc-lang${EXEEXT} -d ${srcdir} $(ORTH) < $(STMPL) > $(TARG).tmp && \
 -	mv $(TARG).tmp $(TARG)
 +	touch $(TARG)
- 
+
  ALIAS_FILES = fcalias.h fcaliastail.h
- 
+
 @@ -50,7 +48,7 @@
- $(ALIAS_FILES): 
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
- 
+
 -CLEANFILES = $(TARG) $(ALIAS_FILES)
 +CLEANFILES = $(ALIAS_FILES)
- 
+
  # NOTE:
  #
 diff -uNr fontconfig-2.7.3/fc-lang/Makefile.in fontconfig-2.7.3.nacl/fc-lang/Makefile.in
@@ -51243,19 +51244,19 @@ diff -uNr fontconfig-2.7.3/fc-lang/Makefile.in fontconfig-2.7.3.nacl/fc-lang/Mak
  BUILT_SOURCES = $(ALIAS_FILES) $(TARG)
 -CLEANFILES = $(TARG) $(ALIAS_FILES)
 +CLEANFILES = $(ALIAS_FILES)
- 
+
  # NOTE:
  #
 @@ -780,9 +780,7 @@
- 
- 
+
+
  $(TARG):$(ORTH) fc-lang${EXEEXT} $(STMPL)
 -	rm -f $(TARG)
 -	./fc-lang${EXEEXT} -d ${srcdir} $(ORTH) < $(STMPL) > $(TARG).tmp && \
 -	mv $(TARG).tmp $(TARG)
 +	touch $(TARG)
- 
- $(ALIAS_FILES): 
+
+ $(ALIAS_FILES):
  	touch $(ALIAS_FILES)
 diff -uNr fontconfig-2.7.3/fontconfig-2.7.3-build/fc-lang/fclang.h fontconfig-2.7.3.nacl/fontconfig-2.7.3-build/fc-lang/fclang.h
 --- fontconfig-2.7.3/fontconfig-2.7.3-build/fc-lang/fclang.h	1970-01-01 03:00:00.000000000 +0300

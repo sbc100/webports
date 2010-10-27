@@ -63,7 +63,8 @@ CustomConfigureStep() {
     --with-http=off \
     --with-html=off \
     --with-ftp=off \
-    --with-x=no
+    --with-x=no \
+    --with-arch=x86
 }
 
 
@@ -71,6 +72,7 @@ CustomPatchMakefileStep() {
   # fontconfig wants to build executable tools.  These tools aren't needed
   # for Native Client.  This function will patch the generated Makefile
   # to remove them.  (Use fontconfig tools on your build machine instead.)
+  echo "CustomPatchMakefileStep"
   Patch ${PACKAGE_NAME} ${MAKEFILE_PATCH_FILE}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
 }
