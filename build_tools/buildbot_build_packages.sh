@@ -6,3 +6,4 @@ cd ${SCRIPT_DIR}/../packages
 export NACL_SDK_ROOT="${SCRIPT_DIR}/../"
 
 ./nacl-install-all.sh
+exit 0

@@ -32,7 +32,7 @@ RunInstallScript() {
   local CURRENT_DIR=`pwd -P`
   cd scripts/$1
   if ./$2 ; then
-    echo "nacports nacl-install-all: Install $1 succeeded"
+    echo "nacports nacl-install-all: Install SUCCEEDED $1"
   else
     echo "nacports nacl-install-all: Install FAILED for $1"
   fi
