@@ -46,6 +46,7 @@ RunInstallScript zlib-1.2.3 nacl-zlib-1.2.3.sh
 RunInstallScript jpeg-6b nacl-jpeg-6b.sh
 RunInstallScript libpng-1.2.40 nacl-libpng-1.2.40.sh
 RunInstallScript tiff-3.9.1 nacl-tiff-3.9.1.sh
+RunInstallScript FreeImage-3.14.1 nacl-FreeImage-3.14.1.sh
 RunInstallScript libogg-1.1.4 nacl-libogg-1.1.4.sh
 RunInstallScript libvorbis-1.2.3 nacl-libvorbis-1.2.3.sh
 RunInstallScript lame-398-2 nacl-lame-398-2.sh
