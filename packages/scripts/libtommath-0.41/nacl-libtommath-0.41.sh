@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds libtommath for Native Client
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/ltm-0.41.tar.bz2
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ltm-0.41.tar.bz2
 #readonly URL=http://sourceforge.net/projects/tommath/files/libtommath/0.41/ltm-0.41.tar.bz2/download
 readonly PATCH_FILE=libtommath-0.41/libtommath-0.41.patch
 readonly PACKAGE_NAME=libtommath-0.41

@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds agg for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/agg-2.5.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/agg-2.5.tar.gz
 #readonly URL=http://www.antigrain.com/agg-2.5.tar.gz
 readonly PATCH_FILE=agg-2.5/nacl-agg-2.5.patch
 readonly PACKAGE_NAME=agg-2.5

@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds ffmpeg for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/ffmpeg-0.5.tar.bz2
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ffmpeg-0.5.tar.bz2
 #readonly URL=http://ffmpeg.org/releases/ffmpeg-0.5.tar.bz2
 readonly PATCH_FILE=ffmpeg-0.5/nacl-ffmpeg-0.5.patch
 readonly PACKAGE_NAME=ffmpeg-0.5

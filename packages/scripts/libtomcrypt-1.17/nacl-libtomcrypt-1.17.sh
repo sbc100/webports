@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds libtomcrypt for Native Client
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/crypt-1.17.tar.bz2
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/crypt-1.17.tar.bz2
 #readonly URL=http://libtomcrypt.googlecode.com/files/crypt-1.17.tar.bz2
 readonly PATCH_FILE=libtomcrypt-1.17/libtomcrypt-1.17.patch
 readonly PACKAGE_NAME=libtomcrypt-1.17

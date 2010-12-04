@@ -20,8 +20,8 @@ readonly SAVE_PWD=$(pwd)
 readonly DIR_TMP=${DIR_TMP:-/tmp/nacl}
 readonly DIR_INSTALL=${DIR_INSTALL:-/tmp/nacl}
 
-readonly URL_CARPE_JS=http://build.chromium.org/mirror/nacl/slider.js
-readonly URL_CARPE_CSS=http://build.chromium.org/mirror/nacl/default.css
+readonly URL_CARPE_JS=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/slider.js
+readonly URL_CARPE_CSS=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/default.css
 #readonly URL_CARPE_JS=http://carpe.ambiprospect.com/slider/scripts/slider.js
 #readonly URL_CARPE_CSS=http://carpe.ambiprospect.com/slider/styles/default.css
 

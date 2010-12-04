@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds libmodplug for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/libmodplug-0.8.7.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/libmodplug-0.8.7.tar.gz
 #readonly URL=http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.7/libmodplug-0.8.7.tar.gz/download
 readonly PATCH_FILE=libmodplug-0.8.7/nacl-libmodplug-0.8.7.patch
 readonly PACKAGE_NAME=libmodplug-0.8.7

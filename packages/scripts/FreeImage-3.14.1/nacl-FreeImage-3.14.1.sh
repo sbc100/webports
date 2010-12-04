@@ -12,7 +12,7 @@
 # See http://freeimage.sourceforge.net/ for more details.
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/FreeImage3141.zip
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/FreeImage3141.zip
 #readonly URL=http://downloads.sourceforge.net/freeimage/FreeImage3141.zip
 readonly PATCH_FILE=FreeImage-3.14.1/nacl-FreeImage-3.14.1.patch
 readonly PACKAGE_BASE_NAME=FreeImage

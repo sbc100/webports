@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds flac for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/flac-1.2.1.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/flac-1.2.1.tar.gz
 #readonly URL=http://sourceforge.net/projects/flac/files/flac-src/\
 #flac-1.2.1-src/flac-1.2.1.tar.gz/download
 readonly PATCH_FILE=flac-1.2.1/nacl-flac-1.2.1.patch

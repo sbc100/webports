@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds boost for Native Client
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/boost_1_43_0.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/boost_1_43_0.tar.gz
 #readonly URL=http://sourceforge.net/projects/boost/files/boost/1.43.0/boost_1_43_0.tar.gz/download
 readonly PATCH_FILE=boost_1_43_0/nacl-boost_1_43_0.patch
 readonly PACKAGE_NAME=boost_1_43_0

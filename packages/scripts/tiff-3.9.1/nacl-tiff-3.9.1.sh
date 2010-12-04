@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds tiff for Native Client
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/tiff-3.9.1.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/tiff-3.9.1.tar.gz
 #readonly URL=http://www.imagemagick.org/download/delegates/tiff-3.9.1.tar.gz
 readonly PATCH_FILE=tiff-3.9.1/nacl-tiff-3.9.1.patch
 readonly PACKAGE_NAME=tiff-3.9.1

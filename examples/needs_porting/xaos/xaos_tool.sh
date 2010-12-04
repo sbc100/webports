@@ -34,8 +34,8 @@ fi
 readonly NACL_TOOLCHAIN_ROOT=\
 ${SAVE_PWD}/../../../native_client/src/third_party/nacl_sdk/$OS_SUBDIR/sdk/nacl-sdk/
 
-readonly URL_XAOS=http://build.chromium.org/mirror/nacl/XaoS-3.4.tar.gz
-readonly URL_GSL=http://build.chromium.org/mirror/nacl/gsl-1.9.tar.gz
+readonly URL_XAOS=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/XaoS-3.4.tar.gz
+readonly URL_GSL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gsl-1.9.tar.gz
 #readonly URL_XAOS=http://downloads.sourceforge.net/xaos/XaoS-3.4.tar.gz
 #readonly URL_GSL=http://ftp.gnu.org/pub/gnu/gsl/gsl-1.9.tar.gz
 

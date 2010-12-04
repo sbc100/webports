@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds boost for Native Client
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/gtest-1.5.0.tgz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gtest-1.5.0.tgz
 #readonly URL=http://code.google.com/p/googletest/downloads/detail?name=gtest-1.5.0.tar.gz
 readonly PATCH_FILE=gtest-1.5.0/nacl-gtest-1.5.0.patch
 readonly PACKAGE_NAME=gtest-1.5.0

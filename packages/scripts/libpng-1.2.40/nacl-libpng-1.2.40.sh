@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds libpng for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/libpng-1.2.40.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/libpng-1.2.40.tar.gz
 #readonly URL=http://downloads.sourceforge.net/libpng/libpng-1.2.40.tar.gz
 readonly PATCH_FILE=libpng-1.2.40/nacl-libpng-1.2.40.patch
 readonly PACKAGE_NAME=libpng-1.2.40

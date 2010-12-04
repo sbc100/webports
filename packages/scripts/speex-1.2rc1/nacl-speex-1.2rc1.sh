@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds speex for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/speex-1.2rc1.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/speex-1.2rc1.tar.gz
 #readonly URL=http://downloads.xiph.org/releases/speex/speex-1.2rc1.tar.gz
 readonly PATCH_FILE=speex-1.2rc1/nacl-speex-1.2rc1.patch
 readonly PACKAGE_NAME=speex-1.2rc1

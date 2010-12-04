@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds cairo for Native Client.
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/cairo-1.8.8.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/cairo-1.8.8.tar.gz
 #readonly URL=http://cairographics.org/releases/cairo-1.8.8.tar.gz
 readonly PATCH_FILE=cairo-1.8.8/nacl-cairo-1.8.8.patch
 readonly PACKAGE_NAME=cairo-1.8.8

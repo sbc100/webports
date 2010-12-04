@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds boost for Native Client
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/gmock-1.5.0.tgz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gmock-1.5.0.tgz
 #readonly URL=http://googlemock.googlecode.com/files/gmock-1.5.0.tar.gz
 readonly PATCH_FILE=gmock-1.5.0/nacl-gmock-1.5.0.patch
 readonly PACKAGE_NAME=gmock-1.5.0

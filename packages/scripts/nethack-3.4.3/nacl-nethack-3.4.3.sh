@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds libjpeg for Native Client
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/nethack-343-src.tgz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nethack-343-src.tgz
 readonly PATCH_FILE=nethack-3.4.3/nacl-nethack-3.4.3.patch
 readonly PACKAGE_NAME=nethack-3.4.3
 

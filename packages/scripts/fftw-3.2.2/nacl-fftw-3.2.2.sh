@@ -14,7 +14,7 @@
 #   perl check.pl "nacl(32|64)-sel_ldr -- bench" [-0d|-1d|-2d|-random] [-v]
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/fftw-3.2.2.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fftw-3.2.2.tar.gz
 #readonly URL=http://www.fftw.org/fftw-3.2.2.tar.gz
 readonly PATCH_FILE=fftw-3.2.2/fftw-3.2.2.patch
 readonly PACKAGE_NAME=fftw-3.2.2

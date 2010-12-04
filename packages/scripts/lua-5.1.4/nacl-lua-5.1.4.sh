@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds lua for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/lua-5.1.4.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/lua-5.1.4.tar.gz
 #readonly URL=http://www.lua.org/ftp/lua-5.1.4.tar.gz
 readonly PATCH_FILE=lua-5.1.4/nacl-lua-5.1.4.patch
 readonly PACKAGE_NAME=lua-5.1.4

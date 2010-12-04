@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds fontconfig for Native Client.
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/fontconfig-2.7.3.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fontconfig-2.7.3.tar.gz
 #readonly URL=http://cgit.freedesktop.org/fontconfig/snapshot/fontconfig-2.7.3.tar.gz
 readonly PATCH_FILE=fontconfig-2.7.3/nacl-fontconfig-2.7.3.patch
 readonly MAKEFILE_PATCH_FILE=fontconfig-2.7.3/nacl-fontconfig-2.7.3.Makefile.patch

@@ -11,7 +11,7 @@
 # this script downloads, patches, and builds freetype for Native Client 
 #
 
-readonly URL=http://build.chromium.org/mirror/nacl/freetype-2.1.10.tar.gz
+readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/freetype-2.1.10.tar.gz
 #readonly URL=http://download.savannah.gnu.org/releases/freetype/freetype-2.1.10.tar.gz
 readonly PATCH_FILE=freetype-2.1.10/nacl-freetype-2.1.10.patch
 readonly PACKAGE_NAME=freetype-2.1.10
