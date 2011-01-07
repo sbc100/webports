@@ -16,6 +16,11 @@
 set -o nounset
 set -o errexit
 
+
+RESULT=0
+MESSAGES=
+
+
 # need to define NACL_PACKAGES_BITSIZE before pulling in common.sh
 bitsize=${1:-"32"}
 if [ "${bitsize}" = "32" ] ; then
@@ -32,12 +37,18 @@ RunInstallScript() {
   local CURRENT_DIR=`pwd -P`
   cd scripts/$1
   if ./$2 ; then
-    echo "nacports nacl-install-all: Install SUCCEEDED $1"
+    echo "naclports nacl-install-all: Install SUCCEEDED $1 \
+($NACL_PACKAGES_BITSIZE)"
   else
-    echo "nacports nacl-install-all: Install FAILED for $1"
+    MESSAGE="naclports nacl-install-all: Install FAILED for $1 \
+($NACL_PACKAGES_BITSIZE)"
+    echo $MESSAGE
+    MESSAGES="$MESSAGES\n$MESSAGE"
+    RESULT=1
   fi
   cd $CURRENT_DIR
 }
+
 
 RunInstallScript fftw-3.2.2 nacl-fftw-3.2.2.sh
 RunInstallScript libtommath-0.41 nacl-libtommath-0.41.sh
@@ -73,4 +84,6 @@ RunInstallScript memory_filesys nacl-memory_filesys.sh
 RunInstallScript nethack-3.4.3 nacl-nethack-3.4.3.sh
 RunInstallScript OpenSceneGraph-2.9.7 nacl-OpenSceneGraph-2.9.7.sh
 
-exit 0
+echo -e "$MESSAGES"
+
+exit $RESULT
