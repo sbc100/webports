@@ -5,4 +5,9 @@ cd ${SCRIPT_DIR}/../packages
 
 export NACL_SDK_ROOT="${SCRIPT_DIR}/../"
 
-./nacl-clean-all.sh
+if ! "./nacl-clean-all.sh" ; then
+  echo "Error cleaning!" 1>&2
+  exit 1
+fi
+
+exit 0
