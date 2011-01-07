@@ -104,12 +104,13 @@ int simple_tar_extract(const char *path) {
 
 #ifdef __native_client__
 
-NaClSrpcError NaClSimpleTarExtract(NaClSrpcChannel *channel,
-                                   NaClSrpcArg **in_args,
-                                   NaClSrpcArg **out_args) {
-  out_args[0]->u.ival = simple_tar_extract(in_args[0]->u.sval);
-  return NACL_SRPC_RESULT_OK;
+void NaClSimpleTarExtract(NaClSrpcRpc *rpc,
+                          NaClSrpcArg **in_args,
+                          NaClSrpcArg **out_args,
+                          NaClSrpcClosure *done) {
+  out_args[0]->u.ival = simple_tar_extract(in_args[0]->arrays.str);
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("untar:s:i", NaClSimpleTarExtract);
 
 #endif

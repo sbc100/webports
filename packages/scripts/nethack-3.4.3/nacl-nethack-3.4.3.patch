@@ -289,7 +289,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  # WINTTYLIB = -lcurses16
  # WINTTYLIB = -lncurses
 -WINTTYLIB = -ltermlib
-+WINTTYLIB = -lsrpc -lpthread -Wl,--whole-archive -lmemory_filesys -Wl,--no-whole-archive
++WINTTYLIB = -lsrpc -lpthread -Wl,--whole-archive -lmemory_filesys -lsrpc -Wl,--no-whole-archive
  #
  # libraries for X11
  # If USE_XPM is defined in config.h, you will also need -lXpm here.

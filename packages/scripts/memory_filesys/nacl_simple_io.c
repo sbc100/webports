@@ -272,13 +272,14 @@ int has_colors(void) {
 
 #ifdef __native_client__
 
-NaClSrpcError NaClConsole(NaClSrpcChannel *channel,
-                          NaClSrpcArg **in_args,
-                          NaClSrpcArg **out_args) {
+void NaClConsole(NaClSrpcRpc *rpc,
+                 NaClSrpcArg **in_args,
+                 NaClSrpcArg **out_args,
+                 NaClSrpcClosure *done) {
   char *tmp;
   int tmp_len;
 
-  unescape_string(in_args[0]->u.sval, &tmp, &tmp_len);
+  unescape_string(in_args[0]->arrays.str, &tmp, &tmp_len);
 
   console_lock();
 
@@ -297,8 +298,8 @@ NaClSrpcError NaClConsole(NaClSrpcChannel *channel,
   }
 
   /* Drain output buffer. */
-  out_args[0]->u.sval = escape_string(output_buffer,
-                                      output_buffer_length);
+  out_args[0]->arrays.str = escape_string(output_buffer,
+                                          output_buffer_length);
   free(output_buffer);
   output_buffer = 0;
   output_buffer_capacity = 0;
@@ -307,8 +308,9 @@ NaClSrpcError NaClConsole(NaClSrpcChannel *channel,
   console_unlock();
 
   free(tmp);
-  return NACL_SRPC_RESULT_OK;
+
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("console:s:s", NaClConsole);
 
 #endif

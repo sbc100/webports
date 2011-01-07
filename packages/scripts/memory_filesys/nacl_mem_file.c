@@ -112,12 +112,12 @@ static char *path_collapse(const char *path) {
     /* Drain a character until done. */
     cur = *src;
     if (!cur) break;
-    ++src; 
+    ++src;
     /* Handle this character. */
     if (cur == '/') {
       for(;;) {
         if (strcmp(src, "..") == 0 || strncmp(src, "../", 3) == 0) {
-          /* Strip off a layer. */ 
+          /* Strip off a layer. */
           (*dst) = 0;
           tmp = strrchr(ret, '/');
           if (tmp) { dst = tmp; }
@@ -158,7 +158,7 @@ static char *path_canonical(const char *path) {
   strcat(tmp, path);
   ret = path_collapse(tmp);
   free(tmp);
-  return ret;  
+  return ret;
 }
 
 static char *path_last(const char *path) {
@@ -262,7 +262,7 @@ int __wrap_open(const char *path, int oflag, ...) {
   }
   /* Get the directory its in. */
   parent = file_node_get_parent(path);
-  if (!parent) return -1; 
+  if (!parent) return -1;
   /* It must be a directory. */
   if (parent->kind != FILE_NODE_DIRECTORY) {
     errno = ENOTDIR;
@@ -382,13 +382,13 @@ ssize_t __wrap_read(int fildes, void *buf, size_t nbyte) {
   /* Limit to the end of the file. */
   len = nbyte;
   if (len > handle->node->u.file.len - handle->offset) {
-    len = handle->node->u.file.len - handle->offset; 
+    len = handle->node->u.file.len - handle->offset;
   }
   /* Do the read. */
   memcpy(buf, handle->node->u.file.data + handle->offset, len);
   handle->offset += len;
   file_global_unlock();
-  return len; 
+  return len;
 }
 
 
@@ -664,7 +664,7 @@ char *__wrap_getwd(char *buf) {
 
 int __wrap_chdir(const char *path) {
   FILE_NODE *node;
-  
+
   file_global_lock();
   /* It must exist. */
   node = file_node_get(path);
@@ -758,7 +758,7 @@ uid_t __wrap_getuid(void) {
 
 int __wrap_setuid(uid_t id) {
   return 0;
-} 
+}
 
 gid_t __wrap_getgid(void) {
   return 1002;
@@ -811,26 +811,29 @@ int __wrap_kill(pid_t pid, int sig) {
 
 #ifdef __native_client__
 
-NaClSrpcError NaClOpen(NaClSrpcChannel *channel,
-                       NaClSrpcArg **in_args,
-                       NaClSrpcArg **out_args) {
-  out_args[0]->u.ival = __wrap_open(in_args[0]->u.sval,
+static void NaClOpen(NaClSrpcRpc *rpc,
+                     NaClSrpcArg **in_args,
+                     NaClSrpcArg **out_args,
+                     NaClSrpcClosure *done) {
+  out_args[0]->u.ival = __wrap_open(in_args[0]->arrays.str,
                                     in_args[1]->u.ival);
-  return NACL_SRPC_RESULT_OK;
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("open:si:i", NaClOpen);
 
-NaClSrpcError NaClClose(NaClSrpcChannel *channel,
-                        NaClSrpcArg **in_args,
-                        NaClSrpcArg **out_args) {
+static void NaClClose(NaClSrpcRpc *rpc,
+                      NaClSrpcArg **in_args,
+                      NaClSrpcArg **out_args,
+                      NaClSrpcClosure *done) {
   out_args[0]->u.ival = __wrap_close(in_args[0]->u.ival);
-  return NACL_SRPC_RESULT_OK;
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("close:i:i", NaClClose);
 
-NaClSrpcError NaClReadEscaped(NaClSrpcChannel *channel,
-                              NaClSrpcArg **in_args,
-                              NaClSrpcArg **out_args) {
+static void NaClReadEscaped(NaClSrpcRpc *rpc,
+                            NaClSrpcArg **in_args,
+                            NaClSrpcArg **out_args,
+                            NaClSrpcClosure *done) {
   char *buf;
   char *escaped;
   int ret;
@@ -847,105 +850,159 @@ NaClSrpcError NaClReadEscaped(NaClSrpcChannel *channel,
   free(buf);
   /* Return result. */
   out_args[0]->u.ival = ret;
-  out_args[1]->u.sval = escaped;
-  return NACL_SRPC_RESULT_OK;
-}
-NACL_SRPC_METHOD("readEscaped:ii:is", NaClReadEscaped);
+  out_args[1]->arrays.str = escaped;
 
-NaClSrpcError NaClWriteEscaped(NaClSrpcChannel *channel,
-                               NaClSrpcArg **in_args,
-                               NaClSrpcArg **out_args) {
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
+}
+
+static void NaClWriteEscaped(NaClSrpcRpc *rpc,
+                             NaClSrpcArg **in_args,
+                             NaClSrpcArg **out_args,
+                             NaClSrpcClosure *done) {
   char *unescaped;
   int unescaped_len;
 
   /* Unescape it. */
-  unescape_string(in_args[1]->u.sval, &unescaped, &unescaped_len);
+  unescape_string(in_args[1]->arrays.str, &unescaped, &unescaped_len);
   /* Write it. */
   out_args[0]->u.ival = __wrap_write(in_args[0]->u.ival,
                                      unescaped, unescaped_len);
   free(unescaped);
-  return NACL_SRPC_RESULT_OK;
-}
-NACL_SRPC_METHOD("writeEscaped:is:i", NaClWriteEscaped);
 
-NaClSrpcError NaClSeek(NaClSrpcChannel *channel,
-                       NaClSrpcArg **in_args,
-                       NaClSrpcArg **out_args) {
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
+}
+
+static void NaClSeek(NaClSrpcRpc *rpc,
+                     NaClSrpcArg **in_args,
+                     NaClSrpcArg **out_args,
+                     NaClSrpcClosure *done) {
   out_args[0]->u.ival = __wrap_lseek(in_args[0]->u.ival,
                                      in_args[1]->u.ival,
                                      in_args[2]->u.ival);
-  return NACL_SRPC_RESULT_OK;
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("seek:iii:i", NaClSeek);
 
-NaClSrpcError NaClTell(NaClSrpcChannel *channel,
-                       NaClSrpcArg **in_args,
-                       NaClSrpcArg **out_args) {
+static void NaClTell(NaClSrpcRpc *rpc,
+                     NaClSrpcArg **in_args,
+                     NaClSrpcArg **out_args,
+                     NaClSrpcClosure *done) {
   out_args[0]->u.ival = __wrap_tell(in_args[0]->u.ival);
-  return NACL_SRPC_RESULT_OK;
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("tell:i:i", NaClTell);
 
-NaClSrpcError NaClMkdir(NaClSrpcChannel *channel,
-                        NaClSrpcArg **in_args,
-                        NaClSrpcArg **out_args) {
-  out_args[0]->u.ival = __wrap_mkdir(in_args[0]->u.sval, 0777);
-  return NACL_SRPC_RESULT_OK;
+static void NaClMkdir(NaClSrpcRpc *rpc,
+                      NaClSrpcArg **in_args,
+                      NaClSrpcArg **out_args,
+                      NaClSrpcClosure *done) {
+  out_args[0]->u.ival = __wrap_mkdir(in_args[0]->arrays.str, 0777);
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("mkdir:s:i", NaClMkdir);
 
-NaClSrpcError NaClRmdir(NaClSrpcChannel *channel,
-                        NaClSrpcArg **in_args,
-                        NaClSrpcArg **out_args) {
-  out_args[0]->u.ival = __wrap_rmdir(in_args[0]->u.sval);
-  return NACL_SRPC_RESULT_OK;
+static void NaClRmdir(NaClSrpcRpc *rpc,
+                      NaClSrpcArg **in_args,
+                      NaClSrpcArg **out_args,
+                      NaClSrpcClosure *done) {
+  out_args[0]->u.ival = __wrap_rmdir(in_args[0]->arrays.str);
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("rmdir:s:i", NaClRmdir);
 
-NaClSrpcError NaClRemove(NaClSrpcChannel *channel,
-                         NaClSrpcArg **in_args,
-                         NaClSrpcArg **out_args) {
-  out_args[0]->u.ival = __wrap_remove(in_args[0]->u.sval);
-  return NACL_SRPC_RESULT_OK;
+static void NaClRemove(NaClSrpcRpc *rpc,
+                       NaClSrpcArg **in_args,
+                       NaClSrpcArg **out_args,
+                       NaClSrpcClosure *done) {
+  out_args[0]->u.ival = __wrap_remove(in_args[0]->arrays.str);
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("remove:s:i", NaClRemove);
 
-NaClSrpcError NaClGetCWD(NaClSrpcChannel *channel,
-                         NaClSrpcArg **in_args,
-                         NaClSrpcArg **out_args) {
+static void NaClGetCWD(NaClSrpcRpc *rpc,
+                       NaClSrpcArg **in_args,
+                       NaClSrpcArg **out_args,
+                       NaClSrpcClosure *done) {
   char buf[MAXPATHLEN];
   if (!__wrap_getcwd(buf, MAXPATHLEN)) assert(0);
-  out_args[0]->u.sval = strdup(buf);
-  return NACL_SRPC_RESULT_OK;
+  out_args[0]->arrays.str = strdup(buf);
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("getcwd::s", NaClGetCWD);
 
-NaClSrpcError NaClChdir(NaClSrpcChannel *channel,
-                        NaClSrpcArg **in_args,
-                        NaClSrpcArg **out_args) {
-  out_args[0]->u.ival = chdir(in_args[0]->u.sval);
-  return NACL_SRPC_RESULT_OK;
+static void NaClChdir(NaClSrpcRpc *rpc,
+                      NaClSrpcArg **in_args,
+                      NaClSrpcArg **out_args,
+                      NaClSrpcClosure *done) {
+  out_args[0]->u.ival = chdir(in_args[0]->arrays.str);
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("chdir:s:i", NaClChdir);
 
-NaClSrpcError NaClErrno(NaClSrpcChannel *channel,
-                        NaClSrpcArg **in_args,
-                        NaClSrpcArg **out_args) {
+static void NaClErrno(NaClSrpcRpc *rpc,
+                      NaClSrpcArg **in_args,
+                      NaClSrpcArg **out_args,
+                      NaClSrpcClosure *done) {
   out_args[0]->u.ival = errno;
-  return NACL_SRPC_RESULT_OK;
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("errno::i", NaClErrno);
 
-NaClSrpcError NaClGetEnv(NaClSrpcChannel *channel,
-                         NaClSrpcArg **in_args,
-                         NaClSrpcArg **out_args) {
+static void NaClGetEnv(NaClSrpcRpc *rpc,
+                       NaClSrpcArg **in_args,
+                       NaClSrpcArg **out_args,
+                       NaClSrpcClosure *done) {
   char *val;
 
-  val = getenv(in_args[0]->u.sval);
+  val = getenv(in_args[0]->arrays.str);
   if (!val) val = "";
-  out_args[0]->u.sval = strdup(val);
-  return NACL_SRPC_RESULT_OK;
+  out_args[0]->arrays.str = strdup(val);
+  rpc->result = NACL_SRPC_RESULT_OK;
+  done->Run(done);
 }
-NACL_SRPC_METHOD("getenv:s:s", NaClGetEnv);
+
+extern void NaClConsole(NaClSrpcRpc *rpc,
+                        NaClSrpcArg **in_args,
+                        NaClSrpcArg **out_args,
+                        NaClSrpcClosure *done);
+extern void NaClSimpleTarExtract(NaClSrpcRpc *rpc,
+                                 NaClSrpcArg **in_args,
+                                 NaClSrpcArg **out_args,
+                                 NaClSrpcClosure *done);
+
+static const struct NaClSrpcHandlerDesc srpc_methods[] = {
+  { "open:si:i", NaClOpen },
+  { "close:i:i", NaClClose },
+  { "readEscaped:ii:is", NaClReadEscaped },
+  { "writeEscaped:is:i", NaClWriteEscaped },
+  { "seek:iii:i", NaClSeek },
+  { "tell:i:i", NaClTell },
+  { "mkdir:s:i", NaClMkdir },
+  { "rmdir:s:i", NaClRmdir },
+  { "remove:s:i", NaClRemove },
+  { "getcwd::s", NaClGetCWD },
+  { "chdir:s:i", NaClChdir },
+  { "errno::i", NaClErrno },
+  { "getenv:s:s", NaClGetEnv },
+
+  /* These live outside. */
+  { "untar:s:i", NaClSimpleTarExtract },
+  { "console:s:s", NaClConsole },
+
+  { NULL, NULL},
+};
+
+int NaClFileSrpc(void) {
+  if (!NaClSrpcModuleInit()) {
+    return 1;
+  }
+  if (!NaClSrpcAcceptClientConnection(srpc_methods)) {
+    return 1;
+  }
+  NaClSrpcModuleFini();
+  return 0;
+}
 
 #endif
