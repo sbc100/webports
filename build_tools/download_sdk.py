@@ -121,7 +121,7 @@ def main(argv):
   parser = optparse.OptionParser()
   parser.add_option(
       '-b', '--base-url', dest='base_url',
-      default='http://build.chromium.org/buildbot/nacl_archive/sdk/',
+      default='http://build.chromium.org/f/client/nacl_archive/sdk/',
       help='base url to download from')
   parser.add_option(
       '-v', '--version', dest='version',
