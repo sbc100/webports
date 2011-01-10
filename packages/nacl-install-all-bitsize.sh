@@ -50,6 +50,7 @@ RunInstallScript() {
 }
 
 
+RunInstallScript gc6.8 nacl-gc6.8.sh
 RunInstallScript fftw-3.2.2 nacl-fftw-3.2.2.sh
 RunInstallScript libtommath-0.41 nacl-libtommath-0.41.sh
 RunInstallScript libtomcrypt-1.17 nacl-libtomcrypt-1.17.sh
