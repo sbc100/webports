@@ -1,0 +1,127 @@
+diff -Naur protobuf-2.3.0/config.sub protobuf-2.3.0.nacl/config.sub
+--- protobuf-2.3.0/config.sub	2010-01-08 12:26:21.000000000 -0700
++++ protobuf-2.3.0.nacl/config.sub	2011-01-13 08:12:48.000000000 -0700
+@@ -139,6 +139,10 @@
+ ### recognize some manufacturers as not being operating systems, so we
+ ### can provide default operating systems below.
+ case $os in
++	-nacl*)
++		basic_machine=i686-pc
++		os=-nacl
++		;;
+ 	-sun*os*)
+ 		# Prevent following clause from handling this invalid input.
+ 		;;
+@@ -270,6 +274,7 @@
+ 	| mn10200 | mn10300 \
+ 	| mt \
+ 	| msp430 \
++	| nacl \
+ 	| nios | nios2 \
+ 	| ns16k | ns32k \
+ 	| or32 \
+@@ -351,6 +356,7 @@
+ 	| mmix-* \
+ 	| mt-* \
+ 	| msp430-* \
++	| nacl-* \
+ 	| nios-* | nios2-* \
+ 	| none-* | np1-* | ns16k-* | ns32k-* \
+ 	| orion-* \
+diff -Naur protobuf-2.3.0/configure protobuf-2.3.0.nacl/configure
+--- protobuf-2.3.0/configure	2010-01-08 12:26:18.000000000 -0700
++++ protobuf-2.3.0.nacl/configure	2011-01-13 08:06:48.198231000 -0700
+@@ -906,7 +906,6 @@
+ CXXFLAGS
+ CCC
+ CXXCPP'
+-ac_subdirs_all='gtest'
+ 
+ # Initialize some variables set by options.
+ ac_init_help=
+@@ -17158,6 +17157,7 @@
+ 
+ 
+ # Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
++acx_pthread_ok=yes
+ if test x"$acx_pthread_ok" = xyes; then
+ 
+ cat >>confdefs.h <<\_ACEOF
+@@ -17299,7 +17299,6 @@
+ #   too.
+ export CFLAGS
+ export CXXFLAGS
+-subdirs="$subdirs gtest"
+ 
+ 
+ ac_config_files="$ac_config_files Makefile src/Makefile protobuf.pc protobuf-lite.pc"
+diff -Naur protobuf-2.3.0/src/Makefile.am protobuf-2.3.0.nacl/src/Makefile.am
+--- protobuf-2.3.0/src/Makefile.am	2010-01-08 12:19:11.000000000 -0700
++++ protobuf-2.3.0.nacl/src/Makefile.am	2011-01-13 08:06:48.201221000 -0700
+@@ -74,7 +74,7 @@
+   google/protobuf/compiler/java/java_generator.h               \
+   google/protobuf/compiler/python/python_generator.h
+ 
+-lib_LTLIBRARIES = libprotobuf-lite.la libprotobuf.la libprotoc.la
++lib_LTLIBRARIES = libprotobuf-lite.la libprotobuf.la
+ 
+ libprotobuf_lite_la_LIBADD = $(PTHREAD_LIBS)
+ libprotobuf_lite_la_LDFLAGS = -version-info 6:0:0 -export-dynamic -no-undefined
+diff -Naur protobuf-2.3.0/src/Makefile.in protobuf-2.3.0.nacl/src/Makefile.in
+--- protobuf-2.3.0/src/Makefile.in	2010-01-08 12:26:21.000000000 -0700
++++ protobuf-2.3.0.nacl/src/Makefile.in	2011-01-13 08:06:48.208225000 -0700
+@@ -493,7 +493,7 @@
+   google/protobuf/compiler/java/java_generator.h               \
+   google/protobuf/compiler/python/python_generator.h
+ 
+-lib_LTLIBRARIES = libprotobuf-lite.la libprotobuf.la libprotoc.la
++lib_LTLIBRARIES = libprotobuf-lite.la libprotobuf.la
+ libprotobuf_lite_la_LIBADD = $(PTHREAD_LIBS)
+ libprotobuf_lite_la_LDFLAGS = -version-info 6:0:0 -export-dynamic -no-undefined
+ libprotobuf_lite_la_SOURCES = \
+@@ -757,7 +757,7 @@
+ @HAVE_ZLIB_TRUE@zcgzip_SOURCES = google/protobuf/testing/zcgzip.cc
+ @HAVE_ZLIB_TRUE@zcgunzip_LDADD = $(PTHREAD_LIBS) libprotobuf.la
+ @HAVE_ZLIB_TRUE@zcgunzip_SOURCES = google/protobuf/testing/zcgunzip.cc
+-all: $(BUILT_SOURCES)
++all:
+ 	$(MAKE) $(AM_MAKEFLAGS) all-am
+ 
+ .SUFFIXES:
+@@ -2635,14 +2635,14 @@
+ 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+ check: $(BUILT_SOURCES)
+ 	$(MAKE) $(AM_MAKEFLAGS) check-am
+-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) $(HEADERS)
++all-am: Makefile $(LTLIBRARIES) $(DATA) $(HEADERS)
+ install-binPROGRAMS: install-libLTLIBRARIES
+ 
+ installdirs:
+ 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(protodir)" "$(DESTDIR)$(includedir)"; do \
+ 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+ 	done
+-install: $(BUILT_SOURCES)
++install:
+ 	$(MAKE) $(AM_MAKEFLAGS) install-am
+ install-exec: install-exec-am
+ install-data: install-data-am
+@@ -2696,7 +2696,7 @@
+ 
+ install-dvi: install-dvi-am
+ 
+-install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
++install-exec-am: install-libLTLIBRARIES
+ 
+ install-html: install-html-am
+ 
+diff -Naur protobuf-2.3.0/src/google/protobuf/io/coded_stream.h protobuf-2.3.0.nacl/src/google/protobuf/io/coded_stream.h
+--- protobuf-2.3.0/src/google/protobuf/io/coded_stream.h	2010-01-08 12:19:11.000000000 -0700
++++ protobuf-2.3.0.nacl/src/google/protobuf/io/coded_stream.h	2011-01-13 08:06:48.211218000 -0700
+@@ -109,6 +109,7 @@
+ #ifndef GOOGLE_PROTOBUF_IO_CODED_STREAM_H__
+ #define GOOGLE_PROTOBUF_IO_CODED_STREAM_H__
+ 
++#include <climits>
+ #include <string>
+ #ifndef _MSC_VER
+ #include <sys/param.h>
