@@ -290,7 +290,11 @@ DefaultExtractStep() {
   Banner "Untaring ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_NAME}
-  tar zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
+  if [ $OS_SUBDIR = "windows" ]; then
+    tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
+  else
+    tar zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
+  fi
 }
 
 
