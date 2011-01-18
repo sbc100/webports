@@ -1,4 +1,4 @@
 cd ../../scriptable/crypto
 make
-cp --verbose *.nexe ../../chrome_extensions/crypto_ext
+cp -v *.nexe ../../chrome_extensions/crypto_ext
 

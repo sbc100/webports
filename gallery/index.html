@@ -14,18 +14,18 @@
 .INFO {
   font-weight: bold;
   font-size: 100%;
-  margin: 0 0.25in 0 0.25in; 
+  margin: 0 0.25in 0 0.25in;
   background-color: white;
   border: solid blue 5px;
-  padding: 5px; 
+  padding: 5px;
 }
 .WARNING {
   font-weight: bold;
   font-size: 125%;
-  margin: 0 0.25in 0 0.25in; 
+  margin: 0 0.25in 0 0.25in;
   background-color: yellow;
   border: solid red 5px;
-  padding: 5px; 
+  padding: 5px;
 }
 .inactive_link {
   font-weight: bold;
@@ -74,7 +74,7 @@
     if (!result) {
       naclGalObj.browserSupportMessage = "This non-Chrome browser does NOT "
         + " support native-client apps.";
-      naclGalObj.validBrowser = false; 
+      naclGalObj.validBrowser = false;
     } else {
       naclGalObj.chromeVersion = result[1];
       //then we have a Chrome browswer, check version and/or plugin
@@ -93,7 +93,7 @@
           + "Launch the browser with --enable-nacl</a>."
           naclGalObj.validBrowser = false;
         }
-      } else { 
+      } else {
         naclGalObj.browserSupportMessage = "Google Chrome nacl cannot run"
           + " in version " + naclGalObj.chromeVersion
           + ". You need version 7 or version 6 with --enable-nacl!";
@@ -103,7 +103,7 @@
   }
 
   // Check for Native Client support in the browser before the DOM loads.
-  checkBrowser(naclGallery); 
+  checkBrowser(naclGallery);
 
   /**
    * The page onload event handler. Update the markup to reflect whether this is
@@ -114,14 +114,14 @@
     var nacl_status_field = document.getElementById('nacl_status');
     if (!naclGallery.validBrowser) {
       nacl_status_field.className = "WARNING";
-      nacl_status_field.innerHTML = "WARNING: " 
+      nacl_status_field.innerHTML = "WARNING: "
         + naclGallery.browserSupportMessage
         + "<BR>You can view the screenshots and source code for NaCl plugins"
         + "<BR>but you will not be able to run the plugins in this browser";
     } else {
       nacl_status_field.className = "INFO";
-      nacl_status_field.innerHTML = "INFO: " 
-        + naclGallery.browserSupportMessage 
+      nacl_status_field.innerHTML = "INFO: "
+        + naclGallery.browserSupportMessage
         + "  To run the NaCl plugins within this browser, "
         + "click 'Run' or click the plugin screenshot.";
     }
@@ -154,14 +154,14 @@
       document.write('<a href="' + href + '"><IMG src="'
         + imagelink + '" width=100% alt="screenshot of NaCl-enabled app"></a>');
     } else {
-      document.write('<IMG src="' + imagelink 
+      document.write('<IMG src="' + imagelink
          + '" width=100% alt=screenshot of NaCl-enabled app>');
     }
   }
 
 </script>
 
-<link href="http://code.google.com/css/codesite.css" rel="stylesheet" 
+<link href="http://code.google.com/css/codesite.css" rel="stylesheet"
  type="text/css" />
 <title>Gallery: Native Client Examples</title>
 </head>
@@ -171,11 +171,11 @@
 <BR>
 <div id="nacl_status"> </div>
 
-<p>This page lists the current Native Client (NaCl) examples, some of which 
+<p>This page lists the current Native Client (NaCl) examples, some of which
   are included with the
 <a href="http://code.google.com/p/nativeclient-sdk">download file</a>.</p>
-<p>To run these examples, you must use Chromium or Dev-channel version of 
-Google Chrome with the <code>--enable-nacl</code> flag. You can also use the 
+<p>To run these examples, you must use Chromium or Dev-channel version of
+Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
 <a href="http://blog.chromium.org/2010/08/google-chrome-in-coal-mine.html">
   Canary Build</a> to run them. Refer to
 <a href="http://code.google.com/p/nativeclient-sdk/wiki/HowTo_RunModules">
@@ -184,8 +184,8 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
 <tbody>
 <tr>
   <td style="width: 75%;"><b>Hello World</b>
-    <p><b>Overview: </b>The Hello World example combines HTML, JavaScript, and 
-    C++ (the C++ is compiled to create a .nexe file). The .nexe code responds 
+    <p><b>Overview: </b>The Hello World example combines HTML, JavaScript, and
+    C++ (the C++ is compiled to create a .nexe file). The .nexe code responds
     to button click events and calls the browser to show alert panels.</p>
     <p></p>
     <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/hello_world">View source</a>
@@ -201,12 +201,12 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
 </tr>
 <tr>
   <td style="width: 75%;"><b>Pi Generator</b>
-    <p><b>Overview: </b>The Pi Generator example combines HTML, JavaScript, 
-    and C++ (the C++ is compiled to create a .nexe file). The .nexe code 
-    creates a thread that estimate pi using the Monte Carlo method while 
-    randomly putting 1,000,000,000 points inside a 2D square that shares two 
+    <p><b>Overview: </b>The Pi Generator example combines HTML, JavaScript,
+    and C++ (the C++ is compiled to create a .nexe file). The .nexe code
+    creates a thread that estimate pi using the Monte Carlo method while
+    randomly putting 1,000,000,000 points inside a 2D square that shares two
     sides with a quarter circle. The 2D square is generated using the Pepper 2D
-    API. Pepper is an extension of the NPAPI or Netscape Plugin Application 
+    API. Pepper is an extension of the NPAPI or Netscape Plugin Application
     Programming API.</p>
     <p></p>
     <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/pi_generator">View source</a>
@@ -216,16 +216,16 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
   </td>
   <td style="width: 25%;">
     <script type="text/javascript">
-      addNaclImageLink("pi_generator/montecarlopi.png", 
+      addNaclImageLink("pi_generator/montecarlopi.png",
         "pi_generator/pi_generator.html");
     </script>
   </td>
 </tr>
 <tr>
   <td style="width: 75%;"><b>Sine Wave Synthesizer</b>
-    <p><b>Overview: </b>The Sine Wave Synthesizer example combines HTML, 
-    JavaScript, and C++ (the C++ is compiled to create a .nexe file). It 
-    synthesizes and plays a sine wave.  You can enter the frequency of the 
+    <p><b>Overview: </b>The Sine Wave Synthesizer example combines HTML,
+    JavaScript, and C++ (the C++ is compiled to create a .nexe file). It
+    synthesizes and plays a sine wave.  You can enter the frequency of the
     sine wave.  It uses Pepper Audio API to play the tone.</p>
     <p></p>
     <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/sine_synth">View source</a>
@@ -239,11 +239,13 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
     </script>
   </td>
 </tr>
+<!-- TODO(dspringer): Re-enable this part of the gallery page once 3D support
+     is avbailable in PPAPI.
 <tr>
   <td style="width: 75%;"><b>Tumbler</b>
     <p><b>Overview: </b> The Tumbler example combines HTML, JavaScript, and C++
-    (the C++ is compiled to create a .nexe file). The .nexe code uses the 
-    Pepper 3D API to create a 3 dimensional cube that can be rotated using the 
+    (the C++ is compiled to create a .nexe file). The .nexe code uses the
+    Pepper 3D API to create a 3 dimensional cube that can be rotated using the
     left mouse button.</p>
     <p></p>
     <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/tumbler">View source</a>
@@ -257,11 +259,14 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
     </script>
   </td>
 </tr>
+-->
+<!-- TODO(dspringer): Re-enable this part of the gallery page once the life
+     example has been ported to PPAPI and uses a .nmf file.
 <tr>
   <td style="width: 75%;"><b>Life</b>
     <p><b>Overview: </b> The Life example combines HTML and C++
-    (the C++ is compiled to create a .nexe file). The .nexe code implements 
-    the Life cellular automaton invented by British mathematiciaion John 
+    (the C++ is compiled to create a .nexe file). The .nexe code implements
+    the Life cellular automaton invented by British mathematiciaion John
     Horton Conway.  Use the mouse to paint extra life into the simulation.</p>
     <p></p>
     <a href="http://code.google.com/p/naclports/source/browse/#svn/trunk/src/examples/graphics/life">View source</a>
@@ -275,8 +280,9 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
     </script>
   </td>
 </tr>
+-->
 
-</tbody> 
-</table> 
-</body> 
+</tbody>
+</table>
+</body>
 </html>
