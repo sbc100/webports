@@ -10,15 +10,13 @@ NACLPORTS_ROOT = ../../..
 
 CCFILES = matrix_comp.cc
 
-OBJECTS_X86_32 = $(CCFILES:%.cc=%_x86_32.o)
-OBJECTS_X86_64 = $(CCFILES:%.cc=%_x86_64.o)
-
-
 CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
 
 LDFLAGS = -lppruntime \
           -lppapi_cpp \
+          -lgoogle_nacl_platform \
+          -lgio \
           -lpthread \
           -lsrpc \
           $(ARCH_FLAGS)

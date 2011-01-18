@@ -14,8 +14,8 @@
 
     // global object to hold app-specific values
     var matrixApp = {
-      maxRows: 8,
-      maxColumns: 8
+      maxRows: 15,
+      maxColumns: 15
     };
 
     // Indicates the shared state of the two application objects.
@@ -47,6 +47,26 @@
       }
     }
 
+    /**
+     * Fill all the cells with data -- just puts in values 0...10 repeatedly.
+     * This is useful if the user wants to fill in the entire matrix with
+     * some values to try out larger matrices without lots of typing.
+     * @param {object} matrixForm The form containing the html table
+     */ 
+    function fillCells(matrixForm) {
+      var cell_value = 1;
+      for (var i = 0; i < matrixApp.maxColumns; ++i) {
+         var thisRowWidth = 0;
+         for (var j = 0; j < matrixApp.maxRows; j++) {
+            var index = i * matrixApp.maxRows + j;
+            // matrixForm.elements is a 1-d array
+            var cell = matrixForm.elements[index];
+            cell.value = cell_value++;
+            if (cell_value>10)
+              cell_value = 0;
+         } 
+      }
+    }
     /**
      * Calls |proc_one.ComputeAnswer| with table data (from the matrixform)
      * as multiple args (scalar values).
@@ -189,7 +209,12 @@
 <p>
   Enter data in the table for a matrix.  The matrix does not have to be
   square (same number of rows and columns) but each row must have the same
-  number of columns in it.
+  number of columns in it.  Empty cells are ignored.  Thus, if you just
+  enter values in the first 4 columns of the first 3 cells, a 4x3 matrix will
+  be passed to the NaCl C++ code.
+  <BR>
+  The 'Fill cells' button will put data into all cells (just 0..10) so that
+  you can try invert and transpose with a large matrix without a lot of typing.
   <BR>
   Clicking on "Invert Matrix" calls a function with a comma-separated list
   of arguments to the C++ code including
@@ -222,6 +247,7 @@
 
 <button onclick="invertMatrix(document.forms[0])">Invert Matrix</button>
 <button onclick="transpose(document.forms[0])">Transpose Matrix</button>
+<button onclick="fillCells(document.forms[0])">Fill cells</button>
 
   <!-- Load the published .nexe.  This includes the 'nexes' attribute which
   shows how to load multi-architecture modules.  Each entry in the
@@ -231,10 +257,8 @@
   <embed name="nacl_module"
          id="matrix_module_id"
          width=0 height=0
-         nexes="ARM: matrix_arm.nexe
-                x86-32: matrix_x86_32.nexe
-                x86-64: matrix_x86_64.nexe"
-         type="application/x-ppapi-nacl-srpc"
+         nacl="matrix.nmf"
+         type="application/x-nacl"
          onload="moduleDidLoad();" />
 </p>
 

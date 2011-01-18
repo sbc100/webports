@@ -5,10 +5,10 @@
 #ifndef EXAMPLES_SCRIPTABLE_MATRIX_MATRIX_COMP_H_
 #define EXAMPLES_SCRIPTABLE_MATRIX_MATRIX_COMP_H_
 
+#include <ppapi/cpp/dev/scriptable_object_deprecated.h>
+#include <ppapi/cpp/var.h>
 #include <string>
 #include <vector>
-#include <ppapi/cpp/scriptable_object.h>
-#include <ppapi/cpp/var.h>
 
 namespace {
   const char* kComputeAnswer = "ComputeAnswer";
@@ -16,7 +16,7 @@ namespace {
 };
 
 // Extends pp::ScriptableObject and adds the plugin's specific functionality.
-class MatrixScriptableObject : public pp::ScriptableObject {
+class MatrixScriptableObject : public  pp::deprecated::ScriptableObject {
  private:
   static std::string ComputeAnswer(const std::vector<pp::Var>& args);
   static std::string ComputeUsingArray(const std::vector<pp::Var>& args);

@@ -2,31 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#include <cstdio>
+#include "examples/scriptable/matrix/matrix_comp.h"
 
-#include <vector>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <cstdio>
 #include <sstream>
+#include <vector>
 
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/module.h>
 
-#include "examples/scriptable/matrix/matrix_comp.h"
-#include "boost/numeric/ublas/matrix.hpp"
-#include "boost/numeric/ublas/lu.hpp"
-#include "boost/numeric/ublas/io.hpp"
 
 
 // constructor for the MatrixScriptableObject class -- does logging for debug
 MatrixScriptableObject::MatrixScriptableObject()
-    : pp::ScriptableObject() {
-  printf("MatrixScriptableObject CTOR was called!\n");
-  fflush(stdout);
+    : pp::deprecated::ScriptableObject() {
 }
 
 // destructor for the MatrixScriptableObject class
 MatrixScriptableObject::~MatrixScriptableObject() {
-  printf("MatrixScriptableObject DTOR was called!\n");
-  fflush(stdout);
 }
 
 
@@ -60,8 +56,6 @@ class ppVarToNumber {
          T val = 0;
          // try to read a number (type T) from the string-stream
          if ((ss >> val).fail()) {
-            printf("GetNthArrayElement: Error converting %s to a number\n",
-                   result.c_str());
             conversion_error_ = true;
             error_message_ = "Error converting string ";
             error_message_ += arg.DebugString();
@@ -101,14 +95,10 @@ double GetNthArrayElement(const pp::Var& var, int index, bool* error_occurred) {
     ppVarToNumber<double> dbl_converter;
     double value = dbl_converter(indexVar);
     if (dbl_converter.conversion_error()) {
-      printf("GetNthArrayElement - error converting index %d: %s\n",
-        index, dbl_converter.error_message().c_str());
       return 0.0;
     }
     return value;
   } else {
-    printf("GetNthArrayElement: arg does not have a prop for index %d [%s]\n",
-           index, var.DebugString().c_str());
     *error_occurred = true;
   }
   return 0.0;
@@ -166,7 +156,6 @@ std::string ConvertMatrixToHtml(
   return ss.str();
 }
 
-
 // Called by Javascript -- this is a static method to process the matrix that
 // is passed as a Javascript array object.  The array object is a 1-d array
 // whose first two values are integer values for the width and height
@@ -176,16 +165,12 @@ std::string ConvertMatrixToHtml(
 // the indices: "0", "1" ... up to length-1
 std::string MatrixScriptableObject::ComputeUsingArray(
     const std::vector<pp::Var>& args) {
-  printf("ComputeUsingArray, arg_count=%d\n", args.size());
-  fflush(stdout);
 
   // There should be exactly one arg, which should be an object
   if (args.size() != 1) {
-    printf("Unexpected number of args\n");
     return "Unexpected number of args";
   }
   if (!args[0].is_object()) {
-    printf("Arg is NOT an object\n");
     return "Arg from Javascript is not an object!";
   }
 
@@ -193,17 +178,15 @@ std::string MatrixScriptableObject::ComputeUsingArray(
   pp::Var arg0 = args[0];
   pp::Var var_length = arg0.GetProperty("length", &exception);
 
-  if (!exception.is_void()) {
+  if (!exception.is_undefined()) {
     printf("Error getting 'length' of JS object\n");
     return "Error getting length property of JS object";
   }
-
   int length = var_length.AsInt();
 
   // The length should be > 2 since we always have a width and height plus data
   if (length <= 2) {
     // then we didn't get width, height, and then the cell values...
-    printf("Invalid length (%d)\n", length);
     return "Error: Invalid length";
   }
 
@@ -225,8 +208,6 @@ std::string MatrixScriptableObject::ComputeUsingArray(
       return "Error getting matrix values";
     } else {
       // got good value from Javascript array
-      printf("Grabbed %g from array for %d,%d\n", cur_value, column, row);
-      fflush(stdout);
       initial_matrix(row, column) = cur_value;
       ++column;
       if (column == width) {
@@ -272,26 +253,21 @@ std::string MatrixScriptableObject::ComputeAnswer(
 
   matrix_width = int_converter(args[0]);
   if (int_converter.conversion_error()) {
-    printf(" ComputeAnswer: %s\n", int_converter.error_message().c_str());
     return int_converter.error_message();
   }
 
   matrix_height = int_converter(args[1]);
   if (int_converter.conversion_error()) {
-    printf(" ComputeAnswer: %s\n", int_converter.error_message().c_str());
     return int_converter.error_message();
   }
 
   if (matrix_width <= 0 || matrix_height <= 0) {
-    printf("Invalid matrix sizes\n");
     return "Invalid matrix sizes";
   }
 
   for (unsigned int index = 2; index < args.size(); ++index) {
     double arg_value = dbl_converter(args[index]);
     if (dbl_converter.conversion_error()) {
-      printf("arg %d ComputeAnswer: %s\n", index,
-        dbl_converter.error_message().c_str());
       return dbl_converter.error_message();
     } else {
       input_vector.push_back(arg_value);
@@ -306,7 +282,6 @@ std::string MatrixScriptableObject::ComputeAnswer(
   for ( std::vector<double>::iterator iter = input_vector.begin();
         iter != input_vector.end(); ++iter) {
     double value = *iter;
-    printf(" row %d column %d %3.3g ", row, column, value);
     matrix_data(row, column) = value;
     ++column;
     if (column >= matrix_width) {
@@ -315,16 +290,11 @@ std::string MatrixScriptableObject::ComputeAnswer(
     }
   }
 
-  printf("Filled matrix_data...\n");
-  fflush(stdout);
-
   std::string js_message;   // message to send back to Javascript
   js_message = ConvertMatrixToHtml("Original Matrix:", 3, matrix_data);
 
   if ((matrix_height == matrix_width) && matrix_height>0) {
     std::string inverted_matrix_string;
-    printf("Inverting...height=%d width=%d\n", matrix_height, matrix_width);
-    fflush(stdout);
 
     boost::numeric::ublas::matrix<double>
       inverted_matrix(matrix_height, matrix_width);
@@ -371,7 +341,7 @@ class MatrixInstance : public pp::Instance {
   // The pp::Var takes over ownership of the MatrixInstance.
   virtual pp::Var GetInstanceObject() {
     MatrixScriptableObject* hw_object = new MatrixScriptableObject();
-    return pp::Var(hw_object);
+    return pp::Var(this, hw_object);
   }
 };
 
