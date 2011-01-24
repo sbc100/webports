@@ -84,6 +84,7 @@ RunInstallScript libmodplug-0.8.7 nacl-libmodplug-0.8.7.sh
 RunInstallScript memory_filesys nacl-memory_filesys.sh
 RunInstallScript nethack-3.4.3 nacl-nethack-3.4.3.sh
 RunInstallScript OpenSceneGraph-2.9.7 nacl-OpenSceneGraph-2.9.7.sh
+RunInstallScript cfitsio-3.26.0 nacl-cfitsio-3.26.0.sh
 
 echo -e "$MESSAGES"
 
