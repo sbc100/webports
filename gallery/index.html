@@ -55,6 +55,7 @@
 
   var naclGallery = {
     chromeVersion: null,
+    supportedChromeVersion: 10,
     validBrowser: false,
     browserSupportMessage: '???'
   };
@@ -78,7 +79,7 @@
     } else {
       naclGalObj.chromeVersion = result[1];
       //then we have a Chrome browswer, check version and/or plugin
-      if (naclGalObj.chromeVersion >= 6) {
+      if (naclGalObj.chromeVersion >= naclGalObj.supportedChromeVersion) {
         var found_nacl = pluginExists("Native Client");
         if (found_nacl) {
           naclGalObj.browserSupportMessage = "Native Client plugin located"
@@ -86,17 +87,18 @@
           naclGalObj.validBrowser = true;
         } else {
           naclGalObj.browserSupportMessage = "Native Client plugin missing!<BR>"
-          + "To run NativeClient modules you need to quit Google Chrome and"
-          + " restart it from the command line with the --enable-nacl flag.<BR>"
-          + "For more information see "
+          + "To run NativeClient modules you need to quit Google Chrome<BR>"
+          + "and restart it from the command line with the --enable-nacl"
+          + " flag.<BR><BR>For more information see "
           + '<a href="http://code.google.com/p/nativeclient-sdk/wiki/HowTo_RunModules#Step_2:_Launch_the_browser_with_--enable-nacl">'
           + "Launch the browser with --enable-nacl</a>."
           naclGalObj.validBrowser = false;
         }
       } else {
         naclGalObj.browserSupportMessage = "Google Chrome nacl cannot run"
-          + " in version " + naclGalObj.chromeVersion
-          + ". You need version 7 or version 6 with --enable-nacl!";
+          + " in version " + naclGalObj.chromeVersion + ".<BR>"
+          + " You need version " + naclGalObj.supportedChromeVersion
+          + " or greater with --enable-nacl.";
         naclGalObj.validBrowser = false;
       }
     }
@@ -122,8 +124,9 @@
       nacl_status_field.className = "INFO";
       nacl_status_field.innerHTML = "INFO: "
         + naclGallery.browserSupportMessage
-        + "  To run the NaCl plugins within this browser, "
-        + "click 'Run' or click the plugin screenshot.";
+        + "<BR>To run the NaCl plugins within this browser, click 'Run'"
+        + " in the left column<BR> or click on the screenshot"
+        + " of the Native Client application in the right column.";
     }
   }
 
