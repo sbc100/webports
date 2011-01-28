@@ -138,7 +138,7 @@
    * @return {bool} |true| if the plugin is found.
    */
   function addNaclPluginLink(href) {
-    if (naclGallery.validBrowser) {
+    if (1 /*naclGallery.validBrowser*/) {
       document.write('<BR><a href="' + href + '">Run</a>');
     } else {
       document.write("<BR><p class=inactive_link>Run</p>");
@@ -153,7 +153,7 @@
    * @return {bool} |true| if the plugin is found.
    */
   function addNaclImageLink(imagelink, href) {
-    if (naclGallery.validBrowser) {
+    if (1 /*naclGallery.validBrowser */) {
       document.write('<a href="' + href + '"><IMG src="'
         + imagelink + '" width=100% alt="screenshot of NaCl-enabled app"></a>');
     } else {
