@@ -46,6 +46,9 @@
     for (var index=0; index < plugins.length; index++) {
       var plugin = plugins[index];
       var plugin_name = plugin["name"];
+      // If the plugin is not found, you can use the Javascript console
+      // to see the names of the plugins that were found when debugging.
+      console.log("plugin name: " + plugin_name);
       if (plugin_name.indexOf(name) != -1) {
         return true;
       }
@@ -71,25 +74,29 @@
     var versionPatt = /Chrome\/(\d+)\.(\d+)\.(\d+)\.(\d+)/;
     var result = appVersion.match(versionPatt);
 
-    //result stores the Chrome version number
+    //|result| stores the Chrome version number
     if (!result) {
       naclGalObj.browserSupportMessage = "This non-Chrome browser does NOT "
         + " support native-client apps.";
       naclGalObj.validBrowser = false;
     } else {
       naclGalObj.chromeVersion = result[1];
-      //then we have a Chrome browswer, check version and/or plugin
+      // We know we have Chrome, check version and/or plugin named NaCl
       if (naclGalObj.chromeVersion >= naclGalObj.supportedChromeVersion) {
-        var found_nacl = pluginExists("Native Client");
+        var found_nacl = pluginExists("NaCl");
         if (found_nacl) {
           naclGalObj.browserSupportMessage = "Native Client plugin located"
             + " in Google Chrome version " + naclGalObj.chromeVersion + ".";
           naclGalObj.validBrowser = true;
         } else {
           naclGalObj.browserSupportMessage = "Native Client plugin missing!<BR>"
-          + "To run NativeClient modules you need to quit Google Chrome<BR>"
-          + "and restart it from the command line with the --enable-nacl"
-          + " flag.<BR><BR>For more information see "
+          + "To run NativeClient modules, go to about:flags in a tab,<BR>"
+          + "click the Enable button beneath the Native Client section,<BR>"
+          + "and then scroll down to the bottom of the page and press<BR>"
+          + " the 'Restart Now' button.<BR><BR>"
+          + "For more information see "
+          // TODO: Fix the link below when we have the new external site
+          // BUG: http://code.google.com/p/nativeclient/issues/detail?id=1386
           + '<a href="http://code.google.com/p/nativeclient-sdk/wiki/HowTo_RunModules#Step_2:_Launch_the_browser_with_--enable-nacl">'
           + "Launch the browser with --enable-nacl</a>."
           naclGalObj.validBrowser = false;
