@@ -35,139 +35,68 @@
 }
 </style>
 
+<script type="text/javascript" src="check_browser.js"></script>
+
 <script type="text/javascript">
-  /**
-   * Determines if the plugin with name |name| exists in the browser.
-   * @param {string} name The name of the plugin.
-   * @return {bool} |true| if the plugin is found.
-   */
-  function pluginExists(name) {
-    var plugins = navigator["plugins"];
-    for (var index=0; index < plugins.length; index++) {
-      var plugin = plugins[index];
-      var plugin_name = plugin["name"];
-      // If the plugin is not found, you can use the Javascript console
-      // to see the names of the plugins that were found when debugging.
-      console.log("plugin name: " + plugin_name);
-      if (plugin_name.indexOf(name) != -1) {
-        return true;
-      }
-    }
-    return false;
+// Check for Native Client support in the browser before the DOM loads.
+checker = new browser_version.BrowserChecker(10, navigator["appVersion"],
+                                             navigator["plugins"]);
+console.log("checker=" + checker);
+var result = checker.checkBrowser();
+/**
+ * The page onload event handler. Update the markup to reflect whether this is
+ * a valid version of the Google Chrome browser, and that it supports Native
+ * client modules.
+ */
+function pageDidLoad() {
+  var nacl_status_field = document.getElementById('nacl_status');
+  if (!checker.getIsValidBrowser()) {
+    nacl_status_field.className = "WARNING";
+    nacl_status_field.innerHTML = "WARNING: "
+      + checker.getBrowserSupportMessage()
+      + "<BR>You can view the screenshots and source code for the Native Client"
+      + " modules<BR>but you will not be able to run them in this browser.";
+  } else {
+    nacl_status_field.className = "INFO";
+    nacl_status_field.innerHTML = "INFO: "
+      + checker.getBrowserSupportMessage()
+      + "<BR>To run the Native Client modules within this browser, click 'Run'"
+      + " in the left column<BR> or click on the screenshot"
+      + " of the Native Client application in the right column.";
   }
+}
 
-  var naclGallery = {
-    chromeVersion: null,
-    supportedChromeVersion: 10,
-    validBrowser: false,
-    browserSupportMessage: '???'
-  };
-
-  /**
-   * Called return startup - before the DOM is set up so that naclGallery
-   * fields are set and can be used by the rest of the Javascript code.
-   * @param {Object} naclGalObj An object used to store version about
-   *     the browser and its support for NaCl.
-   */
-  function checkBrowser(naclGalObj) {
-    var appVersion = navigator['appVersion'];
-    var versionPatt = /Chrome\/(\d+)\.(\d+)\.(\d+)\.(\d+)/;
-    var result = appVersion.match(versionPatt);
-
-    //|result| stores the Chrome version number
-    if (!result) {
-      naclGalObj.browserSupportMessage = "This non-Chrome browser does NOT "
-        + " support native-client apps.";
-      naclGalObj.validBrowser = false;
-    } else {
-      naclGalObj.chromeVersion = result[1];
-      // We know we have Chrome, check version and/or plugin named NaCl
-      if (naclGalObj.chromeVersion >= naclGalObj.supportedChromeVersion) {
-        var found_nacl = pluginExists("NaCl");
-        if (found_nacl) {
-          naclGalObj.browserSupportMessage = "Native Client plugin located"
-            + " in Google Chrome version " + naclGalObj.chromeVersion + ".";
-          naclGalObj.validBrowser = true;
-        } else {
-          naclGalObj.browserSupportMessage = "Native Client plugin missing!<BR>"
-          + "To run NativeClient modules, go to about:flags in a tab,<BR>"
-          + "click the Enable button beneath the Native Client section,<BR>"
-          + "and then scroll down to the bottom of the page and press<BR>"
-          + " the 'Restart Now' button.<BR><BR>"
-          + "For more information see "
-          // TODO: Fix the link below when we have the new external site
-          // BUG: http://code.google.com/p/nativeclient/issues/detail?id=1386
-          + '<a href="http://code.google.com/p/nativeclient-sdk/wiki/HowTo_RunModules#Step_2:_Launch_the_browser_with_--enable-nacl">'
-          + "Launch the browser with --enable-nacl</a>."
-          naclGalObj.validBrowser = false;
-        }
-      } else {
-        naclGalObj.browserSupportMessage = "Google Chrome nacl cannot run"
-          + " in version " + naclGalObj.chromeVersion + ".<BR>"
-          + " You need version " + naclGalObj.supportedChromeVersion
-          + " or greater with --enable-nacl.";
-        naclGalObj.validBrowser = false;
-      }
-    }
+/**
+ * Adds a link to the plugin page if checker.getIsValidBrowser() is true
+ * (i.e. if NaCl is enabled); otherwise it uses the inactive_link
+ * sytlesheet to show a greyed out link.
+ * @param {string} href The link (url) to the plugin page.
+ * @return {bool} |true| if the plugin is found.
+ */
+function addNaclPluginLink(href) {
+  if (1 /*checker.getIsValidBrowser()*/) {
+    document.write('<BR><a href="' + href + '">Run</a>');
+  } else {
+    document.write("<BR><p class=inactive_link>Run</p>");
   }
+}
 
-  // Check for Native Client support in the browser before the DOM loads.
-  checkBrowser(naclGallery);
-
-  /**
-   * The page onload event handler. Update the markup to reflect whether this is
-   * a valid version of the Google Chrome browser, and that it supports Native
-   * client modules.
-   */
-  function pageDidLoad() {
-    var nacl_status_field = document.getElementById('nacl_status');
-    if (!naclGallery.validBrowser) {
-      nacl_status_field.className = "WARNING";
-      nacl_status_field.innerHTML = "WARNING: "
-        + naclGallery.browserSupportMessage
-        + "<BR>You can view the screenshots and source code for NaCl plugins"
-        + "<BR>but you will not be able to run the plugins in this browser";
-    } else {
-      nacl_status_field.className = "INFO";
-      nacl_status_field.innerHTML = "INFO: "
-        + naclGallery.browserSupportMessage
-        + "<BR>To run the NaCl plugins within this browser, click 'Run'"
-        + " in the left column<BR> or click on the screenshot"
-        + " of the Native Client application in the right column.";
-    }
+/**
+ * Adds an image for this plugin and, if NaCl is enabled, also makes
+ * the image a link to the plugin page.
+ * @param {string} imagelink The link (url) to the image.
+ * @param {string} href The link (url) to the plugin page.
+ * @return {bool} |true| if the plugin is found.
+ */
+function addNaclImageLink(imagelink, href) {
+  if (1 /*checker.getIsValidBrowser() */) {
+    document.write('<a href="' + href + '"><IMG src="'
+      + imagelink + '" width=100% alt="screenshot of NaCl-enabled app"></a>');
+  } else {
+    document.write('<IMG src="' + imagelink
+       + '" width=100% alt=screenshot of NaCl-enabled app>');
   }
-
-  /**
-   * Adds a link to the plugin page if naclGallery.validBrowser is true
-   * (i.e. if NaCl is enabled); otherwise it uses the inactive_link
-   * sytlesheet to show a greyed out link.
-   * @param {string} href The link (url) to the plugin page.
-   * @return {bool} |true| if the plugin is found.
-   */
-  function addNaclPluginLink(href) {
-    if (1 /*naclGallery.validBrowser*/) {
-      document.write('<BR><a href="' + href + '">Run</a>');
-    } else {
-      document.write("<BR><p class=inactive_link>Run</p>");
-    }
-  }
-
-  /**
-   * Adds an image for this plugin and, if NaCl is enabled, also makes
-   * the image a link to the plugin page.
-   * @param {string} imagelink The link (url) to the image.
-   * @param {string} href The link (url) to the plugin page.
-   * @return {bool} |true| if the plugin is found.
-   */
-  function addNaclImageLink(imagelink, href) {
-    if (1 /*naclGallery.validBrowser */) {
-      document.write('<a href="' + href + '"><IMG src="'
-        + imagelink + '" width=100% alt="screenshot of NaCl-enabled app"></a>');
-    } else {
-      document.write('<IMG src="' + imagelink
-         + '" width=100% alt=screenshot of NaCl-enabled app>');
-    }
-  }
+}
 
 </script>
 
@@ -184,9 +113,9 @@
 <p>This page lists the current Native Client (NaCl) examples, some of which
   are included with the
 <a href="http://code.google.com/p/nativeclient-sdk">download file</a>.</p>
-<p>To run these examples, you must use Chromium or Dev-channel version of
-Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
-<a href="http://blog.chromium.org/2010/08/google-chrome-in-coal-mine.html">
+<p>To run these examples, you must use Chrome version 10.x or greater with
+   Native Client enabled.  On Windows you can also use the
+ <a href="http://blog.chromium.org/2010/08/google-chrome-in-coal-mine.html">
   Canary Build</a> to run them. Refer to
 <a href="http://code.google.com/p/nativeclient-sdk/wiki/HowTo_RunModules">
   HowTo_RunModules</a> for further information.</p>
@@ -216,8 +145,7 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
     creates a thread that estimate pi using the Monte Carlo method while
     randomly putting 1,000,000,000 points inside a 2D square that shares two
     sides with a quarter circle. The 2D square is generated using the Pepper 2D
-    API. Pepper is an extension of the NPAPI or Netscape Plugin Application
-    Programming API.</p>
+    API.</p>
     <p></p>
     <a href="http://code.google.com/p/nativeclient-sdk/source/browse/#svn/trunk/src/examples/pi_generator">View source</a>
     <script type="text/javascript">
@@ -270,8 +198,6 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
   </td>
 </tr>
 -->
-<!-- TODO(dspringer): Re-enable this part of the gallery page once the life
-     example has been ported to PPAPI and uses a .nmf file.
 <tr>
   <td style="width: 75%;"><b>Life</b>
     <p><b>Overview: </b> The Life example combines HTML and C++
@@ -290,7 +216,6 @@ Google Chrome with the <code>--enable-nacl</code> flag. You can also use the
     </script>
   </td>
 </tr>
--->
 
 </tbody>
 </table>
