@@ -160,7 +160,7 @@ browser_version.BrowserChecker.prototype.checkBrowser = function() {
     } else {
       this.browserSupportMessage_ = "Native Client cannot run"
         + " in version " + this.chromeVersion_ + ".<BR>"
-        + " You need version " + requiredChromeVersion_
+        + " You need version " + this.requiredChromeVersion_
         + " or greater.";
       this.isValidBrowser_ = false;
     }
