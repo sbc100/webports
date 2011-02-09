@@ -75,8 +75,30 @@ browser_version.BrowserChecker = function(requiredChromeVersion, appVersion,
    * @type {string}
    * @private
    */
-  this.browserSupportMessage_ = '???';
+  this.browserSupportMessage_ = 'Unable to detect browser and/or'
+                                + ' Native Client support.<br>';
+
+  /**
+   * Browser support status. This allows the user to get a detailed status
+   * rather than using this.browserSupportMessage.
+   */
+  this.browserSupportStatus_ =
+      browser_version.BrowserChecker.StatusValues.UNKNOWN;
 }
+
+/**
+ * The values used for BrowserChecker status to indicate success or
+ * a specific error. This can be used instead of this.browserSupportMessage_.
+ * @enum {id}
+ */
+browser_version.BrowserChecker.StatusValues = {
+  UNKNOWN: 0,  
+  NACL_ENABLED: 1,
+  NON_CHROME_BROWSER: 2,
+  CHROME_VERSION_TOO_OLD: 3,
+  NACL_NOT_ENABLED: 4,
+  NOT_USING_SERVER: 5,
+};
 
 /**
  * Determines if the plugin with name |name| exists in the browser.
@@ -88,15 +110,24 @@ browser_version.BrowserChecker.prototype.pluginExists = function(name,
                                                                  plugins) {
   for (var index=0; index < plugins.length; index++) {
     var plugin = this.plugins_[index];
-    var plugin_name = plugin["name"];
+    var plugin_name = plugin['name'];
     // If the plugin is not found, you can use the Javascript console
     // to see the names of the plugins that were found when debugging.
-    console.log("plugin name: " + plugin_name);
     if (plugin_name.indexOf(name) != -1) {
       return true;
     }
   }
   return false;
+}
+
+/**
+ * Returns browserSupportStatus_ which indicates if the browser supports
+ * Native Client.  Values are defined as literals in
+ * browser_version.BrowserChecker.StatusValues.
+ * @ return {int} Level of NaCl support.
+ */
+browser_version.BrowserChecker.prototype.getBrowserSupportStatus = function() {
+  return this.browserSupportStatus_;
 }
 
 /**
@@ -131,39 +162,55 @@ browser_version.BrowserChecker.prototype.checkBrowser = function() {
 
   // |result| stores the Chrome version number.
   if (!result) {
-    this.browserSupportMessage_ = "This non-Chrome browser does NOT "
-      + " support Native Client.";
+    this.browserSupportMessage_ = 'This browser does NOT '
+      + 'support Native Client.';
     this.isValidBrowser_ = false;
+    this.browserSupportStatus_ =
+        browser_version.BrowserChecker.StatusValues.NON_CHROME_BROWSER;
   } else {
     this.chromeVersion_ = result[1];
     // We know we have Chrome, check version and/or plugin named NaCl
     if (this.chromeVersion_ >= this.requiredChromeVersion_) {
-      var found_nacl = this.pluginExists("NaCl", this.plugins_);
+      var found_nacl = this.pluginExists('NaCl', this.plugins_);
       if (found_nacl) {
-        this.browserSupportMessage_ = "Native Client enabled"
-          + " in Google Chrome version " + this.chromeVersion_ + ".";
+        this.browserSupportMessage_ = 'Native Client enabled'
+          + ' in Google Chrome version ' + this.chromeVersion_ + '.';
         this.isValidBrowser_ = true;
+        this.browserSupportStatus_ =
+            browser_version.BrowserChecker.StatusValues.NACL_ENABLED;
       } else {
-        this.browserSupportMessage_ = "Native Client not enabled!<BR>"
-          + "To run Native Client modules, go to about:flags in a tab,<BR>"
-          + "click the Enable button beneath the Native Client section,<BR>"
-          + "and then scroll down to the bottom of the page and press<BR>"
-          + " the 'Restart Now' button.<BR><BR>"
-          + "For more information see "
+        this.browserSupportMessage_ = 'Native Client not enabled!<br>'
+          + 'To run Native Client modules, go to about:flags in a tab,<br>'
+          + 'click the Enable button beneath the Native Client section,<br>'
+          + 'and then scroll down to the bottom of the page and press<br>'
+          + ' the "Restart Now" button.<br><br>'
+          + 'For more information see '
           // TODO: Fix the link below when we have the new external site
           // BUG: http://code.google.com/p/nativeclient/issues/detail?id=1386
           + '<a href="http://code.google.com/p/nativeclient-sdk/wiki/'
           + 'HowTo_RunModules#Step_2:_Launch_the_browser_with_--enable-nacl">'
-          + "Launch the browser with --enable-nacl</a>."
+          + '  Run Native Client applications</a>.'
         this.isValidBrowser_ = false;
+        this.browserSupportStatus_ =
+            browser_version.BrowserChecker.StatusValues.NACL_NOT_ENABLED;
       }
     } else {
-      this.browserSupportMessage_ = "Native Client cannot run"
-        + " in version " + this.chromeVersion_ + ".<BR>"
-        + " You need version " + this.requiredChromeVersion_
-        + " or greater.";
+      this.browserSupportMessage_ = 'Native Client cannot run'
+        + ' in Google Chrome version ' + this.chromeVersion_ + '.<br>'
+        + ' You need version ' + this.requiredChromeVersion_
+        + ' or greater.';
       this.isValidBrowser_ = false;
+      this.browserSupportStatus_ =
+          browser_version.BrowserChecker.StatusValues.CHROME_VERSION_TOO_OLD;
     }
+  }
+  var my_protocol = window.location.protocol;
+  if (my_protocol.indexOf('file') == 0) {
+    this.browserSupportMessage_ += '<br><br>ERROR: You cannot use local url'
+      + ' (file:). You need a server, such as "localhost:5103"<br>';
+    this.isValidBrowser_ = false;
+    this.browserSupportStatus_ =
+        browser_version.BrowserChecker.StatusValues.NOT_USING_SERVER;
   }
 }
 
