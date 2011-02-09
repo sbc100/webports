@@ -97,7 +97,7 @@ browser_version.BrowserChecker.StatusValues = {
   NON_CHROME_BROWSER: 2,
   CHROME_VERSION_TOO_OLD: 3,
   NACL_NOT_ENABLED: 4,
-  NOT_USING_SERVER: 5,
+  NOT_USING_SERVER: 5
 };
 
 /**
