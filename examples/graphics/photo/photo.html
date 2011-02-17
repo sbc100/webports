@@ -22,14 +22,6 @@
 photo = {};
 
 /**
- * Init is called when the document has completed loading.  It downloads the
- * Native Client modules.
- */
-var initPhoto = function() {
-  loadPhotoModule(document.getElementById('nacl_photo_content'));
-}
-
-/**
  * Called once the photo .nexe is loaded, this is the onload event handler
  * for the module's <embed> tag.
  */
@@ -37,29 +29,6 @@ moduleDidLoad = function() {
   photo.module = document.getElementById('photo_module');
   carpeInit();
   openPhotoFromUrl(document.getElementById('imageUrlForm').value);
-}
-
-/**
- * Load the Photo .nexe, this is done by injecting an <embed> tag into the
- * element that contains the Photo module.
- * @param {!Element} contentDiv The DOM Element object that will contain the
- *     NaCl module.
- */
-loadPhotoModule = function(contentDiv) {
-  var nexes = 'x86-32: photo_x86_32.nexe\n'
-              + 'x86-64: photo_x86_64.nexe\n'
-              + 'ARM: photo_arm.nexe ';
-  contentDiv.innerHTML = '<embed name="photo_module" '
-                         + 'id="photo_module" '
-                         + 'width=640 height=480 '
-                         // + nexes
-                         + 'type="application/x-nacl-srpc" '
-                         + 'dimensions="2" '
-                         + 'onload=moduleDidLoad(); />';
-  // Note: this code is here to work around a bug in Chromium build
-  // #47357.  See also
-  // http://code.google.com/p/nativeclient/issues/detail?id=500
-  document.getElementById('photo_module').nexes = nexes;
 }
 
 /**
@@ -143,7 +112,7 @@ var UpdateFineAngle = function(s) {
 
 </head>
 
-<body onload="initPhoto();" id="body_id" bgcolor="#D3D3D3" >
+<body id="body_id" bgcolor="#D3D3D3" >
 <h1>Native Client Photo Editing Demo</h1>
 
 <form id="getfileform">
@@ -161,10 +130,16 @@ var UpdateFineAngle = function(s) {
 <table>
   <tr>
     <td>
-      <!-- The photo area; contains a div for the NaCl photo module as well as
+      <!-- The photo area; contains the NaCl photo module as well as
       a <canvas> used to display the image.  The Canvas object is handed to the
       NaCl photo module for processing. -->
-      <div id="nacl_photo_content"></div>
+      <embed name="photo_module"
+             id="photo_module"
+             width=640 height=480
+             nacl="photo.nmf"
+             type="application/x-nacl"
+             dimensions="2"
+             onload="moduleDidLoad();" />
     </td>
     <td valign="top">
       <!-- Begin Carpe sliders { -->
@@ -569,7 +544,7 @@ var UpdateFineAngle = function(s) {
 </table>
 
 Sliders by
-<a href="http://carpe.ambiprospect.com/slider/" style="color: lightblue">
+<a href="http://carpe.ambiprospect.com/slider/" style="color: green">
 CARPE Design
 </a>
 <br>

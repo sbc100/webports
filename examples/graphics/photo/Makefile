@@ -1,4 +1,4 @@
-# Copyright 2010, The Native Client SDK Authors. All rights reserved.
+# Copyright 2011, The Native Client SDK Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can
 # be found in the LICENSE file.
 
@@ -7,16 +7,23 @@
 .PHONY: all carpe clean
 
 NACLPORTS_ROOT = ../../..
+INSTALL_DIR ?= $$HOME/Sites/photo
 
 # $(OBJDIR) is an optional variable in nacl_build.mk, it is the directory
 # that holds all the .o's.  Note that a rule to create this dir is built into
 # common_build_scripts/nacl_build.mk
 OBJDIR = obj
 
-CFILES = nacl_file.c
-CCFILES = loader.cc \
-          npn_bridge.cc \
-          npp_gate.cc \
+HFILES = callback.h \
+         fastmath.h \
+         geturl_handler.h \
+         photo.h \
+         scripting_bridge.h \
+         surface.h
+
+CCFILES = geturl_handler.cc \
+          jpeg_mem_src.cc \
+          loader.cc \
           photo.cc \
           scripting_bridge.cc \
           surface.cc
@@ -27,30 +34,32 @@ OBJECTS_X86_32 += $(patsubst %,${OBJDIR}/%,$(CCFILES:%.cc=%_x86_32.o))
 OBJECTS_X86_64 = $(patsubst %,${OBJDIR}/%,$(CFILES:%.c=%_x86_64.o))
 OBJECTS_X86_64 += $(patsubst %,${OBJDIR}/%,$(CCFILES:%.cc=%_x86_64.o))
 
-CFLAGS = -flax-vector-conversions -DXP_UNIX \
-         -Wall -Wno-long-long -pthread -Werror
+CFLAGS = -flax-vector-conversions -Wall -Wno-long-long -pthread -Werror
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
 
-# This example uses linker aliasing to wrap the standard IO functions read(2),
-# open(2), close(2) and lseek(2).  This aliasing causes the real functions to
-# be aliased to __real_*, and calls to be turned into __wrap_*.  See
-# nacl_file.c for implementation details.
-LDFLAGS = $(ARCH_FLAGS) \
-          -Xlinker --wrap -Xlinker read \
-          -Xlinker --wrap -Xlinker open \
-          -Xlinker --wrap -Xlinker close \
-          -Xlinker --wrap -Xlinker lseek \
-          -lgoogle_nacl_imc \
-          -lgoogle_nacl_npruntime \
+LDFLAGS = -lppruntime \
+          -lppapi_cpp \
+          -lgoogle_nacl_platform \
+          -lgio \
           -lpthread \
           -ljpeg \
-          -lsrpc
+          -lsrpc \
+          $(ARCH_FLAGS)
 
 OPT_FLAGS = -O3 \
             -mfpmath=sse \
             -msse3 \
             -funroll-loops \
             -fomit-frame-pointer
+
+PHOTO_MODULES = photo_x86_32.nexe photo_x86_64.nexe
+
+APPLICATION_FILES = $(CARPE_FILES) \
+                    photo.html \
+                    photo.nmf \
+                    spear.jpg \
+                    sunspots.jpg \
+                    $(PHOTO_MODULES)
 
 all: all_photo
 
@@ -70,19 +79,26 @@ PACKAGES = $(LIB_JPEG_32) \
            $(BOOST_SMART_PTR_64) \
            $(CARPE_FILES)
 
-NACL_MODULES = photo_x86_32.nexe photo_x86_64.nexe
+all_photo: check_variables $(OBJDIR) $(PHOTO_MODULES)
 
-# The check_variables target is in nacl_build.mk.
-all_photo: $(OBJDIR) check_variables $(PACKAGES) $(NACL_MODULES)
+$(OBJECTS_X86_32) $(OBJECTS_X86_64):: $(HFILES)
 
 photo_x86_32.nexe: $(OBJECTS_X86_32)
 	$(CPP) -m32 $^ $(LDFLAGS) -o $@
+	$(NACL_STRIP) $@ -o $@
 
 photo_x86_64.nexe: $(OBJECTS_X86_64)
 	$(CPP) -m64 $^ $(LDFLAGS) -o $@
+	$(NACL_STRIP) $@ -o $@
+
+install: $(APPLICATION_FILES) $(INSTALL_DIR)
+	install $(APPLICATION_FILES) $(INSTALL_DIR)
+
+$(INSTALL_DIR):
+	mkdir -p $@
 
 clean:
-	-rm -rf $(OBJDIR) $(NACL_MODULES)
+	-rm -rf $(OBJDIR) $(PHOTO_MODULES)
 
 # Build the required packages.
 $(LIB_JPEG_32):

@@ -1,31 +1,38 @@
-// Copyright 2010 The Native Client SDK Authors. All rights reserved.
+// Copyright 2011 The Native Client SDK Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#include <nacl/npupp.h>
+#include <ppapi/cpp/instance.h>
+#include <ppapi/cpp/module.h>
+#include <ppapi/cpp/var.h>
+#include <cstdio>
+#include <string>
+#include "examples/graphics/photo/photo.h"
 
-// These functions are called when a module instance is first loaded, and when
-// the module instance is finally deleted.  They must use C-style linkage.
+/// The Module class.  The browser calls the CreateInstance() method to create
+/// an instance of your NaCl module on the web page.  The browser creates a new
+/// instance for each <embed> tag with type="application/x-nacl".
+class PhotoModule : public pp::Module {
+ public:
+  PhotoModule() : pp::Module() {}
+  virtual ~PhotoModule() {}
 
-extern "C" {
-NPError NP_GetEntryPoints(NPPluginFuncs* plugin_funcs) {
-  extern NPError InitializePluginFunctions(NPPluginFuncs* plugin_funcs);
-  return InitializePluginFunctions(plugin_funcs);
+  /// Create and return a PhotoInstance object.
+  /// @param[in] instance The browser-side instance.
+  /// @return the plugin-side instance.
+  virtual pp::Instance* CreateInstance(PP_Instance instance) {
+    return new photo::Photo(instance);
+  }
+};
+
+namespace pp {
+/// Factory function called by the browser when the module is first loaded.
+/// The browser keeps a singleton of this module.  It calls the
+/// CreateInstance() method on the object you return to make instances.  There
+/// is one instance per <embed> tag on the page.  This is the main binding
+/// point for your NaCl module with the browser.
+Module* CreateModule() {
+  return new PhotoModule();
 }
-
-// Some platforms, including Native Client uses the two-parameter version of
-// NP_Initialize(), and do not call NP_GetEntryPoints().  Others (Mac, e.g.)
-// use single-parameter version of NP_Initialize(), and then call
-// NP_GetEntryPoints() to get the NPP functions.  Also, the NPN entry points are
-// defined by the Native Client loader, but are not defined in the trusted
-// plugin loader (and must be filled in in NP_Initialize()).
-NPError NP_Initialize(NPNetscapeFuncs* browser_functions,
-                      NPPluginFuncs* plugin_functions) {
-  return NP_GetEntryPoints(plugin_functions);
-}
-
-NPError NP_Shutdown() {
-  return NPERR_NO_ERROR;
-}
-}  // extern "C"
+}  // namespace pp
 

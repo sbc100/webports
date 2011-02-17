@@ -1,9 +1,11 @@
-// Copyright 2010 The Native Client SDK Authors. All rights reserved.
+// Copyright 2011 The Native Client SDK Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
 // This file implements a small collection of filtered scanline based
 // pixel operations, including scaling and shearing.
+
+#include "examples/graphics/photo/surface.h"
 
 #include <emmintrin.h>
 #include <pmmintrin.h>
@@ -12,8 +14,7 @@
 
 #include <algorithm>
 
-#include "fastmath.h"
-#include "surface.h"
+#include "examples/graphics/photo/fastmath.h"
 
 // Note: none of these functions are designed to be multi-thread safe.
 // They must be used consistently from the same thread.

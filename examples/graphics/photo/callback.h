@@ -1,9 +1,12 @@
-// Copyright 2010 The Native Client SDK Authors. All rights reserved.
+// Copyright 2011 The Native Client SDK Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
 #ifndef PHOTO_CALLBACK_H_
 #define PHOTO_CALLBACK_H_
+
+#include <ppapi/cpp/var.h>
+#include <vector>
 
 namespace photo {
 
@@ -21,39 +24,30 @@ class ScriptingBridge;
 //     ...
 //     delete calculate_callback_;
 //
-// Tne caller must delete the callback.
+// The caller must delete the callback.
 
 // Pure virtual class used in STL containers.
 class MethodCallbackExecutor {
  public:
   virtual ~MethodCallbackExecutor() {}
-  virtual bool Execute(ScriptingBridge* bridge,
-                       const NPVariant* args,
-                       uint32_t arg_count,
-                       NPVariant* return_value) = 0;
+  virtual pp::Var Execute(const ScriptingBridge& bridge,
+                          const std::vector<pp::Var>& args) = 0;
 };
 
 template <class T>
 class MethodCallback : public MethodCallbackExecutor {
  public:
-  typedef bool (T::*Method)(ScriptingBridge* bridge,
-                            const NPVariant* args,
-                            uint32_t arg_count,
-                            NPVariant* return_value);
+  typedef pp::Var (T::*Method)(const ScriptingBridge& bridge,
+                               const std::vector<pp::Var>& args);
 
   MethodCallback(T* instance, Method method)
       : instance_(instance), method_(method) {}
   virtual ~MethodCallback() {}
-  virtual bool Execute(ScriptingBridge* bridge,
-                       const NPVariant* args,
-                       uint32_t arg_count,
-                       NPVariant* return_value) {
+  virtual pp::Var Execute(const ScriptingBridge& bridge,
+                          const std::vector<pp::Var>& args) {
     // Use "this->" to force C++ to look inside our templatized base class; see
     // Effective C++, 3rd Ed, item 43, p210 for details.
-    return ((this->instance_)->*(this->method_))(bridge,
-                                                 args,
-                                                 arg_count,
-                                                 return_value);
+    return ((this->instance_)->*(this->method_))(bridge, args);
   }
 
  private:
@@ -64,24 +58,17 @@ class MethodCallback : public MethodCallbackExecutor {
 template <class T>
 class ConstMethodCallback : public MethodCallbackExecutor {
  public:
-  typedef bool (T::*ConstMethod)(ScriptingBridge* bridge,
-                                 const NPVariant* args,
-                                 uint32_t arg_count,
-                                 NPVariant* return_value) const;
+  typedef pp::Var (T::*ConstMethod)(const ScriptingBridge& bridge,
+                                    const std::vector<pp::Var>& args) const;
 
   ConstMethodCallback(T* instance, ConstMethod method)
       : instance_(instance), const_method_(method) {}
   virtual ~ConstMethodCallback() {}
-  virtual bool Execute(ScriptingBridge* bridge,
-                       const NPVariant* args,
-                       uint32_t arg_count,
-                       NPVariant* return_value) {
+  virtual pp::Var Execute(const ScriptingBridge& bridge,
+                          const std::vector<pp::Var>& args) {
     // Use "this->" to force C++ to look inside our templatized base class; see
     // Effective C++, 3rd Ed, item 43, p210 for details.
-    return ((this->instance_)->*(this->const_method_))(bridge,
-                                                       args,
-                                                       arg_count,
-                                                       return_value);
+    return ((this->instance_)->*(this->const_method_))(bridge, args);
   }
 
  private:
@@ -108,24 +95,21 @@ class ConstMethodCallback : public MethodCallbackExecutor {
 // Tne caller must delete the callback.
 class PropertyAccessorCallbackExecutor {
  public:
-  virtual bool Execute(ScriptingBridge* bridge,
-                       NPVariant* return_value) = 0;
+  virtual pp::Var Execute(const ScriptingBridge& bridge) = 0;
 };
 
 template <class T>
 class PropertyAccessorCallback : public PropertyAccessorCallbackExecutor {
  public:
-  typedef bool (T::*Method)(ScriptingBridge* bridge,
-                            NPVariant* return_value) const;
+  typedef pp::Var (T::*Method)(const ScriptingBridge& bridge) const;
 
   PropertyAccessorCallback(T* instance, Method method)
       : instance_(instance), method_(method) {}
   virtual ~PropertyAccessorCallback() {}
-  virtual bool Execute(ScriptingBridge* bridge,
-                       NPVariant* return_value) {
+  virtual pp::Var Execute(const ScriptingBridge& bridge) {
     // Use "this->" to force C++ to look inside our templatized base class; see
     // Effective C++, 3rd Ed, item 43, p210 for details.
-    return ((this->instance_)->*(this->method_))(bridge, return_value);
+    return ((this->instance_)->*(this->method_))(bridge);
   }
 
  private:
@@ -135,21 +119,20 @@ class PropertyAccessorCallback : public PropertyAccessorCallbackExecutor {
 
 class PropertyMutatorCallbackExecutor {
  public:
-  virtual bool Execute(ScriptingBridge* bridge,
-                       const NPVariant* value) = 0;
+  virtual bool Execute(const ScriptingBridge& bridge,
+                       const pp::Var& value) = 0;
 };
 
 template <class T>
 class PropertyMutatorCallback : public PropertyMutatorCallbackExecutor {
  public:
-  typedef bool (T::*Method)(ScriptingBridge* bridge,
-                            const NPVariant* return_value);
+  typedef bool (T::*Method)(const ScriptingBridge& bridge,
+                            const pp::Var& value);
 
   PropertyMutatorCallback(T* instance, Method method)
       : instance_(instance), method_(method) {}
   virtual ~PropertyMutatorCallback() {}
-  virtual bool Execute(ScriptingBridge* bridge,
-                       const NPVariant* value) {
+  virtual bool Execute(const ScriptingBridge& bridge, const pp::Var& value) {
     // Use "this->" to force C++ to look inside our templatized base class; see
     // Effective C++, 3rd Ed, item 43, p210 for details.
     return ((this->instance_)->*(this->method_))(bridge, value);

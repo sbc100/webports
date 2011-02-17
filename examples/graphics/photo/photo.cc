@@ -1,8 +1,8 @@
-// Copyright 2010 The Native Client Authors. All rights reserved.
+// Copyright 2011 The Native Client Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#include "photo.h"
+#include "examples/graphics/photo/photo.h"
 
 extern "C" {
 // These files are installed into the NaCl toolchain by the $(LIB_JPEG) target
@@ -11,11 +11,7 @@ extern "C" {
 #include <jerror.h>
 }
 
-#include <nacl/nacl_imc.h>
-#include <nacl/nacl_npapi.h>
-#include <nacl/npapi_extensions.h>
-#include <nacl/npruntime.h>
-
+#include <ppapi/c/pp_errors.h>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -23,10 +19,14 @@ extern "C" {
 #include <cstdlib>
 #include <cstring>
 
-#include "fastmath.h"
-#include "scripting_bridge.h"
+#include "examples/graphics/photo/fastmath.h"
+#include "examples/graphics/photo/geturl_handler.h"
 
-extern NPDevice* NPN_AcquireDevice(NPP instance, NPDeviceID device);
+// Helper function to read JPEG data from a memory buffer instead of requiring
+// a file descriptor.  See jpg_mem_src.cc for mroe details.
+void jpeg_mem_src(j_decompress_ptr cinfo,
+                  uint8_t* inbuffer,
+                  size_t insize);
 
 // Anonymous namespace for the static consts.
 namespace {
@@ -49,34 +49,33 @@ const char* kShadowsSaturationKey = "shadowsSaturation";
 const char* kSplitPointKey = "splitPoint";
 const char* kTemperatureKey = "temperature";
 
-}  // namespace
-
 // This is called by the brower when the 2D context has been flushed to the
 // browser window.
-void FlushCallback(NPP instance, NPDeviceContext* context,
-                   NPError err, NPUserData* user_data) {
+void FlushCallback(void* data, int32_t result) {
+  static_cast<photo::Photo*>(data)->set_flush_pending(false);
 }
+}  // namespace
 
 namespace photo {
 
 // Attempt to turn any NPVariant value into a float, except for NPObjects.
 // NPStrings are passed into strtof() for conversion.
-static float FloatValue(const NPVariant& variant) {
+static float FloatValue(const pp::Var& variant) {
   float return_value = 0.0f;
-  switch (variant.type) {
-  case NPVariantType_Int32:
-    return_value = static_cast<float>(NPVARIANT_TO_INT32(variant));
+  const PP_Var& pp_var = variant.pp_var();
+  switch (pp_var.type) {
+  case PP_VARTYPE_INT32:
+    return_value = static_cast<float>(variant.AsInt());
     break;
-  case NPVariantType_Double:
-    return_value = static_cast<float>(NPVARIANT_TO_DOUBLE(variant));
+  case PP_VARTYPE_DOUBLE:
+    return_value = static_cast<float>(variant.AsDouble());
     break;
-  case NPVariantType_Bool:
-    return_value = NPVARIANT_TO_BOOLEAN(variant) ? 1.0f : 0.0f;
+  case PP_VARTYPE_BOOL:
+    return_value = variant.AsBool() ? 1.0f : 0.0f;
     break;
-  case NPVariantType_String:
+  case PP_VARTYPE_STRING:
     {
-      std::string str_value(NPVARIANT_TO_STRING(variant).UTF8Characters,
-                            NPVARIANT_TO_STRING(variant).UTF8Length);
+      std::string str_value(variant.AsString());
       return_value = str_value.empty() ? 0.0f :
                                          strtof(str_value.c_str(), NULL);
     }
@@ -88,15 +87,21 @@ static float FloatValue(const NPVariant& variant) {
   return return_value;
 }
 
-Photo::Photo(NPP npp) : npp_(npp), window_width_(0), window_height_(0) {
-}
-
 Photo::~Photo() {
   DestroyContext();
+  delete pixel_buffer_;
 }
 
-void Photo::InitializeMethods(
-    const ScriptingBridge::SharedScriptingBridge& bridge) {
+pp::Var Photo::GetInstanceObject() {
+  photo::ScriptingBridge* bridge = new photo::ScriptingBridge();
+  if (bridge == NULL)
+    return pp::Var();
+  InitializeMethods(bridge);
+  InitializeProperties(bridge);
+  return pp::Var(this, bridge);
+}
+
+void Photo::InitializeMethods(ScriptingBridge* bridge) {
   ScriptingBridge::SharedMethodCallbackExecutor value_for_key_method(
       new photo::ConstMethodCallback<Photo>(this, &Photo::GetValueForKey));
   bridge->AddMethodNamed("valueForKey", value_for_key_method);
@@ -105,8 +110,7 @@ void Photo::InitializeMethods(
   bridge->AddMethodNamed("setValueForKey", set_value_for_key_method);
 }
 
-void Photo::InitializeProperties(
-    const ScriptingBridge::SharedScriptingBridge& bridge) {
+void Photo::InitializeProperties(ScriptingBridge* bridge) {
   ScriptingBridge::SharedPropertyAccessorCallbackExecutor get_image_url(
       new photo::PropertyAccessorCallback<Photo>(this, &Photo::GetImageUrl));
   ScriptingBridge::SharedPropertyMutatorCallbackExecutor set_image_url(
@@ -114,96 +118,75 @@ void Photo::InitializeProperties(
   bridge->AddPropertyNamed("imageUrl", get_image_url, set_image_url);
 }
 
-bool Photo::GetValueForKey(photo::ScriptingBridge* bridge,
-                           const NPVariant* args,
-                           uint32_t arg_count,
-                           NPVariant* return_value) const {
-  if (arg_count < 1 || !NPVARIANT_IS_STRING(args[0])) {
+pp::Var Photo::GetValueForKey(const ScriptingBridge& bridge,
+                              const std::vector<pp::Var>& args) const {
+  if (args.size() < 1 || !args[0].is_string()) {
     return false;
   }
-  NPString np_string = NPVARIANT_TO_STRING(args[0]);
-  std::string key(static_cast<const char*>(np_string.UTF8Characters),
-                  np_string.UTF8Length);
-  ParameterDictionary::const_iterator item = parameter_dictionary_.find(key);
+  ParameterDictionary::const_iterator item =
+      parameter_dictionary_.find(args[0].AsString());
   if (item == parameter_dictionary_.end()) {
     // Key is not in the dictionary.
-    NULL_TO_NPVARIANT(*return_value);
-    return false;
+    return pp::Var();
   }
-  DOUBLE_TO_NPVARIANT(static_cast<double>(item->second), *return_value);
-  return true;
+  return pp::Var(static_cast<double>(item->second));
 }
 
-bool Photo::SetValueForKey(photo::ScriptingBridge* bridge,
-                           const NPVariant* args,
-                           uint32_t arg_count,
-                           NPVariant* value) {
-  NULL_TO_NPVARIANT(*value);
+pp::Var Photo::SetValueForKey(const ScriptingBridge& bridge,
+                              const std::vector<pp::Var>& args) {
   // |args[0]| is the value, and must be a simple type (int, double, string,
   // bool).  Objects are not evaluated.  |args[1]| is the key and must be a
-  // NPString.
-  if (arg_count < 2 ||
-      NPVARIANT_IS_OBJECT(args[0]) ||
-      !NPVARIANT_IS_STRING(args[1])) {
-    return false;
+  // string.
+  if (args.size() < 2 || args[0].is_null() || !args[1].is_string()) {
+    return pp::Var(false);
   }
-  NPString np_string = NPVARIANT_TO_STRING(args[1]);
-  std::string key(static_cast<const char*>(np_string.UTF8Characters),
-                  np_string.UTF8Length);
+  std::string key(args[1].AsString());
   ParameterDictionary::iterator item = parameter_dictionary_.find(key);
   if (item == parameter_dictionary_.end()) {
     // Key is not in the dictionary.
-    return false;
+    return pp::Var(false);
   }
-  float float_value = FloatValue(args[0]);
-  parameter_dictionary_[key] = float_value;
+  parameter_dictionary_[key] = FloatValue(args[0]);
   FitPhotoToWorking();
   ApplyWorkingToFinal(working_photo_.get(), final_photo_.get());
   Paint();
-  return true;
+  return pp::Var(true);
 }
 
-bool Photo::GetImageUrl(ScriptingBridge* bridge, NPVariant* return_value)
-    const {
-  // Create an in-browser version of the string memory and return that.
-  NULL_TO_NPVARIANT(*return_value);
-  uint32_t length = image_url_.size();
-  NPUTF8* utf8_string = reinterpret_cast<NPUTF8*>(NPN_MemAlloc(length+1));
-  memcpy(utf8_string, image_url_.c_str(), length);
-  utf8_string[length] = '\0';
-  STRINGN_TO_NPVARIANT(utf8_string, length, *return_value);
-  return true;
+pp::Var Photo::GetImageUrl(const ScriptingBridge& bridge) const {
+  return pp::Var(image_url_);
 }
 
-bool Photo::SetImageUrl(ScriptingBridge* bridge, const NPVariant* value) {
-  if (!NPVARIANT_IS_STRING(*value)) {
+bool Photo::SetImageUrl(const ScriptingBridge& bridge, const pp::Var& value) {
+  if (!value.is_string()) {
     return false;
   }
+  bool success = false;
   // Maintain a local copy the string contents of |value|.
-  NPString np_string = NPVARIANT_TO_STRING(*value);
-  image_url_.assign(static_cast<const char*>(np_string.UTF8Characters),
-                    np_string.UTF8Length);
-  // Initiate the GET.  URLDidDownload() is called when this request completes.
-  // NPN_GetURL() always returns an error, even if it works.  Also note that
-  // the target parameter is the empty string and not NULL.  The documentation
-  // says to pass NULL for this parameter, but that produces nothing.  An
-  // empty string works.
-  NPN_GetURL(npp_, image_url_.c_str(), "");
-  return true;
+  image_url_ = value.AsString();
+  // Starts asynchronous download. When download is finished or when an
+  // error occurs, |handler| calls JavaScript function
+  // reportResult(url, result, success) (defined in geturl.html) and
+  // self-destroys.
+  GetURLHandler* handler = GetURLHandler::Create(this, image_url_);
+  if (handler != NULL) {
+    GetURLHandler::SharedURLCallbackExecutor url_callback(
+        new GetURLHandler::URLCallback<Photo>(this,
+                                              &Photo::Photo::URLDidDownload));
+    success = handler->Start(url_callback);
+  }
+  return success;
 }
 
-void Photo::ModuleDidLoad() {
-  // Allocate the Surface objects.  These will be made valid when SetWindow()
-  // is called.
+bool Photo::Init(uint32_t argc, const char* argn[], const char* argv[]) {
+  // Allocate the Surface objects.  These will be made valid when
+  // DidChangeView() is called.
   original_photo_.reset(new Surface());
   temp_photo_.reset(new Surface());
   working_photo_.reset(new Surface());
   rotated_photo_.reset(new Surface());
   final_photo_.reset(new Surface());
 
-  if (!IsContextValid()) {
-    CreateContext();
-  }
   // Populate the dictionary of photo editing values with some initial values.
   //    setting                    range
   // angle                 -45 .. 45
@@ -232,18 +215,28 @@ void Photo::ModuleDidLoad() {
   parameter_dictionary_[kShadowsSaturationKey] = 0.0f;
   parameter_dictionary_[kSplitPointKey] = 0.0f;
   parameter_dictionary_[kTemperatureKey] = 0.0f;
+  return true;
 }
 
-bool Photo::HandleEvent(const NPPepperEvent& event) {
-  return false;
-}
+void Photo::DidChangeView(const pp::Rect& position, const pp::Rect& clip) {
+  if (position.size().width() == window_width_ &&
+      position.size().height() == window_height_)
+    return;  // Size didn't change, no need to update anything.
 
-bool Photo::SetWindow(int width, int height) {
-  if (!IsContextValid()) {
-    return false;
+  // Create a new device context with the new size.
+  DestroyContext();
+  CreateContext(position.size());
+  delete pixel_buffer_;
+  pixel_buffer_ = NULL;
+  if (IsContextValid()) {
+    pixel_buffer_ = new pp::ImageData(this,
+                                      PP_IMAGEDATAFORMAT_BGRA_PREMUL,
+                                      graphics_2d_context_->size(),
+                                      false);
   }
-  window_width_ = width;
-  window_height_ = height;
+
+  window_width_ = position.size().width();
+  window_height_ = position.size().height();
   // Reset all the photo surfaces in the pipeline to match the new module
   // window size, taking the border into account.
   int width_no_border = window_width_ - kBorderSize * 2;
@@ -253,110 +246,99 @@ bool Photo::SetWindow(int width, int height) {
   working_photo_->SetWidthAndHeight(width_no_border, height_no_border, false);
   rotated_photo_->SetWidthAndHeight(width_no_border, height_no_border, false);
   final_photo_->SetWidthAndHeight(width_no_border, height_no_border, false);
-  return true;
 }
 
-bool Photo::URLDidDownload(NPStream* stream) {
-  FILE *f;
-  f = fopen(stream->url, "r");
-  if (f) {
-    // Read the JPEG file into the Surface object.
-    struct jpeg_decompress_struct cinfo;
-    struct jpeg_error_mgr jerr;
-    cinfo.err = jpeg_std_error(&jerr);
-    jpeg_create_decompress(&cinfo);
-    jpeg_stdio_src(&cinfo, f);
-    jpeg_read_header(&cinfo, TRUE);
-    jpeg_start_decompress(&cinfo);
+void Photo::URLDidDownload(const std::vector<uint8_t>& data, int32_t error) {
+  if (error != PP_OK)
+    return;
+  // Read the JPEG file into the Surface object.
+  struct jpeg_decompress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_decompress(&cinfo);
+  jpeg_mem_src(&cinfo, const_cast<uint8_t*>(&data[0]), data.size());
+  jpeg_read_header(&cinfo, TRUE);
+  jpeg_start_decompress(&cinfo);
 
-    original_photo_->SetWidthAndHeight(cinfo.output_width,
-                                       cinfo.output_height,
-                                       true);
-    boost::scoped_array<uint8_t>scanline_rgb(
-        new uint8_t[cinfo.output_width * 3]);
-    for (uint32_t i = 0; i < cinfo.output_height; ++i) {
-      uint8_t* src_scanline = scanline_rgb.get();
-      jpeg_read_scanlines(&cinfo, &src_scanline, 1);
-      // Copy the RGB scanline from the JPEG file to the ARGB Surface buffer.
-      src_scanline = scanline_rgb.get();
-      for (uint32_t j = 0; j < cinfo.output_width; ++j) {
-        uint8_t r = src_scanline[0];
-        uint8_t g = src_scanline[1];
-        uint8_t b = src_scanline[2];
-        src_scanline += 3;
-        original_photo_->PutPixelNoClip(j, i, MakeARGB(r, g, b, 0xFF));
-      }
+  original_photo_->SetWidthAndHeight(cinfo.output_width,
+                                     cinfo.output_height,
+                                     true);
+  boost::scoped_array<uint8_t>scanline_rgb(
+      new uint8_t[cinfo.output_width * 3]);
+  for (uint32_t i = 0; i < cinfo.output_height; ++i) {
+    uint8_t* src_scanline = scanline_rgb.get();
+    jpeg_read_scanlines(&cinfo, &src_scanline, 1);
+    // Copy the RGB scanline from the JPEG file to the ARGB Surface buffer.
+    src_scanline = scanline_rgb.get();
+    for (uint32_t j = 0; j < cinfo.output_width; ++j) {
+      uint8_t r = src_scanline[0];
+      uint8_t g = src_scanline[1];
+      uint8_t b = src_scanline[2];
+      src_scanline += 3;
+      original_photo_->PutPixelNoClip(j, i, MakeARGB(r, g, b, 0xFF));
     }
-    fclose(f);
-    FitPhotoToWorking();
-    ApplyWorkingToFinal(working_photo_.get(), final_photo_.get());
-    Paint();
   }
-  return true;
-}
-
-NPObject* Photo::GetScriptableObject(NPP instance) {
-  if (!scripting_bridge_.get()) {
-    scripting_bridge_ = ScriptingBridge::CreateScriptingBridge(instance);
-    InitializeMethods(scripting_bridge_);
-    InitializeProperties(scripting_bridge_);
-  }
-  return scripting_bridge_->CopyBrowserBinding();
+  FitPhotoToWorking();
+  ApplyWorkingToFinal(working_photo_.get(), final_photo_.get());
+  Paint();
 }
 
 bool Photo::Paint() {
-  if (IsContextValid()) {
-    uint32_t* window_pixels = static_cast<uint32_t*>(context2d_.region);
-    const uint32_t* photo_pixels = final_photo_->pixels();
-    // Center the photo in the browser window, inset by the border size.
-    int width_no_border = window_width_ - kBorderSize * 2;
-    int height_no_border = window_height_ - kBorderSize * 2;
-    int clip_width = std::min(width_no_border, final_photo_->width());
-    int clip_height = std::min(height_no_border, final_photo_->height());
-    int clip_origin_x = 0;
-    int clip_origin_y = 0;
-    if (clip_width < width_no_border) {
-      clip_origin_x = (width_no_border - clip_width) / 2;
-    }
-    if (clip_height < height_no_border) {
-      clip_origin_y = (height_no_border - clip_height) / 2;
-    }
-    clip_origin_x += kBorderSize;
-    clip_origin_y += kBorderSize;
-    window_pixels += clip_origin_x + clip_origin_y * window_width_;
-    for (int y = 0; y < clip_height; ++y) {
-      memcpy(window_pixels, photo_pixels, clip_width * sizeof(uint32_t));
-      window_pixels += window_width_;
-      photo_pixels += final_photo_->width();
-    }
-    NPDeviceFlushContextCallbackPtr callback = &FlushCallback;
-    device2d_->flushContext(npp_, &context2d_, callback, NULL);
-    return true;
+  if (!IsContextValid())
+    return false;
+  if (pixel_buffer_ == NULL || pixel_buffer_->is_null())
+    return false;
+  uint32_t* window_pixels = static_cast<uint32_t*>(pixel_buffer_->data());
+  const uint32_t* photo_pixels = final_photo_->pixels();
+  // Center the photo in the browser window, inset by the border size.
+  int width_no_border = window_width_ - kBorderSize * 2;
+  int height_no_border = window_height_ - kBorderSize * 2;
+  int clip_width = std::min(width_no_border, final_photo_->width());
+  int clip_height = std::min(height_no_border, final_photo_->height());
+  int clip_origin_x = 0;
+  int clip_origin_y = 0;
+  if (clip_width < width_no_border) {
+    clip_origin_x = (width_no_border - clip_width) / 2;
   }
-  return false;
+  if (clip_height < height_no_border) {
+    clip_origin_y = (height_no_border - clip_height) / 2;
+  }
+  clip_origin_x += kBorderSize;
+  clip_origin_y += kBorderSize;
+  window_pixels += clip_origin_x + clip_origin_y * window_width_;
+  for (int y = 0; y < clip_height; ++y) {
+    memcpy(window_pixels, photo_pixels, clip_width * sizeof(uint32_t));
+    window_pixels += window_width_;
+    photo_pixels += final_photo_->width();
+  }
+  graphics_2d_context_->PaintImageData(*pixel_buffer_, pp::Point());
+  if (!flush_pending()) {
+    set_flush_pending(true);
+    graphics_2d_context_->Flush(pp::CompletionCallback(&FlushCallback, this));
+  }
+  return true;
 }
 
-void Photo::CreateContext() {
+void Photo::CreateContext(const pp::Size& size) {
   if (IsContextValid()) {
     return;
   }
-  device2d_ = NPN_AcquireDevice(npp_, NPPepper2DDevice);
-  assert(IsContextValid());
-  memset(&context2d_, 0, sizeof(context2d_));
-  NPDeviceContext2DConfig config;
-  NPError init_err = device2d_->initializeContext(npp_, &config, &context2d_);
-  assert(NPERR_NO_ERROR == init_err);
+  graphics_2d_context_ = new pp::Graphics2D(this, size, false);
+  if (!BindGraphics(*graphics_2d_context_)) {
+    printf("Couldn't bind the device context\n");
+  }
 }
 
 void Photo::DestroyContext() {
   if (!IsContextValid()) {
     return;
   }
-  device2d_->destroyContext(npp_, &context2d_);
+  delete graphics_2d_context_;
+  graphics_2d_context_ = NULL;
 }
 
 bool Photo::IsContextValid() {
-  return device2d_ != NULL;
+  return graphics_2d_context_ != NULL;
 }
 
 void Photo::FitPhotoToWorking() {

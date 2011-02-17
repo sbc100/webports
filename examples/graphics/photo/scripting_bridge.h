@@ -1,4 +1,4 @@
-// Copyright 2010 The Native Client SDK Authors. All rights reserved.
+// Copyright 2011 The Native Client SDK Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
@@ -6,10 +6,12 @@
 #define PHOTO_SCRIPTING_BRIDGE_H_
 
 #include <boost/noncopyable.hpp>
-#include <nacl/nacl_npapi.h>
-#include <nacl/npruntime.h>
+#include <ppapi/cpp/dev/scriptable_object_deprecated.h>
+#include <ppapi/cpp/var.h>
 
 #include <map>
+#include <string>
+#include <vector>
 #include <tr1/memory>
 
 namespace photo {
@@ -20,7 +22,7 @@ class MethodCallbackExecutor;
 
 // This class represents the Photo application object that gets exposed to the
 // browser code.
-class ScriptingBridge : public boost::noncopyable {
+class ScriptingBridge : public pp::deprecated::ScriptableObject {
  public:
   // Shared pointer types used in the method and property maps.
   typedef std::tr1::shared_ptr<MethodCallbackExecutor>
@@ -30,78 +32,55 @@ class ScriptingBridge : public boost::noncopyable {
   typedef std::tr1::shared_ptr<PropertyMutatorCallbackExecutor>
       SharedPropertyMutatorCallbackExecutor;
 
-  typedef std::tr1::shared_ptr<ScriptingBridge> SharedScriptingBridge;
+  virtual ~ScriptingBridge() {}
 
-  virtual ~ScriptingBridge();
+  /// Called by the browser to decide whether @a method is provided by this
+  /// plugin's scriptable interface.
+  /// @param[in] method The name of the method
+  /// @param[out] exception A pointer to an exception.  May be used to notify
+  ///     the browser if an exception occurs.
+  /// @return true iff @a method is one of the exposed method names.
+  virtual bool HasMethod(const pp::Var& method, pp::Var* exception);
+  virtual bool HasProperty(const pp::Var& name, pp::Var* exception);
+  virtual pp::Var GetProperty(const pp::Var& name, pp::Var* exception);
+  virtual void SetProperty(const pp::Var& name,
+                           const pp::Var& value,
+                           pp::Var* exception);
 
-  // Creates an instance of the scripting bridge object in the browser, with
-  // a corresponding ScriptingBridge object instance.
-  static SharedScriptingBridge CreateScriptingBridge(NPP npp);
+  /// Invoke the function associated with @a method.  The argument list passed
+  /// in via JavaScript is marshalled into a vector of pp::Vars.  None of the
+  /// functions in this example take arguments, so this vector is always empty.
+  /// @param[in] method The name of the method to be invoked.
+  /// @param[in] args The arguments to be passed to the method.
+  /// @param[out] exception A pointer to an exception.  May be used to notify
+  ///     the browser if an exception occurs.
+  /// @return true iff @a method was called successfully.
+  virtual pp::Var Call(const pp::Var& method,
+                       const std::vector<pp::Var>& args,
+                       pp::Var* exception);
 
   // Causes |method_name| to be published as a method that can be called by
   // JavaScript.  Associated this method with |method|.
-  bool AddMethodNamed(const char* method_name,
+  bool AddMethodNamed(const std::string& method_name,
                       SharedMethodCallbackExecutor method);
 
   // Associate property accessor and mutator with |property_name|.  This
   // publishes |property_name| to the JavaScript.  |get_property| must not
   // be NULL; if |set_property| is NULL the property is considered read-only.
-  bool AddPropertyNamed(const char* property_name,
+  bool AddPropertyNamed(const std::string& property_name,
       SharedPropertyAccessorCallbackExecutor property_accessor,
       SharedPropertyMutatorCallbackExecutor property_mutator);
 
-  // Make a copy of the browser binding object by asking the browser to retain
-  // it.  Use this for the return value of functions that expect the retain
-  // count to increment, such as NPP_GetScriptableInstance().
-  NPObject* CopyBrowserBinding() {
-    if (browser_binding_)
-      return NPN_RetainObject(browser_binding_);
-    return NULL;
-  }
-
-  // Release the browser binding object.  Note that this *might* cause |this|
-  // to get deleted, if the ref count of the browser binding object falls to 0.
-  void ReleaseBrowserBinding();
-
-  const NPP npp() const {
-    return npp_;
-  }
-  const NPObject* browser_binding() const {
-    return browser_binding_;
-  }
-
-  // A hidden class that wraps the NPObject, preserving its memory layout
-  // for the browser.
-  friend class BrowserBinding;
-
  private:
-  typedef std::map<NPIdentifier, SharedMethodCallbackExecutor> MethodDictionary;
-  typedef std::map<NPIdentifier, SharedPropertyAccessorCallbackExecutor>
+  typedef std::map<std::string, SharedMethodCallbackExecutor> MethodDictionary;
+  typedef std::map<std::string, SharedPropertyAccessorCallbackExecutor>
       PropertyAccessorDictionary;
-  typedef std::map<NPIdentifier, SharedPropertyMutatorCallbackExecutor>
+  typedef std::map<std::string, SharedPropertyMutatorCallbackExecutor>
       PropertyMutatorDictionary;
-
-  ScriptingBridge(NPP npp, NPObject* browser_binding);
-
-  // NPAPI support methods.
-  bool HasMethod(NPIdentifier name);
-  bool Invoke(NPIdentifier name,
-              const NPVariant* args,
-              uint32_t arg_count,
-              NPVariant* return_value);
-  bool HasProperty(NPIdentifier name);
-  bool GetProperty(NPIdentifier name, NPVariant* return_value);
-  bool SetProperty(NPIdentifier name, const NPVariant* value);
-
-  NPP npp_;
-  NPObject* browser_binding_;
 
   MethodDictionary method_dictionary_;
   PropertyAccessorDictionary property_accessor_dictionary_;
   PropertyMutatorDictionary property_mutator_dictionary_;
-
-  // No implicit ctors.
-  ScriptingBridge();
 };
 
 }  // namespace photo
