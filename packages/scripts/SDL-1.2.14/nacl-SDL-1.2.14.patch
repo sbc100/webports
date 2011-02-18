@@ -1,0 +1,917 @@
+diff --git SDL-1.2.14/Makefile.in SDL-1.2.14/Makefile.in
+index e29dc6d..5a658af 100644
+--- SDL-1.2.14/Makefile.in
++++ SDL-1.2.14/Makefile.in
+@@ -42,7 +42,7 @@ SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
+ 
+ DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
+ 
+-HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
++HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_nacl.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
+ 
+ LT_AGE      = @LT_AGE@
+ LT_CURRENT  = @LT_CURRENT@
+diff --git SDL-1.2.14/build-scripts/config.sub SDL-1.2.14/build-scripts/config.sub
+index 5ecc18b..7693a2a 100755
+--- SDL-1.2.14/build-scripts/config.sub
++++ SDL-1.2.14/build-scripts/config.sub
+@@ -318,6 +318,14 @@ case $basic_machine in
+ 	i*86 | x86_64)
+ 	  basic_machine=$basic_machine-pc
+ 	  ;;
++	nacl64*)
++	  basic_machine=x86_64-pc
++	  os=-nacl
++	  ;;
++	nacl*)
++	  basic_machine=i686-pc
++	  os=-nacl
++	  ;;
+ 	# Object if more than one company name word.
+ 	*-*-*)
+ 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
+@@ -1309,6 +1317,9 @@ case $os in
+ 			;;
+ 		esac
+ 		;;
++	-nacl*)
++		os=-nacl
++		;;
+ 	-nto-qnx*)
+ 		;;
+ 	-nto*)
+diff --git SDL-1.2.14/configure.in SDL-1.2.14/configure.in
+index a7e9b18..d2386a9 100644
+--- SDL-1.2.14/configure.in
++++ SDL-1.2.14/configure.in
+@@ -885,6 +885,26 @@ CheckVisibilityHidden()
+     fi
+ }
+ 
++dnl Check for Native Client stuff
++CheckNativeClient()
++{
++    AC_ARG_ENABLE(naclvideo,
++AC_HELP_STRING([--enable-naclvideo], [enable the nacl video driver [[default=yes]]]),
++                  , enable_naclvideo=yes)
++    if test x$enable_video = xyes -a x$enable_naclvideo = xyes; then
++        AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
++        SOURCES="$SOURCES $srcdir/src/video/nacl/*.cc"
++    fi
++
++    AC_ARG_ENABLE(naclaudio,
++AC_HELP_STRING([--enable-naclaudio], [enable the nacl audio driver [[default=yes]]]),
++                  , enable_naclaudio=yes)
++    if test x$enable_audio = xyes -a x$enable_naclaudio = xyes; then
++        AC_DEFINE(SDL_AUDIO_DRIVER_NACL)
++        SOURCES="$SOURCES $srcdir/src/audio/nacl/*.cc"
++    fi
++}
++
+ 
+ dnl Do the iPod thing
+ CheckIPod()
+@@ -2284,6 +2304,20 @@ case "$host" in
+             have_timers=yes
+         fi
+         ;;
++    *-nacl)
++        ARCH=nacl
++	CheckNativeClient
++        CheckDummyAudio
++        CheckDummyVideo
++        CheckInputEvents
++        # Set up files for the timer library
++        if test x$enable_timers = xyes; then
++            AC_DEFINE(SDL_TIMER_UNIX)
++            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
++            have_timers=yes
++        fi
++        CheckPTHREAD
++        ;;
+     *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
+         case "$host" in
+             *-*-linux*)         ARCH=linux ;;
+diff --git SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14/include/SDL_config.h.in
+index 58593ca..674e421 100644
+--- SDL-1.2.14/include/SDL_config.h.in
++++ SDL-1.2.14/include/SDL_config.h.in
+@@ -174,6 +174,7 @@
+ #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC
+ #undef SDL_AUDIO_DRIVER_MINT
+ #undef SDL_AUDIO_DRIVER_MMEAUDIO
++#undef SDL_AUDIO_DRIVER_NACL
+ #undef SDL_AUDIO_DRIVER_NAS
+ #undef SDL_AUDIO_DRIVER_NAS_DYNAMIC
+ #undef SDL_AUDIO_DRIVER_OSS
+@@ -265,6 +266,7 @@
+ #undef SDL_VIDEO_DRIVER_GEM
+ #undef SDL_VIDEO_DRIVER_GGI
+ #undef SDL_VIDEO_DRIVER_IPOD
++#undef SDL_VIDEO_DRIVER_NACL
+ #undef SDL_VIDEO_DRIVER_NANOX
+ #undef SDL_VIDEO_DRIVER_OS2FS
+ #undef SDL_VIDEO_DRIVER_PHOTON
+diff --git SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14/include/SDL_nacl.h
+new file mode 100644
+index 0000000..9d1b396
+--- /dev/null
++++ SDL-1.2.14/include/SDL_nacl.h
+@@ -0,0 +1,22 @@
++#ifndef _SDL_nacl_h
++#define _SDL_nacl_h
++
++#include "begin_code.h"
++/* Set up for C function definitions, even when using C++ */
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#include <ppapi/c/ppb_instance.h>
++#include <ppapi/c/pp_input_event.h>
++
++void SDL_NACL_SetInstance(PP_Instance instance, int width, int height);
++void SDL_NACL_PushEvent(const PP_InputEvent* ppevent);
++
++/* Ends C function definitions when using C++ */
++#ifdef __cplusplus
++}
++#endif
++#include "close_code.h"
++
++#endif /* _SDL_nacl_h */
+diff --git SDL-1.2.14/include/SDL_platform.h SDL-1.2.14/include/SDL_platform.h
+index 11d8673..dd99403 100644
+--- SDL-1.2.14/include/SDL_platform.h
++++ SDL-1.2.14/include/SDL_platform.h
+@@ -63,10 +63,14 @@
+ #undef __IRIX__
+ #define __IRIX__	1
+ #endif
+-#if defined(linux) || defined(__linux) || defined(__linux__)
++#if defined(linux) || defined(__linux) || defined(__linux__) && !defined(__native_client__)
+ #undef __LINUX__
+ #define __LINUX__	1
+ #endif
++#if defined(__native_client__)
++#undef __NACL__
++#define __NACL__ 1
++#endif
+ #if defined(__APPLE__)
+ #undef __MACOSX__
+ #define __MACOSX__	1
+diff --git SDL-1.2.14/src/audio/SDL_audio.c SDL-1.2.14/src/audio/SDL_audio.c
+index bdeacdc..ac43356 100644
+--- SDL-1.2.14/src/audio/SDL_audio.c
++++ SDL-1.2.14/src/audio/SDL_audio.c
+@@ -36,6 +36,9 @@
+ 
+ /* Available audio drivers */
+ static AudioBootStrap *bootstrap[] = {
++#if SDL_AUDIO_DRIVER_NACL
++	&NACLAUD_bootstrap,
++#endif
+ #if SDL_AUDIO_DRIVER_BSD
+ 	&BSD_AUDIO_bootstrap,
+ #endif
+diff --git SDL-1.2.14/src/audio/SDL_sysaudio.h SDL-1.2.14/src/audio/SDL_sysaudio.h
+index 50cf179..7b9a0a7 100644
+--- SDL-1.2.14/src/audio/SDL_sysaudio.h
++++ SDL-1.2.14/src/audio/SDL_sysaudio.h
+@@ -156,6 +156,9 @@ extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
+ extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
+ extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
+ #endif
++#if SDL_AUDIO_DRIVER_NACL
++extern AudioBootStrap NACLAUD_bootstrap;
++#endif
+ #if SDL_AUDIO_DRIVER_DISK
+ extern AudioBootStrap DISKAUD_bootstrap;
+ #endif
+diff --git SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc
+new file mode 100644
+index 0000000..ed1e499
+--- /dev/null
++++ SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc
+@@ -0,0 +1,133 @@
++
++#include "SDL_config.h"
++#include "SDL_naclaudio.h"
++
++#include <assert.h>
++#include <ppapi/cpp/instance.h>
++
++extern pp::Instance* gNaclPPInstance;
++
++extern "C" {
++
++#include "SDL_rwops.h"
++#include "SDL_timer.h"
++#include "SDL_audio.h"
++#include "SDL_mutex.h"
++#include "../SDL_audiomem.h"
++#include "../SDL_audio_c.h"
++#include "../SDL_audiodev_c.h"
++
++  /* The tag name used by NACL audio */
++#define NACLAUD_DRIVER_NAME         "nacl"
++
++const uint32_t kSampleFrameCount = 4096u;
++
++/* Audio driver functions */
++static int NACLAUD_OpenAudio(_THIS, SDL_AudioSpec *spec);
++static void NACLAUD_CloseAudio(_THIS);
++
++static void AudioCallback(void* samples, size_t buffer_size, void* data);
++
++
++/* Audio driver bootstrap functions */
++static int NACLAUD_Available(void) {
++  return gNaclPPInstance != 0;
++}
++
++static void NACLAUD_DeleteDevice(SDL_AudioDevice *device) {
++  // We should stop playback here, but it can only be done on the main thread :(
++}
++
++static SDL_AudioDevice *NACLAUD_CreateDevice(int devindex) {
++  SDL_AudioDevice *_this;
++
++  /* Initialize all variables that we clean on shutdown */
++  _this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
++  if ( _this ) {
++    SDL_memset(_this, 0, (sizeof *_this));
++    _this->hidden = (struct SDL_PrivateAudioData *)
++        SDL_malloc((sizeof *_this->hidden));
++  }
++  if ( (_this == NULL) || (_this->hidden == NULL) ) {
++    SDL_OutOfMemory();
++    if ( _this ) {
++      SDL_free(_this);
++    }
++    return(0);
++  }
++  SDL_memset(_this->hidden, 0, (sizeof *_this->hidden));
++
++  _this->hidden->mutex = SDL_CreateMutex();
++
++  _this->hidden->opened = false;
++
++  // TODO: Move audio device creation to NACLAUD_OpenAudio.
++  _this->hidden->sample_frame_count =
++      pp::AudioConfig::RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
++          kSampleFrameCount);
++  _this->hidden->audio = pp::Audio(
++      gNaclPPInstance,
++      pp::AudioConfig(gNaclPPInstance,
++          PP_AUDIOSAMPLERATE_44100,
++          _this->hidden->sample_frame_count),
++      AudioCallback, _this);
++
++  // Start audio playback while we are still on the main thread.
++  _this->hidden->audio.StartPlayback();
++
++  /* Set the function pointers */
++  _this->OpenAudio = NACLAUD_OpenAudio;
++  _this->CloseAudio = NACLAUD_CloseAudio;
++
++  _this->free = NACLAUD_DeleteDevice;
++
++  return _this;
++}
++
++AudioBootStrap NACLAUD_bootstrap = {
++  NACLAUD_DRIVER_NAME, "SDL nacl audio driver",
++  NACLAUD_Available, NACLAUD_CreateDevice
++};
++
++
++static void NACLAUD_CloseAudio(_THIS) {
++  SDL_LockMutex(_this->hidden->mutex);
++  _this->hidden->opened = 0;
++  SDL_UnlockMutex(_this->hidden->mutex);
++}
++
++
++static void AudioCallback(void* samples, size_t buffer_size, void* data) {
++  SDL_AudioDevice* _this = reinterpret_cast<SDL_AudioDevice*>(data);
++
++  SDL_LockMutex(_this->hidden->mutex);
++  if (_this->hidden->opened) {
++    SDL_memset(samples, _this->spec.silence, buffer_size);
++    SDL_LockMutex(_this->mixer_lock);
++    (*_this->spec.callback)(_this->spec.userdata,
++        (Uint8*)samples, buffer_size);
++    SDL_UnlockMutex(_this->mixer_lock);
++  } else {
++    SDL_memset(samples, 0, buffer_size);
++  }
++  SDL_UnlockMutex(_this->hidden->mutex);
++
++  return;
++}
++
++
++static int NACLAUD_OpenAudio(_THIS, SDL_AudioSpec *spec) {
++  // We don't care what the user wants.
++  spec->freq = 44100;
++  spec->format = AUDIO_S16LSB;
++  spec->channels = 2;
++  spec->samples = _this->hidden->sample_frame_count;
++
++  SDL_LockMutex(_this->hidden->mutex);
++  _this->hidden->opened = 1;
++  SDL_UnlockMutex(_this->hidden->mutex);
++
++  // Do not create an audio thread.
++  return 1;
++}
++} // extern "C"
+diff --git SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h
+new file mode 100644
+index 0000000..e095c34
+--- /dev/null
++++ SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h
+@@ -0,0 +1,30 @@
++#include "SDL_config.h"
++
++#ifndef _SDL_naclaudio_h
++#define _SDL_naclaudio_h
++
++extern "C" {
++#include "SDL_audio.h"
++#include "../SDL_sysaudio.h"
++#include "SDL_mutex.h"
++}
++
++#include <ppapi/cpp/audio.h>
++
++/* Hidden "this" pointer for the video functions */
++#define _THIS	SDL_AudioDevice *_this
++
++struct SDL_PrivateAudioData {
++
++  SDL_mutex* mutex;
++  // This flag is use to determine when the audio is opened and we can start
++  // serving audio data instead of silence. This is needed because current
++  // Pepper2 can only be used from the main thread; Therefore, we start the
++  // audio thread very early.
++  bool opened;
++
++  int sample_frame_count;
++  pp::Audio audio;
++};
++
++#endif /* _SDL_naclaudio_h */
+diff --git SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c
+index 5c2d81f..7a757a3 100644
+--- SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c
++++ SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c
+@@ -53,6 +53,8 @@ static void illegal_instruction(int sig)
+ }
+ #endif /* HAVE_SETJMP */
+ 
++
++#if SDL_ASSEMBLY_ROUTINES
+ static __inline__ int CPU_haveCPUID(void)
+ {
+ 	int has_CPUID = 0;
+@@ -280,6 +282,15 @@ done:
+ 	return features;
+ }
+ 
++#else // SDL_ASSEMBLY_ROUTINES
++
++static __inline__ int CPU_haveCPUID(void) { return 0; }
++static __inline__ int CPU_getCPUIDFeaturesExt(void) { return 0; }
++static __inline__ int CPU_getCPUIDFeatures(void) { return 0; }
++
++#endif // SDL_ASSEMBLY_ROUTINES
++
++
+ static __inline__ int CPU_haveRDTSC(void)
+ {
+ 	if ( CPU_haveCPUID() ) {
+diff --git SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14/src/thread/pthread/SDL_systhread.c
+index 479bf34..a3b9119 100644
+--- SDL-1.2.14/src/thread/pthread/SDL_systhread.c
++++ SDL-1.2.14/src/thread/pthread/SDL_systhread.c
+@@ -81,12 +81,15 @@ void SDL_SYS_SetupThread(void)
+ 	int i;
+ 	sigset_t mask;
+ 
++	// NativeClient does not yet support signals.
++#ifndef __NACL__
+ 	/* Mask asynchronous signals for this thread */
+ 	sigemptyset(&mask);
+ 	for ( i=0; sig_list[i]; ++i ) {
+ 		sigaddset(&mask, sig_list[i]);
+ 	}
+ 	pthread_sigmask(SIG_BLOCK, &mask, 0);
++#endif
+ 
+ #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
+ 	/* Allow ourselves to be asynchronously cancelled */
+diff --git SDL-1.2.14/src/video/SDL_sysvideo.h SDL-1.2.14/src/video/SDL_sysvideo.h
+index 1c72e09..9fc1a85 100644
+--- SDL-1.2.14/src/video/SDL_sysvideo.h
++++ SDL-1.2.14/src/video/SDL_sysvideo.h
+@@ -317,6 +317,9 @@ typedef struct VideoBootStrap {
+ 	SDL_VideoDevice *(*create)(int devindex);
+ } VideoBootStrap;
+ 
++#if SDL_VIDEO_DRIVER_NACL
++extern VideoBootStrap NACL_bootstrap;
++#endif
+ #if SDL_VIDEO_DRIVER_QUARTZ
+ extern VideoBootStrap QZ_bootstrap;
+ #endif
+diff --git SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14/src/video/SDL_video.c
+index e84ef35..927dfa2 100644
+--- SDL-1.2.14/src/video/SDL_video.c
++++ SDL-1.2.14/src/video/SDL_video.c
+@@ -33,6 +33,9 @@
+ 
+ /* Available video drivers */
+ static VideoBootStrap *bootstrap[] = {
++#if SDL_VIDEO_DRIVER_NACL
++	&NACL_bootstrap,
++#endif
+ #if SDL_VIDEO_DRIVER_QUARTZ
+ 	&QZ_bootstrap,
+ #endif
+diff --git SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14/src/video/nacl/SDL_naclevents.cc
+new file mode 100644
+index 0000000..5c3b091
+--- /dev/null
++++ SDL-1.2.14/src/video/nacl/SDL_naclevents.cc
+@@ -0,0 +1,149 @@
++#include "SDL_config.h"
++
++extern "C" {
++#include "SDL.h"
++#include "SDL_nacl.h"
++#include "../../events/SDL_sysevents.h"
++#include "../../events/SDL_events_c.h"
++}
++
++#include "SDL_naclevents_c.h"
++#include "eventqueue.h"
++
++static EventQueue event_queue;
++
++void SDL_NACL_PushEvent(const PP_InputEvent* ppevent) {
++  PP_InputEvent* copy = (PP_InputEvent*)malloc(sizeof(PP_InputEvent));
++  memcpy(copy, ppevent, sizeof(PP_InputEvent));
++  event_queue.PushEvent(copy);
++}
++
++static Uint8 translateButton(int32_t button) {
++  switch (button) {
++    case PP_INPUTEVENT_MOUSEBUTTON_LEFT:
++      return SDL_BUTTON_LEFT;
++    case PP_INPUTEVENT_MOUSEBUTTON_MIDDLE:
++      return SDL_BUTTON_MIDDLE;
++    case PP_INPUTEVENT_MOUSEBUTTON_RIGHT:
++      return SDL_BUTTON_RIGHT;
++    case PP_INPUTEVENT_MOUSEBUTTON_NONE:
++    default:
++      return 0;
++  }
++}
++
++static SDLKey translateKey(uint32_t code) {
++  if (code >= 'A' && code <= 'Z')
++    return (SDLKey)(code - 'A' + SDLK_a);
++  if (code >= SDLK_0 && code <= SDLK_9)
++    return (SDLKey)code;
++  const uint32_t f1_code = 112;
++  if (code >= f1_code && code < f1_code + 12)
++    return (SDLKey)(code - f1_code + SDLK_F1);
++  const uint32_t kp0_code = 96;
++  if (code >= kp0_code && code < kp0_code + 10)
++    return (SDLKey)(code - kp0_code + SDLK_KP0);
++  switch (code) {
++    case SDLK_BACKSPACE:
++      return SDLK_BACKSPACE;
++    case SDLK_TAB:
++      return SDLK_TAB;
++    case SDLK_RETURN:
++      return SDLK_RETURN;
++    case SDLK_PAUSE:
++      return SDLK_PAUSE;
++    case SDLK_ESCAPE:
++      return SDLK_ESCAPE;
++    case 16:
++      return SDLK_LSHIFT;
++    case 17:
++      return SDLK_LCTRL;
++    case 18:
++      return SDLK_LALT;
++    case 37:
++      return SDLK_LEFT;
++    case 38:
++      return SDLK_UP;
++    case 39:
++      return SDLK_RIGHT;
++    case 40:
++      return SDLK_DOWN;
++    case 106:
++      return SDLK_KP_MULTIPLY;
++    case 107:
++      return SDLK_KP_PLUS;
++    case 109:
++      return SDLK_KP_MINUS;
++    case 110:
++      return SDLK_KP_PERIOD;
++    case 111:
++      return SDLK_KP_DIVIDE;
++    case 45:
++      return SDLK_INSERT;
++    case 46:
++      return SDLK_DELETE;
++    case 36:
++      return SDLK_HOME;
++    case 35:
++      return SDLK_END;
++    case 33:
++      return SDLK_PAGEUP;
++    case 34:
++      return SDLK_PAGEDOWN;
++    case 189:
++      return SDLK_MINUS;
++    case 187:
++      return SDLK_EQUALS;
++    case 219:
++      return SDLK_LEFTBRACKET;
++    case 221:
++      return SDLK_RIGHTBRACKET;
++    case 186:
++      return SDLK_SEMICOLON;
++    case 222:
++      return SDLK_QUOTE;
++    case 220:
++      return SDLK_BACKSLASH;
++    case 188:
++      return SDLK_COMMA;
++    case 190:
++      return SDLK_PERIOD;
++    case 191:
++      return SDLK_SLASH;
++    case 192:
++      return SDLK_BACKQUOTE;
++    default:
++      return SDLK_UNKNOWN;
++  }
++}
++
++void NACL_PumpEvents(_THIS) {
++  PP_InputEvent* event;
++  SDL_keysym keysym;
++  while (event = event_queue.PopEvent()) {
++    if (event->type == PP_INPUTEVENT_TYPE_MOUSEDOWN) {
++      SDL_PrivateMouseButton(SDL_PRESSED, translateButton(event->u.mouse.button), 0, 0);
++    } else if (event->type == PP_INPUTEVENT_TYPE_MOUSEUP) {
++      SDL_PrivateMouseButton(SDL_RELEASED, translateButton(event->u.mouse.button), 0, 0);
++    } else if (event->type == PP_INPUTEVENT_TYPE_MOUSEMOVE) {
++      SDL_PrivateMouseMotion(0, 0, event->u.mouse.x, event->u.mouse.y);
++    } else if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN) {
++      keysym.scancode = 0;
++      keysym.sym = translateKey(event->u.key.key_code);
++      keysym.mod = KMOD_NONE;
++      keysym.unicode = 0;
++      SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
++    } else if (event->type == PP_INPUTEVENT_TYPE_KEYUP) {
++      keysym.scancode = 0;
++      keysym.sym = translateKey(event->u.key.key_code);
++      keysym.mod = KMOD_NONE;
++      keysym.unicode = 0;
++      SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
++    }
++    free(event);
++  }
++}
++
++void NACL_InitOSKeymap(_THIS) {
++  /* do nothing. */
++}
+diff --git SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h
+new file mode 100644
+index 0000000..71ae309
+--- /dev/null
++++ SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h
+@@ -0,0 +1,7 @@
++#include "SDL_config.h"
++
++#include "SDL_naclvideo.h"
++#include "SDL_nacl.h"
++
++extern void NACL_InitOSKeymap(_THIS);
++extern void NACL_PumpEvents(_THIS);
+diff --git SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc
+new file mode 100644
+index 0000000..e72075f
+--- /dev/null
++++ SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc
+@@ -0,0 +1,215 @@
++#include "SDL_config.h"
++
++#include <assert.h>
++
++#include "SDL_naclvideo.h"
++#include "SDL_naclevents_c.h"
++
++#include <ppapi/cpp/instance.h>
++#include <ppapi/cpp/graphics_2d.h>
++#include <ppapi/cpp/completion_callback.h>
++#include <ppapi/cpp/image_data.h>
++
++pp::Instance* gNaclPPInstance;
++static int gNaclVideoWidth;
++static int gNaclVideoHeight;
++
++extern "C" {
++
++#include "SDL_video.h"
++#include "SDL_mouse.h"
++#include "SDL_nacl.h"
++#include "../SDL_sysvideo.h"
++#include "../SDL_pixels_c.h"
++#include "../../events/SDL_events_c.h"
++
++#define NACLVID_DRIVER_NAME "nacl"
++
++void SDL_NACL_SetInstance(PP_Instance instance, int width, int height) {
++  gNaclPPInstance = pp::Module::Get()->InstanceForPPInstance(instance);
++  gNaclVideoWidth = width;
++  gNaclVideoHeight = height;
++}
++
++static void flush(void* data, int32_t unused);
++
++/* Initialization/Query functions */
++static int NACL_VideoInit(_THIS, SDL_PixelFormat *vformat);
++static SDL_Rect **NACL_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
++static SDL_Surface *NACL_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
++static void NACL_VideoQuit(_THIS);
++static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
++
++
++static int NACL_Available(void) {
++  return gNaclPPInstance != 0;
++}
++
++static void NACL_DeleteDevice(SDL_VideoDevice *device) {
++  SDL_free(device->hidden);
++  SDL_free(device);
++}
++
++static SDL_VideoDevice *NACL_CreateDevice(int devindex) {
++  SDL_VideoDevice *device;
++
++  assert(gNaclPPInstance);
++
++  /* Initialize all variables that we clean on shutdown */
++  device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
++  if ( device ) {
++    SDL_memset(device, 0, (sizeof *device));
++    device->hidden = (struct SDL_PrivateVideoData *)
++        SDL_malloc((sizeof *device->hidden));
++  }
++  if ( (device == NULL) || (device->hidden == NULL) ) {
++    SDL_OutOfMemory();
++    if ( device ) {
++      SDL_free(device);
++    }
++    return(0);
++  }
++  SDL_memset(device->hidden, 0, (sizeof *device->hidden));
++
++  device->hidden->image_data_mutex = SDL_CreateMutex();
++
++  device->hidden->ow = gNaclVideoWidth;
++  device->hidden->oh = gNaclVideoHeight;
++
++  if (device->hidden->context2d)
++    delete device->hidden->context2d;
++  device->hidden->context2d = new pp::Graphics2D(gNaclPPInstance,
++      pp::Size(device->hidden->ow, device->hidden->oh), false);
++  assert(device->hidden->context2d != NULL);
++
++  if (!gNaclPPInstance->BindGraphics(*device->hidden->context2d)) {
++    fprintf(stderr, "***** Couldn't bind the device context *****\n");
++  }
++
++  // TODO: convert normal RGBA to premultiplied alpha.
++  device->hidden->image_data = new pp::ImageData(gNaclPPInstance,
++      PP_IMAGEDATAFORMAT_BGRA_PREMUL,
++      device->hidden->context2d->size(),
++      false);
++  assert(device->hidden->image_data != NULL);
++
++  /* Set the function pointers */
++  device->VideoInit = NACL_VideoInit;
++  device->ListModes = NACL_ListModes;
++  device->SetVideoMode = NACL_SetVideoMode;
++  device->UpdateRects = NACL_UpdateRects;
++  device->VideoQuit = NACL_VideoQuit;
++  device->InitOSKeymap = NACL_InitOSKeymap;
++  device->PumpEvents = NACL_PumpEvents;
++
++  device->free = NACL_DeleteDevice;
++
++  flush(device, 0);
++
++  return device;
++}
++
++VideoBootStrap NACL_bootstrap = {
++  NACLVID_DRIVER_NAME, "SDL Native Client video driver",
++  NACL_Available, NACL_CreateDevice
++};
++
++
++int NACL_VideoInit(_THIS, SDL_PixelFormat *vformat) {
++  fprintf(stderr, "CONGRATULATIONS: You are using the SDL nacl video driver!\n");
++
++  /* Determine the screen depth (use default 8-bit depth) */
++  /* we change this during the SDL_SetVideoMode implementation... */
++  vformat->BitsPerPixel = 8;
++  vformat->BytesPerPixel = 1;
++
++  /* We're done! */
++  return(0);
++}
++
++SDL_Rect **NACL_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags) {
++  return (SDL_Rect **) -1;
++}
++
++
++SDL_Surface *NACL_SetVideoMode(_THIS, SDL_Surface *current,
++    int width, int height, int bpp, Uint32 flags) {
++  if ( _this->hidden->buffer ) {
++    SDL_free( _this->hidden->buffer );
++  }
++
++  bpp = 32; // Let SDL handle pixel format conversion.
++  width = _this->hidden->ow;
++  height = _this->hidden->oh;
++
++  _this->hidden->buffer = SDL_malloc(width * height * (bpp / 8));
++  if ( ! _this->hidden->buffer ) {
++    SDL_SetError("Couldn't allocate buffer for requested mode");
++    return(NULL);
++  }
++
++  SDL_memset(_this->hidden->buffer, 0, width * height * (bpp / 8));
++
++  /* Allocate the new pixel format for the screen */
++  if ( ! SDL_ReallocFormat(current, bpp, 0xFF0000, 0xFF00, 0xFF, 0xFF000000) ) {
++    SDL_free(_this->hidden->buffer);
++    _this->hidden->buffer = NULL;
++    SDL_SetError("Couldn't allocate new pixel format for requested mode");
++    return(NULL);
++  }
++
++  /* Set up the new mode framebuffer */
++  current->flags = flags & SDL_FULLSCREEN;
++  _this->hidden->bpp = bpp;
++  _this->hidden->w = current->w = width;
++  _this->hidden->h = current->h = height;
++  _this->hidden->pitch = current->pitch = current->w * (bpp / 8);
++  current->pixels = _this->hidden->buffer;
++
++  /* We're done */
++  return(current);
++}
++
++
++static void flush(void* data, int32_t unused) {
++  SDL_VideoDevice* _this = reinterpret_cast<SDL_VideoDevice*>(data);
++
++  SDL_LockMutex(_this->hidden->image_data_mutex);
++  _this->hidden->context2d->PaintImageData(*_this->hidden->image_data, pp::Point());
++  // TODO: This is a busy loop. Replace with CallOnMainThread with a delay when it is supported.
++  _this->hidden->context2d->Flush(pp::CompletionCallback(&flush, _this));
++  SDL_UnlockMutex(_this->hidden->image_data_mutex);
++}
++
++static void flip(_THIS) {
++  assert(_this->hidden->image_data);
++  assert(_this->hidden->w == _this->hidden->ow);
++  assert(_this->hidden->h == _this->hidden->oh);
++
++  SDL_LockMutex(_this->hidden->image_data_mutex);
++
++  SDL_memcpy(_this->hidden->image_data->data(), _this->hidden->buffer,
++      _this->hidden->w * _this->hidden->h * _this->hidden->bpp / 8);
++
++  SDL_UnlockMutex(_this->hidden->image_data_mutex);
++}
++
++static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects) {
++  if (_this->hidden->bpp == 0) // not initialized yet
++    return;
++  flip(_this);
++}
++
++/* Note:  If we are terminated, this could be called in the middle of
++   another SDL video routine -- notably UpdateRects.
++*/
++void NACL_VideoQuit(_THIS) {
++  if (_this->screen->pixels != NULL)
++  {
++    SDL_free(_this->screen->pixels);
++    _this->screen->pixels = NULL;
++  }
++  delete _this->hidden->context2d;
++  delete _this->hidden->image_data;
++}
++} // extern "C"
+diff --git SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14/src/video/nacl/SDL_naclvideo.h
+new file mode 100644
+index 0000000..09480c8
+--- /dev/null
++++ SDL-1.2.14/src/video/nacl/SDL_naclvideo.h
+@@ -0,0 +1,33 @@
++#include "SDL_config.h"
++
++#ifndef _SDL_naclvideo_h
++#define _SDL_naclvideo_h
++
++extern "C" {
++#include "../SDL_sysvideo.h"
++#include "SDL_mutex.h"
++}
++
++#include <ppapi/cpp/instance.h>
++#include <ppapi/cpp/graphics_2d.h>
++
++
++/* Hidden "this" pointer for the video functions */
++#define _THIS	SDL_VideoDevice *_this
++
++
++/* Private display data */
++
++struct SDL_PrivateVideoData {
++  int bpp;
++  int w, h;
++  int pitch;
++  void *buffer;
++
++  SDL_mutex* image_data_mutex;
++  int ow, oh; // plugin output dimensions
++  pp::ImageData* image_data;
++  pp::Graphics2D* context2d;  // The PINPAPI 2D drawing context.
++};
++
++#endif /* _SDL_naclvideo_h */
+diff --git SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14/src/video/nacl/eventqueue.h
+new file mode 100644
+index 0000000..38ac2b0
+--- /dev/null
++++ SDL-1.2.14/src/video/nacl/eventqueue.h
+@@ -0,0 +1,41 @@
++#ifndef _SDL_nacl_eventqueue_h
++#define _SDL_nacl_eventqueue_h
++
++#include "SDL_mutex.h"
++
++#include <queue>
++#include <ppapi/c/pp_input_event.h>
++
++class EventQueue {
++public:
++  EventQueue() {
++    mu_ = SDL_CreateMutex();
++  }
++
++  ~EventQueue() {
++    SDL_DestroyMutex(mu_);
++  }
++
++  PP_InputEvent* PopEvent() {
++    SDL_LockMutex(mu_);
++    PP_InputEvent* event = NULL;
++    if (!queue_.empty()) {
++      event = queue_.front();
++      queue_.pop();
++    }
++    SDL_UnlockMutex(mu_);
++    return event;
++  }
++
++  void PushEvent(PP_InputEvent* event) {
++    SDL_LockMutex(mu_);
++    queue_.push(event);
++    SDL_UnlockMutex(mu_);
++  }
++
++private:
++  std::queue<PP_InputEvent*> queue_;
++  SDL_mutex* mu_;
++};
++
++#endif // _SDL_nacl_eventqueue_h
