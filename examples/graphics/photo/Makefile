@@ -79,7 +79,7 @@ PACKAGES = $(LIB_JPEG_32) \
            $(BOOST_SMART_PTR_64) \
            $(CARPE_FILES)
 
-all_photo: check_variables $(OBJDIR) $(PHOTO_MODULES)
+all_photo: check_variables $(PACKAGES) $(OBJDIR) $(PHOTO_MODULES)
 
 $(OBJECTS_X86_32) $(OBJECTS_X86_64):: $(HFILES)
 

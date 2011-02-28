@@ -51,26 +51,28 @@ class Photo : public pp::Instance {
   // Called whenever the in-browser window changes size.
   virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
 
-
   // Bind and publish the module's methods to JavaScript.
   void InitializeMethods(ScriptingBridge* bridge);
   // Bind and publish the module's properties to JavaScript.
   void InitializeProperties(ScriptingBridge* bridge);
 
-  // Get the value for a key from |parameter_dictionary_|; the value is
-  // returned via |return_value|.  If the key does not exist, then a NULL
-  // value is returned.  |arg_count| must be atleast 1; |args[0]| is the key
-  // and must be an NPString.  Return |true| on success.
+  // Get the value for a key from |parameter_dictionary_| and return its value
+  // as a pp::Var.  If the key does not exist, then a null pp::Var value is
+  // returned.  |arg_count| must be at least 1; |args[0]| is the key and must
+  // be a string value.
+  // This method is bound to the "getValueForKey" Javascript method and is
+  // called like this:
+  //     var value = module.getValueForKey('myKey');
   pp::Var GetValueForKey(const ScriptingBridge& bridge,
                          const std::vector<pp::Var>& args) const;
 
   // Set a value in |parameter_dictionary_|; the requested key must already
-  // exist in |parameter_dictionary_|.  See ModuleDidLoad() for a list of
+  // exist in |parameter_dictionary_|.  See the code in Init() for a list of
   // available keys.  |arg_count| must be at least 2; |args[0]| is the value,
   // and must be a simple type (int, double, string, bool).  Objects are not
   // accepted.  All values are converted to and stored as floats; for example
   // the string "1.3" is stored as a float 1.3f.  |args[1]| is the key and must
-  // be an NPString.  Return |true| on success.
+  // be string type.  Return a pp:Var with boolean value true on success.
   // This method is bound to the JavaScript "setValueForKey" method and is
   // called like this:
   //     module.setValueForKey(value, 'myKey');

@@ -58,8 +58,8 @@ void FlushCallback(void* data, int32_t result) {
 
 namespace photo {
 
-// Attempt to turn any NPVariant value into a float, except for NPObjects.
-// NPStrings are passed into strtof() for conversion.
+// Attempt to turn any PP_Var value into a float, except for objects.
+// Strings are passed into strtof() for conversion.
 static float FloatValue(const pp::Var& variant) {
   float return_value = 0.0f;
   const PP_Var& pp_var = variant.pp_var();
@@ -172,7 +172,7 @@ bool Photo::SetImageUrl(const ScriptingBridge& bridge, const pp::Var& value) {
   if (handler != NULL) {
     GetURLHandler::SharedURLCallbackExecutor url_callback(
         new GetURLHandler::URLCallback<Photo>(this,
-                                              &Photo::Photo::URLDidDownload));
+                                              &Photo::URLDidDownload));
     success = handler->Start(url_callback);
   }
   return success;
