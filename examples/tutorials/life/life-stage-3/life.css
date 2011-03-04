@@ -1,0 +1,51 @@
+/* Copyright 2011 The Native Client SDK Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can
+ * be found in the LICENSE file.
+ */
+
+/**
+ * Set up the html and body tags so that they support a view that automatically
+ * resizes itself as you change the size of the browser window.
+ */
+html,body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #A9A9A9;
+}
+
+body {
+  font-family: "Lucida Grande";
+  font-size: 10pt;
+  border: 0px;
+  overflow: hidden;
+}
+
+/**
+ * The DIV with this id establishes the autosizing container for the NaCl
+ * module.
+ */
+#autosize_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/**
+ * Use this EMBED class inside of the DIV with id @a autosize_background to
+ * load an auosizing NaCl module.  E.g.:
+ *  <div id="autosize_background">
+ *    <embed class="autosize" type="application/x-nacl" nacl="life.nmf"... />
+ *  </div>
+ */
+embed.autosize {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
