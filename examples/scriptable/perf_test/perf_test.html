@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+  <!--
+  Copyright (c) 2011 The Native Client Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+  -->
+<head>
+  <title>Performance Tests</title>
+
+  <script language="javascript" type="text/javascript" 
+    src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.js">
+  </script>
+
+
+  <script language="javascript" type="text/javascript" 
+    // flot is a Javascript plotting library for jQuery developed as an
+    // open source project by IOLA.
+    // The source can be downloaded from http://code.google.com/p/flot/.
+    src="http://people.iola.dk/olau/flot/jquery.flot.js">
+  </script>
+
+  <script type="text/javascript">
+    naclPerfModule = null;  // Global application object.
+    statusText = 'NO-STATUS';
+    resultText = '';
+
+    /*
+     * This is the onload fuction -- called when the module loads.
+     */
+    function moduleDidLoad() {
+      naclPerfModule = document.getElementById('perf_test');
+      updateStatus('SUCCESS');
+    }
+
+    /*
+     * If the page loads before the Native Client module loads, then set the
+     * status message indicating that the module is still loading.  Otherwise,
+     * do not change the status message.
+     */
+    function pageDidLoad() {
+      if (naclPerfModule == null) {
+        updateStatus('LOADING...');
+      } else {
+        // It's possible that the Native Client module onload event fired
+        // before the page's onload event.  In this case, the status message
+        // will reflect 'SUCCESS', but won't be displayed.  This call will
+        // display the current message.
+        updateStatus();
+      }
+    }
+
+    /*
+     * Returns the current time.
+     */
+    function getTimeStamp() {
+      var a_date = new Date();
+      return a_date.getTime();
+    }
+
+    /*
+     * Returns the difference between the current time and |timestamp|
+     * @param timestamp Timestamp of past event.
+     */
+    function getTimeDiff(timestamp) {
+      var currentTimeStamp = getTimeStamp();
+      return currentTimeStamp - timestamp;
+    }
+
+    /*
+     * Creates a string containing the numbers 1 .. |arraysize|.
+     * The array is then sent to |naclPerfModule| so that the nexe can
+     * calculate the sum of its elements.  This function measures the
+     * time taken to send and receive the data and calls updateResult.
+     * @param {Number} value Size of array to create and send.
+     */
+    function sendStringArray(arraysize) {
+      try {
+        var stringValue = createArrayAsString(arraysize);
+        var start = getTimeStamp()
+        var result = naclPerfModule.computeSumOfIntsInString(stringValue);
+        var dateDiff = getTimeDiff(start);
+
+        message = "Time to process string array of length " + arraysize
+              + "   , " +stringValue + " which had length " + stringValue.length
+              + " was " + dateDiff + " milliseconds.";
+        updateResult(result, message);
+        return dateDiff;
+      } catch(e) {
+        alert(e.message);
+      }
+    }
+
+    /*
+     * Creates an array containing the numbers 1 .. |arraysize|.
+     * The array is then sent to |naclPerfModule| so that the nexe can
+     * calculate the sum of its elements.  This function measures the time
+     * taken to send and receive the data and calls updateResult.
+     * @param {Number} arraysize Size of array to create and send.
+     */
+    function sendIntArray(arraysize) {
+      try {
+        var arrayData = createArray(arraysize)
+        var start = getTimeStamp()
+        var result = naclPerfModule.computeSumOfIntsInArray(arrayData);
+        var dateDiff = getTimeDiff(start);
+
+        message = "Time to process {" + arrayData + "} array of "
+          + arraysize.value + " integers (as Javascript numbers) was "
+          + dateDiff + " milliseconds.";
+        updateResult(result, message);
+        return dateDiff;
+      } catch(e) {
+        alert(e.message);
+      }
+    }
+
+    /*
+     * Helper function that creates a Javascript array with values 1...|num|.
+     * @param {num} value Size of array to create.
+     */
+    function createArray(num) {
+      var arrayData = []; 
+      for (i = 1; i <= num; ++i) {
+        arrayData.push( i );
+      }
+      return arrayData;
+    }
+
+    /*
+     * Helper function that creates a string with values 1...|arraysize|
+     * separated by spaces.
+     * @param {arraysize} value Size of array to create.
+     */
+    function createArrayAsString(arraysize) {
+        var stringValue = "";
+        var num = 1;
+        for (i = 0; i < arraysize; ++i) {
+          stringValue = stringValue + (i+1) + " ";
+        }
+        return stringValue;
+    }
+
+    /*
+     * Runs a suite of Javascript string versus Javascript array
+     * tests, recording the times for each and plotting them.
+     * @param {starting_size} value Starting array size.
+     * @param {ending_size} value Size of array to stop at.
+     * @param {suite_step_size} value How much to increase size each time
+     *                                through loop
+     */
+    function runSuite(starting_size, ending_size, suite_step_size) {
+      var intArrayTimes = [];
+      var stringArrayTimes = [];
+      var timestamp;
+      var i;
+      for (i = starting_size; i <= ending_size; i += suite_step_size) {
+        updateResult("", "Iteration " + i + " ============================ ");
+        timestamp = sendIntArray(i);
+        intArrayTimes.push([i, timestamp]);
+        timestamp = sendStringArray(i);
+        stringArrayTimes.push([i, timestamp]);
+      }
+
+      // plot the two arrays of times, labeling the plots
+      $.plot($("#placeholder"), [
+          { data: intArrayTimes, label: " Int array ",
+            lines: { show: true}, points: { show: true } },
+          { data: stringArrayTimes, label: " String ",
+            lines: { show: true}, points: { show: true } },
+        ]
+      );
+    }
+
+    /*
+     * clickRunSuite is called when the user pressed the 'Run Suite' button.
+     * Because it has to grab long form values and parseInt, it's a helper
+     * function to keep the onclick text from being really long in the form.
+     */
+    function clickRunSuite() {
+      runSuite(parseInt(this.perf_form.starting_size.value),
+               parseInt(this.perf_form.ending_size.value),
+               parseInt(this.perf_form.suite_step_size.value));
+    }
+
+    /*
+     * Set the global result message.  If the element with id 'resultField'
+     * exists, then set its HTML to the result message as well.
+     * opt_message The message test.  If this is null or undefined, then
+     * attempt to set the element with id 'resultField' to the value of
+     * |resultText|.
+     * @param {result} value Result of some call to the nexe.
+     * @param {opt_message} value Optional message (e.g. time elasped)
+     */
+    function updateResult(result, opt_message) {
+      if (result)
+        resultText = resultText + "RESULT: " + result + "<BR>";
+      if (opt_message)
+        resultText = resultText + opt_message + "<BR><BR>";
+      var resultField = document.getElementById('result_field');
+      if (resultField) {
+        resultField.innerHTML = resultText;
+      }
+    }
+
+    /*
+     * Set the global status message.  If the element with id 'statusField'
+     * exists, then set its HTML to the status message as well.
+     * opt_message The message test.  If this is null or undefined, then
+     *     attempt to set the element with id 'statusField' to the value of
+     *     |statusText|.
+     */
+    function updateStatus(opt_message) {
+      if (opt_message)
+        statusText = opt_message;
+      var statusField = document.getElementById('status_field');
+      if (statusField) {
+        statusField.innerHTML = statusText;
+      }
+    }
+  </script>
+</head>
+<body onload="pageDidLoad()">
+
+<h1>Native Client Performance Prototyping</h1>
+This page sends data from Javascript to C++ in various formats. 
+The C++ code sums the elements of an array (passed either as a
+Javascript array or as a space-separated string).
+<p>
+This is <b>not</b> intended as a high-precision performance tool.
+Rather, it is intended to quickly prototype the tradeoffs between different
+types of data passing in NaCl.
+For all tests, the results (output, time for the NaCl C++ function to execute)
+are appended to the <b>bottom</b> of the page under the Results section.
+<p>
+The next two lines allow you to enter a number and then send an array of data
+of that many elements to Javascript.
+The sum of the values is returned by the C++ NaCl application.
+The first sends a Javascript array containing integer values.
+The second sends a single string that contains a space-separated list of all
+ the values.
+<p>
+
+
+  <form name="perf_form" action="" method="get">
+    &nbsp; Size of int array (elements will be 1,2,3 ....):
+    <input type="text" id="int_arraysize" name="inputbox" value="10">
+    <input type="button" value="Send int array"
+      onclick="sendIntArray(perf_form.int_arraysize.value)"><p>
+
+    &nbsp; Size of int 'string array' (string will be "1,2,3 ...."): 
+    <input type="text" id="stringsize" name="inputbox" value="10">
+    <input type="button" value="Send string"
+      onclick="sendStringArray(perf_form.stringsize.value)"><p>
+
+    <HR SIZE="2">
+    Starting size:
+    <input type="text" id="starting_size" name="inputbox" value="1">
+    Step size: <input type="text" id="suite_step_size" name="inputbox"
+      value="100">
+    Ending size: <input type="text" id="ending_size" name="inputbox"
+      value="501">
+    <input type="button" value="Run suite of array summation tests"
+       onclick="clickRunSuite()"><p>
+
+  </form>
+
+  </form>
+  <!-- Load the published .nexe.  This includes the 'nacl' attribute which
+  shows how to load multi-architecture modules.  Each entry in the "nexes"
+  object in the  .nmf manifest file is a key-value pair: the key is the runtime
+  ('x86-32', 'x86-64', etc.); the value is a URL for the desired NaCl module.
+  To load the debug versions of your .nexes, set the 'nacl' attribute to the
+  _dbg.nmf version of the manifest file.
+  -->
+  <embed name="nacl_module"
+         id="perf_test"
+         width=0 height=0
+         nacl="perf_test.nmf"
+         type="application/x-nacl"
+         onload="moduleDidLoad();" />
+</p>
+
+ <div id="placeholder" style="width:600px;height:300px;"></div> 
+
+<h2>Status</h2>
+<div id="status_field">NO-STATUS</div>
+<h2>Results</h2>
+<div id="result_field"></div>
+</body>
+</html>
