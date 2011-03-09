@@ -6,10 +6,10 @@
 
 .PHONY: all carpe clean
 
-NACLPORTS_ROOT = ../../..
-C_SALT_ROOT=../../../../../nacl-sdk-pepper2/src/c_salt
+NACLPORTS_ROOT ?= ../../..
+C_SALT_ROOT ?= $(NACL_SDK_ROOT)/c_salt
 
-VPATH=$(C_SALT_ROOT) $(C_SALT_ROOT)/npapi
+VPATH = $(C_SALT_ROOT) $(C_SALT_ROOT)/npapi
 
 # $(OBJDIR) is an optional variable in nacl_build.mk, it is the directory
 # that holds all the .o's.  Note that a rule to create this dir is built into
@@ -132,3 +132,6 @@ $(BOOST_SMART_PTR_64):
 # Download and patch the Carpe sliders.
 $(CARPE_FILES):
 	/bin/bash photo_tool.sh
+
+check_variables::
+	@echo "C_SALT_ROOT=$(C_SALT_ROOT)"

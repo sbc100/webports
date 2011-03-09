@@ -98,7 +98,7 @@ OBJECTS_X86_64_DBG ?= $(CCFILES:%.cc=%_x86_64_dbg.o)
 
 # Make sure certain variables are defined.  This rule is set as a dependency
 # for all the .nexe builds in the examples.
-check_variables:
+check_variables::
 ifeq ($(origin OS), undefined)
 	@echo "Error: OS is undefined" ; exit 42
 endif
