@@ -34,6 +34,7 @@ fi
 
 
 RunInstallScript() {
+  echo "@@@BUILD_STEP ${bitsize}-bit $1@@@"
   local CURRENT_DIR=`pwd -P`
   cd scripts/$1
   if ./$2 ; then
@@ -43,6 +44,7 @@ RunInstallScript() {
     MESSAGE="naclports nacl-install-all: Install FAILED for $1 \
 ($NACL_PACKAGES_BITSIZE)"
     echo $MESSAGE
+    echo "@@@STEP_FAILED@@@"
     MESSAGES="$MESSAGES\n$MESSAGE"
     RESULT=1
   fi
@@ -86,6 +88,11 @@ RunInstallScript memory_filesys nacl-memory_filesys.sh
 RunInstallScript nethack-3.4.3 nacl-nethack-3.4.3.sh
 RunInstallScript OpenSceneGraph-2.9.7 nacl-OpenSceneGraph-2.9.7.sh
 RunInstallScript cfitsio nacl-cfitsio.sh
+
+echo "@@@BUILD_STEP ${bitsize}-bit Summary@@@"
+if [[ $RESULT != 0 ]]; then
+  echo "@@@STEP_FAILED@@@"
+fi
 
 echo -e "$MESSAGES"
 
