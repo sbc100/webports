@@ -44,7 +44,7 @@ RunInstallScript() {
     MESSAGE="naclports nacl-install-all: Install FAILED for $1 \
 ($NACL_PACKAGES_BITSIZE)"
     echo $MESSAGE
-    echo "@@@STEP_FAILED@@@"
+    echo "@@@STEP_FAILURE@@@"
     MESSAGES="$MESSAGES\n$MESSAGE"
     RESULT=1
   fi
@@ -91,7 +91,7 @@ RunInstallScript cfitsio nacl-cfitsio.sh
 
 echo "@@@BUILD_STEP ${bitsize}-bit Summary@@@"
 if [[ $RESULT != 0 ]]; then
-  echo "@@@STEP_FAILED@@@"
+  echo "@@@STEP_FAILURE@@@"
 fi
 
 echo -e "$MESSAGES"
