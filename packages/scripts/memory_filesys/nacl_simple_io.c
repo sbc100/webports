@@ -81,7 +81,7 @@ int console_get(void) {
 
   return ret;
 }
-
+#ifndef __GLIBC__
 int __wrap___srget_r(struct _reent *ptr, register FILE *fp) {
   if (fp == stdin) {
     return console_get();
@@ -89,6 +89,7 @@ int __wrap___srget_r(struct _reent *ptr, register FILE *fp) {
     return __real___srget_r(ptr, fp);
   }
 }
+#endif
 
 int __wrap_getchar(void) {
   return console_get();

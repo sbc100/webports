@@ -64,9 +64,13 @@ CustomPostConfigureStep() {
   # add ntohl for Native Client
   echo "#define ntohl(x) ((((x)>>24)&0xFF)|(((x)>>8)&0xFF00)|\
 (((x)<<8)&0xFF0000)|(((x)<<24)&0xFF000000))" >> config.h
-  # satisfy random, srandom, utime
-  echo "#define random() rand()" >> config.h
-  echo "#define srandom(x) srand(x)" >> config.h
+  # satisfy random, srandom
+  echo "/* pull features.h that has __GLIBC__ */" >> config.h
+  echo "#include <stdlib.h>" >> config.h
+  echo "#ifndef __GLIBC__" >> config.h
+  echo "# define random() rand()" >> config.h
+  echo "# define srandom(x) srand(x)" >> config.h
+  echo "#endif" >> config.h
 }
 
 
