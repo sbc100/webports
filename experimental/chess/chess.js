@@ -1,11 +1,14 @@
 //
+// Copyright 2011 The Native Client SDK Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can
+// be found in the LICENSE file.
+//
 // NOTE:  Images are public domain .png files from
 //        http://www.pdclipart.org/thumbnails.php?album=121
 //
-// COPYRIGHT: Google NativeClient Team, 2011
-//
 
-chessBoard = {};
+// Create a namespace object
+var chessBoard = chessBoard || {}
 
 chessBoard.ColorType = {
   BLACK: 0,
@@ -22,6 +25,9 @@ chessBoard.PieceType = {
   NONE: 6
 };
 
+//
+// Piece class
+//
 chessBoard.Piece = function(color, pieceType) {
   this.color_ = color;
   this.pieceType_ = pieceType;
@@ -52,6 +58,9 @@ chessBoard.Piece.prototype.toChar = function() {
   }
 }
 
+//
+// BoardContents class
+//
 chessBoard.BoardContents = function(columns, rows) {
   this.columns_ = columns;
   this.rows_ = rows;
@@ -212,8 +221,6 @@ chessBoard.convertRowToChessRow = function(row) {
   return 8 - row;
 }
 
-chessBoard.getRowClicked = function(ycoord) {
-}
 chessBoard.drawBoard = function(pixelsPerSquare, leftBorder, topBorder, ctxBoard) {
   var column, row, color;
   color = chessBoard.topLeft;
@@ -405,7 +412,7 @@ chessBoard.mouseDownHandler = function(e) {
                 ' chess notation: ' + chessBoard.convertColumnToLetter(column) +
                 chessBoard.convertRowToChessRow(row) + '\n';
   if (thePiece) {
-    message += ' That space contains ' + thePiece.toString() + ' \n';
+    message += 'That space contains ' + thePiece.toString() + ' \n';
     var boardString = chessBoard.contents.toString();
     boardString += 'Column ' + column + ' Row ' + row;
     message += boardString;
