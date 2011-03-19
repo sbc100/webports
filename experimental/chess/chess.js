@@ -39,6 +39,18 @@ chessBoard.Piece.prototype.toString = function() {
   theString = colorArray[this.color_] + ' ' + pieceArray[this.pieceType_];
   return theString;
 }
+chessBoard.Piece.prototype.toChar = function() {
+  // convert Pawn to p, Rook to r, Knight to h (horse), Bishop to b,
+  //   Queen to q, and King to k
+  // Black is just uppercase of this.
+  var whitePieceArray = ['p', 'r', 'h', 'b', 'q', 'k'];
+  var blackPieceArray = ['P', 'R', 'H', 'B', 'Q', 'K'];
+  if (this.color_ == chessBoard.ColorType.BLACK) {
+    return blackPieceArray[this.pieceType_];
+  } else {
+    return whitePieceArray[this.pieceType_];
+  }
+}
 
 chessBoard.BoardContents = function(columns, rows) {
   this.columns_ = columns;
@@ -61,6 +73,22 @@ chessBoard.BoardContents.prototype.update = function(column, row, theUnit) {
 chessBoard.BoardContents.prototype.getPiece = function(column, row) {
   var index = this.getIndex(column, row);
   return this.pieceArray_[index];
+}
+
+chessBoard.BoardContents.prototype.toString = function() {
+  var theString = "";
+  for (var row = 0; row < chessBoard.boardSize; ++row) {
+    for (var column = 0; column < chessBoard.boardSize; ++column) {
+      var thePiece = this.getPiece(column, row);
+      if (thePiece) 
+        theString += thePiece.toChar();
+      else
+        theString += ' ';
+    }
+    theString += '\n';
+  }
+  theString += 'Top: Black\n'; //FIXME, use a variable for this
+  return theString;
 }
 
 chessBoard.BoardContents.prototype.defaultInit = function() {
@@ -298,7 +326,8 @@ chessBoard.init = function() {
 
  chessBoard.contents = new chessBoard.BoardContents(chessBoard.boardSize,
    chessBoard.boardSize); // typically 8x8 board
-  chessBoard.contents.defaultInit();
+ chessBoard.contents.defaultInit();
+  
 }
 
 
@@ -374,14 +403,27 @@ chessBoard.mouseDownHandler = function(e) {
   var thePiece = chessBoard.contents.getPiece(column, row);
   var message = 'You clicked on column ' + column + ' row ' + row +
                 ' chess notation: ' + chessBoard.convertColumnToLetter(column) +
-                chessBoard.convertRowToChessRow(row);
+                chessBoard.convertRowToChessRow(row) + '\n';
   if (thePiece) {
-    message += ' That space contains ' + thePiece.toString();
+    message += ' That space contains ' + thePiece.toString() + ' \n';
+    var boardString = chessBoard.contents.toString();
+    boardString += 'Column ' + column + ' Row ' + row;
+    message += boardString;
   }
   if (x != -1 && y != -1) {
     alert(message);
   }
 }
+
+chessBoard.doneMoveHandler = function() {
+  var thePiece = chessBoard.contents.getPiece(1,1);
+  console.log(' random piece: ' + thePiece.toString());
+  var boardString = chessBoard.contents.toString();
+  console.log('chessBoard: ' + chessBoard + ' chessBoard.contents:'+chessBoard.contents +
+              ' boardString: ' + boardString);
+  alert(boardString);
+}
+
 
 chessBoard.init();
 chessBoard.canvasScratch.onmousedown = chessBoard.mouseDownHandler;
