@@ -8,14 +8,15 @@
 //
 
 // Create a namespace object
-var chessBoard = chessBoard || {}
+var Chess = Chess || {}
+Chess.boardSize = 8;
 
-chessBoard.ColorType = {
+Chess.ColorType = {
   BLACK: 0,
   WHITE: 1
 };
 
-chessBoard.PieceType = {
+Chess.PieceType = {
   PAWN: 0,
   ROOK: 1,
   KNIGHT: 2,
@@ -28,30 +29,30 @@ chessBoard.PieceType = {
 //
 // Piece class
 //
-chessBoard.Piece = function(color, pieceType) {
+Chess.Piece = function(color, pieceType) {
   this.color_ = color;
   this.pieceType_ = pieceType;
 }
-chessBoard.Piece.prototype.getColor = function () {
+Chess.Piece.prototype.getColor = function () {
   return this.color_;
 }
-chessBoard.Piece.prototype.getPieceType = function () {
+Chess.Piece.prototype.getPieceType = function () {
   return this.pieceType_;
 }
-chessBoard.Piece.prototype.toString = function() {
+Chess.Piece.prototype.toString = function() {
   var theString;
   var colorArray = ['BLACK', 'WHITE'];
   var pieceArray = ['Pawn', 'Rook', 'Knight', 'Bishop', 'Queen', 'King', 'None'];
   theString = colorArray[this.color_] + ' ' + pieceArray[this.pieceType_];
   return theString;
 }
-chessBoard.Piece.prototype.toChar = function() {
+Chess.Piece.prototype.toChar = function() {
   // convert Pawn to p, Rook to r, Knight to h (horse), Bishop to b,
   //   Queen to q, and King to k
   // Black is just uppercase of this.
   var whitePieceArray = ['p', 'r', 'h', 'b', 'q', 'k'];
   var blackPieceArray = ['P', 'R', 'H', 'B', 'Q', 'K'];
-  if (this.color_ == chessBoard.ColorType.BLACK) {
+  if (this.color_ == Chess.ColorType.BLACK) {
     return blackPieceArray[this.pieceType_];
   } else {
     return whitePieceArray[this.pieceType_];
@@ -61,7 +62,7 @@ chessBoard.Piece.prototype.toChar = function() {
 //
 // BoardContents class
 //
-chessBoard.BoardContents = function(columns, rows) {
+Chess.BoardContents = function(columns, rows) {
   this.columns_ = columns;
   this.rows_ = rows;
   this.pieceArray_ = new Array();
@@ -70,24 +71,24 @@ chessBoard.BoardContents = function(columns, rows) {
   } 
 }
 
-chessBoard.BoardContents.prototype.getIndex = function(column, row) {
+Chess.BoardContents.prototype.getIndex = function(column, row) {
   return row * this.columns_ + column;
 }
 
-chessBoard.BoardContents.prototype.update = function(column, row, theUnit) {
+Chess.BoardContents.prototype.update = function(column, row, theUnit) {
   var index = this.getIndex(column, row);
   this.pieceArray_[index] = theUnit;
 }
 
-chessBoard.BoardContents.prototype.getPiece = function(column, row) {
+Chess.BoardContents.prototype.getPiece = function(column, row) {
   var index = this.getIndex(column, row);
   return this.pieceArray_[index];
 }
 
-chessBoard.BoardContents.prototype.toString = function() {
+Chess.BoardContents.prototype.toString = function() {
   var theString = "";
-  for (var row = 0; row < chessBoard.boardSize; ++row) {
-    for (var column = 0; column < chessBoard.boardSize; ++column) {
+  for (var row = 0; row < Chess.boardSize; ++row) {
+    for (var column = 0; column < Chess.boardSize; ++column) {
       var thePiece = this.getPiece(column, row);
       if (thePiece) 
         theString += thePiece.toChar();
@@ -100,75 +101,81 @@ chessBoard.BoardContents.prototype.toString = function() {
   return theString;
 }
 
-chessBoard.BoardContents.prototype.defaultInit = function() {
+Chess.BoardContents.prototype.defaultInit = function() {
   // black starting locations
   this.pieceArray_[this.getIndex(0,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.ROOK);
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.ROOK);
   this.pieceArray_[this.getIndex(7,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.ROOK);
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.ROOK);
 
   this.pieceArray_[this.getIndex(1,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.KNIGHT);
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KNIGHT);
   this.pieceArray_[this.getIndex(6,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.KNIGHT);
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KNIGHT);
 
   this.pieceArray_[this.getIndex(2,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.BISHOP);
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.BISHOP);
   this.pieceArray_[this.getIndex(5,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.BISHOP);
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.BISHOP);
 
-  this.pieceArray_[this.getIndex(3,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.KING);
   this.pieceArray_[this.getIndex(4,0)] =
-    new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.QUEEN);
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KING);
+  this.pieceArray_[this.getIndex(3,0)] =
+    new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.QUEEN);
   for (var i=0; i < 8; ++i) {
     this.pieceArray_[this.getIndex(i,1)] =
-      new chessBoard.Piece(chessBoard.ColorType.BLACK, chessBoard.PieceType.PAWN);
+      new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.PAWN);
   }
 
   // white starting locations
   this.pieceArray_[this.getIndex(0,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.ROOK);
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.ROOK);
   this.pieceArray_[this.getIndex(7,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.ROOK);
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.ROOK);
 
   this.pieceArray_[this.getIndex(1,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.KNIGHT);
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KNIGHT);
   this.pieceArray_[this.getIndex(6,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.KNIGHT);
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KNIGHT);
 
   this.pieceArray_[this.getIndex(2,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.BISHOP);
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.BISHOP);
   this.pieceArray_[this.getIndex(5,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.BISHOP);
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.BISHOP);
 
-  this.pieceArray_[this.getIndex(3,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.KING);
   this.pieceArray_[this.getIndex(4,7)] =
-    new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.QUEEN);
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KING);
+  this.pieceArray_[this.getIndex(3,7)] =
+    new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.QUEEN);
   for (var i=0; i < 8; ++i) {
     this.pieceArray_[this.getIndex(i,6)] =
-      new chessBoard.Piece(chessBoard.ColorType.WHITE, chessBoard.PieceType.PAWN);
+      new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.PAWN);
   }
 }
 
+//
+// Board class -- draws the board squares and chess notation around the side.
+//
+Chess.Board = function() {
+  Chess.Board.pixelsPerSquare = 80;
+  this.Init(); //defined below!
+}
 
-chessBoard.pixelsPerSquare = 80;
-chessBoard.borderPixels = 130;
-chessBoard.textOffset = 10;
-chessBoard.gapPixels = 1; //gap between squares
-chessBoard.WHITE = 'rgb(255,240,240)';
-chessBoard.BLACK = 'rgb(139,137,137)';
-chessBoard.topLeft = chessBoard.WHITE;
-chessBoard.boardSize = 8;
-chessBoard.letterArray = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-chessBoard.otherColor = function(color) {
+Chess.Board.pixelsPerSquare = 80;
+Chess.Board.borderPixels = 130;
+Chess.Board.gapPixels = 1; //gap between squares
+Chess.Board.WHITE = 'rgb(255,240,240)';
+Chess.Board.BLACK = 'rgb(139,137,137)';
+Chess.Board.topLeft = Chess.Board.WHITE;
+Chess.Board.letterArray = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+Chess.Board.prototype.otherColor = function(color) {
   // console.log('color=' + color);
-  if (color == chessBoard.BLACK) {
-    return chessBoard.WHITE;
+  if (color == Chess.Board.BLACK) {
+    return Chess.Board.WHITE;
   }
-  else if (color == chessBoard.WHITE) {
-    return chessBoard.BLACK;
+  else if (color == Chess.Board.WHITE) {
+    return Chess.Board.BLACK;
   } else {
     console.log('ERROR IN otherColor');
   }
@@ -177,110 +184,111 @@ chessBoard.otherColor = function(color) {
 //
 // Given a row or column, convert to coordinate (pixel) value.
 // 
-chessBoard.gridToCoord = function(grid) {
-  if (grid < 0 || grid > chessBoard.boardSize) {
+Chess.Board.prototype.gridToCoord = function(grid) {
+  if (grid < 0 || grid > Chess.boardSize) {
     return 0;
   }
-  return chessBoard.borderPixels +
-    chessBoard.pixelsPerSquare * grid;
+  return Chess.Board.borderPixels +
+    Chess.Board.pixelsPerSquare * grid;
 }
 
 // use gridToCoord and image size to get x coord
-chessBoard.getPieceX = function(grid, image) {
-  return chessBoard.gridToCoord(grid) +
-         (chessBoard.pixelsPerSquare - image.width)/2;
+Chess.Board.prototype.getPieceX = function(grid, image) {
+  return this.gridToCoord(grid) +
+         (Chess.Board.pixelsPerSquare - image.width)/2;
 }
 // use gridToCoord and image size to get y coord
-chessBoard.getPieceY = function(grid, image) {
-  return chessBoard.gridToCoord(grid) +
-         (chessBoard.pixelsPerSquare - image.height)/2;
+Chess.Board.prototype.getPieceY = function(grid, image) {
+  return this.gridToCoord(grid) +
+         (Chess.Board.pixelsPerSquare - image.height)/2;
 }
 
-chessBoard.getGridClicked = function(coord) {
-  if (coord < chessBoard.borderPixels) {
+Chess.Board.prototype.getGridClicked = function(coord) {
+  if (coord < Chess.Board.borderPixels) {
     return -1;
   }
-  if (coord > chessBoard.borderPixels
-      + chessBoard.boardSize * chessBoard.pixelsPerSquare) {
+  if (coord > Chess.Board.borderPixels
+      + Chess.boardSize * Chess.Board.pixelsPerSquare) {
     return -1;
   }
-  grid = Math.floor(((coord - chessBoard.borderPixels) /
-                      chessBoard.pixelsPerSquare));
+  grid = Math.floor(((coord - Chess.Board.borderPixels) /
+                      Chess.Board.pixelsPerSquare));
   return grid;
 }
-chessBoard.convertColumnToLetter = function(coord) {
-  if (coord < 0 || coord >= chessBoard.boardSize) {
+
+Chess.Board.prototype.convertColumnToLetter = function(coord) {
+  if (coord < 0 || coord >= Chess.boardSize) {
     return "?column?";
   }
-  return chessBoard.letterArray[coord];
+  return Chess.Board.letterArray[coord];
 }
-chessBoard.convertRowToChessRow = function(row) {
-  if (row < 0 || row >= chessBoard.boardSize) {
+Chess.Board.prototype.convertRowToChessRow = function(row) {
+  if (row < 0 || row >= Chess.boardSize) {
     return "?row?";
   }
   return 8 - row;
 }
 
-chessBoard.drawBoard = function(pixelsPerSquare, leftBorder, topBorder, ctxBoard) {
+Chess.Board.prototype.drawBoard = function(leftBorder, topBorder, ctxBoard) {
   var column, row, color;
-  color = chessBoard.topLeft;
+  color = Chess.Board.topLeft;
   var topLeftX, topLeftY;
 
   var font = ctxBoard.font;  
   var fillStyle = ctxBoard.fillStyle;
   var strokeStyle = ctxBoard.strokeStyle;
-  ctxBoard.strokeStyle = chessBoard.BLACK;
+  ctxBoard.strokeStyle = Chess.Board.BLACK;
 
   column = 0;
   row = 0;
-  for (var index = 0; index < chessBoard.boardSize * chessBoard.boardSize; ++index) {
+  for (var index = 0; index < Chess.boardSize * Chess.boardSize; ++index) {
 
     // get top left corner of square
-    topLeftX = column * chessBoard.pixelsPerSquare + chessBoard.borderPixels;
-    topLeftY = row * chessBoard.pixelsPerSquare + chessBoard.borderPixels;
+    topLeftX = column * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
+    topLeftY = row * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
     // set color
     ctxBoard.fillStyle = color;
     ctxBoard.beginPath();
-    ctxBoard.fillRect(topLeftX + chessBoard.gapPixels,
-                      topLeftY + chessBoard.gapPixels,
-                      chessBoard.pixelsPerSquare - chessBoard.gapPixels*2,
-                      chessBoard.pixelsPerSquare - chessBoard.gapPixels*2);
+    ctxBoard.fillRect(topLeftX + Chess.Board.gapPixels,
+                      topLeftY + Chess.Board.gapPixels,
+                      Chess.Board.pixelsPerSquare - Chess.Board.gapPixels*2,
+                      Chess.Board.pixelsPerSquare - Chess.Board.gapPixels*2);
     // console.log('Filling col ' + column + ' row ' + row + ' @ '
                 // + topLeftX + ':' + topLeftY + '  ' + color);
     ctxBoard.closePath(); 
-    color = chessBoard.otherColor(color);
+    color = this.otherColor(color);
     ++column;
     if (column == 8) {
       ++row;
       column = 0;
-      color = chessBoard.otherColor(color);
+      color = this.otherColor(color);
     }
   }
 
   // now draw labels
-  ctxBoard.strokeStyle = chessBoard.BLACK;
-  for (column = 0; column < chessBoard.boardSize; ++column) {
+  ctxBoard.strokeStyle = Chess.Board.BLACK;
+  for (column = 0; column < Chess.boardSize; ++column) {
     ctxBoard.font = "14pt Arial";
-    topLeftX = column * chessBoard.pixelsPerSquare + chessBoard.borderPixels
-               + chessBoard.pixelsPerSquare/3;
-    topLeftY = chessBoard.borderPixels - 20;
-    ctxBoard.strokeText(chessBoard.letterArray[column], topLeftX, topLeftY);
-    // console.log(' text ' + chessBoard.letterArray[column] + ' at ' + topLeftX + ':' + topLeftY);
-    topLeftY = chessBoard.boardSize * chessBoard.pixelsPerSquare +
-               chessBoard.borderPixels + 40;
-    ctxBoard.strokeText(chessBoard.letterArray[column], topLeftX, topLeftY);
-    // console.log(' text ' + chessBoard.letterArray[column] + ' at ' + topLeftX + ':' + topLeftY);
+    topLeftX = column * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels
+               + Chess.Board.pixelsPerSquare/3;
+    topLeftY = Chess.Board.borderPixels - 20;
+    ctxBoard.strokeText(Chess.Board.letterArray[column], topLeftX, topLeftY);
+    // console.log(' text ' + Chess.Board.letterArray[column] + ' at ' + topLeftX + ':' + topLeftY);
+    topLeftY = Chess.boardSize * Chess.Board.pixelsPerSquare +
+               Chess.Board.borderPixels + 40;
+    ctxBoard.strokeText(Chess.Board.letterArray[column], topLeftX, topLeftY);
+    // console.log(' text ' + Chess.Board.letterArray[column] + ' at ' + topLeftX + ':' + topLeftY);
   }
-  for (row = 0; row < chessBoard.boardSize; ++row) {
+  for (row = 0; row < Chess.boardSize; ++row) {
     var chess_row = 8 - row;
-    topLeftX = chessBoard.borderPixels - 20;
-    topLeftY = row * chessBoard.pixelsPerSquare + chessBoard.borderPixels + chessBoard.pixelsPerSquare/2;
+    topLeftX = Chess.Board.borderPixels - 20;
+    topLeftY = row * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels + Chess.Board.pixelsPerSquare/2;
     // console.log(topLeftX);
     // console.log(topLeftY);
     // console.log('text: ' + row +' @' + topLeftX + ':' + topLeftY);
     ctxBoard.strokeText(chess_row + '', topLeftX, topLeftY);
-    topLeftX = chessBoard.boardSize * chessBoard.pixelsPerSquare +
-               chessBoard.borderPixels + 20;
+    topLeftX = Chess.boardSize * Chess.Board.pixelsPerSquare +
+               Chess.Board.borderPixels + 20;
     ctxBoard.strokeText(chess_row + '', topLeftX, topLeftY);
   }
 
@@ -289,131 +297,131 @@ chessBoard.drawBoard = function(pixelsPerSquare, leftBorder, topBorder, ctxBoard
   ctxBoard.font = font;
 }
 
-chessBoard.init = function() {
- chessBoard.canvasScratch = document.getElementById("canvasScratch");
- chessBoard.canvasPieces = document.getElementById("canvasPieces");
- chessBoard.canvasBk = document.getElementById("canvasBk");
+Chess.Board.prototype.Init = function() {
+ Chess.canvasScratch = document.getElementById("canvasScratch");
+ Chess.canvasPieces = document.getElementById("canvasPieces");
+ Chess.canvasBk = document.getElementById("canvasBk");
 
- chessBoard.ctxScratch = canvasScratch.getContext("2d");
- chessBoard.ctxPieces = canvasPieces.getContext("2d");
- chessBoard.ctxBk = canvasBk.getContext("2d");
+ Chess.ctxScratch = canvasScratch.getContext("2d");
+ Chess.ctxPieces = canvasPieces.getContext("2d");
+ Chess.ctxBk = canvasBk.getContext("2d");
 
- chessBoard.drawBoard(chessBoard.pixelsPerSquare, chessBoard.borderPixels,
-                      chessBoard.borderPixels, chessBoard.ctxBk);
+ this.drawBoard(Chess.Board.borderPixels, Chess.Board.borderPixels, Chess.ctxBk);
 
- chessBoard.whitePawnImage = new Image();
- chessBoard.whitePawnImage.src = "chess_piece_2_white_pawn.png";
- chessBoard.whiteKnightImage = new Image();
- chessBoard.whiteKnightImage.src = "chess_piece_2_white_knight.png";
- chessBoard.whiteRookImage = new Image();
- chessBoard.whiteRookImage.src = "chess_piece_2_white_rook.png";
- chessBoard.whiteBishopImage = new Image();
- chessBoard.whiteBishopImage.src = "chess_piece_2_white_bishop.png";
- chessBoard.whiteKingImage = new Image();
- chessBoard.whiteKingImage.src = "chess_piece_2_white_king.png";
- chessBoard.whiteQueenImage = new Image();
- chessBoard.whiteQueenImage.src = "chess_piece_2_white_queen.png";
+ Chess.whitePawnImage = new Image();
+ Chess.whitePawnImage.src = "chess_piece_2_white_pawn.png";
+ Chess.whiteKnightImage = new Image();
+ Chess.whiteKnightImage.src = "chess_piece_2_white_knight.png";
+ Chess.whiteRookImage = new Image();
+ Chess.whiteRookImage.src = "chess_piece_2_white_rook.png";
+ Chess.whiteBishopImage = new Image();
+ Chess.whiteBishopImage.src = "chess_piece_2_white_bishop.png";
+ Chess.whiteKingImage = new Image();
+ Chess.whiteKingImage.src = "chess_piece_2_white_king.png";
+ Chess.whiteQueenImage = new Image();
+ Chess.whiteQueenImage.src = "chess_piece_2_white_queen.png";
  
- chessBoard.blackPawnImage = new Image();
- chessBoard.blackPawnImage.src = "chess_piece_2_black_pawn.png";
- chessBoard.blackKnightImage = new Image();
- chessBoard.blackKnightImage.src = "chess_piece_2_black_knight.png";
- chessBoard.blackRookImage = new Image();
- chessBoard.blackRookImage.src = "chess_piece_2_black_rook.png";
- chessBoard.blackBishopImage = new Image();
- chessBoard.blackBishopImage.src = "chess_piece_2_black_bishop.png";
- chessBoard.blackKingImage = new Image();
- chessBoard.blackKingImage.src = "chess_piece_2_black_king.png";
- chessBoard.blackQueenImage = new Image();
- chessBoard.blackQueenImage.src = "chess_piece_2_black_queen.png";
+ Chess.blackPawnImage = new Image();
+ Chess.blackPawnImage.src = "chess_piece_2_black_pawn.png";
+ Chess.blackKnightImage = new Image();
+ Chess.blackKnightImage.src = "chess_piece_2_black_knight.png";
+ Chess.blackRookImage = new Image();
+ Chess.blackRookImage.src = "chess_piece_2_black_rook.png";
+ Chess.blackBishopImage = new Image();
+ Chess.blackBishopImage.src = "chess_piece_2_black_bishop.png";
+ Chess.blackKingImage = new Image();
+ Chess.blackKingImage.src = "chess_piece_2_black_king.png";
+ Chess.blackQueenImage = new Image();
+ Chess.blackQueenImage.src = "chess_piece_2_black_queen.png";
 
- chessBoard.blackQueenImage.onload = function() {
-   chessBoard.drawPieces(chessBoard.ctxPieces);
- };
+ // Chess.blackQueenImage.onload = function() {
+ //  this.drawPieces(Chess.ctxPieces);
+ // };
 
- chessBoard.contents = new chessBoard.BoardContents(chessBoard.boardSize,
-   chessBoard.boardSize); // typically 8x8 board
- chessBoard.contents.defaultInit();
-  
+ this.contents = new Chess.BoardContents(Chess.boardSize,
+   Chess.boardSize); // typically 8x8 board
+ this.contents.defaultInit();
 }
 
 
-chessBoard.drawPiece = function(ctx, column, row, pieceType, colorType) {
+Chess.Board.prototype.drawPiece = function(ctx, column, row, pieceType, colorType) {
   var theImage;
   switch (pieceType) {
-    case chessBoard.PieceType.PAWN:
-      if (colorType == chessBoard.ColorType.WHITE) {
-        theImage = chessBoard.whitePawnImage;
+    case Chess.PieceType.PAWN:
+      if (colorType == Chess.ColorType.WHITE) {
+        theImage = Chess.whitePawnImage;
       } else {
-        theImage = chessBoard.blackPawnImage;
+        theImage = Chess.blackPawnImage;
       } 
       break;
-    case chessBoard.PieceType.ROOK:
-      if (colorType == chessBoard.ColorType.WHITE) {
-        theImage = chessBoard.whiteRookImage;
+    case Chess.PieceType.ROOK:
+      if (colorType == Chess.ColorType.WHITE) {
+        theImage = Chess.whiteRookImage;
       } else {
-        theImage = chessBoard.blackRookImage;
+        theImage = Chess.blackRookImage;
       }
       break;
-    case chessBoard.PieceType.KNIGHT:
-      if (colorType == chessBoard.ColorType.WHITE) {
-        theImage = chessBoard.whiteKnightImage;
+    case Chess.PieceType.KNIGHT:
+      if (colorType == Chess.ColorType.WHITE) {
+        theImage = Chess.whiteKnightImage;
       } else {
-        theImage = chessBoard.blackKnightImage;
+        theImage = Chess.blackKnightImage;
       }
       break;
-    case chessBoard.PieceType.BISHOP:
-      if (colorType == chessBoard.ColorType.WHITE) {
-        theImage = chessBoard.whiteBishopImage;
+    case Chess.PieceType.BISHOP:
+      if (colorType == Chess.ColorType.WHITE) {
+        theImage = Chess.whiteBishopImage;
       } else {
-        theImage = chessBoard.blackBishopImage;
+        theImage = Chess.blackBishopImage;
       }
       break;
-    case chessBoard.PieceType.QUEEN:
-      if (colorType == chessBoard.ColorType.WHITE) {
-        theImage = chessBoard.whiteQueenImage;
+    case Chess.PieceType.QUEEN:
+      if (colorType == Chess.ColorType.WHITE) {
+        theImage = Chess.whiteQueenImage;
       } else {
-        theImage = chessBoard.blackQueenImage;
+        theImage = Chess.blackQueenImage;
       }
       break;
-    case chessBoard.PieceType.KING:
-      if (colorType == chessBoard.ColorType.WHITE) {
-        theImage = chessBoard.whiteKingImage;
+    case Chess.PieceType.KING:
+      if (colorType == Chess.ColorType.WHITE) {
+        theImage = Chess.whiteKingImage;
       } else {
-        theImage = chessBoard.blackKingImage;
+        theImage = Chess.blackKingImage;
       }
       break;
   }
-  ctx.drawImage(theImage, chessBoard.getPieceX(column, theImage),
-                chessBoard.getPieceY(row, theImage));
+  ctx.drawImage(theImage, this.getPieceX(column, theImage),
+                this.getPieceY(row, theImage));
 }
 
-chessBoard.drawPieces = function(ctx) {
+Chess.Board.prototype.drawPieces = function(ctx) {
   console.log('drawPieces...'); 
   var column, row;
-  for (column = 0; column < chessBoard.boardSize; ++column) {
-    for (row = 0; row < chessBoard.boardSize; ++row) {
-      var thePiece = chessBoard.contents.getPiece(column, row);
+  for (column = 0; column < Chess.boardSize; ++column) {
+    for (row = 0; row < Chess.boardSize; ++row) {
+      var thePiece = this.contents.getPiece(column, row);
       if (thePiece) {
-        chessBoard.drawPiece(ctx, column, row, thePiece.getPieceType(),
+        this.drawPiece(ctx, column, row, thePiece.getPieceType(),
                              thePiece.getColor());
       }
     }
   }
 }
 
-chessBoard.mouseDownHandler = function(e) {
+var theBoard = null; // FIXME -- global (un-namespaced) variable
+
+Chess.mouseDownHandler = function(e) {
   var x = e.offsetX;
   var y = e.offsetY;
-  var column = chessBoard.getGridClicked(x);
-  var row = chessBoard.getGridClicked(y);
-  var thePiece = chessBoard.contents.getPiece(column, row);
+  var column = theBoard.getGridClicked(x);
+  var row = theBoard.getGridClicked(y);
+  var thePiece = theBoard.contents.getPiece(column, row);
   var message = 'You clicked on column ' + column + ' row ' + row +
-                ' chess notation: ' + chessBoard.convertColumnToLetter(column) +
-                chessBoard.convertRowToChessRow(row) + '\n';
+                ' chess notation: ' + theBoard.convertColumnToLetter(column) +
+                theBoard.convertRowToChessRow(row) + '\n';
   if (thePiece) {
     message += 'That space contains ' + thePiece.toString() + ' \n';
-    var boardString = chessBoard.contents.toString();
+    var boardString = theBoard.contents.toString();
     boardString += 'Column ' + column + ' Row ' + row;
     message += boardString;
   }
@@ -422,16 +430,16 @@ chessBoard.mouseDownHandler = function(e) {
   }
 }
 
-chessBoard.doneMoveHandler = function() {
-  var thePiece = chessBoard.contents.getPiece(1,1);
+Chess.doneMoveHandler = function() {
+  var thePiece = theBoard.contents.getPiece(1,1);
   console.log(' random piece: ' + thePiece.toString());
-  var boardString = chessBoard.contents.toString();
-  console.log('chessBoard: ' + chessBoard + ' chessBoard.contents:'+chessBoard.contents +
+  var boardString = theBoard.contents.toString();
+  console.log('Chess: ' + Chess + ' theBoard.contents:'+theBoard.contents +
               ' boardString: ' + boardString);
   alert(boardString);
 }
 
-
-chessBoard.init();
-chessBoard.canvasScratch.onmousedown = chessBoard.mouseDownHandler;
-setInterval( "chessBoard.drawPieces(chessBoard.ctxPieces)", 1000);
+theBoard = new Chess.Board();
+// Chess.Init();
+Chess.canvasScratch.onmousedown = Chess.mouseDownHandler;
+setInterval( "theBoard.drawPieces(Chess.ctxPieces)", 1000);
