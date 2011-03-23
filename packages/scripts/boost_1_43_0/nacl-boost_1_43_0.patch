@@ -1,14 +1,14 @@
 diff -Naur boost_1_43_0/Makefile boost_1_43_0.nacl/Makefile
 --- boost_1_43_0/Makefile	1969-12-31 17:00:00.000000000 -0700
 +++ boost_1_43_0.nacl/Makefile	2010-08-27 13:20:45.000000000 -0600
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,60 @@
 +CXXFLAGS = -c -pthread
 +DEFINES = \
 +		  -DBOOST_HAS_GETTIMEOFDAY \
 +		  -DBOOST_HAS_PTHREADS \
 +		  -DBOOST_PARAMETER_MAX_ARITY=7 \
 +		  -DPHOENIX_LIMIT=6
-+	
++
 +INCLUDE = -I./
 +
 +NACL_SDK_USR_INCLUDE = ../../../toolchain/$(OS_PREFIX)_x86/nacl/usr/include
@@ -20,11 +20,25 @@ diff -Naur boost_1_43_0/Makefile boost_1_43_0.nacl/Makefile
 +			 libs/date_time/src/gregorian/gregorian_types.o \
 +			 libs/date_time/src/posix_time/posix_time_types.o
 +
-+OBJ_DIR = obj
-+										
-+LIB_BOOST_DATETIME = libboost_datetime.a
++PROGRAM_OPTIONS_OBJ_FILES = \
++       libs/program_options/src/cmdline.o \
++			 libs/program_options/src/config_file.o \
++			 libs/program_options/src/convert.o \
++			 libs/program_options/src/options_description.o \
++			 libs/program_options/src/parsers.o \
++			 libs/program_options/src/positional_options.o \
++			 libs/program_options/src/split.o \
++			 libs/program_options/src/utf8_codecvt_facet.o \
++			 libs/program_options/src/value_semantic.o \
++			 libs/program_options/src/variables_map.o \
++			 libs/program_options/src/winmain.o
 +
-+all: $(LIB_BOOST_DATETIME)
++OBJ_DIR = obj
++
++LIB_BOOST_DATETIME = libboost_datetime.a
++LIB_BOOST_PROGRAM_OPTIONS = libboost_program_options.a
++
++all: $(LIB_BOOST_DATETIME) $(LIB_BOOST_PROGRAM_OPTIONS)
 +	$(CXX) $(CXXFLAGS) $(INCLUDE) $(DEFINES) test.cpp
 +
 +clean:
@@ -35,12 +49,19 @@ diff -Naur boost_1_43_0/Makefile boost_1_43_0.nacl/Makefile
 +$(OBJ_DIR):
 +	mkdir -p $(OBJ_DIR)/libs/date_time/src/gregorian
 +	mkdir -p $(OBJ_DIR)/libs/date_time/src/posix_time
++	mkdir -p $(OBJ_DIR)/libs/program_options/src
 +
 +$(DATETIME_OBJ_FILES): %.o: %.cpp $(OBJ_DIR)
 +	$(CXX) -c $(INCLUDE) $(CXXFLAGS) $< -o $(OBJ_DIR)/$@
 +
 +$(LIB_BOOST_DATETIME): $(OBJ_DIR) $(DATETIME_OBJ_FILES)
 +	cd $(OBJ_DIR) && $(AR) rcs ../$(LIB_BOOST_DATETIME) $(DATETIME_OBJ_FILES)
++
++$(PROGRAM_OPTIONS_OBJ_FILES): %.o: %.cpp $(OBJ_DIR)
++	$(CXX) -c $(INCLUDE) $(CXXFLAGS) $< -o $(OBJ_DIR)/$@
++
++$(LIB_BOOST_PROGRAM_OPTIONS): $(OBJ_DIR) $(PROGRAM_OPTIONS_OBJ_FILES)
++	cd $(OBJ_DIR) && $(AR) rcs ../$(LIB_BOOST_PROGRAM_OPTIONS) $(PROGRAM_OPTIONS_OBJ_FILES)
 diff -Naur boost_1_43_0/boost/smart_ptr/detail/yield_k.hpp boost_1_43_0.nacl/boost/smart_ptr/detail/yield_k.hpp
 --- boost_1_43_0/boost/smart_ptr/detail/yield_k.hpp	2009-03-02 09:22:16.000000000 -0700
 +++ boost_1_43_0.nacl/boost/smart_ptr/detail/yield_k.hpp	2010-08-27 13:20:45.000000000 -0600

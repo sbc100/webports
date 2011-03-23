@@ -26,6 +26,7 @@ CustomConfigureStep() {
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export LIB_BOOST_DATETIME=libboost_datetime.a
+  export LIB_BOOST_PROGRAM_OPTIONS=libboost_program_options.a
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
@@ -34,6 +35,8 @@ CustomInstallStep() {
   tar cf - --exclude='asio.hpp' --exclude='asio' --exclude='mpi.hpp' --exclude='mpi' boost | ( ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -)
   Remove ${NACL_SDK_USR_LIB}/${LIB_BOOST_DATETIME}
   install -m 644 ${LIB_BOOST_DATETIME} ${NACL_SDK_USR_LIB}/${LIB_BOOST_DATETIME}
+  Remove ${NACL_SDK_USR_LIB}/${LIB_BOOST_PROGRAM_OPTIONS}
+  install -m 644 ${LIB_BOOST_PROGRAM_OPTIONS} ${NACL_SDK_USR_LIB}/${LIB_BOOST_PROGRAM_OPTIONS}
 }
 
 CustomPackageInstall() {
