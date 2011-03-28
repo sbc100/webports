@@ -257,10 +257,10 @@ Chess.Board.prototype.highlight = function(column, row, ctxHighlight) {
   ctxHighlight.beginPath();
   ctxHighlight.fillRect(topLeftX + Chess.Board.gapPixels,
                     topLeftY + Chess.Board.gapPixels,
-                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels*2,
-                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels*2);
-  ctxHighlight.closePath(); 
-}
+                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2,
+                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2);
+  ctxHighlight.closePath();
+};
 
 Chess.Board.prototype.drawBoard = function(leftBorder, topBorder, ctxBoard) {
   var column, row, color;
@@ -457,13 +457,13 @@ Chess.mouseDownHandler = function(e) {
     console.log(message);
     console.log('naclModule = ' + naclModule);
     var moveList = naclModule.GetChoices(boardString);
-    moveList = moveList.replace(/^\s*/gi,""); //trim leading spaces
-    moveList = moveList.replace(/\s*$/gi,""); //trim trailing spaces
+    moveList = moveList.replace(/^\s*/gi, '');  // trim leading spaces
+    moveList = moveList.replace(/\s*$/gi, '');  // trim trailing spaces
     console.log('NEXE moveList=' + moveList);
     var moves = moveList.split(' ');
     console.log('moves=' + moves);
     clearContext(Chess.ctxScratch, Chess.canvasScratch);
-    moves.forEach( function(el) {
+    moves.forEach(function(el) {
         coords = el.split(':');
         console.log('x=' + coords[0] + ' y=' + coords[1]);
         // highlight a valid move
