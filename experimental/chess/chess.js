@@ -27,6 +27,15 @@ Chess.PieceType = {
 };
 
 //
+// Clear a context
+//
+function clearContext(theContext, theCanvas) {
+  theContext.beginPath();
+  theContext.clearRect(0, 0, theCanvas.width, theCanvas.height);
+  theContext.closePath();
+}
+
+//
 // Piece class
 //
 Chess.Piece = function(color, pieceType) {
@@ -167,6 +176,7 @@ Chess.Board.borderPixels = 130;
 Chess.Board.gapPixels = 1; //gap between squares
 Chess.Board.WHITE = 'rgb(255,240,240)';
 Chess.Board.BLACK = 'rgb(139,137,137)';
+Chess.Board.HIGHLIGHT = 'rgba(255,255,0,0.5)';
 Chess.Board.topLeft = Chess.Board.WHITE;
 Chess.Board.letterArray = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -230,6 +240,27 @@ Chess.Board.prototype.convertRowToChessRow = function(row) {
   }
   return 8 - row;
 };
+
+Chess.Board.prototype.highlight = function(column, row, ctxHighlight) {
+
+  // set borders
+  leftBorder = Chess.Board.borderPixels;
+  topBorder = Chess.Board.borderPixels;
+
+  // get top left corner of this square
+  topLeftX = column * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
+  topLeftY = row * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
+
+  // set color
+  ctxHighlight.fillStyle = Chess.Board.HIGHLIGHT;
+
+  ctxHighlight.beginPath();
+  ctxHighlight.fillRect(topLeftX + Chess.Board.gapPixels,
+                    topLeftY + Chess.Board.gapPixels,
+                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels*2,
+                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels*2);
+  ctxHighlight.closePath(); 
+}
 
 Chess.Board.prototype.drawBoard = function(leftBorder, topBorder, ctxBoard) {
   var column, row, color;
@@ -419,11 +450,26 @@ Chess.mouseDownHandler = function(e) {
   if (thePiece) {
     message += 'That space contains ' + thePiece.toString() + ' \n';
     var boardString = theBoard.contents.toString();
-    boardString += 'Column ' + column + ' Row ' + row;
+    boardString += column + ':' + row;
     message += boardString;
   }
   if (x != -1 && y != -1) {
-    alert(message);
+    console.log(message);
+    console.log('naclModule = ' + naclModule);
+    var moveList = naclModule.GetChoices(boardString);
+    moveList = moveList.replace(/^\s*/gi,""); //trim leading spaces
+    moveList = moveList.replace(/\s*$/gi,""); //trim trailing spaces
+    console.log('NEXE moveList=' + moveList);
+    var moves = moveList.split(' ');
+    console.log('moves=' + moves);
+    clearContext(Chess.ctxScratch, Chess.canvasScratch);
+    moves.forEach( function(el) {
+        coords = el.split(':');
+        console.log('x=' + coords[0] + ' y=' + coords[1]);
+        // highlight a valid move
+        theBoard.highlight(coords[0], coords[1], Chess.ctxScratch);
+      }
+    );
   }
 };
 

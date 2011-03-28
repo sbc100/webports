@@ -13,6 +13,7 @@
     //     attempt to set the element with id |field| to the value of
     //     |statusText|.
     function updateHtmlField(field, opt_message) {
+      console.log('updateHtmlField ' + field + ',' + opt_message);
       if (opt_message)
         statusText = opt_message;
       var statusField = document.getElementById(field);
@@ -22,7 +23,7 @@
     }
 
     function moduleDidLoad() {
-      naclModule = document.getElementById('hex_app');
+      naclModule = document.getElementById('chess_engine');
       updateHtmlField('status_field', 'SUCCESS');
     }
     // If the page loads before the Native Client module loads, then set the
@@ -44,9 +45,9 @@
 </head>
 <body onload="pageDidLoad()">
   <embed name="nacl_module"
-         id="hex_app"
+         id="chess_engine"
          width=0 height=0
-         nacl="hex.nmf"
+         nacl="chess.nmf"
          type="application/x-nacl"
          onload="moduleDidLoad();" />
 <p>
