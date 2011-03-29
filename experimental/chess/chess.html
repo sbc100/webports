@@ -53,27 +53,28 @@
 <p>
 
 <div>
+<BR>
  <canvas id="canvasScratch" 
   style="z-index:6;
   position:absolute;
-  left:0px;
-  top:100px;"
+  left:175px;
+  top:50px;"
   width="1200" height="900">
   This text is displayed if your browser does not support HTML5 Canvas.
  </canvas>
  <canvas id="canvasPieces" 
   style="z-index:4;
   position:absolute;
-  left:0px;
-  top:100px;"
+  left:175px;
+  top:50px;"
   width="1200" height="900">
   This text is displayed if your browser does not support HTML5 Canvas.
  </canvas>
  <canvas id="canvasBk" 
   style="z-index:2;
   position:absolute;
-  left:0px;
-  top:100px;"
+  left:175px;
+  top:50px;"
   width="1200" height="900">
   This text is displayed if your browser does not support HTML5 Canvas.
  </canvas>
@@ -81,14 +82,17 @@
 
 <script type="text/javascript" src="chess.js"></script>
 
-<button onClick="chessBoard.doneMoveHandler()">Done move</button>
-<div id="TurnNumber">NO-NUMBER</div>
-<div id="Turn">NO-TURN</div>
+  <div id="TurnNumber">NO-NUMBER</div>
+  <div id="Turn">NO-TURN</div>
+  Nexe status
+  <div id="status_field">NO-STATUS</div>
 
-</form>
+  <button onClick="Chess.doneMoveHandler()">Done move</button>
+  <textarea rows='10' cols='10' id='chessText'>
+   ...
+  </textarea><BR>
+  <button onClick="Chess.updateBoardHandler()">Update board</button>
+  <button onClick="Chess.updateTextHandler()">Update text</button>
 
-</section>
-Nexe status
-<div id="status_field">NO-STATUS</div>
 </body>
 </html>

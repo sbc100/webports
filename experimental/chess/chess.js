@@ -69,6 +69,40 @@ Chess.Piece.prototype.toChar = function() {
   }
 };
 
+Chess.Piece.pieceFactory = function(character) {
+  switch (character) {
+    case ' ':
+      console.log('returning null in pieceFactory');
+      return null;
+    case 'p': 
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.PAWN);
+    case 'P': 
+      return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.PAWN);
+    case 'r':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.ROOK);
+    case 'R':
+      return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.ROOK);
+    case 'h':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KNIGHT);
+    case 'H':
+      return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KNIGHT);
+    case 'b':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.BISHOP);
+    case 'B':
+      return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.BISHOP);
+    case 'q':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.QUEEN);
+    case 'Q':
+      return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.QUEEN);
+    case 'k':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KING);
+    case 'K':
+      return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KING);
+    default:
+      alert('Bad piece [' + character + '] in Chess.Piece.pieceFactory');
+  }
+}
+
 //
 // BoardContents class
 //
@@ -109,6 +143,23 @@ Chess.BoardContents.prototype.toString = function() {
   }
   theString += 'Top: Black\n'; //FIXME, use a variable for this
   return theString;
+};
+
+///
+/// stringData can have up to 8 lines, each line can have up to 8 characters.
+///
+Chess.BoardContents.prototype.setContents = function(stringData) {
+  var lines = stringData.split('\n');
+  var lineIndex;
+  for (lineIndex = 0; lineIndex < Math.min(lines.length, 8); ++lineIndex) {
+    var line = lines[lineIndex];
+    console.log('LINE ' + lineIndex + ' : ' + line);
+    for (charIndex = 0; charIndex < Math.min(line.length, 8); ++charIndex) {
+      this.pieceArray_[this.getIndex(charIndex, lineIndex)] =
+        Chess.Piece.pieceFactory(line.charAt(charIndex));
+    }
+  }
+  clearContext(Chess.ctxPieces, Chess.canvasPieces);
 };
 
 Chess.BoardContents.prototype.defaultInit = function() {
@@ -480,6 +531,18 @@ Chess.doneMoveHandler = function() {
   console.log('Chess: ' + Chess + ' theBoard.contents:' + theBoard.contents +
               ' boardString: ' + boardString);
   alert(boardString);
+};
+
+Chess.updateBoardHandler = function() {
+  var textField = document.getElementById('chessText');
+  alert('Text is ' + textField.value);
+  theBoard.contents.setContents(textField.value);
+};
+
+Chess.updateTextHandler = function() {
+  var textField = document.getElementById('chessText');
+  var boardString = theBoard.contents.toString();
+  textField.value = boardString;
 };
 
 theBoard = new Chess.Board();
