@@ -5,8 +5,8 @@
 # Makefile for Stage 1 of the Life2011 tutorial.
 
 NACLPORTS_ROOT ?= ../../..
-INSTALL_ROOT ?= $$HOME/Sites/life-tutorial
-INSTALL_DIR ?= $(INSTALL_ROOT)/life-stage-1
+INSTALL_ROOT ?= $$HOME/Sites/life2011
+INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_1
 
 CCFILES = life_module.cc life.cc
 

@@ -1,10 +1,10 @@
 // Copyright 2011 The Native Client SDK Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can
-// be found in the LICENSE file.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <ppapi/cpp/module.h>
 
-#include "examples/tutorials/life/life-stage-2/life.h"
+#include "experimental/life2011/life_stage_3/life.h"
 
 namespace life {
 // The Module class.  The browser calls the CreateInstance() method to create

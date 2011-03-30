@@ -1,8 +1,8 @@
 // Copyright 2011 The Native Client SDK Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can
-// be found in the LICENSE file.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-#include "examples/tutorials/life/life-stage-3/life.h"
+#include "experimental/life2011/life_stage_2/life.h"
 
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/cpp/completion_callback.h>
@@ -15,8 +15,8 @@
 #include <cstring>
 #include <string>
 
-#include "examples/tutorials/life/life-stage-3/scoped_mutex_lock.h"
-#include "examples/tutorials/life/life-stage-3/scoped_pixel_lock.h"
+#include "experimental/life2011/life_stage_2/scoped_mutex_lock.h"
+#include "experimental/life2011/life_stage_2/scoped_pixel_lock.h"
 
 namespace {
 const char* const kAddCellAtPointMethodId = "addCellAtPoint";

@@ -9,7 +9,7 @@
 
 .PHONY: all install clean
 
-INSTALL_DIR ?= $(HOME)/Sites/life-tutorial
+INSTALL_DIR ?= $(HOME)/Sites/life2011
 
 TUTORIALS = life_stage_1 \
             life_stage_2 \

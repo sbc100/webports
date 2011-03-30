@@ -5,8 +5,8 @@
 # Makefile for Stage 3 of the Life2011 tutorial.
 
 NACLPORTS_ROOT ?= ../../..
-INSTALL_ROOT ?= $$HOME/Sites/life-tutorial
-INSTALL_DIR ?= $(INSTALL_ROOT)/life-stage-2
+INSTALL_ROOT ?= $$HOME/Sites/life2011
+INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_2
 
 CCFILES = life_module.cc life.cc
 HFILES = life.h scoped_mutex_lock.h scoped_pixel_lock.h
