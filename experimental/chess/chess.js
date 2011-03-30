@@ -380,6 +380,10 @@ Chess.Board.prototype.Init = function() {
  Chess.canvasPieces = document.getElementById('canvasPieces');
  Chess.canvasBk = document.getElementById('canvasBk');
 
+ if (Chess.canvasScratch == undefined) {
+   console.log('Canvas canvasScratch is not defined');
+   return;
+ }
  Chess.ctxScratch = canvasScratch.getContext('2d');
  Chess.ctxPieces = canvasPieces.getContext('2d');
  Chess.ctxBk = canvasBk.getContext('2d');
@@ -412,10 +416,6 @@ Chess.Board.prototype.Init = function() {
  Chess.blackKingImage.src = 'chess_piece_2_black_king.png';
  Chess.blackQueenImage = new Image();
  Chess.blackQueenImage.src = 'chess_piece_2_black_queen.png';
-
- // Chess.blackQueenImage.onload = function() {
- //  this.drawPieces(Chess.ctxPieces);
- // };
 
  this.contents = new Chess.BoardContents(Chess.boardSize,
    Chess.boardSize); // typically 8x8 board
@@ -546,5 +546,7 @@ Chess.updateTextHandler = function() {
 };
 
 theBoard = new Chess.Board();
-Chess.canvasScratch.onmousedown = Chess.mouseDownHandler;
-setInterval('theBoard.drawPieces(Chess.ctxPieces)', 1000);
+if (Chess.canvasScratch != undefined) {
+  Chess.canvasScratch.onmousedown = Chess.mouseDownHandler;
+  setInterval('theBoard.drawPieces(Chess.ctxPieces)', 1000);
+}
