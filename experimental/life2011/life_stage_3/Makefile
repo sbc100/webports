@@ -1,10 +1,10 @@
-# Copyright 2011, The Native Client SDK Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that can
-# be found in the LICENSE file.
+# Copyright 2011, The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
-# Makefile for Stage 2 of the Life tutorial.
+# Makefile for Stage 3 of the Life2011 tutorial.
 
-NACLPORTS_ROOT ?= ../../../..
+NACLPORTS_ROOT ?= ../../..
 INSTALL_ROOT ?= $$HOME/Sites/life-tutorial
 INSTALL_DIR ?= $(INSTALL_ROOT)/life-stage-2
 
