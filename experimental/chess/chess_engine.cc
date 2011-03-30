@@ -95,6 +95,12 @@ struct Coord {
 };
 enum Side {BLACK, WHITE};
 
+std::string SideToString(Side s) {
+  if (s == BLACK) 
+    return "BLACK";
+  return "WHITE";
+}
+
 class Board {
     char contents_[8][8];
     Side top_side_;
@@ -147,11 +153,11 @@ class Board {
 
 Side GetSide(char piece) {
   char upper_char = toupper(piece);
-  // Black pieces are uppercase
+  // White pieces are uppercase
   if (upper_char == piece) {
-    return BLACK;
+    return WHITE;
   }
-  return WHITE;
+  return BLACK;
 }
 
 ///
@@ -328,6 +334,7 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
   // key assumption -- Javascript only calls us with a valid selected piece.
   Board *board = new Board(board_contents, top_side);
   Side my_side = GetSide(selected_piece);
+  printf("My side is = %s\n", SideToString(my_side).c_str()); 
   std::vector<Coord> moves;
   if (IsPawn(selected_piece)) {
     printf("PAWN\n");

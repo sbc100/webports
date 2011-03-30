@@ -60,8 +60,8 @@ Chess.Piece.prototype.toChar = function() {
   // convert Pawn to p, Rook to r, Knight to h (horse), Bishop to b,
   //   Queen to q, and King to k
   // Black is just uppercase of this.
-  var whitePieceArray = ['p', 'r', 'h', 'b', 'q', 'k'];
-  var blackPieceArray = ['P', 'R', 'H', 'B', 'Q', 'K'];
+  var blackPieceArray = ['p', 'r', 'h', 'b', 'q', 'k'];
+  var whitePieceArray = ['P', 'R', 'H', 'B', 'Q', 'K'];
   if (this.color_ == Chess.ColorType.BLACK) {
     return blackPieceArray[this.pieceType_];
   } else {
@@ -75,29 +75,29 @@ Chess.Piece.pieceFactory = function(character) {
       console.log('returning null in pieceFactory');
       return null;
     case 'p': 
-      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.PAWN);
-    case 'P': 
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.PAWN);
+    case 'P': 
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.PAWN);
     case 'r':
-      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.ROOK);
-    case 'R':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.ROOK);
+    case 'R':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.ROOK);
     case 'h':
-      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KNIGHT);
-    case 'H':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KNIGHT);
+    case 'H':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KNIGHT);
     case 'b':
-      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.BISHOP);
-    case 'B':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.BISHOP);
+    case 'B':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.BISHOP);
     case 'q':
-      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.QUEEN);
-    case 'Q':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.QUEEN);
+    case 'Q':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.QUEEN);
     case 'k':
-      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KING);
-    case 'K':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KING);
+    case 'K':
+      return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KING);
     default:
       alert('Bad piece [' + character + '] in Chess.Piece.pieceFactory');
   }
