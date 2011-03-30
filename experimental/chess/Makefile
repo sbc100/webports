@@ -10,7 +10,7 @@ CCFILES = chess_engine.cc
 
 #NACL_SDK_ROOT = ../..
 
-NACL_SDK_ROOT = /Users/mmortensen/nacl_sdk_705/native_client_sdk_0_1_721_0
+#NACL_SDK_ROOT = /Users/mmortensen/nacl_sdk_705/native_client_sdk_0_1_721_0
 NACLPORTS_ROOT = ../../..
 
 INCLUDES = -I$(NACL_SDK_ROOT)
