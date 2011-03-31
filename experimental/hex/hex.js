@@ -1,19 +1,19 @@
 
-// Provide the hexgame namespace
-hexgame = {};
+// Provide the HexGame namespace
+HexGame = {};
 
-hexgame.LEFT_OFFSET = 100;
-hexgame.TOP_OFFSET = 50;
-hexgame.HEX_SIZE = 50;
-hexgame.HALF_HEX_SIZE = hexgame.HEX_SIZE / 2;
-hexgame.Cos60 = 0.50;
-hexgame.Sin60 = 0.866025403784439;
-var X_DELTA = hexgame.HEX_SIZE * hexgame.Cos60;
-var Y_DELTA = hexgame.HEX_SIZE * hexgame.Sin60;
+HexGame.LEFT_OFFSET = 100;
+HexGame.TOP_OFFSET = 50;
+HexGame.HEX_SIZE = 50;
+HexGame.HALF_HEX_SIZE = HexGame.HEX_SIZE / 2;
+HexGame.Cos60 = 0.50;
+HexGame.Sin60 = 0.866025403784439;
+var X_DELTA = HexGame.HEX_SIZE * HexGame.Cos60;
+var Y_DELTA = HexGame.HEX_SIZE * HexGame.Sin60;
 var Y_HEX_SIZE = 2 * Y_DELTA;
-var X_HEX_SIZE = 2 * X_DELTA + hexgame.HALF_HEX_SIZE;
+var X_HEX_SIZE = 2 * X_DELTA + HexGame.HALF_HEX_SIZE;
 var UNIT_Y_ODD_COLUMN_OFFSET = 46;
-var UNIT_SIZE = hexgame.HEX_SIZE * 1.10; //height and width of unit (pixels)
+var UNIT_SIZE = HexGame.HEX_SIZE * 1.10; //height and width of unit (pixels)
 
 var canvas;
 var canvas2;
@@ -243,8 +243,8 @@ Unit.prototype.drawAtXY = function(ctx, x, y) {
 };
 
 Unit.prototype.drawAt = function(ctx) {
-  var xCoord = hexgame.LEFT_OFFSET + X_HEX_SIZE * this.x_ + X_HEX_SIZE / 3;
-  var yCoord = hexgame.TOP_OFFSET + Y_HEX_SIZE * this.y_ - Y_DELTA;
+  var xCoord = HexGame.LEFT_OFFSET + X_HEX_SIZE * this.x_ + X_HEX_SIZE / 3;
+  var yCoord = HexGame.TOP_OFFSET + Y_HEX_SIZE * this.y_ - Y_DELTA;
 
   if (this.x_ % 2 == 1) yCoord += Y_DELTA * 2;
 
@@ -267,11 +267,11 @@ function removeUnitFromArray(theArray, theUnit) {
 }
 
 function getHexX(column, row) {
-  var x = hexgame.LEFT_OFFSET + X_HEX_SIZE * (column);
+  var x = HexGame.LEFT_OFFSET + X_HEX_SIZE * (column);
   return x;
 }
 function getHexY(column, row) {
-  var y = hexgame.TOP_OFFSET + Y_HEX_SIZE * row;
+  var y = HexGame.TOP_OFFSET + Y_HEX_SIZE * row;
   if (column % 2 == 1) y += Y_DELTA;
   return y;
 }
@@ -288,14 +288,14 @@ function getHexYup(column, row) {
 // Convert an xCoord to a column
 function xToColumn(xCoord) {
   // TODO: handle the 'pointy parts' of a hex
-  var column = Math.floor((xCoord - hexgame.LEFT_OFFSET) / X_HEX_SIZE);
+  var column = Math.floor((xCoord - HexGame.LEFT_OFFSET) / X_HEX_SIZE);
   return column;
 }
 
 // Convert a column, yCoord to a row
 function yToRow(column, yCoord) {
   // TODO: handle the 'pointy parts' of a hex
-  var columnTop = yCoord - hexgame.TOP_OFFSET;
+  var columnTop = yCoord - HexGame.TOP_OFFSET;
   if (column % 2 == 1) {
     columnTop -= Y_DELTA;
   }
@@ -304,10 +304,10 @@ function yToRow(column, yCoord) {
 
 // note: Uses ctx.fillColor to fill, unless dontFill is defined
 function drawHex(ctx, column, row, dontFill) {
-  var x = hexgame.LEFT_OFFSET + X_HEX_SIZE * column;
-  var y = hexgame.TOP_OFFSET + Y_HEX_SIZE * row;
+  var x = HexGame.LEFT_OFFSET + X_HEX_SIZE * column;
+  var y = HexGame.TOP_OFFSET + Y_HEX_SIZE * row;
   if (column % 2 == 1) y += Y_DELTA;
-  y += hexgame.HALF_HEX_SIZE;
+  y += HexGame.HALF_HEX_SIZE;
   ctx.beginPath();
   ctx.moveTo(x, y);
   var lineThickness = ctx.lineThickness;
@@ -317,7 +317,7 @@ function drawHex(ctx, column, row, dontFill) {
   x += X_DELTA;
   y += Y_DELTA;
   ctx.lineTo(x, y);
-  x += hexgame.HEX_SIZE;
+  x += HexGame.HEX_SIZE;
   ctx.lineTo(x, y);
   x += X_DELTA;
   y -= Y_DELTA;
@@ -325,7 +325,7 @@ function drawHex(ctx, column, row, dontFill) {
   x -= X_DELTA;
   y -= Y_DELTA;
   ctx.lineTo(x, y);
-  x -= hexgame.HEX_SIZE;
+  x -= HexGame.HEX_SIZE;
   ctx.lineTo(x, y);
   x -= X_DELTA;
   y += Y_DELTA;
@@ -338,12 +338,12 @@ function drawHex(ctx, column, row, dontFill) {
     x += X_DELTA;
     y -= Y_DELTA;
     ctx.moveTo(x, y);
-    x += hexgame.HEX_SIZE;
+    x += HexGame.HEX_SIZE;
     y += Y_DELTA * 2;
     ctx.lineTo(x, y);
-    x -= hexgame.HEX_SIZE;
+    x -= HexGame.HEX_SIZE;
     ctx.moveTo(x, y);
-    x += hexgame.HEX_SIZE;
+    x += HexGame.HEX_SIZE;
     y -= Y_DELTA * 2;
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -493,6 +493,7 @@ Board.prototype.initDraw = function(ctx) {
       ctx.globalCompositeOperation = 'source-over';
     }
   }
+
   updateHtmlField('Phase', 'PHASE: ' + theBoard.getTurnStateString());
   updateHtmlField('Turn', 'TURN: ' + whoseTurn);
   updateHtmlField('TurnNumber', 'Turn: Number: ' + turnNumber);
@@ -1098,6 +1099,80 @@ function findUnitClickedOn(x, y, unitList) {
     }
   }
   return undefined;
+}
+
+///
+/// Define 3 State classes -- MoveTool, AttackTool, ResolveTool
+///
+function MoveTool() {
+  this.state = Board.TurnState.MOVING;
+}
+function AttackTool() {
+  this.state = Board.TurnState.ATTACKING;
+}
+function ResolveTool() {
+  this.state = Board.TurnState.RESOLVING;
+}
+
+///
+/// Define 3 objects - one for each state - that we can switch between.
+///
+HexGame.moveTool = new MoveTool();
+HexGame.attackTool = new AttackTool();
+HexGame.resolveTool = new ResolveTool();
+
+/// Define |HexGame.currentTool| to initially refer to |HexGame.moveTool|.
+HexGame.currentTool = HexGame.moveTool;
+
+MoveTool.prototype.doneHandler = function() {
+  console.log('MoveTool doneHandler');
+  HexGame.currentTool = HexGame.attackTool;
+  theBoard.turnState_ = Board.TurnState.ATTACKING;
+  updateHtmlField('Phase', 'PHASE: ' + theBoard.getTurnStateString());
+};
+
+AttackTool.prototype.doneHandler = function() {
+  console.log('AttackTool doneHandler');
+  HexGame.currentTool = HexGame.resolveTool;
+  theBoard.turnState_ = Board.TurnState.RESOLVING;
+  updateHtmlField('Phase', 'PHASE: ' + theBoard.getTurnStateString());
+};
+  
+ResolveTool.prototype.doneHandler = function() {
+  console.log('ResolveTool doneHandler');
+
+  theBoard.turnState_ = Board.TurnState.MOVING;
+  // switch |theSide| and |otherSide|
+  if (theSide == gSide) {
+    theSide = rSide;
+    otherSide = gSide;
+  } else {
+    theSide = gSide;
+    otherSide = rSide;
+  }
+  // switch |whoseTurn| and possibly increment |turnNumber|
+  if (whoseTurn == 'G') {
+    whoseTurn = 'R';
+  } else {
+    // we are switching back to G, increment turn number
+    turnNumber++;
+    whoseTurn = 'G';
+  }
+
+  HexGame.currentTool = HexGame.moveTool;
+  updateHtmlField('Phase', 'PHASE: ' + theBoard.getTurnStateString());
+};
+
+///
+/// The doneHandler function must look at the current state and
+/// advance to the next state.
+///
+function doneHandler() {
+  var turnState = theBoard.getTurnState();
+  var turnString = theBoard.getTurnStateString();
+  console.log('doneHandler ' + turnString);
+  // call the currentTool's doneHandler
+  HexGame.currentTool.doneHandler();
 }
 
 function doneMovesHandler() {
