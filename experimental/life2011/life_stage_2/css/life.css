@@ -61,7 +61,8 @@ embed.autosize {
 }
 
 /**
- * Center the elemnent vertically within its parent container.
+ * Center the elemnent vertically within its parent container.  The parent
+ * container needs to have a display type of "table" for this to work.
  */
 .vertical-align-center {
   margin: 0;

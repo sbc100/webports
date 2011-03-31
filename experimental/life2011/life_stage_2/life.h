@@ -38,19 +38,39 @@ class Life : public pp::Instance {
   virtual pp::Var GetInstanceObject();
 
   // Runs a tick of the simulations, updating all buffers.  Flushes the
-  // contents of |pixel_buffer_| to the 2D graphics context.  This method is
-  // exposed to the browser as "update()".
+  // contents of |pixel_buffer_| to the 2D graphics context.
   void Update();
+
+  // Clears the current simulation (resets back to all-dead, graphcis buffer to
+  // black).  Exposed to the browser as "clear()".
+  void Clear();
 
   // Plot a new blob of life centered around (|var_x|, |var_y|).  This method
   // is exposed to the browser as "addCellAtPoint()".
   void AddCellAtPoint(const pp::Var& var_x, const pp::Var& var_y);
+
+  // Run the simulation in a mode.  If the mode is changed, then the simulation
+  // is stoped and restarted in the new mode.  |simulation_mode| is expected
+  // to be a string.  Exposed to the browser as "runSimulation()".
+  void RunSimulation(const pp::Var& simulation_mode);
+
+  // Stop the simulation.  Does nothing if the simulation is stopped.
+  // Exposed to the browser as "stopSimulation()".
+  void StopSimulation();
 
   int width() const {
     return pixel_buffer_ ? pixel_buffer_->size().width() : 0;
   }
   int height() const {
     return pixel_buffer_ ? pixel_buffer_->size().height() : 0;
+  }
+
+  // Indicate whether the simulation is running or paused.
+  bool is_running() const {
+    return is_running_;
+  }
+  void set_is_running(bool flag) {
+    is_running_ = flag;
   }
 
   // Indicate whether a flush is pending.  This can only be called from the
@@ -64,16 +84,22 @@ class Life : public pp::Instance {
 
   // Cheap bit used by the simulation thread to decide when it should shut
   // down.
-  bool is_running() const {
-    return is_running_;
+  bool is_simulation_running() const {
+    return is_simulation_running_;
   }
-  void set_is_running(bool flag) {
-    is_running_ = flag;
+  void set_is_simulation_running(bool flag) {
+    is_simulation_running_ = flag;
   }
 
   friend class ScopedPixelLock;
 
  private:
+  // The possible play modes.
+  enum PlayMode {
+    kRandomSeedMode,
+    kStampMode
+  };
+
   // This class exposes the scripting interface for this NaCl module.  The
   // HasMethod method is called by the browser when executing a method call on
   // the |life| object (see, e.g. the update() function in
@@ -131,6 +157,10 @@ class Life : public pp::Instance {
   // Swap the input and output cell arrays.
   void Swap();
 
+  // Clear out the cell buffers (reset to all-dead).  Note: this assumes that
+  // the mutex locking the cell buffers has ben acquired.
+  void ResetCells();
+
   // Create and initialize the 2D context used for drawing.
   void CreateContext(const pp::Size& size);
   // Destroy the 2D drawing context.
@@ -150,7 +180,7 @@ class Life : public pp::Instance {
 
   // Thread support variables.
   pthread_t life_simulation_thread_;
-  bool is_running_;
+  bool is_simulation_running_;
   mutable pthread_mutex_t pixel_buffer_mutex_;
 
   // 2D context variables.
@@ -160,10 +190,9 @@ class Life : public pp::Instance {
   bool view_changed_size_;
   pp::Size view_size_;
 
-  // Event handling variables.
-  bool is_mouse_down_;
-
   // Simulation variables.
+  PlayMode play_mode_;
+  bool is_running_;
   RandomBitGenerator random_bits_;
   uint8_t* cell_in_;
   uint8_t* cell_out_;

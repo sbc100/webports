@@ -44,6 +44,21 @@ life.controllers.ViewController = function(nativeModule) {
   this.module_ = nativeModule;
 
   /**
+   * The play mode.  Accessed via playMode(), mutated via setPlayMode().
+   * Note that changing the play mode can cause the simulation to restart.
+   * @type {enum}
+   * @private
+   */
+  this.playMode_ = life.controllers.ViewController.PlayModes_.RANDOM_SEED;
+
+  /**
+   * Indicate whether the simulation is running.
+   * @type {bool}
+   * @private
+   */
+  this.isRunning_ = false;
+
+  /**
    * Mouse drag event object.
    * @type {life.events.Dragger}
    * @private
@@ -61,6 +76,16 @@ life.controllers.ViewController = function(nativeModule) {
 goog.inherits(life.controllers.ViewController, goog.events.EventTarget);
 
 /**
+ * Values for the play mode.  These come from the |PLAY_MODE_SELECT| element.
+ * @enum {string}
+ * @private
+ */
+life.controllers.ViewController.PlayModes_ = {
+  RANDOM_SEED: 'random_seed',
+  STAMP: 'stamp'
+};
+
+/**
  * Override of disposeInternal() to unhook all the listeners and dispose
  * of retained objects.
  * @override
@@ -76,6 +101,52 @@ life.controllers.ViewController.prototype.disposeInternal = function() {
   this.dragListener_ = null;
   this.module_ = null;
 };
+
+/**
+ * Simple wrapper that forwards the "clear" method to the NaCl module.
+ */
+life.controllers.ViewController.prototype.clear = function() {
+  this.module_.clear();
+}
+
+/**
+ * Return the current play mode.
+ * @return {enum} The current play mode.
+ */
+life.controllers.ViewController.prototype.playMode = function() {
+  return this.playMode_;
+}
+
+/**
+ * Set the play mode to one of RANDOM_SEED or STAMP.  Changing the play mode
+ * can cause the simulation to restart in the new play mode.  Do nothing if the
+ * play mode is set to the current mode.
+ * @param {string} playMode The new play mode.
+ */
+life.controllers.ViewController.prototype.setPlayMode = function(playMode) {
+  if (playMode == this.playMode_)
+    return;
+  this.playMode_ = playMode;
+  if (this.isRunning_) {
+    this.module_.runSimulation(this.playMode_);
+  }
+}
+
+/**
+ * Start the simulation.  Does nothing if it's already running.
+ */
+life.controllers.ViewController.prototype.run = function() {
+  this.isRunning_ = true;
+  this.module_.runSimulation(this.playMode_);
+}
+
+/**
+ * Stop the simulation.  Does nothing if it's already stopped.
+ */
+life.controllers.ViewController.prototype.stop = function() {
+  this.isRunning_ = false;
+  this.module_.stopSimulation();
+}
 
 /**
  * Method to get the bounding frame rectangle for the DOM container.

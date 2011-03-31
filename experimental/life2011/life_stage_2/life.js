@@ -11,6 +11,7 @@
 goog.provide('life.Application');
 
 goog.require('goog.Disposable');
+goog.require('goog.events.EventType');
 goog.require('goog.style');
 
 goog.require('life.controllers.ViewController');
@@ -42,8 +43,24 @@ life.Application.prototype.viewController_ = null;
  * @private
  */
 life.Application.DomIds_ = {
-  VIEW: 'life_view',  // The <div> containing the NaCl element.
-  MODULE: 'life_module'  // The <embed> element representing the NaCl module.
+  BIRTH_FIELD: 'birth_field',  // Text field with the birth rule string.
+  CLEAR_BUTTON: 'clear_button',  // The clear button element.
+  KEEP_ALIVE_FIELD: 'keep_alive_field',  // Keep alive rule string.
+  MODULE: 'life_module',  // The <embed> element representing the NaCl module.
+  PLAY_MODE_SELECT: 'play_mode_select',  // The <select> element for play mode.
+  PLAY_BUTTON: 'play_button',  // The play button element.
+  VIEW: 'life_view'  // The <div> containing the NaCl element.
+};
+
+/**
+ * The Run/Stop button attribute labels.  These are used to determine the state
+ * and label of the button.
+ * @enum {string}
+ * @private
+ */
+life.Application.PlayButtonAttributes_ = {
+  ALT_TEXT: 'alttext',  // Text to display in the "on" state.
+  STATE: 'state'  // The button's state.
 };
 
 /**
@@ -74,8 +91,75 @@ life.Application.prototype.moduleDidLoad =
   var contentDiv = document.getElementById(contentDivId);
   // Listen for 'unload' in order to terminate cleanly.
   goog.events.listen(window, goog.events.EventType.UNLOAD, this.terminate);
+
   // Set up the view controller, it contains the NaCl module.
   this.viewController_ = new life.controllers.ViewController(nativeModule);
+
+  // Wire up the various controls.
+  var playModeSelect = goog.dom.$(life.Application.DomIds_.PLAY_MODE_SELECT);
+  if (playModeSelect) {
+    goog.events.listen(playModeSelect, goog.events.EventType.CHANGE,
+        this.selectPlayMode, false, this);
+  }
+
+  var clearButton = goog.dom.$(life.Application.DomIds_.CLEAR_BUTTON);
+  if (clearButton) {
+    goog.events.listen(clearButton, goog.events.EventType.CLICK,
+        this.clear, false, this);
+  }
+
+  var playButton = goog.dom.$(life.Application.DomIds_.PLAY_BUTTON);
+  if (playButton) {
+    goog.events.listen(playButton, goog.events.EventType.CLICK,
+        this.togglePlayButton, false, this);
+  }
+}
+
+/**
+ * Change the play mode.
+ * @param {!goog.events.Event} changeEvent The CHANGE event that triggered this
+ *     handler.
+ */
+life.Application.prototype.selectPlayMode = function(changeEvent) {
+  changeEvent.stopPropagation();
+  this.viewController_.setPlayMode(changeEvent.target.value);
+}
+
+/**
+ * Toggle the simulation.
+ * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
+ *     handler.
+ */
+life.Application.prototype.togglePlayButton = function(clickEvent) {
+  clickEvent.stopPropagation();
+  var button = clickEvent.target;
+  var buttonText = button.innerText;
+  var altText = button.getAttribute(
+      life.Application.PlayButtonAttributes_.ALT_TEXT);
+  var state = button.getAttribute(
+      life.Application.PlayButtonAttributes_.STATE);
+  // Switch the inner and alternate labels.
+  button.innerText = altText;
+  button.setAttribute(life.Application.PlayButtonAttributes_.ALT_TEXT,
+                      buttonText);
+  if (state == 'off') {
+    button.setAttribute(
+        life.Application.PlayButtonAttributes_.STATE, 'on');
+    this.viewController_.run();
+  } else {
+    button.setAttribute(
+        life.Application.PlayButtonAttributes_.STATE, 'off');
+    this.viewController_.stop();
+  }
+}
+
+/**
+ * Clear the current simulation.
+ * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
+ */
+life.Application.prototype.clear = function(clickEvent) {
+  clickEvent.stopPropagation();
+  this.viewController_.clear();
 }
 
 /**
