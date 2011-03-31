@@ -88,6 +88,19 @@ life.controllers.ViewController.prototype.frame = function() {
 };
 
 /**
+ * Convert the coordinate system of |point| to the root window's coordinate
+ * system.
+ * @param {!goog.math.Coordinate} point The point in the coordinate system
+ *     of this view.
+ * @return {goog.math.Coordinate} The converted point.
+ */
+life.controllers.ViewController.prototype.convertPointToWindow =
+    function(point) {
+  var offset = goog.style.getFramedPageOffset(this.module_, window);
+  return goog.math.Coordinate.difference(point, offset);
+}
+
+/**
  * Handle the drag START event: add a cell at the event's coordinates.
  * @param {!goog.fx.DragEvent} dragStartEvent The START event that
  *     triggered this handler.
@@ -96,7 +109,10 @@ life.controllers.ViewController.prototype.frame = function() {
 life.controllers.ViewController.prototype.handleStartDrag_ =
     function(dragStartEvent) {
   dragStartEvent.stopPropagation();
-  this.module_.addCellAtPoint(dragStartEvent.clientX, dragStartEvent.clientY);
+  var point = this.convertPointToWindow(
+      new goog.math.Coordinate(dragStartEvent.clientX,
+                               dragStartEvent.clientY));
+  this.module_.addCellAtPoint(point.x, point.y);
 };
 
 /**
@@ -107,7 +123,9 @@ life.controllers.ViewController.prototype.handleStartDrag_ =
  */
 life.controllers.ViewController.prototype.handleDrag_ = function(dragEvent) {
   dragEvent.stopPropagation();
-  this.module_.addCellAtPoint(dragEvent.clientX, dragEvent.clientY);
+  var point = this.convertPointToWindow(
+      new goog.math.Coordinate(dragEvent.clientX, dragEvent.clientY));
+  this.module_.addCellAtPoint(point.x, point.y);
 };
 
 /**
