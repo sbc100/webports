@@ -107,7 +107,7 @@ Life::Life(PP_Instance instance) : pp::Instance(instance),
                                    graphics_2d_context_(NULL),
                                    pixel_buffer_(NULL),
                                    flush_pending_(false),
-                                   view_changed_size_(false),
+                                   view_changed_size_(true),
                                    play_mode_(kRandomSeedMode),
                                    is_running_(false),
                                    random_bits_(kInitialRandSeed),
@@ -196,8 +196,11 @@ void Life::Clear() {
   uint32_t* pixel_buffer = scoped_pixel_lock.pixels();
   ResetCells();
   const size_t size = width() * height();
-  if (pixel_buffer)
-    std::fill(pixel_buffer, pixel_buffer + size, 0);
+  if (pixel_buffer) {
+    std::fill(pixel_buffer,
+              pixel_buffer + size,
+              MakeRGBA(0, 0, 0, 0xff));
+  }
   Update();  // Flushes the buffer correctly.
 }
 
