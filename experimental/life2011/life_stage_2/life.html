@@ -4,6 +4,7 @@
   <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
   <meta HTTP-EQUIV="Expires" CONTENT="-1">
   <link href="life.css" rel="stylesheet" type="text/css">
+  <link href="toolbar.css" rel="stylesheet" type="text/css">
   <script type="text/javascript" src="dragger.js"></script>
   <script type="text/javascript" src="life.js"></script>
   <script type="text/javascript">
@@ -14,33 +15,35 @@
      * module.
      */
     function moduleDidLoad() {
-      var module =
-          document.getElementById('life');
-      life.application.moduleDidLoad(module, 'life');
+      var module = document.getElementById('life_view');
+      life.application.moduleDidLoad(module, 'life_view');
     }
   </script>
 </head>
 <body id="bodyId">
-
-<h1>Conway's Life</h1>
- <p>
-  Use the mouse to paint extra life into the simulation.
- </p>
-
-  <!-- Load the published .nexe.  This includes the 'nacl' attribute which
-  shows how to load multi-architecture modules.  Each entry in the "nexes"
-  object in the .nmf manifest file is a key-value pair: the key is the
-  runtime ('x86-32', 'x86-64', etc.); the value is a URL for the desired NaCl
-  module.  To load the debug versions of your .nexes, set the 'nacl'
-  attribute to the _dbg.nmf version of the manifest file.
+  <!--
+  Place the Life game UI components inside an auto-sizing container so that
+  they change size with the window.
   -->
   <div id="autosize_background">
+    <div id="life_top_toolbar" class="life-toolbar top-toolbar">
+      <div class="vertical-align-center">Conway's Game  of Life 2011</div>
+    </div>
+
+    <!-- Load the published .nexe.  This includes the 'nacl' attribute which
+    shows how to load multi-architecture modules.  Each entry in the "nexes"
+    object in the .nmf manifest file is a key-value pair: the key is the
+    runtime ('x86-32', 'x86-64', etc.); the value is a URL for the desired NaCl
+    module.  To load the debug versions of your .nexes, set the 'nacl'
+    attribute to the _dbg.nmf version of the manifest file.
+    -->
+    <div id="life_game_view" class="life-view"></div>
     <script type="text/javascript">
-      var element = document.getElementById('autosize_background')
+      var element = document.getElementById('life_game_view')
       var viewSize = {width: element.offsetWidth || 400,
                       height: element.offsetHeight || 400};
       element.innerHTML = '<embed name="nacl_module"' +
-                           ' id="life"' +
+                           ' id="life_view"' +
                            ' class="autosize"' +
                            ' width=' + viewSize.width +
                            ' height=' + viewSize.height +
@@ -48,7 +51,24 @@
                            ' type="application/x-nacl"' +
                            ' onload="moduleDidLoad();" />'
     </script>
+    <div id="life_bottom_toolbar" class="life-toolbar bottom-toolbar">
+      <form name="automaton_rules_form"
+            class="vertical-align-center text-align-right"
+            action=""
+            method="get">
+        Birth: <input type="text"
+                      id="birth_field"
+                      name="birth_field"
+                      value="1"
+                      size="3" />
+        <div id="separator" class="toolbar-separator"></div>
+        Keep Alive: <input type="text"
+                           id="keep_alive_field"
+                           name="keep_alive_field"
+                           value="2"
+                           size="3" />
+      </form>
+    </div>
   </div>
-<br>
 </body>
 </html>

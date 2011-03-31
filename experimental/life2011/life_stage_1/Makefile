@@ -27,6 +27,8 @@ ALL_MODULES = $(RELEASE_MODULES) $(DEBUG_MODULES)
 APPLICATION_FILES = life.html \
                     life.css \
                     life.nmf \
+                    toolbar.css \
+                    toolbar-bg.png \
                     $(RELEASE_MODULES)
 
 # The check_variables target is in nacl_build.mk.

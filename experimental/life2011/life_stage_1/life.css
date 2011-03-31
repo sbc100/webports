@@ -1,6 +1,6 @@
-/* Copyright 2011 The Native Client SDK Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can
- * be found in the LICENSE file.
+/* Copyright 2011 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
 
 /**
@@ -49,7 +49,7 @@ embed.autosize {
   width: 100%;
 }
 
-.life_view {
+.life-view {
   position: absolute;
    /* The |top| dimension has to match the #goog-toolbar height. */
   top: 32px;
@@ -60,15 +60,20 @@ embed.autosize {
   margin-bottom: 32px;
 }
 
-.life_toolbar {
-  /* Client apps may override the URL at which they serve the image. */
-  background: #fafafa url(toolbar-bg.png) repeat-x bottom left;
-  border-bottom: 1px solid #d5d5d5;
-  cursor: default;
-  font: normal 12px Arial, sans-serif;
+/**
+ * Center the elemnent vertically within its parent container.
+ */
+.vertical-align-center {
   margin: 0;
-  outline: none;
-  padding: 0px;
-  position: relative;
-  zoom: 1; /* The toolbar element must have layout on IE. */
+  padding: 0;
+  vertical-align: middle;
+  display: table-cell;
+}
+
+/**
+ * Right-align text within its parent container.
+ */
+.text-align-right {
+  padding-right: 16px;
+  text-align: right;
 }

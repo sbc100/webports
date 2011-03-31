@@ -6,7 +6,7 @@
 
 NACLPORTS_ROOT ?= ../../..
 INSTALL_ROOT ?= $$HOME/Sites/life2011
-INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_2
+INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_3
 
 CCFILES = life_module.cc life.cc
 HFILES = life.h scoped_mutex_lock.h scoped_pixel_lock.h

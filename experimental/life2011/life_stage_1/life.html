@@ -4,34 +4,7 @@
   <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
   <meta HTTP-EQUIV="Expires" CONTENT="-1">
   <link href="life.css" rel="stylesheet" type="text/css">
-  <style>
-    .top-toolbar {
-      display: table;
-      height: 32px;
-      padding-left: 16px;
-    }
-
-    .bottom-toolbar {
-      display: table;
-      bottom: 0;
-      left: 0;
-      height: 32px;
-      position: absolute;
-      width: 100%;
-    }
-
-    .vertical-align-center {
-      margin: 0;
-      padding:0;
-      vertical-align: middle;
-      display: table-cell;
-    }
-
-    .text-align-right {
-      padding-right: 16px;
-      text-align: right;
-    }
-  </style>
+  <link href="toolbar.css" rel="stylesheet" type="text/css">
 </head>
 <body id="bodyId">
   <!--
@@ -50,7 +23,7 @@
     module.  To load the debug versions of your .nexes, set the 'nacl'
     attribute to the _dbg.nmf version of the manifest file.
     -->
-    <div id="life_game_view" class="life_view"></div>
+    <div id="life_game_view" class="life-view"></div>
     <script type="text/javascript">
       var element = document.getElementById('life_game_view')
       var viewSize = {width: element.offsetWidth || 400,
@@ -64,11 +37,23 @@
                            ' type="application/x-nacl" />'
     </script>
     <div id="life_bottom_toolbar" class="life-toolbar bottom-toolbar">
-      <div class="vertical-align-center text-align-right">
-        Birth: 1 Keep Alive: 2
-      </div>
+      <form name="automaton_rules_form"
+            class="vertical-align-center text-align-right"
+            action=""
+            method="get">
+        Birth: <input type="text"
+                      id="birth_field"
+                      name="birth_field"
+                      value="1"
+                      size="3" />
+        <div id="separator" class="toolbar-separator"></div>
+        Keep Alive: <input type="text"
+                           id="keep_alive_field"
+                           name="keep_alive_field"
+                           value="2"
+                           size="3" />
+      </form>
     </div>
   </div>
-<br>
 </body>
 </html>

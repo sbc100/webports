@@ -1,6 +1,6 @@
-/* Copyright 2011 The Native Client SDK Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can
- * be found in the LICENSE file.
+/* Copyright 2011 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
  */
 
 /**
@@ -49,3 +49,31 @@ embed.autosize {
   width: 100%;
 }
 
+.life-view {
+  position: absolute;
+   /* The |top| dimension has to match the #goog-toolbar height. */
+  top: 32px;
+  left: 0;
+  bottom: 0;
+  height: auto;
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+/**
+ * Center the elemnent vertically within its parent container.
+ */
+.vertical-align-center {
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+  display: table-cell;
+}
+
+/**
+ * Right-align text within its parent container.
+ */
+.text-align-right {
+  padding-right: 16px;
+  text-align: right;
+}

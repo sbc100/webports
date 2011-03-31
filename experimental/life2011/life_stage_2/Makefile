@@ -6,7 +6,7 @@
 
 NACLPORTS_ROOT ?= ../../..
 INSTALL_ROOT ?= $$HOME/Sites/life2011
-INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_3
+INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_2
 
 CCFILES = life_module.cc life.cc
 HFILES = life.h scoped_mutex_lock.h scoped_pixel_lock.h
@@ -30,6 +30,8 @@ APPLICATION_FILES = dragger.js \
                     life.css \
                     life.js \
                     life.nmf \
+                    toolbar.css \
+                    toolbar-bg.png \
                     $(RELEASE_MODULES)
 
 # The check_variables target is in nacl_build.mk.
