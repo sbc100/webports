@@ -132,8 +132,8 @@ Chess.Piece.prototype.toChar = function() {
   // convert Pawn to p, Rook to r, Knight to h (horse), Bishop to b,
   //   Queen to q, and King to k
   // Black is just uppercase of this.
-  var blackPieceArray = ['p', 'r', 'h', 'b', 'q', 'k'];
-  var whitePieceArray = ['P', 'R', 'H', 'B', 'Q', 'K'];
+  var blackPieceArray = ['p', 'r', 'n', 'b', 'q', 'k'];
+  var whitePieceArray = ['P', 'R', 'N', 'B', 'Q', 'K'];
   if (this.color_ == Chess.ColorType.BLACK) {
     return blackPieceArray[this.pieceType_];
   } else {
@@ -154,9 +154,9 @@ Chess.Piece.pieceFactory = function(character) {
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.ROOK);
     case 'R':
       return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.ROOK);
-    case 'h':
+    case 'n':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.KNIGHT);
-    case 'H':
+    case 'N':
       return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KNIGHT);
     case 'b':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.BISHOP);
@@ -242,6 +242,7 @@ Chess.BoardContents.prototype.setContents = function(stringData) {
     }
   }
   clearContext(Chess.ctxPieces, Chess.canvasPieces);
+  theBoard.drawPieces(Chess.ctxPieces);
 };
 
 Chess.BoardContents.prototype.defaultInit = function() {
@@ -676,6 +677,7 @@ Chess.doMove = function(fromNotation, toNotation) {
   theBoard.contents.update(fromCoord.getColumn(), fromCoord.getRow(), null);
   // clear the piece layer so we redraw it
   clearContext(Chess.ctxPieces, Chess.canvasPieces);
+  theBoard.drawPieces(Chess.ctxPieces);
 }
 
 Chess.moveHandler = function() {

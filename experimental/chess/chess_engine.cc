@@ -170,7 +170,7 @@ bool IsPawn(char piece) {
 ///
 ///
 bool IsKnight(char piece) {
-  return (piece == 'h' || piece == 'H');
+  return (piece == 'n' || piece == 'N');
 }
 
 ///
