@@ -25,13 +25,13 @@ RELEASE_MODULES = life_x86_32.nexe life_x86_64.nexe
 DEBUG_MODULES = life_x86_32_dbg.nexe life_x86_64_dbg.nexe
 ALL_MODULES = $(RELEASE_MODULES) $(DEBUG_MODULES)
 
-APPLICATION_FILES = dragger.js \
-                    life.html \
+APPLICATION_FILES = life.html \
                     life.css \
                     life.js \
                     life.nmf \
                     toolbar.css \
                     toolbar-bg.png \
+                    viewcontroller.js \
                     $(RELEASE_MODULES)
 
 # The check_variables target is in nacl_build.mk.
