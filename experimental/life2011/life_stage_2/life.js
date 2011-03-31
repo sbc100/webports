@@ -1,6 +1,6 @@
-// Copyright 2011 The Native Client Authors.
-// Use of this source code is governed by a BSD-style license that can
-// be found in the LICENSE file.
+// Copyright 2011 (c) The Native Client Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 /**
  * @file
@@ -8,34 +8,57 @@
  * connects it to the element named @a life_module.
  */
 
-// Requires life
-// Requires uikit.Dragger
+goog.provide('life.Application');
 
-// The life namespace
-var life = life || {};
+goog.require('goog.Disposable');
+goog.require('goog.style');
+
+goog.require('life.controllers.ViewController');
 
 /**
  * Constructor for the Application class.  Use the run() method to populate
  * the object with controllers and wire up the events.
  * @constructor
+ * @extends {goog.Disposable}
  */
 life.Application = function() {
+  goog.Disposable.call(this);
 }
+goog.inherits(life.Application, goog.Disposable);
 
 /**
- * The native module for the application.  This refers to the module loaded via
- * the <embed> tag.
- * @type {Element}
+ * The view controller for the application.  A DOM element that encapsulates
+ * the grayskull plugin; this is allocated at run time.  Connects to the
+ * element with id life.Application.DomIds_.VIEW.
+ * @type {life.ViewController}
  * @private
  */
-life.Application.prototype.module_ = null;
+life.Application.prototype.viewController_ = null;
 
 /**
- * The mouse-drag event object.
- * @type {tumbler.Dragger}
+ * The ids used for elements in the DOM.  The Life Application expects these
+ * elements to exist.
+ * @enum {string}
  * @private
  */
-life.Application.prototype.dragger_ = null;
+life.Application.DomIds_ = {
+  VIEW: 'life_view',  // The <div> containing the NaCl element.
+  MODULE: 'life_module'  // The <embed> element representing the NaCl module.
+};
+
+/**
+ * Place-holder to make the onload event handling process all work.
+ */
+var loadingLifeApp_ = {};
+
+/**
+ * Override of disposeInternal() to dispose of retained objects.
+ * @override
+ */
+life.Application.prototype.disposeInternal = function() {
+  this.terminate();
+  life.Application.superClass_.disposeInternal.call(this);
+}
 
 /**
  * Called by the module loading function once the module has been loaded. Wire
@@ -49,58 +72,66 @@ life.Application.prototype.moduleDidLoad =
     function(nativeModule, opt_contentDivId) {
   contentDivId = opt_contentDivId || life.Application.DEFAULT_DIV_ID;
   var contentDiv = document.getElementById(contentDivId);
-  this.module_ = nativeModule;
-  this.dragger_ = new uikit.Dragger(contentDiv);
-  this.dragger_.addDragListener(this);
+  // Listen for 'unload' in order to terminate cleanly.
+  goog.events.listen(window, goog.events.EventType.UNLOAD, this.terminate);
+  // Set up the view controller, it contains the NaCl module.
+  this.viewController_ = new life.controllers.ViewController(nativeModule);
 }
 
 /**
- * Add a simulation cell at a 2D point.
- * @param {!number} point_x The x-coordinate, relative to the origin of the
- *     enclosing element.
- * @param {!number} point_y The y-coordinate, relative to the origin of the
- *     enclosing element, y increases downwards.
+ * Asserts that cond is true; issues an alert and throws an Error otherwise.
+ * @param {bool} cond The condition.
+ * @param {String} message The error message issued if cond is false.
  */
-life.Application.prototype.AddCellAtPoint = function(point_x, point_y) {
-  if (this.module_)
-    this.module_.addCellAtPoint(point_x, point_y);
+life.Application.prototype.assert = function(cond, message) {
+  if (!cond) {
+    message = "Assertion failed: " + message;
+    alert(message);
+    throw new Error(message);
+  }
 }
 
 /**
- * Handle the drag START event: Drop a new life cell at the mouse location.
- * @param {!life.Application} view The view controller that called
- *     this method.
- * @param {!uikit.DragEvent} dragStartEvent The DRAG_START event that
- *     triggered this handler.
+ * The run() method starts and 'runs' the application.  An <embed> tag is
+ * injected into the <div> element |opt_viewDivName| which causes the Ginsu NaCl
+ * module to be loaded.  Once loaded, the moduleDidLoad() method is called.
+ * @param {?String} opt_viewDivName The id of a DOM element in which to
+ *     embed the Ginsu module.  If unspecified, defaults to DomIds_.VIEW.  The
+ *     DOM element must exist.
  */
-life.Application.prototype.handleStartDrag =
-    function(controller, dragStartEvent) {
-  this.AddCellAtPoint(dragStartEvent.clientX, dragStartEvent.clientY);
+life.Application.prototype.run = function(opt_viewDivName) {
+  var viewDivName = opt_viewDivName || life.Application.DomIds_.VIEW;
+  var viewDiv = goog.dom.$(viewDivName);
+  this.assert(viewDiv, "Missing DOM element '" + viewDivName + "'");
+  // This assumes that the <div> containers for Life modules each have a
+  // unique name on the page.
+  var uniqueModuleName = viewDivName + life.Application.DomIds_.MODULE;
+  // This is a bit of a hack: when the |onload| event fires, |this| is set to
+  // the DOM window object, *not* the <embed> element.  So, we keep a global
+  // pointer to |this| because there is no way to make a closure here. See
+  // http://code.google.com/p/nativeclient/issues/detail?id=693
+  loadingLifeApp_[uniqueModuleName] = this;
+  var onLoadJS = "loadingLifeApp_['"
+               + uniqueModuleName
+               + "'].moduleDidLoad(document.getElementById('"
+               + uniqueModuleName
+               + "'));"
+  var viewSize = goog.style.getSize(viewDiv);
+  viewDiv.innerHTML = '<embed  id="' + uniqueModuleName + '" ' +
+                       ' class="autosize"' +
+                       ' width=' + viewSize.width +
+                       ' height=' + viewSize.height +
+                       ' nacl="life.nmf"' +
+                       ' type="application/x-nacl"' +
+                       'onload="' + onLoadJS + '" />'
 }
 
 /**
- * Handle the drag DRAG event: Drop a new life cell at the mouse location.
- * @param {!life.Application} view The view controller that called
- *     this method.
- * @param {!uikit.DragEvent} dragEvent The DRAG event that triggered
- *     this handler.
+ * Shut down the application instance.  This unhooks all the event listeners
+ * and deletes the objects created in moduleDidLoad().
  */
-life.Application.prototype.handleDrag = function(controller, dragEvent) {
-  this.AddCellAtPoint(dragEvent.clientX, dragEvent.clientY);
+life.Application.prototype.terminate = function() {
+  goog.events.removeAll();
+  this.viewController_ = null;
 }
 
-/**
- * Handle the drag END event: This is a no-op.
- * @param {!life.Application} view The view controller that called
- *     this method.
- * @param {!uikit.DragEvent} dragEndEvent The DRAG_END event that
- *     triggered this handler.
- */
-life.Application.prototype.handleEndDrag = function(controller, dragEndEvent) {
-}
-
-/**
- * The default name for the Life module EMBED element.
- * @type {string}
- */
-life.Application.DEFAULT_DIV_ID = 'life_module';

@@ -3,21 +3,38 @@
   <title>Life Demo</title>
   <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
   <meta HTTP-EQUIV="Expires" CONTENT="-1">
-  <link href="life.css" rel="stylesheet" type="text/css">
-  <link href="toolbar.css" rel="stylesheet" type="text/css">
-  <script type="text/javascript" src="dragger.js"></script>
-  <script type="text/javascript" src="life.js"></script>
-  <script type="text/javascript">
-    life.application = new life.Application();
+  <link href="css/life.css" rel="stylesheet" type="text/css">
+  <link href="css/toolbar.css" rel="stylesheet" type="text/css">
 
-    /**
-     * The 'onload' event handler for the EMBED element that loads the NaCl
-     * module.
-     */
-    function moduleDidLoad() {
-      var module = document.getElementById('life_view');
-      life.application.moduleDidLoad(module, 'life_view');
-    }
+  <script src="closure-library/closure/goog/base.js"></script>
+  <!-- Resolves the goog.base interdependencies. -->
+  <script type="text/javascript">
+    goog.require('goog.Disposable');
+    goog.require('goog.dom');
+    goog.require('goog.events');
+    goog.require('goog.fx.Dragger');
+    goog.require('goog.structs.Map');
+    goog.require('goog.style');
+    goog.require('goog.ui.Component');
+    goog.require('goog.ui.Container');
+    goog.require('goog.ui.Control');
+    goog.require('goog.ui.KeyboardShortcutHandler');
+    goog.require('goog.ui.SelectionModel');
+    goog.require('goog.ui.Toolbar');
+    goog.require('goog.ui.ToolbarButton');
+  </script>
+
+  <!-- Loads the Life application code. This is order dependent. -->
+  <script type="text/javascript" src="events/dragger.js"></script>
+  <script type="text/javascript" src="events/event.js"></script>
+  <script type="text/javascript" src="controllers/viewcontroller.js"> </script>
+  <script type="text/javascript" src="life.js"></script>
+  <!--Resolve interdependencies in Life. -->
+  <script type="text/javascript">
+    goog.require('life.Application');
+    goog.require('life.controllers.ViewController');
+    goog.require('uikit.events.Dragger');
+    goog.require('uikit.events.Event');
   </script>
 </head>
 <body id="bodyId">
@@ -38,19 +55,6 @@
     attribute to the _dbg.nmf version of the manifest file.
     -->
     <div id="life_game_view" class="life-view"></div>
-    <script type="text/javascript">
-      var element = document.getElementById('life_game_view')
-      var viewSize = {width: element.offsetWidth || 400,
-                      height: element.offsetHeight || 400};
-      element.innerHTML = '<embed name="nacl_module"' +
-                           ' id="life_view"' +
-                           ' class="autosize"' +
-                           ' width=' + viewSize.width +
-                           ' height=' + viewSize.height +
-                           ' nacl="life.nmf"' +
-                           ' type="application/x-nacl"' +
-                           ' onload="moduleDidLoad();" />'
-    </script>
     <div id="life_bottom_toolbar" class="life-toolbar bottom-toolbar">
       <form name="automaton_rules_form"
             class="vertical-align-center text-align-right"
@@ -70,5 +74,10 @@
       </form>
     </div>
   </div>
+
+  <script type="text/javascript">
+    var application = new life.Application();
+    application.run('life_game_view');
+  </script>
 </body>
 </html>

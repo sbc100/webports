@@ -26,12 +26,14 @@ DEBUG_MODULES = life_x86_32_dbg.nexe life_x86_64_dbg.nexe
 ALL_MODULES = $(RELEASE_MODULES) $(DEBUG_MODULES)
 
 APPLICATION_FILES = life.html \
-                    life.css \
                     life.js \
                     life.nmf \
-                    toolbar.css \
-                    toolbar-bg.png \
-                    viewcontroller.js \
+                    controllers/viewcontroller.js \
+                    events/dragger.js \
+                    events/event.js \
+                    css/life.css \
+                    css/toolbar.css \
+                    img/toolbar-bg.png \
                     $(RELEASE_MODULES)
 
 # The check_variables target is in nacl_build.mk.
@@ -58,7 +60,7 @@ life_x86_64_dbg.nexe: $(OBJECTS_X86_64_DBG)
 	$(CPP) $^ $(LDFLAGS) -m64 -o $@
 
 install: $(APPLICATION_FILES) $(INSTALL_DIR)
-	install $(APPLICATION_FILES) $(INSTALL_DIR)
+	tar cf - $(APPLICATION_FILES) | (cd $(INSTALL_DIR); tar xvf - --exclude="._*")
 
 $(INSTALL_DIR):
 	mkdir -p $@
