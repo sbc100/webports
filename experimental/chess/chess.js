@@ -9,6 +9,12 @@
 
 // Create a namespace object
 var Chess = Chess || {};
+
+Chess.Alert = function(message) {
+  console.log('CHESS ALERT' + message);
+  alert(message);
+};
+
 Chess.boardSize = 8;
 
 Chess.ColorType = {
@@ -25,6 +31,72 @@ Chess.PieceType = {
   KING: 5,
   NONE: 6
 };
+
+Chess.Coordinate = function(c, r) {
+  this.column_ = c;
+  this.row_ = r;
+};
+
+Chess.Coordinate.prototype.getColumn = function() {
+  return this.column_;
+};
+
+Chess.Coordinate.prototype.getRow = function() {
+  return this.row_;
+};
+
+Chess.Notation = function(letter, number) {
+  this.letter_ = letter;
+  this.number = number;
+};
+
+Chess.notationStrToCoord = function(notationString) {
+  var letter = notationString.charAt(0);
+  var number = notationString.charAt(1);
+  var column = -1;  // so that we know we have an error if we don't change it
+  switch (letter) {
+    case 'a': case 'A':
+      column = 0;
+      break;
+    case 'b': case 'B':
+      column = 1;
+      break;
+    case 'c': case 'C':
+      column = 2;
+      break;
+    case 'd': case 'D':
+      column = 3;
+      break;
+    case 'e': case 'E':
+      column = 4;
+      break;
+    case 'f': case 'F':
+      column = 5;
+      break;
+    case 'g': case 'G':
+      column = 6;
+      break;
+    case 'h': case 'H':
+      column = 7;
+      break;
+  }
+  if (column < 0 || column > 7) {
+    console.log('Error converting notation ' + notationString +
+                ' to column');
+    return null;
+  }
+  if (number != '1' && number != '2' && number != '3' && number != '4' &&
+      number != '5' && number != '6' && number != '7' && number != '8') {
+    console.log('Invalid number for 2nd digit ' + number);
+    return null;
+  }
+  var row = 8 - parseInt(number);
+  if (row < 0 || row > 7) {
+    console.log('Error converting notation ' + notation + ' to row');
+    return null;
+  }
+  return new Chess.Coordinate(column, row);
+}
 
 //
 // Clear a context
@@ -128,6 +200,16 @@ Chess.BoardContents.prototype.getPiece = function(column, row) {
   var index = this.getIndex(column, row);
   return this.pieceArray_[index];
 };
+
+Chess.BoardContents.prototype.getPieceAtNotation = function(notation) {
+  if (notation.length != 2) {
+    console.log('Error in Chess.BoardContents.prototype.getPieceAtNotation [' +
+                notation + ']');
+    return '?';
+  }
+  var coord = Chess.notationStrToCoord(notation);
+  return this.getPiece(coord.getColumn(), coord.getRow());
+}
 
 Chess.BoardContents.prototype.toString = function() {
   var theString = '';
@@ -278,6 +360,10 @@ Chess.Board.prototype.getGridClicked = function(coord) {
   return grid;
 };
 
+///
+/// Converts a 0-based column (0 is leftmost, 7 is rightmost)
+/// to a,b,...,h
+///
 Chess.Board.prototype.convertColumnToLetter = function(coord) {
   if (coord < 0 || coord >= Chess.boardSize) {
     return '?column?';
@@ -285,6 +371,11 @@ Chess.Board.prototype.convertColumnToLetter = function(coord) {
   return Chess.Board.letterArray[coord];
 };
 
+///
+/// Converts a 0-based internal row representation to chess row.
+/// Input is 0-7 where 0 is top row, 7 is bottom row.
+/// Output is 8-1 where 8 is top row, 1 is bottom row.
+///
 Chess.Board.prototype.convertRowToChessRow = function(row) {
   if (row < 0 || row >= Chess.boardSize) {
     return '?row?';
@@ -544,6 +635,62 @@ Chess.updateTextHandler = function() {
   var boardString = theBoard.contents.toString();
   textField.value = boardString;
 };
+
+///
+/// Try to move a piece from |fromNotation| to |toNotation|.
+/// If not successful, use Chess.Alert to notify user.
+///
+Chess.doMove = function(fromNotation, toNotation) {
+  var fromCoord = Chess.notationStrToCoord(fromNotation);
+  if (fromCoord==null) {
+    Chess.Alert('Error, fromNotation [' + fromNotation + '] is not valid');
+    return;
+  }
+
+  var pieceInFrom = theBoard.contents.getPieceAtNotation(fromNotation);
+  var pieceInFromString = ' NONE ';
+  if (pieceInFrom) {
+    pieceInFromString = pieceInFrom.toString();
+  } else {
+    // this is an error, because there should be a piece in the 'from' location
+    Chess.Alert('There is no piece at ' + fromNotation);
+    return;
+  }
+
+  var toCoord = Chess.notationStrToCoord(toNotation);
+  console.log('toCoord=' + toCoord);
+  if (toCoord==null) {
+    Chess.Alert('Error, toNotation[' + toNotation + '] is not valid');
+    return;
+  }
+  var pieceInTo = theBoard.contents.getPieceAtNotation(toNotation);
+  var pieceInToString = ' NONE ';
+  if (pieceInTo) {
+    pieceInToString = pieceInTo.toString();
+  } 
+  console.log('Piece at that location is ' + pieceInFromString +
+              ' piece in the new location is ' + pieceInToString);
+
+  // actually change the board
+  theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(), pieceInFrom);
+  theBoard.contents.update(fromCoord.getColumn(), fromCoord.getRow(), null);
+  // clear the piece layer so we redraw it
+  clearContext(Chess.ctxPieces, Chess.canvasPieces);
+}
+
+Chess.moveHandler = function() {
+  var moveField = document.getElementById('userMove');
+  console.log('Move is ' + moveField.value);
+  if (moveField.value.length != 4) {
+    Chess.Alert('Invalid move notation [' + moveField.value + ']');
+    return;
+  }
+  var fromNotation = moveField.value.substr(0, 2);
+  var toNotation = moveField.value.substr(2, 2);
+  console.log('from=' + fromNotation + ' to=' + toNotation);
+  Chess.doMove(fromNotation, toNotation);
+}
+
 
 theBoard = new Chess.Board();
 if (Chess.canvasScratch != undefined) {
