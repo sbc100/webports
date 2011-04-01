@@ -640,6 +640,10 @@ Chess.updateTextHandler = function() {
 ///
 /// Try to move a piece from |fromNotation| to |toNotation|.
 /// If not successful, use Chess.Alert to notify user.
+/// |fromNotation| should be an algebraic location (e.g. 'a4')
+/// |toNotation| can be an algebraic location (e.g. 'b2') but
+/// can include an option piece if it's for pawn promotion
+/// such as 'b7Q'.
 ///
 Chess.doMove = function(fromNotation, toNotation) {
   var fromCoord = Chess.notationStrToCoord(fromNotation);
@@ -658,6 +662,12 @@ Chess.doMove = function(fromNotation, toNotation) {
     return;
   }
 
+  var promotionPiece = '';
+  var newPieceInTo = null;  // new piece in To location for promotion
+  if (toNotation.length == 3) {
+    promotionPiece = toNotation.substr(2, 1);  // grab the promotionPiece 
+    toNotation = toNotation.substr(0, 2); // shorten to the 2 characters
+  }
   var toCoord = Chess.notationStrToCoord(toNotation);
   console.log('toCoord=' + toCoord);
   if (toCoord==null) {
@@ -672,8 +682,32 @@ Chess.doMove = function(fromNotation, toNotation) {
   console.log('Piece at that location is ' + pieceInFromString +
               ' piece in the new location is ' + pieceInToString);
 
+  // check details of promotionPiece...
+  if (promotionPiece != '') {
+    newPieceInTo = Chess.Piece.pieceFactory(promotionPiece);
+    if (newPieceInTo == null) {
+      Chess.Alert('Invalid promotion piece ' + promotionPiece);
+      return;
+    }
+    var row = toCoord.getRow();
+    if (row != 7 && row != 0) {
+      Chess.Alert('Error, ' + toNotation + ' is not a valid promotion location');
+      return;
+    }
+    if (newPieceInTo.getColor() != pieceInFrom.getColor()) {
+      Chess.Alert('Piece ' + pieceInFrom.toString() +
+                  ' cannot get promoted to ' + newPieceInTo.toString() +
+                  ' which is of a different color');
+      return;
+    }
+  }
+
   // actually change the board
-  theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(), pieceInFrom);
+  if (newPieceInTo) {
+    theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(), newPieceInTo);
+  } else {
+    theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(), pieceInFrom);
+  }
   theBoard.contents.update(fromCoord.getColumn(), fromCoord.getRow(), null);
   // clear the piece layer so we redraw it
   clearContext(Chess.ctxPieces, Chess.canvasPieces);
@@ -683,16 +717,15 @@ Chess.doMove = function(fromNotation, toNotation) {
 Chess.moveHandler = function() {
   var moveField = document.getElementById('userMove');
   console.log('Move is ' + moveField.value);
-  if (moveField.value.length != 4) {
+  if (moveField.value.length < 4 || moveField.value.length > 5) {
     Chess.Alert('Invalid move notation [' + moveField.value + ']');
     return;
   }
   var fromNotation = moveField.value.substr(0, 2);
-  var toNotation = moveField.value.substr(2, 2);
+  var toNotation = moveField.value.substr(2, 3);
   console.log('from=' + fromNotation + ' to=' + toNotation);
   Chess.doMove(fromNotation, toNotation);
 }
-
 
 theBoard = new Chess.Board();
 if (Chess.canvasScratch != undefined) {
