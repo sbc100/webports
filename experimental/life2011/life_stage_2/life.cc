@@ -19,7 +19,7 @@
 #include "experimental/life2011/life_stage_2/scoped_pixel_lock.h"
 
 namespace {
-const char* const kAddCellAtPointMethodId = "addCellAtPoint";
+const char* const kAddStampAtPointMethodId = "addStampAtPoint";
 const char* const kClearMethodId = "clear";
 const char* const kRunSimulationMethodId = "runSimulation";
 const char* const kStopSimulationMethodId = "stopSimulation";
@@ -114,6 +114,9 @@ Life::Life(PP_Instance instance) : pp::Instance(instance),
                                    cell_in_(NULL),
                                    cell_out_(NULL) {
   pthread_mutex_init(&pixel_buffer_mutex_, NULL);
+  // Add the default stamp.
+  stamps_.push_back(Stamp());
+  current_stamp_index_ = 0;
 }
 
 Life::~Life() {
@@ -124,6 +127,7 @@ Life::~Life() {
   delete[] cell_in_;
   delete[] cell_out_;
   DestroyContext();
+  stamps_.clear();
   pthread_mutex_destroy(&pixel_buffer_mutex_);
 }
 
@@ -161,7 +165,7 @@ void Life::Update() {
     DestroyContext();
     CreateContext(view_size_);
     // Delete the old pixel buffer and create a new one.
-    ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
+    threading::ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
     if (!scoped_mutex.is_valid())
       return;
     delete[] cell_in_;
@@ -186,24 +190,6 @@ void Life::Update() {
   FlushPixelBuffer();
 }
 
-void Life::Plot(int x, int y) {
-  if (cell_in_ == NULL ||
-      x < 0 ||
-      x >= width() ||
-      y < 0 ||
-      y >= height()) {
-    return;
-  }
-  *(cell_in_ + x + y * width()) = 1;
-  // Note: do not acquire the pixel lock here, because Plot() is run in the UI
-  // thread.
-  uint32_t* pixel_buffer = PixelBufferNoLock();
-  if (pixel_buffer) {
-    uint32_t* pixel = pixel_buffer + x + y * width();
-    *pixel = MakeRGBA(0x00, 0xE0, 0x00, 0xff);
-  }
-}
-
 void Life::Clear() {
   ScopedPixelLock scoped_pixel_lock(this);
   uint32_t* pixel_buffer = scoped_pixel_lock.pixels();
@@ -217,25 +203,6 @@ void Life::Clear() {
   Update();  // Flushes the buffer correctly.
 }
 
-void Life::AddCellAtPoint(const pp::Var& var_x, const pp::Var& var_y) {
-  if (!var_x.is_number() || !var_y.is_number())
-    return;
-  int32_t x, y;
-  x = var_x.is_int() ? var_x.AsInt() : static_cast<int32_t>(var_x.AsDouble());
-  y = var_y.is_int() ? var_y.AsInt() : static_cast<int32_t>(var_y.AsDouble());
-  Plot(x - 1, y - 1);
-  Plot(x + 0, y - 1);
-  Plot(x + 1, y - 1);
-  Plot(x - 1, y + 0);
-  Plot(x + 0, y + 0);
-  Plot(x + 1, y + 0);
-  Plot(x - 1, y + 1);
-  Plot(x + 0, y + 1);
-  Plot(x + 1, y + 1);
-  if (!is_running())
-    Update();
-}
-
 void Life::RunSimulation(const pp::Var& simulation_mode) {
   if (!simulation_mode.is_string())
     return;
@@ -244,7 +211,7 @@ void Life::RunSimulation(const pp::Var& simulation_mode) {
   } else {
     play_mode_ = kStampMode;
   }
-  // Schedule a simulation tick to get things going
+  // Schedule a simulation tick to get things going.
   set_is_running(true);
   pp::Module::Get()->core()->CallOnMainThread(
       kSimulationTickInterval,
@@ -258,7 +225,7 @@ void Life::StopSimulation() {
 }
 
 void Life::AddRandomSeed() {
-  ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
+  threading::ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
   if (!scoped_mutex.is_valid())
     return;
   if (cell_in_ == NULL || cell_out_ == NULL)
@@ -273,6 +240,24 @@ void Life::AddRandomSeed() {
     cell_in_[i * sim_width] = random_bits_.value();
     cell_in_[i * sim_width + (sim_width - 1)] = random_bits_.value();
   }
+}
+
+void Life::AddStampAtPoint(const pp::Var& var_x, const pp::Var& var_y) {
+  if (!var_x.is_number() || !var_y.is_number() || current_stamp_index_ < 0)
+    return;
+  int32_t x, y;
+  x = var_x.is_int() ? var_x.AsInt() : static_cast<int32_t>(var_x.AsDouble());
+  y = var_y.is_int() ? var_y.AsInt() : static_cast<int32_t>(var_y.AsDouble());
+  // Note: do not acquire the pixel lock here, because stamping is done in the
+  // UI thread.
+  stamps_[current_stamp_index_].StampAtPointInBuffers(
+      pp::Point(x, y),
+      PixelBufferNoLock(),
+      cell_in_,
+      pp::Size(width(), height()));
+  // If the simulation isn't running, make sure the stamp shows up.
+  if (!is_running())
+    Update();
 }
 
 void Life::UpdateCells() {
@@ -313,7 +298,7 @@ void Life::UpdateCells() {
 }
 
 void Life::Swap() {
-  ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
+  threading::ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
   if (!scoped_mutex.is_valid()) {
     return;
   }
@@ -348,7 +333,7 @@ void Life::ResetCells() {
 }
 
 void Life::CreateContext(const pp::Size& size) {
-  ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
+  threading::ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
   if (!scoped_mutex.is_valid()) {
     return;
   }
@@ -361,7 +346,7 @@ void Life::CreateContext(const pp::Size& size) {
 }
 
 void Life::DestroyContext() {
-  ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
+  threading::ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
   if (!scoped_mutex.is_valid()) {
     return;
   }
@@ -395,7 +380,7 @@ bool Life::LifeScriptObject::HasMethod(
     return false;
   }
   std::string method_name = method.AsString();
-  return method_name == kAddCellAtPointMethodId ||
+  return method_name == kAddStampAtPointMethodId ||
          method_name == kClearMethodId ||
          method_name == kRunSimulationMethodId ||
          method_name == kStopSimulationMethodId;
@@ -411,14 +396,14 @@ pp::Var Life::LifeScriptObject::Call(
   }
   std::string method_name = method.AsString();
   if (app_instance_ != NULL) {
-    if (method_name == kAddCellAtPointMethodId) {
+    if (method_name == kAddStampAtPointMethodId) {
       // Pull off the first two params.
       if (args.size() < 2) {
         SetExceptionString(exception,
                            std::string(kInsufficientArgs) + method_name);
         return pp::Var(false);
       }
-      app_instance_->AddCellAtPoint(args[0], args[1]);
+      app_instance_->AddStampAtPoint(args[0], args[1]);
     } else if (method_name == kClearMethodId) {
       app_instance_->Clear();
     } else if (method_name == kRunSimulationMethodId) {

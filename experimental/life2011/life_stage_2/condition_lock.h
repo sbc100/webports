@@ -9,7 +9,7 @@
 
 namespace threading {
 // Class to manage a lock associated with a specific value.  The calling thread
-// can ask to acquire the lock only when the lock in in a certain condition.
+// can ask to acquire the lock only when the lock is in a certain condition.
 class ConditionLock {
  public:
   ConditionLock() : condition_value_(0) {

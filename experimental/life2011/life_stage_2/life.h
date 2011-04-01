@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "experimental/life2011/life_stage_2/condition_lock.h"
+#include "experimental/life2011/life_stage_2/stamp.h"
 
 namespace life {
 // The main object that runs Conway's Life simulation (for details, see:
@@ -54,8 +55,8 @@ class Life : public pp::Instance {
   void Clear();
 
   // Plot a new blob of life centered around (|var_x|, |var_y|).  This method
-  // is exposed to the browser as "addCellAtPoint()".
-  void AddCellAtPoint(const pp::Var& var_x, const pp::Var& var_y);
+  // is exposed to the browser as "addStampAtPoint()".
+  void AddStampAtPoint(const pp::Var& var_x, const pp::Var& var_y);
 
   // Run the simulation in a mode.  If the mode is changed, then the simulation
   // is stoped and restarted in the new mode.  |simulation_mode| is expected
@@ -154,10 +155,6 @@ class Life : public pp::Instance {
     RandomBitGenerator();  // Not implemented, do not use.
   };
 
-  // Plot a new seed cell in the simulation.  If |x| or |y| fall outside of the
-  // size of the 2D context, then do nothing.
-  void Plot(int x, int y);
-
   // Add in some random noise to the borders of the simulation, which is used
   // to determine the life of adjacent cells.  This is part of a simulation
   // tick.
@@ -208,6 +205,8 @@ class Life : public pp::Instance {
   PlayMode play_mode_;
   bool is_running_;
   RandomBitGenerator random_bits_;
+  std::vector<Stamp> stamps_;
+  int current_stamp_index_;
   uint8_t* cell_in_;
   uint8_t* cell_out_;
 };

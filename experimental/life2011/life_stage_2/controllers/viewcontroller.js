@@ -149,16 +149,6 @@ life.controllers.ViewController.prototype.stop = function() {
 }
 
 /**
- * Method to get the bounding frame rectangle for the DOM container.
- * @return {Object} The bounding frame expressed in the coordinate space
- *     of this view.
- */
-life.controllers.ViewController.prototype.frame = function() {
-  var containerSize = goog.style.getSize(this.module_);
-  return {x: 0, y: 0, width: containerSize.width, height: containerSize.height};
-};
-
-/**
  * Convert the coordinate system of |point| to the root window's coordinate
  * system.
  * @param {!goog.math.Coordinate} point The point in the coordinate system
@@ -183,7 +173,7 @@ life.controllers.ViewController.prototype.handleStartDrag_ =
   var point = this.convertPointToWindow(
       new goog.math.Coordinate(dragStartEvent.clientX,
                                dragStartEvent.clientY));
-  this.module_.addCellAtPoint(point.x, point.y);
+  this.module_.addStampAtPoint(point.x, point.y);
 };
 
 /**
@@ -196,7 +186,7 @@ life.controllers.ViewController.prototype.handleDrag_ = function(dragEvent) {
   dragEvent.stopPropagation();
   var point = this.convertPointToWindow(
       new goog.math.Coordinate(dragEvent.clientX, dragEvent.clientY));
-  this.module_.addCellAtPoint(point.x, point.y);
+  this.module_.addStampAtPoint(point.x, point.y);
 };
 
 /**

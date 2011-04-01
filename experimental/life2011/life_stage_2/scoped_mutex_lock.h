@@ -9,6 +9,7 @@
 
 #define PTHREAD_MUTEX_SUCCESS 0
 
+namespace threading {
 // A small helper RAII class that implements a scoped pthread_mutex lock.
 class ScopedMutexLock {
  public:
@@ -27,6 +28,7 @@ class ScopedMutexLock {
  private:
   pthread_mutex_t* mutex_;  // Weak reference.
 };
+}  // namespace threading
 
 #endif  // SCOPED_MUTEX_LOCK_H_
 

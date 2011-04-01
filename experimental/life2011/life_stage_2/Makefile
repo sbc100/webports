@@ -8,8 +8,12 @@ NACLPORTS_ROOT ?= ../../..
 INSTALL_ROOT ?= $$HOME/Sites/life2011
 INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_2
 
-CCFILES = life_module.cc life.cc
-HFILES = life.h scoped_mutex_lock.h scoped_pixel_lock.h
+CCFILES = life_module.cc life.cc stamp.cc
+HFILES = condition_lock.h \
+         life.h \
+         scoped_mutex_lock.h \
+         scoped_pixel_lock.h \
+         stamp.h
 
 CFLAGS = -Wall -Wno-long-long -pthread -Werror
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
