@@ -103,7 +103,7 @@ void FlushCallback(void* data, int32_t result) {
 namespace life {
 Life::Life(PP_Instance instance) : pp::Instance(instance),
                                    life_simulation_thread_(NULL),
-                                   is_simulation_running_(false),
+                                   sim_state_condition_(kStopped),
                                    graphics_2d_context_(NULL),
                                    pixel_buffer_(NULL),
                                    flush_pending_(false),

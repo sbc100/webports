@@ -17,6 +17,8 @@
 #include <map>
 #include <vector>
 
+#include "experimental/life2011/life_stage_2/condition_lock.h"
+
 namespace life {
 // The main object that runs Conway's Life simulation (for details, see:
 // http://en.wikipedia.org/wiki/Conway's_Game_of_Life).  The Update() method
@@ -91,18 +93,25 @@ class Life : public pp::Instance {
     flush_pending_ = flag;
   }
 
-  // Cheap bit used by the simulation thread to decide when it should shut
-  // down.
+  // Set the condition lock to indicate whether the simulation thread is
+  // running.
   bool is_simulation_running() const {
-    return is_simulation_running_;
+    return sim_state_condition_.condition_value() == kRunning;
   }
   void set_is_simulation_running(bool flag) {
-    is_simulation_running_ = flag;
+    sim_state_condition_.Lock();
+    sim_state_condition_.UnlockWithCondition(flag ? kRunning : kStopped);
   }
 
   friend class ScopedPixelLock;
 
  private:
+  // The states for the |sim_state_condition_| condition lock.
+  enum SimulationState {
+    kStopped,
+    kRunning
+  };
+
   // This class exposes the scripting interface for this NaCl module.  The
   // HasMethod method is called by the browser when executing a method call on
   // the |life| object (see, e.g. the update() function in
@@ -185,7 +194,7 @@ class Life : public pp::Instance {
 
   // Thread support variables.
   pthread_t life_simulation_thread_;
-  bool is_simulation_running_;
+  threading::ConditionLock sim_state_condition_;
   mutable pthread_mutex_t pixel_buffer_mutex_;
 
   // 2D context variables.
