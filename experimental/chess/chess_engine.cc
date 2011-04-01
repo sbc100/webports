@@ -27,7 +27,7 @@ void SetExceptionString(pp::Var* exception, const std::string& except_string) {
 }
 }  // namespace
 
-namespace hello_world {
+namespace chess_engine {
 
 /// method name for GetChoices, as seen by JavaScript code.
 const char* const kGetChoices = "GetChoices";
@@ -357,7 +357,7 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
 }
 
 
-class HelloWorldScriptableObject : public pp::deprecated::ScriptableObject {
+class ChessEngineScriptableObject : public pp::deprecated::ScriptableObject {
  public:
   /// Determines whether a given method is implemented in this object.
   /// @param[in] method A JavaScript string containing the method name to check
@@ -378,7 +378,7 @@ class HelloWorldScriptableObject : public pp::deprecated::ScriptableObject {
 };
 
 
-bool HelloWorldScriptableObject::HasMethod(const pp::Var& method,
+bool ChessEngineScriptableObject::HasMethod(const pp::Var& method,
                                            pp::Var* exception) {
   if (!method.is_string()) {
     SetExceptionString(exception, kExceptionMethodNotAString);
@@ -388,7 +388,7 @@ bool HelloWorldScriptableObject::HasMethod(const pp::Var& method,
   return method_name == kGetChoices;
 }
 
-pp::Var HelloWorldScriptableObject::Call(const pp::Var& method,
+pp::Var ChessEngineScriptableObject::Call(const pp::Var& method,
                                          const std::vector<pp::Var>& args,
                                          pp::Var* exception) {
   if (!method.is_string()) {
@@ -406,28 +406,20 @@ pp::Var HelloWorldScriptableObject::Call(const pp::Var& method,
   return pp::Var();
 }
 
-/// The Instance class.  One of these exists for each instance of your NaCl
-/// module on the web page.  The browser will ask the Module object to create
-/// a new Instance for each occurrence of the <embed> tag that has these
-/// attributes:
-/// <pre>
-///     type="application/x-nacl"
-///     nacl="hello_world.nmf"
-/// </pre>
 /// The Instance can return a ScriptableObject representing itself.  When the
 /// browser encounters JavaScript that wants to access the Instance, it calls
 /// the GetInstanceObject() method.  All the scripting work is done through
 /// the returned ScriptableObject.
-class HelloWorldInstance : public pp::Instance {
+class ChessEngineInstance : public pp::Instance {
  public:
-  explicit HelloWorldInstance(PP_Instance instance) : pp::Instance(instance) {}
-  virtual ~HelloWorldInstance() {}
+  explicit ChessEngineInstance(PP_Instance instance) : pp::Instance(instance) {}
+  virtual ~ChessEngineInstance() {}
 
   /// @return a new pp::deprecated::ScriptableObject as a JavaScript @a Var
-  /// @note The pp::Var takes over ownership of the HelloWorldScriptableObject
+  /// @note The pp::Var takes over ownership of the ChessEngineScriptableObject
   ///       and is responsible for deallocating memory.
   virtual pp::Var GetInstanceObject() {
-    HelloWorldScriptableObject* hw_object = new HelloWorldScriptableObject();
+    ChessEngineScriptableObject* hw_object = new ChessEngineScriptableObject();
     return pp::Var(this, hw_object);
   }
 };
@@ -436,20 +428,20 @@ class HelloWorldInstance : public pp::Instance {
 /// an instance of you NaCl module on the web page.  The browser creates a new
 /// instance for each <embed> tag with
 /// <code>type="application/x-ppapi-nacl-srpc"</code>.
-class HelloWorldModule : public pp::Module {
+class ChessEngineModule : public pp::Module {
  public:
-  HelloWorldModule() : pp::Module() {}
-  virtual ~HelloWorldModule() {}
+  ChessEngineModule() : pp::Module() {}
+  virtual ~ChessEngineModule() {}
 
-  /// Create and return a HelloWorldInstance object.
+  /// Create and return a ChessEngineInstance object.
   /// @param[in] instance a handle to a plug-in instance.
-  /// @return a newly created HelloWorldInstance.
+  /// @return a newly created ChessEngineInstance.
   /// @note The browser is responsible for calling @a delete when done.
   virtual pp::Instance* CreateInstance(PP_Instance instance) {
-    return new HelloWorldInstance(instance);
+    return new ChessEngineInstance(instance);
   }
 };
-}  // namespace hello_world
+}  // namespace chess_engine
 
 
 namespace pp {
@@ -458,10 +450,10 @@ namespace pp {
 /// CreateInstance() method on the object you return to make instances.  There
 /// is one instance per <embed> tag on the page.  This is the main binding
 /// point for your NaCl module with the browser.
-/// @return new HelloWorldModule.
+/// @return new ChessEngineModule.
 /// @note The browser is responsible for deleting returned @a Module.
 Module* CreateModule() {
-  return new hello_world::HelloWorldModule();
+  return new chess_engine::ChessEngineModule();
 }
 }  // namespace pp
 
