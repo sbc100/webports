@@ -282,8 +282,8 @@ pp::Var Talk(const std::vector<pp::Var>& args) {
   static int answer_index = 0;
   const int num_answers = 10;
   const char* answer_array[num_answers] = {
-    "d7d5", "e7e5", "b8b6", "g8g6", "f8e7",
-    "h7h5", "b7b5", "c7c5", "f7f5", "g7g5"
+    "move d7d5", "move:e7e5", "move: b8b6", "g8g6", "f8e7",
+    "h7h5", "b7b5", "f7f5", "f5f4", "f4f1q"
   };
 
   // There should be exactly one arg, which should be an object

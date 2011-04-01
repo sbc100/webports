@@ -631,6 +631,10 @@ Chess.mouseDownHandler = function(e) {
     if (!valid_move) {
       Chess.selectedPiece = null;  // unselect the piece & we are done
       return;
+    } else if (Chess.selectedCoord.getColumn() == column &&
+               Chess.selectedCoord.getRow() == row) {
+      // then we clicked on the selected piece 
+      Chess.selectedPiece = null;  // unselect the piece & we are done
     } else {
       //doMove
       var toNotation = theBoard.convertColumnToLetter(column) + theBoard.convertRowToChessRow(row);
@@ -797,6 +801,33 @@ Chess.moveHandler = function() {
 
 theBoard = new Chess.Board();
 
+// 
+// if answer starts with 'move:' 'move ' or 'move' remove that
+//
+Chess.filterAnswer = function(str) {
+  var index = 0;
+  var newString = str;
+  var prefixList = ['move:', 'Move:', 'move', 'Move'];
+  var foundPrefix = false;
+
+  // Remove a word from prefixList from the beginning of |str| 
+  while ( index < prefixList.length && !foundPrefix) {
+    var prefix = prefixList[index];
+    var prefix_location = str.indexOf(prefix);
+    if (prefix_location != -1) {
+      foundPrefix = true;
+      newString = str.substr(prefix_location + prefix.length);  // start after |prefix|
+    }
+    ++index;
+  }
+  // trim any leading/trailing whitespace
+  newString = newString.replace(/^\s+/, '');
+  newString = newString.replace(/\s+$/, '');
+
+  console.log('FILTER [' + str + '] => [' + newString + ']');
+  return newString;
+}
+
 Chess.mainLoop = function() {
   theBoard.drawPieces(Chess.ctxPieces);
   var state = Chess.getState();
@@ -816,6 +847,8 @@ Chess.mainLoop = function() {
     var answer = naclModule.talk('');
     console.log('GOT ' + answer);
     if (answer != '') {
+      // if answer starts with 'move:' 'move ' or 'move' remove that
+      answer = Chess.filterAnswer(answer);
       // do the move
       var fromNotation = answer.substr(0, 2);
       var toNotation = answer.substr(2);
