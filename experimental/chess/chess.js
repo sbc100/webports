@@ -15,14 +15,20 @@ Chess.Alert = function(message) {
   alert(message);
 };
 
-///
-/// Variable and functions for state/GUI elements
-/// Valid states are 'PlayerTurn', 'PlayerDone', 'AiTurn', 'WaitingOnAi'
 /// 
+/// Variables for currently selected piece/coordinate, and lastMove
 ///
 Chess.selectedPiece = null;
 Chess.selectedCoord = null;
 Chess.lastMove = '';  //string containing the algebraic last move (e.g. 'b2b4')
+
+/// If we need to undo a move, we need to know the from/to coords and original
+/// pieces that were there.
+Chess.boardString = '';
+///
+/// Variable and functions for state/GUI elements
+/// Valid states are 'PlayerTurn', 'PlayerDone', 'AiTurn', 'WaitingOnAi'
+///
 Chess.state = 'PlayerTurn';
 Chess.getState = function() {
   return Chess.state;
@@ -39,7 +45,9 @@ Chess.nextState = function() {
   }
   return Chess.state;
 }
-
+Chess.setState = function(s) {
+  Chess.state = s;
+}
 
 
 Chess.boardSize = 8;
@@ -627,7 +635,7 @@ Chess.mouseDownHandler = function(e) {
   }
 
   if (Chess.selectedPiece) {
-    var valid_move = (x != -1) && (y != -1);
+    var valid_move = (column != -1) && (row != -1);
     if (!valid_move) {
       Chess.selectedPiece = null;  // unselect the piece & we are done
       return;
@@ -636,20 +644,58 @@ Chess.mouseDownHandler = function(e) {
       // then we clicked on the selected piece 
       Chess.selectedPiece = null;  // unselect the piece & we are done
     } else {
-      //doMove
+      // save the old state in case we need to Undo
+      Chess.boardString = theBoard.contents.toString();
+
+      // do the move
       var toNotation = theBoard.convertColumnToLetter(column) + theBoard.convertRowToChessRow(row);
       var fromNotation = theBoard.convertColumnToLetter(Chess.selectedCoord.getColumn()) +
                          theBoard.convertRowToChessRow(Chess.selectedCoord.getRow());
+
+      var isCastleMove = false;
+      var rookCastleOldCoord = null;
+      var rookCastleNewCoord = null;
+      if ((Chess.selectedPiece.getPieceType() == Chess.PieceType.KING) &&
+          (Math.abs(column - Chess.selectedCoord.getColumn()) == 2)) {
+        isCastleMove = true;
+        if (column < Chess.selectedCoord.getColumn()) {
+          // the king is castling to the left
+          rookCastleOldCoord = new Chess.Coordinate(0, row);
+          rookCastleNewCoord = new Chess.Coordinate(column + 1, row);
+        } else {
+          // the king is castling to the right
+          rookCastleOldCoord = new Chess.Coordinate(7, row);
+          rookCastleNewCoord = new Chess.Coordinate(column - 1, row);
+        }
+      }
+
       console.log('FROM:' + fromNotation + ' TO:' + toNotation);
       // FIXME -- add to toNotation on pawn promotion...
       var result = Chess.doMove(fromNotation, toNotation);
       if (result) {
+
+        // if this was a castle move, move the rook too!
+        if (isCastleMove) {
+          var theRook = theBoard.contents.getPiece(
+              rookCastleOldCoord.getColumn(),
+              rookCastleOldCoord.getRow());
+          theBoard.contents.update(rookCastleNewCoord.getColumn(),
+                                   rookCastleNewCoord.getRow(), theRook);
+          theBoard.contents.update(rookCastleOldCoord.getColumn(),
+                                   rookCastleOldCoord.getRow(), null);
+          console.log('DOING CASTLE theRook = ' + theRook.toString() + ' new:' + rookCastleNewCoord.toString() + ' old:' + rookCastleOldCoord.toString());
+        }
+
         // Clear last selected piece/coord; advance state;
         // Save 'lastMove' so we can send it to AI
         Chess.lastMove = fromNotation + toNotation;
         Chess.state = Chess.nextState();
         Chess.selectedPiece = null;
         Chess.selectedCoord = null;
+
+        // FIXME -- valid move -- redraw pieces
+        clearContext(Chess.ctxPieces, Chess.canvasPieces);
+        theBoard.drawPieces(Chess.ctxPieces);
       }
       return;
     }
@@ -828,6 +874,40 @@ Chess.filterAnswer = function(str) {
   return newString;
 }
 
+Chess.handleReply = function(answer) {
+  // if answer contains 'move' then handle the board update for AI move
+  if (answer.indexOf('Illegal move') != -1) {
+    // take back person's move
+    Chess.Alert('Your last move was NOT legal: ' + answer);
+
+    // restore the old move...
+    console.log('oldFromPiece: ' + Chess.oldFromPiece + '  oldToPiece: ' + Chess.oldToPiece);
+    theBoard.contents.setContents(Chess.boardString);
+
+    // clear the piece layer so we redraw it
+    clearContext(Chess.ctxPieces, Chess.canvasPieces);
+    theBoard.drawPieces(Chess.ctxPieces);
+
+    // set state back to PlayerTurn...
+    Chess.setState('PlayerTurn'); 
+
+  } else if (answer.indexOf('move') != -1) {
+    answer = Chess.filterAnswer(answer);
+    // do the move
+    var fromNotation = answer.substr(0, 2);
+    var toNotation = answer.substr(2);
+    var result = Chess.doMove(fromNotation, toNotation);
+    if (!result) {
+      Chess.Alert('Error doing moving from [' + fromNotation + '] to [' +
+                  toNotation + '] based on [' + answer + ']');
+    }
+    theBoard.drawPieces(Chess.ctxPieces);
+    Chess.nextState();
+  } else if (answer.indexOf('win') != -1) {
+    Chess.Alert('Game Over: ' + answer);
+  }
+}
+
 Chess.mainLoop = function() {
   theBoard.drawPieces(Chess.ctxPieces);
   var state = Chess.getState();
@@ -843,37 +923,14 @@ Chess.mainLoop = function() {
     // now go to the waiting state
     Chess.nextState();
     if (answer != '') {
-      // FIXME -- this is a COPY block starting at line 865
-      // if answer starts with 'move:' 'move ' or 'move' remove that
-      answer = Chess.filterAnswer(answer);
-      // do the move
-      var fromNotation = answer.substr(0, 2);
-      var toNotation = answer.substr(2);
-      var result = Chess.doMove(fromNotation, toNotation);
-      if (!result) {
-        Chess.Alert('Error doing moving from [' + fromNotation + '] to [' +
-                    toNotation + '] based on [' + answer + ']');
-      }
-      theBoard.drawPieces(Chess.ctxPieces);
-      Chess.nextState();
+      Chess.handleReply(answer);
     }
   } else if (state == 'WaitingOnAi') {
     console.log('Waiting...');
     var answer = naclModule.talk('');
     console.log('GOT ' + answer);
     if (answer != '') {
-      // if answer starts with 'move:' 'move ' or 'move' remove that
-      answer = Chess.filterAnswer(answer);
-      // do the move
-      var fromNotation = answer.substr(0, 2);
-      var toNotation = answer.substr(2);
-      var result = Chess.doMove(fromNotation, toNotation);
-      if (!result) {
-        Chess.Alert('Error doing moving from [' + fromNotation + '] to [' +
-                    toNotation + '] based on [' + answer + ']');
-      }
-      theBoard.drawPieces(Chess.ctxPieces);
-      Chess.nextState();
+      Chess.handleReply(answer);
     }
   }
   console.log('STATE = ' + state);
