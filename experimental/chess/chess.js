@@ -17,10 +17,12 @@ Chess.Alert = function(message) {
 
 ///
 /// Variable and functions for state/GUI elements
-/// Valid states are 'PlayerTurn', 'PlayerDone', 'AiTurn', 'AiDone'
+/// Valid states are 'PlayerTurn', 'PlayerDone', 'AiTurn', 'WaitingOnAi'
 /// 
 ///
 Chess.selectedPiece = null;
+Chess.selectedCoord = null;
+Chess.lastMove = '';  //string containing the algebraic last move (e.g. 'b2b4')
 Chess.state = 'PlayerTurn';
 Chess.getState = function() {
   return Chess.state;
@@ -31,8 +33,8 @@ Chess.nextState = function() {
   } else if (Chess.state == 'PlayerDone') {
     Chess.state = 'AiTurn';
   } else if (Chess.state == 'AiTurn') {
-    Chess.state = 'AiDone';
-  } else if (Chess.state == 'AiDone') {
+    Chess.state = 'WaitingOnAi';
+  } else if (Chess.state == 'WaitingOnAi') {
     Chess.state = 'PlayerTurn';
   }
   return Chess.state;
@@ -606,23 +608,60 @@ Chess.Board.prototype.drawPieces = function(ctx) {
 
 var theBoard = null; // FIXME -- global (un-namespaced) variable
 
+///
+///
+///
 Chess.mouseDownHandler = function(e) {
   var x = e.offsetX;
   var y = e.offsetY;
   var column = theBoard.getGridClicked(x);
   var row = theBoard.getGridClicked(y);
-  var thePiece = theBoard.contents.getPiece(column, row);
   var message = 'You clicked on column ' + column + ' row ' + row +
                 ' chess notation: ' + theBoard.convertColumnToLetter(column) +
                 theBoard.convertRowToChessRow(row) + '\n';
+
+  // make sure we are in a state where player can select
+  if (Chess.state != 'PlayerTurn') {
+    console.log('State ' + Chess.state + ' does NOT allow mouse selections!');
+    return;
+  }
+
+  if (Chess.selectedPiece) {
+    var valid_move = (x != -1) && (y != -1);
+    if (!valid_move) {
+      Chess.selectedPiece = null;  // unselect the piece & we are done
+      return;
+    } else {
+      //doMove
+      var toNotation = theBoard.convertColumnToLetter(column) + theBoard.convertRowToChessRow(row);
+      var fromNotation = theBoard.convertColumnToLetter(Chess.selectedCoord.getColumn()) +
+                         theBoard.convertRowToChessRow(Chess.selectedCoord.getRow());
+      console.log('FROM:' + fromNotation + ' TO:' + toNotation);
+      // FIXME -- add to toNotation on pawn promotion...
+      var result = Chess.doMove(fromNotation, toNotation);
+      if (result) {
+        // Clear last selected piece/coord; advance state;
+        // Save 'lastMove' so we can send it to AI
+        Chess.lastMove = fromNotation + toNotation;
+        Chess.state = Chess.nextState();
+        Chess.selectedPiece = null;
+        Chess.selectedCoord = null;
+      }
+      return;
+    }
+  }
+
+  var thePiece = theBoard.contents.getPiece(column, row);
   if (thePiece) {
     Chess.selectedPiece = thePiece;
+    Chess.selectedCoord = new Chess.Coordinate(column, row);
     message += 'That space contains ' + thePiece.toString() + ' \n';
     var boardString = theBoard.contents.toString();
     boardString += column + ':' + row;
     message += boardString;
   } else {
     Chess.selectedPiece = null;
+    Chess.selectedCoord = null;
   }
   if (x != -1 && y != -1) {
     console.log(message);
@@ -677,7 +716,7 @@ Chess.doMove = function(fromNotation, toNotation) {
   var fromCoord = Chess.notationStrToCoord(fromNotation);
   if (fromCoord==null) {
     Chess.Alert('Error, fromNotation [' + fromNotation + '] is not valid');
-    return;
+    return false;
   }
 
   var pieceInFrom = theBoard.contents.getPieceAtNotation(fromNotation);
@@ -687,7 +726,7 @@ Chess.doMove = function(fromNotation, toNotation) {
   } else {
     // this is an error, because there should be a piece in the 'from' location
     Chess.Alert('There is no piece at ' + fromNotation);
-    return;
+    return false;
   }
 
   var promotionPiece = '';
@@ -700,7 +739,7 @@ Chess.doMove = function(fromNotation, toNotation) {
   console.log('toCoord=' + toCoord);
   if (toCoord==null) {
     Chess.Alert('Error, toNotation[' + toNotation + '] is not valid');
-    return;
+    return false;
   }
   var pieceInTo = theBoard.contents.getPieceAtNotation(toNotation);
   var pieceInToString = ' NONE ';
@@ -715,18 +754,18 @@ Chess.doMove = function(fromNotation, toNotation) {
     newPieceInTo = Chess.Piece.pieceFactory(promotionPiece);
     if (newPieceInTo == null) {
       Chess.Alert('Invalid promotion piece ' + promotionPiece);
-      return;
+      return false;
     }
     var row = toCoord.getRow();
     if (row != 7 && row != 0) {
       Chess.Alert('Error, ' + toNotation + ' is not a valid promotion location');
-      return;
+      return false;
     }
     if (newPieceInTo.getColor() != pieceInFrom.getColor()) {
       Chess.Alert('Piece ' + pieceInFrom.toString() +
                   ' cannot get promoted to ' + newPieceInTo.toString() +
                   ' which is of a different color');
-      return;
+      return false;
     }
   }
 
@@ -740,6 +779,7 @@ Chess.doMove = function(fromNotation, toNotation) {
   // clear the piece layer so we redraw it
   clearContext(Chess.ctxPieces, Chess.canvasPieces);
   theBoard.drawPieces(Chess.ctxPieces);
+  return true;
 }
 
 Chess.moveHandler = function() {
@@ -752,7 +792,7 @@ Chess.moveHandler = function() {
   var fromNotation = moveField.value.substr(0, 2);
   var toNotation = moveField.value.substr(2, 3);
   console.log('from=' + fromNotation + ' to=' + toNotation);
-  Chess.doMove(fromNotation, toNotation);
+  var result = Chess.doMove(fromNotation, toNotation);
 }
 
 theBoard = new Chess.Board();
@@ -760,6 +800,35 @@ theBoard = new Chess.Board();
 Chess.mainLoop = function() {
   theBoard.drawPieces(Chess.ctxPieces);
   var state = Chess.getState();
+  if (state == 'PlayerDone') {
+    // do we need to do something...or just go to next state?
+    // for now, advance to next state and return...mainLoop is done
+    Chess.nextState();
+    return;
+  } else if (state == 'AiTurn') {
+    // send |Chess.lastMove| to the AI
+    var answer = naclModule.talk(Chess.lastMove);
+    console.log('Sent ' + Chess.lastMove + ' got ' + answer);
+    // now go to the waiting state
+    Chess.nextState();
+  } else if (state == 'WaitingOnAi') {
+    console.log('Waiting...');
+    var answer = naclModule.talk('');
+    console.log('GOT ' + answer);
+    if (answer != '') {
+      // do the move
+      var fromNotation = answer.substr(0, 2);
+      var toNotation = answer.substr(2);
+      var result = Chess.doMove(fromNotation, toNotation);
+      if (!result) {
+        Chess.Alert('Error doing moving from [' + fromNotation + '] to [' +
+                    toNotation + '] based on [' + answer + ']');
+      }
+      theBoard.drawPieces(Chess.ctxPieces);
+      Chess.nextState();
+    }
+  }
+  console.log('STATE = ' + state);
   var stateField = document.getElementById('State');
   stateField.innerHTML = state;
   var selectedPieceField = document.getElementById('SelectedPiece');
@@ -768,7 +837,6 @@ Chess.mainLoop = function() {
   } else {
     selectedPieceField.innerHTML = '';
   }
-  console.log('STATE = ' + state + ' stateField:' + stateField);
 }
 
 if (Chess.canvasScratch != undefined) {

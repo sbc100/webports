@@ -306,6 +306,7 @@ pp::Var Talk(const std::vector<pp::Var>& args) {
       answer = "";
     }
   }
+  printf(" Talk returning %s\n", answer.c_str());
   return pp::Var(answer);
 }
 
