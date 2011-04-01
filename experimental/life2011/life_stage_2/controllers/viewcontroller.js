@@ -118,6 +118,18 @@ life.controllers.ViewController.prototype.playMode = function() {
 }
 
 /**
+ * Set the automaton rules.  The rules are expressed as an object that maps
+ * birth and keep-alive rules to neighbour counts.
+ * @param {Object.<Array>} automatonRules The new rule string.
+ */
+life.controllers.ViewController.prototype.setAutomatonRules =
+    function(automatonRules) {
+  var ruleString = [automatonRules.keepAliveRule.join(''),
+                    automatonRules.birthRule.join('')].join('/');
+  this.module_.setAutomatonRules(ruleString);
+}
+
+/**
  * Set the play mode to one of RANDOM_SEED or STAMP.  Changing the play mode
  * can cause the simulation to restart in the new play mode.  Do nothing if the
  * play mode is set to the current mode.

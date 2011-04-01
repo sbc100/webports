@@ -11,6 +11,7 @@
 goog.provide('life.Application');
 
 goog.require('goog.Disposable');
+goog.require('goog.array');
 goog.require('goog.events.EventType');
 goog.require('goog.style');
 
@@ -35,6 +36,20 @@ goog.inherits(life.Application, goog.Disposable);
  * @private
  */
 life.Application.prototype.viewController_ = null;
+
+/**
+ * The automaton rule string.  It is expressed as SSS/BB, where S is the
+ * neighbour count that keeps a cell alive, and B is the count that causes a
+ * cell to become alive.  See the .LIF 1.05 section in
+ * http://psoup.math.wisc.edu/mcell/ca_files_formats.html for more info.
+ * @default 23/3 the "Normal" Conway rules.
+ * @type {Object.<Array>}
+ * @private
+ */
+life.Application.prototype.automatonRules_ = {
+  birthRule: [3],
+  keepAliveRule: [2, 3]
+};
 
 /**
  * The ids used for elements in the DOM.  The Life Application expects these
@@ -94,6 +109,7 @@ life.Application.prototype.moduleDidLoad =
 
   // Set up the view controller, it contains the NaCl module.
   this.viewController_ = new life.controllers.ViewController(nativeModule);
+  this.viewController_.setAutomatonRules(this.automatonRules_);
 
   // Wire up the various controls.
   var playModeSelect = goog.dom.$(life.Application.DomIds_.PLAY_MODE_SELECT);
@@ -112,6 +128,18 @@ life.Application.prototype.moduleDidLoad =
   if (playButton) {
     goog.events.listen(playButton, goog.events.EventType.CLICK,
         this.togglePlayButton, false, this);
+  }
+
+  var birthField = goog.dom.$(life.Application.DomIds_.BIRTH_FIELD);
+  if (birthField) {
+    goog.events.listen(birthField, goog.events.EventType.CHANGE,
+        this.updateBirthRule, false, this);
+  }
+
+  var keepAliveField = goog.dom.$(life.Application.DomIds_.KEEP_ALIVE_FIELD);
+  if (keepAliveField) {
+    goog.events.listen(keepAliveField, goog.events.EventType.CHANGE,
+        this.updateKeepAliveRule, false, this);
   }
 }
 
@@ -160,6 +188,71 @@ life.Application.prototype.togglePlayButton = function(clickEvent) {
 life.Application.prototype.clear = function(clickEvent) {
   clickEvent.stopPropagation();
   this.viewController_.clear();
+}
+
+/**
+ * Read the text input and change it from a comma-separated list into a string
+ * of the form BB, where B is a digit in [0..9] that represents the neighbour
+ * count that causes a cell to come to life.
+ * @param {!goog.events.Event} changeEvent The CHANGE event that triggered this
+ *     handler.
+ */
+life.Application.prototype.updateBirthRule = function(changeEvent) {
+  changeEvent.stopPropagation();
+  var birthRule = this.parseAutomatonRule_(changeEvent.target.value);
+  // Put the sanitized version of the rule string back into the text field.
+  changeEvent.target.value = birthRule.join(',');
+  // Make the new rule string and tell the NaCl module.
+  this.automatonRules_.birthRule = birthRule;
+  this.viewController_.setAutomatonRules(this.automatonRules_);
+}
+
+/**
+ * Read the text input and change it from a comma-separated list into a string
+ * of the form SSS, where S is a digit in [0..9] that represents the neighbour
+ * count that allows a cell to stay alive.
+ * @param {!goog.events.Event} changeEvent The CHANGE event that triggered this
+ *     handler.
+ */
+life.Application.prototype.updateKeepAliveRule = function(changeEvent) {
+  changeEvent.stopPropagation();
+  var keepAliveRule = this.parseAutomatonRule_(changeEvent.target.value);
+  // Put the sanitized version of the rule string back into the text field.
+  changeEvent.target.value = keepAliveRule.join(',');
+  // Make the new rule string and tell the NaCl module.
+  this.automatonRules_.keepAliveRule = keepAliveRule;
+  this.viewController_.setAutomatonRules(this.automatonRules_);
+}
+
+/**
+ * Parse a user-input string representing an automaton rule into an array of
+ * neighbour counts.  |ruleString| is expected to be a comma-separated string
+ * of integers in range [0..9].  This routine attempts to sanitize non-
+ * conforming values by clipping (numbers outside [0..9] are clipped), and
+ * replaces non-numberic input with 0.  The resulting array is sorted, and each
+ * value is unique.  For example: '1,3,2,2' will produce [1, 2, 3].
+ * @param {!string} ruleString The user-input string.
+ * @return {Array.<number>} An array of neighbour counts that can be used to
+ *    create an automaton rule.
+ * @private
+ */
+life.Application.prototype.parseAutomatonRule_ = function(ruleString) {
+  var rule = ruleString.split(',');
+  // Each rule has to be an integer in [0..9]
+  goog.array.forEach(rule,
+      function(ruleString, index, array) {
+        var neighbourCount = parseInt(ruleString.trim());
+        if (isNaN(neighbourCount) || neighbourCount < 0)
+          neighbourCount = 0;
+        if (neighbourCount > 9)
+          neighbourCount = 9;
+        array[index] = neighbourCount;
+      },
+      this);
+  // Sort the rules numerically.
+  rule.sort(function(a, b) { return a - b; });
+  goog.array.removeDuplicates(rule);
+  return rule;
 }
 
 /**
@@ -219,3 +312,11 @@ life.Application.prototype.terminate = function() {
   this.viewController_ = null;
 }
 
+/**
+ * Extend the String class to trim whitespace.
+ * @return {string} the original string with leading and trailing whitespace
+ *     removed.
+ */
+String.prototype.trim = function () {
+  return this.replace(/^\s*/, '').replace(/\s*$/, '');
+}

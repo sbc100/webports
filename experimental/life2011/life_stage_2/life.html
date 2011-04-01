@@ -11,6 +11,7 @@
   <!-- Resolves the goog.base interdependencies. -->
   <script type="text/javascript">
     goog.require('goog.Disposable');
+    goog.require('goog.array');
     goog.require('goog.dom');
     goog.require('goog.events');
     goog.require('goog.fx.Dragger');
@@ -64,6 +65,7 @@
             class="vertical-align-center text-align-right"
             action=""
             method="get">
+        <div style="font-size: 10pt;">
         Birth: <input type="text"
                       id="birth_field"
                       value="1"
@@ -73,6 +75,7 @@
                            id="keep_alive_field"
                            value="2"
                            size="3" />
+        </div>
       </form>
     </div>
   </div>

@@ -22,6 +22,7 @@ namespace {
 const char* const kAddStampAtPointMethodId = "addStampAtPoint";
 const char* const kClearMethodId = "clear";
 const char* const kRunSimulationMethodId = "runSimulation";
+const char* const kSetAutomatonRulesMethodId = "setAutomatonRules";
 const char* const kStopSimulationMethodId = "stopSimulation";
 const unsigned int kInitialRandSeed = 0xC0DE533D;
 const int kSimulationTickInterval = 10;  // Measured in msec.
@@ -201,6 +202,12 @@ void Life::Clear() {
               MakeRGBA(0, 0, 0, 0xff));
   }
   Update();  // Flushes the buffer correctly.
+}
+
+void Life::SetAutomatonRules(const pp::Var& rule_string) {
+  if (!rule_string.is_string())
+    return;
+  printf("New automaton rules: %s\n", rule_string.AsString().c_str());
 }
 
 void Life::RunSimulation(const pp::Var& simulation_mode) {
@@ -383,6 +390,7 @@ bool Life::LifeScriptObject::HasMethod(
   return method_name == kAddStampAtPointMethodId ||
          method_name == kClearMethodId ||
          method_name == kRunSimulationMethodId ||
+         method_name == kSetAutomatonRulesMethodId ||
          method_name == kStopSimulationMethodId;
 }
 
@@ -414,6 +422,14 @@ pp::Var Life::LifeScriptObject::Call(
         return pp::Var(false);
       }
       app_instance_->RunSimulation(args[0]);
+    } else if (method_name == kSetAutomatonRulesMethodId) {
+      // setSutomatonRules() requires at least one arg.
+      if (args.size() < 1) {
+        SetExceptionString(exception,
+                           std::string(kInsufficientArgs) + method_name);
+        return pp::Var(false);
+      }
+      app_instance_->SetAutomatonRules(args[0]);
     } else if (method_name == kStopSimulationMethodId) {
       app_instance_->StopSimulation();
     } else {

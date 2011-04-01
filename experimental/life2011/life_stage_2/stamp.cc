@@ -19,8 +19,12 @@ inline uint32_t MakeRGBA(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
 // cropping and clipping has been done, and that all the buffer pointers are
 // valid.
 template <class PixelT> void CopyCompositeToPoint(
-    const PixelT* src_buffer, int src_row_width, const pp::Rect& src_rect,
-    PixelT* dst_buffer, int dst_row_width, const pp::Point& dst_loc) {
+    const PixelT* src_buffer,
+    int src_row_width,
+    const pp::Rect& src_rect,
+    PixelT* dst_buffer,
+    int dst_row_width,
+    const pp::Point& dst_loc) {
   const PixelT* src = src_buffer + src_rect.x() + src_rect.y() * src_row_width;
   PixelT* dst = dst_buffer + dst_loc.x() + dst_loc.y() * dst_row_width;
   for (int y = 0; y < src_rect.height(); ++y) {

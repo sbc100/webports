@@ -50,6 +50,13 @@ class Life : public pp::Instance {
   // contents of |pixel_buffer_| to the 2D graphics context.
   void Update();
 
+  // Set the automaton rules.  The rules are expressed as a string, with the
+  // Birth and Keep Alive rules separated by a '/'.  The format follows the .LIF
+  // 1.05 format here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
+  // Survival/Birth.  Exposed to the browser as SetAutomatonRules.
+  // |rule_string| is expected to be a string type; if not that do nothing.
+  void SetAutomatonRules(const pp::Var& rule_string);
+
   // Clears the current simulation (resets back to all-dead, graphcis buffer to
   // black).  Exposed to the browser as "clear()".
   void Clear();

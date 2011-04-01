@@ -16,7 +16,7 @@ html,body {
 }
 
 body {
-  font-family: "Lucida Grande";
+  font-family: Verdana, "Lucida Grande", Arial;
   font-size: 10pt;
   border: 0px;
   overflow: hidden;
