@@ -23,6 +23,12 @@ namespace life {
 // is called by the browser to do a single tick of the simulation.
 class Life : public pp::Instance {
  public:
+  // The possible play modes.  These are set by RunSimulation().
+  enum PlayMode {
+    kRandomSeedMode,
+    kStampMode
+  };
+
   explicit Life(PP_Instance instance);
   virtual ~Life();
 
@@ -64,6 +70,9 @@ class Life : public pp::Instance {
   int height() const {
     return pixel_buffer_ ? pixel_buffer_->size().height() : 0;
   }
+  PlayMode play_mode() const {
+    return play_mode_;
+  }
 
   // Indicate whether the simulation is running or paused.
   bool is_running() const {
@@ -94,12 +103,6 @@ class Life : public pp::Instance {
   friend class ScopedPixelLock;
 
  private:
-  // The possible play modes.
-  enum PlayMode {
-    kRandomSeedMode,
-    kStampMode
-  };
-
   // This class exposes the scripting interface for this NaCl module.  The
   // HasMethod method is called by the browser when executing a method call on
   // the |life| object (see, e.g. the update() function in
@@ -149,7 +152,7 @@ class Life : public pp::Instance {
   // Add in some random noise to the borders of the simulation, which is used
   // to determine the life of adjacent cells.  This is part of a simulation
   // tick.
-  void Stir();
+  void AddRandomSeed();
 
   // Draw the current state of the simulation into the pixel buffer.
   void UpdateCells();
@@ -169,6 +172,8 @@ class Life : public pp::Instance {
   // there is a pending flush on the 2D context, then update the pixels only
   // and do not flush.
   void FlushPixelBuffer();
+  // Return a pointer to the pixels without acquiring the pixel buffer lock.
+  uint32_t* PixelBufferNoLock();
 
   bool IsContextValid() const {
     return graphics_2d_context_ != NULL;

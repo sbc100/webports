@@ -148,6 +148,9 @@ void Life::DidChangeView(const pp::Rect& position,
   // call.
   view_changed_size_ = true;
   view_size_ = position.size();
+  // Make sure the buffers get changed if the simulation isn't running.
+  if (!is_running())
+    Update();
 }
 
 void Life::Update() {
@@ -171,6 +174,9 @@ void Life::Update() {
                                         false);
       set_flush_pending(false);
       const size_t size = width() * height();
+      uint32_t* pixels = PixelBufferNoLock();
+      if (pixels)
+        std::fill(pixels, pixels + size, MakeRGBA(0, 0, 0, 0xff));
       cell_in_ = new uint8_t[size];
       cell_out_ = new uint8_t[size];
       ResetCells();
@@ -189,6 +195,13 @@ void Life::Plot(int x, int y) {
     return;
   }
   *(cell_in_ + x + y * width()) = 1;
+  // Note: do not acquire the pixel lock here, because Plot() is run in the UI
+  // thread.
+  uint32_t* pixel_buffer = PixelBufferNoLock();
+  if (pixel_buffer) {
+    uint32_t* pixel = pixel_buffer + x + y * width();
+    *pixel = MakeRGBA(0x00, 0xE0, 0x00, 0xff);
+  }
 }
 
 void Life::Clear() {
@@ -219,6 +232,8 @@ void Life::AddCellAtPoint(const pp::Var& var_x, const pp::Var& var_y) {
   Plot(x - 1, y + 1);
   Plot(x + 0, y + 1);
   Plot(x + 1, y + 1);
+  if (!is_running())
+    Update();
 }
 
 void Life::RunSimulation(const pp::Var& simulation_mode) {
@@ -242,11 +257,9 @@ void Life::StopSimulation() {
   set_is_running(false);
 }
 
-void Life::Stir() {
+void Life::AddRandomSeed() {
   ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
   if (!scoped_mutex.is_valid())
-    return;
-  if (play_mode_ != kRandomSeedMode)
     return;
   if (cell_in_ == NULL || cell_out_ == NULL)
     return;
@@ -317,7 +330,8 @@ void* Life::LifeSimulation(void* param) {
   life->set_is_simulation_running(true);
   while (life->is_simulation_running()) {
     if (life->is_running()) {
-      life->Stir();
+      if (life->play_mode() == Life::kRandomSeedMode)
+        life->AddRandomSeed();
       life->UpdateCells();
       life->Swap();
     }
@@ -357,6 +371,12 @@ void Life::DestroyContext() {
   pixel_buffer_ = NULL;
   delete graphics_2d_context_;
   graphics_2d_context_ = NULL;
+}
+
+uint32_t* Life::PixelBufferNoLock() {
+  if (pixel_buffer_ == NULL || pixel_buffer_->is_null())
+    return NULL;
+  return static_cast<uint32_t*>(pixel_buffer_->data());
 }
 
 void Life::FlushPixelBuffer() {
