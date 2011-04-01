@@ -842,6 +842,21 @@ Chess.mainLoop = function() {
     console.log('Sent ' + Chess.lastMove + ' got ' + answer);
     // now go to the waiting state
     Chess.nextState();
+    if (answer != '') {
+      // FIXME -- this is a COPY block starting at line 865
+      // if answer starts with 'move:' 'move ' or 'move' remove that
+      answer = Chess.filterAnswer(answer);
+      // do the move
+      var fromNotation = answer.substr(0, 2);
+      var toNotation = answer.substr(2);
+      var result = Chess.doMove(fromNotation, toNotation);
+      if (!result) {
+        Chess.Alert('Error doing moving from [' + fromNotation + '] to [' +
+                    toNotation + '] based on [' + answer + ']');
+      }
+      theBoard.drawPieces(Chess.ctxPieces);
+      Chess.nextState();
+    }
   } else if (state == 'WaitingOnAi') {
     console.log('Waiting...');
     var answer = naclModule.talk('');
