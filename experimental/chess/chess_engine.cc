@@ -31,6 +31,7 @@ namespace chess_engine {
 
 /// method name for GetChoices, as seen by JavaScript code.
 const char* const kGetChoices = "GetChoices";
+const char* const kTalk = "talk";
 
 /// Use @a delims to identify all the elements in @ the_string, and add
 /// Invoke the function associated with @a method.  The argument list passed
@@ -275,6 +276,46 @@ void GetPawnMoves(int x, int y, Side myside, Board *board,
 /// On good input, finds the legal moves and returns the result.  The
 /// ScriptableObject that called this function returns this string back to the
 /// browser as a JavaScript value.
+pp::Var Talk(const std::vector<pp::Var>& args) {
+  static unsigned int talkCount = 0;
+  std::string answer = "";
+  static int answer_index = 0;
+  const int num_answers = 10;
+  const char* answer_array[num_answers] = {
+    "d7d5", "e7e5", "b8b6", "g8g6", "f8e7",
+    "h7h5", "b7b5", "c7c5", "f7f5", "g7g5"
+  };
+
+  // There should be exactly one arg, which should be an object
+  if (args.size() != 1) {
+    printf("Unexpected number of args\n");
+    return "Unexpected number of args";
+  }
+  if (!args[0].is_string()) {
+    printf("Arg %s is NOT a string\n", args[0].DebugString().c_str());
+    return "Arg from Javascript is not a string!";
+  }
+  std::string input = args[0].AsString();
+  printf(" Talk ... input = %s\n", input.c_str());
+
+  ++talkCount;
+  if (talkCount % 4 == 0) {
+    if (answer_index < num_answers) {
+      answer = answer_array[answer_index++];
+    } else {
+      answer = "";
+    }
+  }
+  return pp::Var(answer);
+}
+
+/// This function is passed the arg list from the JavaScript call to
+/// @a GetChoices.
+/// It makes sure that there is one argument and that it is a string, returning
+/// an error message if it is not.
+/// On good input, finds the legal moves and returns the result.  The
+/// ScriptableObject that called this function returns this string back to the
+/// browser as a JavaScript value.
 pp::Var GetChoices(const std::vector<pp::Var>& args) {
   // There should be exactly one arg, which should be an object
   if (args.size() != 1) {
@@ -385,7 +426,7 @@ bool ChessEngineScriptableObject::HasMethod(const pp::Var& method,
     return false;
   }
   std::string method_name = method.AsString();
-  return method_name == kGetChoices;
+  return method_name == kGetChoices || method_name == kTalk;
 }
 
 pp::Var ChessEngineScriptableObject::Call(const pp::Var& method,
@@ -399,6 +440,8 @@ pp::Var ChessEngineScriptableObject::Call(const pp::Var& method,
   if (method_name == kGetChoices) {
     // note that the vector of pp::Var |args| is passed to GetChoices
     return GetChoices(args);
+  } else if (method_name == kTalk) {
+    return Talk(args);
   } else {
     SetExceptionString(exception,
                        std::string(kExceptionNoMethodName) + method_name);

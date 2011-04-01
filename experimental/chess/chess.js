@@ -15,6 +15,31 @@ Chess.Alert = function(message) {
   alert(message);
 };
 
+///
+/// Variable and functions for state/GUI elements
+/// Valid states are 'PlayerTurn', 'PlayerDone', 'AiTurn', 'AiDone'
+/// 
+///
+Chess.selectedPiece = null;
+Chess.state = 'PlayerTurn';
+Chess.getState = function() {
+  return Chess.state;
+}
+Chess.nextState = function() {
+  if (Chess.state == 'PlayerTurn') {
+    Chess.state = 'PlayerDone';
+  } else if (Chess.state == 'PlayerDone') {
+    Chess.state = 'AiTurn';
+  } else if (Chess.state == 'AiTurn') {
+    Chess.state = 'AiDone';
+  } else if (Chess.state == 'AiDone') {
+    Chess.state = 'PlayerTurn';
+  }
+  return Chess.state;
+}
+
+
+
 Chess.boardSize = 8;
 
 Chess.ColorType = {
@@ -566,7 +591,7 @@ Chess.Board.prototype.drawPiece = function(ctx, column, row, pieceType, colorTyp
 };
 
 Chess.Board.prototype.drawPieces = function(ctx) {
-  console.log('drawPieces...');
+  console.log('Chess.Board.drawPieces...');
   var column, row;
   for (column = 0; column < Chess.boardSize; ++column) {
     for (row = 0; row < Chess.boardSize; ++row) {
@@ -591,10 +616,13 @@ Chess.mouseDownHandler = function(e) {
                 ' chess notation: ' + theBoard.convertColumnToLetter(column) +
                 theBoard.convertRowToChessRow(row) + '\n';
   if (thePiece) {
+    Chess.selectedPiece = thePiece;
     message += 'That space contains ' + thePiece.toString() + ' \n';
     var boardString = theBoard.contents.toString();
     boardString += column + ':' + row;
     message += boardString;
+  } else {
+    Chess.selectedPiece = null;
   }
   if (x != -1 && y != -1) {
     console.log(message);
@@ -728,7 +756,23 @@ Chess.moveHandler = function() {
 }
 
 theBoard = new Chess.Board();
+
+Chess.mainLoop = function() {
+  theBoard.drawPieces(Chess.ctxPieces);
+  var state = Chess.getState();
+  var stateField = document.getElementById('State');
+  stateField.innerHTML = state;
+  var selectedPieceField = document.getElementById('SelectedPiece');
+  if (Chess.selectedPiece) {
+    selectedPieceField.innerHTML = Chess.selectedPiece.toString();
+  } else {
+    selectedPieceField.innerHTML = '';
+  }
+  console.log('STATE = ' + state + ' stateField:' + stateField);
+}
+
 if (Chess.canvasScratch != undefined) {
   Chess.canvasScratch.onmousedown = Chess.mouseDownHandler;
-  setInterval('theBoard.drawPieces(Chess.ctxPieces)', 1000);
+  setInterval('Chess.mainLoop()', 1000);
 }
+
