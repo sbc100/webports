@@ -601,7 +601,7 @@ Chess.Board.prototype.drawPiece = function(ctx, column, row, pieceType, colorTyp
 };
 
 Chess.Board.prototype.drawPieces = function(ctx) {
-  console.log('Chess.Board.drawPieces...');
+  // console.log('Chess.Board.drawPieces...');
   var column, row;
   for (column = 0; column < Chess.boardSize; ++column) {
     for (row = 0; row < Chess.boardSize; ++row) {
@@ -876,6 +876,8 @@ Chess.filterAnswer = function(str) {
 
 Chess.handleReply = function(answer) {
   // if answer contains 'move' then handle the board update for AI move
+
+  console.log('ANSWER: [' + answer + ']');
   if (answer.indexOf('Illegal move') != -1) {
     // take back person's move
     Chess.Alert('Your last move was NOT legal: ' + answer);
@@ -891,6 +893,8 @@ Chess.handleReply = function(answer) {
     // set state back to PlayerTurn...
     Chess.setState('PlayerTurn'); 
 
+  } else if (answer.indexOf('win') != -1) {
+    Chess.Alert('Game Over: ' + answer);
   } else if (answer.indexOf('move') != -1) {
     answer = Chess.filterAnswer(answer);
     // do the move
@@ -902,9 +906,7 @@ Chess.handleReply = function(answer) {
                   toNotation + '] based on [' + answer + ']');
     }
     theBoard.drawPieces(Chess.ctxPieces);
-    Chess.nextState();
-  } else if (answer.indexOf('win') != -1) {
-    Chess.Alert('Game Over: ' + answer);
+    Chess.nextState(); 
   }
 }
 
