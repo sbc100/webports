@@ -43,10 +43,20 @@ Stamp::Stamp()
   int buffer_size = size_.GetArea();
   pixel_buffer_.resize(buffer_size);
   cell_buffer_.resize(buffer_size);
-  std::fill(&pixel_buffer_[0],
-            &pixel_buffer_[0] + buffer_size,
-            MakeRGBA(0, 0xE0, 0, 0xFF));
-  std::fill(&cell_buffer_[0], &cell_buffer_[0] + buffer_size, 1);
+  uint32_t green = MakeRGBA(0, 0xE0, 0, 0xFF);
+  uint32_t black = MakeRGBA(0, 0, 0, 0xFF);
+  pixel_buffer_[0] = pixel_buffer_[1] = pixel_buffer_[2] = green;
+  pixel_buffer_[3] = green;
+  pixel_buffer_[4] = pixel_buffer_[5] = black;
+  pixel_buffer_[6] = black;
+  pixel_buffer_[7] = green;
+  pixel_buffer_[8] = black;
+  cell_buffer_[0] = cell_buffer_[1] = cell_buffer_[2] = 1;
+  cell_buffer_[3] = 1;
+  cell_buffer_[4] = cell_buffer_[5] = 0;
+  cell_buffer_[6] = 0;
+  cell_buffer_[7] = 1;
+  cell_buffer_[8] = 0;
 }
 
 Stamp::Stamp(const std::vector<uint32_t>& pixel_buffer,

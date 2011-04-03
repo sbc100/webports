@@ -22,8 +22,7 @@
 
 namespace life {
 // The main object that runs Conway's Life simulation (for details, see:
-// http://en.wikipedia.org/wiki/Conway's_Game_of_Life).  The Update() method
-// is called by the browser to do a single tick of the simulation.
+// http://en.wikipedia.org/wiki/Conway's_Game_of_Life).
 class Life : public pp::Instance {
  public:
   // The possible play modes.  These are set by RunSimulation().
@@ -54,8 +53,8 @@ class Life : public pp::Instance {
   // Birth and Keep Alive rules separated by a '/'.  The format follows the .LIF
   // 1.05 format here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
   // Survival/Birth.  Exposed to the browser as SetAutomatonRules.
-  // |rule_string| is expected to be a string type; if not that do nothing.
-  void SetAutomatonRules(const pp::Var& rule_string);
+  // |rule_string| is expected to be a string type; if not then do nothing.
+  void SetAutomatonRules(const pp::Var& rule_string_var);
 
   // Clears the current simulation (resets back to all-dead, graphcis buffer to
   // black).  Exposed to the browser as "clear()".
@@ -192,6 +191,13 @@ class Life : public pp::Instance {
     return graphics_2d_context_ != NULL;
   }
 
+  // Take each character in |rule_string| and convert it into an index value,
+  // set the bit in |life_rules_table_| at each of these indices, applying
+  // |rule_offset|.  Assumes that all necessary locks have been acquired.  Does
+  // no range checking or validation of the strings.
+  void SetRuleFromString(size_t rule_offset,
+                         const std::string& rule_string);
+
   // The main game loop.  This loop runs the Life simulation.  |param| is a
   // pointer to the Life instance.  This routins is run on its own thread.
   static void* LifeSimulation(void* param);
@@ -214,6 +220,7 @@ class Life : public pp::Instance {
   RandomBitGenerator random_bits_;
   std::vector<Stamp> stamps_;
   int current_stamp_index_;
+  std::vector<uint8_t> life_rules_table_;
   uint8_t* cell_in_;
   uint8_t* cell_out_;
 };

@@ -238,17 +238,28 @@ life.Application.prototype.updateKeepAliveRule = function(changeEvent) {
  */
 life.Application.prototype.parseAutomatonRule_ = function(ruleString) {
   var rule = ruleString.split(',');
-  // Each rule has to be an integer in [0..9]
-  goog.array.forEach(rule,
-      function(ruleString, index, array) {
-        var neighbourCount = parseInt(ruleString.trim());
-        if (isNaN(neighbourCount) || neighbourCount < 0)
-          neighbourCount = 0;
-        if (neighbourCount > 9)
-          neighbourCount = 9;
-        array[index] = neighbourCount;
-      },
-      this);
+
+  /**
+   * Helper function to parse a single rule element: trim off any leading or
+   * trailing white-space, then attempt to convert the resulting string into
+   * an integer.  Clip the integer to range [0..8].  Replace the element in
+   * |array| with the resulting number.  Note: non-numeric values are replaced
+   * with 0.
+   * @param {string} ruleString The string to parse.
+   * @param {number} index The index of the element in the original array.
+   * @param {Array} ruleArray The array of rules.
+   */
+  function parseOneRule(ruleString, index, ruleArray) {
+    var neighbourCount = parseInt(ruleString.trim());
+    if (isNaN(neighbourCount) || neighbourCount < 0)
+      neighbourCount = 0;
+    if (neighbourCount > 8)
+      neighbourCount = 8;
+    ruleArray[index] = neighbourCount;
+  }
+
+  // Each rule has to be an integer in [0..8]
+  goog.array.forEach(rule, parseOneRule, this);
   // Sort the rules numerically.
   rule.sort(function(a, b) { return a - b; });
   goog.array.removeDuplicates(rule);

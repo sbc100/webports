@@ -26,6 +26,10 @@ const char* const kSetAutomatonRulesMethodId = "setAutomatonRules";
 const char* const kStopSimulationMethodId = "stopSimulation";
 const unsigned int kInitialRandSeed = 0xC0DE533D;
 const int kSimulationTickInterval = 10;  // Measured in msec.
+const int kMaxNeighbourCount = 8;
+// Offests into the autmaton rule lookup table.
+const size_t kKeepAliveRuleOffset = 9;
+const size_t kBirthRuleOffset = 0;
 
 // Simulation modes.  These strings are matched by the browser script.
 const char* const kRandomSeedModeId = "random_seed";
@@ -73,13 +77,6 @@ const uint32_t kNeighborColors[] = {
     MakeRGBA(0x00, 0xFF, 0x00, 0xff),
 };
 
-// These represent the new health value of a cell based on its neighboring
-// values.  The health is binary: either alive or dead.
-const uint8_t kIsAlive[] = {
-      0, 0, 0, 1, 0, 0, 0, 0, 0,  // Values if the center cell is dead.
-      0, 0, 1, 1, 0, 0, 0, 0, 0  // Values if the center cell is alive.
-  };
-
 // Called from the browser when the delay time has elapsed.  This routine
 // runs a simulation update, then reschedules itself to run the next
 // simulation tick.
@@ -118,6 +115,17 @@ Life::Life(PP_Instance instance) : pp::Instance(instance),
   // Add the default stamp.
   stamps_.push_back(Stamp());
   current_stamp_index_ = 0;
+  // Set up the default life rules table.  |life_rules_table_| is a look-up
+  // table, index by the number of living neighbours of a cell.  Indices [0..8]
+  // represent the rules when the cell being examined is dead; indices [9..17]
+  // represnt the rules when the cell is alive.
+  life_rules_table_.resize(kMaxNeighbourCount * 2 + 1);
+  std::fill(&life_rules_table_[0],
+            &life_rules_table_[0] + life_rules_table_.size(),
+            0);
+  life_rules_table_[kBirthRuleOffset + 3] = 1;
+  life_rules_table_[kKeepAliveRuleOffset + 2] = 1;
+  life_rules_table_[kKeepAliveRuleOffset + 3] = 1;
 }
 
 Life::~Life() {
@@ -204,10 +212,35 @@ void Life::Clear() {
   Update();  // Flushes the buffer correctly.
 }
 
-void Life::SetAutomatonRules(const pp::Var& rule_string) {
-  if (!rule_string.is_string())
+void Life::SetAutomatonRules(const pp::Var& rule_string_var) {
+  if (!rule_string_var.is_string())
     return;
-  printf("New automaton rules: %s\n", rule_string.AsString().c_str());
+  std::string rule_string = rule_string_var.AsString();
+  if (rule_string.size() == 0)
+    return;
+  // Separate the birth rule from the keep-alive rule.
+  size_t slash_pos = rule_string.find('/');
+  if (slash_pos == std::string::npos)
+    return;
+  std::string keep_alive_rule = rule_string.substr(0, slash_pos);
+  std::string birth_rule = rule_string.substr(slash_pos + 1);
+  // Reset the lookup table with the new rules.
+  threading::ScopedMutexLock scoped_mutex(&pixel_buffer_mutex_);
+  if (!scoped_mutex.is_valid())
+    return;
+  std::fill(&life_rules_table_[0],
+            &life_rules_table_[0] + life_rules_table_.size(),
+            0);
+  SetRuleFromString(kBirthRuleOffset, birth_rule);
+  SetRuleFromString(kKeepAliveRuleOffset, keep_alive_rule);
+}
+
+void Life::SetRuleFromString(size_t rule_offset,
+                             const std::string& rule_string) {
+  for (size_t i = 0; i < rule_string.size(); ++i) {
+    size_t rule_index = rule_string[i] - '0';
+    life_rules_table_[rule_offset + rule_index] = 1;
+  }
 }
 
 void Life::RunSimulation(const pp::Var& simulation_mode) {
@@ -282,24 +315,24 @@ void Life::UpdateCells() {
   const int sim_width = width();
   // Do neighbor sumation; apply rules, output pixel color.
   for (int y = 1; y < (sim_height - 1); ++y) {
-    uint8_t *src0 = (cell_in_ + (y - 1) * sim_width) + 1;
-    uint8_t *src1 = src0 + sim_width;
-    uint8_t *src2 = src1 + sim_width;
-    int count;
-    uint32_t color;
-    uint8_t *dst = (cell_out_ + (y) * sim_width) + 1;
-    uint32_t *scanline = pixel_buffer + y * sim_width;
+    uint8_t *src = cell_in_ + 1 + y * sim_width;
+    uint8_t *src_above = src - sim_width;
+    uint8_t *src_below = src + sim_width;
+    uint8_t *dst = cell_out_ + 1 + y * sim_width;
+    uint32_t *scanline = pixel_buffer + 1 + y * sim_width;
     for (int x = 1; x < (sim_width - 1); ++x) {
-      // Build sum, weight center by 9x.
-      count = src0[-1] + src0[0] +     src0[1] +
-              src1[-1] + src1[0] * 9 + src1[1] +
-              src2[-1] + src2[0] +     src2[1];
-      color = kNeighborColors[count];
-      *scanline++ = color;
-      *dst++ = kIsAlive[count];
-      ++src0;
-      ++src1;
-      ++src2;
+      // Build sum to get a neighbour count.  By multiplying the current
+      // (center) cell by 9, this provides indices [0..8] that relate to the
+      // cases when the current cell is dead, and indices [9..17] that relate
+      // to the cases when the current cell is alive.
+      int count = *(src_above - 1) + *src_above + *(src_above + 1) +
+                  *(src - 1) + *src * kKeepAliveRuleOffset + *(src + 1) +
+                  *(src_below - 1) + *src_below + *(src_below + 1);
+      *dst++ = life_rules_table_[count];
+      *scanline++ = kNeighborColors[count];
+      ++src;
+      ++src_above;
+      ++src_below;
     }
   }
 }
