@@ -5,7 +5,7 @@
 #ifndef THREAD_CONDITION_H_
 #define THREAD_CONDITION_H_
 
-#include <pthread.h>
+#include "experimental/life2011/life_stage_2/pthread_ext.h"
 
 namespace threading {
 // A wrapper class for condition signaling.  Contains a mutex and condition

@@ -5,9 +5,7 @@
 #ifndef SCOPED_MUTEX_LOCK_H_
 #define SCOPED_MUTEX_LOCK_H_
 
-#include <pthread.h>
-
-#define PTHREAD_MUTEX_SUCCESS 0
+#include "experimental/life2011/life_stage_2/pthread_ext.h"
 
 namespace threading {
 // A small helper RAII class that implements a scoped pthread_mutex lock.

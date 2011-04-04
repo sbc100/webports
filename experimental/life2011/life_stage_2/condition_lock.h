@@ -41,6 +41,17 @@ class ConditionLock {
     // calling thread must unlock it.
   }
 
+  // Acquire the mutex lock when the lock values are _NOT_ equal.  Blocks the
+  // calling thread until the lock can be acquired and the condition is met.
+  void LockWhenNotCondition(int32_t condition_value) {
+    Lock();
+    while (condition_value == condition_value_) {
+      pthread_cond_wait(&condition_condition_, &condition_lock_);
+    }
+    // When this method returns, |contition_lock_| will be acquired.  The
+    // calling thread must unlock it.
+  }
+
   // Release the lock without changing the condition.  Signal the condition
   // so that threads waiting in LockWhenCondtion() will wake up.  If there are
   // no threads waiting for the signal, this has the same effect as a simple

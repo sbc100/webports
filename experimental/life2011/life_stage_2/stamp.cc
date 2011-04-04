@@ -73,7 +73,7 @@ Stamp::~Stamp() {
 void Stamp::StampAtPointInBuffers(const pp::Point& point,
                                   uint32_t* dest_pixel_buffer,
                                   uint8_t* dest_cell_buffer,
-                                  const pp::Size& buffer_size) {
+                                  const pp::Size& buffer_size) const {
   // Do a simple COPY composite operation into the pixel and cell buffers.
   int copy_width = size().width();
   int copy_height = size().height();

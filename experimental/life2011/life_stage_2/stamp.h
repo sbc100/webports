@@ -38,7 +38,7 @@ class Stamp {
   void StampAtPointInBuffers(const pp::Point& point,
                              uint32_t* dest_pixel_buffer,
                              uint8_t* dest_cell_buffer,
-                             const pp::Size& buffer_size);
+                             const pp::Size& buffer_size) const;
 
   pp::Size size() const {
     return size_;
