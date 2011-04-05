@@ -9,6 +9,7 @@
 #include <ppapi/cpp/rect.h>
 #include <ppapi/cpp/size.h>
 
+#include <string>
 #include <vector>
 
 namespace life {
@@ -19,16 +20,17 @@ namespace life {
 // rectangular, and have minimum dimensions of (3 x 3).
 class Stamp {
  public:
-  // Create the default stamp.
+  // Create the default stamp: size of minimum dimensions and all cells alive.
   Stamp();
-  // Create a stamp using the supplied color and cell buffer.  The color
-  // buffer is assumed to be in ARGB format.  Both buffer must have the same
-  // dimensions.  The stamp makes a copy of both buffers, so it is safe to
-  // delete the passed-in buffers when this ctor returns.
-  Stamp(const std::vector<uint32_t>& pixel_buffer,
-        const std::vector<uint8_t>& cell_buffer,
-        const pp::Size& size);
   virtual ~Stamp();
+
+  // Create a stamp using the supplied stamp description. |stamp_desription| is
+  // expressed as a string where each character represents a cell: '*' is a
+  // live cell and '.' is a dead one.  A new-line represents the end of arow of
+  // cells.  See the .LIF 1.05 format for more details:
+  //   http://psoup.math.wisc.edu/mcell/ca_files_formats.html
+  // Returns success.
+  bool InitFromDescription(const std::string& stamp_description);
 
   // Apply the stamp to the color and cell buffers.  The stamp is cropped to
   // the buffer rectangles.  Both the pixel and cell buffer must have the same

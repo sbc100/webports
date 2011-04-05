@@ -79,4 +79,4 @@ $(INSTALL_DIR):
 	mkdir -p $@
 
 clean:
-	-$(RM) *.o *.obj *.nexe
+	-$(RM) -rf $(OBJDIR) *.o *.obj *.nexe

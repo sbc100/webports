@@ -59,6 +59,15 @@ life.controllers.ViewController = function(nativeModule) {
   this.isRunning_ = false;
 
   /**
+   * The map of stamps.  Initialized to a default stamp that produces a glider
+   * when using the "normal" Conway rules of 23/3.
+   * @type {Hash}
+   * @private
+   */
+  this.stampDictionary_ = {};
+  this.addStampWithId('***\n*..\n.*.\n', this.DEFAULT_STAMP_ID);
+
+  /**
    * Mouse drag event object.
    * @type {life.events.Dragger}
    * @private
@@ -86,6 +95,12 @@ life.controllers.ViewController.PlayModes_ = {
 };
 
 /**
+ * The id for the default stamp.
+ * @type {string}
+ */
+life.controllers.ViewController.prototype.DEFAULT_STAMP_ID = 'default_stamp';
+
+/**
  * Override of disposeInternal() to unhook all the listeners and dispose
  * of retained objects.
  * @override
@@ -100,6 +115,7 @@ life.controllers.ViewController.prototype.disposeInternal = function() {
       this.handleEndDrag_, false, this);
   this.dragListener_ = null;
   this.module_ = null;
+  this.stampDictionary_ = null;
 };
 
 /**
@@ -118,18 +134,6 @@ life.controllers.ViewController.prototype.playMode = function() {
 }
 
 /**
- * Set the automaton rules.  The rules are expressed as an object that maps
- * birth and keep-alive rules to neighbour counts.
- * @param {Object.<Array>} automatonRules The new rule string.
- */
-life.controllers.ViewController.prototype.setAutomatonRules =
-    function(automatonRules) {
-  var ruleString = [automatonRules.keepAliveRule.join(''),
-                    automatonRules.birthRule.join('')].join('/');
-  this.module_.setAutomatonRules(ruleString);
-}
-
-/**
  * Set the play mode to one of RANDOM_SEED or STAMP.  Changing the play mode
  * can cause the simulation to restart in the new play mode.  Do nothing if the
  * play mode is set to the current mode.
@@ -143,6 +147,51 @@ life.controllers.ViewController.prototype.setPlayMode = function(playMode) {
     this.module_.runSimulation(this.playMode_);
   }
 }
+
+/**
+ * Set the automaton rules.  The rules are expressed as an object that maps
+ * birth and keep-alive rules to neighbour counts.
+ * @param {Object.<Array>} automatonRules The new rule string.
+ */
+life.controllers.ViewController.prototype.setAutomatonRules =
+    function(automatonRules) {
+  var ruleString = [automatonRules.keepAliveRule.join(''),
+                    automatonRules.birthRule.join('')].join('/');
+  this.module_.setAutomatonRules(ruleString);
+}
+
+/**
+ * Add a stamp to the simulation.  The stamp is expressed as a string where
+ * each character represents a cell: '*' is a live cell and '.' is a dead one.
+ * A new-line represents the end of arow of cells.  See the .LIF 1.05 format
+ * for more details:
+ *   http://psoup.math.wisc.edu/mcell/ca_files_formats.html
+ * If a stamp with |stampId| already exists, then it gets replaced with the
+ * new |stampDefinition|.
+ * @param {!string} stampDescription The new stamp description.
+ * @param {!string} stampId The id associated with this stamp.
+ */
+life.controllers.ViewController.prototype.addStampWithId =
+    function(stampDescription, stampId) {
+  this.stampDictionary_[stampId] = stampDescription;
+}
+
+/**
+ * Set the current stamp.  If a stamp with id |stmpId| doesn't exist, then
+ * do nothing.
+ * @param {!string} stampDescription The new stamp description.
+ * @param {!string} stampId The id associated with this stamp.
+ * @return {bool} Success.
+ */
+life.controllers.ViewController.prototype.makeStampCurrent =
+    function(stampId) {
+  if (stampId in this.stampDictionary_) {
+    this.module_.setCurrentStamp(this.stampDictionary_[stampId]);
+    return true;
+  }
+  return false;
+}
+
 
 /**
  * Start the simulation.  Does nothing if it's already running.

@@ -13,6 +13,7 @@
 
 #include <cstdlib>
 #include <map>
+#include <memory>
 #include <tr1/memory>
 #include <vector>
 
@@ -54,38 +55,39 @@ class LifeApplication : public pp::Instance {
   // contents of |pixel_buffer_| to the 2D graphics context.
   void Update();
 
-  // Add a stamp to the set of stamps.  The stamp format is taken from the
-  // .LIF 1.05 spec here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
-  // Exposed to the browser as "addStamp".  |args[0]| is expcted to be a string
-  // variable that contains the stamp definition.  Returns an undefined Var.
-  // On failure, |exception| is set to indicate the error.
-  pp::Var AddStamp(const scripting::ScriptingBridge& bridge,
-                   const std::vector<pp::Var>& args,
-                   pp::Var* exception);
+  // Replace the current stamp.  See stamp.h for a description of the stamp
+  // format.  Exposed to the browser as "setCurrentStamp()".  |args[0]| is
+  // expected to be a string variable that contains the stamp definition.
+  // Returns a bool Var indicating success.  On failure, |exception| is set to
+  // indicate the error. If |exception| is NULL, no error value is set.
+  pp::Var SetCurrentStamp(const scripting::ScriptingBridge& bridge,
+                          const std::vector<pp::Var>& args,
+                          pp::Var* exception);
 
   // Set the automaton rules.  The rules are expressed as a string, with the
   // Birth and Keep Alive rules separated by a '/'.  The format follows the .LIF
   // 1.05 format here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
-  // Survival/Birth.  Exposed to the browser as SetAutomatonRules.
+  // Survival/Birth.  Exposed to the browser as "setAutomatonRules()".
   // |args[0]| is expected to be a string type; if not then do nothing.
-  // Returns an undefined Var.  On failure, |exception| is set to indicate the
-  // error.
+  // Returns a bool Var indicating success.  On failure, |exception| is set to
+  // indicate the error. If |exception| is NULL, no error value is set.
   pp::Var SetAutomatonRules(const scripting::ScriptingBridge& bridge,
                             const std::vector<pp::Var>& args,
                             pp::Var* exception);
 
   // Clears the current simulation (resets back to all-dead, graphics buffer to
   // black).  Exposed to the browser as "clear()".  |args| can be empty.
-  // Returns an undefined Var.  On failure, |exception| is set to indicate the
-  // error.
+  // Returns a bool Var indicating success.  On failure, |exception| is set to
+  // indicate the error. If |exception| is NULL, no error value is set.
   pp::Var Clear(const scripting::ScriptingBridge& bridge,
                 const std::vector<pp::Var>& args,
                 pp::Var* exception);
 
   // Plot a new blob of life centered around (|args[0]|, |args[1]|).  There
   // must be at least two args, both of them number values.  This method is
-  // exposed to the browser as "putStampAtPoint()".  Returns an undefined Var.
-  // On failure, |exception| is set to indicate the error.
+  // exposed to the browser as "putStampAtPoint()".  Returns a bool Var
+  // indicating success. On failure, |exception| is set to indicate the error.
+  // If |exception| is NULL, no error value is set.
   pp::Var PutStampAtPoint(const scripting::ScriptingBridge& bridge,
                           const std::vector<pp::Var>& args,
                           pp::Var* exception);
@@ -94,16 +96,16 @@ class LifeApplication : public pp::Instance {
   // the simulation is stoped and restarted in the new mode.  |args[0]| is
   // expected to be a string describing the mode, and can be one of
   // "random_seed" or "stamp".  Exposed to the browser as "runSimulation()".
-  // Returns an undefined Var.  On failure, |exception| is set to indicate the
-  // error.
+  // Returns a bool Var indicating success.  On failure, |exception| is set to
+  // indicate the error. If |exception| is NULL, no error value is set.
   pp::Var RunSimulation(const scripting::ScriptingBridge& bridge,
                         const std::vector<pp::Var>& args,
                         pp::Var* exception);
 
   // Stop the simulation.  Does nothing if the simulation is stopped.
   // Exposed to the browser as "stopSimulation()".  |args| can be empty.
-  // Returns an undefined Var.  On failure, |exception| is set to indicate the
-  // error.
+  // Returns a bool Var indicating success.  On failure, |exception| is set to
+  // indicate the error. If |exception| is NULL, no error value is set.
   pp::Var StopSimulation(const scripting::ScriptingBridge& bridge,
                          const std::vector<pp::Var>& args,
                          pp::Var* exception);
@@ -155,9 +157,8 @@ class LifeApplication : public pp::Instance {
   bool view_changed_size_;
   pp::Size view_size_;
 
-  // Simulation variables.
-  std::vector<Stamp> stamps_;
-  int current_stamp_index_;
+  // The current stamp.  The dictionary of stamps is kept in the browser.
+  std::auto_ptr<Stamp> stamp_;
 };
 
 }  // namespace life

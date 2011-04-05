@@ -19,11 +19,11 @@
 #include "experimental/life2011/life_stage_2/scoped_pixel_lock.h"
 
 namespace {
-const char* const kAddStampMethodId = "addStamp";
 const char* const kClearMethodId = "clear";
 const char* const kPutStampAtPointMethodId = "putStampAtPoint";
 const char* const kRunSimulationMethodId = "runSimulation";
 const char* const kSetAutomatonRulesMethodId = "setAutomatonRules";
+const char* const kSetCurrentStampMethodId = "setCurrentStamp";
 const char* const kStopSimulationMethodId = "stopSimulation";
 
 const unsigned int kInitialRandSeed = 0xC0DE533D;
@@ -38,6 +38,7 @@ const char* const kStampModeId = "stamp";
 const char* const kInsufficientArgs =
     "Insufficient number of arguments to method ";
 const char* const kInvalidArgs = "Invalid arguments to method ";
+const char* const kInvalidStampFormat = "Invalid stamp format: ";
 
 // Helper function to set the scripting exception.  Both |exception| and
 // |except_string| can be NULL.  If |exception| is NULL, this function does
@@ -80,16 +81,13 @@ LifeApplication::LifeApplication(PP_Instance instance)
     : pp::Instance(instance),
       graphics_2d_context_(NULL),
       flush_pending_(false),
-      view_changed_size_(true) {
-  // Add the default stamp.
-  stamps_.push_back(Stamp());
-  current_stamp_index_ = 0;
+      view_changed_size_(true),
+      stamp_(new Stamp()) {
 }
 
 LifeApplication::~LifeApplication() {
   life_simulation_.set_is_simulation_running(false);
   DestroyContext();
-  stamps_.clear();
 }
 
 pp::Var LifeApplication::GetInstanceObject() {
@@ -97,11 +95,6 @@ pp::Var LifeApplication::GetInstanceObject() {
   if (bridge == NULL)
     return pp::Var();
   // Add all the methods to the scripting bridge.
-  ScriptingBridge::SharedMethodCallbackExecutor
-      add_stamp_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::AddStamp));
-  bridge->AddMethodNamed(kAddStampMethodId, add_stamp_method);
-
   ScriptingBridge::SharedMethodCallbackExecutor
       clear_method(new scripting::MethodCallback<LifeApplication>(
           this, &LifeApplication::Clear));
@@ -121,6 +114,11 @@ pp::Var LifeApplication::GetInstanceObject() {
       set_auto_rules_method(new scripting::MethodCallback<LifeApplication>(
           this, &LifeApplication::SetAutomatonRules));
   bridge->AddMethodNamed(kSetAutomatonRulesMethodId, set_auto_rules_method);
+
+  ScriptingBridge::SharedMethodCallbackExecutor
+      set_stamp_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::SetCurrentStamp));
+  bridge->AddMethodNamed(kSetCurrentStampMethodId, set_stamp_method);
 
   ScriptingBridge::SharedMethodCallbackExecutor
       stop_sim_method(new scripting::MethodCallback<LifeApplication>(
@@ -184,21 +182,37 @@ void LifeApplication::Update() {
   FlushPixelBuffer();
 }
 
-pp::Var LifeApplication::AddStamp(const ScriptingBridge& bridge,
-                                  const std::vector<pp::Var>& args,
-                                  pp::Var* exception) {
-  // Pull off the first parameter.
+pp::Var LifeApplication::SetCurrentStamp(const ScriptingBridge& bridge,
+                                         const std::vector<pp::Var>& args,
+                                         pp::Var* exception) {
+  // Require one string parameter.
   if (args.size() < 1) {
-    SetExceptionString(exception,
-                       std::string(kInsufficientArgs) + kAddStampMethodId);
+    SetExceptionString(
+        exception, std::string(kInsufficientArgs) + kSetCurrentStampMethodId);
     return pp::Var(false);
   }
+  if (!args[0].is_string()) {
+    SetExceptionString(exception,
+                       std::string(kInvalidArgs) + kSetCurrentStampMethodId);
+    return pp::Var(false);
+  }
+  Stamp* new_stamp = new Stamp();
+  if (!new_stamp->InitFromDescription(args[0].AsString())) {
+    SetExceptionString(exception,
+                       std::string(kInvalidStampFormat) + args[0].AsString());
+    return pp::Var(false);
+  }
+  stamp_.reset(new_stamp);
   return pp::Var(true);
 }
 
 pp::Var LifeApplication::Clear(const ScriptingBridge& bridge,
                                const std::vector<pp::Var>& args,
                                pp::Var* exception) {
+  // Temporarily pause the the simulation while clearing the buffers.
+  volatile Life::SimulationMode sim_mode = life_simulation_.simulation_mode();
+  if (sim_mode != Life::kPaused)
+    life_simulation_.set_simulation_mode(Life::kPaused);
   life_simulation_.ClearCells();
   ScopedPixelLock scoped_pixel_lock(shared_pixel_buffer_.get());
   uint32_t* pixel_buffer = scoped_pixel_lock.pixels();
@@ -209,6 +223,8 @@ pp::Var LifeApplication::Clear(const ScriptingBridge& bridge,
               MakeRGBA(0, 0, 0, 0xff));
   }
   Update();  // Flushes the buffer correctly.
+  if (sim_mode != Life::kPaused)
+    life_simulation_.set_simulation_mode(sim_mode);
   return pp::Var(true);
 }
 
@@ -275,8 +291,7 @@ pp::Var LifeApplication::PutStampAtPoint(const ScriptingBridge& bridge,
     return pp::Var(false);
   }
   if (!args[0].is_number() ||
-      !args[1].is_number() ||
-      current_stamp_index_ < 0) {
+      !args[1].is_number()) {
     SetExceptionString(exception,
                        std::string(kInvalidArgs) + kPutStampAtPointMethodId);
     return pp::Var(false);
@@ -286,8 +301,7 @@ pp::Var LifeApplication::PutStampAtPoint(const ScriptingBridge& bridge,
                          static_cast<int32_t>(args[0].AsDouble());
   y = args[1].is_int() ? args[1].AsInt() :
                          static_cast<int32_t>(args[1].AsDouble());
-  life_simulation_.PutStampAtPoint(stamps_[current_stamp_index_],
-                                   pp::Point(x, y));
+  life_simulation_.PutStampAtPoint(*stamp_, pp::Point(x, y));
   // If the simulation isn't running, make sure the stamp shows up.
   if (!is_running())
     Update();

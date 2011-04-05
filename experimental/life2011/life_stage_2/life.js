@@ -52,6 +52,14 @@ life.Application.prototype.automatonRules_ = {
 };
 
 /**
+ * The id of the current stamp.  Defaults to the DEFAULT_STAMP_ID.
+ * @type {string}
+ * @private
+ */
+life.Application.prototype.currentStampId_ =
+    life.controllers.ViewController.DEFAULT_STAMP_ID;
+
+/**
  * The ids used for elements in the DOM.  The Life Application expects these
  * elements to exist.
  * @enum {string}
@@ -110,6 +118,9 @@ life.Application.prototype.moduleDidLoad =
   // Set up the view controller, it contains the NaCl module.
   this.viewController_ = new life.controllers.ViewController(nativeModule);
   this.viewController_.setAutomatonRules(this.automatonRules_);
+  // Initialize the module with the default stamp.
+  this.currentStampId_ = this.viewController_.DEFAULT_STAMP_ID;
+  this.viewController_.makeStampCurrent(this.currentStampId_);
 
   // Wire up the various controls.
   var playModeSelect = goog.dom.$(life.Application.DomIds_.PLAY_MODE_SELECT);

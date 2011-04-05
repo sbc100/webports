@@ -4,15 +4,18 @@
 
 #include "experimental/life2011/life_stage_2/stamp.h"
 
+#include <stdio.h>
+
 #include <algorithm>
 #include <cstring>
-#include <vector>
 
 namespace {
 const int32_t kMinimumStampDimension = 3;
-inline uint32_t MakeRGBA(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
-  return (((a) << 24) | ((r) << 16) | ((g) << 8) | (b));
-}
+const char kStampLineSeparator = '\n';
+const char kStampAliveCharacter = '*';
+const char kStampDeadCharacter = '.';
+const uint32_t kGreenColor = 0xFF00E000;
+const uint32_t kBlackColor = 0xFF000000;
 
 // Do a simple copy composite from src_buffer into dst_buffer.  Copy the pixels
 // contained in |src_rect| to |dst_loc|.  This assumes that all the necessary
@@ -43,28 +46,53 @@ Stamp::Stamp()
   int buffer_size = size_.GetArea();
   pixel_buffer_.resize(buffer_size);
   cell_buffer_.resize(buffer_size);
-  uint32_t green = MakeRGBA(0, 0xE0, 0, 0xFF);
-  uint32_t black = MakeRGBA(0, 0, 0, 0xFF);
-  pixel_buffer_[0] = pixel_buffer_[1] = pixel_buffer_[2] = green;
-  pixel_buffer_[3] = green;
-  pixel_buffer_[4] = pixel_buffer_[5] = black;
-  pixel_buffer_[6] = black;
-  pixel_buffer_[7] = green;
-  pixel_buffer_[8] = black;
-  cell_buffer_[0] = cell_buffer_[1] = cell_buffer_[2] = 1;
-  cell_buffer_[3] = 1;
-  cell_buffer_[4] = cell_buffer_[5] = 0;
-  cell_buffer_[6] = 0;
-  cell_buffer_[7] = 1;
-  cell_buffer_[8] = 0;
+  std::fill(&pixel_buffer_[0],
+            &pixel_buffer_[0] + buffer_size, kGreenColor);
+  std::fill(&cell_buffer_[0],
+            &cell_buffer_[0] + buffer_size, 1);
 }
 
-Stamp::Stamp(const std::vector<uint32_t>& pixel_buffer,
-             const std::vector<uint8_t>& cell_buffer,
-             const pp::Size& size)
-    : size_(size), stamp_offset_(0, 0) {
-  pixel_buffer_ = pixel_buffer;
-  cell_buffer_ = cell_buffer;
+bool Stamp::InitFromDescription(const std::string& stamp_description) {
+  // Compute the width and height of the stamp description.
+  size_t eol_pos = stamp_description.find(kStampLineSeparator);
+  if (eol_pos == std::string::npos) {
+    size_.set_width(stamp_description.size());
+    size_.set_height(1);
+  } else {
+    size_.set_width(eol_pos);
+    // Count up the number of lines.
+    int count = 0;
+    while (eol_pos != std::string::npos) {
+      eol_pos = stamp_description.find(kStampLineSeparator, eol_pos + 1);
+      ++count;
+    }
+    size_.set_height(count);
+  }
+  int buffer_size = size_.GetArea();
+  pixel_buffer_.resize(buffer_size);
+  cell_buffer_.resize(buffer_size);
+  int buffer_index = 0;
+  for (size_t i = 0; i < stamp_description.size(); ++i) {
+    switch (stamp_description[i]) {
+    case kStampAliveCharacter:
+      pixel_buffer_[buffer_index] = kGreenColor;
+      cell_buffer_[buffer_index] = 1;
+      ++buffer_index;
+      break;
+    case kStampDeadCharacter:
+      pixel_buffer_[buffer_index] = kBlackColor;
+      cell_buffer_[buffer_index] = 0;
+      ++buffer_index;
+      break;
+    case kStampLineSeparator:
+      // Ignore these.
+      break;
+    default:
+      // Invalid character - error?
+      break;
+    }
+  }
+  return true;
 }
 
 Stamp::~Stamp() {
