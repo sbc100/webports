@@ -206,7 +206,7 @@ Chess.Piece.pieceFactory = function(character) {
     case 'K':
       return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.KING);
     default:
-      alert('Bad piece [' + character + '] in Chess.Piece.pieceFactory');
+      Chess.Alert('Bad piece [' + character + '] in Chess.Piece.pieceFactory');
   }
 }
 
@@ -689,6 +689,7 @@ Chess.mouseDownHandler = function(e) {
         // Clear last selected piece/coord; advance state;
         // Save 'lastMove' so we can send it to AI
         Chess.lastMove = fromNotation + toNotation;
+        Chess.updateLastMove(Chess.lastMove);
         Chess.state = Chess.nextState();
         Chess.selectedPiece = null;
         Chess.selectedCoord = null;
@@ -733,25 +734,31 @@ Chess.mouseDownHandler = function(e) {
   }
 };
 
-Chess.doneMoveHandler = function() {
-  var thePiece = theBoard.contents.getPiece(1, 1);
-  console.log(' random piece: ' + thePiece.toString());
-  var boardString = theBoard.contents.toString();
-  console.log('Chess: ' + Chess + ' theBoard.contents:' + theBoard.contents +
-              ' boardString: ' + boardString);
-  alert(boardString);
-};
-
 Chess.updateBoardHandler = function() {
-  var textField = document.getElementById('chessText');
-  alert('Text is ' + textField.value);
-  theBoard.contents.setContents(textField.value);
-};
+  // Need to send a command 'show board'
+  // Need to remove spaces, then replace '.' with ' '
 
-Chess.updateTextHandler = function() {
-  var textField = document.getElementById('chessText');
-  var boardString = theBoard.contents.toString();
-  textField.value = boardString;
+  var cmdReply = naclModule.talk('show board');
+  console.log('cmdReply=\n' + cmdReply);
+
+  var boardString = '';
+  var lineArray = cmdReply.split('\n');
+  for (var index = 0; index < lineArray.length; ++index) {
+    console.log('Index:' + index + ' Line:' + lineArray[index]);
+
+    // if the line is not empty and is not the header-line that contains
+    // 'white', then lets put in |boardString| which is just the contents
+   
+    if (lineArray[index].length > 0 &&
+        lineArray[index].indexOf('white') == -1) {
+      boardString += lineArray[index] + '\n';
+    }
+  }
+  // Chess.Alert('Board is [' + boardString + ']');
+  var newBoard = boardString.replace(/ /g, '');
+  newBoard = newBoard.replace(/\./g, ' ');
+  console.log('newBoard=' + newBoard);
+  theBoard.contents.setContents(newBoard);
 };
 
 ///
@@ -832,17 +839,15 @@ Chess.doMove = function(fromNotation, toNotation) {
   return true;
 }
 
-Chess.moveHandler = function() {
-  var moveField = document.getElementById('userMove');
-  console.log('Move is ' + moveField.value);
-  if (moveField.value.length < 4 || moveField.value.length > 5) {
-    Chess.Alert('Invalid move notation [' + moveField.value + ']');
+Chess.cmdHandler = function() {
+  var cmdField = document.getElementById('userCmd');
+  console.log('Command is ' + cmdField.value + ' len=' + cmdField.value.length);
+  if (cmdField.value.length > 0) {
+    var cmdReply = naclModule.talk(cmdField.value);
+    console.log('cmdReply = ' + cmdReply);
+    Chess.Alert('Cmd:' + cmdField.value + ' Reply {' + cmdReply + '}');
     return;
   }
-  var fromNotation = moveField.value.substr(0, 2);
-  var toNotation = moveField.value.substr(2, 3);
-  console.log('from=' + fromNotation + ' to=' + toNotation);
-  var result = Chess.doMove(fromNotation, toNotation);
 }
 
 theBoard = new Chess.Board();
@@ -883,7 +888,8 @@ Chess.handleReply = function(answer) {
     Chess.Alert('Your last move was NOT legal: ' + answer);
 
     // restore the old move...
-    console.log('oldFromPiece: ' + Chess.oldFromPiece + '  oldToPiece: ' + Chess.oldToPiece);
+    console.log('oldFromPiece: ' + Chess.oldFromPiece + '  oldToPiece: ' +
+                Chess.oldToPiece);
     theBoard.contents.setContents(Chess.boardString);
 
     // clear the piece layer so we redraw it
@@ -894,10 +900,12 @@ Chess.handleReply = function(answer) {
     Chess.setState('PlayerTurn'); 
 
   } else if (answer.indexOf('win') != -1) {
+    Chess.updateBoardHandler(); //update the board with the final configuration
     Chess.Alert('Game Over: ' + answer);
   } else if (answer.indexOf('move') != -1) {
     answer = Chess.filterAnswer(answer);
     // do the move
+    Chess.updateLastMove(answer);
     var fromNotation = answer.substr(0, 2);
     var toNotation = answer.substr(2);
     var result = Chess.doMove(fromNotation, toNotation);
@@ -908,6 +916,22 @@ Chess.handleReply = function(answer) {
     theBoard.drawPieces(Chess.ctxPieces);
     Chess.nextState(); 
   }
+}
+
+Chess.updateLastMove = function(lastMove) {
+  var lastMoveField = document.getElementById('LastMove');
+  if (!lastMoveField) {
+    console.log('Error getting lastMoveField, could not by element with id LastMove');
+    return;
+  }
+  lastMoveField.innerHTML = lastMove;
+  var historyField = document.getElementById('History');
+  if (!historyField) {
+    console.log('Error getting historyField, could not by element with id History');
+    return;
+  }
+  var historySoFar = historyField.innerHTML;
+  historyField.innerHTML = historySoFar + '<br>' + lastMove;
 }
 
 Chess.mainLoop = function() {

@@ -87,14 +87,11 @@
   <div id="SelectedPiece">?SelectedPiece?</div>
   Nexe status
   <div id="status_field">NO-STATUS</div>
+  <div id="LastMove">?LM?</div>
 
-  <button onClick="Chess.doneMoveHandler()">Done move</button>
-  <textarea rows='10' cols='10' id='chessText'>
-   ...
-  </textarea><BR>
-  <button onClick="Chess.updateBoardHandler()">Update board</button>
-  <button onClick="Chess.updateTextHandler()">Update text</button><BR>
-  <input id='userMove' type='text'>
-  <button onClick='Chess.moveHandler()'>DoMove</button>
+  <button onClick="Chess.updateBoardHandler()">Update board</button><BR>
+  <input id='userCmd' type='text'>
+  <button onClick='Chess.cmdHandler()'>Command:</button>
+  <div id='History'>History:</div>
 </body>
 </html>
