@@ -81,8 +81,7 @@ LifeApplication::LifeApplication(PP_Instance instance)
     : pp::Instance(instance),
       graphics_2d_context_(NULL),
       flush_pending_(false),
-      view_changed_size_(true),
-      stamp_(new Stamp()) {
+      view_changed_size_(true) {
 }
 
 LifeApplication::~LifeApplication() {
@@ -196,13 +195,11 @@ pp::Var LifeApplication::SetCurrentStamp(const ScriptingBridge& bridge,
                        std::string(kInvalidArgs) + kSetCurrentStampMethodId);
     return pp::Var(false);
   }
-  Stamp* new_stamp = new Stamp();
-  if (!new_stamp->InitFromDescription(args[0].AsString())) {
+  if (!stamp_.InitFromDescription(args[0].AsString())) {
     SetExceptionString(exception,
                        std::string(kInvalidStampFormat) + args[0].AsString());
     return pp::Var(false);
   }
-  stamp_.reset(new_stamp);
   return pp::Var(true);
 }
 
@@ -301,7 +298,7 @@ pp::Var LifeApplication::PutStampAtPoint(const ScriptingBridge& bridge,
                          static_cast<int32_t>(args[0].AsDouble());
   y = args[1].is_int() ? args[1].AsInt() :
                          static_cast<int32_t>(args[1].AsDouble());
-  life_simulation_.PutStampAtPoint(*stamp_, pp::Point(x, y));
+  life_simulation_.PutStampAtPoint(stamp_, pp::Point(x, y));
   // If the simulation isn't running, make sure the stamp shows up.
   if (!is_running())
     Update();

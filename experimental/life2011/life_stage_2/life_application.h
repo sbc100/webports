@@ -158,7 +158,7 @@ class LifeApplication : public pp::Instance {
   pp::Size view_size_;
 
   // The current stamp.  The dictionary of stamps is kept in the browser.
-  std::auto_ptr<Stamp> stamp_;
+  Stamp stamp_;
 };
 
 }  // namespace life

@@ -55,20 +55,24 @@ Stamp::Stamp()
 bool Stamp::InitFromDescription(const std::string& stamp_description) {
   // Compute the width and height of the stamp description.
   size_t eol_pos = stamp_description.find(kStampLineSeparator);
+  pp::Size new_size;
   if (eol_pos == std::string::npos) {
-    size_.set_width(stamp_description.size());
-    size_.set_height(1);
+    new_size.set_width(stamp_description.size());
+    new_size.set_height(1);
   } else {
-    size_.set_width(eol_pos);
+    new_size.set_width(eol_pos);
     // Count up the number of lines.
     int count = 0;
-    while (eol_pos != std::string::npos) {
-      eol_pos = stamp_description.find(kStampLineSeparator, eol_pos + 1);
+    do {
       ++count;
-    }
-    size_.set_height(count);
+      eol_pos = stamp_description.find(kStampLineSeparator, eol_pos + 1);
+    } while (eol_pos != std::string::npos);
+    new_size.set_height(count);
   }
-  int buffer_size = size_.GetArea();
+  int buffer_size = new_size.GetArea();
+  if (buffer_size <= 0)
+    return false;
+  size_ = new_size;
   pixel_buffer_.resize(buffer_size);
   cell_buffer_.resize(buffer_size);
   int buffer_index = 0;
@@ -89,6 +93,7 @@ bool Stamp::InitFromDescription(const std::string& stamp_description) {
       break;
     default:
       // Invalid character - error?
+      ++buffer_index;
       break;
     }
   }
