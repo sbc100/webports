@@ -3,36 +3,74 @@
   <title>Life Demo</title>
   <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
   <meta HTTP-EQUIV="Expires" CONTENT="-1">
-  <link href="life.css" rel="stylesheet" type="text/css">
+  <link href="css/life.css" rel="stylesheet" type="text/css">
+  <link href="css/toolbar.css" rel="stylesheet" type="text/css">
+
+  <script type="text/javascript" src="closure.js"></script>
+  <!-- Loads the Life application code. This is order dependent. -->
+  <script type="text/javascript" src="events/dragger.js"></script>
+  <script type="text/javascript" src="events/event.js"></script>
+  <script type="text/javascript" src="controllers/viewcontroller.js"> </script>
+  <script type="text/javascript" src="life.js"></script>
+  <!--Resolve interdependencies in Life. -->
+  <script type="text/javascript">
+    goog.require('life.Application');
+    goog.require('life.controllers.ViewController');
+    goog.require('uikit.events.Dragger');
+    goog.require('uikit.events.Event');
+  </script>
 </head>
 <body id="bodyId">
-
-<h1>Conway's Life</h1>
- <p>
-  Use the mouse to paint extra life into the simulation.
- </p>
-
-  <!-- Load the published .nexe.  This includes the 'nacl' attribute which
-  shows how to load multi-architecture modules.  Each entry in the "nexes"
-  object in the .nmf manifest file is a key-value pair: the key is the
-  runtime ('x86-32', 'x86-64', etc.); the value is a URL for the desired NaCl
-  module.  To load the debug versions of your .nexes, set the 'nacl'
-  attribute to the _dbg.nmf version of the manifest file.
+  <!--
+  Place the Life game UI components inside an auto-sizing container so that
+  they change size with the window.
   -->
   <div id="autosize_background">
-    <script type="text/javascript">
-      var element = document.getElementById('autosize_background')
-      var viewSize = {width: element.offsetWidth || 400,
-                      height: element.offsetHeight || 400};
-      element.innerHTML = '<embed name="nacl_module"' +
-                           ' id="life"' +
-                           ' class="autosize"' +
-                           ' width=' + viewSize.width +
-                           ' height=' + viewSize.height +
-                           ' nacl="life.nmf"' +
-                           ' type="application/x-nacl" />'
-    </script>
+    <div id="life_top_toolbar" class="life-toolbar top-toolbar">
+      <div class="vertical-align-center">Conway's Game  of Life 2011</div>
+      <form name="game_controls_form"
+            class="vertical-align-center text-align-right"
+            action=""
+            method="get">
+        <select id="play_mode_select">
+          <option selected="yes" value="random_seed">Random Seed</option>
+          <option value="stamp">Stamp</option>
+        </select>
+        <button id="play_button"
+                type="button"
+                alttext="Stop"
+                state="off"
+                style="width: 72px;">Run</button>
+        <button id="clear_button"
+                type="button"
+                style="width: 72px;">Clear</button>
+      </form>
+    </div>
+    <!-- The Life NaCl module will end up in this <DIV>. -->
+    <div id="life_game_view" class="life-view"></div>
+    <div id="life_bottom_toolbar" class="life-toolbar bottom-toolbar">
+      <form name="automaton_rules_form"
+            class="vertical-align-center text-align-right"
+            action=""
+            method="get">
+        <div style="font-size: 10pt;">
+        Birth: <input type="text"
+                      id="birth_field"
+                      value="3"
+                      size="3" />
+        <div id="separator" class="toolbar-separator"></div>
+        Keep Alive: <input type="text"
+                           id="keep_alive_field"
+                           value="2,3"
+                           size="3" />
+        </div>
+      </form>
+    </div>
   </div>
-<br>
+
+  <script type="text/javascript">
+    var application = new life.Application();
+    application.run('life_game_view');
+  </script>
 </body>
 </html>

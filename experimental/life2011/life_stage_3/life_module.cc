@@ -4,7 +4,7 @@
 
 #include <ppapi/cpp/module.h>
 
-#include "experimental/life2011/life_stage_3/life.h"
+#include "experimental/life2011/life_stage_3/life_application.h"
 
 namespace life {
 // The Module class.  The browser calls the CreateInstance() method to create
@@ -17,7 +17,7 @@ class LifeModule : public pp::Module {
 
   // Create and return a Life instance object.
   virtual pp::Instance* CreateInstance(PP_Instance instance) {
-    return new Life(instance);
+    return new LifeApplication(instance);
   }
 };
 }  // namespace life

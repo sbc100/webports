@@ -5,70 +5,106 @@
 #ifndef LIFE_H_
 #define LIFE_H_
 
-#include <ppapi/cpp/dev/scriptable_object_deprecated.h>
-#include <ppapi/cpp/graphics_2d.h>
-#include <ppapi/cpp/image_data.h>
-#include <ppapi/cpp/instance.h>
-#include <ppapi/cpp/rect.h>
-#include <ppapi/cpp/size.h>
-#include <pthread.h>
+#include <ppapi/cpp/point.h>
 
-#include <cstdlib>
-#include <map>
+#include <string>
+#include <tr1/memory>
 #include <vector>
+
+#include "experimental/life2011/life_stage_3/condition_lock.h"
+#include "experimental/life2011/life_stage_3/locking_image_data.h"
+#include "experimental/life2011/life_stage_3/pthread_ext.h"
+#include "experimental/life2011/life_stage_3/stamp.h"
 
 namespace life {
 // The main object that runs Conway's Life simulation (for details, see:
-// http://en.wikipedia.org/wiki/Conway's_Game_of_Life).  The Update() method
-// is called by the browser to do a single tick of the simulation.
-class Life : public pp::Instance {
+// http://en.wikipedia.org/wiki/Conway's_Game_of_Life).
+class Life {
  public:
-  explicit Life(PP_Instance instance);
+  // The possible simulation modes.  Modes with "Run" in their name will cause
+  // the simulation thread to start running if it was paused.
+  enum SimulationMode {
+    kRunRandomSeed,
+    kRunStamp,
+    kPaused
+  };
+
+  Life();
   virtual ~Life();
 
-  // Called by the browser when the NaCl module is loaded and all ready to go.
-  virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
+  // Start up the simulation thread.
+  void StartSimulation();
 
-  // Update the graphics context to the new size, and reallocate all new
-  // buffers to the new size.
-  virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
+  // Set the automaton rules.  The rules are expressed as a string, with the
+  // Birth and Keep Alive rules separated by a '/'.  The format follows the .LIF
+  // 1.05 format here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
+  // Survival/Birth.
+  void SetAutomatonRules(const std::string& rule_string);
 
-  // Runs a tick of the simulations, updating all buffers.  Flushes the
-  // contents of |pixel_buffer_| to the 2D graphics context.  This method is
-  // exposed to the browser as "update()".
-  void Update();
+  // Resize the simulation to |width|, |height|.  This will delete and
+  // reallocate all necessary buffer to the new size, and set all the
+  // buffers to a new initial state.
+  void Resize(int width, int height);
 
-  // Plot a new blob of life centered around (|x|, |y|).
-  void AddCellAtPoint(int x, int y);
+  // Delete all the cell buffers.  Sets the buffers to NULL.
+  void DeleteCells();
+
+  // Clear out the cell buffers (reset to all-dead).
+  void ClearCells();
+
+  // Stamp |stamp| at point |point| in both the pixel and cell buffers.
+  void PutStampAtPoint(const Stamp& stamp, const pp::Point& point);
+
+  // Stop the simulation.  Does nothing if the simulation is stopped.
+  void StopSimulation();
+
+  // Sleep on the condition that the current simulation mode is not the
+  // paused mode.  Returns the new run mode.
+  SimulationMode WaitForRunMode();
+
+  SimulationMode simulation_mode() const {
+    return static_cast<SimulationMode>(simulation_mode_.condition_value());
+  }
+  void set_simulation_mode(SimulationMode new_mode) {
+    simulation_mode_.Lock();
+    simulation_mode_.UnlockWithCondition(new_mode);
+  }
 
   int width() const {
-    return pixel_buffer_ ? pixel_buffer_->size().width() : 0;
+    return width_;
   }
   int height() const {
-    return pixel_buffer_ ? pixel_buffer_->size().height() : 0;
+    return height_;
   }
 
-  // Indicate whether a flush is pending.  This can only be called from the
-  // main thread; it is not thread safe.
-  bool flush_pending() const {
-    return flush_pending_;
-  }
-  void set_flush_pending(bool flag) {
-    flush_pending_ = flag;
+  void set_pixel_buffer(
+      const std::tr1::shared_ptr<LockingImageData>& pixel_buffer) {
+    shared_pixel_buffer_ = pixel_buffer;
   }
 
-  // Cheap bit used by the simulation thread to decide when it should shut
-  // down.
-  bool is_running() const {
-    return is_running_;
-  }
-  void set_is_running(bool flag) {
-    is_running_ = flag;
+  pthread_mutex_t* simulation_mutex() {
+    return &life_simulation_mutex_;
   }
 
-  friend class ScopedPixelLock;
+  // Set the condition lock to indicate whether the simulation thread is
+  // running.
+  bool is_simulation_running() const {
+    return sim_state_condition_.condition_value() != kSimulationStopped;
+  }
+  void set_is_simulation_running(bool flag) {
+    sim_state_condition_.Lock();
+    sim_state_condition_.UnlockWithCondition(
+        flag ? kSimulationRunning : kSimulationStopped);
+  }
 
  private:
+  // The state of the main simulaiton thread.  These are values that the
+  // simulation condition lock can have.
+  enum SimulationState {
+    kSimulationStopped,
+    kSimulationRunning
+  };
+
   // Produce single bit random values.  Successive calls to value() should
   // return 0 or 1 with a random distribution.
   class RandomBitGenerator {
@@ -86,14 +122,17 @@ class Life : public pp::Instance {
     RandomBitGenerator();  // Not implemented, do not use.
   };
 
-  // Plot a new seed cell in the simulation.  If |x| or |y| fall outside of the
-  // size of the 2D context, then do nothing.
-  void Plot(int x, int y);
+  // Take each character in |rule_string| and convert it into an index value,
+  // set the bit in |life_rules_table_| at each of these indices, applying
+  // |rule_offset|.  Assumes that all necessary locks have been acquired.  Does
+  // no range checking or validation of the strings.
+  void SetRuleFromString(size_t rule_offset,
+                         const std::string& rule_string);
 
   // Add in some random noise to the borders of the simulation, which is used
   // to determine the life of adjacent cells.  This is part of a simulation
   // tick.
-  void Stir();
+  void AddRandomSeed();
 
   // Draw the current state of the simulation into the pixel buffer.
   void UpdateCells();
@@ -101,37 +140,22 @@ class Life : public pp::Instance {
   // Swap the input and output cell arrays.
   void Swap();
 
-  // Create and initialize the 2D context used for drawing.
-  void CreateContext(const pp::Size& size);
-  // Destroy the 2D drawing context.
-  void DestroyContext();
-  // Push the pixels to the browser, then attempt to flush the 2D context.  If
-  // there is a pending flush on the 2D context, then update the pixels only
-  // and do not flush.
-  void FlushPixelBuffer();
-
-  bool IsContextValid() const {
-    return graphics_2d_context_ != NULL;
-  }
-
-  // The main game loop.  This loop runs the Life simulation.  |param| is a
-  // pointer to the Life instance.  This routins is run on its own thread.
+  // The main simulation loop.  This loop runs the Life simulation.  |param| is
+  // a pointer to the Life instance.  This routine is run on its own thread.
   static void* LifeSimulation(void* param);
 
   // Thread support variables.
   pthread_t life_simulation_thread_;
-  bool is_running_;
-  mutable pthread_mutex_t pixel_buffer_mutex_;
-
-  // 2D context variables.
-  pp::Graphics2D* graphics_2d_context_;
-  pp::ImageData* pixel_buffer_;
-  bool flush_pending_;
-  bool view_changed_size_;
-  pp::Size view_size_;
+  pthread_mutex_t life_simulation_mutex_;
+  threading::ConditionLock sim_state_condition_;
+  std::tr1::shared_ptr<LockingImageData> shared_pixel_buffer_;
 
   // Simulation variables.
+  int width_;
+  int height_;
+  threading::ConditionLock simulation_mode_;
   RandomBitGenerator random_bits_;
+  std::vector<uint8_t> life_rules_table_;
   uint8_t* cell_in_;
   uint8_t* cell_out_;
 };

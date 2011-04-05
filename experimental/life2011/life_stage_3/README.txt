@@ -1,7 +1,7 @@
-Life Tutorial Step 2.
+Life Tutorial Step 3.
 
-In this step of the Life Tutorial, we change the game so that it is multi-
-threaded.  When the NaCl module starts up, it spawns a LifeSimulation thread
-which runs the dim ticks.  Some locking classes are added, and some internal
-state is added to handle things like view size changes in a multi-threaded
-environment.
+In this step of the Life Tutorial, we improve performance in two significant
+ways: first, but multi-threading the application, so that the simulation runs
+in its own thread, and not on the browser thread; next, by implementing
+algortihmic improvements that take advantage of the memory lay-out of the data.
+

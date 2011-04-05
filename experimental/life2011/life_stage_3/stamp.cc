@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "experimental/life2011/life_stage_2/stamp.h"
+#include "experimental/life2011/life_stage_3/stamp.h"
 
 #include <algorithm>
 #include <cstring>

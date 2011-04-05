@@ -2,14 +2,27 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Makefile for Stage 3 of the Life2011 tutorial.
+# Makefile for Stage 2 of the Life2011 tutorial.
 
 NACLPORTS_ROOT ?= ../../..
 INSTALL_ROOT ?= $$HOME/Sites/life2011
 INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_3
 
-CCFILES = life_module.cc life.cc
-HFILES = life.h scoped_mutex_lock.h scoped_pixel_lock.h
+CCFILES = life.cc \
+          life_application.cc \
+          life_module.cc \
+          scripting_bridge.cc \
+          stamp.cc
+HFILES = callback.h \
+         condition_lock.h \
+         life.h \
+         life_application.h \
+         locking_image_data.h \
+         pthread_ext.h \
+         scoped_mutex_lock.h \
+         scoped_pixel_lock.h \
+         scripting_bridge.h \
+         stamp.h
 
 CFLAGS = -Wall -Wno-long-long -pthread -Werror
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
@@ -26,8 +39,15 @@ DEBUG_MODULES = life_x86_32_dbg.nexe life_x86_64_dbg.nexe
 ALL_MODULES = $(RELEASE_MODULES) $(DEBUG_MODULES)
 
 APPLICATION_FILES = life.html \
-                    life.css \
                     life.nmf \
+                    closure.js \
+                    life.js \
+                    controllers/viewcontroller.js \
+                    events/dragger.js \
+                    events/event.js \
+                    css/life.css \
+                    css/toolbar.css \
+                    img/toolbar-bg.png \
                     $(RELEASE_MODULES)
 
 # The check_variables target is in nacl_build.mk.
@@ -54,10 +74,10 @@ life_x86_64_dbg.nexe: $(OBJECTS_X86_64_DBG)
 	$(CPP) $^ $(LDFLAGS) -m64 -o $@
 
 install: $(APPLICATION_FILES) $(INSTALL_DIR)
-	install $(APPLICATION_FILES) $(INSTALL_DIR)
+	tar cf - $(APPLICATION_FILES) | (cd $(INSTALL_DIR); tar xvf - --exclude="._*")
 
 $(INSTALL_DIR):
 	mkdir -p $@
 
 clean:
-	-$(RM) *.o *.obj *.nexe
+	-$(RM) -rf *.o *.obj *.nexe

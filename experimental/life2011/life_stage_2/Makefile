@@ -39,8 +39,9 @@ DEBUG_MODULES = life_x86_32_dbg.nexe life_x86_64_dbg.nexe
 ALL_MODULES = $(RELEASE_MODULES) $(DEBUG_MODULES)
 
 APPLICATION_FILES = life.html \
-                    life.js \
                     life.nmf \
+                    closure.js \
+                    life.js \
                     controllers/viewcontroller.js \
                     events/dragger.js \
                     events/event.js \
@@ -79,4 +80,4 @@ $(INSTALL_DIR):
 	mkdir -p $@
 
 clean:
-	-$(RM) -rf $(OBJDIR) *.o *.obj *.nexe
+	-$(RM) -rf *.o *.obj *.nexe
