@@ -20,6 +20,7 @@
 #include "experimental/life2011/life_stage_2/life.h"
 #include "experimental/life2011/life_stage_2/locking_image_data.h"
 #include "experimental/life2011/life_stage_2/pthread_ext.h"
+#include "experimental/life2011/life_stage_2/scripting_bridge.h"
 #include "experimental/life2011/life_stage_2/stamp.h"
 
 namespace life {
@@ -53,29 +54,59 @@ class LifeApplication : public pp::Instance {
   // contents of |pixel_buffer_| to the 2D graphics context.
   void Update();
 
+  // Add a stamp to the set of stamps.  The stamp format is taken from the
+  // .LIF 1.05 spec here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
+  // Exposed to the browser as "addStamp".  |args[0]| is expcted to be a string
+  // variable that contains the stamp definition.  Returns an undefined Var.
+  // On failure, |exception| is set to indicate the error.
+  pp::Var AddStamp(const scripting::ScriptingBridge& bridge,
+                   const std::vector<pp::Var>& args,
+                   pp::Var* exception);
+
   // Set the automaton rules.  The rules are expressed as a string, with the
   // Birth and Keep Alive rules separated by a '/'.  The format follows the .LIF
   // 1.05 format here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
   // Survival/Birth.  Exposed to the browser as SetAutomatonRules.
-  // |rule_string| is expected to be a string type; if not then do nothing.
-  void SetAutomatonRules(const pp::Var& rule_string_var);
+  // |args[0]| is expected to be a string type; if not then do nothing.
+  // Returns an undefined Var.  On failure, |exception| is set to indicate the
+  // error.
+  pp::Var SetAutomatonRules(const scripting::ScriptingBridge& bridge,
+                            const std::vector<pp::Var>& args,
+                            pp::Var* exception);
 
   // Clears the current simulation (resets back to all-dead, graphics buffer to
-  // black).  Exposed to the browser as "clear()".
-  void Clear();
+  // black).  Exposed to the browser as "clear()".  |args| can be empty.
+  // Returns an undefined Var.  On failure, |exception| is set to indicate the
+  // error.
+  pp::Var Clear(const scripting::ScriptingBridge& bridge,
+                const std::vector<pp::Var>& args,
+                pp::Var* exception);
 
-  // Plot a new blob of life centered around (|var_x|, |var_y|).  This method
-  // is exposed to the browser as "addStampAtPoint()".
-  void AddStampAtPoint(const pp::Var& var_x, const pp::Var& var_y);
+  // Plot a new blob of life centered around (|args[0]|, |args[1]|).  There
+  // must be at least two args, both of them number values.  This method is
+  // exposed to the browser as "putStampAtPoint()".  Returns an undefined Var.
+  // On failure, |exception| is set to indicate the error.
+  pp::Var PutStampAtPoint(const scripting::ScriptingBridge& bridge,
+                          const std::vector<pp::Var>& args,
+                          pp::Var* exception);
 
-  // Run the simulation in a mode.  If the mode is changed, then the simulation
-  // is stoped and restarted in the new mode.  |simulation_mode| is expected
-  // to be a string.  Exposed to the browser as "runSimulation()".
-  void RunSimulation(const pp::Var& simulation_mode);
+  // Run the simulation in the sepcified mode.  If the mode is changed, then
+  // the simulation is stoped and restarted in the new mode.  |args[0]| is
+  // expected to be a string describing the mode, and can be one of
+  // "random_seed" or "stamp".  Exposed to the browser as "runSimulation()".
+  // Returns an undefined Var.  On failure, |exception| is set to indicate the
+  // error.
+  pp::Var RunSimulation(const scripting::ScriptingBridge& bridge,
+                        const std::vector<pp::Var>& args,
+                        pp::Var* exception);
 
   // Stop the simulation.  Does nothing if the simulation is stopped.
-  // Exposed to the browser as "stopSimulation()".
-  void StopSimulation();
+  // Exposed to the browser as "stopSimulation()".  |args| can be empty.
+  // Returns an undefined Var.  On failure, |exception| is set to indicate the
+  // error.
+  pp::Var StopSimulation(const scripting::ScriptingBridge& bridge,
+                         const std::vector<pp::Var>& args,
+                         pp::Var* exception);
 
   int width() const {
     return shared_pixel_buffer_ ? shared_pixel_buffer_->size().width() : 0;
@@ -99,31 +130,6 @@ class LifeApplication : public pp::Instance {
   }
 
  private:
-  // This class exposes the scripting interface for this NaCl module.  The
-  // HasMethod method is called by the browser when executing a method call on
-  // the |life| object (see, e.g. the update() function in
-  // life.html).  The name of the JavaScript function (e.g. "paint") is
-  // passed in the |method| parameter as a string pp::Var.  If HasMethod()
-  // returns |true|, then the browser will call the Call() method to actually
-  // invoke the method.
-  class LifeScriptObject : public pp::deprecated::ScriptableObject {
-   public:
-    explicit LifeScriptObject(LifeApplication* app_instance)
-        : pp::deprecated::ScriptableObject(),
-          app_instance_(app_instance) {}
-    virtual ~LifeScriptObject() {}
-    // Return |true| if |method| is one of the exposed method names.
-    virtual bool HasMethod(const pp::Var& method, pp::Var* exception);
-
-    // Invoke the function associated with |method|.  The argument list passed
-    // in via JavaScript is marshaled into a vector of pp::Vars.
-    virtual pp::Var Call(const pp::Var& method,
-                         const std::vector<pp::Var>& args,
-                         pp::Var* exception);
-   private:
-    LifeApplication* app_instance_;  // weak reference.
-  };
-
   // Create and initialize the 2D context used for drawing.
   void CreateContext(const pp::Size& size);
   // Destroy the 2D drawing context.

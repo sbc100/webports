@@ -53,7 +53,7 @@ class Life {
   void ClearCells();
 
   // Stamp |stamp| at point |point| in both the pixel and cell buffers.
-  void AddStampAtPoint(const Stamp& stamp, const pp::Point& point);
+  void PutStampAtPoint(const Stamp& stamp, const pp::Point& point);
 
   // Stop the simulation.  Does nothing if the simulation is stopped.
   void StopSimulation();

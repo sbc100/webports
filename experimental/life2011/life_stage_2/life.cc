@@ -142,7 +142,7 @@ void Life::ClearCells() {
     std::fill(cell_out_, cell_out_ + size, 0);
 }
 
-void Life::AddStampAtPoint(const Stamp& stamp, const pp::Point& point) {
+void Life::PutStampAtPoint(const Stamp& stamp, const pp::Point& point) {
   // Note: do not acquire the pixel lock here, because stamping is done in the
   // UI thread.
   stamp.StampAtPointInBuffers(

@@ -185,7 +185,7 @@ life.controllers.ViewController.prototype.handleStartDrag_ =
   var point = this.convertPointToWindow(
       new goog.math.Coordinate(dragStartEvent.clientX,
                                dragStartEvent.clientY));
-  this.module_.addStampAtPoint(point.x, point.y);
+  this.module_.putStampAtPoint(point.x, point.y);
 };
 
 /**
@@ -198,7 +198,7 @@ life.controllers.ViewController.prototype.handleDrag_ = function(dragEvent) {
   dragEvent.stopPropagation();
   var point = this.convertPointToWindow(
       new goog.math.Coordinate(dragEvent.clientX, dragEvent.clientY));
-  this.module_.addStampAtPoint(point.x, point.y);
+  this.module_.putStampAtPoint(point.x, point.y);
 };
 
 /**
