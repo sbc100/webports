@@ -15,7 +15,7 @@ Chess.Alert = function(message) {
   alert(message);
 };
 
-/// 
+///
 /// Variables for currently selected piece/coordinate, and lastMove
 ///
 Chess.selectedPiece = null;
@@ -32,7 +32,7 @@ Chess.boardString = '';
 Chess.state = 'PlayerTurn';
 Chess.getState = function() {
   return Chess.state;
-}
+};
 Chess.nextState = function() {
   if (Chess.state == 'PlayerTurn') {
     Chess.state = 'PlayerDone';
@@ -44,10 +44,10 @@ Chess.nextState = function() {
     Chess.state = 'PlayerTurn';
   }
   return Chess.state;
-}
+};
 Chess.setState = function(s) {
   Chess.state = s;
-}
+};
 
 
 Chess.boardSize = 8;
@@ -131,7 +131,7 @@ Chess.notationStrToCoord = function(notationString) {
     return null;
   }
   return new Chess.Coordinate(column, row);
-}
+};
 
 //
 // Clear a context
@@ -181,9 +181,9 @@ Chess.Piece.pieceFactory = function(character) {
     case ' ':
       console.log('returning null in pieceFactory');
       return null;
-    case 'p': 
+    case 'p':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.PAWN);
-    case 'P': 
+    case 'P':
       return new Chess.Piece(Chess.ColorType.WHITE, Chess.PieceType.PAWN);
     case 'r':
       return new Chess.Piece(Chess.ColorType.BLACK, Chess.PieceType.ROOK);
@@ -208,7 +208,7 @@ Chess.Piece.pieceFactory = function(character) {
     default:
       Chess.Alert('Bad piece [' + character + '] in Chess.Piece.pieceFactory');
   }
-}
+};
 
 //
 // BoardContents class
@@ -244,7 +244,7 @@ Chess.BoardContents.prototype.getPieceAtNotation = function(notation) {
   }
   var coord = Chess.notationStrToCoord(notation);
   return this.getPiece(coord.getColumn(), coord.getRow());
-}
+};
 
 Chess.BoardContents.prototype.toString = function() {
   var theString = '';
@@ -550,7 +550,8 @@ Chess.Board.prototype.Init = function() {
 };
 
 
-Chess.Board.prototype.drawPiece = function(ctx, column, row, pieceType, colorType) {
+Chess.Board.prototype.drawPiece = function(ctx, column, row, pieceType,
+                                           colorType) {
   var theImage;
   switch (pieceType) {
     case Chess.PieceType.PAWN:
@@ -641,16 +642,19 @@ Chess.mouseDownHandler = function(e) {
       return;
     } else if (Chess.selectedCoord.getColumn() == column &&
                Chess.selectedCoord.getRow() == row) {
-      // then we clicked on the selected piece 
+      // then we clicked on the selected piece
       Chess.selectedPiece = null;  // unselect the piece & we are done
     } else {
       // save the old state in case we need to Undo
       Chess.boardString = theBoard.contents.toString();
 
       // do the move
-      var toNotation = theBoard.convertColumnToLetter(column) + theBoard.convertRowToChessRow(row);
-      var fromNotation = theBoard.convertColumnToLetter(Chess.selectedCoord.getColumn()) +
-                         theBoard.convertRowToChessRow(Chess.selectedCoord.getRow());
+      var toNotation = theBoard.convertColumnToLetter(column) +
+                       theBoard.convertRowToChessRow(row);
+      var fromNotation = theBoard.convertColumnToLetter(
+                           Chess.selectedCoord.getColumn()) +
+                         theBoard.convertRowToChessRow(
+                           Chess.selectedCoord.getRow());
 
       var isCastleMove = false;
       var rookCastleOldCoord = null;
@@ -683,7 +687,9 @@ Chess.mouseDownHandler = function(e) {
                                    rookCastleNewCoord.getRow(), theRook);
           theBoard.contents.update(rookCastleOldCoord.getColumn(),
                                    rookCastleOldCoord.getRow(), null);
-          console.log('DOING CASTLE theRook = ' + theRook.toString() + ' new:' + rookCastleNewCoord.toString() + ' old:' + rookCastleOldCoord.toString());
+          console.log('DOING CASTLE theRook = ' + theRook.toString() +
+                      ' new:' + rookCastleNewCoord.toString() + ' old:' +
+                      rookCastleOldCoord.toString());
         }
 
         // Clear last selected piece/coord; advance state;
@@ -748,7 +754,6 @@ Chess.updateBoardHandler = function() {
 
     // if the line is not empty and is not the header-line that contains
     // 'white', then lets put in |boardString| which is just the contents
-   
     if (lineArray[index].length > 0 &&
         lineArray[index].indexOf('white') == -1) {
       boardString += lineArray[index] + '\n';
@@ -771,8 +776,8 @@ Chess.updateBoardHandler = function() {
 ///
 Chess.doMove = function(fromNotation, toNotation) {
   var fromCoord = Chess.notationStrToCoord(fromNotation);
-  if (fromCoord==null) {
-    Chess.Alert('Error, fromNotation [' + fromNotation + '] is not valid');
+  if (!fromCoord) {
+    Chess.Alert('Error: fromNotation [' + fromNotation + '] is not valid');
     return false;
   }
 
@@ -789,20 +794,20 @@ Chess.doMove = function(fromNotation, toNotation) {
   var promotionPiece = '';
   var newPieceInTo = null;  // new piece in To location for promotion
   if (toNotation.length == 3) {
-    promotionPiece = toNotation.substr(2, 1);  // grab the promotionPiece 
+    promotionPiece = toNotation.substr(2, 1);  // grab the promotionPiece
     toNotation = toNotation.substr(0, 2); // shorten to the 2 characters
   }
   var toCoord = Chess.notationStrToCoord(toNotation);
   console.log('toCoord=' + toCoord);
-  if (toCoord==null) {
-    Chess.Alert('Error, toNotation[' + toNotation + '] is not valid');
+  if (toCoord == null) {
+    Chess.Alert('Error: toNotation[' + toNotation + '] is not valid');
     return false;
   }
   var pieceInTo = theBoard.contents.getPieceAtNotation(toNotation);
   var pieceInToString = ' NONE ';
   if (pieceInTo) {
     pieceInToString = pieceInTo.toString();
-  } 
+  }
   console.log('Piece at that location is ' + pieceInFromString +
               ' piece in the new location is ' + pieceInToString);
 
@@ -815,7 +820,7 @@ Chess.doMove = function(fromNotation, toNotation) {
     }
     var row = toCoord.getRow();
     if (row != 7 && row != 0) {
-      Chess.Alert('Error, ' + toNotation + ' is not a valid promotion location');
+      Chess.Alert('Error:' + toNotation + ' is not a valid promotion location');
       return false;
     }
     if (newPieceInTo.getColor() != pieceInFrom.getColor()) {
@@ -828,16 +833,18 @@ Chess.doMove = function(fromNotation, toNotation) {
 
   // actually change the board
   if (newPieceInTo) {
-    theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(), newPieceInTo);
+    theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(),
+                             newPieceInTo);
   } else {
-    theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(), pieceInFrom);
+    theBoard.contents.update(toCoord.getColumn(), toCoord.getRow(),
+                             pieceInFrom);
   }
   theBoard.contents.update(fromCoord.getColumn(), fromCoord.getRow(), null);
   // clear the piece layer so we redraw it
   clearContext(Chess.ctxPieces, Chess.canvasPieces);
   theBoard.drawPieces(Chess.ctxPieces);
   return true;
-}
+};
 
 Chess.cmdHandler = function() {
   var cmdField = document.getElementById('userCmd');
@@ -848,11 +855,11 @@ Chess.cmdHandler = function() {
     Chess.Alert('Cmd:' + cmdField.value + ' Reply {' + cmdReply + '}');
     return;
   }
-}
+};
 
 theBoard = new Chess.Board();
 
-// 
+//
 // if answer starts with 'move:' 'move ' or 'move' remove that
 //
 Chess.filterAnswer = function(str) {
@@ -861,13 +868,14 @@ Chess.filterAnswer = function(str) {
   var prefixList = ['move:', 'Move:', 'move', 'Move'];
   var foundPrefix = false;
 
-  // Remove a word from prefixList from the beginning of |str| 
-  while ( index < prefixList.length && !foundPrefix) {
+  // Remove a word from prefixList from the beginning of |str|
+  while (index < prefixList.length && !foundPrefix) {
     var prefix = prefixList[index];
     var prefix_location = str.indexOf(prefix);
     if (prefix_location != -1) {
       foundPrefix = true;
-      newString = str.substr(prefix_location + prefix.length);  // start after |prefix|
+      // start after |prefix|
+      newString = str.substr(prefix_location + prefix.length);
     }
     ++index;
   }
@@ -877,7 +885,7 @@ Chess.filterAnswer = function(str) {
 
   console.log('FILTER [' + str + '] => [' + newString + ']');
   return newString;
-}
+};
 
 Chess.handleReply = function(answer) {
   // if answer contains 'move' then handle the board update for AI move
@@ -897,7 +905,7 @@ Chess.handleReply = function(answer) {
     theBoard.drawPieces(Chess.ctxPieces);
 
     // set state back to PlayerTurn...
-    Chess.setState('PlayerTurn'); 
+    Chess.setState('PlayerTurn');
 
   } else if (answer.indexOf('win') != -1) {
     Chess.updateBoardHandler(); //update the board with the final configuration
@@ -914,25 +922,25 @@ Chess.handleReply = function(answer) {
                   toNotation + '] based on [' + answer + ']');
     }
     theBoard.drawPieces(Chess.ctxPieces);
-    Chess.nextState(); 
+    Chess.nextState();
   }
-}
+};
 
 Chess.updateLastMove = function(lastMove) {
   var lastMoveField = document.getElementById('LastMove');
   if (!lastMoveField) {
-    console.log('Error getting lastMoveField, could not by element with id LastMove');
+    console.log('Error getting element with id LastMove');
     return;
   }
   lastMoveField.innerHTML = lastMove;
   var historyField = document.getElementById('History');
   if (!historyField) {
-    console.log('Error getting historyField, could not by element with id History');
+    console.log('Error getting element with id History');
     return;
   }
   var historySoFar = historyField.innerHTML;
   historyField.innerHTML = historySoFar + '<br>' + lastMove;
-}
+};
 
 Chess.mainLoop = function() {
   theBoard.drawPieces(Chess.ctxPieces);
@@ -968,7 +976,7 @@ Chess.mainLoop = function() {
   } else {
     selectedPieceField.innerHTML = '';
   }
-}
+};
 
 if (Chess.canvasScratch != undefined) {
   Chess.canvasScratch.onmousedown = Chess.mouseDownHandler;
