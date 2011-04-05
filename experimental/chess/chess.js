@@ -701,6 +701,16 @@ Chess.mouseDownHandler = function(e) {
         Chess.selectedCoord = null;
 
         // FIXME -- valid move -- redraw pieces
+        clearContext(Chess.ctxScratch, Chess.canvasScratch);
+        clearContext(Chess.ctxPieces, Chess.canvasPieces);
+        theBoard.drawPieces(Chess.ctxPieces);
+      } else {
+        // error calling doMove -- unselected selected piece
+        console.log('Error calling doMove, de-selecting...');
+        Chess.selectedPiece = null;
+        Chess.selectedCoord = null;
+        // FIXME -- valid move -- redraw pieces
+        clearContext(Chess.ctxScratch, Chess.canvasScratch);
         clearContext(Chess.ctxPieces, Chess.canvasPieces);
         theBoard.drawPieces(Chess.ctxPieces);
       }
@@ -722,8 +732,8 @@ Chess.mouseDownHandler = function(e) {
   }
   if (x != -1 && y != -1) {
     console.log(message);
-    console.log('naclModule = ' + naclModule);
-    var moveList = naclModule.GetChoices(boardString);
+    console.log('naclHelperModule = ' + naclHelperModule);
+    var moveList = naclHelperModule.GetChoices(boardString);
     moveList = moveList.replace(/^\s*/gi, '');  // trim leading spaces
     moveList = moveList.replace(/\s*$/gi, '');  // trim trailing spaces
     console.log('NEXE moveList=' + moveList);

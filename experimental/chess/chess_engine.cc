@@ -161,17 +161,23 @@ Side GetSide(char piece) {
   return BLACK;
 }
 
-///
-/// Return true if the piece is a pawn
-///
 bool IsPawn(char piece) {
   return (piece == 'p' || piece == 'P');
 }
-
-///
-///
 bool IsKnight(char piece) {
   return (piece == 'n' || piece == 'N');
+}
+bool IsBishop(char piece) {
+  return (piece == 'b' || piece == 'B');
+}
+bool IsRook(char piece) {
+  return (piece == 'r' || piece == 'R');
+}
+bool IsKing(char piece) {
+  return (piece == 'k' || piece == 'K');
+}
+bool IsQueen(char piece) {
+  return (piece == 'q' || piece == 'Q');
 }
 
 ///
@@ -215,6 +221,147 @@ int GetPawnHomeRow(Side side_on_top, Side myside) {
   return 6;
 }
 
+void GetKingMoves(int x, int y, Side myside, Board *board,
+                  Coord *last_move,
+                  std::vector<Coord>* moves) {
+  char mypiece = board->PieceAt(x, y);
+  int dx, dy;
+  Coord move_coord;
+  for (dx = -1; dx <= 1; ++dx) {
+    for (dy = -1; dy <= 1; ++dy) {
+      if (dx != 0 || dy != 0) {
+        printf("Considering %d %d from %x %d\n", dx, dy, x, y);
+        // moving in at least one dimension
+        bool is_valid = GetCoordFromXY(x, y, myside, board->GetTopSide(),
+                                       dx, dy, &move_coord);
+        // see if this move is_valid (on board) and not on friendly piece
+        if (is_valid && !board->FriendlyPieceAt(move_coord, mypiece)) {
+          moves->push_back(move_coord);
+        }
+        // TODO -- need to check if we are moving into check!
+      }
+    }
+  }
+}
+
+
+void GetRookMoves(int x, int y, Side myside, Board *board,
+                    Coord *last_move,
+                    std::vector<Coord>* moves) {
+  char mypiece = board->PieceAt(x, y);
+  int dx, dy;
+  int total_dx, total_dy;
+  bool is_valid;
+  Coord move_coord;
+
+  for (int direction = 0; direction < 4; ++direction) {
+    switch (direction) {
+      case 0: // up 
+        dx = 0;
+        dy = 1;
+        break;
+      case 1: // down
+        dx = 0;
+        dy = -1;
+        break;
+      case 2: // left 
+        dx = -1;
+        dy = 0;
+        break;
+      case 3: // right
+        dx = 1;
+        dy = 0;
+        break;
+    }
+    total_dx = dx;
+    total_dy = dy;
+    do {
+      is_valid = GetCoordFromXY(x, y, myside, board->GetTopSide(),
+                                total_dx, total_dy,
+                                &move_coord);
+      if (is_valid && board->FriendlyPieceAt(move_coord, mypiece)) {
+        // then we are done in this direction
+        is_valid = false;
+        printf("Found friendly piece at %d:%d\n", move_coord.x_, move_coord.y_);
+      } else if (is_valid && board->EnemyPieceAt(move_coord, mypiece)) {
+        // then we can move here...but no more in this direction
+        moves->push_back(move_coord);
+        is_valid = false;
+        printf("Found enemy piece at %d:%d\n", move_coord.x_, move_coord.y_);
+      } else if (is_valid) {
+        printf("Found empty coord at %d:%d\n", move_coord.x_, move_coord.y_);
+        moves->push_back(move_coord);
+      }
+      total_dx += dx;
+      total_dy += dy;
+    }
+    while (is_valid);
+  }
+}
+
+void GetBishopMoves(int x, int y, Side myside, Board *board,
+                    Coord *last_move,
+                    std::vector<Coord>* moves) {
+  char mypiece = board->PieceAt(x, y);
+  int dx, dy;
+  int total_dx, total_dy;
+  bool is_valid;
+  Coord move_coord;
+
+  for (int direction = 0; direction < 4; ++direction) {
+    switch (direction) {
+      case 0: // up and left
+        dx = -1;
+        dy = 1;
+        break;
+      case 1: // up and right
+        dx = 1;
+        dy = 1;
+        break;
+      case 2: // down and left 
+        dx = -1;
+        dy = -1;
+        break;
+      case 3: // down and right
+        dx = 1;
+        dy = -1;
+        break;
+    }
+    total_dx = dx;
+    total_dy = dy;
+    do {
+      is_valid = GetCoordFromXY(x, y, myside, board->GetTopSide(),
+                                total_dx, total_dy,
+                                &move_coord);
+  
+      if (is_valid && board->FriendlyPieceAt(move_coord, mypiece)) {
+        // then we are done in this direction
+        is_valid = false;
+        printf("Found friendly piece at %d:%d\n", move_coord.x_, move_coord.y_);
+      } else if (is_valid && board->EnemyPieceAt(move_coord, mypiece)) {
+        // then we can move here...but no more in this direction
+        moves->push_back(move_coord);
+        is_valid = false;
+        printf("Found enemy piece at %d:%d\n", move_coord.x_, move_coord.y_);
+      } else if (is_valid) {
+        printf("Found empty coord at %d:%d\n", move_coord.x_, move_coord.y_);
+        moves->push_back(move_coord);
+      }
+      total_dx += dx;
+      total_dy += dy;
+    }
+    while (is_valid);
+  }
+}
+
+void GetQueenMoves(int x, int y, Side myside, Board *board,
+                   Coord *last_move,
+                   std::vector<Coord>* moves) {
+  // the queen has the combined moves of a bishop AND a rook
+  GetRookMoves(x, y, myside, board, last_move, moves);
+  GetBishopMoves(x, y, myside, board, last_move, moves);
+}
+
 void GetKnightMoves(int x, int y, Side myside, Board *board,
                     Coord *last_move,
                     std::vector<Coord>* moves) {
@@ -251,10 +398,18 @@ void GetPawnMoves(int x, int y, Side myside, Board *board,
   bool is_valid_one_ahead;
   is_valid_one_ahead = GetCoordFromXY(x, y, myside, board->GetTopSide(), 0, 1,
                                       &one_ahead);
+  char mypiece = board->PieceAt(x, y);
+
+  if(is_valid_one_ahead) {
+    // if moving one space ahead is valid, make sure that space is empty
+    if(board->AnyPieceAt(one_ahead)) {
+      printf("Piece at %d:%d, cannot move one\n", one_ahead.x_, one_ahead.y_);
+      is_valid_one_ahead = false;
+    }
+  }
 
   // we can move one straight ahead if its empty
   if (is_valid_one_ahead) {
-    // FIXME -- check if it's empty!  If not, change is_valid_one_ahead to false
     moves->push_back(one_ahead);
   }
 
@@ -262,11 +417,28 @@ void GetPawnMoves(int x, int y, Side myside, Board *board,
     // then we can move two straight ahead if both are empty
     bool is_valid = GetCoordFromXY(x, y, myside, board->GetTopSide(), 0, 2,
                                    &two_ahead);
+
+    // if moving two spaces ahead is valid, make sure that space is empty
+    if(board->AnyPieceAt(two_ahead)) {
+      printf("Piece at %d:%d, cannot move two\n", two_ahead.x_, two_ahead.y_);
+      is_valid = false;
+    }
     if (is_valid)
-      // FIXME -- check if it's empty!
       moves->push_back(two_ahead);
   }
+
   // if an opponent is diagonal one space on either side we can move there too
+  Coord diag_left;
+  bool is_valid_left = GetCoordFromXY(x, y, myside, board->GetTopSide(), -1, 1,
+                                      &diag_left);
+  if (is_valid_left && board->EnemyPieceAt(diag_left, mypiece))
+    moves->push_back(diag_left);
+
+  Coord diag_right;
+  bool is_valid_right = GetCoordFromXY(x, y, myside, board->GetTopSide(),  1, 1,
+                                       &diag_right);
+  if (is_valid_right && board->EnemyPieceAt(diag_right, mypiece))
+    moves->push_back(diag_right);
 }
 
 /// This function is passed the arg list from the JavaScript call to
@@ -384,6 +556,18 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
   } else if (IsKnight(selected_piece)) {
     printf("KNIGHT\n");
     GetKnightMoves(column, row, my_side, board, NULL, &moves);
+  } else if (IsBishop(selected_piece)) {
+    printf("BISHOP\n");
+    GetBishopMoves(column, row, my_side, board, NULL, &moves);
+  } else if (IsRook(selected_piece)) {
+    printf("ROOK\n");
+    GetRookMoves(column, row, my_side, board, NULL, &moves);
+  } else if (IsKing(selected_piece)) {
+    printf("KING\n");
+    GetKingMoves(column, row, my_side, board, NULL, &moves);
+  } else if (IsQueen(selected_piece)) {
+    printf("QUEEN\n");
+    GetQueenMoves(column, row, my_side, board, NULL, &moves);
   } else {
     printf("UNSUPPORTED PIECE %c\n", selected_piece);
   }

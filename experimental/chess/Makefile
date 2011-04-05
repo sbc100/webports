@@ -46,7 +46,7 @@ chess_engine_x86_64_dbg.nexe: $(OBJECTS_X86_64_DBG)
 	$(CPP) $^ $(LDFLAGS) -m64 -o $@
 
 clean:
-	-$(RM) *.o *.nexe *.obj
+	-$(RM) *.o chess_engine*.nexe *.obj
 
 # This target is used by the SDK build system to produce a pre-built version
 # of the .nexe.  You do not need to call this target.

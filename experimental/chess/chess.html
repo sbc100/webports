@@ -5,6 +5,7 @@
 <title>Chess Canvas</title>
   <script type="text/javascript">
     naclModule = null;  // Global application object.
+    naclHelperModule = null;  // Global application object.
     statusText = 'NO-STATUS';
 
     // Set the global |field| message.  If the element with id |field|
@@ -23,8 +24,12 @@
     }
 
     function moduleDidLoad() {
-      naclModule = document.getElementById('chess_engine');
+      naclModule = document.getElementById('chess_ai');
       updateHtmlField('status_field', 'SUCCESS');
+    }
+    function helperModuleDidLoad() {
+      naclHelperModule = document.getElementById('nacl_chess_helper');
+      updateHtmlField('helper_status_field', 'SUCCESS');
     }
     // If the page loads before the Native Client module loads, then set the
     // status message indicating that the module is still loading.  Otherwise,
@@ -32,12 +37,14 @@
     function pageDidLoad() {
       if (naclModule == null) {
         updateHtmlField('status_field', 'LOADING...');
+        updateHtmlField('helper_status_field', 'LOADING...');
       } else {
         // It's possible that the Native Client module onload event fired
         // before the page's onload event.  In this case, the status message
         // will reflect 'SUCCESS', but won't be displayed.  This call will
         // display the current message.
         updateHtmlField('status_field', 'LOADED');
+        updateHtmlField('helper_status_field', 'LOADED');
       }
     }
 
@@ -45,11 +52,17 @@
 </head>
 <body onload="pageDidLoad()">
   <embed name="nacl_module"
-         id="chess_engine"
+         id="chess_ai"
          width=0 height=0
-         nacl="chess.nmf"
+         nacl="nacl_chess.nmf"
          type="application/x-nacl"
          onload="moduleDidLoad();" />
+  <embed name="helper_module"
+         id="nacl_chess_helper"
+         width=0 height=0
+         nacl="nacl_chess_helper.nmf"
+         type="application/x-nacl"
+         onload="helperModuleDidLoad();" />
 <p>
 
 <div>
@@ -86,7 +99,8 @@
   <div id="State">?State?</div>
   <div id="SelectedPiece">?SelectedPiece?</div>
   Nexe status
-  <div id="status_field">NO-STATUS</div>
+  <div id="status_field">AI: NO-STATUS</div>
+  <div id="helper_status_field">UI helper: NO-STATUS</div>
   <div id="LastMove">?LM?</div>
 
   <button onClick="Chess.updateBoardHandler()">Update board</button><BR>
