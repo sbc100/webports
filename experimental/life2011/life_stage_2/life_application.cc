@@ -15,9 +15,6 @@
 #include <cstring>
 #include <string>
 
-#include "experimental/life2011/life_stage_2/scoped_mutex_lock.h"
-#include "experimental/life2011/life_stage_2/scoped_pixel_lock.h"
-
 namespace {
 const char* const kClearMethodId = "clear";
 const char* const kPutStampAtPointMethodId = "putStampAtPoint";
@@ -85,7 +82,6 @@ LifeApplication::LifeApplication(PP_Instance instance)
 }
 
 LifeApplication::~LifeApplication() {
-  life_simulation_.set_is_simulation_running(false);
   DestroyContext();
 }
 
@@ -130,7 +126,6 @@ pp::Var LifeApplication::GetInstanceObject() {
 bool LifeApplication::Init(uint32_t /* argc */,
                            const char* /* argn */[],
                            const char* /* argv */[]) {
-  life_simulation_.StartSimulation();
   return true;
 }
 
@@ -156,19 +151,15 @@ void LifeApplication::Update() {
     DestroyContext();
     CreateContext(view_size_);
     // Delete the old pixel buffer and create a new one.
-    threading::ScopedMutexLock scoped_mutex(
-        life_simulation_.simulation_mutex());
-    if (!scoped_mutex.is_valid())
-      return;
     life_simulation_.DeleteCells();
     if (graphics_2d_context_ != NULL) {
       shared_pixel_buffer_.reset(
-          new LockingImageData(this,
-                               PP_IMAGEDATAFORMAT_BGRA_PREMUL,
-                               graphics_2d_context_->size(),
-                               false));
+          new pp::ImageData(this,
+                            PP_IMAGEDATAFORMAT_BGRA_PREMUL,
+                            graphics_2d_context_->size(),
+                            false));
       set_flush_pending(false);
-      uint32_t* pixels = shared_pixel_buffer_->PixelBufferNoLock();
+      uint32_t* pixels = static_cast<uint32_t*>(shared_pixel_buffer_->data());
       if (pixels) {
         const size_t size = width() * height();
         std::fill(pixels, pixels + size, MakeRGBA(0, 0, 0, 0xff));
@@ -178,6 +169,8 @@ void LifeApplication::Update() {
     }
     view_changed_size_ = false;
   }
+  if (is_running())
+    life_simulation_.LifeSimulation();
   FlushPixelBuffer();
 }
 
@@ -211,8 +204,7 @@ pp::Var LifeApplication::Clear(const ScriptingBridge& bridge,
   if (sim_mode != Life::kPaused)
     life_simulation_.set_simulation_mode(Life::kPaused);
   life_simulation_.ClearCells();
-  ScopedPixelLock scoped_pixel_lock(shared_pixel_buffer_.get());
-  uint32_t* pixel_buffer = scoped_pixel_lock.pixels();
+  uint32_t* pixel_buffer = static_cast<uint32_t*>(shared_pixel_buffer_->data());
   if (pixel_buffer) {
     const size_t size = width() * height();
     std::fill(pixel_buffer,
@@ -315,10 +307,6 @@ void LifeApplication::CreateContext(const pp::Size& size) {
 }
 
 void LifeApplication::DestroyContext() {
-  threading::ScopedMutexLock scoped_mutex(life_simulation_.simulation_mutex());
-  if (!scoped_mutex.is_valid()) {
-    return;
-  }
   if (!IsContextValid())
     return;
   shared_pixel_buffer_.reset();

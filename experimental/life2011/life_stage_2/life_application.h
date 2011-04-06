@@ -7,6 +7,7 @@
 
 #include <ppapi/cpp/dev/scriptable_object_deprecated.h>
 #include <ppapi/cpp/graphics_2d.h>
+#include <ppapi/cpp/image_data.h>
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/rect.h>
 #include <ppapi/cpp/size.h>
@@ -17,10 +18,7 @@
 #include <tr1/memory>
 #include <vector>
 
-#include "experimental/life2011/life_stage_2/condition_lock.h"
 #include "experimental/life2011/life_stage_2/life.h"
-#include "experimental/life2011/life_stage_2/locking_image_data.h"
-#include "experimental/life2011/life_stage_2/pthread_ext.h"
 #include "experimental/life2011/life_stage_2/scripting_bridge.h"
 #include "experimental/life2011/life_stage_2/stamp.h"
 
@@ -151,7 +149,7 @@ class LifeApplication : public pp::Instance {
   Life life_simulation_;
 
   // 2D context variables.
-  std::tr1::shared_ptr<LockingImageData> shared_pixel_buffer_;
+  std::tr1::shared_ptr<pp::ImageData> shared_pixel_buffer_;
   pp::Graphics2D* graphics_2d_context_;
   bool flush_pending_;
   bool view_changed_size_;

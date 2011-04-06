@@ -14,13 +14,8 @@ CCFILES = life.cc \
           scripting_bridge.cc \
           stamp.cc
 HFILES = callback.h \
-         condition_lock.h \
          life.h \
          life_application.h \
-         locking_image_data.h \
-         pthread_ext.h \
-         scoped_mutex_lock.h \
-         scoped_pixel_lock.h \
          scripting_bridge.h \
          stamp.h
 

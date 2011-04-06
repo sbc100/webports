@@ -5,15 +5,13 @@
 #ifndef LIFE_H_
 #define LIFE_H_
 
+#include <ppapi/cpp/image_data.h>
 #include <ppapi/cpp/point.h>
 
 #include <string>
 #include <tr1/memory>
 #include <vector>
 
-#include "experimental/life2011/life_stage_2/condition_lock.h"
-#include "experimental/life2011/life_stage_2/locking_image_data.h"
-#include "experimental/life2011/life_stage_2/pthread_ext.h"
 #include "experimental/life2011/life_stage_2/stamp.h"
 
 namespace life {
@@ -32,8 +30,8 @@ class Life {
   Life();
   virtual ~Life();
 
-  // Start up the simulation thread.
-  void StartSimulation();
+  // Run a single tick of the simulation.
+  void LifeSimulation();
 
   // Set the automaton rules.  The rules are expressed as a string, with the
   // Birth and Keep Alive rules separated by a '/'.  The format follows the .LIF
@@ -58,16 +56,11 @@ class Life {
   // Stop the simulation.  Does nothing if the simulation is stopped.
   void StopSimulation();
 
-  // Sleep on the condition that the current simulation mode is not the
-  // paused mode.  Returns the new run mode.
-  SimulationMode WaitForRunMode();
-
   SimulationMode simulation_mode() const {
-    return static_cast<SimulationMode>(simulation_mode_.condition_value());
+    return simulation_mode_;
   }
   void set_simulation_mode(SimulationMode new_mode) {
-    simulation_mode_.Lock();
-    simulation_mode_.UnlockWithCondition(new_mode);
+    simulation_mode_ = new_mode;
   }
 
   int width() const {
@@ -78,33 +71,11 @@ class Life {
   }
 
   void set_pixel_buffer(
-      const std::tr1::shared_ptr<LockingImageData>& pixel_buffer) {
+      const std::tr1::shared_ptr<pp::ImageData>& pixel_buffer) {
     shared_pixel_buffer_ = pixel_buffer;
   }
 
-  pthread_mutex_t* simulation_mutex() {
-    return &life_simulation_mutex_;
-  }
-
-  // Set the condition lock to indicate whether the simulation thread is
-  // running.
-  bool is_simulation_running() const {
-    return sim_state_condition_.condition_value() != kSimulationStopped;
-  }
-  void set_is_simulation_running(bool flag) {
-    sim_state_condition_.Lock();
-    sim_state_condition_.UnlockWithCondition(
-        flag ? kSimulationRunning : kSimulationStopped);
-  }
-
  private:
-  // The state of the main simulaiton thread.  These are values that the
-  // simulation condition lock can have.
-  enum SimulationState {
-    kSimulationStopped,
-    kSimulationRunning
-  };
-
   // Produce single bit random values.  Successive calls to value() should
   // return 0 or 1 with a random distribution.
   class RandomBitGenerator {
@@ -140,20 +111,13 @@ class Life {
   // Swap the input and output cell arrays.
   void Swap();
 
-  // The main simulation loop.  This loop runs the Life simulation.  |param| is
-  // a pointer to the Life instance.  This routine is run on its own thread.
-  static void* LifeSimulation(void* param);
-
-  // Thread support variables.
-  pthread_t life_simulation_thread_;
-  pthread_mutex_t life_simulation_mutex_;
-  threading::ConditionLock sim_state_condition_;
-  std::tr1::shared_ptr<LockingImageData> shared_pixel_buffer_;
+  std::tr1::shared_ptr<pp::ImageData> shared_pixel_buffer_;
 
   // Simulation variables.
+  SimulationMode simulation_mode_;
+  bool simulation_running_;
   int width_;
   int height_;
-  threading::ConditionLock simulation_mode_;
   RandomBitGenerator random_bits_;
   std::vector<uint8_t> life_rules_table_;
   uint8_t* cell_in_;

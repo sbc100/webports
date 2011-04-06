@@ -12,9 +12,6 @@
 #include <cmath>
 #include <string>
 
-#include "experimental/life2011/life_stage_2/scoped_mutex_lock.h"
-#include "experimental/life2011/life_stage_2/scoped_pixel_lock.h"
-
 namespace {
 const unsigned int kInitialRandSeed = 0xC0DE533D;
 const int kMaxNeighbourCount = 8;
@@ -50,15 +47,13 @@ const uint32_t kNeighborColors[] = {
 }  // namespace
 
 namespace life {
-Life::Life() : life_simulation_thread_(NULL),
-               sim_state_condition_(kSimulationStopped),
+Life::Life() : simulation_mode_(kPaused),
+               simulation_running_(false),
                width_(0),
                height_(0),
-               simulation_mode_(kPaused),
                random_bits_(kInitialRandSeed),
                cell_in_(NULL),
                cell_out_(NULL) {
-  pthread_mutex_init(&life_simulation_mutex_, NULL);
   // Set up the default life rules table.  |life_rules_table_| is a look-up
   // table, index by the number of living neighbours of a cell.  Indices [0..8]
   // represent the rules when the cell being examined is dead; indices [9..17]
@@ -73,22 +68,7 @@ Life::Life() : life_simulation_thread_(NULL),
 }
 
 Life::~Life() {
-  set_is_simulation_running(false);
-  if (life_simulation_thread_) {
-    pthread_join(life_simulation_thread_, NULL);
-  }
   DeleteCells();
-  pthread_mutex_destroy(&life_simulation_mutex_);
-}
-
-void Life::StartSimulation() {
-  pthread_create(&life_simulation_thread_, NULL, LifeSimulation, this);
-}
-
-Life::SimulationMode Life::WaitForRunMode() {
-  simulation_mode_.LockWhenNotCondition(kPaused);
-  simulation_mode_.Unlock();
-  return simulation_mode();
 }
 
 void Life::SetAutomatonRules(const std::string& rule_string) {
@@ -100,9 +80,6 @@ void Life::SetAutomatonRules(const std::string& rule_string) {
     return;
   std::string keep_alive_rule = rule_string.substr(0, slash_pos);
   std::string birth_rule = rule_string.substr(slash_pos + 1);
-  threading::ScopedMutexLock scoped_mutex(&life_simulation_mutex_);
-  if (!scoped_mutex.is_valid())
-    return;
   std::fill(&life_rules_table_[0],
             &life_rules_table_[0] + life_rules_table_.size(),
             0);
@@ -147,15 +124,12 @@ void Life::PutStampAtPoint(const Stamp& stamp, const pp::Point& point) {
   // UI thread.
   stamp.StampAtPointInBuffers(
       point,
-      shared_pixel_buffer_->PixelBufferNoLock(),
+      static_cast<uint32_t*>(shared_pixel_buffer_->data()),
       cell_in_,
       pp::Size(width(), height()));
 }
 
 void Life::AddRandomSeed() {
-  threading::ScopedMutexLock scoped_mutex(&life_simulation_mutex_);
-  if (!scoped_mutex.is_valid())
-    return;
   if (cell_in_ == NULL || cell_out_ == NULL)
     return;
   const int sim_height = height();
@@ -171,8 +145,7 @@ void Life::AddRandomSeed() {
 }
 
 void Life::UpdateCells() {
-  ScopedPixelLock scoped_pixel_lock(shared_pixel_buffer_.get());
-  uint32_t* pixel_buffer = scoped_pixel_lock.pixels();
+  uint32_t* pixel_buffer = static_cast<uint32_t*>(shared_pixel_buffer_->data());
   if (pixel_buffer == NULL || cell_in_ == NULL || cell_out_ == NULL) {
     // Note that if the pixel buffer never gets initialized, this won't ever
     // paint anything.  Which is probably the right thing to do.  Also, this
@@ -208,30 +181,18 @@ void Life::UpdateCells() {
 }
 
 void Life::Swap() {
-  threading::ScopedMutexLock scoped_mutex(&life_simulation_mutex_);
-  if (!scoped_mutex.is_valid()) {
-    return;
-  }
   if (cell_in_ == NULL || cell_out_ == NULL) {
     return;
   }
   std::swap(cell_in_, cell_out_);
 }
 
-void* Life::LifeSimulation(void* param) {
-  Life* life = static_cast<Life*>(param);
-  // Run the Life simulation in an endless loop.  Shut this down when
-  // is_simulation_running() returns |false|.
-  life->set_is_simulation_running(true);
-  while (life->is_simulation_running()) {
-    SimulationMode sim_mode = life->WaitForRunMode();
-    if (sim_mode == kRunRandomSeed) {
-      life->AddRandomSeed();
-    }
-    life->UpdateCells();
-    life->Swap();
+void Life::LifeSimulation() {
+  if (simulation_mode() == kRunRandomSeed) {
+    AddRandomSeed();
   }
-  return NULL;
+  UpdateCells();
+  Swap();
 }
 
 uint8_t Life::RandomBitGenerator::value() {
