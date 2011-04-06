@@ -9,7 +9,7 @@
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/size.h>
 
-#include "experimental/life2011/life_stage_3/pthread_ext.h"
+#include "experimental/life2011/life_stage_3/threading/pthread_ext.h"
 
 namespace life {
 

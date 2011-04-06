@@ -13,7 +13,7 @@
 #include <tr1/memory>
 #include <vector>
 
-#include "experimental/life2011/life_stage_3/callback.h"
+#include "experimental/life2011/life_stage_3/scripting/callback.h"
 
 namespace scripting {
 

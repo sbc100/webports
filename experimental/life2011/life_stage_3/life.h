@@ -11,10 +11,10 @@
 #include <tr1/memory>
 #include <vector>
 
-#include "experimental/life2011/life_stage_3/condition_lock.h"
 #include "experimental/life2011/life_stage_3/locking_image_data.h"
-#include "experimental/life2011/life_stage_3/pthread_ext.h"
 #include "experimental/life2011/life_stage_3/stamp.h"
+#include "experimental/life2011/life_stage_3/threading/condition_lock.h"
+#include "experimental/life2011/life_stage_3/threading/pthread_ext.h"
 
 namespace life {
 // The main object that runs Conway's Life simulation (for details, see:

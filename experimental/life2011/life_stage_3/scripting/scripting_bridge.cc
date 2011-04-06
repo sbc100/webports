@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can
 // be found in the LICENSE file.
 
-#include "experimental/life2011/life_stage_3/scripting_bridge.h"
+#include "experimental/life2011/life_stage_3/scripting/scripting_bridge.h"
 
 #include <string>
 

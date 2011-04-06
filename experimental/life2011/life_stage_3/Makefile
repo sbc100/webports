@@ -11,18 +11,19 @@ INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_3
 CCFILES = life.cc \
           life_application.cc \
           life_module.cc \
-          scripting_bridge.cc \
-          stamp.cc
-HFILES = callback.h \
-         condition_lock.h \
-         life.h \
+          stamp.cc \
+          scripting/scripting_bridge.cc
+
+HFILES = life.h \
          life_application.h \
          locking_image_data.h \
-         pthread_ext.h \
-         scoped_mutex_lock.h \
          scoped_pixel_lock.h \
-         scripting_bridge.h \
-         stamp.h
+         scripting/callback.h \
+         scripting/scripting_bridge.h \
+         stamp.h \
+         threading/condition_lock.h \
+         threading/pthread_ext.h \
+         threading/scoped_mutex_lock.h
 
 CFLAGS = -Wall -Wno-long-long -pthread -Werror
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)

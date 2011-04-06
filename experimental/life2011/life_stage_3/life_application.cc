@@ -15,8 +15,8 @@
 #include <cstring>
 #include <string>
 
-#include "experimental/life2011/life_stage_3/scoped_mutex_lock.h"
 #include "experimental/life2011/life_stage_3/scoped_pixel_lock.h"
+#include "experimental/life2011/life_stage_3/threading/scoped_mutex_lock.h"
 
 namespace {
 const char* const kClearMethodId = "clear";
