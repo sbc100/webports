@@ -1,0 +1,65 @@
+# Copyright 2011, The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Makefile for Stage 3 of the Life2011 tutorial.
+
+NACLPORTS_ROOT ?= ../../..
+INSTALL_ROOT ?= $$HOME/Sites/life2011
+INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_5
+
+CCFILES = audio_player.cc sine_synth.cc web_resource_loader.cc \
+          web_wav_sound_resource.cc
+HFILES = audio_player.h audio_source.h web_resource_loader.h web_resource_loader_inl.h \
+         web_wav_sound_resource.h
+
+CFLAGS = -Wall -Wno-long-long -pthread -Werror
+INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
+LDFLAGS = -lppruntime \
+          -lppapi_cpp \
+          -lplatform \
+          -lgio \
+          -lpthread \
+          -lsrpc \
+          $(ARCH_FLAGS)
+
+RELEASE_MODULES = life_x86_32.nexe life_x86_64.nexe
+DEBUG_MODULES = life_x86_32_dbg.nexe life_x86_64_dbg.nexe
+ALL_MODULES = $(RELEASE_MODULES) $(DEBUG_MODULES)
+
+APPLICATION_FILES = life.html \
+                    life.css \
+                    life.nmf \
+                    $(RELEASE_MODULES)
+
+# The check_variables target is in nacl_build.mk.
+all: check_variables $(ALL_MODULES)
+
+# nacl_build.mk has rules to build .o files from .cc files.
+-include $(NACLPORTS_ROOT)/common_build_scripts/nacl_build.mk
+
+$(OBJECTS_X86_32) $(OBJECTS_X86_64) \
+$(OBJECTS_X86_32_DBG) $(OBJECTS_X86_64_DBG):: $(HFILES)
+
+life_x86_32.nexe: $(OBJECTS_X86_32)
+	$(CPP) $^ $(LDFLAGS) -m32 -o $@
+	$(NACL_STRIP) $@ -o $@
+
+life_x86_64.nexe: $(OBJECTS_X86_64)
+	$(CPP) $^ $(LDFLAGS) -m64 -o $@
+	$(NACL_STRIP) $@ -o $@
+
+life_x86_32_dbg.nexe: $(OBJECTS_X86_32_DBG)
+	$(CPP) $^ $(LDFLAGS) -m32 -o $@
+
+life_x86_64_dbg.nexe: $(OBJECTS_X86_64_DBG)
+	$(CPP) $^ $(LDFLAGS) -m64 -o $@
+
+install: $(APPLICATION_FILES) $(INSTALL_DIR)
+	install $(APPLICATION_FILES) $(INSTALL_DIR)
+
+$(INSTALL_DIR):
+	mkdir -p $@
+
+clean:
+	-$(RM) *.o *.obj *.nexe
