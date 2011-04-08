@@ -656,41 +656,10 @@ Chess.mouseDownHandler = function(e) {
                          theBoard.convertRowToChessRow(
                            Chess.selectedCoord.getRow());
 
-      var isCastleMove = false;
-      var rookCastleOldCoord = null;
-      var rookCastleNewCoord = null;
-      if ((Chess.selectedPiece.getPieceType() == Chess.PieceType.KING) &&
-          (Math.abs(column - Chess.selectedCoord.getColumn()) == 2)) {
-        isCastleMove = true;
-        if (column < Chess.selectedCoord.getColumn()) {
-          // the king is castling to the left
-          rookCastleOldCoord = new Chess.Coordinate(0, row);
-          rookCastleNewCoord = new Chess.Coordinate(column + 1, row);
-        } else {
-          // the king is castling to the right
-          rookCastleOldCoord = new Chess.Coordinate(7, row);
-          rookCastleNewCoord = new Chess.Coordinate(column - 1, row);
-        }
-      }
-
       console.log('FROM:' + fromNotation + ' TO:' + toNotation);
       // FIXME -- add to toNotation on pawn promotion...
       var result = Chess.doMove(fromNotation, toNotation);
       if (result) {
-
-        // if this was a castle move, move the rook too!
-        if (isCastleMove) {
-          var theRook = theBoard.contents.getPiece(
-              rookCastleOldCoord.getColumn(),
-              rookCastleOldCoord.getRow());
-          theBoard.contents.update(rookCastleNewCoord.getColumn(),
-                                   rookCastleNewCoord.getRow(), theRook);
-          theBoard.contents.update(rookCastleOldCoord.getColumn(),
-                                   rookCastleOldCoord.getRow(), null);
-          console.log('DOING CASTLE theRook = ' + theRook.toString() +
-                      ' new:' + rookCastleNewCoord.toString() + ' old:' +
-                      rookCastleOldCoord.toString());
-        }
 
         // Clear last selected piece/coord; advance state;
         // Save 'lastMove' so we can send it to AI
@@ -850,6 +819,40 @@ Chess.doMove = function(fromNotation, toNotation) {
                              pieceInFrom);
   }
   theBoard.contents.update(fromCoord.getColumn(), fromCoord.getRow(), null);
+
+
+  // CHECK FOR CASTLING MOVE
+  var isCastleMove = false;
+  var rookCastleOldCoord = null;
+  var rookCastleNewCoord = null;
+  if ((pieceInFrom.getPieceType() == Chess.PieceType.KING) &&
+      (Math.abs(fromCoord.getColumn() - toCoord.getColumn()) == 2)) {
+    isCastleMove = true;
+    if (toCoord.getColumn() < fromCoord.getColumn()) {
+      // the king is castling to the left
+      rookCastleOldCoord = new Chess.Coordinate(0, fromCoord.getRow());
+      rookCastleNewCoord = new Chess.Coordinate(toCoord.getColumn() + 1, fromCoord.getRow());
+    } else {
+      // the king is castling to the right
+      rookCastleOldCoord = new Chess.Coordinate(7, fromCoord.getRow());
+      rookCastleNewCoord = new Chess.Coordinate(toCoord.getColumn() - 1, fromCoord.getRow());
+    }
+  }
+  // if this was a castle move, move the rook too!
+  if (isCastleMove) {
+    var theRook = theBoard.contents.getPiece(
+        rookCastleOldCoord.getColumn(),
+        rookCastleOldCoord.getRow());
+    theBoard.contents.update(rookCastleNewCoord.getColumn(),
+                             rookCastleNewCoord.getRow(), theRook);
+    theBoard.contents.update(rookCastleOldCoord.getColumn(),
+                             rookCastleOldCoord.getRow(), null);
+    console.log('DOING CASTLE MOVE: theRook = ' + theRook.toString() +
+                ' new:' + rookCastleNewCoord.toString() + ' old:' +
+                rookCastleOldCoord.toString());
+  }
+
+
   // clear the piece layer so we redraw it
   clearContext(Chess.ctxPieces, Chess.canvasPieces);
   theBoard.drawPieces(Chess.ctxPieces);
@@ -897,6 +900,9 @@ Chess.filterAnswer = function(str) {
   return newString;
 };
 
+///
+/// Handle AI reply to the user move
+///
 Chess.handleReply = function(answer) {
   // if answer contains 'move' then handle the board update for AI move
 
