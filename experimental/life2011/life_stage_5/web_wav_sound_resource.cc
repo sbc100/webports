@@ -197,8 +197,10 @@ void WebWavSoundResource::Clear() {
   wav_data_.clear();
   wav_data_size_ = 0;
   received_data_size_ = 0;
-  loader_->CloseAndDeleteSelf();
-  loader_ = NULL;
+  if (loader_) {
+    loader_->CloseAndDeleteSelf();
+    loader_ = NULL;
+  }
 }
 
 }  // namespace life
