@@ -16,6 +16,7 @@ goog.require('goog.events.EventType');
 goog.require('goog.style');
 
 goog.require('life.controllers.ViewController');
+goog.require('stamp.Editor');
 
 /**
  * Constructor for the Application class.  Use the run() method to populate
@@ -116,17 +117,22 @@ life.Application.prototype.moduleDidLoad =
   goog.events.listen(window, goog.events.EventType.UNLOAD, this.terminate);
 
   // Set up the stamp editor.
-  var stampEditorElement = document.getElementById('stamp_editor_button');
+  var stampEditorElement =
+      document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_BUTTON);
   this.stampEditor_ = new stamp.Editor(stampEditorElement);
   var stampEditorElements = {
-    mainPanel: document.getElementById('stamp_editor_panel'),
-    editorContainer: document.getElementById('stamp_editor_container'),
-    addColumnButton: document.getElementById('add_column_button'),
-    removeColumnButton: document.getElementById('remove_column_button'),
-    addRowButton: document.getElementById('add_row_button'),
-    removeRowButton: document.getElementById('remove_row_button'),
-    cancelButton: document.getElementById('cancel_button'),
-    okButton: document.getElementById('ok_button')
+    mainPanel: document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_PANEL),
+    editorContainer:
+        document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_CONTAINER),
+    addColumnButton:
+        document.getElementById(stamp.Editor.DomIds.ADD_COLUMN_BUTTON),
+    removeColumnButton:
+        document.getElementById(stamp.Editor.DomIds.REMOVE_COLUMN_BUTTON),
+    addRowButton: document.getElementById(stamp.Editor.DomIds.ADD_ROW_BUTTON),
+    removeRowButton:
+        document.getElementById(stamp.Editor.DomIds.REMOVE_ROW_BUTTON),
+    cancelButton: document.getElementById(stamp.Editor.DomIds.CANCEL_BUTTON),
+    okButton: document.getElementById(stamp.Editor.DomIds.OK_BUTTON)
   };
   this.stampEditor_.makeStampEditorPanel(stampEditorElements);
 
@@ -138,31 +144,36 @@ life.Application.prototype.moduleDidLoad =
   this.viewController_.makeStampCurrent(this.currentStampId_);
 
   // Wire up the various controls.
-  var playModeSelect = goog.dom.$(life.Application.DomIds_.PLAY_MODE_SELECT);
+  var playModeSelect =
+      document.getElementById(life.Application.DomIds_.PLAY_MODE_SELECT);
   if (playModeSelect) {
     goog.events.listen(playModeSelect, goog.events.EventType.CHANGE,
         this.selectPlayMode, false, this);
   }
 
-  var clearButton = goog.dom.$(life.Application.DomIds_.CLEAR_BUTTON);
+  var clearButton =
+      document.getElementById(life.Application.DomIds_.CLEAR_BUTTON);
   if (clearButton) {
     goog.events.listen(clearButton, goog.events.EventType.CLICK,
         this.clear, false, this);
   }
 
-  var playButton = goog.dom.$(life.Application.DomIds_.PLAY_BUTTON);
+  var playButton =
+      document.getElementById(life.Application.DomIds_.PLAY_BUTTON);
   if (playButton) {
     goog.events.listen(playButton, goog.events.EventType.CLICK,
         this.togglePlayButton, false, this);
   }
 
-  var birthField = goog.dom.$(life.Application.DomIds_.BIRTH_FIELD);
+  var birthField =
+      document.getElementById(life.Application.DomIds_.BIRTH_FIELD);
   if (birthField) {
     goog.events.listen(birthField, goog.events.EventType.CHANGE,
         this.updateBirthRule, false, this);
   }
 
-  var keepAliveField = goog.dom.$(life.Application.DomIds_.KEEP_ALIVE_FIELD);
+  var keepAliveField =
+      document.getElementById(life.Application.DomIds_.KEEP_ALIVE_FIELD);
   if (keepAliveField) {
     goog.events.listen(keepAliveField, goog.events.EventType.CHANGE,
         this.updateKeepAliveRule, false, this);
@@ -315,7 +326,7 @@ life.Application.prototype.assert = function(cond, message) {
  */
 life.Application.prototype.run = function(opt_viewDivName) {
   var viewDivName = opt_viewDivName || life.Application.DomIds_.VIEW;
-  var viewDiv = goog.dom.$(viewDivName);
+  var viewDiv = document.getElementById(viewDivName);
   this.assert(viewDiv, "Missing DOM element '" + viewDivName + "'");
   // This assumes that the <div> containers for Life modules each have a
   // unique name on the page.

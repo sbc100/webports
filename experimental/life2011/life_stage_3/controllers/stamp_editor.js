@@ -47,6 +47,23 @@ stamp.Editor.prototype.MIN_ROW_COUNT = 3;
 stamp.Editor.prototype.MIN_COLUMN_COUNT = 3;
 
 /**
+ * The ids used for elements in the DOM.  The stamp editor expects these
+ * elements to exist.
+ * @enum {string}
+ */
+stamp.Editor.DomIds = {
+  ADD_COLUMN_BUTTON: 'add_column_button',
+  ADD_ROW_BUTTON: 'add_row_button',
+  CANCEL_BUTTON: 'cancel_button',
+  OK_BUTTON: 'ok_button',
+  REMOVE_COLUMN_BUTTON: 'remove_column_button',
+  REMOVE_ROW_BUTTON: 'remove_row_button',
+  STAMP_EDITOR_BUTTON: 'stamp_editor_button',
+  STAMP_EDITOR_CONTAINER: 'stamp_editor_container',
+  STAMP_EDITOR_PANEL: 'stamp_editor_panel'
+};
+
+/**
  * Attributes added to cells to cache certain parameters like aliveState.
  * @enum {string}
  * @private
