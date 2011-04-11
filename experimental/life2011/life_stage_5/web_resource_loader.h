@@ -56,7 +56,8 @@ class WebResourceLoader {
   void LoadURL(const std::string& url);
 
   // Buffer to receive the resource data. If no buffer is provided, a 4K
-  // internal buffer is used.
+  // internal buffer is used. Method set_content_buffer should be called
+  // before starting a download or from within one of the delegate methods.
   void set_content_buffer(char* buffer, size_t size);
   const char* buffer() const { return buffer_; }
   int32_t data_size() const { return data_size_; }
@@ -79,8 +80,9 @@ class WebResourceLoader {
   pp::CompletionCallback MakeCallback(DispatchOpCode op_code);
 
   // Helpers.
-  void FillURLRequest(const std::string& url, pp::URLRequestInfo* request);
+  void InitializeRequest(const std::string& url, pp::URLRequestInfo* request);
   void ReadNextDataBlock();
+  void StartDownload(int32_t result, const std::string& url);
 
   // Main-thread callback for CloseAndDeleteSelf.
   static void DeleteOnMainThread(void* user_data, int32_t err);

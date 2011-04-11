@@ -45,24 +45,15 @@ WebResourceLoader<Delegate>::~WebResourceLoader() {
 
 template <class Delegate>
 void WebResourceLoader<Delegate>::LoadURL(const std::string& url) {
-  // Only usable from main plugin thread.
-  // TODO(gwink): Allow downloads off the main thread.
-  assert(pp::Module::Get()->core()->IsMainThread());
-  // No pending request.
+  // Check that there is no pending request.
   assert(!connected_ && url_loader_.GetResponseInfo().is_null());
-
-  // Initiate the URL download.
-  printf("Initiating url download.\n");
-  pp::CompletionCallback cc = MakeCallback(kUrlResponseInfoReady);
-  pp::URLRequestInfo url_request(instance_);
-  FillURLRequest(url, &url_request);
-  int32_t rv = url_loader_.Open(url_request, cc);
-  if (rv != PP_ERROR_WOULDBLOCK) {
-    // Getting here isn't necessarily an error. It indicates that the call to
-    // Open did not block. It can happen, for instance, when the resource data
-    // comes out of the cache. In any case, we can simply call the callback
-    // 'manually.'
-    cc.Run(rv);
+  // Only usable from main plugin thread.
+  if (pp::Module::Get()->core()->IsMainThread()) {
+    StartDownload(PP_OK, url);
+  } else {
+    pp::CompletionCallback cc = factory_.NewCallback(
+      &WebResourceLoader<Delegate>::StartDownload, std::string(url));
+    pp::Module::Get()->core()->CallOnMainThread(0, cc, PP_OK);
   }
 }
 
@@ -140,8 +131,9 @@ pp::CompletionCallback WebResourceLoader<Delegate>::MakeCallback(
 }
 
 template <class Delegate>
-void WebResourceLoader<Delegate>::FillURLRequest(const std::string& url,
-                                                 pp::URLRequestInfo* request) {
+void WebResourceLoader<Delegate>::InitializeRequest(
+    const std::string& url,
+    pp::URLRequestInfo* request) {
   request->SetURL(url);
   request->SetMethod("GET");
   request->SetFollowRedirects(true);
@@ -160,6 +152,25 @@ void WebResourceLoader<Delegate>::ReadNextDataBlock() {
   pp::CompletionCallback cc = MakeCallback(kDataReceived);
   int32_t rv = url_loader_.ReadResponseBody(buffer_, buffer_size_, cc);
   if (rv != PP_ERROR_WOULDBLOCK) {
+    cc.Run(rv);
+  }
+}
+
+template <class Delegate>
+void WebResourceLoader<Delegate>::StartDownload(int32_t result,
+                                                const std::string& url) {
+  // Only usable from main plugin thread.
+  assert(pp::Module::Get()->core()->IsMainThread());
+
+  pp::CompletionCallback cc = MakeCallback(kUrlResponseInfoReady);
+  pp::URLRequestInfo request(instance_);
+  InitializeRequest(url, &request);
+  int32_t rv = url_loader_.Open(request, cc);
+  if (rv != PP_ERROR_WOULDBLOCK) {
+    // Getting here isn't necessarily an error. It indicates that the call to
+    // Open did not take place asynchronously. That can happen, for instance,
+    // when the resource data comes out of the cache. In any case, we simply
+    // invoke the callback 'manually.'
     cc.Run(rv);
   }
 }
