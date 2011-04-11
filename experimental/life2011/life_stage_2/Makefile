@@ -37,11 +37,15 @@ APPLICATION_FILES = life.html \
                     life.nmf \
                     closure.js \
                     life.js \
+                    controllers/stamp_editor.js \
                     controllers/viewcontroller.js \
                     events/dragger.js \
                     events/event.js \
                     css/life.css \
+                    css/stamp_editor.css \
                     css/toolbar.css \
+                    img/dead_cell.png \
+                    img/live_cell.png \
                     img/toolbar-bg.png \
                     $(RELEASE_MODULES)
 

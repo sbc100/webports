@@ -115,6 +115,21 @@ life.Application.prototype.moduleDidLoad =
   // Listen for 'unload' in order to terminate cleanly.
   goog.events.listen(window, goog.events.EventType.UNLOAD, this.terminate);
 
+  // Set up the stamp editor.
+  var stampEditorElement = document.getElementById('stamp_editor_button');
+  this.stampEditor_ = new stamp.Editor(stampEditorElement);
+  var stampEditorElements = {
+    mainPanel: document.getElementById('stamp_editor_panel'),
+    editorContainer: document.getElementById('stamp_editor_container'),
+    addColumnButton: document.getElementById('add_column_button'),
+    removeColumnButton: document.getElementById('remove_column_button'),
+    addRowButton: document.getElementById('add_row_button'),
+    removeRowButton: document.getElementById('remove_row_button'),
+    cancelButton: document.getElementById('cancel_button'),
+    okButton: document.getElementById('ok_button')
+  };
+  this.stampEditor_.makeStampEditorPanel(stampEditorElements);
+
   // Set up the view controller, it contains the NaCl module.
   this.viewController_ = new life.controllers.ViewController(nativeModule);
   this.viewController_.setAutomatonRules(this.automatonRules_);

@@ -5,11 +5,13 @@
   <meta HTTP-EQUIV="Expires" CONTENT="-1">
   <link href="css/life.css" rel="stylesheet" type="text/css">
   <link href="css/toolbar.css" rel="stylesheet" type="text/css">
+  <link href="css/stamp_editor.css" rel="stylesheet" type="text/css">
 
   <script type="text/javascript" src="closure.js"></script>
   <!-- Loads the Life application code. This is order dependent. -->
   <script type="text/javascript" src="events/dragger.js"></script>
   <script type="text/javascript" src="events/event.js"></script>
+  <script type="text/javascript" src="controllers/stamp_editor.js"></script>
   <script type="text/javascript" src="controllers/viewcontroller.js"> </script>
   <script type="text/javascript" src="life.js"></script>
   <!--Resolve interdependencies in Life. -->
@@ -32,6 +34,62 @@
             class="vertical-align-center text-align-right"
             action=""
             method="get">
+        <button type="button"
+                id="stamp_editor_button"
+                style="position: relative;"></button>
+        <!-- Lay out the stamp editor panel.  There is some title text, followed
+             the the stamp editor itself, a set of cancel/ok buttons and then
+             an explanatory legend.  The stamp editor DOM is built via
+             Javascript in stamp.Editor.makeStampEditorPanel(). -->
+        <div class="panel"
+             style="display: none;"
+             id="stamp_editor_panel">
+          <p id="title_text">Click on a cell to change its state.</p>
+          <table id="stamp_editor_outer_container"
+                 style="font-size: inherit; text-align: center;">
+            <tr>
+              <!-- The cell editor table. This gets populated in stamp_editor.js -->
+              <td id="stamp_editor_container" colspan=2></td>
+              <td valign="top">
+                <!-- The add/collapse column buttons. -->
+                <table rows=2 cols=1 style="font-size: inherit;">
+                  <tr>
+                    <td id="add_column_button" width="16">&gt;</td>
+                  </tr>
+                  <tr>
+                    <td id="remove_column_button"
+                        style="color: lightgray;"
+                        width="16">&lt;</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- The add/remove row buttons -->
+            <tr>
+              <td id="add_row_button" width="16px">&gt;</td>
+              <td id="remove_row_button"
+                  align="left"
+                  style="color: lightgray;">&lt;</td>
+            </tr>
+          </table>
+          <table id="ok_cancel_buttons">
+            <!-- The OK/Cancel buttons -->
+            <tr>
+              <td id="cancel_button" class="stamp_editor_button">Cancel</td>
+              <td id="ok_button" class="stamp_editor_button">OK</td>
+            </tr>
+          </table>
+          <!-- The editor legend. -->
+          <table id="stamp_editor_legend"
+                 rows=1 cols=4 align=center width=100%>
+            <tr>
+              <td><img src="img/live_cell.png" width=8 height=8 /></td>
+              <td>alive</td>
+              <td><img src="img/dead_cell.png" width=8 height=8 /></td>
+              <td>dead</td>
+            </tr>
+          </table>
+        </div>
         <select id="play_mode_select">
           <option selected="yes" value="random_seed">Random Seed</option>
           <option value="stamp">Stamp</option>
