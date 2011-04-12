@@ -117,10 +117,10 @@ life.Application.prototype.moduleDidLoad =
   goog.events.listen(window, goog.events.EventType.UNLOAD, this.terminate);
 
   // Set up the stamp editor.
-  var stampEditorElement =
+  var stampEditorButton =
       document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_BUTTON);
-  this.stampEditor_ = new stamp.Editor(stampEditorElement);
-  var stampEditorElements = {
+  this.stampEditor_ = new stamp.Editor(stampEditorButton);
+  var stampEditorButtons = {
     mainPanel: document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_PANEL),
     editorContainer:
         document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_CONTAINER),
@@ -134,14 +134,19 @@ life.Application.prototype.moduleDidLoad =
     cancelButton: document.getElementById(stamp.Editor.DomIds.CANCEL_BUTTON),
     okButton: document.getElementById(stamp.Editor.DomIds.OK_BUTTON)
   };
-  this.stampEditor_.makeStampEditorPanel(stampEditorElements);
+  this.stampEditor_.makeStampEditorPanel(stampEditorButtons);
+
+  // When the stamp editor panel is about to open, set its stamp to the
+  // current stamp.
+  goog.events.listen(this.stampEditor_, stamp.Editor.Events.PANEL_WILL_OPEN,
+      this.handlePanelWillOpen_, false, this);
 
   // Set up the view controller, it contains the NaCl module.
   this.viewController_ = new life.controllers.ViewController(nativeModule);
   this.viewController_.setAutomatonRules(this.automatonRules_);
   // Initialize the module with the default stamp.
   this.currentStampId_ = this.viewController_.DEFAULT_STAMP_ID;
-  this.viewController_.makeStampCurrent(this.currentStampId_);
+  this.viewController_.selectStamp(this.currentStampId_);
 
   // Wire up the various controls.
   var playModeSelect =
@@ -216,6 +221,21 @@ life.Application.prototype.togglePlayButton = function(clickEvent) {
         life.Application.PlayButtonAttributes_.STATE, 'off');
     this.viewController_.stop();
   }
+}
+
+/**
+ * Handle the "panel will open" event: set the stamp in the stamp editor to
+ * the current stamp.
+ * @param {!goog.events.Event} event The event that triggered this handler.
+ * @private
+ */
+life.Application.prototype.handlePanelWillOpen_ = function(event) {
+  event.stopPropagation();
+  var currentStamp =
+      this.viewController_.stampWithId(this.currentStampId_);
+  if (currentStamp)
+    this.stampEditor_.setStampFromString(currentStamp);
+  return true;
 }
 
 /**

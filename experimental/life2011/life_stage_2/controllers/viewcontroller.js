@@ -177,13 +177,13 @@ life.controllers.ViewController.prototype.addStampWithId =
 }
 
 /**
- * Set the current stamp.  If a stamp with id |stmpId| doesn't exist, then
+ * Set the current stamp.  If a stamp with id |stampId| doesn't exist, then
  * do nothing.
  * @param {!string} stampDescription The new stamp description.
  * @param {!string} stampId The id associated with this stamp.
  * @return {bool} Success.
  */
-life.controllers.ViewController.prototype.makeStampCurrent =
+life.controllers.ViewController.prototype.selectStamp =
     function(stampId) {
   if (stampId in this.stampDictionary_) {
     this.module_.setCurrentStamp(this.stampDictionary_[stampId]);
@@ -192,6 +192,16 @@ life.controllers.ViewController.prototype.makeStampCurrent =
   return false;
 }
 
+/**
+ * Return the encoded string for stamp with id |stampId|.  If no such stamp
+ * exists, return null.
+ * @return {?string} The current stamp string.
+ */
+life.controllers.ViewController.prototype.stampWithId = function(stampId) {
+  if (stampId in this.stampDictionary_)
+    return this.stampDictionary_[stampId];
+  return null;
+}
 
 /**
  * Start the simulation.  Does nothing if it's already running.
