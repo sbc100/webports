@@ -80,6 +80,10 @@ Chess.Coordinate.prototype.getRow = function() {
   return this.row_;
 };
 
+Chess.Coordinate.prototype.toString = function() {
+  return " " + this.column_ + ":" + this.row_ + " ";
+};
+
 Chess.Notation = function(letter, number) {
   this.letter_ = letter;
   this.number = number;
@@ -346,6 +350,7 @@ Chess.Board.gapPixels = 1; //gap between squares
 Chess.Board.WHITE = 'rgb(255,240,240)';
 Chess.Board.BLACK = 'rgb(139,137,137)';
 Chess.Board.HIGHLIGHT = 'rgba(255,255,0,0.5)';
+Chess.Board.LAST_MOVE_COLOR = 'rgba(0,0,255,0.5)';
 Chess.Board.topLeft = Chess.Board.WHITE;
 Chess.Board.letterArray = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -419,6 +424,22 @@ Chess.Board.prototype.convertRowToChessRow = function(row) {
   return 8 - row;
 };
 
+Chess.Board.prototype.markSquare = function(column, row, ctxHighlight) {
+  // get top left corner of this square
+  topLeftX = column * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
+  topLeftY = row * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
+
+  // set color
+  ctxHighlight.fillStyle = Chess.Board.LAST_MOVE_COLOR;
+
+  ctxHighlight.beginPath();
+  ctxHighlight.strokeRect(topLeftX + Chess.Board.gapPixels,
+                          topLeftY + Chess.Board.gapPixels,
+                          Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2,
+                          Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2);
+  ctxHighlight.closePath();
+};
+
 Chess.Board.prototype.highlight = function(column, row, ctxHighlight) {
 
   // set borders
@@ -434,9 +455,9 @@ Chess.Board.prototype.highlight = function(column, row, ctxHighlight) {
 
   ctxHighlight.beginPath();
   ctxHighlight.fillRect(topLeftX + Chess.Board.gapPixels,
-                    topLeftY + Chess.Board.gapPixels,
-                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2,
-                    Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2);
+                        topLeftY + Chess.Board.gapPixels,
+                        Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2,
+                        Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2);
   ctxHighlight.closePath();
 };
 
@@ -612,6 +633,17 @@ Chess.Board.prototype.drawPieces = function(ctx) {
                              thePiece.getColor());
       }
     }
+  }
+  // highlight Chess.lastMove
+  if (Chess.lastMove != '') {
+    var toNotation = Chess.lastMove.substr(2,2);
+    console.log('Last move: ' + Chess.lastMove + 'toNotation = ' + toNotation);
+    // convert
+    var toCoord = Chess.notationStrToCoord(toNotation);
+    console.log('toCoord: ' + toCoord.toString());
+    // highlight |toCoord| LAST_MOVE
+    theBoard.markSquare(toCoord.getColumn(), toCoord.getRow(), ctx);
+                        /// Chess.ctxScratch);
   }
 };
 
@@ -929,6 +961,7 @@ Chess.handleReply = function(answer) {
   } else if (answer.indexOf('move') != -1) {
     answer = Chess.filterAnswer(answer);
     // do the move
+    Chess.lastMove = answer;
     Chess.updateLastMove(answer);
     var fromNotation = answer.substr(0, 2);
     var toNotation = answer.substr(2);
