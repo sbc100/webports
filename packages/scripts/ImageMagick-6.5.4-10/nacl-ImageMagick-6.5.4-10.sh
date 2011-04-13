@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that be
 # found in the LICENSE file.
 #
@@ -41,6 +41,7 @@ CustomConfigureStep() {
     --libdir=${NACL_SDK_USR_LIB} \
     --oldincludedir=${NACL_SDK_USR_INCLUDE} \
     --with-x=no \
+    --disable-largefile \
     --without-fftw
 }
 
