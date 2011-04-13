@@ -6,21 +6,28 @@
 
 NACLPORTS_ROOT ?= ../../..
 INSTALL_ROOT ?= $$HOME/Sites/life2011
-INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_3
+INSTALL_DIR ?= $(INSTALL_ROOT)/life_stage_4
 
 CCFILES = life.cc \
           life_application.cc \
           life_module.cc \
           stamp.cc \
+          audio/audio_player.cc \
+          audio/web_wav_sound_resource.cc \
           scripting/scripting_bridge.cc
 
 HFILES = life.h \
          life_application.h \
          locking_image_data.h \
          scoped_pixel_lock.h \
+         stamp.h \
+         web_resource_loader.h \
+         web_resource_loader_inl.h \
+         audio/audio_player.h \
+         audio/audio_source.h \
+         audio/web_wav_sound_resource.h \
          scripting/callback.h \
          scripting/scripting_bridge.h \
-         stamp.h \
          threading/condition_lock.h \
          threading/pthread_ext.h \
          threading/scoped_mutex_lock.h
@@ -86,4 +93,4 @@ $(INSTALL_DIR):
 	mkdir -p $@
 
 clean:
-	-$(RM) -rf *.o */*.o *.obj *.nexe
+	-$(RM) -rf *.o *.obj */*.o *.nexe

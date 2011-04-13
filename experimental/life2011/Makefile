@@ -13,7 +13,8 @@ INSTALL_DIR ?= $(HOME)/Sites/life2011
 
 TUTORIALS = life_stage_1 \
             life_stage_2 \
-            life_stage_3
+            life_stage_3 \
+            life_stage_4
 
 APPLICATION_FILES = index.html
 
