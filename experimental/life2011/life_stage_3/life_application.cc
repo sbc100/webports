@@ -26,8 +26,8 @@ const char* const kSetAutomatonRulesMethodId = "setAutomatonRules";
 const char* const kSetCurrentStampMethodId = "setCurrentStamp";
 const char* const kStopSimulationMethodId = "stopSimulation";
 
-const unsigned int kInitialRandSeed = 0xC0DE533D;
 const int kSimulationTickInterval = 10;  // Measured in msec.
+const uint32_t kBackgroundColor = 0xFFFFFFFF;  // Opaque white.
 
 // Simulation modes.  These strings are matched by the browser script.
 const char* const kRandomSeedModeId = "random_seed";
@@ -47,10 +47,6 @@ void SetExceptionString(pp::Var* exception, const std::string& except_string) {
   if (exception) {
     *exception = except_string;
   }
-}
-
-inline uint32_t MakeRGBA(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
-  return (((a) << 24) | ((r) << 16) | ((g) << 8) | (b));
 }
 
 // Called from the browser when the delay time has elapsed.  This routine
@@ -171,7 +167,7 @@ void LifeApplication::Update() {
       uint32_t* pixels = shared_pixel_buffer_->PixelBufferNoLock();
       if (pixels) {
         const size_t size = width() * height();
-        std::fill(pixels, pixels + size, MakeRGBA(0, 0, 0, 0xff));
+        std::fill(pixels, pixels + size, kBackgroundColor);
       }
       life_simulation_.Resize(width(), height());
       life_simulation_.set_pixel_buffer(shared_pixel_buffer_);
@@ -217,7 +213,7 @@ pp::Var LifeApplication::Clear(const ScriptingBridge& bridge,
     const size_t size = width() * height();
     std::fill(pixel_buffer,
               pixel_buffer + size,
-              MakeRGBA(0, 0, 0, 0xff));
+              kBackgroundColor);
   }
   Update();  // Flushes the buffer correctly.
   if (sim_mode != Life::kPaused)

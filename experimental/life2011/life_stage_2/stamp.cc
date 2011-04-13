@@ -12,7 +12,7 @@ const int32_t kMinimumStampDimension = 3;
 const char kStampLineSeparator = '\n';
 const char kStampAliveCharacter = '*';
 const char kStampDeadCharacter = '.';
-const uint32_t kGreenColor = 0xFF00E000;
+const uint32_t kWhiteColor = 0xFFFFFFFF;
 const uint32_t kBlackColor = 0xFF000000;
 
 // Do a simple copy composite from src_buffer into dst_buffer.  Copy the pixels
@@ -45,7 +45,7 @@ Stamp::Stamp()
   pixel_buffer_.resize(buffer_size);
   cell_buffer_.resize(buffer_size);
   std::fill(&pixel_buffer_[0],
-            &pixel_buffer_[0] + buffer_size, kGreenColor);
+            &pixel_buffer_[0] + buffer_size, kBlackColor);
   std::fill(&cell_buffer_[0],
             &cell_buffer_[0] + buffer_size, 1);
 }
@@ -77,12 +77,12 @@ bool Stamp::InitFromDescription(const std::string& stamp_description) {
   for (size_t i = 0; i < stamp_description.size(); ++i) {
     switch (stamp_description[i]) {
     case kStampAliveCharacter:
-      pixel_buffer_[buffer_index] = kGreenColor;
+      pixel_buffer_[buffer_index] = kBlackColor;
       cell_buffer_[buffer_index] = 1;
       ++buffer_index;
       break;
     case kStampDeadCharacter:
-      pixel_buffer_[buffer_index] = kBlackColor;
+      pixel_buffer_[buffer_index] = kWhiteColor;
       cell_buffer_[buffer_index] = 0;
       ++buffer_index;
       break;
