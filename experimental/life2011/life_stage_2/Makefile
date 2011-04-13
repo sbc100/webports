@@ -37,6 +37,7 @@ APPLICATION_FILES = life.html \
                     life.nmf \
                     closure.js \
                     life.js \
+                    controllers/stamp.js \
                     controllers/stamp_editor.js \
                     controllers/viewcontroller.js \
                     events/dragger.js \

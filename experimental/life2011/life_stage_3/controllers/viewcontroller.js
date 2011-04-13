@@ -183,8 +183,7 @@ life.controllers.ViewController.prototype.addStampWithId =
  * @param {!string} stampId The id associated with this stamp.
  * @return {bool} Success.
  */
-life.controllers.ViewController.prototype.selectStamp =
-    function(stampId) {
+life.controllers.ViewController.prototype.selectStamp = function(stampId) {
   if (stampId in this.stampDictionary_) {
     this.module_.setCurrentStamp(this.stampDictionary_[stampId]);
     return true;

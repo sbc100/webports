@@ -16,7 +16,7 @@ goog.require('goog.events.EventType');
 goog.require('goog.style');
 
 goog.require('life.controllers.ViewController');
-goog.require('stamp.Editor');
+goog.require('stamp.StampPanel');
 
 /**
  * Constructor for the Application class.  Use the run() method to populate
@@ -118,28 +118,35 @@ life.Application.prototype.moduleDidLoad =
 
   // Set up the stamp editor.
   var stampEditorButton =
-      document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_BUTTON);
-  this.stampEditor_ = new stamp.Editor(stampEditorButton);
+      document.getElementById(stamp.StampPanel.DomIds.STAMP_EDITOR_BUTTON);
+  this.stampPanel_ = new stamp.StampPanel(stampEditorButton);
   var stampEditorButtons = {
-    mainPanel: document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_PANEL),
+    mainPanel:
+        document.getElementById(stamp.StampPanel.DomIds.STAMP_EDITOR_PANEL),
     editorContainer:
-        document.getElementById(stamp.Editor.DomIds.STAMP_EDITOR_CONTAINER),
+        document.getElementById(stamp.StampPanel.DomIds.STAMP_EDITOR_CONTAINER),
     addColumnButton:
-        document.getElementById(stamp.Editor.DomIds.ADD_COLUMN_BUTTON),
+        document.getElementById(stamp.StampPanel.DomIds.ADD_COLUMN_BUTTON),
     removeColumnButton:
-        document.getElementById(stamp.Editor.DomIds.REMOVE_COLUMN_BUTTON),
-    addRowButton: document.getElementById(stamp.Editor.DomIds.ADD_ROW_BUTTON),
+        document.getElementById(stamp.StampPanel.DomIds.REMOVE_COLUMN_BUTTON),
+    addRowButton:
+        document.getElementById(stamp.StampPanel.DomIds.ADD_ROW_BUTTON),
     removeRowButton:
-        document.getElementById(stamp.Editor.DomIds.REMOVE_ROW_BUTTON),
-    cancelButton: document.getElementById(stamp.Editor.DomIds.CANCEL_BUTTON),
-    okButton: document.getElementById(stamp.Editor.DomIds.OK_BUTTON)
+        document.getElementById(stamp.StampPanel.DomIds.REMOVE_ROW_BUTTON),
+    cancelButton:
+        document.getElementById(stamp.StampPanel.DomIds.CANCEL_BUTTON),
+    okButton: document.getElementById(stamp.StampPanel.DomIds.OK_BUTTON)
   };
-  this.stampEditor_.makeStampEditorPanel(stampEditorButtons);
+  this.stampPanel_.makeStampEditorPanel(stampEditorButtons);
 
   // When the stamp editor panel is about to open, set its stamp to the
   // current stamp.
-  goog.events.listen(this.stampEditor_, stamp.Editor.Events.PANEL_WILL_OPEN,
+  goog.events.listen(this.stampPanel_, stamp.StampPanel.Events.PANEL_WILL_OPEN,
       this.handlePanelWillOpen_, false, this);
+
+  // Listen for the "PANEL_DID_SAVE" event posted by the stamp editor.
+  goog.events.listen(this.stampPanel_, stamp.StampPanel.Events.PANEL_DID_SAVE,
+      this.handlePanelDidSave_, false, this);
 
   // Set up the view controller, it contains the NaCl module.
   this.viewController_ = new life.controllers.ViewController(nativeModule);
@@ -234,8 +241,21 @@ life.Application.prototype.handlePanelWillOpen_ = function(event) {
   var currentStamp =
       this.viewController_.stampWithId(this.currentStampId_);
   if (currentStamp)
-    this.stampEditor_.setStampFromString(currentStamp);
+    this.stampPanel_.setStampFromString(currentStamp);
   return true;
+}
+
+/**
+ * Handle the "panel did save" event: grab the stamp from the stamp editor,
+ * add it to the dictionary of stamps and set it as the current stamp.
+ * @param {!goog.events.Event} event The event that triggered this handler.
+ * @private
+ */
+life.Application.prototype.handlePanelDidSave_ = function(event) {
+  event.stopPropagation();
+  var stampString = this.stampPanel_.getStampAsString();
+  this.viewController_.addStampWithId(stampString, this.currentStampId_);
+  this.viewController_.selectStamp(this.currentStampId_);
 }
 
 /**

@@ -11,7 +11,7 @@
 
 
 goog.provide('stamp');
-goog.provide('stamp.Editor');
+goog.provide('stamp.StampPanel');
 
 goog.require('goog.Disposable');
 goog.require('goog.dom');
@@ -20,6 +20,8 @@ goog.require('goog.events');
 goog.require('goog.style');
 goog.require('goog.ui.Zippy');
 
+goog.require('stamp.Editor');
+
 /**
  * Manages the data and interface for the stamp editor.
  * @param {!Element} noteContainer The element under which DOM nodes for
@@ -27,31 +29,31 @@ goog.require('goog.ui.Zippy');
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-stamp.Editor = function(editorContainer) {
+stamp.StampPanel = function(editorContainer) {
   goog.events.EventTarget.call(this);
   this.parent_ = editorContainer;
 };
-goog.inherits(stamp.Editor, goog.events.EventTarget);
+goog.inherits(stamp.StampPanel, goog.events.EventTarget);
 
 /**
  * A dictionary of all the DOM elements used by the stamp editor.
  * @type {Object<Element>}
  * @private
  */
-stamp.Editor.prototype.domElements_ = {};
+stamp.StampPanel.prototype.domElements_ = {};
 
 /**
  * The minimum number of rows and columns in the stamp editor table.
  */
-stamp.Editor.prototype.MIN_ROW_COUNT = 3;
-stamp.Editor.prototype.MIN_COLUMN_COUNT = 3;
+stamp.StampPanel.prototype.MIN_ROW_COUNT = 3;
+stamp.StampPanel.prototype.MIN_COLUMN_COUNT = 3;
 
 /**
  * The ids used for elements in the DOM.  The stamp editor expects these
  * elements to exist.
  * @enum {string}
  */
-stamp.Editor.DomIds = {
+stamp.StampPanel.DomIds = {
   ADD_COLUMN_BUTTON: 'add_column_button',
   ADD_ROW_BUTTON: 'add_row_button',
   CANCEL_BUTTON: 'cancel_button',
@@ -69,7 +71,7 @@ stamp.Editor.DomIds = {
  * panel is about to open, or when it has been closed using specific buttons.
  * @enum {string}
  */
-stamp.Editor.Events = {
+stamp.StampPanel.Events = {
   PANEL_DID_CANCEL: 'panel_did_cancel',  // The Cancel button was clicked.
   PANEL_DID_SAVE: 'panel_did_save',  // The OK button was clicked.
   // Sent right before the editor panel will collapse.  Note that it is possible
@@ -89,8 +91,7 @@ stamp.Editor.Events = {
  * @enum {string}
  * @private
  */
-stamp.Editor.CellAttributes_ = {
-  IS_ALIVE: 'isalive',  // Whether the cell is alive or dead.
+stamp.StampPanel.CellAttributes_ = {
   ENABLED_FONT_COLOR: 'black',
   DISABLED_FONT_COLOR: 'lightgray'
 };
@@ -111,75 +112,15 @@ stamp.Editor.StringEncoding_ = {
  * events.
  * @override
  */
-stamp.Editor.prototype.disposeInternal = function() {
+stamp.StampPanel.prototype.disposeInternal = function() {
   for (elt in this.domElements_) {
     goog.events.removeAll(elt);
-  }
-  var tableCells =
-      this.stampEditorTable_.element.getElementsByTagName(goog.dom.TagName.TD);
-  for (var i = 0; i < tableCells.length; ++i) {
-    goog.events.removeAll(tableCells[i]);
   }
   goog.events.removeAll(this.parent_);
   this.panel_ = null;
   this.parent_ = null;
-  stamp.Editor.superClass_.disposeInternal.call(this);
-}
-
-/**
- * Fills out the TABLE structure for the stamp editor.  The stamp editor
- * can be resized, and handles clicks in its cells by toggling their state.
- * The resulting TABLE element will have the minumum number of rows and
- * columns, and be filled in with a default stamp that creates a glider.
- * @param {!Element<TABLE>} stampEditorTableElement The TABLE element that gets
- *     filled out with the editable cells.
- * @private
- */
-stamp.Editor.prototype.makeStampEditorDom_ = function(stampEditorTableElement) {
-  var domTable = goog.editor.Table.createDomTable(
-      document,
-      this.MIN_COLUMN_COUNT,
-      this.MIN_ROW_COUNT,
-      { 'borderWidth': 1, 'borderColor': 'white' });
-  var tableStyle = {
-    'borderCollpase': 'collapse',
-    'borderSpacing': '0px',
-    'borderStyle': 'solid'
-  };
-
-  goog.style.setStyle(domTable, tableStyle);
-  var tableCells =
-      domTable.getElementsByTagName(goog.dom.TagName.TD);
-  this.initCells_(tableCells);
-  goog.dom.appendChild(stampEditorTableElement, domTable);
-  this.stampEditorTable_ = new goog.editor.Table(domTable);
-}
-
-/**
- * Initialize a list of cells to the "alive" state: sets the is-alive
- * attribute and the enclosed image element.  Fix up the various attributes
- * that goog.editor.Table sets on cells.
- * @param {!Array<Element>} cells The array of cells to initialize.
- * @private
- */
-stamp.Editor.prototype.initCells_ = function(cells) {
-  var cellStyle = {
-    'padding': '0px'
-  };
-  for (var i = 0; i < cells.length; ++i) {
-    var cell = cells[i];
-    // The goog.editor.Table functions set the cell widths to 60px.
-    cell.style.removeProperty('width');
-    goog.style.setStyle(cell, cellStyle);
-    this.setCellIsAlive(cell, false);
-    /*
-    cell.innerHTML = '<img src="img/dead_cell.png" ' +
-                     'alt="Click to change state" />';
-    cell.setAttribute(stamp.Editor.CellAttributes_.IS_ALIVE, false);
-    */
-    goog.events.listen(cell, goog.events.EventType.CLICK,
-        this.toggleCellState, false, this);
-  }
+  this.stampEditor_ = null;
+  stamp.StampPanel.superClass_.disposeInternal.call(this);
 }
 
 /**
@@ -188,134 +129,32 @@ stamp.Editor.prototype.initCells_ = function(cells) {
  * @param {!goog.events.Event} mousedownEvent The MOUSEDOWN event that
  *     triggered this handler.
  */
-stamp.Editor.prototype.handleParentMousedown_ = function(mousedownEvent) {
+stamp.StampPanel.prototype.handleParentMousedown_ = function(mousedownEvent) {
   mousedownEvent.stopPropagation();
   var eventType;
   if (this.panel_.isExpanded()) {
     // About to close the panel.
-    eventType = stamp.Editor.Events.PANEL_WILL_CLOSE;
+    eventType = stamp.StampPanel.Events.PANEL_WILL_CLOSE;
   } else {
-    eventType = stamp.Editor.Events.PANEL_WILL_OPEN;
+    eventType = stamp.StampPanel.Events.PANEL_WILL_OPEN;
   }
   this.dispatchEvent(new goog.events.Event(eventType));
 }
 
 /**
- * Return the current stamp expressed as a string.  The format loosely follows
- * the .LIF 1.05 "spec", where rows are delineated by a \n, a live cell is
- * represented by a '*' and a dead one by a '.'.
+ * Return the current stamp expressed as a string.
+ * @return {!string} The stamp currently in the editor.
  */
-stamp.Editor.prototype.getStampAsString = function() {
-  var stampString = '';
-  var rowCount = this.rowCount();
-  for (var rowIndex = 0; rowIndex < rowCount; ++rowIndex) {
-    var row = this.stampEditorTable_.rows[rowIndex];
-    for (var colIndex = 0; colIndex < row.columns.length; ++colIndex) {
-      var cell = row.columns[colIndex];
-      if (this.cellIsAlive(cell.element)) {
-        stampString += stamp.Editor.StringEncoding_.LIVE_CELL;
-      } else {
-        stampString += stamp.Editor.StringEncoding_.DEAD_CELL;
-      }
-    }
-    stampString += stamp.Editor.StringEncoding_.END_OF_ROW;
-  }
-  return stampString;
+stamp.StampPanel.prototype.getStampAsString = function() {
+  return this.stampEditor_.getStampAsString();
 }
 
 /**
- * Sets the current stamp baes on the stamp encoding in |stampString|.  The
- * format loosely follows the .LIF 1.05 "spec", where rows are delineated by a
- * \n, a live cell is represented by a '*' and a dead one by a '.'.
+ * Sets the current stamp based on the stamp encoding in |stampString|.
  * @param {!string} stampString The encoded stamp string.
  */
-stamp.Editor.prototype.setStampFromString = function(stampStringIn) {
-  if (stampStringIn.length == 0)
-    return;  // Error?
-  // The stamp string has to end with a END_OF_ROW character.
-  var stampString = stampStringIn;
-  if (stampString[stampString.length - 1] !=
-      stamp.Editor.StringEncoding_.END_OF_ROW) {
-    stampString += stamp.Editor.StringEncoding_.END_OF_ROW;
-  }
-  // Compute the width and height of the new stamp.
-  var eorPos = stampString.indexOf(stamp.Editor.StringEncoding_.END_OF_ROW);
-  var width = 0;
-  var height = 0;
-  if (eorPos == -1) {
-    // The stamp string is a single row.
-    width = stampString.length;
-    height = 1;
-  } else {
-    width = eorPos;
-    // Count up the number of rows in the encoded string.
-    var rowCount = 0;
-    do {
-      ++rowCount;
-      eorPos = stampString.indexOf(stamp.Editor.StringEncoding_.END_OF_ROW,
-                                   eorPos + 1);
-    } while (eorPos != -1);
-    height = rowCount;
-  }
-
-  // Resize the editor.
-  var currentWidth = this.columnCount();
-  if (currentWidth < width) {
-    for (var col = 0; col < width - currentWidth; ++col) {
-      this.addColumn();
-    }
-  } else {
-    var clampedWidth = width;
-    if (width < this.MIN_COLUMN_COUNT) {
-      clampedWidth = this.MIN_COLUMN_COUNT;
-    }
-    if (currentWidth > clampedWidth) {
-      for (var col = 0; col < currentWidth - clampedWidth; ++col) {
-        this.removeColumn();
-      }
-    }
-  }
-  var currentHeight = this.rowCount();
-  if (currentHeight < height) {
-    for (var row = 0; row < height - currentHeight; ++row) {
-      this.addRow();
-    }
-  } else {
-    var clampedHeight = height;
-    if (height < this.MIN_ROW_COUNT) {
-      clampedHeight = this.MIN_ROW_COUNT;
-    }
-    if (currentHeight > clampedHeight) {
-      for (var row = 0; row < currentHeight - clampedHeight; ++row) {
-        this.removeRow();
-      }
-    }
-  }
-
-  var rowIndex = 0;
-  var columnIndex = 0;
-  for (var i = 0; i < stampString.length; ++i) {
-    var cell = this.cellAt(rowIndex, columnIndex);
-    switch (stampString.charAt(i)) {
-    case stamp.Editor.StringEncoding_.DEAD_CELL:
-      this.setCellIsAlive(cell, false);
-      ++columnIndex;
-      break;
-    case stamp.Editor.StringEncoding_.LIVE_CELL:
-      this.setCellIsAlive(cell, true);
-      ++columnIndex;
-      break;
-    case stamp.Editor.StringEncoding_.END_OF_ROW:
-      ++rowIndex;
-      columnIndex = 0;
-      break;
-    default:
-      // Invalid character, set the cel to "dead".
-      this.setCellIsAlive(cell, false);
-      ++columnIndex;
-      break;
-    }
-  }
+stamp.StampPanel.prototype.setStampFromString = function(stampString) {
+  this.stampEditor_.setStampFromString(stampString);
 }
 
 /**
@@ -346,7 +185,8 @@ stamp.Editor.prototype.setStampFromString = function(stampStringIn) {
  * @return {!goog.ui.Zippy} The Zippy element representing the entire stamp
  *     panel with enclosed editor.
  */
-stamp.Editor.prototype.makeStampEditorPanel = function(stampEditorElements) {
+stamp.StampPanel.prototype.makeStampEditorPanel =
+    function(stampEditorElements) {
   if (!stampEditorElements) {
     return null;
   }
@@ -369,7 +209,8 @@ stamp.Editor.prototype.makeStampEditorPanel = function(stampEditorElements) {
       this.domElements_.panelHeader, this.domElements_.panelContainer);
 
   // Create the editable stamp representation within the editor panel.
-  this.makeStampEditorDom_(stampEditorElements.editorContainer);
+  this.stampEditor_ = new stamp.Editor();
+  this.stampEditor_.makeStampEditorDom(stampEditorElements.editorContainer);
 
   goog.events.listen(this.parent_, goog.events.EventType.MOUSEDOWN,
                      this.handleParentMousedown_, false, this);
@@ -377,22 +218,22 @@ stamp.Editor.prototype.makeStampEditorPanel = function(stampEditorElements) {
   // Wire up the add/remove column and row buttons.
   goog.events.listen(stampEditorElements.addColumnButton,
                      goog.events.EventType.CLICK,
-                     this.addColumn, false, this);
+                     this.addColumn_, false, this);
   goog.events.listen(stampEditorElements.removeColumnButton,
                      goog.events.EventType.CLICK,
-                     this.removeColumn, false, this);
+                     this.removeColumn_, false, this);
   goog.events.listen(stampEditorElements.addRowButton,
                      goog.events.EventType.CLICK,
-                     this.addRow, false, this);
+                     this.addRow_, false, this);
   goog.events.listen(stampEditorElements.removeRowButton,
                      goog.events.EventType.CLICK,
-                     this.removeRow, false, this);
+                     this.removeRow_, false, this);
   goog.events.listen(stampEditorElements.cancelButton,
                      goog.events.EventType.CLICK,
-                     this.closePanelAndCancel, false, this);
+                     this.closePanelAndCancel_, false, this);
   goog.events.listen(stampEditorElements.okButton,
                      goog.events.EventType.CLICK,
-                     this.closePanelAndUpdate, false, this);
+                     this.closePanelAndSave_, false, this);
 
   // Add the panel's DOM structure to the document.
   goog.dom.appendChild(this.parent_, newEditor);
@@ -402,51 +243,15 @@ stamp.Editor.prototype.makeStampEditorPanel = function(stampEditorElements) {
 };
 
 /**
- * Respond to a CLICK event in a table cell by toggling its state.
- * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
- *     handler.
- */
-stamp.Editor.prototype.toggleCellState = function(clickEvent) {
-  clickEvent.stopPropagation();
-  // The cell is the enclosing TD element.
-  var cell = goog.dom.getAncestor(clickEvent.target, function(node) {
-      return node.tagName && node.tagName.toUpperCase() == goog.dom.TagName.TD;
-    });
-  // TODO(dspringer): throw an error or assert if no enclosing TD element is
-  // found.
-  this.setCellIsAlive(cell, !this.cellIsAlive(cell));
-}
-
-/**
- * Return the TD element for the cell at location (|row|, |column|).
- * @param {number} rowIndex The row index.  This is 0-based.
- * @param {number} columnIndex The column index.  This is 0-based.
- * @return {?Element} The TD element representing the cell.  If no cell exists
- *     then return null.
- */
-stamp.Editor.prototype.cellAt = function(rowIndex, columnIndex) {
-  if (rowIndex < 0 || rowIndex >= this.stampEditorTable_.rows.length)
-    return null;
-  var row = this.stampEditorTable_.rows[rowIndex];
-  if (columnIndex < 0 || columnIndex >= row.columns.length)
-    return null;
-  return row.columns[columnIndex].element;
-}
-
-/**
  * Respond to a CLICK event on the "add column" button.  Update the display
  * to reflect whether columns can be removed or not.
  * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
  *     handler.
  */
-stamp.Editor.prototype.addColumn = function(clickEvent) {
+stamp.StampPanel.prototype.addColumn_ = function(clickEvent) {
   clickEvent.stopPropagation();
-  var newCells = this.stampEditorTable_.insertColumn();
-  this.initCells_(newCells);
-  if (this.columnCount() > this.MIN_COLUMN_COUNT) {
-    goog.style.setStyle(this.domElements_.removeColumnButton,
-        { 'color': stamp.Editor.CellAttributes_.ENABLED_FONT_COLOR });
-  }
+  this.stampEditor_.appendColumn();
+  this.refreshUI_();
 }
 
 /**
@@ -454,43 +259,10 @@ stamp.Editor.prototype.addColumn = function(clickEvent) {
  * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
  *     handler.
  */
-stamp.Editor.prototype.removeColumn = function(clickEvent) {
+stamp.StampPanel.prototype.removeColumn_ = function(clickEvent) {
   clickEvent.stopPropagation();
-  var columnCount = this.columnCount();
-  if (columnCount <= this.MIN_COLUMN_COUNT) {
-    return;
-  }
-  // Unhook all the listeners that have been attached to the cells in the
-  // last column, then remove the column.
-  for (var i = 0; i < this.stampEditorTable_.rows.length; ++i) {
-    var row = this.stampEditorTable_.rows[i];
-    var cell = row.columns[columnCount - 1];
-    goog.events.removeAll(cell);
-  }
-  this.stampEditorTable_.removeColumn(columnCount - 1);
-  // Update the UI if there are the minumum number of columns remaining.  Note
-  // that the value of columnCount() could be different than when it was called
-  // before removing the column.
-  if (this.columnCount() == this.MIN_COLUMN_COUNT) {
-    goog.style.setStyle(this.domElements_.removeColumnButton,
-        { 'color': stamp.Editor.CellAttributes_.DISABLED_FONT_COLOR });
-  }
-}
-
-/**
- * Return the number of columns in the stamp editor table.  This assumes that
- * there are no merged cells in row[0], and that the number of cells in all
- * rows is the same as the length of row[0].
- * @return {int} The number of columns.
- */
-stamp.Editor.prototype.columnCount = function() {
-  if (!this.stampEditorTable_)
-    return 0;
-  if (!this.stampEditorTable_.rows)
-    return 0;
-  if (!this.stampEditorTable_.rows[0].columns)
-    return 0;
-  return this.stampEditorTable_.rows[0].columns.length;
+  this.stampEditor_.removeLastColumn();
+  this.refreshUI_();
 }
 
 /**
@@ -498,107 +270,74 @@ stamp.Editor.prototype.columnCount = function() {
  * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
  *     handler.
  */
-stamp.Editor.prototype.addRow = function(clickEvent) {
+stamp.StampPanel.prototype.addRow_ = function(clickEvent) {
   clickEvent.stopPropagation();
-  var newTableRow = this.stampEditorTable_.insertRow();
-  this.initCells_(goog.editor.Table.getChildCellElements(newTableRow));
-  if (this.rowCount() > this.MIN_ROW_COUNT) {
-    goog.style.setStyle(this.domElements_.removeRowButton,
-        { 'color': stamp.Editor.CellAttributes_.ENABLED_FONT_COLOR });
-  }
+  this.stampEditor_.appendRow();
+  this.refreshUI_();
 }
 
 /**
  * Respond to a CLICK event on the "remove row" button.
  * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
  *     handler.
+ * @private
  */
-stamp.Editor.prototype.removeRow = function(clickEvent) {
+stamp.StampPanel.prototype.removeRow_ = function(clickEvent) {
   clickEvent.stopPropagation();
-  var rowCount = this.rowCount();
-  // If removing this row will result in less than the minumum number of
-  // row, then update the UI to disable the remove row button and return
-  // without removing the row.
-  if (rowCount <= this.MIN_ROW_COUNT) {
-    return;
-  }
-  // Unhook all the listeners that have been attached to the cells in the
-  // last row, then remove the row.
-  var lastRow = this.stampEditorTable_.rows[rowCount - 1];
-  for (var i = 0; i < lastRow.columns.length; ++i) {
-    var cell = lastRow.columns[i];
-    goog.events.removeAll(cell);
-  }
-  this.stampEditorTable_.removeRow(rowCount - 1);
-  // Update the UI if there are the minumum number of rows remaining.  Note
-  // that the value of rowCount() could be different than when it was called
-  // before removing the row.
-  if (this.rowCount() == this.MIN_ROW_COUNT) {
-    goog.style.setStyle(this.domElements_.removeRowButton,
-        { 'color': stamp.Editor.CellAttributes_.DISABLED_FONT_COLOR });
-  }
+  this.stampEditor_.removeLastRow();
+  this.refreshUI_();
 }
 
 /**
- * Return the number of rows in the stamp editor table.  Assumes that there are
- * no merged cells in any columns.
- * @return {int} The number of rows.
+ * Update the UI to reflect thing like "remove column" button to be enabled if
+ * there are column that can be removed.
+ * @private
  */
-stamp.Editor.prototype.rowCount = function() {
-  if (!this.stampEditorTable_)
-    return 0;
-  if (!this.stampEditorTable_.rows)
-    return 0;
-  return this.stampEditorTable_.rows.length;
+stamp.StampPanel.prototype.refreshUI_ = function() {
+  if (this.stampEditor_.rowCount() > this.MIN_ROW_COUNT) {
+    goog.style.setStyle(this.domElements_.removeRowButton,
+        { 'color': stamp.StampPanel.CellAttributes_.ENABLED_FONT_COLOR });
+  } else {
+    goog.style.setStyle(this.domElements_.removeRowButton,
+        { 'color': stamp.StampPanel.CellAttributes_.DISABLED_FONT_COLOR });
+  }
+  if (this.stampEditor_.columnCount() > this.MIN_COLUMN_COUNT) {
+    goog.style.setStyle(this.domElements_.removeColumnButton,
+        { 'color': stamp.StampPanel.CellAttributes_.ENABLED_FONT_COLOR });
+  } else {
+    goog.style.setStyle(this.domElements_.removeColumnButton,
+        { 'color': stamp.StampPanel.CellAttributes_.DISABLED_FONT_COLOR });
+  }
 }
 
 /**
  * Respond to a CLICK event on the "cancel" button.
  * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
  *     handler.
+ * @private
  */
-stamp.Editor.prototype.closePanelAndCancel = function(clickEvent) {
+stamp.StampPanel.prototype.closePanelAndCancel_ = function(clickEvent) {
   if (this.panel_.isExpanded())
     this.panel_.collapse();
   // Dispatch two events: PANEL_WILL_CLOSE and PANEL_DID_CANCEL.
-  this.dispatchEvent(new goog.events.Event(stamp.Editor.PANEL_WILL_CLOSE));
-  this.dispatchEvent(new goog.events.Event(stamp.Editor.PANEL_DID_CANCEL));
+  this.dispatchEvent(
+      new goog.events.Event(stamp.StampPanel.Events.PANEL_WILL_CLOSE));
+  this.dispatchEvent(
+      new goog.events.Event(stamp.StampPanel.Events.PANEL_DID_CANCEL));
 }
 
 /**
  * Respond to a CLICK event on the "ok" button.
  * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
  *     handler.
+ * @private
  */
-stamp.Editor.prototype.closePanelAndUpdate = function(clickEvent) {
+stamp.StampPanel.prototype.closePanelAndSave_ = function(clickEvent) {
   if (this.panel_.isExpanded())
     this.panel_.collapse();
-  // Dispatch two events: PANEL_WILL_CLOSE and PANEL_DID_SAVE.  The
-  // PANEL_DID_SAVE event carries the stamp string aas part of its payload.
-  this.dispatchEvent(new goog.events.Event(stamp.Editor.PANEL_WILL_CLOSE));
-  var didSaveEvent = new goog.events.Event(stamp.Editor.PANEL_DID_SAVE);
-  didSaveEvent.stampString = this.getStampAsString();
-  this.dispatchEvent(didSaveEvent);
-}
-
-/**
- * Accessor for the is-alive state of a cell.
- * @param {!Element} cell The target cell.
- * @return {bool} The is-alive state of |cell|.
- */
-stamp.Editor.prototype.cellIsAlive = function(cell) {
-  isAlive = cell.getAttribute(stamp.Editor.CellAttributes_.IS_ALIVE);
-  return isAlive != 'false';
-}
-
-/**
- * Change the is-alive state of a cell to |isAlive|.  The appearance of the cell
- * is also changed to match the new state.
- * @param {!Element} cell The target cell.
- * @param {bool} isAlive The new is-alive state of the cell.
- */
-stamp.Editor.prototype.setCellIsAlive = function(cell, isAlive) {
-  cell.setAttribute(stamp.Editor.CellAttributes_.IS_ALIVE, isAlive);
-  var cellImg = isAlive ? 'img/live_cell.png' : 'img/dead_cell.png';
-  cell.innerHTML = '<img src="' + cellImg + '" alt="Click to change state." />';
+  // Dispatch two events: PANEL_WILL_CLOSE and PANEL_DID_SAVE.
+  this.dispatchEvent(
+      new goog.events.Event(stamp.StampPanel.Events.PANEL_WILL_CLOSE));
+  this.dispatchEvent(
+      new goog.events.Event(stamp.StampPanel.Events.PANEL_DID_SAVE));
 }
