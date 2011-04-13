@@ -155,6 +155,7 @@ stamp.StampPanel.prototype.getStampAsString = function() {
  */
 stamp.StampPanel.prototype.setStampFromString = function(stampString) {
   this.stampEditor_.setStampFromString(stampString);
+  this.refreshUI_();
 }
 
 /**

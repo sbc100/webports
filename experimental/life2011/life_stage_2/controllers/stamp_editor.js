@@ -131,6 +131,52 @@ stamp.Editor.prototype.initCells_ = function(cells) {
 }
 
 /**
+ * Inspect the encoded stamp string and make sure it's valid.  Add things like
+ * newline characters when necessary.  |stampStringIn| is assumed to have
+ * length > 0.
+ * @param {!string} stampStringIn The input stamp string.  Must have length > 0.
+ * @return {!string} The santized version of the input string.
+ * @private
+ */
+stamp.Editor.prototype.sanitizeStampString_ = function(stampStringIn) {
+  var stampString = stampStringIn;
+  if (stampString[stampString.length - 1] !=
+      stamp.Editor.StringEncoding_.END_OF_ROW) {
+    stampString += stamp.Editor.StringEncoding_.END_OF_ROW;
+  }
+  return stampString;
+}
+
+/**
+ * Compute a stamp size from an encoded stamp string.  Stamps are assumed to be
+ * rectangular.  The width is the length in characters of the first line in
+ * the stamp string.  The height is the number of lines.
+ * @param {!string} stampString The encoded stamp string.  Must have length > 0.
+ * @return {!Object} An object containing width and height.
+ * @private
+ */
+stamp.Editor.prototype.getSizeFromStampString_ = function(stampString) {
+  var size = {width: 0, height: 0};
+  var eorPos = stampString.indexOf(stamp.Editor.StringEncoding_.END_OF_ROW);
+  if (eorPos == -1) {
+    // The stamp string is a single row.
+    size.width = stampString.length;
+    size.height = 1;
+  } else {
+    size.width = eorPos;
+    // Count up the number of rows in the encoded string.
+    var rowCount = 0;
+    do {
+      ++rowCount;
+      eorPos = stampString.indexOf(stamp.Editor.StringEncoding_.END_OF_ROW,
+                                   eorPos + 1);
+    } while (eorPos != -1);
+    size.height = rowCount;
+  }
+  return size;
+}
+
+/**
  * Return the current stamp expressed as a string.  The format loosely follows
  * the .LIF 1.05 "spec", where rows are delineated by a \n, a live cell is
  * represented by a '*' and a dead one by a '.'.
@@ -162,66 +208,11 @@ stamp.Editor.prototype.getStampAsString = function() {
 stamp.Editor.prototype.setStampFromString = function(stampStringIn) {
   if (stampStringIn.length == 0)
     return;  // Error?
-  // The stamp string has to end with a END_OF_ROW character.
-  var stampString = stampStringIn;
-  if (stampString[stampString.length - 1] !=
-      stamp.Editor.StringEncoding_.END_OF_ROW) {
-    stampString += stamp.Editor.StringEncoding_.END_OF_ROW;
-  }
-  // Compute the width and height of the new stamp.
-  var eorPos = stampString.indexOf(stamp.Editor.StringEncoding_.END_OF_ROW);
-  var width = 0;
-  var height = 0;
-  if (eorPos == -1) {
-    // The stamp string is a single row.
-    width = stampString.length;
-    height = 1;
-  } else {
-    width = eorPos;
-    // Count up the number of rows in the encoded string.
-    var rowCount = 0;
-    do {
-      ++rowCount;
-      eorPos = stampString.indexOf(stamp.Editor.StringEncoding_.END_OF_ROW,
-                                   eorPos + 1);
-    } while (eorPos != -1);
-    height = rowCount;
-  }
+  var stampString = this.sanitizeStampString_(stampStringIn);
+  var newSize = this.getSizeFromStampString_(stampString);
+  this.resize(newSize.width, newSize.height);
 
-  // Resize the editor.
-  var currentWidth = this.columnCount();
-  if (currentWidth < width) {
-    for (var col = 0; col < width - currentWidth; ++col) {
-      this.appendColumn();
-    }
-  } else {
-    var clampedWidth = width;
-    if (width < this.MIN_COLUMN_COUNT) {
-      clampedWidth = this.MIN_COLUMN_COUNT;
-    }
-    if (currentWidth > clampedWidth) {
-      for (var col = 0; col < currentWidth - clampedWidth; ++col) {
-        this.removeLastColumn();
-      }
-    }
-  }
-  var currentHeight = this.rowCount();
-  if (currentHeight < height) {
-    for (var row = 0; row < height - currentHeight; ++row) {
-      this.appendRow();
-    }
-  } else {
-    var clampedHeight = height;
-    if (height < this.MIN_ROW_COUNT) {
-      clampedHeight = this.MIN_ROW_COUNT;
-    }
-    if (currentHeight > clampedHeight) {
-      for (var row = 0; row < currentHeight - clampedHeight; ++row) {
-        this.removeLastRow();
-      }
-    }
-  }
-
+  // Parse the stamp string and set cell states.
   var rowIndex = 0;
   var columnIndex = 0;
   for (var i = 0; i < stampString.length; ++i) {
@@ -246,11 +237,6 @@ stamp.Editor.prototype.setStampFromString = function(stampStringIn) {
       break;
     }
   }
-
-  // Initialize any padding cells to "dead".  Padding cells can happen when the
-  // stamp is smaller than the minimum size.
-  var paddingCells = [];
-  this.initCells_(paddingCells);
 }
 
 /**
@@ -296,6 +282,46 @@ stamp.Editor.prototype.domCellAt = function(rowIndex, columnIndex) {
   if (columnIndex < 0 || columnIndex >= row.columns.length)
     return null;
   return row.columns[columnIndex].element;
+}
+
+/**
+ * Resize the table of cells to contain |width| columns and |height| rows. A
+ * 0 value for either dimension leaves that dimension unchanged.  Both
+ * dimensions are clamped to the minumum and maximum row/column counts.
+ * @param {!number} width The new width, must be >= 0.
+ * @param {!number} height The new height, must be >= 0.
+ */
+stamp.Editor.prototype.resize = function(width, height) {
+  if (width < this.MIN_COLUMN_COUNT) {
+    width = this.MIN_COLUMN_COUNT;
+  }
+  if (height < this.MIN_ROW_COUNT) {
+    height = this.MIN_ROW_COUNT;
+  }
+  var currentWidth = this.columnCount();
+  if (width > 0 && width != currentWidth) {
+    if (currentWidth < width) {
+      for (var col = 0; col < width - currentWidth; ++col) {
+        this.appendColumn();
+      }
+    } else {
+      for (var col = 0; col < currentWidth - width; ++col) {
+        this.removeLastColumn();
+      }
+    }
+  }
+  var currentHeight = this.rowCount();
+  if (height > 0 && height != currentHeight) {
+    if (currentHeight < height) {
+      for (var row = 0; row < height - currentHeight; ++row) {
+        this.appendRow();
+      }
+    } else {
+      for (var row = 0; row < currentHeight - height; ++row) {
+        this.removeLastRow();
+      }
+    }
+  }
 }
 
 /**
