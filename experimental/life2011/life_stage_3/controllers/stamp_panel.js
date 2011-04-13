@@ -4,7 +4,7 @@
 
 /**
  * @file
- * The stamp editor object.  This object manages the UI connections for various
+ * The stamp panel object.  This object manages the UI connections for various
  * elements of the stamp editor panel, and makes the dynamic parts of the
  * panel's DOM.
  */
