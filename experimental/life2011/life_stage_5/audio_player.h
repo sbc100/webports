@@ -4,7 +4,10 @@
 #ifndef AUDIO_PLAYER_H_
 #define AUDIO_PLAYER_H_
 
-#include "web_resource_loader.h"
+#include <ppapi/cpp/completion_callback.h>
+
+#include "experimental/life2011/life_stage_5/threading/pthread_ext.h"
+#include "experimental/life2011/life_stage_5/web_resource_loader.h"
 
 namespace pp {
 class Audio;
@@ -46,11 +49,9 @@ class AudioPlayer {
   static void AudioCallback(void* sample_buffer, size_t buffer_size_in_bytes,
                             void* user_data);
 
-  // StopPlaying is callable from any thread or the audio callback to stop
-  // playing the sound. It uses the callback that follows to schedule the
-  // action on the main thread.
-  void StopPlaying();
-  static void StopPlayingCallback(void* user_data, int32_t err);
+  // Internal versions of Play/Stop that only run on the main thread.
+  void InternalPlay(int32_t result);
+  void InternalStop(int32_t result);
 
   // Clear (delete) the audio objects. 
   void ClearAudioSource();
@@ -62,6 +63,9 @@ class AudioPlayer {
   size_t playback_offset_;
   pp::Audio* pp_audio_;
   pp::Instance* instance_;
+
+  pp::CompletionCallbackFactory<AudioPlayer, RefCount> factory_;
+  pthread_mutex_t mutex_;
 };
 
 }  // namespace life

@@ -1,8 +1,7 @@
 // Copyright 2011 The Native Client Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#include "audio_player.h"
-#include "audio_source.h"
+#include "experimental/life2011/life_stage_5/audio_player.h"
 
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/cpp/audio.h>
@@ -13,6 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "experimental/life2011/life_stage_5/audio_source.h"
+#include "experimental/life2011/life_stage_5/threading/scoped_mutex_lock.h"
 
 namespace life {
 
@@ -20,18 +21,19 @@ AudioPlayer::AudioPlayer(pp::Instance* instance)
   : audio_source_(NULL),
     playback_offset_(0),
     pp_audio_(NULL),
-    instance_(instance) {
+    instance_(instance),
+    factory_(this) {
+  pthread_mutex_init(&mutex_, NULL);
 }
 
 AudioPlayer::~AudioPlayer() {
   ClearAudioSource();
   ClearPepperAudio();
+  pthread_mutex_destroy(&mutex_);
 }
 
 void AudioPlayer::AssignAudioSource(AudioSource* source) {
-  // TODO(gink): Allow this to happen on threads other than main.
-  assert(pp::Module::Get()->core()->IsMainThread());
-
+  threading::ScopedMutexLock scoped_mutex(&mutex_);
   ClearPepperAudio();
   playback_offset_ = 0;
   if (audio_source_ != source) {
@@ -42,20 +44,13 @@ void AudioPlayer::AssignAudioSource(AudioSource* source) {
 
 void AudioPlayer::Play() {
   assert(audio_source_ != NULL);  // Forgot to assign a sound source?
-
-  if (pp_audio_ == NULL && audio_source_->IsReady()) {
-    CreatePepperAudio();
-  }
-  if (pp_audio_ != NULL) {
-    playback_offset_ = 0;
-    pp_audio_->StartPlayback();
-  }
+  pp::CompletionCallback cc = factory_.NewCallback(&AudioPlayer::InternalPlay);
+  pp::Module::Get()->core()->CallOnMainThread(0, cc, PP_OK);
 }
 
 void AudioPlayer::Stop() {
-  if (pp_audio_ != NULL) {
-    pp_audio_->StopPlayback();
-  }
+  pp::CompletionCallback cc = factory_.NewCallback(&AudioPlayer::InternalStop);
+  pp::Module::Get()->core()->CallOnMainThread(0, cc, PP_OK);
 }
 
 void AudioPlayer::AudioCallback(void* sample_buffer,
@@ -74,7 +69,7 @@ void AudioPlayer::AudioCallback(void* sample_buffer,
   if (copy_size == 0) {
     // No samples left; fill the buffer with 0s and stop the player.
     ::memset(out_buffer, 0, out_buffer_size);
-    player->StopPlaying();
+    player->Stop();
   } else {
     // Copy the next chunk of samples to the audio buffer; if it's not enough
     // to fill the buffer add 0s.
@@ -87,15 +82,23 @@ void AudioPlayer::AudioCallback(void* sample_buffer,
   }
 }
 
-void AudioPlayer::StopPlaying() {
-  pp::CompletionCallback cc(StopPlayingCallback, this);
-  pp::Module::Get()->core()->CallOnMainThread(0, cc, PP_OK);
+void AudioPlayer::InternalPlay(int32_t result) {
+  assert(pp::Module::Get()->core()->IsMainThread());
+  threading::ScopedMutexLock scoped_mutex(&mutex_);
+  if (pp_audio_ == NULL && audio_source_->IsReady()) {
+    CreatePepperAudio();
+  }
+  if (pp_audio_ != NULL) {
+    playback_offset_ = 0;
+    pp_audio_->StartPlayback();
+  }
 }
 
-void AudioPlayer::StopPlayingCallback(void* user_data, int32_t err) {
-  if (PP_OK == err) {
-    AudioPlayer* player = static_cast<AudioPlayer*>(user_data);
-    player->Stop();
+void AudioPlayer::InternalStop(int32_t result) {
+  assert((pp::Module::Get()->core()->IsMainThread()));
+  threading::ScopedMutexLock scoped_mutex(&mutex_);
+  if (pp_audio_ != NULL) {
+    pp_audio_->StopPlayback();
   }
 }
 
@@ -114,6 +117,8 @@ void AudioPlayer::ClearPepperAudio() {
 }
 
 bool AudioPlayer::CreatePepperAudio() {
+  assert(pp::Module::Get()->core()->IsMainThread());
+
   // Create audio config per sound info.
   PP_AudioSampleRate rate = (audio_source_->GetSampleRate() == 44100) ? 
       PP_AUDIOSAMPLERATE_44100 : PP_AUDIOSAMPLERATE_48000;
