@@ -212,6 +212,11 @@ stamp.Editor.prototype.setStampFromString = function(stampStringIn) {
   var newSize = this.getSizeFromStampString_(stampString);
   this.resize(newSize.width, newSize.height);
 
+  // Set all the cells to "dead".
+  var tableCells =
+      this.stampEditorTable_.element.getElementsByTagName(goog.dom.TagName.TD);
+  this.initCells_(tableCells);
+
   // Parse the stamp string and set cell states.
   var rowIndex = 0;
   var columnIndex = 0;
