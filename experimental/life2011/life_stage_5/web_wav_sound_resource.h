@@ -4,10 +4,11 @@
 #ifndef WEB_WAV_SOUND_RESOURCE_H_
 #define WEB_WAV_SOUND_RESOURCE_H_
 
-#include "audio_source.h"
-#include "web_resource_loader.h"
 #include <string>
 #include <vector>
+
+#include "experimental/life2011/life_stage_5/audio_source.h"
+#include "experimental/life2011/life_stage_5/web_resource_loader.h"
 
 namespace pp {
 class Instance;
@@ -15,6 +16,13 @@ class Instance;
 
 namespace life {
 
+// WebWavSoundResource downloads a wav audio file from a URL and, if successful,
+// exposes the sound samples through the AudioSource interface. Each instance
+// can only be used once. That is, once Init has been called there is no way
+// to call it again to load a different sound resource. As such, this class
+// uses a lock-free, producer-consumer approach to thread safety. It starts
+// with IsReady returning false. Once the audio data is available, IsReady
+// reports true and remains so until the instance is deleted.
 class WebWavSoundResource : public AudioSource {
  public:
   typedef WebResourceLoader<WebWavSoundResource> Loader;
@@ -29,7 +37,7 @@ class WebWavSoundResource : public AudioSource {
   // Return whether the audio sample is ready to play.
   bool IsReady() const { return is_ready_; }
 
-  // Get the audio data.
+  // AudioSource interface.
   int32_t GetSampleRate() const;
   const char* GetAudioData() const;
   size_t GetAudioDataSize() const;

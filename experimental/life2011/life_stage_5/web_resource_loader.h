@@ -8,6 +8,8 @@
 #include <ppapi/cpp/url_loader.h>
 #include <string>
 
+#include "experimental/life2011/life_stage_5/ref_count.h"
+
 namespace pp {
 class Instance;
 class URLRequestInfo;
@@ -87,7 +89,7 @@ class WebResourceLoader {
   // Main-thread callback for CloseAndDeleteSelf.
   static void DeleteOnMainThread(void* user_data, int32_t err);
 
-  pp::CompletionCallbackFactory<WebResourceLoader> factory_;
+  pp::CompletionCallbackFactory<WebResourceLoader, RefCount> factory_;
   pp::Instance* instance_;
   pp::URLLoader url_loader_;
   bool connected_;

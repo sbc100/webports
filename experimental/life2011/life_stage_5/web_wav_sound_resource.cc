@@ -1,15 +1,15 @@
 // Copyright 2011 The Native Client Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#include "web_wav_sound_resource.h"
-#include "web_resource_loader_inl.h"
+#include "experimental/life2011/life_stage_5/web_wav_sound_resource.h"
 
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/url_response_info.h>
 #include <ppapi/cpp/var.h>
-
 #include <algorithm>
 #include <string.h>
+
+#include "experimental/life2011/life_stage_5/web_resource_loader_inl.h"
 
 namespace {
 // Wav record descriptor per 
@@ -38,8 +38,6 @@ struct WavRecord {
 
 // Parse the headers in the url response and return the length of the
 // resource content ion bytes. Returns 0 in case of error.
-// TODO(gwink): Define a wrapper class around URLResponseInfo and parse
-// the headers into a map that can be conveniently queried.
 int GetContentLength(const pp::URLResponseInfo response) {
   pp::Var header_var = response.GetHeaders();
   if (!header_var.is_string()) {
@@ -60,42 +58,40 @@ int GetContentLength(const pp::URLResponseInfo response) {
 // the pepper audio interface.
 bool VerifyWavData(const char* data, size_t data_size) {
   // Do we have enough data.
-  printf("Wav data size: %i\n", (int)data_size);
   if (data_size < sizeof(WavRecord)) {
+  printf("Wav data size = %lu is too short.\n",
+         static_cast<uint32_t>(data_size));
     return false;
   }
 
   const WavRecord* wav = reinterpret_cast<const WavRecord*>(data);
   // Check various chunk formats.
-  printf("Wav header id: |%4.4s|\n", wav->header_id);
-  printf("Wav audio format id: |%4.4s|\n", wav->format);
-  printf("Wav format header id: |%4.4s|\n", wav->format_chunk_id);
-  printf("Wav data header id: |%4.4s|\n", wav->data_id);
   if (::strncmp(wav->header_id, "RIFF", 4) != 0 ||
       ::strncmp(wav->format, "WAVE", 4) != 0 ||
       ::strncmp(wav->format_chunk_id, "fmt ", 4) != 0 ||
       ::strncmp(wav->data_id, "data", 4) != 0) {
-    printf("   ** bad format id.\n");
+    printf("Did not find 'RIFF', 'WAVE' and 'fmt ' headers in wav data.\n");
     return false;
   }
   // Check that we support the audio format.
-  printf("Wav sample rate: %i\n", (int)wav->sample_rate);
   if (wav->sample_rate != 44100 && wav->sample_rate != 48000) {
-    printf("   ** bad sample rate.\n");
+    printf("Wav sample rate = %li. MNacl only supports 44100 or 48000.\n",
+           wav->sample_rate);
     return false;
   }
-  printf("Wav num channels: %i\n", wav->num_channels);
-  printf("Wav bits per sample: %i\n", wav->bits_per_sample);
   if (wav->num_channels != 2 || wav->bits_per_sample != 16) {
-    printf("   ** not stereo or not 16-bit.\n");
+    printf("NaCl supports stereo audio and 16-bit per sample at this time.\n");
     return false;
   }
   // Finally, check that the actual data size and wav sample data size match.
-  printf("Wav audio size: actual = %i, expected = %i\n",
-         (int)wav->audio_chunk_size,
-         static_cast<int>(data_size - sizeof(WavRecord) + 1));
-  return (wav->audio_chunk_size ==
+  bool check_audio_size = (wav->audio_chunk_size ==
           static_cast<int32_t>(data_size - sizeof(WavRecord) + 1));
+  if (!check_audio_size) {
+    printf("Wav audio size: actual = %li, expected = %i\n",
+        wav->audio_chunk_size,
+        static_cast<int>(data_size - sizeof(WavRecord) + 1));
+  }
+  return check_audio_size;
 }
 
 }  // anonymous namespace

@@ -4,7 +4,7 @@
 #ifndef WEB_RESOURCE_LOADER_INL_H_
 #define WEB_RESOURCE_LOADER_INL_H_
 
-#include "web_resource_loader.h"
+#include "experimental/life2011/life_stage_5/web_resource_loader.h"
 
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/cpp/module.h>
@@ -46,15 +46,12 @@ WebResourceLoader<Delegate>::~WebResourceLoader() {
 template <class Delegate>
 void WebResourceLoader<Delegate>::LoadURL(const std::string& url) {
   // Check that there is no pending request.
-  assert(!connected_ && url_loader_.GetResponseInfo().is_null());
+  assert(!connected_);
+  assert(url_loader_.GetResponseInfo().is_null());
   // Only usable from main plugin thread.
-  if (pp::Module::Get()->core()->IsMainThread()) {
-    StartDownload(PP_OK, url);
-  } else {
-    pp::CompletionCallback cc = factory_.NewCallback(
+  pp::CompletionCallback cc = factory_.NewCallback(
       &WebResourceLoader<Delegate>::StartDownload, std::string(url));
-    pp::Module::Get()->core()->CallOnMainThread(0, cc, PP_OK);
-  }
+  pp::Module::Get()->core()->CallOnMainThread(0, cc, PP_OK);
 }
 
 template <class Delegate>
@@ -77,6 +74,7 @@ pp::URLResponseInfo WebResourceLoader<Delegate>::GetResponseInfo() const {
 
 template <class Delegate>
 void WebResourceLoader<Delegate>::Close() {
+  assert(pp::Module::Get()->core()->IsMainThread());
   // TODO(gwink): The nexe crashes miserably when I call Close on the URLLoader.
   // Taking it out for now.
   // url_loader_.Close();
