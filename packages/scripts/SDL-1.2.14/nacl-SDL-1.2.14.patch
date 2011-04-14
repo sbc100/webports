@@ -222,7 +222,7 @@ index 0000000..ed1e499
 +static int NACLAUD_OpenAudio(_THIS, SDL_AudioSpec *spec);
 +static void NACLAUD_CloseAudio(_THIS);
 +
-+static void AudioCallback(void* samples, size_t buffer_size, void* data);
++static void AudioCallback(void* samples, uint32_t buffer_size, void* data);
 +
 +
 +/* Audio driver bootstrap functions */
@@ -293,7 +293,7 @@ index 0000000..ed1e499
 +}
 +
 +
-+static void AudioCallback(void* samples, size_t buffer_size, void* data) {
++static void AudioCallback(void* samples, uint32_t buffer_size, void* data) {
 +  SDL_AudioDevice* _this = reinterpret_cast<SDL_AudioDevice*>(data);
 +
 +  SDL_LockMutex(_this->hidden->mutex);
