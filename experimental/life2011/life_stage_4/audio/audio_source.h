@@ -12,7 +12,7 @@ class Audio;
 class Instance;
 }
 
-namespace life {
+namespace audio {
 
 // AudioSource declares the interface for a class that can be assigned to an
 // AudioPlayer instance.
@@ -32,6 +32,6 @@ class AudioSource {
 
 inline AudioSource::~AudioSource() {}
 
-}  // namespace life
+}  // namespace audio
 
 #endif  // AUDIO_SOURCE_H_

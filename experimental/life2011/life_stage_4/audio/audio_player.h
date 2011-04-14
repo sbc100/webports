@@ -15,7 +15,7 @@ class Audio;
 class Instance;
 }
 
-namespace life {
+namespace audio {
 
 class AudioSource;
 
@@ -27,7 +27,7 @@ class AudioSource;
 //   player.Play();
 class AudioPlayer {
  public:
-  AudioPlayer(pp::Instance* instance);
+  explicit AudioPlayer(pp::Instance* instance);
   ~AudioPlayer();
 
   // Assign an audio source to this player. The player owns the audio source and
@@ -41,13 +41,17 @@ class AudioPlayer {
   // Stop playing.
   void Stop();
 
+  // Indicates whether this player instance can play a sound.
+  bool IsReady() const;
+
  private:
   // Disallow copy and assigment.
   AudioPlayer(const AudioPlayer&);
-  AudioPlayer&  operator=(const AudioPlayer&);
+  AudioPlayer& operator=(const AudioPlayer&);
 
   // Pepper audio callback function.
-  static void AudioCallback(void* sample_buffer, size_t buffer_size_in_bytes,
+  static void AudioCallback(void* sample_buffer,
+                            size_t buffer_size_in_bytes,
                             void* user_data);
 
   // Internal versions of Play/Stop that only run on the main thread.
@@ -63,11 +67,11 @@ class AudioPlayer {
   AudioSource* audio_source_;
   size_t playback_offset_;
   pp::Audio* pp_audio_;
-  pp::Instance* instance_;
+  pp::Instance* instance_;  // Weak reference.
 
   pp::CompletionCallbackFactory<AudioPlayer, threading::RefCount> factory_;
   pthread_mutex_t mutex_;
 };
 
-}  // namespace life
+}  // namespace audio
 #endif  // AUDIO_PLAYER_H_

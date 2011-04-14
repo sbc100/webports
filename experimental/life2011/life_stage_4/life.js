@@ -155,6 +155,8 @@ life.Application.prototype.moduleDidLoad =
   this.currentStampId_ = this.viewController_.DEFAULT_STAMP_ID;
   this.viewController_.selectStamp(this.currentStampId_);
 
+  this.viewController_.setStampSoundUrl('sounds/doorbell.wav');
+
   // Wire up the various controls.
   var playModeSelect =
       document.getElementById(life.Application.DomIds_.PLAY_MODE_SELECT);

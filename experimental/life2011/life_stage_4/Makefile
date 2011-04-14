@@ -61,6 +61,7 @@ APPLICATION_FILES = life.html \
                     img/dead_cell.png \
                     img/live_cell.png \
                     img/toolbar-bg.png \
+                    sounds/doorbell.wav \
                     $(RELEASE_MODULES)
 
 # The check_variables target is in nacl_build.mk.

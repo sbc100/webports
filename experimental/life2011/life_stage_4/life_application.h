@@ -17,6 +17,7 @@
 #include <tr1/memory>
 #include <vector>
 
+#include "experimental/life2011/life_stage_4/audio/audio_player.h"
 #include "experimental/life2011/life_stage_4/life.h"
 #include "experimental/life2011/life_stage_4/locking_image_data.h"
 #include "experimental/life2011/life_stage_4/scripting/scripting_bridge.h"
@@ -110,6 +111,18 @@ class LifeApplication : public pp::Instance {
                          const std::vector<pp::Var>& args,
                          pp::Var* exception);
 
+  // Set the URL used to get the stamp sound.  |args[0]| is expected to be a
+  // string variable containing the URL of the stamp file.  Does not affect a
+  // stamp sound that is currently playing, but can affect all subsequent plays
+  // of the stamp sound.  If there are errors fetching the sound data from
+  // |soundUrl|, then the stamp sound is left unchanged.  Exposed to the browser
+  // as "setStampSoundUrl()".  Returns a bool Var indicating success.  On
+  // failure, |exception| is set to indicate the error. If |exception| is NULL,
+  // no error value is set.
+  pp::Var SetStampSoundUrl(const scripting::ScriptingBridge& bridge,
+                           const std::vector<pp::Var>& args,
+                           pp::Var* exception);
+
   int width() const {
     return shared_pixel_buffer_ ? shared_pixel_buffer_->size().width() : 0;
   }
@@ -159,6 +172,9 @@ class LifeApplication : public pp::Instance {
 
   // The current stamp.  The dictionary of stamps is kept in the browser.
   Stamp stamp_;
+
+  // Audio.
+  audio::AudioPlayer audio_player_;
 };
 
 }  // namespace life

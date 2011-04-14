@@ -219,6 +219,20 @@ life.controllers.ViewController.prototype.stop = function() {
 }
 
 /**
+ * Set the stamp sound to the file pointed at by |stampSoundUrl|.  For now,
+ * only .wav files are supported.  If there is a currentstamp sound in effect,
+ * it will be replaced with this one.
+ * @param {!string} stampSoundUrl The Url that points to a .wav file containing
+ *     the stamp sound.
+ */
+life.controllers.ViewController.prototype.setStampSoundUrl =
+    function(stampSoundUrl) {
+  if (stampSoundUrl.length > 0) {
+    this.module_.setStampSoundUrl(stampSoundUrl);
+  }
+}
+
+/**
  * Convert the coordinate system of |point| to the root window's coordinate
  * system.
  * @param {!goog.math.Coordinate} point The point in the coordinate system

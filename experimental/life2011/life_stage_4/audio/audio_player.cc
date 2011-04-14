@@ -16,7 +16,7 @@
 #include "experimental/life2011/life_stage_4/audio/audio_source.h"
 #include "experimental/life2011/life_stage_4/threading/scoped_mutex_lock.h"
 
-namespace life {
+namespace audio {
 
 AudioPlayer::AudioPlayer(pp::Instance* instance)
   : audio_source_(NULL),
@@ -52,6 +52,10 @@ void AudioPlayer::Play() {
 void AudioPlayer::Stop() {
   pp::CompletionCallback cc = factory_.NewCallback(&AudioPlayer::InternalStop);
   pp::Module::Get()->core()->CallOnMainThread(0, cc, PP_OK);
+}
+
+bool AudioPlayer::IsReady() const {
+  return audio_source_ != NULL && audio_source_->IsReady();
 }
 
 void AudioPlayer::AudioCallback(void* sample_buffer,
@@ -137,4 +141,4 @@ bool AudioPlayer::CreatePepperAudio() {
   return true;
 }
 
-}  // namespace life
+}  // namespace audio

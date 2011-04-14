@@ -98,7 +98,7 @@ bool VerifyWavData(const char* data, size_t data_size) {
 }  // anonymous namespace
 
 
-namespace life {
+namespace audio {
 
 WebWavSoundResource::WebWavSoundResource()
   : is_ready_(false),
@@ -200,4 +200,4 @@ void WebWavSoundResource::Clear() {
   }
 }
 
-}  // namespace life
+}  // namespace audio

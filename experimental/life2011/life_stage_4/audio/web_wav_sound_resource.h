@@ -15,7 +15,7 @@ namespace pp {
 class Instance;
 }
 
-namespace life {
+namespace audio {
 
 // WebWavSoundResource downloads a wav audio file from a URL and, if successful,
 // exposes the sound samples through the AudioSource interface. Each instance
@@ -26,7 +26,7 @@ namespace life {
 // reports true and remains so until the instance is deleted.
 class WebWavSoundResource : public AudioSource {
  public:
-  typedef WebResourceLoader<WebWavSoundResource> Loader;
+  typedef life::WebResourceLoader<WebWavSoundResource> Loader;
 
   WebWavSoundResource();
   ~WebWavSoundResource();
@@ -68,6 +68,6 @@ class WebWavSoundResource : public AudioSource {
   Loader* loader_;
 };
 
-}  // namespace life
+}  // namespace audio
 
 #endif  // WEB_WAV_SOUND_RESOURCE_H_

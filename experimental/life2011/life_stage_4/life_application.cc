@@ -15,6 +15,7 @@
 #include <cstring>
 #include <string>
 
+#include "experimental/life2011/life_stage_4/audio/web_wav_sound_resource.h"
 #include "experimental/life2011/life_stage_4/scoped_pixel_lock.h"
 #include "experimental/life2011/life_stage_4/threading/scoped_mutex_lock.h"
 
@@ -24,6 +25,7 @@ const char* const kPutStampAtPointMethodId = "putStampAtPoint";
 const char* const kRunSimulationMethodId = "runSimulation";
 const char* const kSetAutomatonRulesMethodId = "setAutomatonRules";
 const char* const kSetCurrentStampMethodId = "setCurrentStamp";
+const char* const kSetStampSoundUrlMethodId = "setStampSoundUrl";
 const char* const kStopSimulationMethodId = "stopSimulation";
 
 const int kSimulationTickInterval = 10;  // Measured in msec.
@@ -77,7 +79,8 @@ LifeApplication::LifeApplication(PP_Instance instance)
     : pp::Instance(instance),
       graphics_2d_context_(NULL),
       flush_pending_(false),
-      view_changed_size_(true) {
+      view_changed_size_(true),
+      audio_player_(this) {
 }
 
 LifeApplication::~LifeApplication() {
@@ -114,6 +117,11 @@ pp::Var LifeApplication::GetInstanceObject() {
       set_stamp_method(new scripting::MethodCallback<LifeApplication>(
           this, &LifeApplication::SetCurrentStamp));
   bridge->AddMethodNamed(kSetCurrentStampMethodId, set_stamp_method);
+
+  ScriptingBridge::SharedMethodCallbackExecutor
+      set_stamp_sound_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::SetStampSoundUrl));
+  bridge->AddMethodNamed(kSetStampSoundUrlMethodId, set_stamp_sound_method);
 
   ScriptingBridge::SharedMethodCallbackExecutor
       stop_sim_method(new scripting::MethodCallback<LifeApplication>(
@@ -295,9 +303,35 @@ pp::Var LifeApplication::PutStampAtPoint(const ScriptingBridge& bridge,
   y = args[1].is_int() ? args[1].AsInt() :
                          static_cast<int32_t>(args[1].AsDouble());
   life_simulation_.PutStampAtPoint(stamp_, pp::Point(x, y));
+  // Play the stamp sound.
+  if (audio_player_.IsReady())
+    audio_player_.Play();
   // If the simulation isn't running, make sure the stamp shows up.
   if (!is_running())
     Update();
+  return pp::Var(true);
+}
+
+pp::Var LifeApplication::SetStampSoundUrl(
+    const scripting::ScriptingBridge& bridge,
+    const std::vector<pp::Var>& args,
+    pp::Var* exception) {
+  // setStampSoundUrl() requires at least one arg.
+  if (args.size() < 1) {
+    SetExceptionString(
+        exception, std::string(kInsufficientArgs) + kSetStampSoundUrlMethodId);
+    return pp::Var(false);
+  }
+  if (!args[0].is_string()) {
+    SetExceptionString(exception,
+                       std::string(kInvalidArgs) + kSetStampSoundUrlMethodId);
+    return pp::Var(false);
+  }
+  audio::WebWavSoundResource* sound = new audio::WebWavSoundResource();
+  sound->Init(args[0].AsString(), this);
+  // |audio_player_| takes ownership of |sound| and is responsible for
+  // deleting it.
+  audio_player_.AssignAudioSource(sound);
   return pp::Var(true);
 }
 
