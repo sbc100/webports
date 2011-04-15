@@ -1,6 +1,6 @@
-# Copyright 2010, The Native Client SDK Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that can
-# be found in the LICENSE file.
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 # Common makefile for the examples.  This has some basic variables, such as
 # CC (the compiler) and some suffix rules such as .c.o.
@@ -91,10 +91,12 @@ $(OBJDIR):
 #Define standard object file lists based on .cc files.
 #Only define if these rules are undefined, so that we don't conflict
 #with existing nacl_ports Makefiles.
-OBJECTS_X86_32 ?= $(CCFILES:%.cc=%_x86_32.o)
-OBJECTS_X86_64 ?= $(CCFILES:%.cc=%_x86_64.o)
-OBJECTS_X86_32_DBG ?= $(CCFILES:%.cc=%_x86_32_dbg.o)
-OBJECTS_X86_64_DBG ?= $(CCFILES:%.cc=%_x86_64_dbg.o)
+OBJECTS_X86_32 ?= $(CCFILES:%.cc=%_x86_32.o) $(CFILES:%.c=%_x86_32.o)
+OBJECTS_X86_64 ?= $(CCFILES:%.cc=%_x86_64.o) $(CFILES:%.c=%_x86_64.o)
+OBJECTS_X86_32_DBG ?= $(CCFILES:%.cc=%_x86_32_dbg.o) \
+  $(CFILES:%.c=%_x86_32_dbg.o)
+OBJECTS_X86_64_DBG ?= $(CCFILES:%.cc=%_x86_64_dbg.o) \
+  $(CFILES:%.c=%_x86_64_dbg.o)
 
 # Make sure certain variables are defined.  This rule is set as a dependency
 # for all the .nexe builds in the examples.
