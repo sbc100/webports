@@ -31,6 +31,7 @@ namespace chess_engine {
 
 /// method name for GetChoices, as seen by JavaScript code.
 const char* const kGetChoices = "GetChoices";
+const char* const kGetCheck = "GetCheck";
 const char* const kTalk = "talk";
 
 /// Use @a delims to identify all the elements in @ the_string, and add
@@ -93,6 +94,9 @@ struct Coord {
   int x_, y_;
   Coord(int x, int y) : x_(x), y_(y) {}
   Coord() : x_(-1), y_(-1) {}  // Set default values to be bogus.
+  bool operator== (const Coord& rhs) {
+    return ((x_ == rhs.x_) && (y_ == rhs.y_));
+  }
 };
 enum Side {BLACK, WHITE};
 
@@ -442,7 +446,7 @@ void GetPawnMoves(int x, int y, Side myside, Board *board,
 }
 
 /// This function is passed the arg list from the JavaScript call to
-/// @a GetChoices.
+/// @a Talk.
 /// It makes sure that there is one argument and that it is a string, returning
 /// an error message if it is not.
 /// On good input, finds the legal moves and returns the result.  The
@@ -482,6 +486,176 @@ pp::Var Talk(const std::vector<pp::Var>& args) {
   return pp::Var(answer);
 }
 
+void GetPieceMoves(int column, int row, Side my_side, Board *board,
+                   char selected_piece, std::vector<Coord> *moves) {
+  if (IsPawn(selected_piece)) {
+    printf("PAWN\n");
+    GetPawnMoves(column, row, my_side, board, NULL, moves);
+  } else if (IsKnight(selected_piece)) {
+    printf("KNIGHT\n");
+    GetKnightMoves(column, row, my_side, board, NULL, moves);
+  } else if (IsBishop(selected_piece)) {
+    printf("BISHOP\n");
+    GetBishopMoves(column, row, my_side, board, NULL, moves);
+  } else if (IsRook(selected_piece)) {
+    printf("ROOK\n");
+    GetRookMoves(column, row, my_side, board, NULL, moves);
+  } else if (IsKing(selected_piece)) {
+    printf("KING\n");
+    GetKingMoves(column, row, my_side, board, NULL, moves);
+  } else if (IsQueen(selected_piece)) {
+    printf("QUEEN\n");
+    GetQueenMoves(column, row, my_side, board, NULL, moves);
+  } else {
+    printf("UNSUPPORTED PIECE %c\n", selected_piece);
+  }
+}
+
+///
+/// Search the board for the piece that is on |my_side| -- i.e. my own color
+/// and is a king (by calling IsKing).  If found, return true and modify
+/// |my_king_coord| to set the x/y (column/row) value.
+///
+bool GetMyKingCoord(char board_contents[][8], Side my_side, Coord *my_king_coord) {
+  char board_piece;
+  int column, row;
+  // See if the king is in check...
+  for (column = 0; column < 8; ++column) {
+    for (row = 0; row < 8; ++row) {
+      board_piece = board_contents[column][row];
+      if (board_piece != ' ') {
+        Side piece_side = GetSide(board_piece);
+        if (my_side == piece_side && IsKing(board_piece)) {
+            my_king_coord->x_ = column;
+            my_king_coord->y_ = row;
+          return true;
+        }
+      }
+    }
+  }
+  // not found!
+  return false;
+}
+
+///
+/// Read board_contents and top_side (color) from input_lines
+/// Return 'no error' status -- true to indicate success, false
+/// to indicate errors.
+///
+bool ReadBoardContents(std::vector<std::string> input_lines,
+                       char board_contents[][8], Side* top_side) {
+  for (int line = 0; line < 8; ++line) {
+    std::string line_data = input_lines[line];
+    if (line_data.length() != 8) {
+      printf("Error, line '%s' is not 8 characters\n", line_data.c_str());
+      return false;
+    }
+    for (int index = 0; index < 8; ++index) {
+      // copy data to board_contents, indexing by [column][row]
+      board_contents[index][line] = line_data[index];
+    }
+  }
+  // "Top: Black" or "Top: White" should be in input_lines[8]
+  std::string color_at_top = "Black";
+  size_t colon_start = input_lines[8].find_first_of(":");
+  if (colon_start == std::string::npos) {
+    printf("Did not find : in %s\n", input_lines[8].c_str());
+  } else {
+    color_at_top = input_lines[8].substr(colon_start+2);
+  }
+  if (color_at_top == "Black") {
+    *top_side = BLACK;
+  } else {
+    *top_side = WHITE;
+  }
+  return true;
+}
+
+///
+/// Return if the white player is in check
+///
+pp::Var GetCheck(const std::vector<pp::Var>& args) {
+  // There should be exactly one arg, which should be an object
+  if (args.size() != 1) {
+    printf("Unexpected number of args\n");
+    return "Unexpected number of args";
+  }
+  if (!args[0].is_string()) {
+    printf("Arg [%s] is NOT a string\n", args[0].DebugString().c_str());
+    return "Arg from Javascript is not a string!";
+  }
+  std::string input = args[0].AsString();
+  printf("========== GetCheck Arg = {%s}\n", input.c_str());
+  std::vector<std::string> input_lines;
+  GetElementsFromString(input, "\n", &input_lines);
+  if (input_lines.size() != 9) {
+    return "Error, there should have been 9 lines of data";
+  }
+
+  char board_contents[8][8];
+  Side top_side;
+
+  // Reads the board_contents and 'top' side (color)
+  // from the first 9 lines of text.
+  bool read_board = ReadBoardContents(input_lines, board_contents, &top_side);
+  if (!read_board) {
+    printf("ERROR READING BOARD CONTENTS\n");
+    return "ERROR READING BOARD CONTENTS";
+  }
+  Side my_side = WHITE;
+  Board *board = new Board(board_contents, top_side);
+
+  char board_piece;
+  // See if the king is in check...
+  std::vector<Coord> enemy_moves;
+  std::string check_string;
+  Coord my_king_coord;
+  if(!GetMyKingCoord(board_contents, my_side, &my_king_coord)) {
+    printf("ERROR - did NOT find my king!\n"); 
+    return "ERROR - did NOT find my king";
+  }
+  int column, row;
+
+  printf("FOUND MY KING at %d:%d\n", my_king_coord.x_, my_king_coord.y_);
+  // look for pieces that could capture king (i.e. they put him in check)
+  for (column = 0; column < 8; ++column) {
+    for (row = 0; row < 8; ++row) {
+      board_piece = board_contents[column][row];
+      if (board_piece != ' ') {
+        Side piece_side = GetSide(board_piece);
+        if (my_side != piece_side) {
+          printf(" ENEMY PIECE [%c] AT %d:%d\n", board_piece, column, row);
+          // Note the |piece_side| has to be passed in with |board_piece|
+          // so that the legal moves are calculated correctly
+          enemy_moves.clear();
+          GetPieceMoves(column, row, piece_side,
+                        board, board_piece, &enemy_moves);
+          printf("PIECE %c has %d MOVES\n", board_piece, enemy_moves.size());
+          for (std::vector<Coord>::iterator iter = enemy_moves.begin();
+               iter != enemy_moves.end(); ++iter) {
+            Coord enemy_move = *iter;
+            printf("ENEMY MOVE %d:%d\n", enemy_move.x_, enemy_move.y_);
+            if (enemy_move == my_king_coord) {
+              printf("CHECK FROM %c at %d:%d\n", board_piece, column, row);
+              check_string += IntToString(column) + ":" +
+                              IntToString(row) + " ";
+            }
+          }
+        }
+      }
+    }
+  }
+  printf("End of for loop, check_string is '%s'\n", check_string.c_str());
+  // if we are in check from some piece, add king's coords to list of
+  // check coords so it gets highlighted too
+  if (!check_string.empty()) {
+    check_string += IntToString(my_king_coord.x_) + ":" +
+                    IntToString(my_king_coord.y_);
+  }
+  printf("\n-----CHECK STRING IS <%s>-----\n\n", check_string.c_str());
+  return check_string;
+}
+
 /// This function is passed the arg list from the JavaScript call to
 /// @a GetChoices.
 /// It makes sure that there is one argument and that it is a string, returning
@@ -496,7 +670,7 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
     return "Unexpected number of args";
   }
   if (!args[0].is_string()) {
-    printf("Arg %s is NOT a string\n", args[0].DebugString().c_str());
+    printf("Arg [%s] is NOT a string\n", args[0].DebugString().c_str());
     return "Arg from Javascript is not a string!";
   }
   std::string input = args[0].AsString();
@@ -508,32 +682,17 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
   }
 
   char board_contents[8][8];
-  for (int line = 0; line < 8; ++line) {
-    std::string line_data = input_lines[line];
-    if (line_data.length() != 8) {
-      return std::string("Error, line '") + line_data + "' is not 8 characters";
-    }
-    for (int index = 0; index < 8; ++index) {
-      // copy data to board_contents, indexing by [column][row]
-      board_contents[index][line] = line_data[index];
-    }
-  }
-  // "Top: Black" or "Top: White" should be in input_lines[8]
-  std::string color_at_top = "Black";
-  size_t colon_start = input_lines[8].find_first_of(":");
   Side top_side;
-  if (colon_start == std::string::npos) {
-    printf("Did not find : in %s\n", input_lines[8].c_str());
-  } else {
-    color_at_top = input_lines[8].substr(colon_start+2);
-  }
-  if (color_at_top == "Black") {
-    top_side = BLACK;
-  } else {
-    top_side = WHITE;
+
+  // Reads the board_contents and 'top' side (color)
+  // from the first 9 lines of text.
+  bool read_board = ReadBoardContents(input_lines, board_contents, &top_side);
+  if (!read_board) {
+    printf("ERROR READING BOARD CONTENTS\n");
+    return "ERROR READING BOARD CONTENTS";
   }
   // column:row should be in input_lines[9]
-  colon_start = input_lines[9].find_first_of(":");
+  size_t colon_start = input_lines[9].find_first_of(":");
   if (colon_start == std::string::npos) {
     return std::string("Error, no column:row found in ") + input_lines[9];
   }
@@ -550,27 +709,7 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
   Side my_side = GetSide(selected_piece);
   printf("My side is = %s\n", SideToString(my_side).c_str()); 
   std::vector<Coord> moves;
-  if (IsPawn(selected_piece)) {
-    printf("PAWN\n");
-    GetPawnMoves(column, row, my_side, board, NULL, &moves);
-  } else if (IsKnight(selected_piece)) {
-    printf("KNIGHT\n");
-    GetKnightMoves(column, row, my_side, board, NULL, &moves);
-  } else if (IsBishop(selected_piece)) {
-    printf("BISHOP\n");
-    GetBishopMoves(column, row, my_side, board, NULL, &moves);
-  } else if (IsRook(selected_piece)) {
-    printf("ROOK\n");
-    GetRookMoves(column, row, my_side, board, NULL, &moves);
-  } else if (IsKing(selected_piece)) {
-    printf("KING\n");
-    GetKingMoves(column, row, my_side, board, NULL, &moves);
-  } else if (IsQueen(selected_piece)) {
-    printf("QUEEN\n");
-    GetQueenMoves(column, row, my_side, board, NULL, &moves);
-  } else {
-    printf("UNSUPPORTED PIECE %c\n", selected_piece);
-  }
+  GetPieceMoves(column, row, my_side, board, selected_piece, &moves);
 
   std::string answer = "";
   for (std::vector<Coord>::iterator iter = moves.begin();
@@ -579,6 +718,53 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
     printf("- Valid move %d:%d\n", c.x_, c.y_);
     answer += IntToString(c.x_) + ":" + IntToString(c.y_) + " ";
   }
+
+/***
+  char board_piece;
+  // See if the king is in check...
+  std::vector<Coord> enemy_moves;
+  std::string check_string;
+  Coord my_king_coord;
+  if(!GetMyKingCoord(board_contents, my_side, &my_king_coord)) {
+    printf("ERROR - did NOT find my king!\n"); 
+  } else {
+    printf("FOUND MY KING at %d:%d\n", my_king_coord.x_, my_king_coord.y_);
+    // look for pieces that could capture king (i.e. they put him in check)
+    for (column = 0; column < 8; ++column) {
+      for (row = 0; row < 8; ++row) {
+        board_piece = board_contents[column][row];
+        if (board_piece != ' ') {
+          Side piece_side = GetSide(board_piece);
+          if (my_side != piece_side) {
+            printf(" ENEMY PIECE [%c] AT %d:%d\n", board_piece, column, row);
+            // Note the |piece_side| has to be passed in with |board_piece|
+            // so that the legal moves are calculated correctly
+            enemy_moves.clear();
+            GetPieceMoves(column, row, piece_side,
+                          board, board_piece, &enemy_moves);
+            printf("PIECE %c has %d MOVES\n", board_piece, enemy_moves.size());
+            for (std::vector<Coord>::iterator iter = enemy_moves.begin();
+                 iter != enemy_moves.end(); ++iter) {
+              Coord enemy_move = *iter;
+              printf("ENEMY MOVE %d:%d\n", enemy_move.x_, enemy_move.y_);
+              if (enemy_move == my_king_coord) {
+                printf("CHECK FROM %c at %d:%d\n", board_piece, column, row);
+                check_string += IntToString(column) + ":" +
+                                IntToString(row) + " ";
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  check_string += IntToString(my_king_coord.x_) + ":" +
+                  IntToString(my_king_coord.y_);
+  printf("Number of enemy moves is %d, my king is at %d:%d\n",
+         enemy_moves.size(), my_king_coord.x_, my_king_coord.y_);
+  answer += "|";
+  answer += check_string;
+***/
   return pp::Var(answer);
 }
 
@@ -611,7 +797,8 @@ bool ChessEngineScriptableObject::HasMethod(const pp::Var& method,
     return false;
   }
   std::string method_name = method.AsString();
-  return method_name == kGetChoices || method_name == kTalk;
+  return method_name == kGetChoices || method_name == kTalk ||
+         method_name == kGetCheck;
 }
 
 pp::Var ChessEngineScriptableObject::Call(const pp::Var& method,
@@ -627,6 +814,8 @@ pp::Var ChessEngineScriptableObject::Call(const pp::Var& method,
     return GetChoices(args);
   } else if (method_name == kTalk) {
     return Talk(args);
+  } else if (method_name == kGetCheck) {
+    return GetCheck(args);
   } else {
     SetExceptionString(exception,
                        std::string(kExceptionNoMethodName) + method_name);

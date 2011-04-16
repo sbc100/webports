@@ -21,6 +21,7 @@ Chess.Alert = function(message) {
 Chess.selectedPiece = null;
 Chess.selectedCoord = null;
 Chess.lastMove = '';  //string containing the algebraic last move (e.g. 'b2b4')
+Chess.checkList = [];
 
 /// If we need to undo a move, we need to know the from/to coords and original
 /// pieces that were there.
@@ -351,6 +352,7 @@ Chess.Board.WHITE = 'rgb(255,240,240)';
 Chess.Board.BLACK = 'rgb(139,137,137)';
 Chess.Board.HIGHLIGHT = 'rgba(255,255,0,0.5)';
 Chess.Board.LAST_MOVE_COLOR = 'rgba(0,0,255,0.5)';
+Chess.Board.CHECK_COLOR = 'rgba(255,0,0,0.9)';
 Chess.Board.topLeft = Chess.Board.WHITE;
 Chess.Board.letterArray = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -424,6 +426,28 @@ Chess.Board.prototype.convertRowToChessRow = function(row) {
   return 8 - row;
 };
 
+///
+/// For now, this is VERY similar to markSquare...but it may not always be,
+/// so I'm keeping it a separate function.
+///
+Chess.Board.prototype.markCheck = function(column, row, ctxHighlight) {
+  // get top left corner of this square
+  topLeftX = column * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
+  topLeftY = row * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
+
+  // set color
+  ctxHighlight.fillStyle = Chess.Board.CHECK_COLOR;
+  ctxHighlight.strokeStyle = Chess.Board.CHECK_COLOR;
+
+  ctxHighlight.beginPath();
+  ctxHighlight.strokeRect(topLeftX + Chess.Board.gapPixels,
+                          topLeftY + Chess.Board.gapPixels,
+                          Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2,
+                          Chess.Board.pixelsPerSquare - Chess.Board.gapPixels * 2);
+  ctxHighlight.closePath();
+  console.log('markCheck ' + column + ':' + row);
+};
+
 Chess.Board.prototype.markSquare = function(column, row, ctxHighlight) {
   // get top left corner of this square
   topLeftX = column * Chess.Board.pixelsPerSquare + Chess.Board.borderPixels;
@@ -431,6 +455,7 @@ Chess.Board.prototype.markSquare = function(column, row, ctxHighlight) {
 
   // set color
   ctxHighlight.fillStyle = Chess.Board.LAST_MOVE_COLOR;
+  ctxHighlight.strokeStyle = Chess.Board.LAST_MOVE_COLOR;
 
   ctxHighlight.beginPath();
   ctxHighlight.strokeRect(topLeftX + Chess.Board.gapPixels,
@@ -637,13 +662,15 @@ Chess.Board.prototype.drawPieces = function(ctx) {
   // highlight Chess.lastMove
   if (Chess.lastMove != '') {
     var toNotation = Chess.lastMove.substr(2,2);
-    console.log('Last move: ' + Chess.lastMove + 'toNotation = ' + toNotation);
-    // convert
     var toCoord = Chess.notationStrToCoord(toNotation);
-    console.log('toCoord: ' + toCoord.toString());
     // highlight |toCoord| LAST_MOVE
     theBoard.markSquare(toCoord.getColumn(), toCoord.getRow(), ctx);
-                        /// Chess.ctxScratch);
+    if (Chess.checkList.length > 0) {
+      Chess.checkList.forEach(function(el) {
+          theBoard.markCheck(el.getColumn(), el.getRow(), ctx);
+        }
+      );
+    }
   }
 };
 
@@ -701,6 +728,9 @@ Chess.mouseDownHandler = function(e) {
         Chess.selectedPiece = null;
         Chess.selectedCoord = null;
 
+        // clear out pieces that were in check
+        Chess.checkList = [];
+
         // FIXME -- valid move -- redraw pieces
         clearContext(Chess.ctxScratch, Chess.canvasScratch);
         clearContext(Chess.ctxPieces, Chess.canvasPieces);
@@ -735,14 +765,33 @@ Chess.mouseDownHandler = function(e) {
     console.log(message);
     console.log('naclHelperModule = ' + naclHelperModule);
     var moveList = naclHelperModule.GetChoices(boardString);
-    moveList = moveList.replace(/^\s*/gi, '');  // trim leading spaces
-    moveList = moveList.replace(/\s*$/gi, '');  // trim trailing spaces
-    console.log('NEXE moveList=' + moveList);
-    var moves = moveList.split(' ');
-    console.log('moves=' + moves);
+    // moveList = moveList.replace(/^\s*/gi, '');  // trim leading spaces
+    // moveList = moveList.replace(/\s*$/gi, '');  // trim trailing spaces
+    console.log('NEXE moveList={' + moveList + '}');
+    var movesAndChecks = moveList.split('|');
+    var moveOnlyString = movesAndChecks[0];
+    moveOnlyString = moveOnlyString.replace(/^\s*/gi, '');  // trim leading spaces
+    moveOnlyString = moveOnlyString.replace(/\s*$/gi, '');  // trim trailing spaces
+
+ if(0) {
+    var checkOnlyString = movesAndChecks[1];
+    console.log('CheckOnlyString = ' + checkOnlyString); 
+    checkOnlyString = checkOnlyString.replace(/^\s*/gi, '');  // trim leading spaces
+    checkOnlyString = checkOnlyString.replace(/\s*$/gi, '');  // trim trailing spaces
+    var checks = checkOnlyString.split(' ');
+    console.log('CHECKS=' + checks);
+    checks.forEach(function(el) {
+        var coords = el.split(':');
+        console.log('Check x=' + coords[0] + ' y=' + coords[1]);
+        theBoard.markCheck(coords[0], coords[1], Chess.ctxScratch);
+      }
+    );
+ }
+    var moves = moveOnlyString.split(' ');
+    console.log('LIST of moves=' + moves);
     clearContext(Chess.ctxScratch, Chess.canvasScratch);
     moves.forEach(function(el) {
-        coords = el.split(':');
+        var coords = el.split(':');
         console.log('x=' + coords[0] + ' y=' + coords[1]);
         // highlight a valid move
         theBoard.highlight(coords[0], coords[1], Chess.ctxScratch);
@@ -997,26 +1046,48 @@ Chess.mainLoop = function() {
   if (state == 'PlayerDone') {
     // do we need to do something...or just go to next state?
     // for now, advance to next state and return...mainLoop is done
+    Chess.checkList = [];
     Chess.nextState();
     return;
   } else if (state == 'AiTurn') {
     // send |Chess.lastMove| to the AI
     var answer = naclModule.talk(Chess.lastMove);
     console.log('Sent ' + Chess.lastMove + ' got ' + answer);
+
     // now go to the waiting state
     Chess.nextState();
     if (answer != '') {
       Chess.handleReply(answer);
     }
+
+    // now check for check
+    console.log('In check?');
+    var boardString = theBoard.contents.toString();
+    var checkString = naclHelperModule.GetCheck(boardString);
+    console.log('CHECK STRING: ' + checkString);
+    Chess.checkList = [];
+    if (checkString != '') {
+      // alert(checkString);
+      // trim checkString
+      checkString = checkString.replace(/^\s+/, '');
+      checkString = checkString.replace(/\s+$/, '');
+      var checkStrList = checkString.split(' ');
+      checkStrList.forEach(function(el) {
+          var coords = el.split(':');
+          Chess.checkList.push(new Chess.Coordinate(coords[0], coords[1]));
+          console.log('Check x=' + coords[0] + ' y=' + coords[1]);
+        }
+      );
+    }
+
   } else if (state == 'WaitingOnAi') {
-    console.log('Waiting...');
+    // console.log('Waiting...');
     var answer = naclModule.talk('');
-    console.log('GOT ' + answer);
+    // console.log('GOT ' + answer);
     if (answer != '') {
       Chess.handleReply(answer);
     }
   }
-  console.log('STATE = ' + state);
   var stateField = document.getElementById('State');
   stateField.innerHTML = state;
   var selectedPieceField = document.getElementById('SelectedPiece');
