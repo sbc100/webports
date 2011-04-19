@@ -1,0 +1,30 @@
+Experimental Native Client XaoS Demo
+
+* Builds on Linux, requiring standard tools
+  recent nacl sdk installed at NACL_SDK_BASE
+  make
+  autotools
+  wget
+  python
+* Runs in the browser on Linux, Mac, and Windows
+
+This is an experimental version of XaoS for Native Client. XaoS
+is open-source
+For more information see:
+
+  http://wmi.math.u-szeged.hu/xaos/doku.php
+
+To build and run XaoS simply:
+
+  # download the xaos tarball
+  .//xaos_tool.sh download-xaos
+
+  # build 32/64 bit nexes
+  ./xaos_tool.sh build-all
+
+  # start local webserver
+  python -m SimpleHTTPServer
+
+  # point your browser at
+  http://localhost:8000/xaos.html
+
