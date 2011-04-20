@@ -190,7 +190,7 @@ index 50cf179..7b9a0a7 100644
  #endif
 diff --git SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc
 new file mode 100644
-index 0000000..ed1e499
+index 0000000..6e33b2d
 --- /dev/null
 +++ SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc
 @@ -0,0 +1,133 @@
@@ -610,10 +610,10 @@ index 0000000..71ae309
 +extern void NACL_PumpEvents(_THIS);
 diff --git SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc
 new file mode 100644
-index 0000000..e72075f
+index 0000000..2c9f6e5
 --- /dev/null
 +++ SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc
-@@ -0,0 +1,215 @@
+@@ -0,0 +1,269 @@
 +#include "SDL_config.h"
 +
 +#include <assert.h>
@@ -625,10 +625,13 @@ index 0000000..e72075f
 +#include <ppapi/cpp/graphics_2d.h>
 +#include <ppapi/cpp/completion_callback.h>
 +#include <ppapi/cpp/image_data.h>
++#include <ppapi/c/pp_errors.h>
 +
 +pp::Instance* gNaclPPInstance;
 +static int gNaclVideoWidth;
 +static int gNaclVideoHeight;
++
++static int kNaClFlushDelayMs = 20;
 +
 +extern "C" {
 +
@@ -687,7 +690,11 @@ index 0000000..e72075f
 +  }
 +  SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 +
-+  device->hidden->image_data_mutex = SDL_CreateMutex();
++  device->hidden->flush_mutex = SDL_CreateMutex();
++  device->hidden->flush_cond = SDL_CreateCond();
++
++  device->hidden->flush_pending = false;
++  device->hidden->data_ready = false;
 +
 +  device->hidden->ow = gNaclVideoWidth;
 +  device->hidden->oh = gNaclVideoHeight;
@@ -736,8 +743,11 @@ index 0000000..e72075f
 +
 +  /* Determine the screen depth (use default 8-bit depth) */
 +  /* we change this during the SDL_SetVideoMode implementation... */
-+  vformat->BitsPerPixel = 8;
-+  vformat->BytesPerPixel = 1;
++  vformat->BitsPerPixel = 32;
++  vformat->BytesPerPixel = 4;
++
++  _this->info.current_w = gNaclVideoWidth;
++  _this->info.current_h = gNaclVideoHeight;
 +
 +  /* We're done! */
 +  return(0);
@@ -786,15 +796,45 @@ index 0000000..e72075f
 +  return(current);
 +}
 +
++// Called from the browser when the 2D graphics have been flushed out to the device.
++static void flush_callback(void* data, int32_t unused) {
++  SDL_VideoDevice* _this = reinterpret_cast<SDL_VideoDevice*>(data);
 +
++  SDL_LockMutex(_this->hidden->flush_mutex);
++
++
++  assert(_this->hidden->flush_pending == true);
++  // image_data was locked since the last flush.
++  assert(_this->hidden->data_ready == false);
++  _this->hidden->flush_pending = false;
++
++  // Now is a good time to update image_data.
++  SDL_CondSignal(_this->hidden->flush_cond);
++
++  // Do another flush after a small delay.
++  pp::Module::Get()->core()->CallOnMainThread(kNaClFlushDelayMs, pp::CompletionCallback(&flush, _this), PP_OK);
++
++  SDL_UnlockMutex(_this->hidden->flush_mutex);
++}
++
++// Called periodically on the main thread.
 +static void flush(void* data, int32_t unused) {
 +  SDL_VideoDevice* _this = reinterpret_cast<SDL_VideoDevice*>(data);
 +
-+  SDL_LockMutex(_this->hidden->image_data_mutex);
-+  _this->hidden->context2d->PaintImageData(*_this->hidden->image_data, pp::Point());
-+  // TODO: This is a busy loop. Replace with CallOnMainThread with a delay when it is supported.
-+  _this->hidden->context2d->Flush(pp::CompletionCallback(&flush, _this));
-+  SDL_UnlockMutex(_this->hidden->image_data_mutex);
++  SDL_LockMutex(_this->hidden->flush_mutex);
++
++  assert(_this->hidden->flush_pending == false);
++  if (_this->hidden->data_ready) {
++    // Flush image_data.
++    _this->hidden->flush_pending = true;
++    _this->hidden->data_ready = false;
++    _this->hidden->context2d->PaintImageData(*_this->hidden->image_data, pp::Point());
++    _this->hidden->context2d->Flush(pp::CompletionCallback(&flush_callback, _this));
++  } else {
++    // Check again after a small delay.
++    pp::Module::Get()->core()->CallOnMainThread(kNaClFlushDelayMs, pp::CompletionCallback(&flush, _this), PP_OK);
++  }
++  SDL_UnlockMutex(_this->hidden->flush_mutex);
 +}
 +
 +static void flip(_THIS) {
@@ -802,12 +842,23 @@ index 0000000..e72075f
 +  assert(_this->hidden->w == _this->hidden->ow);
 +  assert(_this->hidden->h == _this->hidden->oh);
 +
-+  SDL_LockMutex(_this->hidden->image_data_mutex);
++  SDL_LockMutex(_this->hidden->flush_mutex);
 +
++  if (_this->hidden->flush_pending)
++  // If we are flushing, wait.
++  // TODO(eugenis): this blocks the game thread. Should we just drop the frame
++  // instead, or store it in some kind of a side buffer?
++  while (_this->hidden->flush_pending)
++    SDL_CondWait(_this->hidden->flush_cond, _this->hidden->flush_mutex);
++
++  // data_ready may be true here if the previous frame is not flushed yet.
++  // No problem, just drop it.
 +  SDL_memcpy(_this->hidden->image_data->data(), _this->hidden->buffer,
 +      _this->hidden->w * _this->hidden->h * _this->hidden->bpp / 8);
 +
-+  SDL_UnlockMutex(_this->hidden->image_data_mutex);
++  _this->hidden->data_ready = true;
++
++  SDL_UnlockMutex(_this->hidden->flush_mutex);
 +}
 +
 +static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects) {
@@ -827,14 +878,17 @@ index 0000000..e72075f
 +  }
 +  delete _this->hidden->context2d;
 +  delete _this->hidden->image_data;
++
++  SDL_DestroyMutex(_this->hidden->flush_mutex);
++  SDL_DestroyCond(_this->hidden->flush_cond);
 +}
 +} // extern "C"
 diff --git SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14/src/video/nacl/SDL_naclvideo.h
 new file mode 100644
-index 0000000..09480c8
+index 0000000..5c050b8
 --- /dev/null
 +++ SDL-1.2.14/src/video/nacl/SDL_naclvideo.h
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,38 @@
 +#include "SDL_config.h"
 +
 +#ifndef _SDL_naclvideo_h
@@ -861,8 +915,13 @@ index 0000000..09480c8
 +  int pitch;
 +  void *buffer;
 +
-+  SDL_mutex* image_data_mutex;
++  SDL_mutex* flush_mutex;
++  SDL_cond* flush_cond;
 +  int ow, oh; // plugin output dimensions
++  // Whether context2d is being flushed to the device.
++  bool flush_pending;
++  // Whether image_data contains new data.
++  bool data_ready;
 +  pp::ImageData* image_data;
 +  pp::Graphics2D* context2d;  // The PINPAPI 2D drawing context.
 +};
