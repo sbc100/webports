@@ -76,9 +76,6 @@ pp::URLResponseInfo WebResourceLoader<Delegate>::GetResponseInfo() const {
 template <class Delegate>
 void WebResourceLoader<Delegate>::Close() {
   assert(pp::Module::Get()->core()->IsMainThread());
-  // TODO(gwink): The nexe crashes miserably when I call Close on the URLLoader.
-  // Taking it out for now.
-  // url_loader_.Close();
   connected_ = false;
   buffer_ = NULL;
   buffer_size_ = 0;
