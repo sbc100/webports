@@ -38,15 +38,13 @@ dd {
   appears to take the whole screen.  See also <code>life.css</code>
   for more info on the classes used for things like autosizing and filling
   an HTML element.</p>
-  <p>The 2D drawing is implemented directly on the UI thread.  In the next
-  stage, 2D drawing is moved to an independent thread.</p>
   </dd>
 
-  <dt><a href="life_stage_2/life.html">Stage 2: Meet Your Parents</a></dt>
+  <dt><a href="life_stage_2/life.html">Stage 2: In Your Parent's House</a></dt>
   <dd>This stage adds event handling by adding Javascript to process mouse
   events into "drag" events.  Whenever a mouse-down or drag event occurs over
-  the NaCl module's screen area, the Javascript code calls the
-  <code>addCellAtPoint()</code> method on the NaCl module with the mouse
+  the NaCl module's screen area, the Javascript code invokes the
+  <code>addCellAtPoint</code> method on the NaCl module with the mouse
   coordinates.
   <p>This stage also adds a considerable amount of browser programming that
   implements a simple stamp editor.  With the stamp editor, you can change the

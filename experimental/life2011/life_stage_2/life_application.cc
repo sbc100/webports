@@ -106,6 +106,12 @@ LifeApplication::~LifeApplication() {
   DestroyContext();
 }
 
+bool LifeApplication::Init(uint32_t /* argc */,
+                           const char* /* argn */[],
+                           const char* /* argv */[]) {
+  return true;
+}
+
 pp::Var LifeApplication::GetInstanceObject() {
   // Add all the methods to the scripting bridge.
   ScriptingBridge::SharedMethodCallbackExecutor
@@ -149,12 +155,6 @@ void LifeApplication::HandleMessage(const pp::Var& message) {
   if (!message.is_string())
     return;
   scripting_bridge_.InvokeMethod(message.AsString());
-}
-
-bool LifeApplication::Init(uint32_t /* argc */,
-                           const char* /* argn */[],
-                           const char* /* argv */[]) {
-  return true;
 }
 
 void LifeApplication::DidChangeView(const pp::Rect& position,

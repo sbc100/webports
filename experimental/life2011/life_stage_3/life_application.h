@@ -51,64 +51,49 @@ class LifeApplication : public pp::Instance {
   // The pp::Var takes over ownership of the returned script object.
   virtual pp::Var GetInstanceObject();
 
+  // Called by the browser to handle the postMessage() call in Javascript.
+  virtual void HandleMessage(const pp::Var& message);
+
   // Runs a tick of the simulations, updating all buffers.  Flushes the
   // contents of |pixel_buffer_| to the 2D graphics context.
   void Update();
 
   // Replace the current stamp.  See stamp.h for a description of the stamp
-  // format.  Exposed to the browser as "setCurrentStamp()".  |args[0]| is
-  // expected to be a string variable that contains the stamp definition.
-  // Returns a bool Var indicating success.  On failure, |exception| is set to
-  // indicate the error. If |exception| is NULL, no error value is set.
-  pp::Var SetCurrentStamp(const scripting::ScriptingBridge& bridge,
-                          const std::vector<pp::Var>& args,
-                          pp::Var* exception);
+  // format.  Exposed to the browser as "setCurrentStamp".  Takes a parameter
+  // named "description" that contains the string-encoded stamp description.
+  void SetCurrentStamp(const scripting::ScriptingBridge& bridge,
+                       const scripting::MethodParameter& parameters);
 
   // Set the automaton rules.  The rules are expressed as a string, with the
   // Birth and Keep Alive rules separated by a '/'.  The format follows the .LIF
   // 1.05 format here: http://psoup.math.wisc.edu/mcell/ca_files_formats.html
-  // Survival/Birth.  Exposed to the browser as "setAutomatonRules()".
-  // |args[0]| is expected to be a string type; if not then do nothing.
-  // Returns a bool Var indicating success.  On failure, |exception| is set to
-  // indicate the error. If |exception| is NULL, no error value is set.
-  pp::Var SetAutomatonRules(const scripting::ScriptingBridge& bridge,
-                            const std::vector<pp::Var>& args,
-                            pp::Var* exception);
+  // Survival/Birth.  Exposed to the browser as "setAutomatonRules".
+  // Takes a single parameter named "rules".
+  void SetAutomatonRules(const scripting::ScriptingBridge& bridge,
+                         const scripting::MethodParameter& parameters);
 
   // Clears the current simulation (resets back to all-dead, graphics buffer to
   // black).  Exposed to the browser as "clear()".  |args| can be empty.
-  // Returns a bool Var indicating success.  On failure, |exception| is set to
-  // indicate the error. If |exception| is NULL, no error value is set.
-  pp::Var Clear(const scripting::ScriptingBridge& bridge,
-                const std::vector<pp::Var>& args,
-                pp::Var* exception);
+  void Clear(const scripting::ScriptingBridge& bridge,
+             const scripting::MethodParameter& parameters);
 
-  // Plot a new blob of life centered around (|args[0]|, |args[1]|).  There
-  // must be at least two args, both of them number values.  This method is
-  // exposed to the browser as "putStampAtPoint()".  Returns a bool Var
-  // indicating success. On failure, |exception| is set to indicate the error.
-  // If |exception| is NULL, no error value is set.
-  pp::Var PutStampAtPoint(const scripting::ScriptingBridge& bridge,
-                          const std::vector<pp::Var>& args,
-                          pp::Var* exception);
+  // Plot a new blob of life centered around the (x, y) coordinates described
+  // in |parameters|.  This method is exposed to the browser as
+  // "putStampAtPoint", it takes a parameter named "x" and one named "y".
+  void PutStampAtPoint(const scripting::ScriptingBridge& bridge,
+                       const scripting::MethodParameter& parameters);
 
-  // Run the simulation in the sepcified mode.  If the mode is changed, then
-  // the simulation is stoped and restarted in the new mode.  |args[0]| is
-  // expected to be a string describing the mode, and can be one of
-  // "random_seed" or "stamp".  Exposed to the browser as "runSimulation()".
-  // Returns a bool Var indicating success.  On failure, |exception| is set to
-  // indicate the error. If |exception| is NULL, no error value is set.
-  pp::Var RunSimulation(const scripting::ScriptingBridge& bridge,
-                        const std::vector<pp::Var>& args,
-                        pp::Var* exception);
+  // Run the simulation in the specified mode.  If the mode is changed, then
+  // the simulation is stopped and restarted in the new mode.  Takes one
+  // parameter named "mode" which can be one of "random_seed" or "stamp".
+  // Exposed to the browser as "runSimulation".
+  void RunSimulation(const scripting::ScriptingBridge& bridge,
+                     const scripting::MethodParameter& parameters);
 
   // Stop the simulation.  Does nothing if the simulation is stopped.
-  // Exposed to the browser as "stopSimulation()".  |args| can be empty.
-  // Returns a bool Var indicating success.  On failure, |exception| is set to
-  // indicate the error. If |exception| is NULL, no error value is set.
-  pp::Var StopSimulation(const scripting::ScriptingBridge& bridge,
-                         const std::vector<pp::Var>& args,
-                         pp::Var* exception);
+  // Exposed to the browser as "stopSimulation".  Takes no parameters.
+  void StopSimulation(const scripting::ScriptingBridge& bridge,
+                      const scripting::MethodParameter& parameters);
 
   int width() const {
     return shared_pixel_buffer_ ? shared_pixel_buffer_->size().width() : 0;
@@ -132,6 +117,32 @@ class LifeApplication : public pp::Instance {
   }
 
  private:
+  // This class exposes the scripting interface for this NaCl module.  The
+  // HasMethod method is called by the browser when executing the postMessage
+  // method call on the |life| object (see, e.g. the clear() function in
+  // controllers/viewcontroller.js).  This class only supports calling the
+  // postMessage() function; it is an emulation shim for the real postMessage
+  // handler.
+  // TODO(dspringer): Remove this when postMessage is available in NaCl.
+  class PostMessageBridge : public pp::deprecated::ScriptableObject {
+   public:
+    explicit PostMessageBridge(LifeApplication* app_instance)
+        : pp::deprecated::ScriptableObject(),
+          app_instance_(app_instance) {}
+    virtual ~PostMessageBridge() {}
+    // Return |true| if |method| is one of the exposed method names.
+    virtual bool HasMethod(const pp::Var& method, pp::Var* exception);
+
+    // Invoke the function associated with |method|.  The argument list passed
+    // in via JavaScript is marshaled into a vector of pp::Vars.
+    virtual pp::Var Call(const pp::Var& method,
+                         const std::vector<pp::Var>& args,
+                         pp::Var* exception);
+   private:
+    static const char* const kPostMessageMethodId;
+    LifeApplication* app_instance_;  // weak reference.
+  };
+
   // Create and initialize the 2D context used for drawing.
   void CreateContext(const pp::Size& size);
   // Destroy the 2D drawing context.
@@ -146,6 +157,9 @@ class LifeApplication : public pp::Instance {
   bool IsContextValid() const {
     return graphics_2d_context_ != NULL;
   }
+
+  // Browser connectivity and scripting support.
+  scripting::ScriptingBridge scripting_bridge_;
 
   // The simulation.
   Life life_simulation_;

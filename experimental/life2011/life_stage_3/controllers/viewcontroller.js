@@ -38,7 +38,7 @@ life.controllers.ViewController = function(nativeModule) {
    * @private
    */
   if (!nativeModule) {
-    throw new Error('ViewController() requries a valid NaCl module');
+    throw new Error('ViewController() requires a valid NaCl module');
   }
   // The container is the containing DOM element.
   this.module_ = nativeModule;
@@ -74,7 +74,7 @@ life.controllers.ViewController = function(nativeModule) {
    */
   this.dragListener_ = new uikit.events.Dragger(nativeModule);
   // Hook up a Dragger and listen to the drag events coming from it, then
-  // reprocess the events as Ginsu DRAG events.
+  // reprocess the events as Life DRAG events.
   goog.events.listen(this.dragListener_, goog.fx.Dragger.EventType.START,
       this.handleStartDrag_, false, this);
   goog.events.listen(this.dragListener_, goog.fx.Dragger.EventType.END,
@@ -122,7 +122,7 @@ life.controllers.ViewController.prototype.disposeInternal = function() {
  * Simple wrapper that forwards the "clear" method to the NaCl module.
  */
 life.controllers.ViewController.prototype.clear = function() {
-  this.module_.clear();
+  this.invokeMethod_('clear');
 }
 
 /**
@@ -144,7 +144,7 @@ life.controllers.ViewController.prototype.setPlayMode = function(playMode) {
     return;
   this.playMode_ = playMode;
   if (this.isRunning_) {
-    this.module_.runSimulation(this.playMode_);
+    this.invokeMethod_('runSimulation', { mode: this.playMode_ });
   }
 }
 
@@ -157,7 +157,7 @@ life.controllers.ViewController.prototype.setAutomatonRules =
     function(automatonRules) {
   var ruleString = [automatonRules.keepAliveRule.join(''),
                     automatonRules.birthRule.join('')].join('/');
-  this.module_.setAutomatonRules(ruleString);
+  this.invokeMethod_('setAutomatonRules', { rules: ruleString });
 }
 
 /**
@@ -185,7 +185,8 @@ life.controllers.ViewController.prototype.addStampWithId =
  */
 life.controllers.ViewController.prototype.selectStamp = function(stampId) {
   if (stampId in this.stampDictionary_) {
-    this.module_.setCurrentStamp(this.stampDictionary_[stampId]);
+    this.invokeMethod_('setCurrentStamp',
+                       { description: this.stampDictionary_[stampId] });
     return true;
   }
   return false;
@@ -207,7 +208,7 @@ life.controllers.ViewController.prototype.stampWithId = function(stampId) {
  */
 life.controllers.ViewController.prototype.run = function() {
   this.isRunning_ = true;
-  this.module_.runSimulation(this.playMode_);
+  this.invokeMethod_('runSimulation', { mode: this.playMode_ });
 }
 
 /**
@@ -215,7 +216,7 @@ life.controllers.ViewController.prototype.run = function() {
  */
 life.controllers.ViewController.prototype.stop = function() {
   this.isRunning_ = false;
-  this.module_.stopSimulation();
+  this.invokeMethod_('stopSimulation');
 }
 
 /**
@@ -232,6 +233,26 @@ life.controllers.ViewController.prototype.convertPointToWindow =
 }
 
 /**
+ * Format a method invocation and call postMessage with the formatted method
+ * string.  This calls the NaCl module with the invocation string.  Note that
+ * this is an asynchronous call into the NaCl module.
+ * @param {!string} methodName The name of the method.  This must match a
+ *     published method name in the NaCl module.
+ * @param {?Object} parameters A dictionary that maps parameter names to
+ *     values.  All parameter values are passed a strings.
+ */
+life.controllers.ViewController.prototype.invokeMethod_ =
+    function(methodName, opt_parameters) {
+  var method_invocation = methodName
+  if (opt_parameters) {
+    for (param in opt_parameters) {
+      method_invocation += ' ' + param + ':' + opt_parameters[param]
+    }
+  }
+  this.module_.postMessage(method_invocation);
+}
+
+/**
  * Handle the drag START event: add a cell at the event's coordinates.
  * @param {!goog.fx.DragEvent} dragStartEvent The START event that
  *     triggered this handler.
@@ -243,7 +264,7 @@ life.controllers.ViewController.prototype.handleStartDrag_ =
   var point = this.convertPointToWindow(
       new goog.math.Coordinate(dragStartEvent.clientX,
                                dragStartEvent.clientY));
-  this.module_.putStampAtPoint(point.x, point.y);
+  this.invokeMethod_('putStampAtPoint', { x: point.x, y: point.y });
 };
 
 /**
@@ -256,7 +277,7 @@ life.controllers.ViewController.prototype.handleDrag_ = function(dragEvent) {
   dragEvent.stopPropagation();
   var point = this.convertPointToWindow(
       new goog.math.Coordinate(dragEvent.clientX, dragEvent.clientY));
-  this.module_.putStampAtPoint(point.x, point.y);
+  this.invokeMethod_('putStampAtPoint', { x: point.x, y: point.y });
 };
 
 /**

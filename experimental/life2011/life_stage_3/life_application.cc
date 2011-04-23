@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 #include <string>
 
 #include "experimental/life2011/life_stage_3/scoped_pixel_lock.h"
@@ -33,12 +34,35 @@ const uint32_t kBackgroundColor = 0xFFFFFFFF;  // Opaque white.
 const char* const kRandomSeedModeId = "random_seed";
 const char* const kStampModeId = "stamp";
 
+// Return the value of parameter named |param_name| from |parameters|.  If
+// |param_name| doesn't exist, then return an empty string.
+std::string GetParameterNamed(
+    const std::string& param_name,
+    const scripting::MethodParameter& parameters) {
+  scripting::MethodParameter::const_iterator i =
+      parameters.find(param_name);
+  if (i == parameters.end()) {
+    return "";
+  }
+  return i->second;
+}
+
+// Return the int32_t equivalent of |str|.  All the usual C++ rounding rules
+// apply.
+int32_t StringAsInt32(const std::string& str) {
+  std::istringstream cvt_stream(str);
+  double double_val;
+  cvt_stream >> double_val;
+  return static_cast<int32_t>(double_val);
+}
+
 // Exception strings.  These are passed back to the browser when errors
 // happen during property accesses or method calls.
+const char* const kExceptionMethodNotAString = "Method name is not a string";
+const char* const kExceptionNoMethodName = "No method named ";
 const char* const kInsufficientArgs =
     "Insufficient number of arguments to method ";
 const char* const kInvalidArgs = "Invalid arguments to method ";
-const char* const kInvalidStampFormat = "Invalid stamp format: ";
 
 // Helper function to set the scripting exception.  Both |exception| and
 // |except_string| can be NULL.  If |exception| is NULL, this function does
@@ -85,49 +109,56 @@ LifeApplication::~LifeApplication() {
   DestroyContext();
 }
 
-pp::Var LifeApplication::GetInstanceObject() {
-  ScriptingBridge* bridge = new ScriptingBridge();
-  if (bridge == NULL)
-    return pp::Var();
-  // Add all the methods to the scripting bridge.
-  ScriptingBridge::SharedMethodCallbackExecutor
-      clear_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::Clear));
-  bridge->AddMethodNamed(kClearMethodId, clear_method);
-
-  ScriptingBridge::SharedMethodCallbackExecutor
-      put_stamp_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::PutStampAtPoint));
-  bridge->AddMethodNamed(kPutStampAtPointMethodId, put_stamp_method);
-
-  ScriptingBridge::SharedMethodCallbackExecutor
-      run_sim_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::RunSimulation));
-  bridge->AddMethodNamed(kRunSimulationMethodId, run_sim_method);
-
-  ScriptingBridge::SharedMethodCallbackExecutor
-      set_auto_rules_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::SetAutomatonRules));
-  bridge->AddMethodNamed(kSetAutomatonRulesMethodId, set_auto_rules_method);
-
-  ScriptingBridge::SharedMethodCallbackExecutor
-      set_stamp_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::SetCurrentStamp));
-  bridge->AddMethodNamed(kSetCurrentStampMethodId, set_stamp_method);
-
-  ScriptingBridge::SharedMethodCallbackExecutor
-      stop_sim_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::StopSimulation));
-  bridge->AddMethodNamed(kStopSimulationMethodId, stop_sim_method);
-
-  return pp::Var(this, bridge);
-}
-
 bool LifeApplication::Init(uint32_t /* argc */,
                            const char* /* argn */[],
                            const char* /* argv */[]) {
   life_simulation_.StartSimulation();
   return true;
+}
+
+pp::Var LifeApplication::GetInstanceObject() {
+  // Add all the methods to the scripting bridge.
+  ScriptingBridge::SharedMethodCallbackExecutor
+      clear_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::Clear));
+  scripting_bridge_.AddMethodNamed(kClearMethodId, clear_method);
+
+  ScriptingBridge::SharedMethodCallbackExecutor
+      put_stamp_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::PutStampAtPoint));
+  scripting_bridge_.AddMethodNamed(kPutStampAtPointMethodId, put_stamp_method);
+
+  ScriptingBridge::SharedMethodCallbackExecutor
+      run_sim_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::RunSimulation));
+  scripting_bridge_.AddMethodNamed(kRunSimulationMethodId, run_sim_method);
+
+  ScriptingBridge::SharedMethodCallbackExecutor
+      set_auto_rules_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::SetAutomatonRules));
+  scripting_bridge_.AddMethodNamed(kSetAutomatonRulesMethodId,
+                                   set_auto_rules_method);
+
+  ScriptingBridge::SharedMethodCallbackExecutor
+      set_stamp_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::SetCurrentStamp));
+  scripting_bridge_.AddMethodNamed(kSetCurrentStampMethodId, set_stamp_method);
+
+  ScriptingBridge::SharedMethodCallbackExecutor
+      stop_sim_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::StopSimulation));
+  scripting_bridge_.AddMethodNamed(kStopSimulationMethodId, stop_sim_method);
+
+  // Return the temporary shim that handles postMessage() to the browser.  The
+  // browser takes over ownership of this object instance.
+  PostMessageBridge* script_object = new PostMessageBridge(this);
+  return pp::Var(this, script_object);
+}
+
+void LifeApplication::HandleMessage(const pp::Var& message) {
+  if (!message.is_string())
+    return;
+  scripting_bridge_.InvokeMethod(message.AsString());
 }
 
 void LifeApplication::DidChangeView(const pp::Rect& position,
@@ -177,31 +208,18 @@ void LifeApplication::Update() {
   FlushPixelBuffer();
 }
 
-pp::Var LifeApplication::SetCurrentStamp(const ScriptingBridge& bridge,
-                                         const std::vector<pp::Var>& args,
-                                         pp::Var* exception) {
-  // Require one string parameter.
-  if (args.size() < 1) {
-    SetExceptionString(
-        exception, std::string(kInsufficientArgs) + kSetCurrentStampMethodId);
-    return pp::Var(false);
+void LifeApplication::SetCurrentStamp(
+    const scripting::ScriptingBridge& bridge,
+    const scripting::MethodParameter& parameters) {
+  std::string stamp_desc = GetParameterNamed("description", parameters);
+  if (stamp_desc.length()) {
+    stamp_.InitFromDescription(stamp_desc);
   }
-  if (!args[0].is_string()) {
-    SetExceptionString(exception,
-                       std::string(kInvalidArgs) + kSetCurrentStampMethodId);
-    return pp::Var(false);
-  }
-  if (!stamp_.InitFromDescription(args[0].AsString())) {
-    SetExceptionString(exception,
-                       std::string(kInvalidStampFormat) + args[0].AsString());
-    return pp::Var(false);
-  }
-  return pp::Var(true);
 }
 
-pp::Var LifeApplication::Clear(const ScriptingBridge& bridge,
-                               const std::vector<pp::Var>& args,
-                               pp::Var* exception) {
+void LifeApplication::Clear(
+    const scripting::ScriptingBridge& bridge,
+    const scripting::MethodParameter& parameters) {
   // Temporarily pause the the simulation while clearing the buffers.
   volatile Life::SimulationMode sim_mode = life_simulation_.simulation_mode();
   if (sim_mode != Life::kPaused)
@@ -218,42 +236,25 @@ pp::Var LifeApplication::Clear(const ScriptingBridge& bridge,
   Update();  // Flushes the buffer correctly.
   if (sim_mode != Life::kPaused)
     life_simulation_.set_simulation_mode(sim_mode);
-  return pp::Var(true);
 }
 
-pp::Var LifeApplication::SetAutomatonRules(const ScriptingBridge& bridge,
-                                           const std::vector<pp::Var>& args,
-                                           pp::Var* exception) {
-  // setAutomatonRules() requires at least one arg.
-  if (args.size() < 1) {
-    SetExceptionString(
-        exception, std::string(kInsufficientArgs) + kSetAutomatonRulesMethodId);
-    return pp::Var(false);
+void LifeApplication::SetAutomatonRules(
+    const scripting::ScriptingBridge& bridge,
+    const scripting::MethodParameter& parameters) {
+  std::string rules = GetParameterNamed("rules", parameters);
+  if (rules.length()) {
+    life_simulation_.SetAutomatonRules(rules);
   }
-  if (!args[0].is_string()) {
-    SetExceptionString(exception,
-                       std::string(kInvalidArgs) + kSetAutomatonRulesMethodId);
-    return pp::Var(false);
-  }
-  life_simulation_.SetAutomatonRules(args[0].AsString());
-  return pp::Var(true);
 }
 
-pp::Var LifeApplication::RunSimulation(const ScriptingBridge& bridge,
-                                       const std::vector<pp::Var>& args,
-                                       pp::Var* exception) {
-  // runSimulation() requires at least one arg.
-  if (args.size() < 1) {
-    SetExceptionString(exception,
-                       std::string(kInsufficientArgs) + kRunSimulationMethodId);
-    return pp::Var(false);
+void LifeApplication::RunSimulation(
+    const scripting::ScriptingBridge& bridge,
+    const scripting::MethodParameter& parameters) {
+  std::string sim_mode = GetParameterNamed("mode", parameters);
+  if (sim_mode.length() == 0) {
+    return;
   }
-  if (!args[0].is_string()) {
-    SetExceptionString(exception,
-                       std::string(kInvalidArgs) + kRunSimulationMethodId);
-    return pp::Var(false);
-  }
-  if (args[0].AsString() == kRandomSeedModeId) {
+  if (sim_mode == kRandomSeedModeId) {
     life_simulation_.set_simulation_mode(life::Life::kRunRandomSeed);
   } else {
     life_simulation_.set_simulation_mode(life::Life::kRunStamp);
@@ -263,42 +264,29 @@ pp::Var LifeApplication::RunSimulation(const ScriptingBridge& bridge,
       kSimulationTickInterval,
       pp::CompletionCallback(&SimulationTickCallback, this),
       PP_OK);
-  return pp::Var(true);
 }
 
-pp::Var LifeApplication::StopSimulation(const ScriptingBridge& bridge,
-                                        const std::vector<pp::Var>& args,
-                                        pp::Var* exception) {
+void LifeApplication::StopSimulation(
+    const scripting::ScriptingBridge& bridge,
+    const scripting::MethodParameter& parameters) {
   // This will pause the simulation on the next tick.
   life_simulation_.set_simulation_mode(life::Life::kPaused);
-  return pp::Var(true);
 }
 
-pp::Var LifeApplication::PutStampAtPoint(const ScriptingBridge& bridge,
-                                         const std::vector<pp::Var>& args,
-                                         pp::Var* exception) {
-  // Pull off the first two params.
-  if (args.size() < 2) {
-    SetExceptionString(
-        exception, std::string(kInsufficientArgs) + kPutStampAtPointMethodId);
-    return pp::Var(false);
+void LifeApplication::PutStampAtPoint(
+    const scripting::ScriptingBridge& bridge,
+    const scripting::MethodParameter& parameters) {
+  std::string x_coord = GetParameterNamed("x", parameters);
+  std::string y_coord = GetParameterNamed("y", parameters);
+  if (x_coord.length() == 0 || y_coord.length() == 0) {
+    return;
   }
-  if (!args[0].is_number() ||
-      !args[1].is_number()) {
-    SetExceptionString(exception,
-                       std::string(kInvalidArgs) + kPutStampAtPointMethodId);
-    return pp::Var(false);
-  }
-  int32_t x, y;
-  x = args[0].is_int() ? args[0].AsInt() :
-                         static_cast<int32_t>(args[0].AsDouble());
-  y = args[1].is_int() ? args[1].AsInt() :
-                         static_cast<int32_t>(args[1].AsDouble());
+  int32_t x = StringAsInt32(x_coord);
+  int32_t y = StringAsInt32(y_coord);
   life_simulation_.PutStampAtPoint(stamp_, pp::Point(x, y));
   // If the simulation isn't running, make sure the stamp shows up.
   if (!is_running())
     Update();
-  return pp::Var(true);
 }
 
 void LifeApplication::CreateContext(const pp::Size& size) {
@@ -330,6 +318,45 @@ void LifeApplication::FlushPixelBuffer() {
   graphics_2d_context_->PaintImageData(*(shared_pixel_buffer_.get()),
                                        pp::Point());
   graphics_2d_context_->Flush(pp::CompletionCallback(&FlushCallback, this));
+}
+
+const char* const LifeApplication::PostMessageBridge::kPostMessageMethodId =
+    "postMessage";
+
+bool LifeApplication::PostMessageBridge::HasMethod(const pp::Var& method,
+                                                   pp::Var* exception) {
+  if (!method.is_string()) {
+    SetExceptionString(exception, kExceptionMethodNotAString);
+    return false;
+  }
+  return method.AsString() == kPostMessageMethodId;
+}
+
+pp::Var LifeApplication::PostMessageBridge::Call(
+    const pp::Var& method,
+    const std::vector<pp::Var>& args,
+    pp::Var* exception) {
+  if (!method.is_string()) {
+    SetExceptionString(exception, kExceptionMethodNotAString);
+    return pp::Var();
+  }
+  if (method.AsString() != kPostMessageMethodId) {
+    SetExceptionString(
+        exception, std::string(kExceptionNoMethodName) + method.AsString());
+    return pp::Var();
+  }
+  if (args.size() < 1) {
+    SetExceptionString(
+        exception, std::string(kInsufficientArgs) + method.AsString());
+    return pp::Var();
+  }
+  if (!args[0].is_string()) {
+    SetExceptionString(exception,
+                       std::string(kInvalidArgs) + method.AsString());
+    return pp::Var();
+  }
+  app_instance_->HandleMessage(args[0]);
+  return pp::Var();
 }
 }  // namespace life
 
