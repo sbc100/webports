@@ -18,6 +18,10 @@ Chess.Alert = function(message) {
 ///
 /// Variables for currently selected piece/coordinate, and lastMove
 ///
+Chess.lastMovedPiece = null;
+Chess.playerMovedKing = false;
+Chess.playerMovedLeftRook = false;
+Chess.playerMovedRightRook = false;
 Chess.selectedPiece = null;
 Chess.selectedCoord = null;
 Chess.lastMove = '';  //string containing the algebraic last move (e.g. 'b2b4')
@@ -725,6 +729,7 @@ Chess.mouseDownHandler = function(e) {
         Chess.lastMove = fromNotation + toNotation;
         Chess.updateLastMove(Chess.lastMove);
         Chess.state = Chess.nextState();
+        Chess.lastMovedPiece = Chess.selectedPiece;
         Chess.selectedPiece = null;
         Chess.selectedCoord = null;
 
@@ -756,6 +761,21 @@ Chess.mouseDownHandler = function(e) {
     message += 'That space contains ' + thePiece.toString() + ' \n';
     var boardString = theBoard.contents.toString();
     boardString += column + ':' + row;
+    if (Chess.playerMovedKing) {
+      boardString += ':1';
+    } else {
+      boardString += ':0';
+    }
+    if (Chess.playerMovedLeftRook) {
+      boardString += '1';
+    } else {
+      boardString += '0';
+    }
+    if (Chess.playerMovedRightRook) {
+      boardString += '1';
+    } else {
+      boardString += '0';
+    }
     message += boardString;
   } else {
     Chess.selectedPiece = null;
@@ -1010,6 +1030,7 @@ Chess.handleReply = function(answer) {
   } else if (answer.indexOf('move') != -1) {
     answer = Chess.filterAnswer(answer);
     // do the move
+    Chess.lastHumanMove = Chess.lastMove;
     Chess.lastMove = answer;
     Chess.updateLastMove(answer);
     var fromNotation = answer.substr(0, 2);
@@ -1018,6 +1039,19 @@ Chess.handleReply = function(answer) {
     if (!result) {
       Chess.Alert('Error doing moving from [' + fromNotation + '] to [' +
                   toNotation + '] based on [' + answer + ']');
+    } else {
+      if (Chess.lastMovedPiece.toString().indexOf('King') != -1) {
+        Chess.playerMovedKing = true;
+        alert('Player moved king! LastMove=' + Chess.lastMove);
+      }
+      if (Chess.lastHumanMove.indexOf('a1')==0) {
+        alert('Moved left rook!');
+        Chess.playerMovedLeftRook = true;
+      } 
+      if (Chess.lastHumanMove.indexOf('h1')==0) {
+        alert('Moved right rook!');
+        Chess.playerMovedRightRook = true;
+      }
     }
     theBoard.drawPieces(Chess.ctxPieces);
     Chess.nextState();

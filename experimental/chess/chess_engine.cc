@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -225,7 +226,8 @@ int GetPawnHomeRow(Side side_on_top, Side myside) {
   return 6;
 }
 
-void GetKingMoves(int x, int y, Side myside, Board *board,
+void GetKingMoves(int x, int y, Side myside, bool king_has_moved,
+                  Board *board,
                   Coord *last_move,
                   std::vector<Coord>* moves) {
   char mypiece = board->PieceAt(x, y);
@@ -487,6 +489,7 @@ pp::Var Talk(const std::vector<pp::Var>& args) {
 }
 
 void GetPieceMoves(int column, int row, Side my_side, Board *board,
+                   bool king_moved,
                    char selected_piece, std::vector<Coord> *moves) {
   if (IsPawn(selected_piece)) {
     printf("PAWN\n");
@@ -502,7 +505,7 @@ void GetPieceMoves(int column, int row, Side my_side, Board *board,
     GetRookMoves(column, row, my_side, board, NULL, moves);
   } else if (IsKing(selected_piece)) {
     printf("KING\n");
-    GetKingMoves(column, row, my_side, board, NULL, moves);
+    GetKingMoves(column, row, my_side, king_moved, board, NULL, moves);
   } else if (IsQueen(selected_piece)) {
     printf("QUEEN\n");
     GetQueenMoves(column, row, my_side, board, NULL, moves);
@@ -571,6 +574,40 @@ bool ReadBoardContents(std::vector<std::string> input_lines,
   return true;
 }
 
+void GetAllEnemyMoves(std::set<Coord>* all_enemy_moves, Board* board, Side my_side) {
+  int column, row;
+  char board_piece;
+  std::vector<Coord> enemy_moves;
+
+  for (column = 0; column < 8; ++column) {
+    for (row = 0; row < 8; ++row) {
+      // board_piece = board_contents[column][row];
+      board_piece = board->PieceAt(column, row);
+      if (board_piece != ' ') {
+        Side piece_side = GetSide(board_piece);
+        if (my_side != piece_side) {
+          printf(" ENEMY PIECE [%c] AT %d:%d\n", board_piece, column, row);
+          // Note the |piece_side| has to be passed in with |board_piece|
+          // so that the legal moves are calculated correctly
+          enemy_moves.clear();
+          GetPieceMoves(column, row, piece_side,
+                        board, false, /* set king-moved to check, dont care */
+                        board_piece, &enemy_moves);
+          printf("PIECE %c has %d MOVES\n", board_piece, enemy_moves.size());
+          for (std::vector<Coord>::iterator iter = enemy_moves.begin();
+               iter != enemy_moves.end(); ++iter) {
+            Coord enemy_move = *iter;
+            printf("ENEMY MOVE %d:%d\n", enemy_move.x_, enemy_move.y_);
+            all_enemy_moves->insert(enemy_move);
+          }
+        }
+      }
+    }
+  }
+
+}
+
+
 ///
 /// Return if the white player is in check
 ///
@@ -629,7 +666,8 @@ pp::Var GetCheck(const std::vector<pp::Var>& args) {
           // so that the legal moves are calculated correctly
           enemy_moves.clear();
           GetPieceMoves(column, row, piece_side,
-                        board, board_piece, &enemy_moves);
+                        board, false, /* set king-moved to check, dont care */
+                        board_piece, &enemy_moves);
           printf("PIECE %c has %d MOVES\n", board_piece, enemy_moves.size());
           for (std::vector<Coord>::iterator iter = enemy_moves.begin();
                iter != enemy_moves.end(); ++iter) {
@@ -696,12 +734,181 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
   if (colon_start == std::string::npos) {
     return std::string("Error, no column:row found in ") + input_lines[9];
   }
+  size_t second_colon_start = input_lines[9].find_first_of(":", colon_start+1);
+  if (second_colon_start == std::string::npos) {
+    return std::string("Error, no column:row:king_moved found in ") + input_lines[9];
+  }
   std::string column_str, row_str;
   column_str = input_lines[9].substr(0, colon_start);
-  row_str = input_lines[9].substr(colon_start+1);
+  row_str = input_lines[9].substr(colon_start+1,
+                second_colon_start - colon_start - 1);
 
   int column = atoi(column_str.c_str());
   int row = atoi(row_str.c_str());
+  std::string king_moved_str = input_lines[9].substr(second_colon_start + 1, 1);
+  int king_moved = atoi(king_moved_str.c_str());
+  std::string left_rook_str = input_lines[9].substr(second_colon_start + 2, 1);
+  int left_rook_moved = atoi(left_rook_str.c_str());
+  std::string right_rook_str = input_lines[9].substr(second_colon_start + 3, 1);
+  int right_rook_moved = atoi(right_rook_str.c_str());
+
+  bool king_has_moved = king_moved == 1;
+  printf("Col = %d row = %d king_moved = %d left rook=%d right rook=%d\n",
+         column, row, king_moved, left_rook_moved, right_rook_moved);
+
+  char selected_piece = board_contents[column][row];
+  // key assumption -- Javascript only calls us with a valid selected piece.
+
+}
+
+
+///
+/// Return if the white player is in check
+///
+pp::Var GetCheck(const std::vector<pp::Var>& args) {
+  // There should be exactly one arg, which should be an object
+  if (args.size() != 1) {
+    printf("Unexpected number of args\n");
+    return "Unexpected number of args";
+  }
+  if (!args[0].is_string()) {
+    printf("Arg [%s] is NOT a string\n", args[0].DebugString().c_str());
+    return "Arg from Javascript is not a string!";
+  }
+  std::string input = args[0].AsString();
+  printf("========== GetCheck Arg = {%s}\n", input.c_str());
+  std::vector<std::string> input_lines;
+  GetElementsFromString(input, "\n", &input_lines);
+  if (input_lines.size() != 9) {
+    return "Error, there should have been 9 lines of data";
+  }
+
+  char board_contents[8][8];
+  Side top_side;
+
+  // Reads the board_contents and 'top' side (color)
+  // from the first 9 lines of text.
+  bool read_board = ReadBoardContents(input_lines, board_contents, &top_side);
+  if (!read_board) {
+    printf("ERROR READING BOARD CONTENTS\n");
+    return "ERROR READING BOARD CONTENTS";
+  }
+  Side my_side = WHITE;
+  Board *board = new Board(board_contents, top_side);
+
+  char board_piece;
+  // See if the king is in check...
+  std::vector<Coord> enemy_moves;
+  std::string check_string;
+  Coord my_king_coord;
+  if(!GetMyKingCoord(board_contents, my_side, &my_king_coord)) {
+    printf("ERROR - did NOT find my king!\n"); 
+    return "ERROR - did NOT find my king";
+  }
+  int column, row;
+
+  printf("FOUND MY KING at %d:%d\n", my_king_coord.x_, my_king_coord.y_);
+  // look for pieces that could capture king (i.e. they put him in check)
+  for (column = 0; column < 8; ++column) {
+    for (row = 0; row < 8; ++row) {
+      board_piece = board_contents[column][row];
+      if (board_piece != ' ') {
+        Side piece_side = GetSide(board_piece);
+        if (my_side != piece_side) {
+          printf(" ENEMY PIECE [%c] AT %d:%d\n", board_piece, column, row);
+          // Note the |piece_side| has to be passed in with |board_piece|
+          // so that the legal moves are calculated correctly
+          enemy_moves.clear();
+          GetPieceMoves(column, row, piece_side,
+                        board, false, /* set king-moved to check, dont care */
+                        board_piece, &enemy_moves);
+          printf("PIECE %c has %d MOVES\n", board_piece, enemy_moves.size());
+          for (std::vector<Coord>::iterator iter = enemy_moves.begin();
+               iter != enemy_moves.end(); ++iter) {
+            Coord enemy_move = *iter;
+            printf("ENEMY MOVE %d:%d\n", enemy_move.x_, enemy_move.y_);
+            if (enemy_move == my_king_coord) {
+              printf("CHECK FROM %c at %d:%d\n", board_piece, column, row);
+              check_string += IntToString(column) + ":" +
+                              IntToString(row) + " ";
+            }
+          }
+        }
+      }
+    }
+  }
+  printf("End of for loop, check_string is '%s'\n", check_string.c_str());
+  // if we are in check from some piece, add king's coords to list of
+  // check coords so it gets highlighted too
+  if (!check_string.empty()) {
+    check_string += IntToString(my_king_coord.x_) + ":" +
+                    IntToString(my_king_coord.y_);
+  }
+  printf("\n-----CHECK STRING IS <%s>-----\n\n", check_string.c_str());
+  return check_string;
+}
+
+/// This function is passed the arg list from the JavaScript call to
+/// @a GetChoices.
+/// It makes sure that there is one argument and that it is a string, returning
+/// an error message if it is not.
+/// On good input, finds the legal moves and returns the result.  The
+/// ScriptableObject that called this function returns this string back to the
+/// browser as a JavaScript value.
+pp::Var GetChoices(const std::vector<pp::Var>& args) {
+  // There should be exactly one arg, which should be an object
+  if (args.size() != 1) {
+    printf("Unexpected number of args\n");
+    return "Unexpected number of args";
+  }
+  if (!args[0].is_string()) {
+    printf("Arg [%s] is NOT a string\n", args[0].DebugString().c_str());
+    return "Arg from Javascript is not a string!";
+  }
+  std::string input = args[0].AsString();
+  printf("Arg = {%s}\n", input.c_str());
+  std::vector<std::string> input_lines;
+  GetElementsFromString(input, "\n", &input_lines);
+  if (input_lines.size() != 10) {
+    return "Error, there should have been 10 lines of data";
+  }
+
+  char board_contents[8][8];
+  Side top_side;
+
+  // Reads the board_contents and 'top' side (color)
+  // from the first 9 lines of text.
+  bool read_board = ReadBoardContents(input_lines, board_contents, &top_side);
+  if (!read_board) {
+    printf("ERROR READING BOARD CONTENTS\n");
+    return "ERROR READING BOARD CONTENTS";
+  }
+  // column:row should be in input_lines[9]
+  size_t colon_start = input_lines[9].find_first_of(":");
+  if (colon_start == std::string::npos) {
+    return std::string("Error, no column:row found in ") + input_lines[9];
+  }
+  size_t second_colon_start = input_lines[9].find_first_of(":", colon_start+1);
+  if (second_colon_start == std::string::npos) {
+    return std::string("Error, no column:row:king_moved found in ") + input_lines[9];
+  }
+  std::string column_str, row_str;
+  column_str = input_lines[9].substr(0, colon_start);
+  row_str = input_lines[9].substr(colon_start+1,
+                second_colon_start - colon_start - 1);
+
+  int column = atoi(column_str.c_str());
+  int row = atoi(row_str.c_str());
+  std::string king_moved_str = input_lines[9].substr(second_colon_start + 1, 1);
+  int king_moved = atoi(king_moved_str.c_str());
+  std::string left_rook_str = input_lines[9].substr(second_colon_start + 2, 1);
+  int left_rook_moved = atoi(left_rook_str.c_str());
+  std::string right_rook_str = input_lines[9].substr(second_colon_start + 3, 1);
+  int right_rook_moved = atoi(right_rook_str.c_str());
+
+  bool king_has_moved = king_moved == 1;
+  printf("Col = %d row = %d king_moved = %d left rook=%d right rook=%d\n",
+         column, row, king_moved, left_rook_moved, right_rook_moved);
 
   char selected_piece = board_contents[column][row];
   // key assumption -- Javascript only calls us with a valid selected piece.
@@ -709,7 +916,8 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
   Side my_side = GetSide(selected_piece);
   printf("My side is = %s\n", SideToString(my_side).c_str()); 
   std::vector<Coord> moves;
-  GetPieceMoves(column, row, my_side, board, selected_piece, &moves);
+  GetPieceMoves(column, row, my_side, board, king_has_moved,
+                selected_piece, &moves);
 
   std::string answer = "";
   for (std::vector<Coord>::iterator iter = moves.begin();
