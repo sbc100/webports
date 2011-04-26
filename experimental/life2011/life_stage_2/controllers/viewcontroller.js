@@ -119,11 +119,8 @@ life.controllers.ViewController.prototype.disposeInternal = function() {
 };
 
 /**
- * Simple wrapper that forwards the "clear" method to the NaCl module.
+ * ==GoogleIO2011== Add clear wrapper here.
  */
-life.controllers.ViewController.prototype.clear = function() {
-  this.invokeMethod_('clear');
-}
 
 /**
  * Return the current play mode.

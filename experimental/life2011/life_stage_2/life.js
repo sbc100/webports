@@ -163,12 +163,7 @@ life.Application.prototype.moduleDidLoad =
         this.selectPlayMode, false, this);
   }
 
-  var clearButton =
-      document.getElementById(life.Application.DomIds_.CLEAR_BUTTON);
-  if (clearButton) {
-    goog.events.listen(clearButton, goog.events.EventType.CLICK,
-        this.clear, false, this);
-  }
+  // ==GoogleIO2011== Add clear onclick here.
 
   var playButton =
       document.getElementById(life.Application.DomIds_.PLAY_BUTTON);
@@ -259,13 +254,8 @@ life.Application.prototype.handlePanelDidSave_ = function(event) {
 }
 
 /**
- * Clear the current simulation.
- * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
+ * ==GoogleIO2011== Add clickEvent handler here.
  */
-life.Application.prototype.clear = function(clickEvent) {
-  clickEvent.stopPropagation();
-  this.viewController_.clear();
-}
 
 /**
  * Read the text input and change it from a comma-separated list into a string

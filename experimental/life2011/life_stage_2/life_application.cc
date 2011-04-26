@@ -114,11 +114,7 @@ bool LifeApplication::Init(uint32_t /* argc */,
 
 pp::Var LifeApplication::GetInstanceObject() {
   // Add all the methods to the scripting bridge.
-  ScriptingBridge::SharedMethodCallbackExecutor
-      clear_method(new scripting::MethodCallback<LifeApplication>(
-          this, &LifeApplication::Clear));
-  scripting_bridge_.AddMethodNamed(kClearMethodId, clear_method);
-
+  // ==GoogleIO2011== Add clear callback here.
   ScriptingBridge::SharedMethodCallbackExecutor
       put_stamp_method(new scripting::MethodCallback<LifeApplication>(
           this, &LifeApplication::PutStampAtPoint));

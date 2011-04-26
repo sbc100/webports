@@ -1,0 +1,40 @@
+Step 1:
+life.html, line 101
+        <button id="clear_button"
+                type="button"
+                style="width: 72px;">Clear</button>
+
+Step 2:
+life.js, line 167
+  var clearButton =
+      document.getElementById(life.Application.DomIds_.CLEAR_BUTTON);
+  if (clearButton) {
+    goog.events.listen(clearButton, goog.events.EventType.CLICK,
+        this.clear, false, this);
+  }
+
+life.js, line 265
+/**
+ * Clear the current simulation.
+ * @param {!goog.events.Event} clickEvent The CLICK event that triggered this
+ */
+life.Application.prototype.clear = function(clickEvent) {
+  clickEvent.stopPropagation();
+  this.viewController_.clear();
+}
+
+viewcontroller.js, line 124
+/**
+ * Simple wrapper that forwards the "clear" method to the NaCl module.
+ */
+life.controllers.ViewController.prototype.clear = function() {
+  this.invokeMethod_('clear');
+}
+
+Step 3:
+life_application.cc, line 118
+  ScriptingBridge::SharedMethodCallbackExecutor
+      clear_method(new scripting::MethodCallback<LifeApplication>(
+          this, &LifeApplication::Clear));
+  scripting_bridge_.AddMethodNamed(kClearMethodId, clear_method);
+
