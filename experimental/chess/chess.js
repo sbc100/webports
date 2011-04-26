@@ -1042,14 +1042,11 @@ Chess.handleReply = function(answer) {
     } else {
       if (Chess.lastMovedPiece.toString().indexOf('King') != -1) {
         Chess.playerMovedKing = true;
-        alert('Player moved king! LastMove=' + Chess.lastMove);
       }
       if (Chess.lastHumanMove.indexOf('a1')==0) {
-        alert('Moved left rook!');
         Chess.playerMovedLeftRook = true;
       } 
       if (Chess.lastHumanMove.indexOf('h1')==0) {
-        alert('Moved right rook!');
         Chess.playerMovedRightRook = true;
       }
     }

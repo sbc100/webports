@@ -251,6 +251,7 @@ void GetKingMoves(int x, int y, Side myside, bool king_has_moved,
       }
     }
   }
+  // TODO -- check for valid castling moves
 }
 
 
@@ -609,6 +610,52 @@ void GetAllEnemyMoves(std::set<Coord>* all_enemy_moves, Board* board, Side my_si
   }
 
 }
+void GetCastlingMoves(int king_moved, int left_rook_moved, int right_rook_moved,
+                     Side my_side, Board* board,
+                     const std::set<Coord>& all_enemy_moves,
+                     std::vector<Coord>* moves) {
+  if (king_moved==1) 
+    return;
+  if (left_rook_moved==1 && right_rook_moved==1) 
+    return;
+  
+  // if we are here, we know the king is at Coord 4:7 (hasn't moved)
+  Coord king_coord(4, 7);
+  Coord left_one(3, 7), left_two(2, 7);
+  Coord right_one(5, 7), right_two(6, 7);
+
+  // if we are in check, cannot castle
+  if (all_enemy_moves.find(king_coord) != all_enemy_moves.end()) {
+    printf("In check!");
+    return;
+  }
+
+  if (left_rook_moved==0) {
+    // then coords 1,7; 2,7 (left_two); and 3,7 (left_one) must all be empty
+    Coord one_seven(1, 7);
+    printf("Checking left castle!\n");
+    if (!board->AnyPieceAt(one_seven) &&
+        !board->AnyPieceAt(left_two) &&
+        !board->AnyPieceAt(left_one) &&
+        (all_enemy_moves.find(left_one) == all_enemy_moves.end()) &&
+        (all_enemy_moves.find(left_two) == all_enemy_moves.end())) {
+      // then the 3 spaces between are empty AND the king is not
+      // in check or moving through/to check
+      printf("LEFT CASTLE LEGAL!\n");
+      moves->push_back(left_two); 
+    }
+  }
+  if (right_rook_moved==0) {
+    printf("Checking right castle!\n");
+    if (!board->AnyPieceAt(right_one) &&
+        !board->AnyPieceAt(right_two) &&
+        (all_enemy_moves.find(right_one) == all_enemy_moves.end()) &&
+        (all_enemy_moves.find(right_two) == all_enemy_moves.end())) {
+      printf("RIGHT CASTLE LEGAL!\n");
+      moves->push_back(right_two);
+    }
+  }
+}
 
 ///
 /// Return if the white player is in check
@@ -763,9 +810,25 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
   Board *board = new Board(board_contents, top_side);
   Side my_side = GetSide(selected_piece);
   printf("My side is = %s\n", SideToString(my_side).c_str()); 
+
+
+  std::set<Coord> all_enemy_moves;
+  GetAllEnemyMoves(&all_enemy_moves, board, my_side);
+  printf("\nENEMY MOVES: <%d>", all_enemy_moves.size());
+  for (std::set<Coord>::iterator set_iter = all_enemy_moves.begin();
+       set_iter != all_enemy_moves.end(); ++set_iter) {
+    Coord enemy_move = *set_iter;
+    printf(" [%d:%d] ", enemy_move.x_, enemy_move.y_);
+  }
+
   std::vector<Coord> moves;
   GetPieceMoves(column, row, my_side, board, king_has_moved,
                 selected_piece, &moves);
+
+  if (IsKing(selected_piece)) {
+    GetCastlingMoves(king_moved, left_rook_moved, right_rook_moved,
+                     my_side, board, all_enemy_moves, &moves);
+  }
 
   std::string answer = "";
   for (std::vector<Coord>::iterator iter = moves.begin();
@@ -774,6 +837,8 @@ pp::Var GetChoices(const std::vector<pp::Var>& args) {
     printf("- Valid move %d:%d\n", c.x_, c.y_);
     answer += IntToString(c.x_) + ":" + IntToString(c.y_) + " ";
   }
+
+  
 
 /***
   char board_piece;
