@@ -1,0 +1,6 @@
+{
+  "nexes": {
+    "x86-64": "earth_cc_x86_64.nexe",
+    "x86-32": "earth_cc_x86_32.nexe",
+  }
+}
