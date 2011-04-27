@@ -1,6 +1,6 @@
-# Copyright 2011, The Native Client SDK Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that can
-# be found in the LICENSE file.
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 # Makefile for the Photo example.
 
@@ -37,9 +37,11 @@ OBJECTS_X86_64 += $(patsubst %,${OBJDIR}/%,$(CCFILES:%.cc=%_x86_64.o))
 CFLAGS = -flax-vector-conversions -Wall -Wno-long-long -pthread -Werror
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
 
+# PLEASE NOTE: If you are using a NaCl SDK version 0.1 you must use
+# -lgoogle_nacl_platform instead of -lplatform
 LDFLAGS = -lppruntime \
           -lppapi_cpp \
-          -lgoogle_nacl_platform \
+          -lplatform \
           -lgio \
           -lpthread \
           -ljpeg \
