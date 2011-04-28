@@ -21,20 +21,29 @@ ifeq ($(origin OS), undefined)
   endif
 endif
 
+# Native Client originally supported only newlib, and is in transition
+# to gnu-libc. Please set LIBCIMPL as follows:
+#     For NaCl SDK v0.1 and v0.2: LIBCIMPL=
+#     For NaCl head-of-tree with glibc: LIBCIMPL=
+#     For NaCl head-of-tree with newlib: LIBCIMPL=_newlib
+ifeq ($(origin LIBCIMPL), undefined)
+  LIBCIMPL=
+endif
+
 ifeq ($(OS), $(filter $(OS), Windows_NT Cygwin))
   PLATFORM = win
-  TARGET = x86
+  TARGET = x86$(LIBCIMPL)
 endif
 ifeq ($(OS), $(filter $(OS), Darwin MACOS))
   PLATFORM = mac
-  TARGET = x86
+  TARGET = x86$(LIBCIMPL)
 endif
 
 # Look for 'Linux' in the $(OS) string.  $(OS) is assumed to be a Linux
 # variant if the result of $(findstring) is not empty.
 ifneq (, $(findstring Linux, $(OS)))
   PLATFORM = linux
-  TARGET = x86
+  TARGET = x86$(LIBCIMPL)
 endif
 
 NACL_TOOLCHAIN_DIR = toolchain/$(PLATFORM)_$(TARGET)
