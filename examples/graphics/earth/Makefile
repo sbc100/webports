@@ -47,5 +47,15 @@ earth_c_x86_64.nexe: earth.cc pepper_c.c
 earth_cc_x86_64.nexe: earth.cc pepper_cc.cc
 	 $(CPP) -o $@ $^ -m64 $(CCFLAGS) $(LIBS)
 
+$(LIBSDL):
+	@echo Could not find $@
+	@echo Please run nacl-install-all.sh in ../../packages first
+	@exit -1
+
+$(LIBSDL64):
+	@echo Could not find $@
+	@echo Please run nacl-install-all.sh in ../../packages first
+	@exit -1
+
 clean:
 	rm -f *.o *.nexe
