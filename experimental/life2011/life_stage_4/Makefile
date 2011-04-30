@@ -60,6 +60,8 @@ APPLICATION_FILES = life.html \
                     css/toolbar.css \
                     img/dead_cell.png \
                     img/live_cell.png \
+                    img/minus_button.png \
+                    img/plus_button.png \
                     img/toolbar-bg.png \
                     sounds/doorbell.wav \
                     $(RELEASE_MODULES)

@@ -92,8 +92,8 @@ stamp.StampPanel.Events = {
  * @private
  */
 stamp.StampPanel.CellAttributes_ = {
-  ENABLED_FONT_COLOR: 'black',
-  DISABLED_FONT_COLOR: 'lightgray'
+  ENABLED_OPACITY: '1',
+  DISABLED_OPACITY: '0.5'
 };
 
 /**
@@ -297,17 +297,17 @@ stamp.StampPanel.prototype.removeRow_ = function(clickEvent) {
 stamp.StampPanel.prototype.refreshUI_ = function() {
   if (this.stampEditor_.rowCount() > this.MIN_ROW_COUNT) {
     goog.style.setStyle(this.domElements_.removeRowButton,
-        { 'color': stamp.StampPanel.CellAttributes_.ENABLED_FONT_COLOR });
+        { 'opacity': stamp.StampPanel.CellAttributes_.ENABLED_OPACITY });
   } else {
     goog.style.setStyle(this.domElements_.removeRowButton,
-        { 'color': stamp.StampPanel.CellAttributes_.DISABLED_FONT_COLOR });
+        { 'opacity': stamp.StampPanel.CellAttributes_.DISABLED_OPACITY });
   }
   if (this.stampEditor_.columnCount() > this.MIN_COLUMN_COUNT) {
     goog.style.setStyle(this.domElements_.removeColumnButton,
-        { 'color': stamp.StampPanel.CellAttributes_.ENABLED_FONT_COLOR });
+        { 'opacity': stamp.StampPanel.CellAttributes_.ENABLED_OPACITY });
   } else {
     goog.style.setStyle(this.domElements_.removeColumnButton,
-        { 'color': stamp.StampPanel.CellAttributes_.DISABLED_FONT_COLOR });
+        { 'opacity': stamp.StampPanel.CellAttributes_.DISABLED_OPACITY });
   }
 }
 
