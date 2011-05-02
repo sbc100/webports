@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2010 The Native Client SDK Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that be
+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
 
@@ -14,6 +14,22 @@
 
 #include <assert.h>
 #include <errno.h>
+
+#include <ppapi/c/pp_completion_callback.h>
+#include <ppapi/c/pp_errors.h>
+#include <ppapi/c/pp_instance.h>
+#include <ppapi/c/pp_module.h>
+#include <ppapi/c/pp_size.h>
+#include <ppapi/c/pp_var.h>
+#include <ppapi/c/ppb.h>
+#include <ppapi/c/ppb_core.h>
+#include <ppapi/c/ppb_graphics_2d.h>
+#include <ppapi/c/ppb_image_data.h>
+#include <ppapi/c/ppb_instance.h>
+#include <ppapi/c/ppp.h>
+#include <ppapi/c/ppp_instance.h>
+
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,30 +37,64 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/osmesa.h>
-#include <nacl/nacl_npapi.h>
-#include <nacl/npapi_extensions.h>
-#include <nacl/npupp.h>
+
+
+PPB_GetInterface g_get_browser_interface = NULL;
+
+const struct PPB_Core* g_core_interface;
+const struct PPB_Graphics2D* g_graphics_2d_interface;
+const struct PPB_ImageData* g_image_data_interface;
+const struct PPB_Instance* g_instance_interface;
+struct GLDemo* gldemo;
+
+// PPP_Instance implementation -----------------------------------------------
+
+struct InstanceInfo {
+  PP_Instance pp_instance;
+  struct PP_Size last_size;
+
+  struct InstanceInfo* next;
+};
+
+// Linked list of all live instances.
+struct InstanceInfo* all_instances = NULL;
 
 
 //-----------------------------------------------------------------------------
 //
 // The module code.  This section implements the application code.  There are
-// three other sections that implement the NPAPI module loading and browser
+// three other sections that implement the Pepper module loading and browser
 // bridging code.
 //
 //-----------------------------------------------------------------------------
 
-void FlushCallback(NPP instance, NPDeviceContext* context,
-                   NPError err, void* user_data) {
+// Returns a refed resource corresponding to the created device context.
+PP_Resource CreateDeviceContext(PP_Instance instance,
+                                const struct PP_Size* size) {
+  PP_Resource device_context;
+  device_context = g_graphics_2d_interface->Create(instance, size, PP_FALSE);
+  if (!device_context)
+    return 0;
+  return device_context;
 }
 
-// The Surface class owns a bitmap which is a Pepper 2D context, and owns the
+void BindDeviceContext(PP_Instance instance, PP_Resource device_context) {
+  if (!g_instance_interface->BindGraphics(instance, device_context)) {
+    g_core_interface->ReleaseResource(device_context);
+  }
+}
+
+void FlushCompletionCallback(void* user_data, int32_t result) {
+  // Don't need to do anything here.
+}
+
+// The Surface class owns a image resource and a Pepper 2D context, and owns the
 // Mesa OpenGL context that renders into that bitmap.
 class Surface {
  public:
-  explicit Surface(NPP npp);
+  explicit Surface(struct InstanceInfo *instance);
   ~Surface();
-  bool CreateContext(int width, int height);
+  bool CreateContext(const struct PP_Size* size);
   void DestroyContext();
   bool MakeCurrentContext() const {
     return OSMesaMakeCurrent(mesa_context_,
@@ -53,9 +103,8 @@ class Surface {
                              width(),
                              height()) == GL_TRUE;
   }
-
   bool IsContextValid() const {
-    return context2d_.region != NULL;
+    return static_cast<bool>(g_graphics_2d_interface->IsGraphics2D(context2d_));
   }
   void Flush();
   int width() const {
@@ -65,51 +114,43 @@ class Surface {
     return height_;
   }
   void* pixels() const {
-    return context2d_.region;
+    return static_cast<void *>(g_image_data_interface->Map(image_));
   }
 
  private:
-  NPP npp_;
-  NPExtensions* extensions_;
+  InstanceInfo* info_;
   int width_;
   int height_;
-  NPDevice* device2d_;  // The PINPAPI 2D device.
-  NPDeviceContext2D context2d_;  // The PINPAPI 2D drawing context.
+  PP_Resource image_;
+  PP_Resource context2d_;  // The Pepper device context.
   // Mesa specific
   OSMesaContext mesa_context_;
 };
 
-Surface::Surface(NPP npp)
-    : npp_(npp),
-      extensions_(NULL),
+Surface::Surface(InstanceInfo* info)
+    : info_(info),
       width_(0),
       height_(0),
-      device2d_(NULL),
+      image_(0),
+      context2d_(0),
       mesa_context_(0) {
-  memset(&context2d_, 0, sizeof(context2d_));
-  NPN_GetValue(npp_, NPNVPepperExtensions, &extensions_);
-  assert(extensions_);
 }
 
 Surface::~Surface() {
   DestroyContext();
 }
 
-bool Surface::CreateContext(int width, int height) {
+bool Surface::CreateContext(const PP_Size* size) {
   if (IsContextValid())
     return true;
-  // Acquire and initilaize the Pepper 2D device that Mesa use as its rendering
-  // surface.
-  assert(extensions_);
-  device2d_ = extensions_->acquireDevice(npp_, NPPepper2DDevice);
-  assert(device2d_);
-  NPDeviceContext2DConfig config;
-  NPError init_err = device2d_->initializeContext(npp_, &config, &context2d_);
-  assert(NPERR_NO_ERROR == init_err);
+  width_ = size->width;
+  height_ = size->height;
+  image_ = g_image_data_interface->Create(
+      info_->pp_instance, PP_IMAGEDATAFORMAT_BGRA_PREMUL, size, PP_TRUE);
+  context2d_ = CreateDeviceContext(info_->pp_instance, size);
+  BindDeviceContext(info_->pp_instance, context2d_);
 
-  // Create a Mesa OpenGL context, bind it to the Pepper 2D context from above.
-  width_ = width;
-  height_ = height;
+  // Create a Mesa OpenGL context, bind it to the Pepper 2D context.
   mesa_context_ = OSMesaCreateContext(OSMESA_BGRA, NULL);
   if (0 == mesa_context_) {
     printf("OSMesaCreateContext failed!\n");
@@ -146,24 +187,23 @@ void Surface::DestroyContext() {
   printf("OpenGL: Mesa context destroyed.\n");
   if (!IsContextValid())
     return;
-  device2d_->destroyContext(npp_, &context2d_);
-  memset(&context2d_, 0, sizeof(context2d_));
+  g_core_interface->ReleaseResource(context2d_);
+  printf("OpenGL: Device context released.\n");
+  g_core_interface->ReleaseResource(image_);
+  printf("OpenGL: Image context released.\n");
 }
 
 void Surface::Flush() {
-  if (!IsContextValid())
-    return;
-  NPDeviceFlushContextCallbackPtr callback =
-      reinterpret_cast<NPDeviceFlushContextCallbackPtr>(&FlushCallback);
-  device2d_->flushContext(npp_, &context2d_, callback, NULL);
+  g_graphics_2d_interface->ReplaceContents(context2d_, image_);
+  g_graphics_2d_interface->Flush(context2d_,
+      PP_MakeCompletionCallback(&FlushCompletionCallback, NULL));
 }
 
 // GLDemo is an object that responds to calls from the browser to do the 3D
-// rendering.  It publishes an "update" method via the HasMethod() callback
-// (see below).
-class GLDemo : public NPObject {
+// rendering.
+class GLDemo {
  public:
-  explicit GLDemo(NPP npp) : surf_(new Surface(npp)) {}
+  explicit GLDemo(InstanceInfo* info) : surf_(new Surface(info)) {}
   ~GLDemo() {
     delete surf_;
   }
@@ -179,17 +219,17 @@ class GLDemo : public NPObject {
   void Update();
 
  private:
-  Surface *surf_;
+  Surface* surf_;
   GLuint vbo_color_;
   GLuint vbo_vertex_;
 };
 
 
 void GLDemo::Setup(int width, int height) {
-  if (!surf_->CreateContext(width, height)) {
-    return;
-  }
-  if (!surf_->MakeCurrentContext()) {
+  PP_Size size;
+  size.width = width;
+  size.height = height;
+  if (!surf_->CreateContext(&size)) {
     return;
   }
   const int num_vertices = 3;
@@ -253,172 +293,125 @@ void GLDemo::Update() {
 
 //-----------------------------------------------------------------------------
 //
-// The scripting bridge code.  These functions are published to the browser via
-// the NPP_New() function and |np_class| (see later section), and are called
-// from the browser to allocate, deallocate and query the GLDemo instance.
+// The scripting bridge code.
 //
 //-----------------------------------------------------------------------------
 
-extern "C" {
-
-// The following functions implement functions to be used with npruntime.
-static NPObject* AllocateMesaGL(NPP npp, NPClass* npclass) {
-  GLDemo* rv = new GLDemo(npp);
-  return rv;
-}
-
-static void Deallocate(NPObject* obj) {
-  GLDemo* const gldemo = static_cast<GLDemo*>(obj);
-  delete gldemo;
-}
-
-static bool HasMethod(NPObject*, NPIdentifier name) {
-  bool rv = false;
-  NPUTF8* method_name = NPN_UTF8FromIdentifier(name);
-  if (0 == memcmp(method_name, "update", sizeof("update"))) {
-    rv = true;
+// Returns the info for the given instance, or NULL if it's not found.
+struct InstanceInfo* FindInstance(PP_Instance instance) {
+  struct InstanceInfo* cur = all_instances;
+  while (cur) {
+    if (cur->pp_instance == instance)
+      return cur;
   }
-  NPN_MemFree(method_name);
-  return rv;
+  return NULL;
 }
 
-static bool Invoke(NPObject *obj, NPIdentifier name, const NPVariant *args,
-                   uint32_t argc, NPVariant *result) {
-  bool rv = false;
-  NPUTF8* method_name = NPN_UTF8FromIdentifier(name);
-  if (0 == memcmp(method_name, "update", sizeof("update"))) {
-    rv = true;
-    GLDemo* const gldemo = static_cast<GLDemo*>(obj);
+PP_Bool Instance_DidCreate(PP_Instance instance,
+                           uint32_t argc,
+                           const char* argn[],
+                           const char* argv[]) {
+  struct InstanceInfo* info =
+      (struct InstanceInfo*)malloc(sizeof(struct InstanceInfo));
+  info->pp_instance = instance;
+  info->last_size.width = 0;
+  info->last_size.height = 0;
+
+  // Insert into linked list of live instances.
+  info->next = all_instances;
+  all_instances = info;
+
+  gldemo = new GLDemo(info);
+  return PP_TRUE;
+}
+
+void Instance_DidDestroy(PP_Instance instance) {
+  // Find the matching item in the linked list, delete it, and patch the
+  // links.
+  struct InstanceInfo** prev_ptr = &all_instances;
+  struct InstanceInfo* cur = all_instances;
+  while (cur) {
+    if (instance == cur->pp_instance) {
+      *prev_ptr = cur->next;
+      free(cur);
+      return;
+    }
+    prev_ptr = &cur->next;
+  }
+}
+
+void Instance_DidChangeView(PP_Instance pp_instance,
+                            const struct PP_Rect* position,
+                            const struct PP_Rect* clip) {
+  struct InstanceInfo* info = FindInstance(pp_instance);
+  if (!info)
+    return;
+
+  if (info->last_size.width != position->size.width ||
+      info->last_size.height != position->size.height) {
+    // Got a resize, repaint the plugin.
+    gldemo->Setup(position->size.width, position->size.height);
     gldemo->Update();
     gldemo->Display();
+    info->last_size.width = position->size.width;
+    info->last_size.height = position->size.height;
   }
-  NPN_MemFree(method_name);
-  return rv;
 }
 
-NPClass np_class = {
-  NP_CLASS_STRUCT_VERSION,
-  AllocateMesaGL,
-  Deallocate,
-  NULL,  // Invalidate Not implemented.
-  HasMethod,
-  Invoke,
-  NULL,  // InvokeDefault Not implemented.
-  NULL,  // HasProperty Not implemented.
-  NULL,  // GetProperty Not implemented.
-  NULL,  // SetProperty Not implemented.
-  NULL  // RemoveProperty Not implemented.
+void Instance_DidChangeFocus(PP_Instance pp_instance, PP_Bool has_focus) {
+}
+
+PP_Bool Instance_HandleInputEvent(PP_Instance pp_instance,
+                               const struct PP_InputEvent* event) {
+  // We don't handle any events.
+  return PP_FALSE;
+}
+
+PP_Bool Instance_HandleDocumentLoad(PP_Instance pp_instance,
+                                    PP_Resource pp_url_loader) {
+  return PP_FALSE;
+}
+
+struct PP_Var Instance_GetInstanceObject(PP_Instance pp_instance) {
+  return PP_MakeNull();
+}
+
+static struct PPP_Instance instance_interface = {
+  &Instance_DidCreate,
+  &Instance_DidDestroy,
+  &Instance_DidChangeView,
+  &Instance_DidChangeFocus,
+  &Instance_HandleInputEvent,
+  &Instance_HandleDocumentLoad,
+  &Instance_GetInstanceObject,
 };
 
-//-----------------------------------------------------------------------------
-//
-// The browser gateway code.  These functions are published to the browser via
-// the InitializePluginFunctions() function, they are called from the browser
-// to set up and manage a module instance.
-//
-//-----------------------------------------------------------------------------
 
-// These functions are required by both the develop and publish versions,
-// they are called when a module instance is first loaded, and when the module
-// instance is finally deleted.  They must use C-style linkage.
-NPError NPP_Destroy(NPP instance, NPSavedData** save) {
-  if (instance == NULL) {
-    return NPERR_INVALID_INSTANCE_ERROR;
-  }
+// Global entrypoints --------------------------------------------------------
 
-  GLDemo* gldemo = static_cast<GLDemo*>(instance->pdata);
-  if (gldemo != NULL) {
-    NPN_ReleaseObject(gldemo);
-  }
-  return NPERR_NO_ERROR;
+PP_EXPORT int32_t PPP_InitializeModule(PP_Module module,
+                                       PPB_GetInterface get_browser_interface) {
+  g_get_browser_interface = get_browser_interface;
+
+  g_core_interface = (const struct PPB_Core*)
+      get_browser_interface(PPB_CORE_INTERFACE);
+  g_instance_interface = (const struct PPB_Instance*)
+      get_browser_interface(PPB_INSTANCE_INTERFACE);
+  g_image_data_interface = (const struct PPB_ImageData*)
+      get_browser_interface(PPB_IMAGEDATA_INTERFACE);
+  g_graphics_2d_interface = (const struct PPB_Graphics2D*)
+      get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
+  if (!g_core_interface || !g_instance_interface || !g_image_data_interface ||
+      !g_graphics_2d_interface)
+    return -1;
+  return PP_OK;
 }
 
-// NPP_GetScriptableInstance retruns the NPObject pointer that corresponds to
-// NPPVpluginScriptableNPObject queried by NPP_GetValue() from the browser.
-NPObject* NPP_GetScriptableInstance(NPP instance) {
-  if (instance == NULL) {
-    return NULL;
-  }
-  GLDemo* gldemo = static_cast<GLDemo*>(instance->pdata);
-  return gldemo;
+PP_EXPORT void PPP_ShutdownModule() {
 }
 
-NPError NPP_GetValue(NPP instance, NPPVariable variable, void *value) {
-  if (NPPVpluginScriptableNPObject == variable) {
-    NPObject* scriptable_object = NPP_GetScriptableInstance(instance);
-    if (scriptable_object == NULL)
-      return NPERR_INVALID_INSTANCE_ERROR;
-    *reinterpret_cast<NPObject**>(value) = scriptable_object;
-    return NPERR_NO_ERROR;
-  }
-  return NPERR_INVALID_PARAM;
+PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
+  if (strcmp(interface_name, PPP_INSTANCE_INTERFACE) == 0)
+    return &instance_interface;
+  return NULL;
 }
-
-int16_t NPP_HandleEvent(NPP instance, void* event) {
-  return 0;
-}
-
-NPError NPP_New(NPMIMEType mime_type,
-                NPP instance,
-                uint16_t mode,
-                int16_t argc,
-                char* argn[],
-                char* argv[],
-                NPSavedData* saved) {
-  if (instance == NULL) {
-    return NPERR_INVALID_INSTANCE_ERROR;
-  }
-
-  GLDemo* const gldemo =
-      static_cast<GLDemo*>(NPN_CreateObject(instance, &np_class));
-  instance->pdata = gldemo;
-  return NPERR_NO_ERROR;
-}
-
-NPError NPP_SetWindow(NPP instance, NPWindow* window) {
-  if (instance == NULL) {
-    return NPERR_INVALID_INSTANCE_ERROR;
-  }
-  if (window == NULL) {
-    return NPERR_GENERIC_ERROR;
-  }
-  GLDemo* gldemo = static_cast<GLDemo*>(instance->pdata);
-  if (gldemo != NULL) {
-    gldemo->Setup(window->width, window->height);
-  }
-  return NPERR_NO_ERROR;
-}
-
-//-----------------------------------------------------------------------------
-//
-// The module loading code.  The browser calls these when first loading the
-// module, and once when all instances of the module have been destroyed.
-//
-//-----------------------------------------------------------------------------
-
-static NPError InitializePluginFunctions(NPPluginFuncs* plugin_funcs) {
-  memset(plugin_funcs, 0, sizeof(*plugin_funcs));
-  plugin_funcs->version = NPVERS_HAS_PLUGIN_THREAD_ASYNC_CALL;
-  plugin_funcs->size = sizeof(*plugin_funcs);
-  plugin_funcs->newp = NPP_New;
-  plugin_funcs->destroy = NPP_Destroy;
-  plugin_funcs->setwindow = NPP_SetWindow;
-  plugin_funcs->event = NPP_HandleEvent;
-  plugin_funcs->getvalue = NPP_GetValue;
-  return NPERR_NO_ERROR;
-}
-
-NPError NP_GetEntryPoints(NPPluginFuncs* plugin_funcs) {
-  return InitializePluginFunctions(plugin_funcs);
-}
-
-NPError NP_Initialize(NPNetscapeFuncs* browser_functions,
-                      NPPluginFuncs* plugin_functions) {
-  return NP_GetEntryPoints(plugin_functions);
-}
-
-NPError NP_Shutdown() {
-  return NPERR_NO_ERROR;
-}
-
-}  // extern "C"

@@ -1,5 +1,5 @@
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 # Makefile for the MesaGL example.
@@ -9,8 +9,10 @@ NACLPORTS_ROOT ?= ../../..
 CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror -DGL_GLEXT_PROTOTYPES
 INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
 # Note that the OpenGL libraries are NOT included.  We use Mesa for rendering.
-LDFLAGS = -lgoogle_nacl_imc \
-          -lgoogle_nacl_npruntime \
+LDFLAGS = -lppruntime \
+          -lppapi_cpp \
+          -lplatform \
+          -lgio \
           -lpthread \
           -lsrpc \
           -lOSMesa
