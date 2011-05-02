@@ -1,8 +1,7 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 # nacl-ffmpeg-0.5.sh
 #
@@ -17,13 +16,6 @@ readonly PATCH_FILE=ffmpeg-0.5/nacl-ffmpeg-0.5.patch
 readonly PACKAGE_NAME=ffmpeg-0.5
 
 source ../common.sh
-
-CustomExtractStep() {
-  Banner "Untaring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
-  tar xfj ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
-}
 
 
 CustomConfigureStep() {
@@ -74,8 +66,8 @@ CustomBuildAndInstallStep() {
 
 CustomPackageInstall() {
   DefaultPreInstallStep
-  DefaultDownloadStep
-  CustomExtractStep
+  DefaultDownloadBzipStep
+  DefaultExtractBzipStep
   DefaultPatchStep
   CustomConfigureStep
   CustomPostConfigureStep

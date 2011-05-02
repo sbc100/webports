@@ -1,8 +1,7 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 # nacl-x264-snapshot-20091023-2245.sh
 #
@@ -17,13 +16,6 @@ readonly PATCH_FILE=x264-snapshot-20091023-2245/nacl-x264-snapshot-20091023-2245
 readonly PACKAGE_NAME=x264-snapshot-20091023-2245
 
 source ../common.sh
-
-CustomExtractStep() {
-  Banner "Untaring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
-  tar xfj ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
-}
 
 
 CustomConfigureStep() {
@@ -61,8 +53,8 @@ CustomConfigureStep() {
 
 CustomPackageInstall() {
   DefaultPreInstallStep
-  DefaultDownloadStep
-  CustomExtractStep
+  DefaultDownloadBzipStep
+  DefaultExtractBzipStep
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep

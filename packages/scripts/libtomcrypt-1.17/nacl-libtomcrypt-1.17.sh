@@ -1,8 +1,7 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 # nacl-libtomcrypt-1.17.sh
 #
@@ -17,14 +16,6 @@ readonly PATCH_FILE=libtomcrypt-1.17/libtomcrypt-1.17.patch
 readonly PACKAGE_NAME=libtomcrypt-1.17
 
 source ../common.sh
-
-
-CustomExtractStep() {
-  Banner "Untaring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
-  tar xfj ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
-}
 
 
 CustomBuildStep() {
@@ -54,8 +45,8 @@ CustomInstallStep() {
 
 CustomPackageInstall() {
   DefaultPreInstallStep
-  DefaultDownloadStep
-  CustomExtractStep
+  DefaultDownloadBzipStep
+  DefaultExtractBzipStep
   DefaultPatchStep
   CustomBuildStep
   CustomInstallStep

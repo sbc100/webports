@@ -1,8 +1,7 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 # nacl-libtheora-1.1.1.sh
 #
@@ -17,14 +16,6 @@ readonly PATCH_FILE=libtheora-1.1.1/nacl-libtheora-1.1.1.patch
 readonly PACKAGE_NAME=libtheora-1.1.1
 
 source ../common.sh
-
-
-CustomExtractStep() {
-  Banner "Untaring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
-  tar xfj ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
-}
 
 
 CustomConfigureStep() {
@@ -63,8 +54,8 @@ CustomConfigureStep() {
 
 CustomPackageInstall() {
   DefaultPreInstallStep
-  DefaultDownloadStep
-  CustomExtractStep
+  DefaultDownloadBzipStep
+  DefaultExtractBzipStep
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep

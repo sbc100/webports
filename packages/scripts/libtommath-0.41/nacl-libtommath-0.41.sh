@@ -1,8 +1,7 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 # nacl-libtommath-0.41.sh
 #
@@ -17,14 +16,6 @@ readonly PATCH_FILE=libtommath-0.41/libtommath-0.41.patch
 readonly PACKAGE_NAME=libtommath-0.41
 
 source ../common.sh
-
-
-CustomExtractStep() {
-  Banner "Untaring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
-  tar xfj ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
-}
 
 
 CustomBuildStep() {
@@ -59,8 +50,8 @@ CustomInstallStep() {
 
 CustomPackageInstall() {
   DefaultPreInstallStep
-  DefaultDownloadStep
-  CustomExtractStep
+  DefaultDownloadBzipStep
+  DefaultExtractBzipStep
   DefaultPatchStep
   CustomBuildStep
   CustomInstallStep

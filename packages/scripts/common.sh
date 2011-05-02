@@ -1,5 +1,5 @@
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 # Environment variable NACL_PACKAGES_BITSIZE should be unset or set to "32"
@@ -158,11 +158,24 @@ Check() {
 }
 
 
-Download() {
+DefaultDownloadStep() {
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching tarball already exists, don't download again
   if ! Check ; then
     Fetch ${URL} ${PACKAGE_NAME}.tgz
+    if ! Check ; then
+       Banner "${PACKAGE_NAME} failed checksum!"
+       exit -1
+    fi
+  fi
+}
+
+
+DefaultDownloadBzipStep() {
+  cd ${NACL_PACKAGES_TARBALLS}
+  # if matching tarball already exists, don't download again
+  if ! Check ; then
+    Fetch ${URL} ${PACKAGE_NAME}.tbz2
     if ! Check ; then
        Banner "${PACKAGE_NAME} failed checksum!"
        exit -1
@@ -281,19 +294,26 @@ DefaultPreInstallStep() {
 }
 
 
-DefaultDownloadStep() {
-  Download
-}
-
-
 DefaultExtractStep() {
-  Banner "Untaring ${PACKAGE_NAME}"
+  Banner "Untaring ${PACKAGE_NAME}.tgz"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_NAME}
   if [ $OS_SUBDIR = "windows" ]; then
     tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
   else
     tar zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
+  fi
+}
+
+
+DefaultExtractBzipStep() {
+  Banner "Untaring ${PACKAGE_NAME}.tbz2"
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}
+  Remove ${PACKAGE_NAME}
+  if [ $OS_SUBDIR = "windows" ]; then
+    tar --no-same-owner -jxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tbz2
+  else
+    tar jxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tbz2
   fi
 }
 
