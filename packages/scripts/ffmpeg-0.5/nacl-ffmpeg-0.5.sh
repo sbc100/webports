@@ -26,6 +26,7 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ../configure \
     --cross-prefix=${NACL_CROSS_PREFIX} \
+    --target-os=linux \
     --enable-gpl \
     --enable-static \
     --enable-cross-compile \

@@ -1,8 +1,7 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 # nacl-fontconfig-2.7.3.sh
 #
@@ -49,6 +48,7 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${NACL_SDK_USR}/bin:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  chmod a+x install-sh
   cd ${PACKAGE_NAME}-build
   # We'll not build host anyway
   CC_FOR_BUILD=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/pseudo-gcc \
