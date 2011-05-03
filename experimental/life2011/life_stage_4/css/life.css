@@ -34,6 +34,12 @@ body {
   width: 100%;
 }
 
+button.image_button {
+  background-color: transparent;
+  border: none;
+  width: 24px;  /* Default width is 24 pixels. */
+}
+
 /**
  * Use this EMBED class inside of the DIV with id @a autosize_background to
  * load an auosizing NaCl module.  E.g.:
@@ -78,3 +84,4 @@ embed.autosize {
   padding-right: 16px;
   text-align: right;
 }
+
