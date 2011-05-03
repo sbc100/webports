@@ -1,8 +1,7 @@
 #!/bin/bash
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 # nacl-ImageMagick-6.5.4-10.sh
 #
@@ -29,6 +28,8 @@ CustomConfigureStep() {
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
+  # Drop /opt/X11/bin (may interfere build on osx).
+  export PATH=$(echo $PATH | sed -e 's;/opt/X11/bin;;')
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build
