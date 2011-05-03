@@ -83,7 +83,7 @@ life.Application.DomIds_ = {
  * @private
  */
 life.Application.PlayButtonAttributes_ = {
-  ALT_TEXT: 'alttext',  // Text to display in the "on" state.
+  ALT_IMAGE: 'altimage',  // Image to display in the "on" state.
   STATE: 'state'  // The button's state.
 };
 
@@ -205,15 +205,15 @@ life.Application.prototype.selectPlayMode = function(changeEvent) {
 life.Application.prototype.togglePlayButton = function(clickEvent) {
   clickEvent.stopPropagation();
   var button = clickEvent.target;
-  var buttonText = button.innerText;
-  var altText = button.getAttribute(
-      life.Application.PlayButtonAttributes_.ALT_TEXT);
+  var buttonImage = button.style.backgroundImage;
+  var altImage = button.getAttribute(
+      life.Application.PlayButtonAttributes_.ALT_IMAGE);
   var state = button.getAttribute(
       life.Application.PlayButtonAttributes_.STATE);
   // Switch the inner and alternate labels.
-  button.innerText = altText;
-  button.setAttribute(life.Application.PlayButtonAttributes_.ALT_TEXT,
-                      buttonText);
+  goog.style.setStyle(button, { 'backgroundImage': altImage });
+  button.setAttribute(life.Application.PlayButtonAttributes_.ALT_IMAGE,
+                      buttonImage);
   if (state == 'off') {
     button.setAttribute(
         life.Application.PlayButtonAttributes_.STATE, 'on');

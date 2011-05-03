@@ -48,6 +48,8 @@ APPLICATION_FILES = life.html \
                     img/dead_cell.png \
                     img/live_cell.png \
                     img/minus_button.png \
+                    img/pause_button.png \
+                    img/play_button.png \
                     img/plus_button.png \
                     img/toolbar-bg.png \
                     $(RELEASE_MODULES)
