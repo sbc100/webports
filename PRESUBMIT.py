@@ -19,5 +19,5 @@ def CheckChangeOnCommit(input_api, output_api):
   report.extend(CheckChangeOnUpload(input_api, output_api))
   report.extend(input_api.canned_checks.CheckTreeIsOpen(
       input_api, output_api,
-      json_url='http://naclsdk-status.appspot.com/current?format=json'))
+      json_url='http://naclports-status.appspot.com/current?format=json'))
   return report
