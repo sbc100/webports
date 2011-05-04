@@ -45,7 +45,7 @@ class WebResourceLoader {
   enum DispatchOpCode {
     kUrlResponseInfoReady,  // URL response ready; query with GetResponseInfo.
     kDataReceived,  // A chunk of data has been received in buffer.
-    kDownloadComplete,  // Download done, data/file is ready for consumption.
+    kDownloadComplete  // Download done, data/file is ready for consumption.
   };
 
   WebResourceLoader(pp::Instance* instance, Delegate* delegate);
