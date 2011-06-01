@@ -1,8 +1,7 @@
-diff --git SDL-1.2.14/Makefile.in SDL-1.2.14/Makefile.in
-index e29dc6d..5a658af 100644
---- SDL-1.2.14/Makefile.in
-+++ SDL-1.2.14/Makefile.in
-@@ -42,7 +42,7 @@ SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
+diff -urN SDL-1.2.14/Makefile.in SDL-1.2.14-nacl/Makefile.in
+--- SDL-1.2.14/Makefile.in	2009-10-13 03:07:20.000000000 +0400
++++ SDL-1.2.14-nacl/Makefile.in	2011-05-27 12:35:37.274169187 +0400
+@@ -42,7 +42,7 @@
  
  DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
  
@@ -11,11 +10,10 @@ index e29dc6d..5a658af 100644
  
  LT_AGE      = @LT_AGE@
  LT_CURRENT  = @LT_CURRENT@
-diff --git SDL-1.2.14/build-scripts/config.sub SDL-1.2.14/build-scripts/config.sub
-index 5ecc18b..7693a2a 100755
---- SDL-1.2.14/build-scripts/config.sub
-+++ SDL-1.2.14/build-scripts/config.sub
-@@ -318,6 +318,14 @@ case $basic_machine in
+diff -urN SDL-1.2.14/build-scripts/config.sub SDL-1.2.14-nacl/build-scripts/config.sub
+--- SDL-1.2.14/build-scripts/config.sub	2009-10-13 03:07:12.000000000 +0400
++++ SDL-1.2.14-nacl/build-scripts/config.sub	2011-05-27 12:35:37.274169187 +0400
+@@ -318,6 +318,14 @@
  	i*86 | x86_64)
  	  basic_machine=$basic_machine-pc
  	  ;;
@@ -30,7 +28,7 @@ index 5ecc18b..7693a2a 100755
  	# Object if more than one company name word.
  	*-*-*)
  		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
-@@ -1309,6 +1317,9 @@ case $os in
+@@ -1309,6 +1317,9 @@
  			;;
  		esac
  		;;
@@ -40,11 +38,10 @@ index 5ecc18b..7693a2a 100755
  	-nto-qnx*)
  		;;
  	-nto*)
-diff --git SDL-1.2.14/configure.in SDL-1.2.14/configure.in
-index a7e9b18..d2386a9 100644
---- SDL-1.2.14/configure.in
-+++ SDL-1.2.14/configure.in
-@@ -885,6 +885,26 @@ CheckVisibilityHidden()
+diff -urN SDL-1.2.14/configure.in SDL-1.2.14-nacl/configure.in
+--- SDL-1.2.14/configure.in	2009-10-17 21:35:03.000000000 +0400
++++ SDL-1.2.14-nacl/configure.in	2011-05-27 12:35:37.274169187 +0400
+@@ -885,6 +885,26 @@
      fi
  }
  
@@ -71,7 +68,7 @@ index a7e9b18..d2386a9 100644
  
  dnl Do the iPod thing
  CheckIPod()
-@@ -2284,6 +2304,20 @@ case "$host" in
+@@ -2284,6 +2304,20 @@
              have_timers=yes
          fi
          ;;
@@ -92,10 +89,9 @@ index a7e9b18..d2386a9 100644
      *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
          case "$host" in
              *-*-linux*)         ARCH=linux ;;
-diff --git SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14/include/SDL_config.h.in
-index 58593ca..674e421 100644
---- SDL-1.2.14/include/SDL_config.h.in
-+++ SDL-1.2.14/include/SDL_config.h.in
+diff -urN SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14-nacl/include/SDL_config.h.in
+--- SDL-1.2.14/include/SDL_config.h.in	2009-10-13 08:21:25.000000000 +0400
++++ SDL-1.2.14-nacl/include/SDL_config.h.in	2011-05-27 12:35:37.274169187 +0400
 @@ -174,6 +174,7 @@
  #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC
  #undef SDL_AUDIO_DRIVER_MINT
@@ -112,11 +108,9 @@ index 58593ca..674e421 100644
  #undef SDL_VIDEO_DRIVER_NANOX
  #undef SDL_VIDEO_DRIVER_OS2FS
  #undef SDL_VIDEO_DRIVER_PHOTON
-diff --git SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14/include/SDL_nacl.h
-new file mode 100644
-index 0000000..9d1b396
---- /dev/null
-+++ SDL-1.2.14/include/SDL_nacl.h
+diff -urN SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14-nacl/include/SDL_nacl.h
+--- SDL-1.2.14/include/SDL_nacl.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/include/SDL_nacl.h	2011-05-27 12:35:37.274169187 +0400
 @@ -0,0 +1,22 @@
 +#ifndef _SDL_nacl_h
 +#define _SDL_nacl_h
@@ -140,10 +134,9 @@ index 0000000..9d1b396
 +#include "close_code.h"
 +
 +#endif /* _SDL_nacl_h */
-diff --git SDL-1.2.14/include/SDL_platform.h SDL-1.2.14/include/SDL_platform.h
-index 11d8673..dd99403 100644
---- SDL-1.2.14/include/SDL_platform.h
-+++ SDL-1.2.14/include/SDL_platform.h
+diff -urN SDL-1.2.14/include/SDL_platform.h SDL-1.2.14-nacl/include/SDL_platform.h
+--- SDL-1.2.14/include/SDL_platform.h	2009-10-13 03:07:19.000000000 +0400
++++ SDL-1.2.14-nacl/include/SDL_platform.h	2011-05-27 12:35:37.274169187 +0400
 @@ -63,10 +63,14 @@
  #undef __IRIX__
  #define __IRIX__	1
@@ -160,10 +153,9 @@ index 11d8673..dd99403 100644
  #if defined(__APPLE__)
  #undef __MACOSX__
  #define __MACOSX__	1
-diff --git SDL-1.2.14/src/audio/SDL_audio.c SDL-1.2.14/src/audio/SDL_audio.c
-index bdeacdc..ac43356 100644
---- SDL-1.2.14/src/audio/SDL_audio.c
-+++ SDL-1.2.14/src/audio/SDL_audio.c
+diff -urN SDL-1.2.14/src/audio/SDL_audio.c SDL-1.2.14-nacl/src/audio/SDL_audio.c
+--- SDL-1.2.14/src/audio/SDL_audio.c	2009-10-13 14:25:35.000000000 +0400
++++ SDL-1.2.14-nacl/src/audio/SDL_audio.c	2011-05-27 12:35:37.274169187 +0400
 @@ -36,6 +36,9 @@
  
  /* Available audio drivers */
@@ -174,11 +166,10 @@ index bdeacdc..ac43356 100644
  #if SDL_AUDIO_DRIVER_BSD
  	&BSD_AUDIO_bootstrap,
  #endif
-diff --git SDL-1.2.14/src/audio/SDL_sysaudio.h SDL-1.2.14/src/audio/SDL_sysaudio.h
-index 50cf179..7b9a0a7 100644
---- SDL-1.2.14/src/audio/SDL_sysaudio.h
-+++ SDL-1.2.14/src/audio/SDL_sysaudio.h
-@@ -156,6 +156,9 @@ extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
+diff -urN SDL-1.2.14/src/audio/SDL_sysaudio.h SDL-1.2.14-nacl/src/audio/SDL_sysaudio.h
+--- SDL-1.2.14/src/audio/SDL_sysaudio.h	2009-10-13 03:07:14.000000000 +0400
++++ SDL-1.2.14-nacl/src/audio/SDL_sysaudio.h	2011-05-27 12:35:37.274169187 +0400
+@@ -156,6 +156,9 @@
  extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
  extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
  #endif
@@ -188,11 +179,9 @@ index 50cf179..7b9a0a7 100644
  #if SDL_AUDIO_DRIVER_DISK
  extern AudioBootStrap DISKAUD_bootstrap;
  #endif
-diff --git SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc
-new file mode 100644
-index 0000000..6e33b2d
---- /dev/null
-+++ SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc
+diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc
+--- SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc	2011-05-27 12:35:37.274169187 +0400
 @@ -0,0 +1,133 @@
 +
 +#include "SDL_config.h"
@@ -327,11 +316,9 @@ index 0000000..6e33b2d
 +  return 1;
 +}
 +} // extern "C"
-diff --git SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h
-new file mode 100644
-index 0000000..e095c34
---- /dev/null
-+++ SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h
+diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.h
+--- SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.h	2011-05-27 12:35:37.274169187 +0400
 @@ -0,0 +1,30 @@
 +#include "SDL_config.h"
 +
@@ -363,11 +350,10 @@ index 0000000..e095c34
 +};
 +
 +#endif /* _SDL_naclaudio_h */
-diff --git SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c
-index 5c2d81f..7a757a3 100644
---- SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c
-+++ SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c
-@@ -53,6 +53,8 @@ static void illegal_instruction(int sig)
+diff -urN SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14-nacl/src/cpuinfo/SDL_cpuinfo.c
+--- SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c	2009-10-13 03:07:14.000000000 +0400
++++ SDL-1.2.14-nacl/src/cpuinfo/SDL_cpuinfo.c	2011-05-27 12:35:37.274169187 +0400
+@@ -53,6 +53,8 @@
  }
  #endif /* HAVE_SETJMP */
  
@@ -376,7 +362,7 @@ index 5c2d81f..7a757a3 100644
  static __inline__ int CPU_haveCPUID(void)
  {
  	int has_CPUID = 0;
-@@ -280,6 +282,15 @@ done:
+@@ -280,6 +282,15 @@
  	return features;
  }
  
@@ -392,11 +378,10 @@ index 5c2d81f..7a757a3 100644
  static __inline__ int CPU_haveRDTSC(void)
  {
  	if ( CPU_haveCPUID() ) {
-diff --git SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14/src/thread/pthread/SDL_systhread.c
-index 479bf34..a3b9119 100644
---- SDL-1.2.14/src/thread/pthread/SDL_systhread.c
-+++ SDL-1.2.14/src/thread/pthread/SDL_systhread.c
-@@ -81,12 +81,15 @@ void SDL_SYS_SetupThread(void)
+diff -urN SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14-nacl/src/thread/pthread/SDL_systhread.c
+--- SDL-1.2.14/src/thread/pthread/SDL_systhread.c	2009-10-13 03:07:16.000000000 +0400
++++ SDL-1.2.14-nacl/src/thread/pthread/SDL_systhread.c	2011-05-27 12:35:37.274169187 +0400
+@@ -81,12 +81,15 @@
  	int i;
  	sigset_t mask;
  
@@ -412,11 +397,10 @@ index 479bf34..a3b9119 100644
  
  #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
  	/* Allow ourselves to be asynchronously cancelled */
-diff --git SDL-1.2.14/src/video/SDL_sysvideo.h SDL-1.2.14/src/video/SDL_sysvideo.h
-index 1c72e09..9fc1a85 100644
---- SDL-1.2.14/src/video/SDL_sysvideo.h
-+++ SDL-1.2.14/src/video/SDL_sysvideo.h
-@@ -317,6 +317,9 @@ typedef struct VideoBootStrap {
+diff -urN SDL-1.2.14/src/video/SDL_sysvideo.h SDL-1.2.14-nacl/src/video/SDL_sysvideo.h
+--- SDL-1.2.14/src/video/SDL_sysvideo.h	2009-10-13 03:07:15.000000000 +0400
++++ SDL-1.2.14-nacl/src/video/SDL_sysvideo.h	2011-05-27 12:35:37.274169187 +0400
+@@ -317,6 +317,9 @@
  	SDL_VideoDevice *(*create)(int devindex);
  } VideoBootStrap;
  
@@ -426,10 +410,9 @@ index 1c72e09..9fc1a85 100644
  #if SDL_VIDEO_DRIVER_QUARTZ
  extern VideoBootStrap QZ_bootstrap;
  #endif
-diff --git SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14/src/video/SDL_video.c
-index e84ef35..927dfa2 100644
---- SDL-1.2.14/src/video/SDL_video.c
-+++ SDL-1.2.14/src/video/SDL_video.c
+diff -urN SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14-nacl/src/video/SDL_video.c
+--- SDL-1.2.14/src/video/SDL_video.c	2009-10-13 03:07:15.000000000 +0400
++++ SDL-1.2.14-nacl/src/video/SDL_video.c	2011-05-27 12:35:37.284169164 +0400
 @@ -33,6 +33,9 @@
  
  /* Available video drivers */
@@ -440,11 +423,9 @@ index e84ef35..927dfa2 100644
  #if SDL_VIDEO_DRIVER_QUARTZ
  	&QZ_bootstrap,
  #endif
-diff --git SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14/src/video/nacl/SDL_naclevents.cc
-new file mode 100644
-index 0000000..5c3b091
---- /dev/null
-+++ SDL-1.2.14/src/video/nacl/SDL_naclevents.cc
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc
+--- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2011-05-27 12:35:37.284169164 +0400
 @@ -0,0 +1,149 @@
 +#include "SDL_config.h"
 +
@@ -595,11 +576,9 @@ index 0000000..5c3b091
 +void NACL_InitOSKeymap(_THIS) {
 +  /* do nothing. */
 +}
-diff --git SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h
-new file mode 100644
-index 0000000..71ae309
---- /dev/null
-+++ SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents_c.h
+--- SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents_c.h	2011-05-27 12:35:37.284169164 +0400
 @@ -0,0 +1,7 @@
 +#include "SDL_config.h"
 +
@@ -608,12 +587,10 @@ index 0000000..71ae309
 +
 +extern void NACL_InitOSKeymap(_THIS);
 +extern void NACL_PumpEvents(_THIS);
-diff --git SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc
-new file mode 100644
-index 0000000..2c9f6e5
---- /dev/null
-+++ SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc
-@@ -0,0 +1,269 @@
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc
+--- SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc	2011-05-27 12:43:32.114950885 +0400
+@@ -0,0 +1,324 @@
 +#include "SDL_config.h"
 +
 +#include <assert.h>
@@ -625,6 +602,7 @@ index 0000000..2c9f6e5
 +#include <ppapi/cpp/graphics_2d.h>
 +#include <ppapi/cpp/completion_callback.h>
 +#include <ppapi/cpp/image_data.h>
++#include <ppapi/cpp/rect.h>
 +#include <ppapi/c/pp_errors.h>
 +
 +pp::Instance* gNaclPPInstance;
@@ -658,6 +636,17 @@ index 0000000..2c9f6e5
 +static SDL_Surface *NACL_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
 +static void NACL_VideoQuit(_THIS);
 +static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
++
++/* The implementation dependent data for the window manager cursor */
++struct WMcursor {
++  // Fake cursor data to fool SDL into not using its broken (as it seems) software cursor emulation.
++};
++
++static void NACL_FreeWMCursor(_THIS, WMcursor *cursor);
++static WMcursor *NACL_CreateWMCursor(_THIS,
++                Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
++static int NACL_ShowWMCursor(_THIS, WMcursor *cursor);
++static void NACL_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
 +
 +
 +static int NACL_Available(void) {
@@ -725,6 +714,11 @@ index 0000000..2c9f6e5
 +  device->InitOSKeymap = NACL_InitOSKeymap;
 +  device->PumpEvents = NACL_PumpEvents;
 +
++  device->FreeWMCursor = NACL_FreeWMCursor;
++  device->CreateWMCursor = NACL_CreateWMCursor;
++  device->ShowWMCursor = NACL_ShowWMCursor;
++  device->WarpWMCursor = NACL_WarpWMCursor;
++
 +  device->free = NACL_DeleteDevice;
 +
 +  flush(device, 0);
@@ -777,7 +771,7 @@ index 0000000..2c9f6e5
 +  SDL_memset(_this->hidden->buffer, 0, width * height * (bpp / 8));
 +
 +  /* Allocate the new pixel format for the screen */
-+  if ( ! SDL_ReallocFormat(current, bpp, 0xFF0000, 0xFF00, 0xFF, 0xFF000000) ) {
++  if ( ! SDL_ReallocFormat(current, bpp, 0xFF0000, 0xFF00, 0xFF, 0) ) {
 +    SDL_free(_this->hidden->buffer);
 +    _this->hidden->buffer = NULL;
 +    SDL_SetError("Couldn't allocate new pixel format for requested mode");
@@ -828,7 +822,13 @@ index 0000000..2c9f6e5
 +    // Flush image_data.
 +    _this->hidden->flush_pending = true;
 +    _this->hidden->data_ready = false;
-+    _this->hidden->context2d->PaintImageData(*_this->hidden->image_data, pp::Point());
++
++    for (int i = 0; i < _this->hidden->updated_rects.size(); ++i) {
++      SDL_Rect& r = _this->hidden->updated_rects[i];
++      _this->hidden->context2d->PaintImageData(*_this->hidden->image_data, pp::Point(), pp::Rect(r.x, r.y, r.w, r.h));
++    }
++    _this->hidden->updated_rects.clear();
++
 +    _this->hidden->context2d->Flush(pp::CompletionCallback(&flush_callback, _this));
 +  } else {
 +    // Check again after a small delay.
@@ -837,14 +837,16 @@ index 0000000..2c9f6e5
 +  SDL_UnlockMutex(_this->hidden->flush_mutex);
 +}
 +
-+static void flip(_THIS) {
++static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects) {
++  if (_this->hidden->bpp == 0) // not initialized yet
++    return;
++
 +  assert(_this->hidden->image_data);
 +  assert(_this->hidden->w == _this->hidden->ow);
 +  assert(_this->hidden->h == _this->hidden->oh);
 +
 +  SDL_LockMutex(_this->hidden->flush_mutex);
 +
-+  if (_this->hidden->flush_pending)
 +  // If we are flushing, wait.
 +  // TODO(eugenis): this blocks the game thread. Should we just drop the frame
 +  // instead, or store it in some kind of a side buffer?
@@ -853,18 +855,48 @@ index 0000000..2c9f6e5
 +
 +  // data_ready may be true here if the previous frame is not flushed yet.
 +  // No problem, just drop it.
-+  SDL_memcpy(_this->hidden->image_data->data(), _this->hidden->buffer,
-+      _this->hidden->w * _this->hidden->h * _this->hidden->bpp / 8);
++
++  // Copy the updated areas to the ImageData.
++  unsigned pitch = _this->hidden->w * _this->hidden->bpp / 8;
++  for (int i = 0; i < numrects; ++i) {
++    unsigned start_offset = rects[i].x * _this->hidden->bpp / 8 + rects[i].y * pitch;
++    unsigned char* src = (unsigned char*)_this->hidden->buffer + start_offset;
++    unsigned char* src_end = src + rects[i].h * pitch;
++    unsigned char* dst = (unsigned char*)_this->hidden->image_data->data() + start_offset;
++    unsigned line_size = rects[i].w * _this->hidden->bpp / 8;
++    while (src < src_end) {
++      SDL_memcpy(dst, src, line_size);
++      src += pitch;
++      dst += pitch;
++    }
++    _this->hidden->updated_rects.push_back(rects[i]);
++  }
++
++  // Clear alpha channel in the ImageData.
++  unsigned char* start = (unsigned char*)_this->hidden->image_data->data();
++  unsigned char* end = start + (_this->hidden->w * _this->hidden->h * _this->hidden->bpp / 8);
++  for (unsigned char* p = start + 3; p < end; p +=4)
++    *p = 0xFF;
 +
 +  _this->hidden->data_ready = true;
 +
 +  SDL_UnlockMutex(_this->hidden->flush_mutex);
 +}
 +
-+static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects) {
-+  if (_this->hidden->bpp == 0) // not initialized yet
-+    return;
-+  flip(_this);
++static void NACL_FreeWMCursor(_THIS, WMcursor *cursor) {
++  delete cursor;
++}
++
++static WMcursor *NACL_CreateWMCursor(_THIS,
++    Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y) {
++  return new WMcursor();
++}
++
++static int NACL_ShowWMCursor(_THIS, WMcursor *cursor) {
++  return 1; // Success!
++}
++
++static void NACL_WarpWMCursor(_THIS, Uint16 x, Uint16 y) {
 +}
 +
 +/* Note:  If we are terminated, this could be called in the middle of
@@ -883,12 +915,10 @@ index 0000000..2c9f6e5
 +  SDL_DestroyCond(_this->hidden->flush_cond);
 +}
 +} // extern "C"
-diff --git SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14/src/video/nacl/SDL_naclvideo.h
-new file mode 100644
-index 0000000..5c050b8
---- /dev/null
-+++ SDL-1.2.14/src/video/nacl/SDL_naclvideo.h
-@@ -0,0 +1,38 @@
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h
+--- SDL-1.2.14/src/video/nacl/SDL_naclvideo.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h	2011-05-27 12:37:33.594694774 +0400
+@@ -0,0 +1,41 @@
 +#include "SDL_config.h"
 +
 +#ifndef _SDL_naclvideo_h
@@ -901,6 +931,8 @@ index 0000000..5c050b8
 +
 +#include <ppapi/cpp/instance.h>
 +#include <ppapi/cpp/graphics_2d.h>
++
++#include <vector>
 +
 +
 +/* Hidden "this" pointer for the video functions */
@@ -923,15 +955,14 @@ index 0000000..5c050b8
 +  // Whether image_data contains new data.
 +  bool data_ready;
 +  pp::ImageData* image_data;
++  std::vector<SDL_Rect> updated_rects;
 +  pp::Graphics2D* context2d;  // The PINPAPI 2D drawing context.
 +};
 +
 +#endif /* _SDL_naclvideo_h */
-diff --git SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14/src/video/nacl/eventqueue.h
-new file mode 100644
-index 0000000..38ac2b0
---- /dev/null
-+++ SDL-1.2.14/src/video/nacl/eventqueue.h
+diff -urN SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14-nacl/src/video/nacl/eventqueue.h
+--- SDL-1.2.14/src/video/nacl/eventqueue.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/video/nacl/eventqueue.h	2011-05-27 12:35:37.284169164 +0400
 @@ -0,0 +1,41 @@
 +#ifndef _SDL_nacl_eventqueue_h
 +#define _SDL_nacl_eventqueue_h
