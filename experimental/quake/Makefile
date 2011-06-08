@@ -1,4 +1,4 @@
-# Copyright 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -19,7 +19,7 @@ LDFLAGS = -Xlinker --wrap -Xlinker read
 LDFLAGS += -Xlinker --wrap -Xlinker open
 LDFLAGS += -Xlinker --wrap -Xlinker close
 LDFLAGS += -Xlinker --wrap -Xlinker lseek
-LDFLAGS += -lnosys \
+LDFLAGS += \
           -lSDL \
           -lppruntime \
           -lppapi_cpp \
@@ -27,7 +27,8 @@ LDFLAGS += -lnosys \
           -lgio \
           -lm \
           -lpthread \
-          -lsrpc
+          -lsrpc \
+          -lnosys
 LDFLAGS32 = $(LDFLAGS) -m32
 LDFLAGS64 = $(LDFLAGS) -m64
 CCFILES := nacl_file.cc geturl_handler.cc quake_module.cc quake_instance.cc
@@ -90,4 +91,3 @@ build/64/%.o: %.c
 
 build/64/%.o: %.cc
 	$(CXX) $(INCLUDES) $(CCFLAGS64) -c -o $@ $<
-
