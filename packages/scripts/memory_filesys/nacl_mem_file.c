@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2010 The Native Client Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that be
+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
 
+#include <dirent.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -51,6 +52,12 @@ typedef struct {
   int flags;
   int used;
 } FILE_HANDLE;
+
+struct utimbuf {
+  time_t actime;
+  time_t modtime;
+};
+
 
 static pthread_once_t mem_file_has_started = PTHREAD_ONCE_INIT;
 #define MAX_FILE_HANDLES 100
@@ -108,14 +115,14 @@ static char *path_collapse(const char *path) {
   src = path;
   dst = ret;
   cur = 0;
-  for(;;) {
+  for (;;) {
     /* Drain a character until done. */
     cur = *src;
     if (!cur) break;
     ++src;
     /* Handle this character. */
     if (cur == '/') {
-      for(;;) {
+      for (;;) {
         if (strcmp(src, "..") == 0 || strncmp(src, "../", 3) == 0) {
           /* Strip off a layer. */
           (*dst) = 0;
@@ -187,7 +194,7 @@ static FILE_NODE *file_node_get(const char *path) {
   /* Walk up from root. */
   node = root;
   pos = fpath;
-  for(;;) {
+  for (;;) {
     /* Found it if pos is used up. */
     if ((*pos) == 0) {
       free(fpath);
@@ -236,6 +243,7 @@ static FILE_NODE *file_node_get_parent(const char *path) {
   strcat(tmp, "/..");
   /* Get its node. */
   node = file_node_get(tmp);
+
   /* Cleanup. */
   free(tmp);
   return node;
@@ -262,7 +270,11 @@ int __wrap_open(const char *path, int oflag, ...) {
   }
   /* Get the directory its in. */
   parent = file_node_get_parent(path);
-  if (!parent) return -1;
+  if (!parent) {
+    errno = ENOTDIR;
+    file_global_unlock();
+    return -1;
+  }
   /* It must be a directory. */
   if (parent->kind != FILE_NODE_DIRECTORY) {
     errno = ENOTDIR;
@@ -273,7 +285,7 @@ int __wrap_open(const char *path, int oflag, ...) {
   node = file_node_get(path);
   if (node) {
     /* Check that it is a file if it does. */
-    if (node->kind != FILE_NODE_FILE) {
+    if (node->kind != FILE_NODE_FILE && oflag != 0) {
       errno = EISDIR;
       file_global_unlock();
       return -1;
@@ -316,7 +328,6 @@ int __wrap_open(const char *path, int oflag, ...) {
   file_global_unlock();
   return fildes;
 }
-
 
 int __wrap_close(int fildes) {
   FILE_HANDLE *handle;
@@ -374,7 +385,8 @@ ssize_t __wrap_read(int fildes, void *buf, size_t nbyte) {
     return -1;
   }
   /* Check that this file handle can be read from. */
-  if ((handle->flags & O_ACCMODE) == O_WRONLY) {
+  if ((handle->flags & O_ACCMODE) == O_WRONLY ||
+      handle->node->kind != FILE_NODE_FILE) {
     errno = EBADF;
     file_global_unlock();
     return -1;
@@ -391,7 +403,6 @@ ssize_t __wrap_read(int fildes, void *buf, size_t nbyte) {
   return len;
 }
 
-
 ssize_t __wrap_write(int fildes, const void *buf, size_t nbyte) {
   FILE_HANDLE *handle;
   size_t len;
@@ -400,8 +411,11 @@ ssize_t __wrap_write(int fildes, const void *buf, size_t nbyte) {
   /* Hook in console write. */
   if (fildes == STDOUT_FILENO ||
       fildes == STDERR_FILENO) {
-    console_put(buf, nbyte);
-    return nbyte;
+    return __real_write(fildes, buf, nbyte);
+
+  /* TODO(bradnelson): Handle the console_put case for nethack. */
+    // console_put(buf, nbyte);
+    // return nbyte;
   }
   if (fildes == STDIN_FILENO) {
     errno = EBADF;
@@ -416,7 +430,8 @@ ssize_t __wrap_write(int fildes, const void *buf, size_t nbyte) {
     return -1;
   }
   /* Check that this file handle can be written to. */
-  if ((handle->flags & O_ACCMODE) == O_RDONLY) {
+  if ((handle->flags & O_ACCMODE) == O_RDONLY ||
+      handle->node->kind != FILE_NODE_FILE) {
     errno = EBADF;
     file_global_unlock();
     return -1;
@@ -462,6 +477,12 @@ off_t __wrap_lseek(int fildes, off_t offset, int whence) {
     file_global_unlock();
     return -1;
   }
+  /* Check that it isn't a directory. */
+  if (handle->node->kind != FILE_NODE_FILE) {
+    errno = EBADF;
+    file_global_unlock();
+    return -1;
+  }
   switch(whence) {
     case SEEK_SET:
       next = offset;
@@ -491,7 +512,6 @@ off_t __wrap_lseek(int fildes, off_t offset, int whence) {
    return next;
 }
 
-
 off_t __wrap_tell(int fildes) {
   FILE_HANDLE *handle;
   off_t pos;
@@ -507,11 +527,16 @@ off_t __wrap_tell(int fildes) {
     file_global_unlock();
     return -1;
   }
+  /* Check that it isn't a directory. */
+  if (handle->node->kind != FILE_NODE_FILE) {
+    errno = EBADF;
+    file_global_unlock();
+    return -1;
+  }
   pos = handle->offset;
   file_global_unlock();
   return pos;
 }
-
 
 int __wrap_mkdir(const char *path, mode_t mode) {
   FILE_NODE *node;
@@ -549,7 +574,6 @@ int __wrap_mkdir(const char *path, mode_t mode) {
   file_global_unlock();
   return 0;
 }
-
 
 int __wrap_rmdir(const char *path) {
   FILE_NODE *node;
@@ -594,7 +618,6 @@ int __wrap_rmdir(const char *path) {
   file_global_unlock();
   return 0;
 }
-
 
 int __wrap_remove(const char *path) {
   FILE_NODE *node;
@@ -641,7 +664,6 @@ int __wrap_remove(const char *path) {
   return 0;
 }
 
-
 char *__wrap_getcwd(char *buf, size_t size) {
   if (size == 0) {
     errno = EINVAL;
@@ -685,6 +707,59 @@ int __wrap_chdir(const char *path) {
   return 0;
 }
 
+int __wrap_getdents(int fildes, void *buf, unsigned int count) {
+  int pos;
+  FILE_NODE *child;
+  struct dirent *dir;
+  FILE_HANDLE *handle;
+  int bytes_read;
+
+  if (fildes == STDIN_FILENO ||
+      fildes == STDOUT_FILENO ||
+      fildes == STDERR_FILENO) {
+    errno = ENOTDIR;
+    return -1;
+  }
+  file_global_lock();
+  handle = file_handle_get(fildes);
+  if (!handle) {
+    errno = EBADF;
+    file_global_unlock();
+    return -1;
+  }
+  /* Check that it is a directory. */
+  if (handle->node->kind != FILE_NODE_DIRECTORY) {
+    errno = ENOTDIR;
+    file_global_unlock();
+    return -1;
+  }
+
+  pos = 0;
+  bytes_read = 0;
+  dir = (struct dirent*)buf;
+  child = handle->node->u.directory.children;
+  /* Skip to the child at the current offset. */
+  for (;child && pos < handle->offset; child = child->next) {
+     ++pos;
+  }
+  /* Read out as many children as we can. */
+  for (;child && bytes_read + sizeof(struct dirent) < count;
+        child = child->next) {
+    memset(dir, 0, sizeof(struct dirent));
+    /* We want d_ino to be non-zero because readdir()
+       will return null if d_ino is zero. */
+    dir->d_ino = 123;
+    dir->d_off = sizeof(struct dirent);
+    dir->d_reclen = sizeof(struct dirent);
+    snprintf(dir->d_name, sizeof(dir->d_name), child->name);
+    ++dir;
+    ++pos;
+    ++handle->offset;
+    bytes_read += sizeof(struct dirent);
+  }
+  file_global_unlock();
+  return bytes_read;
+}
 
 int __wrap_isatty(int fildes) {
   if (fildes == STDIN_FILENO ||
@@ -747,8 +822,17 @@ int __wrap_fstat(int fildes, struct stat *buf) {
 
 /* Everything else is just a do nothing stub. */
 
-
 int __wrap_access(const char *path, int amode) {
+  FILE_NODE *node;
+
+  file_global_lock();
+  node = file_node_get(path);
+  if (!node) {
+    file_global_unlock();
+    return -1;
+  }
+  /* For now assume if the file exists we can access it. */
+  file_global_unlock();
   return 0;
 }
 
@@ -805,6 +889,10 @@ int __wrap_unlink(const char *path) {
 }
 
 int __wrap_kill(pid_t pid, int sig) {
+  return 0;
+}
+
+int __wrap_utime(const char *path, struct utimbuf const *times) {
   return 0;
 }
 
