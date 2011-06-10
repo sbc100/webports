@@ -426,7 +426,7 @@ diff -urN SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14-nacl/src/video/SDL_video.c
 diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc
 --- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 03:00:00.000000000 +0300
 +++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2011-05-27 12:35:37.284169164 +0400
-@@ -0,0 +1,149 @@
+@@ -0,0 +1,151 @@
 +#include "SDL_config.h"
 +
 +extern "C" {
@@ -489,6 +489,8 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +      return SDLK_LCTRL;
 +    case 18:
 +      return SDLK_LALT;
++    case 32:
++      return SDLK_SPACE;
 +    case 37:
 +      return SDLK_LEFT;
 +    case 38:
