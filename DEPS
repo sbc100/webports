@@ -1,6 +1,4 @@
 deps = {
-  "src/testing/gtest":
-    "http://googletest.googlecode.com/svn/trunk@560",
 }
 
 deps_os = {
