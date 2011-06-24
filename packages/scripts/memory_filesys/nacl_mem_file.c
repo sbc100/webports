@@ -512,32 +512,6 @@ off_t __wrap_lseek(int fildes, off_t offset, int whence) {
    return next;
 }
 
-off_t __wrap_tell(int fildes) {
-  FILE_HANDLE *handle;
-  off_t pos;
-
-  if (fildes == STDIN_FILENO ||
-      fildes == STDOUT_FILENO ||
-      fildes == STDERR_FILENO) return 0;
-
-  file_global_lock();
-  handle = file_handle_get(fildes);
-  if (!handle) {
-    errno = EBADF;
-    file_global_unlock();
-    return -1;
-  }
-  /* Check that it isn't a directory. */
-  if (handle->node->kind != FILE_NODE_FILE) {
-    errno = EBADF;
-    file_global_unlock();
-    return -1;
-  }
-  pos = handle->offset;
-  file_global_unlock();
-  return pos;
-}
-
 int __wrap_mkdir(const char *path, mode_t mode) {
   FILE_NODE *node;
   FILE_NODE *nnode;
@@ -973,15 +947,6 @@ static void NaClSeek(NaClSrpcRpc *rpc,
   done->Run(done);
 }
 
-static void NaClTell(NaClSrpcRpc *rpc,
-                     NaClSrpcArg **in_args,
-                     NaClSrpcArg **out_args,
-                     NaClSrpcClosure *done) {
-  out_args[0]->u.ival = __wrap_tell(in_args[0]->u.ival);
-  rpc->result = NACL_SRPC_RESULT_OK;
-  done->Run(done);
-}
-
 static void NaClMkdir(NaClSrpcRpc *rpc,
                       NaClSrpcArg **in_args,
                       NaClSrpcArg **out_args,
@@ -1066,7 +1031,6 @@ static const struct NaClSrpcHandlerDesc srpc_methods[] = {
   { "readEscaped:ii:is", NaClReadEscaped },
   { "writeEscaped:is:i", NaClWriteEscaped },
   { "seek:iii:i", NaClSeek },
-  { "tell:i:i", NaClTell },
   { "mkdir:s:i", NaClMkdir },
   { "rmdir:s:i", NaClRmdir },
   { "remove:s:i", NaClRemove },
