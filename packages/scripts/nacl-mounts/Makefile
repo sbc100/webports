@@ -48,9 +48,12 @@ $(TESTS_OUT)/PathTest.o: PathTest.cc $(GTEST_HEADERS)
 $(TESTS_OUT)/Path.o: Path.cc Path.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c Path.cc -o $@
 
+$(TESTS_OUT)/SlotAllocatorTest.o: SlotAllocatorTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SlotAllocatorTest.cc -o $@
+
 output:
 	test -d $(TESTS_OUT) || mkdir $(TESTS_OUT)
 
 nacl_mounts_tests: $(TESTS_OUT)/Path.o $(TESTS_OUT)/PathTest.o \
-          $(TESTS_OUT)/gtest_main.a
+          $(TESTS_OUT)/SlotAllocatorTest.o $(TESTS_OUT)/gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $(TESTS_OUT)/$@
