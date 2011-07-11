@@ -362,9 +362,16 @@ DefaultBuildStep() {
 }
 
 
+DefaultTouchStep() {
+  test -d ${NACL_PACKAGES}/sentinels || mkdir ${NACL_PACKAGES}/sentinels && \
+  touch ${NACL_PACKAGES}/sentinels/sentinel_file_${PACKAGE_NAME}
+}
+
+
 DefaultInstallStep() {
   # assumes pwd has makefile
   make install
+  DefaultTouchStep
 }
 
 
