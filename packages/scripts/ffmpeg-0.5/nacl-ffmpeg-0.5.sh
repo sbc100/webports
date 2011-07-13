@@ -25,7 +25,7 @@ CustomConfigureStep() {
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ../configure \
-    --cross-prefix=${NACL_CROSS_PREFIX} \
+    --cross-prefix=${NACL_CROSS_PREFIX_DASH} \
     --target-os=linux \
     --enable-gpl \
     --enable-static \
