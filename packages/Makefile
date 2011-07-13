@@ -32,12 +32,17 @@ endif
 
 NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
 
-NACL_DIRS_BASE = tarballs repository repository64 publish publish64
+NACL_OUT = out
+NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
+                 $(NACL_OUT)/repository \
+                 $(NACL_OUT)/repository64 \
+                 $(NACL_OUT)/publish \
+                 $(NACL_OUT)/publish64
 
 NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/nacl/usr
 NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/nacl64/usr
 
-NACL_DIRS_TO_REMOVE = $(NACL_DIRS_BASE) \
+NACL_DIRS_TO_REMOVE = $(NACL_OUT) \
 		      $(NACL_SDK_USR32) \
 		      $(NACL_SDK_USR64)
 
@@ -83,7 +88,7 @@ PACKAGES = SDL-1.2.14 \
 	   OpenSceneGraph-2.9.7 \
 	   cfitsio
 
-SENTINELS_DIR = sentinels
+SENTINELS_DIR = out/sentinels
 SENT = $(SENTINELS_DIR)/sentinel_file_
 
 .PHONY: all clean
@@ -91,14 +96,14 @@ SENT = $(SENTINELS_DIR)/sentinel_file_
 all: $(PACKAGES)
 
 clean:
-	rm -rf $(SENTINELS_DIR) $(NACL_DIRS_TO_REMOVE) installed.txt;
+	rm -rf $(NACL_DIRS_TO_REMOVE)
 
 $(NACL_DIRS_TO_MAKE):
 	mkdir -p $@
 
-$(PACKAGES): %: $(SENT)%
+$(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)%
 
-$(PACKAGES:%=$(SENT)%): $(SENT)%: $(NACL_DIRS_TO_MAKE)
+$(PACKAGES:%=$(SENT)%): $(SENT)%:
 	@echo "@@@BUILD_STEP $*@@@"
 	cd scripts/$* && ./nacl-$*.sh
 	mkdir -p $(@D)

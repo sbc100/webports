@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -17,7 +17,7 @@ readonly PATCH_FILE=gsl-1.9/nacl-gsl-1.9.patch
 readonly PACKAGE_NAME=gsl-1.9
 export LIBS="-lm"
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 DefaultPackageInstall
 exit 0

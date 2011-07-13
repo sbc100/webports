@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -18,7 +18,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/cf
 readonly PATCH_FILE=cfitsio/nacl-cfitsio.patch
 readonly PACKAGE_NAME=cfitsio
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 DefaultPackageInstall
 exit 0

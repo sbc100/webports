@@ -16,7 +16,7 @@ readonly PATCH_FILE=fontconfig-2.7.3/nacl-fontconfig-2.7.3.patch
 readonly MAKEFILE_PATCH_FILE=fontconfig-2.7.3/nacl-fontconfig-2.7.3.Makefile.patch
 readonly PACKAGE_NAME=fontconfig-2.7.3
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 # fontconfig with-arch to be set for cross compiling
 export with_arch=i686

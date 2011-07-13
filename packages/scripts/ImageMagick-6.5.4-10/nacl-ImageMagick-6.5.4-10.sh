@@ -15,8 +15,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/Im
 readonly PATCH_FILE=ImageMagick-6.5.4-10/nacl-ImageMagick-6.5.4-10.patch
 readonly PACKAGE_NAME=ImageMagick-6.5.4-10
 
-source ../common.sh
-
+source ../../../build_tools/common.sh
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -52,6 +51,7 @@ CustomBuildAndInstallStep() {
   make clean
   make CFLAGS='-DSSIZE_MAX="((ssize_t)(~((size_t)0)>>1))"' \
     install-libLTLIBRARIES install-data-am -j4
+  DefaultTouchStep
 }
 
 

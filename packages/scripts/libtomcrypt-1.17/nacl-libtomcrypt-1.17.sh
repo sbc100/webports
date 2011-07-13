@@ -15,7 +15,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/cr
 readonly PATCH_FILE=libtomcrypt-1.17/libtomcrypt-1.17.patch
 readonly PACKAGE_NAME=libtomcrypt-1.17
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomBuildStep() {
@@ -40,6 +40,7 @@ CustomInstallStep() {
   cp ${THIS_PACKAGE_PATH}/src/headers/*.h ./
   ChangeDir ${NACL_SDK_USR_LIB}
   cp ${THIS_PACKAGE_PATH}/*.a .
+  DefaultTouchStep
 }
 
 

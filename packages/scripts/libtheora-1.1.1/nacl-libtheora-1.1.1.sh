@@ -15,7 +15,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/li
 readonly PATCH_FILE=libtheora-1.1.1/nacl-libtheora-1.1.1.patch
 readonly PACKAGE_NAME=libtheora-1.1.1
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomConfigureStep() {

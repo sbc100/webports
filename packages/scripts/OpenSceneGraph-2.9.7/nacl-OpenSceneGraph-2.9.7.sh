@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,8 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/Op
 readonly PATCH_FILE=OpenSceneGraph-2.9.7/nacl-OpenSceneGraph-2.9.7.patch
 readonly PACKAGE_NAME=OpenSceneGraph-2.9.7
 
-source ../common.sh
-
+source ../../../build_tools/common.sh
 
 CustomDownloadStep() {
   cd ${NACL_PACKAGES_TARBALLS}
@@ -67,6 +66,7 @@ CustomInstallStep() {
   install -m 644 ${LIB_OSG} ${NACL_SDK_USR_LIB}/${LIB_OSG}
   install -m 644 ${LIB_OSGUTIL} ${NACL_SDK_USR_LIB}/${LIB_OSGUTIL}
   install -m 644 ${LIB_OPENTHREADS} ${NACL_SDK_USR_LIB}/${LIB_OPENTHREADS}
+  DefaultTouchStep
 }
 
 CustomPackageInstall() {

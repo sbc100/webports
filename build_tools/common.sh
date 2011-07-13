@@ -8,12 +8,14 @@
 set -o nounset
 set -o errexit
 
-# scripts that source this file must be run from within packages tree
+# Scripts that source this file must be run from within the naclports src tree.
+# Note that default build steps reference the packages directory.
 readonly SAVE_PWD=$(pwd)
 
-readonly START_DIR=$(cd $(dirname 0) ; pwd)
-readonly NACL_PACKAGES=`expr ${START_DIR} : '\(.*\/packages\).*'`
-readonly NACL_NATIVE_CLIENT_SDK=$(cd $NACL_PACKAGES/.. ; pwd)
+readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
+readonly NACL_SRC=`expr ${START_DIR} : '\(.*\/src\).*'`
+readonly NACL_PACKAGES=${NACL_SRC}/packages
+readonly NACL_NATIVE_CLIENT_SDK=$(cd $NACL_SRC ; pwd)
 
 # Pick platform directory for compiler.
 readonly OS_NAME=$(uname -s)
@@ -39,6 +41,10 @@ else
   exit 1
 fi
 
+readonly CROSS_ID=${NACL_BIT_SPEC}
+readonly NACL_CROSS_PREFIX=nacl${CROSS_ID}
+readonly NACL_CROSS_PREFIX_DASH=${NACL_CROSS_PREFIX}-
+
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
 # TODO: Currently only x86-32 will encourage MMX, SSE & SSE2 intrinsics
 #       and handcoded assembly.
@@ -57,32 +63,33 @@ ${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86}
 readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
 # packages subdirectories
-readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES}/publish${NACL_BIT_SPEC}
-readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES}/repository${NACL_BIT_SPEC}
 readonly NACL_PACKAGES_SCRIPTS=${NACL_PACKAGES}/scripts
-readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES}/tarballs
+readonly NACL_PACKAGES_OUT=${NACL_PACKAGES}/out
+readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository${CROSS_ID}
+readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish${CROSS_ID}
+readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 
 # sha1check python script
 readonly SHA1CHECK=${NACL_PACKAGES_SCRIPTS}/sha1check.py
 
 readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
-readonly NACLCC=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-gcc
-readonly NACLCXX=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-g++
-readonly NACLAR=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-ar
-readonly NACLRANLIB=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-ranlib
-readonly NACLLD=${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-ld
-readonly NACL_CROSS_PREFIX=nacl${NACL_BIT_SPEC}-
+readonly NACLCC=${NACL_TOOLCHAIN_ROOT}/bin/${NACL_CROSS_PREFIX_DASH}gcc
+readonly NACLCXX=${NACL_TOOLCHAIN_ROOT}/bin/${NACL_CROSS_PREFIX_DASH}g++
+readonly NACLAR=${NACL_TOOLCHAIN_ROOT}/bin/${NACL_CROSS_PREFIX_DASH}ar
+readonly NACLRANLIB=${NACL_TOOLCHAIN_ROOT}/bin/${NACL_CROSS_PREFIX_DASH}ranlib
+readonly NACLLD=${NACL_TOOLCHAIN_ROOT}/bin/${NACL_CROSS_PREFIX_DASH}ld
+
 
 # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
 readonly NACL_SDK_GCC_SPECS_PATH=${NACL_TOOLCHAIN_ROOT}/lib/gcc/nacl64/4.4.3
 
 # NACL_SDK_USR is where the headers, libraries, etc. will be installed
-readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/nacl${NACL_BIT_SPEC}/usr
+readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
 readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
 readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
 
 # NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
-# the gcc specs file.  It has a gcc spec-file conditional for ${NACL_BIT_SPEC}
+# the gcc specs file.  It has a gcc spec-file conditional for ${CROSS_ID}
 readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
 readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
 readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
@@ -243,7 +250,8 @@ MakeDir() {
 IsInstalled() {
   local LOCAL_PACKAGE_NAME=$1
   if [ ${#LOCAL_PACKAGE_NAME} -ne 0 ]; then
-    if grep -qx ${LOCAL_PACKAGE_NAME} ${NACL_PACKAGES}/installed.txt &>/dev/null; then
+    if grep -qx ${LOCAL_PACKAGE_NAME} ${NACL_PACKAGES_OUT}/installed.txt \
+       &>/dev/null; then
       return 0
     else
       return 1
@@ -257,7 +265,7 @@ IsInstalled() {
 AddToInstallFile() {
   local LOCAL_PACKAGE_NAME=$1
   if ! IsInstalled ${LOCAL_PACKAGE_NAME}; then
-    echo ${LOCAL_PACKAGE_NAME} >> ${NACL_PACKAGES}/installed.txt
+    echo ${LOCAL_PACKAGE_NAME} >> ${NACL_PACKAGES_OUT}/installed.txt
   fi
 }
 
@@ -267,7 +275,7 @@ PatchSpecFile() {
   local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
   local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
   # have nacl-gcc dump specs file & add include & lib search paths
-  ${NACL_TOOLCHAIN_ROOT}/bin/nacl${NACL_BIT_SPEC}-gcc -dumpspecs |\
+  ${NACLCC} -dumpspecs |\
     awk '/\*cpp:/ {\
       printf("*nacl_arch:\n%%{m64:nacl64; m32:nacl; :nacl64}\n\n", $1); } \
       { print $0; }' |\
@@ -363,8 +371,8 @@ DefaultBuildStep() {
 
 
 DefaultTouchStep() {
-  test -d ${NACL_PACKAGES}/sentinels || mkdir ${NACL_PACKAGES}/sentinels && \
-  touch ${NACL_PACKAGES}/sentinels/sentinel_file_${PACKAGE_NAME}
+  mkdir -p ${NACL_PACKAGES_OUT}/sentinels && \
+  touch ${NACL_PACKAGES_OUT}/sentinels/sentinel_file_${PACKAGE_NAME}
 }
 
 
@@ -392,4 +400,3 @@ DefaultPackageInstall() {
   DefaultInstallStep
   DefaultCleanUpStep
 }
-

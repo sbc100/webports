@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fr
 readonly PATCH_FILE=freetype-2.1.10/nacl-freetype-2.1.10.patch
 readonly PACKAGE_NAME=freetype-2.1.10
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 CustomInstallStep() {
   # do the regular make install
@@ -25,6 +25,7 @@ CustomInstallStep() {
   Remove ${NACL_SDK_USR_INCLUDE}/freetype
   cp -R ${NACL_SDK_USR_INCLUDE}/freetype2/freetype ${NACL_SDK_USR_INCLUDE}/.
   Remove ${NACL_SDK_USR_INCLUDE}/freetype2
+  DefaultTouchStep
 }
 
 

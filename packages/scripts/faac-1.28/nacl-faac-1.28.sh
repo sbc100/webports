@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,8 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fa
 readonly PATCH_FILE=faac-1.28/nacl-faac-1.28.patch
 readonly PACKAGE_NAME=faac-1.28
 
-source ../common.sh
-
+source ../../../build_tools/common.sh
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"

@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bo
 readonly PATCH_FILE=boost_1_43_0/nacl-boost_1_43_0.patch
 readonly PACKAGE_NAME=boost_1_43_0
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"

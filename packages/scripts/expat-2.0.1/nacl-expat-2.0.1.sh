@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ex
 readonly PATCH_FILE=expat-2.0.1/nacl-expat-2.0.1.patch
 readonly PACKAGE_NAME=expat-2.0.1
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 export LIBS=-lnosys
 

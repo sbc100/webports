@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -8,7 +8,7 @@
 #
 # usage:  nacl-protobuf-2.3.0.sh
 #
-# this script downloads, patches, and builds tinyxml for Native Client
+# this script downloads, patches, and builds protobuf for Native Client
 #
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/protobuf-2.3.0.tar.gz
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/pr
 readonly PATCH_FILE=protobuf-2.3.0/nacl-protobuf-2.3.0.patch
 readonly PACKAGE_NAME=protobuf-2.3.0
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 DefaultPackageInstall
 exit 0

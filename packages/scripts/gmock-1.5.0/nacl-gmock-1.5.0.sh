@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -8,7 +8,7 @@
 #
 # usage:  nacl-gmock-1.5.0.sh
 #
-# this script downloads, patches, and builds boost for Native Client
+# this script downloads, patches, and builds gmock for Native Client
 #
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gmock-1.5.0.tgz
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gm
 readonly PATCH_FILE=gmock-1.5.0/nacl-gmock-1.5.0.patch
 readonly PACKAGE_NAME=gmock-1.5.0
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -37,6 +37,7 @@ CustomInstallStep() {
   (ChangeDir include; tar cf - gmock | (ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -))
   Remove ${NACL_SDK_USR_LIB}/${LIB_GMOCK}
   install -m 644 ${LIB_GMOCK} ${NACL_SDK_USR_LIB}/${LIB_GMOCK}
+  DefaultTouchStep
 }
 
 CustomPackageInstall() {

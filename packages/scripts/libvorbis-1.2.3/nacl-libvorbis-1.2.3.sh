@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/li
 readonly PATCH_FILE=libvorbis-1.2.3/nacl-libvorbis-1.2.3.patch
 readonly PACKAGE_NAME=libvorbis-1.2.3
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 export LIBS=-lnosys
 

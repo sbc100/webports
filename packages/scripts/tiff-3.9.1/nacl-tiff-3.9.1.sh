@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ti
 readonly PATCH_FILE=tiff-3.9.1/nacl-tiff-3.9.1.patch
 readonly PACKAGE_NAME=tiff-3.9.1
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 export LIBS=-lnosys
 

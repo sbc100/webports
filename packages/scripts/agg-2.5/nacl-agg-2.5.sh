@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ag
 readonly PATCH_FILE=agg-2.5/nacl-agg-2.5.patch
 readonly PACKAGE_NAME=agg-2.5
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomBuildStep() {
@@ -36,6 +36,7 @@ CustomInstallStep() {
   ChangeDir ${NACL_SDK_USR_LIB}
   cp ${THIS_PACKAGE_PATH}/src/libagg.a .
   cp ${THIS_PACKAGE_PATH}/font_freetype/libaggfontfreetype.a .
+  DefaultTouchStep
 }
 
 

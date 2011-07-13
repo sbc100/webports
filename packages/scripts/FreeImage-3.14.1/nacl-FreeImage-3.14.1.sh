@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -30,7 +30,7 @@ readonly -a CRLF_TRANSLATE_FILES=(
     "Source/OpenEXR/Imath/ImathMatrix.h"
     "Source/Utilities.h")
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 CustomPreInstallStep() {
   DefaultPreInstallStep
@@ -90,6 +90,7 @@ CustomBuildStep() {
 CustomInstallStep() {
   # assumes pwd has makefile
   make OS=nacl install
+  DefaultTouchStep
 }
 
 CustomPackageInstall() {

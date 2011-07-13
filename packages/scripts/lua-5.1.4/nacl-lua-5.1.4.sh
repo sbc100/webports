@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/lu
 readonly PATCH_FILE=lua-5.1.4/nacl-lua-5.1.4.patch
 readonly PACKAGE_NAME=lua-5.1.4
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomBuildStep() {
@@ -35,6 +35,7 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
+  DefaultTouchStep
   DefaultCleanUpStep
 }
 

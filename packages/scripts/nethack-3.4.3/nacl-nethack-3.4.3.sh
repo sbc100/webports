@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -8,14 +8,14 @@
 #
 # usage:  nacl-nethack-343.sh
 #
-# this script downloads, patches, and builds libjpeg for Native Client
+# this script downloads, patches, and builds nethack for Native Client
 #
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nethack-343-src.tgz
 readonly PATCH_FILE=nethack-3.4.3/nacl-nethack-3.4.3.patch
 readonly PACKAGE_NAME=nethack-3.4.3
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomBuildStep() {
@@ -54,6 +54,7 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
+  DefaultTouchStep
   DefaultCleanUpStep
 }
 

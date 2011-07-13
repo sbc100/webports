@@ -15,7 +15,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/x2
 readonly PATCH_FILE=x264-snapshot-20091023-2245/nacl-x264-snapshot-20091023-2245.patch
 readonly PACKAGE_NAME=x264-snapshot-20091023-2245
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomConfigureStep() {

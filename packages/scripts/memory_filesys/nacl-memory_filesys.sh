@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2010 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -8,12 +8,12 @@
 #
 # usage:  nacl-memory_filesys.sh
 #
-# this script downloads, patches, and builds libjpeg for Native Client
+# this script downloads, patches, and builds memory_filesys for Native Client
 #
 
 readonly PACKAGE_NAME=memory_filesys
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomBuildStep() {
@@ -41,6 +41,7 @@ CustomInstallStep() {
   mkdir -p ${NACL_SDK_USR_LIB}/memory_filesys
   cp ${START_DIR}/simple_tar.py ${NACL_SDK_USR_LIB}/memory_filesys/
   cp ${START_DIR}/*.js ${NACL_SDK_USR_LIB}/memory_filesys/
+  DefaultTouchStep
 }
 
 CustomPackageInstall() {

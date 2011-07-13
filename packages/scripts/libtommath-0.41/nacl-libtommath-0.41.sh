@@ -15,7 +15,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/lt
 readonly PATCH_FILE=libtommath-0.41/libtommath-0.41.patch
 readonly PACKAGE_NAME=libtommath-0.41
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomBuildStep() {
@@ -45,6 +45,7 @@ CustomInstallStep() {
   cp ${THIS_PACKAGE_PATH}/*.h ${PACKAGE_NAME}/
   ChangeDir ${NACL_SDK_USR_LIB}
   cp ${THIS_PACKAGE_PATH}/*.a .
+  DefaultTouchStep
 }
 
 

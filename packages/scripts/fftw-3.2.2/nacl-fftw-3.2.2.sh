@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -8,10 +8,7 @@
 #
 # usage:  nacl-fftw-3.2.2.sh
 #
-# This script downloads, patches, and builds fftw-3.2.2 for Native Client. To
-# run tests, run this script then switch to "<repository dir>/tests" and run:
-#
-#   perl check.pl "nacl(32|64)-sel_ldr -- bench" [-0d|-1d|-2d|-random] [-v]
+# This script downloads, patches, and builds fftw-3.2.2 for Native Client.
 #
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fftw-3.2.2.tar.gz
@@ -19,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ff
 readonly PATCH_FILE=fftw-3.2.2/fftw-3.2.2.patch
 readonly PACKAGE_NAME=fftw-3.2.2
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"

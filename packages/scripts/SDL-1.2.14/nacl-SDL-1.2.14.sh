@@ -1,6 +1,6 @@
 #!/bin/bash
-# Copyright (c) 2009 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
@@ -8,7 +8,7 @@
 #
 # usage:  nacl-SDL-1.2.14.sh
 #
-# this script downloads, patches, and builds faad2 for Native Client 
+# this script downloads, patches, and builds SDL for Native Client
 #
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/SDL-1.2.14.tar.gz
@@ -16,7 +16,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/SD
 readonly PATCH_FILE=SDL-1.2.14/nacl-SDL-1.2.14.patch
 readonly PACKAGE_NAME=SDL-1.2.14
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 export LIBS=-lnosys
 

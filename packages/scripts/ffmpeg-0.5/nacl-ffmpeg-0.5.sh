@@ -15,7 +15,7 @@ readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ff
 readonly PATCH_FILE=ffmpeg-0.5/nacl-ffmpeg-0.5.patch
 readonly PACKAGE_NAME=ffmpeg-0.5
 
-source ../common.sh
+source ../../../build_tools/common.sh
 
 
 CustomConfigureStep() {
@@ -62,6 +62,7 @@ CustomPostConfigureStep() {
 CustomBuildAndInstallStep() {
   make -j4
   make install
+  DefaultTouchStep
 }
 
 
