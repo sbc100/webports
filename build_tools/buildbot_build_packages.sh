@@ -62,6 +62,43 @@ elif [ ${BUILDBOT_BUILDERNAME} = mac-ports-2 ] ; then
   if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-mac-ports-2.sh" ${SCRIPT_DIR}/bots/mac 64
   fi
+elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-0 ] ; then
+  StartBuild "./nacl-install-windows-ports-0.sh" ${SCRIPT_DIR}/bots/windows 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-windows-ports-0.sh" ${SCRIPT_DIR}/bots/windows 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-1 ] ; then
+  StartBuild "./nacl-install-windows-ports-1.sh" ${SCRIPT_DIR}/bots/windows 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-windows-ports-1.sh" ${SCRIPT_DIR}/bots/windows 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-2 ] ; then
+  BuildNaclMounts
+  StartBuild "./nacl-install-windows-ports-2.sh" ${SCRIPT_DIR}/bots/windows 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-windows-ports-2.sh" ${SCRIPT_DIR}/bots/windows 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-3 ] ; then
+  StartBuild "./nacl-install-windows-ports-3.sh" ${SCRIPT_DIR}/bots/windows 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-windows-ports-3.sh" ${SCRIPT_DIR}/bots/windows 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-4 ] ; then
+  StartBuild "./nacl-install-windows-ports-4.sh" ${SCRIPT_DIR}/bots/windows 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-windows-ports-4.sh" ${SCRIPT_DIR}/bots/windows 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-5 ] ; then
+  StartBuild "./nacl-install-windows-ports-5.sh" ${SCRIPT_DIR}/bots/windows 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-windows-ports-5.sh" ${SCRIPT_DIR}/bots/windows 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-6 ] ; then
+  BuildNaclMounts
+  StartBuild "./nacl-install-windows-ports-6.sh" ${SCRIPT_DIR}/bots/windows 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-windows-ports-6.sh" ${SCRIPT_DIR}/bots/windows 64
+  fi
 else
   BuildNaclMounts
   cd ${SCRIPT_DIR}/../packages
