@@ -115,10 +115,10 @@ $(SENT)libvorbis-1.2.3: ogg
 $(SENT)libtheora-1.1.1: ogg
 $(SENT)flac-1.2.1: ogg
 $(SENT)speex-1.2rc1: ogg
-$(SENT)fontconfig-2.7.3: expat
+$(SENT)fontconfig-2.7.3: expat freetype
 $(SENT)libpng-1.2.40: zlib
 $(SENT)agg-2.5: freetype
-$(SENT)cairo-1.8.8: pixman fontconfig freetype png
+$(SENT)cairo-1.8.8: pixman fontconfig png
 $(SENT)ffmpeg-0.5: lame vorbis theora
 $(SENT)nethack-3.4.3: memory_filesys
 
