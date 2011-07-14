@@ -40,7 +40,7 @@ NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
                  $(NACL_OUT)/publish64
 
 NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/nacl/usr
-NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/nacl64/usr
+NACL_SDK_USR64 = $(NACL_TOOLCHAIN_ROOT)/nacl64/usr
 
 NACL_DIRS_TO_REMOVE = $(NACL_OUT) \
 		      $(NACL_SDK_USR32) \
