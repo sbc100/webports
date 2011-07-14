@@ -86,6 +86,7 @@ PACKAGES = SDL-1.2.14 \
 	   libmodplug-0.8.7 \
 	   memory_filesys \
 	   OpenSceneGraph-2.9.7 \
+           nethack-3.4.3 \
 	   cfitsio
 
 SENTINELS_DIR = out/sentinels
@@ -119,6 +120,7 @@ $(SENT)libpng-1.2.40: zlib
 $(SENT)agg-2.5: freetype
 $(SENT)cairo-1.8.8: pixman fontconfig freetype png
 $(SENT)ffmpeg-0.5: lame vorbis theora
+$(SENT)nethack-3.4.3: memory_filesys
 
 # shortcuts
 sdl: SDL-1.2.14 ;
@@ -153,3 +155,4 @@ ffmpeg: ffmpeg-0.5 ;
 mesa: Mesa-7.6 ;
 modplug: libmodplug-0.8.7 ;
 openscenegraph: OpenSceneGraph-2.9.7 ;
+nethack: nethack-3.4.3
