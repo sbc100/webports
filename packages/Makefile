@@ -30,6 +30,11 @@ ifeq ($(OS_SUBDIR), UNKNOWN)
   $(error No support for the Operating System: $(OS_NAME))
 endif
 
+BITSIZE := 32
+ifeq ($(NACL_PACKAGES_BITSIZE), 64)
+  BITSIZE := 64
+endif
+
 NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
 
 NACL_OUT = out
@@ -105,7 +110,7 @@ $(NACL_DIRS_TO_MAKE):
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)%
 
 $(PACKAGES:%=$(SENT)%): $(SENT)%:
-	@echo "@@@BUILD_STEP $*@@@"
+	@echo "@@@BUILD_STEP $(BITSIZE)-bit $*@@@"
 	cd scripts/$* && ./nacl-$*.sh
 	mkdir -p $(@D)
 	touch $@

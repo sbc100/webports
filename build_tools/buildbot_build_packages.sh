@@ -25,6 +25,7 @@ BuildNaclMounts() {
 StartBuild() {
   cd $2
   export NACL_PACKAGES_BITSIZE=$3
+  echo "@@@BUILD_STEP $3-bit setup@@@"
   if ! $1 ; then
     RESULT=0
   fi
