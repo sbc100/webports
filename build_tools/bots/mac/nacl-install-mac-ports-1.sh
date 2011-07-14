@@ -4,12 +4,12 @@
 # found in the LICENSE file.
 #
 
-# nacl-install-linux-ports-0.sh
+# nacl-install-mac-ports-1.sh
 #
-# usage:  nacl-install-linux-ports-0.sh
+# usage:  nacl-install-mac-ports-1.sh
 #
 # This script builds the packages for Native Client that are designated to
-# the bot named linux-ports-0.
+# the bot named mac-ports-1
 #
 
 source ../bot_common.sh
@@ -18,15 +18,13 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../../packages
 make clean
 
-# ffmpeg also builds lame, vorbis, theora, and ogg
-BuildPackage ffmpeg
-BuildPackage speex
-BuildPackage flac
-BuildPackage gsl
-BuildPackage faac
-BuildPackage lua
-BuildPackage modplug
-BuildPackage gc
+# cairo also builds png, zlib, freetype, fontconfig, expat, and pixman
+BuildPackage cairo
+BuildPackage agg
+BuildPackage openscenegraph
+BuildPackage freeimage
+BuildPackage x264
+BuildPackage imagemagick
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
@@ -36,3 +34,4 @@ fi
 echo -e "$MESSAGES"
 
 exit $RESULT
+

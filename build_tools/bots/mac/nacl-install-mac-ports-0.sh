@@ -4,12 +4,12 @@
 # found in the LICENSE file.
 #
 
-# nacl-install-linux-ports-0.sh
+# nacl-install-mac-ports-0.sh
 #
-# usage:  nacl-install-linux-ports-0.sh
+# usage:  nacl-install-mac-ports-0.sh
 #
 # This script builds the packages for Native Client that are designated to
-# the bot named linux-ports-0.
+# the bot named mac-ports-0.
 #
 
 source ../bot_common.sh

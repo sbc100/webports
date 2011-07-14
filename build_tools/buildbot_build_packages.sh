@@ -46,6 +46,22 @@ elif [ ${BUILDBOT_BUILDERNAME} = linux-ports-2 ] ; then
   if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-linux-ports-2.sh" ${SCRIPT_DIR}/bots/linux 64
   fi
+elif [ ${BUILDBOT_BUILDERNAME} = mac-ports-0 ] ; then
+  StartBuild "./nacl-install-mac-ports-0.sh" ${SCRIPT_DIR}/bots/mac 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-mac-ports-0.sh" ${SCRIPT_DIR}/bots/mac 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = mac-ports-1 ] ; then
+  StartBuild "./nacl-install-mac-ports-1.sh" ${SCRIPT_DIR}/bots/mac 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-mac-ports-1.sh" ${SCRIPT_DIR}/bots/mac 64
+  fi
+elif [ ${BUILDBOT_BUILDERNAME} = mac-ports-2 ] ; then
+  BuildNaclMounts
+  StartBuild "./nacl-install-mac-ports-2.sh" ${SCRIPT_DIR}/bots/mac 32
+  if [[ $RESULT != 0 ]]; then
+    StartBuild "./nacl-install-mac-ports-2.sh" ${SCRIPT_DIR}/bots/mac 64
+  fi
 else
   BuildNaclMounts
   cd ${SCRIPT_DIR}/../packages

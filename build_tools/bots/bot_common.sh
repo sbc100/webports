@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 #
 
-# The nacl-install-linux-*.sh scripts should source this script.
+# The nacl-install-{linux,mac}-*.sh scripts should source this script.
 #
 
 set -o nounset

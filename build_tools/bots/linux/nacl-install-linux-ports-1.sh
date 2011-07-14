@@ -12,7 +12,7 @@
 # the bot named linux-ports-1
 #
 
-source linux_bot_common.sh
+source ../bot_common.sh
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../../packages

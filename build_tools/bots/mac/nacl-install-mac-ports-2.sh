@@ -4,12 +4,12 @@
 # found in the LICENSE file.
 #
 
-# nacl-install-linux-ports-0.sh
+# nacl-install-mac-ports-2.sh
 #
-# usage:  nacl-install-linux-ports-0.sh
+# usage:  nacl-install-mac-ports-2.sh
 #
 # This script builds the packages for Native Client that are designated to
-# the bot named linux-ports-0.
+# the bot named mac-ports-2
 #
 
 source ../bot_common.sh
@@ -18,15 +18,18 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../../packages
 make clean
 
-# ffmpeg also builds lame, vorbis, theora, and ogg
-BuildPackage ffmpeg
-BuildPackage speex
-BuildPackage flac
-BuildPackage gsl
-BuildPackage faac
-BuildPackage lua
-BuildPackage modplug
-BuildPackage gc
+# nethack also builds memory_filesys
+BuildPackage nethack
+BuildPackage sdl
+BuildPackage fftw
+BuildPackage tommath
+BuildPackage tomcrypt
+BuildPackage jpeg
+BuildPackage tiff
+BuildPackage faad
+BuildPackage tinyxml
+BuildPackage mesa
+BuildPackage cfitsio
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
