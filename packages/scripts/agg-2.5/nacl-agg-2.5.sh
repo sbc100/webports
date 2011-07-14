@@ -21,7 +21,7 @@ source ../../../build_tools/common.sh
 
 CustomBuildStep() {
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  make NACL_BIN_PATH=${NACL_BIN_PATH}
+  make NACLCXX=${NACLCXX} NACLCC=${NACLCC} NACLAR=${NACLAR}
 }
 
 

@@ -21,9 +21,9 @@ diff -Naur agg-2.5/Makefile.in.NativeClient agg-2.5.nacl/Makefile.in.NativeClien
 @@ -0,0 +1,8 @@
 +AGGLIBS= -lagg
 +AGGCXXFLAGS = -O3 -mfpmath=sse -msse -fomit-frame-pointer
-+CXX = $(NACL_BIN_PATH)/nacl-g++
-+C = $(NACL_BIN_PATH)/nacl-gcc
-+LIB = $(NACL_BIN_PATH)/nacl-ar cr
++CXX = $(NACLCXX)
++C = $(NACLCC)
++LIB = $(NACLAR) cr
 +
 +.PHONY : clean
 +
