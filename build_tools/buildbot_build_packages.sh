@@ -32,18 +32,18 @@ StartBuild() {
 
 if [ ${BUILDBOT_BUILDERNAME} = linux-ports-0 ] ; then
   StartBuild "./nacl-install-linux-ports-0.sh" ${SCRIPT_DIR}/bots/linux 32
-  if [[ $RESULT != 1 ]]; then
+  if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-linux-ports-0.sh" ${SCRIPT_DIR}/bots/linux 64
   fi
 elif [ ${BUILDBOT_BUILDERNAME} = linux-ports-1 ] ; then
   StartBuild "./nacl-install-linux-ports-1.sh" ${SCRIPT_DIR}/bots/linux 32
-  if [[ $RESULT != 1 ]]; then
+  if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-linux-ports-1.sh" ${SCRIPT_DIR}/bots/linux 64
   fi
 elif [ ${BUILDBOT_BUILDERNAME} = linux-ports-2 ] ; then
   BuildNaclMounts
   StartBuild "./nacl-install-linux-ports-2.sh" ${SCRIPT_DIR}/bots/linux 32
-  if [[ $RESULT != 1 ]]; then
+  if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-linux-ports-2.sh" ${SCRIPT_DIR}/bots/linux 64
   fi
 else
