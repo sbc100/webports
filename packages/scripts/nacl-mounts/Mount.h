@@ -7,6 +7,7 @@
 #define PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNT_H_
 
 #include <fcntl.h>
+#include <sys/dir.h>
 #include <sys/stat.h>
 #include <string>
 #include "macros.h"
