@@ -22,11 +22,16 @@
 // operations.
 class Mount {
  public:
-  Mount() {}
+  Mount() { ref_count_ = 0; }
   virtual ~Mount() {}
 
   // Given a path and a stat struct, return the inode associated with the path
   virtual int GetNode(const std::string& path, struct stat *st) = 0;
+
+  // These methods are used by KernelProxy and MountManager
+  void Ref(void) { ++ref_count_; }
+  void Unref(void) { --ref_count_; }
+  int ref_count(void) { return ref_count_; }
 
   // Increase the reference count for a given inode
   virtual void Ref(ino_t node) = 0;
@@ -48,6 +53,8 @@ class Mount {
                         size_t count) = 0;
 
  private:
+  int ref_count_;
+
   DISALLOW_COPY_AND_ASSIGN(Mount);
 };
 

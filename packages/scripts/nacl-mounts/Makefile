@@ -48,16 +48,30 @@ $(TESTS_OUT)/PathTest.o: PathTest.cc $(GTEST_HEADERS)
 $(TESTS_OUT)/Path.o: Path.cc Path.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c Path.cc -o $@
 
+$(TESTS_OUT)/SimpleAutoLock.o: SimpleAutoLock.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SimpleAutoLock.cc -o $@
+
 $(TESTS_OUT)/SlotAllocatorTest.o: SlotAllocatorTest.cc $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SlotAllocatorTest.cc -o $@
 
 $(TESTS_OUT)/BaseMountTest.o: BaseMountTest.cc $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c BaseMountTest.cc -o $@
 
+$(TESTS_OUT)/MountManager.o: MountManager.cc MountManager.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MountManager.cc -o $@
+
+$(TESTS_OUT)/KernelProxy.o: KernelProxy.cc KernelProxy.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c KernelProxy.cc -o $@
+
+$(TESTS_OUT)/MountManagerTest.o: MountManagerTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MountManagerTest.cc -o $@
+
 output:
-	test -d $(TESTS_OUT) || mkdir $(TESTS_OUT)
+	mkdir -p $(TESTS_OUT)
 
 nacl_mounts_tests: $(TESTS_OUT)/Path.o $(TESTS_OUT)/PathTest.o \
-          $(TESTS_OUT)/SlotAllocatorTest.o $(TESTS_OUT)/BaseMountTest.o \
-          $(TESTS_OUT)/gtest_main.a
+      $(TESTS_OUT)/SimpleAutoLock.o $(TESTS_OUT)/SlotAllocatorTest.o \
+      $(TESTS_OUT)/BaseMountTest.o $(TESTS_OUT)/MountManager.o \
+      $(TESTS_OUT)/KernelProxy.o $(TESTS_OUT)/MountManagerTest.o \
+      $(TESTS_OUT)/gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $(TESTS_OUT)/$@
