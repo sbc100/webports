@@ -92,7 +92,9 @@ PACKAGES = SDL-1.2.14 \
 	   memory_filesys \
 	   OpenSceneGraph-2.9.7 \
            nethack-3.4.3 \
-	   cfitsio
+           cfitsio \
+           boost_1_43_0 \
+           protobuf-2.3.0
 
 SENTINELS_DIR = out/sentinels
 SENT = $(SENTINELS_DIR)/sentinel_file_
@@ -160,4 +162,6 @@ ffmpeg: ffmpeg-0.5 ;
 mesa: Mesa-7.6 ;
 modplug: libmodplug-0.8.7 ;
 openscenegraph: OpenSceneGraph-2.9.7 ;
-nethack: nethack-3.4.3
+nethack: nethack-3.4.3 ;
+boost: boost_1_43_0 ;
+protobuf: protobuf-2.3.0 ;

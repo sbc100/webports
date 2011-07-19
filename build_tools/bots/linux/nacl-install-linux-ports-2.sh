@@ -30,6 +30,8 @@ BuildPackage faad
 BuildPackage tinyxml
 BuildPackage mesa
 BuildPackage cfitsio
+BuildPackage boost
+BuildPackage protobuf
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
