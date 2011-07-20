@@ -5,15 +5,10 @@
  */
 #include "BaseMount.h"
 #include "gtest/gtest.h"
-#include "KernelProxy.h"
 #include "MountManager.h"
 
-MountManager *mm = new MountManager();
-
-// TODO(arbenson): Add in the tests that rely on a memory mount
-// being the default mount.
-
 TEST(MountManagerTest, AddRemoveMount) {
+  MountManager *mm = new MountManager();
   BaseMount *mnt = new BaseMount();
 
   // should start with a default mount at "/"
@@ -52,6 +47,7 @@ TEST(MountManagerTest, AddRemoveMount) {
 }
 
 TEST(MountManagerTest, GetMount) {
+  MountManager *mm = new MountManager();
   mm->ClearMounts();
   std::pair<Mount *, std::string> ret;
   BaseMount *mnt = new BaseMount();
@@ -78,39 +74,6 @@ TEST(MountManagerTest, GetMount) {
   std::string s;
   ret = mm->GetMount(s);
   EXPECT_EQ(0, static_cast<int>(ret.second.length()));
-
-  mm->ClearMounts();
-}
-
-TEST(MountManagerTest, RoutedSysCalls) {
-  KernelProxy *kp = KernelProxy::KPInstance();
-  // put in a mount
-  mm->ClearMounts();
-  BaseMount *mnt = new BaseMount();
-  EXPECT_EQ(0, mm->AddMount(mnt, "/"));
-
-  // Run through each sys call.
-  // No call should do anything useful, but each should be able to run.
-  const char *path = "/hi/there";
-  int fd = 5;
-
-  EXPECT_EQ(-1, kp->chmod(path, 0));
-  EXPECT_EQ(-1, kp->remove(path));
-  EXPECT_EQ(-1, kp->stat(path, NULL));
-  EXPECT_EQ(-1, kp->access(path, 0));
-  EXPECT_EQ(-1, kp->mkdir(path, 0));
-  EXPECT_EQ(-1, kp->rmdir(path));
-  EXPECT_EQ(-1, kp->open(path, 0, 0));
-
-  EXPECT_EQ(-1, kp->close(fd));
-  EXPECT_EQ(-1, kp->close(-10));
-  EXPECT_EQ(-1, kp->read(fd, NULL, 0));
-  EXPECT_EQ(-1, kp->write(fd, NULL, 0));
-  EXPECT_EQ(-1, kp->fstat(fd, NULL));
-  EXPECT_EQ(-1, kp->getdents(fd, NULL, 0));
-  EXPECT_EQ(-1, kp->lseek(fd, 0, 0));
-
-  EXPECT_EQ(0, mm->RemoveMount("/"));
 
   mm->ClearMounts();
 }

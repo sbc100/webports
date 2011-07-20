@@ -42,20 +42,11 @@ $(TESTS_OUT)/gtest_main.a: $(TESTS_OUT)/gtest-all.o $(TESTS_OUT)/gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
 # nacl-mounts targets for tests using gtest_main.a
-$(TESTS_OUT)/PathTest.o: PathTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c PathTest.cc -o $@
-
 $(TESTS_OUT)/Path.o: Path.cc Path.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c Path.cc -o $@
 
 $(TESTS_OUT)/SimpleAutoLock.o: SimpleAutoLock.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SimpleAutoLock.cc -o $@
-
-$(TESTS_OUT)/SlotAllocatorTest.o: SlotAllocatorTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SlotAllocatorTest.cc -o $@
-
-$(TESTS_OUT)/BaseMountTest.o: BaseMountTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c BaseMountTest.cc -o $@
 
 $(TESTS_OUT)/MountManager.o: MountManager.cc MountManager.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MountManager.cc -o $@
@@ -63,15 +54,41 @@ $(TESTS_OUT)/MountManager.o: MountManager.cc MountManager.h
 $(TESTS_OUT)/KernelProxy.o: KernelProxy.cc KernelProxy.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c KernelProxy.cc -o $@
 
+$(TESTS_OUT)/MemMount.o: MemMount.cc MemMount.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemMount.cc -o $@
+
+$(TESTS_OUT)/MemNode.o: MemNode.cc MemNode.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemNode.cc -o $@
+
+$(TESTS_OUT)/SlotAllocatorTest.o: SlotAllocatorTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SlotAllocatorTest.cc -o $@
+
+$(TESTS_OUT)/PathTest.o: PathTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c PathTest.cc -o $@
+
+$(TESTS_OUT)/BaseMountTest.o: BaseMountTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c BaseMountTest.cc -o $@
+
+$(TESTS_OUT)/MemMountTest.o: MemMountTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemMountTest.cc -o $@
+
+$(TESTS_OUT)/MemNodeTest.o: MemNodeTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemNodeTest.cc -o $@
+
 $(TESTS_OUT)/MountManagerTest.o: MountManagerTest.cc $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MountManagerTest.cc -o $@
+
+$(TESTS_OUT)/KernelProxyTest.o: KernelProxyTest.cc $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c KernelProxyTest.cc -o $@
 
 output:
 	mkdir -p $(TESTS_OUT)
 
-nacl_mounts_tests: $(TESTS_OUT)/Path.o $(TESTS_OUT)/PathTest.o \
-      $(TESTS_OUT)/SimpleAutoLock.o $(TESTS_OUT)/SlotAllocatorTest.o \
-      $(TESTS_OUT)/BaseMountTest.o $(TESTS_OUT)/MountManager.o \
-      $(TESTS_OUT)/KernelProxy.o $(TESTS_OUT)/MountManagerTest.o \
-      $(TESTS_OUT)/gtest_main.a
+nacl_mounts_tests: $(TESTS_OUT)/Path.o $(TESTS_OUT)/SimpleAutoLock.o \
+      $(TESTS_OUT)/KernelProxy.o $(TESTS_OUT)/MountManager.o \
+      $(TESTS_OUT)/MemMount.o $(TESTS_OUT)/MemNode.o \
+      $(TESTS_OUT)/SlotAllocatorTest.o $(TESTS_OUT)/PathTest.o \
+      $(TESTS_OUT)/MountManagerTest.o $(TESTS_OUT)/KernelProxyTest.o \
+      $(TESTS_OUT)/MemMountTest.o $(TESTS_OUT)/MemNodeTest.o \
+      $(TESTS_OUT)/BaseMountTest.o $(TESTS_OUT)/gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $(TESTS_OUT)/$@

@@ -78,6 +78,8 @@ class KernelProxy {
   int symlink(const std::string& path1, const std::string& path2);
   int isatty(int fd);
 
+  MountManager *mm() { return &mm_; }
+
  private:
   struct FileDescriptor {
     // An index in open_files_ table

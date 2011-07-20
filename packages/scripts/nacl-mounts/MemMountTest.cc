@@ -6,10 +6,7 @@
 
 #include "gtest/gtest.h"
 #include "MemMount.h"
-
-// TODO(arbenson): Add in the tests that rely on the MountManager
-// when that gets checked in to nacl-mounts.  This includes tests
-// for Read()/Write()
+#include "KernelProxy.h"
 
 #define CHECK(x) { \
     ASSERT_NE(reinterpret_cast<void*>(NULL), x); \
@@ -111,6 +108,48 @@ TEST(MemMountTest, Creat) {
   EXPECT_NE(-1, mount->GetNode("/node1/node3/../../node1/./", NULL));
 
   delete mount;
+}
+
+static const char* kTestFileName = "/MemMountTest_DefaultMount";
+
+static void test_write() {
+  KernelProxy* kp = KernelProxy::KPInstance();
+  int fd = kp->open(kTestFileName, O_WRONLY | O_CREAT, 0644);
+  if (fd == -1) {
+    perror("mm->open: ");
+  }
+  ASSERT_LE(0, fd);
+  ASSERT_EQ(5, kp->write(fd, "hello", 5));
+  ASSERT_EQ(0, kp->close(fd));
+}
+
+static void test_read(int* out) {
+  KernelProxy* kp = KernelProxy::KPInstance();
+  int fd = kp->open(kTestFileName, O_RDONLY, 0);
+  if (fd == -1) {
+    perror("mm->open: ");
+  }
+  ASSERT_LE(0, fd);
+  char buf[6];
+  buf[5] = 0;
+  ASSERT_EQ(5, kp->read(fd, buf, 5));
+  ASSERT_STREQ("hello", buf);
+  *out = fd;
+}
+
+static void test_close(int fd) {
+  ASSERT_EQ(0, KernelProxy::KPInstance()->close(fd));
+}
+
+TEST(MemMountTest, DefaultMount) {
+  int fds[1];
+  for (int i = 0; i < 1; i++) {
+    test_write();
+    test_read(&fds[i]);
+  }
+  for (int i = 0; i < 1; i++) {
+    test_close(fds[i]);
+  }
 }
 
 TEST(MemMountTest, Stat) {

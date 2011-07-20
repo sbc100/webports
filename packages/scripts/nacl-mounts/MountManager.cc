@@ -3,6 +3,7 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
+#include "MemMount.h"
 #include "MountManager.h"
 
 MountManager::MountManager() {
@@ -15,8 +16,7 @@ MountManager::~MountManager() {
 
 void MountManager::Init() {
   if (pthread_mutex_init(&mm_lock_, NULL)) assert(0);
-  // TODO(arbenson): make the default mount a memory mount.
-  BaseMount *default_mount = new BaseMount();
+  MemMount *default_mount = new MemMount();
   assert(default_mount);
   AddMount(default_mount, "/");
   cwd_mount_ = default_mount;
