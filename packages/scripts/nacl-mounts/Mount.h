@@ -7,9 +7,9 @@
 #define PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNT_H_
 
 #include <fcntl.h>
-#include <sys/dir.h>
 #include <sys/stat.h>
 #include <string>
+#include "dirent.h"
 #include "macros.h"
 
 // Mount serves as the base mounting class that will be used by
