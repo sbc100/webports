@@ -31,6 +31,8 @@ StartBuild() {
   fi
 }
 
+BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
+
 if [ ${BUILDBOT_BUILDERNAME} = linux-ports-0 ] ; then
   StartBuild "./nacl-install-linux-ports-0.sh" ${SCRIPT_DIR}/bots/linux 32
   if [[ $RESULT != 0 ]]; then
