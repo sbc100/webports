@@ -81,7 +81,8 @@ readonly NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ld
 
 
 # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
-readonly NACL_SDK_GCC_SPECS_PATH=${NACL_TOOLCHAIN_ROOT}/lib/gcc/nacl64/4.4.3
+readonly NACL_SDK_GCC_SPECS_PATH=\
+${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
 
 # NACL_SDK_USR is where the headers, libraries, etc. will be installed
 readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
