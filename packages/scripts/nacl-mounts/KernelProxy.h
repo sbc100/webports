@@ -54,6 +54,7 @@ class KernelProxy {
   int fstat(int fd, struct stat *buf);
   int getdents(int fd, void *buf, unsigned int count);
   int fsync(int fd);
+  int isatty(int fd);
 
   // System calls handled by KernelProxy that rely on mount-specific calls
   // close() calls the mount's Unref() if the file handle corresponding to
@@ -76,7 +77,6 @@ class KernelProxy {
   int ioctl(int fd, unsigned long request);
   int link(const std::string& path1, const std::string& path2);
   int symlink(const std::string& path1, const std::string& path2);
-  int isatty(int fd);
 
   MountManager *mm() { return &mm_; }
 

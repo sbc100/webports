@@ -47,6 +47,7 @@ TEST(KernelProxyTest, RoutedSysCalls) {
   EXPECT_EQ(-1, kp->fstat(fd, NULL));
   EXPECT_EQ(-1, kp->getdents(fd, NULL, 0));
   EXPECT_EQ(-1, kp->lseek(fd, 0, 0));
+  EXPECT_EQ(0, kp->isatty(fd));
 
   EXPECT_EQ(0, mm->RemoveMount("/"));
 

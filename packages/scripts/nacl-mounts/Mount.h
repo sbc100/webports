@@ -51,6 +51,7 @@ class Mount {
   virtual ssize_t Read(ino_t node, off_t offset, void *buf, size_t count) = 0;
   virtual ssize_t Write(ino_t node, off_t offset, const void *buf,
                         size_t count) = 0;
+  virtual int Isatty(ino_t node) = 0;
 
  private:
   int ref_count_;

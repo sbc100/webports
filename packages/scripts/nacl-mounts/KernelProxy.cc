@@ -329,6 +329,17 @@ int KernelProxy::fsync(int fd) {
   return handle->mount->Fsync(handle->node);
 }
 
+int KernelProxy::isatty(int fd) {
+  FileHandle *handle;
+
+  if (!(handle = GetFileHandle(fd))) {
+    errno = EBADF;
+    return 0;
+  }
+  SimpleAutoLock(&handle->lock);
+  return handle->mount->Isatty(handle->node);
+}
+
 int KernelProxy::dup(int oldfd) {
   SimpleAutoLock lock(&kp_lock_);
 
@@ -580,13 +591,6 @@ int KernelProxy::rmdir(const std::string& path) {
     return -1;
   }
   return mnode.first->Rmdir(mnode.second);
-}
-
-int KernelProxy::isatty(int fd) {
-  errno = ENOSYS;
-  fprintf(stderr, "isatty has not been implemented!\n");
-  assert(0);
-  return -1;
 }
 
 KernelProxy::FileHandle *KernelProxy::GetFileHandle(int fd) {

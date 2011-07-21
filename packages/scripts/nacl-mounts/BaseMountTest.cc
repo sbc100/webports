@@ -22,4 +22,5 @@ TEST(BaseMountTest, Sanity) {
   EXPECT_EQ(-1, bm->Getdents(0, 0, NULL, 0));
   EXPECT_EQ(-1, bm->Read(0, 0, NULL, 0));
   EXPECT_EQ(-1, bm->Write(0, 0, NULL, 0));
+  EXPECT_EQ(0, bm->Isatty(0));
 }

@@ -78,6 +78,10 @@ class BaseMount : public Mount {
     errno = ENOSYS;
     return -1;
   }
+  virtual int Isatty(ino_t node) {
+    errno = ENOSYS;
+    return 0;
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BaseMount);
