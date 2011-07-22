@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_ENTRY_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_ENTRY_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -41,4 +41,4 @@ extern "C" {
   int __wrap_symlink(const char *path1, const char *path2);
 }
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_ENTRY_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_

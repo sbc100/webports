@@ -4,7 +4,7 @@
  * found in the LICENSE file.
  */
 
-#include "BaseMount.h"
+#include "../base/BaseMount.h"
 #include "gtest/gtest.h"
 
 TEST(BaseMountTest, Sanity) {

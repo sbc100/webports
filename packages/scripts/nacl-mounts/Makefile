@@ -16,79 +16,49 @@ CXXFLAGS += -g -Wall -Werror -lpthread -I$(GTEST_DIR)
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 $(GTEST_DIR)/include/gtest/internal/*.h
 
-# Output directory
+UTIL_SOURCES = $(addprefix util/, Path.cc SimpleAutoLock.cc)
+BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc)
+MEM_SOURCES = $(addprefix memory/, MemMount.cc MemNode.cc)
+TEST_SOURCES = $(addprefix test/, SlotAllocatorTest.cc \
+            PathTest.cc BaseMountTest.cc MemMountTest.cc \
+            MemNodeTest.cc MountManagerTest.cc KernelProxyTest.cc)
+
+SOURCES = $(UTIL_SOURCES) $(BASE_SOURCES) $(MEM_SOURCES) $(TEST_SOURCES)
+OBJECTS = $(SOURCES:.cc=.o)
 TESTS_OUT = tests_out
+OUTPUT = $(addprefix $(TESTS_OUT)/, base util test memory)
 
 # House-keeping build targets
-all: output nacl_mounts_tests
+all: nacl_mounts_tests
 
-clean:
+clean: 
 	rm -rf $(TESTS_OUT)
 
 # gtest sources
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 # gtest targets
-$(TESTS_OUT)/gtest-all.o: $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest-all.cc -o $@
+gtest-all.o: $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest-all.cc \
+        -o $(TESTS_OUT)/$@
 
-$(TESTS_OUT)/gtest_main.o: $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest_main.cc -o $@
+gtest_main.o: $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest_main.cc \
+        -o $(TESTS_OUT)/$@
 
-$(TESTS_OUT)/gtest.a: $(TESTS_OUT)/gtest-all.o
-	$(AR) $(ARFLAGS) $@ $^
+gtest.a: gtest-all.o
+	$(AR) $(ARFLAGS) $(addprefix $(TESTS_OUT)/, $@ /$^)
 
-$(TESTS_OUT)/gtest_main.a: $(TESTS_OUT)/gtest-all.o $(TESTS_OUT)/gtest_main.o
-	$(AR) $(ARFLAGS) $@ $^
+gtest_main.a: gtest-all.o gtest_main.o
+	$(AR) $(ARFLAGS) $(addprefix $(TESTS_OUT)/, $@ $^)
 
 # nacl-mounts targets for tests using gtest_main.a
-$(TESTS_OUT)/Path.o: Path.cc Path.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c Path.cc -o $@
+$(OUTPUT):
+	mkdir -p $@
 
-$(TESTS_OUT)/SimpleAutoLock.o: SimpleAutoLock.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SimpleAutoLock.cc -o $@
+%.o : %.cc $(OUTPUT)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $(TESTS_OUT)/$@
 
-$(TESTS_OUT)/MountManager.o: MountManager.cc MountManager.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MountManager.cc -o $@
-
-$(TESTS_OUT)/KernelProxy.o: KernelProxy.cc KernelProxy.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c KernelProxy.cc -o $@
-
-$(TESTS_OUT)/MemMount.o: MemMount.cc MemMount.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemMount.cc -o $@
-
-$(TESTS_OUT)/MemNode.o: MemNode.cc MemNode.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemNode.cc -o $@
-
-$(TESTS_OUT)/SlotAllocatorTest.o: SlotAllocatorTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c SlotAllocatorTest.cc -o $@
-
-$(TESTS_OUT)/PathTest.o: PathTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c PathTest.cc -o $@
-
-$(TESTS_OUT)/BaseMountTest.o: BaseMountTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c BaseMountTest.cc -o $@
-
-$(TESTS_OUT)/MemMountTest.o: MemMountTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemMountTest.cc -o $@
-
-$(TESTS_OUT)/MemNodeTest.o: MemNodeTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MemNodeTest.cc -o $@
-
-$(TESTS_OUT)/MountManagerTest.o: MountManagerTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c MountManagerTest.cc -o $@
-
-$(TESTS_OUT)/KernelProxyTest.o: KernelProxyTest.cc $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c KernelProxyTest.cc -o $@
-
-output:
-	mkdir -p $(TESTS_OUT)
-
-nacl_mounts_tests: $(TESTS_OUT)/Path.o $(TESTS_OUT)/SimpleAutoLock.o \
-      $(TESTS_OUT)/KernelProxy.o $(TESTS_OUT)/MountManager.o \
-      $(TESTS_OUT)/MemMount.o $(TESTS_OUT)/MemNode.o \
-      $(TESTS_OUT)/SlotAllocatorTest.o $(TESTS_OUT)/PathTest.o \
-      $(TESTS_OUT)/MountManagerTest.o $(TESTS_OUT)/KernelProxyTest.o \
-      $(TESTS_OUT)/MemMountTest.o $(TESTS_OUT)/MemNodeTest.o \
-      $(TESTS_OUT)/BaseMountTest.o $(TESTS_OUT)/gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $(TESTS_OUT)/$@
+nacl_mounts_tests: $(OBJECTS) gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(addprefix $(TESTS_OUT)/, $^) \
+        -o $(TESTS_OUT)/$@

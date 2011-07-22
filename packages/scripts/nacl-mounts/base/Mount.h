@@ -3,14 +3,14 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNT_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <string>
-#include "dirent.h"
-#include "macros.h"
+#include "../util/dirent.h"
+#include "../util/macros.h"
 
 // Mount serves as the base mounting class that will be used by
 // the mount manager (class MountManager).  The mount manager
@@ -59,4 +59,4 @@ class Mount {
   DISALLOW_COPY_AND_ASSIGN(Mount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNT_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_

@@ -3,12 +3,12 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLEMOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLEMOUNT_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_
 
 #include <string>
-#include "BaseMount.h"
-#include "macros.h"
+#include "../base/BaseMount.h"
+#include "../util/macros.h"
 
 // ConsoleMount is used to re-direct I/O to the console.  This mount
 // assumes the following paths:
@@ -39,4 +39,4 @@ class ConsoleMount: public BaseMount {
   DISALLOW_COPY_AND_ASSIGN(ConsoleMount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLEMOUNT_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_

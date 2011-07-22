@@ -3,11 +3,10 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-
 #include <string>
 #include "gtest/gtest.h"
-#include "MemMount.h"
-#include "MemNode.h"
+#include "../memory/MemMount.h"
+#include "../memory/MemNode.h"
 
 MemNode *CreateMemNode(std::string name, int parent,
                        MemMount *mount, bool is_dir, int slot) {

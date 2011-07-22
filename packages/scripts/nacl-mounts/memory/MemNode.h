@@ -3,15 +3,15 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_MEMNODE_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_MEMNODE_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMNODE_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMNODE_H_
 
 #include <string.h>
 #include <sys/stat.h>
 #include <list>
 #include <string>
-#include "macros.h"
-#include "SlotAllocator.h"
+#include "../util/macros.h"
+#include "../util/SlotAllocator.h"
 
 class MemMount;
 
@@ -115,4 +115,4 @@ class MemNode {
   DISALLOW_COPY_AND_ASSIGN(MemNode);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_MEMNODE_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMNODE_H_

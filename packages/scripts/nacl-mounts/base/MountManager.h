@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNTMANAGER_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNTMANAGER_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNTMANAGER_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNTMANAGER_H_
 
 #include <assert.h>
 #include <errno.h>
@@ -19,8 +19,8 @@
 #include <utility>
 #include <vector>
 #include "BaseMount.h"
-#include "Path.h"
-#include "SimpleAutoLock.h"
+#include "../util/Path.h"
+#include "../util/SimpleAutoLock.h"
 
 class Mount;
 
@@ -71,4 +71,4 @@ class MountManager {
   pthread_mutex_t mm_lock_;
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_MOUNTMANAGER_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNTMANAGER_H_

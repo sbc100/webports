@@ -3,10 +3,9 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-
+#include "../base/KernelProxy.h"
+#include "../memory/MemMount.h"
 #include "gtest/gtest.h"
-#include "MemMount.h"
-#include "KernelProxy.h"
 
 #define CHECK(x) { \
     ASSERT_NE(reinterpret_cast<void*>(NULL), x); \

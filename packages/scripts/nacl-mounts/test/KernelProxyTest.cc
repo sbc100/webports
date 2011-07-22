@@ -3,11 +3,11 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#include "BaseMount.h"
+#include "../base/BaseMount.h"
+#include "../base/KernelProxy.h"
+#include "../base/MountManager.h"
+#include "../memory/MemMount.h"
 #include "gtest/gtest.h"
-#include "KernelProxy.h"
-#include "MemMount.h"
-#include "MountManager.h"
 
 #define CHECK_WD(want) { \
   std::string wd; \

@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_DIRENT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_DIRENT_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_DIRENT_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_DIRENT_H_
 
 #include <stdint.h>
 #include <sys/stat.h>
@@ -16,4 +16,4 @@ struct dirent {
   char d_name[256];
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_DIRENT_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_DIRENT_H_

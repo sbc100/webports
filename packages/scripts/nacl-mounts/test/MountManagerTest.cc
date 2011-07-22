@@ -3,9 +3,9 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#include "BaseMount.h"
+#include "../base/BaseMount.h"
+#include "../base/MountManager.h"
 #include "gtest/gtest.h"
-#include "MountManager.h"
 
 TEST(MountManagerTest, AddRemoveMount) {
   MountManager *mm = new MountManager();

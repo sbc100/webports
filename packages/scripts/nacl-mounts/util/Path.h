@@ -4,8 +4,8 @@
  * found in the LICENSE file.
  */
 
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_PATH_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_PATH_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_PATH_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_PATH_H_
 
 #include <list>
 #include <string>
@@ -81,4 +81,4 @@ class Path {
   static bool IsSlash(const std::string& s) { return s == "/"; }
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_PATH_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_PATH_H_

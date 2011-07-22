@@ -3,14 +3,14 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASEMOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASEMOUNT_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_BASEMOUNT_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_BASEMOUNT_H_
 
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <string>
-#include "macros.h"
+#include "../util/macros.h"
 #include "Mount.h"
 
 // BaseMount serves as the base mounting class that can be used by
@@ -87,4 +87,4 @@ class BaseMount : public Mount {
   DISALLOW_COPY_AND_ASSIGN(BaseMount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASEMOUNT_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_BASEMOUNT_H_

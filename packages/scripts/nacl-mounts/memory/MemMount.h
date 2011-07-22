@@ -3,18 +3,18 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_MEMMOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_MEMMOUNT_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMMOUNT_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMMOUNT_H_
 
 #include <assert.h>
 #include <errno.h>
 #include <list>
 #include <string>
-#include "BaseMount.h"
-#include "macros.h"
+#include "../base/BaseMount.h"
+#include "../util/macros.h"
+#include "../util/Path.h"
+#include "../util/SlotAllocator.h"
 #include "MemNode.h"
-#include "Path.h"
-#include "SlotAllocator.h"
 
 // MemMount is a storage mount representing local memory.  The MemMount uses
 // the MemNode to represent an inode.
@@ -90,4 +90,4 @@ class MemMount: public BaseMount {
   DISALLOW_COPY_AND_ASSIGN(MemMount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_MEMMOUNT_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMMOUNT_H_

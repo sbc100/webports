@@ -3,18 +3,18 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_KERNELPROXY_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_KERNELPROXY_H_
+#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_KERNELPROXY_H_
+#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_KERNELPROXY_H_
 
 #include <errno.h>
 #include <pthread.h>
 #include <sys/stat.h>
 #include <string>
+#include "../util/Path.h"
+#include "../util/SimpleAutoLock.h"
+#include "../util/SlotAllocator.h"
 #include "Mount.h"
 #include "MountManager.h"
-#include "Path.h"
-#include "SimpleAutoLock.h"
-#include "SlotAllocator.h"
 
 // KernelProxy handles all of the system calls.  System calls are either
 // (1) handled entirely by the KernelProxy, (2) processed by the
@@ -111,4 +111,4 @@ class KernelProxy {
   static void Instantiate();
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_KERNELPROXY_H_
+#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_KERNELPROXY_H_
