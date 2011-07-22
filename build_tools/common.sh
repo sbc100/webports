@@ -379,7 +379,11 @@ DefaultConfigureStep() {
 DefaultBuildStep() {
   # assumes pwd has makefile
   make clean
-  make -j4
+  if [ $OS_SUBDIR = "windows" ]; then
+    make -j1
+  else
+    make -j4
+  fi
 }
 
 
