@@ -32,6 +32,11 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ./autogen.sh
+
+  # TODO(khim): remove this when nacl-gcc -V doesn't lockup.
+  # See: http://code.google.com/p/nativeclient/issues/detail?id=2074
+  TemporaryVersionWorkaround
+
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build
   cd ${PACKAGE_NAME}-build
