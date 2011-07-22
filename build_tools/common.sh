@@ -333,7 +333,7 @@ TemporaryVersionWorkaround() {
   if [ $OS_SUBDIR = "windows" ]; then
     Banner "TEMPORARY: Replacing -V with --version for ${PACKAGE_NAME}"
     cd ${NACL_PACKAGES_REPOSITORY}
-    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/configure
+    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/configure || true
   fi
 }
 
