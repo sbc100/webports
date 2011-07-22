@@ -327,7 +327,19 @@ DefaultExtractBzipStep() {
 }
 
 
+# TODO(khim): remove this when nacl-gcc -V doesn't lockup.
+# See: http://code.google.com/p/nativeclient/issues/detail?id=2074
+TemporaryVersionWorkaround() {
+  if [ $OS_SUBDIR = "windows" ]; then
+    Banner "TEMPORARY: Replacing -V with --version for ${PACKAGE_NAME}"
+    cd ${NACL_PACKAGES_REPOSITORY}
+    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/configureq
+  fi
+}
+
+
 DefaultPatchStep() {
+  TemporaryVersionWorkaround
   Patch ${PACKAGE_NAME} ${PATCH_FILE}
 }
 
