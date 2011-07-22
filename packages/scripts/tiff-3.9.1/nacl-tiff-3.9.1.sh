@@ -18,7 +18,7 @@ readonly PACKAGE_NAME=tiff-3.9.1
 
 source ../../../build_tools/common.sh
 
-export LIBS=-lnosys
+export LIBS="-lnosys -lm"
 
 DefaultPackageInstall
 exit 0

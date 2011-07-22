@@ -334,13 +334,15 @@ TemporaryVersionWorkaround() {
     Banner "TEMPORARY: Replacing -V with --version for ${PACKAGE_NAME}"
     cd ${NACL_PACKAGES_REPOSITORY}
     sed -i 's/-V/--version/g' ${PACKAGE_NAME}/configure || true
+    # For SDL.
+    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/acinclude/libtool.m4 || true
   fi
 }
 
 
 DefaultPatchStep() {
-  TemporaryVersionWorkaround
   Patch ${PACKAGE_NAME} ${PATCH_FILE}
+  TemporaryVersionWorkaround
 }
 
 
