@@ -388,8 +388,12 @@ DefaultBuildStep() {
 
 
 DefaultTouchStep() {
+  BITSPEC="32"
+  if [ "$NACL_BIT_SPEC" = "64" ]; then
+    BITSPEC="64"
+  fi
   mkdir -p ${NACL_PACKAGES_OUT}/sentinels && \
-  touch ${NACL_PACKAGES_OUT}/sentinels/sentinel_file_${PACKAGE_NAME}
+  touch ${NACL_PACKAGES_OUT}/sentinels/sentinel_file_${BITSPEC}_${PACKAGE_NAME}
 }
 
 

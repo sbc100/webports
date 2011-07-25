@@ -35,6 +35,7 @@ ifeq ($(NACL_PACKAGES_BITSIZE), 64)
   BITSIZE := 64
 endif
 
+
 NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
 
 NACL_OUT = out
@@ -97,7 +98,7 @@ PACKAGES = SDL-1.2.14 \
            protobuf-2.3.0
 
 SENTINELS_DIR = out/sentinels
-SENT = $(SENTINELS_DIR)/sentinel_file_
+SENT = $(SENTINELS_DIR)/sentinel_file_$(BITSIZE)_
 
 .PHONY: all clean
 
