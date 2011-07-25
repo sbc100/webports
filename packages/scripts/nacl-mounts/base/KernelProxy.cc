@@ -134,12 +134,12 @@ int KernelProxy::OpenHandle(Mount *mount, const std::string& path,
 
   struct stat st;
   bool ok = false;
-  if (flags && O_CREAT) {
+  if (flags & O_CREAT) {
     if (0 == mount->Creat(path, mode, &st)) {
       ok = true;
     } else {
       if ((errno != EEXIST) ||
-          (flags && O_EXCL)) {
+          (flags & O_EXCL)) {
         return -1;
       }
     }
