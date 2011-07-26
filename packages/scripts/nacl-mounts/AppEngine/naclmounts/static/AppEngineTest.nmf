@@ -1,0 +1,7 @@
+{
+  "program": {
+    "x86-32": {"url": "/static/AppEngineTest.nexe"},
+    "x86-64": {"url": "/static/AppEngineTest.nexe"},
+    "arm": {"url": "/static/AppEngineTest.nexe"}
+  }
+}
