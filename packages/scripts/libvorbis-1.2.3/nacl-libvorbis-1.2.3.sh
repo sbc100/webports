@@ -18,7 +18,7 @@ readonly PACKAGE_NAME=libvorbis-1.2.3
 
 source ../../../build_tools/common.sh
 
-export LIBS=-lnosys
+export LIBS="-lnosys -lm"
 
 DefaultPackageInstall
 exit 0
