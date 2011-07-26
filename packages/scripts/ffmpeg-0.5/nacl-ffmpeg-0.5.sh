@@ -60,7 +60,7 @@ CustomPostConfigureStep() {
 
 
 CustomBuildAndInstallStep() {
-  make -j4
+  DefaultBuildStep
   make install
   DefaultTouchStep
 }

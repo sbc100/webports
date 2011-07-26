@@ -22,12 +22,15 @@ readonly OS_NAME=$(uname -s)
 if [ $OS_NAME = "Darwin" ]; then
   readonly OS_SUBDIR="mac"
   readonly OS_SUBDIR_SHORT="mac"
+  readonly OS_JOBS=4
 elif [ $OS_NAME = "Linux" ]; then
   readonly OS_SUBDIR="linux"
   readonly OS_SUBDIR_SHORT="linux"
+  readonly OS_JOBS=4
 else
   readonly OS_SUBDIR="windows"
   readonly OS_SUBDIR_SHORT="win"
+  readonly OS_JOBS=1
 fi
 
 # Get the desired bit size.
@@ -333,7 +336,11 @@ TemporaryVersionWorkaround() {
   if [ $OS_SUBDIR = "windows" ]; then
     Banner "TEMPORARY: Replacing -V with --version for ${PACKAGE_NAME}"
     cd ${NACL_PACKAGES_REPOSITORY}
+    # Generic.
     sed -i 's/-V/--version/g' ${PACKAGE_NAME}/configure || true
+    # For freetype.
+    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/builds/unix/configure || true
+    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/builds/unix/aclocal.m4 || true
   fi
 }
 
@@ -379,11 +386,7 @@ DefaultConfigureStep() {
 DefaultBuildStep() {
   # assumes pwd has makefile
   make clean
-  if [ $OS_SUBDIR = "windows" ]; then
-    make -j1
-  else
-    make -j4
-  fi
+  make -j${OS_JOBS}
 }
 
 

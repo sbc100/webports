@@ -26,8 +26,7 @@ CustomBuildStep() {
   export AR=${NACLAR}
   export LD=${NACLLD}
   export RANLIB=${NACLRANLIB}
-  make clean
-  make -j4
+  DefaultBuildStep
 }
 
 

@@ -50,13 +50,6 @@ CustomConfigureStep() {
 }
 
 
-CustomBuildStep() {
-  # after running configure, default make target is the autoconf output
-  make clean
-  make -j4
-}
-
-
 CustomInstallStep() {
   # assumes pwd has makefile
   make install
@@ -70,7 +63,7 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomConfigureStep
-  CustomBuildStep
+  DefaultBuildStep
   CustomInstallStep
   DefaultCleanUpStep
 }

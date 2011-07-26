@@ -26,12 +26,14 @@ CustomBuildStep() {
   export AR=${NACLAR}
   export LD=${NACLLD}
   export RANLIB=${NACLRANLIB}
-  make clean
+
+  # make clean + make
+  DefaultBuildStep
 
   # To run tests, build with make -j4 test. Then using mtest from non-NaCl build
   # run the following:
   #   mtest/mtest | sel_ldr test.nexe
-  make -j4
+  # make -j4
 }
 
 

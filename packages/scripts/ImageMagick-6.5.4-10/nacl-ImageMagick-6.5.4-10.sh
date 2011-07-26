@@ -50,7 +50,7 @@ CustomBuildAndInstallStep() {
   # assumes pwd has makefile
   make clean
   make CFLAGS='-DSSIZE_MAX="((ssize_t)(~((size_t)0)>>1))"' \
-    install-libLTLIBRARIES install-data-am -j4
+    install-libLTLIBRARIES install-data-am -j${OS_JOBS}
   DefaultTouchStep
 }
 
