@@ -18,7 +18,6 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../../packages
 make clean
 
-BuildPackage sdl
 BuildPackage freeimage
 BuildPackage mesa
 

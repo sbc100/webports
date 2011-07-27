@@ -20,6 +20,9 @@ make clean
 
 # ffmpeg also builds lame, vorbis, theora, and ogg
 BuildPackage ffmpeg
+BuildPackage nacl-mounts
+BuildPackage sdl
+BuildExample games/scummvm-1.2.1 scummvm-1.2.1
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then

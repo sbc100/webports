@@ -23,10 +23,10 @@ BuildPackage ffmpeg
 BuildPackage speex
 BuildPackage flac
 BuildPackage gsl
-BuildPackage faac
-BuildPackage lua
-BuildPackage modplug
+BuildPackage nacl-mounts
+BuildPackage sdl
 BuildPackage gc
+BuildExample games/scummvm-1.2.1 scummvm-1.2.1
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
