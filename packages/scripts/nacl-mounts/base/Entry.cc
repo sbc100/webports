@@ -3,6 +3,7 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
+#include <errno.h>
 #include <string.h>
 #include "Entry.h"
 #include "KernelProxy.h"
@@ -125,4 +126,8 @@ int __wrap_link(const char *path1, const char *path2) {
 
 int __wrap_symlink(const char *path1, const char *path2) {
   return kp->symlink(path1, path2);
+}
+
+int __wrap_kill(pid_t pid, int sig) {
+  return kp->kill(pid, sig);
 }

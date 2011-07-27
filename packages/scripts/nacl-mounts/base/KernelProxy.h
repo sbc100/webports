@@ -77,6 +77,7 @@ class KernelProxy {
   int ioctl(int fd, unsigned long request);
   int link(const std::string& path1, const std::string& path2);
   int symlink(const std::string& path1, const std::string& path2);
+  int kill(pid_t pid, int sig);
 
   MountManager *mm() { return &mm_; }
 

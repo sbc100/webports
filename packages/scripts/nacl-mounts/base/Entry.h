@@ -7,6 +7,7 @@
 #define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_
 
 #include <dirent.h>
+#include <signal.h>
 #include <sys/stat.h>
 
 // The following functions are wrapper functions for system calls which are
@@ -39,6 +40,7 @@ extern "C" {
   int __wrap_ioctl(int fd, unsigned long request, ...);
   int __wrap_link(const char *path1, const char *path2);
   int __wrap_symlink(const char *path1, const char *path2);
+  int __wrap_kill(pid_t pid, int sig);
 }
 
 #endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_

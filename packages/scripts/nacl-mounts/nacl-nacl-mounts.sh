@@ -31,6 +31,7 @@ CustomBuildStep() {
   ${NACLCC} -c ${START_DIR}/base/UrlLoaderJob.cc -o UrlLoaderJob.o
   ${NACLCC} -c ${START_DIR}/util/Path.cc -o Path.o
   ${NACLCC} -c ${START_DIR}/util/SimpleAutoLock.cc -o SimpleAutoLock.o
+  ${NACLCC} -c ${START_DIR}/util/nacl_simple_tar.c -o nacl_simple_tar.o
   ${NACLCC} -c ${START_DIR}/memory/MemMount.cc -o MemMount.o
   ${NACLCC} -c ${START_DIR}/memory/MemNode.cc -o MemNode.o
   ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineMount.cc -o AppEngineMount.o
@@ -44,6 +45,7 @@ CustomBuildStep() {
       UrlLoaderJob.o \
       Path.o \
       SimpleAutoLock.o \
+      nacl_simple_tar.o \
       MemMount.o \
       MemNode.o \
       AppEngineMount.o \
@@ -57,6 +59,8 @@ CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACL_SDK_USR_LIB}
+  mkdir -p ${NACL_SDK_USR_LIB}/nacl-mounts/util
+  cp ${START_DIR}/util/simple_tar.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
 }
 
 CustomPackageInstall() {

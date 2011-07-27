@@ -310,6 +310,13 @@ int KernelProxy::ioctl(int fd, unsigned long request) {
   return -1;
 }
 
+int KernelProxy::kill(pid_t pid, int sig) {
+  errno = ENOSYS;
+  fprintf(stderr, "kill has not been implemented!\n");
+  assert(0);
+  return -1;
+}
+
 int KernelProxy::getdents(int fd, void *buf, unsigned int count) {
   FileHandle *handle;
 
