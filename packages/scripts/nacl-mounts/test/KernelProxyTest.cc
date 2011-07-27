@@ -127,7 +127,8 @@ TEST(KernelProxyTest, access) {
 
   EXPECT_EQ(0, kp->mkdir("/hello", 0));
   EXPECT_EQ(0, kp->mkdir("/hello/world", 0));
-  EXPECT_NE(-1, kp->open("/hello/world/test.txt", O_CREAT, 0));
+  int fd = kp->open("/hello/world/test.txt", O_CREAT, 0);
+  EXPECT_NE(-1, fd);
 
   int amode = F_OK;
   EXPECT_EQ(0, kp->access("/hello/world/test.txt", amode));
@@ -149,7 +150,7 @@ TEST(KernelProxyTest, access) {
   EXPECT_EQ(0, kp->access("/", amode));
   EXPECT_EQ(0, kp->access("hello/world/test.txt", amode));
 
-  EXPECT_EQ(0, kp->close(0));
+  EXPECT_EQ(0, kp->close(fd));
 }
 
 TEST(KernelProxyTest, BasicOpen) {
@@ -158,8 +159,8 @@ TEST(KernelProxyTest, BasicOpen) {
   EXPECT_EQ(0, mm->AddMount(mnt, "/"));
   kp->chdir("/");
 
-  EXPECT_EQ(0, kp->open("/test.txt", O_CREAT, 0));
-  EXPECT_EQ(1, kp->open("hi.txt", O_CREAT, 0));
+  EXPECT_EQ(3, kp->open("/test.txt", O_CREAT, 0));
+  EXPECT_EQ(4, kp->open("hi.txt", O_CREAT, 0));
 
   mm->ClearMounts();
 }

@@ -31,6 +31,19 @@ void KernelProxy::Instantiate() {
   if (!kp_instance_) {
     kp_instance_ = new KernelProxy();
   }
+  int ret;
+  ret = kp_instance_->mkdir("/dev", 0777);
+  assert(ret == 0);
+  ret = kp_instance_->mkdir("/dev/fd", 0777);
+  assert(ret == 0);
+  // TODO(arbenson): Have a ConsoleMount mounted at /dev/fd
+  int fd;
+  fd = kp_instance_->open("/dev/fd/0", O_CREAT | O_RDWR, 0);
+  assert(fd == 0);
+  fd = kp_instance_->open("/dev/fd/1", O_CREAT | O_RDWR, 0);
+  assert(fd == 1);
+  fd = kp_instance_->open("/dev/fd/2", O_CREAT | O_RDWR, 0);
+  assert(fd == 2);
 }
 
 static bool is_dir(Mount *mount, ino_t node) {
@@ -127,11 +140,10 @@ int KernelProxy::OpenHandle(Mount *mount, const std::string& path,
 
   SimpleAutoLock lock(&kp_lock_);
 
-  Path p(path);
-  if (path[0] != '/') {
-    p = Path(cwd_.FormulatePath() + "/" + path);
-  }
-
+  // OpenHandle() is only called by open().  open() handles relative paths by
+  // prepending the current working directory to the path.  open() then
+  // provides a relative path to the corresponding mount for Openhandle().
+  // Thus, we should not to do any relative path checking in OpenHandle().
   struct stat st;
   bool ok = false;
   if (flags & O_CREAT) {
@@ -145,7 +157,7 @@ int KernelProxy::OpenHandle(Mount *mount, const std::string& path,
     }
   }
   if (!ok) {
-    if (0 != mount->GetNode(p.FormulatePath(), &st)) {
+    if (0 != mount->GetNode(path, &st)) {
       errno = ENOENT;
       return -1;
     }
