@@ -16,12 +16,6 @@ RESULT=1
 # found.
 export PATH=${PATH}:/opt/local/bin
 
-BuildNaclMounts() {
-  cd ${SCRIPT_DIR}/../packages/scripts/nacl-mounts
-  echo "@@@BUILD_STEP nacl-mounts test@@@"
-  make clean && make all && ./tests_out/nacl_mounts_tests
-}
-
 StartBuild() {
   cd $2
   export NACL_PACKAGES_BITSIZE=$3
@@ -44,7 +38,6 @@ elif [ ${BUILDBOT_BUILDERNAME} = linux-ports-1 ] ; then
     StartBuild "./nacl-install-linux-ports-1.sh" ${SCRIPT_DIR}/bots/linux 64
   fi
 elif [ ${BUILDBOT_BUILDERNAME} = linux-ports-2 ] ; then
-  BuildNaclMounts
   StartBuild "./nacl-install-linux-ports-2.sh" ${SCRIPT_DIR}/bots/linux 32
   if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-linux-ports-2.sh" ${SCRIPT_DIR}/bots/linux 64
@@ -60,7 +53,6 @@ elif [ ${BUILDBOT_BUILDERNAME} = mac-ports-1 ] ; then
     StartBuild "./nacl-install-mac-ports-1.sh" ${SCRIPT_DIR}/bots/mac 64
   fi
 elif [ ${BUILDBOT_BUILDERNAME} = mac-ports-2 ] ; then
-  BuildNaclMounts
   StartBuild "./nacl-install-mac-ports-2.sh" ${SCRIPT_DIR}/bots/mac 32
   if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-mac-ports-2.sh" ${SCRIPT_DIR}/bots/mac 64
@@ -76,7 +68,6 @@ elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-1 ] ; then
     StartBuild "./nacl-install-windows-ports-1.sh" ${SCRIPT_DIR}/bots/windows 64
   fi
 elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-2 ] ; then
-  BuildNaclMounts
   StartBuild "./nacl-install-windows-ports-2.sh" ${SCRIPT_DIR}/bots/windows 32
   if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-windows-ports-2.sh" ${SCRIPT_DIR}/bots/windows 64
@@ -97,13 +88,11 @@ elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-5 ] ; then
     StartBuild "./nacl-install-windows-ports-5.sh" ${SCRIPT_DIR}/bots/windows 64
   fi
 elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-6 ] ; then
-  BuildNaclMounts
   StartBuild "./nacl-install-windows-ports-6.sh" ${SCRIPT_DIR}/bots/windows 32
   if [[ $RESULT != 0 ]]; then
     StartBuild "./nacl-install-windows-ports-6.sh" ${SCRIPT_DIR}/bots/windows 64
   fi
 else
-  BuildNaclMounts
   cd ${SCRIPT_DIR}/../packages
   if ! "./nacl-install-all.sh" ; then
     echo "Error building!" 1>&2

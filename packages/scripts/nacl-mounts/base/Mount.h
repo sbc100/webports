@@ -6,10 +6,10 @@
 #ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_
 #define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_
 
+#include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <string>
-#include "../util/dirent.h"
 #include "../util/macros.h"
 
 // Mount serves as the base mounting class that will be used by

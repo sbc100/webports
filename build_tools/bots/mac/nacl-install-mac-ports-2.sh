@@ -18,6 +18,7 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../../packages
 make clean
 
+BuildPackage nacl-mounts
 # nethack also builds memory_filesys
 BuildPackage nethack
 BuildPackage sdl

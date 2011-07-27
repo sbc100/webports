@@ -52,6 +52,7 @@ RunInstallScript() {
 }
 
 
+RunInstallScript nacl-mounts nacl-nacl-mounts.sh
 RunInstallScript SDL-1.2.14 nacl-SDL-1.2.14.sh
 RunInstallScript gc6.8 nacl-gc6.8.sh
 RunInstallScript fftw-3.2.2 nacl-fftw-3.2.2.sh

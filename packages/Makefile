@@ -58,7 +58,8 @@ NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
 		    $(NACL_SDK_USR32)/lib \
 		    $(NACL_SDK_USR64)/lib
 
-PACKAGES = SDL-1.2.14 \
+PACKAGES = nacl-mounts \
+           SDL-1.2.14 \
 	   gc6.8 \
 	   fftw-3.2.2 \
 	   libtommath-0.41 \
