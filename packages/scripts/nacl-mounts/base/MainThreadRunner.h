@@ -17,20 +17,9 @@
 #include <semaphore.h>
 #include <list>
 
-class MainThreadRunner;
-
-// The MainThreadJobEntry struct provides all of the information for
-// a particular job.  It acts as an opaque handle to the job to and
-// is used by ResultCompletion().
-struct MainThreadJobEntry;
-
 // MainThreadJob is a class that provides a method for running
-// a MainThreadJobEntry.
-class MainThreadJob {
- public:
-  virtual ~MainThreadJob() {}
-  virtual void Run(MainThreadJobEntry* entry) = 0;
-};
+// a MainThreadRunner::JobEntry.
+class MainThreadJob;
 
 // MainThreadRunner executes MainThreadJobs asynchronously
 // on the main thread.
@@ -41,20 +30,35 @@ class MainThreadRunner {
 
   // RunJob() creates an entry for the job and submits
   // that job for execution.
-  int32_t RunJob(MainThreadJob* job);
+  int32_t RunJob(MainThreadJob *job);
 
   // ResultCompletion() is a function for putting result into arg, which
-  // is reinterpreted as a MainThreadJobEntry pointer.  ResultCompletion()
+  // is reinterpreted as a JobEntry pointer.  ResultCompletion()
   // is intended to be used with pp::CompletionCallback()
   static void ResultCompletion(void *arg, int32_t result);
+
+  // The JobEntry struct provides all of the information for
+  // a particular job.  It acts as an opaque handle to the job to and
+  // is used by ResultCompletion().
+  struct JobEntry;
+
+  static pp::Instance *ExtractPepperInstance(MainThreadRunner::JobEntry *e);
 
  private:
   static void DoWorkShim(void *p, int32_t unused);
   void DoWork(void);
 
   pthread_mutex_t lock_;
-  std::list<MainThreadJobEntry*> job_queue_;
+  std::list<JobEntry*> job_queue_;
   pp::Instance *pepper_instance_;
 };
+
+class MainThreadJob {
+ public:
+  virtual ~MainThreadJob() {}
+  virtual void Run(MainThreadRunner::JobEntry *entry) = 0;
+};
+
+// MainThreadRunner executes MainThreadJobs asynchronously
 
 #endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_

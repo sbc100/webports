@@ -9,12 +9,12 @@
 // for available jobs.
 static const int kWORK_POLL_TIMEOUT = 10;
 
-struct MainThreadJobEntry {
-  pp::Instance *pepper_instance;
-  MainThreadRunner *runner;
-  MainThreadJob *job;
-  sem_t done;
-  int32_t result;
+struct MainThreadRunner::JobEntry {
+    pp::Instance *pepper_instance;
+    MainThreadRunner *runner;
+    MainThreadJob *job;
+    sem_t done;
+    int32_t result;
 };
 
 MainThreadRunner::MainThreadRunner(pp::Instance *instance) {
@@ -28,7 +28,7 @@ MainThreadRunner::~MainThreadRunner() {
 }
 
 int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
-  MainThreadJobEntry entry;
+  JobEntry entry;
 
   // initialize the entry
   entry.runner = this;
@@ -48,7 +48,7 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
 }
 
 void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
-  MainThreadJobEntry *entry = reinterpret_cast<MainThreadJobEntry*>(arg);
+  JobEntry *entry = reinterpret_cast<JobEntry*>(arg);
   entry->result = result;
   DoWorkShim(entry->runner, 0);
   sem_post(&entry->done);
@@ -62,7 +62,7 @@ void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
 void MainThreadRunner::DoWork(void) {
   pthread_mutex_lock(&lock_);
   if (!job_queue_.empty()) {
-    MainThreadJobEntry *entry = job_queue_.front();
+    JobEntry *entry = job_queue_.front();
     job_queue_.pop_front();
     entry->job->Run(entry);
   } else {
@@ -72,3 +72,7 @@ void MainThreadRunner::DoWork(void) {
   pthread_mutex_unlock(&lock_);
 }
 
+pp::Instance *MainThreadRunner::ExtractPepperInstance(
+    MainThreadRunner::JobEntry *e) {
+  return e->pepper_instance;
+}
