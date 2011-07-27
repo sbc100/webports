@@ -1,0 +1,570 @@
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/midi/timidity.cpp scummvm-1.2.1/backends/midi/timidity.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/midi/timidity.cpp	2010-12-11 01:38:09.000000000 -0800
++++ scummvm-1.2.1/backends/midi/timidity.cpp	2011-07-27 09:15:26.000000000 -0700
+@@ -34,8 +34,7 @@
+  *
+  */
+ 
+-#if defined (UNIX)
+-
++#if defined (UNIX) && !defined(NACL)
+ #include "common/util.h"
+ #include "common/endian.h"
+ #include "common/str.h"
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/main.cpp scummvm-1.2.1/backends/platform/sdl/main.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/main.cpp	2010-12-11 01:38:11.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/main.cpp	2011-07-27 09:36:08.000000000 -0700
+@@ -52,16 +52,18 @@
+ }
+ #endif
+ 
+-int main(int argc, char *argv[]) {
+-
++#if defined(NACL)
++extern "C" int scummvm_sdl_init(void) {
+ 	// Create our OSystem instance
+ 	g_system = new OSystem_SDL();
+ 	assert(g_system);
++}
++#endif
+ 
++extern "C" int scummvm_sdl_main(int argc, const char * const argv[]) {
+ #ifdef DYNAMIC_MODULES
+ 	PluginManager::instance().addPluginProvider(new SDLPluginProvider());
+ #endif
+-
+ 	// Invoke the actual ScummVM main entry point:
+ 	int res = scummvm_main(argc, argv);
+ 	((OSystem_SDL *)g_system)->deinit();
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/module.mk scummvm-1.2.1/backends/platform/sdl/module.mk
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/module.mk	2010-12-11 01:38:11.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/module.mk	2011-05-23 14:23:56.000000000 -0700
+@@ -5,6 +5,8 @@
+ 	graphics.o \
+ 	hardwarekeys.o \
+ 	main.o \
++	ppapi/scummvm_pepper_instance.o \
++	ppapi/scummvm_pepper_module.o \
+ 	sdl.o
+ 
+ # We don't use rules.mk but rather manually update OBJS and MODULE_DIRS.
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	2011-05-23 14:23:58.000000000 -0700
+@@ -0,0 +1,8 @@
++MODULE := scummvm_ppapi
++
++MODULE_OBJS := \
++	scummvm_pepper_instance.o \
++	scummvm_pepper_module.o 
++
++# Include common rules
++include $(srcdir)/rules.mk
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-07-27 09:20:16.000000000 -0700
+@@ -0,0 +1,180 @@
++// Copyright 2011 The Native Client Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can
++// be found in the LICENSE file.
++
++#include "scummvm_pepper_instance.h"
++
++#include <ppapi/cpp/completion_callback.h>
++#include <ppapi/cpp/url_loader.h>
++#include <ppapi/cpp/url_request_info.h>
++#include <ppapi/cpp/url_response_info.h>
++#include <ppapi/cpp/var.h>
++#include <ppapi/c/pp_errors.h>
++#include "ppapi/c/pp_stdint.h"
++#include "ppapi/cpp/resource.h"
++#include <stdio.h>
++#include <stdlib.h>
++#include <fcntl.h>
++#include <dirent.h>
++#include <sys/stat.h>
++
++#include <cassert>
++#include <cmath>
++#include <cstring>
++
++#include <SDL_video.h>
++
++#include <SDL.h>
++#include <SDL_nacl.h>
++
++extern "C" int scummvm_sdl_init(void);
++extern "C" int scummvm_sdl_main(int argc,const char * const argv[]);
++extern "C" int simple_tar_extract(const char *path);
++
++namespace pp {
++
++  class MyUrlLoader {
++  public:
++    MyUrlLoader(Instance* instance, pp::CompletionCallback done)
++      : factory_(this),
++	loader_(instance),
++	did_open_(false),
++	pepper_instance_(instance),
++	done_(done) {
++      file_handle_ = ::open("runimage.sar", O_CREAT | O_WRONLY);
++      assert(file_handle_ != -1);
++    }
++    void ProcessURL(const char* url) {
++      pp::CompletionCallback cc = factory_.NewCallback(&MyUrlLoader::OnOpen);
++      int32_t rv = loader_.Open(MakeRequest(url), cc);
++      if (rv != PP_OK_COMPLETIONPENDING)
++	cc.Run(rv);
++    }
++
++  private:
++    URLRequestInfo MakeRequest(const char* url) {
++      URLRequestInfo request(pepper_instance_);
++      request.SetURL(url);
++      request.SetMethod("GET");
++      request.SetFollowRedirects(true);
++      return request;
++    }
++    void OnOpen(int32_t result) {
++      if (result >= 0)
++	ReadMore();
++    }
++
++    void OnRead(int32_t result) {
++      if (result > 0) {
++	ProcessBytes(buf_, result);
++	ReadMore();
++      } else if (result == PP_OK && !did_open_) {
++	// Headers are available, and we can start reading the body.
++	did_open_ = true;
++	ProcessResponseInfo(loader_.GetResponseInfo());
++	ReadMore();
++      } else {
++	// Done reading (possibly with an error given by 'result').
++	::close(file_handle_);
++	done_.Run(0);
++      }
++    }
++    void ReadMore() {
++      pp::CompletionCallback cc = factory_.NewCallback(&MyUrlLoader::OnRead);
++      int32_t rv = loader_.ReadResponseBody(buf_, sizeof(buf_), cc);
++      if (rv != PP_OK_COMPLETIONPENDING)
++	cc.Run(rv);
++    }
++    void ProcessResponseInfo(const URLResponseInfo& response_info) {
++      // Read response headers, etc.
++    }
++    void ProcessBytes(const char* bytes, int32_t length) {
++      ::write(file_handle_, bytes, length); 
++    }
++    pp::CompletionCallbackFactory<MyUrlLoader> factory_;
++    pp::URLLoader loader_;
++    char buf_[4096];
++    bool did_open_;
++    int file_handle_;
++    pp::Instance* pepper_instance_;
++    pp::CompletionCallback done_;
++  };
++}
++
++namespace scummvm_pepper {
++
++  ScummvmPepperInstance::ScummvmPepperInstance(PP_Instance instance)
++    : pp::Instance(instance),
++      graphics_2d_context_(NULL),
++      quit_(false),
++      scummvm_run_thread_(0),
++      width_(0),
++      height_(0),
++      factory_(this) {
++  }
++
++  ScummvmPepperInstance::~ScummvmPepperInstance() {
++    quit_ = true;
++    if (scummvm_run_thread_) {
++      pthread_join(scummvm_run_thread_, NULL);
++    }
++  }
++
++  void ScummvmPepperInstance::FinishedInit(int32_t result) {
++    pthread_create(&scummvm_run_thread_, NULL, ScummVMRun, this);
++  }
++
++  void ScummvmPepperInstance::DidChangeView(const pp::Rect& position,
++					    const pp::Rect& clip) {
++    if (width_ && height_)
++      return;
++
++    if (position.size().width() == width_ &&
++	position.size().height() == height_)
++      return;  // Size didn't change, no need to update anything.
++
++    width_ = position.size().width();
++    height_ = position.size().height();
++
++    SDL_NACL_SetInstance(pp_instance(), width_, height_);
++
++    int lval = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
++
++    assert(lval >= 0);
++
++    pp::CompletionCallback cc = factory_.NewCallback(
++        &ScummvmPepperInstance::FinishedInit);
++    myloader_ = new pp::MyUrlLoader(this, cc);
++    myloader_->ProcessURL("runimage.sar");
++  }
++
++  pp::Var ScummvmPepperInstance::GetInstanceObject() {
++    ScummvmPepperInstanceScriptObject* script_object =
++        new ScummvmPepperInstanceScriptObject(this);
++    return pp::Var(this, script_object);
++  }
++
++  bool ScummvmPepperInstance::HandleInputEvent(const PP_InputEvent& event) {
++    SDL_NACL_PushEvent(&event);
++    return true;
++  }
++
++  bool ScummvmPepperInstance::Init(uint32_t argc, const char* argn[],
++                                   const char* argv[]) {
++    return true;
++  }
++
++  void* ScummvmPepperInstance::ScummVMRun(void* param) {
++    // extract the files for scummvm from the tar
++    simple_tar_extract("runimage.sar");
++
++    chdir("/usr/local/share/scummvm");
++
++    static char const * argv[] = {"scummvm", NULL};
++    scummvm_sdl_init();
++    scummvm_sdl_main(1, (char**)argv);
++
++    return NULL;
++  }
++
++}  // namespace scummvm_pepper
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-06-07 16:40:56.000000000 -0700
+@@ -0,0 +1,93 @@
++// Copyright 2011 The Native Client Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can
++// be found in the LICENSE file.
++
++#ifndef EXAMPLES_SCUMMVM_PEPPER_H_
++#define EXAMPLES_SCUMMVM_PEPPER_H_
++
++#include <ppapi/cpp/graphics_2d.h>
++#include <ppapi/cpp/image_data.h>
++#include <ppapi/cpp/instance.h>
++#include <ppapi/cpp/rect.h>
++#include <ppapi/cpp/dev/scriptable_object_deprecated.h>
++#include <ppapi/cpp/size.h>
++#include <ppapi/cpp/completion_callback.h>
++#include <pthread.h>
++
++#include <vector>
++
++// We use a URLLoader in order to obtain a compression (.sar generated
++// by simple_tar.py in memory_filesys) of all of the game files.
++namespace pp {
++  class MyUrlLoader;
++}
++
++namespace scummvm_pepper {
++
++  // The Instance class.  One of these exists for each instance of your NaCl
++  // module on the web page.  The browser will ask the Module object to create
++  // a new Instance for each occurence of the <embed> tag that has these
++  // attributes:
++  //     type="application/x-ppapi-nacl-srpc"
++  //     nexes="ARM: scummvm_pepper_arm.nexe
++  //            ..."
++  // The Instance can return a ScriptableObject representing itself.  When the
++  // browser encounters JavaScript that wants to access the Instance, it calls
++  // the GetInstanceObject() method.  All the scripting work is done though
++  // the returned ScriptableObject.
++  class ScummvmPepperInstance : public pp::Instance {
++  public:
++    explicit ScummvmPepperInstance(PP_Instance instance);
++    virtual ~ScummvmPepperInstance();
++
++    // Start up the ScummVMRun() thread.
++    virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
++
++    // Update the graphcs context to the new size, and regnerate |pixel_buffer_|
++    // to fit the new size as well.
++    virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
++
++    // The pp::Var takes over ownership of the returned script object.
++    virtual pp::Var GetInstanceObject();
++
++    // HandleInputEvent() pushes events to SDL.
++    virtual bool HandleInputEvent(const PP_InputEvent& event);
++
++    bool quit() const {
++      return quit_;
++    }
++
++  private:
++    class ScummvmPepperInstanceScriptObject : public pp::deprecated::ScriptableObject {
++    public:
++      explicit ScummvmPepperInstanceScriptObject(ScummvmPepperInstance* app_instance)
++	: pp::deprecated::ScriptableObject(),
++	app_instance_(app_instance) {}
++      virtual ~ScummvmPepperInstanceScriptObject() {}
++    private:
++      ScummvmPepperInstance* app_instance_;  // weak reference.
++    };
++
++    pp::Graphics2D* graphics_2d_context_;
++    pp::ImageData* pixel_buffer_;
++    bool flush_pending_;
++    bool quit_;
++    pthread_t scummvm_run_thread_;
++    int width_;
++    int height_;
++
++    // ScummVMRun() starts SDL and ScummVM.  ScummVM has to untar
++    // several game files, so the initialization overhead is
++    // noticeable.
++    static void* ScummVMRun(void* param);
++ 
++    void FinishedInit(int32_t result);
++
++    pp::CompletionCallbackFactory<ScummvmPepperInstance> factory_;
++    pp::MyUrlLoader *myloader_; // used for obtaining a .sar of all
++                                //of the game files 
++  };
++
++}  // namespace scummvm_pepper
++
++#endif  // EXAMPLES_SCUMMVM_PEPPER_H_
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-07-26 14:33:14.000000000 -0700
+@@ -0,0 +1,33 @@
++// Copyright 2011 The Native Client SDK Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can
++// be found in the LICENSE file.
++
++#include <ppapi/cpp/module.h>
++#include <stdio.h>
++#include "scummvm_pepper_instance.h"
++
++namespace scummvm_pepper {
++  // The Module class.  The browser calls the CreateInstance() method to create
++  // an instance of you NaCl module on the web page.  The browser creates a new
++  // instance for each <embed> tag with type="application/x-ppapi-nacl-srpc".
++  class ScummvmPepperModule : public pp::Module {
++  public:
++    ScummvmPepperModule() : pp::Module() {}
++    virtual ~ScummvmPepperModule() {}
++
++    virtual pp::Instance* CreateInstance(PP_Instance instance) {
++      return new ScummvmPepperInstance(instance);
++    }
++  };
++}  // namespace scummvm_pepper
++
++// Factory function called by the browser when the module is first loaded.
++// The browser keeps a singleton of this module.  It calls the
++// CreateInstance() method on the object you return to make instances.  There
++// is one instance per <embed> tag on the page.  This is the main binding
++// point for your NaCl module with the browser.
++namespace pp {
++  Module* CreateModule() {
++    return new scummvm_pepper::ScummvmPepperModule();
++  }
++}  // namespace pp
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/sdl.cpp scummvm-1.2.1/backends/platform/sdl/sdl.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/sdl.cpp	2010-12-11 01:38:11.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/sdl.cpp	2011-07-27 09:38:24.000000000 -0700
+@@ -97,6 +97,8 @@
+ 
+ #if !defined(_WIN32_WCE) && !defined(__SYMBIAN32__) && defined(USE_SCALERS)
+ static AspectRatio getDesiredAspectRatio() {
++  return AspectRatio(1, 1);
++#if !defined(NACL)
+ 	const size_t AR_COUNT = 4;
+ 	const char*       desiredAspectRatioAsStrings[AR_COUNT] = {            "auto",            "4/3",            "16/9",            "16/10" };
+ 	const AspectRatio desiredAspectRatios[AR_COUNT]         = { AspectRatio(0, 0), AspectRatio(4,3), AspectRatio(16,9), AspectRatio(16,10) };
+@@ -113,6 +115,7 @@
+ 	}
+ 	// TODO : Report a warning
+ 	return AspectRatio(0, 0);
++#endif
+ }
+ #endif
+ 
+@@ -135,9 +138,11 @@
+ 	if (joystick_num > -1)
+ 		sdlFlags |= SDL_INIT_JOYSTICK;
+ 
++#if !defined(NACL)
+ 	if (SDL_Init(sdlFlags) == -1) {
+ 		error("Could not initialize SDL: %s", SDL_GetError());
+ 	}
++#endif
+ 
+ 	_graphicsMutex = createMutex();
+ 
+@@ -407,7 +412,8 @@
+ 	// from the Springboard, is /. Which we don't want.
+ 	const char *home = getenv("HOME");
+ 	if (home != NULL && strlen(home) < MAXPATHLEN)
+-		snprintf(configFile, MAXPATHLEN, "%s/%s", home, DEFAULT_CONFIG_FILE);
++		//snprintf(configFile, MAXPATHLEN, "%s/%s", home, DEFAULT_CONFIG_FILE);
++		sprintf(configFile, "%s/%s", home, DEFAULT_CONFIG_FILE);
+ 	else
+ 		strcpy(configFile, DEFAULT_CONFIG_FILE);
+ #else
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/commandLine.cpp scummvm-1.2.1/base/commandLine.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/base/commandLine.cpp	2010-12-11 01:38:08.000000000 -0800
++++ scummvm-1.2.1/base/commandLine.cpp	2011-05-19 17:31:28.000000000 -0700
+@@ -140,7 +140,8 @@
+ 	va_list va;
+ 
+ 	va_start(va, s);
+-	vsnprintf(buf, STRINGBUFLEN, s, va);
++	//vsnprintf(buf, STRINGBUFLEN, s, va);
++	vsprintf(buf, s, va);
+ 	va_end(va);
+ 
+ #if !(defined(__GP32__) || defined (__SYMBIAN32__) || defined(__DS__))
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/plugins.cpp scummvm-1.2.1/base/plugins.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/base/plugins.cpp	2010-12-11 01:38:08.000000000 -0800
++++ scummvm-1.2.1/base/plugins.cpp	2011-07-27 09:54:52.000000000 -0700
+@@ -212,7 +212,7 @@
+ 		LINK_PLUGIN(AMIGA)
+ 		LINK_PLUGIN(APPLEIIGS)
+ 		LINK_PLUGIN(TOWNS)
+-		#if defined (UNIX)
++                #if defined (UNIX) && !defined(NACL)
+ 		LINK_PLUGIN(TIMIDITY)
+ 		#endif
+ 
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/config.log scummvm-1.2.1/config.log
+--- temp_scummvm-1.2.1/scummvm-1.2.1/config.log	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/config.log	2011-07-20 14:46:13.000000000 -0700
+@@ -0,0 +1 @@
++Configure run on Wed Jul 20 14:46:13 PDT 2011
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/configure scummvm-1.2.1/configure
+--- temp_scummvm-1.2.1/scummvm-1.2.1/configure	2010-12-11 01:38:39.000000000 -0800
++++ scummvm-1.2.1/configure	2011-05-18 18:08:14.000000000 -0700
+@@ -1091,6 +1091,11 @@
+ 	_host_cpu=arm
+ 	_host_alias=arm-wince-mingw32ce
+ 	;;
++nacl)
++	_host_os=nacl
++	_host_cpu=x86
++	_host_alias=nacl
++	;;
+ *)
+ 	if test -n "$_host"; then
+ 		guessed_host=`$_srcdir/config.sub $_host`
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/scumm/detection.cpp scummvm-1.2.1/engines/scumm/detection.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/engines/scumm/detection.cpp	2010-12-11 01:37:23.000000000 -0800
++++ scummvm-1.2.1/engines/scumm/detection.cpp	2011-05-19 17:46:37.000000000 -0700
+@@ -23,6 +23,11 @@
+  *
+  */
+ 
++
++#define snprintf4(a,b,c,d) sprintf(a,c,d)
++#define snprintf5(a,b,c,d,e) sprintf(a,c,d,e)
++#define snprintf6(a,b,c,d,e,f) sprintf(a,c,d,e,f)
++
+ #include "base/plugins.h"
+ 
+ #include "common/archive.h"
+@@ -72,20 +77,20 @@
+ 
+ 	if (_game.version == 4) {
+ 		if (room == 0 || room >= 900) {
+-			snprintf(buf, sizeof(buf), "%03d.lfl", room);
++			snprintf4(buf, sizeof(buf), "%03d.lfl", room);
+ 		} else {
+-			snprintf(buf, sizeof(buf), "disk%02d.lec", diskNumber);
++			snprintf4(buf, sizeof(buf), "disk%02d.lec", diskNumber);
+ 		}
+ 	} else {
+ 		char id = 0;
+ 
+ 		switch (_filenamePattern.genMethod) {
+ 		case kGenDiskNum:
+-			snprintf(buf, sizeof(buf), _filenamePattern.pattern, diskNumber);
++			snprintf4(buf, sizeof(buf), _filenamePattern.pattern, diskNumber);
+ 			break;
+ 
+ 		case kGenRoomNum:
+-			snprintf(buf, sizeof(buf), _filenamePattern.pattern, room);
++			snprintf4(buf, sizeof(buf), _filenamePattern.pattern, room);
+ 			break;
+ 
+ 		case kGenHEMac:
+@@ -107,15 +112,15 @@
+ 					else if (_game.id == GID_TREASUREHUNT)
+ 						strcpy(buf, "Blue'sTreasureHunt.(b)");
+ 					else
+-						snprintf(buf, sizeof(buf), "%s.(b)", _filenamePattern.pattern);
++						snprintf4(buf, sizeof(buf), "%s.(b)", _filenamePattern.pattern);
+ 					break;
+ 				case 1:
+ 					id = 'a';
+-					snprintf(buf, sizeof(buf), "%s.(a)", _filenamePattern.pattern);
++					snprintf4(buf, sizeof(buf), "%s.(a)", _filenamePattern.pattern);
+ 					break;
+ 				default:
+ 					id = '0';
+-					snprintf(buf, sizeof(buf), "%s.he0", _filenamePattern.pattern);
++					snprintf4(buf, sizeof(buf), "%s.he0", _filenamePattern.pattern);
+ 				}
+ 			} else if (_game.heversion >= 70) {
+ 				id = (room == 0) ? '0' : '1';
+@@ -126,16 +131,16 @@
+ 			if (_filenamePattern.genMethod == kGenHEPC) {
+ 				// For HE >= 98, we already called snprintf above.
+ 				if (_game.heversion < 98 || room < 0)
+-					snprintf(buf, sizeof(buf), "%s.he%c", _filenamePattern.pattern, id);
++					snprintf5(buf, sizeof(buf), "%s.he%c", _filenamePattern.pattern, id);
+ 			} else {
+ 				if (id == '3') { // special case for cursors
+ 					// For mac they're stored in game binary
+ 					strncpy(buf, _filenamePattern.pattern, sizeof(buf));
+ 				} else {
+ 					if (_filenamePattern.genMethod == kGenHEMac)
+-						snprintf(buf, sizeof(buf), "%s (%c)", _filenamePattern.pattern, id);
++						snprintf5(buf, sizeof(buf), "%s (%c)", _filenamePattern.pattern, id);
+ 					else
+-						snprintf(buf, sizeof(buf), "%s %c", _filenamePattern.pattern, id);
++						snprintf5(buf, sizeof(buf), "%s %c", _filenamePattern.pattern, id);
+ 				}
+ 			}
+ 
+@@ -159,19 +164,19 @@
+ 	switch (genMethod) {
+ 	case kGenDiskNum:
+ 	case kGenRoomNum:
+-		snprintf(buf, sizeof(buf), pattern, 0);
++		snprintf4(buf, sizeof(buf), pattern, 0);
+ 		break;
+ 
+ 	case kGenHEPC:
+-		snprintf(buf, sizeof(buf), "%s.he0", pattern);
++		snprintf4(buf, sizeof(buf), "%s.he0", pattern);
+ 		break;
+ 
+ 	case kGenHEMac:
+-		snprintf(buf, sizeof(buf), "%s (0)", pattern);
++		snprintf4(buf, sizeof(buf), "%s (0)", pattern);
+ 		break;
+ 
+ 	case kGenHEMacNoParens:
+-		snprintf(buf, sizeof(buf), "%s 0", pattern);
++		snprintf4(buf, sizeof(buf), "%s 0", pattern);
+ 		break;
+ 
+ 	case kGenUnchanged:
