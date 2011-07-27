@@ -38,7 +38,7 @@ endif
 
 NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
 
-NACL_OUT = out
+NACL_OUT = ../out
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
                  $(NACL_OUT)/repository \
                  $(NACL_OUT)/repository64 \
@@ -98,7 +98,7 @@ PACKAGES = nacl-mounts \
            boost_1_43_0 \
            protobuf-2.3.0
 
-SENTINELS_DIR = out/sentinels
+SENTINELS_DIR = $(NACL_OUT)/sentinels
 SENT = $(SENTINELS_DIR)/sentinel_file_$(BITSIZE)_
 
 .PHONY: all clean
