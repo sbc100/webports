@@ -73,7 +73,7 @@ readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish${CROSS_ID}
 readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 
 # sha1check python script
-readonly SHA1CHECK=${NACL_PACKAGES_SCRIPTS}/sha1check.py
+readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
 
 readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 readonly NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}gcc
