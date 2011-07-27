@@ -94,8 +94,15 @@ elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-6 ] ; then
   fi
 else
   cd ${SCRIPT_DIR}/../packages
-  if ! "./nacl-install-all.sh" ; then
-    echo "Error building!" 1>&2
+  export NACL_PACKAGES_BITSIZE=32
+  make clean
+  if ! make all ; then
+    echo "Error building for 32-bits." 1>&2
+    exit 1
+  fi
+  export NACL_PACKAGES_BITSIZE=64
+  if ! make all ; then
+    echo "Error building for 64-bits." 1>&2
     exit 1
   fi
 fi
