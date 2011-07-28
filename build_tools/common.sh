@@ -66,7 +66,7 @@ ${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86}
 readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
 # packages subdirectories
-readonly NACL_PACKAGES_SCRIPTS=${NACL_PACKAGES}/scripts
+readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
 readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
 readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository${CROSS_ID}
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish${CROSS_ID}
@@ -160,7 +160,7 @@ Fetch() {
 
 Check() {
   # verify sha1 checksum for tarball
-  local IN_FILE=${NACL_PACKAGES_SCRIPTS}/${PACKAGE_NAME}/${PACKAGE_NAME}.sha1
+  local IN_FILE=${NACL_PACKAGES_LIBRARIES}/${PACKAGE_NAME}/${PACKAGE_NAME}.sha1
   if ${SHA1CHECK} <${IN_FILE} &>/dev/null; then
     return 0
   else
@@ -201,7 +201,7 @@ Patch() {
   if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
     Banner "Patching ${LOCAL_PACKAGE_NAME}"
     cd ${NACL_PACKAGES_REPOSITORY}
-    patch -p0 < ${NACL_PACKAGES_SCRIPTS}/${LOCAL_PATCH_FILE}
+    patch -p0 < ${NACL_PACKAGES_LIBRARIES}/${LOCAL_PATCH_FILE}
   fi
 }
 

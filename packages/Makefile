@@ -8,7 +8,7 @@
 #
 # This makefile builds all of the Native Client packages listed below
 # in $(PACKAGES). Each package has a dependency on its own sentinel
-# file, which can be found at scripts/sentinels/sentinel_file_*
+# file, which can be found at naclports/src/out/sentinels/sentinel_file_*
 #
 # The makefile depends on the NACL_SDK_ROOT environment variable
 #
@@ -115,7 +115,7 @@ $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)%
 
 $(PACKAGES:%=$(SENT)%): $(SENT)%:
 	@echo "@@@BUILD_STEP $(BITSIZE)-bit $*@@@"
-	cd scripts/$* && ./nacl-$*.sh
+	cd libraries/$* && ./nacl-$*.sh
 	mkdir -p $(@D)
 	touch $@
 
