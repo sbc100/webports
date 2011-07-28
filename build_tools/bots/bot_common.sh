@@ -36,6 +36,7 @@ BuildPackage() {
 }
 
 BuildExample() {
+  echo "@@@BUILD_STEP $NACL_PACKAGES_BITSIZE-bit $2@@@"
   readonly CURR_DIR=$(cd "$(dirname "$0")" ; pwd)
   cd ../examples/$1
   if ./nacl-$2.sh ; then
