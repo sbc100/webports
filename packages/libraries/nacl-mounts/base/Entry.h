@@ -23,6 +23,7 @@ extern "C" {
   int __wrap_mkdir(const char *path, mode_t mode);
   int __wrap_rmdir(const char *path);
   int __wrap_umount(const char *path);
+  int __wrap_mount(const char *type, const char *dir, int flags, void *data);
 
   ssize_t __wrap_read(int fd, void *buf, size_t nbyte);
   ssize_t __wrap_write(int fd, const void *buf, size_t nbyte);

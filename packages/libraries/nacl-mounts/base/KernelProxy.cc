@@ -501,6 +501,24 @@ int KernelProxy::umount(const std::string& path) {
   return mm_.RemoveMount(path.c_str());
 }
 
+int KernelProxy::mount(const std::string& path, void *mount) {
+  if (path.empty()) {
+    errno = ENOENT;
+    return -1;
+  }
+
+  SimpleAutoLock lock(&kp_lock_);
+
+  Mount *m = reinterpret_cast<Mount *>(mount);
+
+  Path p(path);
+  if (path[0] != '/') {
+    p = Path(cwd_.FormulatePath() + "/" + path);
+  }
+
+  return mm_.AddMount(m, path.c_str());
+}
+
 int KernelProxy::stat(const std::string& path, struct stat *buf) {
   if (path.empty()) {
     errno = ENOENT;

@@ -44,6 +44,7 @@ class KernelProxy {
   int mkdir(const std::string& path, mode_t mode);
   int rmdir(const std::string& path);
   int umount(const std::string& path);
+  int mount(const std::string& path, void *mount);
 
   // System calls that take a file descriptor as an argument:
   // The kernel proxy will determine to which mount the file

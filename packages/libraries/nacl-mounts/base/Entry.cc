@@ -64,6 +64,10 @@ int __wrap_umount(const char *path) {
   return kp->umount(path);
 }
 
+int __wrap_mount(const char *type, const char *dir, int flags, void *data) {
+  return kp->mount(dir, data);
+}
+
 ssize_t __wrap_read(int fd, void *buf, size_t nbyte) {
   return kp->read(fd, buf, nbyte);
 }
