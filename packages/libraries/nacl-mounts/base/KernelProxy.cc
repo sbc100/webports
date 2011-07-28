@@ -31,12 +31,6 @@ void KernelProxy::Instantiate() {
   if (!kp_instance_) {
     kp_instance_ = new KernelProxy();
   }
-  int ret;
-  ret = kp_instance_->mkdir("/dev", 0777);
-  assert(ret == 0);
-  ret = kp_instance_->mkdir("/dev/fd", 0777);
-  assert(ret == 0);
-  // TODO(arbenson): Have a ConsoleMount mounted at /dev/fd
   int fd;
   fd = kp_instance_->open("/dev/fd/0", O_CREAT | O_RDWR, 0);
   assert(fd == 0);

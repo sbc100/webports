@@ -11,8 +11,7 @@ TEST(MountManagerTest, AddRemoveMount) {
   MountManager *mm = new MountManager();
   BaseMount *mnt = new BaseMount();
 
-  // should start with a default mount at "/"
-  EXPECT_EQ(-1, mm->AddMount(mnt, "/"));
+  EXPECT_EQ(0, mm->AddMount(mnt, "/"));
   EXPECT_EQ(0, mm->RemoveMount("/"));
 
   EXPECT_EQ(0, mm->AddMount(mnt, "/"));

@@ -5,9 +5,9 @@
  */
 #include "../memory/MemMount.h"
 #include "MountManager.h"
+#include <stdio.h>
 
 MountManager::MountManager() {
-  Init();
 }
 
 MountManager::~MountManager() {
@@ -18,7 +18,13 @@ void MountManager::Init() {
   if (pthread_mutex_init(&mm_lock_, NULL)) assert(0);
   MemMount *default_mount = new MemMount();
   assert(default_mount);
-  AddMount(default_mount, "/");
+  int ret = AddMount(default_mount, "/");
+  assert(ret == 0);
+  // TODO(arbenson): change std_mount to a console mount
+  MemMount *std_mount = new MemMount();
+  assert(std_mount);
+  ret = AddMount(std_mount, "/dev/fd");
+  assert(ret == 0);
   cwd_mount_ = default_mount;
 }
 
@@ -29,8 +35,11 @@ int MountManager::AddMount(Mount *m, const char *path) {
   if (!m) return -2;  // bad mount
   std::string p(path);
   if (p.empty()) return -3;  // bad path
-  Mount *mount = mount_map_[path];
-  if (mount) return -1;  // mount already exists
+  std::map<std::string, Mount *>::iterator it = mount_map_.find(p);
+  if (it != mount_map_.end() && it->second != NULL) {
+    // a mount already exists at that path
+    return -1;
+  }
   mount_map_[p] = m;
   return 0;
 }
@@ -63,7 +72,7 @@ void MountManager::ClearMounts(void) {
 
   std::map<std::string, Mount *>::iterator it;
   for (it = mount_map_.begin(); it != mount_map_.end(); ++it) {
-    if (it->second) {
+    if (it->second != NULL && it->second->ref_count() <= 0) {
       delete it->second;
       it->second = NULL;
     }

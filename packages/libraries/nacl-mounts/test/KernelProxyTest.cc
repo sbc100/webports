@@ -153,7 +153,7 @@ TEST(KernelProxyTest, access) {
   EXPECT_EQ(0, kp->close(fd));
 }
 
-TEST(KernelProxyTest, BasicOpen) {
+TEST(KernelProxyTest, BasicOpenClose) {
   mm->ClearMounts();
   MemMount *mnt = new MemMount();
   EXPECT_EQ(0, mm->AddMount(mnt, "/"));
@@ -161,6 +161,8 @@ TEST(KernelProxyTest, BasicOpen) {
 
   EXPECT_EQ(3, kp->open("/test.txt", O_CREAT, 0));
   EXPECT_EQ(4, kp->open("hi.txt", O_CREAT, 0));
+  EXPECT_EQ(0, kp->close(3));
+  EXPECT_EQ(0, kp->close(4));
 
   mm->ClearMounts();
 }
@@ -182,4 +184,18 @@ TEST(KernelProxyTest, Stat) {
   ASSERT_EQ(0, kp->stat("/MemMountTest_Stat/file", &st));
   ASSERT_FALSE(S_ISDIR(st.st_mode));
   ASSERT_TRUE(S_ISREG(st.st_mode));
+  ASSERT_EQ(0, kp->close(fd));
+}
+
+TEST(KernelProxyTest, MountRefs) {
+  mm->ClearMounts();
+  MemMount *mnt = new MemMount();
+  EXPECT_EQ(0, mm->AddMount(mnt, "/"));
+  kp->chdir("/");
+  // Close the default fds
+  EXPECT_EQ(-1, mm->RemoveMount("/dev/fd"));
+  EXPECT_EQ(0, kp->close(0));
+  EXPECT_EQ(0, kp->close(1));
+  EXPECT_EQ(0, kp->close(2));
+  EXPECT_EQ(0, mm->RemoveMount("/dev/fd"));
 }
