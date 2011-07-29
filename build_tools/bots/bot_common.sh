@@ -33,10 +33,13 @@ BuildPackage() {
     BuildSuccess $1
   else
     if [ ${BUILDBOT_BUILDERNAME:0:3} = win ] ; then
-      if make $1 ; then
-        BuildSuccess $1
-        return
-      fi
+      echo " @@@STEP_WARNINGS@@@"
+      for i in 1 2 3 ; do
+        if make $1 ; then
+          BuildSuccess $1
+          return
+        fi
+      done
     fi
     BuildFailure $1
   fi
