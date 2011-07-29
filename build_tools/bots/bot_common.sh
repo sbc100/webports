@@ -28,9 +28,16 @@ BuildFailure() {
 }
 
 BuildPackage() {
+  echo "@@@BUILD_STEP $NACL_PACKAGES_BITSIZE-bit $1@@@"
   if make $1 ; then
     BuildSuccess $1
   else
+    if [ ${BUILDBOT_BUILDERNAME:0:3} = win ] ; then
+      if make $1 ; then
+        BuildSuccess $1
+        return
+      fi
+    fi
     BuildFailure $1
   fi
 }
