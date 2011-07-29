@@ -28,7 +28,6 @@ BuildFailure() {
 }
 
 BuildPackage() {
-  echo "@@@BUILD_STEP $NACL_PACKAGES_BITSIZE-bit $1@@@"
   if make $1 ; then
     BuildSuccess $1
   else

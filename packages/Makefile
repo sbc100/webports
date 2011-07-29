@@ -114,6 +114,7 @@ $(NACL_DIRS_TO_MAKE):
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)%
 
 $(PACKAGES:%=$(SENT)%): $(SENT)%:
+	echo "@@@BUILD_STEP $(BITSIZE)-bit $*@@@"
 	cd libraries/$* && ./nacl-$*.sh
 	mkdir -p $(@D)
 	touch $@
