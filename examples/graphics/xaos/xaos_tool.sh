@@ -1,11 +1,7 @@
 #!/bin/bash
-# Copyright 2011, Google Inc.
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-#
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 #@ xaos_tool.sh
 #@
@@ -135,7 +131,7 @@ download-xaos() {
 }
 
 #@
-#@ prepare-src-xaos <dir>
+#@ prepare-src-xaos
 #@
 #@  untar xaos tarball and apply local patches
 prepare-src-xaos() {
@@ -172,7 +168,7 @@ build-xaos() {
   export RANLIB=${NACLRANLIB}
   export LDFLAGS="-static"
   export CFLAGS="${cflags}"
-  export LIBS="-lppruntime -limc -lplatform -lpthread -lgio -lsrpc -lstdc++ -lm -u PPP_GetInterface -u PPP_ShutdownModule -u PPP_InitializeModule -u original_main"
+  export LIBS="-lppapi -lpthread -lstdc++ -lm -u PPP_GetInterface -u PPP_ShutdownModule -u PPP_InitializeModule -u original_main"
 
   ./configure\
       --with-png=no\

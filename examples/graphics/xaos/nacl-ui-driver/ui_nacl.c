@@ -1,4 +1,12 @@
+/*
+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 #include "aconfig.h"
+
+#include "ui_nacl.h"
 
 /*includes */
 #include <ui.h>
@@ -6,9 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ui_nacl.h"
-
-#include "ppapi/c/pp_input_event.h"
+#include "ppapi/c/ppb_input_event.h"
 
 char* getcwd(char* buf, size_t size) {
   NaClLog(LOG_INFO, "getcwd\n");
@@ -95,24 +101,24 @@ static void nacl_processevents (int wait, int *mx, int *my, int *mb, int *k) {
   static unsigned int mousey = 0;
   static int iflag = 0; /* FIXEM*/
 
-  struct PP_InputEvent event;
-  if (GetEvent(&event, wait)) {
+  struct PpapiEvent* event = GetEvent(wait);
+  if (event != NULL) {
     /* only support mouse events for now */ 
-
-    switch (event.type) {
+    switch (event->type) {
      default:
       break;
      case PP_INPUTEVENT_TYPE_MOUSEDOWN:
-      mousebuttons |= ButtonToMask(event.u.mouse.button);
+      mousebuttons |= ButtonToMask(event->button);
       break;
      case PP_INPUTEVENT_TYPE_MOUSEUP:
-      mousebuttons &= ~ButtonToMask(event.u.mouse.button);
+      mousebuttons &= ~ButtonToMask(event->button);
       break;
      case PP_INPUTEVENT_TYPE_MOUSEMOVE:
-      mousex = event.u.mouse.x;
-      mousey = event.u.mouse.y;
+      mousex = event->position.x;
+      mousey = event->position.y;
       break;
     }
+    free(event);
   }
 
   *mx = mousex;

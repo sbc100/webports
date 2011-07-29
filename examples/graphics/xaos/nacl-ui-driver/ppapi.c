@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #include "aconfig.h"
 
 /*includes */
@@ -8,7 +13,6 @@
 
 #include "ppapi/c/pp_completion_callback.h"
 #include "ppapi/c/pp_errors.h"
-#include "ppapi/c/pp_input_event.h"
 #include "ppapi/c/pp_instance.h"
 #include "ppapi/c/pp_module.h"
 #include "ppapi/c/pp_point.h"
@@ -16,9 +20,11 @@
 
 #include "ppapi/c/ppb.h"
 #include "ppapi/c/ppb_core.h"
+#include "ppapi/c/ppb_input_event.h"
 #include "ppapi/c/ppb_graphics_2d.h"
 #include "ppapi/c/ppb_image_data.h"
 #include "ppapi/c/ppb_instance.h"
+#include "ppapi/c/ppp_input_event.h"
 
 #include "ppapi/c/ppp.h"
 #include "ppapi/c/ppp_instance.h"
@@ -29,12 +35,13 @@
 /* chrome cananot handle all that many refreshs */
 #define kRefreshInterval 20
 
+
 static struct {
   pthread_mutex_t mutex;
   pthread_cond_t condvar;
   int tail;
   int num;
-  struct PP_InputEvent queue[kMaxEvents];
+  struct PpapiEvent* queue[kMaxEvents];
 } EventQueue;
 
 
@@ -53,9 +60,11 @@ static struct {
 /*  zero initialized */
 static struct {
   struct PPB_Core* if_core;
-  struct PPB_Instance* if_instance;
-  struct PPB_ImageData* if_image_data;
   struct PPB_Graphics2D* if_graphics_2d;
+  struct PPB_ImageData* if_image_data;
+  struct PPB_InputEvent* if_input_event;
+  struct PPB_Instance* if_instance;
+  struct PPB_MouseInputEvent* if_mouse_input_event;
 
   PP_Module module;
   PP_Instance instance;
@@ -137,6 +146,11 @@ static InitEvents() {
 static InitScreenRefresh(PP_Instance instance,
                          const struct PP_Size* size) {
   NaClLog(LOG_INFO, "initialize screen refresh\n");
+  /* NOTE: this limits are not tight but there seem to be some
+     limitations inside xaos */
+  CHECK(size->width <= 640);
+  CHECK(size->width <= 480);
+
   Video.width = size->width;
   Video.height = size->height;
 
@@ -167,15 +181,16 @@ static InitScreenRefresh(PP_Instance instance,
 
 
 static Init(PP_Instance instance, const struct PP_Size* size) {
-
   InitEvents();
+  Global.if_input_event->RequestInputEvents(instance,
+                                            PP_INPUTEVENT_CLASS_MOUSE);
   NaClLog(LOG_INFO, "allocate xaos video buffers\n");
   /* HORRIBLE HACK - TO AVOID SOME MEMORY CORRUPTION PROBLEMS */
   malloc(1024 * 1024);
   Global.instance = instance;
   InitScreenRefresh(instance, size);
 
-  NaClLog(LOG_INFO, "spawn xoas main thread\n");
+  NaClLog(LOG_INFO, "spawn xaos main thread\n");
   int rv = pthread_create(&Global.tid, NULL, ThreadForRunningXaosMain, 0);
   if (rv != 0) {
     NaClLog(LOG_FATAL, "cannot spawn xaos thread\n");
@@ -225,15 +240,24 @@ static void DidChangeFocus(PP_Instance instance,
 }
 
 static PP_Bool HandleInputEvent(PP_Instance instance,
-                                const struct PP_InputEvent* event) {
+                                PP_Resource input_event) {
   NaClLog(LOG_INFO, "HandleInputEvent\n");
+  if (!Global.if_mouse_input_event->IsMouseInputEvent(input_event)) {
+    return;
+  }
+
+  struct PpapiEvent* event = (struct PpapiEvent*) malloc(sizeof *event);
+  event->type = Global.if_input_event->GetType(input_event);
+  event->button = Global.if_mouse_input_event->GetButton(input_event);
+  event->position = Global.if_mouse_input_event->GetPosition(input_event);
+  event->clicks = Global.if_mouse_input_event->GetClickCount(input_event);
+
   pthread_mutex_lock(&EventQueue.mutex);
   if (EventQueue.num >= kMaxEvents) {
     NaClLog(LOG_ERROR, "dropping events because of overflow\n");
   } else {
     int head = (EventQueue.tail + EventQueue.num) % kMaxEvents;
-    /* structure copy */
-    EventQueue.queue[head] = *event;
+    EventQueue.queue[head] = event;
     ++EventQueue.num;
     if (EventQueue.num >= kMaxEvents) EventQueue.num -= kMaxEvents;
     pthread_cond_signal(&EventQueue.condvar);
@@ -244,22 +268,21 @@ static PP_Bool HandleInputEvent(PP_Instance instance,
 }
 
 
-int GetEvent(struct PP_InputEvent* event, int wait) {
-  int result = 0;
+struct PpapiEvent* GetEvent(int wait) {
+  struct PpapiEvent* event = NULL;
   pthread_mutex_lock(&EventQueue.mutex);
   if (EventQueue.num == 0 && wait) {
     pthread_cond_wait(&EventQueue.condvar, &EventQueue.mutex);
   }
 
   if (EventQueue.num > 0) {
-    result = 1;
-    *event = EventQueue.queue[EventQueue.tail];
+    event = EventQueue.queue[EventQueue.tail];
     ++EventQueue.tail;
     if (EventQueue.tail >= kMaxEvents) EventQueue.tail -= kMaxEvents;
     --EventQueue.num;
   }
   pthread_mutex_unlock(&EventQueue.mutex);
-  return result;
+  return event;
 }
 
 static PP_Bool HandleDocumentLoad(PP_Instance instance,
@@ -280,18 +303,25 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module module_id,
                                    PPB_GetInterface get_browser_interface) {
   NaClLog(LOG_INFO, "PPP_InitializeModule\n");
   Global.module = module_id;
-  Global.if_core = (struct PPB_Core*)
-                          get_browser_interface(PPB_CORE_INTERFACE);
+  Global.if_core =
+    (struct PPB_Core*) get_browser_interface(PPB_CORE_INTERFACE);
   CHECK(Global.if_core != 0);
-  Global.if_instance = (struct PPB_Instance*)
-                              get_browser_interface(PPB_INSTANCE_INTERFACE);
+  Global.if_instance =
+    (struct PPB_Instance*) get_browser_interface(PPB_INSTANCE_INTERFACE);
   CHECK(Global.if_instance != 0);
-  Global.if_image_data = (struct PPB_ImageData*)
-                                get_browser_interface(PPB_IMAGEDATA_INTERFACE);
+  Global.if_image_data =
+    (struct PPB_ImageData*) get_browser_interface(PPB_IMAGEDATA_INTERFACE);
   CHECK(Global.if_image_data != 0);
-  Global.if_graphics_2d = (struct PPB_Graphics2D*)
-                                 get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
+  Global.if_graphics_2d =
+    (struct PPB_Graphics2D*) get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
   CHECK(Global.if_graphics_2d != 0);
+  Global.if_input_event =
+    (struct PPB_InputEvent*) get_browser_interface(PPB_INPUT_EVENT_INTERFACE);
+  CHECK(Global.if_input_event != 0);
+  Global.if_mouse_input_event =
+    (struct PPB_MouseInputEvent*) get_browser_interface(
+        PPB_MOUSE_INPUT_EVENT_INTERFACE);
+  CHECK(Global.if_input_event != 0);
   return PP_OK;
 }
 
@@ -305,9 +335,11 @@ static struct PPP_Instance GlobalInstanceInterface = {
   DidDestroy,
   DidChangeView,
   DidChangeFocus,
-  HandleInputEvent,
-  HandleDocumentLoad,
-  GetInstanceObject
+  HandleDocumentLoad
+};
+
+static struct PPP_InputEvent GlobalInputEventInterface = {
+  HandleInputEvent
 };
 
 
@@ -317,6 +349,11 @@ PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
                      strlen(PPP_INSTANCE_INTERFACE))) {
 
       return &GlobalInstanceInterface;
+    }
+  if (0 == strncmp(PPP_INPUT_EVENT_INTERFACE, interface_name,
+                   strlen(PPP_INPUT_EVENT_INTERFACE))) {
+
+      return &GlobalInputEventInterface;
     }
   return NULL;
 }

@@ -12,14 +12,21 @@
     <body>
     <h1>Xaos NativeClient demo</h1>
 
-
+    <!-- Note xaos seems to have problems with larger dimension -->
     <embed
-           width=1000
-           height=700
-           nacl="xaos.nmf"
-           type="application/x-nacl"
-           dimensions="2"/>
+           width=640
+           height=480
+           src="xaos.nmf"
+           type="application/x-nacl" />
 
     <br />
+    XaoS is a GPL'ed open source project: 
+    <a href="http://wmi.math.u-szeged.hu/xaos/doku.php?id=documentation:manual:gpl"> license</a>,
+    <a href="http://wmi.math.u-szeged.hu/xaos/doku.php?id=downloads:main">
+      source</a>.
+    <br />
+    The patches used to create this demo can be found 
+    <a href="http://code.google.com/p/naclports/source/browse/trunk/src/examples/graphics/xaos/">
+      here</a>.
   </body>
 </HTML>
