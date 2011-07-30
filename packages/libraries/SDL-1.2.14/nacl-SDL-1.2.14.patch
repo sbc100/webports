@@ -425,8 +425,8 @@ diff -Naur temp_SDL-1.2.14/SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14/src/video
  #endif
 diff -Naur temp_SDL-1.2.14/SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14/src/video/nacl/SDL_naclevents.cc
 --- temp_SDL-1.2.14/SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1969-12-31 16:00:00.000000000 -0800
-+++ SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	2011-07-29 16:20:18.000000000 -0700
-@@ -0,0 +1,176 @@
++++ SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	2011-07-29 16:43:06.000000000 -0700
+@@ -0,0 +1,177 @@
 +#include "SDL_config.h"
 +
 +#include "SDL_nacl.h"
@@ -546,7 +546,8 @@ diff -Naur temp_SDL-1.2.14/SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.1
 +    case 191:
 +      return SDLK_SLASH;
 +    case 192:
-+      return SDLK_BACKQUOTE;    default:
++      return SDLK_BACKQUOTE;
++    default:
 +      return SDLK_UNKNOWN;
 +  }
 +}
