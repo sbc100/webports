@@ -33,7 +33,8 @@ CustomConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
+  export PATH=${NACL_TOOLCHAIN_ROOT}/nacl/include:${PATH}
   export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
   export DEFINES="$DEFINES -Dvsnprintf\(a,b,c,d\)=vsprintf\(a,c,d\)"
   export DEFINES="$DEFINES -Dsnprintf\(a,b,c,...\)=sprintf\(a,c,__VA_ARGS__\)"
@@ -90,7 +91,6 @@ CustomInstallStep() {
   SCUMMVM_DIR=runimage/usr/local/share/scummvm
   BASS_DIR=${SCUMMVM_DIR}/${BASS_FLOPPY_NAME}
   mkdir -p ${BASS_DIR}
-  SCRIPT_DIR=${NACL_PACKAGES_SCRIPTS}/${PACKAGE_NAME}
   SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   cp ${SRC_DIR}/gui/themes/scummclassic.zip \
      ${SRC_DIR}/dists/engine-data/sky.cpt \
