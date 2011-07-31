@@ -62,8 +62,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.m
 +include $(srcdir)/rules.mk
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-07-31 12:22:14.000000000 -0700
-@@ -0,0 +1,184 @@
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-07-31 13:11:00.000000000 -0700
+@@ -0,0 +1,175 @@
 +// Copyright 2011 The Native Client Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
 +// be found in the LICENSE file.
@@ -215,15 +215,6 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +    myloader_->ProcessURL("runimage.sar");
 +  }
 +
-+  /*
-+  pp::Var ScummvmPepperInstance::GetInstanceObject() {
-+    ScummvmPepperInstanceScriptObject* script_object =
-+        new ScummvmPepperInstanceScriptObject(this);
-+    //return pp::Var(this, script_object);
-+    return pp::Var(script_object);
-+  }
-+  */
-+
 +  bool ScummvmPepperInstance::HandleInputEvent(pp::InputEvent *event) {
 +    SDL_NACL_PushEvent(event);
 +    return true;
@@ -250,8 +241,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +}  // namespace scummvm_pepper
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-07-31 12:22:06.000000000 -0700
-@@ -0,0 +1,94 @@
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-07-31 13:10:46.000000000 -0700
+@@ -0,0 +1,91 @@
 +// Copyright 2011 The Native Client Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
 +// be found in the LICENSE file.
@@ -301,9 +292,6 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +    // Update the graphcs context to the new size, and regnerate |pixel_buffer_|
 +    // to fit the new size as well.
 +    virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
-+
-+    // The pp::Var takes over ownership of the returned script object.
-+    //virtual pp::Var GetInstanceObject();
 +
 +    // HandleInputEvent() pushes events to SDL.
 +    virtual bool HandleInputEvent(pp::InputEvent *event);

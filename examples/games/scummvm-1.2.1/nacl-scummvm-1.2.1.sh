@@ -20,7 +20,6 @@ PACKAGE_NAME=scummvm-1.2.1
 readonly BASS_FLOPPY_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
 readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
 
-
 source ../../../build_tools/common.sh
 
 SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/examples/games/scummvm-1.2.1
@@ -34,7 +33,7 @@ CustomConfigureStep() {
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH}
-  export PATH=${NACL_TOOLCHAIN_ROOT}/nacl/include:${PATH}
+  export PATH="$NACL_TOOLCHAIN_ROOT/nacl/usr/bin:$PATH"
   export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
   export DEFINES="$DEFINES -Dvsnprintf\(a,b,c,d\)=vsprintf\(a,c,d\)"
   export DEFINES="$DEFINES -Dsnprintf\(a,b,c,...\)=sprintf\(a,c,__VA_ARGS__\)"
