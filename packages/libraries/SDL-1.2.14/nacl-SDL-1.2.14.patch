@@ -110,7 +110,7 @@ diff -Naur temp_SDL-1.2.14/SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14/include
  #undef SDL_VIDEO_DRIVER_PHOTON
 diff -Naur temp_SDL-1.2.14/SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14/include/SDL_nacl.h
 --- temp_SDL-1.2.14/SDL-1.2.14/include/SDL_nacl.h	1969-12-31 16:00:00.000000000 -0800
-+++ SDL-1.2.14/include/SDL_nacl.h	2011-07-29 15:42:23.000000000 -0700
++++ SDL-1.2.14/include/SDL_nacl.h	2011-08-01 13:47:05.000000000 -0700
 @@ -0,0 +1,22 @@
 +#ifndef _SDL_nacl_h
 +#define _SDL_nacl_h
@@ -125,7 +125,7 @@ diff -Naur temp_SDL-1.2.14/SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14/include/SDL_
 +
 +#include <ppapi/c/ppp_instance.h>
 +void SDL_NACL_SetInstance(PP_Instance instance, int width, int height);
-+void SDL_NACL_PushEvent(pp::InputEvent *ppevent);
++void SDL_NACL_PushEvent(const pp::InputEvent& ppevent);
 +
 +/* Ends C function definitions when using C++ */
 +#ifdef __cplusplus
@@ -425,8 +425,8 @@ diff -Naur temp_SDL-1.2.14/SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14/src/video
  #endif
 diff -Naur temp_SDL-1.2.14/SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14/src/video/nacl/SDL_naclevents.cc
 --- temp_SDL-1.2.14/SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1969-12-31 16:00:00.000000000 -0800
-+++ SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	2011-07-29 16:43:06.000000000 -0700
-@@ -0,0 +1,177 @@
++++ SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	2011-08-01 14:03:50.000000000 -0700
+@@ -0,0 +1,179 @@
 +#include "SDL_config.h"
 +
 +#include "SDL_nacl.h"
@@ -552,26 +552,28 @@ diff -Naur temp_SDL-1.2.14/SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.1
 +  }
 +}
 +
-+void SDL_NACL_PushEvent(pp::InputEvent *ppevent) {
++void SDL_NACL_PushEvent(const pp::InputEvent& ppevent) {
 +  SDL_keysym keysym;
 +  struct SDL_NACL_Event* event =
 +    (struct SDL_NACL_Event*)malloc(sizeof(struct SDL_NACL_Event));
-+  event->type = ppevent->GetType();
++  event->type = ppevent.GetType();
++
++  pp::InputEvent *input_event = const_cast<pp::InputEvent*>(&ppevent);
 +
 +  if (event->type == PP_INPUTEVENT_TYPE_MOUSEDOWN ||
 +      event->type == PP_INPUTEVENT_TYPE_MOUSEUP) {
 +    pp::MouseInputEvent *mouse_event =
-+      reinterpret_cast<pp::MouseInputEvent*>(ppevent);
++      reinterpret_cast<pp::MouseInputEvent*>(input_event);
 +    event->button = translateButton(mouse_event->GetButton());
 +  } else if (event->type == PP_INPUTEVENT_TYPE_MOUSEMOVE) {
 +    pp::MouseInputEvent *mouse_event =
-+      reinterpret_cast<pp::MouseInputEvent*>(ppevent);
++      reinterpret_cast<pp::MouseInputEvent*>(input_event);
 +    event->x = mouse_event->GetPosition().x();
 +    event->y = mouse_event->GetPosition().y();
 +  } else if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN || 
 +             event->type == PP_INPUTEVENT_TYPE_KEYUP) {
 +    pp::KeyboardInputEvent *keyboard_event =
-+      reinterpret_cast<pp::KeyboardInputEvent*>(ppevent);
++      reinterpret_cast<pp::KeyboardInputEvent*>(input_event);
 +    keysym.scancode = 0;
 +    keysym.sym = translateKey(keyboard_event->GetKeyCode());
 +    keysym.mod = KMOD_NONE;
