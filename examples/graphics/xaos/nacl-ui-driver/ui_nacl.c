@@ -14,8 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ppapi/c/ppb_input_event.h"
-
 char* getcwd(char* buf, size_t size) {
   NaClLog(LOG_INFO, "getcwd\n");
   strcpy(buf, "/tmp");

@@ -6,6 +6,9 @@
 
 #ifndef UI_NACL_H
 
+#include "ppapi/c/ppb_input_event.h"
+
+
 #define BITS_PER_PIXEL 32
 #define BYTES_PER_PIXEL (BITS_PER_PIXEL/8)
 
@@ -32,7 +35,7 @@ struct PpapiEvent* GetEvent(int wait);
 #include <nacl/nacl_check.h>
 #include <nacl/nacl_log.h>
 #else
-#define CHECK(cond) do { if (!cond) {puts("ABORT: " #cond "\n"); abort();}} while(0)
+#define CHECK(cond) do { if (!(cond)) {puts("ABORT: " #cond "\n"); abort();}} while(0)
 #define NaClLog(lev, ...)  fprintf(stderr, __VA_ARGS__)
 #endif
 

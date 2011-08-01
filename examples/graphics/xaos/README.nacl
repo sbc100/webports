@@ -17,10 +17,12 @@ For more information see:
 To build and run XaoS simply:
 
   # download the xaos tarball
-  .//xaos_tool.sh download-xaos
+  ./xaos_tool.sh download-xaos
 
-  # build 32/64 bit nexes
+  # prepare sources and build 32/64 bit nexes
   ./xaos_tool.sh build-all
+  # NOTE: you may to specify the location of the sdk like so:
+  NACL_SDK_ROOT=/usr/local/.../native_client_sdk_0_5_984/ ./xaos_tool.sh build-all
 
   # start local webserver
   python -m SimpleHTTPServer

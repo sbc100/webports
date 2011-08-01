@@ -146,10 +146,10 @@ static InitEvents() {
 static InitScreenRefresh(PP_Instance instance,
                          const struct PP_Size* size) {
   NaClLog(LOG_INFO, "initialize screen refresh\n");
-  /* NOTE: this limits are not tight but there seem to be some
-     limitations inside xaos */
+  /* NOTE: these limits are not tight but there seem to be some
+     not so well documented limitations inside xaos */
   CHECK(size->width <= 640);
-  CHECK(size->width <= 480);
+  CHECK(size->height <= 480);
 
   Video.width = size->width;
   Video.height = size->height;
