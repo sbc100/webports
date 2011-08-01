@@ -194,6 +194,17 @@ DefaultDownloadBzipStep() {
   fi
 }
 
+DefaultDownloadZipStep() {
+  cd ${NACL_PACKAGES_TARBALLS}
+  # if matching zip already exists, don't download again
+  if ! Check ; then
+    Fetch ${URL} ${PACKAGE_NAME}.zip
+    if ! Check ; then
+       Banner "${PACKAGE_NAME} failed checksum!"
+       exit -1
+    fi
+  fi
+}
 
 Patch() {
   local LOCAL_PACKAGE_NAME=$1
@@ -329,6 +340,12 @@ DefaultExtractBzipStep() {
   fi
 }
 
+DefaultExtractZipStep() {
+  Banner "Unzipping ${PACKAGE_NAME}.zip"
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}
+  Remove ${PACKAGE_NAME}
+  unzip -d ${PACKAGE_NAME} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
+}
 
 # TODO(khim): remove this when nacl-gcc -V doesn't lockup.
 # See: http://code.google.com/p/nativeclient/issues/detail?id=2074

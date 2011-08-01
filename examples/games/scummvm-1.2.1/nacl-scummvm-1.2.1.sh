@@ -101,8 +101,7 @@ CustomInstallStep() {
   cp `find ${SRC_DIR}/gui/themes/fonts/ -type f` ${SCUMMVM_DIR}
 
   #Beneath a Steel Sky (Floppy version)
-  cp -r ${NACL_PACKAGES_REPOSITORY}/sky.* ${BASS_DIR}
-  cp -r ${NACL_PACKAGES_REPOSITORY}/readme.txt ${BASS_DIR}
+  cp -r ${NACL_PACKAGES_REPOSITORY}/${BASS_FLOPPY_NAME} ${BASS_DIR}
 
   cd runimage
   python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../runimage.sar
@@ -119,11 +118,23 @@ CustomCheck() {
 }
 
 
+CustomDownloadZipStep() {
+  cd ${NACL_PACKAGES_TARBALLS}
+  # if matching zip already exists, don't download again
+  if ! CustomCheck $3; then
+    Fetch $1 $2.zip
+    if ! CustomCheck $3 ; then
+       Banner "${PACKAGE_NAME} failed checksum!"
+       exit -1
+    fi
+  fi
+}
+
 CustomDownloadStep() {
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching tarball already exists, don't download again
   if ! CustomCheck $3; then
-    Fetch $1 $2.tgz
+    Fetch $1 $2.tbz2
     if ! CustomCheck $3 ; then
        Banner "${PACKAGE_NAME} failed checksum!"
        exit -1
@@ -135,8 +146,8 @@ GameGetStep() {
   PACKAGE_NAME_TEMP=${PACKAGE_NAME}
   PACKAGE_NAME=$2
   SHA1=${SCUMMVM_EXAMPLE_DIR}/$2/$2.sha1
-  CustomDownloadStep $1 $2 ${SHA1}
-  DefaultExtractStep
+  CustomDownloadZipStep $1 $2 ${SHA1}
+  DefaultExtractZipStep
   PACKAGE_NAME=${PACKAGE_NAME_TEMP}
 }
 
@@ -160,7 +171,7 @@ CustomPackageInstall() {
   DefaultPreInstallStep
   CustomDownloadStep ${URL} ${PACKAGE_NAME} \
     ${SCUMMVM_EXAMPLE_DIR}/scummvm-1.2.1.sha1
-  DefaultExtractStep
+  DefaultExtractBzipStep
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
