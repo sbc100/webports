@@ -34,6 +34,7 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH}
   export PATH="$NACL_TOOLCHAIN_ROOT/nacl/usr/bin:$PATH"
+  export PATH="$NACL_TOOLCHAIN_ROOT/nacl64/usr/bin:$PATH"
   export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
   export DEFINES="$DEFINES -Dvsnprintf\(a,b,c,d\)=vsprintf\(a,c,d\)"
   export DEFINES="$DEFINES -Dsnprintf\(a,b,c,...\)=sprintf\(a,c,__VA_ARGS__\)"
@@ -118,11 +119,11 @@ CustomCheck() {
 }
 
 
-CustomDownloadBzipStep() {
+CustomDownloadStep() {
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching tarball already exists, don't download again
   if ! CustomCheck $3; then
-    Fetch $1 $2.tbz2
+    Fetch $1 $2.tgz
     if ! CustomCheck $3 ; then
        Banner "${PACKAGE_NAME} failed checksum!"
        exit -1
@@ -134,8 +135,8 @@ GameGetStep() {
   PACKAGE_NAME_TEMP=${PACKAGE_NAME}
   PACKAGE_NAME=$2
   SHA1=${SCUMMVM_EXAMPLE_DIR}/$2/$2.sha1
-  CustomDownloadBzipStep $1 $2 ${SHA1}
-  DefaultExtractBzipStep
+  CustomDownloadStep $1 $2 ${SHA1}
+  DefaultExtractStep
   PACKAGE_NAME=${PACKAGE_NAME_TEMP}
 }
 
@@ -157,9 +158,9 @@ CustomPatchStep() {
 CustomPackageInstall() {
   GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
   DefaultPreInstallStep
-  CustomDownloadBzipStep ${URL} ${PACKAGE_NAME} \
+  CustomDownloadStep ${URL} ${PACKAGE_NAME} \
     ${SCUMMVM_EXAMPLE_DIR}/scummvm-1.2.1.sha1
-  DefaultExtractBzipStep
+  DefaultExtractStep
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
