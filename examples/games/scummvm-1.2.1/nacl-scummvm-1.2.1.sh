@@ -101,7 +101,7 @@ CustomInstallStep() {
   cp `find ${SRC_DIR}/gui/themes/fonts/ -type f` ${SCUMMVM_DIR}
 
   #Beneath a Steel Sky (Floppy version)
-  cp -r ${NACL_PACKAGES_REPOSITORY}/${BASS_FLOPPY_NAME} ${BASS_DIR}
+  cp -r ${NACL_PACKAGES_REPOSITORY}/${BASS_FLOPPY_NAME}/* ${BASS_DIR}
 
   cd runimage
   python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../runimage.sar

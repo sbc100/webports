@@ -62,8 +62,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.m
 +include $(srcdir)/rules.mk
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-07-31 13:11:00.000000000 -0700
-@@ -0,0 +1,175 @@
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-08-01 10:31:53.000000000 -0700
+@@ -0,0 +1,177 @@
 +// Copyright 2011 The Native Client Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
 +// be found in the LICENSE file.
@@ -178,6 +178,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +      width_(0),
 +      height_(0),
 +      factory_(this) {
++    RequestInputEvents(PP_INPUTEVENT_CLASS_MOUSE);
++    RequestFilteringInputEvents(PP_INPUTEVENT_CLASS_KEYBOARD);
 +  }
 +
 +  ScummvmPepperInstance::~ScummvmPepperInstance() {
@@ -215,8 +217,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +    myloader_->ProcessURL("runimage.sar");
 +  }
 +
-+  bool ScummvmPepperInstance::HandleInputEvent(pp::InputEvent *event) {
-+    SDL_NACL_PushEvent(event);
++  bool ScummvmPepperInstance::HandleInputEvent(const pp::InputEvent& event) {
++    SDL_NACL_PushEvent((pp::InputEvent*)&event);
 +    return true;
 +  }
 +
@@ -229,7 +231,7 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +    // extract the files for scummvm from the tar
 +    simple_tar_extract("runimage.sar");
 +
-+    chdir("/usr/local/share/scummvm");
++    int ret = chdir("/usr/local/share/scummvm");
 +
 +    static char const * argv[] = {"scummvm", NULL};
 +    scummvm_sdl_init();
@@ -241,8 +243,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +}  // namespace scummvm_pepper
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-07-31 13:10:46.000000000 -0700
-@@ -0,0 +1,91 @@
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-08-01 10:25:11.000000000 -0700
+@@ -0,0 +1,84 @@
 +// Copyright 2011 The Native Client Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
 +// be found in the LICENSE file.
@@ -294,23 +296,16 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +    virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
 +
 +    // HandleInputEvent() pushes events to SDL.
-+    virtual bool HandleInputEvent(pp::InputEvent *event);
++    //virtual bool HandleInputEvent(pp::InputEvent *event);
++
++    // HandleInputEvent() pushes events to SDL.
++    virtual bool HandleInputEvent(const pp::InputEvent& event);
 +
 +    bool quit() const {
 +      return quit_;
 +    }
 +
 +  private:
-+    class ScummvmPepperInstanceScriptObject : public pp::deprecated::ScriptableObject {
-+    public:
-+      explicit ScummvmPepperInstanceScriptObject(ScummvmPepperInstance* app_instance)
-+	: pp::deprecated::ScriptableObject(),
-+	app_instance_(app_instance) {}
-+      virtual ~ScummvmPepperInstanceScriptObject() {}
-+    private:
-+      ScummvmPepperInstance* app_instance_;  // weak reference.
-+    };
-+
 +    pp::Graphics2D* graphics_2d_context_;
 +    pp::ImageData* pixel_buffer_;
 +    bool flush_pending_;
@@ -336,8 +331,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +#endif  // EXAMPLES_SCUMMVM_PEPPER_H_
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-07-26 14:33:14.000000000 -0700
-@@ -0,0 +1,33 @@
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-08-01 09:47:43.000000000 -0700
+@@ -0,0 +1,34 @@
 +// Copyright 2011 The Native Client SDK Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
 +// be found in the LICENSE file.
@@ -368,6 +363,7 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +// point for your NaCl module with the browser.
 +namespace pp {
 +  Module* CreateModule() {
++    fprintf(stderr, "In CreateModule()\n");
 +    return new scummvm_pepper::ScummvmPepperModule();
 +  }
 +}  // namespace pp
