@@ -12,6 +12,10 @@
 #define MAXPATHLEN 256
 #endif
 
+extern "C" {
+  ssize_t __real_write(int fd, const void *buf, size_t count);
+}
+
 KernelProxy *kp = KernelProxy::KPInstance();
 
 int __wrap_chdir(const char *path) {
@@ -73,6 +77,9 @@ ssize_t __wrap_read(int fd, void *buf, size_t nbyte) {
 }
 
 ssize_t __wrap_write(int fd, const void *buf, size_t count) {
+  if (fd <= 2) {
+    return __real_write(fd, buf, count);
+  }
   return kp->write(fd, buf, count);
 }
 
