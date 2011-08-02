@@ -19,8 +19,8 @@ struct MainThreadRunner::JobEntry {
 
 MainThreadRunner::MainThreadRunner(pp::Instance *instance) {
   pepper_instance_ = instance;
-  DoWork();
   pthread_mutex_init(&lock_, NULL);
+  DoWork();
 }
 
 MainThreadRunner::~MainThreadRunner() {
