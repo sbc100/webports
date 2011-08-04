@@ -62,8 +62,9 @@ class MountManager {
   // mounts will be called.
   void ClearMounts(void);
 
-  // Get the node and its corresponding mount given the path
-  std::pair<Mount *, ino_t> GetNode(const std::string& path);
+  // Get the Mount corresponding to the node.  GetNode() also fills the stat
+  // buffer with information about the node.
+  Mount *GetNode(const std::string& path, struct stat *buf);
 
  private:
   std::map<std::string, Mount*> mount_map_;

@@ -17,12 +17,10 @@ MountManager::~MountManager() {
 void MountManager::Init() {
   if (pthread_mutex_init(&mm_lock_, NULL)) assert(0);
   MemMount *default_mount = new MemMount();
-  assert(default_mount);
   int ret = AddMount(default_mount, "/");
   assert(ret == 0);
   // TODO(arbenson): change std_mount to a console mount
   MemMount *std_mount = new MemMount();
-  assert(std_mount);
   ret = AddMount(std_mount, "/dev/fd");
   assert(ret == 0);
   cwd_mount_ = default_mount;
@@ -31,10 +29,14 @@ void MountManager::Init() {
 int MountManager::AddMount(Mount *m, const char *path) {
   SimpleAutoLock lock(&mm_lock_);
 
-  if (!path) return -3;  // bad path
-  if (!m) return -2;  // bad mount
+  // check for null mount
+  if (!m) return -2;
+  // check for NULL path
+  if (!path) return -3;
   std::string p(path);
-  if (p.empty()) return -3;  // bad path
+  // check for empty path
+  if (p.empty()) return -3;
+  // TODO(arbenson): check for access to the parent directory
   std::map<std::string, Mount *>::iterator it = mount_map_.find(p);
   if (it != mount_map_.end() && it->second != NULL) {
     // a mount already exists at that path
@@ -80,35 +82,28 @@ void MountManager::ClearMounts(void) {
   cwd_mount_ = NULL;
 }
 
-std::pair<Mount *, ino_t> MountManager::GetNode(const std::string& path) {
-  std::pair<Mount *, std::string> m_and_p;
-  std::pair<Mount *, ino_t> res;
-  res.first = NULL;
-  res.second = -1;
-
+Mount *MountManager::GetNode(const std::string& path,
+                                                struct stat *buf) {
   // check if path is of length zero
   if (path.length() == 0) {
-    return res;
+    return NULL;
   }
 
-  m_and_p = GetMount(path);
+  std::pair<Mount *, std::string> m_and_p = GetMount(path);
 
   // Wait until after GetMount() to acquire the lock
   SimpleAutoLock lock(&mm_lock_);
 
   if ((m_and_p.second).length() == 0) {
-    return res;
+    return NULL;
   } else {
     if (!m_and_p.first) {
-      return res;
+      return NULL;
     }
-    struct stat st;
-    if (0 != m_and_p.first->GetNode(m_and_p.second, &st)) {
-      return res;
+    if (0 != m_and_p.first->GetNode(m_and_p.second, buf)) {
+      return NULL;
     }
-    res.first = m_and_p.first;
-    res.second = st.st_ino;
-    return res;
+    return m_and_p.first;
   }
 }
 

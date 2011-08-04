@@ -65,15 +65,15 @@ int KernelProxy::chdir(const std::string& path) {
   }
 
   struct stat buf;
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), &buf);
+  Mount *mount = mm_.GetNode(p.FormulatePath(), &buf);
 
   // check if node exists
-  if (!mnode.first) {
+  if (!mount) {
     errno = ENOENT;
     return -1;
   }
   // check that node is a directory
-  if (!is_dir(mnode.first, mnode.second)) {
+  if (!is_dir(mount, buf.st_ino)) {
     errno = ENOTDIR;
     return -1;
   }
@@ -441,13 +441,13 @@ int KernelProxy::chmod(const std::string& path, mode_t mode) {
   }
 
   struct stat buf;
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), &buf);
+  Mount *mount = mm_.GetNode(p.FormulatePath(), &buf);
 
-  if (!mnode.first) {
+  if (!mount) {
     errno = ENOENT;
     return -1;
   }
-  return mnode.first->Chmod(mnode.second, mode);
+  return mount->Chmod(buf.st_ino, mode);
 }
 
 int KernelProxy::remove(const std::string& path) {
@@ -527,8 +527,8 @@ int KernelProxy::stat(const std::string& path, struct stat *buf) {
     p = Path(cwd_.FormulatePath() + "/" + path);
   }
 
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), buf);
-  if (!mnode.first) {
+  Mount *mount = mm_.GetNode(p.FormulatePath(), buf);
+  if (!mount) {
     errno = ENOENT;
     return -1;
   }
@@ -619,12 +619,12 @@ int KernelProxy::rmdir(const std::string& path) {
   }
 
   struct stat buf;
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), &buf);
-  if (!mnode.first) {
+  Mount *mount = mm_.GetNode(p.FormulatePath(), &buf);
+  if (!mount) {
     errno = ENOENT;
     return -1;
   }
-  return mnode.first->Rmdir(mnode.second);
+  return mount->Rmdir(buf.st_ino);
 }
 
 KernelProxy::FileHandle *KernelProxy::GetFileHandle(int fd) {
