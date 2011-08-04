@@ -64,7 +64,8 @@ int KernelProxy::chdir(const std::string& path) {
     p = Path(cwd_.FormulatePath() + "/" + path);
   }
 
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath());
+  struct stat buf;
+  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), &buf);
 
   // check if node exists
   if (!mnode.first) {
@@ -439,7 +440,9 @@ int KernelProxy::chmod(const std::string& path, mode_t mode) {
     p = Path(cwd_.FormulatePath() + "/" + path);
   }
 
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(path);
+  struct stat buf;
+  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), &buf);
+
   if (!mnode.first) {
     errno = ENOENT;
     return -1;
@@ -458,7 +461,7 @@ int KernelProxy::remove(const std::string& path) {
     p = Path(cwd_.FormulatePath() + "/" + path);
   }
 
-  std::pair<Mount *, std::string> mp = mm_.GetMount(path);
+  std::pair<Mount *, std::string> mp = mm_.GetMount(p.FormulatePath());
   if (!mp.first) {
     errno = ENOENT;
     return -1;
@@ -524,17 +527,15 @@ int KernelProxy::stat(const std::string& path, struct stat *buf) {
     p = Path(cwd_.FormulatePath() + "/" + path);
   }
 
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(path);
+  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), buf);
   if (!mnode.first) {
     errno = ENOENT;
     return -1;
   }
-  return mnode.first->Stat(mnode.second, buf);
+  return 0;
 }
 
 int KernelProxy::access(const std::string& path, int amode) {
-  struct stat *buf = (struct stat *)malloc(sizeof(struct stat));
-
   if (path.empty()) {
     errno = ENOENT;
     return -1;
@@ -567,10 +568,11 @@ int KernelProxy::access(const std::string& path, int amode) {
        it != incremental_paths.end(); ++it) {
     curr_path = *it;
     // first call stat on the file
-    if (stat(curr_path, buf) == -1) {
+    struct stat buf;
+    if (stat(curr_path, &buf) == -1) {
       return -1;  // stat should take care of errno
     }
-    mode_t mode = buf->st_mode;
+    mode_t mode = buf.st_mode;
 
     // We know that the file exists at this point.
     // Thus, we don't have to check F_OK.
@@ -616,7 +618,8 @@ int KernelProxy::rmdir(const std::string& path) {
     p = Path(cwd_.FormulatePath() + "/" + path);
   }
 
-  std::pair<Mount *, ino_t> mnode = mm_.GetNode(path);
+  struct stat buf;
+  std::pair<Mount *, ino_t> mnode = mm_.GetNode(p.FormulatePath(), &buf);
   if (!mnode.first) {
     errno = ENOENT;
     return -1;

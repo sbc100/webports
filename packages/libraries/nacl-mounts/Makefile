@@ -10,7 +10,7 @@
 GTEST_DIR = ../../../testing/gtest
 
 CPPFLAGS += -I$(GTEST_DIR) -I$(GTEST_DIR)/include
-CXXFLAGS += -g -Wall -Werror -lpthread -I$(GTEST_DIR)
+CXXFLAGS += -g -Wall -Werror -I$(GTEST_DIR)
 
 # All gtest headers
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
@@ -60,5 +60,5 @@ $(OUTPUT):
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $(TESTS_OUT)/$@
 
 nacl_mounts_tests: $(OBJECTS) gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(addprefix $(TESTS_OUT)/, $^) \
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $(addprefix $(TESTS_OUT)/, $^) \
         -o $(TESTS_OUT)/$@

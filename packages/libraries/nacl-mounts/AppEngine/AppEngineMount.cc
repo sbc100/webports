@@ -19,6 +19,9 @@ AppEngineMount::AppEngineMount(MainThreadRunner *runner,
   runner_ = runner;
   base_url_ = base_url;
   slots_.Alloc();
+  int slot = CreateNode("/", NULL);
+  AppEngineNode *node = slots_.At(slot);
+  node->set_is_dir(true);
 }
 
 int AppEngineMount::RemoteRead(const std::string& path,
@@ -61,7 +64,7 @@ int AppEngineMount::Creat(const std::string& path, mode_t mode,
 
   // Second, check if the path is on GAE
   std::vector<char> data;
-  if (!RemoteRead(abs_path, &data)) {
+  if (RemoteRead(abs_path, &data)) {
     errno = EIO;
     return -1;
   }
@@ -82,7 +85,7 @@ int AppEngineMount::GetNode(const std::string& path, struct stat *buf) {
     return Stat(it->second, buf);
   }
   std::vector<char> data;
-  if (!RemoteRead(abs_path, &data)) {
+  if (RemoteRead(abs_path, &data)) {
     errno = EIO;
     return -1;
   }
@@ -161,7 +164,7 @@ int AppEngineMount::Getdents(ino_t slot, off_t offset,
   job->AppendField("prefix", node->path());
   job->set_url(base_url_ + "/list");
   int ret = runner_->RunJob(job);
-  if (!ret) {
+  if (ret) {
     return -1;
   }
 
@@ -225,8 +228,10 @@ ssize_t AppEngineMount::Read(ino_t slot, off_t offset, void *buf,
 
   // Do the read.
   char *data = node->data();
-  if (!data) {
+  if (data) {
     memcpy(buf, data + offset, len);
+  } else {
+    return 0;
   }
   return len;
 }
@@ -260,7 +265,7 @@ int AppEngineMount::Fsync(ino_t slot) {
   job->AppendDataField("data", node->data(), node->len(), false);
   job->set_url(base_url_ + "/write");
   int ret = runner_->RunJob(job);
-  if (!ret || dst.size() == 0 || dst[dst.size()-1] != '1') {
+  if (ret || dst.size() == 0 || dst[dst.size()-1] != '1') {
     errno = EIO;
     return -1;
   }
@@ -281,7 +286,7 @@ int AppEngineMount::Unlink(const std::string& path) {
   job->AppendField("filename", abs_path);
   job->set_url(base_url_ + "/remove");
   int ret = runner_->RunJob(job);
-  if (!ret || dst.size() == 0 || dst[dst.size()-1] != '1') {
+  if (ret || dst.size() == 0 || dst[dst.size()-1] != '1') {
     errno = EIO;
     return -1;
   }
@@ -291,7 +296,7 @@ int AppEngineMount::Unlink(const std::string& path) {
 int AppEngineMount::Mkdir(const std::string& path, mode_t mode,
                           struct stat *buf) {
   int ret = Creat(path, mode, buf);
-  if (ret != 0) {
+  if (ret) {
     return ret;
   }
   AppEngineNode *node = slots_.At(buf->st_ino);

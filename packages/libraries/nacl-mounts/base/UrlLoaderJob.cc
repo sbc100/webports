@@ -7,9 +7,9 @@
 #include <string.h>
 #include "UrlLoaderJob.h"
 
-#define BOUNDARY_STRING_HEADER "60061E\n"
-#define BOUNDARY_STRING_SEP "--60061E\r\n"
-#define BOUNDARY_STRING_END "--60061E--\r\n"
+#define BOUNDARY_STRING_HEADER "n4(1+60061E(|20|^^|34TW1234567890!$\n"
+#define BOUNDARY_STRING_SEP "--n4(1+60061E(|20|^^|34TW1234567890!$\r\n"
+#define BOUNDARY_STRING_END "--n4(1+60061E(|20|^^|34TW1234567890!$--\r\n"
 
 UrlLoaderJob::UrlLoaderJob() {
   start_ = -1;
@@ -97,7 +97,8 @@ void UrlLoaderJob::OnOpen(int32_t result) {
   if (result >= 0) {
     ReadMore();
   } else {
-    MainThreadRunner::ResultCompletion(job_entry_, result);
+    // TODO(arbenson): provide a more meaningful completion result
+    MainThreadRunner::ResultCompletion(job_entry_, 0);
     delete this;
   }
 }
@@ -112,8 +113,8 @@ void UrlLoaderJob::OnRead(int32_t result) {
     ProcessResponseInfo(loader_->GetResponseInfo());
     ReadMore();
   } else {
-    // Done reading (possibly with an error given by 'result').
-    MainThreadRunner::ResultCompletion(job_entry_, result);
+    // TODO(arbenson): provide a more meaningful completion result
+    MainThreadRunner::ResultCompletion(job_entry_, 0);
     delete this;
   }
 }
@@ -123,9 +124,6 @@ void UrlLoaderJob::ReadMore() {
   int32_t rv = loader_->ReadResponseBody(buf_, sizeof(buf_), cc);
   if (rv != PP_OK_COMPLETIONPENDING) {
     cc.Run(rv);
-  } else {
-    MainThreadRunner::ResultCompletion(job_entry_, rv);
-    delete this;
   }
 }
 
