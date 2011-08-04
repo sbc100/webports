@@ -24,12 +24,12 @@ TEST_SOURCES = $(addprefix test/, SlotAllocatorTest.cc \
             MemNodeTest.cc MountManagerTest.cc KernelProxyTest.cc)
 
 SOURCES = $(UTIL_SOURCES) $(BASE_SOURCES) $(MEM_SOURCES) $(TEST_SOURCES)
-OBJECTS = $(SOURCES:.cc=.o)
 TESTS_OUT = tests_out
-OUTPUT = $(addprefix $(TESTS_OUT)/, base util test memory)
+OBJECTS = $(addprefix $(TESTS_OUT)/, $(SOURCES:.cc=.o))
+OUTPUT = $(addprefix $(TESTS_OUT)/, base util test memory console)
 
 # House-keeping build targets
-all: nacl_mounts_tests
+all: $(TESTS_OUT)/nacl_mounts_tests
 
 clean: 
 	rm -rf $(TESTS_OUT)
@@ -38,27 +38,26 @@ clean:
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 # gtest targets
-gtest-all.o: $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest-all.cc \
-        -o $(TESTS_OUT)/$@
+$(TESTS_OUT)/gtest-all.o: $(GTEST_SRCS_)
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest-all.cc -o $@
 
-gtest_main.o: $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest_main.cc \
-        -o $(TESTS_OUT)/$@
+$(TESTS_OUT)/gtest_main.o: $(GTEST_SRCS_)
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GTEST_DIR)/src/gtest_main.cc -o $@
 
-gtest.a: gtest-all.o
-	$(AR) $(ARFLAGS) $(addprefix $(TESTS_OUT)/, $@ /$^)
+$(TESTS_OUT)/gtest.a: $(TESTS_OUT)/gtest-all.o
+	mkdir -p $(dir $@)
+	$(AR) $(ARFLAGS) $@ $^
 
-gtest_main.a: gtest-all.o gtest_main.o
-	$(AR) $(ARFLAGS) $(addprefix $(TESTS_OUT)/, $@ $^)
+$(TESTS_OUT)/gtest_main.a: $(TESTS_OUT)/gtest-all.o $(TESTS_OUT)/gtest_main.o
+	mkdir -p $(dir $@)
+	$(AR) $(ARFLAGS) $@ $^
 
-# nacl-mounts targets for tests using gtest_main.a
-$(OUTPUT):
-	mkdir -p $@
+$(TESTS_OUT)/%.o: %.cc
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-%.o : %.cc $(OUTPUT)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $(TESTS_OUT)/$@
-
-nacl_mounts_tests: $(OBJECTS) gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $(addprefix $(TESTS_OUT)/, $^) \
-        -o $(TESTS_OUT)/$@
+$(TESTS_OUT)/nacl_mounts_tests: $(OBJECTS) $(TESTS_OUT)/gtest_main.a
+	mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
