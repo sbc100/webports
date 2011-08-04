@@ -96,7 +96,8 @@ PACKAGES = nacl-mounts \
            nethack-3.4.3 \
            cfitsio \
            boost_1_43_0 \
-           protobuf-2.3.0
+           protobuf-2.3.0 \
+           dreadthread
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
 SENT = $(SENTINELS_DIR)/sentinel_file_$(BITSIZE)_
