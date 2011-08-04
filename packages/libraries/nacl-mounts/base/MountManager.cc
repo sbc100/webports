@@ -8,14 +8,15 @@
 #include <stdio.h>
 
 MountManager::MountManager() {
+  if (pthread_mutex_init(&mm_lock_, NULL)) assert(0);
 }
 
 MountManager::~MountManager() {
+  if (pthread_mutex_destroy(&mm_lock_)) assert(0);
   ClearMounts();
 }
 
 void MountManager::Init() {
-  if (pthread_mutex_init(&mm_lock_, NULL)) assert(0);
   MemMount *default_mount = new MemMount();
   int ret = AddMount(default_mount, "/");
   assert(ret == 0);
