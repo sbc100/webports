@@ -37,6 +37,7 @@ CustomBuildStep() {
   ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineMount.cc -o AppEngineMount.o
   ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineNode.cc -o AppEngineNode.o
   ${NACLCC} -c ${START_DIR}/console/ConsoleMount.cc -o ConsoleMount.o
+  ${NACLCC} -c ${START_DIR}/console/JSPipeMount.cc -o JSPipeMount.o
   ${NACLAR} rcs libnacl-mounts.a \
       MountManager.o \
       KernelProxy.o \
@@ -50,7 +51,8 @@ CustomBuildStep() {
       MemNode.o \
       AppEngineMount.o \
       AppEngineNode.o \
-      ConsoleMount.o
+      ConsoleMount.o \
+      JSPipeMount.o
 
   ${NACLRANLIB} libnacl-mounts.a
 }
@@ -58,9 +60,17 @@ CustomBuildStep() {
 CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
+  cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
   cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACL_SDK_USR_LIB}
   mkdir -p ${NACL_SDK_USR_LIB}/nacl-mounts/util
   cp ${START_DIR}/util/simple_tar.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
+  cp ${START_DIR}/console/console.js ${NACL_SDK_USR_LIB}/nacl-mounts
+
+  mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
+  for DIR in console base; do
+    mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
+    cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
+  done
 }
 
 CustomPackageInstall() {
