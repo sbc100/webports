@@ -37,12 +37,8 @@ class JSOutboundPipeBridge {
 //    /dev/jspipe/0
 class JSPipeMount : public BaseMount {
  public:
-  JSPipeMount() : prefix_("JSPipeMount") {
-    is_tty_ = 1;
-    outbound_bridge_ = NULL;
-  }
-
-  virtual ~JSPipeMount() {}
+  JSPipeMount();
+  virtual ~JSPipeMount();
 
   // Select the outbound bridge to write to.
   void set_outbound_bridge(JSOutboundPipeBridge *outbound_bridge) {

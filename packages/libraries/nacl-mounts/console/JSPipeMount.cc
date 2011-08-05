@@ -9,6 +9,18 @@
 #include "JSPipeMount.h"
 
 
+JSPipeMount::JSPipeMount() : prefix_("JSPipeMount") {
+  is_tty_ = 1;
+  outbound_bridge_ = NULL;
+  int ret = pthread_mutex_init(&incoming_lock_, 0);
+  assert(!ret);
+}
+
+JSPipeMount::~JSPipeMount() {
+  int ret = pthread_mutex_destroy(&incoming_lock_);
+  assert(!ret);
+}
+
 int JSPipeMount::Creat(const std::string& path, mode_t mode,
                        struct stat* buf) {
   return GetNode(path, buf);
