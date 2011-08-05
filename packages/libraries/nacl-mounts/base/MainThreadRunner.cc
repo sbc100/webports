@@ -43,6 +43,7 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
 
   // wait until the job is done
   sem_wait(&entry.done);
+  delete job;
   sem_destroy(&entry.done);
   return entry.result;
 }

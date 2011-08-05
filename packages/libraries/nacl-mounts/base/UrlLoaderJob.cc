@@ -99,7 +99,6 @@ void UrlLoaderJob::OnOpen(int32_t result) {
   } else {
     // TODO(arbenson): provide a more meaningful completion result
     MainThreadRunner::ResultCompletion(job_entry_, 0);
-    delete this;
   }
 }
 
@@ -115,7 +114,6 @@ void UrlLoaderJob::OnRead(int32_t result) {
   } else {
     // TODO(arbenson): provide a more meaningful completion result
     MainThreadRunner::ResultCompletion(job_entry_, 0);
-    delete this;
   }
 }
 
