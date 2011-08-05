@@ -60,11 +60,9 @@ CustomBuildStep() {
 CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
   cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACL_SDK_USR_LIB}
   mkdir -p ${NACL_SDK_USR_LIB}/nacl-mounts/util
   cp ${START_DIR}/util/simple_tar.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
-  cp ${START_DIR}/console/console.js ${NACL_SDK_USR_LIB}/nacl-mounts
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
   for DIR in console base; do
