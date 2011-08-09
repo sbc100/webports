@@ -65,11 +65,13 @@ void MainThreadRunner::DoWork(void) {
   if (!job_queue_.empty()) {
     JobEntry *entry = job_queue_.front();
     job_queue_.pop_front();
+    // Release lock before doing work.
+    pthread_mutex_unlock(&lock_);
     entry->job->Run(entry);
-  } else {
-    pp::Module::Get()->core()->CallOnMainThread(kWORK_POLL_TIMEOUT,
-        pp::CompletionCallback(&DoWorkShim, this), PP_OK);
+    return;
   }
+  pp::Module::Get()->core()->CallOnMainThread(kWORK_POLL_TIMEOUT,
+      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
   pthread_mutex_unlock(&lock_);
 }
 
