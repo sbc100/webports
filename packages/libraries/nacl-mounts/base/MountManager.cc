@@ -5,6 +5,7 @@
  */
 #include "../memory/MemMount.h"
 #include "MountManager.h"
+#include "../console/ConsoleMount.h"
 #include <stdio.h>
 
 MountManager::MountManager() {
@@ -20,9 +21,7 @@ void MountManager::Init() {
   MemMount *default_mount = new MemMount();
   int ret = AddMount(default_mount, "/");
   assert(ret == 0);
-  // TODO(arbenson): change std_mount to a console mount
-  MemMount *std_mount = new MemMount();
-  ret = AddMount(std_mount, "/dev/fd");
+  ret = AddMount(new ConsoleMount, "/dev/fd");
   assert(ret == 0);
   cwd_mount_ = default_mount;
 }

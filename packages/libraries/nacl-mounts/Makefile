@@ -19,14 +19,14 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 UTIL_SOURCES = $(addprefix util/, Path.cc SimpleAutoLock.cc)
 BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc)
 MEM_SOURCES = $(addprefix memory/, MemMount.cc MemNode.cc)
-JSPIPE_SOURCES = $(addprefix console/, JSPipeMount.cc)
+CONSOLE_SOURCES = $(addprefix console/, ConsoleMount.cc JSPipeMount.cc)
 TEST_SOURCES = $(addprefix test/, SlotAllocatorTest.cc \
             PathTest.cc BaseMountTest.cc MemMountTest.cc \
             MemNodeTest.cc MountManagerTest.cc KernelProxyTest.cc \
             JSPipeMountTest.cc)
 
 SOURCES = $(UTIL_SOURCES) $(BASE_SOURCES) $(MEM_SOURCES) \
-          $(JSPIPE_SOURCES) $(TEST_SOURCES)
+          $(CONSOLE_SOURCES) $(TEST_SOURCES)
 TESTS_OUT = tests_out
 OBJECTS = $(addprefix $(TESTS_OUT)/, $(SOURCES:.cc=.o))
 OUTPUT = $(addprefix $(TESTS_OUT)/, base util test memory console)

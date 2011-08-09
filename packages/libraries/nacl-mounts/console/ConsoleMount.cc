@@ -7,9 +7,17 @@
 #include <string.h>
 #include "ConsoleMount.h"
 
-static const char *kSTDIN_PATH = "/dev/fd/0";
-static const char *kSTDOUT_PATH = "/dev/fd/1";
-static const char *kSTDERR_PATH = "/dev/fd/2";
+
+// Assume no wrappers when not building under nacl (for testing).
+#ifndef __native_client__
+#define __real_read read
+#define __real_write write
+#endif
+
+
+static const char *kSTDIN_PATH = "/0";
+static const char *kSTDOUT_PATH = "/1";
+static const char *kSTDERR_PATH = "/2";
 
 static const ino_t kSTDIN_INO = 1;
 static const ino_t kSTDOUT_INO = 2;

@@ -28,9 +28,8 @@ KernelProxy *KernelProxy::KPInstance() {
 }
 
 void KernelProxy::Instantiate() {
-  if (!kp_instance_) {
-    kp_instance_ = new KernelProxy();
-  }
+  assert(!kp_instance_);
+  kp_instance_ = new KernelProxy();
   int fd;
   fd = kp_instance_->open("/dev/fd/0", O_CREAT | O_RDWR, 0);
   assert(fd == 0);
