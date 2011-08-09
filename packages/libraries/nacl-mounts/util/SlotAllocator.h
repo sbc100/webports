@@ -44,7 +44,7 @@ class SlotAllocator {
   std::vector<T*> slots_;
   std::vector<int> heap_;
 
-  static bool comp(int i, int j) { return i < j; }
+  static bool comp(int i, int j) { return i > j; }
 
   DISALLOW_COPY_AND_ASSIGN(SlotAllocator);
 };

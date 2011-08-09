@@ -32,3 +32,17 @@ TEST(SlotAllocatorTest, AtAccess) {
   EXPECT_EQ((std::string*)NULL, slots.At(1));
   EXPECT_EQ((std::string*)NULL, slots.At(-1));
 }
+
+TEST(SlotAllocatorTest, Same10) {
+  SlotAllocator<std::string> slots;
+  int i;
+  for (i = 0; i < 10; ++i) {
+    EXPECT_EQ(i, slots.Alloc());
+  }
+  for (i = 0; i < 10; ++i) {
+    slots.Free(i);
+  }
+  for (i = 0; i < 10; ++i) {
+    EXPECT_EQ(i, slots.Alloc());
+  }
+}
