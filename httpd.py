@@ -1,8 +1,8 @@
 #!/usr/bin/python
 #
-# Copyright 2010, The Native Client SDK Authors.  All Rights Reserved.
-# Use of this source code is governed by a BSD-style license that can
-# be found in the LICENSE file.
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 #
 
 """A tiny web server.
@@ -32,7 +32,7 @@ SERVER_HOST = ''
 # multi-user machine and not all users are trusted.  We only serve via
 # the loopback interface.
 
-SAFE_DIR_COMPONENTS = ['packages']
+SAFE_DIR_COMPONENTS = ['out']
 SAFE_DIR_SUFFIX = apply(os.path.join, SAFE_DIR_COMPONENTS)
 
 def SanityCheckDirectory():
