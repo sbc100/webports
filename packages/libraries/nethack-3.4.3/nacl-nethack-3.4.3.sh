@@ -38,15 +38,23 @@ CustomBuildStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
+  readonly ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
+  MakeDir ${ASSEMBLY_DIR}
   cp ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack \
-      ${PUBLISH_DIR}/nethack_x86-${NACL_PACKAGES_BITSIZE:-"32"}.nexe
+      ${ASSEMBLY_DIR}/nethack_x86-${NACL_PACKAGES_BITSIZE:-"32"}.nexe
   ChangeDir ${PACKAGE_DIR}/out/games
   rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
   python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py lib lib.sar
-  cp ${PACKAGE_DIR}/out/games/lib.sar ${PUBLISH_DIR}/nethack.sar
-  cp ${START_DIR}/nethack.html ${PUBLISH_DIR}
-  cp ${START_DIR}/nethack.nmf ${PUBLISH_DIR}
-  cp ${NACL_SDK_USR_LIB}/nacl-mounts/*.js ${PUBLISH_DIR}
+  cp ${PACKAGE_DIR}/out/games/lib.sar ${ASSEMBLY_DIR}/nethack.sar
+  cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
+  cp ${START_DIR}/nethack.nmf ${ASSEMBLY_DIR}
+  cp ${NACL_SDK_USR_LIB}/nacl-mounts/*.js ${ASSEMBLY_DIR}
+  cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
+  cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
+  cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
+  cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  ChangeDir ${PUBLISH_DIR}
+  zip -r nethack-3.4.3.zip nethack
 }
 
 CustomPackageInstall() {
