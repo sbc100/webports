@@ -58,8 +58,9 @@ NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
 		    $(NACL_SDK_USR32)/lib \
 		    $(NACL_SDK_USR64)/lib
 
-PACKAGES = nacl-mounts \
-           SDL-1.2.14 \
+PACKAGES = \
+     nacl-mounts \
+     SDL-1.2.14 \
 	   gc6.8 \
 	   fftw-3.2.2 \
 	   libtommath-0.41 \
@@ -77,7 +78,7 @@ PACKAGES = nacl-mounts \
 	   libtheora-1.1.1 \
 	   flac-1.2.1 \
 	   speex-1.2rc1 \
-           x264-snapshot-20091023-2245 \
+     x264-snapshot-20091023-2245 \
 	   lua-5.1.4 \
 	   tinyxml \
 	   expat-2.0.1 \
@@ -91,13 +92,12 @@ PACKAGES = nacl-mounts \
 	   ffmpeg-0.5 \
 	   Mesa-7.6 \
 	   libmodplug-0.8.7 \
-	   memory_filesys \
 	   OpenSceneGraph-2.9.7 \
-           nethack-3.4.3 \
-           cfitsio \
-           boost_1_43_0 \
-           protobuf-2.3.0 \
-           dreadthread
+     nethack-3.4.3 \
+     cfitsio \
+     boost_1_43_0 \
+     protobuf-2.3.0 \
+     dreadthread
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
 SENT = $(SENTINELS_DIR)/sentinel_file_$(BITSIZE)_
@@ -130,7 +130,7 @@ $(SENT)libpng-1.2.40: zlib
 $(SENT)agg-2.5: freetype
 $(SENT)cairo-1.8.8: pixman fontconfig png
 $(SENT)ffmpeg-0.5: lame vorbis theora
-$(SENT)nethack-3.4.3: memory_filesys
+$(SENT)nethack-3.4.3: nacl-mounts
 
 # shortcuts
 sdl: SDL-1.2.14 ;

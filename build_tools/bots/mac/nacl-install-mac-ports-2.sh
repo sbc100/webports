@@ -18,7 +18,7 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../../packages
 make clean
 
-# nethack also builds memory_filesys
+# nethack also builds nacl-mounts
 BuildPackage nethack
 BuildPackage faac
 BuildPackage lua
