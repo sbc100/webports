@@ -15,6 +15,7 @@ UrlLoaderJob::UrlLoaderJob() {
   start_ = -1;
   did_open_ = false;
   result_dst_ = NULL;
+  dst_ = NULL;
   method_ = "GET";
 }
 
@@ -125,6 +126,21 @@ void UrlLoaderJob::ReadMore() {
   }
 }
 
+int UrlLoaderJob::ParseContentLength(const std::string& headers) {
+  static const char *kCONTENT_LENGTH = "Content-Length: ";
+  ssize_t begin = headers.find(kCONTENT_LENGTH);
+  ssize_t end = headers.find("\n", begin);
+  if (begin == std::string::npos || end == std::string::npos) {
+    return -1;
+  }
+  std::string line = headers.substr(begin, end);
+  int cl;
+  if (!sscanf(line.c_str(), "Content-Length: %d\n", &cl)) {
+    return -1;
+  }
+  return cl;
+}
+
 void UrlLoaderJob::ProcessResponseInfo(
     const pp::URLResponseInfo& response_info) {
   if (!result_dst_) {
@@ -132,13 +148,7 @@ void UrlLoaderJob::ProcessResponseInfo(
   }
   result_dst_->status_code = response_info.GetStatusCode();
   std::string headers = response_info.GetHeaders().AsString();
-  static const char *kCONTENT_LENGTH = "Content-Length: ";
-  ssize_t pos = headers.find(kCONTENT_LENGTH);
-  result_dst_->length = -1;
-  if (pos != headers.size()) {
-    sscanf(headers.c_str() + pos + sizeof(kCONTENT_LENGTH), "%d",
-           &result_dst_->length);
-  }
+  result_dst_->length = ParseContentLength(headers);
 }
 
 void UrlLoaderJob::ProcessBytes(const char* bytes, int32_t length) {

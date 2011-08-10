@@ -69,6 +69,7 @@ class UrlLoaderJob : public MainThreadJob {
   void ReadMore();
   void ProcessResponseInfo(const pp::URLResponseInfo& response_info);
   void ProcessBytes(const char* bytes, int32_t length);
+  int ParseContentLength(const std::string& headers);
 
   pp::CompletionCallbackFactory<UrlLoaderJob> *factory_;
   pp::URLLoader *loader_;
