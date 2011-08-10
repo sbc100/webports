@@ -32,12 +32,15 @@ CustomBuildStep() {
   ${NACLCC} -c ${START_DIR}/util/Path.cc -o Path.o
   ${NACLCC} -c ${START_DIR}/util/SimpleAutoLock.cc -o SimpleAutoLock.o
   ${NACLCC} -c ${START_DIR}/util/nacl_simple_tar.c -o nacl_simple_tar.o
+  ${NACLCC} -c ${START_DIR}/console/terminal.c -o terminal.o
   ${NACLCC} -c ${START_DIR}/memory/MemMount.cc -o MemMount.o
   ${NACLCC} -c ${START_DIR}/memory/MemNode.cc -o MemNode.o
   ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineMount.cc -o AppEngineMount.o
   ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineNode.cc -o AppEngineNode.o
   ${NACLCC} -c ${START_DIR}/console/ConsoleMount.cc -o ConsoleMount.o
   ${NACLCC} -c ${START_DIR}/console/JSPipeMount.cc -o JSPipeMount.o
+  ${NACLCC} -c ${START_DIR}/console/JSPostMessageBridge.cc \
+      -o JSPostMessageBridge.o
   ${NACLAR} rcs libnacl-mounts.a \
       MountManager.o \
       KernelProxy.o \
@@ -47,12 +50,14 @@ CustomBuildStep() {
       Path.o \
       SimpleAutoLock.o \
       nacl_simple_tar.o \
+      terminal.o \
       MemMount.o \
       MemNode.o \
       AppEngineMount.o \
       AppEngineNode.o \
       ConsoleMount.o \
-      JSPipeMount.o
+      JSPipeMount.o \
+      JSPostMessageBridge.o
 
   ${NACLRANLIB} libnacl-mounts.a
 }
@@ -63,9 +68,11 @@ CustomInstallStep() {
   cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACL_SDK_USR_LIB}
   mkdir -p ${NACL_SDK_USR_LIB}/nacl-mounts/util
   cp ${START_DIR}/util/simple_tar.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
+  cp ${START_DIR}/console/console.js ${NACL_SDK_USR_LIB}/nacl-mounts
+  cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
-  for DIR in console base; do
+  for DIR in console base util memory; do
     mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
     cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
   done

@@ -139,3 +139,54 @@ int __wrap_symlink(const char *path1, const char *path2) {
 int __wrap_kill(pid_t pid, int sig) {
   return kp->kill(pid, sig);
 }
+
+
+
+// Several more, don't route to kernel proxy for now.
+
+uid_t __wrap_getuid(void) {
+  // Make up a user id.
+  return 1001;
+}
+
+int __wrap_setuid(uid_t id) {
+  return 0;
+}
+
+gid_t __wrap_getgid(void) {
+  // Make up a group id.
+  return 1002;
+}
+
+int __wrap_setgid(gid_t id) {
+  return 0;
+}
+
+char *__wrap_getlogin(void) {
+  return const_cast<char*>("nobody");
+}
+
+struct passwd *__wrap_getpwnam(const char *login) {
+  // Not sure this is helpful, as its an error.
+  return 0;
+}
+
+struct passwd *__wrap_getpwuid(uid_t uid) {
+  // Not sure this is helpful, as its an error.
+  return 0;
+}
+
+mode_t __wrap_umask(mode_t cmask) {
+  return 0777;
+}
+
+int __wrap_unlink(const char *path) {
+  // Always pretend to work for now.
+  return 0;
+}
+
+struct utimbuf;
+
+int __wrap_utime(const char *path, struct utimbuf const *times) {
+  return 0;
+}

@@ -42,6 +42,18 @@ extern "C" {
   int __wrap_link(const char *path1, const char *path2);
   int __wrap_symlink(const char *path1, const char *path2);
   int __wrap_kill(pid_t pid, int sig);
+
+  uid_t __wrap_getuid(void);
+  int __wrap_setuid(uid_t id);
+  gid_t __wrap_getgid(void);
+  int __wrap_setgid(gid_t id);
+  char *__wrap_getlogin(void);
+  struct passwd *__wrap_getpwnam(const char *login);
+  struct passwd *__wrap_getpwuid(uid_t uid);
+  mode_t __wrap_umask(mode_t cmask);
+  int __wrap_unlink(const char *path);
+  struct utimbuf;
+  int __wrap_utime(const char *path, struct utimbuf const *times);
 }
 
 #endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_
