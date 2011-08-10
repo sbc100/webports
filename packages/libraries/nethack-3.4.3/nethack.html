@@ -19,8 +19,6 @@ div.console
     </style>
   </head>
   <body onload="init()">
-<script type="text/javascript" src="nacl_mem_file.js"></script>
-<script type="text/javascript" src="http.js"></script>
 <script type="text/javascript" src="console.js"></script>
 <script type="text/javascript">
 //<![CDATA[
@@ -28,58 +26,20 @@ div.console
 /**
  * Create the console, and wait for nacl module to load.
  */ 
+
+var term;
+
 function init() {
   // Setup console.
-  var term = new console.Console('console', 'nethack');
+  term = new console.Console('console', 'nethack');
   term.nethackKeyboard();
 
   // Show loading message.
   term.write('Loading...');
-
-  // initialize plugin
-  var nh = document.getElementById('nethack');
-  init_plugin(term, nh);
 }
 
-/**
- * Create the console, and wait for nacl module to load.
- * @param {console.Console} term The console for nethack.
- * @param {Object} nh The nethack nacl module.
- */ 
-function init_plugin(term, nh) {
-  // Re-run until ready.
-  if (!nh.__moduleReady) {
-    setTimeout(function() { init_plugin(term, nh); }, 100);
-    return;
-  }
-
-  // Load datafiles from a simple archive.
-  http.getText('nethack.sar', function(data) {
-    // Write to file.
-    var fh = nh.open('/nethack.sar', O_CREAT | O_WRONLY);
-    for (var x = 0; x < data.length; x+=1000) {
-      var part = data.substr(x, 1000);
-      var len = write(nh, fh, part);
-      if (len != part.length) alert(' ' + len + ' ' + part.length);
-    }
-    nh.close(fh);
-    // Untar it.
-    nh.mkdir('/usr');
-    nh.mkdir('/usr/games');
-    nh.chdir('/usr/games');
-    nh.untar('/nethack.sar');
-    // Setup config file.
-    nh.mkdir('/myhome');
-    fh = nh.open('/myhome/.nethackrc', O_CREAT | O_WRONLY);
-    write(nh, fh, 'OPTIONS=color\n');
-    nh.close(fh);
-    // Note finished loading.
-    term.clear();
-    // Commence input.
-    term.got('\n');
-    // Turn on event handlers.
-    term.focus();
-  });
+function moduleDidLoad(e) {
+  term.attach();
 }
 
 //]]>
@@ -90,11 +50,16 @@ function init_plugin(term, nh) {
 <div id="console" class="console"></div>
 </td></tr></table>
 <p>
+  <div id="listener">
+    <script type="text/javascript">
+      document.getElementById('listener').addEventListener(
+          'load', moduleDidLoad, true);
+    </script>
   <embed name="nacl_module"
          id="nethack"
          width=0 height=0
-         src="nethack.nexe"
-         type="application/x-nacl-srpc" />
+         src="nethack.nmf"
+         type="application/x-nacl" />
 </p>
 
 </body>

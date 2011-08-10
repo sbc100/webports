@@ -31,7 +31,7 @@ CustomBuildStep() {
   export STRNCMPI=1
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
-  cp ${START_DIR}/nacl_start.c ${PACKAGE_DIR}/src
+  cp ${START_DIR}/nethack_pepper.cc ${PACKAGE_DIR}/src
   bash sys/unix/setup.sh
   make
   make install
@@ -39,13 +39,14 @@ CustomBuildStep() {
   export PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   cp ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack \
-      ${PUBLISH_DIR}/nethack.nexe
+      ${PUBLISH_DIR}/nethack_x86-${NACL_PACKAGES_BITSIZE:-"32"}.nexe
   ChangeDir ${PACKAGE_DIR}/out/games
   rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
-  python ${NACL_SDK_USR_LIB}/memory_filesys/simple_tar.py lib lib.sar
+  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py lib lib.sar
   cp ${PACKAGE_DIR}/out/games/lib.sar ${PUBLISH_DIR}/nethack.sar
   cp ${START_DIR}/nethack.html ${PUBLISH_DIR}
-  cp ${NACL_SDK_USR_LIB}/memory_filesys/*.js ${PUBLISH_DIR}
+  cp ${START_DIR}/nethack.nmf ${PUBLISH_DIR}
+  cp ${NACL_SDK_USR_LIB}/nacl-mounts/*.js ${PUBLISH_DIR}
 }
 
 CustomPackageInstall() {
