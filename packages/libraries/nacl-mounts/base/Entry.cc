@@ -163,7 +163,7 @@ int __wrap_setgid(gid_t id) {
 }
 
 char *__wrap_getlogin(void) {
-  return const_cast<char*>("nobody");
+  return const_cast<char*>("");
 }
 
 struct passwd *__wrap_getpwnam(const char *login) {

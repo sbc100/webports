@@ -33,6 +33,7 @@ CustomBuildStep() {
   ${NACLCC} -c ${START_DIR}/util/SimpleAutoLock.cc -o SimpleAutoLock.o
   ${NACLCC} -c ${START_DIR}/util/nacl_simple_tar.c -o nacl_simple_tar.o
   ${NACLCC} -c ${START_DIR}/console/terminal.c -o terminal.o
+  ${NACLCC} -c ${START_DIR}/console/terminal_stubs.c -o terminal_stubs.o
   ${NACLCC} -c ${START_DIR}/memory/MemMount.cc -o MemMount.o
   ${NACLCC} -c ${START_DIR}/memory/MemNode.cc -o MemNode.o
   ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineMount.cc -o AppEngineMount.o
@@ -51,6 +52,7 @@ CustomBuildStep() {
       SimpleAutoLock.o \
       nacl_simple_tar.o \
       terminal.o \
+      terminal_stubs.o \
       MemMount.o \
       MemNode.o \
       AppEngineMount.o \
