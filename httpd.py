@@ -17,6 +17,7 @@ import SimpleHTTPServer
 import SocketServer
 import sys
 import urlparse
+import shutil
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -44,8 +45,11 @@ def SanityCheckDirectory():
   sys.exit(1)
 
 
-# An HTTP server that will quit when |is_running| is set to False.
-class QuittableHTTPServer(BaseHTTPServer.HTTPServer):
+# An HTTP server that will quit when |is_running| is set to False.  We also use
+# SocketServer.ThreadingMixIn in order to handle requests asynchronously for
+# faster responses.
+class QuittableHTTPServer(SocketServer.ThreadingMixIn,
+                          BaseHTTPServer.HTTPServer):
   def serve_forever(self):
     self.is_running = True
     while self.is_running:
@@ -81,7 +85,72 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       self.server.shutdown()
       return
 
+    headers = str(self.headers)
+    begin = headers.find('Range: ')
+    if begin != -1:
+      end = headers.find('\n', begin)
+      if end != -1:
+        line = headers[begin:end]
+        ind = line.find('=')
+        byte_range = line[ind+1:].split('-')
+        byte_begin = int(byte_range[0])
+        byte_end = int(byte_range[1])
+        length = byte_end-byte_begin+1
+        f = self.send_partial(byte_begin, length)
+        if f:
+          curr_pos = f.tell()
+          shutil.copyfileobj(f, self.wfile, length)
+          f.seek(-byte_begin, os.SEEK_CUR)
+          f.close()
+          return
+
     SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+
+
+  def send_partial(self, offset, length):
+    """
+    The following code is lifed from SimpleHTTPServer.send_head()
+    The only change is that a 206 response is sent instead of 200.
+    """
+
+    path = self.translate_path(self.path)
+    f = None
+    if os.path.isdir(path):
+      if not self.path.endswith('/'):
+        # redirect browser - doing basically what apache does
+        self.send_response(301)
+        self.send_header("Location", self.path + "/")
+        self.end_headers()
+        return None
+      for index in "index.html", "index.htm":
+        index = os.path.join(path, index)
+        if os.path.exists(index):
+          path = index
+          break
+      else:
+        return self.list_directory(path)
+    ctype = self.guess_type(path)
+    try:
+      # Always read in binary mode. Opening files in text mode may cause
+      # newline translations, making the actual size of the content
+      # transmitted *less* than the content-length!
+      f = open(path, 'rb')
+      #f.seek(offset)
+    except IOError:
+      self.send_error(404, "File not found")
+      return None
+    fs = os.fstat(f.fileno())
+    if (offset + length > fs[6] or length < 0):
+      self.send_error(416, 'Request range not satisfiable')
+      return None
+    self.send_response(206, 'Partial content')
+    f.seek(offset, os.SEEK_CUR)
+    self.send_header("Content-Range", str(offset) + '-' + str(length+offset-1))
+    self.send_header("Content-Length", str(length))
+    self.send_header("Content-type", ctype)
+    self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+    self.end_headers()
+    return f
 
 
 def Run(server_address,
