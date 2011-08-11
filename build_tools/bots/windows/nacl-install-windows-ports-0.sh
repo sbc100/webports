@@ -23,6 +23,7 @@ BuildPackage ffmpeg
 BuildPackage nacl-mounts
 BuildPackage sdl
 BuildExample games/scummvm-1.2.1 scummvm-1.2.1
+BuildExample systems/bochs-2.4.6 bochs-2.4.6
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then

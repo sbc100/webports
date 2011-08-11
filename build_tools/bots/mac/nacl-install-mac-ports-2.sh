@@ -34,6 +34,7 @@ BuildPackage mesa
 BuildPackage cfitsio
 BuildPackage boost
 BuildPackage protobuf
+BuildPackage gc
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then

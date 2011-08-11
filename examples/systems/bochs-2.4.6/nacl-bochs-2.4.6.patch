@@ -1,0 +1,918 @@
+diff -Naur temp_bochs/bochs-2.4.6/Makefile.in bochs-2.4.6/Makefile.in
+--- temp_bochs/bochs-2.4.6/Makefile.in	2011-05-20 09:51:00.000000000 -0700
++++ bochs-2.4.6/Makefile.in	2011-08-08 17:18:03.000000000 -0700
+@@ -175,11 +175,11 @@
+ @EXTERNAL_DEPENDENCY@
+ 
+ bochs@EXE@: @IODEV_LIB_VAR@ @DEBUGGER_VAR@ \
+-           cpu/libcpu.a memory/libmemory.a gui/libgui.a \
++           cpu/libcpu.a memory/libmemory.a gui/libgui.a bochs_ppapi/libbochs_ppapi.a \
+            @DISASM_VAR@ @INSTRUMENT_VAR@ $(BX_OBJS) \
+            $(SIMX86_OBJS) @FPU_VAR@ @GDBSTUB_VAR@ @PLUGIN_VAR@
+ 	@LINK@ @EXPORT_DYNAMIC@ $(BX_OBJS) $(SIMX86_OBJS) \
+-		@IODEV_LIB_VAR@ @DEBUGGER_VAR@ cpu/libcpu.a memory/libmemory.a gui/libgui.a \
++		@IODEV_LIB_VAR@ @DEBUGGER_VAR@ cpu/libcpu.a memory/libmemory.a gui/libgui.a bochs_ppapi/libbochs_ppapi.a \
+ 		@DISASM_VAR@ @INSTRUMENT_VAR@ @PLUGIN_VAR@ \
+ 		@GDBSTUB_VAR@ @FPU_VAR@ \
+ 		@NONPLUGIN_GUI_LINK_OPTS@ \
+@@ -216,6 +216,8 @@
+ 		$(LIBS)
+ 	touch .win32_dll_plugin_target
+ 
++
++
+ bochs_plugins:
+ 	cd gui @COMMAND_SEPARATOR@
+ 	$(MAKE) plugins
+@@ -225,20 +227,20 @@
+ 	@CD_UP_ONE@
+ 
+ bximage@EXE@: misc/bximage.o
+-	@LINK_CONSOLE@ $(BXIMAGE_LINK_OPTS) misc/bximage.o
++	@LINK_CONSOLE@ $(NACLBXLIBS) $(BXIMAGE_LINK_OPTS) misc/bximage.o
+ 
+ bxcommit@EXE@: misc/bxcommit.o
+-	@LINK_CONSOLE@ misc/bxcommit.o
++	@LINK_CONSOLE@ $(NACLBXLIBS) $(BXIMAGE_LINK_OPTS) misc/bxcommit.o
+ 
+ niclist@EXE@: misc/niclist.o
+ 	@LINK_CONSOLE@ misc/niclist.o
+ 
+ # compile with console CXXFLAGS, not gui CXXFLAGS
+ misc/bximage.o: $(srcdir)/misc/bximage.c $(srcdir)/iodev/hdimage.h
+-	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(srcdir)/misc/bximage.c @OFP@$@
++	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(NACLBXLIBS) $(srcdir)/misc/bximage.c @OFP@$@
+ 
+ misc/bxcommit.o: $(srcdir)/misc/bxcommit.c $(srcdir)/iodev/hdimage.h
+-	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(srcdir)/misc/bxcommit.c @OFP@$@
++	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(NACLBXLIBS) $(srcdir)/misc/bxcommit.c @OFP@$@
+ 
+ misc/niclist.o: $(srcdir)/misc/niclist.c
+ 	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(srcdir)/misc/niclist.c @OFP@$@
+@@ -246,6 +248,11 @@
+ $(BX_OBJS): $(BX_INCLUDES)
+ 
+ # cannot use -C option to be compatible with Microsoft nmake
++bochs_ppapi/libbochs_ppapi.a::
++	cd bochs_ppapi @COMMAND_SEPARATOR@
++	$(MAKE) $(MDEFINES) libbochs_ppapi.a
++	@CD_UP_ONE@
++
+ iodev/libiodev.a::
+ 	cd iodev @COMMAND_SEPARATOR@
+ 	$(MAKE) $(MDEFINES) libiodev.a
+@@ -473,6 +480,9 @@
+ 	cd iodev @COMMAND_SEPARATOR@
+ 	$(MAKE) clean
+ 	@CD_UP_ONE@
++	cd bochs_ppapi @COMMAND_SEPARATOR@
++	$(MAKE) clean
++	@CD_UP_ONE@
+ 	cd bx_debug @COMMAND_SEPARATOR@
+ 	$(MAKE) clean
+ 	@CD_UP_ONE@
+@@ -508,6 +518,9 @@
+ 	cd iodev @COMMAND_SEPARATOR@
+ 	$(MAKE) dist-clean
+ 	@CD_UP_ONE@
++	cd bochs_ppapi @COMMAND_SEPARATOR@
++	$(MAKE) dist-clean
++	@CD_UP_ONE@
+ 	cd bx_debug @COMMAND_SEPARATOR@
+ 	$(MAKE) dist-clean
+ 	@CD_UP_ONE@
+diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/Makefile.in bochs-2.4.6/bochs_ppapi/Makefile.in
+--- temp_bochs/bochs-2.4.6/bochs_ppapi/Makefile.in	1969-12-31 16:00:00.000000000 -0800
++++ bochs-2.4.6/bochs_ppapi/Makefile.in	2011-05-31 15:56:31.000000000 -0700
+@@ -0,0 +1,74 @@
++# Copyright (C) 2001  The Bochs Project
++#
++# This library is free software; you can redistribute it and/or
++# modify it under the terms of the GNU Lesser General Public
++# License as published by the Free Software Foundation; either
++# version 2 of the License, or (at your option) any later version.
++#
++# This library is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++# Lesser General Public License for more details.
++#
++# You should have received a copy of the GNU Lesser General Public
++# License along with this library; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++
++@SUFFIX_LINE@
++
++srcdir = @srcdir@
++VPATH = @srcdir@
++top_builddir    = ..
++top_srcdir      = @top_srcdir@
++
++SHELL = /bin/sh
++
++@SET_MAKE@
++
++CXX = @CXX@
++CXXFLAGS = @CXXFLAGS@ @GUI_CXXFLAGS@
++
++LDFLAGS = @LDFLAGS@
++#LIBS = @LIBS@
++RANLIB = @RANLIB@
++
++# ===========================================================
++# end of configurable options
++# ===========================================================
++
++
++BX_OBJS = \
++  bochs_pepper_instance.o \
++  bochs_pepper_module.o \
++  ../main.o
++
++BX_INCLUDES = bochs_pepper_instance.h
++
++BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
++
++all: libbochs_ppapi.a
++
++.@CPP_SUFFIX@.o:
++	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@
++
++
++libbochs_ppapi.a: $(BX_OBJS)
++	@RMCOMMAND@ libbochs_ppapi.a
++	@MAKELIB@ $(BX_OBJS)
++	$(RANLIB) libbochs_ppapi.a
++
++$(BX_OBJS): $(BX_INCLUDES)
++
++clean:
++	@RMCOMMAND@ *.o
++	@RMCOMMAND@ *.a
++
++dist-clean: clean
++	@RMCOMMAND@ Makefile
++
++###########################################
++# dependencies generated by
++#  gcc -MM -I.. -I../instrument/stubs *.cc | sed 's/\.cc/.@CPP_SUFFIX@/g'
++###########################################
++# May need to add more here
+diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp
+--- temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
++++ bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp	2011-08-11 15:11:18.000000000 -0700
+@@ -0,0 +1,179 @@
++// Copyright 2011 The Native Client Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can
++// be found in the LICENSE file.
++
++#include "bochs_pepper_instance.h"
++
++#include <ppapi/cpp/completion_callback.h>
++#include <ppapi/cpp/url_loader.h>
++#include <ppapi/cpp/url_request_info.h>
++#include <ppapi/cpp/url_response_info.h>
++#include <ppapi/cpp/var.h>
++#include <ppapi/c/pp_errors.h>
++#include "ppapi/c/pp_stdint.h"
++#include "ppapi/cpp/resource.h"
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <fcntl.h>
++
++#include <cassert>
++#include <cmath>
++#include <cstring>
++
++#include <SDL_video.h>
++
++#include <SDL.h>
++#include <SDL_nacl.h>
++
++extern "C" int simple_tar_extract(const char *path);
++extern int bochs_main(int argc, char *argv[]);
++
++namespace pp {
++
++  class MyUrlLoader {
++  public:
++    MyUrlLoader(Instance* instance, pp::CompletionCallback done)
++      : factory_(this),
++	loader_(instance),
++	did_open_(false),
++	pepper_instance_(instance),
++	done_(done) {
++      file_handle_ = ::open("img.sar", O_CREAT | O_WRONLY);
++      assert(file_handle_ != -1);
++    }
++
++    void ProcessURL(const char* url) {
++      pp::CompletionCallback cc = factory_.NewCallback(&MyUrlLoader::OnOpen);
++      int32_t rv = loader_.Open(MakeRequest(url), cc);
++      if (rv != PP_OK_COMPLETIONPENDING)
++	cc.Run(rv);
++    }
++
++  private:
++    URLRequestInfo MakeRequest(const char* url) {
++      URLRequestInfo request(pepper_instance_);
++      request.SetURL(url);
++      request.SetMethod("GET");
++      request.SetFollowRedirects(true);
++      return request;
++    }
++
++    void OnOpen(int32_t result) {
++      if (result >= 0)
++	ReadMore();
++    }
++
++    void OnRead(int32_t result) {
++      if (result > 0) {
++	ProcessBytes(buf_, result);
++	ReadMore();
++      } else if (result == PP_OK && !did_open_) {
++	// Headers are available, and we can start reading the body.
++	did_open_ = true;
++	ProcessResponseInfo(loader_.GetResponseInfo());
++	ReadMore();
++      } else {
++	// Done reading (possibly with an error given by 'result').
++	::close(file_handle_);
++	done_.Run(0);
++      }
++    }
++
++    void ReadMore() {
++      pp::CompletionCallback cc = factory_.NewCallback(&MyUrlLoader::OnRead);
++      int32_t rv = loader_.ReadResponseBody(buf_, sizeof(buf_), cc);
++      if (rv != PP_OK_COMPLETIONPENDING)
++	cc.Run(rv);
++    }
++
++    void ProcessResponseInfo(const URLResponseInfo& response_info) {
++      // Read response headers, etc.
++    }
++
++    void ProcessBytes(const char* bytes, int32_t length) {
++      ::write(file_handle_, bytes, length); 
++    }
++
++    pp::CompletionCallbackFactory<MyUrlLoader> factory_;
++    pp::URLLoader loader_;
++    char buf_[4096];
++    bool did_open_;
++    int file_handle_;
++    pp::Instance* pepper_instance_;
++    pp::CompletionCallback done_;
++  };
++
++}
++
++
++namespace bochs_pepper {
++
++  BochsPepperInstance::BochsPepperInstance(PP_Instance instance)
++    : pp::Instance(instance),
++      graphics_2d_context_(NULL),
++      quit_(false),
++      bochs_run_thread_(0),
++      width_(0),
++      height_(0),
++      factory_(this) {
++  }
++
++  BochsPepperInstance::~BochsPepperInstance() {
++    quit_ = true;
++    if (bochs_run_thread_) {
++      pthread_join(bochs_run_thread_, NULL);
++    }
++  }
++
++  void BochsPepperInstance::FinishedInit(int32_t result) {
++    pthread_create(&bochs_run_thread_, NULL, BochsRun, this);
++  }
++
++  void BochsPepperInstance::DidChangeView(const pp::Rect& position,
++					    const pp::Rect& clip) {
++    if (width_ && height_)
++      return;
++
++    if (position.size().width() == width_ &&
++	position.size().height() == height_)
++      return;  // Size didn't change, no need to update anything.
++
++    width_ = position.size().width();
++    height_ = position.size().height();
++
++    SDL_NACL_SetInstance(pp_instance(), width_, height_);
++
++    int lval = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
++
++    assert(lval >= 0);
++    
++    pp::CompletionCallback cc = factory_.NewCallback(
++						     &BochsPepperInstance::FinishedInit);
++    myloader_ = new pp::MyUrlLoader(this, cc);
++    myloader_->ProcessURL("img.sar");
++  }
++
++  bool BochsPepperInstance::HandleInputEvent(const pp::InputEvent& event) {
++    SDL_NACL_PushEvent(event);
++    return true;
++  }
++
++  bool BochsPepperInstance::Init(uint32_t argc, const char* argn[], const char* argv[]) {
++    return true;
++  }
++
++  void* BochsPepperInstance::BochsRun(void* param) {
++    int err = simple_tar_extract("img.sar");
++    chdir("/img");
++
++    if(err == -2)
++      fprintf(stderr, "ERROR extracting img.sar\n");
++    
++    static char * argv[] = {"placeholder", "-qf", "tinylinux-img/bochsrc", NULL};
++    bochs_main(3, (char**)argv);
++
++    return NULL;
++  }
++
++}  // namespace bochs_pepper
+diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.h bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.h
+--- temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
++++ bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.h	2011-08-08 12:02:21.000000000 -0700
+@@ -0,0 +1,78 @@
++// Copyright 2011 The Native Client Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can
++// be found in the LICENSE file.
++
++#ifndef EXAMPLES_BOCHS_PEPPER_H_
++#define EXAMPLES_BOCHS_PEPPER_H_
++
++#include <ppapi/cpp/graphics_2d.h>
++#include <ppapi/cpp/image_data.h>
++#include <ppapi/cpp/instance.h>
++#include <ppapi/cpp/rect.h>
++#include <ppapi/cpp/dev/scriptable_object_deprecated.h>
++#include <ppapi/cpp/size.h>
++#include <ppapi/cpp/completion_callback.h>
++#include <pthread.h>
++
++#include <vector>
++
++// We use a URLLoader in order to obtain a compression (.sar generated
++// by simple_tar.py in memory_filesys) of all of the game files.
++namespace pp {
++  class MyUrlLoader;
++}
++
++namespace bochs_pepper {
++
++  // The Instance class.  One of these exists for each instance of your NaCl
++  // module on the web page.  The browser will ask the Module object to create
++  // a new Instance for each occurence of the <embed> tag that has these
++  // attributes:
++  //     type="application/x-ppapi-nacl-srpc"
++  //     nexes="ARM: bochs_pepper_arm.nexe
++  //            ..."
++  // The Instance can return a ScriptableObject representing itself.  When the
++  // browser encounters JavaScript that wants to access the Instance, it calls
++  // the GetInstanceObject() method.  All the scripting work is done though
++  // the returned ScriptableObject.
++  class BochsPepperInstance : public pp::Instance {
++  public:
++    explicit BochsPepperInstance(PP_Instance instance);
++    virtual ~BochsPepperInstance();
++
++    // Start up the BochsRun() thread.
++    virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
++
++    // Update the graphcs context to the new size, and regnerate |pixel_buffer_|
++    // to fit the new size as well.
++    virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
++
++    // HandleInputEvent() pushes events to SDL.
++    virtual bool HandleInputEvent(const pp::InputEvent& event);
++
++    bool quit() const {
++      return quit_;
++    }
++
++  private:
++    pp::Graphics2D* graphics_2d_context_;
++    pp::ImageData* pixel_buffer_;
++    bool quit_;
++    pthread_t bochs_run_thread_;
++    int width_;
++    int height_;
++
++    // BochsRun starts bochs.  Bochs has to untar a disk image
++    // and some other configuration files, so there is some overhead.
++    static void* BochsRun(void* param);
++
++    // Starts bochs_run_thread_
++    void FinishedInit(int32_t result);
++
++    pp::CompletionCallbackFactory<BochsPepperInstance> factory_;
++    pp::MyUrlLoader *myloader_; // used for obtaining a .sar of the OS image
++  };
++
++}  // namespace bochs_pepper
++
++#endif  // EXAMPLES_BOCHS_PEPPER_H_
+diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_module.cpp bochs-2.4.6/bochs_ppapi/bochs_pepper_module.cpp
+--- temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
++++ bochs-2.4.6/bochs_ppapi/bochs_pepper_module.cpp	2011-06-03 13:45:13.000000000 -0700
+@@ -0,0 +1,33 @@
++// Copyright 2011 The Native Client SDK Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can
++// be found in the LICENSE file.
++
++#include <ppapi/cpp/module.h>
++#include <stdio.h>
++#include "bochs_pepper_instance.h"
++
++namespace bochs_pepper {
++  // The Module class.  The browser calls the CreateInstance() method to create
++  // an instance of you NaCl module on the web page.  The browser creates a new
++  // instance for each <embed> tag with type="application/x-ppapi-nacl-srpc".
++  class BochsPepperModule : public pp::Module {
++  public:
++    BochsPepperModule() : pp::Module() {}
++    virtual ~BochsPepperModule() {}
++
++    virtual pp::Instance* CreateInstance(PP_Instance instance) {
++      return new BochsPepperInstance(instance);
++    }
++  };
++}  // namespace bochs_pepper
++
++// Factory function called by the browser when the module is first loaded.
++// The browser keeps a singleton of this module.  It calls the
++// CreateInstance() method on the object you return to make instances.  There
++// is one instance per <embed> tag on the page.  This is the main binding
++// point for your NaCl module with the browser.
++namespace pp {
++  Module* CreateModule() {
++    return new bochs_pepper::BochsPepperModule();
++  }
++}  // namespace pp
+diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/module.mk bochs-2.4.6/bochs_ppapi/module.mk
+--- temp_bochs/bochs-2.4.6/bochs_ppapi/module.mk	1969-12-31 16:00:00.000000000 -0800
++++ bochs-2.4.6/bochs_ppapi/module.mk	2011-05-19 14:19:48.000000000 -0700
+@@ -0,0 +1,8 @@
++MODULE := scummvm_ppapi
++
++MODULE_OBJS := \
++	scummvm_pepper_instance.o \
++	scummvm_pepper_module.o 
++
++# Include common rules
++include $(srcdir)/rules.mk
+diff -Naur temp_bochs/bochs-2.4.6/config.cc bochs-2.4.6/config.cc
+--- temp_bochs/bochs-2.4.6/config.cc	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/config.cc	2011-08-08 16:31:27.000000000 -0700
+@@ -292,7 +292,7 @@
+       "ips", "Emulated instructions per second (IPS)",
+       "Emulated instructions per second, used to calibrate bochs emulated time with wall clock time.",
+       BX_MIN_IPS, BX_MAX_BIT32U,
+-      4000000);
++      15000000);
+ #if BX_SUPPORT_SMP
+   new bx_param_num_c(cpu_param,
+       "quantum", "Quantum ticks in SMP simulation",
+diff -Naur temp_bochs/bochs-2.4.6/config.sub bochs-2.4.6/config.sub
+--- temp_bochs/bochs-2.4.6/config.sub	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/config.sub	2011-05-20 11:00:53.000000000 -0700
+@@ -283,6 +283,7 @@
+ 	| moxie \
+ 	| mt \
+ 	| msp430 \
++	| nacl \
+ 	| nios | nios2 \
+ 	| ns16k | ns32k \
+ 	| or32 \
+diff -Naur temp_bochs/bochs-2.4.6/configure bochs-2.4.6/configure
+--- temp_bochs/bochs-2.4.6/configure	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/configure	2011-05-23 09:19:43.000000000 -0700
+@@ -3748,11 +3748,11 @@
+ $as_echo "$as_me: failed program was:" >&5
+ sed 's/^/| /' conftest.$ac_ext >&5
+ 
+-{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-{ as_fn_set_status 77
+-as_fn_error "C compiler cannot create executables
+-See \`config.log' for more details." "$LINENO" 5; }; }
++#{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
++#$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
++#{ as_fn_set_status 77
++#as_fn_error "C compiler cannot create executables
++#See \`config.log' for more details." "$LINENO" 5; }; }
+ else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+@@ -3792,10 +3792,11 @@
+   esac
+ done
+ else
+-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error "cannot compute suffix of executables: cannot compile and link
+-See \`config.log' for more details." "$LINENO" 5; }
++   echo "skipping suffix of executables check"
++#  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
++#$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
++#as_fn_error "cannot compute suffix of executables: cannot compile and link
++#See \`config.log' for more details." "$LINENO" 5; }
+ fi
+ rm -f conftest conftest$ac_cv_exeext
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
+@@ -25426,7 +25427,7 @@
+ 
+ 
+ 
+-ac_config_files="$ac_config_files Makefile iodev/Makefile bx_debug/Makefile bios/Makefile cpu/Makefile memory/Makefile gui/Makefile disasm/Makefile ${INSTRUMENT_DIR}/Makefile misc/Makefile fpu/Makefile doc/docbook/Makefile build/linux/bochs-dlx bxversion.h bxversion.rc build/macosx/Info.plist build/win32/nsis/Makefile build/win32/nsis/bochs.nsi host/linux/pcidev/Makefile"
++ac_config_files="$ac_config_files Makefile iodev/Makefile bx_debug/Makefile bios/Makefile cpu/Makefile memory/Makefile gui/Makefile bochs_ppapi/Makefile disasm/Makefile ${INSTRUMENT_DIR}/Makefile misc/Makefile fpu/Makefile doc/docbook/Makefile build/linux/bochs-dlx bxversion.h bxversion.rc build/macosx/Info.plist build/win32/nsis/Makefile build/win32/nsis/bochs.nsi host/linux/pcidev/Makefile"
+ 
+ cat >confcache <<\_ACEOF
+ # This file is a shell script that caches the results of configure
+@@ -26118,6 +26119,7 @@
+     "bx_debug/Makefile") CONFIG_FILES="$CONFIG_FILES bx_debug/Makefile" ;;
+     "bios/Makefile") CONFIG_FILES="$CONFIG_FILES bios/Makefile" ;;
+     "cpu/Makefile") CONFIG_FILES="$CONFIG_FILES cpu/Makefile" ;;
++    "bochs_ppapi/Makefile") CONFIG_FILES="$CONFIG_FILES bochs_ppapi/Makefile" ;;
+     "memory/Makefile") CONFIG_FILES="$CONFIG_FILES memory/Makefile" ;;
+     "gui/Makefile") CONFIG_FILES="$CONFIG_FILES gui/Makefile" ;;
+     "disasm/Makefile") CONFIG_FILES="$CONFIG_FILES disasm/Makefile" ;;
+diff -Naur temp_bochs/bochs-2.4.6/cpu/Makefile.in bochs-2.4.6/cpu/Makefile.in
+--- temp_bochs/bochs-2.4.6/cpu/Makefile.in	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/cpu/Makefile.in	2011-08-08 12:26:12.000000000 -0700
+@@ -35,6 +35,8 @@
+ X_PRE_LIBS = @X_PRE_LIBS@
+ RANLIB = @RANLIB@
+ 
++LIBS += $(NACLBXLIBS)
++
+ 
+ 
+ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
+diff -Naur temp_bochs/bochs-2.4.6/cpu/init.cc bochs-2.4.6/cpu/init.cc
+--- temp_bochs/bochs-2.4.6/cpu/init.cc	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/cpu/init.cc	2011-06-03 14:03:35.000000000 -0700
+@@ -160,6 +160,7 @@
+     BX_CPU_THIS_PTR msrs[n] = 0;
+   }
+   const char *msrs_filename = SIM->get_param_string(BXPN_CONFIGURABLE_MSRS_PATH)->getptr();
++  msrs_filename = "/msrs/msrs.def";
+   load_MSRs(msrs_filename);
+ #endif
+ 
+diff -Naur temp_bochs/bochs-2.4.6/gui/sdl.cc bochs-2.4.6/gui/sdl.cc
+--- temp_bochs/bochs-2.4.6/gui/sdl.cc	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/gui/sdl.cc	2011-08-08 16:32:26.000000000 -0700
+@@ -153,6 +153,7 @@
+ 
+ void switch_to_windowed(void)
+ {
++
+   SDL_Surface *tmp;
+   SDL_Rect src, dst;
+   src.x = 0; src.y = 0;
+@@ -182,6 +183,7 @@
+   SDL_FreeSurface(sdl_fullscreen);
+   sdl_fullscreen = NULL;
+ 
++
+   sdl_screen = SDL_SetVideoMode(res_x,res_y+headerbar_height+statusbar_height,32, SDL_SWSURFACE);
+   dst.y = headerbar_height;
+   SDL_BlitSurface(tmp,&src,sdl_screen,&dst);
+@@ -236,6 +238,9 @@
+   SDL_UpdateRect(tmp,0,0,res_x,res_y);
+   SDL_FreeSurface(tmp);
+ 
++  bx_gui->statusbar_setitem(-1, true, true);
++  bx_gui->show_headerbar();
++
+   SDL_ShowCursor(0);
+   if (sdl_grab==0) {
+ 	SDL_WM_GrabInput(SDL_GRAB_ON);
+@@ -279,7 +284,7 @@
+ 
+   tilewidth = x_tilesize;
+   tileheight = y_tilesize;
+-  headerbar_height = header_bar_y;
++  headerbar_height = 42;
+ 
+   for(i=0;i<256;i++)
+     for(j=0;j<16;j++)
+@@ -317,7 +322,8 @@
+ 
+   sdl_screen = NULL;
+   sdl_fullscreen_toggle = 0;
+-  dimension_update(640,480);
++
++  dimension_update(10,10);
+ 
+   SDL_EnableKeyRepeat(250,50);
+   SDL_WM_SetCaption(BOCHS_WINDOW_NAME, "Bochs");
+diff -Naur temp_bochs/bochs-2.4.6/iodev/Makefile.in bochs-2.4.6/iodev/Makefile.in
+--- temp_bochs/bochs-2.4.6/iodev/Makefile.in	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/iodev/Makefile.in	2011-08-11 15:08:42.000000000 -0700
+@@ -56,7 +56,7 @@
+ SCSI_OBJS = @SCSI_OBJS@
+ 
+ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
+-LOCAL_CXXFLAGS = $(MCH_CFLAGS)
++LOCAL_CXXFLAGS = $(MCH_CFLAGS) -D__nativeclient__=1
+ 
+ PCIDEV_CXXFLAGS = -I$(srcdir)/../host/linux/pcidev
+ 
+diff -Naur temp_bochs/bochs-2.4.6/iodev/cdrom.cc bochs-2.4.6/iodev/cdrom.cc
+--- temp_bochs/bochs-2.4.6/iodev/cdrom.cc	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/iodev/cdrom.cc	2011-05-26 15:10:54.000000000 -0700
+@@ -236,7 +236,7 @@
+ #else // all others (Irix, Tru64)
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-#include <sys/ioctl.h>
++//#include <sys/ioctl.h>
+ #define BX_CD_FRAMESIZE 2048
+ #define CD_FRAMESIZE 2048
+ #endif
+diff -Naur temp_bochs/bochs-2.4.6/iodev/harddrv.cc bochs-2.4.6/iodev/harddrv.cc
+--- temp_bochs/bochs-2.4.6/iodev/harddrv.cc	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/iodev/harddrv.cc	2011-08-08 15:57:07.000000000 -0700
+@@ -307,7 +307,7 @@
+         BX_HD_THIS channels[channel].drives[device].hdimage->sectors = spt;
+ 
+         /* open hard drive image file */
+-        if ((BX_HD_THIS channels[channel].drives[device].hdimage->open(SIM->get_param_string("path", base)->getptr())) < 0) {
++	if ((BX_HD_THIS channels[channel].drives[device].hdimage->open(SIM->get_param_string("path", base)->getptr())) < 0) {
+           BX_PANIC(("ata%d-%d: could not open hard drive image file '%s'", channel, device, SIM->get_param_string("path", base)->getptr()));
+           return;
+         }
+@@ -344,7 +344,7 @@
+             }
+           } else {
+             if (disk_size != BX_HD_THIS channels[channel].drives[device].hdimage->hd_size) {
+-              BX_PANIC(("ata%d-%d disk size doesn't match specified geometry", channel, device));
++              //BX_PANIC(("ata%d-%d disk size doesn't match specified geometry", channel, device));
+               // workaround large files problem with diskimages
+               BX_HD_THIS channels[channel].drives[device].hdimage->hd_size = disk_size;
+             }
+diff -Naur temp_bochs/bochs-2.4.6/iodev/serial.cc bochs-2.4.6/iodev/serial.cc
+--- temp_bochs/bochs-2.4.6/iodev/serial.cc	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/iodev/serial.cc	2011-08-11 14:56:17.000000000 -0700
+@@ -30,6 +30,7 @@
+ // is used to know when we are exporting symbols and when we are importing.
+ #define BX_PLUGGABLE
+ 
++#ifndef __nativeclient__
+ #ifndef WIN32
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+@@ -37,6 +38,7 @@
+ #define closesocket(s)    close(s)
+ typedef int SOCKET;
+ #endif
++#endif
+ 
+ #include "iodev.h"
+ #include "serial.h"
+@@ -104,7 +106,6 @@
+ #endif
+           break;
+         case BX_SER_MODE_SOCKET:
+-          if (BX_SER_THIS s[i].socket_id >= 0) closesocket(BX_SER_THIS s[i].socket_id);
+           break;
+         case BX_SER_MODE_PIPE:
+ #ifdef WIN32
+@@ -303,11 +304,8 @@
+         BX_SER_THIS mouse_type = SIM->get_param_enum(BXPN_MOUSE_TYPE)->get();
+       } else if (!strncmp(mode, "socket", 6)) {
+         BX_SER_THIS s[i].io_mode = BX_SER_MODE_SOCKET;
+-        struct sockaddr_in  sin;
+-        struct hostent      *hp;
+         char                host[BX_PATHNAME_LEN];
+         int                 port;
+-        SOCKET              socket;
+         bx_bool             server = !strcmp(mode, "socket-server");
+ 
+ #if defined(WIN32)
+@@ -332,15 +330,19 @@
+         }
+         port = atoi(substr);
+ 
++#ifndef __nativeclient__
+         hp = gethostbyname(host);
+         if (!hp) {
+           BX_PANIC(("com%d: gethostbyname failed (%s)", i+1, host));
+         }
+ 
+         memset ((char*) &sin, 0, sizeof (sin));
++#endif
+ #if BX_HAVE_SOCKADDR_IN_SIN_LEN
+        sin.sin_len = sizeof sin;
+ #endif
++
++#ifndef __nativeclient__
+         memcpy ((char*) &(sin.sin_addr), hp->h_addr, hp->h_length);
+         sin.sin_family = hp->h_addrtype;
+         sin.sin_port = htons (port);
+@@ -372,12 +374,17 @@
+           socket = (SOCKET) -1;
+           BX_INFO(("com%d: connect() failed (host:%s, port:%d)",i+1, host, port));
+         }
++#endif
+ 
++#ifndef __nativeclient__
+         BX_SER_THIS s[i].socket_id = socket;
+         if (socket > 0)
+           BX_INFO(("com%d - inet %s - socket_id: %d, ip:%s, port:%d",
+             i+1, server ? "server" : "client", socket, host, port));
+-      } else if (!strncmp(mode, "pipe", 4)) {
++#endif
++      }
++
++      else if (!strncmp(mode, "pipe", 4)) {
+         if (strlen(dev) > 0) {
+ #ifdef WIN32
+           bx_bool server = !strcmp(mode, "pipe-server");
+@@ -1294,6 +1301,7 @@
+         BX_INFO(("com%d: write to mouse ignored: 0x%02x", port+1, BX_SER_THIS s[port].tsrbuffer));
+         break;
+       case BX_SER_MODE_SOCKET:
++#ifndef __nativeclient__
+         if (BX_SER_THIS s[port].socket_id >= 0) {
+ #ifdef WIN32
+           BX_INFO(("attempting to write win32 : %c", BX_SER_THIS s[port].tsrbuffer));
+@@ -1304,6 +1312,7 @@
+                   (bx_ptr_t) & BX_SER_THIS s[port].tsrbuffer, 1);
+ #endif
+       }
++#endif
+       case BX_SER_MODE_PIPE:
+ #ifdef WIN32
+         if (BX_SER_THIS s[port].pipe) {
+diff -Naur temp_bochs/bochs-2.4.6/iodev/serial.h bochs-2.4.6/iodev/serial.h
+--- temp_bochs/bochs-2.4.6/iodev/serial.h	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/iodev/serial.h	2011-08-08 15:58:55.000000000 -0700
+@@ -112,7 +112,6 @@
+ 
+   int io_mode;
+   int tty_id;
+-  SOCKET socket_id;
+   FILE *output;
+ #ifdef WIN32
+   HANDLE pipe;
+diff -Naur temp_bochs/bochs-2.4.6/iodev/slowdown_timer.cc bochs-2.4.6/iodev/slowdown_timer.cc
+--- temp_bochs/bochs-2.4.6/iodev/slowdown_timer.cc	2011-05-20 09:50:59.000000000 -0700
++++ bochs-2.4.6/iodev/slowdown_timer.cc	2011-08-08 15:59:42.000000000 -0700
+@@ -147,7 +147,7 @@
+ #elif BX_HAVE_SLEEP
+     sleep(usectosec(s.Q));
+ #else
+-#error do not know have to sleep
++    sleep(usectosec(s.Q));
+ #endif    //delay(wanttime-totaltime);
+     /* alternatively: delay(Q);
+      * This works okay because we share the delay between
+diff -Naur temp_bochs/bochs-2.4.6/iodev/vvfat.cc bochs-2.4.6/iodev/vvfat.cc
+--- temp_bochs/bochs-2.4.6/iodev/vvfat.cc	2011-05-20 09:51:00.000000000 -0700
++++ bochs-2.4.6/iodev/vvfat.cc	2011-08-08 16:00:22.000000000 -0700
+@@ -1529,7 +1529,6 @@
+   } else {
+     ut.actime = ut.modtime;
+   }
+-  utime(path, &ut);
+ #else
+   hFile = CreateFile(path, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+   if (hFile != INVALID_HANDLE_VALUE) {
+diff -Naur temp_bochs/bochs-2.4.6/logio.cc bochs-2.4.6/logio.cc
+--- temp_bochs/bochs-2.4.6/logio.cc	2011-05-20 09:51:00.000000000 -0700
++++ bochs-2.4.6/logio.cc	2011-05-23 09:45:55.000000000 -0700
+@@ -25,6 +25,8 @@
+ #include "iodev/iodev.h"
+ #include <assert.h>
+ 
++#include "osdep.h"
++
+ #if BX_WITH_CARBON
+ #define Float32 KLUDGE_Float32
+ #define Float64 KLUDGE_Float64
+diff -Naur temp_bochs/bochs-2.4.6/main.cc bochs-2.4.6/main.cc
+--- temp_bochs/bochs-2.4.6/main.cc	2011-05-20 09:51:00.000000000 -0700
++++ bochs-2.4.6/main.cc	2011-08-08 16:29:12.000000000 -0700
+@@ -54,6 +54,7 @@
+ #endif
+ 
+ 
++
+ extern "C" {
+ #include <signal.h>
+ }
+@@ -473,8 +474,9 @@
+ #if !defined(__WXMSW__)
+ // normal main function, presently in for all cases except for
+ // wxWidgets under win32.
+-int CDECL main(int argc, char *argv[])
++int bochs_main(int argc, char *argv[])
+ {
++
+   bx_startup_flags.argc = argc;
+   bx_startup_flags.argv = argv;
+ #if BX_WITH_SDL && defined(WIN32)
+@@ -483,9 +485,11 @@
+     return 1;
+   }
+ #endif
++
+ #if defined(WIN32)
+   SetConsoleTitle("Bochs for Windows - Console");
+ #endif
++
+   return bxmain();
+ }
+ #endif
+@@ -1116,7 +1120,7 @@
+ 
+   // First load the BIOS and VGABIOS
+   BX_MEM(0)->load_ROM(SIM->get_param_string(BXPN_ROM_PATH)->getptr(),
+-                      SIM->get_param_num(BXPN_ROM_ADDRESS)->get(), 0);
++		      SIM->get_param_num(BXPN_ROM_ADDRESS)->get(), 0);
+   BX_MEM(0)->load_ROM(SIM->get_param_string(BXPN_VGA_ROM_PATH)->getptr(), 0xc0000, 1);
+ 
+   // Then load the optional ROM images
+@@ -1139,6 +1143,7 @@
+   if (strcmp(SIM->get_param_string(BXPN_OPTRAM4_PATH)->getptr(), "") !=0)
+     BX_MEM(0)->load_RAM(SIM->get_param_string(BXPN_OPTRAM4_PATH)->getptr(), SIM->get_param_num(BXPN_OPTRAM4_ADDRESS)->get(), 2);
+ 
++
+ #if BX_SUPPORT_SMP == 0
+   BX_CPU(0)->initialize();
+   BX_CPU(0)->sanity_checks();
+@@ -1193,6 +1198,7 @@
+   alarm(1);
+ #endif
+ #endif
++
+ }
+ 
+ void bx_init_bx_dbg(void)
+diff -Naur temp_bochs/bochs-2.4.6/misc/bxcommit.c bochs-2.4.6/misc/bxcommit.c
+--- temp_bochs/bochs-2.4.6/misc/bxcommit.c	2011-05-20 09:51:00.000000000 -0700
++++ bochs-2.4.6/misc/bxcommit.c	2011-08-08 15:48:04.000000000 -0700
+@@ -26,6 +26,8 @@
+ 
+ #include <string.h>
+ 
++#include "../osdep.h"
++
+ #if !BX_HAVE_SNPRINTF
+ #include <stdarg.h>
+ /* XXX use real snprintf */
+@@ -43,11 +45,10 @@
+ }
+ #endif  /* !BX_HAVE_SNPRINTF */
+ 
+-#include "../osdep.h"
+-
+ #define HDIMAGE_HEADERS_ONLY 1
+ #include "../iodev/hdimage.h"
+ 
++
+ char *EOF_ERR = "ERROR: End of input";
+ char *rcsid = "$Id: bxcommit.c,v 1.14 2009/04/14 09:45:22 sshwarts Exp $";
+ char *divider = "========================================================================";
+diff -Naur temp_bochs/bochs-2.4.6/osdep.cc bochs-2.4.6/osdep.cc
+--- temp_bochs/bochs-2.4.6/osdep.cc	2011-05-20 09:51:00.000000000 -0700
++++ bochs-2.4.6/osdep.cc	2011-08-08 16:33:59.000000000 -0700
+@@ -54,9 +54,9 @@
+ #endif  /* !BX_HAVE_SNPRINTF */
+ 
+ #if !BX_HAVE_VSNPRINTF
+-int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg)
++int bx_vsnprintf (char *s, size_t maxlen, const char *format, ...)
+ {
+-  return vsprintf (s, format, arg);
++  return snprintf(s, maxlen, format);
+ }
+ #endif /* !BX_HAVE_VSNPRINTF*/
+ 
+diff -Naur temp_bochs/bochs-2.4.6/osdep.h bochs-2.4.6/osdep.h
+--- temp_bochs/bochs-2.4.6/osdep.h	2011-05-20 09:51:00.000000000 -0700
++++ bochs-2.4.6/osdep.h	2011-08-11 15:23:31.000000000 -0700
+@@ -154,7 +154,7 @@
+ 
+ #if !BX_HAVE_VSNPRINTF
+   #define vsnprintf bx_vsnprintf
+-  extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);
++  extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, ...);
+ #endif
+ 
+ #if BX_HAVE_STRTOULL
