@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_URLLOADERJOB_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_URLLOADERJOB_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_URLLOADERJOB_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_URLLOADERJOB_H_
 
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/cpp/completion_callback.h>
@@ -85,4 +85,4 @@ class UrlLoaderJob : public MainThreadJob {
   char buf_[4096];
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_URLLOADERJOB_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_URLLOADERJOB_H_

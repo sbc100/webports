@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
 
 #include <pthread.h>
 #include <ppapi/cpp/instance.h>
@@ -61,4 +61,4 @@ class MainThreadJob {
 
 // MainThreadRunner executes MainThreadJobs asynchronously
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_

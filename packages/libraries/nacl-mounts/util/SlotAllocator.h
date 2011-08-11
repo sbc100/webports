@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_
 
 #include <stdint.h>
 #include <algorithm>
@@ -94,4 +94,4 @@ T *SlotAllocator<T>::At(int slot) {
   return slots_[slot];
 }
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_

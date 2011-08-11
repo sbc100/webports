@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_
 
 #include <string>
 #include "../base/BaseMount.h"
@@ -39,4 +39,4 @@ class ConsoleMount: public BaseMount {
   DISALLOW_COPY_AND_ASSIGN(ConsoleMount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_CONSOLEMOUNT_H_

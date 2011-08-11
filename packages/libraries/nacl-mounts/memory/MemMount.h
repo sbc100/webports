@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMMOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMMOUNT_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_MEMORY_MEMMOUNT_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_MEMORY_MEMMOUNT_H_
 
 #include <assert.h>
 #include <errno.h>
@@ -90,4 +90,4 @@ class MemMount: public BaseMount {
   DISALLOW_COPY_AND_ASSIGN(MemMount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_MEMORY_MEMMOUNT_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_MEMORY_MEMMOUNT_H_

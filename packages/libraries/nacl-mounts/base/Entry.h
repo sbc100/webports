@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_ENTRY_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_ENTRY_H_
 
 #include <dirent.h>
 #include <signal.h>
@@ -56,4 +56,4 @@ extern "C" {
   int __wrap_utime(const char *path, struct utimbuf const *times);
 }
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_ENTRY_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_ENTRY_H_

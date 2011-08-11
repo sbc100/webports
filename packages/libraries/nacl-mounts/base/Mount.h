@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_MOUNT_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_MOUNT_H_
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -59,4 +59,4 @@ class Mount {
   DISALLOW_COPY_AND_ASSIGN(Mount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_MOUNT_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_MOUNT_H_

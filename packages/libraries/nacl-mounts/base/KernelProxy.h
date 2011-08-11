@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_KERNELPROXY_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_KERNELPROXY_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_KERNELPROXY_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_KERNELPROXY_H_
 
 #include <errno.h>
 #include <pthread.h>
@@ -113,4 +113,4 @@ class KernelProxy {
   static void Instantiate();
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_BASE_KERNELPROXY_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_KERNELPROXY_H_

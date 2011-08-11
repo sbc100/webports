@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
-#define PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
 
 #include <map>
 #include <string>
@@ -82,4 +82,4 @@ class JSPipeMount : public BaseMount {
   DISALLOW_COPY_AND_ASSIGN(JSPipeMount);
 };
 
-#endif  // PACKAGES_SCRIPTS_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
