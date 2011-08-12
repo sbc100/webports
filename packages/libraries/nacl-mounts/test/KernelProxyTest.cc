@@ -79,12 +79,12 @@ TEST(KernelProxyTest, ChdirCwdWd) {
   EXPECT_EQ(0, kp->chdir("/"));
   CHECK_WD("/");
 
+  EXPECT_EQ(0, kp->mkdir("/usr", 077));
   mnt2 = new MemMount();
   EXPECT_EQ(0, mm->AddMount(mnt2, "/usr/mount2"));
   EXPECT_EQ(-2, mm->AddMount(NULL, "/usr/mount3"));
   mnt3 = new MemMount();
   EXPECT_EQ(0, mm->AddMount(mnt3, "/usr/mount3"));
-  EXPECT_EQ(0, kp->mkdir("/usr", 0));
   EXPECT_EQ(-1, kp->mkdir("/usr/mount2", 0));
   EXPECT_EQ(0, kp->mkdir("/usr/mount2/hello", 0));
   EXPECT_EQ(0, kp->mkdir("/usr/mount2/hello/world", 0));

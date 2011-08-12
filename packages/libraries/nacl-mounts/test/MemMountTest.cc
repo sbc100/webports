@@ -155,9 +155,9 @@ TEST(MemMountTest, Stat) {
   MemMount mount;
   struct stat st;
   ASSERT_EQ(0, mount.Mkdir("/node1", 0755, &st));
-  ASSERT_EQ((ino_t)1, st.st_ino);
-  ASSERT_EQ(0, mount.Mkdir("/node2", 0755, &st));
   ASSERT_EQ((ino_t)2, st.st_ino);
+  ASSERT_EQ(0, mount.Mkdir("/node2", 0755, &st));
+  ASSERT_EQ((ino_t)3, st.st_ino);
 }
 
 TEST(MemMountTest, Unlink) {

@@ -3,10 +3,10 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
+#include <stdio.h>
+#include "../console/ConsoleMount.h"
 #include "../memory/MemMount.h"
 #include "MountManager.h"
-#include "../console/ConsoleMount.h"
-#include <stdio.h>
 
 MountManager::MountManager() {
   if (pthread_mutex_init(&mm_lock_, NULL)) assert(0);
@@ -21,14 +21,10 @@ void MountManager::Init() {
   MemMount *default_mount = new MemMount();
   int ret = AddMount(default_mount, "/");
   assert(ret == 0);
-  ret = AddMount(new ConsoleMount, "/dev/fd");
-  assert(ret == 0);
   cwd_mount_ = default_mount;
 }
 
 int MountManager::AddMount(Mount *m, const char *path) {
-  SimpleAutoLock lock(&mm_lock_);
-
   // check for null mount
   if (!m) return -2;
   // check for NULL path
@@ -36,7 +32,17 @@ int MountManager::AddMount(Mount *m, const char *path) {
   std::string p(path);
   // check for empty path
   if (p.empty()) return -3;
-  // TODO(arbenson): check for access to the parent directory
+  // check for access to the parent directory
+  if (p != "/") {
+    struct stat buf;
+    memset(&buf, 0, sizeof(struct stat));
+    Path parent(p + "/..");
+    GetNode(parent.FormulatePath(), &buf);
+    if (buf.st_ino == 0) return -4;
+  }
+
+  SimpleAutoLock lock(&mm_lock_);
+
   std::map<std::string, Mount *>::iterator it = mount_map_.find(p);
   if (it != mount_map_.end() && it->second != NULL) {
     // a mount already exists at that path
@@ -83,7 +89,7 @@ void MountManager::ClearMounts(void) {
 }
 
 Mount *MountManager::GetNode(const std::string& path,
-                                                struct stat *buf) {
+                             struct stat *buf) {
   // check if path is of length zero
   if (path.length() == 0) {
     return NULL;

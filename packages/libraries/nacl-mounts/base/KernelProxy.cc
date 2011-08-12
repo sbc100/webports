@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <list>
 #include <utility>
+#include "../console/ConsoleMount.h"
 #include "KernelProxy.h"
 #include "MountManager.h"
 
@@ -20,6 +21,21 @@ KernelProxy::KernelProxy() {
   if (pthread_mutex_init(&kp_lock_, NULL)) assert(0);
   cwd_ = Path("/");
   mm_.Init();
+
+  // Setup file descriptors 0, 1, and 2 for STDIN, STDOUT, and STDERR
+  int ret = mkdir("/dev", 0777);
+  assert(ret == 0);
+  ret = mkdir("/dev/fd", 0777);
+  assert(ret == 0);
+  ConsoleMount *console_mount = new ConsoleMount();
+  ret = mm_.AddMount(console_mount, "/dev/fd");
+  assert(ret == 0);
+  int fd = open("/dev/fd/0", O_CREAT | O_RDWR, 0);
+  assert(fd == 0);
+  fd = open("/dev/fd/1", O_CREAT | O_RDWR, 0);
+  assert(fd == 1);
+  fd = open("/dev/fd/2", O_CREAT | O_RDWR, 0);
+  assert(fd == 2);
 }
 
 KernelProxy *KernelProxy::KPInstance() {
@@ -30,13 +46,6 @@ KernelProxy *KernelProxy::KPInstance() {
 void KernelProxy::Instantiate() {
   assert(!kp_instance_);
   kp_instance_ = new KernelProxy();
-  int fd;
-  fd = kp_instance_->open("/dev/fd/0", O_CREAT | O_RDWR, 0);
-  assert(fd == 0);
-  fd = kp_instance_->open("/dev/fd/1", O_CREAT | O_RDWR, 0);
-  assert(fd == 1);
-  fd = kp_instance_->open("/dev/fd/2", O_CREAT | O_RDWR, 0);
-  assert(fd == 2);
 }
 
 static bool is_dir(Mount *mount, ino_t node) {

@@ -6,9 +6,11 @@
 #include "MemMount.h"
 
 MemMount::MemMount() {
+  // Don't use the zero slot
   slots_.Alloc();
-  root_ = slots_.At(0);
-  root_->set_slot(0);
+  int slot = slots_.Alloc();
+  root_ = slots_.At(slot);
+  root_->set_slot(slot);
   root_->set_mount(this);
   root_->set_is_dir(true);
   root_->set_name("/");
@@ -133,7 +135,7 @@ int MemMount::GetSlot(std::string path) {
   path_components = p.path();
 
   // Walk up from root.
-  slot = 0;
+  slot = root_->slot();
   std::list<std::string>::iterator path_it;
   // loop through path components
   for (path_it = path_components.begin();
