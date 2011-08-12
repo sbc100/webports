@@ -27,13 +27,9 @@ int __wrap_getchar(void) {
   char ch;
   int ret;
 
-  for(;;) {
-    ret = __wrap_read(0, &ch, 1);
-    if (ret == 1) return ch;
-    // TODO(bradnelson): busy waits since jspipe can't currently be blocking.
-    if (ret == 0) continue;
-    return -1;
-  }
+  ret = __wrap_read(0, &ch, 1);
+  if (ret == 1) return ch;
+  return -1;
 }
 
 int __wrap_tgetch(void) {

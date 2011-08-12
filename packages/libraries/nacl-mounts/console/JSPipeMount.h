@@ -77,6 +77,7 @@ class JSPipeMount : public BaseMount {
   JSOutboundPipeBridge *outbound_bridge_;
   std::map<int, std::vector<char> > incoming_;
   pthread_mutex_t incoming_lock_;
+  pthread_cond_t incoming_available_;
   std::string prefix_;
 
   DISALLOW_COPY_AND_ASSIGN(JSPipeMount);

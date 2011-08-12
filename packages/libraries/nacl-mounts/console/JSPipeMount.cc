@@ -14,10 +14,14 @@ JSPipeMount::JSPipeMount() : prefix_("JSPipeMount") {
   outbound_bridge_ = NULL;
   int ret = pthread_mutex_init(&incoming_lock_, 0);
   assert(!ret);
+  ret = pthread_cond_init(&incoming_available_, 0);
+  assert(!ret);
 }
 
 JSPipeMount::~JSPipeMount() {
   int ret = pthread_mutex_destroy(&incoming_lock_);
+  assert(!ret);
+  ret = pthread_cond_destroy(&incoming_available_);
   assert(!ret);
 }
 
@@ -50,23 +54,38 @@ ssize_t JSPipeMount::Read(ino_t slot, off_t offset,
     return -1;
   }
 
-  // Find this pipe.
-  std::map<int, std::vector<char> >:: iterator i = incoming_.find(slot - 1);
-  if (i == incoming_.end()) {
-    return 0;
+  SimpleAutoLock lock(&incoming_lock_);
+
+  // TODO(bradnelson): currently this always blocks if nothing is
+  // available. We likely want nacl-mounts to support non-blocking i/o +
+  // select + poll, at that point this will need to change.
+  for (;;) {
+    // Find this pipe.
+    std::map<int, std::vector<char> >:: iterator i = incoming_.find(slot - 1);
+    if (i == incoming_.end()) {
+      pthread_cond_wait(&incoming_available_, &incoming_lock_);
+      continue;
+    }
+
+    // Limit to the size of the read buffer.
+    size_t len = count;
+    if (i->second.size() < len) {
+      len = i->second.size();
+    }
+
+    // Wait for something if empty.
+    if (len <= 0) {
+      pthread_cond_wait(&incoming_available_, &incoming_lock_);
+      continue;
+    }
+
+    // Copy out the data.
+    memcpy(buf, &i->second[0], len);
+    // Remove the data from the buffer.
+    i->second.erase(i->second.begin(), i->second.begin() + len);
+
+    return len;
   }
-
-  // Limit to the size of the read buffer.
-  if (i->second.size() < count) {
-    count = i->second.size();
-  }
-
-  // Copy out the data.
-  memcpy(buf, &i->second[0], count);
-  // Remove the data from the buffer.
-  i->second.erase(i->second.begin(), i->second.begin() + count);
-
-  return count;
 }
 
 ssize_t JSPipeMount::Write(ino_t slot, off_t offset, const void *buf,
@@ -130,9 +149,14 @@ bool JSPipeMount::Receive(const void *buf, size_t count) {
   if (i == incoming_.end()) {
     incoming_[id] = std::vector<char>();
     i = incoming_.find(id);
+    assert(i != incoming_.end());
   }
 
+  // Add it.
   i->second.insert(i->second.end(), bufc, bufc + count);
+
+  // Signal we've got something.
+  pthread_cond_broadcast(&incoming_available_);
 
   return true;
 }

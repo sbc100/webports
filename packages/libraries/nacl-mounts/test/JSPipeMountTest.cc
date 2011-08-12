@@ -6,6 +6,8 @@
 #include "../console/JSPipeMount.h"
 #include "gtest/gtest.h"
 #include <list>
+#include <pthread.h>
+
 
 #define CHECK(x) { \
     ASSERT_NE(reinterpret_cast<void*>(NULL), x); \
@@ -136,4 +138,34 @@ TEST(JSPipeMountTest, CornerCasePaths) {
   EXPECT_NE(mount.Creat("/abc", 0, &st), 0);
   EXPECT_NE(mount.Creat("//123", 0, &st), 0);
   EXPECT_NE(mount.Creat("/dev/pipe/123", 0, &st), 0);
+}
+
+static void *Blocking_sender(void *arg) {
+  JSPipeMount *mount = reinterpret_cast<JSPipeMount*>(arg);
+
+  usleep(50 * 1000);  // 50 ms
+  EXPECT_TRUE(mount->Receive(STRING_PAIR("JSPipeMount:1234:Testing")));
+  usleep(50 * 1000);  // 50 ms
+  EXPECT_TRUE(mount->Receive(STRING_PAIR("JSPipeMount:1234:ABC")));
+
+  return 0;
+}
+
+TEST(JSPipeMountTest, Blocking) {
+  JSPipeMount mount;
+
+  struct stat st;
+  EXPECT_EQ(mount.Creat("/1234", 0, &st), 0);
+
+  pthread_t thread_id;
+  pthread_create(&thread_id, 0, Blocking_sender, &mount);
+  char buffer[40];
+  EXPECT_EQ(mount.Read(st.st_ino, 0, buffer, 7), 7);
+  EXPECT_TRUE(memcmp(buffer, STRING_PAIR("Testing")) == 0);
+  EXPECT_EQ(mount.Read(st.st_ino, 0, buffer, 3), 3);
+  EXPECT_TRUE(memcmp(buffer, STRING_PAIR("ABC")) == 0);
+
+  void *ret;
+  pthread_join(thread_id, &ret);
+  assert(ret == 0);
 }
