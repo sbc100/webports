@@ -42,6 +42,7 @@ CustomBuildStep() {
   ${NACLCC} -c ${START_DIR}/http/HTTPMount.cc -o HTTPMount.o
   ${NACLCC} -c ${START_DIR}/http/HTTPNode.cc -o HTTPNode.o
   ${NACLCC} -c ${START_DIR}/pepper/PepperMount.cc -o PepperMount.o
+  ${NACLCC} -c ${START_DIR}/pepper/PepperFileIOJob.cc -o PepperFileIOJob.o
   ${NACLCC} -c ${START_DIR}/console/ConsoleMount.cc -o ConsoleMount.o
   ${NACLCC} -c ${START_DIR}/console/JSPipeMount.cc -o JSPipeMount.o
   ${NACLCC} -c ${START_DIR}/console/JSPostMessageBridge.cc \
@@ -64,6 +65,7 @@ CustomBuildStep() {
       HTTPMount.o \
       HTTPNode.o \
       PepperMount.o \
+      PepperFileIOJob.o \
       ConsoleMount.o \
       JSPipeMount.o \
       JSPostMessageBridge.o
