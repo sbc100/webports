@@ -29,7 +29,6 @@ class PepperMount: public BaseMount {
 
   int Creat(const std::string& path, mode_t mode, struct stat *st);
   int Stat(ino_t node, struct stat *buf);
-  int Unlink(const std::string& path);
   ssize_t Read(ino_t node, off_t offset, void *buf, size_t count);
   ssize_t Write(ino_t node, off_t offset, const void *buf, size_t count);
 
