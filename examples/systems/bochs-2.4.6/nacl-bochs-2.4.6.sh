@@ -44,7 +44,14 @@ CustomConfigureStep() {
   # --whole-archive and don't allow for multiple libraries with the same name
   # on the linker line
   PWD=`pwd`
-  ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib${NACL_PACKAGES_BITSIZE}
+  # TODO(bradnelson): take this out once the sdk is fixed (and do the line
+  # after).
+  if [ "$NACL_PACKAGES_BITSIZE" = "64" ]; then
+    ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib
+  else
+    ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32
+  fi
+  #ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib${NACL_PACKAGES_BITSIZE}
   cp libppapi_cpp.a libppapi_cpp_COPY.a
   ChangeDir ${PWD}
 
