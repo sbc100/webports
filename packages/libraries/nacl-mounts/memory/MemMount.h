@@ -49,17 +49,22 @@ class MemMount: public BaseMount {
   // a directory.
   int Rmdir(ino_t node);
 
-  int Chmod(ino_t node, mode_t mode);
+  int Chmod(ino_t slot, mode_t mode);
   int Stat(ino_t node, struct stat *buf);
   int Getdents(ino_t node, off_t offset, struct dirent *dirp,
                unsigned int count);
   ssize_t Read(ino_t node, off_t offset, void *buf, size_t count);
   ssize_t Write(ino_t node, off_t offset, const void *buf, size_t count);
 
-  // Return the node at path.  If the path is invalid,
-  // NULL is returned.
+  // Return the node at path.  If the path is invalid, NULL is returned.
   MemNode *GetMemNode(std::string path);
 
+  // Get the MemNode corresponding to the inode.
+  MemNode *ToMemNode(ino_t node) {
+    return slots_.At(node);
+  }
+
+ private:
   // Return the MemNode corresponding to the inode.
   // Return the node that is a parent of the node at path.
   // If the path is not valid or if the node has no parent,
@@ -75,16 +80,8 @@ class MemMount: public BaseMount {
   // is returned.
   int GetParentSlot(std::string path);
 
-  // Get the MemNode corresponding to the inode.
-  MemNode *ToMemNode(ino_t node) {
-    return slots_.At(node);
-  }
-
-  // Return the root node for this mount.
-  MemNode *root() { return root_; }
-
- private:
   MemNode *root_;
+
   SlotAllocator<MemNode> slots_;
 
   DISALLOW_COPY_AND_ASSIGN(MemMount);

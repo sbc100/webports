@@ -23,9 +23,6 @@ class MemNode {
 
   // System calls
   int stat(struct stat *buf);
-  int chmod(mode_t mode);
-  int utime(struct utimbuf const *times);
-  int unlink(void);
 
   // Add child to this node's children.  This method will do nothing
   // if this node is a directory or if child points to a child that is
@@ -88,9 +85,6 @@ class MemNode {
 
   // set_mount() sets the mount to which this node belongs
   void set_mount(MemMount *mount) { mount_ = mount; }
-
-  // stat helper
-  void raw_stat(struct stat *buf);
 
   // is_dir() returns whether or not this node represents a directory
   bool is_dir(void) { return is_dir_; }

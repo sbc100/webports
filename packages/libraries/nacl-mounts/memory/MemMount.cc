@@ -117,7 +117,7 @@ MemNode *MemMount::GetMemNode(std::string path) {
   if (slot == -1) {
     return NULL;
   }
-  return slots_.At(GetSlot(path));
+  return slots_.At(slot);
 }
 
 int MemMount::GetSlot(std::string path) {
@@ -179,9 +179,9 @@ int MemMount::Chmod(ino_t slot, mode_t mode) {
   MemNode *node = slots_.At(slot);
   if (node == NULL) {
     errno = ENOENT;
-    return -1;
   }
-  return node->chmod(mode);
+
+  return -1;
 }
 
 int MemMount::Stat(ino_t slot, struct stat *buf) {

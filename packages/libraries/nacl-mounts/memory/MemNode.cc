@@ -22,11 +22,6 @@ MemNode::~MemNode() {
 }
 
 int MemNode::stat(struct stat *buf) {
-  raw_stat(buf);
-  return 0;
-}
-
-void MemNode::raw_stat(struct stat *buf) {
   memset(buf, 0, sizeof(struct stat));
   buf->st_ino = (ino_t)slot_;
   if (is_dir()) {
@@ -38,21 +33,7 @@ void MemNode::raw_stat(struct stat *buf) {
   buf->st_uid = 1001;
   buf->st_gid = 1002;
   buf->st_blksize = 1024;
-}
-
-int MemNode::chmod(mode_t mode) {
-  errno = ENOSYS;
-  return -1;
-}
-
-int MemNode::utime(struct utimbuf const *times) {
-  errno = ENOSYS;
-  return -1;
-}
-
-int MemNode::unlink() {
-  errno = ENOSYS;
-  return -1;
+  return 0;
 }
 
 void MemNode::AddChild(int child) {

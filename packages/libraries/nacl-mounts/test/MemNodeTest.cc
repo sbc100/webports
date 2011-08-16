@@ -158,16 +158,6 @@ TEST(MemNodeTest, UseCount) {
   delete node1;
 }
 
-TEST(MemNodeTest, Stubs) {
-  MemMount *mnt = new MemMount();
-  MemNode *node1 = CreateMemNode("node1", NULL, mnt, false, 1);
-  EXPECT_EQ(-1, node1->utime(NULL));
-  EXPECT_EQ(-1, node1->unlink());
-
-  delete mnt;
-  delete node1;
-}
-
 TEST(MemNodeTest, ReallocData) {
   MemMount *mnt = new MemMount();
   MemNode *node1 = CreateMemNode("node1", NULL, mnt, false, 1);
