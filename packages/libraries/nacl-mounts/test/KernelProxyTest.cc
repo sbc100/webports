@@ -199,3 +199,19 @@ TEST(KernelProxyTest, MountRefs) {
   EXPECT_EQ(0, kp->close(2));
   EXPECT_EQ(0, mm->RemoveMount("/dev/fd"));
 }
+
+TEST(KernelProxyTest, rmdir) {
+  mm->ClearMounts();
+  MemMount *mnt = new MemMount();
+  EXPECT_EQ(0, mm->AddMount(mnt, "/"));
+  kp->chdir("/");
+  kp->mkdir("/hi", 0777);
+  kp->mkdir("/hi/there", 0777);
+  MemMount *mnt2 = new MemMount();
+  EXPECT_EQ(0, mm->AddMount(mnt2, "/hi/there"));
+  EXPECT_EQ(-1, kp->rmdir("/hi/there"));
+  EXPECT_EQ(-1, kp->rmdir("/hi"));
+  EXPECT_EQ(0, mm->RemoveMount("/hi/there"));
+  EXPECT_EQ(0, kp->rmdir("/hi/there"));
+  EXPECT_EQ(0, kp->rmdir("/hi"));
+}

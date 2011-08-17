@@ -129,8 +129,7 @@ std::pair<Mount *, std::string> MountManager::GetMount(
 
   // Find the longest path in the map that matches
   // the start of path
-  for (it = mount_map_.begin();
-       it != mount_map_.end() && path.length() != 0; ++it) {
+  for (it = mount_map_.begin(); it != mount_map_.end(); ++it) {
     if (path.find(it->first) == 0) {
       if (it->first.length() > curr_best.length()) {
         curr_best = it->first;
@@ -150,4 +149,19 @@ std::pair<Mount *, std::string> MountManager::GetMount(
     ret.second = path.substr(curr_best.length());
   }
   return ret;
+}
+
+Mount *MountManager::InMountRootPath(const std::string& path) {
+  if (path.length() == 0) {
+    return NULL;
+  }
+
+  SimpleAutoLock lock(&mm_lock_);
+  std::map<std::string, Mount *>::iterator it;
+  for (it = mount_map_.begin(); it != mount_map_.end(); ++it) {
+    if (it->first.find(path) == 0) {
+      return it->second;
+    }
+  }
+  return NULL;
 }

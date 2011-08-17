@@ -66,7 +66,6 @@ TEST(MemMountTest, GetMemNode) {
   EXPECT_EQ(-1, mount->GetNode("/hi", NULL));
   EXPECT_EQ(-1, mount->GetNode("/node2/node4/node5", NULL));
   EXPECT_EQ(-1, mount->GetNode("", NULL));
-  EXPECT_EQ(mount->root(), mount->GetMemNode("/"));
 
   delete mount;
 }

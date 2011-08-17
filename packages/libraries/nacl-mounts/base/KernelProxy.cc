@@ -627,11 +627,19 @@ int KernelProxy::rmdir(const std::string& path) {
   }
 
   struct stat buf;
-  Mount *mount = mm_.GetNode(p.FormulatePath(), &buf);
+  std::string abs_path = p.FormulatePath();
+  Mount *mount = mm_.GetNode(abs_path, &buf);
   if (!mount) {
     errno = ENOENT;
     return -1;
   }
+
+  // Check if a mount is mounted on abs_path or on a subdirectory of abs_path
+  if (mm_.InMountRootPath(abs_path)) {
+    errno = EBUSY;
+    return -1;
+  }
+
   return mount->Rmdir(buf.st_ino);
 }
 

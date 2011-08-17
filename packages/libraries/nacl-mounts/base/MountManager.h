@@ -66,6 +66,11 @@ class MountManager {
   // buffer with information about the node.
   Mount *GetNode(const std::string& path, struct stat *buf);
 
+  // Determine whether or not a mount is rooted at path or a subdirectory of
+  // path.  If it exists, a mount that is rooted at path or a subdirectory of
+  // path is returned.  Otherwise, NULL is returned.
+  Mount *InMountRootPath(const std::string& path);
+
  private:
   std::map<std::string, Mount*> mount_map_;
   Mount *cwd_mount_;
