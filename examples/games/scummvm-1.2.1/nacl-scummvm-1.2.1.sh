@@ -20,6 +20,9 @@ PACKAGE_NAME=scummvm-1.2.1
 readonly BASS_FLOPPY_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
 readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
 
+readonly LURE_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/lure/lure-1.1.zip
+readonly LURE_NAME=lure-1.1
+
 source ../../../build_tools/common.sh
 
 SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/examples/games/scummvm-1.2.1
@@ -87,28 +90,44 @@ CustomConfigureStep() {
     --disable-flac \
     --disable-zlib \
     --disable-all-engines \
+    --enable-lure \
     --enable-sky
 }
 
 CustomInstallStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   SCUMMVM_DIR=runimage/usr/local/share/scummvm
-  BASS_DIR=${SCUMMVM_DIR}/${BASS_FLOPPY_NAME}
-  mkdir -p ${BASS_DIR}
+
+  mkdir -p ${SCUMMVM_DIR}
   SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   cp ${SRC_DIR}/gui/themes/scummclassic.zip \
      ${SRC_DIR}/dists/engine-data/sky.cpt \
      ${SRC_DIR}/gui/themes/scummmodern.zip \
      ${SRC_DIR}/gui/themes/translations.dat \
+     ${SRC_DIR}/dists/engine-data/lure.dat \
+     ${SRC_DIR}/dists/pred.dic \
      ${SCUMMVM_DIR}
 
   cp `find ${SRC_DIR}/gui/themes/fonts/ -type f` ${SCUMMVM_DIR}
 
-  #Beneath a Steel Sky (Floppy version)
-  cp -r ${NACL_PACKAGES_REPOSITORY}/${BASS_FLOPPY_NAME}/* ${BASS_DIR}
-
   cd runimage
   python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../runimage.sar
+  cd ..
+
+  #Beneath a Steel Sky (Floppy version)
+  BASS_DIR=bass/usr/local/share/scummvm/${BASS_FLOPPY_NAME}
+  mkdir -p ${BASS_DIR}
+  cp -r ${NACL_PACKAGES_REPOSITORY}/${BASS_FLOPPY_NAME}/* ${BASS_DIR}
+  cd bass
+  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../bass.sar
+  cd ..
+
+  #Lure of the temptress
+  LURE_DIR=lure/usr/local/share/scummvm
+  mkdir -p ${LURE_DIR}
+  cp -r ${NACL_PACKAGES_REPOSITORY}/${LURE_NAME}/* ${LURE_DIR}
+  cd lure
+  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../lure.sar
   cd ..
 }
 
@@ -172,6 +191,7 @@ CustomPatchStep() {
 
 CustomPackageInstall() {
   GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
+  GameGetStep ${LURE_URL} ${LURE_NAME}
   DefaultPreInstallStep
   CustomDownloadStep ${URL} ${PACKAGE_NAME} \
     ${SCUMMVM_EXAMPLE_DIR}/scummvm-1.2.1.sha1

@@ -62,8 +62,8 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.m
 +include $(srcdir)/rules.mk
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-08-17 17:45:40.000000000 -0700
-@@ -0,0 +1,93 @@
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-08-18 15:19:27.000000000 -0700
+@@ -0,0 +1,115 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -96,6 +96,28 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +  close(fh);
 +
 +  simple_tar_extract("runimage.sar");
++
++  UrlLoaderJob *job2 = new UrlLoaderJob;
++  job2->set_url("bass.sar");
++  std::vector<char> data2;
++  job2->set_dst(&data2);
++  runner->RunJob(job2);
++  int fh2 = open("/bass.sar", O_CREAT | O_WRONLY);
++  write(fh2, &data2[0], data2.size());
++  close(fh2);
++
++  simple_tar_extract("bass.sar");
++
++  UrlLoaderJob *job3 = new UrlLoaderJob;
++  job3->set_url("lure.sar");
++  std::vector<char> data3;
++  job3->set_dst(&data3);
++  runner->RunJob(job3);
++  int fh3 = open("/lure.sar", O_CREAT | O_WRONLY);
++  write(fh3, &data3[0], data3.size());
++  close(fh3);
++
++  simple_tar_extract("lure.sar");
 +
 +  int ret;
 +  mkdir("/usr", 0777);
@@ -306,9 +328,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/plugins.cpp scummvm-1.2.1/base/
  
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/config.log scummvm-1.2.1/config.log
 --- temp_scummvm-1.2.1/scummvm-1.2.1/config.log	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/config.log	2011-08-01 21:16:01.000000000 -0700
++++ scummvm-1.2.1/config.log	2011-08-18 14:57:56.000000000 -0700
 @@ -0,0 +1 @@
-+Configure run on Mon Aug 1 21:16:01 PDT 2011
++Configure run on Thu Aug 18 14:57:56 PDT 2011
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/configure scummvm-1.2.1/configure
 --- temp_scummvm-1.2.1/scummvm-1.2.1/configure	2010-12-11 01:38:39.000000000 -0800
 +++ scummvm-1.2.1/configure	2011-05-18 18:08:14.000000000 -0700
