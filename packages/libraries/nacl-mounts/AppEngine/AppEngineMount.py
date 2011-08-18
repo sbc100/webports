@@ -1,3 +1,10 @@
+#!/usr/bin/python
+#
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+#
+
 import cgi
 import datetime
 import urllib
@@ -12,6 +19,13 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import Request
 from google.appengine.ext.db import Key
+
+
+"""
+This script is an example server backend for use with the App Engine
+mount type in nacl-mounts.
+"""
+
 
 class File(db.Model):
   owner = db.UserProperty()
@@ -45,10 +59,6 @@ def FileKey(filename, user):
 class FileHandlingPage(webapp.RequestHandler):
   def post(self):
     user = users.get_current_user()
-    #logging.info(str(user.email()))
-    #logging.info(user.user_id())
-    #logging.info(str(user))
-    #logging.info(str(list(self.request.body)))
 
     split = self.request.path.rsplit('/', 1)
     assert (len(split) > 1)
@@ -77,11 +87,10 @@ class FileHandlingPage(webapp.RequestHandler):
         k = FileKey(filename, user)
         f = File.get(k)
         if not f:
-          logging.info('Creating file: ' + filename)
           f = File(key=k)
           f.owner = owner
           f.filename = filename
-        f.data = data.encode('utf-8')
+        f.data = data
         return f
 
       f = db.run_in_transaction(create_or_update, filename, data, user)
@@ -98,8 +107,7 @@ class FileHandlingPage(webapp.RequestHandler):
       k = FileKey(prefix, user)
       f = File.get(k)
       if not f:
-        #return
-        pass
+        return
       q = File.all()
       q.filter('owner =', user)
       q.filter('filename >', prefix)
@@ -109,20 +117,15 @@ class FileHandlingPage(webapp.RequestHandler):
         prefixslash += '/'
       depth = len(prefixslash.split('/'))
       results = q.fetch(limit=100)
-      logging.info('prefix is: ' + str(prefix))
-      if prefix == '/test':
-        logging.info('num results: ' + str(len(results)))
       for r in results:
         # make sure the file is directly under prefixslash
         if len(r.filename.split('/')) != depth:
           continue
         self.response.out.write('%s\n' % r.filename)
-        logging.info('WRITING: ' + str(r.filename))
 
     elif method == 'remove':
       filename = self.request.get(u'filename')
       assert filename
-      logging.info('Removing file: ' + filename)
       k = FileKey(filename, user)
       try:
         db.delete(k)
