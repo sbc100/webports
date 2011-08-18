@@ -24,8 +24,8 @@ diff -Naur lua-5.1.4/src/Makefile lua-5.1.4.nacl/src/Makefile
  CFLAGS= -O2 -Wall $(MYCFLAGS)
 -AR= ar rcu
 -RANLIB= ranlib
-+AR= nacl-ar rcu
-+RANLIB= nacl-ranlib
++AR= ${NACLAR} rcu
++RANLIB= ${NACLRANLIB}
  RM= rm -f
  LIBS= -lm $(MYLIBS)
  

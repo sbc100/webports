@@ -27,7 +27,7 @@
  MKDIR= mkdir
  # library (.a) file creation command
 -AR= ar rc
-+AR= nacl-ar rc
++AR= ${NACLAR} rc
  # second step in .a creation (use "touch" if not needed)
  AR2= @RANLIB@
  # installation program

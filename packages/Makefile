@@ -40,8 +40,8 @@ NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
 
 NACL_OUT = ../out
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
-                 $(NACL_OUT)/repository \
-                 $(NACL_OUT)/repository64 \
+                 $(NACL_OUT)/repository-i686 \
+                 $(NACL_OUT)/repository-x86_64 \
                  $(NACL_OUT)/publish
 
 NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/nacl/usr

@@ -36,16 +36,15 @@ fi
 # Get the desired bit size.
 readonly NACL_PACKAGES_BITSIZE=${NACL_PACKAGES_BITSIZE:-"32"}
 if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
-  readonly NACL_BIT_SPEC=""
+  readonly CROSS_ID=i686
 elif [ $NACL_PACKAGES_BITSIZE = "64" ] ; then
-  readonly NACL_BIT_SPEC="64"
+  readonly CROSS_ID=x86_64
 else
   echo "Unknown value for NACL_PACKAGES_BITSIZE: '$NACL_PACKAGES_BITSIZE'" 1>&2
   exit 1
 fi
 
-readonly CROSS_ID=${NACL_BIT_SPEC}
-readonly NACL_CROSS_PREFIX=nacl${CROSS_ID}
+readonly NACL_CROSS_PREFIX=${CROSS_ID}-nacl
 readonly NACL_CROSS_PREFIX_DASH=${NACL_CROSS_PREFIX}-
 
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
@@ -68,7 +67,7 @@ readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 # packages subdirectories
 readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
 readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
-readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository${CROSS_ID}
+readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository-${CROSS_ID}
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish
 readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 
@@ -76,11 +75,13 @@ readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
 
 readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
-readonly NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}gcc
-readonly NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}g++
-readonly NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ar
-readonly NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ranlib
-readonly NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ld
+
+# export nacl tools for direct use in patches.
+export NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}gcc
+export NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}g++
+export NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ar
+export NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ranlib
+export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ld
 
 
 # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
@@ -292,7 +293,7 @@ PatchSpecFile() {
   # have nacl-gcc dump specs file & add include & lib search paths
   ${NACLCC} -dumpspecs |\
     awk '/\*cpp:/ {\
-      printf("*nacl_arch:\n%%{m64:nacl64; m32:nacl; :nacl64}\n\n", $1); } \
+      printf("*nacl_arch:\n%%{m64:x86_64-nacl; m32:i686-nacl; :x86_64-nacl}\n\n", $1); } \
       { print $0; }' |\
     sed "/*cpp:/{
       N
@@ -409,7 +410,7 @@ DefaultBuildStep() {
 
 DefaultTouchStep() {
   BITSPEC="32"
-  if [ "$NACL_BIT_SPEC" = "64" ]; then
+  if [ "$NACL_PACKAGES_BITSIZE" = "64" ] ; then
     BITSPEC="64"
   fi
   mkdir -p ${NACL_PACKAGES_OUT}/sentinels && \
