@@ -72,6 +72,10 @@ CustomConfigureStep() {
   export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker link"
   export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker getdents"
   export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker kill"
+  export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker mount"
+  export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker fflush"
+
+  export CPPFLAGS="-I$NACL_PACKAGES_LIBRARIES"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build

@@ -41,7 +41,6 @@ int AppEngineMount::CreateNode(const std::string& path,
   node->set_path(path);
   node->set_slot(slot);
   node->set_is_dir(false);
-  node->IncrementUseCount();
   if (data) {
     node->set_data(*data);
   }
@@ -251,7 +250,6 @@ ssize_t AppEngineMount::Write(ino_t slot, off_t offset, const void *buf,
 }
 
 int AppEngineMount::Fsync(ino_t slot) {
-  SimpleAutoLock lock(&ae_lock_);
   AppEngineNode *node = slots_.At(slot);
   if (!node->is_dirty()) {
     return 0;

@@ -47,6 +47,7 @@ int AppEngineNode::WriteData(off_t offset, const void *buf, size_t count) {
   if (offset > static_cast<off_t>(len_)) {
     len_ = offset;
   }
+  is_dirty_ = true;
   return count;
 }
 

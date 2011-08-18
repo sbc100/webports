@@ -50,285 +50,159 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/module.mk scum
  # We don't use rules.mk but rather manually update OBJS and MODULE_DIRS.
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	2011-05-23 14:23:58.000000000 -0700
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	2011-08-17 17:49:23.000000000 -0700
 @@ -0,0 +1,8 @@
 +MODULE := scummvm_ppapi
 +
 +MODULE_OBJS := \
 +	scummvm_pepper_instance.o \
-+	scummvm_pepper_module.o 
++	scummvm_pepper_module.o
 +
 +# Include common rules
 +include $(srcdir)/rules.mk
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-08-01 13:46:04.000000000 -0700
-@@ -0,0 +1,177 @@
-+// Copyright 2011 The Native Client Authors. All rights reserved.
-+// Use of this source code is governed by a BSD-style license that can
-+// be found in the LICENSE file.
-+
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-08-17 17:45:40.000000000 -0700
+@@ -0,0 +1,93 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
 +#include "scummvm_pepper_instance.h"
-+
-+#include <ppapi/cpp/completion_callback.h>
-+#include <ppapi/cpp/input_event.h>
-+#include <ppapi/cpp/url_loader.h>
-+#include <ppapi/cpp/url_request_info.h>
-+#include <ppapi/cpp/url_response_info.h>
-+#include <ppapi/cpp/var.h>
-+#include <ppapi/c/pp_errors.h>
-+#include "ppapi/c/pp_stdint.h"
-+#include "ppapi/cpp/resource.h"
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <fcntl.h>
-+#include <dirent.h>
-+#include <sys/stat.h>
-+
-+#include <cassert>
-+#include <cmath>
-+#include <cstring>
-+
-+#include <SDL_video.h>
-+
++#include <assert.h>
++#include <vector>
 +#include <SDL.h>
 +#include <SDL_nacl.h>
++#include <SDL_video.h>
++#include "nacl-mounts/base/UrlLoaderJob.h"
++#include "nacl-mounts/AppEngine/AppEngineMount.h"
 +
++extern "C" int mount(const char *type, const char *dir, int flags, void *data);
 +extern "C" int scummvm_sdl_init(void);
 +extern "C" int scummvm_sdl_main(int argc,const char * const argv[]);
 +extern "C" int simple_tar_extract(const char *path);
 +
-+namespace pp {
++static void *scummvm_init(void *arg) {
++  MainThreadRunner *runner = reinterpret_cast<MainThreadRunner*>(arg);
 +
-+  class MyUrlLoader {
-+  public:
-+    MyUrlLoader(Instance* instance, pp::CompletionCallback done)
-+      : factory_(this),
-+	loader_(instance),
-+	did_open_(false),
-+	pepper_instance_(instance),
-+	done_(done) {
-+      file_handle_ = ::open("runimage.sar", O_CREAT | O_WRONLY);
-+      assert(file_handle_ != -1);
-+    }
-+    void ProcessURL(const char* url) {
-+      pp::CompletionCallback cc = factory_.NewCallback(&MyUrlLoader::OnOpen);
-+      int32_t rv = loader_.Open(MakeRequest(url), cc);
-+      if (rv != PP_OK_COMPLETIONPENDING)
-+	cc.Run(rv);
-+    }
++  UrlLoaderJob *job = new UrlLoaderJob;
++  job->set_url("runimage.sar");
++  std::vector<char> data;
++  job->set_dst(&data);
++  runner->RunJob(job);
++  int fh = open("/runimage.sar", O_CREAT | O_WRONLY);
++  write(fh, &data[0], data.size());
++  close(fh);
 +
-+  private:
-+    URLRequestInfo MakeRequest(const char* url) {
-+      URLRequestInfo request(pepper_instance_);
-+      request.SetURL(url);
-+      request.SetMethod("GET");
-+      request.SetFollowRedirects(true);
-+      return request;
-+    }
-+    void OnOpen(int32_t result) {
-+      if (result >= 0)
-+	ReadMore();
-+    }
++  simple_tar_extract("runimage.sar");
 +
-+    void OnRead(int32_t result) {
-+      if (result > 0) {
-+	ProcessBytes(buf_, result);
-+	ReadMore();
-+      } else if (result == PP_OK && !did_open_) {
-+	// Headers are available, and we can start reading the body.
-+	did_open_ = true;
-+	ProcessResponseInfo(loader_.GetResponseInfo());
-+	ReadMore();
-+      } else {
-+	// Done reading (possibly with an error given by 'result').
-+	::close(file_handle_);
-+	done_.Run(0);
-+      }
-+    }
-+    void ReadMore() {
-+      pp::CompletionCallback cc = factory_.NewCallback(&MyUrlLoader::OnRead);
-+      int32_t rv = loader_.ReadResponseBody(buf_, sizeof(buf_), cc);
-+      if (rv != PP_OK_COMPLETIONPENDING)
-+	cc.Run(rv);
-+    }
-+    void ProcessResponseInfo(const URLResponseInfo& response_info) {
-+      // Read response headers, etc.
-+    }
-+    void ProcessBytes(const char* bytes, int32_t length) {
-+      ::write(file_handle_, bytes, length); 
-+    }
-+    pp::CompletionCallbackFactory<MyUrlLoader> factory_;
-+    pp::URLLoader loader_;
-+    char buf_[4096];
-+    bool did_open_;
-+    int file_handle_;
-+    pp::Instance* pepper_instance_;
-+    pp::CompletionCallback done_;
-+  };
++  int ret;
++  mkdir("/usr", 0777);
++  mkdir("/usr/local", 0777);
++  mkdir("/usr/local/save", 0777);
++  mkdir("/usr/local/save/AppEngine", 0777);
++
++  AppEngineMount *aem = new AppEngineMount(runner, "/_file");
++  ret = mount("AppEngine", "/usr/local/save/AppEngine", 0, aem);
++  assert(ret == 0);
++
++  ret = chdir("/usr/local/save/AppEngine");
++  assert(ret == 0);
++
++  static char const * argv[] = {"scummvm", NULL};
++  scummvm_sdl_init();
++  scummvm_sdl_main(1, (const char**)argv);
++
++  return 0;
 +}
 +
-+namespace scummvm_pepper {
++ScummvmPepperInstance::ScummvmPepperInstance(PP_Instance instance)
++  : pp::Instance(instance),
++    quit_(false),
++    width_(0),
++    height_(0),
++    runner_(NULL) {
++  RequestInputEvents(PP_INPUTEVENT_CLASS_MOUSE);
++  RequestFilteringInputEvents(PP_INPUTEVENT_CLASS_KEYBOARD);
++}
 +
-+  ScummvmPepperInstance::ScummvmPepperInstance(PP_Instance instance)
-+    : pp::Instance(instance),
-+      graphics_2d_context_(NULL),
-+      quit_(false),
-+      scummvm_run_thread_(0),
-+      width_(0),
-+      height_(0),
-+      factory_(this) {
-+    RequestInputEvents(PP_INPUTEVENT_CLASS_MOUSE);
-+    RequestFilteringInputEvents(PP_INPUTEVENT_CLASS_KEYBOARD);
-+  }
++bool ScummvmPepperInstance::Init(uint32_t argc, const char* argn[], const char* argv[]) {
++  return true;
++}
 +
-+  ScummvmPepperInstance::~ScummvmPepperInstance() {
-+    quit_ = true;
-+    if (scummvm_run_thread_) {
-+      pthread_join(scummvm_run_thread_, NULL);
-+    }
-+  }
++void ScummvmPepperInstance::DidChangeView(const pp::Rect& position, const pp::Rect& clip) {
++  if (width_ && height_)
++    return;
 +
-+  void ScummvmPepperInstance::FinishedInit(int32_t result) {
-+    pthread_create(&scummvm_run_thread_, NULL, ScummVMRun, this);
-+  }
++  if (position.size().width() == width_ &&
++      position.size().height() == height_)
++    return;  // Size didn't change, no need to update anything.
 +
-+  void ScummvmPepperInstance::DidChangeView(const pp::Rect& position,
-+					    const pp::Rect& clip) {
-+    if (width_ && height_)
-+      return;
++  width_ = position.size().width();
++  height_ = position.size().height();
 +
-+    if (position.size().width() == width_ &&
-+	position.size().height() == height_)
-+      return;  // Size didn't change, no need to update anything.
++  SDL_NACL_SetInstance(pp_instance(), width_, height_);
 +
-+    width_ = position.size().width();
-+    height_ = position.size().height();
++  int lval = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 +
-+    SDL_NACL_SetInstance(pp_instance(), width_, height_);
++  assert(lval >= 0);
 +
-+    int lval = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
++  runner_ = new MainThreadRunner(this);
++  pthread_create(&scummvm_thread_, NULL, scummvm_init, runner_);
++}
 +
-+    assert(lval >= 0);
++bool ScummvmPepperInstance::HandleInputEvent(const pp::InputEvent& event) {
++  SDL_NACL_PushEvent(event);
++  return true;
++}
 +
-+    pp::CompletionCallback cc = factory_.NewCallback(
-+        &ScummvmPepperInstance::FinishedInit);
-+    myloader_ = new pp::MyUrlLoader(this, cc);
-+    myloader_->ProcessURL("runimage.sar");
-+  }
-+
-+  bool ScummvmPepperInstance::HandleInputEvent(const pp::InputEvent& event) {
-+    SDL_NACL_PushEvent(event);
-+    return true;
-+  }
-+
-+  bool ScummvmPepperInstance::Init(uint32_t argc, const char* argn[],
-+                                   const char* argv[]) {
-+    return true;
-+  }
-+
-+  void* ScummvmPepperInstance::ScummVMRun(void* param) {
-+    // extract the files for scummvm from the tar
-+    simple_tar_extract("runimage.sar");
-+
-+    chdir("/usr/local/share/scummvm");
-+
-+    static char const * argv[] = {"scummvm", NULL};
-+    scummvm_sdl_init();
-+    scummvm_sdl_main(1, (const char**)argv);
-+
-+    return NULL;
-+  }
-+
-+}  // namespace scummvm_pepper
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-08-01 10:36:31.000000000 -0700
-@@ -0,0 +1,81 @@
-+// Copyright 2011 The Native Client Authors. All rights reserved.
-+// Use of this source code is governed by a BSD-style license that can
-+// be found in the LICENSE file.
-+
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-08-17 17:49:08.000000000 -0700
+@@ -0,0 +1,39 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
 +#ifndef EXAMPLES_SCUMMVM_PEPPER_H_
 +#define EXAMPLES_SCUMMVM_PEPPER_H_
 +
-+#include <ppapi/cpp/graphics_2d.h>
-+#include <ppapi/cpp/image_data.h>
++#include <pthread.h>
 +#include <ppapi/cpp/input_event.h>
 +#include <ppapi/cpp/instance.h>
 +#include <ppapi/cpp/rect.h>
-+#include <ppapi/cpp/dev/scriptable_object_deprecated.h>
-+#include <ppapi/cpp/size.h>
-+#include <ppapi/cpp/completion_callback.h>
-+#include <pthread.h>
++#include "nacl-mounts/base/MainThreadRunner.h"
 +
-+#include <vector>
++class ScummvmPepperInstance : public pp::Instance {
++ public:
++  explicit ScummvmPepperInstance(PP_Instance instance);
 +
-+// We use a URLLoader in order to obtain a compression (.sar generated
-+// by simple_tar.py in memory_filesys) of all of the game files.
-+namespace pp {
-+  class MyUrlLoader;
-+}
++  virtual ~ScummvmPepperInstance() {
++    if (runner_) delete runner_;
++  }
 +
-+namespace scummvm_pepper {
++  virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
 +
-+  // The Instance class.  One of these exists for each instance of your NaCl
-+  // module on the web page.  The browser will ask the Module object to create
-+  // a new Instance for each occurence of the <embed> tag that has these
-+  // attributes:
-+  //     type="application/x-ppapi-nacl-srpc"
-+  //     nexes="ARM: scummvm_pepper_arm.nexe
-+  //            ..."
-+  // The Instance can return a ScriptableObject representing itself.  When the
-+  // browser encounters JavaScript that wants to access the Instance, it calls
-+  // the GetInstanceObject() method.  All the scripting work is done though
-+  // the returned ScriptableObject.
-+  class ScummvmPepperInstance : public pp::Instance {
-+  public:
-+    explicit ScummvmPepperInstance(PP_Instance instance);
-+    virtual ~ScummvmPepperInstance();
++  void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
 +
-+    // Start up the ScummVMRun() thread.
-+    virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
++  bool HandleInputEvent(const pp::InputEvent& event);
 +
-+    // Update the graphcs context to the new size, and regnerate |pixel_buffer_|
-+    // to fit the new size as well.
-+    virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
++  bool quit() const { return quit_; }
 +
-+    // HandleInputEvent() pushes events to SDL.
-+    virtual bool HandleInputEvent(const pp::InputEvent& event);
-+
-+    bool quit() const {
-+      return quit_;
-+    }
-+
-+  private:
-+    pp::Graphics2D* graphics_2d_context_;
-+    pp::ImageData* pixel_buffer_;
-+    bool flush_pending_;
-+    bool quit_;
-+    pthread_t scummvm_run_thread_;
-+    int width_;
-+    int height_;
-+
-+    // ScummVMRun() starts SDL and ScummVM.  ScummVM has to untar
-+    // several game files, so the initialization overhead is
-+    // noticeable.
-+    static void* ScummVMRun(void* param);
-+ 
-+    void FinishedInit(int32_t result);
-+
-+    pp::CompletionCallbackFactory<ScummvmPepperInstance> factory_;
-+    pp::MyUrlLoader *myloader_; // used for obtaining a .sar of all
-+                                //of the game files 
-+  };
-+
-+}  // namespace scummvm_pepper
++ private:
++  pthread_t scummvm_thread_;
++  MainThreadRunner *runner_;
++  int width_;
++  int height_;
++  bool quit_;
++};
 +
 +#endif  // EXAMPLES_SCUMMVM_PEPPER_H_
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp
 --- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-08-01 14:09:18.000000000 -0700
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-08-17 17:47:19.000000000 -0700
 @@ -0,0 +1,33 @@
 +// Copyright 2011 The Native Client SDK Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
@@ -432,9 +306,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/plugins.cpp scummvm-1.2.1/base/
  
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/config.log scummvm-1.2.1/config.log
 --- temp_scummvm-1.2.1/scummvm-1.2.1/config.log	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/config.log	2011-07-20 14:46:13.000000000 -0700
++++ scummvm-1.2.1/config.log	2011-08-01 21:16:01.000000000 -0700
 @@ -0,0 +1 @@
-+Configure run on Wed Jul 20 14:46:13 PDT 2011
++Configure run on Mon Aug 1 21:16:01 PDT 2011
 diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/configure scummvm-1.2.1/configure
 --- temp_scummvm-1.2.1/scummvm-1.2.1/configure	2010-12-11 01:38:39.000000000 -0800
 +++ scummvm-1.2.1/configure	2011-05-18 18:08:14.000000000 -0700
@@ -553,3 +427,75 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/scumm/detection.cpp scummvm-
  		break;
  
  	case kGenUnchanged:
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.cpp scummvm-1.2.1/engines/sky/control.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.cpp	2010-12-11 01:37:35.000000000 -0800
++++ scummvm-1.2.1/engines/sky/control.cpp	2011-08-12 12:07:13.000000000 -0700
+@@ -1031,7 +1031,7 @@
+ 	savenames.resize(MAX_SAVE_GAMES);
+ 
+ 	Common::InSaveFile *inf;
+-	inf = _saveFileMan->openForLoading("SKY-VM.SAV");
++	inf = _saveFileMan->openForLoading(SKY_VM_SAVE_PATH);
+ 	if (inf != NULL) {
+ 		char *tmpBuf =  new char[MAX_SAVE_GAMES * MAX_TEXT_LEN];
+ 		char *tmpPtr = tmpBuf;
+@@ -1075,7 +1075,7 @@
+ void Control::saveDescriptions(const Common::StringArray &list) {
+ 	Common::OutSaveFile *outf;
+ 
+-	outf = _saveFileMan->openForSaving("SKY-VM.SAV");
++	outf = _saveFileMan->openForSaving(SKY_VM_SAVE_PATH);
+ 	bool ioFailed = true;
+ 	if (outf) {
+ 		for (uint16 cnt = 0; cnt < MAX_SAVE_GAMES; cnt++) {
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.h scummvm-1.2.1/engines/sky/control.h
+--- temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.h	2010-12-11 01:37:35.000000000 -0800
++++ scummvm-1.2.1/engines/sky/control.h	2011-08-01 18:39:45.000000000 -0700
+@@ -137,6 +137,8 @@
+ #define SAVE_FILE_REVISION 6
+ #define OLD_SAVEGAME_TYPE 5
+ 
++#define SKY_VM_SAVE_PATH "SKY-VM.SAV"
++
+ struct AllocedMem {
+ 	uint16 *mem;
+ 	AllocedMem *next;
+diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/detection.cpp scummvm-1.2.1/engines/sky/detection.cpp
+--- temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/detection.cpp	2010-12-11 01:37:35.000000000 -0800
++++ scummvm-1.2.1/engines/sky/detection.cpp	2011-08-01 18:36:52.000000000 -0700
+@@ -37,6 +37,8 @@
+ 
+ #include "engines/metaengine.h"
+ 
++#include "control.h"
++
+ static const PlainGameDescriptor skySetting =
+ 	{"sky", "Beneath a Steel Sky" };
+ 
+@@ -182,7 +184,7 @@
+ 	savenames.resize(MAX_SAVE_GAMES+1);
+ 
+ 	Common::InSaveFile *inf;
+-	inf = saveFileMan->openForLoading("SKY-VM.SAV");
++	inf = saveFileMan->openForLoading(SKY_VM_SAVE_PATH);
+ 	if (inf != NULL) {
+ 		char *tmpBuf =  new char[MAX_SAVE_GAMES * MAX_TEXT_LEN];
+ 		char *tmpPtr = tmpBuf;
+@@ -238,7 +240,7 @@
+ 	Common::StringArray savenames;
+ 	savenames.resize(MAX_SAVE_GAMES+1);
+ 	Common::InSaveFile *inf;
+-	inf = saveFileMan->openForLoading("SKY-VM.SAV");
++	inf = saveFileMan->openForLoading(SKY_VM_SAVE_PATH);
+ 	if (inf != NULL) {
+ 		char *tmpBuf =  new char[MAX_SAVE_GAMES * MAX_TEXT_LEN];
+ 		char *tmpPtr = tmpBuf;
+@@ -257,7 +259,7 @@
+ 	// Save the updated descriptions
+ 	Common::OutSaveFile *outf;
+ 
+-	outf = saveFileMan->openForSaving("SKY-VM.SAV");
++	outf = saveFileMan->openForSaving(SKY_VM_SAVE_PATH);
+ 	bool ioFailed = true;
+ 	if (outf) {
+ 		for (uint16 cnt = 0; cnt < MAX_SAVE_GAMES; cnt++) {

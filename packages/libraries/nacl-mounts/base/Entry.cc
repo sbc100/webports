@@ -18,6 +18,11 @@ extern "C" {
 
 KernelProxy *kp = KernelProxy::KPInstance();
 
+int __wrap_fflush(FILE *f) {
+  int fd = fileno(f);
+  return kp->fsync(fd);
+}
+
 int __wrap_chdir(const char *path) {
   return kp->chdir(path);
 }
