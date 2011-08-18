@@ -34,7 +34,7 @@ class AppEngineNode {
   int WriteData(off_t offset, const void *buf, size_t count);
 
   char *data(void);
-  void set_data(std::vector<char> data) { data_ = data; }
+  void set_data(std::vector<char> data) { WriteData(0, &data[0], data.size()); }
 
   std::string path() { return path_; }
   void set_path(const std::string& path) { path_ = path; }
@@ -55,15 +55,16 @@ class AppEngineNode {
 
  private:
   int parent_;
-  std::vector<char> data_;
+  char *data_;
   size_t len_;
   bool is_dir_;
   int use_count_;
   std::string path_;
   int slot_;
   bool is_dirty_;
+  int capacity_;
 
   DISALLOW_COPY_AND_ASSIGN(AppEngineNode);
 };
 
-#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_MEMORY_APPENGINENODE_H_
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_APPENGINE_APPENGINENODE_H_

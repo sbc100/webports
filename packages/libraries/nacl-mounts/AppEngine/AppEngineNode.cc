@@ -14,33 +14,42 @@ AppEngineNode::AppEngineNode() {
   len_ = 0;
   use_count_ = 0;
   is_dirty_ = false;
+  capacity_ = 0;
+  data_ = NULL;
 }
 
 void AppEngineNode::ReallocData(int len) {
   assert(len > 0);
-  data_.resize(len);
+  // TODO(arbenson): Handle memory overflow more gracefully.
+  data_ = reinterpret_cast<char *>(realloc(data_, len));
+  assert(data_);
+  capacity_ = len;
 }
 
 int AppEngineNode::WriteData(off_t offset, const void *buf, size_t count) {
-  size_t len;
   // Grow the file if needed.
-  if (offset + static_cast<off_t>(count) > data_.size()) {
+  size_t len = capacity_;
+  if (offset + static_cast<off_t>(count) > static_cast<off_t>(len)) {
     len = offset + count;
-    size_t next = (data_.size() + 1) * 2;
+    size_t next = (capacity_ + 1) * 2;
     if (next > len) {
       len = next;
     }
     ReallocData(len);
   }
-  memcpy(&data_[0] + offset, buf, count);
-  len_ = offset + count;
-  is_dirty_ = true;
-  return 0;
+  // Pad any gap with zeros.
+  // TODO(arbenson): double check this logic
+  if (offset > static_cast<off_t>(len_)) {
+    memset(data_+len, 0, offset);
+  }
+  memcpy(data_ + offset, buf, count);
+  offset += count;
+  if (offset > static_cast<off_t>(len_)) {
+    len_ = offset;
+  }
+  return count;
 }
 
 char *AppEngineNode::data(void) {
-  if (data_.empty()) {
-    return NULL;
-  }
-  return &data_[0];
+  return data_;
 }

@@ -73,7 +73,7 @@ void UrlLoaderJob::InitRequest(pp::URLRequestInfo *request) {
     headers += "/*\n";
   }
   if (method_ == "POST") {
-    headers += "Content-Type: multipart/form-data; charset=utf-8; boundary=";
+    headers += "Content-Type: multipart/form-data; boundary=";
     headers += BOUNDARY_STRING_HEADER;
     std::vector<FieldEntry>::iterator it;
     for (it = fields_.begin(); it != fields_.end(); ++it) {
@@ -82,8 +82,11 @@ void UrlLoaderJob::InitRequest(pp::URLRequestInfo *request) {
       }
       request->AppendDataToBody(BOUNDARY_STRING_SEP,
                                 sizeof(BOUNDARY_STRING_SEP) - 1);
+
       std::string line = "Content-Disposition: form-data; name=\"" + it->key
-                         + "\"\n\n";
+                         + "\"; filename=\"" + it->key
+                         + "\"\nContent-Type: application/octet-stream\n\n";
+
       request->AppendDataToBody(line.c_str(), line.size());
       request->AppendDataToBody(it->data, it->length);
     }

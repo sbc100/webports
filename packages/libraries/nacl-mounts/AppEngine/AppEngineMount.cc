@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
+#include <vector>
 #include "../base/UrlLoaderJob.h"
 #include "../util/Path.h"
 #include "../util/SimpleAutoLock.h"
 #include "AppEngineMount.h"
 #include "AppEngineNode.h"
-
 
 AppEngineMount::AppEngineMount(MainThreadRunner *runner,
                                const std::string& base_url) {
@@ -56,8 +56,7 @@ int AppEngineMount::Creat(const std::string& path, mode_t mode,
   SimpleAutoLock lock(&ae_lock_);
 
   // First, check if the path is in the path map.
-  std::map<std::string, int>::iterator it = path_map_.find(abs_path);
-  if (it != path_map_.end()) {
+  if (path_map_.count(abs_path) != 0) {
     errno = EEXIST;
     return -1;
   }
@@ -305,12 +304,17 @@ int AppEngineMount::Mkdir(const std::string& path, mode_t mode,
 }
 
 bool AppEngineMount::IsDir(ino_t slot) {
+  AppEngineNode *node = slots_.At(slot);
+  if (!node) {
+    return false;
+  }
+
   struct dirent *dir = (struct dirent *)malloc(sizeof(struct dirent));
   int num_bytes = Getdents(slot, 0, dir, sizeof(struct dirent));
+
   if (num_bytes > 0) {
     // Cache this result in the node.  At this point, we consider the node
     // to be a directory for the rest of run-time
-    AppEngineNode *node = slots_.At(slot);
     node->set_is_dir(true);
     return true;
   }
