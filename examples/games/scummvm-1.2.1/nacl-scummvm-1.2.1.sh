@@ -36,8 +36,8 @@ CustomConfigureStep() {
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH}
-  export PATH="$NACL_TOOLCHAIN_ROOT/nacl/usr/bin:$PATH"
-  export PATH="$NACL_TOOLCHAIN_ROOT/nacl64/usr/bin:$PATH"
+  export PATH="$NACL_TOOLCHAIN_ROOT/i686-nacl/usr/bin:$PATH"
+  export PATH="$NACL_TOOLCHAIN_ROOT/x86_64-nacl/usr/bin:$PATH"
   export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
   export DEFINES="$DEFINES -Dvsnprintf\(a,b,c,d\)=vsprintf\(a,c,d\)"
   export DEFINES="$DEFINES -Dsnprintf\(a,b,c,...\)=sprintf\(a,c,__VA_ARGS__\)"
