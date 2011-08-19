@@ -279,7 +279,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
 +LFLAGS += -Xlinker --wrap -Xlinker __srget_r
 +LFLAGS += -Xlinker --wrap -Xlinker tgetch
 +LFLAGS += -Xlinker --wrap -Xlinker mount
-+LFLAGS += -Xlinker --wrap -Xlinker umount
++LFLAGS += -Xlinker --wrap -Xlinker umount -Xlinker --wrap -Xlinker signal
  
  # The Qt and Be window systems are written in C++, while the rest of
  # NetHack is standard C.  If using Qt, uncomment the LINK line here to get

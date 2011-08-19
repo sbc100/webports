@@ -195,3 +195,7 @@ struct utimbuf;
 int __wrap_utime(const char *path, struct utimbuf const *times) {
   return 0;
 }
+
+void (*__wrap_signal(int sig, void (*func)(int)))(int) {
+  return reinterpret_cast<void(*)(int)>(-1);
+}

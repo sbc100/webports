@@ -60,6 +60,7 @@ extern "C" {
   int __wrap_unlink(const char *path);
   struct utimbuf;
   int __wrap_utime(const char *path, struct utimbuf const *times);
+  void (*__wrap_signal(int sig, void (*func)(int)))(int);
 }
 
 #endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_ENTRY_H_
