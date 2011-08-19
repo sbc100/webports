@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+  <!--
+  Copyright 2011 The Native Client Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+  -->
+
+  <head>
+    <title>ScummVM NaCl Demo</title>
+  </head>
+
+  <body id="bodyId" >
+
+  <h1>ScummVM Native Client Demo</h1>
+
+  <p>This is a Native Client port of ScummVM.</p>
+
+  <p>To play this game, you must use Google Chrome version 14 or higher, and you must enable Native Client (type <kbd>about:flags</kbd> in the address bar, click the "Enable" link under Native Client, and restart Google Chrome).</p>
+
+  <p style="margin-bottom: 0;">The following games are available in the port (all freeware):</p>
+  <ul style="margin-top: 0;">
+    <li><i>Beneath a Steel Sky</i></li>
+    <li><i>Lure of the Temptress</i></li>
+  </ul> 
+
+  <p style="margin-bottom: 0;">Known issues:</p>
+  <ul style="margin-top: 0;">
+    <li>BASS and Lure crash on saved games for 64-bit machines</li>
+  </ul> 
+
+
+  <p style="margin-bottom: 0;">Notes:</p>
+  <ul style="margin-top: 0;">
+    <li>F5 to save/restore games in BASS</li>
+    <li>F5 to save games in Lure, F7 to restore games in Lure</li>
+  </ul> 
+  
+  You can look at the  
+  <a href="http://code.google.com/p/naclports/source/browse#svn%2Ftrunk%2Fsrc%2Fexamples%2Fgames%2Fscummvm-1.2.1">source code</a>
+  on naclports.
+
+  <br /><br />
+
+  Special thanks to <a href="http://www.revolution.co.uk/">Revolution Games</a> for providing both <i>Beneath a Steel Sky</i> and
+  <i>Lure of the Temptress</i> as freeware!
+
+  <br /><br />
+
+  To select a game, click on <i>Add game...</i>.  From the directory, go up two directories to /usr/local and then go to /usr/local/share/scummvm-1.2.1.
+  Then go to a game's directory and click <i>Choose</i> followed by <i>OK</i>. To begin the game, select the directory from the main menu and click <i>Start</i>.
+
+  <br /><br />
+  ScummVM may take a few moments to load.  Please be patient.
+
+  <br />
+
+  <center>
+  <embed name="nacl_module"
+         id="scummvm"
+         width=640 height=400
+         src="static/scummvm.nmf"
+         type="application/x-nacl" />
+  </center>
+
+  <br />
+
+  </body>
+
+</html>

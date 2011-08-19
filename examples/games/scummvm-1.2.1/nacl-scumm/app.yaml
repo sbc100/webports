@@ -1,0 +1,15 @@
+application: nacl-scumm
+version: 1
+runtime: python
+api_version: 1
+
+default_expiration: "1s"
+
+handlers:
+- url: /(.*\.(sar))
+  static_files: static/\1
+  upload: static/(.*\.(sar))
+- url: /static
+  static_dir: static
+- url: /.*
+  script: AppEngineMount.py
