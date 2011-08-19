@@ -63,7 +63,6 @@ CustomConfigureStep() {
   export LIBS="$LIBS -lnacl-mounts"
   export LIBS="$LIBS -lpthread"
   export LIBS="$LIBS -lppapi_cpp_COPY"
-
   export LIBS="$LIBS -Wl, --no-whole-archive"
 
   export LDFLAGS=
@@ -89,6 +88,7 @@ CustomConfigureStep() {
   export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker getdents"
   export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker kill"
   export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker unlink"
+  export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker signal"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
