@@ -341,7 +341,7 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/configure scummvm-1.2.1/configure
 +nacl)
 +	_host_os=nacl
 +	_host_cpu=x86
-+	_host_alias=nacl
++	_host_alias=${NACL_CROSS_PREFIX}
 +	;;
  *)
  	if test -n "$_host"; then

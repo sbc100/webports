@@ -44,8 +44,9 @@ else
   exit 1
 fi
 
-readonly NACL_CROSS_PREFIX=${CROSS_ID}-nacl
-readonly NACL_CROSS_PREFIX_DASH=${NACL_CROSS_PREFIX}-
+# Export these so they can be used inside the ports.
+export NACL_CROSS_PREFIX=${CROSS_ID}-nacl
+export NACL_CROSS_PREFIX_DASH=${NACL_CROSS_PREFIX}-
 
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
 # TODO: Currently only x86-32 will encourage MMX, SSE & SSE2 intrinsics
