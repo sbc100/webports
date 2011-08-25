@@ -62,7 +62,7 @@ fi
 readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
 readonly NACL_NATIVE_CLIENT=${NACL_TOP}/native_client
 readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-\
-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86}
+${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib}
 readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
 # packages subdirectories
