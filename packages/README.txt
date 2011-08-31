@@ -5,6 +5,11 @@ common libraries for Native Client. The bash scripts will download, patch
 build and copy the binary library and developer header files into your
 Native Client SDK.
 
+Before you can use the Makefile in this directory, you must set the
+NACL_SDK_ROOT environment variable to top directory of a version of the
+Native Client SDK (the directory containing toolchain/).
+This path should be absolute.
+
 The Makefile can build all of the libraries. Package dependencies are 
 built into the Makefile. For example, 'make vorbis' will build
 libvorbis-1.2.3 and libogg-1.1.4.  'make all' will build all of the libraries.

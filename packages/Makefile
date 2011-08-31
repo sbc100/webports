@@ -30,6 +30,10 @@ ifeq ($(OS_SUBDIR), UNKNOWN)
   $(error No support for the Operating System: $(OS_NAME))
 endif
 
+ifndef NACL_SDK_ROOT
+  $(error NACL_SDK_ROOT not set, see README.txt)
+endif
+
 BITSIZE := 32
 ifeq ($(NACL_PACKAGES_BITSIZE), 64)
   BITSIZE := 64

@@ -41,7 +41,7 @@ elif [ $NACL_PACKAGES_BITSIZE = "64" ] ; then
   readonly CROSS_ID=x86_64
 else
   echo "Unknown value for NACL_PACKAGES_BITSIZE: '$NACL_PACKAGES_BITSIZE'" 1>&2
-  exit 1
+  exit -1
 fi
 
 # Export these so they can be used inside the ports.
@@ -55,6 +55,16 @@ if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
   readonly NACL_OPTION="enable"
 else
   readonly NACL_OPTION="disable"
+fi
+
+if [ -z "${NACL_SDK_ROOT:-}" ]; then
+  echo "-------------------------------------------------------------------"
+  echo "NACL_SDK_ROOT is unset."
+  echo "This environment variable needs to be pointed at some version of"
+  echo "the Native Client SDK (the directory containing toolchain/)."
+  echo "NOTE: set this to an absolute path."
+  echo "-------------------------------------------------------------------"
+  exit -1
 fi
 
 # locate default nacl_sdk toolchain
