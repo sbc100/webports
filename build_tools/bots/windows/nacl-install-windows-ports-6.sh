@@ -15,7 +15,7 @@
 source ../bot_common.sh
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-cd ${SCRIPT_DIR}/../../../packages
+cd ${SCRIPT_DIR}/../../..
 make clean
 
 BuildPackage openscenegraph

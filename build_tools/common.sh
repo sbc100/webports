@@ -14,7 +14,7 @@ readonly SAVE_PWD=$(pwd)
 
 readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
 readonly NACL_SRC=`expr ${START_DIR} : '\(.*\/src\).*'`
-readonly NACL_PACKAGES=${NACL_SRC}/packages
+readonly NACL_PACKAGES=${NACL_SRC}
 readonly NACL_NATIVE_CLIENT_SDK=$(cd $NACL_SRC ; pwd)
 
 # Pick platform directory for compiler.

@@ -15,7 +15,7 @@
 source ../bot_common.sh
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-cd ${SCRIPT_DIR}/../../../packages
+cd ${SCRIPT_DIR}/../../..
 make clean
 
 # ffmpeg also builds lame, vorbis, theora, and ogg
@@ -25,8 +25,8 @@ BuildPackage flac
 BuildPackage gsl
 BuildPackage nacl-mounts
 BuildPackage sdl
-BuildExample games/scummvm-1.2.1 scummvm-1.2.1
-BuildExample systems/bochs-2.4.6 bochs-2.4.6
+BuildPackage scummvm
+BuildPackage bochs
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then

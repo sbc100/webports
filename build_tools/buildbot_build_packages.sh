@@ -93,7 +93,7 @@ elif [ ${BUILDBOT_BUILDERNAME} = windows-ports-6 ] ; then
     StartBuild "./nacl-install-windows-ports-6.sh" ${SCRIPT_DIR}/bots/windows 64
   fi
 else
-  cd ${SCRIPT_DIR}/../packages
+  cd ${SCRIPT_DIR}/..
   export NACL_PACKAGES_BITSIZE=32
   make clean
   if ! make all ; then

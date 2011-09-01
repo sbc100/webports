@@ -15,7 +15,7 @@
 source ../bot_common.sh
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-cd ${SCRIPT_DIR}/../../../packages
+cd ${SCRIPT_DIR}/../../..
 make clean
 
 # cairo also builds png, zlib, freetype, fontconfig, expat, and pixman
