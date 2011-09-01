@@ -128,7 +128,7 @@ $(NACL_DIRS_TO_MAKE):
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)%
 
 $(PACKAGES:%=$(SENT)%): $(SENT)%:
-	echo "@@@BUILD_STEP $(BITSIZE)-bit $*@@@"
+	echo "@@@BUILD_STEP $(BITSIZE)-bit $(notdir $*)@@@"
 	cd $* && ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@
@@ -149,6 +149,8 @@ $(SENT)examples/systems/bochs-2.4.6: nacl-mounts sdl
 
 # shortcuts
 nacl-mounts: libraries/nacl-mounts ;
+cfitsio: libraries/cfitsio ;
+tinyxml: libraries/tinyxml ;
 sdl: libraries/SDL-1.2.14 ;
 gc: libraries/gc6.8 ;
 fftw: libraries/fftw-3.2.2 ;
