@@ -15,7 +15,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/cfitsio3260.tar.gz
 # readonly URL=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3260.tar.gz
-readonly PATCH_FILE=cfitsio/nacl-cfitsio.patch
+readonly PATCH_FILE=nacl-cfitsio.patch
 readonly PACKAGE_NAME=cfitsio
 
 source ../../build_tools/common.sh

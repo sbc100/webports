@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/cairo-1.8.8.tar.gz
 #readonly URL=http://cairographics.org/releases/cairo-1.8.8.tar.gz
-readonly PATCH_FILE=cairo-1.8.8/nacl-cairo-1.8.8.patch
+readonly PATCH_FILE=nacl-cairo-1.8.8.patch
 readonly PACKAGE_NAME=cairo-1.8.8
 
 source ../../build_tools/common.sh

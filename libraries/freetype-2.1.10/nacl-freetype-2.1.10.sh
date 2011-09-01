@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/freetype-2.1.10.tar.gz
 #readonly URL=http://download.savannah.gnu.org/releases/freetype/freetype-2.1.10.tar.gz
-readonly PATCH_FILE=freetype-2.1.10/nacl-freetype-2.1.10.patch
+readonly PATCH_FILE=nacl-freetype-2.1.10.patch
 readonly PACKAGE_NAME=freetype-2.1.10
 
 source ../../build_tools/common.sh

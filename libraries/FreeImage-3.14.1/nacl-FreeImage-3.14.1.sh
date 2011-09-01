@@ -14,7 +14,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/FreeImage3141.zip
 #readonly URL=http://downloads.sourceforge.net/freeimage/FreeImage3141.zip
-readonly PATCH_FILE=FreeImage-3.14.1/nacl-FreeImage-3.14.1.patch
+readonly PATCH_FILE=nacl-FreeImage-3.14.1.patch
 readonly PACKAGE_BASE_NAME=FreeImage
 readonly PACKAGE_NAME=${PACKAGE_BASE_NAME}-3.14.1
 # This list of files needs to have CRLF (Windows)-style line endings translated

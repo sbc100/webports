@@ -12,8 +12,8 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fontconfig-2.7.3.tar.gz
 #readonly URL=http://cgit.freedesktop.org/fontconfig/snapshot/fontconfig-2.7.3.tar.gz
-readonly PATCH_FILE=fontconfig-2.7.3/nacl-fontconfig-2.7.3.patch
-readonly MAKEFILE_PATCH_FILE=fontconfig-2.7.3/nacl-fontconfig-2.7.3.Makefile.patch
+readonly PATCH_FILE=nacl-fontconfig-2.7.3.patch
+readonly MAKEFILE_PATCH_FILE=nacl-fontconfig-2.7.3.Makefile.patch
 readonly PACKAGE_NAME=fontconfig-2.7.3
 
 source ../../build_tools/common.sh

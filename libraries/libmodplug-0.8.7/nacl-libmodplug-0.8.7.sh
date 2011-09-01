@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/libmodplug-0.8.7.tar.gz
 #readonly URL=http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.7/libmodplug-0.8.7.tar.gz/download
-readonly PATCH_FILE=libmodplug-0.8.7/nacl-libmodplug-0.8.7.patch
+readonly PATCH_FILE=nacl-libmodplug-0.8.7.patch
 readonly PACKAGE_NAME=libmodplug-0.8.7
 
 source ../../build_tools/common.sh

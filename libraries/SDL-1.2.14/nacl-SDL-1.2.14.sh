@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/SDL-1.2.14.tar.gz
 # readonly URL=http://www.libsdl.org/release/SDL-1.2.14.tar.gz
-readonly PATCH_FILE=SDL-1.2.14/nacl-SDL-1.2.14.patch
+readonly PATCH_FILE=nacl-SDL-1.2.14.patch
 readonly PACKAGE_NAME=SDL-1.2.14
 
 source ../../build_tools/common.sh

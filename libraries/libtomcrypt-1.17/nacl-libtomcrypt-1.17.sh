@@ -12,7 +12,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/crypt-1.17.tar.bz2
 #readonly URL=http://libtomcrypt.googlecode.com/files/crypt-1.17.tar.bz2
-readonly PATCH_FILE=libtomcrypt-1.17/libtomcrypt-1.17.patch
+readonly PATCH_FILE=libtomcrypt-1.17.patch
 readonly PACKAGE_NAME=libtomcrypt-1.17
 
 source ../../build_tools/common.sh

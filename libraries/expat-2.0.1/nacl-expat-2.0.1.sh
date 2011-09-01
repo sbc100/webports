@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/expat-2.0.1.tar.gz
 #readonly URL=http://sourceforge.net/projects/expat/files/expat/2.0.1/expat-2.0.1.tar.gz/download
-readonly PATCH_FILE=expat-2.0.1/nacl-expat-2.0.1.patch
+readonly PATCH_FILE=nacl-expat-2.0.1.patch
 readonly PACKAGE_NAME=expat-2.0.1
 
 source ../../build_tools/common.sh

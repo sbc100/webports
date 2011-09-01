@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gmock-1.5.0.tgz
 #readonly URL=http://googlemock.googlecode.com/files/gmock-1.5.0.tar.gz
-readonly PATCH_FILE=gmock-1.5.0/nacl-gmock-1.5.0.patch
+readonly PATCH_FILE=nacl-gmock-1.5.0.patch
 readonly PACKAGE_NAME=gmock-1.5.0
 
 source ../../build_tools/common.sh

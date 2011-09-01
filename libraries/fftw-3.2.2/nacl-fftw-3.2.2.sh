@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fftw-3.2.2.tar.gz
 #readonly URL=http://www.fftw.org/fftw-3.2.2.tar.gz
-readonly PATCH_FILE=fftw-3.2.2/fftw-3.2.2.patch
+readonly PATCH_FILE=fftw-3.2.2.patch
 readonly PACKAGE_NAME=fftw-3.2.2
 
 source ../../build_tools/common.sh

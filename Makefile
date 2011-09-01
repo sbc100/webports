@@ -96,13 +96,13 @@ LIBRARIES = \
      libraries/Mesa-7.6 \
      libraries/libmodplug-0.8.7 \
      libraries/OpenSceneGraph-2.9.7 \
-     libraries/nethack-3.4.3 \
      libraries/cfitsio \
      libraries/boost_1_43_0 \
      libraries/protobuf-2.3.0 \
      libraries/dreadthread
 
 EXAMPLES = \
+     examples/games/nethack-3.4.3 \
      examples/games/scummvm-1.2.1 \
      examples/systems/bochs-2.4.6
 
@@ -143,7 +143,7 @@ $(SENT)libraries/libpng-1.2.40: zlib
 $(SENT)libraries/agg-2.5: freetype
 $(SENT)libraries/cairo-1.8.8: pixman fontconfig png
 $(SENT)libraries/ffmpeg-0.5: lame vorbis theora
-$(SENT)libraries/nethack-3.4.3: nacl-mounts
+$(SENT)examples/games/nethack-3.4.3: nacl-mounts
 $(SENT)examples/games/scummvm-1.2.1: nacl-mounts sdl
 $(SENT)examples/systems/bochs-2.4.6: nacl-mounts sdl
 
@@ -183,8 +183,8 @@ ffmpeg: libraries/ffmpeg-0.5 ;
 mesa: libraries/Mesa-7.6 ;
 modplug: libraries/libmodplug-0.8.7 ;
 openscenegraph: libraries/OpenSceneGraph-2.9.7 ;
-nethack: libraries/nethack-3.4.3 ;
 boost: libraries/boost_1_43_0 ;
 protobuf: libraries/protobuf-2.3.0 ;
+nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
 bochs: examples/systems/bochs-2.4.6 ;

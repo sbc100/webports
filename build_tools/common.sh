@@ -173,7 +173,7 @@ Fetch() {
 
 Check() {
   # verify sha1 checksum for tarball
-  local IN_FILE=${NACL_PACKAGES_LIBRARIES}/${PACKAGE_NAME}/${PACKAGE_NAME}.sha1
+  local IN_FILE=${START_DIR}/${PACKAGE_NAME}.sha1
   if ${SHA1CHECK} <${IN_FILE} &>/dev/null; then
     return 0
   else
@@ -225,7 +225,7 @@ Patch() {
   if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
     Banner "Patching ${LOCAL_PACKAGE_NAME}"
     cd ${NACL_PACKAGES_REPOSITORY}
-    patch -p0 < ${NACL_PACKAGES_LIBRARIES}/${LOCAL_PATCH_FILE}
+    patch -p0 < ${START_DIR}/${LOCAL_PATCH_FILE}
   fi
 }
 

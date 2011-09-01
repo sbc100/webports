@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/libogg-1.1.4.tar.gz
 #readonly URL=http://downloads.xiph.org/releases/ogg/libogg-1.1.4.tar.gz
-readonly PATCH_FILE=libogg-1.1.4/nacl-libogg-1.1.4.patch
+readonly PATCH_FILE=nacl-libogg-1.1.4.patch
 readonly PACKAGE_NAME=libogg-1.1.4
 
 source ../../build_tools/common.sh

@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/tinyxml_2_5_3.tar.gz
 #readonly URL=http://sourceforge.net/projects/tinyxml/files/tinyxml/2.5.3/tinyxml_2_5_3.tar.gz/download
-readonly PATCH_FILE=tinyxml/nacl-tinyxml.patch
+readonly PATCH_FILE=nacl-tinyxml.patch
 readonly PACKAGE_NAME=tinyxml
 
 source ../../build_tools/common.sh

@@ -12,7 +12,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/libtheora-1.1.1.tar.bz2
 #readonly URL=http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
-readonly PATCH_FILE=libtheora-1.1.1/nacl-libtheora-1.1.1.patch
+readonly PATCH_FILE=nacl-libtheora-1.1.1.patch
 readonly PACKAGE_NAME=libtheora-1.1.1
 
 source ../../build_tools/common.sh

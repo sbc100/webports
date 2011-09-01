@@ -13,7 +13,7 @@
 
 URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm-1.2.1.tar.bz2
 #readonly URL=http://prdownloads.sourceforge.net/scummvm/scummvm-1.2.1.tar.bz2?download
-readonly PATCH_FILE=scummvm-1.2.1/nacl-scummvm-1.2.1.patch
+readonly PATCH_FILE=nacl-scummvm-1.2.1.patch
 PACKAGE_NAME=scummvm-1.2.1
 
 # Beneath a Steel Sky (floppy version)

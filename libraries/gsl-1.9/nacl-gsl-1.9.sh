@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gsl-1.9.tar.gz
 #readonly URL=http://ftp.thaios.net/gnu/gsl/gsl-1.9.tar.gz
-readonly PATCH_FILE=gsl-1.9/nacl-gsl-1.9.patch
+readonly PATCH_FILE=nacl-gsl-1.9.patch
 readonly PACKAGE_NAME=gsl-1.9
 export LIBS="-lm"
 

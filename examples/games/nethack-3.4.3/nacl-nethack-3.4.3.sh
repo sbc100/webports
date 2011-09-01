@@ -12,10 +12,10 @@
 #
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nethack-343-src.tgz
-readonly PATCH_FILE=nethack-3.4.3/nacl-nethack-3.4.3.patch
+readonly PATCH_FILE=nacl-nethack-3.4.3.patch
 readonly PACKAGE_NAME=nethack-3.4.3
 
-source ../../build_tools/common.sh
+source ../../../build_tools/common.sh
 
 
 CustomBuildStep() {

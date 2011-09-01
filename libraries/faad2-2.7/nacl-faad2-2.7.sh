@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/faad2-2.7.tar.gz
 #readonly URL=http://sourceforge.net/projects/faac/files/faad2-src/faad2-2.7/faad2-2.7.tar.gz/download
-readonly PATCH_FILE=faad2-2.7/nacl-faad2-2.7.patch
+readonly PATCH_FILE=nacl-faad2-2.7.patch
 readonly PACKAGE_NAME=faad2-2.7
 
 source ../../build_tools/common.sh
