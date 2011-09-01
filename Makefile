@@ -8,7 +8,7 @@
 #
 # This makefile builds all of the Native Client packages listed below
 # in $(PACKAGES). Each package has a dependency on its own sentinel
-# file, which can be found at naclports/src/out/sentinels/sentinel_file_*
+# file, which can be found at naclports/src/out/sentinels/*
 #
 # The makefile depends on the NACL_SDK_ROOT environment variable
 #
@@ -48,8 +48,8 @@ NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
                  $(NACL_OUT)/repository-x86_64 \
                  $(NACL_OUT)/publish
 
-NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/nacl/usr
-NACL_SDK_USR64 = $(NACL_TOOLCHAIN_ROOT)/nacl64/usr
+NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/i686-nacl/usr
+NACL_SDK_USR64 = $(NACL_TOOLCHAIN_ROOT)/x86_64-nacl/usr
 
 NACL_DIRS_TO_REMOVE = $(NACL_OUT) \
 		      $(NACL_SDK_USR32) \
@@ -110,13 +110,14 @@ PACKAGES = $(LIBRARIES) $(EXAMPLES)
 
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
-SENT = $(SENTINELS_DIR)/sentinel_file_$(BITSIZE)_
+SENT = $(SENTINELS_DIR)/bits$(BITSIZE)
 
-.PHONY: all clean
-
+default: libraries
 libraries: $(LIBRARIES)
 examples: $(EXAMPLES)
 all: $(PACKAGES)
+
+.PHONY: all default libraries examples clean
 
 
 clean:
@@ -125,27 +126,31 @@ clean:
 $(NACL_DIRS_TO_MAKE):
 	mkdir -p $@
 
-$(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)%
+$(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
 
-$(PACKAGES:%=$(SENT)%): $(SENT)%:
+$(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	echo "@@@BUILD_STEP $(BITSIZE)-bit $(notdir $*)@@@"
 	cd $* && ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@
 
 # packages with dependencies
-$(SENT)libraries/libvorbis-1.2.3: ogg
-$(SENT)libraries/libtheora-1.1.1: ogg
-$(SENT)libraries/flac-1.2.1: ogg
-$(SENT)libraries/speex-1.2rc1: ogg
-$(SENT)libraries/fontconfig-2.7.3: expat freetype
-$(SENT)libraries/libpng-1.2.40: zlib
-$(SENT)libraries/agg-2.5: freetype
-$(SENT)libraries/cairo-1.8.8: pixman fontconfig png
-$(SENT)libraries/ffmpeg-0.5: lame vorbis theora
-$(SENT)examples/games/nethack-3.4.3: nacl-mounts
-$(SENT)examples/games/scummvm-1.2.1: nacl-mounts sdl
-$(SENT)examples/systems/bochs-2.4.6: nacl-mounts sdl
+$(SENT)/libraries/libvorbis-1.2.3: libraries/ogg-1.1.4
+$(SENT)/libraries/libtheora-1.1.1: libraries/ogg-1.1.4
+$(SENT)/libraries/flac-1.2.1: libraries/ogg-1.1.4
+$(SENT)/libraries/speex-1.2rc1: libraries/ogg-1.1.4
+$(SENT)/libraries/fontconfig-2.7.3: libraries/expat-2.0.1 freetype-2.1.10
+$(SENT)/libraries/libpng-1.2.40: libraries/zlib-1.2.3
+$(SENT)/libraries/agg-2.5: freetype-2.1.10
+$(SENT)/libraries/cairo-1.8.8: \
+    libraries/pixman-0.16.2 libraries/fontconfig-2.7.3 libraries/libpng-1.2.40
+$(SENT)/libraries/ffmpeg-0.5: \
+    libraries/lame-398-2 libraries/libvorbis-1.2.3 libraries/libtheora-1.1.1
+$(SENT)/examples/games/nethack-3.4.3: libraries/nacl-mounts
+$(SENT)/examples/games/scummvm-1.2.1: \
+    libraries/nacl-mounts libraries/SDL-1.2.14
+$(SENT)/examples/systems/bochs-2.4.6: \
+    libraries/nacl-mounts libraries/SDL-1.2.14
 
 # shortcuts
 nacl-mounts: libraries/nacl-mounts ;

@@ -95,6 +95,7 @@ CustomPackageInstall() {
   CustomBuildStep
   CustomInstallStep
   DefaultCleanUpStep
+  DefaultTouchStep
 }
 
 CustomPackageInstall

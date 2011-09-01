@@ -425,8 +425,10 @@ DefaultTouchStep() {
   if [ "$NACL_PACKAGES_BITSIZE" = "64" ] ; then
     BITSPEC="64"
   fi
-  mkdir -p ${NACL_PACKAGES_OUT}/sentinels && \
-  touch ${NACL_PACKAGES_OUT}/sentinels/sentinel_file_${BITSPEC}_${PACKAGE_NAME}
+  FULL_PACKAGE="${START_DIR/#${NACL_PACKAGES}\//}"
+  SENTFILE="${NACL_PACKAGES_OUT}/sentinels/bits${BITSPEC}/${FULL_PACKAGE}"
+  SENTDIR=$(dirname "${SENTFILE}")
+  mkdir -p "${SENTDIR}" && touch "${SENTFILE}"
 }
 
 
