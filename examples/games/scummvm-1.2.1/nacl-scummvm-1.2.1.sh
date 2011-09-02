@@ -84,12 +84,15 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build
+  # NOTE: disabled mt32emu because it using inline assembly that won't
+  #     validate.
   cd ${PACKAGE_NAME}-build
   ../configure \
     --host=nacl \
     --libdir=${NACL_SDK_USR_LIB} \
     --disable-flac \
     --disable-zlib \
+    --disable-mt32emu \
     --disable-all-engines \
     --enable-lure \
     --enable-sky
@@ -130,6 +133,29 @@ CustomInstallStep() {
   cd lure
   python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../lure.sar
   cd ..
+
+  export PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
+  MakeDir ${PUBLISH_DIR}
+
+  # Prepare AppEngine app.
+  APPENGINE_DIR=${PUBLISH_DIR}/appengine
+  MakeDir ${APPENGINE_DIR}
+  cp `find ${START_DIR}/nacl-scumm -type f -depth 1` ${APPENGINE_DIR}
+  MakeDir ${APPENGINE_DIR}/static
+  cp ${START_DIR}/nacl-scumm/static/* ${APPENGINE_DIR}/static
+  cp ${SRC_DIR}/*.sar ${APPENGINE_DIR}/static
+  ${NACLSTRIP} ${SRC_DIR}/${PACKAGE_NAME}-build/scummvm \
+      -o ${APPENGINE_DIR}/static/scummvm_x86_${NACL_PACKAGES_BITSIZE}.nexe
+
+  # Publish chrome web store app (copy to repository to drop .svn etc).
+  MakeDir ${SRC_DIR}/hosted_app
+  cp ${START_DIR}/hosted_app/* ${SRC_DIR}/hosted_app
+  ChangeDir ${SRC_DIR}
+  WEBSTORE_DIR=${PUBLISH_DIR}/web_store
+  MakeDir ${WEBSTORE_DIR}
+  zip -r ${WEBSTORE_DIR}/scummvm-1.2.1.zip hosted_app
+  cp ${START_DIR}/screenshots/* ${WEBSTORE_DIR}
+  cp ${START_DIR}/hosted_app/scummvm_128.png ${WEBSTORE_DIR}
 }
 
 CustomCheck() {

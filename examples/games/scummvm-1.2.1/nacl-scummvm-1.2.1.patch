@@ -87,7 +87,7 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +  MainThreadRunner *runner = reinterpret_cast<MainThreadRunner*>(arg);
 +
 +  UrlLoaderJob *job = new UrlLoaderJob;
-+  job->set_url("runimage.sar");
++  job->set_url("/static/runimage.sar");
 +  std::vector<char> data;
 +  job->set_dst(&data);
 +  runner->RunJob(job);
@@ -98,7 +98,7 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +  simple_tar_extract("runimage.sar");
 +
 +  UrlLoaderJob *job2 = new UrlLoaderJob;
-+  job2->set_url("bass.sar");
++  job2->set_url("/static/bass.sar");
 +  std::vector<char> data2;
 +  job2->set_dst(&data2);
 +  runner->RunJob(job2);
@@ -109,7 +109,7 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +  simple_tar_extract("bass.sar");
 +
 +  UrlLoaderJob *job3 = new UrlLoaderJob;
-+  job3->set_url("lure.sar");
++  job3->set_url("/static/lure.sar");
 +  std::vector<char> data3;
 +  job3->set_dst(&data3);
 +  runner->RunJob(job3);

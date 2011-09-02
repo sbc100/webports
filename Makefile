@@ -40,7 +40,7 @@ ifeq ($(NACL_PACKAGES_BITSIZE), 64)
 endif
 
 
-NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
+NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_newlib
 
 NACL_OUT = out
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
@@ -135,10 +135,10 @@ $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	touch $@
 
 # packages with dependencies
-$(SENT)/libraries/libvorbis-1.2.3: libraries/ogg-1.1.4
-$(SENT)/libraries/libtheora-1.1.1: libraries/ogg-1.1.4
-$(SENT)/libraries/flac-1.2.1: libraries/ogg-1.1.4
-$(SENT)/libraries/speex-1.2rc1: libraries/ogg-1.1.4
+$(SENT)/libraries/libvorbis-1.2.3: libraries/libogg-1.1.4
+$(SENT)/libraries/libtheora-1.1.1: libraries/libogg-1.1.4
+$(SENT)/libraries/flac-1.2.1: libraries/libogg-1.1.4
+$(SENT)/libraries/speex-1.2rc1: libraries/libogg-1.1.4
 $(SENT)/libraries/fontconfig-2.7.3: libraries/expat-2.0.1 freetype-2.1.10
 $(SENT)/libraries/libpng-1.2.40: libraries/zlib-1.2.3
 $(SENT)/libraries/agg-2.5: freetype-2.1.10
@@ -148,7 +148,7 @@ $(SENT)/libraries/ffmpeg-0.5: \
     libraries/lame-398-2 libraries/libvorbis-1.2.3 libraries/libtheora-1.1.1
 $(SENT)/examples/games/nethack-3.4.3: libraries/nacl-mounts
 $(SENT)/examples/games/scummvm-1.2.1: \
-    libraries/nacl-mounts libraries/SDL-1.2.14
+    libraries/nacl-mounts libraries/SDL-1.2.14 libraries/libvorbis-1.2.3
 $(SENT)/examples/systems/bochs-2.4.6: \
     libraries/nacl-mounts libraries/SDL-1.2.14
 
