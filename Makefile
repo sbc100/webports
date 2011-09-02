@@ -139,9 +139,9 @@ $(SENT)/libraries/libvorbis-1.2.3: libraries/libogg-1.1.4
 $(SENT)/libraries/libtheora-1.1.1: libraries/libogg-1.1.4
 $(SENT)/libraries/flac-1.2.1: libraries/libogg-1.1.4
 $(SENT)/libraries/speex-1.2rc1: libraries/libogg-1.1.4
-$(SENT)/libraries/fontconfig-2.7.3: libraries/expat-2.0.1 freetype-2.1.10
+$(SENT)/libraries/fontconfig-2.7.3: libraries/expat-2.0.1 libraries/freetype-2.1.10
 $(SENT)/libraries/libpng-1.2.40: libraries/zlib-1.2.3
-$(SENT)/libraries/agg-2.5: freetype-2.1.10
+$(SENT)/libraries/agg-2.5: libraries/freetype-2.1.10
 $(SENT)/libraries/cairo-1.8.8: \
     libraries/pixman-0.16.2 libraries/fontconfig-2.7.3 libraries/libpng-1.2.40
 $(SENT)/libraries/ffmpeg-0.5: \

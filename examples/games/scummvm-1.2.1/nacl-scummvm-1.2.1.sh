@@ -140,7 +140,7 @@ CustomInstallStep() {
   # Prepare AppEngine app.
   APPENGINE_DIR=${PUBLISH_DIR}/appengine
   MakeDir ${APPENGINE_DIR}
-  cp `find ${START_DIR}/nacl-scumm -type f -depth 1` ${APPENGINE_DIR}
+  cp `find ${START_DIR}/nacl-scumm -type f -maxdepth 1` ${APPENGINE_DIR}
   MakeDir ${APPENGINE_DIR}/static
   cp ${START_DIR}/nacl-scumm/static/* ${APPENGINE_DIR}/static
   cp ${SRC_DIR}/*.sar ${APPENGINE_DIR}/static
