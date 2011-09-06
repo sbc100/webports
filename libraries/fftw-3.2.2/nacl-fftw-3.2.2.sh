@@ -30,7 +30,7 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
-  ./configure --prefix=${NACL_SDK_USR} --host=nacl
+  ./configure --prefix=${NACL_SDK_USR} --host=nacl --enable-sse2
 }
 
 
