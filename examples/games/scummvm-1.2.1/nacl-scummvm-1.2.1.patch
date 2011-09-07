@@ -1,6 +1,6 @@
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/midi/timidity.cpp scummvm-1.2.1/backends/midi/timidity.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/midi/timidity.cpp	2010-12-11 01:38:09.000000000 -0800
-+++ scummvm-1.2.1/backends/midi/timidity.cpp	2011-07-27 09:15:26.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/midi/timidity.cpp scummvm-1.2.1/backends/midi/timidity.cpp
+--- scummvm-1.2.1_orig/backends/midi/timidity.cpp	2010-12-11 01:38:09.000000000 -0800
++++ scummvm-1.2.1/backends/midi/timidity.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -34,8 +34,7 @@
   *
   */
@@ -11,9 +11,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/midi/timidity.cpp scummvm-1
  #include "common/util.h"
  #include "common/endian.h"
  #include "common/str.h"
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/main.cpp scummvm-1.2.1/backends/platform/sdl/main.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/main.cpp	2010-12-11 01:38:11.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/main.cpp	2011-07-27 09:36:08.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/main.cpp scummvm-1.2.1/backends/platform/sdl/main.cpp
+--- scummvm-1.2.1_orig/backends/platform/sdl/main.cpp	2010-12-11 01:38:11.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/main.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -52,16 +52,18 @@
  }
  #endif
@@ -36,9 +36,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/main.cpp scumm
  	// Invoke the actual ScummVM main entry point:
  	int res = scummvm_main(argc, argv);
  	((OSystem_SDL *)g_system)->deinit();
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/module.mk scummvm-1.2.1/backends/platform/sdl/module.mk
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/module.mk	2010-12-11 01:38:11.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/module.mk	2011-05-23 14:23:56.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/module.mk scummvm-1.2.1/backends/platform/sdl/module.mk
+--- scummvm-1.2.1_orig/backends/platform/sdl/module.mk	2010-12-11 01:38:11.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/module.mk	2011-09-07 11:47:02.000000000 -0700
 @@ -5,6 +5,8 @@
  	graphics.o \
  	hardwarekeys.o \
@@ -48,9 +48,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/module.mk scum
  	sdl.o
  
  # We don't use rules.mk but rather manually update OBJS and MODULE_DIRS.
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	2011-08-17 17:49:23.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/module.mk scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk
+--- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/module.mk	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	2011-09-07 11:47:02.000000000 -0700
 @@ -0,0 +1,8 @@
 +MODULE := scummvm_ppapi
 +
@@ -60,9 +60,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/module.m
 +
 +# Include common rules
 +include $(srcdir)/rules.mk
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-08-18 15:19:27.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
+--- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -0,0 +1,115 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
@@ -179,9 +179,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +  return true;
 +}
 +
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-08-17 17:49:08.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.h scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h
+--- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-09-07 11:47:02.000000000 -0700
 @@ -0,0 +1,39 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
@@ -222,9 +222,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +};
 +
 +#endif  // EXAMPLES_SCUMMVM_PEPPER_H_
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-08-17 17:47:19.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp
+--- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -0,0 +1,33 @@
 +// Copyright 2011 The Native Client SDK Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
@@ -259,9 +259,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_
 +    return new scummvm_pepper::ScummvmPepperModule();
 +  }
 +}  // namespace pp
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/sdl.cpp scummvm-1.2.1/backends/platform/sdl/sdl.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/sdl.cpp	2010-12-11 01:38:11.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/sdl.cpp	2011-07-27 09:38:24.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/sdl.cpp scummvm-1.2.1/backends/platform/sdl/sdl.cpp
+--- scummvm-1.2.1_orig/backends/platform/sdl/sdl.cpp	2010-12-11 01:38:11.000000000 -0800
++++ scummvm-1.2.1/backends/platform/sdl/sdl.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -97,6 +97,8 @@
  
  #if !defined(_WIN32_WCE) && !defined(__SYMBIAN32__) && defined(USE_SCALERS)
@@ -301,9 +301,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/backends/platform/sdl/sdl.cpp scummv
  	else
  		strcpy(configFile, DEFAULT_CONFIG_FILE);
  #else
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/commandLine.cpp scummvm-1.2.1/base/commandLine.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/base/commandLine.cpp	2010-12-11 01:38:08.000000000 -0800
-+++ scummvm-1.2.1/base/commandLine.cpp	2011-05-19 17:31:28.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/base/commandLine.cpp scummvm-1.2.1/base/commandLine.cpp
+--- scummvm-1.2.1_orig/base/commandLine.cpp	2010-12-11 01:38:08.000000000 -0800
++++ scummvm-1.2.1/base/commandLine.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -140,7 +140,8 @@
  	va_list va;
  
@@ -314,9 +314,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/commandLine.cpp scummvm-1.2.1/b
  	va_end(va);
  
  #if !(defined(__GP32__) || defined (__SYMBIAN32__) || defined(__DS__))
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/plugins.cpp scummvm-1.2.1/base/plugins.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/base/plugins.cpp	2010-12-11 01:38:08.000000000 -0800
-+++ scummvm-1.2.1/base/plugins.cpp	2011-07-27 09:54:52.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/base/plugins.cpp scummvm-1.2.1/base/plugins.cpp
+--- scummvm-1.2.1_orig/base/plugins.cpp	2010-12-11 01:38:08.000000000 -0800
++++ scummvm-1.2.1/base/plugins.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -212,7 +212,7 @@
  		LINK_PLUGIN(AMIGA)
  		LINK_PLUGIN(APPLEIIGS)
@@ -326,14 +326,14 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/base/plugins.cpp scummvm-1.2.1/base/
  		LINK_PLUGIN(TIMIDITY)
  		#endif
  
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/config.log scummvm-1.2.1/config.log
---- temp_scummvm-1.2.1/scummvm-1.2.1/config.log	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/config.log	2011-08-18 14:57:56.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/config.log scummvm-1.2.1/config.log
+--- scummvm-1.2.1_orig/config.log	1969-12-31 16:00:00.000000000 -0800
++++ scummvm-1.2.1/config.log	2011-09-07 11:47:02.000000000 -0700
 @@ -0,0 +1 @@
 +Configure run on Thu Aug 18 14:57:56 PDT 2011
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/configure scummvm-1.2.1/configure
---- temp_scummvm-1.2.1/scummvm-1.2.1/configure	2010-12-11 01:38:39.000000000 -0800
-+++ scummvm-1.2.1/configure	2011-05-18 18:08:14.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/configure scummvm-1.2.1/configure
+--- scummvm-1.2.1_orig/configure	2010-12-11 01:38:39.000000000 -0800
++++ scummvm-1.2.1/configure	2011-09-07 11:47:02.000000000 -0700
 @@ -1091,6 +1091,11 @@
  	_host_cpu=arm
  	_host_alias=arm-wince-mingw32ce
@@ -346,9 +346,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/configure scummvm-1.2.1/configure
  *)
  	if test -n "$_host"; then
  		guessed_host=`$_srcdir/config.sub $_host`
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/scumm/detection.cpp scummvm-1.2.1/engines/scumm/detection.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/engines/scumm/detection.cpp	2010-12-11 01:37:23.000000000 -0800
-+++ scummvm-1.2.1/engines/scumm/detection.cpp	2011-05-19 17:46:37.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/engines/scumm/detection.cpp scummvm-1.2.1/engines/scumm/detection.cpp
+--- scummvm-1.2.1_orig/engines/scumm/detection.cpp	2010-12-11 01:37:23.000000000 -0800
++++ scummvm-1.2.1/engines/scumm/detection.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -23,6 +23,11 @@
   *
   */
@@ -449,9 +449,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/scumm/detection.cpp scummvm-
  		break;
  
  	case kGenUnchanged:
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.cpp scummvm-1.2.1/engines/sky/control.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.cpp	2010-12-11 01:37:35.000000000 -0800
-+++ scummvm-1.2.1/engines/sky/control.cpp	2011-08-12 12:07:13.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/engines/sky/control.cpp scummvm-1.2.1/engines/sky/control.cpp
+--- scummvm-1.2.1_orig/engines/sky/control.cpp	2010-12-11 01:37:35.000000000 -0800
++++ scummvm-1.2.1/engines/sky/control.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -1031,7 +1031,7 @@
  	savenames.resize(MAX_SAVE_GAMES);
  
@@ -470,9 +470,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.cpp scummvm-1.2.
  	bool ioFailed = true;
  	if (outf) {
  		for (uint16 cnt = 0; cnt < MAX_SAVE_GAMES; cnt++) {
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.h scummvm-1.2.1/engines/sky/control.h
---- temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.h	2010-12-11 01:37:35.000000000 -0800
-+++ scummvm-1.2.1/engines/sky/control.h	2011-08-01 18:39:45.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/engines/sky/control.h scummvm-1.2.1/engines/sky/control.h
+--- scummvm-1.2.1_orig/engines/sky/control.h	2010-12-11 01:37:35.000000000 -0800
++++ scummvm-1.2.1/engines/sky/control.h	2011-09-07 11:47:02.000000000 -0700
 @@ -137,6 +137,8 @@
  #define SAVE_FILE_REVISION 6
  #define OLD_SAVEGAME_TYPE 5
@@ -482,9 +482,9 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/control.h scummvm-1.2.1/
  struct AllocedMem {
  	uint16 *mem;
  	AllocedMem *next;
-diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/detection.cpp scummvm-1.2.1/engines/sky/detection.cpp
---- temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/detection.cpp	2010-12-11 01:37:35.000000000 -0800
-+++ scummvm-1.2.1/engines/sky/detection.cpp	2011-08-01 18:36:52.000000000 -0700
+diff -Naur scummvm-1.2.1_orig/engines/sky/detection.cpp scummvm-1.2.1/engines/sky/detection.cpp
+--- scummvm-1.2.1_orig/engines/sky/detection.cpp	2010-12-11 01:37:35.000000000 -0800
++++ scummvm-1.2.1/engines/sky/detection.cpp	2011-09-07 11:47:02.000000000 -0700
 @@ -37,6 +37,8 @@
  
  #include "engines/metaengine.h"
@@ -521,3 +521,174 @@ diff -Naur temp_scummvm-1.2.1/scummvm-1.2.1/engines/sky/detection.cpp scummvm-1.
  	bool ioFailed = true;
  	if (outf) {
  		for (uint16 cnt = 0; cnt < MAX_SAVE_GAMES; cnt++) {
+diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics/scaler/scale2x.cpp
+--- scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp	2010-12-11 01:38:07.000000000 -0800
++++ scummvm-1.2.1/graphics/scaler/scale2x.cpp	2011-09-07 12:14:13.000000000 -0700
+@@ -211,9 +211,15 @@
+ 		"0:\n"
+ 
+ 		/* set the current, current_pre, current_next registers */
++#if defined(__x86_64__)
++		"movq %%nacl:-8(%%r15,%q1), %%mm0\n"
++		"movq %%nacl:(%%r15,%q1), %%mm7\n"
++		"movq %%nacl:8(%%r15,%q1), %%mm1\n"
++#else
+ 		"movq -8(%1), %%mm0\n"
+ 		"movq (%1), %%mm7\n"
+ 		"movq 8(%1), %%mm1\n"
++#endif
+ 		"psrlq $56, %%mm0\n"
+ 		"psllq $56, %%mm1\n"
+ 		"movq %%mm7, %%mm2\n"
+@@ -224,7 +230,11 @@
+ 		"por %%mm3, %%mm1\n"
+ 
+ 		/* current_upper */
++#if defined(__x86_64__)
++		"movq %%nacl:(%%r15,%q0), %%mm6\n"
++#else
+ 		"movq (%0), %%mm6\n"
++#endif
+ 
+ 		/* compute the upper-left pixel for dst on %%mm2 */
+ 		/* compute the upper-right pixel for dst on %%mm4 */
+@@ -234,8 +244,13 @@
+ 		"movq %%mm1, %%mm5\n"
+ 		"pcmpeqb %%mm6, %%mm2\n"
+ 		"pcmpeqb %%mm6, %%mm4\n"
++#if defined(__x86_64__)
++		"pcmpeqb %%nacl:(%%r15,%q2), %%mm3\n"
++		"pcmpeqb %%nacl:(%%r15,%q2), %%mm5\n"
++#else
+ 		"pcmpeqb (%2), %%mm3\n"
+ 		"pcmpeqb (%2), %%mm5\n"
++#endif
+ 		"pandn %%mm2, %%mm3\n"
+ 		"pandn %%mm4, %%mm5\n"
+ 		"movq %%mm0, %%mm2\n"
+@@ -257,8 +272,13 @@
+ 		"movq %%mm2, %%mm3\n"
+ 		"punpcklbw %%mm4, %%mm2\n"
+ 		"punpckhbw %%mm4, %%mm3\n"
++#if defined(__x86_64__)
++		"movq %%mm2, %%nacl:(%%r15,%q3)\n"
++		"movq %%mm3, %%nacl:8(%%r15,%q3)\n"
++#else
+ 		"movq %%mm2, (%3)\n"
+ 		"movq %%mm3, 8(%3)\n"
++#endif
+ 
+ 		/* next */
+ 		"add $8, %0\n"
+@@ -289,9 +309,15 @@
+ 		"0:\n"
+ 
+ 		/* set the current, current_pre, current_next registers */
++#if defined(__x86_64__)
++		"movq %%nacl:-8(%%r15,%q1), %%mm0\n"
++		"movq %%nacl:(%%r15,%q1), %%mm7\n"
++		"movq %%nacl:8(%%r15,%q1), %%mm1\n"
++#else
+ 		"movq -8(%1), %%mm0\n"
+ 		"movq (%1), %%mm7\n"
+ 		"movq 8(%1), %%mm1\n"
++#endif
+ 		"psrlq $48, %%mm0\n"
+ 		"psllq $48, %%mm1\n"
+ 		"movq %%mm7, %%mm2\n"
+@@ -302,7 +328,11 @@
+ 		"por %%mm3, %%mm1\n"
+ 
+ 		/* current_upper */
++#if defined(__x86_64__)
++		"movq %%nacl:(%%r15,%q0), %%mm6\n"
++#else
+ 		"movq (%0), %%mm6\n"
++#endif
+ 
+ 		/* compute the upper-left pixel for dst on %%mm2 */
+ 		/* compute the upper-right pixel for dst on %%mm4 */
+@@ -312,8 +342,13 @@
+ 		"movq %%mm1, %%mm5\n"
+ 		"pcmpeqw %%mm6, %%mm2\n"
+ 		"pcmpeqw %%mm6, %%mm4\n"
++#if defined(__x86_64__)
++		"pcmpeqw %%nacl:(%%r15,%q2), %%mm3\n"
++		"pcmpeqw %%nacl:(%%r15,%q2), %%mm5\n"
++#else
+ 		"pcmpeqw (%2), %%mm3\n"
+ 		"pcmpeqw (%2), %%mm5\n"
++#endif
+ 		"pandn %%mm2, %%mm3\n"
+ 		"pandn %%mm4, %%mm5\n"
+ 		"movq %%mm0, %%mm2\n"
+@@ -335,8 +370,13 @@
+ 		"movq %%mm2, %%mm3\n"
+ 		"punpcklwd %%mm4, %%mm2\n"
+ 		"punpckhwd %%mm4, %%mm3\n"
++#if defined(__x86_64__)
++		"movq %%mm2, %%nacl:(%%r15,%q3)\n"
++		"movq %%mm3, %%nacl:8(%%r15,%q3)\n"
++#else
+ 		"movq %%mm2, (%3)\n"
+ 		"movq %%mm3, 8(%3)\n"
++#endif
+ 
+ 		/* next */
+ 		"add $8, %0\n"
+@@ -367,9 +407,15 @@
+ 		"0:\n"
+ 
+ 		/* set the current, current_pre, current_next registers */
++#if defined(__x86_64__)
++		"movq %%nacl:-8(%%r15,%q1), %%mm0\n"
++		"movq %%nacl:(%%r15,%q1), %%mm7\n"
++		"movq %%nacl:8(%%r15,%q1), %%mm1\n"
++#else
+ 		"movq -8(%1), %%mm0\n"
+ 		"movq (%1), %%mm7\n"
+ 		"movq 8(%1), %%mm1\n"
++#endif
+ 		"psrlq $32, %%mm0\n"
+ 		"psllq $32, %%mm1\n"
+ 		"movq %%mm7, %%mm2\n"
+@@ -380,7 +426,11 @@
+ 		"por %%mm3, %%mm1\n"
+ 
+ 		/* current_upper */
++#if defined(__x86_64__)
++		"movq %%nacl:(%%r15,%q0), %%mm6\n"
++#else
+ 		"movq (%0), %%mm6\n"
++#endif
+ 
+ 		/* compute the upper-left pixel for dst on %%mm2 */
+ 		/* compute the upper-right pixel for dst on %%mm4 */
+@@ -390,8 +440,13 @@
+ 		"movq %%mm1, %%mm5\n"
+ 		"pcmpeqd %%mm6, %%mm2\n"
+ 		"pcmpeqd %%mm6, %%mm4\n"
++#if defined(__x86_64__)
++		"pcmpeqd %%nacl:(%%r15,%q2), %%mm3\n"
++		"pcmpeqd %%nacl:(%%r15,%q2), %%mm5\n"
++#else
+ 		"pcmpeqd (%2), %%mm3\n"
+ 		"pcmpeqd (%2), %%mm5\n"
++#endif
+ 		"pandn %%mm2, %%mm3\n"
+ 		"pandn %%mm4, %%mm5\n"
+ 		"movq %%mm0, %%mm2\n"
+@@ -413,8 +468,13 @@
+ 		"movq %%mm2, %%mm3\n"
+ 		"punpckldq %%mm4, %%mm2\n"
+ 		"punpckhdq %%mm4, %%mm3\n"
++#if defined(__x86_64__)
++		"movq %%mm2, %%nacl:(%%r15,%q3)\n"
++		"movq %%mm3, %%nacl:8(%%r15,%q3)\n"
++#else
+ 		"movq %%mm2, (%3)\n"
+ 		"movq %%mm3, 8(%3)\n"
++#endif
+ 
+ 		/* next */
+ 		"add $8, %0\n"
