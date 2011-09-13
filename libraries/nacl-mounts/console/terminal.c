@@ -21,7 +21,6 @@ int __wrap___srget_r(struct _reent *ptr, register FILE *fp) {
     return __real___srget_r(ptr, fp);
   }
 }
-#endif
 
 int __wrap_getchar(void) {
   char ch;
@@ -35,6 +34,7 @@ int __wrap_getchar(void) {
 int __wrap_tgetch(void) {
   return __wrap_getchar();
 }
+#endif
 
 int puts(const char *s) {
   write(1, s, strlen(s));

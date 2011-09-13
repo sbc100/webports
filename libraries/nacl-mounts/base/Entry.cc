@@ -8,6 +8,138 @@
 #include "Entry.h"
 #include "KernelProxy.h"
 
+#ifdef __GLIBC__
+
+#include "irt_syscalls.h"
+#include "nacl_dirent.h"
+
+KernelProxy *kp = KernelProxy::KPInstance();
+
+extern "C" {
+
+#define DECLARE(name) typeof(__nacl_irt_##name) __nacl_irt_##name##_real;
+#define DO_WRAP(name) do { \
+    __nacl_irt_##name##_real = __nacl_irt_##name; \
+    __nacl_irt_##name = __nacl_irt_##name##_wrap; \
+  } while (0)
+#define WRAP(name) __nacl_irt_##name##_wrap
+#define REAL(name) __nacl_irt_##name##_real
+
+  DECLARE(open);
+  DECLARE(close);
+  DECLARE(read);
+  DECLARE(write);
+  DECLARE(stat);
+  DECLARE(fstat);
+  DECLARE(getdents);
+  DECLARE(seek);
+
+  ssize_t __real_read(int fd, void *buf, size_t count) {
+    size_t nread;
+    errno = REAL(read)(fd, buf, count, &nread);
+    return errno == 0 ? (ssize_t)nread : -1;
+  }
+
+  ssize_t __real_write(int fd, const void *buf, size_t count) {
+    size_t nwrote;
+    errno = REAL(write)(fd, buf, count, &nwrote);
+    fsync(fd);
+    return errno == 0 ? (ssize_t)nwrote : -1;
+  }
+
+  int WRAP(open)(const char *pathname, int oflag, mode_t cmode, int *newfd) {
+    *newfd = kp->open(pathname, oflag, cmode);
+    return (*newfd < 0) ? errno : 0;
+  }
+
+  int WRAP(close)(int fd) {
+    int res = kp->close(fd);
+    return (res < 0) ? errno : 0;
+  }
+
+  int WRAP(read)(int fd, void *buf, size_t count, size_t *nread) {
+    *nread = kp->read(fd, buf, count);
+    return (*nread < 0) ? errno : 0;
+  }
+
+  int WRAP(write)(int fd, const void *buf, size_t count, size_t *nwrote) {
+    *nwrote = kp->write(fd, buf, count);
+    return (*nwrote < 0) ? errno : 0;
+  }
+
+  int WRAP(stat)(const char *pathname, struct nacl_abi_stat *buf) {
+    int res = kp->stat(pathname, (struct stat*)buf);
+    return res < 0 ? errno : 0;
+  }
+
+  int WRAP(fstat)(int fd, struct nacl_abi_stat *buf) {
+    if (fd < 3) {
+      // segfault if fstat fails in this case
+      return REAL(fstat)(fd, buf);
+    }
+    int res = kp->fstat(fd, (struct stat*)buf);
+    return res < 0 ? errno : 0;
+  }
+
+  static const int d_name_shift = offsetof (dirent, d_name) -
+    offsetof (struct nacl_abi_dirent, nacl_abi_d_name);
+
+  int WRAP(getdents)(int fd, dirent* nacl_buf, size_t nacl_count,
+      size_t *nread) {
+    int nacl_offset = 0;
+    // "buf" contains dirent(s); "nacl_buf" contains nacl_abi_dirent(s).
+    // nacl_abi_dirent(s) are smaller than dirent(s), so nacl_count bytes buffer
+    // is enough
+    char buf[nacl_count];
+    int offset = 0;
+    int count;
+
+    count = kp->getdents(fd, buf, nacl_count);
+    if (count < 0)
+      return errno;
+
+    while (offset < count) {
+      dirent* d = (dirent*)(buf + offset);
+      nacl_abi_dirent* nacl_d = (nacl_abi_dirent*)((char*)nacl_buf +
+          nacl_offset);
+      nacl_d->nacl_abi_d_ino = d->d_ino;
+      nacl_d->nacl_abi_d_off = d->d_off;
+      nacl_d->nacl_abi_d_reclen = d->d_reclen - d_name_shift;
+      size_t d_name_len = d->d_reclen - offsetof(dirent, d_name);
+      memcpy(nacl_d->nacl_abi_d_name, d->d_name, d_name_len);
+
+      offset += d->d_reclen;
+      nacl_offset += nacl_d->nacl_abi_d_reclen;
+    }
+
+    *nread = nacl_offset;
+    return 0;
+  }
+
+  int WRAP(seek)(int fd, nacl_abi_off_t offset, int whence,
+      nacl_abi_off_t *new_offset) {
+    *new_offset = kp->lseek(fd, offset, whence);
+    return *new_offset < 0 ? errno : 0;
+  }
+}
+
+struct NaClMountsStaticInitializer {
+  NaClMountsStaticInitializer() {
+    DO_WRAP(open);
+    DO_WRAP(close);
+    DO_WRAP(read);
+    DO_WRAP(write);
+    DO_WRAP(stat);
+    DO_WRAP(fstat);
+    DO_WRAP(getdents);
+    DO_WRAP(seek);
+  }
+} nacl_mounts_static_initializer;
+
+
+#else // __GLIBC__
+
+
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 256
 #endif
@@ -199,3 +331,5 @@ int __wrap_utime(const char *path, struct utimbuf const *times) {
 void (*__wrap_signal(int sig, void (*func)(int)))(int) {
   return reinterpret_cast<void(*)(int)>(-1);
 }
+
+#endif // __GLIBC__
