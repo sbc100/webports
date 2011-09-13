@@ -25,6 +25,10 @@ CustomBuildStep() {
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PACKAGE_DIR}
   ChangeDir ${PACKAGE_DIR}
+  set -x
+  ${NACLCC} -c ${START_DIR}/http2/HTTP2Mount.cc -o HTTP2Mount.o
+  ${NACLCC} -c ${START_DIR}/http2/HTTP2OpenJob.cc -o HTTP2OpenJob.o
+  ${NACLCC} -c ${START_DIR}/http2/HTTP2ReadJob.cc -o HTTP2ReadJob.o
   ${NACLCC} -c ${START_DIR}/base/MountManager.cc -o MountManager.o
   ${NACLCC} -c ${START_DIR}/base/KernelProxy.cc -o KernelProxy.o
   ${NACLCC} -c ${START_DIR}/base/Entry.cc -o Entry.o
@@ -64,6 +68,9 @@ CustomBuildStep() {
       AppEngineNode.o \
       HTTPMount.o \
       HTTPNode.o \
+      HTTP2Mount.o \
+      HTTP2OpenJob.o \
+      HTTP2ReadJob.o \
       PepperMount.o \
       PepperFileIOJob.o \
       ConsoleMount.o \
@@ -71,6 +78,7 @@ CustomBuildStep() {
       JSPostMessageBridge.o
 
   ${NACLRANLIB} libnacl-mounts.a
+  set +x
 }
 
 CustomInstallStep() {
@@ -83,7 +91,7 @@ CustomInstallStep() {
   cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
-  for DIR in console base util memory; do
+  for DIR in console base util memory http2; do
     mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
     cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
   done
