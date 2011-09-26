@@ -1,0 +1,41 @@
+diff -uN -x .git glib-2.28.8/config.sub glib-2.28.8.nacl/config.sub
+--- glib-2.28.8/config.sub	2010-03-29 04:21:24.000000000 -0700
++++ glib-2.28.8.nacl/config.sub	2011-09-23 19:53:34.488077559 -0700
+@@ -319,6 +319,10 @@
+ 	i*86 | x86_64)
+ 	  basic_machine=$basic_machine-pc
+ 	  ;;
++        nacl*)
++          basic_machine=i686-pc
++          os=-nacl
++          ;;
+ 	# Object if more than one company name word.
+ 	*-*-*)
+ 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
+@@ -396,7 +400,7 @@
+ 		;;
+ 	# Recognize the various machine names and aliases which stand
+ 	# for a CPU type and a company and sometimes even an OS.
+-	386bsd)
++	/386bsd)
+ 		basic_machine=i386-unknown
+ 		os=-bsd
+ 		;;
+@@ -1302,7 +1306,7 @@
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -nacl*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff -uN -x .git glib-2.28.8/nacl.cache glib-2.28.8.nacl/nacl.cache
+--- glib-2.28.8/nacl.cache	1969-12-31 16:00:00.000000000 -0800
++++ glib-2.28.8.nacl/nacl.cache	2011-09-23 19:54:04.137452630 -0700
+@@ -0,0 +1,5 @@
++glib_cv_stack_grows=no
++glib_cv_uscore=no
++ac_cv_func_posix_getpwuid_r=yes
++ac_cv_func_posix_getgrgid_r=yes
++

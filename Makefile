@@ -39,8 +39,11 @@ ifeq ($(NACL_PACKAGES_BITSIZE), 64)
   BITSIZE := 64
 endif
 
-
-NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_newlib
+ifeq ($(NACL_GLIBC), 1)
+  NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
+else
+  NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_newlib
+endif
 
 NACL_OUT = out
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
@@ -69,6 +72,7 @@ LIBRARIES = \
      libraries/libtommath-0.41 \
      libraries/libtomcrypt-1.17 \
      libraries/zlib-1.2.3 \
+     libraries/bzip2-1.0.6 \
      libraries/jpeg-6b \
      libraries/libpng-1.2.40 \
      libraries/tiff-3.9.1 \
@@ -100,6 +104,11 @@ LIBRARIES = \
      libraries/boost_1_43_0 \
      libraries/protobuf-2.3.0 \
      libraries/dreadthread
+
+ifeq ($(NACL_GLIBC), 1)
+  LIBRARIES += \
+      libraries/glib-2.28.8
+endif
 
 EXAMPLES = \
      examples/games/nethack-3.4.3 \
@@ -151,6 +160,7 @@ $(SENT)/examples/games/scummvm-1.2.1: \
     libraries/nacl-mounts libraries/SDL-1.2.14 libraries/libvorbis-1.2.3
 $(SENT)/examples/systems/bochs-2.4.6: \
     libraries/nacl-mounts libraries/SDL-1.2.14
+$(SENT)/libraries/glib-2.28.8: libraries/zlib-1.2.3
 
 # shortcuts
 nacl-mounts: libraries/nacl-mounts ;
@@ -162,6 +172,8 @@ fftw: libraries/fftw-3.2.2 ;
 tommath: libraries/libtommath-0.41 ;
 tomcrypt: libraries/libtomcrypt-1.17 ;
 zlib: libraries/zlib-1.2.3 ;
+bzip2: libraries/bzip2-1.0.6 ;
+glib: libraries/glib-2.28.8 ;
 jpeg: libraries/jpeg-6b ;
 png: libraries/libpng-1.2.40 ;
 tiff: libraries/tiff-3.9.1 ;
