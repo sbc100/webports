@@ -7,7 +7,7 @@ set -x
 set -e
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-export NACL_SDK_ROOT="${SCRIPT_DIR}/../"
+export NACL_SDK_ROOT="${SCRIPT_DIR}/.."
 
 RESULT=1
 
@@ -44,12 +44,15 @@ if [ "$OS" = "mac" ]; then
   readonly PYTHON=python
   # Use linux config on mac too.
   readonly BOT_OS_DIR=linux
+  readonly TOOLCHAIN_CLEANUP='rm -rf ${SCRIPT_DIR}/native_client_sdk_*'
 elif [ "$OS" = "linux" ]; then
   readonly PYTHON=python
   readonly BOT_OS_DIR=linux
+  readonly TOOLCHAIN_CLEANUP='rm -rf ${SCRIPT_DIR}/native_client_sdk_*'
 elif [ "$OS" = "win" ]; then
   readonly PYTHON=python.bat
   readonly BOT_OS_DIR=windows
+  readonly TOOLCHAIN_CLEANUP='rm -rf c:/native_client_sdk'
 else
   echo "Bad OS: ${OS}" 1>&2
   exit 1
@@ -73,14 +76,13 @@ cd ${SCRIPT_DIR}/..
 
 # Cleanup.
 echo "@@@BUILD_STEP Cleanup@@@"
-if ! make clean ; then
-  echo "Error cleaning!" 1>&2
-  exit 1
-fi
+rm -rf ${SCRIPT_DIR}/toolchain
+${TOOLCHAIN_CLEANUP}
+make clean
 
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"
-#${PYTHON} build_tools/buildbot_sdk_setup.py
+${PYTHON} build_tools/buildbot_sdk_setup.py
 
 # Build 32-bit.
 StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} 32

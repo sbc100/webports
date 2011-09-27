@@ -70,7 +70,7 @@ def DownloadSDK(platform, base_url, version):
     cmd = (
         'mkdir native_client_sdk_latest && '
         'tar xfzv "%s" -C native_client_sdk_latest && '
-        'cd .. && rm -f toolchain && '
+        'cd .. && rm -rf toolchain && '
         'ln -fsn build_tools/native_client_sdk_*/toolchain toolchain'
     ) % path
   p = subprocess.Popen(cmd, shell=True)
