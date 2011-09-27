@@ -73,7 +73,14 @@ NACL_GLIBC=${NACL_GLIBC:-0}
 if [ $NACL_GLIBC = "1" ] ; then
   readonly NACL_TOOLCHAIN_SUFFIX=""
 else
-  readonly NACL_TOOLCHAIN_SUFFIX="_newlib"
+  # Fall back to pre-m15 SDK layout if we can't find i686-nacl-gcc.
+  readonly TENTATIVE_NACL_GCC=\
+${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/i686-nacl-gcc
+  if [ -e ${TENTATIVE_NACL_GCC} ]; then
+    readonly NACL_TOOLCHAIN_SUFFIX="_newlib"
+  else
+    readonly NACL_TOOLCHAIN_SUFFIX=""
+  fi
 fi
 readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
 readonly NACL_NATIVE_CLIENT=${NACL_TOP}/native_client
