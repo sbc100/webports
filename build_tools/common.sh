@@ -69,10 +69,16 @@ fi
 
 # locate default nacl_sdk toolchain
 # TODO: x86 only at the moment
+NACL_GLIBC=${NACL_GLIBC:-0}
+if [ $NACL_GLIBC = "1" ] ; then
+  readonly NACL_TOOLCHAIN_SUFFIX=""
+else
+  readonly NACL_TOOLCHAIN_SUFFIX="_newlib"
+fi
 readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
 readonly NACL_NATIVE_CLIENT=${NACL_TOP}/native_client
 readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-\
-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib}
+${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86${NACL_TOOLCHAIN_SUFFIX}}
 readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
 # packages subdirectories
