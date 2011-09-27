@@ -69,7 +69,6 @@ LIBRARIES = \
      libraries/SDL-1.2.14 \
      libraries/SDL_mixer-1.2.11 \
      libraries/SDL_image-1.2.10 \
-     libraries/SDL_net-1.2.7 \
      libraries/SDL_ttf-2.0.10 \
      libraries/gc6.8 \
      libraries/fftw-3.2.2 \
@@ -111,6 +110,7 @@ LIBRARIES = \
 
 ifeq ($(NACL_GLIBC), 1)
   LIBRARIES += \
+      libraries/SDL_net-1.2.7 \
       libraries/glib-2.28.8 \
       libraries/pango-1.29.3
 endif
