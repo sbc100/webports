@@ -69,6 +69,8 @@ LIBRARIES = \
      libraries/SDL-1.2.14 \
      libraries/SDL_mixer-1.2.11 \
      libraries/SDL_image-1.2.10 \
+     libraries/SDL_net-1.2.7 \
+     libraries/SDL_ttf-2.0.10 \
      libraries/gc6.8 \
      libraries/fftw-3.2.2 \
      libraries/libtommath-0.41 \
@@ -167,6 +169,8 @@ $(SENT)/libraries/glib-2.28.8: libraries/zlib-1.2.3
 $(SENT)/libraries/pango-1.29.3: libraries/glib-2.28.8 libraries/cairo-1.8.8
 $(SENT)/libraries/SDL_mixer-1.2.11: libraries/SDL-1.2.14 libraries/libogg-1.1.4 libraries/libvorbis-1.2.3
 $(SENT)/libraries/SDL_image-1.2.10: libraries/SDL-1.2.14 libraries/libpng-1.2.40
+$(SENT)/libraries/SDL_net-1.2.7: libraries/SDL-1.2.14
+$(SENT)/libraries/SDL_ttf-2.0.10: libraries/SDL-1.2.14 libraries/freetype-2.1.10
 
 # shortcuts
 nacl-mounts: libraries/nacl-mounts ;
@@ -175,6 +179,8 @@ tinyxml: libraries/tinyxml ;
 sdl: libraries/SDL-1.2.14 ;
 sdl_mixer: libraries/SDL_mixer-1.2.11 ;
 sdl_image: libraries/SDL_image-1.2.10 ;
+sdl_net: libraries/SDL_net-1.2.7 ;
+sdl_ttf: libraries/SDL_ttf-2.0.10 ;
 gc: libraries/gc6.8 ;
 fftw: libraries/fftw-3.2.2 ;
 tommath: libraries/libtommath-0.41 ;
