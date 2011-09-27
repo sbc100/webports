@@ -104,7 +104,7 @@ LIBRARIES = \
      libraries/libmodplug-0.8.7 \
      libraries/OpenSceneGraph-2.9.7 \
      libraries/cfitsio \
-     libraries/boost_1_43_0 \
+     libraries/boost_1_47_0 \
      libraries/protobuf-2.3.0 \
      libraries/dreadthread
 
@@ -171,6 +171,7 @@ $(SENT)/libraries/SDL_mixer-1.2.11: libraries/SDL-1.2.14 libraries/libogg-1.1.4 
 $(SENT)/libraries/SDL_image-1.2.10: libraries/SDL-1.2.14 libraries/libpng-1.2.40
 $(SENT)/libraries/SDL_net-1.2.7: libraries/SDL-1.2.14
 $(SENT)/libraries/SDL_ttf-2.0.10: libraries/SDL-1.2.14 libraries/freetype-2.1.10
+$(SENT)/libraries/boost_1_47_0: libraries/zlib-1.2.3 libraries/bzip2-1.0.6
 
 # shortcuts
 nacl-mounts: libraries/nacl-mounts ;
@@ -214,7 +215,7 @@ ffmpeg: libraries/ffmpeg-0.5 ;
 mesa: libraries/Mesa-7.6 ;
 modplug: libraries/libmodplug-0.8.7 ;
 openscenegraph: libraries/OpenSceneGraph-2.9.7 ;
-boost: libraries/boost_1_43_0 ;
+boost: libraries/boost_1_47_0 ;
 protobuf: libraries/protobuf-2.3.0 ;
 pango: libraries/pango-1.29.3 ;
 nethack: examples/games/nethack-3.4.3 ;
