@@ -18,12 +18,13 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../..
 make clean
 
-# pango also builds glib, cairo, png, zlib, freetype, fontconfig, expat,
-# and pixman
+# pango also builds glib
+# cairo also builds png, zlib, freetype, fontconfig, expat, and pixman
 BuildPackage agg
 BuildPackage openscenegraph
 BuildPackage freeimage
 BuildPackage imagemagick
+BuildPackage cairo
 BuildPackage pango
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
