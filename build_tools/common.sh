@@ -75,7 +75,8 @@ if [ $NACL_GLIBC = "1" ] ; then
 else
   # Fall back to pre-m15 SDK layout if we can't find i686-nacl-gcc.
   readonly TENTATIVE_NACL_GCC=\
-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/i686-nacl-gcc
+${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/i686-nacl-gcc
+  echo ${TENTATIVE_NACL_GCC}
   if [ -e ${TENTATIVE_NACL_GCC} ]; then
     readonly NACL_TOOLCHAIN_SUFFIX="_newlib"
   else
