@@ -335,7 +335,9 @@ int KernelProxy::getdents(int fd, void *buf, unsigned int count) {
                                     (struct dirent*)buf, count);
 
   if (ret != -1) {
-    ++handle->offset;
+    // TODO(bradnelson): think of a better interface for Mount::Getdents.
+    // http://code.google.com/p/naclports/issues/detail?id=18
+    handle->offset += ret / sizeof(struct dirent);
   }
   return ret;
 }
