@@ -35,6 +35,7 @@ BuildPackage cfitsio
 BuildPackage boost
 BuildPackage protobuf
 BuildPackage gc
+BuildPackage x264
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then

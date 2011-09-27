@@ -19,12 +19,15 @@ cd ${SCRIPT_DIR}/../../..
 make clean
 
 # ffmpeg also builds lame, vorbis, theora, and ogg
+# sdl_* build sdl, png, freetype
 BuildPackage ffmpeg
 BuildPackage speex
 BuildPackage flac
 BuildPackage gsl
-BuildPackage nacl-mounts
-BuildPackage sdl
+BuildPackage sdl_image
+BuildPackage sdl_ttf
+BuildPackage sdl_net
+BuildPackage sdl_mixer
 BuildPackage scummvm
 BuildPackage bochs
 
