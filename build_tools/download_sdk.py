@@ -68,7 +68,8 @@ def DownloadSDK(platform, base_url, version):
         'c:/native_client_sdk/toolchain toolchain')
   else:
     cmd = (
-        'tar xfzv "%s" && '
+        'mkdir native_client_sdk_latest && '
+        'tar xfzv "%s" -C native_client_sdk_latest && '
         'cd .. && rm -f toolchain && '
         'ln -fsn build_tools/native_client_sdk_*/toolchain toolchain'
     ) % path
