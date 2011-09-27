@@ -67,6 +67,8 @@ NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
 LIBRARIES = \
      libraries/nacl-mounts \
      libraries/SDL-1.2.14 \
+     libraries/SDL_mixer-1.2.11 \
+     libraries/SDL_image-1.2.10 \
      libraries/gc6.8 \
      libraries/fftw-3.2.2 \
      libraries/libtommath-0.41 \
@@ -107,7 +109,8 @@ LIBRARIES = \
 
 ifeq ($(NACL_GLIBC), 1)
   LIBRARIES += \
-      libraries/glib-2.28.8
+      libraries/glib-2.28.8 \
+      libraries/pango-1.29.3
 endif
 
 EXAMPLES = \
@@ -161,12 +164,17 @@ $(SENT)/examples/games/scummvm-1.2.1: \
 $(SENT)/examples/systems/bochs-2.4.6: \
     libraries/nacl-mounts libraries/SDL-1.2.14
 $(SENT)/libraries/glib-2.28.8: libraries/zlib-1.2.3
+$(SENT)/libraries/pango-1.29.3: libraries/glib-2.28.8 libraries/cairo-1.8.8
+$(SENT)/libraries/SDL_mixer-1.2.11: libraries/SDL-1.2.14 libraries/libogg-1.1.4 libraries/libvorbis-1.2.3
+$(SENT)/libraries/SDL_image-1.2.10: libraries/SDL-1.2.14 libraries/libpng-1.2.40
 
 # shortcuts
 nacl-mounts: libraries/nacl-mounts ;
 cfitsio: libraries/cfitsio ;
 tinyxml: libraries/tinyxml ;
 sdl: libraries/SDL-1.2.14 ;
+sdl_mixer: libraries/SDL_mixer-1.2.11 ;
+sdl_image: libraries/SDL_image-1.2.10 ;
 gc: libraries/gc6.8 ;
 fftw: libraries/fftw-3.2.2 ;
 tommath: libraries/libtommath-0.41 ;
@@ -202,6 +210,7 @@ modplug: libraries/libmodplug-0.8.7 ;
 openscenegraph: libraries/OpenSceneGraph-2.9.7 ;
 boost: libraries/boost_1_43_0 ;
 protobuf: libraries/protobuf-2.3.0 ;
+pango: libraries/pango-1.29.3 ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
 bochs: examples/systems/bochs-2.4.6 ;

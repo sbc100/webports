@@ -1,0 +1,34 @@
+diff -urN SDL_image-1.2.10/Makefile.in SDL_image-1.2.10-nacl/Makefile.in
+--- SDL_image-1.2.10/Makefile.in	2009-11-11 22:42:10.000000000 -0800
++++ SDL_image-1.2.10-nacl/Makefile.in	2011-09-26 17:14:14.601905000 -0700
+@@ -41,7 +41,6 @@
+ host_triplet = @host@
+ @USE_VERSION_RC_FALSE@libSDL_image_la_DEPENDENCIES =  \
+ @USE_VERSION_RC_FALSE@	$(am__DEPENDENCIES_1)
+-noinst_PROGRAMS = showimage$(EXEEXT)
+ subdir = .
+ DIST_COMMON = README $(am__configure_deps) \
+ 	$(libSDL_imageinclude_HEADERS) $(srcdir)/Makefile.am \
+diff -urN SDL_image-1.2.10/config.sub SDL_image-1.2.10-nacl/config.sub
+--- SDL_image-1.2.10/config.sub	2009-10-12 16:06:51.000000000 -0700
++++ SDL_image-1.2.10-nacl/config.sub	2011-09-26 17:13:41.095952000 -0700
+@@ -318,6 +318,10 @@
+ 	i*86 | x86_64)
+ 	  basic_machine=$basic_machine-pc
+ 	  ;;
++        nacl*)
++          basic_machine=i686-pc
++          os=-nacl
++          ;;
+ 	# Object if more than one company name word.
+ 	*-*-*)
+ 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
+@@ -1297,7 +1301,7 @@
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -nacl*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
