@@ -12,7 +12,7 @@
 #
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/boost_1_47_0.tar.bz2
-#readonly PATCH_FILE=nacl-SDL_net-1.2.7.patch
+readonly PATCH_FILE=nacl-boost_1_47_0.patch
 readonly PACKAGE_NAME=boost_1_47_0
 
 source ../../build_tools/common.sh
@@ -37,6 +37,7 @@ CustomBuildStep() {
   else
     ./bjam install \
       --prefix=${NACL_SDK_USR} \
+      link=static \
       -d+2 \
       --with-date_time \
       --with-program_options
@@ -47,7 +48,7 @@ CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadBzipStep
   DefaultExtractBzipStep
-  # No patch needed.
+  DefaultPatchStep
   CustomConfigureStep
   CustomBuildStep
   # Installation is done in the build step.

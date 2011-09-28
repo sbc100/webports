@@ -1,0 +1,10 @@
+--- boost_1_47_0/tools/build/v2/tools/gcc.jam	2011-06-06 13:36:21.000000000 -0700
++++ boost_1_47_0-nacl/tools/build/v2/tools/gcc.jam	2011-09-28 09:09:06.326550000 -0700
+@@ -1064,7 +1064,6 @@
+             case * :
+             {
+                 option = -pthread ;
+-                libs = rt ;
+             }
+         }
+     
