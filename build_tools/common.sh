@@ -397,7 +397,6 @@ DefaultPatchStep() {
 
 
 DefaultConfigureStep() {
-  local EXTRA_CONFIGURE_OPTS=$1
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -425,8 +424,7 @@ DefaultConfigureStep() {
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \
     --${NACL_OPTION}-asm \
-    --with-x=no \
-    ${EXTRA_CONFIGURE_OPTS}
+    --with-x=no
 }
 
 

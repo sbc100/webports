@@ -18,16 +18,5 @@ readonly PACKAGE_NAME=libmikmod-3.1.11
 
 source ../../build_tools/common.sh
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadBzipStep
-  DefaultExtractBzipStep
-  DefaultPatchStep
-  DefaultConfigureStep("--disable-esd")
-  DefaultBuildStep
-  DefaultInstallStep
-  DefaultCleanUpStep
-}
-
-CustomPackageInstall
+DefaultPackageInstall
 exit 0
