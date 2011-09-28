@@ -38,11 +38,14 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH}
   export PATH="$NACL_TOOLCHAIN_ROOT/i686-nacl/usr/bin:$PATH"
   export PATH="$NACL_TOOLCHAIN_ROOT/x86_64-nacl/usr/bin:$PATH"
-  export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
-  export DEFINES="$DEFINES -Dvsnprintf\(a,b,c,d\)=vsprintf\(a,c,d\)"
-  export DEFINES="$DEFINES -Dsnprintf\(a,b,c,...\)=sprintf\(a,c,__VA_ARGS__\)"
-  export DEFINES="$DEFINES -DNACL -Dstrcasecmp=strcmp"
-  export DEFINES="$DEFINES -DNACL -Dstrncasecmp=strncmp"
+  export DEFINES=
+  if [ "${NACL_GLIBC}" != "1" ]; then
+    export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
+    export DEFINES="$DEFINES -Dvsnprintf\(a,b,c,d\)=vsprintf\(a,c,d\)"
+    export DEFINES="$DEFINES -Dsnprintf\(a,b,c,...\)=sprintf\(a,c,__VA_ARGS__\)"
+    export DEFINES="$DEFINES -Dstrcasecmp=strcmp"
+    export DEFINES="$DEFINES -Dstrncasecmp=strncmp"
+  fi
   export DEFINES="$DEFINES -DNACL -DSYSTEM_NOT_SUPPORTING_D_TYPE=1"
   export LIBS=
   export LIBS="$LIBS -Wl,--whole-archive"

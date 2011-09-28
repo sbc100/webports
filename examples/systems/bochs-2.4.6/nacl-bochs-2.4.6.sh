@@ -38,7 +38,7 @@ CustomConfigureStep() {
   export PATH="$NACL_TOOLCHAIN_ROOT/i686-nacl/usr/bin:$PATH"
   export PATH="$NACL_TOOLCHAIN_ROOT/x86_64-nacl/usr/bin:$PATH"
 
-  export NACLBXLIBS="-lnacl-mounts -lsrpc -lpthread"
+  export NACLBXLIBS="-lnacl-mounts -lpthread"
 
   # Hacky way of getting around the bochs configuration tools which don't allow
   # --whole-archive and don't allow for multiple libraries with the same name
