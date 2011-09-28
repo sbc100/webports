@@ -1,0 +1,23 @@
+diff -urN libmikmod-3.1.11/config.sub libmikmod-3.1.11-nacl/config.sub
+--- libmikmod-3.1.11/config.sub	2004-01-21 09:43:53.000000000 -0800
++++ libmikmod-3.1.11-nacl/config.sub	2011-09-27 17:26:45.417302000 -0700
+@@ -270,6 +270,10 @@
+ 	i*86 | x86_64)
+ 	  basic_machine=$basic_machine-pc
+ 	  ;;
++        nacl*)
++          basic_machine=i686-pc
++          os=-nacl
++          ;;
+ 	# Object if more than one company name word.
+ 	*-*-*)
+ 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
+@@ -1093,7 +1097,7 @@
+ 	      | -interix* | -uwin* | -rhapsody* | -darwin* | -opened* \
+ 	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
+ 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
+-	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* | -morphos*)
++	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* | -morphos* | -nacl*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)

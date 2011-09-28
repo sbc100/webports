@@ -27,7 +27,9 @@ CustomConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  # Adding target usr/bin for libmikmod-config
+  export PATH=${NACL_BIN_PATH}:${NACL_SDK_USR}/bin:${PATH};
+  export LIBS="-lvorbisfile -lvorbis -logg -lm"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build
@@ -45,7 +47,6 @@ CustomConfigureStep() {
     --${NACL_OPTION}-asm \
     --with-x=no \
     --disable-music-flac \
-    --disable-music-mod \
     --disable-music-mp3
 }
 
