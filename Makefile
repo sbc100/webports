@@ -170,7 +170,8 @@ $(SENT)/libraries/glib-2.28.8: libraries/zlib-1.2.3
 $(SENT)/libraries/pango-1.29.3: libraries/glib-2.28.8 libraries/cairo-1.8.8
 $(SENT)/libraries/SDL_mixer-1.2.11: libraries/SDL-1.2.14 \
     libraries/libogg-1.1.4 libraries/libvorbis-1.2.3 libraries/libmikmod-3.1.11
-$(SENT)/libraries/SDL_image-1.2.10: libraries/SDL-1.2.14 libraries/libpng-1.2.40
+$(SENT)/libraries/SDL_image-1.2.10: libraries/SDL-1.2.14 \
+    libraries/libpng-1.2.40 libraries/jpeg-6b
 $(SENT)/libraries/SDL_net-1.2.7: libraries/SDL-1.2.14
 $(SENT)/libraries/SDL_ttf-2.0.10: libraries/SDL-1.2.14 libraries/freetype-2.1.10
 $(SENT)/libraries/boost_1_47_0: libraries/zlib-1.2.3 libraries/bzip2-1.0.6
