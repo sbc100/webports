@@ -1,6 +1,6 @@
-diff -Naur pixman-0.16.2/config.sub pixman-0.16.2.nacl/config.sub
---- pixman-0.16.2/config.sub	2009-11-13 09:29:08.363344000 -0800
-+++ pixman-0.16.2.nacl/config.sub	2009-11-13 09:30:10.851000000 -0800
+diff -urN pixman-0.16.2/config.sub pixman-0.16.2-nacl/config.sub
+--- pixman-0.16.2/config.sub	2008-08-07 09:01:11.000000000 -0700
++++ pixman-0.16.2-nacl/config.sub	2011-09-29 17:10:54.353340000 -0700
 @@ -739,6 +739,10 @@
  		basic_machine=i370-ibm
  		os=-mvs
@@ -21,3 +21,40 @@ diff -Naur pixman-0.16.2/config.sub pixman-0.16.2.nacl/config.sub
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
+diff -urN pixman-0.16.2/pixman/pixman-cpu.c pixman-0.16.2-nacl/pixman/pixman-cpu.c
+--- pixman-0.16.2/pixman/pixman-cpu.c	2009-09-25 07:38:55.000000000 -0700
++++ pixman-0.16.2-nacl/pixman/pixman-cpu.c	2011-09-29 17:13:05.553342000 -0700
+@@ -370,7 +370,32 @@
+     vendor[0] = 0;
+     vendor[12] = 0;
+ 
+-#ifdef __GNUC__
++#ifdef __native_client__
++    /* With NativeClient, pushf/popf are forbidden, and we always have a cpuid
++       instruction. */
++    __asm__ (
++        "mov $0x00000000, %%eax\n"
++        "push %%ebx\n"
++        "cpuid\n"
++        "mov %%ebx, %%eax\n"
++        "pop %%ebx\n"
++        "mov %%eax, %1\n"
++        "mov %%edx, %2\n"
++        "mov %%ecx, %3\n"
++        "mov $0x00000001, %%eax\n"
++        "push %%ebx\n"
++        "cpuid\n"
++        "pop %%ebx\n"
++        "mov %%edx, %0\n"
++	: "=r" (result),
++        "=m" (vendor[0]),
++        "=m" (vendor[4]),
++        "=m" (vendor[8])
++	:
++	: "%eax", "%ecx", "%edx"
++        );
++
++#elif defined(__GNUC__)
+     /* see p. 118 of amd64 instruction set manual Vol3 */
+     /* We need to be careful about the handling of %ebx and
+      * %esp here. We can't declare either one as clobbered
