@@ -10,20 +10,24 @@
 GTEST_DIR = ../../testing/gtest
 
 CPPFLAGS += -I$(GTEST_DIR) -I$(GTEST_DIR)/include
-CXXFLAGS += -g -Wall -Werror -I$(GTEST_DIR)
+CXXFLAGS += -pthread -g -Wall -Werror -I$(GTEST_DIR)
 
 # All gtest headers
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 $(GTEST_DIR)/include/gtest/internal/*.h
 
+# Add root of nacl-mounts to the include path
+CPPFLAGS += -I.
+
 UTIL_SOURCES = $(addprefix util/, Path.cc SimpleAutoLock.cc)
-BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc)
+BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc \
+                 MainThreadRunner.cc)
 MEM_SOURCES = $(addprefix memory/, MemMount.cc MemNode.cc)
 CONSOLE_SOURCES = $(addprefix console/, ConsoleMount.cc JSPipeMount.cc)
 TEST_SOURCES = $(addprefix test/, SlotAllocatorTest.cc \
-            PathTest.cc BaseMountTest.cc MemMountTest.cc \
-            MemNodeTest.cc MountManagerTest.cc KernelProxyTest.cc \
-            JSPipeMountTest.cc)
+                 PathTest.cc BaseMountTest.cc MemMountTest.cc \
+                 MemNodeTest.cc MountManagerTest.cc KernelProxyTest.cc \
+                 JSPipeMountTest.cc MainThreadRunnerTest.cc)
 
 SOURCES = $(UTIL_SOURCES) $(BASE_SOURCES) $(MEM_SOURCES) \
           $(CONSOLE_SOURCES) $(TEST_SOURCES)

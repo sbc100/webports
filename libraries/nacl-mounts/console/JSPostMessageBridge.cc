@@ -4,7 +4,10 @@
  * found in the LICENSE file.
  */
 
-#include "JSPostMessageBridge.h"
+#include <ppapi/cpp/instance.h>
+#include <ppapi/cpp/var.h>
+#include <string>
+#include "console/JSPostMessageBridge.h"
 
 
 class PostMessageJob : public MainThreadJob {

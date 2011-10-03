@@ -6,11 +6,17 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "JSPipeMount.h"
+#include "base/MainThreadRunner.h"
+#include "console/JSPipeMount.h"
+
+
+static const int kBufferLengthIntAndColons = 40;
 
 
 JSPipeMount::JSPipeMount() : prefix_("JSPipeMount") {
   is_tty_ = 1;
+  using_pseudo_thread_ = false;
+  pseudo_thread_blocked_ = false;
   outbound_bridge_ = NULL;
   int ret = pthread_mutex_init(&incoming_lock_, 0);
   assert(!ret);
@@ -34,7 +40,7 @@ int JSPipeMount::GetNode(const std::string& path, struct stat* buf) {
   int id;
 
   // Allow non-negative pipe numbers.
-  if (sscanf(path.c_str(), "/%d", &id) != 1 && id >= 0) {
+  if (sscanf(path.c_str(), "/%d", &id) != 1 && id >= 0) {  // NOLINT
     return -1;
   }
   return Stat(id + 1, buf);
@@ -48,7 +54,7 @@ int JSPipeMount::Stat(ino_t node, struct stat *buf) {
 }
 
 ssize_t JSPipeMount::Read(ino_t slot, off_t offset,
-                          void *buf, size_t count) {
+                          void* buf, size_t count) {
   if (slot < 0) {
     errno = ENOENT;
     return -1;
@@ -63,7 +69,15 @@ ssize_t JSPipeMount::Read(ino_t slot, off_t offset,
     // Find this pipe.
     std::map<int, std::vector<char> >:: iterator i = incoming_.find(slot - 1);
     if (i == incoming_.end()) {
-      pthread_cond_wait(&incoming_available_, &incoming_lock_);
+      if (using_pseudo_thread_) {
+        pthread_mutex_unlock(&incoming_lock_);
+        pseudo_thread_blocked_ = true;
+        MainThreadRunner::PseudoThreadBlock();
+        pseudo_thread_blocked_ = false;
+        pthread_mutex_lock(&incoming_lock_);
+      } else {
+        pthread_cond_wait(&incoming_available_, &incoming_lock_);
+      }
       continue;
     }
 
@@ -75,7 +89,15 @@ ssize_t JSPipeMount::Read(ino_t slot, off_t offset,
 
     // Wait for something if empty.
     if (len <= 0) {
-      pthread_cond_wait(&incoming_available_, &incoming_lock_);
+      if (using_pseudo_thread_) {
+        pthread_mutex_unlock(&incoming_lock_);
+        pseudo_thread_blocked_ = true;
+        MainThreadRunner::PseudoThreadBlock();
+        pseudo_thread_blocked_ = false;
+        pthread_mutex_lock(&incoming_lock_);
+      } else {
+        pthread_cond_wait(&incoming_available_, &incoming_lock_);
+      }
       continue;
     }
 
@@ -98,9 +120,10 @@ ssize_t JSPipeMount::Write(ino_t slot, off_t offset, const void *buf,
   }
 
   // Allocate a buffer with room for the prefix, the data, and the pipe id.
-  char *tmp = new char[count + prefix_.size() + 40];
+  char* tmp = new char[count + prefix_.size() + kBufferLengthIntAndColons];
   memcpy(tmp, prefix_.c_str(), prefix_.size());
-  sprintf(tmp + prefix_.size(), ":%d:", static_cast<int>(slot - 1));
+  snprintf(tmp + prefix_.size(), count + kBufferLengthIntAndColons,
+           ":%d:", static_cast<int>(slot - 1));
   size_t len = prefix_.size() + strlen(tmp + prefix_.size());
   memcpy(tmp + len, buf, count);
   len += count;
@@ -126,21 +149,24 @@ bool JSPipeMount::Receive(const void *buf, size_t count) {
   // Get out the id.
   if (count < 3) { return false; }
   if (*bufc != ':') { return false; }
-  ++bufc;  --count;
-  char numb[40];
+  ++bufc;
+  --count;
+  char numb[kBufferLengthIntAndColons];
   size_t numb_len = 0;
-  while(numb_len < sizeof(numb) - 1 && count > 0 &&
+  while (numb_len < sizeof(numb) - 1 && count > 0 &&
         *bufc != ':' && isdigit(*bufc)) {
     numb[numb_len] = *bufc;
     ++numb_len;
-    ++bufc;  --count;
+    ++bufc;
+    --count;
   }
   numb[numb_len] = '\0';
   if (count <= 0) { return false; }
   if (*bufc != ':') { return false; }
-  ++bufc;  --count;
+  ++bufc;
+  --count;
   int id;
-  if (sscanf(numb, "%d", &id) != 1) { return false; }
+  if (sscanf(numb, "%d", &id) != 1) { return false; }  // NOLINT
 
   SimpleAutoLock lock(&incoming_lock_);
 
@@ -156,7 +182,15 @@ bool JSPipeMount::Receive(const void *buf, size_t count) {
   i->second.insert(i->second.end(), bufc, bufc + count);
 
   // Signal we've got something.
-  pthread_cond_broadcast(&incoming_available_);
+  if (using_pseudo_thread_) {
+    if (pseudo_thread_blocked_) {
+      pthread_mutex_unlock(&incoming_lock_);
+      MainThreadRunner::PseudoThreadResume();
+      pthread_mutex_lock(&incoming_lock_);
+    }
+  } else {
+    pthread_cond_broadcast(&incoming_available_);
+  }
 
   return true;
 }

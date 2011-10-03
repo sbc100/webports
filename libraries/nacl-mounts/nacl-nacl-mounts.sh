@@ -26,31 +26,31 @@ CustomBuildStep() {
   MakeDir ${PACKAGE_DIR}
   ChangeDir ${PACKAGE_DIR}
   set -x
-  ${NACLCC} -c ${START_DIR}/http2/HTTP2Mount.cc -o HTTP2Mount.o
-  ${NACLCC} -c ${START_DIR}/http2/HTTP2OpenJob.cc -o HTTP2OpenJob.o
-  ${NACLCC} -c ${START_DIR}/http2/HTTP2ReadJob.cc -o HTTP2ReadJob.o
-  ${NACLCC} -c ${START_DIR}/base/MountManager.cc -o MountManager.o
-  ${NACLCC} -c ${START_DIR}/base/KernelProxy.cc -o KernelProxy.o
-  ${NACLCC} -c ${START_DIR}/base/Entry.cc -o Entry.o
-  ${NACLCC} -c ${START_DIR}/base/MainThreadRunner.cc -o MainThreadRunner.o
-  ${NACLCC} -c ${START_DIR}/base/UrlLoaderJob.cc -o UrlLoaderJob.o
-  ${NACLCC} -c ${START_DIR}/util/Path.cc -o Path.o
-  ${NACLCC} -c ${START_DIR}/util/SimpleAutoLock.cc -o SimpleAutoLock.o
-  ${NACLCC} -c ${START_DIR}/util/nacl_simple_tar.c -o nacl_simple_tar.o
-  ${NACLCC} -c ${START_DIR}/console/terminal.c -o terminal.o
-  ${NACLCC} -c ${START_DIR}/console/terminal_stubs.c -o terminal_stubs.o
-  ${NACLCC} -c ${START_DIR}/memory/MemMount.cc -o MemMount.o
-  ${NACLCC} -c ${START_DIR}/memory/MemNode.cc -o MemNode.o
-  ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineMount.cc -o AppEngineMount.o
-  ${NACLCC} -c ${START_DIR}/AppEngine/AppEngineNode.cc -o AppEngineNode.o
-  ${NACLCC} -c ${START_DIR}/http/HTTPMount.cc -o HTTPMount.o
-  ${NACLCC} -c ${START_DIR}/http/HTTPNode.cc -o HTTPNode.o
-  ${NACLCC} -c ${START_DIR}/pepper/PepperMount.cc -o PepperMount.o
-  ${NACLCC} -c ${START_DIR}/pepper/PepperFileIOJob.cc -o PepperFileIOJob.o
-  ${NACLCC} -c ${START_DIR}/console/ConsoleMount.cc -o ConsoleMount.o
-  ${NACLCC} -c ${START_DIR}/console/JSPipeMount.cc -o JSPipeMount.o
-  ${NACLCC} -c ${START_DIR}/console/JSPostMessageBridge.cc \
-      -o JSPostMessageBridge.o
+  export CXXCMD="${NACLCC} -I${START_DIR}"
+  ${CXXCMD} -c ${START_DIR}/http2/HTTP2Mount.cc
+  ${CXXCMD} -c ${START_DIR}/http2/HTTP2OpenJob.cc
+  ${CXXCMD} -c ${START_DIR}/http2/HTTP2ReadJob.cc
+  ${CXXCMD} -c ${START_DIR}/base/MountManager.cc
+  ${CXXCMD} -c ${START_DIR}/base/KernelProxy.cc
+  ${CXXCMD} -c ${START_DIR}/base/Entry.cc
+  ${CXXCMD} -c ${START_DIR}/base/MainThreadRunner.cc
+  ${CXXCMD} -c ${START_DIR}/base/UrlLoaderJob.cc
+  ${CXXCMD} -c ${START_DIR}/util/Path.cc
+  ${CXXCMD} -c ${START_DIR}/util/SimpleAutoLock.cc
+  ${CXXCMD} -c ${START_DIR}/util/nacl_simple_tar.c
+  ${CXXCMD} -c ${START_DIR}/console/terminal.c
+  ${CXXCMD} -c ${START_DIR}/console/terminal_stubs.c
+  ${CXXCMD} -c ${START_DIR}/memory/MemMount.cc
+  ${CXXCMD} -c ${START_DIR}/memory/MemNode.cc
+  ${CXXCMD} -c ${START_DIR}/AppEngine/AppEngineMount.cc
+  ${CXXCMD} -c ${START_DIR}/AppEngine/AppEngineNode.cc
+  ${CXXCMD} -c ${START_DIR}/http/HTTPMount.cc
+  ${CXXCMD} -c ${START_DIR}/http/HTTPNode.cc
+  ${CXXCMD} -c ${START_DIR}/pepper/PepperMount.cc
+  ${CXXCMD} -c ${START_DIR}/pepper/PepperFileIOJob.cc
+  ${CXXCMD} -c ${START_DIR}/console/ConsoleMount.cc
+  ${CXXCMD} -c ${START_DIR}/console/JSPipeMount.cc
+  ${CXXCMD} -c ${START_DIR}/console/JSPostMessageBridge.cc
   ${NACLAR} rcs libnacl-mounts.a \
       MountManager.o \
       KernelProxy.o \

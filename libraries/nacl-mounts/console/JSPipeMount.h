@@ -3,8 +3,8 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
-#define PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
+#ifndef LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
+#define LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
 
 #include <map>
 #include <string>
@@ -17,6 +17,7 @@
 class JSOutboundPipeBridge {
  public:
   JSOutboundPipeBridge() {}
+  virtual ~JSOutboundPipeBridge() {}
 
   // Called by JSPipeMount to write to the bridge.
   // Arguments:
@@ -48,6 +49,11 @@ class JSPipeMount : public BaseMount {
   // Selects if this pipe mount is for ttys.
   void set_is_tty(int is_tty) { is_tty_ = is_tty; }
 
+  // Selects if this pipe mount is used with the pseudothread.
+  void set_using_pseudo_thread(bool using_pseudo_thread) {
+    using_pseudo_thread_ = using_pseudo_thread;
+  }
+
   // Selects a prefix that will be prepended to incoming and outgoing messages.
   void set_prefix(const std::string& prefix) { prefix_ = prefix; }
 
@@ -74,13 +80,15 @@ class JSPipeMount : public BaseMount {
 
  private:
   int is_tty_;
-  JSOutboundPipeBridge *outbound_bridge_;
+  JSOutboundPipeBridge* outbound_bridge_;
   std::map<int, std::vector<char> > incoming_;
   pthread_mutex_t incoming_lock_;
   pthread_cond_t incoming_available_;
   std::string prefix_;
+  bool using_pseudo_thread_;
+  bool pseudo_thread_blocked_;
 
   DISALLOW_COPY_AND_ASSIGN(JSPipeMount);
 };
 
-#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
+#endif  // LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_

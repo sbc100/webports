@@ -4,12 +4,17 @@
  * found in the LICENSE file.
  */
 
+#include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/module.h>
 #include <pthread.h>
 #include <stdio.h>
 #include "nacl-mounts/base/UrlLoaderJob.h"
 #include "nacl-mounts/console/JSPipeMount.h"
 #include "nacl-mounts/console/JSPostMessageBridge.h"
+
+
+// Uncomment this to use pseudothread with nethack:
+// #define USE_PSEUDO_THREADS
 
 
 extern "C" int nethack_main(int argc, char *argv[]);
@@ -19,7 +24,7 @@ extern "C" int simple_tar_extract(const char *path);
 
 
 static void *nethack_init(void *arg) {
-  MainThreadRunner *runner = reinterpret_cast<MainThreadRunner*>(arg);
+  MainThreadRunner* runner = reinterpret_cast<MainThreadRunner*>(arg);
 
   /* Setup home directory to a known location. */
   setenv("HOME", "/myhome", 1);
@@ -34,7 +39,7 @@ static void *nethack_init(void *arg) {
   chdir("/usr/games");
 
   {
-    UrlLoaderJob *job = new UrlLoaderJob;
+    UrlLoaderJob* job = new UrlLoaderJob;
     job->set_url("nethack.sar");
     std::vector<char> data;
     job->set_dst(&data);
@@ -56,7 +61,7 @@ static void *nethack_init(void *arg) {
   }
 
   const char *argv[] = {"nethack"};
-  nethack_main(1, const_cast<char **>(argv));
+  nethack_main(1, const_cast<char**>(argv));
 
   return 0;
 }
@@ -79,6 +84,9 @@ class NethackInstance : public pp::Instance {
     runner_ = new MainThreadRunner(this);
     jsbridge_ = new JSPostMessageBridge(runner_);
     jspipe_ = new JSPipeMount();
+#ifdef USE_PSEUDO_THREADS
+    jspipe_->set_using_pseudo_thread(true);
+#endif
     jspipe_->set_outbound_bridge(jsbridge_);
     // Replace stdin, stdout, stderr with js console.
     mount("jspipe", "/jspipe", 0, jspipe_);
@@ -93,7 +101,12 @@ class NethackInstance : public pp::Instance {
     fd = open("/jspipe/2", O_WRONLY);
     assert(fd == 2);
 
+#ifdef USE_PSEUDO_THREADS
+    runner_->PseudoThreadFork(nethack_init, runner_);
+#else
     pthread_create(&nethack_thread_, NULL, nethack_init, runner_);
+#endif
+
     return true;
   }
 
@@ -104,9 +117,9 @@ class NethackInstance : public pp::Instance {
 
  private:
   pthread_t nethack_thread_;
-  JSPipeMount *jspipe_;
-  JSPostMessageBridge *jsbridge_;
-  MainThreadRunner *runner_;
+  JSPipeMount* jspipe_;
+  JSPostMessageBridge* jsbridge_;
+  MainThreadRunner* runner_;
 };
 
 
@@ -119,7 +132,7 @@ class NethackModule : public pp::Module {
 
 
 namespace pp {
-  Module *CreateModule() {
+  Module* CreateModule() {
     return new NethackModule();
   }
 }
