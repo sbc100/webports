@@ -34,6 +34,7 @@ void PepperFileIOJob::Run(MainThreadRunner::JobEntry *e) {
     case OPEN_FILE_SYSTEM:
       assert(fs_);
       rv = fs_->Open(exp_size_, cc);
+      break;
 
     case OPEN_FILE:
       assert(file_io_);
