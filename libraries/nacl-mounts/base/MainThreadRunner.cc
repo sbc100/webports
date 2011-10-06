@@ -5,7 +5,7 @@
  */
 #include "base/MainThreadRunner.h"
 #include <assert.h>
-#include <errno.h>>
+#include <errno.h>
 
 // Only use pepper in nacl to allow unit testing.
 #ifdef __native_client__

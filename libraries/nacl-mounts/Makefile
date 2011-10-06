@@ -24,16 +24,18 @@ BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc \
                  MainThreadRunner.cc)
 MEM_SOURCES = $(addprefix memory/, MemMount.cc MemNode.cc)
 CONSOLE_SOURCES = $(addprefix console/, ConsoleMount.cc JSPipeMount.cc)
+BUFFER_SOURCES = $(addprefix buffer/, BufferMount.cc)
 TEST_SOURCES = $(addprefix test/, SlotAllocatorTest.cc \
                  PathTest.cc BaseMountTest.cc MemMountTest.cc \
                  MemNodeTest.cc MountManagerTest.cc KernelProxyTest.cc \
-                 JSPipeMountTest.cc MainThreadRunnerTest.cc)
+                 JSPipeMountTest.cc MainThreadRunnerTest.cc \
+                 BufferMountTest.cc MockMount.cc)
 
 SOURCES = $(UTIL_SOURCES) $(BASE_SOURCES) $(MEM_SOURCES) \
-          $(CONSOLE_SOURCES) $(TEST_SOURCES)
+          $(CONSOLE_SOURCES) $(BUFFER_SOURCES) $(TEST_SOURCES)
 TESTS_OUT = tests_out
 OBJECTS = $(addprefix $(TESTS_OUT)/, $(SOURCES:.cc=.o))
-OUTPUT = $(addprefix $(TESTS_OUT)/, base util test memory console)
+OUTPUT = $(addprefix $(TESTS_OUT)/, base buffer util test memory console)
 
 # House-keeping build targets
 all: $(TESTS_OUT)/nacl_mounts_tests
