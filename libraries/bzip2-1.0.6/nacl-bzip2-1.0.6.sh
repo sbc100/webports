@@ -29,7 +29,16 @@ CustomBuildStep() {
 
 CustomInstallStep() {
   # assumes pwd has makefile
-  make PREFIX=${NACL_SDK_USR} install
+
+  # Don't rely on make install, as it implicitly builds executables
+  # that need things not available in newlib.
+  mkdir -p ${NACL_SDK_USR}/include
+  cp -f bzlib.h ${NACL_SDK_USR}/include
+  chmod a+r ${NACL_SDK_USR}/include/bzlib.h
+  mkdir -p ${NACL_SDK_USR}/lib
+  cp -f libbz2.a ${NACL_SDK_USR}/lib
+  chmod a+r ${NACL_SDK_USR}/lib/libbz2.a
+
   DefaultTouchStep
 }
 
