@@ -67,18 +67,46 @@ extern "C" {
     return (*nwrote < 0) ? errno : 0;
   }
 
-  int WRAP(stat)(const char *pathname, struct nacl_abi_stat *buf) {
-    int res = kp->stat(pathname, (struct stat*)buf);
-    return res < 0 ? errno : 0;
+  static void stat_to_nacl_stat(const struct stat* buf,
+      struct nacl_abi_stat *nacl_buf) {
+    memset(nacl_buf, 0, sizeof(struct nacl_abi_stat));
+    nacl_buf->nacl_abi_st_dev = buf->st_dev;
+    nacl_buf->nacl_abi_st_ino = buf->st_ino;
+    nacl_buf->nacl_abi_st_mode = buf->st_mode;
+    nacl_buf->nacl_abi_st_nlink = buf->st_nlink;
+    nacl_buf->nacl_abi_st_uid = buf->st_uid;
+    nacl_buf->nacl_abi_st_gid = buf->st_gid;
+    nacl_buf->nacl_abi_st_rdev = buf->st_rdev;
+    nacl_buf->nacl_abi_st_size = buf->st_size;
+    nacl_buf->nacl_abi_st_blksize = buf->st_blksize;
+    nacl_buf->nacl_abi_st_blocks = buf->st_blocks;
+    nacl_buf->nacl_abi_st_atime = buf->st_atime;
+    nacl_buf->nacl_abi_st_mtime = buf->st_mtime;
+    nacl_buf->nacl_abi_st_ctime = buf->st_ctime;
   }
 
-  int WRAP(fstat)(int fd, struct nacl_abi_stat *buf) {
+  int WRAP(stat)(const char *pathname, struct nacl_abi_stat *nacl_buf) {
+    struct stat buf;
+    memset(&buf, 0, sizeof(struct stat));
+    int res = kp->stat(pathname, &buf);
+    if (res < 0)
+      return errno;
+    stat_to_nacl_stat(&buf, nacl_buf);
+    return 0;
+  }
+
+  int WRAP(fstat)(int fd, struct nacl_abi_stat *nacl_buf) {
     if (fd < 3) {
       // segfault if fstat fails in this case
-      return REAL(fstat)(fd, buf);
+      return REAL(fstat)(fd, nacl_buf);
     }
-    int res = kp->fstat(fd, (struct stat*)buf);
-    return res < 0 ? errno : 0;
+    struct stat buf;
+    memset(&buf, 0, sizeof(struct stat));
+    int res = kp->fstat(fd, &buf);
+    if (res < 0)
+      return errno;
+    stat_to_nacl_stat(&buf, nacl_buf);
+    return 0;
   }
 
   static const int d_name_shift = offsetof (dirent, d_name) -
