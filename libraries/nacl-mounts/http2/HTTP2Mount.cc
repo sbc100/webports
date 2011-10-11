@@ -70,7 +70,7 @@ int HTTP2Mount::doOpen(int slot) {
 
 int HTTP2Mount::GetNode(const std::string& path, struct stat* buf) {
   int slot = GetSlot(path);
-  if (slot >= 0 && doOpen(slot) == 0)
+  if (slot >= 0)
       return Stat(slot, buf);
   return -1;
 }
@@ -153,8 +153,13 @@ int HTTP2Mount::Getdents(ino_t slot, off_t offset,
 
 ssize_t HTTP2Mount::Read(ino_t slot, off_t offset, void *buf, size_t count) {
   HTTP2Node* node = slots_.At(slot);
-  if (!node || (!node->file_io_ && node->pack_slot_ < 0)) {
+  if (!node) {
     errno = ENOENT;
+    return -1;
+  }
+
+  if (doOpen(slot) < 0) {
+    errno = EIO;
     return -1;
   }
 
