@@ -41,10 +41,15 @@ extern "C" {
   }
 
   ssize_t __real_write(int fd, const void *buf, size_t count) {
-    size_t nwrote;
-    errno = REAL(write)(fd, buf, count, &nwrote);
-    fsync(fd);
-    return errno == 0 ? (ssize_t)nwrote : -1;
+    if (REAL(write)) {
+      size_t nwrote;
+      errno = REAL(write)(fd, buf, count, &nwrote);
+      fsync(fd);
+      return errno == 0 ? (ssize_t)nwrote : -1;
+    } else {
+      errno = EIO;
+      return -1;
+    }
   }
 
   int WRAP(open)(const char *pathname, int oflag, mode_t cmode, int *newfd) {
