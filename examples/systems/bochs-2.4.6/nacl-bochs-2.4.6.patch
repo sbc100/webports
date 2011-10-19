@@ -162,7 +162,7 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/Makefile.in bochs-2.4.6/bochs_ppap
 diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp
 --- temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
 +++ bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp	2011-08-11 15:11:18.000000000 -0700
-@@ -0,0 +1,179 @@
+@@ -0,0 +1,181 @@
 +// Copyright 2011 The Native Client Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
 +// be found in the LICENSE file.
@@ -282,6 +282,8 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.
 +      width_(0),
 +      height_(0),
 +      factory_(this) {
++    RequestInputEvents(PP_INPUTEVENT_CLASS_MOUSE);
++    RequestFilteringInputEvents(PP_INPUTEVENT_CLASS_KEYBOARD);
 +  }
 +
 +  BochsPepperInstance::~BochsPepperInstance() {
@@ -335,7 +337,7 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.
 +    if(err == -2)
 +      fprintf(stderr, "ERROR extracting img.sar\n");
 +    
-+    static char * argv[] = {"placeholder", "-qf", "tinylinux-img/bochsrc", NULL};
++    static char * argv[] = {"placeholder", "-qf", "linux-img/bochsrc", NULL};
 +    bochs_main(3, (char**)argv);
 +
 +    return NULL;

@@ -125,14 +125,29 @@ CustomExtractStep(){
 
 CustomInstallStep(){
   BOCHS_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  BOCHS_BUILD=${BOCHS_DIR}/${PACKAGE_NAME}-build
+
   ChangeDir ${BOCHS_DIR}
   mkdir -p img/usr/local/share/bochs/
   cp -r ${NACL_PACKAGES_REPOSITORY}/${LINUX_IMG_NAME} img/
+  mv img/linux-img/bochsrc old-bochsrc
+  cp ${START_DIR}/bochsrc img/linux-img/bochsrc
   cp -r ${BOCHS_DIR}/bios/VGABIOS-lgpl-latest img/
   cp -r ${BOCHS_DIR}/bios/BIOS-bochs-latest img/
   cp -r ${BOCHS_DIR}/msrs.def img/
   cd img
-  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../img.sar
+
+  PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
+  MakeDir ${PUBLISH_DIR}
+
+  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ \
+      ${PUBLISH_DIR}/img.sar
+
+  cp ${START_DIR}/bochs.html ${PUBLISH_DIR}
+  cp ${START_DIR}/bochs.nmf ${PUBLISH_DIR}
+  cp ${BOCHS_BUILD}/bochs \
+      ${PUBLISH_DIR}/bochs_x86-${NACL_PACKAGES_BITSIZE}.nexe \
+
   cd ..
 }
 
