@@ -34,7 +34,7 @@ else
 fi
 
 # Get the desired bit size.
-readonly NACL_PACKAGES_BITSIZE=${NACL_PACKAGES_BITSIZE:-"32"}
+export NACL_PACKAGES_BITSIZE=${NACL_PACKAGES_BITSIZE:-"32"}
 if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
   readonly CROSS_ID=i686
 elif [ $NACL_PACKAGES_BITSIZE = "64" ] ; then
