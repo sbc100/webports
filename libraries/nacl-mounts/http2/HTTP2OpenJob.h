@@ -19,7 +19,7 @@
 #include <vector>
 #include "../base/MainThreadRunner.h"
 #include "../util/macros.h"
-
+#include "HTTP2ProgressHandler.h"
 
 class HTTP2OpenJob : public MainThreadJob {
  public:
@@ -28,18 +28,65 @@ class HTTP2OpenJob : public MainThreadJob {
 
   void Run(MainThreadRunner::JobEntry *e);
 
-  std::string url;
-  pp::FileIO** file_io_;
+  // Remote URL.
+  std::string url_; // in
+
+  // Local cache path.
+  std::string fs_path_; // in
+
+  // Nice looking path (or just textual description) for progress reporting.
+  std::string path_; // in
+
+  // Expected file size. Used to verify locally cached copy.
+  int64_t expected_size_; // in
+
+  // HTML5 file system used as the local cache.
+  pp::FileSystem* fs_; // in
+
+  // Download progress is reported through this handle.
+  HTTP2ProgressHandler* progress_handler_; // in
+
+  // Opened FileIO in the local cache.
+  pp::FileIO** file_io_; // out
 
  private:
   pp::CompletionCallbackFactory<HTTP2OpenJob> *factory_;
 
   pp::URLLoader* loader_;
+  pp::FileRef* ref_;
+  pp::FileRef* parent_ref_;
+  pp::FileIO* io_;
+  PP_FileInfo query_buf_;
+
+  // File offset of the first byte of write_buf_.
+  int64_t offset_;
+
+  // Local file write buffer.
+  std::vector<char> write_buf_;
+
+  // URLLoader read buffer.
+  char read_buf_[4096];
+
+  // Whether there is a pending write request.
+  bool write_in_flight_;
+
+  // Whether remote fetch is complete.
+  bool read_done_;
 
   pp::URLRequestInfo MakeRequest(std::string url);
-  void OpenCallback(int32_t result);
-  void FinishStreamingToFileCallback(int32_t result);
-  void OpenFileBodyCallback(int32_t result);
+  void FileOpenCallback(int32_t result);
+  void FileQueryCallback(int32_t result);
+  void DirCreateCallback(int32_t result);
+  void FileCreateCallback(int32_t result);
+  void UrlOpenCallback(int32_t result);
+  void UrlReadCallback(int32_t result);
+  void FileWriteCallback(int32_t result);
+
+  void DownloadFile();
+  void ReadMore();
+  void MaybeWrite();
+  void MaybeDone();
+  void ReportProgress();
 
   MainThreadRunner::JobEntry *job_entry_;
 

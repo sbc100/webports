@@ -28,6 +28,7 @@ CustomBuildStep() {
   set -x
   export CXXCMD="${NACLCC} -I${START_DIR}"
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2Mount.cc
+  ${CXXCMD} -c ${START_DIR}/http2/HTTP2FSOpenJob.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2OpenJob.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2ReadJob.cc
   ${CXXCMD} -c ${START_DIR}/base/MountManager.cc
@@ -69,6 +70,7 @@ CustomBuildStep() {
       HTTPMount.o \
       HTTPNode.o \
       HTTP2Mount.o \
+      HTTP2FSOpenJob.o \
       HTTP2OpenJob.o \
       HTTP2ReadJob.o \
       PepperMount.o \
@@ -91,7 +93,7 @@ CustomInstallStep() {
   cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
-  for DIR in console base util memory http2; do
+  for DIR in console base util memory http2 AppEngine; do
     mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
     cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
   done

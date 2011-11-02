@@ -16,6 +16,9 @@
 #include "../util/Path.h"
 #include "../util/SlotAllocator.h"
 #include "HTTP2Node.h"
+#include "HTTP2ProgressHandler.h"
+
+#include <ppapi/cpp/file_system.h>
 
 class MainThreadRunner;
 
@@ -25,6 +28,13 @@ class HTTP2Mount: public BaseMount {
   // base_url_ is the HTTP server to which the HTTP2Mount will make requests.
   HTTP2Mount(MainThreadRunner *runner, std::string base_url);
   virtual ~HTTP2Mount() {}
+
+  void SetLocalCache(pp::FileSystem *fs, int64_t fs_expected_size,
+      std::string base_path);
+
+  void SetProgressHandler(HTTP2ProgressHandler* handler) {
+    progress_handler_ = handler;
+  }
 
   /* int Creat(const std::string& path, mode_t mode, struct stat* st); */
   int GetNode(const std::string& path, struct stat* st);
@@ -66,8 +76,18 @@ class HTTP2Mount: public BaseMount {
   std::string base_url_;
 
   int doOpen(int slot);
+  void OpenFileSystem();
 
   std::set<std::string> files_;
+
+  pp::FileSystem* fs_;
+  int64_t fs_expected_size_;
+  std::string fs_base_path_;
+  bool fs_opened_;
+
+  HTTP2ProgressHandler* progress_handler_;
+
+  pthread_mutex_t lock_;
 
   DISALLOW_COPY_AND_ASSIGN(HTTP2Mount);
 };

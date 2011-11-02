@@ -5,20 +5,35 @@
  */
 #include "HTTP2Mount.h"
 #include "HTTP2Node.h"
+#include "HTTP2FSOpenJob.h"
 #include "HTTP2OpenJob.h"
 #include "HTTP2ReadJob.h"
 #include "../util/DebugPrint.h"
+#include "../util/SimpleAutoLock.h"
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
-HTTP2Mount::HTTP2Mount(MainThreadRunner *runner, std::string base_url) {
-  runner_ = runner;
-  base_url_ = base_url;
+HTTP2Mount::HTTP2Mount(MainThreadRunner *runner, std::string base_url) :
+  runner_(runner), base_url_(base_url), fs_(NULL), fs_expected_size_(0),
+  fs_base_path_(""), fs_opened_(false), progress_handler_(NULL) {
+
+  pthread_mutexattr_t attr;
+  pthread_mutexattr_init(&attr);
+  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(&lock_, &attr);
+
   // leave slot 0 open
   slots_.Alloc();
   AddDir("/");
+}
+
+void HTTP2Mount::SetLocalCache(pp::FileSystem *fs, int64_t fs_expected_size,
+    std::string base_path) {
+  fs_ = fs;
+  fs_expected_size_ = fs_expected_size;
+  fs_base_path_ = base_path;
 }
 
 int HTTP2Mount::GetSlot(const std::string& path) {
@@ -45,8 +60,14 @@ int HTTP2Mount::doOpen(int slot) {
     return 0;
 
   HTTP2OpenJob *job = new HTTP2OpenJob;
-  job->url = base_url_ + node->path_;
+  job->url_ = base_url_ + node->path_;
+  job->path_ = node->path_;
+  job->fs_path_ =
+    Path(fs_base_path_).AppendPath(node->path_).FormulatePath();
+  job->expected_size_ = node->size_;
+  job->fs_ = fs_;
   job->file_io_ = &node->file_io_;
+  job->progress_handler_ = progress_handler_;
   int ret = runner_->RunJob(job);
   if (ret != 0) {
     errno = EIO;
@@ -149,9 +170,35 @@ int HTTP2Mount::Getdents(ino_t slot, off_t offset,
   return -1;
 }
 
+void HTTP2Mount::OpenFileSystem(void) {
+  if (!fs_ || fs_opened_)
+    return;
+  HTTP2FSOpenJob *job = new HTTP2FSOpenJob;
+  job->fs_ = fs_;
+  job->expected_size_ = fs_expected_size_;
+  int ret = runner_->RunJob(job);
+  if (ret != 0) {
+    dbgprintf("Could not open the file system: %d\n", ret);
+    fs_ = NULL;
+    // TODO: throw something? abort? work without a FileSystem
+    // (i.e. through FinishStreamingToFile)?
+  } else {
+    dbgprintf("fs opened!\n");
+    fs_opened_ = true;
+  }
+}
+
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 
 ssize_t HTTP2Mount::Read(ino_t slot, off_t offset, void *buf, size_t count) {
+  SimpleAutoLock lock(&lock_);
+
+  OpenFileSystem();
+  if (!fs_opened_) {
+    errno = EIO;
+    return -1;
+  }
+
   HTTP2Node* node = slots_.At(slot);
   if (!node) {
     errno = ENOENT;
@@ -194,7 +241,6 @@ ssize_t HTTP2Mount::Read(ino_t slot, off_t offset, void *buf, size_t count) {
   return ret;
 }
 
-
 int HTTP2Mount::AddPath(const std::string& path, size_t size, bool is_dir) {
   std::string p = Path(path).FormulatePath();
 
@@ -205,7 +251,7 @@ int HTTP2Mount::AddPath(const std::string& path, size_t size, bool is_dir) {
   node->file_io_ = NULL;
   node->pack_slot_ = -1;
   node->start_ = 0;
-  node->size_ = size; // FIXME
+  node->size_ = size;
   node->is_dir_ = is_dir;
   node->in_memory_ = false;
   node->data_ = NULL;

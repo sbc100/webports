@@ -12,7 +12,7 @@
 #include "../util/DebugPrint.h"
 
 
-HTTP2ReadJob::HTTP2ReadJob() {
+HTTP2ReadJob::HTTP2ReadJob() : factory_(NULL) {
 }
 
 HTTP2ReadJob::~HTTP2ReadJob() {
@@ -41,5 +41,6 @@ void HTTP2ReadJob::ReadCallback(int32_t result) {
 }
 
 void HTTP2ReadJob::Finish(int32_t result) {
+  delete factory_;
   MainThreadRunner::ResultCompletion(job_entry_, result);
 }
