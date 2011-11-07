@@ -1,6 +1,6 @@
 These files were used to put ScummVM on App Engine.  In addition to these files, you need:
 
--runimage.sar, bass.sar, and lure.sar
+-runimage.tar, bass.tar, and lure.tar
 -scummvm_x86_32.nexe and scummvm_x86_64.nexe
 
 All of these files can be generated with the build in naclports.

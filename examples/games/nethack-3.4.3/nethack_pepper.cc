@@ -40,16 +40,16 @@ static void *nethack_init(void *arg) {
 
   {
     UrlLoaderJob* job = new UrlLoaderJob;
-    job->set_url("nethack.sar");
+    job->set_url("nethack.tar");
     std::vector<char> data;
     job->set_dst(&data);
     runner->RunJob(job);
-    int fh = open("/nethack.sar", O_CREAT | O_WRONLY);
+    int fh = open("/nethack.tar", O_CREAT | O_WRONLY);
     write(fh, &data[0], data.size());
     close(fh);
   }
 
-  simple_tar_extract("/nethack.sar");
+  simple_tar_extract("/nethack.tar");
 
   // Setup config file.
   {

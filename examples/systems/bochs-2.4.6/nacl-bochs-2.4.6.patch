@@ -204,7 +204,7 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.
 +	did_open_(false),
 +	pepper_instance_(instance),
 +	done_(done) {
-+      file_handle_ = ::open("img.sar", O_CREAT | O_WRONLY);
++      file_handle_ = ::open("img.tar", O_CREAT | O_WRONLY);
 +      assert(file_handle_ != -1);
 +    }
 +
@@ -318,7 +318,7 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.
 +    pp::CompletionCallback cc = factory_.NewCallback(
 +						     &BochsPepperInstance::FinishedInit);
 +    myloader_ = new pp::MyUrlLoader(this, cc);
-+    myloader_->ProcessURL("img.sar");
++    myloader_->ProcessURL("img.tar");
 +  }
 +
 +  bool BochsPepperInstance::HandleInputEvent(const pp::InputEvent& event) {
@@ -331,11 +331,11 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.
 +  }
 +
 +  void* BochsPepperInstance::BochsRun(void* param) {
-+    int err = simple_tar_extract("img.sar");
++    int err = simple_tar_extract("img.tar");
 +    chdir("/img");
 +
 +    if(err == -2)
-+      fprintf(stderr, "ERROR extracting img.sar\n");
++      fprintf(stderr, "ERROR extracting img.tar\n");
 +    
 +    static char * argv[] = {"placeholder", "-qf", "linux-img/bochsrc", NULL};
 +    bochs_main(3, (char**)argv);
@@ -366,8 +366,8 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.h bochs-2.4.
 +
 +#include <vector>
 +
-+// We use a URLLoader in order to obtain a compression (.sar generated
-+// by simple_tar.py in memory_filesys) of all of the game files.
++// We use a URLLoader in order to obtain a compression (.tar generated
++// by tar cf) of all of the game files.
 +namespace pp {
 +  class MyUrlLoader;
 +}
@@ -420,7 +420,7 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.h bochs-2.4.
 +    void FinishedInit(int32_t result);
 +
 +    pp::CompletionCallbackFactory<BochsPepperInstance> factory_;
-+    pp::MyUrlLoader *myloader_; // used for obtaining a .sar of the OS image
++    pp::MyUrlLoader *myloader_; // used for obtaining a .tar of the OS image
 +  };
 +
 +}  // namespace bochs_pepper

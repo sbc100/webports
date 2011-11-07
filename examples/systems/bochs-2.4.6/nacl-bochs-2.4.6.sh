@@ -140,8 +140,7 @@ CustomInstallStep(){
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
 
-  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ \
-      ${PUBLISH_DIR}/img.sar
+  tar cf ${PUBLISH_DIR}/img.tar ./
 
   cp ${START_DIR}/bochs.html ${PUBLISH_DIR}
   cp ${START_DIR}/bochs.nmf ${PUBLISH_DIR}

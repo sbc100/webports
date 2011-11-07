@@ -44,8 +44,8 @@ CustomBuildStep() {
       ${ASSEMBLY_DIR}/nethack_x86-${NACL_PACKAGES_BITSIZE:-"32"}.nexe
   ChangeDir ${PACKAGE_DIR}/out/games
   rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
-  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py lib lib.sar
-  cp ${PACKAGE_DIR}/out/games/lib.sar ${ASSEMBLY_DIR}/nethack.sar
+  tar cf lib.tar lib
+  cp ${PACKAGE_DIR}/out/games/lib.tar ${ASSEMBLY_DIR}/nethack.tar
   cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
   cp ${START_DIR}/nethack.nmf ${ASSEMBLY_DIR}
   cp ${NACL_SDK_USR_LIB}/nacl-mounts/*.js ${ASSEMBLY_DIR}

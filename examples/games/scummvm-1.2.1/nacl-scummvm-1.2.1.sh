@@ -122,7 +122,7 @@ CustomInstallStep() {
   cp `find ${SRC_DIR}/gui/themes/fonts/ -type f` ${SCUMMVM_DIR}
 
   cd runimage
-  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../runimage.sar
+  tar cf ../runimage.tar ./
   cd ..
 
   #Beneath a Steel Sky (Floppy version)
@@ -130,7 +130,7 @@ CustomInstallStep() {
   mkdir -p ${BASS_DIR}
   cp -r ${NACL_PACKAGES_REPOSITORY}/${BASS_FLOPPY_NAME}/* ${BASS_DIR}
   cd bass
-  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../bass.sar
+  tar cf ../bass.tar ./
   cd ..
 
   #Lure of the temptress
@@ -138,7 +138,7 @@ CustomInstallStep() {
   mkdir -p ${LURE_DIR}
   cp -r ${NACL_PACKAGES_REPOSITORY}/${LURE_NAME}/* ${LURE_DIR}
   cd lure
-  python ${NACL_SDK_USR_LIB}/nacl-mounts/util/simple_tar.py ./ ../lure.sar
+  tar cf ../lure.tar ./
   cd ..
 
   export PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
@@ -150,7 +150,7 @@ CustomInstallStep() {
   cp `find ${START_DIR}/nacl-scumm -type f -maxdepth 1` ${APPENGINE_DIR}
   MakeDir ${APPENGINE_DIR}/static
   cp ${START_DIR}/nacl-scumm/static/* ${APPENGINE_DIR}/static
-  cp ${SRC_DIR}/*.sar ${APPENGINE_DIR}/static
+  cp ${SRC_DIR}/*.tar ${APPENGINE_DIR}/static
   ${NACLSTRIP} ${SRC_DIR}/${PACKAGE_NAME}-build/scummvm \
       -o ${APPENGINE_DIR}/static/scummvm_x86_${NACL_PACKAGES_BITSIZE}.nexe
 
