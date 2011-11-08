@@ -203,19 +203,15 @@ int KernelProxy::open(const std::string& path, int flags, mode_t mode) {
     p = Path(cwd_.FormulatePath() + "/" + path);
   }
 
-  std::string filename = p.Last();
-  Path parent(p.FormulatePath() + "/..");
-
   std::pair<Mount *, std::string> m_and_p =
-    mm_.GetMount(parent.FormulatePath());
+    mm_.GetMount(p.FormulatePath());
 
   if (!(m_and_p.first)) {
     errno = ENOENT;
     return -1;
   }
 
-  Path mount_rel_path(m_and_p.second + "/" + filename);
-  return OpenHandle(m_and_p.first, mount_rel_path.FormulatePath(), flags, mode);
+  return OpenHandle(m_and_p.first, m_and_p.second, flags, mode);
 }
 
 int KernelProxy::close(int fd) {

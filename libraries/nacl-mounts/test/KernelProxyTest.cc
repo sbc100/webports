@@ -215,3 +215,20 @@ TEST(KernelProxyTest, rmdir) {
   EXPECT_EQ(0, kp->rmdir("/hi/there"));
   EXPECT_EQ(0, kp->rmdir("/hi"));
 }
+
+TEST(KernelProxyTest, OpenOfMountPoint) {
+  mm->ClearMounts();
+  MemMount *mnt = new MemMount();
+  EXPECT_EQ(0, mm->AddMount(mnt, "/"));
+  kp->chdir("/");
+  kp->mkdir("/hi", 0777);
+
+  int fd = kp->open("/", O_RDONLY | O_DIRECTORY, 0);
+  ASSERT_GE(fd, 0);
+
+  // Test that getdents() of "/" is handled by the MemMount we created.
+  const int bufsize = sizeof(struct dirent) * 2;
+  char buf[bufsize];
+  int count = kp->getdents(fd, buf, bufsize);
+  ASSERT_GE(count, 1);
+}
