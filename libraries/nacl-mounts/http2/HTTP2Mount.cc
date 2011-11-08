@@ -30,10 +30,11 @@ HTTP2Mount::HTTP2Mount(MainThreadRunner *runner, std::string base_url) :
 }
 
 void HTTP2Mount::SetLocalCache(pp::FileSystem *fs, int64_t fs_expected_size,
-    std::string base_path) {
+    std::string base_path, bool is_opened) {
   fs_ = fs;
   fs_expected_size_ = fs_expected_size;
   fs_base_path_ = base_path;
+  fs_opened_ = is_opened;
 }
 
 int HTTP2Mount::GetSlot(const std::string& path) {

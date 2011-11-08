@@ -30,7 +30,7 @@ class HTTP2Mount: public BaseMount {
   virtual ~HTTP2Mount() {}
 
   void SetLocalCache(pp::FileSystem *fs, int64_t fs_expected_size,
-      std::string base_path);
+      std::string base_path, bool is_opened = false);
 
   void SetProgressHandler(HTTP2ProgressHandler* handler) {
     progress_handler_ = handler;
