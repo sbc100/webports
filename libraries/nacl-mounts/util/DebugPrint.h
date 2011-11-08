@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <sys/types.h>
 
 extern "C" {
   ssize_t __real_write(int fd, const void *buf, size_t count);
