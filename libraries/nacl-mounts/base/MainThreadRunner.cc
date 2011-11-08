@@ -4,6 +4,7 @@
  * found in the LICENSE file.
  */
 #include "base/MainThreadRunner.h"
+#include <alloca.h>
 #include <assert.h>
 #include <errno.h>
 

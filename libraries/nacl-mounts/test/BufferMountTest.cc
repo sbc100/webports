@@ -19,7 +19,7 @@ static const int kTestMaxChunks = 10;
 static const int kPrime0 = 7;
 static const int kPrime1 = 733;
 static const int kPrime2 = 331;
-static const int kPrime3 = (1 << 31) - 1;
+static const int kPrime3 = (1U << 31) - 1;
 
 static char DeterministicPattern(int seed, off_t offset) {
   return (kPrime0 + seed * kPrime1 + offset * kPrime2) % kPrime3;
@@ -28,14 +28,14 @@ static char DeterministicPattern(int seed, off_t offset) {
 
 static void DeterministicFill(int seed, off_t offset,
                               size_t count, char *dst) {
-  for (int i = 0; i < count; ++i) {
+  for (size_t i = 0; i < count; ++i) {
     dst[i] = DeterministicPattern(seed, i + offset);
   }
 }
 
 static void DeterministicCheck(int seed, off_t offset,
                                size_t count, const char *src) {
-  for (int i = 0; i < count; ++i) {
+  for (size_t i = 0; i < count; ++i) {
     ASSERT_EQ(src[i], DeterministicPattern(seed, i + offset));
   }
 }
