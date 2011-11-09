@@ -17,8 +17,10 @@
 #include <ppapi/cpp/url_response_info.h>
 #include <string>
 #include <vector>
+#include <set>
 #include "../base/MainThreadRunner.h"
 #include "../util/macros.h"
+#include "PepperDirectoryReader.h"
 
 typedef enum {
   OPEN_FILE_SYSTEM = 0,
@@ -26,6 +28,9 @@ typedef enum {
   READ_FILE,
   WRITE_FILE,
   QUERY_FILE,
+  CLOSE_FILE,
+  MAKE_DIR,
+  READ_DIR,
   NO_OP
 } PepperFileOperation;
 
@@ -46,6 +51,14 @@ class PepperFileIOJob : public MainThreadJob {
   void set_len(int64_t len) { len_ = len; }
   void set_flags(int32_t flags) { flags_ = flags; }
   void set_fs(pp::FileSystem *fs) { fs_ = fs; }
+  void set_path(const std::string& path) { path_ = path; }
+  void set_file_io_p(pp::FileIO **file_io_p) { file_io_p_ = file_io_p; }
+  void set_dir_entries(std::set<std::string>* dir_entries) {
+    dir_entries_ = dir_entries;
+  }
+  void set_directory_reader(DirectoryReader* directory_reader) {
+    directory_reader_ = directory_reader;
+  }
 
   void Run(MainThreadRunner::JobEntry *e);
 
@@ -54,7 +67,11 @@ class PepperFileIOJob : public MainThreadJob {
   pp::CompletionCallbackFactory<PepperFileIOJob> *factory_;
   pp::FileSystem *fs_;
   pp::FileIO *file_io_;
+  std::string path_;
+  pp::FileIO **file_io_p_;
   pp::FileRef *file_ref_;
+  std::set<std::string>* dir_entries_;
+  DirectoryReader* directory_reader_;
   int64_t exp_size_;
   int64_t offset_;
   char *read_buf_;

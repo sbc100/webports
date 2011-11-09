@@ -92,7 +92,7 @@ CustomInstallStep() {
   cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
-  for DIR in console base util memory http2 AppEngine; do
+  for DIR in console base util memory http2 AppEngine pepper; do
     mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
     cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
   done
