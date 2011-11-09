@@ -11,6 +11,7 @@
 
 
 BufferMount::BufferMount(Mount* source, size_t chunk_size, size_t max_chunks) {
+  if (pthread_mutex_init(&cache_lock_, NULL)) assert(0);
   source_ = source;
   chunk_size_ = chunk_size;
   max_chunks_ = max_chunks;

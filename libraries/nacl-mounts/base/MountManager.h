@@ -73,7 +73,6 @@ class MountManager {
 
  private:
   std::map<std::string, Mount*> mount_map_;
-  Mount *cwd_mount_;
   pthread_mutex_t mm_lock_;
 };
 

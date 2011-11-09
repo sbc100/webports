@@ -40,7 +40,7 @@ int JSPipeMount::GetNode(const std::string& path, struct stat* buf) {
   int id;
 
   // Allow non-negative pipe numbers.
-  if (sscanf(path.c_str(), "/%d", &id) != 1 && id >= 0) {  // NOLINT
+  if (sscanf(path.c_str(), "/%d", &id) != 1 || id < 0) {  // NOLINT
     return -1;
   }
   return Stat(id + 1, buf);

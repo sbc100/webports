@@ -21,7 +21,6 @@ void MountManager::Init() {
   MemMount *default_mount = new MemMount();
   int ret = AddMount(default_mount, "/");
   assert(ret == 0);
-  cwd_mount_ = default_mount;
 }
 
 int MountManager::AddMount(Mount *m, const char *path) {
@@ -66,9 +65,6 @@ int MountManager::RemoveMount(const char *path) {
       errno = EBUSY;
       return -1;
     }
-    if (cwd_mount_ == it->second) {
-      cwd_mount_ = NULL;
-    }
     // erase() calls the destructor
     mount_map_.erase(it);
     return 0;
@@ -85,7 +81,6 @@ void MountManager::ClearMounts(void) {
       it->second = NULL;
     }
   }
-  cwd_mount_ = NULL;
 }
 
 Mount *MountManager::GetNode(const std::string& path,

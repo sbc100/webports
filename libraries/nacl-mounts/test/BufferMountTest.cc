@@ -89,7 +89,7 @@ TEST(BufferMountTest, ReadSmall) {
   st.st_ino = 123;
 
   const int file_size = 431;
-  char* buf = new char[file_size];
+  char* buf = new char[kTestChunkSize];
   DeterministicFill(0, 0, file_size, buf);
 
   mm.GetNode("/small.txt", &st);
@@ -252,7 +252,7 @@ TEST(BufferMountTest, ReadOverflow) {
     st.st_ino = 123;
 
     const int file_size = kTestChunkSize * (kTestMaxChunks + 1) + skew;
-    char* buf = new char[file_size];
+    char* buf = new char[file_size + kTestChunkSize];
     DeterministicFill(skew, 0, file_size, buf);
 
     mm.GetNode("/huge.txt", &st);
@@ -300,7 +300,7 @@ TEST(BufferMountTest, Invalidate) {
   st.st_ino = 123;
 
   const int file_size = 431;
-  char* buf = new char[file_size];
+  char* buf = new char[kTestChunkSize];
   DeterministicFill(0, 0, file_size, buf);
 
   mm.GetNode("/small.txt", &st);
