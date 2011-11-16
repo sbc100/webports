@@ -14,6 +14,8 @@ AppEngineNode::AppEngineNode() {
   len_ = 0;
   use_count_ = 0;
   is_dirty_ = false;
+  is_dir_ = false;
+  is_dir_known_ = false;
   capacity_ = 0;
   data_ = NULL;
 }

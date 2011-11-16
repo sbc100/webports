@@ -43,7 +43,8 @@ class AppEngineNode {
   void set_slot(int slot) { slot_ = slot; }
 
   bool is_dir() { return is_dir_; }
-  void set_is_dir(bool is_dir) { is_dir_ = is_dir; }
+  bool is_dir_known() { return is_dir_known_; }
+  void set_is_dir(bool is_dir) { is_dir_ = is_dir; is_dir_known_ = true; }
 
   // len() returns the number of bytes of data written to this node
   size_t len(void) { return len_; }
@@ -58,6 +59,7 @@ class AppEngineNode {
   char *data_;
   size_t len_;
   bool is_dir_;
+  bool is_dir_known_;
   int use_count_;
   std::string path_;
   int slot_;

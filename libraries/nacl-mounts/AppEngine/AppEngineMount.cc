@@ -105,7 +105,13 @@ int AppEngineMount::Stat(ino_t slot, struct stat *buf) {
 
   memset(buf, 0, sizeof(struct stat));
   buf->st_ino = (ino_t)slot;
-  if (node->is_dir() || IsDir(slot)) {
+  bool is_dir;
+  if (node->is_dir_known()) {
+    is_dir = node->is_dir();
+  } else {
+    is_dir = IsDir(slot);
+  }
+  if (is_dir) {
     buf->st_mode = S_IFDIR | 0777;
   } else {
     buf->st_mode = S_IFREG | 0777;
@@ -310,11 +316,12 @@ bool AppEngineMount::IsDir(ino_t slot) {
   struct dirent *dir = (struct dirent *)malloc(sizeof(struct dirent));
   int num_bytes = Getdents(slot, 0, dir, sizeof(struct dirent));
 
+  // Cache this result in the node.  At this point, we consider the node
+  // to be a directory for the rest of run-time.
   if (num_bytes > 0) {
-    // Cache this result in the node.  At this point, we consider the node
-    // to be a directory for the rest of run-time
     node->set_is_dir(true);
     return true;
   }
+  // Assume its not for now, but don't stick to that.
   return false;
 }
