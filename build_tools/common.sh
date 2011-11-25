@@ -119,6 +119,7 @@ ${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
 readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
 readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
 readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
+readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
 
 # NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
 # the gcc specs file.  It has a gcc spec-file conditional for ${CROSS_ID}
@@ -406,6 +407,7 @@ DefaultConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export FREETYPE_CONFIG=${NACL_SDK_USR_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
