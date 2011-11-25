@@ -5,6 +5,13 @@ common libraries for Native Client. The bash scripts will download, patch
 build and copy the binary library and developer header files into your
 Native Client SDK.
 
+The scripts require that centain tools are present in the host system.
+You will need at least these (but probably more):
+- autoconf, automake
+- pkg-config
+- gettext
+- libglib2.0-dev >= 2.26.0 (if you want to build nacl-glib)
+
 Before you can use the Makefile in this directory, you must set the
 NACL_SDK_ROOT environment variable to top directory of a version of the
 Native Client SDK (the directory containing toolchain/).
