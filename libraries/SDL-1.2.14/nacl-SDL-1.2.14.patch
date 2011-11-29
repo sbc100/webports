@@ -1,18 +1,6 @@
-diff -urN SDL-1.2.14/Makefile.in SDL-1.2.14-nacl/Makefile.in
---- SDL-1.2.14/Makefile.in	2009-10-13 03:07:20.000000000 +0400
-+++ SDL-1.2.14-nacl/Makefile.in	2011-10-13 15:43:08.968356696 +0400
-@@ -42,7 +42,7 @@
- 
- DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
- 
--HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
-+HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_nacl.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
- 
- LT_AGE      = @LT_AGE@
- LT_CURRENT  = @LT_CURRENT@
-diff -urN SDL-1.2.14/build-scripts/config.sub SDL-1.2.14-nacl/build-scripts/config.sub
+diff -urN SDL-1.2.14/build-scripts/config.sub SDL-1.2.14-nacl//build-scripts/config.sub
 --- SDL-1.2.14/build-scripts/config.sub	2009-10-13 03:07:12.000000000 +0400
-+++ SDL-1.2.14-nacl/build-scripts/config.sub	2011-10-13 15:43:08.968356696 +0400
++++ SDL-1.2.14-nacl//build-scripts/config.sub	2011-11-28 23:43:22.679635058 +0400
 @@ -318,6 +318,14 @@
  	i*86 | x86_64)
  	  basic_machine=$basic_machine-pc
@@ -38,9 +26,9 @@ diff -urN SDL-1.2.14/build-scripts/config.sub SDL-1.2.14-nacl/build-scripts/conf
  	-nto-qnx*)
  		;;
  	-nto*)
-diff -urN SDL-1.2.14/configure.in SDL-1.2.14-nacl/configure.in
+diff -urN SDL-1.2.14/configure.in SDL-1.2.14-nacl//configure.in
 --- SDL-1.2.14/configure.in	2009-10-17 21:35:03.000000000 +0400
-+++ SDL-1.2.14-nacl/configure.in	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//configure.in	2011-11-28 23:43:22.679635058 +0400
 @@ -885,6 +885,26 @@
      fi
  }
@@ -89,9 +77,9 @@ diff -urN SDL-1.2.14/configure.in SDL-1.2.14-nacl/configure.in
      *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
          case "$host" in
              *-*-linux*)         ARCH=linux ;;
-diff -urN SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14-nacl/include/SDL_config.h.in
+diff -urN SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14-nacl//include/SDL_config.h.in
 --- SDL-1.2.14/include/SDL_config.h.in	2009-10-13 08:21:25.000000000 +0400
-+++ SDL-1.2.14-nacl/include/SDL_config.h.in	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//include/SDL_config.h.in	2011-11-28 23:43:22.679635058 +0400
 @@ -174,6 +174,7 @@
  #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC
  #undef SDL_AUDIO_DRIVER_MINT
@@ -108,9 +96,9 @@ diff -urN SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14-nacl/include/SDL_config.
  #undef SDL_VIDEO_DRIVER_NANOX
  #undef SDL_VIDEO_DRIVER_OS2FS
  #undef SDL_VIDEO_DRIVER_PHOTON
-diff -urN SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14-nacl/include/SDL_nacl.h
+diff -urN SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14-nacl//include/SDL_nacl.h
 --- SDL-1.2.14/include/SDL_nacl.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/include/SDL_nacl.h	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//include/SDL_nacl.h	2011-11-28 23:43:22.679635058 +0400
 @@ -0,0 +1,22 @@
 +#ifndef _SDL_nacl_h
 +#define _SDL_nacl_h
@@ -134,9 +122,9 @@ diff -urN SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14-nacl/include/SDL_nacl.h
 +#include "close_code.h"
 +
 +#endif /* _SDL_nacl_h */
-diff -urN SDL-1.2.14/include/SDL_platform.h SDL-1.2.14-nacl/include/SDL_platform.h
+diff -urN SDL-1.2.14/include/SDL_platform.h SDL-1.2.14-nacl//include/SDL_platform.h
 --- SDL-1.2.14/include/SDL_platform.h	2009-10-13 03:07:19.000000000 +0400
-+++ SDL-1.2.14-nacl/include/SDL_platform.h	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//include/SDL_platform.h	2011-11-28 23:43:22.679635058 +0400
 @@ -63,10 +63,14 @@
  #undef __IRIX__
  #define __IRIX__	1
@@ -153,35 +141,21 @@ diff -urN SDL-1.2.14/include/SDL_platform.h SDL-1.2.14-nacl/include/SDL_platform
  #if defined(__APPLE__)
  #undef __MACOSX__
  #define __MACOSX__	1
-diff -urN SDL-1.2.14/src/audio/SDL_audio.c SDL-1.2.14-nacl/src/audio/SDL_audio.c
---- SDL-1.2.14/src/audio/SDL_audio.c	2009-10-13 14:25:35.000000000 +0400
-+++ SDL-1.2.14-nacl/src/audio/SDL_audio.c	2011-10-13 15:43:08.977067048 +0400
-@@ -36,6 +36,9 @@
+diff -urN SDL-1.2.14/Makefile.in SDL-1.2.14-nacl//Makefile.in
+--- SDL-1.2.14/Makefile.in	2009-10-13 03:07:20.000000000 +0400
++++ SDL-1.2.14-nacl//Makefile.in	2011-11-28 23:43:22.679635058 +0400
+@@ -42,7 +42,7 @@
  
- /* Available audio drivers */
- static AudioBootStrap *bootstrap[] = {
-+#if SDL_AUDIO_DRIVER_NACL
-+	&NACLAUD_bootstrap,
-+#endif
- #if SDL_AUDIO_DRIVER_BSD
- 	&BSD_AUDIO_bootstrap,
- #endif
-diff -urN SDL-1.2.14/src/audio/SDL_sysaudio.h SDL-1.2.14-nacl/src/audio/SDL_sysaudio.h
---- SDL-1.2.14/src/audio/SDL_sysaudio.h	2009-10-13 03:07:14.000000000 +0400
-+++ SDL-1.2.14-nacl/src/audio/SDL_sysaudio.h	2011-10-13 15:43:08.977067048 +0400
-@@ -156,6 +156,9 @@
- extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
- extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
- #endif
-+#if SDL_AUDIO_DRIVER_NACL
-+extern AudioBootStrap NACLAUD_bootstrap;
-+#endif
- #if SDL_AUDIO_DRIVER_DISK
- extern AudioBootStrap DISKAUD_bootstrap;
- #endif
-diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc
+ DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
+ 
+-HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
++HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_nacl.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
+ 
+ LT_AGE      = @LT_AGE@
+ LT_CURRENT  = @LT_CURRENT@
+diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl//src/audio/nacl/SDL_naclaudio.cc
 --- SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//src/audio/nacl/SDL_naclaudio.cc	2011-11-28 23:43:22.679635058 +0400
 @@ -0,0 +1,133 @@
 +
 +#include "SDL_config.h"
@@ -316,9 +290,9 @@ diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/n
 +  return 1;
 +}
 +} // extern "C"
-diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.h
+diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14-nacl//src/audio/nacl/SDL_naclaudio.h
 --- SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.h	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//src/audio/nacl/SDL_naclaudio.h	2011-11-28 23:43:22.679635058 +0400
 @@ -0,0 +1,30 @@
 +#include "SDL_config.h"
 +
@@ -350,9 +324,35 @@ diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14-nacl/src/audio/na
 +};
 +
 +#endif /* _SDL_naclaudio_h */
-diff -urN SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14-nacl/src/cpuinfo/SDL_cpuinfo.c
+diff -urN SDL-1.2.14/src/audio/SDL_audio.c SDL-1.2.14-nacl//src/audio/SDL_audio.c
+--- SDL-1.2.14/src/audio/SDL_audio.c	2009-10-13 14:25:35.000000000 +0400
++++ SDL-1.2.14-nacl//src/audio/SDL_audio.c	2011-11-28 23:43:22.679635058 +0400
+@@ -36,6 +36,9 @@
+ 
+ /* Available audio drivers */
+ static AudioBootStrap *bootstrap[] = {
++#if SDL_AUDIO_DRIVER_NACL
++	&NACLAUD_bootstrap,
++#endif
+ #if SDL_AUDIO_DRIVER_BSD
+ 	&BSD_AUDIO_bootstrap,
+ #endif
+diff -urN SDL-1.2.14/src/audio/SDL_sysaudio.h SDL-1.2.14-nacl//src/audio/SDL_sysaudio.h
+--- SDL-1.2.14/src/audio/SDL_sysaudio.h	2009-10-13 03:07:14.000000000 +0400
++++ SDL-1.2.14-nacl//src/audio/SDL_sysaudio.h	2011-11-28 23:43:22.679635058 +0400
+@@ -156,6 +156,9 @@
+ extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
+ extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
+ #endif
++#if SDL_AUDIO_DRIVER_NACL
++extern AudioBootStrap NACLAUD_bootstrap;
++#endif
+ #if SDL_AUDIO_DRIVER_DISK
+ extern AudioBootStrap DISKAUD_bootstrap;
+ #endif
+diff -urN SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14-nacl//src/cpuinfo/SDL_cpuinfo.c
 --- SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c	2009-10-13 03:07:14.000000000 +0400
-+++ SDL-1.2.14-nacl/src/cpuinfo/SDL_cpuinfo.c	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//src/cpuinfo/SDL_cpuinfo.c	2011-11-28 23:43:22.679635058 +0400
 @@ -53,6 +53,8 @@
  }
  #endif /* HAVE_SETJMP */
@@ -378,9 +378,9 @@ diff -urN SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14-nacl/src/cpuinfo/SDL_c
  static __inline__ int CPU_haveRDTSC(void)
  {
  	if ( CPU_haveCPUID() ) {
-diff -urN SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14-nacl/src/thread/pthread/SDL_systhread.c
+diff -urN SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14-nacl//src/thread/pthread/SDL_systhread.c
 --- SDL-1.2.14/src/thread/pthread/SDL_systhread.c	2009-10-13 03:07:16.000000000 +0400
-+++ SDL-1.2.14-nacl/src/thread/pthread/SDL_systhread.c	2011-10-13 15:43:08.977067048 +0400
++++ SDL-1.2.14-nacl//src/thread/pthread/SDL_systhread.c	2011-11-28 23:43:22.679635058 +0400
 @@ -81,12 +81,15 @@
  	int i;
  	sigset_t mask;
@@ -397,35 +397,408 @@ diff -urN SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14-nacl/src/thre
  
  #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
  	/* Allow ourselves to be asynchronously cancelled */
-diff -urN SDL-1.2.14/src/video/SDL_sysvideo.h SDL-1.2.14-nacl/src/video/SDL_sysvideo.h
---- SDL-1.2.14/src/video/SDL_sysvideo.h	2009-10-13 03:07:15.000000000 +0400
-+++ SDL-1.2.14-nacl/src/video/SDL_sysvideo.h	2011-10-13 15:43:08.977067048 +0400
-@@ -317,6 +317,9 @@
- 	SDL_VideoDevice *(*create)(int devindex);
- } VideoBootStrap;
- 
-+#if SDL_VIDEO_DRIVER_NACL
-+extern VideoBootStrap NACL_bootstrap;
+diff -urN SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14-nacl//src/video/nacl/eventqueue.h
+--- SDL-1.2.14/src/video/nacl/eventqueue.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl//src/video/nacl/eventqueue.h	2011-11-28 23:43:22.689635148 +0400
+@@ -0,0 +1,43 @@
++#ifndef _SDL_nacl_eventqueue_h
++#define _SDL_nacl_eventqueue_h
++
++#include "SDL_mutex.h"
++
++#include <queue>
++#include <ppapi/c/pp_input_event.h>
++
++struct SDL_NACL_Event;
++
++class EventQueue {
++public:
++  EventQueue() {
++    mu_ = SDL_CreateMutex();
++  }
++
++  ~EventQueue() {
++    SDL_DestroyMutex(mu_);
++  }
++
++  SDL_NACL_Event* PopEvent() {
++    SDL_LockMutex(mu_);
++    SDL_NACL_Event* event = NULL;
++    if (!queue_.empty()) {
++      event = queue_.front();
++      queue_.pop();
++    }
++    SDL_UnlockMutex(mu_);
++    return event;
++  }
++
++   void PushEvent(SDL_NACL_Event* event) {
++    SDL_LockMutex(mu_);
++    queue_.push(event);
++    SDL_UnlockMutex(mu_);
++   } 
++
++private:
++  std::queue<SDL_NACL_Event*> queue_;
++  SDL_mutex* mu_;
++};
++
++#endif // _SDL_nacl_eventqueue_h
+diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl//src/video/nacl/MainThreadRunner.cc
+--- SDL-1.2.14/src/video/nacl/MainThreadRunner.cc	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl//src/video/nacl/MainThreadRunner.cc	2011-11-28 23:43:34.019635132 +0400
+@@ -0,0 +1,242 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
++#include "MainThreadRunner.h"
++#include <alloca.h>
++#include <assert.h>
++#include <errno.h>
++
++// Only use pepper in nacl to allow unit testing.
++#ifdef __native_client__
++#  include <ppapi/c/pp_errors.h>
++#  include <ppapi/cpp/completion_callback.h>
++#  include <ppapi/cpp/module.h>
++#  define USE_PEPPER
 +#endif
- #if SDL_VIDEO_DRIVER_QUARTZ
- extern VideoBootStrap QZ_bootstrap;
- #endif
-diff -urN SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14-nacl/src/video/SDL_video.c
---- SDL-1.2.14/src/video/SDL_video.c	2009-10-13 03:07:15.000000000 +0400
-+++ SDL-1.2.14-nacl/src/video/SDL_video.c	2011-10-13 15:43:08.977067048 +0400
-@@ -33,6 +33,9 @@
- 
- /* Available video drivers */
- static VideoBootStrap *bootstrap[] = {
-+#if SDL_VIDEO_DRIVER_NACL
-+	&NACL_bootstrap,
++
++// kWORK_POLL_TIMEOUT sets the time delay (in milliseconds) between checks
++// for available jobs.
++static const int kWorkPollTimeout = 10;
++
++// Stack space to allocate by default to the event handler
++// thread in the presence of an ancillary 'pseudo-thread'.
++// 640K of stack should be enough for anyone.
++static const int kDefaultPseudoThreadHeadroom = 640 * 1024;
++
++// If we're not using pepper, track main thread's id so
++// we can do something sensible.
++#ifndef USE_PEPPER
++static pthread_t main_thread_id_;
 +#endif
- #if SDL_VIDEO_DRIVER_QUARTZ
- 	&QZ_bootstrap,
- #endif
-diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc
++
++struct MainThreadRunner::JobEntry {
++  pp::Instance* pepper_instance;
++  MainThreadRunner* runner;
++  MainThreadJob* job;
++  pthread_mutex_t done_mutex;
++  pthread_cond_t done_cond;
++  bool is_done;
++  int32_t result;
++  bool pseudo_thread_job;
++};
++
++
++MainThreadRunner::MainThreadRunner(pp::Instance *instance) {
++#ifndef USE_PEPPER
++  // Record main thread if not using pepper.
++  main_thread_id_ = pthread_self();
++#endif
++
++  pepper_instance_ = instance;
++  pthread_mutex_init(&lock_, NULL);
++
++#ifdef USE_PEPPER
++  // Start work cycling if using pepper.
++  DoWork();
++#endif
++}
++
++MainThreadRunner::~MainThreadRunner() {
++  pthread_mutex_destroy(&lock_);
++}
++
++int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
++  JobEntry entry;
++
++  // initialize the entry
++  entry.runner = this;
++  entry.pepper_instance = pepper_instance_;
++  entry.job = job;
++
++  bool in_main_thread = IsMainThread();
++  // Must be off main thread, or on a pseudothread.
++  assert(!in_main_thread || in_pseudo_thread_);
++
++  // Thread type specific initialization.
++  if (in_main_thread) {
++    entry.pseudo_thread_job = true;
++  } else {
++    entry.pseudo_thread_job = false;
++    // Init condition variable.
++    entry.is_done = false;
++    int ret = pthread_mutex_init(&entry.done_mutex, NULL);
++    assert(!ret);
++    ret = pthread_cond_init(&entry.done_cond, NULL);
++    assert(!ret);
++  }
++
++  // put the job on the queue
++  pthread_mutex_lock(&lock_);
++  job_queue_.push_back(&entry);
++  pthread_mutex_unlock(&lock_);
++
++  // Block differntly on the main thread.
++  if (entry.pseudo_thread_job) {
++    // block pseudothread until job is done
++    PseudoThreadBlock();
++  } else {
++    // wait on condition until the job is done
++    pthread_mutex_lock(&entry.done_mutex);
++    while (!entry.is_done) {
++      pthread_cond_wait(&entry.done_cond, &entry.done_mutex);
++    }
++    pthread_mutex_unlock(&entry.done_mutex);
++    pthread_mutex_destroy(&entry.done_mutex);
++    pthread_cond_destroy(&entry.done_cond);
++  }
++
++  // Cleanup.
++  delete job;
++  return entry.result;
++}
++
++void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
++  JobEntry* entry = reinterpret_cast<JobEntry*>(arg);
++#ifdef USE_PEPPER
++  MainThreadRunner* runner = entry->runner;
++#endif
++  entry->result = result;
++  // Signal differently depending on if the pseudothread is involved.
++  if (entry->pseudo_thread_job) {
++    PseudoThreadResume();
++  } else {
++    pthread_mutex_lock(&entry->done_mutex);
++    entry->is_done = true;
++    pthread_cond_signal(&entry->done_cond);
++    pthread_mutex_unlock(&entry->done_mutex);
++  }
++#ifdef USE_PEPPER
++  // Do more work now if in pepper.
++  DoWorkShim(runner, 0);
++#endif
++}
++
++void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
++  MainThreadRunner* mtr = static_cast<MainThreadRunner *>(p);
++  mtr->DoWork();
++}
++
++void MainThreadRunner::DoWork(void) {
++  pthread_mutex_lock(&lock_);
++  if (!job_queue_.empty()) {
++    JobEntry* entry = job_queue_.front();
++    job_queue_.pop_front();
++    // Release lock before doing work.
++    pthread_mutex_unlock(&lock_);
++    entry->job->Run(entry);
++    return;
++  }
++#ifdef USE_PEPPER
++  // Wake ourselves back up if we're using pepper.
++  pp::Module::Get()->core()->CallOnMainThread(kWorkPollTimeout,
++      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
++#endif
++  pthread_mutex_unlock(&lock_);
++}
++
++pp::Instance *MainThreadRunner::ExtractPepperInstance(
++    MainThreadRunner::JobEntry *e) {
++  return e->pepper_instance;
++}
++
++void MainThreadRunner::PseudoThreadFork(void *(*func)(void *arg), void *arg) {
++  PseudoThreadHeadroomFork(kDefaultPseudoThreadHeadroom, func, arg);
++}
++
++void MainThreadRunner::PseudoThreadHeadroomFork(
++    int bytes_headroom, void *(*func)(void *arg), void *arg) {
++  // Must be run from the main thread.
++  assert(IsMainThread());
++  // Only one pseudothread can be forked.
++  assert(!forked_pseudo_thread_);
++  // Leave a gap of bytes_headroom on the stack between
++  alloca(bytes_headroom);
++  // Goto pseudothread, but remeber how to come back here.
++  if (!setjmp(main_thread_state_)) {
++    InnerPseudoThreadFork(func, arg);
++  }
++  in_pseudo_thread_ = false;
++}
++
++// Put things in another scope to keep above headroom,
++// even after thread ends.
++void MainThreadRunner::InnerPseudoThreadFork(
++    void *(func)(void *arg), void *arg) {
++  forked_pseudo_thread_ = true;
++  in_pseudo_thread_ = true;
++  func(arg);
++  forked_pseudo_thread_ = false;
++  in_pseudo_thread_ = false;
++  // Dead, keep kicking back to the main thread.
++  for (;;) {
++    longjmp(main_thread_state_, 1);
++  }
++}
++
++void MainThreadRunner::PseudoThreadBlock(void) {
++  // Must be run from the main thread.
++  assert(IsMainThread());
++  // Pseudothread must have been forked.
++  assert(forked_pseudo_thread_);
++  // Must be run only from the pseudothread.
++  assert(in_pseudo_thread_);
++  if (!setjmp(pseudo_thread_state_)) {
++    // Go back to the main thread after saving state.
++    longjmp(main_thread_state_, 1);
++  }
++  in_pseudo_thread_ = true;
++}
++
++void MainThreadRunner::PseudoThreadResume(void) {
++  // Must be run from the main thread.
++  assert(IsMainThread());
++  // Pseudothread must have been forked.
++  assert(forked_pseudo_thread_);
++  // Can only be run from the main thread.
++  assert(!in_pseudo_thread_);
++  if (!setjmp(main_thread_state_)) {
++    // Go back to the pseudo thread after saving state.
++    longjmp(pseudo_thread_state_, 1);
++  }
++  in_pseudo_thread_ = false;
++}
++
++bool MainThreadRunner::IsMainThread(void) {
++#ifdef USE_PEPPER
++  return pp::Module::Get()->core()->IsMainThread();
++#else
++  return pthread_equal(pthread_self(), main_thread_id_);
++#endif
++}
++
++bool MainThreadRunner::IsPseudoThread(void) {
++  return IsMainThread() && in_pseudo_thread_;
++}
++
++// Static variables in MainThreaadRunner.
++jmp_buf MainThreadRunner::main_thread_state_;
++jmp_buf MainThreadRunner::pseudo_thread_state_;
++bool MainThreadRunner::in_pseudo_thread_ = false;
++bool MainThreadRunner::forked_pseudo_thread_ = false;
+diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.h SDL-1.2.14-nacl//src/video/nacl/MainThreadRunner.h
+--- SDL-1.2.14/src/video/nacl/MainThreadRunner.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl//src/video/nacl/MainThreadRunner.h	2011-11-28 23:43:34.019635132 +0400
+@@ -0,0 +1,102 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
++#ifndef LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
++#define LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
++
++#include <pthread.h>
++#include <semaphore.h>
++#include <setjmp.h>
++#include <list>
++
++// Keep pepper specifics out so we can unit test.
++namespace pp {
++  class Instance;
++};
++
++// MainThreadJob is a class that provides a method for running
++// a MainThreadRunner::JobEntry.
++class MainThreadJob;
++
++// MainThreadRunner executes MainThreadJobs asynchronously
++// on the main thread.
++class MainThreadRunner {
++ public:
++  explicit MainThreadRunner(pp::Instance *instance);
++  ~MainThreadRunner();
++
++  // RunJob() creates an entry for the job and submits
++  // that job for execution.
++  int32_t RunJob(MainThreadJob *job);
++
++  // ResultCompletion() is a function for putting result into arg, which
++  // is reinterpreted as a JobEntry pointer.  ResultCompletion()
++  // is intended to be used with pp::CompletionCallback()
++  static void ResultCompletion(void *arg, int32_t result);
++
++  // The JobEntry struct provides all of the information for
++  // a particular job.  It acts as an opaque handle to the job to and
++  // is used by ResultCompletion().
++  struct JobEntry;
++
++  static pp::Instance *ExtractPepperInstance(MainThreadRunner::JobEntry *e);
++
++  // You can have one 'pseudothread' on top of the main thread.
++  // This coroutine (setjmp) based thread can block on Run.
++  // You will have to take some amount of re-entrancy into account.
++  // Assumes 640K of stack is enough for anyone for event handling in the
++  // main thread.
++  static void PseudoThreadFork(void *(*func)(void *arg), void *arg);
++  // Same as above with selectable bytes of headroom.
++  static void PseudoThreadHeadroomFork(
++      int bytes_headroom, void *(*func)(void *arg), void *arg);
++
++  // Returns:
++  //   true - main thread or pseudothread.
++  //   false - other pthreads.
++  static bool IsMainThread(void);
++
++  // Returns true if on the psuedothread.
++  static bool IsPseudoThread(void);
++
++  // Use these directly only if you are interacting with PPAPI
++  // such that you can guarantee you'll resume because of an
++  // asynchronous event you issued.
++  // Block pseudothread until main thread yields.
++  static void PseudoThreadBlock(void);
++  // Yield main thread to pseudothread.
++  static void PseudoThreadResume(void);
++
++  // Do at least one main thread job.
++  // DO NOT use this with pepper (which sets up an event
++  // cycle to call this automatically).
++  // Use directly only for testing.
++  void DoWork(void);
++
++ private:
++  static void DoWorkShim(void *p, int32_t unused);
++
++  // Used to keep things above the headroom.
++  static void InnerPseudoThreadFork(void *(func)(void *arg), void *arg);
++
++  pthread_mutex_t lock_;
++  std::list<JobEntry*> job_queue_;
++  pp::Instance *pepper_instance_;
++
++  static jmp_buf pseudo_thread_state_;
++  static jmp_buf main_thread_state_;
++  static bool in_pseudo_thread_;
++  static bool forked_pseudo_thread_;
++};
++
++class MainThreadJob {
++ public:
++  virtual ~MainThreadJob() {}
++  virtual void Run(MainThreadRunner::JobEntry *entry) = 0;
++};
++
++// MainThreadRunner executes MainThreadJobs asynchronously
++
++#endif  // LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl//src/video/nacl/SDL_naclevents.cc
 --- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2011-10-13 15:43:44.997030707 +0400
++++ SDL-1.2.14-nacl//src/video/nacl/SDL_naclevents.cc	2011-11-28 23:43:22.689635148 +0400
 @@ -0,0 +1,196 @@
 +#include "SDL_config.h"
 +
@@ -623,9 +996,9 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +void NACL_InitOSKeymap(_THIS) {
 +  /* do nothing. */
 +}
-diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents_c.h
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14-nacl//src/video/nacl/SDL_naclevents_c.h
 --- SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents_c.h	2011-10-13 15:43:08.987128198 +0400
++++ SDL-1.2.14-nacl//src/video/nacl/SDL_naclevents_c.h	2011-11-28 23:43:22.689635148 +0400
 @@ -0,0 +1,7 @@
 +#include "SDL_config.h"
 +
@@ -634,16 +1007,152 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14-nacl/src/video
 +
 +extern void NACL_InitOSKeymap(_THIS);
 +extern void NACL_PumpEvents(_THIS);
-diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc
+diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.cc SDL-1.2.14-nacl//src/video/nacl/SDL_nacljob.cc
+--- SDL-1.2.14/src/video/nacl/SDL_nacljob.cc	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl//src/video/nacl/SDL_nacljob.cc	2011-11-28 23:43:34.019635132 +0400
+@@ -0,0 +1,71 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
++#include <assert.h>
++#include <ppapi/cpp/instance.h>
++#include <ppapi/cpp/graphics_2d.h>
++#include <ppapi/cpp/completion_callback.h>
++#include <ppapi/cpp/image_data.h>
++#include <ppapi/cpp/rect.h>
++#include <ppapi/c/pp_errors.h>
++#include "SDL_nacljob.h"
++
++void SDLNaclJob::Run(MainThreadRunner::JobEntry *e) {
++  job_entry_ = e;
++  factory_ = new pp::CompletionCallbackFactory<SDLNaclJob>(this);
++  pp::CompletionCallback cc = factory_->NewCallback(&SDLNaclJob::Finish);
++  pp::Instance *instance = MainThreadRunner::ExtractPepperInstance(e);
++
++  int32_t rv;
++  switch (op_) {
++  case VIDEO_INIT:
++    cc.Run(PP_OK);
++    break;
++
++  case CREATE_GRAPHICS_CONTEXT:
++    if (device_->hidden->context2d)
++      delete device_->hidden->context2d;
++    device_->hidden->context2d =
++      new pp::Graphics2D(instance,
++			 pp::Size(device_->hidden->w, device_->hidden->h), false);
++    assert(device_->hidden->context2d != NULL);
++    
++    if (!instance->BindGraphics(*device_->hidden->context2d)) {
++      fprintf(stderr, "***** Couldn't bind the device context *****\n");
++    }
++    
++    if (device_->hidden->image_data)
++      delete device_->hidden->image_data;
++
++    device_->hidden->image_data =
++      new pp::ImageData(instance,
++			PP_IMAGEDATAFORMAT_BGRA_PREMUL,
++			device_->hidden->context2d->size(),
++			false);
++    assert(device_->hidden->image_data != NULL);
++    // TODO: report any errors
++    cc.Run(PP_OK);
++    break;
++
++  case VIDEO_FLUSH:
++    for (int i = 0; i < device_->hidden->numrects; ++i) {
++      SDL_Rect& r = device_->hidden->rects[i];
++      device_->hidden->context2d->PaintImageData(*device_->hidden->image_data, pp::Point(), pp::Rect(r.x, r.y, r.w, r.h));
++    }
++
++    device_->hidden->context2d->Flush(cc);
++    break;
++
++  case VIDEO_QUIT:
++    delete device_->hidden->context2d;
++    delete device_->hidden->image_data;
++    cc.Run(PP_OK);
++
++  }
++}
++
++void SDLNaclJob::Finish(int32_t result) {
++  MainThreadRunner::ResultCompletion(job_entry_, result);
++}
+diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.h SDL-1.2.14-nacl//src/video/nacl/SDL_nacljob.h
+--- SDL-1.2.14/src/video/nacl/SDL_nacljob.h	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl//src/video/nacl/SDL_nacljob.h	2011-11-28 23:43:34.019635132 +0400
+@@ -0,0 +1,55 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
++#ifndef _SDL_nacljob_h
++#define _SDL_nacljob_h
++
++#include <ppapi/c/pp_errors.h>
++#include <ppapi/c/pp_file_info.h>
++#include <ppapi/cpp/completion_callback.h>
++#include <ppapi/cpp/file_io.h>
++#include <ppapi/cpp/file_ref.h>
++#include <ppapi/cpp/file_system.h>
++#include <ppapi/cpp/url_loader.h>
++#include <ppapi/cpp/url_request_info.h>
++#include <ppapi/cpp/url_response_info.h>
++#include <string>
++#include <vector>
++#include <set>
++#include "MainThreadRunner.h"
++
++#include "SDL_naclvideo.h"
++extern "C" {
++#include "../SDL_sysvideo.h"
++}
++
++typedef enum {
++  NO_OP = 0,
++  VIDEO_INIT,
++  CREATE_GRAPHICS_CONTEXT,
++  VIDEO_FLUSH,
++  VIDEO_QUIT
++} SDLNaclOperation;
++
++class SDLNaclJob : public MainThreadJob {
++ public:
++ SDLNaclJob(SDLNaclOperation op, SDL_VideoDevice* device) : op_(op), device_(device) {}
++  ~SDLNaclJob() {}
++
++  void Run(MainThreadRunner::JobEntry *e);
++  
++ private:
++
++  SDLNaclOperation op_;
++  SDL_VideoDevice *device_;
++
++  pp::CompletionCallbackFactory<SDLNaclJob> *factory_;
++
++  MainThreadRunner::JobEntry *job_entry_;
++
++  void Finish(int32_t result);
++};
++
++#endif
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl//src/video/nacl/SDL_naclvideo.cc
 --- SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc	2011-10-13 15:43:08.987128198 +0400
-@@ -0,0 +1,325 @@
++++ SDL-1.2.14-nacl//src/video/nacl/SDL_naclvideo.cc	2011-11-28 23:43:34.019635132 +0400
+@@ -0,0 +1,236 @@
 +#include "SDL_config.h"
 +
 +#include <assert.h>
 +
 +#include "SDL_naclvideo.h"
 +#include "SDL_naclevents_c.h"
++#include "MainThreadRunner.h"
++#include "SDL_nacljob.h"
 +
 +#include <ppapi/cpp/instance.h>
 +#include <ppapi/cpp/graphics_2d.h>
@@ -655,6 +1164,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +pp::Instance* gNaclPPInstance;
 +static int gNaclVideoWidth;
 +static int gNaclVideoHeight;
++static MainThreadRunner* gNaclMainThreadRunner;
 +
 +static int kNaClFlushDelayMs = 20;
 +
@@ -671,7 +1181,10 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +#define NACLVID_DRIVER_NAME "nacl"
 +
 +void SDL_NACL_SetInstance(PP_Instance instance, int width, int height) {
-+  gNaclPPInstance = pp::Module::Get()->InstanceForPPInstance(instance);
++  if (!gNaclPPInstance) {
++    gNaclPPInstance = pp::Module::Get()->InstanceForPPInstance(instance);
++    gNaclMainThreadRunner = new MainThreadRunner(gNaclPPInstance);
++  }
 +  gNaclVideoWidth = width;
 +  gNaclVideoHeight = height;
 +}
@@ -727,31 +1240,10 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +  }
 +  SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 +
-+  device->hidden->flush_mutex = SDL_CreateMutex();
-+  device->hidden->flush_cond = SDL_CreateCond();
-+
-+  device->hidden->flush_pending = false;
-+  device->hidden->data_ready = false;
-+
 +  device->hidden->ow = gNaclVideoWidth;
 +  device->hidden->oh = gNaclVideoHeight;
 +
-+  if (device->hidden->context2d)
-+    delete device->hidden->context2d;
-+  device->hidden->context2d = new pp::Graphics2D(gNaclPPInstance,
-+      pp::Size(device->hidden->ow, device->hidden->oh), false);
-+  assert(device->hidden->context2d != NULL);
-+
-+  if (!gNaclPPInstance->BindGraphics(*device->hidden->context2d)) {
-+    fprintf(stderr, "***** Couldn't bind the device context *****\n");
-+  }
-+
-+  // TODO: convert normal RGBA to premultiplied alpha.
-+  device->hidden->image_data = new pp::ImageData(gNaclPPInstance,
-+      PP_IMAGEDATAFORMAT_BGRA_PREMUL,
-+      device->hidden->context2d->size(),
-+      false);
-+  assert(device->hidden->image_data != NULL);
++  // TODO: query the fullscreen size
 +
 +  /* Set the function pointers */
 +  device->VideoInit = NACL_VideoInit;
@@ -768,8 +1260,6 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +  device->WarpWMCursor = NACL_WarpWMCursor;
 +
 +  device->free = NACL_DeleteDevice;
-+
-+  flush(device, 0);
 +
 +  return device;
 +}
@@ -796,32 +1286,30 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +}
 +
 +SDL_Rect **NACL_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags) {
++  // TODO: list modes
 +  return (SDL_Rect **) -1;
 +}
 +
 +
 +SDL_Surface *NACL_SetVideoMode(_THIS, SDL_Surface *current,
 +    int width, int height, int bpp, Uint32 flags) {
-+  if ( _this->hidden->buffer ) {
-+    SDL_free( _this->hidden->buffer );
-+  }
 +
-+  bpp = 32; // Let SDL handle pixel format conversion.
-+  width = _this->hidden->ow;
-+  height = _this->hidden->oh;
++  fprintf(stderr, "setvideomode %d %d %d %u\n", width, height, bpp, flags);
++  fflush(stderr);
 +
-+  _this->hidden->buffer = SDL_malloc(width * height * (bpp / 8));
-+  if ( ! _this->hidden->buffer ) {
-+    SDL_SetError("Couldn't allocate buffer for requested mode");
-+    return(NULL);
-+  }
++  if (width > _this->hidden->ow || height > _this->hidden->oh)
++    return NULL;
++  _this->hidden->bpp = bpp = 32; // Let SDL handle pixel format conversion.
++  _this->hidden->w = width;
++  _this->hidden->h = height;
 +
-+  SDL_memset(_this->hidden->buffer, 0, width * height * (bpp / 8));
++  SDLNaclJob* job = new SDLNaclJob(CREATE_GRAPHICS_CONTEXT, _this);
++  int32_t rv = gNaclMainThreadRunner->RunJob(job);
++  if (rv != PP_OK)
++    return NULL;
 +
 +  /* Allocate the new pixel format for the screen */
 +  if ( ! SDL_ReallocFormat(current, bpp, 0xFF0000, 0xFF00, 0xFF, 0) ) {
-+    SDL_free(_this->hidden->buffer);
-+    _this->hidden->buffer = NULL;
 +    SDL_SetError("Couldn't allocate new pixel format for requested mode");
 +    return(NULL);
 +  }
@@ -831,58 +1319,11 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +  _this->hidden->bpp = bpp;
 +  _this->hidden->w = current->w = width;
 +  _this->hidden->h = current->h = height;
-+  _this->hidden->pitch = current->pitch = current->w * (bpp / 8);
-+  current->pixels = _this->hidden->buffer;
++  current->pitch = current->w * (bpp / 8);
++  current->pixels = _this->hidden->image_data->data();
 +
 +  /* We're done */
 +  return(current);
-+}
-+
-+// Called from the browser when the 2D graphics have been flushed out to the device.
-+static void flush_callback(void* data, int32_t unused) {
-+  SDL_VideoDevice* _this = reinterpret_cast<SDL_VideoDevice*>(data);
-+
-+  SDL_LockMutex(_this->hidden->flush_mutex);
-+
-+
-+  assert(_this->hidden->flush_pending == true);
-+  // image_data was locked since the last flush.
-+  assert(_this->hidden->data_ready == false);
-+  _this->hidden->flush_pending = false;
-+
-+  // Now is a good time to update image_data.
-+  SDL_CondSignal(_this->hidden->flush_cond);
-+
-+  // Do another flush after a small delay.
-+  pp::Module::Get()->core()->CallOnMainThread(kNaClFlushDelayMs, pp::CompletionCallback(&flush, _this), PP_OK);
-+
-+  SDL_UnlockMutex(_this->hidden->flush_mutex);
-+}
-+
-+// Called periodically on the main thread.
-+static void flush(void* data, int32_t unused) {
-+  SDL_VideoDevice* _this = reinterpret_cast<SDL_VideoDevice*>(data);
-+
-+  SDL_LockMutex(_this->hidden->flush_mutex);
-+
-+  assert(_this->hidden->flush_pending == false);
-+  if (_this->hidden->data_ready) {
-+    // Flush image_data.
-+    _this->hidden->flush_pending = true;
-+    _this->hidden->data_ready = false;
-+
-+    for (int i = 0; i < _this->hidden->updated_rects.size(); ++i) {
-+      SDL_Rect& r = _this->hidden->updated_rects[i];
-+      _this->hidden->context2d->PaintImageData(*_this->hidden->image_data, pp::Point(), pp::Rect(r.x, r.y, r.w, r.h));
-+    }
-+    _this->hidden->updated_rects.clear();
-+
-+    _this->hidden->context2d->Flush(pp::CompletionCallback(&flush_callback, _this));
-+  } else {
-+    // Check again after a small delay.
-+    pp::Module::Get()->core()->CallOnMainThread(kNaClFlushDelayMs, pp::CompletionCallback(&flush, _this), PP_OK);
-+  }
-+  SDL_UnlockMutex(_this->hidden->flush_mutex);
 +}
 +
 +static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects) {
@@ -890,35 +1331,8 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +    return;
 +
 +  assert(_this->hidden->image_data);
-+  assert(_this->hidden->w == _this->hidden->ow);
-+  assert(_this->hidden->h == _this->hidden->oh);
-+
-+  SDL_LockMutex(_this->hidden->flush_mutex);
-+
-+  // If we are flushing, wait.
-+  // TODO(eugenis): this blocks the game thread. Should we just drop the frame
-+  // instead, or store it in some kind of a side buffer?
-+  while (_this->hidden->flush_pending)
-+    SDL_CondWait(_this->hidden->flush_cond, _this->hidden->flush_mutex);
-+
-+  // data_ready may be true here if the previous frame is not flushed yet.
-+  // No problem, just drop it.
-+
-+  // Copy the updated areas to the ImageData.
-+  unsigned pitch = _this->hidden->w * _this->hidden->bpp / 8;
-+  for (int i = 0; i < numrects; ++i) {
-+    unsigned start_offset = rects[i].x * _this->hidden->bpp / 8 + rects[i].y * pitch;
-+    unsigned char* src = (unsigned char*)_this->hidden->buffer + start_offset;
-+    unsigned char* src_end = src + rects[i].h * pitch;
-+    unsigned char* dst = (unsigned char*)_this->hidden->image_data->data() + start_offset;
-+    unsigned line_size = rects[i].w * _this->hidden->bpp / 8;
-+    while (src < src_end) {
-+      SDL_memcpy(dst, src, line_size);
-+      src += pitch;
-+      dst += pitch;
-+    }
-+    _this->hidden->updated_rects.push_back(rects[i]);
-+  }
++  assert(_this->hidden->w > 0);
++  assert(_this->hidden->h > 0);
 +
 +  // Clear alpha channel in the ImageData.
 +  unsigned char* start = (unsigned char*)_this->hidden->image_data->data();
@@ -926,9 +1340,15 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +  for (unsigned char* p = start + 3; p < end; p +=4)
 +    *p = 0xFF;
 +
-+  _this->hidden->data_ready = true;
++  _this->hidden->numrects = numrects;
++  _this->hidden->rects = rects;
 +
-+  SDL_UnlockMutex(_this->hidden->flush_mutex);
++  // Flush on the main thread.
++  SDLNaclJob* job = new SDLNaclJob(VIDEO_FLUSH, _this);
++  gNaclMainThreadRunner->RunJob(job);
++
++  _this->hidden->numrects = 0; // sanity
++  _this->hidden->rects = NULL;
 +}
 +
 +static void NACL_FreeWMCursor(_THIS, WMcursor *cursor) {
@@ -956,17 +1376,15 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +    SDL_free(_this->screen->pixels);
 +    _this->screen->pixels = NULL;
 +  }
-+  delete _this->hidden->context2d;
-+  delete _this->hidden->image_data;
 +
-+  SDL_DestroyMutex(_this->hidden->flush_mutex);
-+  SDL_DestroyCond(_this->hidden->flush_cond);
++  SDLNaclJob* job = new SDLNaclJob(VIDEO_QUIT, _this);
++  gNaclMainThreadRunner->RunJob(job);
 +}
 +} // extern "C"
-diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h
+diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl//src/video/nacl/SDL_naclvideo.h
 --- SDL-1.2.14/src/video/nacl/SDL_naclvideo.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h	2011-10-13 15:43:08.987128198 +0400
-@@ -0,0 +1,41 @@
++++ SDL-1.2.14-nacl//src/video/nacl/SDL_naclvideo.h	2011-11-28 23:43:34.019635132 +0400
+@@ -0,0 +1,37 @@
 +#include "SDL_config.h"
 +
 +#ifndef _SDL_naclvideo_h
@@ -979,7 +1397,6 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/na
 +
 +#include <ppapi/cpp/instance.h>
 +#include <ppapi/cpp/graphics_2d.h>
-+
 +#include <vector>
 +
 +
@@ -992,66 +1409,42 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/na
 +struct SDL_PrivateVideoData {
 +  int bpp;
 +  int w, h;
-+  int pitch;
 +  void *buffer;
 +
-+  SDL_mutex* flush_mutex;
-+  SDL_cond* flush_cond;
 +  int ow, oh; // plugin output dimensions
-+  // Whether context2d is being flushed to the device.
-+  bool flush_pending;
-+  // Whether image_data contains new data.
-+  bool data_ready;
++  int fsw, fsh; // fullscreen dimensions
++
 +  pp::ImageData* image_data;
-+  std::vector<SDL_Rect> updated_rects;
-+  pp::Graphics2D* context2d;  // The PINPAPI 2D drawing context.
++  pp::Graphics2D* context2d;  // The PPAPI 2D drawing context.
++
++  int numrects;
++  SDL_Rect* rects;
 +};
 +
 +#endif /* _SDL_naclvideo_h */
-diff -urN SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14-nacl/src/video/nacl/eventqueue.h
---- SDL-1.2.14/src/video/nacl/eventqueue.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/eventqueue.h	2011-10-13 15:43:08.987128198 +0400
-@@ -0,0 +1,43 @@
-+#ifndef _SDL_nacl_eventqueue_h
-+#define _SDL_nacl_eventqueue_h
-+
-+#include "SDL_mutex.h"
-+
-+#include <queue>
-+#include <ppapi/c/pp_input_event.h>
-+
-+struct SDL_NACL_Event;
-+
-+class EventQueue {
-+public:
-+  EventQueue() {
-+    mu_ = SDL_CreateMutex();
-+  }
-+
-+  ~EventQueue() {
-+    SDL_DestroyMutex(mu_);
-+  }
-+
-+  SDL_NACL_Event* PopEvent() {
-+    SDL_LockMutex(mu_);
-+    SDL_NACL_Event* event = NULL;
-+    if (!queue_.empty()) {
-+      event = queue_.front();
-+      queue_.pop();
-+    }
-+    SDL_UnlockMutex(mu_);
-+    return event;
-+  }
-+
-+   void PushEvent(SDL_NACL_Event* event) {
-+    SDL_LockMutex(mu_);
-+    queue_.push(event);
-+    SDL_UnlockMutex(mu_);
-+   } 
-+
-+private:
-+  std::queue<SDL_NACL_Event*> queue_;
-+  SDL_mutex* mu_;
-+};
-+
-+#endif // _SDL_nacl_eventqueue_h
+diff -urN SDL-1.2.14/src/video/SDL_sysvideo.h SDL-1.2.14-nacl//src/video/SDL_sysvideo.h
+--- SDL-1.2.14/src/video/SDL_sysvideo.h	2009-10-13 03:07:15.000000000 +0400
++++ SDL-1.2.14-nacl//src/video/SDL_sysvideo.h	2011-11-28 23:43:22.679635058 +0400
+@@ -317,6 +317,9 @@
+ 	SDL_VideoDevice *(*create)(int devindex);
+ } VideoBootStrap;
+ 
++#if SDL_VIDEO_DRIVER_NACL
++extern VideoBootStrap NACL_bootstrap;
++#endif
+ #if SDL_VIDEO_DRIVER_QUARTZ
+ extern VideoBootStrap QZ_bootstrap;
+ #endif
+diff -urN SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14-nacl//src/video/SDL_video.c
+--- SDL-1.2.14/src/video/SDL_video.c	2009-10-13 03:07:15.000000000 +0400
++++ SDL-1.2.14-nacl//src/video/SDL_video.c	2011-11-28 23:43:22.689635148 +0400
+@@ -33,6 +33,9 @@
+ 
+ /* Available video drivers */
+ static VideoBootStrap *bootstrap[] = {
++#if SDL_VIDEO_DRIVER_NACL
++	&NACL_bootstrap,
++#endif
+ #if SDL_VIDEO_DRIVER_QUARTZ
+ 	&QZ_bootstrap,
+ #endif
