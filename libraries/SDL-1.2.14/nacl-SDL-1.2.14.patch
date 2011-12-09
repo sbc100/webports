@@ -797,9 +797,9 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.h SDL-1.2.14-nacl/src/video
 +
 +#endif  // LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
 diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc
---- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2011-11-30 16:15:14.093546234 +0400
-@@ -0,0 +1,196 @@
+--- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 08:00:00.000000000 +0800
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2011-12-05 19:54:13.000000000 +0800
+@@ -0,0 +1,248 @@
 +#include "SDL_config.h"
 +
 +#include "SDL_nacl.h"
@@ -839,6 +839,48 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +  }
 +}
 +
++// Translate ASCII code to browser keycode
++static uint8_t translateAscii(uint8_t ascii) {
++  if ('A' <= ascii && ascii <= 'Z') {
++    return ascii;
++  } else if ('a' <= ascii && ascii <= 'z') {
++    return toupper(ascii);
++  } else if ('0' <= ascii && ascii <= '9') {
++    return ascii;
++  } else if (' ' == ascii || '\r' == ascii || '\t' == ascii ||
++             '\x1b' == ascii || '\b' == ascii) {
++    return ascii;
++  } else {
++    switch (ascii) {
++      case '!': return '1';
++      case '@': return '2';
++      case '#': return '3';
++      case '$': return '4';
++      case '%': return '5';
++      case '^': return '6';
++      case '&': return '7';
++      case '*': return '8';
++      case '(': return '9';
++      case ')': return '0';
++      case ';': case ':': return 186;
++      case '=': case '+': return 187;
++      case ',': case '<': return 188;
++      case '-': case '_': return 189;
++      case '.': case '>': return 190;
++      case '/': case '?': return 191;
++      case '`': case '~': return 192;
++      case '[': case '{': return 219;
++      case '\\': case '|': return 220;
++      case ']': case '}': return 221;
++      case '\'': case '"': return 222;
++      default:
++        break;
++    }
++  }
++  return 0;
++}
++
++// Translate browser keycode to SDLKey
 +static SDLKey translateKey(uint32_t code) {
 +  if (code >= 'A' && code <= 'Z')
 +    return (SDLKey)(code - 'A' + SDLK_a);
@@ -927,6 +969,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +}
 +
 +void SDL_NACL_PushEvent(const pp::InputEvent& ppevent) {
++  static Uint8 last_scancode = 0;
 +  SDL_keysym keysym;
 +  struct SDL_NACL_Event* event =
 +    (struct SDL_NACL_Event*)malloc(sizeof(struct SDL_NACL_Event));
@@ -944,7 +987,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +      reinterpret_cast<pp::MouseInputEvent*>(input_event);
 +    event->x = mouse_event->GetPosition().x();
 +    event->y = mouse_event->GetPosition().y();
-+  } else if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN || 
++  } else if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN ||
 +             event->type == PP_INPUTEVENT_TYPE_KEYUP ||
 +             event->type == PP_INPUTEVENT_TYPE_CHAR) {
 +    // PPAPI sends us separate events for KEYDOWN and CHAR; the first one
@@ -960,12 +1003,21 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +    keysym.scancode = keyboard_event->GetKeyCode();
 +    keysym.unicode = keyboard_event->GetCharacterText().AsString()[0];
 +    keysym.sym = translateKey(keysym.scancode);
-+    if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN &&
-+        keysym.sym >= ' ' &&  keysym.sym <= 126) return;
-+    if (event->type == PP_INPUTEVENT_TYPE_CHAR &&
-+        keysym.unicode >= ' ' &&  keysym.unicode <= 126) {
-+      keysym.scancode = toupper(static_cast<char>(keysym.unicode));
-+      keysym.sym = static_cast<SDLKey>(keysym.unicode);
++    if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN) {
++      last_scancode = keysym.scancode;
++      if (keysym.sym >= ' ' &&  keysym.sym <= 126) {
++        return;
++      }
++    } else if (event->type == PP_INPUTEVENT_TYPE_CHAR) {
++      if (keysym.sym >= ' ' &&  keysym.sym <= 126) {
++        keysym.scancode = translateAscii(keysym.unicode);
++        keysym.sym = translateKey(keysym.scancode);
++      } else if (last_scancode) {
++        keysym.scancode = last_scancode;
++        keysym.sym = translateKey(keysym.scancode);
++      }
++    } else {  // event->type == PP_INPUTEVENT_TYPE_KEYUP
++      last_scancode = 0;
 +    }
 +    keysym.mod = KMOD_NONE;
 +    event->keysym = keysym;
