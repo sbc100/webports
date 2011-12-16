@@ -1,0 +1,670 @@
+diff -Naur dosbox-0.74-orig/configure.in dosbox-0.74/configure.in
+--- dosbox-0.74-orig/configure.in	2010-05-10 22:58:57.000000000 +0400
++++ dosbox-0.74/configure.in	2011-12-15 14:56:43.213309281 +0400
+@@ -519,6 +519,7 @@
+ src/libs/gui_tk/Makefile
+ src/misc/Makefile
+ src/shell/Makefile
++src/ppapi/Makefile
+ src/platform/Makefile
+ src/platform/visualc/Makefile
+ visualc_net/Makefile
+diff -Naur dosbox-0.74-orig/include/setup.h dosbox-0.74/include/setup.h
+--- dosbox-0.74-orig/include/setup.h	2010-05-10 21:43:54.000000000 +0400
++++ dosbox-0.74/include/setup.h	2011-12-15 14:56:43.213309281 +0400
+@@ -21,6 +21,8 @@
+ #ifndef DOSBOX_SETUP_H
+ #define DOSBOX_SETUP_H
+ 
++#include <stdio.h>
++
+ #ifdef _MSC_VER
+ #pragma warning ( disable : 4786 )
+ #pragma warning ( disable : 4290 )
+diff -Naur dosbox-0.74-orig/src/cpu/core_dyn_x86/risc_x86.h dosbox-0.74/src/cpu/core_dyn_x86/risc_x86.h
+--- dosbox-0.74-orig/src/cpu/core_dyn_x86/risc_x86.h	2010-05-10 21:43:54.000000000 +0400
++++ dosbox-0.74/src/cpu/core_dyn_x86/risc_x86.h	2011-12-15 14:57:03.443733630 +0400
+@@ -134,7 +134,11 @@
+ 		"pushl %%ebp						\n"
+ 		"pushl $(run_return_adress)			\n"
+ 		"pushl  %2							\n"
++#ifndef __native_client__
+ 		"jmp  *%3							\n"
++#else
++		"nacljmp  %3							\n"
++#endif
+ 		"run_return_adress:					\n"
+ 		"popl %%ebp							\n"
+ 		:"=a" (retval), "=c" (tempflags)
+@@ -1068,5 +1072,3 @@
+ 	x86gen.regs[X86_REG_ESI]=new GenReg(6);
+ 	x86gen.regs[X86_REG_EDI]=new GenReg(7);
+ }
+-
+-
+diff -Naur dosbox-0.74-orig/src/cpu/cpu.cpp dosbox-0.74/src/cpu/cpu.cpp
+--- dosbox-0.74-orig/src/cpu/cpu.cpp	2010-05-12 13:57:31.000000000 +0400
++++ dosbox-0.74/src/cpu/cpu.cpp	2011-12-15 14:56:43.213309281 +0400
+@@ -22,7 +22,9 @@
+ #include <sstream>
+ #include "dosbox.h"
+ #include "cpu.h"
+-#include "memory.h"
++#ifndef __native_client__
++#  include "memory.h"
++#endif  /* __native_client__ */
+ #include "debug.h"
+ #include "mapper.h"
+ #include "setup.h"
+diff -Naur dosbox-0.74-orig/src/dos/drive_local.cpp dosbox-0.74/src/dos/drive_local.cpp
+--- dosbox-0.74-orig/src/dos/drive_local.cpp	2010-05-10 21:43:54.000000000 +0400
++++ dosbox-0.74/src/dos/drive_local.cpp	2011-12-15 14:56:43.213309281 +0400
+@@ -31,6 +31,10 @@
+ #include "cross.h"
+ #include "inout.h"
+ 
++#ifdef __native_client__
++extern "C" int ftruncate(int fd, off_t length);
++#endif  // __native_client__
++
+ class localFile : public DOS_File {
+ public:
+ 	localFile(const char* name, FILE * handle);
+diff -Naur dosbox-0.74-orig/src/gui/sdlmain.cpp dosbox-0.74/src/gui/sdlmain.cpp
+--- dosbox-0.74-orig/src/gui/sdlmain.cpp	2010-05-10 21:43:54.000000000 +0400
++++ dosbox-0.74/src/gui/sdlmain.cpp	2011-12-15 14:56:43.213309281 +0400
+@@ -1667,7 +1667,7 @@
+ 
+ 
+ //extern void UI_Init(void);
+-int main(int argc, char* argv[]) {
++int dosbox_main(int argc, char* argv[]) {
+ 	try {
+ 		CommandLine com_line(argc,argv);
+ 		Config myconf(&com_line);
+@@ -1743,7 +1743,10 @@
+ #if SDL_VERSION_ATLEAST(1, 2, 14)
+ 	putenv(const_cast<char*>("SDL_DISABLE_LOCK_KEYS=1"));
+ #endif
+-	if ( SDL_Init( SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_CDROM
++	if ( SDL_Init( SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER
++#ifndef __native_client__
++		|SDL_INIT_CDROM  /* nacl-SDL is not built with CDROM */
++#endif  /* __native_client__ */
+ 		|SDL_INIT_NOPARACHUTE
+ 		) < 0 ) E_Exit("Can't init SDL %s",SDL_GetError());
+ 	sdl.inited = true;
+diff -Naur dosbox-0.74-orig/src/gui/sdl_mapper.cpp dosbox-0.74/src/gui/sdl_mapper.cpp
+--- dosbox-0.74-orig/src/gui/sdl_mapper.cpp	2010-05-10 22:58:06.000000000 +0400
++++ dosbox-0.74/src/gui/sdl_mapper.cpp	2011-12-15 14:56:43.213309281 +0400
+@@ -360,7 +360,91 @@
+    expression will raise a compiler error if the condition is false.  */
+ typedef char assert_right_size [MAX_SCANCODES == (sizeof(sdlkey_map)/sizeof(sdlkey_map[0]))	? 1 : -1];
+ 
+-#else // !MACOSX
++#elif defined(__native_client__)
++
++#define MAX_SCANCODES 256
++static SDLKey sdlkey_map[MAX_SCANCODES] = {
++/*   0 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		SDLK_BACKSPACE,	SDLK_TAB,
++/*  10 */
++Z,		Z,		Z,		SDLK_RETURN,	Z,
++Z,		SDLK_LSHIFT,	SDLK_LCTRL,	SDLK_LALT,	SDLK_PAUSE,
++/*  20 */
++SDLK_CAPSLOCK,	Z,		Z,		Z,		Z,
++Z,		Z,		SDLK_ESCAPE,	Z,		Z,
++/*  30 */
++Z,		Z,		SDLK_SPACE,	SDLK_PAGEUP,	SDLK_PAGEDOWN,
++SDLK_END,	SDLK_HOME,	SDLK_LEFT,	SDLK_UP,	SDLK_RIGHT,
++/*  40 */
++SDLK_DOWN,	Z,		SDLK_PRINT,	Z,		Z,
++SDLK_INSERT,	SDLK_DELETE,	Z,		SDLK_0,		SDLK_1,
++/*  50 */
++SDLK_2,		SDLK_3,		SDLK_4,		SDLK_5,		SDLK_6,
++SDLK_7,		SDLK_8,		SDLK_9,		Z,		Z,
++/*  60 */
++Z,		Z,		Z,		Z,		Z,
++SDLK_a,		SDLK_b,		SDLK_c,		SDLK_d,		SDLK_e,
++/*  70 */
++SDLK_f,		SDLK_g,		SDLK_h,		SDLK_i,		SDLK_j,
++SDLK_k,		SDLK_l,		SDLK_m,		SDLK_n,		SDLK_o,
++/*  80 */
++SDLK_p,		SDLK_q,		SDLK_r,		SDLK_s,		SDLK_t,
++SDLK_u,		SDLK_v,		SDLK_w,		SDLK_x,		SDLK_y,
++/*  90 */
++SDLK_z,		SDLK_LSUPER,	SDLK_RSUPER,	SDLK_MENU,	Z,
++Z,		SDLK_KP0,	SDLK_KP1,	SDLK_KP2,	SDLK_KP3,
++/* 100 */
++SDLK_KP4,	SDLK_KP5,	SDLK_KP6,	SDLK_KP7,	SDLK_KP8,
++SDLK_KP9,	SDLK_KP_MULTIPLY, SDLK_KP_PLUS,	Z,		SDLK_KP_MINUS,
++/* 110 */
++SDLK_KP_PERIOD,	SDLK_KP_DIVIDE,	SDLK_F1,	SDLK_F2,	SDLK_F3,
++SDLK_F4,	SDLK_F5,	SDLK_F6,	SDLK_F7,	SDLK_F8,
++/* 120 */
++SDLK_F9,	SDLK_F10,	SDLK_F11,	SDLK_F12,	Z,
++Z,		Z,		Z,		Z,		Z,
++/* 130 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 140 */
++Z,		Z,		Z,		Z,		SDLK_NUMLOCK,
++SDLK_SCROLLOCK,	Z,		Z,		Z,		Z,
++/* 150 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 160 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 170 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 180 */
++Z,		Z,		Z,		Z,		Z,
++Z,		SDLK_SEMICOLON,	SDLK_EQUALS,	SDLK_COMMA,	SDLK_MINUS,
++/* 190 */
++SDLK_PERIOD,	SDLK_SLASH,	SDLK_BACKQUOTE,	Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 200 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 210 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		SDLK_LEFTBRACKET,
++/* 220 */
++SDLK_BACKSLASH,	SDLK_RIGHTBRACKET, SDLK_QUOTE,	Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 230 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 240 */
++Z,		Z,		Z,		Z,		Z,
++Z,		Z,		Z,		Z,		Z,
++/* 250 */
++Z,		Z,		Z,		Z,		Z,
++Z
++};
++
++#else // !MACOSX && !__native_client__
+ 
+ #define MAX_SCANCODES 212
+ static SDLKey sdlkey_map[MAX_SCANCODES]={SDLK_UNKNOWN,SDLK_ESCAPE,
+@@ -415,7 +499,7 @@
+ 			/* try to retrieve key from symbolic key as scancode is zero */
+ 			if (keysym.sym<MAX_SDLKEYS) key=scancode_map[(Bitu)keysym.sym];
+ 		} 
+-#if !defined (WIN32) && !defined (MACOSX) && !defined(OS2)
++#if !defined (WIN32) && !defined (MACOSX) && !defined(OS2) && !defined (__native_client__)
+ 		/* Linux adds 8 to all scancodes */
+ 		else key-=8;
+ #endif
+@@ -2401,7 +2485,7 @@
+ 		usescancodes=true;
+ 
+ 		/* Note: table has to be tested/updated for various OSs */
+-#if defined (MACOSX)
++#if defined (MACOSX) || defined(__native_client__)
+ 		/* nothing */
+ #elif defined(OS2)
+ 		sdlkey_map[0x61]=SDLK_UP;
+diff -Naur dosbox-0.74-orig/src/Makefile.am dosbox-0.74/src/Makefile.am
+--- dosbox-0.74-orig/src/Makefile.am	2010-05-10 21:43:54.000000000 +0400
++++ dosbox-0.74/src/Makefile.am	2011-12-15 14:56:43.223309490 +0400
+@@ -1,6 +1,6 @@
+ AM_CPPFLAGS = -I$(top_srcdir)/include
+ 
+-SUBDIRS = cpu debug dos fpu gui hardware libs ints misc shell platform 
++SUBDIRS = cpu debug dos fpu gui hardware libs ints misc shell platform ppapi
+ 
+ bin_PROGRAMS = dosbox
+ 
+@@ -13,7 +13,8 @@
+ 
+ dosbox_SOURCES = dosbox.cpp $(ico_stuff)
+ dosbox_LDADD = cpu/libcpu.a debug/libdebug.a dos/libdos.a fpu/libfpu.a  hardware/libhardware.a gui/libgui.a \
+-               ints/libints.a misc/libmisc.a shell/libshell.a hardware/serialport/libserial.a libs/gui_tk/libgui_tk.a
++               ints/libints.a misc/libmisc.a shell/libshell.a hardware/serialport/libserial.a libs/gui_tk/libgui_tk.a \
++               ppapi/libppapi.a
+ 
+ EXTRA_DIST = winres.rc dosbox.ico
+ 
+diff -Naur dosbox-0.74-orig/src/ppapi/Makefile.am dosbox-0.74/src/ppapi/Makefile.am
+--- dosbox-0.74-orig/src/ppapi/Makefile.am	1970-01-01 03:00:00.000000000 +0300
++++ dosbox-0.74/src/ppapi/Makefile.am	2011-12-15 14:56:43.223309490 +0400
+@@ -0,0 +1,5 @@
++AM_CPPFLAGS = -I$(top_srcdir)/include
++
++noinst_LIBRARIES = libppapi.a
++EXTRA_DIST = pepper_instance.h
++libppapi_a_SOURCES = pepper_instance.cpp pepper_module.cpp pepper_libc.c
+diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.cpp dosbox-0.74/src/ppapi/pepper_instance.cpp
+--- dosbox-0.74-orig/src/ppapi/pepper_instance.cpp	1970-01-01 03:00:00.000000000 +0300
++++ dosbox-0.74/src/ppapi/pepper_instance.cpp	2011-12-15 14:56:43.223309490 +0400
+@@ -0,0 +1,300 @@
++#include "pepper_instance.h"
++
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++#include <cassert>
++#include <cctype>
++#include <cstring>
++
++#include <ppapi/cpp/rect.h>
++#include <ppapi/cpp/url_loader.h>
++#include <ppapi/cpp/url_request_info.h>
++#include <ppapi/cpp/url_response_info.h>
++#include <ppapi/cpp/var.h>
++
++#include <SDL.h>
++#include <SDL_nacl.h>
++#include <SDL_video.h>
++
++#include "config.h"
++
++#define DOSBOX "dosbox"
++
++#define _LOG(level, fmt, args...) \
++    fprintf(stderr, "%s:%s:%d:" level ": " fmt "\n", \
++            __FILE__, __func__, __LINE__, ##args)
++
++#define WARN(fmt, args...) _LOG("WARNING", fmt, ##args)
++#define ERR(fmt, args...) _LOG("ERROR", fmt, ##args)
++
++extern "C" int simple_tar_extract(const char *path);
++
++int dosbox_main(int argc, char *argv[]);
++SDLKey MapSDLCode(Bitu skey);
++
++namespace dosbox_ppapi {
++
++class FileLoader {
++ public:
++  FileLoader(pp::Instance *instance, pp::CompletionCallback done,
++             bool do_extract)
++      : did_open_(false), filename_(NULL), extract_to_(NULL), fd_(0),
++        instance_(instance),
++        factory_(this),
++        done_(done),
++        loader_(instance) {}
++
++  ~FileLoader() {
++    if (filename_)
++      delete[] filename_;
++    if (extract_to_)
++      delete[] extract_to_;
++  }
++
++  void ProcessImage(const char *filename, const char *extract_to) {
++    filename_ = new char[strlen(filename)];
++    strcpy(filename_, filename);
++    if (extract_to) {
++      extract_to_ = new char[strlen(extract_to)];
++      strcpy(extract_to_, extract_to);
++    }
++    pp::CompletionCallback cc = factory_.NewCallback(&FileLoader::OnOpen);
++    int32_t rv = loader_.Open(MakeRequest(filename_), cc);
++    if (rv != PP_OK_COMPLETIONPENDING)
++      cc.Run(rv);
++  }
++
++ private:
++  pp::URLRequestInfo MakeRequest(const char *filename) {
++    pp::URLRequestInfo request(instance_);
++    request.SetURL(filename);
++    request.SetMethod("GET");
++    request.SetFollowRedirects(true);
++    return request;
++  }
++
++  void OnOpen(int32_t result) {
++    fd_ = ::open(filename_, O_CREAT | O_WRONLY);
++    if (fd_ < 0) {
++      ERR("open failed: filename: %s", filename_);
++      return;
++    }
++    if (result >= 0)
++      ReadMore();
++  }
++
++  void OnRead(int32_t result) {
++    if (result > 0) {
++      ProcessBytes(buf_, result);
++      ReadMore();
++    } else if (result == PP_OK && !did_open_) {
++      // Headers are available, and we can start reading the body.
++      did_open_ = true;
++      ProcessResponseInfo(loader_.GetResponseInfo());
++      ReadMore();
++    } else {
++      // Done reading (possibly with an error given by 'result').
++      ::close(fd_);
++      if (extract_to_) {
++        char abspath[64];
++        mkdir(extract_to_, 0755);
++        chdir(extract_to_);
++        strcpy(abspath, "/");
++        strncat(abspath, filename_, sizeof(abspath) - sizeof("/"));
++        int count = simple_tar_extract(abspath);
++        if (count < 0)
++          ERR("simple_tar_extract: filename=%s, count=%d", filename_, count);
++        chdir("/");
++      }
++      reinterpret_cast<DosboxInstance*>(instance_)->FileLoaded();
++      done_.Run(0);
++    }
++  }
++
++  void ReadMore() {
++    pp::CompletionCallback cc = factory_.NewCallback(&FileLoader::OnRead);
++    int32_t rv = loader_.ReadResponseBody(buf_, sizeof(buf_), cc);
++    if (rv != PP_OK_COMPLETIONPENDING)
++      cc.Run(rv);
++  }
++
++  void ProcessResponseInfo(const pp::URLResponseInfo& response_info) {
++    // TODO read response headers, etc.
++  }
++
++  void ProcessBytes(const char *bytes, int32_t length) {
++    ::write(fd_, bytes, length);
++  }
++
++  bool did_open_;
++  char *filename_;
++  char *extract_to_;
++  int fd_;
++  char buf_[4096];
++  pp::Instance *instance_;
++  pp::CompletionCallbackFactory<FileLoader> factory_;
++  pp::CompletionCallback done_;
++  pp::URLLoader loader_;
++};
++
++int DosboxInstance::num_instances_ = 0;
++
++DosboxInstance::DosboxInstance(PP_Instance instance)
++    : pp::Instance(instance),
++      view_initialized_(false),
++      file_to_load_(0),
++      args_(NULL), argv_(NULL), argc_(0),
++      dosbox_thread_(NULL),
++      factory_(this),
++      last_keysym_() {
++  RequestInputEvents(PP_INPUTEVENT_CLASS_MOUSE);
++  RequestFilteringInputEvents(PP_INPUTEVENT_CLASS_KEYBOARD);
++  ++num_instances_;
++  assert(num_instances_ == 1);
++}
++
++DosboxInstance::~DosboxInstance() {
++  if (args_)
++    delete[] args_;
++  if (argv_)
++    delete[] argv_;
++  for (Loaders::iterator i = loaders_.begin(), e = loaders_.end(); i != e; ++i)
++    delete *i;
++  if (dosbox_thread_)
++    pthread_join(dosbox_thread_, NULL);
++}
++
++bool DosboxInstance::Init(uint32_t argc, const char *argn[],
++                          const char *argv[]) {
++  for (int i = 0; i < argc; ++i) {
++    if (!strcmp(argn[i], "dosbox_args")) {
++      args_ = new char[sizeof(DOSBOX " ") + strlen(argv[i])];
++      strcpy(args_, DOSBOX " ");
++      strcat(args_, argv[i]);
++      argc_ = 1;
++      char *p = args_ + 1;
++      char quote = '\0';
++      while (*p) {
++        if (*p == '\'' || *p == '"') {
++          if (!quote)
++            quote = *p;
++          else if (quote == *p)
++            quote = '\0';
++          else
++            ERR("A quote inside another quote is not supported yet!");
++          *p = '\0';
++        }
++        if (!quote && isspace(*p))
++          *p = '\0';
++        if (!*(p-1) && *p)
++          ++argc_;
++        ++p;
++      }
++      argv_ = new char*[argc_];
++      argv_[0] = args_;
++      int j = 1;
++      for (char *q = args_ + 1; q != p; ++q)
++        if (!*(q-1) && *q)
++          argv_[j++] = q;
++    } else if (!strcmp(argn[i], "dosbox_files")) {
++      char *filename, *extract_to, *sep, buf[64];
++      const char *q, *p = argv[i];
++      while (*p) {
++        while (*p && isspace(*p))
++          ++p;
++        if (!*p)
++          break;
++        q = p;
++        while (*p && !isspace(*p))
++          ++p;
++
++        int n = sizeof(buf) - 1;
++        if (p - q < n)
++          n = p - q;
++        strncpy(buf, q, n);
++        buf[n] = '\0';
++
++        sep = strchr(buf, ':');
++        if (sep) {
++          filename = sep + 1;
++          extract_to = buf;
++          *sep = '\0';
++        } else {
++          filename = buf;
++          extract_to = NULL;
++        }
++
++        ++file_to_load_;
++        pp::CompletionCallback cc =
++            factory_.NewCallback(&DosboxInstance::StartDosboxInNewThread);
++        FileLoader *loader = new FileLoader(this, cc, false);
++        loader->ProcessImage(filename, extract_to);
++        loaders_.push_back(loader);
++      }
++    }
++  }
++  return true;
++}
++
++void DosboxInstance::DidChangeView(const pp::Rect &position,
++                                   const pp::Rect &clip) {
++  if (view_initialized_)
++    return;
++
++  // TODO(clchiou): Check clip value.
++
++  int width = position.size().width();
++  int height = position.size().height();
++
++  if (width < kWidth || height < kHeight)
++    WARN("The new position is smaller than the recommended size: "
++         "%d < %d or %d < %d", width, kWidth, height, kHeight);
++
++  SDL_NACL_SetInstance(pp_instance(), kWidth, kHeight);
++  if (SDL_Init(SDL_INIT_AUDIO)) {
++    ERR("SDL_Init: %s", SDL_GetError());
++    return;
++  }
++
++  // TODO(clchiou): Display a splash screen.
++
++  view_initialized_ = true;
++  StartDosboxInNewThread(0);
++}
++
++bool DosboxInstance::HandleInputEvent(const pp::InputEvent &event) {
++  SDL_NACL_PushEvent(event);
++  return true;
++}
++
++void DosboxInstance::FileLoaded(void) {
++  --file_to_load_;
++}
++
++void *DosboxInstance::DosboxMain(void *param) {
++  static char static_args[] = DOSBOX;
++  static char *static_argv[] = { static_args };
++  DosboxInstance *instance = static_cast<DosboxInstance*>(param);
++  int argc = instance->argc_;
++  char **argv = instance->argv_;
++  if (!argc) {
++    argc = sizeof(static_argv) / sizeof(static_argv[0]);
++    argv = static_argv;
++  }
++  dosbox_main(argc, argv);
++  return NULL;
++}
++
++void DosboxInstance::StartDosboxInNewThread(int32_t dummy) {
++  if (file_to_load_ || !view_initialized_)
++    return;
++  if (pthread_create(&dosbox_thread_, NULL, DosboxMain, this))
++    ERR("pthread_create");
++}
++
++}  // namespace dosbox_pepper
+diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.h dosbox-0.74/src/ppapi/pepper_instance.h
+--- dosbox-0.74-orig/src/ppapi/pepper_instance.h	1970-01-01 03:00:00.000000000 +0300
++++ dosbox-0.74/src/ppapi/pepper_instance.h	2011-12-15 14:56:43.223309490 +0400
+@@ -0,0 +1,60 @@
++#ifndef DOSBOX_PPAPI_PEPPER_INSTANCE_H_
++#define DOSBOX_PPAPI_PEPPER_INSTANCE_H_
++
++#include <string>
++#include <vector>
++
++#include <pthread.h>
++
++#include <ppapi/cpp/completion_callback.h>
++#include <ppapi/cpp/instance.h>
++
++#include <SDL.h>
++
++namespace pp {
++
++class InputEvent;
++class Rect;
++
++}  // namespace pp
++
++namespace dosbox_ppapi {
++
++class FileLoader;
++
++typedef std::vector<FileLoader*> Loaders;
++
++class DosboxInstance : public pp::Instance {
++ public:
++  static const int kWidth = 640;
++  static const int kHeight = 480;
++
++  explicit DosboxInstance(PP_Instance instance);
++  virtual ~DosboxInstance();
++
++  virtual bool Init(uint32_t argc, const char *argn[], const char *argv[]);
++  virtual void DidChangeView(const pp::Rect &position, const pp::Rect &clip);
++  virtual bool HandleInputEvent(const pp::InputEvent &event);
++
++  void FileLoaded(void);
++
++ private:
++  static void *DosboxMain(void *param);
++  void StartDosboxInNewThread(int32_t dummy);
++
++  static int num_instances_;
++  bool view_initialized_;
++  int file_to_load_;
++  std::string image_file_;
++  char *args_;
++  char **argv_;
++  int argc_;
++  pthread_t dosbox_thread_;
++  Loaders loaders_;
++  pp::CompletionCallbackFactory<DosboxInstance> factory_;
++  SDL_keysym last_keysym_;
++};
++
++}  // namespace dosbox_ppapi
++
++#endif  // DOSBOX_PPAPI_PEPPER_INSTANCE_H_
+diff -Naur dosbox-0.74-orig/src/ppapi/pepper_libc.c dosbox-0.74/src/ppapi/pepper_libc.c
+--- dosbox-0.74-orig/src/ppapi/pepper_libc.c	1970-01-01 03:00:00.000000000 +0300
++++ dosbox-0.74/src/ppapi/pepper_libc.c	2011-12-15 14:56:43.223309490 +0400
+@@ -0,0 +1,34 @@
++#include <stdio.h>
++#include <string.h>
++#include <assert.h>
++#include <sys/timeb.h>
++
++int _execve(const char *filename, char *const argv[], char *const envp[]) {
++  fprintf(stderr, "ERROR: %s is not implemented\n", __func__);
++  assert(0);
++  return -1;
++}
++
++char *dirname(char *path) {
++  fprintf(stderr, "ERROR: %s is not implemented\n", __func__);
++  assert(0);
++  return NULL;
++}
++
++int ftruncate(int fd, off_t length) {
++  fprintf(stderr, "ERROR: %s is not implemented\n", __func__);
++  assert(0);
++  return -1;
++}
++
++int ftime(struct timeb *tp) {
++  fprintf(stderr, "ERROR: %s is not implemented\n", __func__);
++  assert(0);
++  return 0;
++}
++
++struct passwd *getpwnam(const char *name) {
++  fprintf(stderr, "ERROR: %s is not implemented\n", __func__);
++  assert(0);
++  return NULL;
++}
+diff -Naur dosbox-0.74-orig/src/ppapi/pepper_module.cpp dosbox-0.74/src/ppapi/pepper_module.cpp
+--- dosbox-0.74-orig/src/ppapi/pepper_module.cpp	1970-01-01 03:00:00.000000000 +0300
++++ dosbox-0.74/src/ppapi/pepper_module.cpp	2011-12-15 14:56:43.223309490 +0400
+@@ -0,0 +1,20 @@
++#include <stdio.h>
++#include <ppapi/cpp/module.h>
++#include "pepper_instance.h"
++
++namespace dosbox_ppapi {
++class DosboxModule : public pp::Module {
++ public:
++  DosboxModule() : pp::Module() {}
++  virtual ~DosboxModule() {}
++  virtual pp::Instance *CreateInstance(PP_Instance instance) {
++    return new DosboxInstance(instance);
++  }
++};
++}  // namespace dosbox_ppapi
++
++namespace pp {
++  Module *CreateModule() {
++    return new dosbox_ppapi::DosboxModule();
++  }
++}  // namespace pp
