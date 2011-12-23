@@ -1,0 +1,1249 @@
+diff -Nru -X exclude snes9x-1.53-src/controls.cpp snes9x/controls.cpp
+--- snes9x-1.53-src/controls.cpp	2011-04-24 21:38:10.000000000 +0800
++++ snes9x/controls.cpp	2011-12-16 20:10:10.000000000 +0800
+@@ -2516,6 +2516,7 @@
+ 						break;
+ 
+ 					case SeekToFrame:
++#ifndef __native_client__
+ 						if (S9xMovieActive())
+ 						{
+ 							sprintf(buf, "Select frame number (current: %d)", S9xMovieGetFrameCounter());
+@@ -2530,6 +2531,7 @@
+ 								Settings.HighSpeedSeek = distance;
+ 							}
+ 						}
++#endif
+ 
+ 						break;
+ 
+diff -Nru -X exclude snes9x-1.53-src/movie.cpp snes9x/movie.cpp
+--- snes9x-1.53-src/movie.cpp	2011-04-24 21:38:10.000000000 +0800
++++ snes9x/movie.cpp	2011-12-16 20:10:10.000000000 +0800
+@@ -550,7 +550,9 @@
+ 		return;
+ 
+ 	int	ignore;
++#ifndef __native_client__
+ 	ignore = ftruncate(fileno(Movie.File), Movie.ControllerDataOffset + Movie.BytesPerSample * (Movie.MaxSample + 1));
++#endif
+ }
+ 
+ static int read_movie_header (FILE *fd, SMovie *movie)
+diff -Nru -X exclude snes9x-1.53-src/port.h snes9x/port.h
+--- snes9x-1.53-src/port.h	2011-04-24 21:38:10.000000000 +0800
++++ snes9x/port.h	2011-12-16 20:10:10.000000000 +0800
+@@ -182,7 +182,11 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <limits.h>
++
++#ifndef __native_client__
+ #include <memory.h>
++#endif
++
+ #include <time.h>
+ #include <string.h>
+ #ifdef HAVE_STRINGS_H
+diff -Nru -X exclude snes9x-1.53-src/unix/Makefile.in snes9x/unix/Makefile.in
+--- snes9x-1.53-src/unix/Makefile.in	2011-04-24 21:38:10.000000000 +0800
++++ snes9x/unix/Makefile.in	2011-12-22 21:29:40.000000000 +0800
+@@ -7,7 +7,7 @@
+ OS         = `uname -s -r -m|sed \"s/ /-/g\"|tr \"[A-Z]\" \"[a-z]\"|tr \"/()\" \"___\"`
+ BUILDDIR   = .
+ 
+-OBJECTS    = ../apu/apu.o ../apu/SNES_SPC.o ../apu/SNES_SPC_misc.o ../apu/SNES_SPC_state.o ../apu/SPC_DSP.o ../apu/SPC_Filter.o ../bsx.o ../c4.o ../c4emu.o ../cheats.o ../cheats2.o ../clip.o ../conffile.o ../controls.o ../cpu.o ../cpuexec.o ../cpuops.o ../crosshairs.o ../dma.o ../dsp.o ../dsp1.o ../dsp2.o ../dsp3.o ../dsp4.o ../fxinst.o ../fxemu.o ../gfx.o ../globals.o ../logger.o ../memmap.o ../movie.o ../obc1.o ../ppu.o ../reader.o ../sa1.o ../sa1cpu.o ../screenshot.o ../sdd1.o ../sdd1emu.o ../seta.o ../seta010.o ../seta011.o ../seta018.o ../snapshot.o ../snes9x.o ../spc7110.o ../srtc.o ../tile.o ../filter/2xsai.o ../filter/blit.o ../filter/epx.o ../filter/hq2x.o ../filter/snes_ntsc.o unix.o x11.o
++OBJECTS    = ../apu/apu.o ../apu/SNES_SPC.o ../apu/SNES_SPC_misc.o ../apu/SNES_SPC_state.o ../apu/SPC_DSP.o ../apu/SPC_Filter.o ../bsx.o ../c4.o ../c4emu.o ../cheats.o ../cheats2.o ../clip.o ../conffile.o ../controls.o ../cpu.o ../cpuexec.o ../cpuops.o ../crosshairs.o ../dma.o ../dsp.o ../dsp1.o ../dsp2.o ../dsp3.o ../dsp4.o ../fxinst.o ../fxemu.o ../gfx.o ../globals.o ../logger.o ../memmap.o ../movie.o ../obc1.o ../ppu.o ../reader.o ../sa1.o ../sa1cpu.o ../screenshot.o ../sdd1.o ../sdd1emu.o ../seta.o ../seta010.o ../seta011.o ../seta018.o ../snapshot.o ../snes9x.o ../spc7110.o ../srtc.o ../tile.o ../filter/2xsai.o ../filter/blit.o ../filter/epx.o ../filter/hq2x.o ../filter/snes_ntsc.o unix.o pepper.o nacl.o
+ DEFS       = -DMITSHM
+ 
+ ifdef S9XDEBUGGER
+@@ -33,6 +33,13 @@
+ 
+ CCFLAGS    = @S9XFLGS@ @S9XDEFS@ $(DEFS)
+ CFLAGS     = $(CCFLAGS)
++LFLAGS     =
++LFLAGS += -Xlinker --wrap -Xlinker open
++LFLAGS += -Xlinker --wrap -Xlinker close
++LFLAGS += -Xlinker --wrap -Xlinker read
++LFLAGS += -Xlinker --wrap -Xlinker write
++LFLAGS += -Xlinker --wrap -Xlinker mkdir
++LFLAGS += -Xlinker --wrap -Xlinker remove -Xlinker --wrap -Xlinker fflush
+ 
+ .SUFFIXES: .o .cpp .c .cc .h .m .i .s .obj
+ 
+@@ -47,7 +54,7 @@
+ 	exit 1
+ 
+ snes9x: $(OBJECTS)
+-	$(CCC) $(INCLUDES) -o $@ $(OBJECTS) -lm @S9XLIBS@
++	$(CCC) $(INCLUDES) -o $@ $(OBJECTS) $(LFLAGS) -lm @S9XLIBS@
+ 
+ ../jma/s9x-jma.o: ../jma/s9x-jma.cpp
+ 	$(CCC) $(INCLUDES) -c $(CCFLAGS) -fexceptions $*.cpp -o $@
+diff -nru -x exclude snes9x-1.53-src/unix/config.sub snes9x/unix/config.sub
+--- snes9x-1.53-src/unix/config.sub	2011-04-24 21:38:10.000000000 +0800
++++ snes9x/unix/config.sub	2011-12-04 09:24:43.000000000 +0800
+@@ -758,6 +758,10 @@
+ 		basic_machine=i370-ibm
+ 		os=-mvs
+ 		;;
++	nacl*)
++		basic_machine=i686-pc
++		os=-nacl
++		;;
+ 	ncr3000)
+ 		basic_machine=i486-ncr
+ 		os=-sysv4
+@@ -1282,7 +1286,7 @@
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -nacl*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff -Nru -X exclude snes9x-1.53-src/unix/configure.ac snes9x/unix/configure.ac
+--- snes9x-1.53-src/unix/configure.ac	2011-04-24 21:38:10.000000000 +0800
++++ snes9x/unix/configure.ac	2011-12-16 20:10:10.000000000 +0800
+@@ -38,7 +38,7 @@
+ 				return (argc);
+ 			}
+ 		],
+-		[snes9x_cv_option_$2="yes"], [snes9x_cv_option_$2="no"])
++		[snes9x_cv_option_$2="yes"], [snes9x_cv_option_$2="no"], [AC_MSG_RESULT(skip for crosscompiling)])
+ 	])
+ 
+ 	CXXFLAGS="[$]OLD_CXXFLAGS"
+@@ -113,7 +113,7 @@
+ AC_CACHE_VAL([snes9x_cv_linux_os],
+ [
+ 	case "$target" in
+-		*-*-linux*)
++		*-*-linux* | *-*-nacl*)
+ 			snes9x_cv_linux_os="yes"
+ 			;;
+ 		*)
+@@ -263,7 +263,7 @@
+ 
+ AC_PATH_XTRA
+ if test "x$no_x" = "xyes"; then
+-	AC_MSG_ERROR([X11 is required.])
++	AC_MSG_WARN([X11 is required.])
+ else
+ 	S9XFLGS="$S9XFLGS $X_CFLAGS"
+ 	S9XLIBS="$S9XLIBS $X_PRE_LIBS -lX11 -lXext $X_LIBS $X_EXTRA_LIBS"
+@@ -303,7 +303,7 @@
+ 			return (!(sizeof(void *) == sizeof(int)));
+ 		}
+ 	],
+-	[snes9x_ptr_is_int="yes"], [snes9x_ptr_is_int="no"])
++	[snes9x_ptr_is_int="yes"], [snes9x_ptr_is_int="no"], [AC_MSG_RESULT(skip for crosscompiling)])
+ 	
+ 	if test "x$snes9x_ptr_is_int" = "xyes"; then
+ 		AC_MSG_RESULT(yes)
+@@ -350,7 +350,7 @@
+ 			return (i < 0 ? 0 : 1);
+ 		}
+ 	],
+-	[snes9x_sar_$1="yes"], [snes9x_sar_$1="no"])
++	[snes9x_sar_$1="yes"], [snes9x_sar_$1="no"], [AC_MSG_RESULT(skip for crosscompiling)])
+ 
+ 	CXXFLAGS="[$]OLD_CXXFLAGS"
+ 
+diff -Nru -X exclude snes9x-1.53-src/unix/event_queue.h snes9x/unix/event_queue.h
+--- snes9x-1.53-src/unix/event_queue.h	1970-01-01 08:00:00.000000000 +0800
++++ snes9x/unix/event_queue.h	2011-12-16 23:08:17.000000000 +0800
+@@ -0,0 +1,85 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
++
++#ifndef __EVENT_QUEUE_H__
++#define __EVENT_QUEUE_H__
++
++#include <string>
++#include "pthread.h"
++
++#define NaClLog(lev, ...)  fprintf(stderr, __VA_ARGS__)
++#define kMaxSize 1024
++
++using std::string;
++
++struct Event {
++  Event(const string &a, const string &k, bool s = false) {
++    act = a;
++    key = k;
++    shift = s;
++  }
++
++  string act;
++  string key;
++  bool shift;
++};
++
++class EventQueue {
++ public:
++  EventQueue() {
++    pthread_mutex_init(&mutex, NULL);
++    pthread_cond_init(&condvar, NULL);
++  }
++
++  void push(Event* event) {
++    pthread_mutex_lock(&mutex);
++    if (num >= kMaxSize) {
++      NaClLog(LOG_ERROR, "dropping event because of overflow\n");
++    } else {
++      int head = (tail + num) % kMaxSize;
++      queue[head] = event;
++      ++num;
++      if (num >= kMaxSize) num -= kMaxSize;
++      pthread_cond_signal(&condvar);
++    }
++
++    pthread_mutex_unlock(&mutex);
++  }
++
++  Event* dequeue(bool blocking) {
++    Event* event = NULL;
++    pthread_mutex_lock(&mutex);
++    if (num == 0 && blocking) {
++      pthread_cond_wait(&condvar, &mutex);
++    }
++
++    if (num > 0) {
++      event = queue[tail];
++      ++tail;
++      if (tail >= kMaxSize) tail -= kMaxSize;
++      --num;
++    }
++    pthread_mutex_unlock(&mutex);
++    return event;
++  }
++
++  size_t size() const {
++    return num;
++  }
++
++  bool empty() const {
++    return num == 0;
++  }
++
++ private:
++  pthread_mutex_t mutex;
++  pthread_cond_t condvar;
++  int tail;
++  int num;
++  Event* queue[kMaxSize];
++};
++
++#endif
+diff -Nru -X exclude snes9x-1.53-src/unix/nacl.cpp snes9x/unix/nacl.cpp
+--- snes9x-1.53-src/unix/nacl.cpp	1970-01-01 08:00:00.000000000 +0800
++++ snes9x/unix/nacl.cpp	2011-12-20 19:50:05.000000000 +0800
+@@ -0,0 +1,262 @@
++#include <cstdio>
++
++#include "snes9x.h"
++#include "controls.h"
++#include "blit.h"
++#include "ppu.h"
++#include "nacl.h"
++
++
++struct GUIData {
++  uint8 *image_data;
++  uint32 bytes_per_line;
++  uint8 *blit_screen;
++  uint32 blit_screen_pitch;
++  int video_mode;
++};
++
++GUIData GUI;
++
++EventQueue event_queue;
++
++enum {
++  VIDEOMODE_BLOCKY = 1,
++  VIDEOMODE_TV,
++  VIDEOMODE_SMOOTH,
++  VIDEOMODE_SUPEREAGLE,
++  VIDEOMODE_2XSAI,
++  VIDEOMODE_SUPER2XSAI,
++  VIDEOMODE_EPX,
++  VIDEOMODE_HQ2X,
++  VIDEOMODE_HQ3X,
++  TOTAL_VIDEOMODE
++};
++
++typedef void (*Blitter) (uint8 *, int, uint8 *, int, int, int);
++static void S9xPutImage (int width, int height);
++static void Convert16To24 (int width, int height);
++
++
++void S9xNaclInit(uint32 *data, uint32 pitch) {
++  printf("S9xNaclInit() %x, %d\n", data, pitch);
++  GUI.image_data = (uint8 *) data;
++  GUI.bytes_per_line = pitch;
++  GUI.video_mode = VIDEOMODE_SUPER2XSAI;
++  Settings.DisplayFrameRate = true;
++
++  const int kMaxFactor = 3;
++  GUI.blit_screen = (uint8 *) malloc((SNES_WIDTH * kMaxFactor) * 4 *
++      (SNES_HEIGHT_EXTENDED * kMaxFactor));
++  GUI.blit_screen_pitch = (SNES_WIDTH * kMaxFactor) * 4;
++
++  GFX.Pitch = SNES_WIDTH * 2 * 2;
++  GFX.Screen = (uint16 *) malloc(GFX.Pitch * (SNES_HEIGHT_EXTENDED * 2));
++
++  S9xSetRenderPixelFormat(RGB565);
++
++  S9xGraphicsInit();
++
++  S9xBlitFilterInit();
++  S9xBlit2xSaIFilterInit();
++  S9xBlitHQ2xFilterInit();
++}
++
++void S9xNaclDraw(int width, int height) {
++  S9xPutImage(width, height);
++}
++
++static void S9xPutImage (int width, int height) {
++  static int prevWidth = 0, prevHeight = 0;
++  int copyWidth, copyHeight;
++  Blitter blitFn = NULL;
++
++  if (width <= SNES_WIDTH) {
++    copyWidth  = width  * 2;
++    copyHeight = height * 2;
++
++    switch (GUI.video_mode) {
++      case VIDEOMODE_BLOCKY:     blitFn = S9xBlitPixSimple2x2; break;
++      case VIDEOMODE_TV:         blitFn = S9xBlitPixTV2x2; break;
++      case VIDEOMODE_SMOOTH:     blitFn = S9xBlitPixSmooth2x2; break;
++      case VIDEOMODE_SUPEREAGLE: blitFn = S9xBlitPixSuperEagle16; break;
++      case VIDEOMODE_2XSAI:      blitFn = S9xBlitPix2xSaI16; break;
++      case VIDEOMODE_SUPER2XSAI: blitFn = S9xBlitPixSuper2xSaI16; break;
++      case VIDEOMODE_EPX:        blitFn = S9xBlitPixEPX16; break;
++      case VIDEOMODE_HQ2X:       blitFn = S9xBlitPixHQ2x16; break;
++      case VIDEOMODE_HQ3X:
++        copyWidth  = width * 3;
++        copyHeight = height * 3;
++        blitFn = S9xBlitPixHQ3x16;
++        break;
++    }
++  } else if (height <= SNES_HEIGHT_EXTENDED) {
++    copyWidth  = width;
++    copyHeight = height * 2;
++
++    switch (GUI.video_mode) {
++      default:           blitFn = S9xBlitPixSimple1x2; break;
++      case VIDEOMODE_TV: blitFn = S9xBlitPixTV1x2; break;
++    }
++  } else {
++    copyWidth  = width;
++    copyHeight = height;
++    blitFn = S9xBlitPixSimple1x1;
++  }
++
++  blitFn((uint8 *) GFX.Screen, GFX.Pitch, GUI.blit_screen,
++         GUI.blit_screen_pitch, width, height);
++
++  if (copyHeight < prevHeight) {
++    for (int y = 0; y < copyHeight; ++y) {
++      uint32 *dst = (uint32 *) (GUI.blit_screen + y * GUI.blit_screen_pitch +
++                    copyWidth * 2);
++      memset(dst, -1, (prevWidth - copyWidth) * 4);
++    }
++    for (int y = copyHeight; y < prevHeight; ++y) {
++      uint32 *dst = (uint32 *) (GUI.blit_screen + y * GUI.blit_screen_pitch);
++      memset(dst, -1, prevWidth * 4);
++    }
++    Convert16To24(prevWidth, prevHeight);
++  } else {
++    Convert16To24(copyWidth, copyHeight);
++  }
++
++  prevWidth  = copyWidth;
++  prevHeight = copyHeight;
++}
++
++static void Convert16To24 (int width, int height) {
++  for (int y = 0; y < height; y++) {
++    uint16 *s = (uint16 *) (GUI.blit_screen + y * GUI.blit_screen_pitch);
++    uint32 *d = (uint32 *) (GUI.image_data + y * GUI.bytes_per_line);
++
++    for (int x = 0; x < width; x++) {
++      uint32 pixel = *s++;
++      // +3 is to convert a 5-bit color to 8-bit
++      *d++ = 0xff000000 |
++          (((pixel >> 11) & 0x1f) << (16 + 3)) |
++          (((pixel >>  6) & 0x1f) << ( 8 + 3)) |
++          (((pixel      ) & 0x1f) << ( 0 + 3));
++    }
++  }
++}
++
++
++const char* KEY_NAME[] = {
++  "J1_UP", "J1_DOWN", "J1_LEFT", "J1_RIGHT", "J1_START", "J1_SELECT",
++  "J1_A", "J1_B", "J1_X", "J1_Y", "J1_L", "J1_R",
++
++  "J2_UP", "J2_DOWN", "J2_LEFT", "J2_RIGHT", "J2_START", "J2_SELECT",
++  "J2_A", "J2_B", "J2_X", "J2_Y", "J2_L", "J2_R",
++
++  "SAVE", "LOAD",
++  "SAVE_1", "SAVE_2", "SAVE_3", "SAVE_4", "SAVE_5", "SAVE_6", "SAVE_7",
++  "SAVE_8", "SAVE_9",
++  "LOAD_1", "LOAD_2", "LOAD_3", "LOAD_4", "LOAD_5", "LOAD_6", "LOAD_7",
++  "LOAD_8", "LOAD_9",
++};
++
++int KeyNameToKey(const string& name) {
++  for (int i = 0; i < sizeof(KEY_NAME) / sizeof(char*); ++i) {
++    if (name == KEY_NAME[i]) {
++      return i;
++    }
++  }
++  printf("warning: key not found: %s\n", name.c_str());
++  return -1;
++}
++
++void S9xNaclMapInput() {
++#define MapKey(name, command) \
++  S9xMapButton(KeyNameToKey(name), S9xGetCommandT(command), false);
++
++  MapKey("J1_UP", "Joypad1 Up");
++  MapKey("J1_DOWN", "Joypad1 Down");
++  MapKey("J1_LEFT", "Joypad1 Left");
++  MapKey("J1_RIGHT", "Joypad1 Right");
++  MapKey("J1_START", "Joypad1 Start");
++  MapKey("J1_SELECT", "Joypad1 Select");
++  MapKey("J1_A", "Joypad1 A");
++  MapKey("J1_B", "Joypad1 B");
++  MapKey("J1_X", "Joypad1 X");
++  MapKey("J1_Y", "Joypad1 Y");
++  MapKey("J1_L", "Joypad1 L");
++  MapKey("J1_R", "Joypad1 R");
++
++  MapKey("J2_UP", "Joypad2 Up");
++  MapKey("J2_DOWN", "Joypad2 Down");
++  MapKey("J2_LEFT", "Joypad2 Left");
++  MapKey("J2_RIGHT", "Joypad2 Right");
++  MapKey("J2_START", "Joypad2 Start");
++  MapKey("J2_SELECT", "Joypad2 Select");
++  MapKey("J2_A", "Joypad2 A");
++  MapKey("J2_B", "Joypad2 B");
++  MapKey("J2_X", "Joypad2 X");
++  MapKey("J2_Y", "Joypad2 Y");
++  MapKey("J2_L", "Joypad2 L");
++  MapKey("J2_R", "Joypad2 R");
++
++  MapKey("SAVE", "SaveFreezeFile");
++  MapKey("LOAD", "LoadFreezeFile");
++  MapKey("SAVE_1", "QuickSave001");
++  MapKey("SAVE_2", "QuickSave002");
++  MapKey("SAVE_3", "QuickSave003");
++  MapKey("SAVE_4", "QuickSave004");
++  MapKey("SAVE_5", "QuickSave005");
++  MapKey("SAVE_6", "QuickSave006");
++  MapKey("SAVE_7", "QuickSave007");
++  MapKey("SAVE_8", "QuickSave008");
++  MapKey("SAVE_9", "QuickSave009");
++  MapKey("LOAD_1", "QuickLoad001");
++  MapKey("LOAD_2", "QuickLoad002");
++  MapKey("LOAD_3", "QuickLoad003");
++  MapKey("LOAD_4", "QuickLoad004");
++  MapKey("LOAD_5", "QuickLoad005");
++  MapKey("LOAD_6", "QuickLoad006");
++  MapKey("LOAD_7", "QuickLoad007");
++  MapKey("LOAD_8", "QuickLoad008");
++  MapKey("LOAD_9", "QuickLoad009");
++
++  MapKey("PAUSE", "Pause");
++  MapKey("RESET", "SoftReset");
++#undef MapKey
++}
++
++void S9xResizeWindow(int mode) {
++  if (mode > 0 && mode < TOTAL_VIDEOMODE) {
++    GUI.video_mode = mode;
++  }
++}
++
++void S9xProcessEvents (bool8 block) {
++  while (block || !event_queue.empty()) {
++    Event* event = event_queue.dequeue(false);
++
++    if (event->key == "TURBO") {
++      if (event->act == "down") {
++        Settings.TurboMode = TRUE;
++      } else {
++        Settings.TurboMode = FALSE;
++      }
++      continue;
++    } else if (event->key == "PAUSE" && event->act == "down") {
++      Settings.Paused = !Settings.Paused;
++      continue;
++    } else if (event->key == "FPS") {
++      Settings.DisplayFrameRate = !Settings.DisplayFrameRate;
++    }
++
++    int key = KeyNameToKey(event->key);
++    if (key != -1) {
++      if (event->act == "down") {
++        S9xReportButton(key, true);
++      } else if (event->act == "up") {
++        S9xReportButton(key, false);
++      } else {
++        printf("The button is not reported due to unknown action: %s\n",
++               event->act.c_str());
++      }
++    }
++    delete event;
++  }
++}
+diff -Nru -X exclude snes9x-1.53-src/unix/nacl.h snes9x/unix/nacl.h
+--- snes9x-1.53-src/unix/nacl.h	1970-01-01 08:00:00.000000000 +0800
++++ snes9x/unix/nacl.h	2011-12-18 00:53:31.000000000 +0800
+@@ -0,0 +1,12 @@
++// Copyright 2011 Google Inc. All Rights Reserved.
++// Author: victorhsieh@google.com (Victor Hsieh)
++
++#include <stdint.h>
++#include "event_queue.h"
++
++extern void S9xNaclInit(uint32_t *data, uint32_t pitch);
++extern void S9xNaclMapInput();
++extern void S9xNaclDraw(int width, int height);
++extern void S9xResizeWindow(int mode);
++
++extern EventQueue event_queue;
+diff -Nru -X exclude snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
+--- snes9x-1.53-src/unix/pepper.cpp	1970-01-01 08:00:00.000000000 +0800
++++ snes9x/unix/pepper.cpp	2011-12-21 22:24:20.000000000 +0800
+@@ -0,0 +1,308 @@
++/*
++ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Use of this source code is governed by a BSD-style license that can be
++ * found in the LICENSE file.
++ */
++
++#include <cstdio>
++#include <pthread.h>
++#include <cstring>
++
++// Pepper includes
++#include "ppapi/c/pp_bool.h"
++#include "ppapi/c/pp_errors.h"
++#include "ppapi/cpp/audio.h"
++#include "ppapi/cpp/completion_callback.h"
++#include "ppapi/cpp/graphics_2d.h"
++#include "ppapi/cpp/image_data.h"
++#include "ppapi/cpp/input_event.h"
++#include "ppapi/cpp/instance.h"
++#include "ppapi/cpp/module.h"
++#include "ppapi/cpp/rect.h"
++#include "ppapi/cpp/size.h"
++
++#include "nacl-mounts/base/UrlLoaderJob.h"
++#include "nacl-mounts/console/JSPipeMount.h"
++#include "nacl.h"
++
++#define DebugPrintf printf
++
++const uint32_t kSampleFrameCount = 1024u;
++
++int original_main(int argc, char **argv);
++void RepaintCallback(void* data, int32_t result);
++extern "C" int simple_tar_extract(const char *path);
++extern unsigned char S9xMixSamples (unsigned char *buffer, int sample_count);
++extern bool sound_initialized;
++extern const char* snapshot_filename;
++
++static const string ROM_FILE = "/game.smc";
++static string rom_url;
++
++static void download_rom(MainThreadRunner* runner, const string& path, const string& local_file) {
++  DebugPrintf("Downloading rom from %s to %s\n", path.c_str(), local_file.c_str());
++  UrlLoaderJob* job = new UrlLoaderJob;
++  job->set_url(path.c_str());
++  std::vector<char> data;
++  job->set_dst(&data);
++  runner->RunJob(job);
++  int fh = open(local_file.c_str(), O_CREAT | O_WRONLY);
++  DebugPrintf("resource fd = %d\n", fh);
++  DebugPrintf("wrote %d bytes\n", write(fh, &data[0], data.size()));
++  close(fh);
++}
++
++static void *snes_init(void *arg) {
++  if (rom_url.empty()) {
++    DebugPrintf("ROM URL shouldn't be empty!\n");
++  }
++
++  mkdir("/savestate", 0777);
++  mkdir("/myhome", 0777);
++
++  MainThreadRunner* runner = reinterpret_cast<MainThreadRunner*>(arg);
++  download_rom(runner, rom_url, ROM_FILE);
++
++  DebugPrintf("original_main\n");
++  const char *argv[] = { "snes9x", ROM_FILE.c_str() };
++  original_main(2, const_cast<char**>(argv));
++
++  return 0;
++}
++
++class GlobeInstance : public pp::Instance {
++ public:
++  explicit GlobeInstance(PP_Instance instance) :
++    pp::Instance(instance),
++    ready_(false),
++    window_width_(0),
++    window_height_(0),
++    which_image_(0),
++    sample_frame_count_(kSampleFrameCount) {
++      DebugPrintf("GlobeInstance::GlobeInstance()\n");
++  }
++
++  virtual ~GlobeInstance() {
++    if (runner_) delete runner_;
++  }
++
++  virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]) {
++    DebugPrintf("GlobeInstance::Init()\n");
++
++    for (int i = 0; i < argc; ++i) {
++      if (strcmp(argn[i], "filename") == 0) {
++        rom_url = argv[i];
++      }
++    }
++
++    InitPixelBuffer();
++    initSound();
++    S9xNaclInit(static_cast<uint32_t*>(pixel_buffer_->data()),
++                pixel_buffer_->stride());
++
++    runner_ = new MainThreadRunner(this);
++#ifdef USE_PSEUDO_THREADS
++    runner_->PseudoThreadFork(snes_init, runner_);
++#else
++    pthread_create(&snes_thread_, NULL, snes_init, runner_);
++#endif
++    return true;
++  }
++
++  void InitPixelBuffer() {
++    size_ = pp::Size(256 * 3, 239 * 3);
++    pixel_buffer_ = new pp::ImageData(this,
++                                      PP_IMAGEDATAFORMAT_BGRA_PREMUL,
++                                      size_, PP_TRUE);
++    if (!pixel_buffer_) {
++      DebugPrintf("couldn't allocate pixel_buffer_.\n");
++      return;
++    }
++  }
++
++  virtual void DidChangeView(const pp::Rect& position, const pp::Rect& clip) {
++    DebugPrintf("GlobeInstance::DidChangeView()\n");
++    DebugPrintf("  position.size.width,height = %d, %d\n", position.size().width(), position.size().height());
++    DebugPrintf("  window.width,height = %d, %d\n", window_width_, window_height_);
++    size_ = position.size();
++    if (false == ready_) {
++      graphics_2d_context_ = new pp::Graphics2D(this, size_, false);
++      if (!BindGraphics(*graphics_2d_context_)) {
++        DebugPrintf("couldn't bind the device context.\n");
++        return;
++      }
++      ready_ = true;
++      if (window_width_ != position.size().width() ||
++          window_height_ != position.size().height()) {
++        // Got a resize, repaint the plugin.
++        window_width_ = position.size().width();
++        window_height_ = position.size().height();
++        Repaint();
++      }
++    }
++    DebugPrintf("GlobeInstance::DidChangeView() Out\n");
++  }
++
++  void Repaint() {
++    if (ready_ != true) return;
++
++    graphics_2d_context_->PaintImageData(*pixel_buffer_, pp::Point());
++    graphics_2d_context_->Flush(pp::CompletionCallback(&RepaintCallback, this));
++  }
++
++  void PostMessageWorkAround(const string& msg) {
++    const int kFragmentSize = 65000;
++    int num = msg.size() / kFragmentSize;
++    for (int i = 0; i < num; ++i) {
++      string fragment = msg.substr(i * kFragmentSize, kFragmentSize);
++      PostMessage(pp::Var(fragment));
++    }
++    string s = msg.substr(num * kFragmentSize);
++    PostMessage(pp::Var(s));
++    PostMessage(pp::Var("EOF"));
++  }
++
++  void DumpSave() {
++    DebugPrintf("Dump save: %s\n", snapshot_filename);
++    FILE *fp = fopen(snapshot_filename, "r");
++    if (fp == NULL) {
++      return;
++    }
++
++    string message;
++    int size = 0;
++    unsigned char buf[8192];
++    do {
++      size_t read = fread(buf, 1, sizeof(buf), fp);
++      size += read;
++      if (ferror(fp)) {
++        DebugPrintf("Error!");
++        fclose(fp);
++        return;
++      }
++      char str[16];
++      for (int i = 0; i < read; ++i) {
++        snprintf(str, sizeof(str), "%d ", (unsigned int)buf[i]);
++        message.append(str);
++      }
++    } while (!feof(fp));
++    fclose(fp);
++
++    DebugPrintf("PostMessageWorkAround: file size: %d ; msg len: %d\n",
++                size,
++                message.size());
++    PostMessageWorkAround(message);
++  }
++
++  void LoadSave(const string& data) {
++    FILE *fp = fopen(snapshot_filename, "w");
++    if (fp == NULL) {
++      return;
++    }
++
++    char* token;
++    char* p = const_cast<char *>(data.c_str());
++    while ((token = strsep(&p, " ")) != NULL) {
++      int byte = atoi(token);
++      fputc(static_cast<char>(byte), fp);
++    }
++    fclose(fp);
++  }
++
++  virtual void HandleMessage(const pp::Var& var_message) {
++    if (!var_message.is_string()) {
++      DebugPrintf("HandleMessage: Not string\n");
++      return;
++    }
++    std::string message = var_message.AsString();
++    if (message[0] == 'K') {
++      int pos = message.find(';');
++      if (pos < 0) {
++        DebugPrintf("HandleMessage: bad msg: %s\n", message.c_str());
++        return;
++      }
++      string act = message.substr(1, pos - 1);
++      event_queue.push(new Event(act, message.substr(pos + 1)));
++    } else if (message[0] == 'V') {
++      S9xResizeWindow(atoi(message.substr(1).c_str()));
++    } else if (message[0] == 'S') {
++      DumpSave();
++    } else if (message[0] == 'L') {
++      if (message[1] == '$') {
++        DebugPrintf("HandleMessage: length: %d (end)\n", message.size());
++        save_ += message.substr(2);
++        LoadSave(save_);
++        save_ = "";
++      } else {
++        save_ += message.substr(2);
++      }
++    }
++  }
++
++  bool initSound() {
++    DebugPrintf("initSound\n");
++    // Ask the browser/device for an appropriate sample frame count size.
++    sample_frame_count_ =
++        pp::AudioConfig::RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
++                                                   kSampleFrameCount);
++    DebugPrintf("sample_frame_count_ = %d\n", sample_frame_count_ );
++
++    // Create an audio configuration resource.
++    pp::AudioConfig audio_config = pp::AudioConfig(this,
++                                                   PP_AUDIOSAMPLERATE_44100,
++                                                   sample_frame_count_);
++
++    // Create an audio resource.
++    audio_ = pp::Audio(this,
++                       audio_config,
++                       SoundCallback,
++                       this);
++
++    // Start playback when the module instance is initialized.
++    return audio_.StartPlayback();
++  }
++
++  static void SoundCallback(void* samples, uint32_t buffer_size, void* data) {
++    if (sound_initialized) {
++      S9xMixSamples((unsigned char*)samples, buffer_size / 2);
++      //S9xMixSamples((unsigned char*)samples + buffer_size / 2, buffer_size / 4);
++    }
++  }
++
++ private:
++  bool ready_;
++  int window_width_;
++  int window_height_;
++  int which_image_;
++  uint32_t sample_frame_count_;
++  string save_;
++  pp::Size size_;
++  pp::ImageData* pixel_buffer_;
++  pp::Graphics2D* graphics_2d_context_;
++  pp::Audio audio_;
++  MainThreadRunner* runner_;
++  pthread_t snes_thread_;
++};
++
++void RepaintCallback(void* data, int32_t result) {
++  static_cast<GlobeInstance*>(data)->Repaint();
++}
++
++class GlobeModule : public pp::Module {
++ public:
++  // Override CreateInstance to create your customized Instance object.
++  virtual pp::Instance* CreateInstance(PP_Instance instance) {
++    return new GlobeInstance(instance);
++  }
++};
++
++namespace pp {
++
++// factory function for your specialization of the Module object
++Module* CreateModule() {
++  Module* mm;
++  mm = new GlobeModule();
++  return mm;
++}
++
++}  // namespace pp
+diff -Nru -X exclude snes9x-1.53-src/unix/unix.cpp snes9x/unix/unix.cpp
+--- snes9x-1.53-src/unix/unix.cpp	2011-04-24 21:38:10.000000000 +0800
++++ snes9x/unix/unix.cpp	2011-12-16 23:08:17.000000000 +0800
+@@ -198,9 +198,11 @@
+ #include <sys/ioctl.h>
+ #endif
+ #ifndef NOSOUND
++#ifndef __native_client__
+ #include <sys/soundcard.h>
+ #include <sys/mman.h>
+ #endif
++#endif
+ #ifdef JOYSTICK_SUPPORT
+ #include <linux/joystick.h>
+ #endif
+@@ -223,12 +225,23 @@
+ #include "debug.h"
+ #endif
+ 
++#ifdef __native_client__
++#include "nacl.h"
++#endif
++
+ #ifdef NETPLAY_SUPPORT
+ #ifdef _DEBUG
+ #define NP_DEBUG 2
+ #endif
+ #endif
+ 
++#ifndef timercmp
++# define timercmp(a, b, CMP) 						      \
++  (((a)->tv_sec == (b)->tv_sec) ? 					      \
++   ((a)->tv_usec CMP (b)->tv_usec) : 					      \
++   ((a)->tv_sec CMP (b)->tv_sec))
++#endif
++
+ typedef std::pair<std::string, std::string>	strpair_t;
+ 
+ ConfigFile::secvec_t	keymaps;
+@@ -244,12 +257,13 @@
+ 
+ static const char	*sound_device = NULL;
+ 
+-static const char	*s9x_base_dir        = NULL,
++static const char	*s9x_base_dir        = "/",
+ 					*rom_filename        = NULL,
+-					*snapshot_filename   = NULL,
+ 					*play_smv_filename   = NULL,
+ 					*record_smv_filename = NULL;
+ 
++const char	        *snapshot_filename   = "/savestate/game.001";
++
+ static char		default_dir[PATH_MAX + 1];
+ 
+ static const char	dirNames[13][32] =
+@@ -310,13 +324,6 @@
+ static uint32	old_joypads[8];
+ #endif
+ 
+-bool8 S9xMapDisplayInput (const char *, s9xcommand_t *);
+-s9xcommand_t S9xGetDisplayCommandT (const char *);
+-char * S9xGetDisplayCommandName (s9xcommand_t);
+-void S9xHandleDisplayCommand (s9xcommand_t, int16, int16);
+-bool S9xDisplayPollButton (uint32, bool *);
+-bool S9xDisplayPollAxis (uint32, int16 *);
+-bool S9xDisplayPollPointer (uint32, int16 *, int16 *);
+ 
+ static long log2 (long);
+ static void SoundTrigger (void);
+@@ -331,6 +338,8 @@
+ static void ReadJoysticks (void);
+ #endif
+ 
++bool sound_initialized = false;
++
+ 
+ void _splitpath (const char *path, char *drive, char *dir, char *fname, char *ext)
+ {
+@@ -402,6 +411,22 @@
+ 	return (n);
+ }
+ 
++void S9xSetPalette (void)
++{
++	return;
++}
++
++void S9xMessage (int type, int number, const char *message)
++{
++	const int	max = 36 * 3;
++	static char	buffer[max + 1];
++
++	fprintf(stdout, "%s\n", message);
++	strncpy(buffer, message, max + 1);
++	buffer[max] = 0;
++	S9xSetInfoString(buffer);
++}
++
+ void S9xExtraUsage (void)
+ {
+ 	/*                               12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
+@@ -436,7 +461,7 @@
+ 	S9xMessage(S9X_INFO, S9X_USAGE, "                                frames (use with -dumpstreams)");
+ 	S9xMessage(S9X_INFO, S9X_USAGE, "");
+ 
+-	S9xExtraDisplayUsage();
++	//S9xExtraDisplayUsage();
+ }
+ 
+ void S9xParseArg (char **argv, int &i, int argc)
+@@ -534,13 +559,15 @@
+ 	else
+ 	if (!strcasecmp(argv[i], "-dumpmaxframes"))
+ 		Settings.DumpStreamsMaxFrames = atoi(argv[++i]);
++        /*
+ 	else
+ 		S9xParseDisplayArg(argv, i, argc);
++                */
+ }
+ 
+ static void NSRTControllerSetup (void)
+ {
+-	if (!strncmp((const char *) Memory.NSRTHeader + 24, "NSRT", 4))
++	if (1 || !strncmp((const char *) Memory.NSRTHeader + 24, "NSRT", 4))
+ 	{
+ 		// First plug in both, they'll change later as needed
+ 		S9xSetController(0, CTL_JOYPAD, 0, 0, 0, 0);
+@@ -679,11 +706,13 @@
+ 		keymaps.push_back(strpair_t("J00:B11",        "Joypad1 Start"));
+ 	}
+ 
++#ifndef __native_client__
+ 	std::string section = S9xParseDisplayConfig(conf, 1);
+ 
+ 	ConfigFile::secvec_t	sec = conf.GetSection((section + " Controls").c_str());
+ 	for (ConfigFile::secvec_t::iterator c = sec.begin(); c != sec.end(); c++)
+ 		keymaps.push_back(*c);
++#endif
+ }
+ 
+ static int make_snes9x_dirs (void)
+@@ -792,6 +821,9 @@
+ 
+ const char * S9xChooseFilename (bool8 read_only)
+ {
++#ifdef __native_client__
++	return snapshot_filename;
++#else
+ 	char	s[PATH_MAX + 1];
+ 	char	drive[_MAX_DRIVE + 1], dir[_MAX_DIR + 1], fname[_MAX_FNAME + 1], ext[_MAX_EXT + 1];
+ 
+@@ -807,10 +839,14 @@
+ 	S9xSetSoundMute(FALSE);
+ 
+ 	return (filename);
++#endif
+ }
+ 
+ const char * S9xChooseMovieFilename (bool8 read_only)
+ {
++#ifdef __native_client__
++	return NULL;
++#else
+ 	char	s[PATH_MAX + 1];
+ 	char	drive[_MAX_DRIVE + 1], dir[_MAX_DIR + 1], fname[_MAX_FNAME + 1], ext[_MAX_EXT + 1];
+ 
+@@ -826,6 +862,7 @@
+ 	S9xSetSoundMute(FALSE);
+ 
+ 	return (filename);
++#endif
+ }
+ 
+ bool8 S9xOpenSnapshotFile (const char *filename, bool8 read_only, STREAM *file)
+@@ -864,7 +901,7 @@
+ 
+ bool8 S9xDeinitUpdate (int width, int height)
+ {
+-	S9xPutImage(width, height);
++	S9xNaclDraw(width, height);
+ 	return (TRUE);
+ }
+ 
+@@ -1087,22 +1124,37 @@
+ 	return (S9xMapButton(d, *cmd, false));
+ 
+ unrecog:
+-	return (S9xMapDisplayInput(n, cmd));
++	return false;//(S9xMapDisplayInput(n, cmd));
+ }
+ 
+ bool S9xPollButton (uint32 id, bool *pressed)
+ {
+-	return (S9xDisplayPollButton(id, pressed));
++  return false;
+ }
+ 
+ bool S9xPollAxis (uint32 id, int16 *value)
+ {
+-	return (S9xDisplayPollAxis(id, value));
++  return false;
+ }
+ 
+ bool S9xPollPointer (uint32 id, int16 *x, int16 *y)
+ {
+-	return (S9xDisplayPollPointer(id, x, y));
++  return false;
++}
++
++static s9xcommand_t BadMapping(const char *n)
++{
++	s9xcommand_t	cmd;
++
++	cmd.type         = S9xBadMapping;
++	cmd.multi_press  = 0;
++	cmd.button_norpt = 0;
++	cmd.port[0]      = 0xff;
++	cmd.port[1]      = 0;
++	cmd.port[2]      = 0;
++	cmd.port[3]      = 0;
++
++	return (cmd);
+ }
+ 
+ s9xcommand_t S9xGetPortCommandT (const char *n)
+@@ -1140,7 +1192,7 @@
+ 		}
+ 	}
+ 
+-	return (S9xGetDisplayCommandT(n));
++	return BadMapping(n);
+ }
+ 
+ char * S9xGetPortCommandName (s9xcommand_t cmd)
+@@ -1179,7 +1231,7 @@
+ 			break;
+ 	}
+ 
+-	return (S9xGetDisplayCommandName(cmd));
++	return strdup("None");
+ }
+ 
+ void S9xHandlePortCommand (s9xcommand_t cmd, int16 data1, int16 data2)
+@@ -1251,6 +1303,8 @@
+ 	}
+ 
+ 	keymaps.clear();
++
++  S9xNaclMapInput();
+ }
+ 
+ void S9xInitInputDevices (void)
+@@ -1360,8 +1414,10 @@
+ static void InitTimer (void)
+ {
+ #ifndef NOSOUND
++#ifndef __native_client__
+ 	struct itimerval	timeout;
+ #endif
++#endif
+ 	struct sigaction	sa;
+ 
+ #ifdef USE_THREADS
+@@ -1382,6 +1438,7 @@
+ #endif
+ 
+ #ifndef NOSOUND // FIXME: Kludge to get calltree running. Remove later.
++#ifndef __native_client__
+ 	sigemptyset(&sa.sa_mask);
+ 	sigaction(SIGALRM, &sa, NULL);
+ 
+@@ -1392,11 +1449,15 @@
+ 	if (setitimer(ITIMER_REAL, &timeout, NULL) < 0)
+ 		perror("setitimer");
+ #endif
++#endif
+ }
+ 
+ bool8 S9xOpenSoundDevice (void)
+ {
+ #ifndef NOSOUND
++#ifdef __native_client__
++	return (TRUE);
++#else
+ 	int	J, K;
+ 
+ 	so.sound_fd = open(sound_device, O_WRONLY | O_NONBLOCK);
+@@ -1428,12 +1489,15 @@
+ #endif
+ 
+ 	return (TRUE);
++#endif
+ }
+ 
+ #ifndef NOSOUND
+ 
+ static void * S9xProcessSound (void *)
+ {
++#ifdef __native_client__
++#else
+ 	// If threads in use, this is to loop indefinitely.
+ 	// If not, this will be called by timer.
+ 
+@@ -1507,6 +1571,7 @@
+ #ifdef USE_THREADS
+ 	} while (unixSettings.ThreadSound);
+ #endif
++#endif
+ 
+ 	return (NULL);
+ }
+@@ -1530,7 +1595,9 @@
+ 	S9xResetSaveTimer(FALSE);
+ 
+ 	S9xUnmapAllControls();
++#ifndef __native_client__
+ 	S9xDeinitDisplay();
++#endif
+ 	Memory.Deinit();
+ 	S9xDeinitAPU();
+ 
+@@ -1545,7 +1612,11 @@
+ }
+ #endif
+ 
++#ifdef __native_client__
++int original_main (int argc, char **argv)
++#else
+ int main (int argc, char **argv)
++#endif
+ {
+ 	if (argc < 2)
+ 		S9xUsage();
+@@ -1553,7 +1624,6 @@
+ 	printf("\n\nSnes9x " VERSION " for unix\n");
+ 
+ 	snprintf(default_dir, PATH_MAX + 1, "%s%s%s", getenv("HOME"), SLASH_STR, ".snes9x");
+-	s9x_base_dir = default_dir;
+ 
+ 	ZeroMemory(&Settings, sizeof(Settings));
+ 	Settings.MouseMaster = TRUE;
+@@ -1564,9 +1634,10 @@
+ 	Settings.FrameTimeNTSC = 16667;
+ 	Settings.SixteenBitSound = TRUE;
+ 	Settings.Stereo = TRUE;
+-	Settings.SoundPlaybackRate = 32000;
++	Settings.SoundPlaybackRate = 44100; // try 32000 first
+ 	Settings.SoundInputRate = 32000;
+ 	Settings.SupportHiRes = TRUE;
++        Settings.SoundSync = TRUE;
+ 	Settings.Transparency = TRUE;
+ 	Settings.AutoDisplayMessages = TRUE;
+ 	Settings.InitialInfoStringTimeout = 120;
+@@ -1598,8 +1669,7 @@
+ 
+ 	CPU.Flags = 0;
+ 
+-	S9xLoadConfigFiles(argv, argc);
+-	rom_filename = S9xParseArgs(argv, argc);
++	rom_filename = S9xParseArgs(const_cast<char**>(argv), argc);
+ 
+ 	make_snes9x_dirs();
+ 
+@@ -1611,7 +1681,7 @@
+ 		exit(1);
+ 	}
+ 
+-	S9xInitSound(unixSettings.SoundBufferSize, 0);
++	sound_initialized = S9xInitSound(unixSettings.SoundBufferSize, 0);
+ 	S9xSetSoundMute(TRUE);
+ 
+ 	S9xReportControllers();
+@@ -1707,9 +1777,7 @@
+ #endif
+ 
+ 	S9xInitInputDevices();
+-	S9xInitDisplay(argc, argv);
+ 	S9xSetupDefaultKeymap();
+-	S9xTextMode();
+ 
+ #ifdef NETPLAY_SUPPORT
+ 	if (strlen(Settings.ServerName) == 0)
+@@ -1758,6 +1826,7 @@
+ 			exit(1);
+ 		CPU.Flags |= flags;
+ 	}
++#ifndef __native_client__
+ 	else
+ 	if (snapshot_filename)
+ 	{
+@@ -1766,11 +1835,9 @@
+ 			exit(1);
+ 		CPU.Flags |= flags;
+ 	}
+-
+-	S9xGraphicsMode();
++#endif
+ 
+ 	sprintf(String, "\"%s\" %s: %s", Memory.ROMName, TITLE, VERSION);
+-	S9xSetTitle(String);
+ 
+ #ifdef JOYSTICK_SUPPORT
+ 	uint32	JoypadSkip = 0;
+@@ -1790,7 +1857,9 @@
+ 		{
+ 			if (NetPlay.PendingWait4Sync && !S9xNPWaitForHeartBeatDelay(100))
+ 			{
++#ifndef __native_client__
+ 				S9xProcessEvents(FALSE);
++#endif
+ 				continue;
+ 			}
+ 

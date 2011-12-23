@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <!--
+  Copyright (c) 2011 The Native Client Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+  -->
+<head>
+  <title>Snes in Native Client</title>
+  <link href="style.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="snes.js"></script>
+</head>
+<body onload="onload()">
+
+<h2>Native Client - SNES Emulator</h2>
+Select ROM (*.smc): <input type="file" id="romfile"/>
+
+<div id="directory">
+  Drag/drop to save/load on local disk:
+</div>
+
+<br>
+
+Video size:
+<select onchange="resizeView(this)">
+  <option value="1">BLOCKY</option>
+  <option value="2">TV</option>
+<!--  <option value="3">SMOOTH</option> -->
+<!--  <option value="4">SUPEREAGLE</option> -->
+<!--  <option value="5">2XSAI</option> -->
+  <option value="6" selected>SUPER2XSAI</option>
+  <option value="7">EPX</option>
+  <option value="8">HQ2X</option>
+  <option value="9">HQ3X</option>
+</select>
+
+<button onclick="pauseOrResume(this)">Pause</button>
+<button onclick="localSave()">Save</button>
+<button onclick="localLoad()">Load</button>
+(Note that "Save" / "Load" are against the 1st snapshot.)
+
+<div id="listener">
+  <div id="game"/>
+</div>
+
+<hr>
+
+<h3>Control</h3>
+<div style="font-weight: bold">1P</div>
+(UP, DOWN, LEFT, RIGHT) = (Up, Down, Left, Right)<br>
+(START, SELECT) = (Enter, Tab)<br>
+(A, B, X, Y, L, R) = (Z, X, A, S, Q, W)<br>
+
+<br>
+<div style="font-weight: bold">2P</div>
+(UP, DOWN, LEFT, RIGHT) = (K, ",", M, ".")<br>
+(START, SELECT) = ("-", "=")<br>
+(A, B, X, Y, L, R) = (V, B, F, G, R, T)<br>
+
+<br>
+<div style="font-weight: bold">System</div>
+(SAVE_1..9, LOAD_1..9) = (1, shift-1) ... (9, shift-9)<br>
+BOOST = "`"<br>
+
+<br>
+<div style="font-weight: bold">Geek</div>
+You can write javascript to send commands "press(['J1_LEFT', 'J1_A'])" to do
+"left", followed by "A" for joypad 1.
+
+</body>
+</html>

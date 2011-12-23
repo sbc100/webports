@@ -109,18 +109,21 @@ LIBRARIES = \
      libraries/dreadthread \
      libraries/libmikmod-3.1.11
 
-ifeq ($(NACL_GLIBC), 1)
-  LIBRARIES += \
-      libraries/SDL_net-1.2.7 \
-      libraries/glib-2.28.8 \
-      libraries/pango-1.29.3
-endif
-
 EXAMPLES = \
      examples/games/nethack-3.4.3 \
      examples/games/scummvm-1.2.1 \
      examples/systems/bochs-2.4.6 \
      examples/systems/dosbox-0.74
+
+ifeq ($(NACL_GLIBC), 1)
+  LIBRARIES += \
+      libraries/SDL_net-1.2.7 \
+      libraries/glib-2.28.8 \
+      libraries/pango-1.29.3
+else
+  EXAMPLES += \
+      examples/games/snes9x-1.53
+endif
 
 PACKAGES = $(LIBRARIES) $(EXAMPLES)
 
@@ -170,6 +173,7 @@ $(SENT)/examples/systems/bochs-2.4.6: \
 $(SENT)/examples/systems/dosbox-0.74: \
     libraries/nacl-mounts libraries/SDL-1.2.14 libraries/zlib-1.2.3 \
     libraries/libpng-1.2.40
+$(SENT)/examples/games/snes9x-1.53: libraries/nacl-mounts
 $(SENT)/libraries/glib-2.28.8: libraries/zlib-1.2.3
 $(SENT)/libraries/pango-1.29.3: libraries/glib-2.28.8 libraries/cairo-1.8.8
 $(SENT)/libraries/SDL_mixer-1.2.11: libraries/SDL-1.2.14 \
@@ -228,5 +232,6 @@ pango: libraries/pango-1.29.3 ;
 mikmod: libraries/libmikmod-3.1.11 ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
+snes9x: examples/games/snes9x-1.53 ;
 bochs: examples/systems/bochs-2.4.6 ;
 dosbox: examples/systems/dosbox-0.74 ;

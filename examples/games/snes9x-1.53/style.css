@@ -1,0 +1,17 @@
+#directory {
+  display: block;
+  float: right;
+  border: 1px solid gray;
+  padding: 3px 5px;
+}
+
+.save {
+  border: 1px solid gray;
+  padding: 0 2px;
+  margin-left: 8px;
+  margin-top: 2px;
+}
+
+.save:hover {
+  background-color: #ddd;
+}
