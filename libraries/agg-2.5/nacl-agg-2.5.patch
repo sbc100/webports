@@ -18,9 +18,8 @@ diff -Naur agg-2.5/Makefile agg-2.5.nacl/Makefile
 diff -Naur agg-2.5/Makefile.in.NativeClient agg-2.5.nacl/Makefile.in.NativeClient
 --- agg-2.5/Makefile.in.NativeClient	1969-12-31 16:00:00.000000000 -0800
 +++ agg-2.5.nacl/Makefile.in.NativeClient	2009-10-13 16:23:34.598139000 -0700
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,7 @@
 +AGGLIBS= -lagg
-+AGGCXXFLAGS = -O3 -mfpmath=sse -msse -fomit-frame-pointer
 +CXX = $(NACLCXX)
 +C = $(NACLCC)
 +LIB = $(NACLAR) cr

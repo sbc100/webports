@@ -21,7 +21,12 @@ source ../../build_tools/common.sh
 
 CustomBuildStep() {
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  make NACLCXX=${NACLCXX} NACLCC=${NACLCC} NACLAR=${NACLAR}
+  if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
+    extra=""
+  else
+    extra="-O3 -mfpmath=sse -msse -fomit-frame-pointer"
+  fi
+  AGGCXXFLAGS="${extra}" make NACLCXX=${NACLCXX} NACLCC=${NACLCC} NACLAR=${NACLAR}
 }
 
 

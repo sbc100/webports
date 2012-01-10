@@ -29,8 +29,13 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
+    extra=
+  else
+    extra="--enable-sse2"
+  fi
 
-  ./configure --prefix=${NACL_SDK_USR} --host=nacl --enable-sse2
+  ./configure --prefix=${NACL_SDK_USR} --host=nacl ${extra}
 }
 
 

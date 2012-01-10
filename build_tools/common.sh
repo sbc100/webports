@@ -5,6 +5,15 @@
 # Environment variable NACL_PACKAGES_BITSIZE should be unset or set to "32"
 # for a 32-bit build.  It should be set to "64" for a 64-bit build.
 
+
+# NAMING CONVENTION
+# =================
+#
+# This file is source'd by other scripts especially those inside libraries/
+# and makes functions env variables available to those scripts.
+# Only variables beginging with "NACL_" are intended to be used by those
+# scripts!
+
 set -o nounset
 set -o errexit
 
@@ -13,9 +22,9 @@ set -o errexit
 readonly SAVE_PWD=$(pwd)
 
 readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
-readonly NACL_SRC=`expr ${START_DIR} : '\(.*\/src\).*'`
+readonly NACL_SRC=$(expr ${START_DIR} : '\(.*\/src\).*')
 readonly NACL_PACKAGES=${NACL_SRC}
-readonly NACL_NATIVE_CLIENT_SDK=$(cd $NACL_SRC ; pwd)
+readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
 
 # Pick platform directory for compiler.
 readonly OS_NAME=$(uname -s)
@@ -33,20 +42,24 @@ else
   readonly OS_JOBS=1
 fi
 
-# Get the desired bit size.
+# Get the desired bit size,
+# Note(robertm): we abuse this to introduce a "pnacl" flavor.
 export NACL_PACKAGES_BITSIZE=${NACL_PACKAGES_BITSIZE:-"32"}
-if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
+if [ ${NACL_PACKAGES_BITSIZE} = "32" ] ; then
   readonly CROSS_ID=i686
-elif [ $NACL_PACKAGES_BITSIZE = "64" ] ; then
+elif [ ${NACL_PACKAGES_BITSIZE} = "64" ] ; then
   readonly CROSS_ID=x86_64
+elif [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
+  readonly CROSS_ID=pnacl
 else
-  echo "Unknown value for NACL_PACKAGES_BITSIZE: '$NACL_PACKAGES_BITSIZE'" 1>&2
+  echo "Unknown value for NACL_PACKAGES_BITSIZE: '${NACL_PACKAGES_BITSIZE}'" 1>&2
   exit -1
 fi
 
 # Export these so they can be used inside the ports.
+# NOTE(robertm): used only by x264 and ffmpeg needs documentation or cleanup
+#
 export NACL_CROSS_PREFIX=${CROSS_ID}-nacl
-export NACL_CROSS_PREFIX_DASH=${NACL_CROSS_PREFIX}-
 
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
 # TODO: Currently only x86-32 will encourage MMX, SSE & SSE2 intrinsics
@@ -67,27 +80,9 @@ if [ -z "${NACL_SDK_ROOT:-}" ]; then
   exit -1
 fi
 
-# locate default nacl_sdk toolchain
-# TODO: x86 only at the moment
-NACL_GLIBC=${NACL_GLIBC:-0}
-if [ $NACL_GLIBC = "1" ] ; then
-  readonly NACL_TOOLCHAIN_SUFFIX=""
-else
-  # Fall back to pre-m15 SDK layout if we can't find i686-nacl-gcc.
-  readonly TENTATIVE_NACL_GCC=\
-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/i686-nacl-gcc
-  echo ${TENTATIVE_NACL_GCC}
-  if [ -e ${TENTATIVE_NACL_GCC} ]; then
-    readonly NACL_TOOLCHAIN_SUFFIX="_newlib"
-  else
-    readonly NACL_TOOLCHAIN_SUFFIX=""
-  fi
-fi
-readonly NACL_TOP=$(cd $NACL_NATIVE_CLIENT_SDK/.. ; pwd)
-readonly NACL_NATIVE_CLIENT=${NACL_TOP}/native_client
-readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-\
-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86${NACL_TOOLCHAIN_SUFFIX}}
-readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
+
+# sha1check python script
+readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
 
 # packages subdirectories
 readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
@@ -96,36 +91,88 @@ readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository-${CROSS_ID}
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish
 readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 
-# sha1check python script
-readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
 
-readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
+InitializeNaClGccToolchain() {
+  # locate default nacl_sdk toolchain
+  # TODO: x86 only at the moment
+  NACL_GLIBC=${NACL_GLIBC:-0}
+  if [ $NACL_GLIBC = "1" ] ; then
+    local TOOLCHAIN_SUFFIX=""
+  else
+    # Fall back to pre-m15 SDK layout if we can't find i686-nacl-gcc.
+    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/i686-nacl-gcc
 
-# export nacl tools for direct use in patches.
-export NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}gcc
-export NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}g++
-export NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ar
-export NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ranlib
-export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}ld
-export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}strings
-export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX_DASH}strip
+    echo ${TENTATIVE_NACL_GCC}
+    if [ -e ${TENTATIVE_NACL_GCC} ]; then
+      local TOOLCHAIN_SUFFIX="_newlib"
+    else
+      local TOOLCHAIN_SUFFIX=""
+    fi
+  fi
 
 
-# NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
-readonly NACL_SDK_GCC_SPECS_PATH=\
-${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86${TOOLCHAIN_SUFFIX}}
+  # TODO(robertm): can we get rid of NACL_SDK_BASE?
+  readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
-# NACL_SDK_USR is where the headers, libraries, etc. will be installed
-readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
-readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
-readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
-readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
+  readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
-# NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
-# the gcc specs file.  It has a gcc spec-file conditional for ${CROSS_ID}
-readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
-readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
-readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
+  # export nacl tools for direct use in patches.
+  export NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-gcc
+  export NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-g++
+  export NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ar
+  export NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
+  export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
+  export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
+  export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+
+  # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
+  readonly NACL_SDK_GCC_SPECS_PATH=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
+
+  # NACL_SDK_USR is where the headers, libraries, etc. will be installed
+  readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
+  readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
+  readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
+  readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
+
+  # NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
+  # the gcc specs file.  It has a gcc spec-file conditional for ${CROSS_ID}
+  readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
+  readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
+  readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
+}
+
+
+InitializePNaClToolchain() {
+  NACL_GLIBC=0
+  # TODO(robertm): fix this to account for OS and ARCH
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/pnacl_linux_x86_64_newlib}
+  readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
+
+  readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
+
+  # export nacl tools for direct use in patches.
+  export NACLCC=${NACL_BIN_PATH}/pnacl-clang
+  export NACLCXX=${NACL_BIN_PATH}/pnacl-clang++
+  export NACLAR=${NACL_BIN_PATH}/pnacl-ar
+  export NACLRANLIB=${NACL_BIN_PATH}/pnacl-ranlib
+  export NACLLD=${NACL_BIN_PATH}/pnacl-ld
+  export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
+  export NACLSTRIP=${NACL_BIN_PATH}/pnacl-strip
+
+  # NACL_SDK_USR is where the headers, libraries, etc. will be installed
+  # FIXME:
+  readonly NACL_SDK_USR=${NACL_SDK_BASE}/usr
+  readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
+  readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
+  readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
+}
+
+if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
+  InitializePNaClToolchain
+else
+  InitializeNaClGccToolchain
+fi
 
 ######################################################################
 # Always run
@@ -335,7 +382,7 @@ PatchSpecFile() {
 
 
 DefaultPreInstallStep() {
-  cd ${NACL_TOP}
+  cd ${NACL_NATIVE_CLIENT_SDK}/..
   MakeDir ${NACL_SDK_USR}
   MakeDir ${NACL_SDK_USR_INCLUDE}
   MakeDir ${NACL_SDK_USR_LIB}
@@ -459,7 +506,9 @@ DefaultInstallStep() {
 
 
 DefaultCleanUpStep() {
-  PatchSpecFile
+  if [ ${NACL_PACKAGES_BITSIZE} != "pnacl" ] ; then
+    PatchSpecFile
+  fi
   AddToInstallFile ${PACKAGE_NAME}
   ChangeDir ${SAVE_PWD}
 }
