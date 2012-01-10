@@ -18,6 +18,8 @@ readonly PACKAGE_NAME=cairo-1.8.8
 
 source ../../build_tools/common.sh
 
+# This is only necessary for pnacl
+export ax_cv_c_float_words_bigendian=no
 
 DefaultPackageInstall
 exit 0

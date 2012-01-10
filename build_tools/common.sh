@@ -158,7 +158,11 @@ InitializePNaClToolchain() {
   export NACLRANLIB=${NACL_BIN_PATH}/pnacl-ranlib
   export NACLLD=${NACL_BIN_PATH}/pnacl-ld
   export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
-  export NACLSTRIP=${NACL_BIN_PATH}/pnacl-strip
+  # TODO(robertm): figure our why we do not have a pnacl-string
+  #export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
+  # until then use the host's strings tool
+  # (used only by the cairo package)
+  export NACLSTRINGS="$(which strings)"
 
   # NACL_SDK_USR is where the headers, libraries, etc. will be installed
   # FIXME:
