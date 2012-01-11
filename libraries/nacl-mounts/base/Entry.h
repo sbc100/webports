@@ -17,8 +17,6 @@
 // passed to the KernelProxy instance.
 extern "C" {
 
-  int __wrap_fflush(FILE *f);
-
   int __wrap_chdir(const char *path);
   char *__wrap_getcwd(char *buf, size_t size);
   char *__wrap_getwd(char *buf);

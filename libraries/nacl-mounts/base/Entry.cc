@@ -177,18 +177,9 @@ struct NaClMountsStaticInitializer {
 #define MAXPATHLEN 256
 #endif
 
-extern "C" {
-  ssize_t __real_write(int fd, const void *buf, size_t count);
-  int __real_fflush(FILE *f);
-}
+ssize_t __real_write(int fd, const void *buf, size_t count);
 
 KernelProxy *kp = KernelProxy::KPInstance();
-
-int __wrap_fflush(FILE *f) {
-  __real_fflush(f);
-  int fd = fileno(f);
-  return kp->fsync(fd);
-}
 
 int __wrap_chdir(const char *path) {
   return kp->chdir(path);
