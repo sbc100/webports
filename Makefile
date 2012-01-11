@@ -34,11 +34,6 @@ ifndef NACL_SDK_ROOT
   $(error NACL_SDK_ROOT not set, see README.txt)
 endif
 
-BITSIZE := 32
-ifeq ($(NACL_PACKAGES_BITSIZE), 64)
-  BITSIZE := 64
-endif
-
 ifeq ($(NACL_GLIBC), 1)
   NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
 else
@@ -129,7 +124,7 @@ PACKAGES = $(LIBRARIES) $(EXAMPLES)
 
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
-SENT = $(SENTINELS_DIR)/bits$(BITSIZE)
+SENT = $(SENTINELS_DIR)/bits$(NACL_PACKAGES_BITSIZE)
 
 default: libraries
 libraries: $(LIBRARIES)
@@ -148,7 +143,7 @@ $(NACL_DIRS_TO_MAKE):
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
 
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
-	echo "@@@BUILD_STEP $(BITSIZE)-bit $(notdir $*)@@@"
+	echo "@@@BUILD_STEP $(NACL_PACKAGES_BITSIZE)-bit $(notdir $*)@@@"
 	cd $* && ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@
