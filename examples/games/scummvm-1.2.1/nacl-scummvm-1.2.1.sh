@@ -82,7 +82,6 @@ CustomConfigureStep() {
     export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker getdents"
     export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker kill"
     export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker mount"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker fflush"
     export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker signal"
   fi
 
