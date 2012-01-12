@@ -1,4 +1,4 @@
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -115,6 +115,11 @@ ifeq ($(NACL_GLIBC), 1)
       libraries/SDL_net-1.2.7 \
       libraries/glib-2.28.8 \
       libraries/pango-1.29.3
+
+ifeq ($(OS_NAME), Linux)
+  LIBRARIES += \
+      libraries/openssl-1.0.0e
+endif
 else
   EXAMPLES += \
       examples/games/snes9x-1.53
@@ -225,6 +230,7 @@ boost: libraries/boost_1_47_0 ;
 protobuf: libraries/protobuf-2.3.0 ;
 pango: libraries/pango-1.29.3 ;
 mikmod: libraries/libmikmod-3.1.11 ;
+openssl: libraries/openssl-1.0.0e ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
 snes9x: examples/games/snes9x-1.53 ;
