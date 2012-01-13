@@ -144,9 +144,14 @@ InitializeNaClGccToolchain() {
 
 
 InitializePNaClToolchain() {
-  NACL_GLIBC=0
+  NACL_GLIBC=${NACL_GLIBC:-0}
+  if [ $NACL_GLIBC = "1" ] ; then
+    local TOOLCHAIN_SUFFIX="glibc"
+  else
+    local TOOLCHAIN_SUFFIX="newlib"
+  fi
   # TODO(robertm): fix this to account for OS and ARCH
-  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/pnacl_linux_x86_64_newlib}
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/pnacl_linux_x86_64/${TOOLCHAIN_SUFFIX}}
   readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
