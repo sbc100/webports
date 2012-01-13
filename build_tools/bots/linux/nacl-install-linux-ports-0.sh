@@ -18,6 +18,10 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../..
 make clean
 
+# openssl fails to build if it's last on this bot.
+# TODO(dpolukhin): figure it out why other packages break openssl build.
+BuildPackage openssl
+
 # ffmpeg also builds lame, vorbis, theora, and ogg
 # sdl_* build sdl, png, freetype
 BuildPackage ffmpeg
@@ -30,7 +34,6 @@ BuildPackage sdl_net
 BuildPackage sdl_mixer
 BuildPackage scummvm
 BuildPackage bochs
-BuildPackage openssl
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
