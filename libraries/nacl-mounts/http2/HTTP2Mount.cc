@@ -10,6 +10,7 @@
 #include "HTTP2ReadJob.h"
 #include "../util/DebugPrint.h"
 #include "../util/SimpleAutoLock.h"
+#include <set>
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
