@@ -1,6 +1,6 @@
 diff -urN SDL-1.2.14/build-scripts/config.sub SDL-1.2.14-nacl/build-scripts/config.sub
 --- SDL-1.2.14/build-scripts/config.sub	2009-10-13 03:07:12.000000000 +0400
-+++ SDL-1.2.14-nacl/build-scripts/config.sub	2011-11-30 16:15:14.013544818 +0400
++++ SDL-1.2.14-nacl/build-scripts/config.sub	2012-01-16 12:16:39.460269192 +0400
 @@ -318,6 +318,14 @@
  	i*86 | x86_64)
  	  basic_machine=$basic_machine-pc
@@ -28,7 +28,7 @@ diff -urN SDL-1.2.14/build-scripts/config.sub SDL-1.2.14-nacl/build-scripts/conf
  	-nto*)
 diff -urN SDL-1.2.14/configure.in SDL-1.2.14-nacl/configure.in
 --- SDL-1.2.14/configure.in	2009-10-17 21:35:03.000000000 +0400
-+++ SDL-1.2.14-nacl/configure.in	2011-11-30 16:15:14.013544818 +0400
++++ SDL-1.2.14-nacl/configure.in	2012-01-16 12:16:39.460269192 +0400
 @@ -885,6 +885,26 @@
      fi
  }
@@ -79,7 +79,7 @@ diff -urN SDL-1.2.14/configure.in SDL-1.2.14-nacl/configure.in
              *-*-linux*)         ARCH=linux ;;
 diff -urN SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14-nacl/include/SDL_config.h.in
 --- SDL-1.2.14/include/SDL_config.h.in	2009-10-13 08:21:25.000000000 +0400
-+++ SDL-1.2.14-nacl/include/SDL_config.h.in	2011-11-30 16:15:14.053545526 +0400
++++ SDL-1.2.14-nacl/include/SDL_config.h.in	2012-01-16 12:16:39.460269192 +0400
 @@ -174,6 +174,7 @@
  #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC
  #undef SDL_AUDIO_DRIVER_MINT
@@ -98,7 +98,7 @@ diff -urN SDL-1.2.14/include/SDL_config.h.in SDL-1.2.14-nacl/include/SDL_config.
  #undef SDL_VIDEO_DRIVER_PHOTON
 diff -urN SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14-nacl/include/SDL_nacl.h
 --- SDL-1.2.14/include/SDL_nacl.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/include/SDL_nacl.h	2011-11-30 16:15:14.053545526 +0400
++++ SDL-1.2.14-nacl/include/SDL_nacl.h	2012-01-16 12:16:39.460269192 +0400
 @@ -0,0 +1,22 @@
 +#ifndef _SDL_nacl_h
 +#define _SDL_nacl_h
@@ -124,7 +124,7 @@ diff -urN SDL-1.2.14/include/SDL_nacl.h SDL-1.2.14-nacl/include/SDL_nacl.h
 +#endif /* _SDL_nacl_h */
 diff -urN SDL-1.2.14/include/SDL_platform.h SDL-1.2.14-nacl/include/SDL_platform.h
 --- SDL-1.2.14/include/SDL_platform.h	2009-10-13 03:07:19.000000000 +0400
-+++ SDL-1.2.14-nacl/include/SDL_platform.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/include/SDL_platform.h	2012-01-16 12:16:39.460269192 +0400
 @@ -63,10 +63,14 @@
  #undef __IRIX__
  #define __IRIX__	1
@@ -143,7 +143,7 @@ diff -urN SDL-1.2.14/include/SDL_platform.h SDL-1.2.14-nacl/include/SDL_platform
  #define __MACOSX__	1
 diff -urN SDL-1.2.14/Makefile.in SDL-1.2.14-nacl/Makefile.in
 --- SDL-1.2.14/Makefile.in	2009-10-13 03:07:20.000000000 +0400
-+++ SDL-1.2.14-nacl/Makefile.in	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/Makefile.in	2012-01-16 12:16:39.460269192 +0400
 @@ -42,7 +42,7 @@
  
  DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
@@ -155,7 +155,7 @@ diff -urN SDL-1.2.14/Makefile.in SDL-1.2.14-nacl/Makefile.in
  LT_CURRENT  = @LT_CURRENT@
 diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc
 --- SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc	2012-01-16 12:16:39.460269192 +0400
 @@ -0,0 +1,133 @@
 +
 +#include "SDL_config.h"
@@ -292,7 +292,7 @@ diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/n
 +} // extern "C"
 diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.h
 --- SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.h	2012-01-16 12:16:39.460269192 +0400
 @@ -0,0 +1,30 @@
 +#include "SDL_config.h"
 +
@@ -326,7 +326,7 @@ diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.h SDL-1.2.14-nacl/src/audio/na
 +#endif /* _SDL_naclaudio_h */
 diff -urN SDL-1.2.14/src/audio/SDL_audio.c SDL-1.2.14-nacl/src/audio/SDL_audio.c
 --- SDL-1.2.14/src/audio/SDL_audio.c	2009-10-13 14:25:35.000000000 +0400
-+++ SDL-1.2.14-nacl/src/audio/SDL_audio.c	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/audio/SDL_audio.c	2012-01-16 12:16:39.460269192 +0400
 @@ -36,6 +36,9 @@
  
  /* Available audio drivers */
@@ -339,7 +339,7 @@ diff -urN SDL-1.2.14/src/audio/SDL_audio.c SDL-1.2.14-nacl/src/audio/SDL_audio.c
  #endif
 diff -urN SDL-1.2.14/src/audio/SDL_sysaudio.h SDL-1.2.14-nacl/src/audio/SDL_sysaudio.h
 --- SDL-1.2.14/src/audio/SDL_sysaudio.h	2009-10-13 03:07:14.000000000 +0400
-+++ SDL-1.2.14-nacl/src/audio/SDL_sysaudio.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/audio/SDL_sysaudio.h	2012-01-16 12:16:39.460269192 +0400
 @@ -156,6 +156,9 @@
  extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
  extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
@@ -352,7 +352,7 @@ diff -urN SDL-1.2.14/src/audio/SDL_sysaudio.h SDL-1.2.14-nacl/src/audio/SDL_sysa
  #endif
 diff -urN SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14-nacl/src/cpuinfo/SDL_cpuinfo.c
 --- SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c	2009-10-13 03:07:14.000000000 +0400
-+++ SDL-1.2.14-nacl/src/cpuinfo/SDL_cpuinfo.c	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/cpuinfo/SDL_cpuinfo.c	2012-01-16 12:16:39.460269192 +0400
 @@ -53,6 +53,8 @@
  }
  #endif /* HAVE_SETJMP */
@@ -380,7 +380,7 @@ diff -urN SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14-nacl/src/cpuinfo/SDL_c
  	if ( CPU_haveCPUID() ) {
 diff -urN SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14-nacl/src/thread/pthread/SDL_systhread.c
 --- SDL-1.2.14/src/thread/pthread/SDL_systhread.c	2009-10-13 03:07:16.000000000 +0400
-+++ SDL-1.2.14-nacl/src/thread/pthread/SDL_systhread.c	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/thread/pthread/SDL_systhread.c	2012-01-16 12:16:39.470269368 +0400
 @@ -81,12 +81,15 @@
  	int i;
  	sigset_t mask;
@@ -399,7 +399,7 @@ diff -urN SDL-1.2.14/src/thread/pthread/SDL_systhread.c SDL-1.2.14-nacl/src/thre
  	/* Allow ourselves to be asynchronously cancelled */
 diff -urN SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14-nacl/src/video/nacl/eventqueue.h
 --- SDL-1.2.14/src/video/nacl/eventqueue.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/eventqueue.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/eventqueue.h	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,43 @@
 +#ifndef _SDL_nacl_eventqueue_h
 +#define _SDL_nacl_eventqueue_h
@@ -446,7 +446,7 @@ diff -urN SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14-nacl/src/video/nacl/
 +#endif // _SDL_nacl_eventqueue_h
 diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc
 --- SDL-1.2.14/src/video/nacl/MainThreadRunner.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,242 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
@@ -692,7 +692,7 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +bool MainThreadRunner::forked_pseudo_thread_ = false;
 diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.h SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h
 --- SDL-1.2.14/src/video/nacl/MainThreadRunner.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,102 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
@@ -797,9 +797,9 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.h SDL-1.2.14-nacl/src/video
 +
 +#endif  // LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
 diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc
---- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 08:00:00.000000000 +0800
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2011-12-05 19:54:13.000000000 +0800
-@@ -0,0 +1,248 @@
+--- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 03:00:00.000000000 +0300
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2012-01-16 12:20:38.794463980 +0400
+@@ -0,0 +1,282 @@
 +#include "SDL_config.h"
 +
 +#include "SDL_nacl.h"
@@ -816,6 +816,8 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +#include <ppapi/cpp/point.h>
 +#include <ppapi/cpp/var.h>
 +
++#include <math.h>
++
 +static EventQueue event_queue;
 +
 +struct SDL_NACL_Event {
@@ -823,6 +825,8 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +  Uint8 button;
 +  SDL_keysym keysym;
 +  int32_t x, y;
++  int32_t wheel_clicks_x;
++  int32_t wheel_clicks_y;
 +};
 +
 +static Uint8 translateButton(int32_t button) {
@@ -973,6 +977,8 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +  SDL_keysym keysym;
 +  struct SDL_NACL_Event* event =
 +    (struct SDL_NACL_Event*)malloc(sizeof(struct SDL_NACL_Event));
++  static double wheel_clicks_x;
++  static double wheel_clicks_y;
 +  event->type = ppevent.GetType();
 +
 +  pp::InputEvent *input_event = const_cast<pp::InputEvent*>(&ppevent);
@@ -982,6 +988,19 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +    pp::MouseInputEvent *mouse_event =
 +      reinterpret_cast<pp::MouseInputEvent*>(input_event);
 +    event->button = translateButton(mouse_event->GetButton());
++  } else if (event->type == PP_INPUTEVENT_TYPE_WHEEL) {
++    pp::WheelInputEvent *wheel_event =
++      reinterpret_cast<pp::WheelInputEvent*>(input_event);
++    wheel_clicks_x += wheel_event->GetTicks().x();
++    wheel_clicks_y += wheel_event->GetTicks().y();
++    event->wheel_clicks_x = trunc(wheel_clicks_x);
++    event->wheel_clicks_y = trunc(wheel_clicks_y);
++    if (event->wheel_clicks_x == 0 && event->wheel_clicks_y == 0) {
++      free(event);
++      return;
++    }
++    wheel_clicks_x -= event->wheel_clicks_x;
++    wheel_clicks_y -= event->wheel_clicks_y;
 +  } else if (event->type == PP_INPUTEVENT_TYPE_MOUSEMOVE) {
 +    pp::MouseInputEvent *mouse_event =
 +      reinterpret_cast<pp::MouseInputEvent*>(input_event);
@@ -1006,6 +1025,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +    if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN) {
 +      last_scancode = keysym.scancode;
 +      if (keysym.sym >= ' ' &&  keysym.sym <= 126) {
++        free(event);
 +        return;
 +      }
 +    } else if (event->type == PP_INPUTEVENT_TYPE_CHAR) {
@@ -1022,6 +1042,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +    keysym.mod = KMOD_NONE;
 +    event->keysym = keysym;
 +  } else {
++    free(event);
 +    return;
 +  }
 +  event_queue.PushEvent(event);
@@ -1034,6 +1055,19 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +      SDL_PrivateMouseButton(SDL_PRESSED, event->button, 0, 0);
 +    } else if (event->type == PP_INPUTEVENT_TYPE_MOUSEUP) {
 +      SDL_PrivateMouseButton(SDL_RELEASED, event->button, 0, 0);
++    } else if (event->type == PP_INPUTEVENT_TYPE_WHEEL) {
++      Uint8 button = event->wheel_clicks_x > 0 ? SDL_BUTTON_X2 : SDL_BUTTON_X1;
++      int count = abs(event->wheel_clicks_x);
++      while (count--) {
++        SDL_PrivateMouseButton(SDL_PRESSED, button, 0, 0);
++        SDL_PrivateMouseButton(SDL_RELEASED, button, 0, 0);
++      }
++      button = event->wheel_clicks_y > 0 ? SDL_BUTTON_WHEELUP : SDL_BUTTON_WHEELDOWN;
++      count = abs(event->wheel_clicks_y);
++      while (count--) {
++        SDL_PrivateMouseButton(SDL_PRESSED, button, 0, 0);
++        SDL_PrivateMouseButton(SDL_RELEASED, button, 0, 0);
++      }
 +    } else if (event->type == PP_INPUTEVENT_TYPE_MOUSEMOVE) {
 +      SDL_PrivateMouseMotion(0, 0, event->x, event->y);
 +    } else if (event->type == PP_INPUTEVENT_TYPE_KEYDOWN || event->type == PP_INPUTEVENT_TYPE_CHAR) {
@@ -1050,7 +1084,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/
 +}
 diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents_c.h
 --- SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents_c.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents_c.h	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,7 @@
 +#include "SDL_config.h"
 +
@@ -1061,7 +1095,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14-nacl/src/video
 +extern void NACL_PumpEvents(_THIS);
 diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.cc SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.cc
 --- SDL-1.2.14/src/video/nacl/SDL_nacljob.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.cc	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.cc	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,71 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
@@ -1136,7 +1170,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.cc SDL-1.2.14-nacl/src/video/nac
 +}
 diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.h SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.h
 --- SDL-1.2.14/src/video/nacl/SDL_nacljob.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.h	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,55 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
@@ -1195,7 +1229,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.h SDL-1.2.14-nacl/src/video/nacl
 +#endif
 diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc
 --- SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc	2011-11-30 16:16:46.755187748 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,243 @@
 +#include "SDL_config.h"
 +
@@ -1442,7 +1476,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +} // extern "C"
 diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h
 --- SDL-1.2.14/src/video/nacl/SDL_naclvideo.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h	2012-01-16 12:16:39.470269368 +0400
 @@ -0,0 +1,37 @@
 +#include "SDL_config.h"
 +
@@ -1483,7 +1517,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/na
 +#endif /* _SDL_naclvideo_h */
 diff -urN SDL-1.2.14/src/video/SDL_sysvideo.h SDL-1.2.14-nacl/src/video/SDL_sysvideo.h
 --- SDL-1.2.14/src/video/SDL_sysvideo.h	2009-10-13 03:07:15.000000000 +0400
-+++ SDL-1.2.14-nacl/src/video/SDL_sysvideo.h	2011-11-30 16:15:14.093546234 +0400
++++ SDL-1.2.14-nacl/src/video/SDL_sysvideo.h	2012-01-16 12:16:39.470269368 +0400
 @@ -317,6 +317,9 @@
  	SDL_VideoDevice *(*create)(int devindex);
  } VideoBootStrap;
@@ -1496,7 +1530,7 @@ diff -urN SDL-1.2.14/src/video/SDL_sysvideo.h SDL-1.2.14-nacl/src/video/SDL_sysv
  #endif
 diff -urN SDL-1.2.14/src/video/SDL_video.c SDL-1.2.14-nacl/src/video/SDL_video.c
 --- SDL-1.2.14/src/video/SDL_video.c	2009-10-13 03:07:15.000000000 +0400
-+++ SDL-1.2.14-nacl/src/video/SDL_video.c	2011-11-30 16:15:14.103546411 +0400
++++ SDL-1.2.14-nacl/src/video/SDL_video.c	2012-01-16 12:16:39.470269368 +0400
 @@ -33,6 +33,9 @@
  
  /* Available video drivers */
