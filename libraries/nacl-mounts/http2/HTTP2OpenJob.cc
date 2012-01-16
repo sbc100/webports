@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -54,12 +54,18 @@ pp::URLRequestInfo HTTP2OpenJob::MakeRequest(std::string url) {
 void HTTP2OpenJob::FileOpenCallback(int32_t result) {
   if (result == PP_OK) {
     // Open for reading succeded. Check that the file size is correct.
-    pp::CompletionCallback cc =
-      factory_->NewCallback(&HTTP2OpenJob::FileQueryCallback);
+    if (expected_size_ == -1) {
+      *file_io_ = io_;
+      io_ = NULL;
+      Finish(result);
+    } else {
+      pp::CompletionCallback cc =
+        factory_->NewCallback(&HTTP2OpenJob::FileQueryCallback);
 
-    int32_t rv = io_->Query(&query_buf_, cc);
-    if (rv != PP_OK_COMPLETIONPENDING)
-      cc.Run(rv);
+      int32_t rv = io_->Query(&query_buf_, cc);
+      if (rv != PP_OK_COMPLETIONPENDING)
+        cc.Run(rv);
+    }
   } else {
     // Open for reading failed. Create a new file.
     DownloadFile();

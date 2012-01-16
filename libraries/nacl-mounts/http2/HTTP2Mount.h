@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -7,7 +7,7 @@
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_HTTP2_HTTP2MOUNT_H_
 
 #include <dirent.h>
-#include <set>
+#include <map>
 #include <string>
 #include "../base/BaseMount.h"
 #include "../base/MainThreadRunner.h"
@@ -46,11 +46,11 @@ class HTTP2Mount: public BaseMount {
   virtual ssize_t Read(ino_t node, off_t offset, void *buf, size_t count);
 
   // Add directory to the list of directories that the HTTP2Mount knows.
-  void AddDir(const std::string& path);
+  int AddDir(const std::string& path);
 
   // Add file to the list of files that the HTTP2Mount knows. AddFile() should
   // be called for each file that will be accessed by the HTTP2Mount.
-  void AddFile(const std::string& path, size_t size);
+  int AddFile(const std::string& path, ssize_t size);
 
   // Set or clear "in-memory" flag of the file. In-memory files are kept
   // entirely in memory from the moment they are opened.
@@ -61,9 +61,15 @@ class HTTP2Mount: public BaseMount {
   void SetInPack(const std::string& path, const std::string& pack_path,
       off_t offset);
 
+  // Read the filesystem manifest from the file at the given path.
+  void ReadManifest(const std::string& path);
+
  private:
 
-  int AddPath(const std::string& file, size_t size, bool is_dir);
+  int AddPath(const std::string& file, ssize_t size, bool is_dir);
+  void RegisterFileFromManifest(const std::string& path,
+      const std::string& pack_path, size_t offset, size_t size);
+  void ParseManifest(const std::string& s);
 
   HTTP2Node *ToHTTP2Node(ino_t node) {
     return slots_.At(node);
@@ -78,7 +84,8 @@ class HTTP2Mount: public BaseMount {
   int doOpen(int slot);
   void OpenFileSystem();
 
-  std::set<std::string> files_;
+  // path -> slot
+  std::map<std::string, int> files_;
 
   pp::FileSystem* fs_;
   int64_t fs_expected_size_;

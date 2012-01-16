@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -27,6 +27,7 @@ CustomBuildStep() {
   ChangeDir ${PACKAGE_DIR}
   set -x
   export CXXCMD="${NACLCC} -I${START_DIR}"
+  ${CXXCMD} -c ${START_DIR}/buffer/BufferMount.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2Mount.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2FSOpenJob.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2OpenJob.cc
@@ -77,7 +78,8 @@ CustomBuildStep() {
       PepperFileIOJob.o \
       ConsoleMount.o \
       JSPipeMount.o \
-      JSPostMessageBridge.o
+      JSPostMessageBridge.o \
+      BufferMount.o
 
   ${NACLRANLIB} libnacl-mounts.a
   set +x
@@ -90,9 +92,10 @@ CustomInstallStep() {
   mkdir -p ${NACL_SDK_USR_LIB}/nacl-mounts/util
   cp ${START_DIR}/console/console.js ${NACL_SDK_USR_LIB}/nacl-mounts
   cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
+  cp ${START_DIR}/http2/genfs.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
-  for DIR in console base util memory http2 AppEngine pepper; do
+  for DIR in console base util memory http2 AppEngine pepper buffer; do
     mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
     cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
   done

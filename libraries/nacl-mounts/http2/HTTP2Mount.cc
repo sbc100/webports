@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -39,13 +39,10 @@ void HTTP2Mount::SetLocalCache(pp::FileSystem *fs, int64_t fs_expected_size,
 
 int HTTP2Mount::GetSlot(const std::string& path) {
   std::string p = Path(path).FormulatePath();
-  HTTP2Node *node = NULL;
-  for (int slot = 0; node = slots_.At(slot); ++slot) {
-    if (node->path_ == p) {
-      return slot;
-    }
-  }
-  return -1;
+  std::map<std::string, int>::iterator it = files_.find(p);
+  if (it == files_.end())
+    return -1;
+  return it->second;
 }
 
 int HTTP2Mount::doOpen(int slot) {
@@ -130,12 +127,12 @@ int HTTP2Mount::Getdents(ino_t slot, off_t offset,
   if (pathslash != "/") {
     pathslash += "/";
   }
-  for (std::set<std::string>::iterator it = files_.begin(); it != files_.end();
-       ++it) {
-    size_t pos = it->find(pathslash);
+  for (std::map<std::string, int>::iterator it = files_.begin();
+       it != files_.end(); ++it) {
+    size_t pos = it->first.find(pathslash);
     if (pos == 0) {
       int len = path_parts.size();
-      std::list<std::string> ipath_parts = Path(*it).path();
+      std::list<std::string> ipath_parts = Path(it->first).path();
       std::list<std::string>::iterator i_it = ipath_parts.begin();
       assert (ipath_parts.size() > len);
       while (len > 0) {
@@ -168,7 +165,6 @@ int HTTP2Mount::Getdents(ino_t slot, off_t offset,
     bytes_read += sizeof(struct dirent);
   }
   return bytes_read;
-  return -1;
 }
 
 void HTTP2Mount::OpenFileSystem(void) {
@@ -212,9 +208,11 @@ ssize_t HTTP2Mount::Read(ino_t slot, off_t offset, void *buf, size_t count) {
   }
 
   // In the presence of packed files, we can not rely on FileIO to handle
-  // clipping.
-  offset = MIN(offset, node->size_);
-  count = MIN(count, node->size_ - offset);
+  // clipping. Only do this when the file size is known.
+  if (node->size_ >= 0) {
+    offset = MIN(offset, node->size_);
+    count = MIN(count, node->size_ - offset);
+  }
   if (count == 0)
     return 0;
 
@@ -242,7 +240,7 @@ ssize_t HTTP2Mount::Read(ino_t slot, off_t offset, void *buf, size_t count) {
   return ret;
 }
 
-int HTTP2Mount::AddPath(const std::string& path, size_t size, bool is_dir) {
+int HTTP2Mount::AddPath(const std::string& path, ssize_t size, bool is_dir) {
   std::string p = Path(path).FormulatePath();
 
   int slot = slots_.Alloc();
@@ -257,18 +255,21 @@ int HTTP2Mount::AddPath(const std::string& path, size_t size, bool is_dir) {
   node->in_memory_ = false;
   node->data_ = NULL;
 
-  files_.insert(p);
+  files_[p] = slot;
   return slot;
 }
 
-void HTTP2Mount::AddFile(const std::string& path, size_t size) {
-  AddPath(path, size, false);
+int HTTP2Mount::AddFile(const std::string& path, ssize_t size) {
+  return AddPath(path, size, false);
 }
 
 void HTTP2Mount::SetInMemory(const std::string& path, bool in_memory) {
   int slot = GetSlot(path);
   HTTP2Node *node = slots_.At(slot);
-  if (node) {
+  if (node && node->pack_slot_) {
+    HTTP2Node* pack_node = slots_.At(node->pack_slot_);
+    pack_node->in_memory_ = in_memory;
+  } else if (node) {
     node->in_memory_ = in_memory;
   }
 }
@@ -284,9 +285,85 @@ void HTTP2Mount::SetInPack(const std::string& path,
     if (node->pack_slot_ < 0) {
       dbgprintf("Pack path not found: %s\n", pack_path.c_str());
     }
+
+    // Update the pack size
+    HTTP2Node* pack_node = slots_.At(node->pack_slot_);
+    size_t end = offset + node->size_;
+    if (pack_node->size_ < 0 || pack_node->size_ < end)
+      pack_node->size_ = end;
   }
 }
 
-void HTTP2Mount::AddDir(const std::string& path) {
-  AddPath(path, 0, true);
+int HTTP2Mount::AddDir(const std::string& path) {
+  return AddPath(path, 0, true);
+}
+
+// The code below deals with fetching and parsing the file system manifest.
+
+static void ReadAll(Mount* mount, int slot, std::string* dst) {
+  int offset = 0;
+  const int kBufSize = 0x10000;
+  char buf[kBufSize];
+  while (true) {
+    int count = mount->Read(slot, offset, buf, kBufSize);
+    if (count <= 0)
+      break;
+    offset += count;
+    dst->append(buf, count);
+  }
+}
+
+void HTTP2Mount::RegisterFileFromManifest(const std::string& path,
+    const std::string& pack_path, size_t offset, size_t size) {
+  std::list<std::string> dirs = Path(path).path();
+  dirs.pop_back();
+  std::string s;
+  while (!dirs.empty()) {
+    s.append("/");
+    s.append(dirs.front());
+    dirs.pop_front();
+    if (GetSlot(s) < 0) {
+      AddDir(s);
+    }
+  }
+
+  if (GetSlot(pack_path) < 0) {
+    dbgprintf("pack: %s\n", pack_path.c_str());
+    AddFile(pack_path, -1);
+  }
+
+  AddFile(path, size);
+  SetInPack(path, pack_path, offset);
+}
+
+void HTTP2Mount::ParseManifest(const std::string& str) {
+  const char* s = str.c_str();
+  while (true) {
+    const char* p = strchr(s, ' ');
+    if (!p) break;
+    std::string pack_path(s, p - s);
+    s = p + 1;
+
+    size_t offset = strtoll(s, const_cast<char**>(&s), 0);
+    size_t size = strtoll(s, const_cast<char**>(&s), 0);
+
+    while (*s == ' ') { s++; }
+    p = strchr(s, '\n');
+    if (!p) break;
+    std::string path(s, p - s);
+    s = p + 1;
+
+    pack_path = "/" + pack_path;
+    path = "/" + path;
+    RegisterFileFromManifest(path, pack_path, offset, size);
+  }
+}
+
+
+void HTTP2Mount::ReadManifest(const std::string& path) {
+  int slot = AddFile(path, -1);
+  std::string s;
+  ReadAll(this, slot, &s);
+  ParseManifest(s);
+  // TODO(eugenis): cleanup the cache by removing all unknown files.
 }
