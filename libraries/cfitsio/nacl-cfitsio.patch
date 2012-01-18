@@ -1,6 +1,6 @@
 diff -u cfitsio/Makefile.in cfitsio.new/Makefile.in
 --- cfitsio/Makefile.in	2011-01-10 09:07:02.000000000 -0800
-+++ cfitsio.new/Makefile.in	2011-02-08 15:48:16.947612000 -0800
++++ cfitsio.new/Makefile.in	2012-01-17 22:49:43.000000000 -0800
 @@ -18,6 +18,7 @@
  # testprog targets. See also changes and comments in configure.in
  #
@@ -26,6 +26,15 @@ diff -u cfitsio/Makefile.in cfitsio.new/Makefile.in
  		$(CC) -c $(CFLAGS) $(DEFS) $<
  
  
+@@ -84,7 +85,7 @@
+ stand_alone:	libcfitsio.a
+ 
+ libcfitsio.a:	${OBJECTS}
+-		ar rv libcfitsio.a ${OBJECTS}; \
++		${AR} rv libcfitsio.a ${OBJECTS}; \
+ 		${RANLIB} libcfitsio.a;
+ 
+ shared: libcfitsio${SHLIB_SUFFIX}
 @@ -99,7 +100,7 @@
  		if [ -f libcfitsio${SHLIB_SUFFIX} ]; then \
  			/bin/mv libcfitsio${SHLIB_SUFFIX} ${CFITSIO_LIB}; \
@@ -37,7 +46,7 @@ diff -u cfitsio/Makefile.in cfitsio.new/Makefile.in
  smem:		smem.o libcfitsio.a ${OBJECTS}
 diff -u cfitsio/configure cfitsio.new/configure
 --- cfitsio/configure	2011-01-10 09:07:41.000000000 -0800
-+++ cfitsio.new/configure	2011-02-08 15:45:46.156363000 -0800
++++ cfitsio.new/configure	2012-01-17 22:47:44.000000000 -0800
 @@ -3771,7 +3771,7 @@
    darwin)
      SHLIB_LD="$CC -dynamiclib"
