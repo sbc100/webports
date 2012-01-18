@@ -102,7 +102,8 @@ LIBRARIES = \
      libraries/boost_1_47_0 \
      libraries/protobuf-2.3.0 \
      libraries/dreadthread \
-     libraries/libmikmod-3.1.11
+     libraries/libmikmod-3.1.11 \
+     libraries/jsoncpp-0.5.0
 
 EXAMPLES = \
      examples/games/nethack-3.4.3 \
@@ -236,3 +237,4 @@ scummvm: examples/games/scummvm-1.2.1 ;
 snes9x: examples/games/snes9x-1.53 ;
 bochs: examples/systems/bochs-2.4.6 ;
 dosbox: examples/systems/dosbox-0.74 ;
+jsoncpp: libraries/jsoncpp-0.5.0 ;

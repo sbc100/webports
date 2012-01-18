@@ -31,6 +31,7 @@ BuildPackage sdl_mixer
 BuildPackage scummvm
 BuildPackage bochs
 BuildPackage openssl
+BuildPackage jsoncpp
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
