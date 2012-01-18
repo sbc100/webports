@@ -91,8 +91,12 @@ CustomInstallStep() {
   cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACL_SDK_USR_LIB}
   mkdir -p ${NACL_SDK_USR_LIB}/nacl-mounts/util
   cp ${START_DIR}/console/console.js ${NACL_SDK_USR_LIB}/nacl-mounts
-  cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
   cp ${START_DIR}/http2/genfs.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
+
+  # GLibC toolcahin has termio.h so don't copy stub header.
+  if [[ $NACL_GLIBC == 0 ]]; then
+    cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
+  fi
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
   for DIR in console base util memory http2 AppEngine pepper buffer; do
