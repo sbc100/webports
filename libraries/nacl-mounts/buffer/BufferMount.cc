@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#include "buffer/BufferMount.h"
+#include "BufferMount.h"
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
-#include "util/SimpleAutoLock.h"
+#include "../util/SimpleAutoLock.h"
 
 
 BufferMount::BufferMount(Mount* source, size_t chunk_size, size_t max_chunks) {
