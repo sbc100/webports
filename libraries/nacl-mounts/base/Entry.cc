@@ -160,10 +160,13 @@ extern "C" {
   int WRAP(mmap)(void **addr, size_t len, int prot, int flags,
       int fd, nacl_abi_off_t off) {
     // Do not pass our fake descriptors to irt.
+    // Also, it would make more sense to return ENODEV instead of ENOSYS,
+    // but _nl_load_locale implementation in GLibC will only fallback to read()
+    // when mmap() returns ENOSYS.
     if (flags & MAP_ANONYMOUS)
       return REAL(mmap)(addr, len, prot, flags, fd, off);
     else
-      return ENOSYS; // Not ENODEV (see _nl_load_locale implementation)
+      return ENOSYS;
   }
 
 }
