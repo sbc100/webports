@@ -5,11 +5,12 @@
  */
 #include <errno.h>
 #include <string.h>
-#include <sys/mman.h>
 #include "Entry.h"
 #include "KernelProxy.h"
 
 #ifdef __GLIBC__
+
+#include <sys/mman.h>
 
 #include "irt_syscalls.h"
 #include "nacl_dirent.h"
