@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
 #include <errno.h>
 #include <string.h>
+#include <sys/mman.h>
 #include "Entry.h"
 #include "KernelProxy.h"
 
@@ -33,6 +34,7 @@ extern "C" {
   DECLARE(fstat);
   DECLARE(getdents);
   DECLARE(seek);
+  DECLARE(mmap);
 
   ssize_t __real_read(int fd, void *buf, size_t count) {
     size_t nread;
@@ -154,6 +156,16 @@ extern "C" {
     *new_offset = kp->lseek(fd, offset, whence);
     return *new_offset < 0 ? errno : 0;
   }
+
+  int WRAP(mmap)(void **addr, size_t len, int prot, int flags,
+      int fd, nacl_abi_off_t off) {
+    // Do not pass our fake descriptors to irt.
+    if (flags & MAP_ANONYMOUS)
+      return REAL(mmap)(addr, len, prot, flags, fd, off);
+    else
+      return ENOSYS; // Not ENODEV (see _nl_load_locale implementation)
+  }
+
 }
 
 struct NaClMountsStaticInitializer {
@@ -166,6 +178,7 @@ struct NaClMountsStaticInitializer {
     DO_WRAP(fstat);
     DO_WRAP(getdents);
     DO_WRAP(seek);
+    DO_WRAP(mmap);
   }
 } nacl_mounts_static_initializer;
 
