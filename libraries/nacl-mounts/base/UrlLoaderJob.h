@@ -6,11 +6,15 @@
 #ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_URLLOADERJOB_H_
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_URLLOADERJOB_H_
 
+#include "../util/ppapi_version.h"
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/cpp/completion_callback.h>
 #include <ppapi/cpp/url_loader.h>
 #include <ppapi/cpp/url_request_info.h>
 #include <ppapi/cpp/url_response_info.h>
+#if ADHOC_PPAPI_VERSION >= 18
+#include <ppapi/utility/completion_callback_factory.h>
+#endif
 #include <string>
 #include <vector>
 #include "MainThreadRunner.h"

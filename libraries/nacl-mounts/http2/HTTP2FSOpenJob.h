@@ -6,10 +6,14 @@
 #ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_HTTP2_HTTP2FSOPENJOB_H_
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_HTTP2_HTTP2FSOPENJOB_H_
 
+#include "../util/ppapi_version.h"
 #include <ppapi/c/pp_errors.h>
 #include <ppapi/c/pp_file_info.h>
 #include <ppapi/cpp/completion_callback.h>
 #include <ppapi/cpp/file_system.h>
+#if ADHOC_PPAPI_VERSION >= 18
+#include <ppapi/utility/completion_callback_factory.h>
+#endif
 #include <string>
 #include <vector>
 #include "../base/MainThreadRunner.h"
