@@ -185,56 +185,87 @@ $(SENT)/libraries/SDL_net-1.2.7: libraries/SDL-1.2.14
 $(SENT)/libraries/SDL_ttf-2.0.10: libraries/SDL-1.2.14 libraries/freetype-2.1.10
 $(SENT)/libraries/boost_1_47_0: libraries/zlib-1.2.3 libraries/bzip2-1.0.6
 
-# shortcuts
-nacl-mounts: libraries/nacl-mounts ;
+# shortcuts libraries (alphabetical)
+agg: libraries/agg-2.5 ;
+boost: libraries/boost_1_47_0 ;
+bzip2: libraries/bzip2-1.0.6 ;
+cairo: libraries/cairo-1.8.8 ;
 cfitsio: libraries/cfitsio ;
-tinyxml: libraries/tinyxml ;
+expat: libraries/expat-2.0.1 ;
+faac: libraries/faac-1.28 ;
+faad: libraries/faad2-2.7 ;
+ffmpeg: libraries/ffmpeg-0.5 ;
+fftw: libraries/fftw-3.2.2 ;
+flac: libraries/flac-1.2.1 ;
+fontconfig: libraries/fontconfig-2.7.3 ;
+freeimage: libraries/FreeImage-3.14.1 ;
+freetype: libraries/freetype-2.1.10 ;
+gc: libraries/gc6.8 ;
+glib: libraries/glib-2.28.8 ;
+gsl: libraries/gsl-1.9 ;
+imagemagick: libraries/ImageMagick-6.5.4-10 ;
+jpeg: libraries/jpeg-6b ;
+jsoncpp: libraries/jsoncpp-0.5.0 ;
+lame: libraries/lame-398-2 ;
+lua: libraries/lua-5.1.4 ;
+mesa: libraries/Mesa-7.6 ;
+mikmod: libraries/libmikmod-3.1.11 ;
+modplug: libraries/libmodplug-0.8.7 ;
+nacl-mounts: libraries/nacl-mounts ;
+ogg: libraries/libogg-1.1.4 ;
+openscenegraph: libraries/OpenSceneGraph-2.9.7 ;
+openssl: libraries/openssl-1.0.0e ;
+pango: libraries/pango-1.29.3 ;
+pixman: libraries/pixman-0.16.2 ;
+png: libraries/libpng-1.2.40 ;
+protobuf: libraries/protobuf-2.3.0 ;
 sdl: libraries/SDL-1.2.14 ;
-sdl_mixer: libraries/SDL_mixer-1.2.11 ;
 sdl_image: libraries/SDL_image-1.2.10 ;
+sdl_mixer: libraries/SDL_mixer-1.2.11 ;
 sdl_net: libraries/SDL_net-1.2.7 ;
 sdl_ttf: libraries/SDL_ttf-2.0.10 ;
-gc: libraries/gc6.8 ;
-fftw: libraries/fftw-3.2.2 ;
-tommath: libraries/libtommath-0.41 ;
-tomcrypt: libraries/libtomcrypt-1.17 ;
-zlib: libraries/zlib-1.2.3 ;
-bzip2: libraries/bzip2-1.0.6 ;
-glib: libraries/glib-2.28.8 ;
-jpeg: libraries/jpeg-6b ;
-png: libraries/libpng-1.2.40 ;
-tiff: libraries/tiff-3.9.1 ;
-freeimage: libraries/FreeImage-3.14.1 ;
-ogg: libraries/libogg-1.1.4 ;
-vorbis: libraries/libvorbis-1.2.3 ;
-lame: libraries/lame-398-2 ;
-faad: libraries/faad2-2.7 ;
-faac: libraries/faac-1.28 ;
-theora: libraries/libtheora-1.1.1 ;
-flac: libraries/flac-1.2.1 ;
 speex: libraries/speex-1.2rc1 ;
+theora: libraries/libtheora-1.1.1 ;
+tiff: libraries/tiff-3.9.1 ;
+tinyxml: libraries/tinyxml ;
+tomcrypt: libraries/libtomcrypt-1.17 ;
+tommath: libraries/libtommath-0.41 ;
+vorbis: libraries/libvorbis-1.2.3 ;
 x264: libraries/x264-snapshot-20091023-2245 ;
-lua: libraries/lua-5.1.4 ;
-expat: libraries/expat-2.0.1 ;
-pixman: libraries/pixman-0.16.2 ;
-gsl: libraries/gsl-1.9 ;
-freetype: libraries/freetype-2.1.10 ;
-fontconfig: libraries/fontconfig-2.7.3 ;
-agg: libraries/agg-2.5 ;
-cairo: libraries/cairo-1.8.8 ;
-imagemagick: libraries/ImageMagick-6.5.4-10 ;
-ffmpeg: libraries/ffmpeg-0.5 ;
-mesa: libraries/Mesa-7.6 ;
-modplug: libraries/libmodplug-0.8.7 ;
-openscenegraph: libraries/OpenSceneGraph-2.9.7 ;
-boost: libraries/boost_1_47_0 ;
-protobuf: libraries/protobuf-2.3.0 ;
-pango: libraries/pango-1.29.3 ;
-mikmod: libraries/libmikmod-3.1.11 ;
-openssl: libraries/openssl-1.0.0e ;
+zlib: libraries/zlib-1.2.3 ;
+
+# shortcuts examples (alphabetical)
+bochs: examples/systems/bochs-2.4.6 ;
+dosbox: examples/systems/dosbox-0.74 ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
 snes9x: examples/games/snes9x-1.53 ;
-bochs: examples/systems/bochs-2.4.6 ;
-dosbox: examples/systems/dosbox-0.74 ;
-jsoncpp: libraries/jsoncpp-0.5.0 ;
+
+######################################################################
+# testing and regression targets 
+# NOTE: there is a problem running these in parallel mode (-jN)
+######################################################################
+
+######################################################################
+# PNACL
+######################################################################
+# We would like to get to the point where all libs work, but for now we 
+# have to skip a few
+WORKS_FOR_PNACL=$(LIBRARIES)
+# needs: patch for callback_factory
+WORKS_FOR_PNACL:=$(subst libraries/nacl-mounts,,$(WORKS_FOR_PNACL))
+# pointer size issue
+WORKS_FOR_PNACL:=$(subst libraries/gc6.8,,$(WORKS_FOR_PNACL))
+# asm
+WORKS_FOR_PNACL:=$(subst libraries/x264-snapshot-20091023-2245,,$(WORKS_FOR_PNACL))
+# config problems e.g.: function strtol is mandatory
+WORKS_FOR_PNACL:=$(subst libraries/ffmpeg-0.5,,$(WORKS_FOR_PNACL))
+# issue with stl and "assign" probably due to clang being more strict
+WORKS_FOR_PNACL:=$(subst libraries/OpenSceneGraph-2.9.7,,$(WORKS_FOR_PNACL))
+# Unrecognized option: -pthread
+WORKS_FOR_PNACL:=$(subst libraries/boost_1_47_0,,$(WORKS_FOR_PNACL))
+
+works_for_pnacl: $(WORKS_FOR_PNACL)
+
+works_for_pnacl_list:
+	echo $(WORKS_FOR_PNACL)
