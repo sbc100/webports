@@ -251,9 +251,7 @@ snes9x: examples/games/snes9x-1.53 ;
 ######################################################################
 # We would like to get to the point where all libs work, but for now we 
 # have to skip a few
-WORKS_FOR_PNACL=$(LIBRARIES)
-# needs: patch for callback_factory
-WORKS_FOR_PNACL:=$(subst libraries/nacl-mounts,,$(WORKS_FOR_PNACL))
+WORKS_FOR_PNACL=$(LIBRARIES) $(EXAMPLES)
 # pointer size issue
 WORKS_FOR_PNACL:=$(subst libraries/gc6.8,,$(WORKS_FOR_PNACL))
 # asm
@@ -264,8 +262,16 @@ WORKS_FOR_PNACL:=$(subst libraries/ffmpeg-0.5,,$(WORKS_FOR_PNACL))
 WORKS_FOR_PNACL:=$(subst libraries/OpenSceneGraph-2.9.7,,$(WORKS_FOR_PNACL))
 # Unrecognized option: -pthread
 WORKS_FOR_PNACL:=$(subst libraries/boost_1_47_0,,$(WORKS_FOR_PNACL))
+# missing header 'termio.h' and undef symbol 'rename'
+WORKS_FOR_PNACL:=$(subst examples/games/nethack-3.4.3,,$(WORKS_FOR_PNACL))
+# unknown - also likely problem with asms
+WORKS_FOR_PNACL:=$(subst examples/systems/bochs-2.4.6,,$(WORKS_FOR_PNACL))
+# machine `pnacl-pc' not recognized, also likely asm issues
+WORKS_FOR_PNACL:=$(subst examples/systems/dosbox-0.74,,$(WORKS_FOR_PNACL))
+# compiler not found, also likely asm issues
+WORKS_FOR_PNACL:=$(subst examples/games/scummvm-1.2.1,,$(WORKS_FOR_PNACL))
 
 works_for_pnacl: $(WORKS_FOR_PNACL)
 
 works_for_pnacl_list:
-	echo $(WORKS_FOR_PNACL)
+	@echo $(WORKS_FOR_PNACL)
