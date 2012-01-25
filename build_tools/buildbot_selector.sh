@@ -39,6 +39,12 @@ else
   exit 1
 fi
 
+# This a temporary hack until the pnacl support is more mature
+if [ ${LIBC} == "pnacl_newlib" ] ; then
+  ${SCRIPT_DIR}/bots/pnacl_bots.sh
+  exit 0
+fi
+
 # Select platform specific things.
 if [ "$OS" = "mac" ]; then
   readonly PYTHON=python
