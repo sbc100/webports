@@ -262,8 +262,6 @@ WORKS_FOR_PNACL:=$(subst libraries/ffmpeg-0.5,,$(WORKS_FOR_PNACL))
 WORKS_FOR_PNACL:=$(subst libraries/OpenSceneGraph-2.9.7,,$(WORKS_FOR_PNACL))
 # Unrecognized option: -pthread
 WORKS_FOR_PNACL:=$(subst libraries/boost_1_47_0,,$(WORKS_FOR_PNACL))
-# missing header 'termio.h' and undef symbol 'rename'
-WORKS_FOR_PNACL:=$(subst examples/games/nethack-3.4.3,,$(WORKS_FOR_PNACL))
 # unknown - also likely problem with asms
 WORKS_FOR_PNACL:=$(subst examples/systems/bochs-2.4.6,,$(WORKS_FOR_PNACL))
 # machine `pnacl-pc' not recognized, also likely asm issues
