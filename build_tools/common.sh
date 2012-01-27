@@ -1,4 +1,4 @@
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -56,10 +56,13 @@ else
   exit -1
 fi
 
-# Export these so they can be used inside the ports.
-# NOTE(robertm): used only by x264 and ffmpeg needs documentation or cleanup
-#
-export NACL_CROSS_PREFIX=${CROSS_ID}-nacl
+# NACL_CROSS_PREFIX is the prefix of the executables in the
+# toolchain's "bin" directory. For example: i686-nacl-<toolname>.
+if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ]; then
+  export NACL_CROSS_PREFIX=pnacl
+else
+  export NACL_CROSS_PREFIX=${CROSS_ID}-nacl
+fi
 
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
 # TODO: Currently only x86-32 will encourage MMX, SSE & SSE2 intrinsics
@@ -157,12 +160,12 @@ InitializePNaClToolchain() {
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
   # export nacl tools for direct use in patches.
-  export NACLCC=${NACL_BIN_PATH}/pnacl-clang
-  export NACLCXX=${NACL_BIN_PATH}/pnacl-clang++
-  export NACLAR=${NACL_BIN_PATH}/pnacl-ar
-  export NACLRANLIB=${NACL_BIN_PATH}/pnacl-ranlib
-  export NACLLD=${NACL_BIN_PATH}/pnacl-ld
-  export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
+  export NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-clang
+  export NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-clang++
+  export NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ar
+  export NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
+  export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
+  export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
   # TODO(robertm): figure our why we do not have a pnacl-string
   #export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
   # until then use the host's strings tool

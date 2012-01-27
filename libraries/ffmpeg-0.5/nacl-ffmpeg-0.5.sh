@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -24,8 +24,13 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
+  local extra_args=""
+  if [ "${NACL_PACKAGES_BITSIZE}" == pnacl ]; then
+    extra_args="--cc=pnacl-clang --arch=pnacl"
+  fi
   ../configure \
     --cross-prefix=${NACL_CROSS_PREFIX}- \
+    ${extra_args} \
     --target-os=linux \
     --enable-gpl \
     --enable-static \

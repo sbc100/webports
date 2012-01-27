@@ -256,8 +256,6 @@ WORKS_FOR_PNACL=$(LIBRARIES) $(EXAMPLES)
 WORKS_FOR_PNACL:=$(subst libraries/gc6.8,,$(WORKS_FOR_PNACL))
 # asm
 WORKS_FOR_PNACL:=$(subst libraries/x264-snapshot-20091023-2245,,$(WORKS_FOR_PNACL))
-# config problems e.g.: function strtol is mandatory
-WORKS_FOR_PNACL:=$(subst libraries/ffmpeg-0.5,,$(WORKS_FOR_PNACL))
 # issue with stl and "assign" probably due to clang being more strict
 WORKS_FOR_PNACL:=$(subst libraries/OpenSceneGraph-2.9.7,,$(WORKS_FOR_PNACL))
 # Unrecognized option: -pthread
