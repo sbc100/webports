@@ -17,7 +17,7 @@ set -o errexit
 readonly BASE_DIR="$(dirname $0)/../.."
 cd ${BASE_DIR}
 
-readonly SDK_VERSION=7642
+readonly SDK_VERSION=7680
 readonly SDK_PLATFOM=linux_x86_64_adhoc_sdk
 readonly SDK_URL=http://gsdview.appspot.com/nativeclient-archive2/toolchain/${SDK_VERSION}/naclsdk_pnacl_${SDK_PLATFOM}.tgz
 
