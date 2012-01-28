@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -29,6 +29,14 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+
+  local naclhost
+  if [ "${NACL_PACKAGES_BITSIZE}" == pnacl ]; then
+    naclhost=pnacl
+  else
+    naclhost=x86-nacl-linux
+  fi
+
   echo "  ./configure \
     --cross-prefix=${NACL_CROSS_PREFIX} \
     --disable-asm \
@@ -37,7 +45,7 @@ CustomConfigureStep() {
     --exec-prefix=${NACL_SDK_USR} \
     --libdir=${NACL_SDK_USR_LIB} \
     --extra-ldflags='-lnosys -lm' \
-    --host=x86-nacl-linux"
+    --host=${naclhost}"
 
   ./configure \
     --cross-prefix=${NACL_CROSS_PREFIX} \
@@ -47,7 +55,7 @@ CustomConfigureStep() {
     --exec-prefix=${NACL_SDK_USR} \
     --libdir=${NACL_SDK_USR_LIB} \
     --extra-ldflags="-lnosys -lm" \
-    --host=x86-nacl-linux
+    --host=${naclhost}
 }
 
 
