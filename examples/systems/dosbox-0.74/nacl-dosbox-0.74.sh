@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -92,7 +92,12 @@ CustomConfigureStep() {
       -Wl,--wrap,unlink \
       -Wl,--wrap,signal"
 
-  SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1|"
+  local MAYBE_NOSYS=""
+  if [ "${NACL_GLIBC}" = "0" ]; then
+    MAYBE_NOSYS="-lnosys"
+  fi
+
+  SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1 ${MAYBE_NOSYS}|"
   SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${LDFLAGS}|"
 
   find . -name Makefile -exec cp {} {}.bak \; \

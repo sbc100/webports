@@ -1,6 +1,19 @@
+diff -Naur dosbox-0.74-orig/config.sub dosbox-0.74/config.sub
+--- dosbox-0.74-orig/config.sub	2010-05-10 10:43:54.000000000 -0700
++++ dosbox-0.74/config.sub	2012-01-27 15:16:51.067078164 -0800
+@@ -1234,6 +1234,9 @@
+ 	pmac | pmac-mpw)
+ 		basic_machine=powerpc-apple
+ 		;;
++	pnacl*)
++		basic_machine=pnacl-pc
++		;;
+ 	*-unknown)
+ 		# Make sure to match an already-canonicalized machine name.
+ 		;;
 diff -Naur dosbox-0.74-orig/configure.in dosbox-0.74/configure.in
---- dosbox-0.74-orig/configure.in	2010-05-10 22:58:57.000000000 +0400
-+++ dosbox-0.74/configure.in	2011-12-15 14:56:43.213309281 +0400
+--- dosbox-0.74-orig/configure.in	2010-05-10 11:58:57.000000000 -0700
++++ dosbox-0.74/configure.in	2012-01-27 15:13:47.312313175 -0800
 @@ -519,6 +519,7 @@
  src/libs/gui_tk/Makefile
  src/misc/Makefile
@@ -10,8 +23,8 @@ diff -Naur dosbox-0.74-orig/configure.in dosbox-0.74/configure.in
  src/platform/visualc/Makefile
  visualc_net/Makefile
 diff -Naur dosbox-0.74-orig/include/setup.h dosbox-0.74/include/setup.h
---- dosbox-0.74-orig/include/setup.h	2010-05-10 21:43:54.000000000 +0400
-+++ dosbox-0.74/include/setup.h	2011-12-15 14:56:43.213309281 +0400
+--- dosbox-0.74-orig/include/setup.h	2010-05-10 10:43:54.000000000 -0700
++++ dosbox-0.74/include/setup.h	2012-01-27 15:13:47.312313175 -0800
 @@ -21,6 +21,8 @@
  #ifndef DOSBOX_SETUP_H
  #define DOSBOX_SETUP_H
@@ -22,8 +35,8 @@ diff -Naur dosbox-0.74-orig/include/setup.h dosbox-0.74/include/setup.h
  #pragma warning ( disable : 4786 )
  #pragma warning ( disable : 4290 )
 diff -Naur dosbox-0.74-orig/src/cpu/core_dyn_x86/risc_x86.h dosbox-0.74/src/cpu/core_dyn_x86/risc_x86.h
---- dosbox-0.74-orig/src/cpu/core_dyn_x86/risc_x86.h	2010-05-10 21:43:54.000000000 +0400
-+++ dosbox-0.74/src/cpu/core_dyn_x86/risc_x86.h	2011-12-15 14:57:03.443733630 +0400
+--- dosbox-0.74-orig/src/cpu/core_dyn_x86/risc_x86.h	2010-05-10 10:43:54.000000000 -0700
++++ dosbox-0.74/src/cpu/core_dyn_x86/risc_x86.h	2012-01-27 15:13:47.312313175 -0800
 @@ -134,7 +134,11 @@
  		"pushl %%ebp						\n"
  		"pushl $(run_return_adress)			\n"
@@ -43,8 +56,8 @@ diff -Naur dosbox-0.74-orig/src/cpu/core_dyn_x86/risc_x86.h dosbox-0.74/src/cpu/
 -
 -
 diff -Naur dosbox-0.74-orig/src/cpu/cpu.cpp dosbox-0.74/src/cpu/cpu.cpp
---- dosbox-0.74-orig/src/cpu/cpu.cpp	2010-05-12 13:57:31.000000000 +0400
-+++ dosbox-0.74/src/cpu/cpu.cpp	2011-12-15 14:56:43.213309281 +0400
+--- dosbox-0.74-orig/src/cpu/cpu.cpp	2010-05-12 02:57:31.000000000 -0700
++++ dosbox-0.74/src/cpu/cpu.cpp	2012-01-27 15:13:47.312313175 -0800
 @@ -22,7 +22,9 @@
  #include <sstream>
  #include "dosbox.h"
@@ -57,8 +70,8 @@ diff -Naur dosbox-0.74-orig/src/cpu/cpu.cpp dosbox-0.74/src/cpu/cpu.cpp
  #include "mapper.h"
  #include "setup.h"
 diff -Naur dosbox-0.74-orig/src/dos/drive_local.cpp dosbox-0.74/src/dos/drive_local.cpp
---- dosbox-0.74-orig/src/dos/drive_local.cpp	2010-05-10 21:43:54.000000000 +0400
-+++ dosbox-0.74/src/dos/drive_local.cpp	2011-12-15 14:56:43.213309281 +0400
+--- dosbox-0.74-orig/src/dos/drive_local.cpp	2010-05-10 10:43:54.000000000 -0700
++++ dosbox-0.74/src/dos/drive_local.cpp	2012-01-27 15:13:47.312313175 -0800
 @@ -31,6 +31,10 @@
  #include "cross.h"
  #include "inout.h"
@@ -71,8 +84,8 @@ diff -Naur dosbox-0.74-orig/src/dos/drive_local.cpp dosbox-0.74/src/dos/drive_lo
  public:
  	localFile(const char* name, FILE * handle);
 diff -Naur dosbox-0.74-orig/src/gui/sdlmain.cpp dosbox-0.74/src/gui/sdlmain.cpp
---- dosbox-0.74-orig/src/gui/sdlmain.cpp	2010-05-10 21:43:54.000000000 +0400
-+++ dosbox-0.74/src/gui/sdlmain.cpp	2011-12-15 14:56:43.213309281 +0400
+--- dosbox-0.74-orig/src/gui/sdlmain.cpp	2010-05-10 10:43:54.000000000 -0700
++++ dosbox-0.74/src/gui/sdlmain.cpp	2012-01-27 15:13:47.312313175 -0800
 @@ -1667,7 +1667,7 @@
  
  
@@ -95,8 +108,8 @@ diff -Naur dosbox-0.74-orig/src/gui/sdlmain.cpp dosbox-0.74/src/gui/sdlmain.cpp
  		) < 0 ) E_Exit("Can't init SDL %s",SDL_GetError());
  	sdl.inited = true;
 diff -Naur dosbox-0.74-orig/src/gui/sdl_mapper.cpp dosbox-0.74/src/gui/sdl_mapper.cpp
---- dosbox-0.74-orig/src/gui/sdl_mapper.cpp	2010-05-10 22:58:06.000000000 +0400
-+++ dosbox-0.74/src/gui/sdl_mapper.cpp	2011-12-15 14:56:43.213309281 +0400
+--- dosbox-0.74-orig/src/gui/sdl_mapper.cpp	2010-05-10 11:58:06.000000000 -0700
++++ dosbox-0.74/src/gui/sdl_mapper.cpp	2012-01-27 15:13:47.312313175 -0800
 @@ -360,7 +360,91 @@
     expression will raise a compiler error if the condition is false.  */
  typedef char assert_right_size [MAX_SCANCODES == (sizeof(sdlkey_map)/sizeof(sdlkey_map[0]))	? 1 : -1];
@@ -209,8 +222,8 @@ diff -Naur dosbox-0.74-orig/src/gui/sdl_mapper.cpp dosbox-0.74/src/gui/sdl_mappe
  #elif defined(OS2)
  		sdlkey_map[0x61]=SDLK_UP;
 diff -Naur dosbox-0.74-orig/src/Makefile.am dosbox-0.74/src/Makefile.am
---- dosbox-0.74-orig/src/Makefile.am	2010-05-10 21:43:54.000000000 +0400
-+++ dosbox-0.74/src/Makefile.am	2011-12-15 14:56:43.223309490 +0400
+--- dosbox-0.74-orig/src/Makefile.am	2010-05-10 10:43:54.000000000 -0700
++++ dosbox-0.74/src/Makefile.am	2012-01-27 15:13:47.312313175 -0800
 @@ -1,6 +1,6 @@
  AM_CPPFLAGS = -I$(top_srcdir)/include
  
@@ -230,8 +243,8 @@ diff -Naur dosbox-0.74-orig/src/Makefile.am dosbox-0.74/src/Makefile.am
  EXTRA_DIST = winres.rc dosbox.ico
  
 diff -Naur dosbox-0.74-orig/src/ppapi/Makefile.am dosbox-0.74/src/ppapi/Makefile.am
---- dosbox-0.74-orig/src/ppapi/Makefile.am	1970-01-01 03:00:00.000000000 +0300
-+++ dosbox-0.74/src/ppapi/Makefile.am	2011-12-15 14:56:43.223309490 +0400
+--- dosbox-0.74-orig/src/ppapi/Makefile.am	1969-12-31 16:00:00.000000000 -0800
++++ dosbox-0.74/src/ppapi/Makefile.am	2012-01-27 15:13:47.312313175 -0800
 @@ -0,0 +1,5 @@
 +AM_CPPFLAGS = -I$(top_srcdir)/include
 +
@@ -239,8 +252,8 @@ diff -Naur dosbox-0.74-orig/src/ppapi/Makefile.am dosbox-0.74/src/ppapi/Makefile
 +EXTRA_DIST = pepper_instance.h
 +libppapi_a_SOURCES = pepper_instance.cpp pepper_module.cpp pepper_libc.c
 diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.cpp dosbox-0.74/src/ppapi/pepper_instance.cpp
---- dosbox-0.74-orig/src/ppapi/pepper_instance.cpp	1970-01-01 03:00:00.000000000 +0300
-+++ dosbox-0.74/src/ppapi/pepper_instance.cpp	2011-12-15 14:56:43.223309490 +0400
+--- dosbox-0.74-orig/src/ppapi/pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
++++ dosbox-0.74/src/ppapi/pepper_instance.cpp	2012-01-27 15:13:47.312313175 -0800
 @@ -0,0 +1,300 @@
 +#include "pepper_instance.h"
 +
@@ -543,9 +556,9 @@ diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.cpp dosbox-0.74/src/ppapi/
 +
 +}  // namespace dosbox_pepper
 diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.h dosbox-0.74/src/ppapi/pepper_instance.h
---- dosbox-0.74-orig/src/ppapi/pepper_instance.h	1970-01-01 03:00:00.000000000 +0300
-+++ dosbox-0.74/src/ppapi/pepper_instance.h	2011-12-15 14:56:43.223309490 +0400
-@@ -0,0 +1,60 @@
+--- dosbox-0.74-orig/src/ppapi/pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
++++ dosbox-0.74/src/ppapi/pepper_instance.h	2012-01-27 15:22:55.176478635 -0800
+@@ -0,0 +1,67 @@
 +#ifndef DOSBOX_PPAPI_PEPPER_INSTANCE_H_
 +#define DOSBOX_PPAPI_PEPPER_INSTANCE_H_
 +
@@ -555,6 +568,13 @@ diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.h dosbox-0.74/src/ppapi/pe
 +#include <pthread.h>
 +
 +#include <ppapi/cpp/completion_callback.h>
++/* TODO(robertm): Include completion_callback_factory.h unconditionally
++ * once all sdk are updated */
++#include <ppapi/c/ppb_var.h>
++#ifdef PPB_VAR_INTERFACE_1_1
++#include <ppapi/utility/completion_callback_factory.h>
++#endif
++
 +#include <ppapi/cpp/instance.h>
 +
 +#include <SDL.h>
@@ -607,8 +627,8 @@ diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.h dosbox-0.74/src/ppapi/pe
 +
 +#endif  // DOSBOX_PPAPI_PEPPER_INSTANCE_H_
 diff -Naur dosbox-0.74-orig/src/ppapi/pepper_libc.c dosbox-0.74/src/ppapi/pepper_libc.c
---- dosbox-0.74-orig/src/ppapi/pepper_libc.c	1970-01-01 03:00:00.000000000 +0300
-+++ dosbox-0.74/src/ppapi/pepper_libc.c	2011-12-15 14:56:43.223309490 +0400
+--- dosbox-0.74-orig/src/ppapi/pepper_libc.c	1969-12-31 16:00:00.000000000 -0800
++++ dosbox-0.74/src/ppapi/pepper_libc.c	2012-01-27 15:13:47.322313435 -0800
 @@ -0,0 +1,34 @@
 +#include <stdio.h>
 +#include <string.h>
@@ -645,8 +665,8 @@ diff -Naur dosbox-0.74-orig/src/ppapi/pepper_libc.c dosbox-0.74/src/ppapi/pepper
 +  return NULL;
 +}
 diff -Naur dosbox-0.74-orig/src/ppapi/pepper_module.cpp dosbox-0.74/src/ppapi/pepper_module.cpp
---- dosbox-0.74-orig/src/ppapi/pepper_module.cpp	1970-01-01 03:00:00.000000000 +0300
-+++ dosbox-0.74/src/ppapi/pepper_module.cpp	2011-12-15 14:56:43.223309490 +0400
+--- dosbox-0.74-orig/src/ppapi/pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
++++ dosbox-0.74/src/ppapi/pepper_module.cpp	2012-01-27 15:13:47.322313435 -0800
 @@ -0,0 +1,20 @@
 +#include <stdio.h>
 +#include <ppapi/cpp/module.h>

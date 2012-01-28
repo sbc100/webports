@@ -262,8 +262,6 @@ WORKS_FOR_PNACL:=$(subst libraries/OpenSceneGraph-2.9.7,,$(WORKS_FOR_PNACL))
 WORKS_FOR_PNACL:=$(subst libraries/boost_1_47_0,,$(WORKS_FOR_PNACL))
 # unknown - also likely problem with asms
 WORKS_FOR_PNACL:=$(subst examples/systems/bochs-2.4.6,,$(WORKS_FOR_PNACL))
-# machine `pnacl-pc' not recognized, also likely asm issues
-WORKS_FOR_PNACL:=$(subst examples/systems/dosbox-0.74,,$(WORKS_FOR_PNACL))
 # compiler not found, also likely asm issues
 WORKS_FOR_PNACL:=$(subst examples/games/scummvm-1.2.1,,$(WORKS_FOR_PNACL))
 
