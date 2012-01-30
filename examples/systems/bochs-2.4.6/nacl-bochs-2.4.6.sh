@@ -32,11 +32,12 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
+  # path and package magic to make sure we call the right
+  # sdl-config, etc.
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  export PATH="$NACL_TOOLCHAIN_ROOT/i686-nacl/usr/bin:$PATH"
-  export PATH="$NACL_TOOLCHAIN_ROOT/x86_64-nacl/usr/bin:$PATH"
+  export PATH="${NACL_SDK_USR_BIN}:${PATH}"
 
   export NACLBXLIBS="-lnacl-mounts -lpthread"
 
@@ -58,14 +59,14 @@ CustomConfigureStep() {
   ChangeDir ${PWD}
 
   export LIBS=
-  export LIBS="$LIBS -Wl, --whole-archive"
+  export LIBS="$LIBS -Wl,--start-group"
   export LIBS="$LIBS -lppapi"
   export LIBS="$LIBS -lppapi_cpp"
   export LIBS="$LIBS -Lbochs_ppapi -lbochs_ppapi"
   export LIBS="$LIBS -lnacl-mounts"
   export LIBS="$LIBS -lpthread"
   export LIBS="$LIBS -lppapi_cpp_COPY"
-  export LIBS="$LIBS -Wl, --no-whole-archive"
+  export LIBS="$LIBS -Wl,--end-group"
   export LDFLAGS=
 
   # linker wrappers
