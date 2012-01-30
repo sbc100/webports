@@ -78,6 +78,10 @@ CustomPackageInstall() {
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    # NOTE: snes9x has unusual dirnames
+    DefaultTranslateStep ${PACKAGE_NAME}-src unix/snes9x
+  fi
   CustomInstallStep
   DefaultCleanUpStep
 }

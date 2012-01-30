@@ -63,6 +63,10 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    # NOTE: nethack does not use a build subdir
+    DefaultTranslateStep ${PACKAGE_NAME} src/nethack
+  fi
   DefaultTouchStep
   DefaultCleanUpStep
 }

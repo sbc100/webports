@@ -124,6 +124,9 @@ CustomPackageInstall() {
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/src/dosbox
+  fi
   CustomInstallStep
   DefaultCleanUpStep
 }

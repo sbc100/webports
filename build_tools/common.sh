@@ -166,6 +166,8 @@ InitializePNaClToolchain() {
   export NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
   export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
   export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
+  export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+  export TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
   # TODO(robertm): figure our why we do not have a pnacl-string
   #export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
   # until then use the host's strings tool
@@ -519,6 +521,25 @@ DefaultCleanUpStep() {
   fi
   AddToInstallFile ${PACKAGE_NAME}
   ChangeDir ${SAVE_PWD}
+}
+
+
+DefaultTranslateStep() {
+  local package=$1
+  local build_dir="${NACL_PACKAGES_REPOSITORY}/${package}"
+  local pexe=${build_dir}/$2
+
+  Banner "Translating ${pexe}"
+
+  echo "stripping"
+  time ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
+  ls -l ${pexe}.stripped
+
+  for a in arm x86-32 x86-64 ; do
+    echo "translating to $a"
+    time ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${pexe}.$a
+    ls -l ${pexe}.$a
+  done
 }
 
 
