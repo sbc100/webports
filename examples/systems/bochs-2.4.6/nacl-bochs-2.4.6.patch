@@ -539,6 +539,17 @@ diff -Naur temp_bochs/bochs-2.4.6/configure bochs-2.4.6/configure
  fi
  rm -f conftest conftest$ac_cv_exeext
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
+@@ -24340,6 +24341,10 @@
+ DIALOG_OBJS=""
+ EXPORT_DYNAMIC="-export-dynamic"
+ case $target in
++  *nacl*)
++    # nacl does not support the plugin mechanism
++    EXPORT_DYNAMIC=
++  ;;
+   *-pc-windows* | *-pc-winnt* | *-cygwin* | *-mingw*)
+     if test "$bx_plugins" = 1; then
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for opendir in -lmingwex" >&5
 @@ -25426,7 +25427,7 @@
  
  
@@ -914,8 +925,12 @@ diff -Naur temp_bochs/bochs-2.4.6/osdep.cc bochs-2.4.6/osdep.cc
 diff -Naur temp_bochs/bochs-2.4.6/osdep.h bochs-2.4.6/osdep.h
 --- temp_bochs/bochs-2.4.6/osdep.h	2011-05-20 09:51:00.000000000 -0700
 +++ bochs-2.4.6/osdep.h	2011-08-11 15:23:31.000000000 -0700
-@@ -154,7 +154,7 @@
- 
+@@ -154,7 +154,11 @@
+
++/* benfits both nnacl and pnacl, avoids tons of warnings from 
++   dubious redefine stricmp -> strcmp  in osdep.h */ 
++#undef BX_HAVE_STRICMP
++#define BX_HAVE_STRICMP 1
  #if !BX_HAVE_VSNPRINTF
    #define vsnprintf bx_vsnprintf
 -  extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);

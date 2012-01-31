@@ -66,6 +66,10 @@ CustomConfigureStep() {
   export LIBS="$LIBS -lnacl-mounts"
   export LIBS="$LIBS -lpthread"
   export LIBS="$LIBS -lppapi_cpp_COPY"
+  # TOOD(robertm): investigate why this is only necessary for pnacl
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    export LIBS="$LIBS -lnosys"
+  fi
   export LIBS="$LIBS -Wl,--end-group"
   export LDFLAGS=
 
@@ -231,6 +235,9 @@ CustomPackageInstall() {
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/bochs
+  fi
   CustomInstallStep
   DefaultCleanUpStep
 }
