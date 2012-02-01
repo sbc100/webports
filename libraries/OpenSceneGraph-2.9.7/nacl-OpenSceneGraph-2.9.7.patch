@@ -65,6 +65,27 @@ diff -Naur OpenSceneGraph-2.9.7/include/OpenThreads/Config OpenSceneGraph-2.9.7.
 +#define OT_LIBRARY_STATIC
 +
 +#endif
+diff -Naur OpenSceneGraph-2.9.7/include/osg/Array OpenSceneGraph-2.9.7.nacl/include/osg/Array
+--- OpenSceneGraph-2.9.7/include/osg/Array	2009-10-20 12:34:24.000000000 -0700
++++ OpenSceneGraph-2.9.7.nacl/include/osg/Array	2012-01-28 01:22:08.272995795 -0800
+@@ -154,7 +154,7 @@
+         TemplateArray& operator = (const TemplateArray& array)
+         {
+             if (this==&array) return *this;
+-            assign(array.begin(),array.end());
++            this->assign(array.begin(),array.end());
+             return *this;
+         } 
+ 
+@@ -240,7 +240,7 @@
+         TemplateIndexArray& operator = (const TemplateIndexArray& array)
+         {
+             if (this==&array) return *this;
+-            assign(array.begin(),array.end());
++            this->assign(array.begin(),array.end());
+             return *this;
+         } 
+ 
 diff -Naur OpenSceneGraph-2.9.7/include/osg/Config OpenSceneGraph-2.9.7.nacl/include/osg/Config
 --- OpenSceneGraph-2.9.7/include/osg/Config	1969-12-31 17:00:00.000000000 -0700
 +++ OpenSceneGraph-2.9.7.nacl/include/osg/Config	2010-07-01 17:32:53.000000000 -0600
