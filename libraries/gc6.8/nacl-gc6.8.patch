@@ -396,7 +396,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
      n_live_threads = GC_suspend_all();
  
        if (GC_retry_signals) {
-@@ -434,19 +466,141 @@
+@@ -434,19 +466,143 @@
  	      }
  	  }
      }
@@ -491,6 +491,8 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
 +        nacl_thread_parked[nacl_thread_idx] = 1;
 +    }
 +}
++
++void __nacl_suspend_thread_if_needed();
 +
 +void nacl_post_syscall_hook()
 +{

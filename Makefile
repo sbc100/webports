@@ -252,8 +252,6 @@ snes9x: examples/games/snes9x-1.53 ;
 # We would like to get to the point where all libs work, but for now we 
 # have to skip a few
 WORKS_FOR_PNACL=$(LIBRARIES) $(EXAMPLES)
-# pointer size issue
-WORKS_FOR_PNACL:=$(subst libraries/gc6.8,,$(WORKS_FOR_PNACL))
 
 works_for_pnacl: $(WORKS_FOR_PNACL)
 
