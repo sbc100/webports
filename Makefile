@@ -256,8 +256,6 @@ WORKS_FOR_PNACL=$(LIBRARIES) $(EXAMPLES)
 WORKS_FOR_PNACL:=$(subst libraries/gc6.8,,$(WORKS_FOR_PNACL))
 # issue with stl and "assign" probably due to clang being more strict
 WORKS_FOR_PNACL:=$(subst libraries/OpenSceneGraph-2.9.7,,$(WORKS_FOR_PNACL))
-# compiler not found, also likely asm issues
-WORKS_FOR_PNACL:=$(subst examples/games/scummvm-1.2.1,,$(WORKS_FOR_PNACL))
 
 works_for_pnacl: $(WORKS_FOR_PNACL)
 
