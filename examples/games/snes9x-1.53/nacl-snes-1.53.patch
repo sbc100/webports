@@ -45,6 +45,15 @@ diff -Nru snes9x-1.53-src/port.h snes9x/port.h
  #include <time.h>
  #include <string.h>
  #ifdef HAVE_STRINGS_H
+@@ -331,7 +335,7 @@
+ #define TITLE "Snes9x"
+ #endif
+ 
+-#if defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) || defined(__x86_64__) || defined(__alpha__) || defined(__MIPSEL__) || defined(_M_IX86) || defined(_M_X64)
++#if defined(__i386__) || defined(__i486__) || defined(__i586__) || defined(__i686__) || defined(__x86_64__) || defined(__alpha__) || defined(__MIPSEL__) || defined(_M_IX86) || defined(_M_X64) || defined(__pnacl__)
+ #define LSB_FIRST
+ #define FAST_LSB_WORD_ACCESS
+ #else
 diff -Nru snes9x-1.53-src/unix/Makefile.in snes9x/unix/Makefile.in
 --- snes9x-1.53-src/unix/Makefile.in	2011-04-24 06:38:10.000000000 -0700
 +++ snes9x/unix/Makefile.in	2012-01-20 03:00:32.340856885 -0800
