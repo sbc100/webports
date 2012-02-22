@@ -56,9 +56,10 @@ def DownloadSDK(platform, base_url, version):
     print 'Looking for latest SDK upload...'
     # Resolve wildcards and pick the highest version
     p = subprocess.Popen(
-        gsutil.split() + ['ls',
-        base_url + 'trunk.*/' + path],
-        stdout=subprocess.PIPE)
+        ' '.join(gsutil.split() + ['ls',
+        base_url + 'trunk.*/' + path]),
+        stdout=subprocess.PIPE,
+        shell=True)
     (p_stdout, _) = p.communicate()
     assert p.returncode == 0
     versions = p_stdout.splitlines()
@@ -74,8 +75,9 @@ def DownloadSDK(platform, base_url, version):
 
   url = base_url + 'trunk.' + str(version) + '/' + path
   p = subprocess.Popen(
-      gsutil.split() + ['ls', url],
-      stdout=subprocess.PIPE)
+      ' '.join(gsutil.split() + ['ls', url]),
+      stdout=subprocess.PIPE,
+      shell=True)
   (p_stdout, _) = p.communicate()
   assert p.returncode == 0
   print url
@@ -103,7 +105,9 @@ def DownloadSDK(platform, base_url, version):
   sys.stdout.flush()
 
   # Download it.
-  subprocess.check_call(gsutil.split() + ['cp', url, 'file://' + bz2_filename])
+  subprocess.check_call(
+      ' '.join(gsutil.split() + ['cp', url, 'file://' + bz2_filename]),
+     shell=True)
 
   # Extract toolchain.
   old_cwd = os.getcwd()
