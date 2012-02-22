@@ -156,7 +156,7 @@ diff -urN SDL-1.2.14/Makefile.in SDL-1.2.14-nacl/Makefile.in
 diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc
 --- SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc	1970-01-01 03:00:00.000000000 +0300
 +++ SDL-1.2.14-nacl/src/audio/nacl/SDL_naclaudio.cc	2012-01-16 12:16:39.460269192 +0400
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,134 @@
 +
 +#include "SDL_config.h"
 +#include "SDL_naclaudio.h"
@@ -222,7 +222,8 @@ diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/n
 +
 +  // TODO: Move audio device creation to NACLAUD_OpenAudio.
 +  _this->hidden->sample_frame_count =
-+      pp::AudioConfig::RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
++      pp::AudioConfig::RecommendSampleFrameCount(gNaclPPInstance,
++          PP_AUDIOSAMPLERATE_44100,
 +          kSampleFrameCount);
 +  _this->hidden->audio = pp::Audio(
 +      gNaclPPInstance,
