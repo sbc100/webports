@@ -37,6 +37,9 @@ LOCAL_GSUTIL = 'gsutil'
 # For local testing on Windows
 #LOCAL_GSUTIL = 'python.exe C:\\bin\\gsutil\\gsutil'
 
+GSTORE = 'http://commondatastorage.googleapis.com/'\
+         'nativeclient-mirror/nacl/nacl_sdk/'
+
 def DownloadSDK(platform, base_url, version):
   """Download one Native Client toolchain and extract it.
 
@@ -67,19 +70,14 @@ def DownloadSDK(platform, base_url, version):
     for version in versions:
       m = re.match(base_url.replace(':', '\:').replace('/', '\/') +
                    'trunk\.(.*)/' + path, version)
-      rev = int(m.group(1))
-      if not newest or rev > newest:
-        newest = rev
+      if m:
+        rev = int(m.group(1))
+        if not newest or rev > newest:
+          newest = rev
     assert newest
     version = newest
 
-  url = base_url + 'trunk.' + str(version) + '/' + path
-  p = subprocess.Popen(
-      ' '.join(gsutil.split() + ['ls', url]),
-      stdout=subprocess.PIPE,
-      shell=True)
-  (p_stdout, _) = p.communicate()
-  assert p.returncode == 0
+  url = GSTORE + 'trunk.' + str(version) + '/' + path
   print url
 
   # Pick target directory.
@@ -105,9 +103,8 @@ def DownloadSDK(platform, base_url, version):
   sys.stdout.flush()
 
   # Download it.
-  subprocess.check_call(
-      ' '.join(gsutil.split() + ['cp', url, 'file://' + bz2_filename]),
-     shell=True)
+  urlret = urllib.urlretrieve(url, bz2_filename)
+  assert urlret[0] == bz2_filename
 
   # Extract toolchain.
   old_cwd = os.getcwd()
