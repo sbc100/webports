@@ -35,9 +35,11 @@ ifndef NACL_SDK_ROOT
 endif
 
 ifeq ($(NACL_GLIBC), 1)
-  NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86
+  NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_glibc
+  NACL_LIBC = glibc
 else
   NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_newlib
+  NACL_LIBC = newlib
 endif
 
 NACL_OUT = out
@@ -130,7 +132,7 @@ PACKAGES = $(LIBRARIES) $(EXAMPLES)
 
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
-SENT = $(SENTINELS_DIR)/bits$(NACL_PACKAGES_BITSIZE)
+SENT = $(SENTINELS_DIR)/bits$(NACL_PACKAGES_BITSIZE)_$(NACL_LIBC)
 
 default: libraries
 libraries: $(LIBRARIES)

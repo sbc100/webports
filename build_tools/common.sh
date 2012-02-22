@@ -100,7 +100,24 @@ InitializeNaClGccToolchain() {
   # TODO: x86 only at the moment
   NACL_GLIBC=${NACL_GLIBC:-0}
   if [ $NACL_GLIBC = "1" ] ; then
-    local TOOLCHAIN_SUFFIX=""
+    # m15-m17 SDK layouts have the glibc toolchain without the _glibc suffix
+    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_glibc/bin/i686-nacl-gcc
+    local TENTATIVE_NEWLIB_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/i686-nacl-gcc
+
+    echo ${TENTATIVE_NACL_GCC}
+    if [ -e ${TENTATIVE_NACL_GCC} ]; then
+      local TOOLCHAIN_SUFFIX="_glibc"
+    elif [ -e ${TENTATIVE_NEWLIB_NACL_GCC} ]; then
+      local TOOLCHAIN_SUFFIX=""
+    else
+      # if neither _newlib or _glibc suffixes exist,
+      # this is a pre-m15 release which has no glibc
+      echo "------------------------------------------------------------------"
+      echo "error: glibc toolchain not present"
+      echo "Your SDK appears to be pre pepper_15, please upgrade to use glibc."
+      echo "------------------------------------------------------------------"
+      exit -1
+    fi
   else
     # Fall back to pre-m15 SDK layout if we can't find i686-nacl-gcc.
     local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/i686-nacl-gcc

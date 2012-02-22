@@ -1,24 +1,41 @@
 #!/usr/bin/python
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
 
 """Download all Native Client toolchains for this platform.
 
-This module downloads multiple tgz's and expands them.
+This module downloads toolchain bz2's and expands them. It requires
+gsutil to be in the bin PATH and assumes if building on windows that
+cygwin is installed to C:\cygwin
 """
 
+import glob
 import optparse
 import os
+import re
 import shutil
 import stat
 import subprocess
 import sys
+import tarfile
 import tempfile
 import time
 import urllib
 
+SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
+SRC_DIR = os.path.dirname(SCRIPT_DIR)
+NACL_BUILD_DIR = os.path.join(SRC_DIR, 'native_client', 'build')
+
+sys.path.append(NACL_BUILD_DIR)
+
+import cygtar
+
+BOT_GSUTIL = '/b/build/scripts/slave/gsutil'
+LOCAL_GSUTIL = 'gsutil'
+# For local testing on Windows
+#LOCAL_GSUTIL = 'python.exe C:\\bin\\gsutil\\gsutil'
 
 def DownloadSDK(platform, base_url, version):
   """Download one Native Client toolchain and extract it.
@@ -28,59 +45,97 @@ def DownloadSDK(platform, base_url, version):
     base_url: base url to download toolchain tarballs from
     version: version directory to select tarballs from
   """
-  if sys.platform in ['win32', 'cygwin']:
-    path = 'naclsdk_' + platform + '.exe'
+  if os.environ.get('BUILDBOT_BUILDERNAME', ''):
+    gsutil = BOT_GSUTIL
   else:
-    path = 'naclsdk_' + platform + '.tgz'
-  url = base_url + version + '/' + path
+    gsutil = LOCAL_GSUTIL
+
+  path = 'naclsdk_' + platform + '.bz2'
+
+  if version == 'latest':
+    print 'Looking for latest SDK upload...'
+    # Resolve wildcards and pick the highest version
+    p = subprocess.Popen(
+        gsutil.split() + ['ls',
+        base_url + 'trunk.*/' + path],
+        stdout=subprocess.PIPE)
+    (p_stdout, _) = p.communicate()
+    assert p.returncode == 0
+    versions = p_stdout.splitlines()
+    newest = None
+    for version in versions:
+      m = re.match(base_url.replace(':', '\:').replace('/', '\/') +
+                   'trunk\.(.*)/' + path, version)
+      rev = int(m.group(1))
+      if not newest or rev > newest:
+        newest = rev
+    assert newest
+    version = newest
+
+  url = base_url + 'trunk.' + str(version) + '/' + path
+  p = subprocess.Popen(
+      gsutil.split() + ['ls', url],
+      stdout=subprocess.PIPE)
+  (p_stdout, _) = p.communicate()
+  assert p.returncode == 0
+  print url
 
   # Pick target directory.
-  script_dir = os.path.abspath(os.path.dirname(__file__))
-  parent_dir = os.path.split(script_dir)[0]
-  toolchain_dir = os.path.join(parent_dir, 'toolchain')
+  toolchain_dir = os.path.join(SRC_DIR, 'toolchain')
   target = os.path.join(toolchain_dir, platform)
 
-  tgz_dir = os.path.join(script_dir)
-  tgz_filename = os.path.join(tgz_dir, path)
+  bz2_dir = SCRIPT_DIR
+  bz2_filename = os.path.join(bz2_dir, path)
 
-  # Drop old versions on mac/linux.
-  if sys.platform not in ['win32', 'cygwin']:
+  # Drop old versions.
+  old_sdks = glob.glob(os.path.join(bz2_dir, 'pepper_*'))
+  if len(old_sdks) > 0:
     print 'Cleaning up old SDKs...'
-    cmd = 'rm -rf "%s"/native_client_sdk_*' % tgz_dir
+    if sys.platform in ['win32', 'cygwin']:
+      cmd = r'C:\cygwin\bin\rm.exe -rf "%s"' % '" "'.join(old_sdks)
+    else:
+      cmd = 'rm -rf "%s"' % '" "'.join(old_sdks)
     p = subprocess.Popen(cmd, shell=True)
     p.communicate()
     assert p.returncode == 0
 
-  print 'Downloading "%s" to "%s"...' % (url, tgz_filename)
+  print 'Downloading "%s" to "%s"...' % (url, bz2_filename)
   sys.stdout.flush()
 
   # Download it.
-  urllib.urlretrieve(url, tgz_filename)
+  subprocess.check_call(gsutil.split() + ['cp', url, 'file://' + bz2_filename])
 
   # Extract toolchain.
   old_cwd = os.getcwd()
-  os.chdir(tgz_dir)
+  os.chdir(bz2_dir)
+  tar_file = None
+  try:
+    print 'Unpacking tarball...'
+    tar_file = cygtar.CygTar(bz2_filename, 'r:bz2')
+    names = tar_file.tar.getnames()
+    pepper_dir = os.path.commonprefix(names)
+    tar_file.Extract()
+  finally:
+    if tar_file:
+      tar_file.Close()
+
+  os.chdir(old_cwd)
   if sys.platform in ['win32', 'cygwin']:
-    cmd = tgz_filename + (
-        ' /S /D=c:\\native_client_sdk&& '
-        'cd .. && '
-        r'c:\cygwin\bin\ln.exe -fsn '
-        'c:/native_client_sdk/toolchain toolchain')
+    cmd = r'C:\cygwin\bin\rm.exe -rf ' + toolchain_dir + ' && ' \
+          r'C:\cygwin\bin\ln.exe -fsn ' + \
+          os.path.join(bz2_dir, pepper_dir, 'toolchain') + ' ' + \
+          toolchain_dir
   else:
-    cmd = (
-        'mkdir native_client_sdk_latest && '
-        'tar xfzv "%s" -C native_client_sdk_latest && '
-        'cd .. && rm -rf toolchain && '
-        'ln -fsn build_tools/native_client_sdk_*/toolchain toolchain'
-    ) % path
+    cmd = 'rm -rf ' + toolchain_dir + ' && ' \
+          'ln -fsn ' + os.path.join(bz2_dir, pepper_dir, 'toolchain') + ' ' + \
+          toolchain_dir
   p = subprocess.Popen(cmd, shell=True)
   p.communicate()
   assert p.returncode == 0
-  os.chdir(old_cwd)
 
-  # Clean up: remove the sdk tgz/exe.
+  # Clean up: remove the sdk bz2.
   time.sleep(2)  # Wait for windows.
-  os.remove(tgz_filename)
+  os.remove(bz2_filename)
 
   print 'Install complete.'
 
@@ -93,13 +148,8 @@ PLATFORM_COLLAPSE = {
     'darwin': 'mac',
 }
 
-
 def main(argv):
   parser = optparse.OptionParser()
-  parser.add_option(
-      '-b', '--base-url', dest='base_url',
-      default='http://build.chromium.org/f/client/nacl_archive/sdk/',
-      help='base url to download from')
   parser.add_option(
       '-v', '--version', dest='version',
       default='latest',
@@ -111,7 +161,9 @@ def main(argv):
     sys.exit(1)
 
   flavor = PLATFORM_COLLAPSE[sys.platform]
-  DownloadSDK(flavor, base_url=options.base_url, version=options.version)
+  DownloadSDK(flavor,
+              base_url='gs://nativeclient-mirror/nacl/nacl_sdk/',
+              version=options.version)
 
 
 if __name__ == '__main__':
