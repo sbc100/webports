@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -33,9 +33,10 @@ typedef struct {
 } TAR_HEADER;
 
 
-int simple_tar_extract(const char *path) {
+int simple_tar_extract_to(const char *tarfile, const char *dst) {
   char block[512];
   char filename[256];
+  char dst_filename[MAXPATHLEN];
   TAR_HEADER *header = (TAR_HEADER*)block;
   int file_len;
   int len;
@@ -44,7 +45,7 @@ int simple_tar_extract(const char *path) {
   int count;
 
   count = 0;
-  file = fopen(path, "rb");
+  file = fopen(tarfile, "rb");
   if (!file) return -1;
   for (;;) {
     len = fread(block, 1, sizeof(block), file);
@@ -63,8 +64,16 @@ int simple_tar_extract(const char *path) {
 
     if (!strlen(filename)) break;
 
-    if (filename[strlen(filename) - 1] == '/') {
-      mkdir(filename, 0777);
+    /* Check that dst + "/" + filename + '\0' fits in MAXPATHLEN. */
+    if (strlen(dst) + strlen(filename) + 2 > MAXPATHLEN) {
+      return -1;
+    }
+    strcpy(dst_filename, dst);
+    strcat(dst_filename, "/");
+    strcat(dst_filename, filename);
+
+    if (dst_filename[strlen(dst_filename) - 1] == '/') {
+      mkdir(dst_filename, 0777);
       continue;
     }
 
@@ -72,7 +81,7 @@ int simple_tar_extract(const char *path) {
       fclose(file);
       return -1;
     }
-    out = fopen(filename, "wb");
+    out = fopen(dst_filename, "wb");
     if (!out) {
       fclose(file);
       return -1;
@@ -95,4 +104,16 @@ int simple_tar_extract(const char *path) {
   }
   fclose(file);
   return count;
+}
+
+
+int simple_tar_extract(const char *tarfile) {
+  char cwd[MAXPATHLEN];
+  char *cwdp;
+
+  cwdp = getcwd(cwd, sizeof(cwd));
+  if (!cwdp) {
+    return -1;
+  }
+  return simple_tar_extract_to(tarfile, cwd);
 }
