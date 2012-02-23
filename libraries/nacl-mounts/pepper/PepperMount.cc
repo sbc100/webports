@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -258,6 +258,33 @@ int PepperMount::Mkdir(const std::string& path, mode_t mode,
   node->set_slot(slot);
   node->set_path(abs_path);
   node->set_is_dir(true);
+
+  return 0;
+}
+
+int PepperMount::Unlink(const std::string& path) {
+  SimpleAutoLock lock(&pp_lock_);
+
+  Path p("/" + path);
+  std::string abs_path = p.FormulatePath();
+  std::string fs_path = Path(path_prefix_).AppendPath(abs_path).FormulatePath();
+
+  int slot = GetSlot(abs_path);
+  if (slot >= 0) {
+    Unref(slot);
+  }
+
+  PepperFileIOJob *job = new PepperFileIOJob;
+  job->set_op(DELETE_PATH);
+  job->set_fs(fs_);
+  job->set_path(fs_path);
+  int ret = runner_->RunJob(job);
+  if (ret < 0) {
+    // TODO(bradnelson): translate error code properly.
+    dbgprintf("delete failed %d\n", ret);
+    errno = EIO;
+    return -1;
+  }
 
   return 0;
 }

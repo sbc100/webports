@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -78,8 +78,11 @@ void PepperFileIOJob::Run(MainThreadRunner::JobEntry *e) {
     directory_reader_->ReadDirectory(path_, dir_entries_, cc);
     break;
 
+  case DELETE_PATH:
+    file_ref_ = new pp::FileRef(*fs_, path_.c_str());
+    rv = file_ref_->Delete(cc);
+    break;
   }
-
 }
 
 void PepperFileIOJob::Finish(int32_t result) {

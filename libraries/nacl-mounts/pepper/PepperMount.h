@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -44,6 +44,7 @@ class PepperMount: public BaseMount {
       struct stat *st);
   int Getdents(ino_t slot, off_t offset,
       struct dirent *dir, unsigned int count);
+  int Unlink(const std::string& path);
  private:
   SlotAllocator<PepperNode> slots_;
   pp::FileSystem *fs_;
