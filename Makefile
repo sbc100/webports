@@ -105,7 +105,8 @@ LIBRARIES = \
      libraries/protobuf-2.3.0 \
      libraries/dreadthread \
      libraries/libmikmod-3.1.11 \
-     libraries/jsoncpp-0.5.0
+     libraries/jsoncpp-0.5.0 \
+     libraries/openal-soft-1.13
 
 EXAMPLES = \
      examples/games/nethack-3.4.3 \
@@ -125,7 +126,8 @@ ifeq ($(OS_NAME), Linux)
 endif
 else
   EXAMPLES += \
-      examples/games/snes9x-1.53
+      examples/games/snes9x-1.53 \
+      examples/audio/openal-ogg
 endif
 
 PACKAGES = $(LIBRARIES) $(EXAMPLES)
@@ -186,6 +188,8 @@ $(SENT)/libraries/SDL_image-1.2.10: libraries/SDL-1.2.14 \
 $(SENT)/libraries/SDL_net-1.2.7: libraries/SDL-1.2.14
 $(SENT)/libraries/SDL_ttf-2.0.10: libraries/SDL-1.2.14 libraries/freetype-2.1.10
 $(SENT)/libraries/boost_1_47_0: libraries/zlib-1.2.3 libraries/bzip2-1.0.6
+$(SENT)/examples/audio/openal-ogg: \
+    libraries/openal-soft-1.13 libraries/libvorbis-1.2.3
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg-2.5 ;
@@ -215,6 +219,7 @@ mikmod: libraries/libmikmod-3.1.11 ;
 modplug: libraries/libmodplug-0.8.7 ;
 nacl-mounts: libraries/nacl-mounts ;
 ogg: libraries/libogg-1.1.4 ;
+openal: libraries/openal-soft-1.13 ;
 openscenegraph: libraries/OpenSceneGraph-2.9.7 ;
 openssl: libraries/openssl-1.0.0e ;
 pango: libraries/pango-1.29.3 ;
@@ -239,6 +244,7 @@ zlib: libraries/zlib-1.2.3 ;
 # shortcuts examples (alphabetical)
 bochs: examples/systems/bochs-2.4.6 ;
 dosbox: examples/systems/dosbox-0.74 ;
+openal-ogg: examples/audio/openal-ogg ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
 snes9x: examples/games/snes9x-1.53 ;
