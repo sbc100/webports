@@ -170,8 +170,10 @@ InitializePNaClToolchain() {
   else
     local TOOLCHAIN_SUFFIX="newlib"
   fi
-  # TODO(robertm): fix this to account for OS and ARCH
-  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/pnacl_linux_x86_64/${TOOLCHAIN_SUFFIX}}
+  # TODO(robertm): fix this to account for OS and ARCH.
+  #                This needs to be better thought thru:
+  #                Currently, SDK and TC seem to be using different paths
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/linux_x86_pnacl/${TOOLCHAIN_SUFFIX}}
   readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin

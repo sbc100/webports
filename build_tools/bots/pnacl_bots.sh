@@ -17,16 +17,19 @@ set -o errexit
 readonly BASE_DIR="$(dirname $0)/../.."
 cd ${BASE_DIR}
 
-readonly SDK_VERSION=7819
-readonly SDK_PLATFORM=linux_x86_64_adhoc_sdk
-readonly SDK_URL=http://gsdview.appspot.com/nativeclient-archive2/toolchain/${SDK_VERSION}/naclsdk_pnacl_${SDK_PLATFORM}.tgz
 
+
+# replace these variables and StepInstallSdk() by relying on
+# build_tools/download_sdk.py to do the job
+readonly SDK_VERSION=123784
+readonly SDK_PLATFOM=pnaclsdk_linux.bz2
+readonly SDK_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/trunk.${SDK_VERSION}/${SDK_PLATFOM}
 
 ERROR=0
 
-readonly PACKAGES=$(make works_for_pnacl_list)
 export NACL_PACKAGES_BITSIZE=pnacl
-export NACL_SDK_ROOT=$(readlink -e ${BASE_DIR})
+export NACL_SDK_ROOT=$(readlink -e ${BASE_DIR})/toolchain/pepper_18
+readonly PACKAGES=$(make works_for_pnacl_list)
 
 
 StepConfig() {
@@ -39,14 +42,14 @@ StepConfig() {
   done
 }
 
-
+# TOOD(robertm): rely on build_tools/download_sdk.py instead
 StepInstallSdk() {
   echo "@@@BUILD_STEP INSTALL_SDK"
   dst=${BASE_DIR}/toolchain
   rm -rf ${dst}
-  mkdir  -p ${dst}/pnacl_linux_x86_64
+  mkdir  -p ${dst}
   wget ${SDK_URL} -O ${dst}/tarball.tgz
-  tar zxvf $(readlink -e ${dst}/tarball.tgz) -C ${dst}/pnacl_linux_x86_64
+  tar jxvf $(readlink -e ${dst}/tarball.tgz) -C ${dst}
 }
 
 
