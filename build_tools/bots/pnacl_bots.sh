@@ -19,37 +19,24 @@ cd ${BASE_DIR}
 
 
 
-# replace these variables and StepInstallSdk() by relying on
-# build_tools/download_sdk.py to do the job
-readonly SDK_VERSION=123784
-readonly SDK_PLATFOM=pnaclsdk_linux.bz2
-readonly SDK_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/trunk.${SDK_VERSION}/${SDK_PLATFOM}
-
 ERROR=0
 
 export NACL_PACKAGES_BITSIZE=pnacl
-export NACL_SDK_ROOT=$(readlink -e ${BASE_DIR})/toolchain/pepper_18
+export NACL_SDK_ROOT=$(readlink -e ${BASE_DIR})/toolchain
 readonly PACKAGES=$(make works_for_pnacl_list)
 
 
 StepConfig() {
   echo "@@@BUILD_STEP CONFIG"
   echo "BASE_DIR: ${BASE_DIR}"
-  echo "SDK:      ${SDK_URL}"
   echo "PACKAGES:"
   for i in ${PACKAGES} ; do
     echo "    $i"
   done
 }
 
-# TOOD(robertm): rely on build_tools/download_sdk.py instead
 StepInstallSdk() {
-  echo "@@@BUILD_STEP INSTALL_SDK"
-  dst=${BASE_DIR}/toolchain
-  rm -rf ${dst}
-  mkdir  -p ${dst}
-  wget ${SDK_URL} -O ${dst}/tarball.tgz
-  tar jxvf $(readlink -e ${dst}/tarball.tgz) -C ${dst}
+  build_tools/download_sdk.py -f pnaclsdk_linux
 }
 
 

@@ -40,11 +40,11 @@ LOCAL_GSUTIL = 'gsutil'
 GSTORE = 'http://commondatastorage.googleapis.com/'\
          'nativeclient-mirror/nacl/nacl_sdk/'
 
-def DownloadSDK(platform, base_url, version):
+def DetermineSdkURL(flavor, base_url, version):
   """Download one Native Client toolchain and extract it.
 
   Arguments:
-    platform: platform of the sdk to download
+    flavor: flavor of the sdk to download
     base_url: base url to download toolchain tarballs from
     version: version directory to select tarballs from
   """
@@ -53,7 +53,7 @@ def DownloadSDK(platform, base_url, version):
   else:
     gsutil = LOCAL_GSUTIL
 
-  path = 'naclsdk_' + platform + '.bz2'
+  path = flavor + '.bz2'
 
   if version == 'latest':
     print 'Looking for latest SDK upload...'
@@ -77,15 +77,15 @@ def DownloadSDK(platform, base_url, version):
     assert newest
     version = newest
 
-  url = GSTORE + 'trunk.' + str(version) + '/' + path
-  print url
+  return GSTORE + 'trunk.' + str(version) + '/' + path
 
+
+def DownloadAndInstallSDK(url):
   # Pick target directory.
   toolchain_dir = os.path.join(SRC_DIR, 'toolchain')
-  target = os.path.join(toolchain_dir, platform)
 
   bz2_dir = SCRIPT_DIR
-  bz2_filename = os.path.join(bz2_dir, path)
+  bz2_filename = os.path.join(bz2_dir, url.split('/')[-1])
 
   # Drop old versions.
   old_sdks = glob.glob(os.path.join(bz2_dir, 'pepper_*'))
@@ -116,20 +116,24 @@ def DownloadSDK(platform, base_url, version):
     names = tar_file.tar.getnames()
     pepper_dir = os.path.commonprefix(names)
     tar_file.Extract()
+  except Exception, err:
+    print 'Error unpacking %s' % str(err)
+    sys.exit(1)
   finally:
     if tar_file:
       tar_file.Close()
 
   os.chdir(old_cwd)
+
+  actual_dir = os.path.join(bz2_dir, pepper_dir, 'toolchain')
+  print 'Create toolchain symlink "%s" -> "%s"' % (actual_dir, toolchain_dir)
   if sys.platform in ['win32', 'cygwin']:
-    cmd = r'C:\cygwin\bin\rm.exe -rf ' + toolchain_dir + ' && ' \
-          r'C:\cygwin\bin\ln.exe -fsn ' + \
-          os.path.join(bz2_dir, pepper_dir, 'toolchain') + ' ' + \
-          toolchain_dir
+    cmd = (r'C:\cygwin\bin\rm.exe -rf ' + toolchain_dir + ' && ' +
+           r'C:\cygwin\bin\ln.exe -fsn ' + actual_dir + ' ' +  toolchain_dir)
   else:
-    cmd = 'rm -rf ' + toolchain_dir + ' && ' \
-          'ln -fsn ' + os.path.join(bz2_dir, pepper_dir, 'toolchain') + ' ' + \
-          toolchain_dir
+    cmd = ('rm -rf ' + toolchain_dir + ' && ' +
+           'ln -fsn ' + actual_dir + ' ' + toolchain_dir)
+
   p = subprocess.Popen(cmd, shell=True)
   p.communicate()
   assert p.returncode == 0
@@ -155,17 +159,27 @@ def main(argv):
       '-v', '--version', dest='version',
       default='latest',
       help='which version of the toolchain to download')
-  (options, args) = parser.parse_args(argv)
+  parser.add_option(
+      '-f', '--flavor', dest='flavor',
+      default='auto',
+      help='which flavor of the toolchain to download, e.g. naclsdk_linux or ' +
+           'pnaclsdk_linux')
+  options, args = parser.parse_args(argv)
   if args:
     parser.print_help()
     print 'ERROR: invalid argument'
     sys.exit(1)
 
-  flavor = PLATFORM_COLLAPSE[sys.platform]
-  DownloadSDK(flavor,
-              base_url='gs://nativeclient-mirror/nacl/nacl_sdk/',
-              version=options.version)
+  flavor = options.flavor
+  if flavor == 'auto':
+    flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
+  url = DetermineSdkURL(flavor,
+                        base_url='gs://nativeclient-mirror/nacl/nacl_sdk/',
+                        version=options.version)
+  print 'SDK URL is "%s"' % url
+
+  DownloadAndInstallSDK(url)
 
 if __name__ == '__main__':
   main(sys.argv[1:])
