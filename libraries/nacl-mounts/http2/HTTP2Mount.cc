@@ -130,6 +130,9 @@ int HTTP2Mount::Getdents(ino_t slot, off_t offset,
   }
   for (std::map<std::string, int>::iterator it = files_.begin();
        it != files_.end(); ++it) {
+    // Don't trip an assert when node->path_ is "/".
+    if (it->second == slot)
+      continue;
     size_t pos = it->first.find(pathslash);
     if (pos == 0) {
       int len = path_parts.size();
