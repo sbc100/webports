@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -71,6 +71,8 @@ class KernelProxy {
   // not the path corresponds to a directory or a file.  The mount's Rmdir()
   // or Unlink() is called accordingly.
   int remove(const std::string& path);
+  // unlink() is a simple wrapper around the mount's Unlink function.
+  int unlink(const std::string& path);
   // access() uses the Mount's Stat().
   int access(const std::string& path, int amode);
 

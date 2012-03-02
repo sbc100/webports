@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -486,6 +486,26 @@ int KernelProxy::remove(const std::string& path) {
   // Only support regular files and directories now.
   errno = EINVAL;
   return -1;
+}
+
+int KernelProxy::unlink(const std::string& path) {
+  if (path.empty()) {
+    errno = ENOENT;
+    return -1;
+  }
+
+  Path p(path);
+  if (path[0] != '/') {
+    p = Path(cwd_.FormulatePath() + "/" + path);
+  }
+
+  std::pair<Mount *, std::string> mp = mm_.GetMount(p.FormulatePath());
+  if (!mp.first) {
+    errno = ENOENT;
+    return -1;
+  }
+
+  return mp.first->Unlink(mp.second);
 }
 
 int KernelProxy::umount(const std::string& path) {

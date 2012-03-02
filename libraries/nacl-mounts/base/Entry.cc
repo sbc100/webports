@@ -361,8 +361,7 @@ mode_t __wrap_umask(mode_t cmask) {
 }
 
 int __wrap_unlink(const char *path) {
-  // Always pretend to work for now.
-  return 0;
+  return kp->unlink(path);
 }
 
 struct utimbuf;

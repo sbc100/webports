@@ -269,11 +269,6 @@ int PepperMount::Unlink(const std::string& path) {
   std::string abs_path = p.FormulatePath();
   std::string fs_path = Path(path_prefix_).AppendPath(abs_path).FormulatePath();
 
-  int slot = GetSlot(abs_path);
-  if (slot >= 0) {
-    Unref(slot);
-  }
-
   PepperFileIOJob *job = new PepperFileIOJob;
   job->set_op(DELETE_PATH);
   job->set_fs(fs_);
