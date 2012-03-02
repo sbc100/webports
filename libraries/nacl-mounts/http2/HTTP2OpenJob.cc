@@ -25,8 +25,7 @@ void HTTP2OpenJob::Run(MainThreadRunner::JobEntry *e) {
 
   dbgprintf("open %s\n", fs_path_.c_str());
   ref_ = new pp::FileRef(*fs_, fs_path_.c_str());
-  pp::Instance *instance = MainThreadRunner::ExtractPepperInstance(job_entry_);
-  io_ = new pp::FileIO(instance);
+  io_ = new pp::FileIO(MainThreadRunner::ExtractPepperInstance(job_entry_));
 
   factory_ = new pp::CompletionCallbackFactory<HTTP2OpenJob>(this);
 
@@ -83,6 +82,8 @@ void HTTP2OpenJob::FileQueryCallback(int32_t result) {
     // Bad/truncated file. Re-download.
     // TODO(eugenis): resume download if the file is shorter than expected
     io_->Close();
+    delete io_;
+    io_ = new pp::FileIO(MainThreadRunner::ExtractPepperInstance(job_entry_));
     DownloadFile();
   } else {
     // success
