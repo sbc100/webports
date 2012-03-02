@@ -360,9 +360,12 @@ void HTTP2Mount::ParseManifest(const std::string& str) {
   }
 }
 
-
 void HTTP2Mount::ReadManifest(const std::string& path) {
-  int slot = AddFile(path, -1);
+  ReadManifest(path, -1);
+}
+
+void HTTP2Mount::ReadManifest(const std::string& path, ssize_t size) {
+  int slot = AddFile(path, size);
   std::string s;
   ReadAll(this, slot, &s);
   ParseManifest(s);

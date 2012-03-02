@@ -63,6 +63,7 @@ class HTTP2Mount: public BaseMount {
 
   // Read the filesystem manifest from the file at the given path.
   void ReadManifest(const std::string& path);
+  void ReadManifest(const std::string& path, ssize_t size);
 
  private:
 
