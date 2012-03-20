@@ -559,6 +559,15 @@ DefaultTranslateStep() {
     time ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${pexe}.$a
     ls -l ${pexe}.$a
   done
+
+  # PIC branch
+  # NOTE: x86-64 omitted
+  # http://code.google.com/p/nativeclient/issues/detail?id=2672
+  for a in arm x86-32 ; do
+    echo "translating to $a [pic]"
+    time ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${pexe}.$a.pic
+    ls -l ${pexe}.$a.pic
+  done
 }
 
 
