@@ -23,6 +23,10 @@ CustomBuildStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
+  # NOTE: we are using the non-standard vars NACL_CCFLAGS/NACL_LDFLAGS
+  # because we are not running ./configure and the Makefile was hacked
+  export NACL_CCFLAGS="-O"
+  export NACL_LDFLAGS=""
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig

@@ -30,6 +30,8 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
+  export CXXFLAGS="-O2 -g"
+  export LDFLAGS=""
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   # path and package magic to make sure we call the right
@@ -71,7 +73,6 @@ CustomConfigureStep() {
     export LIBS="$LIBS -lnosys"
   fi
   export LIBS="$LIBS -Wl,--end-group"
-  export LDFLAGS=
 
   # linker wrappers
   if [ "${NACL_GLIBC}" = "1" ]; then

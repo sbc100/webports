@@ -245,8 +245,8 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  
 -CFLAGS = -O -I../include
 -LFLAGS = 
-+CFLAGS := -O -I../include
-+LFLAGS =
++CFLAGS := $(NACL_CCFLAGS) -I../include
++LFLAGS = $(NACL_LDFLAGS)
 +ifneq ($(NACL_GLIBC), 1)
 +  LFLAGS += -Xlinker --wrap -Xlinker open
 +  LFLAGS += -Xlinker --wrap -Xlinker close

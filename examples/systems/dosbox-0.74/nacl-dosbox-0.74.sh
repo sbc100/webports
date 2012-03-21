@@ -31,6 +31,9 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
+  # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
+  export CXXFLAGS="-O2 -g"
+  export NACL_LDFLAGS=""
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
@@ -74,7 +77,7 @@ CustomConfigureStep() {
       -lnacl-mounts"
 
   # linker wrappers, defined in libnacl-mounts
-  LDFLAGS="-Wl,--wrap,open \
+  LDFLAGS="${NACL_LDFLAGS} -Wl,--wrap,open \
       -Wl,--wrap,close \
       -Wl,--wrap,read \
       -Wl,--wrap,write \

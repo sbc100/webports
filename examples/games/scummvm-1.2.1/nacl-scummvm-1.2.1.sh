@@ -32,6 +32,10 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
+  export CXXFLAGS=""
+  export LDFLAGS=""
+  # without this setting *make* will not show the full command lines
+  export VERBOSE_BUILD=1
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
@@ -53,8 +57,6 @@ CustomConfigureStep() {
   export LIBS="$LIBS -lvorbisfile -lvorbis -logg"
   export LIBS="$LIBS -lnacl-mounts"
   export LIBS="$LIBS -Wl,--no-whole-archive"
-  export LDFLAGS=
-
   # linker wrappers
   if [ "${NACL_GLIBC}" = "1" ]; then
     echo "No linker wrapping for glibc"
