@@ -118,53 +118,21 @@ int HTTP2Mount::Stat(ino_t slot, struct stat *buf) {
 int HTTP2Mount::Getdents(ino_t slot, off_t offset,
                         struct dirent *dir, unsigned int count) {
   HTTP2Node* node = slots_.At(slot);
-  if (node == NULL) {
+  if (node == NULL || !node->is_dir_) {
     errno = ENOTDIR;
     return -1;
   }
-  std::list<std::string> path_parts = Path(node->path_).path();
-  std::set<std::string> entries;
-  std::string pathslash = node->path_;
-  if (pathslash != "/") {
-    pathslash += "/";
-  }
-  for (std::map<std::string, int>::iterator it = files_.begin();
-       it != files_.end(); ++it) {
-    // Don't trip an assert when node->path_ is "/".
-    if (it->second == slot)
-      continue;
-    size_t pos = it->first.find(pathslash);
-    if (pos == 0) {
-      int len = path_parts.size();
-      std::list<std::string> ipath_parts = Path(it->first).path();
-      std::list<std::string>::iterator i_it = ipath_parts.begin();
-      assert (ipath_parts.size() > len);
-      while (len > 0) {
-        --len;
-        ++i_it;
-      }
-      entries.insert(*i_it);
-    }
-  }
-
-  // Now that we have the directory names, we can formulate the dirent structs.
-  std::set<std::string>::iterator it = entries.begin();
-  // Skip to the offset
-  while (offset > 0 && it != entries.end()) {
-    --offset;
-    ++it;
-  }
 
   int bytes_read = 0;
-  for (; it != entries.end() &&
-       bytes_read + sizeof(struct dirent) <= count; ++it) {
+  for (size_t i = offset; i < node->dents_.size() &&
+       bytes_read + sizeof(struct dirent) <= count; ++i) {
     memset(dir, 0, sizeof(struct dirent));
     // We want d_ino to be non-zero because readdir()
     // will return null if d_ino is zero.
     dir->d_ino = 0x60061E;
     dir->d_off = sizeof(struct dirent);
     dir->d_reclen = sizeof(struct dirent);
-    strncpy(dir->d_name, it->c_str(), sizeof(dir->d_name));
+    strncpy(dir->d_name, node->dents_[i].c_str(), sizeof(dir->d_name));
     ++dir;
     bytes_read += sizeof(struct dirent);
   }
@@ -245,7 +213,8 @@ ssize_t HTTP2Mount::Read(ino_t slot, off_t offset, void *buf, size_t count) {
 }
 
 int HTTP2Mount::AddPath(const std::string& path, ssize_t size, bool is_dir) {
-  std::string p = Path(path).FormulatePath();
+  Path path_obj(path);
+  std::string p = path_obj.FormulatePath();
 
   int slot = slots_.Alloc();
   HTTP2Node *node = slots_.At(slot);
@@ -260,7 +229,25 @@ int HTTP2Mount::AddPath(const std::string& path, ssize_t size, bool is_dir) {
   node->data_ = NULL;
 
   files_[p] = slot;
+
+  // Hook it up to the parent directory.
+  if (p != "/") {
+    std::string parent = path_obj.AppendPath("..").FormulatePath();
+    LinkDent(parent, path_obj.Last());
+  }
+
   return slot;
+}
+
+void HTTP2Mount::LinkDent(const std::string& dir, const std::string& dent) {
+  std::map<std::string, int>::iterator it = files_.find(dir);
+  if (it == files_.end()) {
+    dbgprintf("Error: '%s/%s' declared before '%s'\n",
+              dir.c_str(), dent.c_str(), dir.c_str());
+    return;
+  }
+  HTTP2Node* node = slots_.At(it->second);
+  node->dents_.push_back(dent);
 }
 
 int HTTP2Mount::AddFile(const std::string& path, ssize_t size) {

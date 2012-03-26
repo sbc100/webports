@@ -68,6 +68,7 @@ class HTTP2Mount: public BaseMount {
  private:
 
   int AddPath(const std::string& file, ssize_t size, bool is_dir);
+  void LinkDent(const std::string& dir, const std::string& dent);
   void RegisterFileFromManifest(const std::string& path,
       const std::string& pack_path, size_t offset, size_t size);
   void ParseManifest(const std::string& s);

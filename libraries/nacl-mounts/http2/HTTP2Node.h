@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -7,6 +7,7 @@
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_HTTP2_HTTP2NODE_H_
 
 #include <string>
+#include <vector>
 #include <ppapi/cpp/file_io.h>
 
 class HTTP2Node {
@@ -15,6 +16,7 @@ class HTTP2Node {
   size_t start_;
   ssize_t size_;
   bool is_dir_;
+  std::vector<std::string> dents_;  // empty if a file
 
   int slot_;
   int pack_slot_; // -1 if not in a bundle
