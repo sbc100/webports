@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011 The Native Client Authors. All rights reserved.
+  Copyright (c) 2012 The Native Client Authors. All rights reserved.
   Use of this source code is governed by a BSD-style license that can be
   found in the LICENSE file.
 */
@@ -16,32 +16,13 @@ function moduleDidLoad() {
 
 // Handle a message coming from the NaCl module.
 function handleMessage(message_event) {
-  if (message_event.data === 'EOF') {
-    var bytes = save.split(' ');
-    for (var i = 0; i < bytes.length - 1; ++i) {
-      bytes[i] = String.fromCharCode(bytes[i]);
-    }
-    localStorage[game_id_] = bytes.join('');
-    console.log('Received message length ' + save.length +
-        ' ; file size: ' + bytes.length);
-    save = '';
-  } else {
-    save += message_event.data;
+  var bytes = message_event.data.split(' ');
+  for (var i = 0; i < bytes.length - 1; ++i) {
+    bytes[i] = String.fromCharCode(bytes[i]);
   }
-}
-
-function postMessageWorkAround(module, msg) {
-  var begin = (new Date()).getTime();
-  var kFragmentSize = 65000;
-  var num = parseInt(msg.length / kFragmentSize);
-  for (var i = 0; i < num; ++i) {
-    module.postMessage('L-' + msg.substr(i * kFragmentSize, kFragmentSize));
-  }
-  var s = msg.substr(num * kFragmentSize);
-  module.postMessage('L$' + s);
-
-  var end = (new Date()).getTime();
-  console.log('[time] postMessageWorkAround: ' + (end - begin));
+  localStorage[game_id_] = bytes.join('');
+  console.log('Received message length ' + message_event.data.length +
+      ' ; file size: ' + bytes.length);
 }
 
 function localLoad() {
@@ -53,7 +34,7 @@ function localLoad() {
   }
   var end = (new Date()).getTime();
   console.log('[time] localLoad from localStorage: ' + (end - begin));
-  postMessageWorkAround(snesModule, msg);
+  snesModule.postMessage('L ' + msg);
 }
 
 function localSave() {

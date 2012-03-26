@@ -533,8 +533,8 @@ diff -Nru snes9x-1.53-src/unix/nacl.h snes9x/unix/nacl.h
 +extern EventQueue event_queue;
 diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 --- snes9x-1.53-src/unix/pepper.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ snes9x/unix/pepper.cpp	2012-01-20 02:47:19.930979347 -0800
-@@ -0,0 +1,308 @@
++++ snes9x/unix/pepper.cpp	2012-02-17 21:10:45.000000000 +0800
+@@ -0,0 +1,289 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -687,18 +687,6 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +    graphics_2d_context_->Flush(pp::CompletionCallback(&RepaintCallback, this));
 +  }
 +
-+  void PostMessageWorkAround(const string& msg) {
-+    const int kFragmentSize = 65000;
-+    int num = msg.size() / kFragmentSize;
-+    for (int i = 0; i < num; ++i) {
-+      string fragment = msg.substr(i * kFragmentSize, kFragmentSize);
-+      PostMessage(pp::Var(fragment));
-+    }
-+    string s = msg.substr(num * kFragmentSize);
-+    PostMessage(pp::Var(s));
-+    PostMessage(pp::Var("EOF"));
-+  }
-+
 +  void DumpSave() {
 +    DebugPrintf("Dump save: %s\n", snapshot_filename);
 +    FILE *fp = fopen(snapshot_filename, "r");
@@ -725,10 +713,10 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +    } while (!feof(fp));
 +    fclose(fp);
 +
-+    DebugPrintf("PostMessageWorkAround: file size: %d ; msg len: %d\n",
++    DebugPrintf("PostMessage: file size: %d ; msg len: %d\n",
 +                size,
 +                message.size());
-+    PostMessageWorkAround(message);
++    PostMessage(message);
 +  }
 +
 +  void LoadSave(const string& data) {
@@ -765,14 +753,8 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +    } else if (message[0] == 'S') {
 +      DumpSave();
 +    } else if (message[0] == 'L') {
-+      if (message[1] == '$') {
-+        DebugPrintf("HandleMessage: length: %d (end)\n", message.size());
-+        save_ += message.substr(2);
-+        LoadSave(save_);
-+        save_ = "";
-+      } else {
-+        save_ += message.substr(2);
-+      }
++      DebugPrintf("HandleMessage: length: %d (end)\n", message.size());
++      LoadSave(message.substr(2));
 +    }
 +  }
 +
@@ -812,7 +794,6 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +  int window_height_;
 +  int which_image_;
 +  uint32_t sample_frame_count_;
-+  string save_;
 +  pp::Size size_;
 +  pp::ImageData* pixel_buffer_;
 +  pp::Graphics2D* graphics_2d_context_;
