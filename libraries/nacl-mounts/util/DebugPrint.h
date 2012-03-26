@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
+#ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_DEBUGPRINT_H_
+#define PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_DEBUGPRINT_H_
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -23,3 +25,5 @@ static int dbgprintf(const char* format, ...) {
   va_end(args);
   return r;
 }
+
+#endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_DEBUGPRINT_H_

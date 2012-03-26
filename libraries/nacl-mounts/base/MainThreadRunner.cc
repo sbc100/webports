@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -15,10 +15,6 @@
 #  include <ppapi/cpp/module.h>
 #  define USE_PEPPER
 #endif
-
-// kWORK_POLL_TIMEOUT sets the time delay (in milliseconds) between checks
-// for available jobs.
-static const int kWorkPollTimeout = 10;
 
 // Stack space to allocate by default to the event handler
 // thread in the presence of an ancillary 'pseudo-thread'.
@@ -51,11 +47,6 @@ MainThreadRunner::MainThreadRunner(pp::Instance *instance) {
 
   pepper_instance_ = instance;
   pthread_mutex_init(&lock_, NULL);
-
-#ifdef USE_PEPPER
-  // Start work cycling if using pepper.
-  DoWork();
-#endif
 }
 
 MainThreadRunner::~MainThreadRunner() {
@@ -92,6 +83,12 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
   job_queue_.push_back(&entry);
   pthread_mutex_unlock(&lock_);
 
+#ifdef USE_PEPPER
+  // Schedule the job.
+  pp::Module::Get()->core()->CallOnMainThread(0,
+      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
+#endif
+
   // Block differntly on the main thread.
   if (entry.pseudo_thread_job) {
     // block pseudothread until job is done
@@ -114,9 +111,6 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
 
 void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
   JobEntry* entry = reinterpret_cast<JobEntry*>(arg);
-#ifdef USE_PEPPER
-  MainThreadRunner* runner = entry->runner;
-#endif
   entry->result = result;
   // Signal differently depending on if the pseudothread is involved.
   if (entry->pseudo_thread_job) {
@@ -127,10 +121,6 @@ void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
     pthread_cond_signal(&entry->done_cond);
     pthread_mutex_unlock(&entry->done_mutex);
   }
-#ifdef USE_PEPPER
-  // Do more work now if in pepper.
-  DoWorkShim(runner, 0);
-#endif
 }
 
 void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
@@ -148,11 +138,6 @@ void MainThreadRunner::DoWork(void) {
     entry->job->Run(entry);
     return;
   }
-#ifdef USE_PEPPER
-  // Wake ourselves back up if we're using pepper.
-  pp::Module::Get()->core()->CallOnMainThread(kWorkPollTimeout,
-      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
-#endif
   pthread_mutex_unlock(&lock_);
 }
 

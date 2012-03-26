@@ -383,8 +383,8 @@ diff -urN SDL-1.2.14/src/cpuinfo/SDL_cpuinfo.c SDL-1.2.14-nacl/src/cpuinfo/SDL_c
  {
  	if ( CPU_haveCPUID() ) {
 diff -urN SDL-1.2.14/src/SDL_fatal.c SDL-1.2.14-nacl/src/SDL_fatal.c
---- SDL-1.2.14/src/SDL_fatal.c	2009-10-12 16:07:16.000000000 -0700
-+++ SDL-1.2.14-nacl/src/SDL_fatal.c	2012-01-28 00:46:08.909157965 -0800
+--- SDL-1.2.14/src/SDL_fatal.c	2009-10-13 03:07:16.000000000 +0400
++++ SDL-1.2.14-nacl/src/SDL_fatal.c	2012-01-28 12:46:08.909157965 +0400
 @@ -39,7 +39,11 @@
  {
  	signal(sig, SIG_DFL);
@@ -465,10 +465,10 @@ diff -urN SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14-nacl/src/video/nacl/
 +#endif // _SDL_nacl_eventqueue_h
 diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc
 --- SDL-1.2.14/src/video/nacl/MainThreadRunner.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc	2012-01-16 12:16:39.470269368 +0400
-@@ -0,0 +1,242 @@
++++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc	2012-03-21 03:17:01.150449516 +0400
+@@ -0,0 +1,227 @@
 +/*
-+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
 + * found in the LICENSE file.
 + */
@@ -484,10 +484,6 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +#  include <ppapi/cpp/module.h>
 +#  define USE_PEPPER
 +#endif
-+
-+// kWORK_POLL_TIMEOUT sets the time delay (in milliseconds) between checks
-+// for available jobs.
-+static const int kWorkPollTimeout = 10;
 +
 +// Stack space to allocate by default to the event handler
 +// thread in the presence of an ancillary 'pseudo-thread'.
@@ -520,11 +516,6 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +
 +  pepper_instance_ = instance;
 +  pthread_mutex_init(&lock_, NULL);
-+
-+#ifdef USE_PEPPER
-+  // Start work cycling if using pepper.
-+  DoWork();
-+#endif
 +}
 +
 +MainThreadRunner::~MainThreadRunner() {
@@ -561,6 +552,12 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +  job_queue_.push_back(&entry);
 +  pthread_mutex_unlock(&lock_);
 +
++#ifdef USE_PEPPER
++  // Schedule the job.
++  pp::Module::Get()->core()->CallOnMainThread(0,
++      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
++#endif
++
 +  // Block differntly on the main thread.
 +  if (entry.pseudo_thread_job) {
 +    // block pseudothread until job is done
@@ -583,9 +580,6 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +
 +void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
 +  JobEntry* entry = reinterpret_cast<JobEntry*>(arg);
-+#ifdef USE_PEPPER
-+  MainThreadRunner* runner = entry->runner;
-+#endif
 +  entry->result = result;
 +  // Signal differently depending on if the pseudothread is involved.
 +  if (entry->pseudo_thread_job) {
@@ -596,10 +590,6 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +    pthread_cond_signal(&entry->done_cond);
 +    pthread_mutex_unlock(&entry->done_mutex);
 +  }
-+#ifdef USE_PEPPER
-+  // Do more work now if in pepper.
-+  DoWorkShim(runner, 0);
-+#endif
 +}
 +
 +void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
@@ -617,11 +607,6 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +    entry->job->Run(entry);
 +    return;
 +  }
-+#ifdef USE_PEPPER
-+  // Wake ourselves back up if we're using pepper.
-+  pp::Module::Get()->core()->CallOnMainThread(kWorkPollTimeout,
-+      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
-+#endif
 +  pthread_mutex_unlock(&lock_);
 +}
 +
@@ -711,10 +696,10 @@ diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/vide
 +bool MainThreadRunner::forked_pseudo_thread_ = false;
 diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.h SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h
 --- SDL-1.2.14/src/video/nacl/MainThreadRunner.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h	2012-01-16 12:16:39.470269368 +0400
++++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h	2012-03-21 03:16:57.140438993 +0400
 @@ -0,0 +1,102 @@
 +/*
-+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
++ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
 + * found in the LICENSE file.
 + */
