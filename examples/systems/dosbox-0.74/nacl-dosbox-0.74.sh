@@ -34,6 +34,10 @@ CustomConfigureStep() {
   # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
   export CXXFLAGS="-O2 -g"
   export NACL_LDFLAGS=""
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    export CXXFLAGS="-O3 -g"
+    export NACL_LDFLAGS="-O0"
+  fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig

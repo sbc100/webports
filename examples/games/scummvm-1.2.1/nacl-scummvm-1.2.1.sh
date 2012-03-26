@@ -34,6 +34,10 @@ CustomConfigureStep() {
   export AR=${NACLAR}
   export CXXFLAGS=""
   export LDFLAGS=""
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    export CXXFLAGS="-O3 -g"
+    export LDFLAGS="-O0"
+  fi
   # without this setting *make* will not show the full command lines
   export VERBOSE_BUILD=1
   export RANLIB=${NACLRANLIB}

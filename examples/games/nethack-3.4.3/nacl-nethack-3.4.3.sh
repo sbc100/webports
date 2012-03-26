@@ -27,6 +27,10 @@ CustomBuildStep() {
   # because we are not running ./configure and the Makefile was hacked
   export NACL_CCFLAGS="-O"
   export NACL_LDFLAGS=""
+  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+    export NACL_CCFLAGS="-O3 -g"
+    export NACL_LDFLAGS="-O0"
+  fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig

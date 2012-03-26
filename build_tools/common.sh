@@ -186,7 +186,10 @@ InitializePNaClToolchain() {
   export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
   export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
   export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+  # pnacl's translator
   export TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
+  # pnacl's pexe optimizer
+  export OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
   # TODO(robertm): figure our why we do not have a pnacl-string
   #export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
   # until then use the host's strings tool
@@ -543,30 +546,66 @@ DefaultCleanUpStep() {
 }
 
 
+RunCommand() {
+  echo "$@"
+  time "$@"
+}
+
 DefaultTranslateStep() {
   local package=$1
   local build_dir="${NACL_PACKAGES_REPOSITORY}/${package}"
   local pexe=${build_dir}/$2
 
   Banner "Translating ${pexe}"
+  ls -l ${pexe}
 
-  echo "stripping"
-  time ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
+  echo "stripping pexe"
+  RunCommand ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
   ls -l ${pexe}.stripped
 
   for a in arm x86-32 x86-64 ; do
-    echo "translating to $a"
-    time ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${pexe}.$a
-    ls -l ${pexe}.$a
+    echo
+    echo "translating pexe [$a]"
+    nexe=${pexe}.$a.nexe
+    RunCommand ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${nexe}
+    ls -l ${nexe}
   done
 
   # PIC branch
   # NOTE: x86-64 omitted
   # http://code.google.com/p/nativeclient/issues/detail?id=2672
   for a in arm x86-32 ; do
-    echo "translating to $a [pic]"
-    time ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${pexe}.$a.pic
-    ls -l ${pexe}.$a.pic
+    echo
+    echo "translating pexe [$a,pic]"
+    nexe=${pexe}.$a.pic.nexe
+    RunCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${nexe}
+    ls -l ${nexe}
+  done
+
+  # Now the same spiel with an optimized pexe
+  opt_args="-O3 -inline-threshold=100"
+  echo
+  echo "optimizing pexe [${opt_args}]"
+  RunCommand ${OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
+  ls -l ${pexe}.stripped.opt
+
+  for a in arm x86-32 x86-64 ; do
+    echo
+    echo "translating pexe [$a]"
+    nexe=${pexe}.opt.$a.nexe
+    RunCommand ${TRANSLATOR} -arch $a ${pexe}.stripped.opt -o ${nexe}
+    ls -l ${nexe}
+  done
+
+  # PIC branch
+  # NOTE: x86-64 omitted
+  # http://code.google.com/p/nativeclient/issues/detail?id=2672
+  for a in arm x86-32 ; do
+    echo
+    echo "translating pexe [$a,pic]"
+    nexe=${pexe}.$a.pic.opt.nexe
+    RunCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped.opt -o ${nexe}
+    ls -l ${nexe}
   done
 }
 
