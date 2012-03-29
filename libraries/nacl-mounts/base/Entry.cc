@@ -37,6 +37,62 @@ extern "C" {
   DECLARE(seek);
   DECLARE(mmap);
 
+  int chmod(const char *path, mode_t mode) {
+    return kp->chmod(path, mode);
+  }
+
+  int stat(const char *path, struct stat *buf) {
+    return kp->stat(path, buf);
+  }
+
+  int mkdir(const char *path, mode_t mode) {
+    return kp->mkdir(path, mode);
+  }
+
+  int rmdir(const char *path) {
+    return kp->chdir(path);
+  }
+
+  int umount(const char *path) {
+    return kp->umount(path);
+  }
+
+  int _mount(const char *type, const char *dir, int flags, void *data) {
+    return kp->mount(dir, data);
+  }
+
+  int remove(const char *path) {
+    return kp->remove(path);
+  }
+
+  int chdir(const char *path) {
+    return kp->chdir(path);
+  }
+
+  int access(const char *path, int amode) {
+    return kp->access(path, amode);
+  }
+
+  int ioctl(int fd, unsigned long request, ...) {
+    return kp->ioctl(fd, request);
+  }
+
+  int link(const char *path1, const char *path2) {
+    return kp->link(path1, path2);
+  }
+
+  int symlink(const char *path1, const char *path2) {
+    return kp->symlink(path1, path2);
+  }
+
+  int kill(pid_t pid, int sig) {
+    return kp->kill(pid, sig);
+  }
+
+  int unlink(const char *path) {
+    return kp->unlink(path);
+  }
+
   ssize_t __real_read(int fd, void *buf, size_t count) {
     size_t nread;
     errno = REAL(read)(fd, buf, count, &nread);
