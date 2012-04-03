@@ -37,6 +37,11 @@ extern "C" {
   DECLARE(seek);
   DECLARE(mmap);
 
+  DECLARE(mkdir);
+  DECLARE(rmdir);
+  DECLARE(chdir);
+  DECLARE(getcwd);
+
   int chmod(const char *path, mode_t mode) {
     return kp->chmod(path, mode);
   }
@@ -124,6 +129,32 @@ extern "C" {
   int WRAP(read)(int fd, void *buf, size_t count, size_t *nread) {
     *nread = kp->read(fd, buf, count);
     return (*nread < 0) ? errno : 0;
+  }
+
+  int WRAP(mkdir)(const char *pathname, mode_t mode) {
+    return kp->mkdir(pathname, mode) < 0 ? errno : 0;
+  }
+
+  int WRAP(rmdir)(const char *pathname) {
+    return kp->rmdir(pathname) < 0 ? errno : 0;
+  }
+
+  int WRAP(chdir)(const char *path) {
+    return kp->chdir(path) < 0 ? errno : 0;
+  }
+
+  int WRAP(getcwd)(char *buf, size_t size, int* ret) {
+    std::string buff;
+    if (kp->getcwd(&buff, size)) {
+      strncpy(buf, buff->c_str(), size);
+      *ret = buff.length() + 1;
+      return 0;
+    }
+    else
+    {
+      *ret = 0;
+      return errno;
+    }
   }
 
   int WRAP(write)(int fd, const void *buf, size_t count, size_t *nwrote) {
@@ -239,6 +270,11 @@ struct NaClMountsStaticInitializer {
     DO_WRAP(getdents);
     DO_WRAP(seek);
     DO_WRAP(mmap);
+
+    DO_WRAP(chdir);
+    DO_WRAP(mkdir);
+    DO_WRAP(rmdir);
+    DO_WRAP(getcwd);
   }
 } nacl_mounts_static_initializer;
 
@@ -297,7 +333,7 @@ int __wrap_mkdir(const char *path, mode_t mode) {
 }
 
 int __wrap_rmdir(const char *path) {
-  return kp->chdir(path);
+  return kp->rmdir(path);
 }
 
 int __wrap_umount(const char *path) {
