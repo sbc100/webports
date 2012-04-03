@@ -106,7 +106,8 @@ LIBRARIES = \
      libraries/dreadthread \
      libraries/libmikmod-3.1.11 \
      libraries/jsoncpp-0.5.0 \
-     libraries/openal-soft-1.13
+     libraries/openal-soft-1.13 \
+     libraries/gtest-1.5.0
 
 EXAMPLES = \
      examples/games/nethack-3.4.3 \
@@ -190,6 +191,7 @@ $(SENT)/libraries/SDL_ttf-2.0.10: libraries/SDL-1.2.14 libraries/freetype-2.1.10
 $(SENT)/libraries/boost_1_47_0: libraries/zlib-1.2.3 libraries/bzip2-1.0.6
 $(SENT)/examples/audio/openal-ogg: \
     libraries/openal-soft-1.13 libraries/libvorbis-1.2.3
+$(SENT)/libraries/nacl-mounts: libraries/gtest-1.5.0
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg-2.5 ;
