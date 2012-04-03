@@ -149,9 +149,7 @@ extern "C" {
       strncpy(buf, buff->c_str(), size);
       *ret = buff.length() + 1;
       return 0;
-    }
-    else
-    {
+    } else {
       *ret = 0;
       return errno;
     }
@@ -270,7 +268,6 @@ struct NaClMountsStaticInitializer {
     DO_WRAP(getdents);
     DO_WRAP(seek);
     DO_WRAP(mmap);
-
     DO_WRAP(chdir);
     DO_WRAP(mkdir);
     DO_WRAP(rmdir);
