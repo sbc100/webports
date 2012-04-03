@@ -20,6 +20,69 @@ RunTests() {
  make clean
 }
 
+LDFLAGS_NEWLIB="-Wl,--wrap,open \
+-Wl,--wrap,close \
+-Wl,--wrap,read \
+-Wl,--wrap,write \
+-Wl,--wrap,lseek \
+-Wl,--wrap,tell \
+-Wl,--wrap,mkdir \
+-Wl,--wrap,rmdir \
+-Wl,--wrap,remove \
+-Wl,--wrap,getcwd \
+-Wl,--wrap,getwd \
+-Wl,--wrap,chdir \
+-Wl,--wrap,isatty \
+-Wl,--wrap,stat \
+-Wl,--wrap,fstat \
+-Wl,--wrap,access \
+-Wl,--wrap,getuid \
+-Wl,--wrap,setuid \
+-Wl,--wrap,getgid \
+-Wl,--wrap,setgid \
+-Wl,--wrap,getlogin \
+-Wl,--wrap,getpwnam \
+-Wl,--wrap,getpwuid \
+-Wl,--wrap,umask \
+-Wl,--wrap,chmod \
+-Wl,--wrap,ioctl \
+-Wl,--wrap,link \
+-Wl,--wrap,unlink \
+-Wl,--wrap,kill \
+-Wl,--wrap,__srget_r \
+-Wl,--wrap,tgetch \
+-Wl,--wrap,mount \
+-Wl,--wrap,umount \
+-Wl,--wrap,signal"
+
+RunSelLdrTests() {
+  if [ ! -e ${NACL_IRT} ]; then
+    echo "WARNING: Missing IRT binary. Not running sel_ldr-based tests."
+    return
+  fi
+
+  if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ]; then
+    echo "FIXME: Not running sel_ldr-based tests with PNaCl."
+    return
+  fi
+
+  export CC=${NACLCC}
+  export CXX=${NACLCXX}
+  export CFLAGS=-I${NACL_SDK_USR_INCLUDE}
+
+  LDFLAGS=-L${NACL_SDK_USR_LIB}
+  if [ $NACL_GLIBC != "1" ] ; then
+      LDFLAGS="${LDFLAGS} ${LDFLAGS_NEWLIB}"
+  fi
+  export LDFLAGS
+
+  MakeDir ${PACKAGE_DIR}/test.nacl
+  ChangeDir ${PACKAGE_DIR}/test.nacl
+  make -f ${START_DIR}/test.nacl/Makefile
+
+  RunSelLdrCommand ${PACKAGE_DIR}/test.nacl/nacl_mounts_sel_ldr_tests
+}
+
 CustomBuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
@@ -112,6 +175,7 @@ CustomPackageInstall() {
   CustomInstallStep
   DefaultCleanUpStep
   DefaultTouchStep
+  RunSelLdrTests
 }
 
 CustomPackageInstall

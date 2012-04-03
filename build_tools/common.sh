@@ -56,6 +56,15 @@ else
   exit -1
 fi
 
+if [ ${NACL_PACKAGES_BITSIZE} = "32" ] ; then
+  readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_32
+  readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_x86_32.nexe
+else
+  # TODO(eugenis): Is this correct for PNACL?
+  readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_64
+  readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_x86_64.nexe
+fi
+
 # NACL_CROSS_PREFIX is the prefix of the executables in the
 # toolchain's "bin" directory. For example: i686-nacl-<toolname>.
 if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ]; then
@@ -152,6 +161,7 @@ InitializeNaClGccToolchain() {
   # NACL_SDK_USR is where the headers, libraries, etc. will be installed
   readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
   readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
+  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/lib
   readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
   readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
 
@@ -549,6 +559,16 @@ DefaultCleanUpStep() {
 RunCommand() {
   echo "$@"
   time "$@"
+}
+
+RunSelLdrCommand() {
+  echo "[sel_ldr] $@"
+  if [ $NACL_GLIBC = "1" ] ; then
+    time "${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- \
+        "${NACL_SDK_LIB}/runnable-ld.so" --library-path "${NACL_SDK_LIB}" "$@"
+  else
+    time "${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- "$@"
+  fi
 }
 
 DefaultTranslateStep() {
