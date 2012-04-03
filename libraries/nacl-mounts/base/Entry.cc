@@ -146,7 +146,7 @@ extern "C" {
   int WRAP(getcwd)(char *buf, size_t size, int* ret) {
     std::string buff;
     if (kp->getcwd(&buff, size)) {
-      strncpy(buf, buff->c_str(), size);
+      strncpy(buf, buff.c_str(), size);
       *ret = buff.length() + 1;
       return 0;
     } else {
