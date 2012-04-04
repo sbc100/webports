@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2012 The Native Client Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
 #ifndef _IRT_SYSCALLS_H
 #define _IRT_SYSCALLS_H
 
@@ -28,11 +23,6 @@ extern int (*__nacl_irt_nanosleep) (const struct timespec *req,
                                     struct timespec *rem);
 extern int (*__nacl_irt_sched_yield) (void);
 extern int (*__nacl_irt_sysconf) (int name, int *value);
-
-extern int (*__nacl_irt_mkdir) (const char* pathname, mode_t mode);
-extern int (*__nacl_irt_rmdir) (const char* pathname);
-extern int (*__nacl_irt_chdir) (const char* pathname);
-extern int (*__nacl_irt_getcwd) (char* buf, size_t size, int* ret);
 
 extern int (*__nacl_irt_open) (const char *pathname, int oflag, mode_t cmode,
                                int *newfd);
