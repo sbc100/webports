@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -61,35 +61,6 @@ CustomConfigureStep() {
   export LIBS="$LIBS -lvorbisfile -lvorbis -logg"
   export LIBS="$LIBS -lnacl-mounts"
   export LIBS="$LIBS -Wl,--no-whole-archive"
-  # linker wrappers
-  if [ "${NACL_GLIBC}" = "1" ]; then
-    echo "No linker wrapping for glibc"
-  else
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker creat"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker open"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker close"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker read"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker write"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker lseek"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker mkdir"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker rmdir"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker remove"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker getcwd"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker getwd"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker chdir"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker isatty"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker stat"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker fstat"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker access"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker chmod"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker ioctl"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker link"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker getdents"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker kill"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker mount"
-    export LDFLAGS="$LDFLAGS -Xlinker --wrap -Xlinker signal"
-  fi
-
   export CPPFLAGS="-I$NACL_PACKAGES_LIBRARIES"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}

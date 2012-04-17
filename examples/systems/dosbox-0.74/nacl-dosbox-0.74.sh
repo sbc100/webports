@@ -23,11 +23,6 @@ DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/systems/dosbox-0.74
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
 
-  if [ "${NACL_GLIBC}" = "1" ]; then
-    echo "Only linker wrapping for newlib is supported"
-    exit -1
-  fi
-
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -81,23 +76,7 @@ CustomConfigureStep() {
       -lnacl-mounts"
 
   # linker wrappers, defined in libnacl-mounts
-  LDFLAGS="${NACL_LDFLAGS} -Wl,--wrap,open \
-      -Wl,--wrap,close \
-      -Wl,--wrap,read \
-      -Wl,--wrap,write \
-      -Wl,--wrap,lseek \
-      -Wl,--wrap,mkdir \
-      -Wl,--wrap,rmdir \
-      -Wl,--wrap,getcwd \
-      -Wl,--wrap,chdir \
-      -Wl,--wrap,stat \
-      -Wl,--wrap,fstat \
-      -Wl,--wrap,access \
-      -Wl,--wrap,ioctl \
-      -Wl,--wrap,link \
-      -Wl,--wrap,kill \
-      -Wl,--wrap,unlink \
-      -Wl,--wrap,signal"
+  LDFLAGS="${NACL_LDFLAGS}"
 
   local MAYBE_NOSYS=""
   if [ "${NACL_GLIBC}" = "0" ]; then

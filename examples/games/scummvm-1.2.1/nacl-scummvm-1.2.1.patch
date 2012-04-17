@@ -78,7 +78,7 @@ diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instanc
 +#include "nacl-mounts/base/UrlLoaderJob.h"
 +#include "nacl-mounts/AppEngine/AppEngineMount.h"
 +
-+extern "C" int mount(const char *type, const char *dir, int flags, void *data);
++extern "C" int mount(const char *source, const char *target, const char *filesystemtype, unsigned long mountflags, const void *data);
 +extern "C" int scummvm_sdl_init(void);
 +extern "C" int scummvm_sdl_main(int argc,const char * const argv[]);
 +extern "C" int simple_tar_extract(const char *path);
@@ -126,7 +126,7 @@ diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instanc
 +  mkdir("/usr/local/save/AppEngine", 0777);
 +
 +  AppEngineMount *aem = new AppEngineMount(runner, "/_file");
-+  ret = mount("AppEngine", "/usr/local/save/AppEngine", 0, aem);
++  ret = mount(0, "/usr/local/save/AppEngine", 0, 0, aem);
 +  assert(ret == 0);
 +
 +  ret = chdir("/usr/local/save/AppEngine");

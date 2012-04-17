@@ -239,7 +239,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  
  # Pick the SYSSRC and SYSOBJ lines corresponding to your desired operating
  # system.
-@@ -151,14 +151,49 @@
+@@ -151,14 +151,14 @@
  # flags for debugging:
  # CFLAGS = -g -I../include
  
@@ -247,41 +247,6 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
 -LFLAGS = 
 +CFLAGS := $(NACL_CCFLAGS) -I../include
 +LFLAGS = $(NACL_LDFLAGS)
-+ifneq ($(NACL_GLIBC), 1)
-+  LFLAGS += -Xlinker --wrap -Xlinker open
-+  LFLAGS += -Xlinker --wrap -Xlinker close
-+  LFLAGS += -Xlinker --wrap -Xlinker read
-+  LFLAGS += -Xlinker --wrap -Xlinker write
-+  LFLAGS += -Xlinker --wrap -Xlinker lseek
-+  LFLAGS += -Xlinker --wrap -Xlinker tell
-+  LFLAGS += -Xlinker --wrap -Xlinker mkdir
-+  LFLAGS += -Xlinker --wrap -Xlinker rmdir
-+  LFLAGS += -Xlinker --wrap -Xlinker remove
-+  LFLAGS += -Xlinker --wrap -Xlinker getcwd
-+  LFLAGS += -Xlinker --wrap -Xlinker getwd
-+  LFLAGS += -Xlinker --wrap -Xlinker chdir
-+  LFLAGS += -Xlinker --wrap -Xlinker isatty
-+  LFLAGS += -Xlinker --wrap -Xlinker stat
-+  LFLAGS += -Xlinker --wrap -Xlinker fstat
-+  LFLAGS += -Xlinker --wrap -Xlinker access
-+  LFLAGS += -Xlinker --wrap -Xlinker getuid
-+  LFLAGS += -Xlinker --wrap -Xlinker setuid
-+  LFLAGS += -Xlinker --wrap -Xlinker getgid
-+  LFLAGS += -Xlinker --wrap -Xlinker setgid
-+  LFLAGS += -Xlinker --wrap -Xlinker getlogin
-+  LFLAGS += -Xlinker --wrap -Xlinker getpwnam
-+  LFLAGS += -Xlinker --wrap -Xlinker getpwuid
-+  LFLAGS += -Xlinker --wrap -Xlinker umask
-+  LFLAGS += -Xlinker --wrap -Xlinker chmod
-+  LFLAGS += -Xlinker --wrap -Xlinker ioctl
-+  LFLAGS += -Xlinker --wrap -Xlinker link
-+  LFLAGS += -Xlinker --wrap -Xlinker unlink
-+  LFLAGS += -Xlinker --wrap -Xlinker kill
-+  LFLAGS += -Xlinker --wrap -Xlinker __srget_r
-+  LFLAGS += -Xlinker --wrap -Xlinker tgetch
-+  LFLAGS += -Xlinker --wrap -Xlinker mount
-+  LFLAGS += -Xlinker --wrap -Xlinker umount -Xlinker --wrap -Xlinker signal
-+endif
  
  # The Qt and Be window systems are written in C++, while the rest of
  # NetHack is standard C.  If using Qt, uncomment the LINK line here to get
@@ -305,16 +270,12 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  #
  # files for an X11 port
  # (tile.c is a generated source file)
-@@ -231,7 +268,12 @@
+@@ -231,7 +268,8 @@
  # WINTTYLIB = -lcurses
  # WINTTYLIB = -lcurses16
  # WINTTYLIB = -lncurses
 -WINTTYLIB = -ltermlib
-+ifneq ($(NACL_GLIBC), 1)
-+	WINTTYLIB = -lnosys -Wl,--whole-archive -lnacl-mounts -lppapi -lppapi_cpp -Wl,--no-whole-archive
-+else
 +	WINTTYLIB = -Wl,--whole-archive -lnacl-mounts -lppapi -lppapi_cpp -Wl,--no-whole-archive
-+endif
 +
  #
  # libraries for X11

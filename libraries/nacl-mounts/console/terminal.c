@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -12,35 +12,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-
-#ifndef __GLIBC__
-int __wrap___srget_r(struct _reent *ptr, register FILE *fp) {
-  if (fp == stdin) {
-    return __wrap_getchar();
-  } else {
-    return __real___srget_r(ptr, fp);
-  }
-}
-
-int __wrap_getchar(void) {
-  char ch;
-  int ret;
-
-  ret = __wrap_read(0, &ch, 1);
-  if (ret == 1) return ch;
-  return -1;
-}
-
-int __wrap_tgetch(void) {
-  return __wrap_getchar();
-}
-#endif
-
-int puts(const char *s) {
-  write(1, s, strlen(s));
-  write(1, "\n", 1);
-  return 0;
-}
 
 /* exports for termcap */
 char PC = 0;

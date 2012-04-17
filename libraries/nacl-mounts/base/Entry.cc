@@ -8,41 +8,84 @@
 #include "Entry.h"
 #include "KernelProxy.h"
 
-#ifdef __GLIBC__
-
 #include <sys/mman.h>
 
+#include <irt.h>
 #include "irt_syscalls.h"
 #include "nacl_dirent.h"
 
-KernelProxy *kp = KernelProxy::KPInstance();
+static KernelProxy *kp = KernelProxy::KPInstance();
 
 extern "C" {
 
-#define DECLARE(name) typeof(__nacl_irt_##name) __nacl_irt_##name##_real;
-#define DO_WRAP(name) do { \
-    __nacl_irt_##name##_real = __nacl_irt_##name; \
-    __nacl_irt_##name = __nacl_irt_##name##_wrap; \
-  } while (0)
-#define WRAP(name) __nacl_irt_##name##_wrap
 #define REAL(name) __nacl_irt_##name##_real
+#define WRAP(name) __nacl_irt_##name##_wrap
+#ifdef __GLIBC__
+#  define DECLARE_STRUCT(group)
+#  define MUX(group, name) __nacl_irt_##name
+#else
+#  define STRUCT_NAME(group) __libnacl_irt_##group
+#  define DECLARE_STRUCT(group) \
+    extern struct nacl_irt_##group STRUCT_NAME(group);
+#  define MUX(group, name) STRUCT_NAME(group).name
+#endif
+#define DECLARE(group, name) typeof(MUX(group, name)) REAL(name);
+#define DO_WRAP(group, name) do { \
+    REAL(name) = MUX(group, name); \
+    MUX(group, name) = (typeof(REAL(name))) WRAP(name); \
+  } while (0)
 
-  DECLARE(open);
-  DECLARE(close);
-  DECLARE(read);
-  DECLARE(write);
-  DECLARE(stat);
-  DECLARE(fstat);
-  DECLARE(getdents);
-  DECLARE(seek);
-  DECLARE(mmap);
+#ifndef __GLIBC__
+  DECLARE_STRUCT(fdio);
+  DECLARE_STRUCT(filename);
+  DECLARE_STRUCT(memory);
+#endif
+
+  DECLARE(fdio, close);
+  DECLARE(fdio, fstat);
+  DECLARE(fdio, getdents);
+  DECLARE(fdio, read);
+  DECLARE(fdio, seek);
+  DECLARE(fdio, write);
+  DECLARE(filename, open);
+  DECLARE(filename, stat);
+  DECLARE(memory, mmap);
+
+  static char *to_c(const std::string& b, char *buf) {
+    memset(buf, 0, b.length()+1);
+    strncpy(buf, b.c_str(), b.length());
+    return buf;
+  }
+
+  char *getcwd(char *buf, size_t size) {
+    std::string b;
+    if (!kp->getcwd(&b, size-1)) {
+      return NULL;
+    }
+    return to_c(b, buf);
+  }
+
+#ifndef MAXPATHLEN
+#  define MAXPATHLEN 256
+#endif
+  char *getwd(char *buf) {
+    std::string b;
+    if (!kp->getwd(&b) || b.length() >= MAXPATHLEN) {
+      return NULL;
+    }
+    return to_c(b, buf);
+  }
+
+  int fsync(int fd) {
+    return kp->fsync(fd);
+  }
+
+  int isatty(int fd) {
+    return kp->isatty(fd);
+  }
 
   int chmod(const char *path, mode_t mode) {
     return kp->chmod(path, mode);
-  }
-
-  int stat(const char *path, struct stat *buf) {
-    return kp->stat(path, buf);
   }
 
   int mkdir(const char *path, mode_t mode) {
@@ -57,8 +100,10 @@ extern "C" {
     return kp->umount(path);
   }
 
-  int _mount(const char *type, const char *dir, int flags, void *data) {
-    return kp->mount(dir, data);
+  int mount(const char *source, const char *target,
+      const char *filesystemtype, unsigned long mountflags,
+      const void *data) {
+    return kp->mount(target, (void *) data);
   }
 
   int remove(const char *path) {
@@ -162,7 +207,7 @@ extern "C" {
   int WRAP(fstat)(int fd, struct nacl_abi_stat *nacl_buf) {
     if (fd < 3) {
       // segfault if fstat fails in this case
-      return REAL(fstat)(fd, nacl_buf);
+      return ((int (*)(int, struct nacl_abi_stat*)) REAL(fstat))(fd, nacl_buf);
     }
     struct stat buf;
     memset(&buf, 0, sizeof(struct stat));
@@ -226,208 +271,78 @@ extern "C" {
       return ENOSYS;
   }
 
+  static struct NaClMountsStaticInitializer {
+    NaClMountsStaticInitializer() {
+      DO_WRAP(fdio, close);
+      DO_WRAP(fdio, fstat);
+      DO_WRAP(fdio, getdents);
+      DO_WRAP(fdio, read);
+      DO_WRAP(fdio, seek);
+      DO_WRAP(fdio, write);
+      DO_WRAP(filename, open);
+      DO_WRAP(filename, stat);
+      DO_WRAP(memory, mmap);
+    }
+  } nacl_mounts_static_initializer;
+
+};
+
+
+#ifndef __GLIBC__
+
+
+// Several more that newlib lacks, that don't route to kernel proxy for now.
+
+extern "C" {
+
+uid_t getuid(void) {
+  // Match glibc's default.
+  return -1;
 }
 
-struct NaClMountsStaticInitializer {
-  NaClMountsStaticInitializer() {
-    DO_WRAP(open);
-    DO_WRAP(close);
-    DO_WRAP(read);
-    DO_WRAP(write);
-    DO_WRAP(stat);
-    DO_WRAP(fstat);
-    DO_WRAP(getdents);
-    DO_WRAP(seek);
-    DO_WRAP(mmap);
-  }
-} nacl_mounts_static_initializer;
-
-
-#else // __GLIBC__
-
-
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 256
-#endif
-
-ssize_t __real_write(int fd, const void *buf, size_t count);
-
-KernelProxy *kp = KernelProxy::KPInstance();
-
-int __wrap_chdir(const char *path) {
-  return kp->chdir(path);
+int setuid(uid_t id) {
+  errno = EPERM;
+  return -1;
 }
 
-static char *to_c(const std::string& b, char *buf) {
-  memset(buf, 0, b.length()+1);
-  strncpy(buf, b.c_str(), b.length());
-  return buf;
+gid_t getgid(void) {
+  // Match glibc's default.
+  return -1;
 }
 
-char *__wrap_getcwd(char *buf, size_t size) {
-  std::string b;
-  if (!kp->getcwd(&b, size-1)) {
-    return NULL;
-  }
-  return to_c(b, buf);
+int setgid(gid_t id) {
+  errno = EPERM;
+  return -1;
 }
 
-char *__wrap_getwd(char *buf) {
-  std::string b;
-  if (!kp->getwd(&b) || b.length() >= MAXPATHLEN) {
-    return NULL;
-  }
-  return to_c(b, buf);
-}
-
-int __wrap_dup(int oldfd) {
-  return kp->dup(oldfd);
-}
-
-int __wrap_chmod(const char *path, mode_t mode) {
-  return kp->chmod(path, mode);
-}
-
-int __wrap_stat(const char *path, struct stat *buf) {
-  return kp->stat(path, buf);
-}
-
-int __wrap_mkdir(const char *path, mode_t mode) {
-  return kp->mkdir(path, mode);
-}
-
-int __wrap_rmdir(const char *path) {
-  return kp->rmdir(path);
-}
-
-int __wrap_umount(const char *path) {
-  return kp->umount(path);
-}
-
-int __wrap_mount(const char *type, const char *dir, int flags, void *data) {
-  return kp->mount(dir, data);
-}
-
-ssize_t __wrap_read(int fd, void *buf, size_t nbyte) {
-  return kp->read(fd, buf, nbyte);
-}
-
-ssize_t __wrap_write(int fd, const void *buf, size_t count) {
-  return kp->write(fd, buf, count);
-}
-
-int __wrap_fstat(int fd, struct stat *buf) {
-  return kp->fstat(fd, buf);
-}
-
-int __wrap_getdents(int fd, void *buf, unsigned int count) {
-  return kp->getdents(fd, buf, count);
-}
-
-int __wrap_fsync(int fd) {
-  return kp->fsync(fd);
-}
-
-int __wrap_isatty(int fd) {
-  return kp->isatty(fd);
-}
-
-int __wrap_close(int fd) {
-  return kp->close(fd);
-}
-
-off_t __wrap_lseek(int fd, off_t offset, int whence) {
-  return kp->lseek(fd, offset, whence);
-}
-
-int __wrap_open(const char *path, int oflag, ...) {
-  if (oflag & O_CREAT) {
-    va_list argp;
-    mode_t mode;
-    va_start(argp, oflag);
-    mode = va_arg(argp, int);
-    va_end(argp);
-    return kp->open(path, oflag, mode);
-  }
-  return kp->open(path, oflag, 0);
-}
-
-int __wrap_remove(const char *path) {
-  return kp->remove(path);
-}
-
-int __wrap_access(const char *path, int amode) {
-  return kp->access(path, amode);
-}
-
-int __wrap_ioctl(int fd, unsigned long request, ...) {
-  return kp->ioctl(fd, request);
-}
-
-int __wrap_link(const char *path1, const char *path2) {
-  return kp->link(path1, path2);
-}
-
-int __wrap_symlink(const char *path1, const char *path2) {
-  return kp->symlink(path1, path2);
-}
-
-int __wrap_kill(pid_t pid, int sig) {
-  return kp->kill(pid, sig);
-}
-
-
-
-// Several more, don't route to kernel proxy for now.
-
-uid_t __wrap_getuid(void) {
-  // Make up a user id.
-  return 1001;
-}
-
-int __wrap_setuid(uid_t id) {
-  return 0;
-}
-
-gid_t __wrap_getgid(void) {
-  // Make up a group id.
-  return 1002;
-}
-
-int __wrap_setgid(gid_t id) {
-  return 0;
-}
-
-char *__wrap_getlogin(void) {
+char *getlogin(void) {
   return const_cast<char*>("");
 }
 
-struct passwd *__wrap_getpwnam(const char *login) {
-  // Not sure this is helpful, as its an error.
-  return 0;
+struct passwd *getpwnam(const char *login) {
+  errno = ENOENT;
+  return NULL;
 }
 
-struct passwd *__wrap_getpwuid(uid_t uid) {
-  // Not sure this is helpful, as its an error.
-  return 0;
+struct passwd *getpwuid(uid_t uid) {
+  errno = ENOENT;
+  return NULL;
 }
 
-mode_t __wrap_umask(mode_t cmask) {
+mode_t umask(mode_t cmask) {
   return 0777;
-}
-
-int __wrap_unlink(const char *path) {
-  return kp->unlink(path);
 }
 
 struct utimbuf;
 
-int __wrap_utime(const char *path, struct utimbuf const *times) {
+int utime(const char *path, struct utimbuf const *times) {
   return 0;
 }
 
-void (*__wrap_signal(int sig, void (*func)(int)))(int) {
+void (*signal(int sig, void (*func)(int)))(int) {
   return reinterpret_cast<void(*)(int)>(-1);
 }
 
-#endif // __GLIBC__
+};
+
+#endif // !__GLIBC__

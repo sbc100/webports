@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -19,7 +19,8 @@
 
 extern "C" int nethack_main(int argc, char *argv[]);
 extern "C" int umount(const char *path);
-extern "C" int mount(const char *type, const char *dir, int flags, void *data);
+extern "C" int mount(const char *source, const char *target,
+    const char *filesystemtype, unsigned long mountflags, const void *data);
 extern "C" int simple_tar_extract(const char *path);
 
 
@@ -89,7 +90,7 @@ class NethackInstance : public pp::Instance {
 #endif
     jspipe_->set_outbound_bridge(jsbridge_);
     // Replace stdin, stdout, stderr with js console.
-    mount("jspipe", "/jspipe", 0, jspipe_);
+    mount(0, "/jspipe", 0, 0, jspipe_);
     close(0);
     close(1);
     close(2);

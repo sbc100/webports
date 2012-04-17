@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -22,11 +22,6 @@ DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/games/snes9x-1.53
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-
-  if [ "${NACL_GLIBC}" = "1" ]; then
-    echo "Only linker wrapping for newlib is supported"
-    exit -1
-  fi
 
   # export the nacl tools
   export CC=${NACLCC}

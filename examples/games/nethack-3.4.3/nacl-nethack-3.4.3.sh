@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -16,6 +16,9 @@ readonly PATCH_FILE=nacl-nethack-3.4.3.patch
 readonly PACKAGE_NAME=nethack-3.4.3
 
 source ../../../build_tools/common.sh
+
+
+set -x
 
 
 CustomBuildStep() {
@@ -55,7 +58,18 @@ CustomBuildStep() {
   tar cf lib.tar lib
   cp ${PACKAGE_DIR}/out/games/lib.tar ${ASSEMBLY_DIR}/nethack.tar
   cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
-  cp ${START_DIR}/nethack.nmf ${ASSEMBLY_DIR}
+  if [ "${NACL_GLIBC}" = "1" ]; then
+    pushd ${ASSEMBLY_DIR}
+    python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        *.nexe \
+        -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32 \
+        -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib64 \
+        -D ${NACL_TOOLCHAIN_ROOT}/bin/x86_64-nacl-objdump \
+        -s . \
+        -o nethack.nmf
+  else
+    cp ${START_DIR}/nethack.nmf ${ASSEMBLY_DIR}
+  fi
   cp ${NACL_SDK_USR_LIB}/nacl-mounts/*.js ${ASSEMBLY_DIR}
   cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
