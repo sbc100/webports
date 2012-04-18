@@ -40,16 +40,16 @@ CustomBuildStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
   export STRNCMPI=1
-  export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
+  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
   cp ${START_DIR}/nethack_pepper.cc ${PACKAGE_DIR}/src
   bash sys/unix/setup.sh
   make
   make install
   Banner "Installing ${PACKAGE_NAME}"
-  export PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
+  local PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
-  readonly ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
+  local ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
   MakeDir ${ASSEMBLY_DIR}
   cp ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack \
       ${ASSEMBLY_DIR}/nethack_x86-${NACL_PACKAGES_BITSIZE:-"32"}.nexe
@@ -60,13 +60,15 @@ CustomBuildStep() {
   cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
   if [ "${NACL_GLIBC}" = "1" ]; then
     pushd ${ASSEMBLY_DIR}
-    python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+    TRUE_TOOLCHAIN_DIR=$(cd ${NACL_SDK_ROOT}/toolchain && pwd -P)
+    python ${TRUE_TOOLCHAIN_DIR}/../tools/create_nmf.py \
         *.nexe \
         -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32 \
         -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib64 \
         -D ${NACL_TOOLCHAIN_ROOT}/bin/x86_64-nacl-objdump \
         -s . \
         -o nethack.nmf
+    popd
   else
     cp ${START_DIR}/nethack.nmf ${ASSEMBLY_DIR}
   fi
