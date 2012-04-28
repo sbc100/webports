@@ -557,6 +557,7 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +#include "ppapi/cpp/module.h"
 +#include "ppapi/cpp/rect.h"
 +#include "ppapi/cpp/size.h"
++#include "ppapi/cpp/var_array_buffer.h"
 +
 +#include "nacl-mounts/base/UrlLoaderJob.h"
 +#include "nacl-mounts/console/JSPipeMount.h"
@@ -687,31 +688,24 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +    graphics_2d_context_->Flush(pp::CompletionCallback(&RepaintCallback, this));
 +  }
 +
-+  void DumpSave() {
-+    DebugPrintf("Dump save: %s\n", snapshot_filename);
-+    FILE *fp = fopen(snapshot_filename, "r");
++  void ReadIntoString(const string& filename, string* result) {
++    FILE *fp = fopen(filename.c_str(), "r");
 +    if (fp == NULL) {
++      DebugPrintf("No such file: %s\n", filename.c_str());
 +      return;
 +    }
-+
-+    string message;
-+    int size = 0;
-+    unsigned char buf[8192];
 +    do {
-+      size_t read = fread(buf, 1, sizeof(buf), fp);
-+      size += read;
++      char buf[8192];
++      size_t size = fread(buf, 1, sizeof(buf), fp);
 +      if (ferror(fp)) {
 +        DebugPrintf("Error!");
 +        fclose(fp);
 +        return;
 +      }
-+      char str[16];
-+      for (int i = 0; i < read; ++i) {
-+        snprintf(str, sizeof(str), "%d ", (unsigned int)buf[i]);
-+        message.append(str);
-+      }
++      result->append(buf, size);
 +    } while (!feof(fp));
 +    fclose(fp);
++  }
 +
 +    DebugPrintf("PostMessage: file size: %d ; msg len: %d\n",
 +                size,
@@ -719,22 +713,33 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +    PostMessage(message);
 +  }
 +
-+  void LoadSave(const string& data) {
-+    FILE *fp = fopen(snapshot_filename, "w");
++  void LoadSave(const char* data, uint32_t size, int index) {
++    FILE *fp = fopen(SnapshotName(index).c_str(), "w");
 +    if (fp == NULL) {
 +      return;
 +    }
-+
-+    char* token;
-+    char* p = const_cast<char *>(data.c_str());
-+    while ((token = strsep(&p, " ")) != NULL) {
-+      int byte = atoi(token);
-+      fputc(static_cast<char>(byte), fp);
++    if (fwrite(data, size, 1, fp) < 1) {
++       DebugPrintf("error...\n");
 +    }
 +    fclose(fp);
 +  }
 +
 +  virtual void HandleMessage(const pp::Var& var_message) {
++    // ArrayBuffer message always means to load a game save (from localStorage).
++    // First byte of the ArrayBuffer is the index of the snapshot. After that
++    // are just file blob.
++    if (var_message.is_array_buffer()) {
++      pp::VarArrayBuffer* array_buffer =
++          const_cast<pp::VarArrayBuffer*>(
++          reinterpret_cast<const pp::VarArrayBuffer*>(&var_message));
++
++      const char* index = static_cast<char*>(array_buffer->Map());
++      const char* data = static_cast<char*>(array_buffer->Map()) + 1;
++      uint32_t size = array_buffer->ByteLength() - 1;
++      LoadSave(data, size, (*index) - '0');
++      return;
++    }
++
 +    if (!var_message.is_string()) {
 +      DebugPrintf("HandleMessage: Not string\n");
 +      return;
@@ -747,7 +752,17 @@ diff -Nru snes9x-1.53-src/unix/pepper.cpp snes9x/unix/pepper.cpp
 +        return;
 +      }
 +      string act = message.substr(1, pos - 1);
-+      event_queue.push(new Event(act, message.substr(pos + 1)));
++      string cmd = message.substr(pos + 1);
++      event_queue.push(new Event(act, cmd));
++
++      // ACK_SAVE_$N is to tell javascript that SAVE_$N command has been
++      // dispatched, so that javascript can send "S $N" command to download to
++      // localStorage.  Given threads run in parallel, this approach might not
++      // work perfectly (with small chance?).  But I don't know a good way to
++      // sync between SNES, main thread and javascript engine.
++      if (cmd.substr(0, 5) == "SAVE_") {
++        PostMessage(pp::Var("ACK_" + cmd));
++      }
 +    } else if (message[0] == 'V') {
 +      S9xResizeWindow(atoi(message.substr(1).c_str()));
 +    } else if (message[0] == 'S') {

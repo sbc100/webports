@@ -9,6 +9,10 @@ var game_id_;
 var save = '';
 var key_state = {};
 
+window.BlobBuilder = window.BlobBuilder ||
+    window.WebKitBlobBuilder || window.MozBlobBuilder;
+window.URL = window.URL || window.webkitURL;
+
 // Indicate success when the NaCl module has loaded.
 function moduleDidLoad() {
   snesModule = document.getElementById('snes');
@@ -25,25 +29,44 @@ function handleMessage(message_event) {
       ' ; file size: ' + bytes.length);
 }
 
-function localLoad() {
-  var begin = (new Date()).getTime();
-  var save = localStorage[game_id_];
-  var msg = '';
-  for (var i = 0; i < save.length; ++i) {
-    msg += save.charCodeAt(i) + ' ';
+// Key for accessing localStorage.
+function saveKey(game, index) {
+  return game + ':' + index;
+}
+
+// Handle a message coming from the NaCl module.
+function handleMessage(message_event) {
+  console.log('Received message length ' + message_event.data.length);
+      console.log(message_event.data);
+  if (typeof message_event.data == 'string') {
+    if (message_event.data.indexOf('ACK_SAVE_') == 0) {
+      var index = message_event.data[9];
+      downloadSave(index);
+    }
+    return;
   }
   var end = (new Date()).getTime();
   console.log('[time] localLoad from localStorage: ' + (end - begin));
   snesModule.postMessage('L ' + msg);
 }
 
-function localSave() {
-  document.getElementById('snes').postMessage('S');
+function uploadSave(index, callback) {
+  stringToBuffer(index + localStorage[saveKey(game_id_, index)],
+    function (buffer) {
+      console.log('uploading save');
+      snesModule.postMessage(buffer);
+      callback();
+    });
 }
 
-function createGameSaveNode(game_id) {
-  var bb = new window.WebKitBlobBuilder();
-  var data = localStorage[game_id];
+function downloadSave(index) {
+    console.log('downloadSave ' + index);
+  document.getElementById('snes').postMessage('S ' + index);
+}
+
+function createGameSaveNode(key) {
+  var bb = new BlobBuilder();
+  var data = localStorage[key];
   var byteArray = new Uint8Array(data.length);
   for (var i = 0; i < data.length; i++) {
     byteArray[i] = data.charCodeAt(i) & 0xff;
@@ -54,10 +77,10 @@ function createGameSaveNode(game_id) {
   save.setAttribute('draggable', true);
   save.setAttribute('class', 'save');
   save.setAttribute('data-downloadurl',
-      'application/octet-stream:' + game_id + '.sav:' +
-      window.webkitURL.createObjectURL(bb.getBlob()));
+      'application/octet-stream:' + key + '.sav:' +
+      URL.createObjectURL(bb.getBlob()));
 
-  save.appendChild(document.createTextNode(game_id));
+  save.appendChild(document.createTextNode(key));
 
   save.addEventListener("dragstart", function(evt) {
     evt.dataTransfer.setData('DownloadURL', this.dataset.downloadurl);
@@ -77,8 +100,8 @@ function createGameSaveNode(game_id) {
     var reader = new FileReader();
     reader.onloadend = function(evt) {
       if (evt.target.readyState == FileReader.DONE) {
-        localStorage[game_id] = evt.target.result;
-        console.log('save to ' + game_id);
+        localStorage[key] = evt.target.result;
+        console.log('save to ' + key);
       }
     };
     reader.readAsBinaryString(file);
@@ -161,6 +184,8 @@ var keyMap = {
   'T': 'J2_R',
 };
 
+var loaded_from_localstore = {};
+
 function post(act, evt) {
   var ch = String.fromCharCode(evt.keyCode);
   if (event.shiftKey) {
@@ -172,8 +197,28 @@ function post(act, evt) {
   }
   key_state[ch] = act;
 
-  if (keyMap[ch] !== undefined) {
-    snesModule.postMessage('K' + act + ';' + keyMap[ch]);
+  var cmd = keyMap[ch];
+  if (cmd !== undefined) {
+    // Intercept LOAD_$N command, so that after boot up, file in localStorage
+    // can be uploaded to (ram) disk of the module for SNES to read.  It's hard
+    // to know the status of the running SNES, so for now I simply intercept
+    // the first loading command.
+    if (cmd.indexOf('LOAD_') === 0 && act == 'down') {
+      var index = cmd.substring(5);
+
+      // It only needs to be done once. Afterward, file lives in the disk and
+      // we don't need to read from localStorage. In case of saving, we write
+      // (i.e. write through) to both file on the disk and localStorage.
+      if (!loaded_from_localstore[index]) {
+        uploadSave(index, function() {
+          snesModule.postMessage('K' + act + ';' + cmd);
+          loaded_from_localstore[index] = true;
+        });
+        return;
+      }
+    }
+
+    snesModule.postMessage('K' + act + ';' + cmd);
   } else if (keyMap[evt.keyCode] !== undefined) {
     snesModule.postMessage('K' + act + ';' + keyMap[evt.keyCode]);
   } else {
@@ -204,7 +249,7 @@ function press(acts) {
 }
 
 function loadFromLocal(file) {
-  var rom_url = window.webkitURL.createObjectURL(file);
+  var rom_url = URL.createObjectURL(file);
   startGame(file.name, rom_url);
 }
 
