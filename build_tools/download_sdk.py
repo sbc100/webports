@@ -69,7 +69,7 @@ def DetermineSdkURL(flavor, base_url, version):
     newest = None
     for version in versions:
       m = re.match(base_url.replace(':', '\:').replace('/', '\/') +
-                   'trunk\.(.*)/' + path, version)
+                   'trunk\.([01-9]+)/' + path, version)
       if m:
         rev = int(m.group(1))
         if not newest or rev > newest:
