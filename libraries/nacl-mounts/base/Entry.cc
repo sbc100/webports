@@ -4,15 +4,16 @@
  * found in the LICENSE file.
  */
 #include <errno.h>
+#include <irt.h>
+#ifdef __GLIBC__
+#include <irt_syscalls.h>
+#endif
 #include <string.h>
+#include <sys/mman.h>
+#include "base/nacl_dirent.h"
 #include "Entry.h"
 #include "KernelProxy.h"
-
-#include <sys/mman.h>
-
-#include <irt.h>
-#include "irt_syscalls.h"
-#include "nacl_dirent.h"
+#include "util/DebugPrint.h"
 
 static KernelProxy *kp = KernelProxy::KPInstance();
 
@@ -39,6 +40,7 @@ extern "C" {
   DECLARE_STRUCT(fdio);
   DECLARE_STRUCT(filename);
   DECLARE_STRUCT(memory);
+  DECLARE_STRUCT(net);
 #endif
 
   DECLARE(fdio, close);
@@ -47,9 +49,42 @@ extern "C" {
   DECLARE(fdio, read);
   DECLARE(fdio, seek);
   DECLARE(fdio, write);
+
   DECLARE(filename, open);
   DECLARE(filename, stat);
   DECLARE(memory, mmap);
+
+#ifdef __GLIBC__
+  DECLARE(filepath, chdir);
+  DECLARE(filepath, rmdir);
+  DECLARE(filepath, mkdir);
+  DECLARE(filepath, getcwd);
+
+  DECLARE(net, select);
+  DECLARE(net, socket);
+  DECLARE(net, accept);
+  DECLARE(net, bind);
+  DECLARE(net, listen);
+  DECLARE(net, connect);
+  DECLARE(net, send);
+  DECLARE(net, sendto);
+  DECLARE(net, sendmsg);
+  DECLARE(net, recv);
+  DECLARE(net, recvfrom);
+  DECLARE(net, recvmsg);
+  DECLARE(net, getpeername);
+  DECLARE(net, getsockname);
+  DECLARE(net, getsockopt);
+  DECLARE(net, setsockopt);
+  DECLARE(net, socketpair);
+  DECLARE(net, shutdown);
+  DECLARE(net, epoll_create);
+  DECLARE(net, epoll_ctl);
+  DECLARE(net, epoll_wait);
+  DECLARE(net, epoll_pwait);
+  DECLARE(net, poll);
+  DECLARE(net, ppoll);
+#endif
 
   static char *to_c(const std::string& b, char *buf) {
     memset(buf, 0, b.length()+1);
@@ -271,7 +306,160 @@ extern "C" {
       return ENOSYS;
   }
 
-  static struct NaClMountsStaticInitializer {
+  char* WRAP(getcwd) (char* buf, size_t size) {
+    std::string b;
+    if (!kp->getcwd(&b, size-1)) {
+      return NULL;
+    }
+    return to_c(b, buf);
+  }
+
+#ifdef __GLIBC__
+  int WRAP(rmdir) (const char* pathname) {
+    return (kp->rmdir(pathname) < 0) ? errno : 0;
+  }
+
+  int WRAP(chdir) (const char* pathname) {
+    return (kp->chdir(pathname) < 0) ? errno : 0;
+  }
+
+  int WRAP(mkdir) (const char* pathname, mode_t mode) {
+    return (kp->mkdir(pathname, mode) < 0) ? errno : 0;
+  }
+
+  int WRAP(select) (int nfds, fd_set* readfds, fd_set* writefds,
+                  fd_set* exceptfds, const struct timeval* tv, int *count) {
+    *count = kp->select(nfds, readfds, writefds, exceptfds, tv);
+    return (*count < 0) ? errno : 0;
+  }
+
+  int WRAP(socket) (int domain, int type, int protocol, int* sd) {
+    *sd = kp->socket(domain, type, protocol);
+    return (*sd < 0) ? errno : 0;
+  }
+
+  int WRAP(accept) (int sockfd, struct sockaddr* addr, socklen_t* addrlen,
+                    int* ret) {
+    *ret = kp->accept(sockfd, addr, addrlen);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(bind) (int sockfd, const struct sockaddr* addr, socklen_t addrlen) {
+    return (kp->bind(sockfd, addr, addrlen) < 0) ? errno : 0;
+  }
+
+  int WRAP(listen) (int sockfd, int backlog) {
+    return (kp->listen(sockfd, backlog) < 0) ? errno : 0;
+  }
+
+  int WRAP(connect) (int sockfd, const struct sockaddr* addr,
+                     socklen_t addrlen) {
+    return (kp->connect(sockfd, addr, addrlen) < 0) ? errno : 0;
+  }
+
+  int WRAP(send) (int sockfd, const void *buf, size_t len, int flags,
+                  int* ret) {
+    *ret = kp->send(sockfd, buf, len, flags);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(sendto) (int sockfd, const void *buf, size_t len, int flags,
+                    const struct sockaddr *dest_addr, socklen_t addrlen,
+                    int* ret) {
+    *ret = kp->sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(sendmsg) (int sockfd, const struct msghdr *msg, int flags,
+                     int* ret) {
+    *ret = kp->sendmsg(sockfd, msg, flags);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(recv) (int sockfd, void *buf, size_t len, int flags, int* ret) {
+    *ret = kp->recv(sockfd, buf, len, flags);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(recvfrom) (int sockfd, void *buf, size_t len, int flags,
+                struct sockaddr *src_addr, socklen_t *addrlen, int* ret) {
+    *ret = kp->recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(recvmsg) (int sockfd, struct msghdr *msg, int flags, int* ret) {
+    *ret = kp->recvmsg(sockfd, msg, flags);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(getsockname) (int sockfd, struct sockaddr* addr,
+                         socklen_t* addrlen) {
+    return (kp->getsockname(sockfd, addr, addrlen)) < 0 ? errno : 0;
+  }
+
+  int WRAP(getpeername) (int sockfd, struct sockaddr* addr,
+                         socklen_t* addrlen) {
+    return (kp->getpeername(sockfd, addr, addrlen) < 0) ? errno : 0;
+  }
+
+  int WRAP(setsockopt) (int sockfd, int level, int optname, const void *optval,
+                        socklen_t optlen) {
+    return (kp->setsockopt(sockfd, level, optname, optval, optlen) < 0)
+      ? errno : 0;
+  }
+
+  int WRAP(getsockopt) (int sockfd, int level, int optname, void *optval,
+                            socklen_t* optlen) {
+    return (kp->getsockopt(sockfd, level, optname, optval, optlen) < 0)
+      ? errno : 0;
+  }
+
+  int WRAP(socketpair) (int domain, int type, int protocol, int sv[2]) {
+    return (kp->socketpair(domain, type, protocol, sv) < 0) ? errno : 0;
+  }
+
+  int WRAP(shutdown) (int sockfd, int how) {
+    return (kp->shutdown(sockfd, how) < 0) ? errno : 0;
+  }
+
+  int WRAP(epoll_create) (int size, int* ret) {
+    *ret = kp->epoll_create(size);
+    return (*ret < 0) ? errno : 0;
+  }
+
+  int WRAP(epoll_ctl) (int epfd, int op, int fd, struct epoll_event *event) {
+    return (kp->epoll_ctl(epfd, op, fd, event) < 0) ? errno : 0;
+  }
+
+  int WRAP(epoll_wait) (int epfd, struct epoll_event *events,
+                        int maxevents, int timeout, int *count) {
+    *count = kp->epoll_wait(epfd, events, maxevents, timeout);
+    return (*count < 0) ? errno : 0;
+  }
+
+  int WRAP(epoll_pwait) (int epfd, struct epoll_event *events,
+                         int maxevents, int timeout, const sigset_t *sigmask,
+                         size_t sigset_size, int *count) {
+    *count = kp->epoll_pwait(epfd, events, maxevents, timeout, sigmask,
+                           sigset_size);
+    return (*count < 0) ? errno : 0;
+  }
+
+  int WRAP(poll) (struct pollfd *fds, nfds_t nfds, int timeout, int *count) {
+    *count = kp->poll(fds, nfds, timeout);
+    return (*count < 0) ? errno : 0;
+  }
+
+  int WRAP(ppoll) (struct pollfd *fds, nfds_t nfds,
+                   const struct timespec *timeout, const sigset_t *sigmask,
+                   size_t sigset_size, int *count) {
+    *count = kp->ppoll(fds, nfds, timeout, sigmask, sigset_size);
+    return (*count < 0) ? errno : 0;
+  }
+#endif
+}
+
+static struct NaClMountsStaticInitializer {
     NaClMountsStaticInitializer() {
       DO_WRAP(fdio, close);
       DO_WRAP(fdio, fstat);
@@ -282,11 +470,40 @@ extern "C" {
       DO_WRAP(filename, open);
       DO_WRAP(filename, stat);
       DO_WRAP(memory, mmap);
+#ifdef __GLIBC__
+      DO_WRAP(filepath, chdir);
+      DO_WRAP(filepath, mkdir);
+      DO_WRAP(filepath, rmdir);
+      DO_WRAP(filepath, getcwd);
+
+      DO_WRAP(net, select);
+      DO_WRAP(net, socket);
+      DO_WRAP(net, accept);
+      DO_WRAP(net, bind);
+      DO_WRAP(net, listen);
+      DO_WRAP(net, connect);
+      DO_WRAP(net, send);
+      DO_WRAP(net, sendto);
+      DO_WRAP(net, sendmsg);
+      DO_WRAP(net, recv);
+      DO_WRAP(net, recvfrom);
+      DO_WRAP(net, recvmsg);
+      DO_WRAP(net, getpeername);
+      DO_WRAP(net, getsockname);
+      DO_WRAP(net, getsockopt);
+      DO_WRAP(net, setsockopt);
+      DO_WRAP(net, socketpair);
+      DO_WRAP(net, shutdown);
+
+      DO_WRAP(net, epoll_create);
+      DO_WRAP(net, epoll_ctl);
+      DO_WRAP(net, epoll_wait);
+      DO_WRAP(net, epoll_pwait);
+      DO_WRAP(net, poll);
+      DO_WRAP(net, ppoll);
+#endif
     }
   } nacl_mounts_static_initializer;
-
-};
-
 
 #ifndef __GLIBC__
 

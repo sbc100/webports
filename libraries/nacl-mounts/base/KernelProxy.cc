@@ -171,7 +171,7 @@ int KernelProxy::OpenHandle(Mount *mount, const std::string& path,
   // Setup file handle.
   int handle_slot = open_files_.Alloc();
   int fd = fds_.Alloc();
-  FileDescriptor *file = fds_.At(fd);
+  FileDescriptor* file = fds_.At(fd);
   file->handle = handle_slot;
   FileHandle *handle = open_files_.At(handle_slot);
 
@@ -217,7 +217,7 @@ int KernelProxy::open(const std::string& path, int flags, mode_t mode) {
 int KernelProxy::close(int fd) {
   SimpleAutoLock lock(&kp_lock_);
 
-  FileDescriptor *file = fds_.At(fd);
+  FileDescriptor* file = fds_.At(fd);
   if (file == NULL) {
     errno = EBADF;
     return -1;
@@ -363,7 +363,7 @@ int KernelProxy::isatty(int fd) {
 int KernelProxy::dup(int oldfd) {
   SimpleAutoLock lock(&kp_lock_);
 
-  FileDescriptor *oldfile = fds_.At(oldfd);
+  FileDescriptor* oldfile = fds_.At(oldfd);
   if (oldfile == NULL) {
     errno = EBADF;
     return -1;
@@ -614,6 +614,15 @@ int KernelProxy::access(const std::string& path, int amode) {
   return 0;
 }
 
+KernelProxy::FileHandle *KernelProxy::GetFileHandle(int fd) {
+  SimpleAutoLock lock(&kp_lock_);
+  FileDescriptor *file = fds_.At(fd);
+  if (!file) {
+    return NULL;
+  }
+  return open_files_.At(file->handle);
+}
+
 int KernelProxy::mkdir(const std::string& path, mode_t mode) {
   if (path.empty()) {
     return -1;
@@ -661,11 +670,177 @@ int KernelProxy::rmdir(const std::string& path) {
   return mount->Rmdir(buf.st_ino);
 }
 
-KernelProxy::FileHandle *KernelProxy::GetFileHandle(int fd) {
-  SimpleAutoLock lock(&kp_lock_);
-  FileDescriptor *file = fds_.At(fd);
-  if (!file) {
-    return NULL;
-  }
-  return open_files_.At(file->handle);
+#ifdef __GLIBC__
+int KernelProxy::socket(int domain, int type, int protocol) {
+  errno = ENOSYS;
+  fprintf(stderr, "socket has not been implemented!\n");
+  return -1;
 }
+
+int KernelProxy::accept(int sockfd, struct sockaddr *addr,
+    socklen_t* addrlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "accept has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::bind(int sockfd, const struct sockaddr *addr,
+                      socklen_t addrlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "bind has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::listen(int sockfd, int backlog) {
+  errno = ENOSYS;
+  fprintf(stderr, "listen has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::connect(int sockfd, const struct sockaddr *addr,
+                         socklen_t addrlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "connect has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::send(int sockfd, const void *buf, size_t len, int flags) {
+  errno = ENOSYS;
+  fprintf(stderr, "send has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::sendmsg(int sockfd, const struct msghdr *msg, int flags) {
+  errno = ENOSYS;
+  fprintf(stderr, "sendmsg has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::sendto(int sockfd, const void *buf, size_t len, int flags,
+           const struct sockaddr *dest_addr, socklen_t addrlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "sendto has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::recv(int sockfd, void *buf, size_t len, int flags) {
+  errno = ENOSYS;
+  fprintf(stderr, "recv has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::recvmsg(int sockfd, struct msghdr *msg, int flags) {
+  errno = ENOSYS;
+  fprintf(stderr, "recvmsg has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::recvfrom(int sockfd, void *buf, size_t len, int flags,
+             struct sockaddr *dest_addr, socklen_t* addrlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "recvfrom has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::select(int nfds, fd_set *readfds, fd_set *writefds,
+           fd_set* exceptfds, const struct timeval *timeout) {
+  errno = ENOSYS;
+  fprintf(stderr, "select has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::pselect(int nfds, fd_set *readfds, fd_set *writefds,
+            fd_set* exceptfds, const struct timeval *timeout, void* sigmask) {
+  errno = ENOSYS;
+  fprintf(stderr, "pselect has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::getpeername(int sockfd, struct sockaddr *addr,
+                             socklen_t* addrlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "getpeername has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::getsockname(int sockfd, struct sockaddr *addr,
+                             socklen_t* addrlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "getsockname has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::getsockopt(int sockfd, int level, int optname, void *optval,
+               socklen_t* optlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "getsockopt has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::setsockopt(int sockfd, int level, int optname,
+            const void *optval, socklen_t optlen) {
+  errno = ENOSYS;
+  fprintf(stderr, "setsockopt has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::shutdown(int sockfd, int how) {
+  errno = ENOSYS;
+  fprintf(stderr, "shutdown has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::epoll_create(int size) {
+  errno = ENOSYS;
+  fprintf(stderr, "epoll_create has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::epoll_create1(int flags) {
+  errno = ENOSYS;
+  fprintf(stderr, "epoll_create1 has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::epoll_ctl(int epfd, int op, int fd,
+                           struct epoll_event *event) {
+  errno = ENOSYS;
+  fprintf(stderr, "epoll_ctl has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::epoll_wait(int epfd, struct epoll_event *events, int maxevents,
+               int timeout) {
+  errno = ENOSYS;
+  fprintf(stderr, "epoll_wait has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::epoll_pwait(int epfd, struct epoll_event *events,
+    int maxevents, int timeout, const sigset_t *sigmask, size_t sigset_size) {
+  errno = ENOSYS;
+  fprintf(stderr, "epoll_pwait has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::socketpair(int domain, int type, int protocol, int sv[2]) {
+  errno = ENOSYS;
+  fprintf(stderr, "socketpair has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::poll(struct pollfd *fds, nfds_t nfds, int timeout) {
+  errno = ENOSYS;
+  fprintf(stderr, "poll has not been implemented!\n");
+  return -1;
+}
+
+int KernelProxy::ppoll(struct pollfd *fds, nfds_t nfds,
+          const struct timespec *timeout,
+          const sigset_t *sigmask, size_t sigset_size) {
+  errno = ENOSYS;
+  fprintf(stderr, "ppoll has not been implemented!\n");
+  return -1;
+}
+#endif
+

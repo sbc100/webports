@@ -7,14 +7,20 @@
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_KERNELPROXY_H_
 
 #include <errno.h>
+#ifdef __GLIBC__
+#include <poll.h>
+#endif
 #include <pthread.h>
+#ifdef __GLIBC__
+#include <sys/epoll.h>
+#endif
 #include <sys/stat.h>
 #include <string>
+#include "../base/Mount.h"
+#include "../base/MountManager.h"
 #include "../util/Path.h"
 #include "../util/SimpleAutoLock.h"
 #include "../util/SlotAllocator.h"
-#include "Mount.h"
-#include "MountManager.h"
 
 // KernelProxy handles all of the system calls.  System calls are either
 // (1) handled entirely by the KernelProxy, (2) processed by the
@@ -82,6 +88,44 @@ class KernelProxy {
   int symlink(const std::string& path1, const std::string& path2);
   int kill(pid_t pid, int sig);
 
+#ifdef __GLIBC__
+  // TODO(vissi): implement the following system calls
+  int socket(int domain, int type, int protocol);
+  int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+  int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+  int listen(int sockfd, int backlog);
+  int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+  int send(int sockfd, const void *buf, size_t len, int flags);
+  int sendmsg(int sockfd, const struct msghdr *msg, int flags);
+  int sendto(int sockfd, const void *buf, size_t len, int flags,
+             const struct sockaddr *dest_addr, socklen_t addrlen);
+  int recv(int sockfd, void *buf, size_t len, int flags);
+  int recvmsg(int sockfd, struct msghdr *msg, int flags);
+  int recvfrom(int sockfd, void *buf, size_t len, int flags,
+               struct sockaddr *dest_addr, socklen_t* addrlen);
+  int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
+             const struct timeval *timeout);
+  int pselect(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
+              const struct timeval *timeout, void* sigmask);
+  int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+  int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+  int getsockopt(int sockfd, int level, int optname, void *optval,
+                 socklen_t* optlen);
+  int setsockopt(int sockfd, int level, int optname, const void *optval,
+                 socklen_t optlen);
+  int shutdown(int sockfd, int how);
+  int epoll_create(int size);
+  int epoll_create1(int flags);
+  int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
+  int epoll_wait(int epfd, struct epoll_event *events, int maxevents,
+                 int timeout);
+  int epoll_pwait(int epfd, struct epoll_event *events, int maxevents,
+           int timeout, const sigset_t *sigmask, size_t sigset_size);
+  int socketpair(int domain, int type, int protocol, int sv[2]);
+  int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+  int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout,
+            const sigset_t *sigmask, size_t sigset_size);
+#endif
   MountManager *mm() { return &mm_; }
 
  private:
