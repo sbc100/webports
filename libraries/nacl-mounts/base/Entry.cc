@@ -174,17 +174,29 @@ extern "C" {
   }
 
   ssize_t __real_read(int fd, void *buf, size_t count) {
-    size_t nread;
-    errno = REAL(read)(fd, buf, count, &nread);
-    return errno == 0 ? (ssize_t)nread : -1;
+    if (REAL(read)) {
+      size_t nread;
+      int error = REAL(read)(fd, buf, count, &nread);
+      if (error) {
+        errno = error;
+        return -1;
+      }
+      return (ssize_t)nread;
+    } else {
+      errno = EIO;
+      return -1;
+    }
   }
 
   ssize_t __real_write(int fd, const void *buf, size_t count) {
     if (REAL(write)) {
       size_t nwrote;
-      errno = REAL(write)(fd, buf, count, &nwrote);
-      fsync(fd);
-      return errno == 0 ? (ssize_t)nwrote : -1;
+      int error = REAL(write)(fd, buf, count, &nwrote);
+      if (error) {
+        errno = error;
+        return -1;
+      }
+      return (ssize_t)nwrote;
     } else {
       errno = EIO;
       return -1;
