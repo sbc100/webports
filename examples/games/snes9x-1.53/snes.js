@@ -12,32 +12,158 @@ var key_state = {};
 window.BlobBuilder = window.BlobBuilder ||
     window.WebKitBlobBuilder || window.MozBlobBuilder;
 window.URL = window.URL || window.webkitURL;
+window.requestFileSystem = window.requestFileSystem ||
+    window.webkitRequestFileSystem;
+
+var store;
+
+function Storage() {
+
+  this.fs_ = null;
+
+  this.errorHandler = function(err) {
+    var msg = 'An error occured: ';
+
+    switch (err.code) {
+      case FileError.NOT_FOUND_ERR:
+        msg += 'File or directory not found';
+        break;
+
+      case FileError.NOT_READABLE_ERR:
+        msg += 'File or directory not readable';
+        break;
+
+      case FileError.PATH_EXISTS_ERR:
+        msg += 'File or directory already exists';
+        break;
+
+      case FileError.TYPE_MISMATCH_ERR:
+        msg += 'Invalid filetype';
+        break;
+
+      default:
+        msg += 'Unknown Error, error code: ' + err.code;
+        break;
+    };
+
+    console.log(msg);
+  };
+}
+
+Storage.prototype.init = function() {
+  var self = this;
+  window.requestFileSystem(window.PERSISTENT, 100 * 1024 * 1024,
+    function(filesystem) {
+      self.fs_ = filesystem;
+      console.log("fs success!");
+    },
+    self.errorHandler);
+};
+
+// XXX: needs to run manually now.
+Storage.prototype.requestQuota = function() {
+  window.webkitStorageInfo.requestQuota(PERSISTENT, 100*1024*1024,
+    function(grantedBytes) {
+      alert('yay!');
+    }, function(e) {
+      alert('no way!');
+    });
+};
+
+Storage.prototype.saveName = function(game, index) {
+  return game + '-' + index;
+};
+
+Storage.prototype.save = function(game, index, blob) {
+  this.replace(this.saveName(game, index), blob);
+};
+
+Storage.prototype.replace = function(filename, blob) {
+  var self = this;
+  var root = this.fs_.root;
+  root.getFile(filename, {create: true}, function(fileEntry) {
+    fileEntry.createWriter(function(fileWriter) {
+      fileWriter.onwriteend = function(e) {
+        console.log('Write completed.');
+      };
+      fileWriter.onerror = function(e) {
+        console.log('Write failed: ' + e.toString());
+      };
+
+      fileWriter.write(blob);
+    }, self.errorHandler);
+  }, self.errorHandler);
+};
+
+Storage.prototype.load = function(game, index, callback) {
+  var self = this;
+  var root = this.fs_.root;
+  var filename = this.saveName(game, index);
+  root.getFile(filename, {}, function(fileEntry) {
+    fileEntry.file(function(file) {
+      buildArrayBuffer(callback, index, file);
+    }, self.errorHandler);
+  }, self.errorHandler);
+};
+
+Storage.prototype.list = function(game, callback) {
+  var root = this.fs_.root;
+  root.createReader().readEntries(function(entries) {
+    for(var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      if (entry.isDirectory) {
+        console.log('Directory: ' + entry.fullPath);
+      } else if (entry.isFile) {
+        console.log('File: ' + entry.fullPath);
+        if (entry.name.indexOf(game) >= 0) {
+          callback(entry);
+        }
+      }
+    }
+  });
+};
+
+Storage.prototype.remove = function(filename) {
+  var self = this;
+  this.fs_.root.getFile(filename, {create: false}, function(fileEntry) {
+    fileEntry.remove(function() {
+      console.log('File removed.');
+    }, self.errorHandler);
+  }, self.errorHandler)
+};
 
 // Indicate success when the NaCl module has loaded.
 function moduleDidLoad() {
   snesModule = document.getElementById('snes');
 }
 
-// Handle a message coming from the NaCl module.
-function handleMessage(message_event) {
-  var bytes = message_event.data.split(' ');
-  for (var i = 0; i < bytes.length - 1; ++i) {
-    bytes[i] = String.fromCharCode(bytes[i]);
+function arrayBufferToString(buffer, callback) {
+  var blobBuilder = new BlobBuilder();
+  blobBuilder.append(buffer);
+
+  var fileReader = new FileReader();
+  fileReader.onload = function(e) {
+    callback(e.target.result);
+  };
+  fileReader.readAsBinaryString(blobBuilder.getBlob());
+}
+
+function buildArrayBuffer(callback) {
+  var blobBuilder = new BlobBuilder();
+  for (var i = 1; i < arguments.length; ++i) {
+    blobBuilder.append(arguments[i]);
   }
-  localStorage[game_id_] = bytes.join('');
-  console.log('Received message length ' + message_event.data.length +
-      ' ; file size: ' + bytes.length);
-}
 
-// Key for accessing localStorage.
-function saveKey(game, index) {
-  return game + ':' + index;
+  var fileReader = new FileReader();
+  fileReader.onload = function(e) {
+    callback(e.target.result);
+  };
+  fileReader.readAsArrayBuffer(blobBuilder.getBlob());
 }
 
 // Handle a message coming from the NaCl module.
 function handleMessage(message_event) {
-  console.log('Received message length ' + message_event.data.length);
-      console.log(message_event.data);
+  console.log('Received message');
   if (typeof message_event.data == 'string') {
     if (message_event.data.indexOf('ACK_SAVE_') == 0) {
       var index = message_event.data[9];
@@ -45,18 +171,20 @@ function handleMessage(message_event) {
     }
     return;
   }
-  var end = (new Date()).getTime();
-  console.log('[time] localLoad from localStorage: ' + (end - begin));
-  snesModule.postMessage('L ' + msg);
+
+  var bb = new BlobBuilder();
+  bb.append(message_event.data);
+  var blob = bb.getBlob();
+  arrayBufferToString(blob.webkitSlice(0, 1), function(index) {
+    store.save(game_id_, index, blob.webkitSlice(1));
+  });
 }
 
 function uploadSave(index, callback) {
-  stringToBuffer(index + localStorage[saveKey(game_id_, index)],
-    function (buffer) {
-      console.log('uploading save');
-      snesModule.postMessage(buffer);
-      callback();
-    });
+  store.load(game_id_, index, function(buffer) {
+    snesModule.postMessage(buffer);
+    callback();
+  });
 }
 
 function downloadSave(index) {
@@ -64,21 +192,20 @@ function downloadSave(index) {
   document.getElementById('snes').postMessage('S ' + index);
 }
 
-function createGameSaveNode(key) {
-  var bb = new BlobBuilder();
-  var data = localStorage[key];
-  var byteArray = new Uint8Array(data.length);
-  for (var i = 0; i < data.length; i++) {
-    byteArray[i] = data.charCodeAt(i) & 0xff;
-  }
-  bb.append(byteArray.buffer);
+function stringToBlob(str) {
+  var blobBuilder = new BlobBuilder()
+  blobBuilder.append(str);
+  return blobBuilder.getBlob();
+}
 
+
+function createGameSaveNode(key, url) {
   var save = document.createElement('div');
   save.setAttribute('draggable', true);
   save.setAttribute('class', 'save');
   save.setAttribute('data-downloadurl',
       'application/octet-stream:' + key + '.sav:' +
-      URL.createObjectURL(bb.getBlob()));
+      url);
 
   save.appendChild(document.createTextNode(key));
 
@@ -97,14 +224,8 @@ function createGameSaveNode(key) {
     evt.preventDefault();
 
     var file = evt.dataTransfer.files[0];
-    var reader = new FileReader();
-    reader.onloadend = function(evt) {
-      if (evt.target.readyState == FileReader.DONE) {
-        localStorage[key] = evt.target.result;
-        console.log('save to ' + key);
-      }
-    };
-    reader.readAsBinaryString(file);
+    store.replace(key, file);
+    console.log('save to ' + key);
   }, false);
 
   return save;
@@ -112,10 +233,11 @@ function createGameSaveNode(key) {
 
 function initDirectory() {
   var dir = document.getElementById('directory');
-  for (var i = 0; i < localStorage.length; ++i) {
-    var entry = createGameSaveNode(localStorage.key(i));
+  store.list(game_id_, function(entry) {
+    var entry = createGameSaveNode(entry.name,
+        entry.toURL('application/octet-stream'));
     dir.appendChild(entry);
-  }
+  });
 }
 
 function onload() {
@@ -126,7 +248,8 @@ function onload() {
   document.getElementById('romfile').addEventListener(
       'change', handleFileSelect, false);
 
-  initDirectory();
+  store = new Storage();
+  store.init();
 }
 
 var keyMap = {
@@ -267,6 +390,8 @@ function startGame(id, url) {
 
   document.getElementById('game').innerHTML = '';
   document.getElementById('game').appendChild(nacl);
+
+  initDirectory();
 }
 
 function handleFileSelect(evt) {
