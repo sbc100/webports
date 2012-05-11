@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -300,7 +300,6 @@ int MemMount::Getdents(ino_t slot, off_t offset,
     // We want d_ino to be non-zero because readdir()
     // will return null if d_ino is zero.
     dir->d_ino = 0x60061E;
-    dir->d_reclen = sizeof(struct dirent);
     dir->d_reclen = sizeof(struct dirent);
     strncpy(dir->d_name, slots_.At(*it)->name().c_str(), sizeof(dir->d_name));
     ++dir;

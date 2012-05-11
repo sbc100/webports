@@ -25,14 +25,15 @@ BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc \
 MEM_SOURCES = $(addprefix memory/, MemMount.cc MemNode.cc)
 CONSOLE_SOURCES = $(addprefix console/, ConsoleMount.cc JSPipeMount.cc)
 BUFFER_SOURCES = $(addprefix buffer/, BufferMount.cc)
+DEV_SOURCES = $(addprefix dev/, DevMount.cc RandomDevice.cc NullDevice.cc)
 TEST_SOURCES = $(addprefix test/, SlotAllocatorTest.cc \
                  PathTest.cc BaseMountTest.cc MemMountTest.cc \
                  MemNodeTest.cc MountManagerTest.cc KernelProxyTest.cc \
                  JSPipeMountTest.cc MainThreadRunnerTest.cc \
-                 BufferMountTest.cc MockMount.cc)
+                 DevMountTest.cc BufferMountTest.cc MockMount.cc)
 
 SOURCES = $(UTIL_SOURCES) $(BASE_SOURCES) $(MEM_SOURCES) \
-          $(CONSOLE_SOURCES) $(BUFFER_SOURCES) $(TEST_SOURCES)
+          $(CONSOLE_SOURCES) $(BUFFER_SOURCES) $(DEV_SOURCES) $(TEST_SOURCES)
 TESTS_OUT = tests_out
 OBJECTS = $(addprefix $(TESTS_OUT)/, $(SOURCES:.cc=.o))
 OUTPUT = $(addprefix $(TESTS_OUT)/, base buffer util test memory console)

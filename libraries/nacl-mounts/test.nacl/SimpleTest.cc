@@ -14,6 +14,10 @@ TEST(SimpleTest, Simple) {
   struct stat buf;
   EXPECT_EQ(0, stat("/", &buf));
   EXPECT_EQ(1, S_ISDIR(buf.st_mode));
+  EXPECT_EQ(0, stat("/dev", &buf));
+  EXPECT_EQ(1, S_ISDIR(buf.st_mode));
+  EXPECT_EQ(0, stat("/dev/fd", &buf));
+  EXPECT_EQ(1, S_ISDIR(buf.st_mode));
 
   EXPECT_EQ(-1, stat("/dummy", &buf));
 }

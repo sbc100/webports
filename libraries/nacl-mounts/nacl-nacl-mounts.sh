@@ -72,6 +72,9 @@ CustomBuildStep() {
   ${CXXCMD} -c ${START_DIR}/console/terminal_stubs.c
   ${CXXCMD} -c ${START_DIR}/memory/MemMount.cc
   ${CXXCMD} -c ${START_DIR}/memory/MemNode.cc
+  ${CXXCMD} -c ${START_DIR}/dev/DevMount.cc
+  ${CXXCMD} -c ${START_DIR}/dev/NullDevice.cc
+  ${CXXCMD} -c ${START_DIR}/dev/RandomDevice.cc
   ${CXXCMD} -c ${START_DIR}/AppEngine/AppEngineMount.cc
   ${CXXCMD} -c ${START_DIR}/AppEngine/AppEngineNode.cc
   ${CXXCMD} -c ${START_DIR}/http/HTTPMount.cc
@@ -94,6 +97,9 @@ CustomBuildStep() {
       terminal_stubs.o \
       MemMount.o \
       MemNode.o \
+      RandomDevice.o \
+      NullDevice.o \
+      DevMount.o \
       AppEngineMount.o \
       AppEngineNode.o \
       HTTPMount.o \

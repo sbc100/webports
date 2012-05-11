@@ -10,6 +10,7 @@ CFLAGS += -g -Wall -Werror
 
 TEST_SOURCES = \
   SimpleTest.cc \
+  DevTest.cc \
   test_main.cc
 
 SOURCES = $(TEST_SOURCES)

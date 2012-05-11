@@ -7,6 +7,7 @@
 #include <list>
 #include <utility>
 #include "../console/ConsoleMount.h"
+#include "../dev/DevMount.h"
 #include "KernelProxy.h"
 #include "MountManager.h"
 
@@ -24,6 +25,9 @@ KernelProxy::KernelProxy() {
 
   // Setup file descriptors 0, 1, and 2 for STDIN, STDOUT, and STDERR
   int ret = mkdir("/dev", 0777);
+  assert(ret == 0);
+  DevMount* dev_mount = new DevMount();
+  ret = mm_.AddMount(dev_mount, "/dev");
   assert(ret == 0);
   ret = mkdir("/dev/fd", 0777);
   assert(ret == 0);
