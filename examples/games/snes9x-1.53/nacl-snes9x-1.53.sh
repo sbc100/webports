@@ -56,6 +56,10 @@ CustomConfigureStep() {
       -lpthread -lstdc++"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}-src/unix
+  cp -f ${START_DIR}/pepper.cpp .
+  cp -f ${START_DIR}/nacl.h .
+  cp -f ${START_DIR}/nacl.cpp .
+  cp -f ${START_DIR}/event_queue.h .
   autoconf && ./configure ${CONFIG_FLAGS}
 }
 
