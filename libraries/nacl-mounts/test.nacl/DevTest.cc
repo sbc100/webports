@@ -17,7 +17,7 @@ TEST(DevTest, Simple) {
   EXPECT_GT(h, 0);
   char buff[5];
   EXPECT_EQ(5, read(h, reinterpret_cast<void*>(buff), 5));
-  int q = open("/dev/null", O_WRONLY);
+  int q = open("/dev/null", O_RDWR);
   EXPECT_EQ(5, write(q, reinterpret_cast<void*>(buff), 5));
   EXPECT_EQ(0, read(q, reinterpret_cast<void*>(buff), 5));
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -18,10 +18,12 @@
 static const char *kSTDIN_PATH = "/0";
 static const char *kSTDOUT_PATH = "/1";
 static const char *kSTDERR_PATH = "/2";
+static const char *kROOT_PATH = "/";
 
 static const ino_t kSTDIN_INO = 1;
 static const ino_t kSTDOUT_INO = 2;
 static const ino_t kSTDERR_INO = 3;
+static const ino_t kROOT_INO = 4;
 
 extern "C" {
   ssize_t __real_read(int fd, void *buf, size_t count);
@@ -43,13 +45,19 @@ int ConsoleMount::GetNode(const std::string& path, struct stat* buf) {
   if (path == kSTDERR_PATH) {
     return Stat(kSTDERR_INO, buf);
   }
+  if (path == kROOT_PATH) {
+    return Stat(kROOT_INO, buf);
+  }
   return -1;
 }
 
 int ConsoleMount::Stat(ino_t node, struct stat *buf) {
   memset(buf, 0, sizeof(struct stat));
   buf->st_ino = node;
-  buf->st_mode = S_IFREG | 0777;
+  if (node != kROOT_INO)
+    buf->st_mode = S_IFREG | 0777;
+  else
+    buf->st_mode = S_IFDIR | 0777;
   return 0;
 }
 

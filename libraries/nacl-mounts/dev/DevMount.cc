@@ -56,7 +56,7 @@ int DevMount::GetNode(const std::string& path, struct stat *buf) {
   if (path == "/") {
     return Stat(1, buf);
   };
-  if (path == "/fd" || path == "fd") {
+  if (path == "/fd") {
     return Stat(2, buf);
   };
   if (path_to_inode.find(path) != path_to_inode.end()) {
@@ -68,7 +68,7 @@ int DevMount::GetNode(const std::string& path, struct stat *buf) {
 }
 
 int DevMount::Stat(ino_t node, struct stat *buf) {
-  if (inode_to_path.find(node) == inode_to_path.end() && node > 2) {
+  if ((inode_to_path.find(node) == inode_to_path.end()) && node > 2) {
     errno = ENOENT;
     return -1;
   }
@@ -77,7 +77,7 @@ int DevMount::Stat(ino_t node, struct stat *buf) {
   memset(buf, 0, sizeof(struct stat));
   buf->st_ino = node;
   if (node > 2) {
-    buf->st_mode = S_IFREG | 0777;
+    buf->st_mode = S_IFCHR | 0777;
   } else {
     buf->st_mode = S_IFDIR | 0777;
   };
