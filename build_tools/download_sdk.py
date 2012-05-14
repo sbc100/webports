@@ -82,7 +82,7 @@ def DetermineSdkURL(flavor, base_url, version):
 
 def DownloadAndInstallSDK(url):
   # Pick target directory.
-  toolchain_dir = os.path.join(SRC_DIR, 'toolchain')
+  target_dir = os.path.join(SRC_DIR, 'pepper_XX')
 
   bz2_dir = SCRIPT_DIR
   bz2_filename = os.path.join(bz2_dir, url.split('/')[-1])
@@ -125,14 +125,14 @@ def DownloadAndInstallSDK(url):
 
   os.chdir(old_cwd)
 
-  actual_dir = os.path.join(bz2_dir, pepper_dir, 'toolchain')
-  print 'Create toolchain symlink "%s" -> "%s"' % (actual_dir, toolchain_dir)
+  actual_dir = os.path.join(bz2_dir, pepper_dir)
+  print 'Create toolchain symlink "%s" -> "%s"' % (actual_dir, target_dir)
   if sys.platform in ['win32', 'cygwin']:
-    cmd = (r'C:\cygwin\bin\rm.exe -rf ' + toolchain_dir + ' && ' +
-           r'C:\cygwin\bin\ln.exe -fsn ' + actual_dir + ' ' +  toolchain_dir)
+    cmd = (r'C:\cygwin\bin\rm.exe -rf ' + target_dir + ' && ' +
+           r'C:\cygwin\bin\ln.exe -fsn ' + actual_dir + ' ' +  target_dir)
   else:
-    cmd = ('rm -rf ' + toolchain_dir + ' && ' +
-           'ln -fsn ' + actual_dir + ' ' + toolchain_dir)
+    cmd = ('rm -rf ' + target_dir + ' && ' +
+           'ln -fsn ' + actual_dir + ' ' + target_dir)
 
   p = subprocess.Popen(cmd, shell=True)
   p.communicate()

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -7,7 +7,7 @@ set -x
 set -e
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-export NACL_SDK_ROOT="${SCRIPT_DIR}/.."
+export NACL_SDK_ROOT="${SCRIPT_DIR}/../pepper_XX"
 
 RESULT=1
 
