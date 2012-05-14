@@ -261,7 +261,11 @@ class GlobeInstance : public pp::Instance {
     DebugPrintf("initSound\n");
     // Ask the browser/device for an appropriate sample frame count size.
     sample_frame_count_ =
-        pp::AudioConfig::RecommendSampleFrameCount(PP_AUDIOSAMPLERATE_44100,
+        pp::AudioConfig::RecommendSampleFrameCount(
+#ifdef PPB_AUDIO_CONFIG_INTERFACE_1_1
+                                                   this,
+#endif
+                                                   PP_AUDIOSAMPLERATE_44100,
                                                    kSampleFrameCount);
     DebugPrintf("sample_frame_count_ = %d\n", sample_frame_count_ );
 
