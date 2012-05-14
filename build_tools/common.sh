@@ -161,7 +161,7 @@ InitializeNaClGccToolchain() {
   # NACL_SDK_USR is where the headers, libraries, etc. will be installed
   readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
   readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
-  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/lib
+  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib${NACL_PACKAGES_BITSIZE}
   readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
   readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
 
