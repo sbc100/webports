@@ -204,7 +204,7 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +
 +    data->sample_frame_count =
 +        data->audio_config->RecommendSampleFrameCount(
-+#ifdef PPB_AUDIO_CONFIG_INTERFACE_1_1
++#ifndef PPB_AUDIO_CONFIG_INTERFACE_1_0
 +                                                      gInstance,
 +#endif
 +                                                      rate,

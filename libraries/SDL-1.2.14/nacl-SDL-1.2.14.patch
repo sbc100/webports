@@ -225,7 +225,7 @@ diff -urN SDL-1.2.14/src/audio/nacl/SDL_naclaudio.cc SDL-1.2.14-nacl/src/audio/n
 +  // TODO: Move audio device creation to NACLAUD_OpenAudio.
 +  _this->hidden->sample_frame_count =
 +      pp::AudioConfig::RecommendSampleFrameCount(
-+#ifdef PPB_AUDIO_CONFIG_INTERFACE_1_1 
++#ifndef PPB_AUDIO_CONFIG_INTERFACE_1_0
 +          gNaclPPInstance,
 +#endif
 +          PP_AUDIOSAMPLERATE_44100,
