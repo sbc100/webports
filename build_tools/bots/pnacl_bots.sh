@@ -8,7 +8,7 @@
 # Notes on directory layout:
 # makefile location (base_dir):  naclports/src
 # bot script location:           naclports/src/build_tools/bots/
-# toolchain injection point:     naclports/src/toolchain
+# toolchain injection point:     specified externally via NACL_SDK_ROOT.
 ######################################################################
 
 set -o nounset
@@ -17,12 +17,9 @@ set -o errexit
 readonly BASE_DIR="$(dirname $0)/../.."
 cd ${BASE_DIR}
 
-
-
 ERROR=0
 
 export NACL_PACKAGES_BITSIZE=pnacl
-export NACL_SDK_ROOT=$(readlink -e ${BASE_DIR})/toolchain
 readonly PACKAGES=$(make works_for_pnacl_list)
 
 
@@ -38,7 +35,6 @@ StepConfig() {
 StepInstallSdk() {
   build_tools/download_sdk.py -f pnaclsdk_linux
 }
-
 
 StepBuildEverything() {
   local messages=""
