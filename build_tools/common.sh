@@ -575,6 +575,7 @@ DefaultTranslateStep() {
   local package=$1
   local build_dir="${NACL_PACKAGES_REPOSITORY}/${package}"
   local pexe=${build_dir}/$2
+  local arches="arm x86-32 x86-64"
 
   Banner "Translating ${pexe}"
   ls -l ${pexe}
@@ -583,7 +584,7 @@ DefaultTranslateStep() {
   RunCommand ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
   ls -l ${pexe}.stripped
 
-  for a in arm x86-32 x86-64 ; do
+  for a in ${arches} ; do
     echo
     echo "translating pexe [$a]"
     nexe=${pexe}.$a.nexe
@@ -592,9 +593,7 @@ DefaultTranslateStep() {
   done
 
   # PIC branch
-  # NOTE: x86-64 omitted
-  # http://code.google.com/p/nativeclient/issues/detail?id=2672
-  for a in arm x86-32 ; do
+  for a in ${arches} ; do
     echo
     echo "translating pexe [$a,pic]"
     nexe=${pexe}.$a.pic.nexe
@@ -609,7 +608,7 @@ DefaultTranslateStep() {
   RunCommand ${OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
   ls -l ${pexe}.stripped.opt
 
-  for a in arm x86-32 x86-64 ; do
+  for a in ${arches} ; do
     echo
     echo "translating pexe [$a]"
     nexe=${pexe}.opt.$a.nexe
@@ -618,9 +617,7 @@ DefaultTranslateStep() {
   done
 
   # PIC branch
-  # NOTE: x86-64 omitted
-  # http://code.google.com/p/nativeclient/issues/detail?id=2672
-  for a in arm x86-32 ; do
+  for a in ${arches}; do
     echo
     echo "translating pexe [$a,pic]"
     nexe=${pexe}.$a.pic.opt.nexe
