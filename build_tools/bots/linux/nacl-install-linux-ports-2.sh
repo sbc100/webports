@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -18,8 +18,10 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../..
 make clean
 
-# nethack also builds nacl-mounts
+# nethack/dosbox also builds nacl-mounts
 BuildPackage nethack
+BuildPackage dosbox
+BuildPackage snes9x
 BuildPackage faac
 BuildPackage lua
 BuildPackage modplug
