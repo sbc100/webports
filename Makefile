@@ -265,8 +265,6 @@ WORKS_FOR_PNACL=$(LIBRARIES) $(EXAMPLES)
 # BUG: http://code.google.com/p/naclports/issues/detail?id=38
 WORKS_FOR_PNACL:=$(subst libraries/openal-soft-1.13,,$(WORKS_FOR_PNACL))
 WORKS_FOR_PNACL:=$(subst  examples/audio/openal-ogg,,$(WORKS_FOR_PNACL))
-# BUG: http://code.google.com/p/naclports/issues/detail?id=39
-WORKS_FOR_PNACL:=$(subst examples/games/snes9x-1.53,,$(WORKS_FOR_PNACL))
 
 works_for_pnacl: $(WORKS_FOR_PNACL)
 
