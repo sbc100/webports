@@ -30,7 +30,7 @@ CustomConfigureStep() {
   export LDFLAGS=""
   if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"
-    export LDFLAGS="-O0"
+    export LDFLAGS="-O0 -static"
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}

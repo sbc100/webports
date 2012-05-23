@@ -32,7 +32,7 @@ CustomBuildStep() {
   export NACL_LDFLAGS=""
   if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
     export NACL_CCFLAGS="-O3 -g"
-    export NACL_LDFLAGS="-O0"
+    export NACL_LDFLAGS="-O0 -static"
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}

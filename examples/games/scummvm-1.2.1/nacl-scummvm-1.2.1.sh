@@ -36,7 +36,7 @@ CustomConfigureStep() {
   export LDFLAGS=""
   if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"
-    export LDFLAGS="-O0"
+    export LDFLAGS="-O0 -static"
   fi
   # without this setting *make* will not show the full command lines
   export VERBOSE_BUILD=1
