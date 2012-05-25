@@ -210,6 +210,7 @@ freeimage: libraries/FreeImage-3.14.1 ;
 freetype: libraries/freetype-2.1.10 ;
 gc: libraries/gc6.8 ;
 glib: libraries/glib-2.28.8 ;
+gtest: libraries/gtest-1.5.0 ;
 gsl: libraries/gsl-1.9 ;
 imagemagick: libraries/ImageMagick-6.5.4-10 ;
 jpeg: libraries/jpeg-6b ;
