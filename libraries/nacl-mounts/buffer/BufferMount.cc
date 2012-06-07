@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
-#include "../util/SimpleAutoLock.h"
+#include "../util/PthreadHelpers.h"
 
 
 BufferMount::BufferMount(Mount* source, size_t chunk_size, size_t max_chunks) {

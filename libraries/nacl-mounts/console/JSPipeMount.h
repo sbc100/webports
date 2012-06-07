@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+// Copyright (c) 2012 The Native Client Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 #ifndef LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
 #define LIBRARIES_NACL_MOUNTS_CONSOLE_JSPIPEMOUNT_H_
 
@@ -10,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "../base/BaseMount.h"
-#include "../util/SimpleAutoLock.h"
+#include "../util/PthreadHelpers.h"
 #include "../util/macros.h"
 
 // Interface for outbound pipe pool.

@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "../base/MainThreadRunner.h"
 #include "../util/Path.h"
-#include "../util/SimpleAutoLock.h"
+#include "../util/PthreadHelpers.h"
 #include "../util/DebugPrint.h"
 #include "PepperFileIOJob.h"
 #include "PepperMount.h"

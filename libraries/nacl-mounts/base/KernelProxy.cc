@@ -3,13 +3,22 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
+#include "base/KernelProxy.h"
 #include <assert.h>
+#ifndef __GLIBC__
+#include <nacl-mounts/net/newlib_compat.h>
+#else
+#include <netinet/in.h>
+#endif
+#include <sys/time.h>
 #include <list>
 #include <utility>
-#include "../console/ConsoleMount.h"
-#include "../dev/DevMount.h"
-#include "KernelProxy.h"
+#include "console/ConsoleMount.h"
+#include "dev/DevMount.h"
 #include "MountManager.h"
+#include "net/BaseSocketSubSystem.h"
+#include "net/SocketSubSystem.h"
+#include "util/DebugPrint.h"
 
 static pthread_once_t kp_once_ = PTHREAD_ONCE_INIT;
 KernelProxy *KernelProxy::kp_instance_;
@@ -17,6 +26,9 @@ KernelProxy *KernelProxy::kp_instance_;
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 256
 #endif
+
+static const int64_t kMicrosecondsPerSecond = 1000 * 1000;
+static const int64_t kNanosecondsPerMicrosecond = 1000;
 
 KernelProxy::KernelProxy() {
   if (pthread_mutex_init(&kp_lock_, NULL)) assert(0);
@@ -40,6 +52,34 @@ KernelProxy::KernelProxy() {
   assert(fd == 1);
   fd = open("/dev/fd/2", O_CREAT | O_RDWR, 0);
   assert(fd == 2);
+}
+
+void KernelProxy::SetSocketSubSystem(BaseSocketSubSystem* bss) {
+  socket_subsystem_ = bss;
+}
+
+void KernelProxy::RemoveSocket(int fd) {
+  this->close(fd);
+}
+
+int KernelProxy::AddSocket(Socket* stream) {
+  SimpleAutoLock lock(&kp_lock_);
+
+  // Setup file handle.
+  int handle_slot = open_files_.Alloc();
+  int fd = fds_.Alloc();
+  FileDescriptor* file = fds_.At(fd);
+  file->handle = handle_slot;
+  FileHandle* handle = open_files_.At(handle_slot);
+
+  // init should be safe because we have the kernel proxy lock
+  if (pthread_mutex_init(&handle->lock, NULL)) assert(0);
+
+  handle->mount = reinterpret_cast<Mount*>(NULL);
+  handle->stream = reinterpret_cast<Socket*>(NULL);
+  handle->use_count = 1;
+
+  return fd;
 }
 
 KernelProxy *KernelProxy::KPInstance() {
@@ -177,12 +217,13 @@ int KernelProxy::OpenHandle(Mount *mount, const std::string& path,
   int fd = fds_.Alloc();
   FileDescriptor* file = fds_.At(fd);
   file->handle = handle_slot;
-  FileHandle *handle = open_files_.At(handle_slot);
+  FileHandle* handle = open_files_.At(handle_slot);
 
   // init should be safe because we have the kernel proxy lock
   if (pthread_mutex_init(&handle->lock, NULL)) assert(0);
 
   handle->mount = mount;
+  handle->stream = NULL;
   handle->node = st.st_ino;
   handle->flags = flags;
   handle->use_count = 1;
@@ -194,6 +235,47 @@ int KernelProxy::OpenHandle(Mount *mount, const std::string& path,
   }
 
   return fd;
+}
+
+static __thread struct hostent* ghn_res = NULL;
+static __thread char** ghn_addr_list = NULL;
+static __thread char* ghn_item = NULL;
+
+struct hostent* KernelProxy::gethostbyname(const char* name) {
+  struct hostent *res = ghn_res == NULL
+    ? (ghn_res = (struct hostent*) malloc(sizeof(struct hostent)))
+    : ghn_res;
+  if (!res) return NULL;
+  res->h_addr_list = ghn_addr_list == NULL
+    ? (ghn_addr_list = reinterpret_cast<char**>(malloc(sizeof(char*) * 2)))
+    : ghn_addr_list;
+  if (!res->h_addr_list) return NULL;
+  res->h_addr_list[0] = ghn_item == NULL
+    ? (ghn_item = reinterpret_cast<char*>(malloc(sizeof(uint32_t))))
+    : ghn_item;
+  if (!res->h_addr_list[0]) return NULL;
+  *(reinterpret_cast<uint32_t*>(res->h_addr_list[0])) =
+    socket_subsystem_->gethostbyname(name);
+  res->h_addr_list[1] = NULL;
+  res->h_length = sizeof(uint32_t);
+  return res;
+}
+
+int KernelProxy::getaddrinfo(const char* hostname, const char* servname,
+                const struct addrinfo* hints, struct addrinfo** res) {
+  return socket_subsystem_->getaddrinfo(
+      hostname, servname, hints, res);
+}
+
+void KernelProxy::freeaddrinfo(struct addrinfo* ai) {
+  return socket_subsystem_->freeaddrinfo(ai);
+}
+
+int KernelProxy::getnameinfo(const struct sockaddr *sa, socklen_t salen,
+                char* host, socklen_t hostlen,
+                char* serv, socklen_t servlen, unsigned int flags) {
+  return socket_subsystem_->getnameinfo(
+      sa, salen, host, hostlen, serv, servlen, flags);
 }
 
 int KernelProxy::open(const std::string& path, int flags, mode_t mode) {
@@ -228,48 +310,63 @@ int KernelProxy::close(int fd) {
   }
   int h = file->handle;
   fds_.Free(fd);
-  FileHandle *handle = open_files_.At(h);
+  FileHandle* handle = open_files_.At(h);
   if (handle == NULL) {
     errno = EBADF;
     return -1;
   }
   handle->use_count--;
   ino_t node = handle->node;
-  Mount *mount = handle->mount;
-  if (handle->use_count <= 0) {
-    open_files_.Free(h);
-    mount->Unref(node);
+  if (handle->mount) {
+    Mount* mount = handle->mount;
+    if (handle->use_count <= 0) {
+      open_files_.Free(h);
+      mount->Unref(node);
+    }
+    mount->Unref();
+  } else {
+    Socket* stream = handle->stream;
+    socket_subsystem_->close(stream);
+    if (handle->use_count <= 0) {
+      open_files_.Free(h);
+    }
+    return 0;
   }
-  mount->Unref();
   return 0;
 }
 
 ssize_t KernelProxy::read(int fd, void *buf, size_t count) {
-  FileHandle *handle;
+  FileHandle* handle;
   // check if fd is valid and handle exists
   if (!(handle = GetFileHandle(fd))) {
     errno = EBADF;
     return -1;
   }
 
-  SimpleAutoLock(&handle->lock);
+  if (handle->mount) {
+    SimpleAutoLock(&handle->lock);
+    // Check that this file handle can be read from.
+    if ((handle->flags & O_ACCMODE) == O_WRONLY ||
+        is_dir(handle->mount, handle->node)) {
+      errno = EBADF;
+      return -1;
+    }
 
-  // Check that this file handle can be read from.
-  if ((handle->flags & O_ACCMODE) == O_WRONLY ||
-      is_dir(handle->mount, handle->node)) {
-    errno = EBADF;
-    return -1;
+    ssize_t n = handle->mount->Read(handle->node, handle->offset, buf, count);
+    if (n > 0) {
+      handle->offset += n;
+    }
+    return n;
+  } else if (handle->stream) {
+    // TODO(vissi): more elaborate implementation
+    return recv(fd, buf, count, 0);
   }
-
-  ssize_t n = handle->mount->Read(handle->node, handle->offset, buf, count);
-  if (n > 0) {
-    handle->offset += n;
-  }
-  return n;
+  errno = EBADF;
+  return -1;
 }
 
 ssize_t KernelProxy::write(int fd, const void *buf, size_t count) {
-  FileHandle *handle;
+  FileHandle* handle;
 
   // check if fd is valid and handle exists
   if (!(handle = GetFileHandle(fd))) {
@@ -277,25 +374,31 @@ ssize_t KernelProxy::write(int fd, const void *buf, size_t count) {
     return -1;
   }
 
-  SimpleAutoLock(&handle->lock);
+  if (handle->mount) {
+    SimpleAutoLock(&handle->lock);
+    // Check that this file handle can be written to.
+    if ((handle->flags & O_ACCMODE) == O_RDONLY ||
+        is_dir(handle->mount, handle->node)) {
+      errno = EBADF;
+      return -1;
+    }
 
-  // Check that this file handle can be written to.
-  if ((handle->flags & O_ACCMODE) == O_RDONLY ||
-      is_dir(handle->mount, handle->node)) {
-    errno = EBADF;
-    return -1;
+    ssize_t n = handle->mount->Write(handle->node, handle->offset, buf, count);
+
+    if (n > 0) {
+      handle->offset += n;
+    }
+    return n;
+  } else if (handle->stream) {
+    // TODO(vissi): more elaborate implementation
+    return send(fd, buf, count, 0);
   }
-
-  ssize_t n = handle->mount->Write(handle->node, handle->offset, buf, count);
-
-  if (n > 0) {
-    handle->offset += n;
-  }
-  return n;
+  errno = EBADF;
+  return -1;
 }
 
 int KernelProxy::fstat(int fd, struct stat *buf) {
-  FileHandle *handle;
+  FileHandle* handle;
 
   // check if fd is valid and handle exists
   if (!(handle = GetFileHandle(fd))) {
@@ -321,7 +424,7 @@ int KernelProxy::kill(pid_t pid, int sig) {
 }
 
 int KernelProxy::getdents(int fd, void *buf, unsigned int count) {
-  FileHandle *handle;
+  FileHandle* handle;
 
   // check if fd is valid and handle exists
   if (!(handle = GetFileHandle(fd))) {
@@ -343,7 +446,7 @@ int KernelProxy::getdents(int fd, void *buf, unsigned int count) {
 }
 
 int KernelProxy::fsync(int fd) {
-  FileHandle *handle;
+  FileHandle* handle;
 
   if (!(handle = GetFileHandle(fd))) {
     errno = EBADF;
@@ -354,19 +457,70 @@ int KernelProxy::fsync(int fd) {
 }
 
 int KernelProxy::isatty(int fd) {
-  FileHandle *handle;
+  FileHandle* handle;
 
   if (!(handle = GetFileHandle(fd))) {
     errno = EBADF;
     return 0;
   }
-  SimpleAutoLock(&handle->lock);
   return handle->mount->Isatty(handle->node);
+}
+
+int KernelProxy::dup2(int fd, int newfd) {
+  SimpleAutoLock lock(&kp_lock_);
+  int handle_slot = fds_.At(fd)->handle;
+  if (fds_.AllocAt(fd) != fd) return -1;
+  FileDescriptor* file = fds_.At(newfd);
+  file->handle = handle_slot;
+  return 0;
+}
+
+int KernelProxy::IsReady(int nfds, fd_set* fds,
+    bool (Socket::*is_ready)(), bool apply) {
+  if (!fds)
+    return 0;
+
+  int nset = 0;
+  for (int i = 0; i < nfds; i++) {
+    if (FD_ISSET(i, fds)) {
+      Socket* stream = GetFileHandle(i) > 0 ?
+        GetFileHandle(i)->stream : NULL;
+      if (!stream)
+        return -1;
+      if ((stream->*is_ready)()) {
+        if (!apply)
+          return 1;
+        else
+          nset++;
+      } else {
+        if (apply)
+          FD_CLR(i, fds);
+      }
+    }
+  }
+  return nset;
 }
 
 int KernelProxy::dup(int oldfd) {
   SimpleAutoLock lock(&kp_lock_);
 
+  FileHandle* fh = GetFileHandle(oldfd);
+  if (!fh) {
+    errno = EBADF;
+    return -1;
+  }
+  if (fh->mount == NULL) {
+    Socket* stream = GetFileHandle(oldfd) > 0
+      ? GetFileHandle(oldfd)->stream : NULL;
+    if (!stream)
+      return EBADF;
+    SimpleAutoLock lock(&kp_lock_);
+    int handle_slot = fds_.At(oldfd)->handle;
+    int newfd = fds_.Alloc();
+    FileDescriptor* file = fds_.At(newfd);
+    file->handle = handle_slot;
+    return newfd;
+  }
   FileDescriptor* oldfile = fds_.At(oldfd);
   if (oldfile == NULL) {
     errno = EBADF;
@@ -376,7 +530,7 @@ int KernelProxy::dup(int oldfd) {
   FileDescriptor *newfile = fds_.At(newfd);
   int h = oldfile->handle;
   newfile->handle = h;
-  FileHandle *handle = open_files_.At(h);
+  FileHandle* handle = open_files_.At(h);
   // init should be safe because we have the kernel proxy lock
   if (pthread_mutex_init(&handle->lock, NULL)) assert(0);
 
@@ -391,7 +545,7 @@ int KernelProxy::dup(int oldfd) {
 }
 
 off_t KernelProxy::lseek(int fd, off_t offset, int whence) {
-  FileHandle *handle;
+  FileHandle* handle;
   // check if fd is valid and handle exists
   if (!(handle = GetFileHandle(fd))) {
     errno = EBADF;
@@ -618,7 +772,7 @@ int KernelProxy::access(const std::string& path, int amode) {
   return 0;
 }
 
-KernelProxy::FileHandle *KernelProxy::GetFileHandle(int fd) {
+KernelProxy::FileHandle* KernelProxy::GetFileHandle(int fd) {
   SimpleAutoLock lock(&kp_lock_);
   FileDescriptor *file = fds_.At(fd);
   if (!file) {
@@ -674,44 +828,64 @@ int KernelProxy::rmdir(const std::string& path) {
   return mount->Rmdir(buf.st_ino);
 }
 
-#ifdef __GLIBC__
 int KernelProxy::socket(int domain, int type, int protocol) {
-  errno = ENOSYS;
-  fprintf(stderr, "socket has not been implemented!\n");
-  return -1;
+  SimpleAutoLock lock(&kp_lock_);
+  int handle_slot = open_files_.Alloc();
+  int fd = fds_.Alloc();
+  FileDescriptor* file = fds_.At(fd);
+  file->handle = handle_slot;
+  FileHandle* handle = open_files_.At(handle_slot);
+  // this means it is a socket (not a mount handle) and it's implementation
+  // determined by handle->stream type is defined later
+  handle->mount = NULL;
+  handle->stream = NULL;
+  handle->use_count = 1;
+  return fd;
 }
 
 int KernelProxy::accept(int sockfd, struct sockaddr *addr,
     socklen_t* addrlen) {
-  errno = ENOSYS;
-  fprintf(stderr, "accept has not been implemented!\n");
-  return -1;
+  if (GetFileHandle(sockfd) == 0)
+    return EBADF;
+  Socket* ret = socket_subsystem_->accept(GetFileHandle(sockfd)->stream,
+    addr, addrlen);
+  if (ret)
+    return AddSocket(ret);
+  else
+    return -1;
 }
 
 int KernelProxy::bind(int sockfd, const struct sockaddr *addr,
                       socklen_t addrlen) {
-  errno = ENOSYS;
-  fprintf(stderr, "bind has not been implemented!\n");
-  return -1;
+  if (GetFileHandle(sockfd) == 0)
+    return EBADF;
+  struct sockaddr_in* in_addr = (struct sockaddr_in*)addr;
+  return socket_subsystem_->bind(&(GetFileHandle(sockfd)->stream),
+      addr, addrlen);
 }
 
 int KernelProxy::listen(int sockfd, int backlog) {
-  errno = ENOSYS;
-  fprintf(stderr, "listen has not been implemented!\n");
-  return -1;
+  if (GetFileHandle(sockfd) == 0)
+    return EBADF;
+  return socket_subsystem_->listen(GetFileHandle(sockfd)->stream, backlog);
 }
 
 int KernelProxy::connect(int sockfd, const struct sockaddr *addr,
                          socklen_t addrlen) {
-  errno = ENOSYS;
-  fprintf(stderr, "connect has not been implemented!\n");
-  return -1;
+  if (GetFileHandle(sockfd) == 0)
+    return EBADF;
+  struct sockaddr_in* in_addr = (struct sockaddr_in*)addr;
+  return socket_subsystem_->connect(&(GetFileHandle(sockfd)->stream),
+      addr, addrlen);
 }
 
 int KernelProxy::send(int sockfd, const void *buf, size_t len, int flags) {
-  errno = ENOSYS;
-  fprintf(stderr, "send has not been implemented!\n");
-  return -1;
+  if (GetFileHandle(sockfd) == 0)
+    return EBADF;
+  size_t nwr;
+  socket_subsystem_->write(GetFileHandle(sockfd)->stream, (const char*)buf,
+    len, &nwr);
+  return nwr;
 }
 
 int KernelProxy::sendmsg(int sockfd, const struct msghdr *msg, int flags) {
@@ -728,9 +902,12 @@ int KernelProxy::sendto(int sockfd, const void *buf, size_t len, int flags,
 }
 
 int KernelProxy::recv(int sockfd, void *buf, size_t len, int flags) {
-  errno = ENOSYS;
-  fprintf(stderr, "recv has not been implemented!\n");
-  return -1;
+  if (GetFileHandle(sockfd) == 0)
+    return EBADF;
+  size_t nread;
+  socket_subsystem_->read(GetFileHandle(sockfd)->stream,
+    reinterpret_cast<char*>(buf), len, &nread);
+  return nread;
 }
 
 int KernelProxy::recvmsg(int sockfd, struct msghdr *msg, int flags) {
@@ -746,11 +923,64 @@ int KernelProxy::recvfrom(int sockfd, void *buf, size_t len, int flags,
   return -1;
 }
 
+#ifndef TIMEVAL_TO_TIMESPEC
+/* Macros for converting between `struct timeval' and `struct timespec'.  */
+# define TIMEVAL_TO_TIMESPEC(tv, ts) {                                  \
+        (ts)->tv_sec = (tv)->tv_sec;                                    \
+        (ts)->tv_nsec = (tv)->tv_usec * 1000;                           \
+}
+# define TIMESPEC_TO_TIMEVAL(tv, ts) {                                  \
+        (tv)->tv_sec = (ts)->tv_sec;                                    \
+        (tv)->tv_usec = (ts)->tv_nsec / 1000;                           \
+}
+#endif
+
 int KernelProxy::select(int nfds, fd_set *readfds, fd_set *writefds,
            fd_set* exceptfds, const struct timeval *timeout) {
-  errno = ENOSYS;
-  fprintf(stderr, "select has not been implemented!\n");
-  return -1;
+  timespec ts_abs;
+  if (timeout) {
+    timespec ts;
+    TIMEVAL_TO_TIMESPEC(timeout, &ts);
+    timeval tv_now;
+    gettimeofday(&tv_now, NULL);
+    int64_t current_time_us =
+        tv_now.tv_sec * kMicrosecondsPerSecond + tv_now.tv_usec;
+    int64_t wakeup_time_us =
+        current_time_us +
+        timeout->tv_sec * kMicrosecondsPerSecond + timeout->tv_usec;
+     ts_abs.tv_sec = wakeup_time_us / kMicrosecondsPerSecond;
+     ts_abs.tv_nsec =
+        (wakeup_time_us - ts_abs.tv_sec * kMicrosecondsPerSecond) *
+        kNanosecondsPerMicrosecond;
+  }
+
+  while (!(IsReady(nfds, readfds, &Socket::is_read_ready, false) ||
+          IsReady(nfds, writefds, &Socket::is_write_ready, false) ||
+          IsReady(nfds, exceptfds, &Socket::is_exception, false))) {
+    SimpleAutoLock lock(select_mutex().get());
+    if (timeout) {
+      if (!timeout->tv_sec && !timeout->tv_usec)
+        break;
+
+      if (select_cond().timedwait(select_mutex(), &ts_abs)) {
+        if (errno == ETIMEDOUT)
+          break;
+        else
+          return -1;
+      }
+    } else {
+      select_cond().wait(select_mutex());
+    }
+  }
+
+  int nread = IsReady(nfds, readfds, &Socket::is_read_ready, true);
+  int nwrite = IsReady(nfds, writefds, &Socket::is_write_ready, true);
+  int nexcpt = IsReady(nfds, exceptfds, &Socket::is_exception, true);
+  if (nread < 0 || nwrite < 0 || nexcpt < 0) {
+    errno = EBADF;
+    return -1;
+  }
+  return nread + nwrite + nexcpt;
 }
 
 int KernelProxy::pselect(int nfds, fd_set *readfds, fd_set *writefds,
@@ -789,42 +1019,10 @@ int KernelProxy::setsockopt(int sockfd, int level, int optname,
 }
 
 int KernelProxy::shutdown(int sockfd, int how) {
-  errno = ENOSYS;
-  fprintf(stderr, "shutdown has not been implemented!\n");
-  return -1;
-}
-
-int KernelProxy::epoll_create(int size) {
-  errno = ENOSYS;
-  fprintf(stderr, "epoll_create has not been implemented!\n");
-  return -1;
-}
-
-int KernelProxy::epoll_create1(int flags) {
-  errno = ENOSYS;
-  fprintf(stderr, "epoll_create1 has not been implemented!\n");
-  return -1;
-}
-
-int KernelProxy::epoll_ctl(int epfd, int op, int fd,
-                           struct epoll_event *event) {
-  errno = ENOSYS;
-  fprintf(stderr, "epoll_ctl has not been implemented!\n");
-  return -1;
-}
-
-int KernelProxy::epoll_wait(int epfd, struct epoll_event *events, int maxevents,
-               int timeout) {
-  errno = ENOSYS;
-  fprintf(stderr, "epoll_wait has not been implemented!\n");
-  return -1;
-}
-
-int KernelProxy::epoll_pwait(int epfd, struct epoll_event *events,
-    int maxevents, int timeout, const sigset_t *sigmask, size_t sigset_size) {
-  errno = ENOSYS;
-  fprintf(stderr, "epoll_pwait has not been implemented!\n");
-  return -1;
+  FileHandle* fh = GetFileHandle(sockfd);
+  if (fh == 0)
+    return EBADF;
+  return socket_subsystem_->shutdown(fh->stream, how);
 }
 
 int KernelProxy::socketpair(int domain, int type, int protocol, int sv[2]) {
@@ -832,19 +1030,4 @@ int KernelProxy::socketpair(int domain, int type, int protocol, int sv[2]) {
   fprintf(stderr, "socketpair has not been implemented!\n");
   return -1;
 }
-
-int KernelProxy::poll(struct pollfd *fds, nfds_t nfds, int timeout) {
-  errno = ENOSYS;
-  fprintf(stderr, "poll has not been implemented!\n");
-  return -1;
-}
-
-int KernelProxy::ppoll(struct pollfd *fds, nfds_t nfds,
-          const struct timespec *timeout,
-          const sigset_t *sigmask, size_t sigset_size) {
-  errno = ENOSYS;
-  fprintf(stderr, "ppoll has not been implemented!\n");
-  return -1;
-}
-#endif
 

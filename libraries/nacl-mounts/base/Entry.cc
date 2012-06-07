@@ -169,6 +169,10 @@ extern "C" {
     return kp->kill(pid, sig);
   }
 
+  struct hostent* gethostbyname(const char* name) {
+    return kp->gethostbyname(name);
+  }
+
   int unlink(const char *path) {
     return kp->unlink(path);
   }
@@ -404,6 +408,11 @@ extern "C" {
     return (*ret < 0) ? errno : 0;
   }
 
+  struct hostent* WRAP(gethostbyname) (const char* name) {
+    return kp->gethostbyname(name);
+  }
+
+
   int WRAP(getsockname) (int sockfd, struct sockaddr* addr,
                          socklen_t* addrlen) {
     return (kp->getsockname(sockfd, addr, addrlen)) < 0 ? errno : 0;
@@ -434,40 +443,6 @@ extern "C" {
     return (kp->shutdown(sockfd, how) < 0) ? errno : 0;
   }
 
-  int WRAP(epoll_create) (int size, int* ret) {
-    *ret = kp->epoll_create(size);
-    return (*ret < 0) ? errno : 0;
-  }
-
-  int WRAP(epoll_ctl) (int epfd, int op, int fd, struct epoll_event *event) {
-    return (kp->epoll_ctl(epfd, op, fd, event) < 0) ? errno : 0;
-  }
-
-  int WRAP(epoll_wait) (int epfd, struct epoll_event *events,
-                        int maxevents, int timeout, int *count) {
-    *count = kp->epoll_wait(epfd, events, maxevents, timeout);
-    return (*count < 0) ? errno : 0;
-  }
-
-  int WRAP(epoll_pwait) (int epfd, struct epoll_event *events,
-                         int maxevents, int timeout, const sigset_t *sigmask,
-                         size_t sigset_size, int *count) {
-    *count = kp->epoll_pwait(epfd, events, maxevents, timeout, sigmask,
-                           sigset_size);
-    return (*count < 0) ? errno : 0;
-  }
-
-  int WRAP(poll) (struct pollfd *fds, nfds_t nfds, int timeout, int *count) {
-    *count = kp->poll(fds, nfds, timeout);
-    return (*count < 0) ? errno : 0;
-  }
-
-  int WRAP(ppoll) (struct pollfd *fds, nfds_t nfds,
-                   const struct timespec *timeout, const sigset_t *sigmask,
-                   size_t sigset_size, int *count) {
-    *count = kp->ppoll(fds, nfds, timeout, sigmask, sigset_size);
-    return (*count < 0) ? errno : 0;
-  }
 #endif
 }
 
@@ -506,13 +481,6 @@ static struct NaClMountsStaticInitializer {
       DO_WRAP(net, setsockopt);
       DO_WRAP(net, socketpair);
       DO_WRAP(net, shutdown);
-
-      DO_WRAP(net, epoll_create);
-      DO_WRAP(net, epoll_ctl);
-      DO_WRAP(net, epoll_wait);
-      DO_WRAP(net, epoll_pwait);
-      DO_WRAP(net, poll);
-      DO_WRAP(net, ppoll);
 #endif
     }
   } nacl_mounts_static_initializer;

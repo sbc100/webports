@@ -9,7 +9,7 @@
 # location of gtest
 GTEST_DIR = ../../testing/gtest
 
-CPPFLAGS += -I$(GTEST_DIR) -I$(GTEST_DIR)/include
+CPPFLAGS += -I$(GTEST_DIR)
 CXXFLAGS += -pthread -g -Wall -Werror -I$(GTEST_DIR)
 
 # All gtest headers

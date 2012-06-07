@@ -9,7 +9,7 @@
 #include "HTTP2OpenJob.h"
 #include "HTTP2ReadJob.h"
 #include "../util/DebugPrint.h"
-#include "../util/SimpleAutoLock.h"
+#include "../util/PthreadHelpers.h"
 #include <set>
 #include <assert.h>
 #include <errno.h>

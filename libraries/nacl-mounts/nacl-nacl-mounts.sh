@@ -59,7 +59,10 @@ CustomBuildStep() {
   MakeDir ${PACKAGE_DIR}
   ChangeDir ${PACKAGE_DIR}
   set -x
-  export CXXCMD="${NACLCC} -I${START_DIR}"
+  export CXXCMD="${NACLCC} -I${START_DIR}/../ -I${START_DIR}"
+  ${CXXCMD} -c ${START_DIR}/net/TcpSocket.cc
+  ${CXXCMD} -c ${START_DIR}/net/TcpServerSocket.cc
+  ${CXXCMD} -c ${START_DIR}/net/SocketSubSystem.cc
   ${CXXCMD} -c ${START_DIR}/buffer/BufferMount.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2Mount.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2FSOpenJob.cc
@@ -71,7 +74,6 @@ CustomBuildStep() {
   ${CXXCMD} -c ${START_DIR}/base/MainThreadRunner.cc
   ${CXXCMD} -c ${START_DIR}/base/UrlLoaderJob.cc
   ${CXXCMD} -c ${START_DIR}/util/Path.cc
-  ${CXXCMD} -c ${START_DIR}/util/SimpleAutoLock.cc
   ${CXXCMD} -c ${START_DIR}/util/nacl_simple_tar.c
   ${CXXCMD} -c ${START_DIR}/console/terminal.c
   ${CXXCMD} -c ${START_DIR}/console/terminal_stubs.c
@@ -96,7 +98,6 @@ CustomBuildStep() {
       MainThreadRunner.o \
       UrlLoaderJob.o \
       Path.o \
-      SimpleAutoLock.o \
       nacl_simple_tar.o \
       terminal.o \
       terminal_stubs.o \
@@ -118,6 +119,9 @@ CustomBuildStep() {
       ConsoleMount.o \
       JSPipeMount.o \
       JSPostMessageBridge.o \
+      TcpSocket.o \
+      TcpServerSocket.o \
+      SocketSubSystem.o \
       BufferMount.o
 
   ${NACLRANLIB} libnacl-mounts.a
@@ -132,20 +136,26 @@ CustomInstallStep() {
   cp ${START_DIR}/console/console.js ${NACL_SDK_USR_LIB}/nacl-mounts
   cp ${START_DIR}/http2/genfs.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
 
-  # GLibC toolcahin has termio.h so don't copy stub header.
+  # GLibC toolchain has termio.h so don't copy stub header.
   if [[ $NACL_GLIBC == 0 ]]; then
     cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
   fi
 
   mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
-  for DIR in console base util memory http2 AppEngine pepper buffer; do
+  for DIR in console base util memory net http2 AppEngine pepper buffer; do
     mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
     cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
   done
+  mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/cpp/private
+  mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/c/private
+  cp -R ${START_DIR}/ppapi/cpp/private/*.h \
+    ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/cpp/private/
+  cp -R ${START_DIR}/ppapi/c/private/*.h \
+    ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/c/private/
 }
 
 CustomPackageInstall() {
-  RunTests
+#  RunTests
   DefaultPreInstallStep
   CustomBuildStep
   CustomInstallStep

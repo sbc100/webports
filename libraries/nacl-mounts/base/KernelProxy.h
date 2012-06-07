@@ -7,20 +7,21 @@
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_KERNELPROXY_H_
 
 #include <errno.h>
-#ifdef __GLIBC__
-#include <poll.h>
+#include <nacl-mounts/base/Mount.h>
+#include <nacl-mounts/base/MountManager.h>
+#include <nacl-mounts/net/BaseSocketSubSystem.h>
+#ifdef __GLIBC
+#include <nacl-mounts/net/newlib_compat.h>
+#endif
+#include <nacl-mounts/util/Path.h>
+#include <nacl-mounts/util/PthreadHelpers.h>
+#include <nacl-mounts/util/SlotAllocator.h>
+#ifndef __GLIBC__
+#include <netdb.h>
 #endif
 #include <pthread.h>
-#ifdef __GLIBC__
-#include <sys/epoll.h>
-#endif
 #include <sys/stat.h>
 #include <string>
-#include "../base/Mount.h"
-#include "../base/MountManager.h"
-#include "../util/Path.h"
-#include "../util/SimpleAutoLock.h"
-#include "../util/SlotAllocator.h"
 
 // KernelProxy handles all of the system calls.  System calls are either
 // (1) handled entirely by the KernelProxy, (2) processed by the
@@ -33,12 +34,16 @@ class KernelProxy {
   // Obtain the singleton instance of the kernel proxy.  If no instance
   // has been instantiated, one will be instantiated and returned.
   static KernelProxy *KPInstance();
+  // Set socket subsystem reference (not in constructor because it needs to be
+  // created separately and only if you need sockets in your app)
+  void SetSocketSubSystem(BaseSocketSubSystem* bss);
 
   // System calls handled by KernelProxy (not mount-specific)
   int chdir(const std::string& path);
   bool getcwd(std::string *buf, size_t size);
   bool getwd(std::string *buf);
   int dup(int oldfd);
+  int dup2(int oldfd, int newfd);
 
   // System calls that take a path as an argument:
   // The kernel proxy will look for the Node associated to the path.  To
@@ -88,7 +93,6 @@ class KernelProxy {
   int symlink(const std::string& path1, const std::string& path2);
   int kill(pid_t pid, int sig);
 
-#ifdef __GLIBC__
   // TODO(vissi): implement the following system calls
   int socket(int domain, int type, int protocol);
   int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
@@ -109,40 +113,52 @@ class KernelProxy {
               const struct timeval *timeout, void* sigmask);
   int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
   int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+  struct hostent* gethostbyname(const char* name);
+  int getaddrinfo(const char* hostname, const char* servname,
+                const struct addrinfo* hints, struct addrinfo** res);
+  void freeaddrinfo(struct addrinfo* ai);
+  int getnameinfo(const struct sockaddr* sa, socklen_t salen,
+                char* host, socklen_t hostlen,
+                char* serv, socklen_t servlen, unsigned int flags);
   int getsockopt(int sockfd, int level, int optname, void *optval,
                  socklen_t* optlen);
   int setsockopt(int sockfd, int level, int optname, const void *optval,
                  socklen_t optlen);
   int shutdown(int sockfd, int how);
-  int epoll_create(int size);
-  int epoll_create1(int flags);
-  int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
-  int epoll_wait(int epfd, struct epoll_event *events, int maxevents,
-                 int timeout);
-  int epoll_pwait(int epfd, struct epoll_event *events, int maxevents,
-           int timeout, const sigset_t *sigmask, size_t sigset_size);
   int socketpair(int domain, int type, int protocol, int sv[2]);
-  int poll(struct pollfd *fds, nfds_t nfds, int timeout);
-  int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout,
-            const sigset_t *sigmask, size_t sigset_size);
-#endif
   MountManager *mm() { return &mm_; }
 
+  int AddSocket(Socket* stream);
+  void RemoveSocket(int fd);
+
+  int IsReady(int nfds, fd_set* fds, bool (Socket::*is_ready)(),
+    bool apply);
+  Cond& select_cond() { return select_cond_; }
+  Mutex& select_mutex() { return select_mutex_; }
  private:
   struct FileDescriptor {
     // An index in open_files_ table
     int handle;
   };
 
+  // used for select() signals
+  Cond select_cond_;
+  Mutex select_mutex_;
+
+  // if mount == NULL, it's a socket, stream == NULL is a consistent state
+  // for socket that was just opened
   struct FileHandle {
     Mount *mount;
+    Socket* stream;
     ino_t node;
     off_t offset;
     int flags;
     int use_count;
     pthread_mutex_t lock;
   };
+  FileHandle* GetFileHandle(int fd);
 
+  BaseSocketSubSystem* socket_subsystem_;
   Path cwd_;
   int max_path_len_;
   MountManager mm_;
@@ -152,7 +168,6 @@ class KernelProxy {
   SlotAllocator<FileDescriptor> fds_;
   SlotAllocator<FileHandle> open_files_;
 
-  FileHandle *GetFileHandle(int fd);
   int OpenHandle(Mount *mount, const std::string& path, int oflag, mode_t mode);
 
   KernelProxy();

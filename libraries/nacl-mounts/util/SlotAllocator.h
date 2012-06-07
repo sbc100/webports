@@ -1,13 +1,13 @@
-/*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+// Copyright (c) 2012 The Native Client Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_UTIL_SLOTALLOCATOR_H_
 
 #include <stdint.h>
 #include <algorithm>
+#include <set>
 #include <vector>
 #include "macros.h"
 
@@ -29,6 +29,13 @@ class SlotAllocator {
   // that corresponds to that memory.
   int Alloc();
 
+  // AllocAt() allocates memory for an object of type T
+  // at specified index (this is required for dup2 syscall)
+  // and returns the slot index in this SlotAllocator
+  // that corresponds to that memory.
+  // Returns -1 on error.
+  int AllocAt(int fd);
+
   // Free() frees the memory in the given slot.  If
   // no memory has been allocated to the slot, this
   // method does nothing.
@@ -42,7 +49,7 @@ class SlotAllocator {
 
  private:
   std::vector<T*> slots_;
-  std::vector<int> heap_;
+  std::set<int> free_fds_;
 
   static bool comp(int i, int j) { return i > j; }
 
@@ -62,15 +69,30 @@ SlotAllocator<T>::~SlotAllocator() {
 
 template <class T>
 int SlotAllocator<T>::Alloc() {
-  if (heap_.size() == 0) {
+  if (free_fds_.size() == 0) {
     slots_.push_back(new T);
     return slots_.size()-1;
   }
-  int index = heap_.front();
-  std::pop_heap(heap_.begin(), heap_.end(), comp);
-  heap_.pop_back();
+  int index = *(free_fds_.begin());
+  free_fds_.erase(free_fds_.begin());
   slots_[index] = new T;
   return index;
+}
+
+template <class T>
+int SlotAllocator<T>::AllocAt(int fd) {
+  int prev_size = slots_.size();
+  if (slots_.size() < fd + 1) {
+    slots_.resize(fd + 1);
+  } else {
+    if (free_fds_.find(fd) != free_fds_.end()) {
+      slots_[fd] = new T;
+      for (int i = prev_size; i < fd; ++i) free_fds_.insert(i);
+    } else {
+      return -1;
+    }
+  }
+  return fd;
 }
 
 template <class T>
@@ -82,8 +104,7 @@ void SlotAllocator<T>::Free(int slot) {
   }
   delete slots_[slot];
   slots_[slot] = NULL;
-  heap_.push_back(slot);
-  std::push_heap(heap_.begin(), heap_.end(), comp);
+  free_fds_.insert(slot);
 }
 
 template <class T>
