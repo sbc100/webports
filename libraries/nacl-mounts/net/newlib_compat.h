@@ -7,6 +7,7 @@
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_NEWLIB_H_
 
 #include <assert.h>
+#include <inttypes.h>
 
 typedef uint32_t socklen_t;
 struct sockaddr {

@@ -5,6 +5,7 @@
 #include <string.h>
 #ifdef __GLIBC__
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -32,11 +33,12 @@ uint32_t SocketSubSystem::AddHostAddress(const char* name, uint32_t addr) {
   return addr;
 }
 
-addrinfo* SocketSubSystem::CreateAddrInfo(const PP_NetAddress_Private& netaddr,
-                                     const addrinfo* hints,
-                                     const char* name) {
-  addrinfo* ai = new addrinfo();
-  sockaddr_in6* addr = new sockaddr_in6();
+struct addrinfo* SocketSubSystem::CreateAddrInfo(
+    const PP_NetAddress_Private& netaddr,
+    const addrinfo* hints,
+    const char* name) {
+  struct addrinfo* ai = new addrinfo();
+  struct sockaddr_in6* addr = new sockaddr_in6();
 
   ai->ai_addr = reinterpret_cast<sockaddr*>(addr);
   ai->ai_addrlen = sizeof(*addr);
@@ -231,8 +233,8 @@ void SocketSubSystem::OnResolve(int32_t result, GetAddrInfoParams* params,
                            int32_t* pres) {
   SimpleAutoLock lock(mutex());
   assert(host_resolver_);
-  const addrinfo* hints = params->hints;
-  addrinfo** res = params->res;
+  const struct addrinfo* hints = params->hints;
+  struct addrinfo** res = params->res;
   std::string host_name = host_resolver_->GetCanonicalName().AsString();
   if (result == PP_OK) {
     size_t size  = host_resolver_->GetSize();
@@ -254,7 +256,7 @@ void SocketSubSystem::OnResolve(int32_t result, GetAddrInfoParams* params,
 
 void SocketSubSystem::freeaddrinfo(addrinfo* ai) {
   while (ai != NULL) {
-    addrinfo* next = ai->ai_next;
+    struct addrinfo* next = ai->ai_next;
     free(ai->ai_canonname);
     delete ai->ai_addr;
     delete ai;
@@ -279,7 +281,7 @@ int SocketSubSystem::getnameinfo(const sockaddr *sa, socklen_t salen,
         host, hostlen);
     }
   } else {
-      inet_ntop(AF_INET, &(reinterpret_cast<sockaddr_in*>(sa))->sin_addr,
+      inet_ntop(AF_INET, &(reinterpret_cast<const sockaddr_in*>(sa))->sin_addr,
         host, hostlen);
   }
 
@@ -331,8 +333,8 @@ int SocketSubSystem::bind(Socket** stream, const sockaddr* addr,
 }
 
 uint32_t SocketSubSystem::gethostbyname(const char* name) {
-  addrinfo* ai;
-  addrinfo hints;
+  struct addrinfo* ai;
+  struct addrinfo hints;
   hints.ai_family = AF_INET;
   hints.ai_flags = 0;
   if (!getaddrinfo(name, "80", &hints, &ai)) {

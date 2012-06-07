@@ -5,7 +5,13 @@
 #ifndef PACKAGES_LIBRARIES_NACL_MOUNTS_NET_TCP_SERVER_SOCKET_H_
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_NET_TCP_SERVER_SOCKET_H_
 
-#include <string>
+#include <string.h>
+#ifndef __GLIBC__
+#include "../net/newlib_compat.h"
+#else
+#include <sys/socket.h>
+#include <netinet/in.h>
+#endif
 #include "../net/SocketSubSystem.h"
 #include "ppapi/cpp/completion_callback.h"
 #include "../ppapi/cpp/private/tcp_server_socket_private.h"
@@ -14,7 +20,7 @@
 class TCPServerSocket : public Socket {
  public:
   TCPServerSocket(SocketSubSystem* sys,
-      int oflag, const sockaddr* saddr, socklen_t addrlen);
+      int oflag, const struct sockaddr* saddr, socklen_t addrlen);
   virtual ~TCPServerSocket();
 
   bool is_open() { return socket_ != NULL; }
@@ -40,14 +46,15 @@ class TCPServerSocket : public Socket {
   void Accept(int32_t result, int32_t* pres);
   void OnAccept(int32_t result);
   void Close(int32_t result, int32_t* pres);
-  bool CreateNetAddress(const sockaddr* saddr, PP_NetAddress_Private* addr);
+  bool CreateNetAddress(const struct sockaddr* saddr,
+      PP_NetAddress_Private* addr);
 
   SocketSubSystem* sys_;
   int ref_;
   int oflag_;
   pp::CompletionCallbackFactory<TCPServerSocket, ThreadSafeRefCount> factory_;
   pp::TCPServerSocketPrivate* socket_;
-  sockaddr_in6 sin6_;
+  struct sockaddr_in6 sin6_;
   PP_Resource resource_;
 
   DISALLOW_COPY_AND_ASSIGN(TCPServerSocket);

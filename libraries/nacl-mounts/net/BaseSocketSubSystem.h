@@ -49,7 +49,7 @@ class BaseSocketSubSystem {
     socklen_t addrlen) = 0;
   virtual int shutdown(Socket* stream, int how) = 0;
   virtual int listen(Socket* stream, int backlog) = 0;
-  virtual Socket* accept(Socket* stream, struct sockaddr *addr,
+  virtual Socket* accept(Socket* stream, sockaddr *addr,
     socklen_t* addrlen) = 0;
 };
 

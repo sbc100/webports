@@ -8,6 +8,7 @@
 #ifndef __GLIBC__
 #include <nacl-mounts/net/newlib_compat.h>
 #else
+#include <netdb.h>
 #include <netinet/in.h>
 #endif
 #include <sys/time.h>
@@ -242,9 +243,11 @@ static __thread char** ghn_addr_list = NULL;
 static __thread char* ghn_item = NULL;
 
 struct hostent* KernelProxy::gethostbyname(const char* name) {
-  struct hostent *res = ghn_res == NULL
-    ? (ghn_res = (struct hostent*) malloc(sizeof(struct hostent)))
-    : ghn_res;
+  struct hostent *res = ghn_res;
+  if (ghn_res == NULL) {
+    res = (ghn_res = reinterpret_cast<struct hostent*>
+        (malloc(sizeof(struct hostent))));
+  }
   if (!res) return NULL;
   res->h_addr_list = ghn_addr_list == NULL
     ? (ghn_addr_list = reinterpret_cast<char**>(malloc(sizeof(char*) * 2)))
