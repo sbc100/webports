@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <string.h>
 
 typedef uint32_t socklen_t;
 struct sockaddr {
@@ -70,29 +71,19 @@ struct hostent {
   char**  h_addr_list;  /* list of addresses */
 };
 
-#define h_addr  h_addr_list[0]  /* for backward compatibility */
-
-static uint16_t htons(uint16_t v) {
-  assert(0);
-}
-uint16_t ntohs(uint16_t v) {
-  assert(0);
-}
-
-const char*
-inet_ntop(int af, const void *src, char *dst, socklen_t cnt) {
-  assert(0);
-}
-int inet_pton(int af, const char* src, void* dst) {
-  assert(0);
-}
-
 struct sockaddr_in6 {
   uint16_t        sin6_family;   /* AF_INET6     */
   in_port_t       sin6_port;     /* Transport layer port #   */
   uint32_t        sin6_flowinfo; /* IPv6 flow information    */
   struct in6_addr sin6_addr;     /* IPv6 address       */
 };
+
+uint16_t htons(uint16_t v);
+uint16_t ntohs(uint16_t v);
+
+const char*
+inet_ntop(int af, const void *src, char *dst, socklen_t cnt);
+int inet_pton(int af, const char* src, void* dst);
 
 #endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_NEWLIB_H_
 

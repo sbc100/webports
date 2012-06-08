@@ -3,12 +3,11 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#include "base/KernelProxy.h"
+#include <nacl-mounts/base/KernelProxy.h>
 #include "gtest/gtest.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
 
 TEST(SimpleTest, Simple) {
   struct stat buf;

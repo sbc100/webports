@@ -63,6 +63,7 @@ CustomBuildStep() {
   ${CXXCMD} -c ${START_DIR}/net/TcpSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/TcpServerSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/SocketSubSystem.cc
+  ${CXXCMD} -c ${START_DIR}/net/newlib_compat.cc
   ${CXXCMD} -c ${START_DIR}/buffer/BufferMount.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2Mount.cc
   ${CXXCMD} -c ${START_DIR}/http2/HTTP2FSOpenJob.cc
@@ -95,6 +96,7 @@ CustomBuildStep() {
       MountManager.o \
       KernelProxy.o \
       Entry.o \
+      newlib_compat.o \
       MainThreadRunner.o \
       UrlLoaderJob.o \
       Path.o \

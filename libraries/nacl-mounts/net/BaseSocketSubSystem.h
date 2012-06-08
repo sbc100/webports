@@ -7,6 +7,8 @@
 #include <errno.h>
 #ifndef __GLIBC__
 #include <nacl-mounts/net/newlib_compat.h>
+#else
+#include <netdb.h>
 #endif
 #include <nacl-mounts/net/Socket.h>
 #include <nacl-mounts/util/PthreadHelpers.h>
@@ -40,10 +42,10 @@ class BaseSocketSubSystem {
   virtual int getaddrinfo(const char* hostname, const char* servname,
     const addrinfo* hints, addrinfo** res) = 0;
   virtual void freeaddrinfo(addrinfo* ai) = 0;
-  virtual int getnameinfo(const sockaddr *sa, socklen_t salen,
+  virtual int getnameinfo(const struct sockaddr* sa, socklen_t salen,
                           char* host, size_t hostlen,
                           char* serv, size_t servlen, int flags) = 0;
-  virtual int connect(Socket** stream, const sockaddr* serv_addr,
+  virtual int connect(Socket** stream, const struct sockaddr* serv_addr,
     socklen_t addrlen) = 0;
   virtual int bind(Socket** stream, const sockaddr* addr,
     socklen_t addrlen) = 0;

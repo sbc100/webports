@@ -7,16 +7,17 @@
 #define PACKAGES_LIBRARIES_NACL_MOUNTS_BASE_KERNELPROXY_H_
 
 #include <errno.h>
+#include <string.h>
 #include <nacl-mounts/base/Mount.h>
 #include <nacl-mounts/base/MountManager.h>
 #include <nacl-mounts/net/BaseSocketSubSystem.h>
-#ifdef __GLIBC
+#ifndef __GLIBC__
 #include <nacl-mounts/net/newlib_compat.h>
 #endif
 #include <nacl-mounts/util/Path.h>
 #include <nacl-mounts/util/PthreadHelpers.h>
 #include <nacl-mounts/util/SlotAllocator.h>
-#ifndef __GLIBC__
+#ifdef __GLIBC__
 #include <netdb.h>
 #endif
 #include <pthread.h>
