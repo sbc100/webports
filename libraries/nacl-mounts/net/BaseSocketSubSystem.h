@@ -37,6 +37,8 @@ class BaseSocketSubSystem {
 
   virtual int fcntl(Socket* stream, int cmd, va_list ap) = 0;
   virtual int ioctl(Socket* stream, int request, va_list ap) = 0;
+  virtual int setsockopt(Socket* stream, int level, int optname,
+           const void* optval, socklen_t optlen) = 0;
 
   virtual uint32_t gethostbyname(const char* name) = 0;
   virtual int getaddrinfo(const char* hostname, const char* servname,

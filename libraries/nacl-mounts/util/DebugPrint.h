@@ -10,9 +10,13 @@
 #include <stdarg.h>
 #include <sys/types.h>
 
+#ifdef __cplusplus
 extern "C" {
+#endif
   ssize_t __real_write(int fd, const void *buf, size_t count);
+#ifdef __cplusplus
 }
+#endif
 
 static int dbgprintf(const char* format, ...) {
   const int buf_size = 1000;

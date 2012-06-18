@@ -9,6 +9,7 @@
 #include "../net/SocketSubSystem.h"
 #include "ppapi/c/pp_errors.h"
 #include "ppapi/cpp/module.h"
+#include "ppapi/cpp/private/net_address_private.h"
 #include "../util/DebugPrint.h"
 #include "../util/PthreadHelpers.h"
 
@@ -159,6 +160,31 @@ void TCPSocket::Connect(int32_t result, const char* host, uint16_t port,
       factory_.NewCallback(&TCPSocket::OnConnect, pres));
   if (*pres != PP_OK_COMPLETIONPENDING) {
     sys_->cond().broadcast();
+  }
+}
+
+void TCPSocket::GetAddress(struct sockaddr* addr) {
+  struct sockaddr_in* iaddr = (struct sockaddr_in*) addr;
+  struct sockaddr_in6* iaddr6 = (struct sockaddr_in6*) addr;
+  PP_NetAddress_Private netaddr;
+  socket_->GetRemoteAddress(&netaddr);
+  PP_NetAddressFamily_Private family =
+    pp::NetAddressPrivate::GetFamily(netaddr);
+  if (family == PP_NETADDRESSFAMILY_IPV4) {
+    iaddr->sin_family = AF_INET;
+  } else if (family == PP_NETADDRESSFAMILY_IPV6) {
+    iaddr->sin_family = AF_INET6;
+  } else {
+    iaddr->sin_family = AF_UNSPEC;
+    return;
+  }
+  iaddr6->sin6_port = pp::NetAddressPrivate::GetPort(netaddr);
+  if (family == PP_NETADDRESSFAMILY_IPV6) {
+    pp::NetAddressPrivate::GetAddress(
+        netaddr, &iaddr6->sin6_addr, sizeof(in6_addr));
+  } else {
+    pp::NetAddressPrivate::GetAddress(
+        netaddr, &iaddr->sin_addr, sizeof(in_addr));
   }
 }
 

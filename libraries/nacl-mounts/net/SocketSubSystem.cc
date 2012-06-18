@@ -29,6 +29,12 @@ SocketSubSystem::SocketSubSystem(pp::Instance* instance)
   AddHostAddress("localhost", 0x7F000001);
 }
 
+int SocketSubSystem::setsockopt(Socket* stream, int level, int optname,
+           const void* optval, socklen_t optlen) {
+  // this is just a placeholder, chromium does not provide api for this yet
+  return 0;
+}
+
 uint32_t SocketSubSystem::AddHostAddress(const char* name, uint32_t addr) {
   return addr;
 }
@@ -101,7 +107,6 @@ void SocketSubSystem::Resolve(int32_t result, GetAddrInfoParams* params,
       hints->ai_family != AF_INET6) {
     *pres = PP_ERROR_FAILED;
     cond().broadcast();
-    dbgprintf("SSS::Resolve failed: incorrect ai_family\n");
     return;
   }
 
@@ -446,9 +451,8 @@ Socket* SocketSubSystem::accept(Socket* stream, struct sockaddr *addr,
     }
     errno = EINVAL;
     return 0;
-  } else {
-    errno = EBADF;
-    return 0;
   }
+  errno = EBADF;
+  return 0;
 }
 

@@ -89,9 +89,9 @@ bool TCPServerSocket::listen(int backlog) {
 }
 
 PP_Resource TCPServerSocket::accept() {
-  if (!resource_)
+  if (!resource_) {
     return 0;
-
+  }
   PP_Resource ret = resource_;
   resource_ = 0;
   pp::Module::Get()->core()->CallOnMainThread(0,

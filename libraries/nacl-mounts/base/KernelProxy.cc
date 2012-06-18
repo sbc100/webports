@@ -35,7 +35,6 @@ KernelProxy::KernelProxy() {
   if (pthread_mutex_init(&kp_lock_, NULL)) assert(0);
   cwd_ = Path("/");
   mm_.Init();
-
   // Setup file descriptors 0, 1, and 2 for STDIN, STDOUT, and STDERR
   int ret = mkdir("/dev", 0777);
   assert(ret == 0);
@@ -53,6 +52,7 @@ KernelProxy::KernelProxy() {
   assert(fd == 1);
   fd = open("/dev/fd/2", O_CREAT | O_RDWR, 0);
   assert(fd == 2);
+  socket_subsystem_ = NULL;
 }
 
 void KernelProxy::SetSocketSubSystem(BaseSocketSubSystem* bss) {
@@ -77,7 +77,7 @@ int KernelProxy::AddSocket(Socket* stream) {
   if (pthread_mutex_init(&handle->lock, NULL)) assert(0);
 
   handle->mount = reinterpret_cast<Mount*>(NULL);
-  handle->stream = reinterpret_cast<Socket*>(NULL);
+  handle->stream = stream;
   handle->use_count = 1;
 
   return fd;
@@ -428,7 +428,6 @@ int KernelProxy::kill(pid_t pid, int sig) {
 
 int KernelProxy::getdents(int fd, void *buf, unsigned int count) {
   FileHandle* handle;
-
   // check if fd is valid and handle exists
   if (!(handle = GetFileHandle(fd))) {
     errno = EBADF;
@@ -486,11 +485,12 @@ int KernelProxy::IsReady(int nfds, fd_set* fds,
   int nset = 0;
   for (int i = 0; i < nfds; i++) {
     if (FD_ISSET(i, fds)) {
-      Socket* stream = GetFileHandle(i) > 0 ?
-        GetFileHandle(i)->stream : NULL;
-      if (!stream)
+      FileHandle* h = GetFileHandle(i);
+      if (h == NULL) {
         return -1;
-      if ((stream->*is_ready)()) {
+      }
+      Socket* stream = h->stream;
+      if (stream && (stream->*is_ready)()) {
         if (!apply)
           return 1;
         else
@@ -850,12 +850,15 @@ int KernelProxy::accept(int sockfd, struct sockaddr *addr,
     socklen_t* addrlen) {
   if (GetFileHandle(sockfd) == 0)
     return EBADF;
-  Socket* ret = socket_subsystem_->accept(GetFileHandle(sockfd)->stream,
+  Socket* ret = socket_subsystem_->accept(
+    GetFileHandle(sockfd)->stream,
     addr, addrlen);
-  if (ret)
+  if (ret) {
+    ret->GetAddress(addr);
     return AddSocket(ret);
-  else
+  } else {
     return -1;
+  }
 }
 
 int KernelProxy::bind(int sockfd, const struct sockaddr *addr,
@@ -966,10 +969,12 @@ int KernelProxy::select(int nfds, fd_set *readfds, fd_set *writefds,
         break;
 
       if (select_cond().timedwait(select_mutex(), &ts_abs)) {
-        if (errno == ETIMEDOUT)
+        if (errno == ETIMEDOUT) {
           break;
-        else
+        } else {
+          dbgprintf("select: timedwait error %d\n", errno);
           return -1;
+        }
       }
     } else {
       select_cond().wait(select_mutex());
@@ -981,6 +986,7 @@ int KernelProxy::select(int nfds, fd_set *readfds, fd_set *writefds,
   int nexcpt = IsReady(nfds, exceptfds, &Socket::is_exception, true);
   if (nread < 0 || nwrite < 0 || nexcpt < 0) {
     errno = EBADF;
+    dbgprintf("select: EBADF problem %d\n", errno);
     return -1;
   }
   return nread + nwrite + nexcpt;
@@ -1016,9 +1022,8 @@ int KernelProxy::getsockopt(int sockfd, int level, int optname, void *optval,
 
 int KernelProxy::setsockopt(int sockfd, int level, int optname,
             const void *optval, socklen_t optlen) {
-  errno = ENOSYS;
-  fprintf(stderr, "setsockopt has not been implemented!\n");
-  return -1;
+  return socket_subsystem_->setsockopt(GetFileHandle(sockfd)->stream, level,
+      optname, optval, optlen);
 }
 
 int KernelProxy::shutdown(int sockfd, int how) {

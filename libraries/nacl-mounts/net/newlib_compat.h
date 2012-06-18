@@ -8,7 +8,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <string.h>
+#include <stddef.h>
 
 typedef uint32_t socklen_t;
 struct sockaddr {

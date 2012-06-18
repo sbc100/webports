@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 The Native Client Authors. All rights reserved.
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -27,7 +27,8 @@ int MemNode::stat(struct stat *buf) {
   if (is_dir()) {
     buf->st_mode = S_IFDIR | 0777;
   } else {
-    buf->st_mode = S_IFREG | 0777;
+    buf->st_mode = S_IFREG | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH
+                 | S_IWOTH;
     buf->st_size = len_;
   }
   buf->st_uid = 1001;

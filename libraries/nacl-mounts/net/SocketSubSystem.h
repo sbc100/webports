@@ -25,7 +25,7 @@
 
 class SocketSubSystem : public BaseSocketSubSystem {
  public:
-  explicit SocketSubSystem(pp::Instance* instance);
+  SocketSubSystem(pp::Instance* instance);
   virtual ~SocketSubSystem();
   pp::Instance* instance() { return pp_instance_; }
 
@@ -39,6 +39,8 @@ class SocketSubSystem : public BaseSocketSubSystem {
 
   int fcntl(Socket* stream, int cmd, va_list ap);
   int ioctl(Socket* stream, int request, va_list ap);
+  int setsockopt(Socket* stream, int level, int optname,
+           const void* optval, socklen_t optlen);
 
   uint32_t gethostbyname(const char* name);
   int connect(Socket** stream, const sockaddr* serv_addr, socklen_t addrlen);

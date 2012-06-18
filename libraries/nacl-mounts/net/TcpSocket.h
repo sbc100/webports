@@ -40,6 +40,7 @@ class TCPSocket : public Socket {
   virtual bool is_write_ready();
   virtual bool is_exception();
 
+  void GetAddress(struct sockaddr* addr);
  private:
   void Connect(int32_t result, const char* host, uint16_t port, int32_t* pres);
   void OnConnect(int32_t result, int32_t* pres);

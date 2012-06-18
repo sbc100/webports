@@ -177,7 +177,8 @@ int PepperMount::Stat(ino_t slot, struct stat *buf) {
 
   memset(buf, 0, sizeof(struct stat));
   buf->st_ino = (ino_t)slot;
-  buf->st_mode = S_IFREG | 0777;
+  buf->st_mode = S_IFREG | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH
+                 | S_IWOTH;
   buf->st_size = q_buf->size;
   buf->st_uid = 1001;
   buf->st_gid = 1002;
