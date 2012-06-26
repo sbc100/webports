@@ -854,7 +854,7 @@ int KernelProxy::accept(int sockfd, struct sockaddr *addr,
     GetFileHandle(sockfd)->stream,
     addr, addrlen);
   if (ret) {
-    ret->GetAddress(addr);
+    ret->getAddress(addr);
     return AddSocket(ret);
   } else {
     return -1;

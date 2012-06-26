@@ -163,7 +163,28 @@ void TCPSocket::Connect(int32_t result, const char* host, uint16_t port,
   }
 }
 
-void TCPSocket::GetAddress(struct sockaddr* addr) {
+struct GetAddressResult {
+  int result;
+  struct sockaddr* addr;
+};
+
+void TCPSocket::getAddress(struct sockaddr* addr) {
+  dbgprintf("TCPSocket::GetAddress start\n");
+  struct GetAddressResult r = { PP_OK_COMPLETIONPENDING, addr };
+  SimpleAutoLock lock(sys_->mutex());
+  pp::Module::Get()->core()->CallOnMainThread(0,
+      factory_.NewCallback(&TCPSocket::GetAddress,
+      reinterpret_cast<int32_t*>(&r)));
+  while (r.result == PP_OK_COMPLETIONPENDING) {
+    sys_->cond().wait(sys_->mutex());
+  }
+  dbgprintf("TCPSocket::GetAddress end\n");
+}
+
+void TCPSocket::GetAddress(int32_t result, int32_t* pres) {
+  SimpleAutoLock lock(sys_->mutex());
+  struct GetAddressResult* r = reinterpret_cast<struct GetAddressResult*>(pres);
+  struct sockaddr* addr = r->addr;
   struct sockaddr_in* iaddr = (struct sockaddr_in*) addr;
   struct sockaddr_in6* iaddr6 = (struct sockaddr_in6*) addr;
   PP_NetAddress_Private netaddr;
@@ -176,6 +197,7 @@ void TCPSocket::GetAddress(struct sockaddr* addr) {
     iaddr->sin_family = AF_INET6;
   } else {
     iaddr->sin_family = AF_UNSPEC;
+    r->result = PP_ERROR_FAILED;
     return;
   }
   iaddr6->sin6_port = pp::NetAddressPrivate::GetPort(netaddr);
@@ -186,6 +208,8 @@ void TCPSocket::GetAddress(struct sockaddr* addr) {
     pp::NetAddressPrivate::GetAddress(
         netaddr, &iaddr->sin_addr, sizeof(in_addr));
   }
+  r->result = PP_OK;
+  sys_->cond().broadcast();
 }
 
 void TCPSocket::OnConnect(int32_t result, int32_t* pres) {

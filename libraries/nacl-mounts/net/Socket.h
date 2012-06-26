@@ -28,7 +28,7 @@ class Socket {
                    nacl_abi_off_t* new_offset) {
     return ESPIPE;
   }
-  virtual void GetAddress(struct sockaddr* addr) { }
+  virtual void getAddress(struct sockaddr* addr) { }
   virtual int fstat(nacl_abi_stat* out) {
     memset(out, 0, sizeof(nacl_abi_stat));
     return 0;
