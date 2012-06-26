@@ -8,7 +8,7 @@
 #include <string>
 
 #include "ppapi/c/pp_stdint.h"
-#include "ppapi/c/private/ppb_net_address_private.h"
+#include <nacl-mounts/ppapi/c/private/ppb_net_address_private.h>
 
 namespace pp {
 

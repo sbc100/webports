@@ -7,7 +7,7 @@
 #ifndef PPAPI_C_PRIVATE_PPB_TCP_SOCKET_PRIVATE_H_
 #define PPAPI_C_PRIVATE_PPB_TCP_SOCKET_PRIVATE_H_
 
-#include "ppapi/c/private/ppb_net_address_private.h"
+#include <nacl-mounts/ppapi/c/private/ppb_net_address_private.h>
 #include "ppapi/c/pp_bool.h"
 #include "ppapi/c/pp_completion_callback.h"
 #include "ppapi/c/pp_instance.h"

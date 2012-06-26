@@ -8,7 +8,7 @@
 #include <string>
 
 #include "ppapi/c/pp_stdint.h"
-#include "ppapi/c/private/ppb_host_resolver_private.h"
+#include <nacl-mounts/ppapi/c/private/ppb_host_resolver_private.h>
 #include "ppapi/cpp/resource.h"
 #include "ppapi/cpp/var.h"
 

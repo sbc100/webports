@@ -16,7 +16,7 @@
 #include "ppapi/c/pp_resource.h"
 #include "ppapi/c/pp_stdint.h"
 #include "ppapi/c/pp_var.h"
-#include "ppapi/c/private/ppb_net_address_private.h"
+#include <nacl-mounts/ppapi/c/private/ppb_net_address_private.h>
 
 #define PPB_HOSTRESOLVER_PRIVATE_INTERFACE_0_1 "PPB_HostResolver_Private;0.1"
 #define PPB_HOSTRESOLVER_PRIVATE_INTERFACE \

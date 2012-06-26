@@ -8,7 +8,7 @@
 #include "ppapi/cpp/pass_ref.h"
 #include "ppapi/cpp/resource.h"
 #include "ppapi/c/pp_stdint.h"
-#include "ppapi/c/private/ppb_tcp_socket_private.h"
+#include <nacl-mounts/ppapi/c/private/ppb_tcp_socket_private.h>
 
 namespace pp {
 
