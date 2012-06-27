@@ -334,7 +334,7 @@ Patch() {
   if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
     Banner "Patching ${LOCAL_PACKAGE_NAME}"
     cd ${NACL_PACKAGES_REPOSITORY}
-    patch -p0 < ${START_DIR}/${LOCAL_PATCH_FILE}
+    patch -p0 -g0 < ${START_DIR}/${LOCAL_PATCH_FILE}
   fi
 }
 
