@@ -48,7 +48,6 @@ CustomConfigureStep() {
     --enable-libmp3lame \
     --enable-libvorbis \
     --enable-libtheora \
-    --disable-ffmpeg \
     --disable-ffplay \
     --disable-ffserver \
     --disable-demuxer=rtsp \
@@ -60,7 +59,6 @@ CustomConfigureStep() {
 
 CustomPostConfigureStep() {
   touch strings.h
-  echo "#define strcasecmp stricmp" >> config.h
 }
 
 
