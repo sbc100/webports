@@ -45,8 +45,8 @@ struct in6_addr {
   uint8_t  s6_addr[16];  /* IPv6 address */
 };
 
-#define AF_INET 1
-#define AF_INET6 2
+#define AF_INET 2
+#define AF_INET6 27
 #define AF_UNSPEC 4
 #define SOCK_STREAM 1
 #define SOCK_DGRAM 2

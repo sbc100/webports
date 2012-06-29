@@ -120,6 +120,8 @@ ifeq ($(NACL_GLIBC), 1)
       libraries/SDL_net-1.2.7 \
       libraries/glib-2.28.8 \
       libraries/pango-1.29.3
+  EXAMPLES += \
+      examples/tools/thttpd-2.25b
 
 ifeq ($(OS_NAME), Linux)
   LIBRARIES += \
@@ -172,6 +174,8 @@ $(SENT)/libraries/cairo-1.8.8: \
 $(SENT)/libraries/ffmpeg-0.5: \
     libraries/lame-398-2 libraries/libvorbis-1.2.3 libraries/libtheora-1.1.1
 $(SENT)/examples/games/nethack-3.4.3: libraries/nacl-mounts
+$(SENT)/examples/tools/thttpd-2.25b: libraries/nacl-mounts \
+    libraries/jsoncpp-0.5.0
 $(SENT)/examples/games/scummvm-1.2.1: \
     libraries/nacl-mounts libraries/SDL-1.2.14 libraries/libvorbis-1.2.3
 $(SENT)/examples/systems/bochs-2.4.6: \
@@ -251,6 +255,7 @@ openal-ogg: examples/audio/openal-ogg ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
 snes9x: examples/games/snes9x-1.53 ;
+thttpd: examples/tools/thttpd-2.25b ;
 
 ######################################################################
 # testing and regression targets 

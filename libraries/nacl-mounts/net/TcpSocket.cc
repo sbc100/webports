@@ -169,7 +169,6 @@ struct GetAddressResult {
 };
 
 void TCPSocket::getAddress(struct sockaddr* addr) {
-  dbgprintf("TCPSocket::GetAddress start\n");
   struct GetAddressResult r = { PP_OK_COMPLETIONPENDING, addr };
   SimpleAutoLock lock(sys_->mutex());
   pp::Module::Get()->core()->CallOnMainThread(0,
@@ -178,7 +177,6 @@ void TCPSocket::getAddress(struct sockaddr* addr) {
   while (r.result == PP_OK_COMPLETIONPENDING) {
     sys_->cond().wait(sys_->mutex());
   }
-  dbgprintf("TCPSocket::GetAddress end\n");
 }
 
 void TCPSocket::GetAddress(int32_t result, int32_t* pres) {

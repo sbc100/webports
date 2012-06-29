@@ -1,0 +1,57 @@
+{
+    "files": {
+        "ld-nacl-x86-64.so.1": {
+            "x86-64": {
+                "url": "lib/ld-nacl-x86-64.so.1"
+            }
+        }, 
+        "libc.so.11652996": {
+            "x86-64": {
+                "url": "lib/libc.so.11652996"
+            }
+        }, 
+        "libgcc_s.so.1": {
+            "x86-64": {
+                "url": "lib/libgcc_s.so.1"
+            }
+        }, 
+        "libm.so.11652996": {
+            "x86-64": {
+                "url": "lib/libm.so.11652996"
+            }
+        }, 
+        "libppapi_cpp.so": {
+            "x86-64": {
+                "url": "lib/libppapi_cpp.so"
+            }
+        }, 
+        "libcrypt.so.11652996": {
+            "x86-64": {
+                "url": "lib/libcrypt.so.11652996"
+            }
+		},
+        "libpthread.so.11652996": {
+            "x86-64": {
+                "url": "lib/libpthread.so.11652996"
+            }
+        }, 
+        "libstdc++.so.6": {
+            "x86-64": {
+                "url": "lib/libstdc++.so.6"
+            }
+        }, 
+        "main.nexe": {
+            "x86-64": {
+                "url": "thttpd.nexe"
+            }
+        }
+    }, 
+    "program": {
+        "x86-32": {
+            "url": "nacl_fshell_x86-32.nexe"
+        }, 
+        "x86-64": {
+            "url": "lib/runnable-ld.so"
+        }
+    }
+}
