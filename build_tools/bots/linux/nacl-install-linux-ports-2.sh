@@ -38,6 +38,7 @@ BuildPackage boost
 BuildPackage protobuf
 BuildPackage gc
 BuildPackage x264
+BuildPackage thttpd
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
