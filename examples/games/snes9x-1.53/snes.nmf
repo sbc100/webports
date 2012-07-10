@@ -1,6 +1,9 @@
 {
   "program": {
     "x86-64": {"url": "snes_x86_64.nexe"},
-    "x86-32": {"url": "snes_x86_32.nexe"}
-  }
+    "x86-32": {"url": "snes_x86_32.nexe"},
+    "arm":    {"url": "snes_arm.nexe"},
+    "portable": {
+      "pnacl-translate": {"url": "snes.pexe"}
+    }
 }

@@ -1,6 +1,10 @@
 {
   "program": {
     "x86-32": {"url": "bochs_x86-32.nexe"},
-    "x86-64": {"url": "bochs_x86-64.nexe"}
+    "x86-64": {"url": "bochs_x86-64.nexe"},
+    "arm":    {"url": "bochs_arm.nexe"},
+    "portable": {
+      "pnacl-translate": {"url": "bochs.pexe"}
+    }
   }
 }
