@@ -68,15 +68,15 @@ class HTTP2Mount: public BaseMount {
  private:
 
   int AddPath(const std::string& file, ssize_t size, bool is_dir);
-  void LinkDent(const std::string& dir, const std::string& dent);
+  void LinkDentLocked(const std::string& dir, const std::string& dent);
   void RegisterFileFromManifest(const std::string& path,
       const std::string& pack_path, size_t offset, size_t size);
   void ParseManifest(const std::string& s);
 
-  HTTP2Node *ToHTTP2Node(ino_t node) {
-    return slots_.At(node);
-  }
+  HTTP2Node *ToHTTP2Node(ino_t node);
+  HTTP2Node *ToHTTP2Node(const std::string& path);
 
+  int GetSlotLocked(const std::string& path);
   int GetSlot(const std::string& path);
 
   SlotAllocator<HTTP2Node> slots_;
@@ -84,7 +84,7 @@ class HTTP2Mount: public BaseMount {
   std::string base_url_;
 
   int doOpen(int slot);
-  void OpenFileSystem();
+  int OpenFileSystem();
 
   // path -> slot
   std::map<std::string, int> files_;

@@ -20,10 +20,7 @@ HTTP2Mount::HTTP2Mount(MainThreadRunner *runner, std::string base_url) :
   runner_(runner), base_url_(base_url), fs_(NULL), fs_expected_size_(0),
   fs_base_path_(""), fs_opened_(false), progress_handler_(NULL) {
 
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
-  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-  pthread_mutex_init(&lock_, &attr);
+  pthread_mutex_init(&lock_, NULL);
 
   // leave slot 0 open
   slots_.Alloc();
@@ -32,13 +29,27 @@ HTTP2Mount::HTTP2Mount(MainThreadRunner *runner, std::string base_url) :
 
 void HTTP2Mount::SetLocalCache(pp::FileSystem *fs, int64_t fs_expected_size,
     std::string base_path, bool is_opened) {
+  SimpleAutoLock lock(&lock_);
   fs_ = fs;
   fs_expected_size_ = fs_expected_size;
   fs_base_path_ = base_path;
   fs_opened_ = is_opened;
 }
 
-int HTTP2Mount::GetSlot(const std::string& path) {
+HTTP2Node *HTTP2Mount::ToHTTP2Node(ino_t node) {
+  SimpleAutoLock lock(&lock_);
+  return slots_.At(node);
+}
+
+HTTP2Node *HTTP2Mount::ToHTTP2Node(const std::string& path) {
+  SimpleAutoLock lock(&lock_);
+  int slot = GetSlotLocked(path);
+  if (slot < 0)
+    return NULL;
+  return slots_.At(slot);
+}
+
+int HTTP2Mount::GetSlotLocked(const std::string& path) {
   std::string p = Path(path).FormulatePath();
   std::map<std::string, int>::iterator it = files_.find(p);
   if (it == files_.end())
@@ -46,10 +57,16 @@ int HTTP2Mount::GetSlot(const std::string& path) {
   return it->second;
 }
 
+int HTTP2Mount::GetSlot(const std::string& path) {
+  SimpleAutoLock lock(&lock_);
+  return GetSlotLocked(path);
+}
+
 int HTTP2Mount::doOpen(int slot) {
-  HTTP2Node* node = slots_.At(slot);
+  HTTP2Node* node = ToHTTP2Node(slot);
   if (!node)
     return -1;
+  SimpleAutoLock lock(&node->lock_);
 
   if (node->pack_slot_ >= 0) {
     return doOpen(node->pack_slot_);
@@ -97,11 +114,12 @@ int HTTP2Mount::GetNode(const std::string& path, struct stat* buf) {
 
 int HTTP2Mount::Stat(ino_t slot, struct stat *buf) {
   memset(buf, 0, sizeof(struct stat));
-  HTTP2Node* node = slots_.At(slot);
+  HTTP2Node* node = ToHTTP2Node(slot);
   if (node == NULL) {
     errno = ENOENT;
     return -1;
   }
+  SimpleAutoLock lock(&node->lock_);
   buf->st_ino = (ino_t)slot;
   if (node->is_dir_) {
     buf->st_mode = S_IFDIR | 0777;
@@ -117,11 +135,12 @@ int HTTP2Mount::Stat(ino_t slot, struct stat *buf) {
 
 int HTTP2Mount::Getdents(ino_t slot, off_t offset,
                         struct dirent *dir, unsigned int count) {
-  HTTP2Node* node = slots_.At(slot);
+  HTTP2Node* node = ToHTTP2Node(slot);
   if (node == NULL || !node->is_dir_) {
     errno = ENOTDIR;
     return -1;
   }
+  SimpleAutoLock lock(&node->lock_);
 
   int bytes_read = 0;
   for (size_t i = offset; i < node->dents_.size() &&
@@ -139,9 +158,10 @@ int HTTP2Mount::Getdents(ino_t slot, off_t offset,
   return bytes_read;
 }
 
-void HTTP2Mount::OpenFileSystem(void) {
+int HTTP2Mount::OpenFileSystem(void) {
+  SimpleAutoLock lock(&lock_);
   if (!fs_ || fs_opened_)
-    return;
+    return fs_opened_;
   HTTP2FSOpenJob *job = new HTTP2FSOpenJob;
   job->fs_ = fs_;
   job->expected_size_ = fs_expected_size_;
@@ -155,24 +175,23 @@ void HTTP2Mount::OpenFileSystem(void) {
     dbgprintf("fs opened!\n");
     fs_opened_ = true;
   }
+  return fs_opened_;
 }
 
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 
 ssize_t HTTP2Mount::Read(ino_t slot, off_t offset, void *buf, size_t count) {
-  SimpleAutoLock lock(&lock_);
-
-  OpenFileSystem();
-  if (!fs_opened_) {
+  if (!OpenFileSystem() ) {
     errno = EIO;
     return -1;
   }
 
-  HTTP2Node* node = slots_.At(slot);
+  HTTP2Node* node = ToHTTP2Node(slot);
   if (!node) {
     errno = ENOENT;
     return -1;
   }
+  SimpleAutoLock lock(&node->lock_);
 
   if (doOpen(slot) < 0) {
     errno = EIO;
@@ -216,6 +235,7 @@ int HTTP2Mount::AddPath(const std::string& path, ssize_t size, bool is_dir) {
   Path path_obj(path);
   std::string p = path_obj.FormulatePath();
 
+  SimpleAutoLock lock(&lock_);
   int slot = slots_.Alloc();
   HTTP2Node *node = slots_.At(slot);
   node->slot_ = slot;
@@ -228,25 +248,33 @@ int HTTP2Mount::AddPath(const std::string& path, ssize_t size, bool is_dir) {
   node->in_memory_ = false;
   node->data_ = NULL;
 
+  pthread_mutexattr_t attr;
+  pthread_mutexattr_init(&attr);
+  // recursive lock needed because doOpen()/Read() calling each other
+  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(&node->lock_, &attr);
+
   files_[p] = slot;
 
   // Hook it up to the parent directory.
   if (p != "/") {
     std::string parent = path_obj.AppendPath("..").FormulatePath();
-    LinkDent(parent, path_obj.Last());
+    LinkDentLocked(parent, path_obj.Last());
   }
 
   return slot;
 }
 
-void HTTP2Mount::LinkDent(const std::string& dir, const std::string& dent) {
-  std::map<std::string, int>::iterator it = files_.find(dir);
-  if (it == files_.end()) {
+void HTTP2Mount::LinkDentLocked(const std::string& dir,
+    const std::string& dent) {
+  int slot = GetSlotLocked(dir);
+  if (slot < 0) {
     dbgprintf("Error: '%s/%s' declared before '%s'\n",
               dir.c_str(), dent.c_str(), dir.c_str());
     return;
   }
-  HTTP2Node* node = slots_.At(it->second);
+  HTTP2Node* node = slots_.At(slot);
+  SimpleAutoLock node_lock(&node->lock_);
   node->dents_.push_back(dent);
 }
 
@@ -255,21 +283,24 @@ int HTTP2Mount::AddFile(const std::string& path, ssize_t size) {
 }
 
 void HTTP2Mount::SetInMemory(const std::string& path, bool in_memory) {
-  int slot = GetSlot(path);
-  HTTP2Node *node = slots_.At(slot);
-  if (node && node->pack_slot_) {
-    HTTP2Node* pack_node = slots_.At(node->pack_slot_);
-    pack_node->in_memory_ = in_memory;
-  } else if (node) {
-    node->in_memory_ = in_memory;
+  HTTP2Node *node = ToHTTP2Node(path);
+  if (node) {
+    SimpleAutoLock lock(&node->lock_);
+    if (node->pack_slot_) {
+      HTTP2Node* pack_node = ToHTTP2Node(node->pack_slot_);
+      SimpleAutoLock pack_lock(&pack_node->lock_);
+      pack_node->in_memory_ = in_memory;
+    } else {
+      node->in_memory_ = in_memory;
+    }
   }
 }
 
 void HTTP2Mount::SetInPack(const std::string& path,
     const std::string& pack_path, off_t offset) {
-  int slot = GetSlot(path);
-  HTTP2Node *node = slots_.At(slot);
+  HTTP2Node *node = ToHTTP2Node(path);
   if (node) {
+    SimpleAutoLock lock(&node->lock_);
     node->pack_slot_ = GetSlot(pack_path);
     node->start_ = offset;
     // TODO(eugenis): check that the file in the pack's byte range
@@ -278,7 +309,8 @@ void HTTP2Mount::SetInPack(const std::string& path,
     }
 
     // Update the pack size
-    HTTP2Node* pack_node = slots_.At(node->pack_slot_);
+    HTTP2Node* pack_node = ToHTTP2Node(node->pack_slot_);
+    SimpleAutoLock pack_lock(&pack_node->lock_);
     size_t end = offset + node->size_;
     if (pack_node->size_ < 0 || pack_node->size_ < end)
       pack_node->size_ = end;

@@ -24,6 +24,7 @@ class HTTP2Node {
 
   bool in_memory_;
   char* data_; // optional; entire file contents
+  pthread_mutex_t lock_;
 };
 
 #endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_HTTP2_HTTP2NODE_H_
