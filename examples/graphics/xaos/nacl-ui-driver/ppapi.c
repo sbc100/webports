@@ -24,16 +24,17 @@
 #include "ppapi/c/ppb_graphics_2d.h"
 #include "ppapi/c/ppb_image_data.h"
 #include "ppapi/c/ppb_instance.h"
-#include "ppapi/c/ppp_input_event.h"
+#include "ppapi/c/ppb_view.h"
 
 #include "ppapi/c/ppp.h"
+#include "ppapi/c/ppp_input_event.h"
 #include "ppapi/c/ppp_instance.h"
 
 #include "ui_nacl.h"
 
 #define kMaxEvents 1024
 /* chrome cananot handle all that many refreshs */
-#define kRefreshInterval 20
+#define kRefreshInterval 40
 
 
 static struct {
@@ -59,12 +60,13 @@ static struct {
 
 /*  zero initialized */
 static struct {
-  struct PPB_Core* if_core;
-  struct PPB_Graphics2D* if_graphics_2d;
-  struct PPB_ImageData* if_image_data;
-  struct PPB_InputEvent* if_input_event;
-  struct PPB_Instance* if_instance;
-  struct PPB_MouseInputEvent* if_mouse_input_event;
+  PPB_Core* if_core;
+  PPB_Graphics2D* if_graphics_2d;
+  PPB_ImageData* if_image_data;
+  PPB_InputEvent* if_input_event;
+  PPB_Instance* if_instance;
+  PPB_MouseInputEvent* if_mouse_input_event;
+  PPB_View* if_view;
 
   PP_Module module;
   PP_Instance instance;
@@ -81,6 +83,8 @@ static struct {
 int GetHeight() {
   return Video.height;
 }
+
+extern int original_main(int argc, char* argv[]);
 
 static void* ThreadForRunningXaosMain(void* arg) {
   char* argv[] = { "xaos", 0};
@@ -136,15 +140,15 @@ struct PP_CompletionCallback ScreenUpdateCallback =
 { ScreenUpdateCallbackFun, NULL };
 
 
-static InitEvents() {
+static void InitEvents() {
   NaClLog(LOG_INFO, "initialize event queue\n");
   pthread_mutex_init(&EventQueue.mutex, NULL);
   pthread_cond_init(&EventQueue.condvar, NULL);
 }
 
 
-static InitScreenRefresh(PP_Instance instance,
-                         const struct PP_Size* size) {
+static void InitScreenRefresh(PP_Instance instance,
+                              const struct PP_Size* size) {
   NaClLog(LOG_INFO, "initialize screen refresh\n");
   /* NOTE: these limits are not tight but there seem to be some
      not so well documented limitations inside xaos */
@@ -180,7 +184,7 @@ static InitScreenRefresh(PP_Instance instance,
 }
 
 
-static Init(PP_Instance instance, const struct PP_Size* size) {
+static void Init(PP_Instance instance, const struct PP_Size* size) {
   InitEvents();
   Global.if_input_event->RequestInputEvents(instance,
                                             PP_INPUTEVENT_CLASS_MOUSE);
@@ -216,19 +220,23 @@ static void DidDestroy(PP_Instance instance) {
 }
 
 
-static void DidChangeView(PP_Instance instance,
-                          const struct PP_Rect* position,
-                          const struct PP_Rect* clip) {
-  const int width = position->size.width;
-  const int height = position->size.height;
-
-  NaClLog(LOG_INFO, "DidChangeView %d %d\n", width, height);
-  if (Global.num_viewchanges != 0) {
-    NaClLog(LOG_FATAL, "only one view change supported\n");
-  }
+static void DidChangeView(PP_Instance instance, PP_Resource view) {
   ++Global.num_viewchanges;
+  struct PP_Rect position;
+  Global.if_view->GetRect(view, &position);
 
-  Init(instance, &position->size);
+  const int width = position.size.width;
+  const int height = position.size.height;
+
+  NaClLog(LOG_INFO, "DidChangeView [%d] %d %d\n",
+          Global.num_viewchanges, width, height);
+
+  if (Global.num_viewchanges > 1) {
+    NaClLog(LOG_INFO, "only first view change has any effect\n");
+    return;
+  }
+
+  Init(instance, &position.size);
 }
 
 static void DidChangeFocus(PP_Instance instance,
@@ -236,14 +244,18 @@ static void DidChangeFocus(PP_Instance instance,
   NaClLog(LOG_INFO, "DidChangeFocus\n");
   /* force a refresh */
   Video.dirty = 1;
-
 }
 
 static PP_Bool HandleInputEvent(PP_Instance instance,
                                 PP_Resource input_event) {
   NaClLog(LOG_INFO, "HandleInputEvent\n");
   if (!Global.if_mouse_input_event->IsMouseInputEvent(input_event)) {
-    return;
+    return PP_FALSE;
+  }
+
+  // XaoS has problems with Buttons numbered higher than the right button
+  if (Global.if_mouse_input_event->GetButton(input_event) > 2) {
+    return PP_FALSE;
   }
 
   struct PpapiEvent* event = (struct PpapiEvent*) malloc(sizeof *event);
@@ -300,28 +312,30 @@ struct PP_Var GetInstanceObject(PP_Instance instance) {
 }
 /* ====================================================================== */
 PP_EXPORT int32_t PPP_InitializeModule(PP_Module module_id,
-                                   PPB_GetInterface get_browser_interface) {
+                                       PPB_GetInterface get_browser_interface) {
   NaClLog(LOG_INFO, "PPP_InitializeModule\n");
   Global.module = module_id;
   Global.if_core =
-    (struct PPB_Core*) get_browser_interface(PPB_CORE_INTERFACE);
+    (PPB_Core*) get_browser_interface(PPB_CORE_INTERFACE);
   CHECK(Global.if_core != 0);
   Global.if_instance =
-    (struct PPB_Instance*) get_browser_interface(PPB_INSTANCE_INTERFACE);
+    (PPB_Instance*) get_browser_interface(PPB_INSTANCE_INTERFACE);
   CHECK(Global.if_instance != 0);
   Global.if_image_data =
-    (struct PPB_ImageData*) get_browser_interface(PPB_IMAGEDATA_INTERFACE);
+    (PPB_ImageData*) get_browser_interface(PPB_IMAGEDATA_INTERFACE);
   CHECK(Global.if_image_data != 0);
   Global.if_graphics_2d =
-    (struct PPB_Graphics2D*) get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
+    (PPB_Graphics2D*) get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
   CHECK(Global.if_graphics_2d != 0);
   Global.if_input_event =
-    (struct PPB_InputEvent*) get_browser_interface(PPB_INPUT_EVENT_INTERFACE);
+    (PPB_InputEvent*) get_browser_interface(PPB_INPUT_EVENT_INTERFACE);
   CHECK(Global.if_input_event != 0);
   Global.if_mouse_input_event =
-    (struct PPB_MouseInputEvent*) get_browser_interface(
-        PPB_MOUSE_INPUT_EVENT_INTERFACE);
+    (PPB_MouseInputEvent*) get_browser_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE);
   CHECK(Global.if_input_event != 0);
+  Global.if_view =
+    (PPB_View*) get_browser_interface(PPB_VIEW_INTERFACE);
+  CHECK(Global.if_view != 0);
   return PP_OK;
 }
 
@@ -330,7 +344,7 @@ PP_EXPORT void PPP_ShutdownModule() {
   NaClLog(LOG_INFO, "PPP_ShutdownModule\n");
 }
 
-static struct PPP_Instance GlobalInstanceInterface = {
+static PPP_Instance GlobalInstanceInterface = {
   DidCreate,
   DidDestroy,
   DidChangeView,
@@ -338,7 +352,7 @@ static struct PPP_Instance GlobalInstanceInterface = {
   HandleDocumentLoad
 };
 
-static struct PPP_InputEvent GlobalInputEventInterface = {
+static PPP_InputEvent GlobalInputEventInterface = {
   HandleInputEvent
 };
 

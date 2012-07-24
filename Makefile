@@ -113,7 +113,8 @@ EXAMPLES = \
      examples/games/nethack-3.4.3 \
      examples/games/scummvm-1.2.1 \
      examples/systems/bochs-2.4.6 \
-     examples/systems/dosbox-0.74
+     examples/systems/dosbox-0.74 \
+     examples/graphics/xaos
 
 ifeq ($(NACL_GLIBC), 1)
   LIBRARIES += \
@@ -254,7 +255,7 @@ dosbox: examples/systems/dosbox-0.74 ;
 openal-ogg: examples/audio/openal-ogg ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
-snes9x: examples/games/snes9x-1.53 ;
+xaos: examples/graphics/xaos ;
 thttpd: examples/tools/thttpd-2.25b ;
 
 ######################################################################

@@ -1,6 +1,6 @@
-diff -r f1231803bf12 config.sub
---- a/config.sub	Thu Apr 14 12:27:38 2011 -0400
-+++ b/config.sub	Thu Apr 14 16:17:00 2011 -0400
+diff -r e1b373f3aaa2 config.sub
+--- a/config.sub	Mon Jul 23 11:34:01 2012 -0400
++++ b/config.sub	Mon Jul 23 15:52:29 2012 -0400
 @@ -715,6 +715,10 @@
  		basic_machine=i370-ibm
  		os=-mvs
@@ -21,9 +21,9 @@ diff -r f1231803bf12 config.sub
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
-diff -r f1231803bf12 configure.in
---- a/configure.in	Thu Apr 14 12:27:38 2011 -0400
-+++ b/configure.in	Thu Apr 14 16:17:00 2011 -0400
+diff -r e1b373f3aaa2 configure.in
+--- a/configure.in	Mon Jul 23 11:34:01 2012 -0400
++++ b/configure.in	Mon Jul 23 15:52:29 2012 -0400
 @@ -42,6 +42,7 @@
  x_driver_test=yes
  gtk_driver_test=no
@@ -68,9 +68,9 @@ diff -r f1231803bf12 configure.in
      src/ui/ui-drv/x11/Makefile src/ui/ui-drv/win32/Makefile
      doc/Makefile help/Makefile src/ui/ui-drv/gtk/Makefile src/sffe/Makefile
    ])
-diff -r f1231803bf12 src/include/config/config.autoconf
---- a/src/include/config/config.autoconf	Thu Apr 14 12:27:38 2011 -0400
-+++ b/src/include/config/config.autoconf	Thu Apr 14 16:17:00 2011 -0400
+diff -r e1b373f3aaa2 src/include/config/config.autoconf
+--- a/src/include/config/config.autoconf	Mon Jul 23 11:34:01 2012 -0400
++++ b/src/include/config/config.autoconf	Mon Jul 23 15:52:29 2012 -0400
 @@ -2,6 +2,14 @@
  #define CONFIG_H
  #define HOMEDIR
@@ -86,9 +86,21 @@ diff -r f1231803bf12 src/include/config/config.autoconf
  #ifdef __BEOS__
  #define MAIN_FUNCTION be_main
  #ifdef __POWERPC__
-diff -r f1231803bf12 src/ui/drivers.c
---- a/src/ui/drivers.c	Thu Apr 14 12:27:38 2011 -0400
-+++ b/src/ui/drivers.c	Thu Apr 14 16:17:00 2011 -0400
+diff -r e1b373f3aaa2 src/include/ui.h
+--- a/src/include/ui.h	Mon Jul 23 11:34:01 2012 -0400
++++ b/src/include/ui.h	Mon Jul 23 15:52:29 2012 -0400
+@@ -116,7 +116,7 @@
+ 	CONST struct gui_driver *gui_driver;
+     };
+ 
+-    struct uih_context *globaluih;
++    extern struct uih_context *globaluih;
+ 
+ #ifdef USE_LOCALEPATH
+     extern char *localepath;
+diff -r e1b373f3aaa2 src/ui/drivers.c
+--- a/src/ui/drivers.c	Mon Jul 23 11:34:01 2012 -0400
++++ b/src/ui/drivers.c	Mon Jul 23 15:52:29 2012 -0400
 @@ -27,6 +27,7 @@
      osx_fullscreen_driver, os2vio_driver, cocoa_driver,
      cocoa_fullscreen_driver, be_driver, be_direct_driver, be_screen_driver,
@@ -107,9 +119,21 @@ diff -r f1231803bf12 src/ui/drivers.c
  #ifdef SVGA_DRIVER
      &svga_driver,
  #endif
-diff -r f1231803bf12 src/util/timers.c
---- a/src/util/timers.c	Thu Apr 14 12:27:38 2011 -0400
-+++ b/src/util/timers.c	Thu Apr 14 16:17:00 2011 -0400
+diff -r e1b373f3aaa2 src/ui/ui.c
+--- a/src/ui/ui.c	Mon Jul 23 11:34:01 2012 -0400
++++ b/src/ui/ui.c	Mon Jul 23 15:52:29 2012 -0400
+@@ -146,6 +146,8 @@
+ char *sffeinit = NULL;
+ #endif
+ 
++struct uih_context *globaluih;
++
+ CONST struct params global_params[] = {
+     {"-delay", P_NUMBER, &delaytime,
+      "Delay screen updates (milliseconds)"},
+diff -r e1b373f3aaa2 src/util/timers.c
+--- a/src/util/timers.c	Mon Jul 23 11:34:01 2012 -0400
++++ b/src/util/timers.c	Mon Jul 23 15:52:29 2012 -0400
 @@ -218,6 +218,7 @@
  #ifndef HAVE_FTIME
  #ifndef _plan9_

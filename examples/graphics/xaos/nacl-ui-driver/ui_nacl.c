@@ -22,6 +22,7 @@ char* getcwd(char* buf, size_t size) {
 
 int kill() {
   NaClLog(LOG_INFO, "kill\n");
+  return -1;
 }
 
 struct {
