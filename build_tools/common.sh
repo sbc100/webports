@@ -283,7 +283,7 @@ Fetch() {
 Check() {
   # verify sha1 checksum for tarball
   local IN_FILE=${START_DIR}/${PACKAGE_NAME}.sha1
-  if ${SHA1CHECK} <${IN_FILE} &>/dev/null; then
+  if ${SHA1CHECK} <${IN_FILE} ; then
     return 0
   else
     return 1
@@ -506,6 +506,7 @@ DefaultConfigureStep() {
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build
   cd ${PACKAGE_NAME}-build
+  echo "Directory: $(pwd)"
   ../configure \
     --host=nacl \
     --disable-shared \
@@ -526,6 +527,8 @@ DefaultConfigureStep() {
 
 
 DefaultBuildStep() {
+  Banner "Build ${PACKAGE_NAME}"
+  echo "Directory: $(pwd)"
   # assumes pwd has makefile
   make clean
   make -j${OS_JOBS}
@@ -624,6 +627,8 @@ DefaultTranslateStep() {
     RunCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped.opt -o ${nexe}
     ls -l ${nexe}
   done
+
+  ls -l $(dirname ${pexe})
 }
 
 

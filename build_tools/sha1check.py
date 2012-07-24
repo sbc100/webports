@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
@@ -25,14 +25,14 @@ import sys
 
 for s in sys.stdin:
   # split the hash *filename into a pair
-  pair = s.split(' ')
-  hash = pair[0]
-  name = pair[1]
+  hash, name = s.split()
+
+  print "Filename: ",  name
+  print "Expected hash: ", hash
   # make sure filename started with '*' (binary mode)
   if name.find('*') == 0:
     # remove leading '*' and any newlines from filename
-    filename = name[1:].strip('\n')
-    filename = filename.strip('\r')
+    filename = name[1:]
     try:
       # open file in binary mode & sha1 hash it
       f = open(filename, "rb")
@@ -42,6 +42,7 @@ for s in sys.stdin:
       f.close()
       # verify the generated hash and embedded hash match
       if hash.lower() != filehash.lower():
+        print "Actual hash: ", filehash
         print "sha1check.py: sha1 checksum failed on file: " + filename
         sys.exit(-1)
       print "sha1check1.py: "+ filename + " verified"
