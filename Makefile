@@ -123,15 +123,14 @@ ifeq ($(NACL_GLIBC), 1)
       libraries/pango-1.29.3
   EXAMPLES += \
       examples/tools/thttpd-2.25b
-
-ifeq ($(OS_NAME), Linux)
-  LIBRARIES += \
-      libraries/openssl-1.0.0e
-endif
 else
   EXAMPLES += \
       examples/games/snes9x-1.53 \
       examples/audio/openal-ogg
+endif
+
+ifeq ($(OS_NAME), Linux)
+  LIBRARIES += libraries/openssl-1.0.0e
 endif
 
 PACKAGES = $(LIBRARIES) $(EXAMPLES)
