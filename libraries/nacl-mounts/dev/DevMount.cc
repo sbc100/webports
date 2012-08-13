@@ -18,18 +18,15 @@ DevMount::DevMount() {
   max_inode = 2;
   // 1 and 2 are reserved for / and /fd, respectively
   NullDevice* dev_null = new NullDevice();
-  if (dev_null == NULL) {
-    throw 1;
-  }
   Attach("/null", dev_null);
 #ifdef __native_client__
   nacl_irt_random random;
   if (nacl_interface_query(NACL_IRT_RANDOM_v0_1, &random, sizeof(random))) {
     RandomDevice* dev_random = new RandomDevice(random.get_random_bytes);
-    if (dev_random  == NULL) {
-      throw 1;
-    }
     Attach("/random", dev_random);
+
+    RandomDevice* dev_urandom = new RandomDevice(random.get_random_bytes);
+    Attach("/urandom", dev_urandom);
   }
 #endif
 }
