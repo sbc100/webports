@@ -175,6 +175,22 @@ extern "C" {
     return kp->gethostbyname(name);
   }
 
+  int getaddrinfo(const char* hostname, const char* servname,
+                  const struct addrinfo* hints,
+                  struct addrinfo** res) {
+    return kp->getaddrinfo(hostname, servname, hints, res);
+  }
+
+  void freeaddrinfo(struct addrinfo* ai) {
+    kp->freeaddrinfo(ai);
+  }
+
+  int getnameinfo(const struct sockaddr* sa, socklen_t salen,
+                  char* host, socklen_t hostlen,
+                  char* serv, socklen_t servlen, unsigned int flags) {
+    return kp->getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+  }
+
   int unlink(const char *path) {
     return kp->unlink(path);
   }
