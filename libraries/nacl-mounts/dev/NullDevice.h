@@ -15,6 +15,9 @@ class NullDevice : public Device {
   ~NullDevice() {}
   int Read(off_t offset, void *buf, size_t count);
   int Write(off_t offset, const void *buf, size_t count);
+  bool IsReadReady();
+  bool IsWriteReady();
+  bool IsException();
  private:
   DISALLOW_COPY_AND_ASSIGN(NullDevice);
 };

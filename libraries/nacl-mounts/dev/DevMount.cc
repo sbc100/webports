@@ -132,3 +132,26 @@ ssize_t DevMount::Write(ino_t slot, off_t offset, const void *buf,
   }
 }
 
+bool DevMount::IsReadReady(ino_t slot) {
+  if (inode_to_path.find(slot) != inode_to_path.end()) {
+    return inode_to_dev[slot]->IsReadReady();
+  } else {
+    return false;
+  }
+}
+
+bool DevMount::IsWriteReady(ino_t slot) {
+  if (inode_to_path.find(slot) != inode_to_path.end()) {
+    return inode_to_dev[slot]->IsWriteReady();
+  } else {
+    return false;
+  }
+}
+
+bool DevMount::IsException(ino_t slot) {
+  if (inode_to_path.find(slot) != inode_to_path.end()) {
+    return inode_to_dev[slot]->IsException();
+  } else {
+    return false;
+  }
+}

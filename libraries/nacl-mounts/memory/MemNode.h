@@ -55,7 +55,7 @@ class MemNode {
   void set_parent(int parent) { parent_ = parent; }
 
   // parent() returns a pointer to the parent node of
-  // this node.  If this node is the root node, NULL
+  // this node.  If this node is the root node, 0
   // is returned.
   int parent(void) { return parent_; }
 

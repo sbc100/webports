@@ -25,7 +25,7 @@ void MockMount::AndReturn(int return_code, int errno_code) {
 }
 
 void MockMount::Playback(void) {
-  EXPECT_EQ(false, playback_mode_);
+  EXPECT_FALSE(playback_mode_);
   playback_mode_ = true;
 }
 
@@ -294,6 +294,54 @@ int MockMount::Isatty(ino_t node) {
     op.node = node;
     expected_.push_back(op);
     return 0;
+  }
+}
+
+bool MockMount::IsReadReady(ino_t node) {
+  if (playback_mode_) {
+    Operation op;
+    PopOperation(&op);
+    EXPECT_EQ(Operation::MockIsReadReady, op.kind);
+    EXPECT_EQ(op.node, node);
+    return op.return_code != 0;
+  } else {
+    Operation op;
+    op.kind = Operation::MockIsReadReady;
+    op.node = node;
+    expected_.push_back(op);
+    return false;
+  }
+}
+
+bool MockMount::IsWriteReady(ino_t node) {
+  if (playback_mode_) {
+    Operation op;
+    PopOperation(&op);
+    EXPECT_EQ(Operation::MockIsWriteReady, op.kind);
+    EXPECT_EQ(op.node, node);
+    return op.return_code != 0;
+  } else {
+    Operation op;
+    op.kind = Operation::MockIsWriteReady;
+    op.node = node;
+    expected_.push_back(op);
+    return false;
+  }
+}
+
+bool MockMount::IsException(ino_t node) {
+  if (playback_mode_) {
+    Operation op;
+    PopOperation(&op);
+    EXPECT_EQ(Operation::MockIsException, op.kind);
+    EXPECT_EQ(op.node, node);
+    return op.return_code != 0;
+  } else {
+    Operation op;
+    op.kind = Operation::MockIsException;
+    op.node = node;
+    expected_.push_back(op);
+    return false;
   }
 }
 

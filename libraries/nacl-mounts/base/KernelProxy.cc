@@ -18,7 +18,6 @@
 #include "dev/DevMount.h"
 #include "MountManager.h"
 #include "net/BaseSocketSubSystem.h"
-#include "net/SocketSubSystem.h"
 #include "util/DebugPrint.h"
 
 static pthread_once_t kp_once_ = PTHREAD_ONCE_INIT;
@@ -488,7 +487,9 @@ int KernelProxy::dup2(int oldfd, int newfd) {
 }
 
 int KernelProxy::IsReady(int nfds, fd_set* fds,
-    bool (Socket::*is_ready)(), bool apply) {
+                         bool (Socket::*is_ready_sock)(),
+                         bool (Mount::*is_ready_mount)(ino_t),
+                         bool apply) {
   if (!fds)
     return 0;
 
@@ -499,8 +500,16 @@ int KernelProxy::IsReady(int nfds, fd_set* fds,
       if (h == NULL) {
         return -1;
       }
-      Socket* stream = h->stream;
-      if (stream && (stream->*is_ready)()) {
+
+      // TODO(davidben): Could we merge these backends somehow?
+      bool ready;
+      if (h->stream) {
+        ready = (h->stream->*is_ready_sock)();
+      } else {
+        ready = (h->mount->*is_ready_mount)(h->node);
+      }
+
+      if (ready) {
         if (!apply)
           return 1;
         else
@@ -847,7 +856,6 @@ int KernelProxy::bind(int sockfd, const struct sockaddr *addr,
                       socklen_t addrlen) {
   if (GetFileHandle(sockfd) == 0)
     return EBADF;
-  struct sockaddr_in* in_addr = (struct sockaddr_in*)addr;
   return socket_subsystem_->bind(&(GetFileHandle(sockfd)->stream),
       addr, addrlen);
 }
@@ -862,7 +870,6 @@ int KernelProxy::connect(int sockfd, const struct sockaddr *addr,
                          socklen_t addrlen) {
   if (GetFileHandle(sockfd) == 0)
     return EBADF;
-  struct sockaddr_in* in_addr = (struct sockaddr_in*)addr;
   return socket_subsystem_->connect(&(GetFileHandle(sockfd)->stream),
       addr, addrlen);
 }
@@ -942,9 +949,12 @@ int KernelProxy::select(int nfds, fd_set *readfds, fd_set *writefds,
         kNanosecondsPerMicrosecond;
   }
 
-  while (!(IsReady(nfds, readfds, &Socket::is_read_ready, false) ||
-          IsReady(nfds, writefds, &Socket::is_write_ready, false) ||
-          IsReady(nfds, exceptfds, &Socket::is_exception, false))) {
+  while (!(IsReady(nfds, readfds, &Socket::is_read_ready,
+                   &Mount::IsReadReady, false) ||
+           IsReady(nfds, writefds, &Socket::is_write_ready,
+                   &Mount::IsWriteReady, false) ||
+           IsReady(nfds, exceptfds, &Socket::is_exception,
+                   &Mount::IsException, false))) {
     SimpleAutoLock lock(select_mutex().get());
     if (timeout) {
       if (!timeout->tv_sec && !timeout->tv_usec)
@@ -963,9 +973,12 @@ int KernelProxy::select(int nfds, fd_set *readfds, fd_set *writefds,
     }
   }
 
-  int nread = IsReady(nfds, readfds, &Socket::is_read_ready, true);
-  int nwrite = IsReady(nfds, writefds, &Socket::is_write_ready, true);
-  int nexcpt = IsReady(nfds, exceptfds, &Socket::is_exception, true);
+  int nread = IsReady(nfds, readfds,
+                      &Socket::is_read_ready, &Mount::IsReadReady, true);
+  int nwrite = IsReady(nfds, writefds,
+                       &Socket::is_write_ready, &Mount::IsWriteReady, true);
+  int nexcpt = IsReady(nfds, exceptfds,
+                       &Socket::is_exception, &Mount::IsException, true);
   if (nread < 0 || nwrite < 0 || nexcpt < 0) {
     errno = EBADF;
     dbgprintf("select: EBADF problem %d\n", errno);

@@ -66,6 +66,9 @@ class JSPipeMount : public BaseMount {
   ssize_t Write(ino_t node, off_t offset, const void *buf, size_t count);
   int Isatty(ino_t node) { return is_tty_; }
 
+  bool IsReadReady(ino_t node);
+  bool IsWriteReady(ino_t node);
+
   // Called by external writer (javascript HandleMessage) to inject incoming
   // data to a pipe.
   // Arguments:

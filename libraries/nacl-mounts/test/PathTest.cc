@@ -13,10 +13,10 @@ TEST(PathTest, SanityChecks) {
   delete ph2;
 
   Path p1(".");
-  EXPECT_EQ(false, p1.is_absolute());
+  EXPECT_FALSE(p1.is_absolute());
   EXPECT_EQ("", p1.FormulatePath());
   Path p2("/");
-  EXPECT_EQ(true, p2.is_absolute());
+  EXPECT_TRUE(p2.is_absolute());
   EXPECT_EQ("/", p2.FormulatePath());
   Path p3 = p2.AppendPath("hello/world/");
   EXPECT_EQ("/hello/world", p3.FormulatePath());

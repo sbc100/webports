@@ -53,6 +53,11 @@ class Mount {
                         size_t count) = 0;
   virtual int Isatty(ino_t node) = 0;
 
+  // Hooks for whether the file is ready for some I/O operation.
+  virtual bool IsReadReady(ino_t node) = 0;
+  virtual bool IsWriteReady(ino_t node) = 0;
+  virtual bool IsException(ino_t node) = 0;
+
  private:
   int ref_count_;
 

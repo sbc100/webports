@@ -83,6 +83,16 @@ class BaseMount : public Mount {
     return 0;
   }
 
+  virtual bool IsReadReady(ino_t node) {
+    return false;
+  }
+  virtual bool IsWriteReady(ino_t node) {
+    return false;
+  }
+  virtual bool IsException(ino_t node) {
+    return false;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(BaseMount);
 };

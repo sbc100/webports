@@ -16,6 +16,9 @@ class RandomDevice : public Device {
   virtual ~RandomDevice() {}
   int Read(off_t offset, void *buf, size_t count);
   int Write(off_t offset, const void *buf, size_t count);
+  bool IsReadReady();
+  bool IsWriteReady();
+  bool IsException();
  private:
   int (*get_random_bytes_)(void *buf, size_t count, size_t *nread);
 

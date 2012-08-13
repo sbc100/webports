@@ -6,6 +6,7 @@
 #include "BufferMount.h"
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
 #include "../util/PthreadHelpers.h"
 
@@ -104,6 +105,23 @@ ssize_t BufferMount::Write(ino_t node, off_t offset, const void *buf,
 
 int BufferMount::Isatty(ino_t node) {
   return source_->Isatty(node);
+}
+
+bool BufferMount::IsReadReady(ino_t node) {
+  // TODO(davidben): This one doesn't work. It's not quite as easy as
+  // proxying to source_ as we may have read extra. But all the
+  // caching involves offsets, which doesn't make sense for fds where
+  // select works.
+  fprintf(stderr, "select not implemented for BufferMount!\n");
+  return false;
+}
+
+bool BufferMount::IsWriteReady(ino_t node) {
+  return source_->IsWriteReady(node);
+}
+
+bool BufferMount::IsException(ino_t node) {
+  return source_->IsException(node);
 }
 
 class BufferMount::CachedBlock {

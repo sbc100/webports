@@ -27,6 +27,10 @@ class DevMount: public BaseMount {
   int Isatty(ino_t node) { return 0; }
   int Getdents(ino_t, off_t, dirent*, unsigned int);
 
+  bool IsReadReady(ino_t node);
+  bool IsWriteReady(ino_t node);
+  bool IsException(ino_t node);
+
  private:
   std::map<int, std::string> inode_to_path;
   std::map<int, Device*> inode_to_dev;

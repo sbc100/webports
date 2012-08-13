@@ -19,7 +19,6 @@
 #include <nacl-mounts/ppapi/cpp/private/net_address_private.h>
 #include <nacl-mounts/util/DebugPrint.h>
 #include <nacl-mounts/util/PthreadHelpers.h>
-#include "ppapi/cpp/file_ref.h"
 #include <signal.h>
 
 SocketSubSystem::SocketSubSystem(pp::Instance* instance)

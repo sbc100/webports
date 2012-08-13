@@ -143,11 +143,11 @@ TEST(KernelProxyTest, access) {
   EXPECT_EQ(0, kp->access("/", amode));
 
   amode |= X_OK;
-  EXPECT_EQ(0, kp->access("/hello/world/test.txt", amode));
   EXPECT_EQ(0, kp->access("/", amode));
 
   EXPECT_EQ(0, kp->chdir("/"));
   EXPECT_EQ(0, kp->access("/", amode));
+  amode &= ~X_OK;
   EXPECT_EQ(0, kp->access("hello/world/test.txt", amode));
 
   EXPECT_EQ(0, kp->close(fd));

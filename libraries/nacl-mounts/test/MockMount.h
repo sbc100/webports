@@ -38,6 +38,9 @@ class MockMount : public Mount {
   virtual ssize_t Write(ino_t node, off_t offset, const void *buf,
                         size_t count);
   virtual int Isatty(ino_t node);
+  virtual bool IsReadReady(ino_t node);
+  virtual bool IsWriteReady(ino_t node);
+  virtual bool IsException(ino_t node);
 
  private:
   struct Operation {
@@ -56,6 +59,9 @@ class MockMount : public Mount {
       MockRead,
       MockWrite,
       MockIsatty,
+      MockIsReadReady,
+      MockIsWriteReady,
+      MockIsException,
     } kind;
     // Inputs.
     std::string path;

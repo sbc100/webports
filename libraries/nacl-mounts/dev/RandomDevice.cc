@@ -17,3 +17,14 @@ int RandomDevice::Write(off_t offset, const void *buf, size_t count) {
   return EPERM;
 }
 
+bool RandomDevice::IsReadReady() {
+  return true;
+}
+
+bool RandomDevice::IsWriteReady() {
+  return false;
+}
+
+bool RandomDevice::IsException() {
+  return false;
+}

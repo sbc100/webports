@@ -32,6 +32,9 @@ class BufferMount : public Mount {
   virtual ssize_t Write(ino_t node, off_t offset, const void *buf,
                         size_t count);
   virtual int Isatty(ino_t node);
+  virtual bool IsReadReady(ino_t node);
+  virtual bool IsWriteReady(ino_t node);
+  virtual bool IsException(ino_t node);
 
  private:
   size_t chunk_size_;

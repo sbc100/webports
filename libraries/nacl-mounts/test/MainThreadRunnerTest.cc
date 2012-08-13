@@ -66,7 +66,7 @@ static void *Secondary(void *arg) {
 
 TEST(MainThreadRunnerTest, NormalThreads) {
   MainThreadRunner* runner = new MainThreadRunner(kBogusPepperInstance);
-  EXPECT_EQ(true, MainThreadRunner::IsMainThread());
+  EXPECT_TRUE(MainThreadRunner::IsMainThread());
   MainThreadCounter counter;
   counter.runner = runner;
   pthread_t main_thread_id;
@@ -81,12 +81,12 @@ TEST(MainThreadRunnerTest, NormalThreads) {
 
 TEST(MainThreadRunnerTest, PseudoThreads) {
   MainThreadRunner* runner = new MainThreadRunner(kBogusPepperInstance);
-  EXPECT_EQ(true, MainThreadRunner::IsMainThread());
+  EXPECT_TRUE(MainThreadRunner::IsMainThread());
   MainThreadCounter counter;
   counter.runner = runner;
   runner->PseudoThreadFork(Secondary, &counter);
   while (counter.counter < kTimesToBlock) {
-    EXPECT_EQ(false, MainThreadRunner::IsPseudoThread());
+    EXPECT_FALSE(MainThreadRunner::IsPseudoThread());
     runner->DoWork();
   }
   EXPECT_EQ(kTimesToBlock, counter.counter);

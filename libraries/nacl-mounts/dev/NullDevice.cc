@@ -17,3 +17,14 @@ int NullDevice::Write(off_t offset, const void *buf, size_t count) {
   return count;
 }
 
+bool NullDevice::IsReadReady() {
+  return true;
+}
+
+bool NullDevice::IsWriteReady() {
+  return true;
+}
+
+bool NullDevice::IsException() {
+  return false;
+}

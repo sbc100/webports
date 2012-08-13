@@ -132,8 +132,10 @@ class KernelProxy {
   int AddSocket(Socket* stream);
   void RemoveSocket(int fd);
 
-  int IsReady(int nfds, fd_set* fds, bool (Socket::*is_ready)(),
-    bool apply);
+  int IsReady(int nfds, fd_set* fds,
+              bool (Socket::*is_ready_sock)(),
+              bool (Mount::*is_ready_mount)(ino_t),
+              bool apply);
   Cond& select_cond() { return select_cond_; }
   Mutex& select_mutex() { return select_mutex_; }
  private:

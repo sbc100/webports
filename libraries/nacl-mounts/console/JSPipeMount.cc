@@ -6,6 +6,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "base/KernelProxy.h"
 #include "base/MainThreadRunner.h"
 #include "console/JSPipeMount.h"
 
@@ -135,6 +137,16 @@ ssize_t JSPipeMount::Write(ino_t slot, off_t offset, const void *buf,
   return count;
 }
 
+bool JSPipeMount::IsReadReady(ino_t slot) {
+  SimpleAutoLock lock(&incoming_lock_);
+  std::map<int, std::vector<char> >:: iterator i = incoming_.find(slot - 1);
+  return i != incoming_.end() && i->second.size() > 0;
+}
+
+bool JSPipeMount::IsWriteReady(ino_t slot) {
+  return slot >= 1;
+}
+
 bool JSPipeMount::Receive(const void *buf, size_t count) {
   // Ignore if it doesn't match our prefix.
   if (count < prefix_.size() ||
@@ -191,6 +203,8 @@ bool JSPipeMount::Receive(const void *buf, size_t count) {
   } else {
     pthread_cond_broadcast(&incoming_available_);
   }
+  // Also wake up any selectors.
+  KernelProxy::KPInstance()->select_cond().broadcast();
 
   return true;
 }

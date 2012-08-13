@@ -81,7 +81,7 @@ int SlotAllocator<T>::Alloc() {
 
 template <class T>
 int SlotAllocator<T>::AllocAt(int fd) {
-  if (slots_.size() < fd + 1) {
+  if (slots_.size() < (unsigned)(fd + 1)) {
     int prev_size = slots_.size();
     slots_.resize(fd + 1);
     for (int i = prev_size; i < fd + 1; ++i) free_fds_.insert(i);

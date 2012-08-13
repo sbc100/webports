@@ -16,6 +16,9 @@ class Device {
   virtual ~Device() {}
   virtual int Read(off_t offset, void *buf, size_t count) = 0;
   virtual int Write(off_t offset, const void *buf, size_t count) = 0;
+  virtual bool IsReadReady() = 0;
+  virtual bool IsWriteReady() = 0;
+  virtual bool IsException() = 0;
 };
 
 #endif

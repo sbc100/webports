@@ -22,7 +22,7 @@ MemNode *CreateMemNode(std::string name, int parent,
 
 TEST(MemNodeTest, AddChildren) {
   MemMount *mnt = new MemMount();
-  MemNode *node1 = CreateMemNode("node1", NULL, mnt, true, 1);
+  MemNode *node1 = CreateMemNode("node1", 0, mnt, true, 1);
   MemNode *node2 = CreateMemNode("node2", node1->slot(), mnt, true, 2);
   MemNode *node3 = CreateMemNode("node3", node1->slot(), mnt, false, 3);
   MemNode *node4 = CreateMemNode("node4", node1->slot(), mnt, false, 4);
@@ -73,7 +73,7 @@ TEST(MemNodeTest, AddChildren) {
 
 TEST(MemNodeTest, RemoveChildren) {
   MemMount *mnt = new MemMount();
-  MemNode *node1 = CreateMemNode("node1", NULL, mnt, true, 1);
+  MemNode *node1 = CreateMemNode("node1", 0, mnt, true, 1);
   MemNode *node2 = CreateMemNode("node2", node1->slot(), mnt, true, 2);
   MemNode *node3 = CreateMemNode("node3", node1->slot(), mnt, true, 3);
   MemNode *node4 = CreateMemNode("node4", node1->slot(), mnt, true, 4);
@@ -129,7 +129,7 @@ TEST(MemNodeTest, RemoveChildren) {
 TEST(MemNodeTest, Stat) {
   MemMount *mnt = new MemMount();
   struct stat *buf = (struct stat *)malloc(sizeof(struct stat));
-  MemNode *node1 = CreateMemNode("node", NULL, mnt, false, 1);
+  MemNode *node1 = CreateMemNode("node", 0, mnt, false, 1);
   int size = 128;
   node1->ReallocData(size);
   EXPECT_EQ(size, node1->capacity());
@@ -141,7 +141,7 @@ TEST(MemNodeTest, Stat) {
 
 TEST(MemNodeTest, UseCount) {
   MemMount *mnt = new MemMount();
-  MemNode *node1 = CreateMemNode("node1", NULL, mnt, false, 1);
+  MemNode *node1 = CreateMemNode("node1", 0, mnt, false, 1);
   int i;
 
   for (i = 0; i < 10; i++) {
@@ -160,7 +160,7 @@ TEST(MemNodeTest, UseCount) {
 
 TEST(MemNodeTest, ReallocData) {
   MemMount *mnt = new MemMount();
-  MemNode *node1 = CreateMemNode("node1", NULL, mnt, false, 1);
+  MemNode *node1 = CreateMemNode("node1", 0, mnt, false, 1);
 
   node1->ReallocData(10);
   EXPECT_EQ(10, node1->capacity());

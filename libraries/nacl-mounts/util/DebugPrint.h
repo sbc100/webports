@@ -25,7 +25,11 @@ static int dbgprintf(const char* format, ...) {
   va_start(args, format);
   ssize_t r = vsnprintf(buf, buf_size, format, args);
   if (r > 0)
+#ifndef __native_client__
+    write(2, buf, r);
+#else
     __real_write(2, buf, r);
+#endif
   va_end(args);
   return r;
 }

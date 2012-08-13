@@ -3,6 +3,7 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
+#include "../base/KernelProxy.h"
 #include "../console/JSPipeMount.h"
 #include "gtest/gtest.h"
 #include <list>
@@ -168,4 +169,56 @@ TEST(JSPipeMountTest, Blocking) {
   void *ret;
   pthread_join(thread_id, &ret);
   assert(ret == 0);
+}
+
+TEST(JSPipeMountTest, Select) {
+  KernelProxy* kp = KernelProxy::KPInstance();
+  JSPipeMount* mount = new JSPipeMount();
+  kp->mount("/pipe", mount);
+
+  int pipe = kp->open("/pipe/1234", O_RDONLY, 0600);
+  EXPECT_GT(pipe, 0);
+
+  fd_set readfds, writefds, exceptfds;
+  FD_ZERO(&readfds);
+  FD_ZERO(&writefds);
+  FD_ZERO(&exceptfds);
+
+  // Pipe is not readable to begin with.
+  struct timeval timeout = { 0, 0 };
+  FD_SET(pipe, &readfds);
+  FD_SET(pipe, &writefds);
+  FD_SET(pipe, &exceptfds);
+  EXPECT_EQ(1, kp->select(pipe + 1, &readfds, &writefds, &exceptfds, &timeout));
+  EXPECT_FALSE(FD_ISSET(pipe, &readfds));
+  EXPECT_TRUE(FD_ISSET(pipe, &writefds));
+  EXPECT_FALSE(FD_ISSET(pipe, &exceptfds));
+
+  // After sending some data, it is readable.
+  EXPECT_TRUE(mount->Receive(STRING_PAIR("JSPipeMount:1234:hello")));
+  FD_SET(pipe, &readfds);
+  FD_SET(pipe, &writefds);
+  FD_SET(pipe, &exceptfds);
+  EXPECT_EQ(2, kp->select(pipe + 1, &readfds, &writefds, &exceptfds, &timeout));
+  EXPECT_TRUE(FD_ISSET(pipe, &readfds));
+  EXPECT_TRUE(FD_ISSET(pipe, &writefds));
+  EXPECT_FALSE(FD_ISSET(pipe, &exceptfds));
+
+  // Consume the data.
+  char buf[256];
+  EXPECT_EQ(5, kp->read(pipe, buf, sizeof(buf)));
+  EXPECT_EQ(0, memcmp(buf, "hello", 5));
+
+  // Test that we wake up when the pipe becomes readable.
+  pthread_t thread_id;
+  pthread_create(&thread_id, 0, Blocking_sender, mount);
+  FD_SET(pipe, &readfds);
+  EXPECT_EQ(1, kp->select(pipe + 1, &readfds, NULL, NULL, NULL));
+  EXPECT_TRUE(FD_ISSET(pipe, &readfds));
+
+  void* ret;
+  pthread_join(thread_id, &ret);
+  assert(ret == 0);
+
+  kp->umount("/pipe");
 }

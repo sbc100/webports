@@ -18,8 +18,9 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 
 # Add root of nacl-mounts to the include path
 CPPFLAGS += -I.
+CPPFLAGS += -I..
 
-UTIL_SOURCES = $(addprefix util/, Path.cc SimpleAutoLock.cc)
+UTIL_SOURCES = $(addprefix util/, Path.cc)
 BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc \
                  MainThreadRunner.cc)
 MEM_SOURCES = $(addprefix memory/, MemMount.cc MemNode.cc)
