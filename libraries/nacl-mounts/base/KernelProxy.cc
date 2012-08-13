@@ -305,7 +305,10 @@ int KernelProxy::open(const std::string& path, int flags, mode_t mode) {
 
 int KernelProxy::close(int fd) {
   SimpleAutoLock lock(&kp_lock_);
+  return Close(fd);
+}
 
+int KernelProxy::Close(int fd) {
   FileDescriptor* file = fds_.At(fd);
   if (file == NULL) {
     errno = EBADF;
@@ -318,22 +321,16 @@ int KernelProxy::close(int fd) {
     errno = EBADF;
     return -1;
   }
-  handle->use_count--;
-  ino_t node = handle->node;
-  if (handle->mount) {
-    Mount* mount = handle->mount;
-    if (handle->use_count <= 0) {
-      open_files_.Free(h);
-      mount->Unref(node);
+  if (--handle->use_count <= 0) {
+    if (handle->mount) {
+      Mount* mount = handle->mount;
+      mount->Unref(handle->node);
+      mount->Unref();
+    } else {
+      Socket* stream = handle->stream;
+      socket_subsystem_->close(stream);
     }
-    mount->Unref();
-  } else {
-    Socket* stream = handle->stream;
-    socket_subsystem_->close(stream);
-    if (handle->use_count <= 0) {
-      open_files_.Free(h);
-    }
-    return 0;
+    open_files_.Free(h);
   }
   return 0;
 }
@@ -468,13 +465,26 @@ int KernelProxy::isatty(int fd) {
   return handle->mount->Isatty(handle->node);
 }
 
-int KernelProxy::dup2(int fd, int newfd) {
+int KernelProxy::dup2(int oldfd, int newfd) {
   SimpleAutoLock lock(&kp_lock_);
-  int handle_slot = fds_.At(fd)->handle;
-  if (fds_.AllocAt(fd) != fd) return -1;
-  FileDescriptor* file = fds_.At(newfd);
-  file->handle = handle_slot;
-  return 0;
+
+  FileDescriptor* oldfile = fds_.At(oldfd);
+  if (!oldfile) {
+    errno = EBADF;
+    return -1;
+  }
+
+  // Do nothing if the file descriptors match.
+  if (newfd == oldfd)
+    return newfd;
+
+  // close newfd if it exists.
+  if (fds_.At(newfd))
+    Close(newfd);
+  if (fds_.AllocAt(newfd) != newfd) assert(0);
+  fds_.At(newfd)->handle = oldfile->handle;
+  open_files_.At(oldfile->handle)->use_count++;
+  return newfd;
 }
 
 int KernelProxy::IsReady(int nfds, fd_set* fds,
@@ -507,43 +517,15 @@ int KernelProxy::IsReady(int nfds, fd_set* fds,
 int KernelProxy::dup(int oldfd) {
   SimpleAutoLock lock(&kp_lock_);
 
-  FileHandle* fh = GetFileHandle(oldfd);
-  if (!fh) {
-    errno = EBADF;
-    return -1;
-  }
-  if (fh->mount == NULL) {
-    Socket* stream = GetFileHandle(oldfd) > 0
-      ? GetFileHandle(oldfd)->stream : NULL;
-    if (!stream)
-      return EBADF;
-    SimpleAutoLock lock(&kp_lock_);
-    int handle_slot = fds_.At(oldfd)->handle;
-    int newfd = fds_.Alloc();
-    FileDescriptor* file = fds_.At(newfd);
-    file->handle = handle_slot;
-    return newfd;
-  }
   FileDescriptor* oldfile = fds_.At(oldfd);
-  if (oldfile == NULL) {
+  if (!oldfile) {
     errno = EBADF;
     return -1;
   }
-  int newfd = fds_.Alloc();
-  FileDescriptor *newfile = fds_.At(newfd);
-  int h = oldfile->handle;
-  newfile->handle = h;
-  FileHandle* handle = open_files_.At(h);
-  // init should be safe because we have the kernel proxy lock
-  if (pthread_mutex_init(&handle->lock, NULL)) assert(0);
 
-  if (handle == NULL) {
-    errno = EBADF;
-    return -1;
-  }
-  ++handle->use_count;
-  handle->mount->Ref(handle->node);
-  handle->mount->Ref();
+  int newfd = fds_.Alloc();
+  fds_.At(newfd)->handle = oldfile->handle;
+  open_files_.At(oldfile->handle)->use_count++;
   return newfd;
 }
 

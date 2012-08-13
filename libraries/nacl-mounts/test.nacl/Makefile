@@ -11,6 +11,7 @@ CFLAGS += -I/usr/local/google/home/vissi/oogle/naclports/src/libraries/nacl-moun
 TEST_SOURCES = \
   SimpleTest.cc \
   DevTest.cc \
+  DupTest.cc \
   test_main.cc
 
 SOURCES = $(TEST_SOURCES)

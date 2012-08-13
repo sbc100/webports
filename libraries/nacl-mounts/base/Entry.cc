@@ -49,6 +49,8 @@ extern "C" {
   DECLARE(fdio, read);
   DECLARE(fdio, seek);
   DECLARE(fdio, write);
+  DECLARE(fdio, dup);
+  DECLARE(fdio, dup2);
 
   DECLARE(filename, open);
   DECLARE(filename, stat);
@@ -214,6 +216,19 @@ extern "C" {
 
   int WRAP(close)(int fd) {
     int res = kp->close(fd);
+    return (res < 0) ? errno : 0;
+  }
+
+  int WRAP(dup)(int fd, int *newfd) {
+    int res = kp->dup(fd);
+    if (res < 0)
+      return errno;
+    *newfd = res;
+    return 0;
+  }
+
+  int WRAP(dup2)(int fd, int newfd) {
+    int res = kp->dup2(fd, newfd);
     return (res < 0) ? errno : 0;
   }
 
@@ -454,6 +469,8 @@ static struct NaClMountsStaticInitializer {
       DO_WRAP(fdio, read);
       DO_WRAP(fdio, seek);
       DO_WRAP(fdio, write);
+      DO_WRAP(fdio, dup);
+      DO_WRAP(fdio, dup2);
       DO_WRAP(filename, open);
       DO_WRAP(filename, stat);
       DO_WRAP(memory, mmap);

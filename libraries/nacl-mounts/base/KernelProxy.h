@@ -158,6 +158,7 @@ class KernelProxy {
     pthread_mutex_t lock;
   };
   FileHandle* GetFileHandle(int fd);
+  int Close(int fd);
 
   BaseSocketSubSystem* socket_subsystem_;
   Path cwd_;
