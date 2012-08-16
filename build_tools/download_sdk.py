@@ -53,7 +53,7 @@ def DetermineSdkURL(flavor, base_url, version):
   else:
     gsutil = LOCAL_GSUTIL
 
-  path = flavor + '.bz2'
+  path = flavor + '.tar.bz2'
 
   if version == 'latest':
     print 'Looking for latest SDK upload...'
