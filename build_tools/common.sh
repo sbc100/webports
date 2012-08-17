@@ -508,7 +508,7 @@ DefaultConfigureStep() {
   cd ${PACKAGE_NAME}-build
   echo "Directory: $(pwd)"
   ../configure \
-    --host=nacl \
+    --host=${NACL_CROSS_PREFIX} \
     --disable-shared \
     --prefix=${NACL_SDK_USR} \
     --exec-prefix=${NACL_SDK_USR} \

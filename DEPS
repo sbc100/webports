@@ -1,5 +1,5 @@
 deps = {
-  "src/testing/gtest":	
+  "src/testing/gtest":
     "http://googletest.googlecode.com/svn/trunk@560",
   "src/native_client/build":
     "http://src.chromium.org/native_client/trunk/src/native_client/build",

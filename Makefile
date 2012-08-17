@@ -120,6 +120,7 @@ ifeq ($(NACL_GLIBC), 1)
   LIBRARIES += \
       libraries/SDL_net-1.2.7 \
       libraries/glib-2.28.8 \
+      libraries/ncurses-5.9 \
       libraries/pango-1.29.3
   EXAMPLES += \
       examples/tools/thttpd-2.25b
@@ -247,6 +248,7 @@ tommath: libraries/libtommath-0.41 ;
 vorbis: libraries/libvorbis-1.2.3 ;
 x264: libraries/x264-snapshot-20091023-2245 ;
 zlib: libraries/zlib-1.2.3 ;
+ncurses: libraries/ncurses-5.9 ;
 
 # shortcuts examples (alphabetical)
 bochs: examples/systems/bochs-2.4.6 ;

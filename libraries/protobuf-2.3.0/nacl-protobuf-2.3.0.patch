@@ -1,33 +1,16 @@
 diff -Naur protobuf-2.3.0/config.sub protobuf-2.3.0.nacl/config.sub
 --- protobuf-2.3.0/config.sub	2010-01-08 12:26:21.000000000 -0700
 +++ protobuf-2.3.0.nacl/config.sub	2011-01-13 08:12:48.000000000 -0700
-@@ -139,6 +139,10 @@
- ### recognize some manufacturers as not being operating systems, so we
- ### can provide default operating systems below.
- case $os in
-+	-nacl*)
-+		basic_machine=i686-pc
+@@ -1356,6 +1356,9 @@
+ 	-zvmoe)
+ 		os=-zvmoe
+ 		;;
++	-nacl)
 +		os=-nacl
 +		;;
- 	-sun*os*)
- 		# Prevent following clause from handling this invalid input.
+ 	-none)
  		;;
-@@ -270,6 +274,7 @@
- 	| mn10200 | mn10300 \
- 	| mt \
- 	| msp430 \
-+	| nacl \
- 	| nios | nios2 \
- 	| ns16k | ns32k \
- 	| or32 \
-@@ -351,6 +356,7 @@
- 	| mmix-* \
- 	| mt-* \
- 	| msp430-* \
-+	| nacl-* \
- 	| nios-* | nios2-* \
- 	| none-* | np1-* | ns16k-* | ns32k-* \
- 	| orion-* \
+ 	*)
 diff -Naur protobuf-2.3.0/configure protobuf-2.3.0.nacl/configure
 --- protobuf-2.3.0/configure	2010-01-08 12:26:18.000000000 -0700
 +++ protobuf-2.3.0.nacl/configure	2011-01-13 08:06:48.198231000 -0700
