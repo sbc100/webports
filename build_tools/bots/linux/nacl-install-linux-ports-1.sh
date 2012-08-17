@@ -27,6 +27,7 @@ BuildPackage imagemagick
 BuildPackage cairo
 BuildPackage pango
 BuildPackage openal
+BuildPackage ncurses
 
 echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
 if [[ $RESULT != 0 ]] ; then
