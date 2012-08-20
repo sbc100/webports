@@ -13,6 +13,8 @@
 #include <unistd.h>
 
 
+#ifndef __GLIBC__
+
 /* exports for termcap */
 char PC = 0;
 char *UP = "";
@@ -159,3 +161,5 @@ int tputs(const char *str, int affcnt, int (*putc_)(int)) {
 int has_colors(void) {
   return 1;
 }
+
+#endif

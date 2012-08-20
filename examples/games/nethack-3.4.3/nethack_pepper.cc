@@ -23,6 +23,17 @@ extern "C" int mount(const char *source, const char *target,
     const char *filesystemtype, unsigned long mountflags, const void *data);
 extern "C" int simple_tar_extract(const char *path);
 
+static void Download(MainThreadRunner* runner,
+                     const char *url, const char *filename) {
+  UrlLoaderJob* job = new UrlLoaderJob;
+  job->set_url(url);
+  std::vector<char> data;
+  job->set_dst(&data);
+  runner->RunJob(job);
+  int fh = open(filename, O_CREAT | O_WRONLY);
+  write(fh, &data[0], data.size());
+  close(fh);
+}
 
 static void *nethack_init(void *arg) {
   MainThreadRunner* runner = reinterpret_cast<MainThreadRunner*>(arg);
@@ -30,26 +41,21 @@ static void *nethack_init(void *arg) {
   /* Setup home directory to a known location. */
   setenv("HOME", "/myhome", 1);
   /* Setup terminal type. */
-  setenv("TERM", "xterm-color", 1);
+  setenv("TERMINFO", "/usr/share/terminfo", 1);
+  setenv("TERM", "vt100", 1);
   /* Blank out USER and LOGNAME. */
   setenv("USER", "", 1);
   setenv("LOGNAME", "", 1);
 
   mkdir("/usr", 0777);
+
+  chdir("/usr");
+  Download(runner, "terminfo.tar", "/terminfo.tar");
+  simple_tar_extract("/terminfo.tar");
+
   mkdir("/usr/games", 0777);
   chdir("/usr/games");
-
-  {
-    UrlLoaderJob* job = new UrlLoaderJob;
-    job->set_url("nethack.tar");
-    std::vector<char> data;
-    job->set_dst(&data);
-    runner->RunJob(job);
-    int fh = open("/nethack.tar", O_CREAT | O_WRONLY);
-    write(fh, &data[0], data.size());
-    close(fh);
-  }
-
+  Download(runner, "nethack.tar", "/nethack.tar");
   simple_tar_extract("/nethack.tar");
 
   // Setup config file.

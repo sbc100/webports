@@ -42,7 +42,7 @@ OUTPUT = $(addprefix $(TESTS_OUT)/, base buffer util test memory console)
 # House-keeping build targets
 all: $(TESTS_OUT)/nacl_mounts_tests
 
-clean: 
+clean:
 	rm -rf $(TESTS_OUT)
 
 # gtest sources

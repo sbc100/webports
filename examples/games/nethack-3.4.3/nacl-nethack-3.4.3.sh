@@ -39,6 +39,10 @@ CustomBuildStep() {
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
+  export WINTTYLIB="-Wl,--whole-archive"
+  export WINTTYLIB="$WINTTYLIB -lnacl-mounts -lncurses -lppapi -lppapi_cpp"
+  export WINTTYLIB="$WINTTYLIB -Wl,--no-whole-archive"
+  export NACL_SDK_USR_INCLUDE
   export STRNCMPI=1
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
@@ -55,10 +59,13 @@ CustomBuildStep() {
       ${ASSEMBLY_DIR}/nethack_x86-${NACL_PACKAGES_BITSIZE:-"32"}.nexe
   ChangeDir ${PACKAGE_DIR}/out/games
   rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
-  tar cf lib.tar lib
-  cp ${PACKAGE_DIR}/out/games/lib.tar ${ASSEMBLY_DIR}/nethack.tar
+  tar cf ${ASSEMBLY_DIR}/nethack.tar lib
   cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
   if [ "${NACL_GLIBC}" = "1" ]; then
+    pushd ${NACL_SDK_USR}
+    tar cf ${ASSEMBLY_DIR}/terminfo.tar share
+    popd
+
     pushd ${ASSEMBLY_DIR}
     TRUE_TOOLCHAIN_DIR=$(cd ${NACL_SDK_ROOT}/toolchain && pwd -P)
     python ${TRUE_TOOLCHAIN_DIR}/../tools/create_nmf.py \

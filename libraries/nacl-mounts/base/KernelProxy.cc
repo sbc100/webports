@@ -410,8 +410,12 @@ int KernelProxy::fstat(int fd, struct stat *buf) {
 
 int KernelProxy::ioctl(int fd, unsigned long request) {
   errno = ENOSYS;
+  // Don't make failure here a hard, as ncurses attempts to
+  // use ioctl.
+#if 0
   fprintf(stderr, "ioctl has not been implemented!\n");
   assert(0);
+#endif
   return -1;
 }
 
@@ -1033,4 +1037,3 @@ int KernelProxy::socketpair(int domain, int type, int protocol, int sv[2]) {
   fprintf(stderr, "socketpair has not been implemented!\n");
   return -1;
 }
-
