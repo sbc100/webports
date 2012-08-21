@@ -8,7 +8,7 @@
 
 This module downloads toolchain bz2's and expands them. It requires
 gsutil to be in the bin PATH and assumes if building on windows that
-cygwin is installed to C:\cygwin
+cygwin is installed to \cygwin
 """
 
 import glob
@@ -92,7 +92,7 @@ def DownloadAndInstallSDK(url):
   if len(old_sdks) > 0:
     print 'Cleaning up old SDKs...'
     if sys.platform in ['win32', 'cygwin']:
-      cmd = r'C:\cygwin\bin\rm.exe -rf "%s"' % '" "'.join(old_sdks)
+      cmd = r'\cygwin\bin\rm.exe -rf "%s"' % '" "'.join(old_sdks)
     else:
       cmd = 'rm -rf "%s"' % '" "'.join(old_sdks)
     p = subprocess.Popen(cmd, shell=True)
@@ -128,8 +128,8 @@ def DownloadAndInstallSDK(url):
   actual_dir = os.path.join(bz2_dir, pepper_dir)
   print 'Create toolchain symlink "%s" -> "%s"' % (actual_dir, target_dir)
   if sys.platform in ['win32', 'cygwin']:
-    cmd = (r'C:\cygwin\bin\rm.exe -rf ' + target_dir + ' && ' +
-           r'C:\cygwin\bin\ln.exe -fsn ' + actual_dir + ' ' +  target_dir)
+    cmd = (r'\cygwin\bin\rm.exe -rf ' + target_dir + ' && ' +
+           r'\cygwin\bin\ln.exe -fsn ' + actual_dir + ' ' +  target_dir)
   else:
     cmd = ('rm -rf ' + target_dir + ' && ' +
            'ln -fsn ' + actual_dir + ' ' + target_dir)
