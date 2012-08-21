@@ -34,7 +34,7 @@ TEST(DevTest, Simple) {
   EXPECT_EQ(0, read(q, reinterpret_cast<void*>(buff), 5));
 }
 
-#ifdef __GLIBC___
+#ifdef __GLIBC__
 TEST(DevTest, Select) {
   int random = open("/dev/random", O_RDONLY);
   EXPECT_GT(random, 0);
