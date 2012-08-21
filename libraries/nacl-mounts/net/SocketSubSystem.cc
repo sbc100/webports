@@ -281,12 +281,12 @@ int SocketSubSystem::getnameinfo(const sockaddr *sa, socklen_t salen,
   if (host) {
     if (sa->sa_family == AF_INET6) {
       inet_ntop(AF_INET6,
-        &(reinterpret_cast<const sockaddr_in6*>(sa))->sin6_addr,
-        host, hostlen);
-    }
-  } else {
+                &(reinterpret_cast<const sockaddr_in6*>(sa))->sin6_addr,
+                host, hostlen);
+    } else {
       inet_ntop(AF_INET, &(reinterpret_cast<const sockaddr_in*>(sa))->sin_addr,
-        host, hostlen);
+                host, hostlen);
+    }
   }
 
   return 0;
