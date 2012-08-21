@@ -52,7 +52,7 @@ class TCPServerSocket : public Socket {
   SocketSubSystem* sys_;
   int ref_;
   int oflag_;
-  pp::CompletionCallbackFactory<TCPServerSocket, ThreadSafeRefCount> factory_;
+  pp::CompletionCallbackFactory<TCPServerSocket> factory_;
   pp::TCPServerSocketPrivate* socket_;
   struct sockaddr_in6 sin6_;
   PP_Resource resource_;

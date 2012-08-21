@@ -6,7 +6,7 @@
 
 SRC_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
 
-CFLAGS += -I/usr/local/google/home/vissi/oogle/naclports/src/libraries/nacl-mounts -I/usr/local/google/home/vissi/oogle/naclports/src/libraries/nacl-mounts/include -g -Wall -Werror
+CFLAGS += -g -Wall -Werror
 
 TEST_SOURCES = \
   SimpleTest.cc \

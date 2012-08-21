@@ -61,7 +61,7 @@ class TCPSocket : public Socket {
   SocketSubSystem* sys_;
   int ref_;
   int oflag_;
-  pp::CompletionCallbackFactory<TCPSocket, ThreadSafeRefCount> factory_;
+  pp::CompletionCallbackFactory<TCPSocket> factory_;
   pp::TCPSocketPrivate* socket_;
   std::deque<char> in_buf_;
   std::vector<char> out_buf_;
@@ -73,4 +73,3 @@ class TCPSocket : public Socket {
 };
 
 #endif  // PACKAGES_LIBRARIES_NACL_MOUNTS_NET_SOCKET_H_
-

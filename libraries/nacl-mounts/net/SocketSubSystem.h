@@ -75,7 +75,7 @@ class SocketSubSystem : public BaseSocketSubSystem {
   void Resolve(int32_t result, GetAddrInfoParams* params, int32_t* pres);
   void OnResolve(int32_t result, GetAddrInfoParams* params, int32_t* pres);
 
-  pp::CompletionCallbackFactory<SocketSubSystem, ThreadSafeRefCount> factory_;
+  pp::CompletionCallbackFactory<SocketSubSystem> factory_;
   pp::HostResolverPrivate* host_resolver_;
 
   DISALLOW_COPY_AND_ASSIGN(SocketSubSystem);

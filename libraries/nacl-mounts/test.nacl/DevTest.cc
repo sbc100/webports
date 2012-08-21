@@ -8,7 +8,9 @@
 
 #include <fcntl.h>
 #include <sys/types.h>
+#ifdef __GLIBC__
 #include <sys/select.h>
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -32,6 +34,7 @@ TEST(DevTest, Simple) {
   EXPECT_EQ(0, read(q, reinterpret_cast<void*>(buff), 5));
 }
 
+#ifdef __GLIBC___
 TEST(DevTest, Select) {
   int random = open("/dev/random", O_RDONLY);
   EXPECT_GT(random, 0);
@@ -63,3 +66,4 @@ TEST(DevTest, Select) {
   EXPECT_FALSE(FD_ISSET(random, &exceptfds));
   EXPECT_FALSE(FD_ISSET(null, &exceptfds));
 }
+#endif
