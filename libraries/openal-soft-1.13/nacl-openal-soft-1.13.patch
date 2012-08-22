@@ -513,7 +513,7 @@ diff -Naur openal-soft-1.13/OpenAL32/Include/alMain.h openal-soft-1.13-nacl/Open
 diff -Naur openal-soft-1.13/XCompile-nacl.txt openal-soft-1.13-nacl/XCompile-nacl.txt
 --- openal-soft-1.13/XCompile-nacl.txt	1969-12-31 16:00:00.000000000 -0800
 +++ openal-soft-1.13-nacl/XCompile-nacl.txt	2012-01-23 15:45:38.000000000 -0800
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,25 @@
 +# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
 +# this file to set the proper settings and paths. Then use it from build/ like:
 +# cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile.txt \
@@ -527,9 +527,11 @@ diff -Naur openal-soft-1.13/XCompile-nacl.txt openal-soft-1.13-nacl/XCompile-nac
 +# which compilers to use for C and C++
 +SET(CMAKE_C_COMPILER ${NACLCC})
 +SET(CMAKE_CXX_COMPILER ${NACLCXX})
++set(CMAKE_AR ${NACLAR} CACHE FILEPATH "Archiver")
++SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
 +
 +# here is the target environment located
-+SET(CMAKE_FIND_ROOT_PATH ${NACL_SDK_USR})
++SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
 +
 +# adjust the default behaviour of the FIND_XXX() commands:
 +# search headers and libraries in the target environment, search 

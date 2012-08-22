@@ -23,7 +23,7 @@ CustomConfigureStep() {
 
   # Defaults to dynamic lib, but newlib can only link statically.
   LIB_ARG=
-  if [[ ${NACL_TOOLCHAIN_ROOT} == *newlib* ]]; then
+  if [[ ${NACL_GLIBC} == 0 ]]; then
     LIB_ARG="-DLIBTYPE=STATIC"
   fi
 
@@ -31,6 +31,8 @@ CustomConfigureStep() {
   cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
            -DNACLCC=${NACLCC} \
            -DNACLCXX=${NACLCXX} \
+           -DNACLAR=${NACLAR} \
+           -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
            -DCMAKE_INSTALL_PREFIX=${NACL_SDK_USR} \
            ${LIB_ARG}
 

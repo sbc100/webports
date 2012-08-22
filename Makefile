@@ -273,12 +273,9 @@ thttpd: examples/tools/thttpd-2.25b ;
 ######################################################################
 # PNACL
 ######################################################################
-# We would like to get to the point where all libs work, but for now we
-# have to skip a few
+# Libraries and Examples should work for PNaCl, but if new examples
+# do not work, you can filter them here.
 WORKS_FOR_PNACL=$(LIBRARIES) $(EXAMPLES)
-# BUG: http://code.google.com/p/naclports/issues/detail?id=38
-WORKS_FOR_PNACL:=$(subst libraries/openal-soft-1.13,,$(WORKS_FOR_PNACL))
-WORKS_FOR_PNACL:=$(subst  examples/audio/openal-ogg,,$(WORKS_FOR_PNACL))
 
 works_for_pnacl: $(WORKS_FOR_PNACL)
 

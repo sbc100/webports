@@ -89,7 +89,7 @@ void DecodeOggBuffer(void *inBuffer, size_t size,
 
   ov_open_callbacks(&oh, &ogg, NULL, 0, callbacks);
   vorbis_info *info = ov_info(&ogg, -1);
-  printf("ogg file, channels: %d, rate: %d\n", info->channels, info->rate);
+  printf("ogg file, channels: %d, rate: %ld\n", info->channels, info->rate);
   ogg_int64_t num_samples = ov_pcm_total(&ogg, -1);
 #define SAMPLE_SIZE sizeof(short) /* assume 16-bit samples */
   printf("\tnum_samples: %lld buffer size: %lld\n",
@@ -111,4 +111,3 @@ void DecodeOggBuffer(void *inBuffer, size_t size,
   *outChannels = info->channels;
   *outRate = info->rate;
 }
-
