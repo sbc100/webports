@@ -225,6 +225,43 @@ extern "C" {
     }
   }
 
+#ifdef __GLIBC__
+  // Workaround fdopen in glibc failing due to it vetting the provided file
+  // handles with fcntl which is not currently interceptable.
+
+  static ssize_t fdopen_read(void *cookie, char *buf, size_t size) {
+    return read((int) cookie, buf, size);
+  }
+
+  static ssize_t fdopen_write(void *cookie, const char *buf, size_t size) {
+    return write((int) cookie, buf, size);
+  }
+
+  static int fdopen_seek(void *cookie, off_t *offset, int whence) {
+    off_t ret = lseek((int) cookie, *offset, whence);
+    if (ret < 0) {
+      return -1;
+    }
+    *offset = ret;
+    return 0;
+  }
+
+  static int fdopen_close(void *cookie) {
+    return close((int) cookie);
+  }
+
+  static cookie_io_functions_t fdopen_functions = {
+    fdopen_read,
+    fdopen_write,
+    fdopen_seek,
+    fdopen_close,
+  };
+
+  FILE *fdopen(int fildes, const char *mode) {
+    return fopencookie((void *) fildes, mode, fdopen_functions);
+  }
+#endif
+
   int WRAP(open)(const char *pathname, int oflag, mode_t cmode, int *newfd) {
     *newfd = kp->open(pathname, oflag, cmode);
     return (*newfd < 0) ? errno : 0;
