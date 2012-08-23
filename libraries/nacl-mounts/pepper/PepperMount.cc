@@ -277,7 +277,7 @@ int PepperMount::Unlink(const std::string& path) {
   int ret = runner_->RunJob(job);
   if (ret < 0) {
     // TODO(bradnelson): translate error code properly.
-    dbgprintf("delete failed %d\n", ret);
+    dbgprintf("delete failed with %d on %s\n", ret, fs_path.c_str());
     errno = EIO;
     return -1;
   }
