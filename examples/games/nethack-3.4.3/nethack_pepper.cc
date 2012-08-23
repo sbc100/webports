@@ -41,18 +41,12 @@ static void *nethack_init(void *arg) {
   /* Setup home directory to a known location. */
   setenv("HOME", "/myhome", 1);
   /* Setup terminal type. */
-  setenv("TERMINFO", "/usr/share/terminfo", 1);
   setenv("TERM", "vt100", 1);
   /* Blank out USER and LOGNAME. */
   setenv("USER", "", 1);
   setenv("LOGNAME", "", 1);
 
   mkdir("/usr", 0777);
-
-  chdir("/usr");
-  Download(runner, "terminfo.tar", "/terminfo.tar");
-  simple_tar_extract("/terminfo.tar");
-
   mkdir("/usr/games", 0777);
   chdir("/usr/games");
   Download(runner, "nethack.tar", "/nethack.tar");

@@ -62,10 +62,6 @@ CustomBuildStep() {
   tar cf ${ASSEMBLY_DIR}/nethack.tar lib
   cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
   if [ "${NACL_GLIBC}" = "1" ]; then
-    pushd ${NACL_SDK_USR}
-    tar cf ${ASSEMBLY_DIR}/terminfo.tar share
-    popd
-
     pushd ${ASSEMBLY_DIR}
     TRUE_TOOLCHAIN_DIR=$(cd ${NACL_SDK_ROOT}/toolchain && pwd -P)
     python ${TRUE_TOOLCHAIN_DIR}/../tools/create_nmf.py \
