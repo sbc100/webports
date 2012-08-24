@@ -81,13 +81,16 @@ CustomInstallStep() {
       -L$NACL_LIB_PATH/lib$NACL_COMPLEMENT_BITSIZE \
       -L$NACL_LIB_PATH/usr/lib$NACL_PACKAGES_BITSIZE \
       -L$NACL_LIB_PATH/lib$NACL_PACKAGES_BITSIZE \
+      -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \
       thttpd_x86-${NACL_COMPLEMENT_BITSIZE}.nexe \
       thttpd_x86-${NACL_PACKAGES_BITSIZE}.nexe
   else
     $NACL_SDK_ROOT/tools/create_nmf.py \
       -L$NACL_LIB_PATH/usr/lib$NACL_PACKAGES_BITSIZE \
-      -L$NACL_LIB_PATH/lib$NACL_PACKAGES_BITSIZE -o thttpd.nmf -s . \
+      -L$NACL_LIB_PATH/lib$NACL_PACKAGES_BITSIZE \
+      -D$NACL_BIN_PATH/x86_64-nacl-objdump \
+      -o thttpd.nmf -s . \
       thttpd_x86-${NACL_PACKAGES_BITSIZE}.nexe
   fi
   DefaultTouchStep
