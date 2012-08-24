@@ -180,10 +180,7 @@ InitializePNaClToolchain() {
   else
     local TOOLCHAIN_SUFFIX="newlib"
   fi
-  # TODO(robertm): fix this to account for OS and ARCH.
-  #                This needs to be better thought thru:
-  #                Currently, SDK and TC seem to be using different paths
-  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/linux_x86_pnacl/${TOOLCHAIN_SUFFIX}}
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_pnacl/${TOOLCHAIN_SUFFIX}}
   readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
@@ -507,8 +504,17 @@ DefaultConfigureStep() {
   MakeDir ${PACKAGE_NAME}-build
   cd ${PACKAGE_NAME}-build
   echo "Directory: $(pwd)"
+
+  local conf_host=${NACL_CROSS_PREFIX}
+  if [[ ${NACL_PACKAGES_BITSIZE} == "pnacl" ]]; then
+    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
+    # does not know about "pnacl".  It only knows about "le32-nacl".
+    # Unfortunately, most of the config.subs here are so old that
+    # it doesn't know about that "le32" either.  So we just say "nacl".
+    conf_host="nacl"
+  fi
   ../configure \
-    --host=${NACL_CROSS_PREFIX} \
+    --host=${conf_host} \
     --disable-shared \
     --prefix=${NACL_SDK_USR} \
     --exec-prefix=${NACL_SDK_USR} \

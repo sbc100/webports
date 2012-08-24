@@ -1,7 +1,18 @@
 diff -Naur protobuf-2.3.0/config.sub protobuf-2.3.0.nacl/config.sub
 --- protobuf-2.3.0/config.sub	2010-01-08 12:26:21.000000000 -0700
 +++ protobuf-2.3.0.nacl/config.sub	2011-01-13 08:12:48.000000000 -0700
-@@ -1356,6 +1356,9 @@
+@@ -719,6 +719,10 @@
+ 		basic_machine=i370-ibm
+ 		os=-mvs
+ 		;;
++	nacl)
++		basic_machine=le32-unknown
++		os=-nacl
++		;;
+ 	ncr3000)
+ 		basic_machine=i486-ncr
+ 		os=-sysv4
+@@ -1356,6 +1360,9 @@
  	-zvmoe)
  		os=-zvmoe
  		;;
