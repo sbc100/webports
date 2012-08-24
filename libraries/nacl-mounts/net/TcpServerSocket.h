@@ -52,7 +52,12 @@ class TCPServerSocket : public Socket {
   SocketSubSystem* sys_;
   int ref_;
   int oflag_;
+#if PPAPI_RELEASE < 22
+  // TODO(davidben): Remove when we drop pepper_21 support.
+  pp::CompletionCallbackFactory<TCPServerSocket, ThreadSafeRefCount> factory_;
+#else
   pp::CompletionCallbackFactory<TCPServerSocket> factory_;
+#endif
   pp::TCPServerSocketPrivate* socket_;
   struct sockaddr_in6 sin6_;
   PP_Resource resource_;

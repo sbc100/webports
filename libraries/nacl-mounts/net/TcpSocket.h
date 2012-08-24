@@ -61,7 +61,12 @@ class TCPSocket : public Socket {
   SocketSubSystem* sys_;
   int ref_;
   int oflag_;
+#if PPAPI_RELEASE < 22
+  // TODO(davidben): Remove when we drop pepper_21 support.
+  pp::CompletionCallbackFactory<TCPSocket, ThreadSafeRefCount> factory_;
+#else
   pp::CompletionCallbackFactory<TCPSocket> factory_;
+#endif
   pp::TCPSocketPrivate* socket_;
   std::deque<char> in_buf_;
   std::vector<char> out_buf_;

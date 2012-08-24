@@ -75,7 +75,12 @@ class SocketSubSystem : public BaseSocketSubSystem {
   void Resolve(int32_t result, GetAddrInfoParams* params, int32_t* pres);
   void OnResolve(int32_t result, GetAddrInfoParams* params, int32_t* pres);
 
+#if PPAPI_RELEASE < 22
+  // TODO(davidben): Remove when we drop pepper_21 support.
+  pp::CompletionCallbackFactory<SocketSubSystem, ThreadSafeRefCount> factory_;
+#else
   pp::CompletionCallbackFactory<SocketSubSystem> factory_;
+#endif
   pp::HostResolverPrivate* host_resolver_;
 
   DISALLOW_COPY_AND_ASSIGN(SocketSubSystem);
