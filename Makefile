@@ -91,7 +91,6 @@ LIBRARIES = \
      libraries/expat-2.0.1 \
      libraries/pixman-0.16.2 \
      libraries/gsl-1.9 \
- libraries/ncurses-5.9 \
      libraries/freetype-2.1.10 \
      libraries/fontconfig-2.7.3 \
      libraries/agg-2.5 \
@@ -262,6 +261,7 @@ dosbox: examples/systems/dosbox-0.74 ;
 openal-ogg: examples/audio/openal-ogg ;
 nethack: examples/games/nethack-3.4.3 ;
 scummvm: examples/games/scummvm-1.2.1 ;
+snes9x: examples/games/snes9x-1.53 ;
 xaos: examples/graphics/xaos ;
 thttpd: examples/tools/thttpd-2.25b ;
 
