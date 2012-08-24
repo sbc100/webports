@@ -629,11 +629,12 @@ diff -Naur dosbox-0.74-orig/src/ppapi/pepper_instance.h dosbox-0.74/src/ppapi/pe
 diff -Naur dosbox-0.74-orig/src/ppapi/pepper_libc.c dosbox-0.74/src/ppapi/pepper_libc.c
 --- dosbox-0.74-orig/src/ppapi/pepper_libc.c	1969-12-31 16:00:00.000000000 -0800
 +++ dosbox-0.74/src/ppapi/pepper_libc.c	2012-01-27 15:13:47.322313435 -0800
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,29 @@
 +#include <stdio.h>
 +#include <string.h>
 +#include <assert.h>
 +#include <sys/timeb.h>
++#include <sys/types.h>
 +
 +int _execve(const char *filename, char *const argv[], char *const envp[]) {
 +  fprintf(stderr, "ERROR: %s is not implemented\n", __func__);
