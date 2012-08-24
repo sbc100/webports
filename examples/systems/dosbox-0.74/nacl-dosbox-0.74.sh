@@ -87,8 +87,8 @@ CustomConfigureStep() {
   SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${LDFLAGS}|"
 
   find . -name Makefile -exec cp {} {}.bak \; \
-      -exec sed --in-place "${SED_PREPEND_LIBS}" {} \; \
-      -exec sed --in-place "${SED_REPLACE_LDFLAGS}" {} \;
+      -exec sed -i.bak "${SED_PREPEND_LIBS}" {} \; \
+      -exec sed -i.bak "${SED_REPLACE_LDFLAGS}" {} \;
 }
 
 CustomInstallStep(){

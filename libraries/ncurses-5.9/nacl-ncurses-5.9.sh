@@ -23,7 +23,7 @@ CustomConfigureStep() {
   DefaultConfigureStep --disable-database --with-fallbacks=xterm-256color,vt100
   # Glibc inaccurately reports having sigvec.
   # Change the define
-  sed -i 's/HAVE_SIGVEC 1/HAVE_SIGVEC 0/' include/ncurses_cfg.h
+  sed -i.bak 's/HAVE_SIGVEC 1/HAVE_SIGVEC 0/' include/ncurses_cfg.h
 }
 
 
