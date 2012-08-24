@@ -110,7 +110,6 @@ LIBRARIES = \
      libraries/gtest-1.5.0
 
 EXAMPLES = \
-     examples/games/nethack-3.4.3 \
      examples/games/scummvm-1.2.1 \
      examples/systems/bochs-2.4.6 \
      examples/systems/dosbox-0.74 \
@@ -123,6 +122,7 @@ ifeq ($(NACL_GLIBC), 1)
       libraries/ncurses-5.9 \
       libraries/pango-1.29.3
   EXAMPLES += \
+      examples/games/nethack-3.4.3 \
       examples/tools/thttpd-2.25b
 else
   EXAMPLES += \
