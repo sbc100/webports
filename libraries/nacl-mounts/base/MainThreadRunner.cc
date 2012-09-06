@@ -80,14 +80,16 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
 
   // put the job on the queue
   pthread_mutex_lock(&lock_);
+#ifdef USE_PEPPER
+  // Only schedule a wakeup if nothing else has.
+  if (job_queue_.empty()) {
+    // Schedule a wakeup.
+    pp::Module::Get()->core()->CallOnMainThread(0,
+        pp::CompletionCallback(&DoWorkShim, this), PP_OK);
+  }
+#endif
   job_queue_.push_back(&entry);
   pthread_mutex_unlock(&lock_);
-
-#ifdef USE_PEPPER
-  // Schedule the job.
-  pp::Module::Get()->core()->CallOnMainThread(0,
-      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
-#endif
 
   // Block differntly on the main thread.
   if (entry.pseudo_thread_job) {
@@ -111,6 +113,10 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
 
 void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
   JobEntry* entry = reinterpret_cast<JobEntry*>(arg);
+#ifdef USE_PEPPER
+  // Grab this here because entry will be invalid later.
+  MainThreadRunner* runner = entry->runner;
+#endif
   entry->result = result;
   // Signal differently depending on if the pseudothread is involved.
   if (entry->pseudo_thread_job) {
@@ -121,6 +127,10 @@ void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
     pthread_cond_signal(&entry->done_cond);
     pthread_mutex_unlock(&entry->done_mutex);
   }
+#ifdef USE_PEPPER
+  // Do more work now if in pepper.
+  DoWorkShim(runner, 0);
+#endif
 }
 
 void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
@@ -130,13 +140,12 @@ void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
 
 void MainThreadRunner::DoWork(void) {
   pthread_mutex_lock(&lock_);
-  if (!job_queue_.empty()) {
+  while (!job_queue_.empty()) {
     JobEntry* entry = job_queue_.front();
     job_queue_.pop_front();
-    // Release lock before doing work.
     pthread_mutex_unlock(&lock_);
     entry->job->Run(entry);
-    return;
+    pthread_mutex_lock(&lock_);
   }
   pthread_mutex_unlock(&lock_);
 }
