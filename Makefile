@@ -130,6 +130,10 @@ else
       examples/audio/openal-ogg
 endif
 
+ifneq ($(NACL_GLIBC), 1)
+  LIBRARIES += libraries/glibc-compat
+endif
+
 ifeq ($(OS_NAME), Linux)
   LIBRARIES += libraries/openssl-1.0.0e
 endif
@@ -202,6 +206,9 @@ $(SENT)/libraries/boost_1_47_0: libraries/zlib-1.2.3 libraries/bzip2-1.0.6
 $(SENT)/examples/audio/openal-ogg: \
     libraries/openal-soft-1.13 libraries/libvorbis-1.2.3
 $(SENT)/libraries/nacl-mounts: libraries/gtest-1.5.0
+ifneq ($(NACL_GLIBC), 1)
+  $(SENT)/libraries/openssl-1.0.0e: libraries/glibc-compat
+endif
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg-2.5 ;
@@ -220,6 +227,7 @@ freeimage: libraries/FreeImage-3.14.1 ;
 freetype: libraries/freetype-2.1.10 ;
 gc: libraries/gc6.8 ;
 glib: libraries/glib-2.28.8 ;
+glibc-compat: libraries/glibc-compat ;
 gtest: libraries/gtest-1.5.0 ;
 gsl: libraries/gsl-1.9 ;
 imagemagick: libraries/ImageMagick-6.5.4-10 ;
