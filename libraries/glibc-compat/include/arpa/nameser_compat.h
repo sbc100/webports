@@ -52,7 +52,7 @@
 	 * which will force your compiles to bomb until you fix
 	 * the above macros.
 	 */
-  error "Undefined or invalid BYTE_ORDER";
+  #error "Undefined or invalid BYTE_ORDER";
 #endif
 
 /*
