@@ -7,7 +7,7 @@
 #CXX:=$(NACLCXX)
 #AR:=$(NACLAR)
 
-CFLAGS:=-Wno-error -pthread -Iinclude -Isrc
+CFLAGS:=-Wno-error -pthread -Iinclude -Isrc -D_LIBC
 OUT:=out
 SOURCES:=\
   src/getprotobyname_r.c \
