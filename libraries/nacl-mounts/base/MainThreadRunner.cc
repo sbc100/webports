@@ -36,6 +36,7 @@ struct MainThreadRunner::JobEntry {
   bool is_done;
   int32_t result;
   bool pseudo_thread_job;
+  bool async_job;
 };
 
 
@@ -60,6 +61,7 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
   entry.runner = this;
   entry.pepper_instance = pepper_instance_;
   entry.job = job;
+  entry.async_job = false;
 
   bool in_main_thread = IsMainThread();
   // Must be off main thread, or on a pseudothread.
@@ -111,6 +113,33 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
   return entry.result;
 }
 
+void MainThreadRunner::RunJobAsync(MainThreadJob* job) {
+  JobEntry *entry = new JobEntry;
+
+  // initialize the entry
+  entry->runner = this;
+  entry->pepper_instance = pepper_instance_;
+  entry->job = job;
+  entry->async_job = true;
+
+  bool in_main_thread = IsMainThread();
+  // Must be off main thread, or on a pseudothread.
+  assert(!in_main_thread || in_pseudo_thread_);
+
+  // put the job on the queue
+  pthread_mutex_lock(&lock_);
+#ifdef USE_PEPPER
+  // Only schedule a wakeup if nothing else has.
+  if (job_queue_.empty()) {
+    // Schedule a wakeup.
+    pp::Module::Get()->core()->CallOnMainThread(0,
+        pp::CompletionCallback(&DoWorkShim, this), PP_OK);
+  }
+#endif
+  job_queue_.push_back(entry);
+  pthread_mutex_unlock(&lock_);
+}
+
 void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
   JobEntry* entry = reinterpret_cast<JobEntry*>(arg);
 #ifdef USE_PEPPER
@@ -118,14 +147,21 @@ void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
   MainThreadRunner* runner = entry->runner;
 #endif
   entry->result = result;
-  // Signal differently depending on if the pseudothread is involved.
-  if (entry->pseudo_thread_job) {
-    PseudoThreadResume();
+  // Handle async differently.
+  if (entry->async_job) {
+    // Cleanup happens on the main thread for async.
+    delete entry->job;
+    delete entry;
   } else {
-    pthread_mutex_lock(&entry->done_mutex);
-    entry->is_done = true;
-    pthread_cond_signal(&entry->done_cond);
-    pthread_mutex_unlock(&entry->done_mutex);
+    // Signal differently depending on if the pseudothread is involved.
+    if (entry->pseudo_thread_job) {
+      PseudoThreadResume();
+    } else {
+      pthread_mutex_lock(&entry->done_mutex);
+      entry->is_done = true;
+      pthread_cond_signal(&entry->done_cond);
+      pthread_mutex_unlock(&entry->done_mutex);
+    }
   }
 #ifdef USE_PEPPER
   // Do more work now if in pepper.

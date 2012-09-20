@@ -31,6 +31,10 @@ class MainThreadRunner {
   // that job for execution.
   int32_t RunJob(MainThreadJob *job);
 
+  // RunJobAsync() creates an entry for the job and submits
+  // that job for execution, returning immediately.
+  void RunJobAsync(MainThreadJob *job);
+
   // ResultCompletion() is a function for putting result into arg, which
   // is reinterpreted as a JobEntry pointer.  ResultCompletion()
   // is intended to be used with pp::CompletionCallback()
