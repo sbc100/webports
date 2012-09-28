@@ -13,7 +13,7 @@
 
 readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/openssl-1.0.0e.tar.gz
 #readonly URL=http://www.openssl.org/source/openssl-1.0.0e.tar.gz
-readonly PATCH_FILE=
+readonly PATCH_FILE=nacl-openssl-1.0.0e.patch
 readonly PACKAGE_NAME=openssl-1.0.0e
 
 source ../../build_tools/common.sh
@@ -52,7 +52,7 @@ CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-  # openssl doesn't need patching, so no patch step
+  DefaultPatchStep
   CustomConfigureStep
   if [[ "${NACL_PACKAGES_BITSIZE}" = "pnacl" ||
 	"${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
