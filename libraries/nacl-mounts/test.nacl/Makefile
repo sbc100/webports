@@ -6,10 +6,11 @@
 
 SRC_DIR = $(dir $(lastword $(MAKEFILE_LIST)))
 
-CFLAGS += -g -Wall -Werror
+CFLAGS += -g -Wall -Werror -I$(SRC_DIR)/..
 
 TEST_SOURCES = \
   SimpleTest.cc \
+  ThreadTest.cc \
   DevTest.cc \
   DupTest.cc \
   test_main.cc
@@ -25,4 +26,4 @@ all: nacl_mounts_sel_ldr_tests
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 nacl_mounts_sel_ldr_tests: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $^ -o $@ -lgtest -lnacl-mounts -lpthread
+	$(CXX) $(LDFLAGS) $^ -o $@ -lgtest -lnacl-mounts -lppapi -lppapi_cpp -lpthread

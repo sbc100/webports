@@ -73,17 +73,26 @@ class MainThreadRunner {
   // Yield main thread to pseudothread.
   static void PseudoThreadResume(void);
 
+  // FOR TESTING ONLY.
   // Do at least one main thread job.
-  // DO NOT use this with pepper (which sets up an event
-  // cycle to call this automatically).
-  // Use directly only for testing.
-  void DoWork(void);
+  // Returns:
+  //   Boolean indicating if work was done.
+  bool DoWork(void);
+
+  // FOR TESTING ONLY.
+  // Get number of pending jobs.
+  // Returns:
+  //   Number of jobs pending.
+  int PendingJobs(void);
 
  private:
   static void DoWorkShim(void *p, int32_t unused);
 
   // Used to keep things above the headroom.
   static void InnerPseudoThreadFork(void *(func)(void *arg), void *arg);
+
+  // Testing hook.
+  virtual void WakePepperThread(void);
 
   pthread_mutex_t lock_;
   std::list<JobEntry*> job_queue_;

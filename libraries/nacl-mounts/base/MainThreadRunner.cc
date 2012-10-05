@@ -21,11 +21,8 @@
 // 640K of stack should be enough for anyone.
 static const int kDefaultPseudoThreadHeadroom = 640 * 1024;
 
-// If we're not using pepper, track main thread's id so
-// we can do something sensible.
-#ifndef USE_PEPPER
+// Track main thread.
 static pthread_t main_thread_id_;
-#endif
 
 struct MainThreadRunner::JobEntry {
   pp::Instance* pepper_instance;
@@ -41,10 +38,8 @@ struct MainThreadRunner::JobEntry {
 
 
 MainThreadRunner::MainThreadRunner(pp::Instance *instance) {
-#ifndef USE_PEPPER
   // Record main thread if not using pepper.
   main_thread_id_ = pthread_self();
-#endif
 
   pepper_instance_ = instance;
   pthread_mutex_init(&lock_, NULL);
@@ -52,6 +47,13 @@ MainThreadRunner::MainThreadRunner(pp::Instance *instance) {
 
 MainThreadRunner::~MainThreadRunner() {
   pthread_mutex_destroy(&lock_);
+}
+
+void MainThreadRunner::WakePepperThread(void) {
+#ifdef USE_PEPPER
+  pp::Module::Get()->core()->CallOnMainThread(0,
+      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
+#endif
 }
 
 int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
@@ -82,14 +84,11 @@ int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
 
   // put the job on the queue
   pthread_mutex_lock(&lock_);
-#ifdef USE_PEPPER
   // Only schedule a wakeup if nothing else has.
   if (job_queue_.empty()) {
     // Schedule a wakeup.
-    pp::Module::Get()->core()->CallOnMainThread(0,
-        pp::CompletionCallback(&DoWorkShim, this), PP_OK);
+    WakePepperThread();
   }
-#endif
   job_queue_.push_back(&entry);
   pthread_mutex_unlock(&lock_);
 
@@ -128,14 +127,11 @@ void MainThreadRunner::RunJobAsync(MainThreadJob* job) {
 
   // put the job on the queue
   pthread_mutex_lock(&lock_);
-#ifdef USE_PEPPER
   // Only schedule a wakeup if nothing else has.
   if (job_queue_.empty()) {
     // Schedule a wakeup.
-    pp::Module::Get()->core()->CallOnMainThread(0,
-        pp::CompletionCallback(&DoWorkShim, this), PP_OK);
+    WakePepperThread();
   }
-#endif
   job_queue_.push_back(entry);
   pthread_mutex_unlock(&lock_);
 }
@@ -174,16 +170,27 @@ void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
   mtr->DoWork();
 }
 
-void MainThreadRunner::DoWork(void) {
+bool MainThreadRunner::DoWork(void) {
+  bool worked = false;
   pthread_mutex_lock(&lock_);
   while (!job_queue_.empty()) {
     JobEntry* entry = job_queue_.front();
     job_queue_.pop_front();
     pthread_mutex_unlock(&lock_);
     entry->job->Run(entry);
+    worked = true;
     pthread_mutex_lock(&lock_);
   }
   pthread_mutex_unlock(&lock_);
+  return worked;
+}
+
+int MainThreadRunner::PendingJobs(void) {
+  int jobs;
+  pthread_mutex_lock(&lock_);
+  jobs = job_queue_.size();
+  pthread_mutex_unlock(&lock_);
+  return jobs;
 }
 
 pp::Instance *MainThreadRunner::ExtractPepperInstance(
@@ -254,11 +261,7 @@ void MainThreadRunner::PseudoThreadResume(void) {
 }
 
 bool MainThreadRunner::IsMainThread(void) {
-#ifdef USE_PEPPER
-  return pp::Module::Get()->core()->IsMainThread();
-#else
   return pthread_equal(pthread_self(), main_thread_id_);
-#endif
 }
 
 bool MainThreadRunner::IsPseudoThread(void) {

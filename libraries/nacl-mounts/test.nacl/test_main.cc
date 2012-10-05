@@ -4,9 +4,16 @@
  * found in the LICENSE file.
  */
 #include "gtest/gtest.h"
+#include "ppapi/cpp/module.h"
 
 int main(int argc, char**argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 
+// Allows us to links against ppapi_cpp.
+namespace pp {
+  Module *CreateModule() {
+    return 0;
+  }
+}
