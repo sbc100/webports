@@ -1199,7 +1199,7 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.cc SDL-1.2.14-nacl/src/video/nac
 diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.h SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.h
 --- SDL-1.2.14/src/video/nacl/SDL_nacljob.h	1970-01-01 03:00:00.000000000 +0300
 +++ SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.h	2012-01-16 12:16:39.470269368 +0400
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,57 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -1217,11 +1217,8 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.h SDL-1.2.14-nacl/src/video/nacl
 +#include <ppapi/cpp/url_loader.h>
 +#include <ppapi/cpp/url_request_info.h>
 +#include <ppapi/cpp/url_response_info.h>
-+/* TODO: include completion_callback_factory.h unconditionally one all sdk are updated */
 +#include <ppapi/c/ppb_var.h>
-+#ifdef PPB_VAR_INTERFACE_1_1 
 +#include <ppapi/utility/completion_callback_factory.h>
-+#endif
 +#include <string>
 +#include <vector>
 +#include <set>
