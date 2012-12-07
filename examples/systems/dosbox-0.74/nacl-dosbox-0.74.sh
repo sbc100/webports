@@ -35,6 +35,7 @@ CustomConfigureStep() {
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
+  export STRIP=${NACLSTRIP}
   export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
 

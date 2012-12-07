@@ -14,7 +14,15 @@ diff -Naur dosbox-0.74-orig/config.sub dosbox-0.74/config.sub
 diff -Naur dosbox-0.74-orig/configure.in dosbox-0.74/configure.in
 --- dosbox-0.74-orig/configure.in	2010-05-10 11:58:57.000000000 -0700
 +++ dosbox-0.74/configure.in	2012-01-27 15:13:47.312313175 -0800
-@@ -519,6 +519,7 @@
+i@@ -10,6 +10,7 @@
+ dnl Setup for automake
+ AM_INIT_AUTOMAKE
+ AM_CONFIG_HEADER(config.h)
++AM_PROG_AR
+ 
+ dnl Checks for programs.
+ AC_PROG_MAKE_SET
+@@ -519,6 +520,7 @@
  src/libs/gui_tk/Makefile
  src/misc/Makefile
  src/shell/Makefile
