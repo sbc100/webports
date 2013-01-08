@@ -58,11 +58,11 @@ fi
 
 if [ ${NACL_PACKAGES_BITSIZE} = "32" ] ; then
   readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_32
-  readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_x86_32.nexe
+  readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_core_x86_32.nexe
 else
   # TODO(eugenis): Is this correct for PNACL?
   readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_64
-  readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_x86_64.nexe
+  readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_core_x86_64.nexe
 fi
 
 # NACL_CROSS_PREFIX is the prefix of the executables in the
