@@ -161,7 +161,7 @@ $(NACL_DIRS_TO_MAKE):
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
 
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
-	echo "@@@BUILD_STEP $(NACL_PACKAGES_BITSIZE)-bit $(notdir $*)@@@"
+	@echo "@@@BUILD_STEP $(NACL_PACKAGES_BITSIZE)-bit $(notdir $*)@@@"
 	cd $* && ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@

@@ -27,7 +27,7 @@ for filename in sys.argv[1:]:
     h.update(f.read())
     filehash = h.hexdigest()
     f.close()
-    print filehash.lower() + " *" + filename
+    print filehash.lower() + " *" + os.path.basename(filename)
   except IOError:
     print "sha1sum.py unable to open file " + filename
     sys.exit(-1)

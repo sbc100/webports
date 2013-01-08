@@ -22,7 +22,7 @@ set -o errexit
 readonly SAVE_PWD=$(pwd)
 
 readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
-readonly NACL_SRC=$(expr ${START_DIR} : '\(.*\/src\).*')
+readonly NACL_SRC=$(cd $(dirname $(dirname $BASH_SOURCE)) ; pwd )
 readonly NACL_PACKAGES=${NACL_SRC}
 readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
 

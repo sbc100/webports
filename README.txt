@@ -17,7 +17,7 @@ NACL_SDK_ROOT environment variable to top directory of a version of the
 Native Client SDK (the directory containing toolchain/).
 This path should be absolute.
 
-The Makefile can build all of the libraries. Package dependencies are 
+The Makefile can build all of the libraries. Package dependencies are
 built into the Makefile. For example, 'make vorbis' will build
 libvorbis-1.2.3 and libogg-1.1.4.  'make all' will build all of the libraries.
 
@@ -28,8 +28,8 @@ to add the required extra paths.)
 
 The source code and build output for each package is placed in:
 
-  naclports/src/out/repository          for 32-bit builds
-  naclports/src/out/repository64        for 64-bit builds
+  out/repository-i686     for 32-bit builds
+  out/repository-x86_64   for 64-bit builds
 
 NOTE:  These external libraries each have their own licenses for use.
 Please read and understand these licenses before using these packages
@@ -45,8 +45,9 @@ To add a package:
     your new package.  For example, nacl-esidl-0.1.5
 3. Add the build script to that directory.
 4. Optionally build a tarball.  If you choose to do this, you will need to
-    create a checksum for it using naclports/src/build_tools/sha1sum.py.  Redirect 
-    the script output to a .sha1 file so that the common.sh script can pick it up.  E.g.:
-    python scripts/sha1sum.py mytarball.zip > scripts/nacl-esidl-0.1.5/nacl-esidl-0.1.5.sha1
+    create a checksum for it using build_tools/sha1sum.py.  Redirect
+    the script output to a .sha1 file so that the common.sh script can pick it
+    up.  E.g.:
+    sha1sum.py myzip.zip > libraries/nacl-esidl-0.1.5/nacl-esidl-0.1.5.sha1
 5. Add the invocation of your script to the Makefile
 
