@@ -34,7 +34,7 @@ CustomConfigureStep() {
   export AR=${NACLAR}
   export CXXFLAGS=""
   export LDFLAGS=""
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"
     export LDFLAGS="-O0 -static"
   fi
@@ -127,7 +127,7 @@ CustomInstallStep() {
   cp ${START_DIR}/nacl-scumm/static/* ${APPENGINE_DIR}/static
   cp ${SRC_DIR}/*.tar ${APPENGINE_DIR}/static
   ${NACLSTRIP} ${SRC_DIR}/${PACKAGE_NAME}-build/scummvm \
-      -o ${APPENGINE_DIR}/static/scummvm_x86_${NACL_PACKAGES_BITSIZE}.nexe
+      -o ${APPENGINE_DIR}/static/scummvm_${NACL_ARCH}.nexe
 
   # Publish chrome web store app (copy to repository to drop .svn etc).
   MakeDir ${SRC_DIR}/hosted_app

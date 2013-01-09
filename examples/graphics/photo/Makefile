@@ -105,22 +105,22 @@ clean:
 # Build the required packages.
 $(LIB_JPEG_32):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/jpeg-6b; \
-	export NACL_PACKAGES_BITSIZE=32; \
+	export NACL_ARCH=i686; \
 	./nacl-jpeg-6b.sh)
 
 $(LIB_JPEG_64):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/jpeg-6b; \
-	export NACL_PACKAGES_BITSIZE=64; \
+	export NACL_ARCH=x86_64; \
 	./nacl-jpeg-6b.sh)
 
 $(BOOST_SMART_PTR_32):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
-	export NACL_PACKAGES_BITSIZE=32; \
+	export NACL_ARCH=i686; \
 	./nacl-boost_1_43_0.sh)
 
 $(BOOST_SMART_PTR_64):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
-	export NACL_PACKAGES_BITSIZE=64; \
+	export NACL_ARCH=x86_64; \
 	./nacl-boost_1_43_0.sh)
 
 # Download and patch the Carpe sliders.

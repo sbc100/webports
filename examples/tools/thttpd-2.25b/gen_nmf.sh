@@ -23,15 +23,17 @@ function nacl_configure {
     fi
   fi
 
-  export NACL_PACKAGES_BITSIZE=${NACL_PACKAGES_BITSIZE:-"32"}
-  if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
+  export NACL_ARCH=${NACL_ARCH:-"i686"}
+  if [ $NACL_ARCH = "i686" ] ; then
     export ARCH=x86-32
     export LARCH=i686
-  elif [ $NACL_PACKAGES_BITSIZE = "64" ] ; then
+    export NACL_LIBDIR=lib32
+  elif [ $NACL_ARCH = "x86_64" ] ; then
     export LARCH=x86_64
     export ARCH=x86-64
+    export NACL_LIBDIR=lib64
   else
-    "Unknown value for NACL_PACKAGES_BITSIZE: '$NACL_PACKAGES_BITSIZE'"
+    "Unknown value for NACL_ARCH: '$NACL_ARCH'"
     exit -1
   fi
 }
@@ -39,6 +41,6 @@ function nacl_configure {
 nacl_configure
 NACL_LIB_PATH=$NACL_TOOLCHAIN_ROOT/x86_64-nacl
 $NACL_SDK_ROOT/tools/create_nmf.py \
-  -L$NACL_LIB_PATH/usr/lib$NACL_PACKAGES_BITSIZE \
-  -L$NACL_LIB_PATH/lib$NACL_PACKAGES_BITSIZE -o thttpd.nmf -s . \
-  thttpd_x86-$NACL_PACKAGES_BITSIZE.nexe
+  -L$NACL_LIB_PATH/usr/$NACL_LIBDIR \
+  -L$NACL_LIB_PATH/$NACL_LIBDIR -o thttpd.nmf -s . \
+  thttpd_$NACL_ARCH

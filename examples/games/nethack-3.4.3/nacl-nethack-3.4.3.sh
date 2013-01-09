@@ -30,7 +30,7 @@ CustomBuildStep() {
   # because we are not running ./configure and the Makefile was hacked
   export NACL_CCFLAGS="-O"
   export NACL_LDFLAGS=""
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export NACL_CCFLAGS="-O3 -g"
     export NACL_LDFLAGS="-O0 -static"
   fi
@@ -56,7 +56,7 @@ CustomBuildStep() {
   local ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
   MakeDir ${ASSEMBLY_DIR}
   cp ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack \
-      ${ASSEMBLY_DIR}/nethack_x86-${NACL_PACKAGES_BITSIZE:-"32"}.nexe
+      ${ASSEMBLY_DIR}/nethack_${NACL_ARCH}.nexe
   ChangeDir ${PACKAGE_DIR}/out/games
   rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
   tar cf ${ASSEMBLY_DIR}/nethack.tar lib
@@ -90,7 +90,7 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     # NOTE: nethack does not use a build subdir
     DefaultTranslateStep ${PACKAGE_NAME} src/nethack
   fi

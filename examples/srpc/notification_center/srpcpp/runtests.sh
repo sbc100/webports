@@ -4,13 +4,13 @@ echo "Running all tests in `pwd`"
 
 SEL_LDR="SEL_LDR NOT FOUND"
 
-if [ ! -n "$1" ] 
+if [ ! -n "$1" ]
 then
   echo "sel_ldr not provided as argument, attempting to locate it."
   #check for sel_ldr in path
   SEL_LDR=`which sel_ldr`
-  
-  if [ "x${SEL_LDR}" == "x" ]
+
+  if [ "x${SEL_LDR}" = "x" ]
   then
     echo "sel_ldr binary not found in path.";
     echo "Please enter complete path to sel_ldr:"
@@ -28,8 +28,8 @@ then
   echo "using sel_ldr: ${SEL_LDR}"
 
   for i in `ls *test*\.nexe`;
-  do 
-    echo "Running: "$i; 
+  do
+    echo "Running: "$i;
     $SEL_LDR $i  || exit 1
     echo "Test finished successfully, moving on..."
   done

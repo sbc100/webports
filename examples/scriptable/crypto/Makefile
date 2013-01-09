@@ -62,11 +62,11 @@ clean:
 # Build the required packages.
 $(TOMCRYPT_32):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/libtomcrypt-1.17; \
-	export NACL_PACKAGES_BITSIZE=32; \
+	export NACL_ARCH=i686; \
 	./nacl-libtomcrypt-1.17.sh)
 
 $(TOMCRYPT_64):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/libtomcrypt-1.17; \
-	export NACL_PACKAGES_BITSIZE=64; \
+	export NACL_ARCH=x86_64; \
 	./nacl-libtomcrypt-1.17.sh)
 

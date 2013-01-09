@@ -25,7 +25,7 @@ CustomConfigureStep() {
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   local extra_args=""
-  if [ "${NACL_PACKAGES_BITSIZE}" == pnacl ]; then
+  if [ "${NACL_ARCH}" = pnacl ]; then
     extra_args="--cc=pnacl-clang --arch=pnacl"
   fi
   ../configure \

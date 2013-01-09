@@ -32,7 +32,7 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export CXXFLAGS="-O2 -g"
   export LDFLAGS=""
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"
     export LDFLAGS="-O0 -static"
   fi
@@ -53,14 +53,15 @@ CustomConfigureStep() {
   PWD=$(pwd)
   # TODO(bradnelson): take this out once the sdk is fixed (and do the line
   # after).
-  if [ "$NACL_PACKAGES_BITSIZE" = "64" ]; then
+  if [ "$NACL_ARCH" = "x86_64" ]; then
     ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib
-  elif [ "$NACL_PACKAGES_BITSIZE" = "32" ]; then
+  elif [ "$NACL_ARCH" = "i686" ]; then
     ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32
+  elif [ "$NACL_ARCH" = "arm" ]; then
+    ChangeDir ${NACL_TOOLCHAIN_ROOT}/arm-nacl/lib
   else
     ChangeDir ${NACL_TOOLCHAIN_ROOT}/sdk/lib
   fi
-  #ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib${NACL_PACKAGES_BITSIZE}
   cp libppapi_cpp.a libppapi_cpp_COPY.a
   ChangeDir ${PWD}
 
@@ -73,7 +74,7 @@ CustomConfigureStep() {
   export LIBS="$LIBS -lpthread"
   export LIBS="$LIBS -lppapi_cpp_COPY"
   # TOOD(robertm): investigate why this is only necessary for pnacl
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export LIBS="$LIBS -lnosys"
   fi
   export LIBS="$LIBS -Wl,--end-group"
@@ -127,8 +128,7 @@ CustomInstallStep(){
 
   cp ${START_DIR}/bochs.html ${PUBLISH_DIR}
   cp ${START_DIR}/bochs.nmf ${PUBLISH_DIR}
-  cp ${BOCHS_BUILD}/bochs \
-      ${PUBLISH_DIR}/bochs_x86-${NACL_PACKAGES_BITSIZE}.nexe \
+  cp ${BOCHS_BUILD}/bochs ${PUBLISH_DIR}/bochs_${NACL_ARCH}.nexe
 
   cd ..
 }
@@ -211,7 +211,7 @@ CustomPackageInstall() {
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/bochs
   fi
   CustomInstallStep

@@ -58,11 +58,11 @@ clean:
 # Build the required packages.
 $(BOOST_UBLAS_32):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
-	export NACL_PACKAGES_BITSIZE=32; \
+	export NACL_ARCH=i686; \
 	./nacl-boost_1_43_0.sh)
 
 $(BOOST_UBLAS_64):
 	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
-	export NACL_PACKAGES_BITSIZE=64; \
+	export NACL_ARCH=x86_64; \
 	./nacl-boost_1_43_0.sh)
 

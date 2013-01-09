@@ -21,7 +21,7 @@ source ../../build_tools/common.sh
 
 CustomBuildStep() {
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     extra=""
   else
     extra="-O3 -mfpmath=sse -msse -fomit-frame-pointer"

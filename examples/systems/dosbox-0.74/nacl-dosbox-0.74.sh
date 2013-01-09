@@ -29,7 +29,7 @@ CustomConfigureStep() {
   # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
   export CXXFLAGS="-O2 -g"
   export NACL_LDFLAGS=""
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"
     export NACL_LDFLAGS="-O0 -static"
   fi
@@ -44,7 +44,7 @@ CustomConfigureStep() {
       -lpng \
       -lz"
 
-  CONFIG_FLAGS="--host=${CROSS_ID}-pc-nacl \
+  CONFIG_FLAGS="--host=${NACL_ARCH}-pc-nacl \
       --prefix=${NACL_SDK_USR} \
       --exec-prefix=${NACL_SDK_USR} \
       --libdir=${NACL_SDK_USR_LIB} \
@@ -100,7 +100,7 @@ CustomInstallStep(){
   install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
   install ${START_DIR}/dosbox.nmf ${PUBLISH_DIR}
   install ${DOSBOX_BUILD}/src/dosbox \
-      ${PUBLISH_DIR}/dosbox_x86-${NACL_PACKAGES_BITSIZE}.nexe
+      ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
   DefaultTouchStep
 }
 
@@ -111,7 +111,7 @@ CustomPackageInstall() {
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/src/dosbox
   fi
   CustomInstallStep

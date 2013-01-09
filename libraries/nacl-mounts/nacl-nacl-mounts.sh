@@ -31,7 +31,7 @@ RunSelLdrTests() {
     return
   fi
 
-  if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ]; then
+  if [ ${NACL_ARCH} = "pnacl" ]; then
     echo "FIXME: Not running sel_ldr-based tests with PNaCl."
     return
   fi
@@ -139,7 +139,7 @@ CustomInstallStep() {
   cp ${START_DIR}/http2/genfs.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
 
   # GLibC toolchain has termio.h so don't copy stub header.
-  if [[ $NACL_GLIBC == 0 ]]; then
+  if [[ $NACL_GLIBC = 0 ]]; then
     cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
   fi
 

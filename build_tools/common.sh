@@ -2,8 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
-# Environment variable NACL_PACKAGES_BITSIZE should be unset or set to "32"
-# for a 32-bit build.  It should be set to "64" for a 64-bit build.
+# Environment variable NACL_ARCH should be unset or set to "i686"
+# for a 32-bit build.  It should be set to "x86_64", "pnacl", or "arm"
+# for a 64-bit, pnacl, or arm builds.
 
 
 # NAMING CONVENTION
@@ -42,21 +43,32 @@ else
   readonly OS_JOBS=1
 fi
 
-# Get the desired bit size,
-# Note(robertm): we abuse this to introduce a "pnacl" flavor.
-export NACL_PACKAGES_BITSIZE=${NACL_PACKAGES_BITSIZE:-"32"}
-if [ ${NACL_PACKAGES_BITSIZE} = "32" ] ; then
-  readonly CROSS_ID=i686
-elif [ ${NACL_PACKAGES_BITSIZE} = "64" ] ; then
-  readonly CROSS_ID=x86_64
-elif [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
-  readonly CROSS_ID=pnacl
+# Set default NACL_ARCH based on legacy NACL_PACKAGES_BITSIZE
+if [ "${NACL_PACKAGES_BITSIZE:-}" = "64" ] ; then
+  export NACL_ARCH=${NACL_ARCH:-"x86_64"}
+elif [ "${NACL_PACKAGES_BITSIZE:-}" = "pnacl" ] ; then
+  export NACL_ARCH=${NACL_ARCH:-"pnacl"}
 else
-  echo "Unknown value for NACL_PACKAGES_BITSIZE: '${NACL_PACKAGES_BITSIZE}'" 1>&2
+  export NACL_ARCH=${NACL_ARCH:-"i686"}
+fi
+
+# Set NACL_LIBDIR: the name of the lib folder within the toolchain.
+# For arm and pnacl toolchains this is just 'lib'.  For the x86
+# toolchain this is lib32 or lib64
+if [ ${NACL_ARCH} = "i686" ] ; then
+  export NACL_LIBDIR=lib32
+elif [ ${NACL_ARCH} = "x86_64" ] ; then
+  export NACL_LIBDIR=lib64
+elif [ ${NACL_ARCH} = "arm" ] ; then
+  export NACL_LIBDIR=lib
+elif [ ${NACL_ARCH} = "pnacl" ] ; then
+  export NACL_LIBDIR=lib
+else
+  echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
   exit -1
 fi
 
-if [ ${NACL_PACKAGES_BITSIZE} = "32" ] ; then
+if [ ${NACL_ARCH} = "i686" ] ; then
   readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_32
   readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_core_x86_32.nexe
 else
@@ -67,16 +79,16 @@ fi
 
 # NACL_CROSS_PREFIX is the prefix of the executables in the
 # toolchain's "bin" directory. For example: i686-nacl-<toolname>.
-if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ]; then
+if [ ${NACL_ARCH} = "pnacl" ]; then
   export NACL_CROSS_PREFIX=pnacl
 else
-  export NACL_CROSS_PREFIX=${CROSS_ID}-nacl
+  export NACL_CROSS_PREFIX=${NACL_ARCH}-nacl
 fi
 
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
 # TODO: Currently only x86-32 will encourage MMX, SSE & SSE2 intrinsics
 #       and handcoded assembly.
-if [ $NACL_PACKAGES_BITSIZE = "32" ] ; then
+if [ $NACL_ARCH = "i686" ] ; then
   readonly NACL_OPTION="enable"
 else
   readonly NACL_OPTION="disable"
@@ -99,7 +111,7 @@ readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
 # packages subdirectories
 readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
 readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
-readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository-${CROSS_ID}
+readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository-${NACL_ARCH}
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish
 readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 
@@ -108,12 +120,19 @@ InitializeNaClGccToolchain() {
   # locate default nacl_sdk toolchain
   # TODO: x86 only at the moment
   NACL_GLIBC=${NACL_GLIBC:-0}
-  if [ $NACL_GLIBC = "1" ] ; then
-    # m15-m17 SDK layouts have the glibc toolchain without the _glibc suffix
-    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_glibc/bin/i686-nacl-gcc
-    local TENTATIVE_NEWLIB_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/i686-nacl-gcc
+  if [ $NACL_ARCH = "arm" ] ; then
+    local TOOLCHAIN_ARCH="arm"
+  else
+    local TOOLCHAIN_ARCH="x86"
+  fi
 
-    echo ${TENTATIVE_NACL_GCC}
+  if [ $NACL_ARCH = "arm" ] ; then
+    local TOOLCHAIN_DIR=${OS_SUBDIR_SHORT}_arm_newlib
+  elif [ $NACL_GLIBC = "1" ] ; then
+    # m15-m17 SDK layouts have the glibc toolchain without the _glibc suffix
+    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_glibc/bin/${NACL_CROSS_PREFIX}-gcc
+    local TENTATIVE_NEWLIB_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/${NACL_CROSS_PREFIX}-gcc
+
     if [ -e ${TENTATIVE_NACL_GCC} ]; then
       local TOOLCHAIN_SUFFIX="_glibc"
     elif [ -e ${TENTATIVE_NEWLIB_NACL_GCC} ]; then
@@ -127,20 +146,21 @@ InitializeNaClGccToolchain() {
       echo "------------------------------------------------------------------"
       exit -1
     fi
+    local TOOLCHAIN_DIR=${OS_SUBDIR_SHORT}_x86${TOOLCHAIN_SUFFIX}
   else
     # Fall back to pre-m15 SDK layout if we can't find i686-nacl-gcc.
-    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/i686-nacl-gcc
+    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/${NACL_CROSS_PREFIX}-gcc
 
-    echo ${TENTATIVE_NACL_GCC}
     if [ -e ${TENTATIVE_NACL_GCC} ]; then
       local TOOLCHAIN_SUFFIX="_newlib"
     else
       local TOOLCHAIN_SUFFIX=""
     fi
+    local TOOLCHAIN_DIR=${OS_SUBDIR_SHORT}_x86${TOOLCHAIN_SUFFIX}
   fi
 
 
-  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86${TOOLCHAIN_SUFFIX}}
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${TOOLCHAIN_DIR}}
   # TODO(robertm): can we get rid of NACL_SDK_BASE?
   readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
 
@@ -161,12 +181,12 @@ InitializeNaClGccToolchain() {
   # NACL_SDK_USR is where the headers, libraries, etc. will be installed
   readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
   readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
-  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib${NACL_PACKAGES_BITSIZE}
+  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/${NACL_LIBDIR}
   readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
   readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
 
   # NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
-  # the gcc specs file.  It has a gcc spec-file conditional for ${CROSS_ID}
+  # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
   readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
   readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
   readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
@@ -211,7 +231,7 @@ InitializePNaClToolchain() {
   readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
 }
 
-if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
+if [ ${NACL_ARCH} = "pnacl" ] ; then
   InitializePNaClToolchain
 else
   InitializeNaClGccToolchain
@@ -506,7 +526,7 @@ DefaultConfigureStep() {
   echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
-  if [[ ${NACL_PACKAGES_BITSIZE} == "pnacl" ]]; then
+  if [[ ${NACL_ARCH} = "pnacl" ]]; then
     # The PNaCl tools use "pnacl-" as the prefix, but config.sub
     # does not know about "pnacl".  It only knows about "le32-nacl".
     # Unfortunately, most of the config.subs here are so old that
@@ -543,7 +563,7 @@ DefaultBuildStep() {
 
 DefaultTouchStep() {
   FULL_PACKAGE="${START_DIR/#${NACL_PACKAGES}\//}"
-  SENTFILE="${NACL_PACKAGES_OUT}/sentinels/bits${NACL_PACKAGES_BITSIZE}/${FULL_PACKAGE}"
+  SENTFILE="${NACL_PACKAGES_OUT}/sentinels/${NACL_ARCH}/${FULL_PACKAGE}"
   SENTDIR=$(dirname "${SENTFILE}")
   mkdir -p "${SENTDIR}" && touch "${SENTFILE}"
 }
@@ -557,7 +577,7 @@ DefaultInstallStep() {
 
 
 DefaultCleanUpStep() {
-  if [ ${NACL_PACKAGES_BITSIZE} != "pnacl" ] ; then
+  if [ ${NACL_ARCH} != "pnacl" -a ${NACL_ARCH} != "arm" ] ; then
     PatchSpecFile
   fi
   AddToInstallFile ${PACKAGE_NAME}

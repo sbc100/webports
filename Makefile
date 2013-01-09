@@ -30,10 +30,17 @@ ifeq ($(OS_SUBDIR), UNKNOWN)
   $(error No support for the Operating System: $(OS_NAME))
 endif
 
+ifndef NACL_ARCH
+   NACL_ARCH := i686
+endif
+
 ifndef NACL_SDK_ROOT
   $(error NACL_SDK_ROOT not set, see README.txt)
 endif
 
+ifeq ($(NACL_ARCH), "ARM")
+  NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_arm_newlib
+else
 ifeq ($(NACL_GLIBC), 1)
   NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_glibc
   NACL_LIBC = glibc
@@ -41,25 +48,21 @@ else
   NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_newlib
   NACL_LIBC = newlib
 endif
+endif
 
 NACL_OUT = out
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
-                 $(NACL_OUT)/repository-i686 \
-                 $(NACL_OUT)/repository-x86_64 \
+                 $(NACL_OUT)/repository-$(NACL_ARCH) \
                  $(NACL_OUT)/publish
 
-NACL_SDK_USR32 = $(NACL_TOOLCHAIN_ROOT)/i686-nacl/usr
-NACL_SDK_USR64 = $(NACL_TOOLCHAIN_ROOT)/x86_64-nacl/usr
+NACL_SDK_USR = $(NACL_TOOLCHAIN_ROOT)/$(NACL_ARCH)-nacl/usr
 
 NACL_DIRS_TO_REMOVE = $(NACL_OUT) \
-		      $(NACL_SDK_USR32) \
-		      $(NACL_SDK_USR64)
+		      $(NACL_SDK_USR) \
 
 NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
-		    $(NACL_SDK_USR32)/include \
-		    $(NACL_SDK_USR64)/include \
-		    $(NACL_SDK_USR32)/lib \
-		    $(NACL_SDK_USR64)/lib
+		    $(NACL_SDK_USR)/include \
+		    $(NACL_SDK_USR)/lib
 
 LIBRARIES = \
      libraries/nacl-mounts \
@@ -142,7 +145,7 @@ PACKAGES = $(LIBRARIES) $(EXAMPLES)
 
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
-SENT = $(SENTINELS_DIR)/bits$(NACL_PACKAGES_BITSIZE)_$(NACL_LIBC)
+SENT = $(SENTINELS_DIR)/$(NACL_ARCH)_$(NACL_LIBC)
 
 default: libraries
 libraries: $(LIBRARIES)
@@ -161,7 +164,7 @@ $(NACL_DIRS_TO_MAKE):
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
 
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
-	@echo "@@@BUILD_STEP $(NACL_PACKAGES_BITSIZE)-bit $(notdir $*)@@@"
+	@echo "@@@BUILD_STEP $(NACL_ARCH) $(notdir $*)@@@"
 	cd $* && ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@

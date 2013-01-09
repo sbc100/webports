@@ -18,8 +18,8 @@ export PATH=${PATH}:/opt/local/bin
 
 StartBuild() {
   cd $2
-  export NACL_PACKAGES_BITSIZE=$3
-  echo "@@@BUILD_STEP $3-bit setup@@@"
+  export NACL_ARCH=$3
+  echo "@@@BUILD_STEP $3 setup@@@"
   if ! ./$1 ; then
     RESULT=0
   fi
@@ -40,7 +40,7 @@ else
 fi
 
 # This a temporary hack until the pnacl support is more mature
-if [ ${LIBC} == "pnacl_newlib" ] ; then
+if [ ${LIBC} = "pnacl_newlib" ] ; then
   ${SCRIPT_DIR}/bots/pnacl_bots.sh
   exit 0
 fi
@@ -65,9 +65,9 @@ else
 fi
 
 # Select libc
-if [ "$LIBC" == "glibc" ]; then
+if [ "$LIBC" = "glibc" ]; then
   export NACL_GLIBC=1
-elif [ "$LIBC" == "newlib" ]; then
+elif [ "$LIBC" = "newlib" ]; then
   export NACL_GLIBC=0
 else
   echo "Bad LIBC: ${LIBC}" 1>&2
@@ -91,10 +91,10 @@ echo "@@@BUILD_STEP Install Latest SDK@@@"
 ${PYTHON} build_tools/buildbot_sdk_setup.py
 
 # Build 32-bit.
-StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} 32
+StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} i686
 if [[ $RESULT != 0 ]]; then
   # Build 64-bit.
-  StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} 64
+  StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} x86_64
 fi
 
 exit 0

@@ -20,7 +20,7 @@ function check_deps() {
       EXIT=true
     fi
   done
-  if test $EXIT == true
+  if test $EXIT = true
   then
     echo "Dependency missing"
     exit 1
@@ -28,10 +28,10 @@ function check_deps() {
 }
 
 function define_arch() {
-  if [[ "$(uname -m)" == "x86_64" ]]
+  if [[ "$(uname -m)" = "x86_64" ]]
   then
     ARCH=64
-  elif [[ "$(uname -m)" == "i"[3-6]"86" ]]
+  elif [[ "$(uname -m)" = "i"[3-6]"86" ]]
   then
     ARCH=32
   else
@@ -41,10 +41,10 @@ function define_arch() {
 }
 
 function define_os() {
-  if [[ "$(uname -s)" == "Linux" ]]
+  if [[ "$(uname -s)" = "Linux" ]]
   then
     OS="linux"
-  elif [[ "$(uname -s)" == "Darwin" ]]
+  elif [[ "$(uname -s)" = "Darwin" ]]
   then
     OS="mac"
   else
@@ -83,7 +83,7 @@ if ! test -d nacl/native_client
 then
   echo cd nacl && gclient sync --revision 3669
   ( cd nacl && gclient sync --revision 3669 )
-  if [[ "$?" == "0" ]]
+  if [[ "$?" = "0" ]]
   then
     echo "the first run supposed to fail"
     exit 1
@@ -100,7 +100,7 @@ if ! test -f nacl/native_client/scons-out/opt-$OS-x86-32/staging/sel_ldr
 then
   run "cd nacl/native_client && ./scons MODE=opt-$OS platform=x86-32 sdl=none sel_ldr"
 fi
-if ! test -f nacl/native_client/scons-out/opt-$OS-x86-64/staging/sel_ldr && test $ARCH == 64
+if ! test -f nacl/native_client/scons-out/opt-$OS-x86-64/staging/sel_ldr && test $ARCH = 64
 then
   run "cd nacl/native_client && ./scons MODE=opt-$OS platform=x86-64 sdl=none sel_ldr"
 fi
@@ -112,7 +112,7 @@ V8S=(
     "nacl-v8-ia32-3.1.4"  "-r6795" "nacl-v8-ia32-3.1.4.patch"
     )
 
-if test $ARCH == 64
+if test $ARCH = 64
 then
 V8S+=(
     "v8-x64-2.2.19"       "-r4925" "v8-x64-2.2.19.patch"
@@ -156,7 +156,7 @@ V8S=(
     "nacl-v8-ia32-3.1.4"  "NaCl V8-ia32 3.1.4 CrankShaft (revision 6795)"
     )
 
-if test $ARCH == 64
+if test $ARCH = 64
 then
 V8S+=(
     "v8-x64-2.2.19"       "Unmodified V8-x64 2.2.19 (revision 4925)"

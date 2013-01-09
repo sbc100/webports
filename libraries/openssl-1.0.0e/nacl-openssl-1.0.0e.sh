@@ -21,8 +21,8 @@ source ../../build_tools/common.sh
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   local extra_args=""
-  if [[ "${NACL_PACKAGES_BITSIZE}" = "pnacl" ||
-	"${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
+  if [[ "${NACL_ARCH}" = "pnacl" ||
+        "${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
     readonly GLIBC_COMPAT=${NACL_SDK_USR_INCLUDE}/glibc-compat
     if [[ ! -f ${GLIBC_COMPAT}/netdb.h ]]; then
       echo "Please install glibc-compat first"
@@ -54,7 +54,7 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomConfigureStep
-  if [[ "${NACL_PACKAGES_BITSIZE}" = "pnacl" ||
+  if [[ "${NACL_ARCH}" = "pnacl" ||
 	"${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
     CustomHackStepForNewlib
   fi

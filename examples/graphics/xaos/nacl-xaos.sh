@@ -43,7 +43,7 @@ CustomConfigureStep() {
                   -Wl,--undefined=PPP_ShutdownModule \
                   -Wl,--undefined=PPP_InitializeModule \
                   -Wl,--undefined=original_main"
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CFLAGS="${CFLAGS} -O3"
     export LDFLAGS="${LDFLAGS} -O0 -static"
   else
@@ -85,17 +85,13 @@ CustomInstallStep(){
   local out_dir=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   local build_dir=${out_dir}/${PACKAGE_NAME}-build
   local publish_dir="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
-  local arch=${NACL_PACKAGES_BITSIZE}
-  if [[ "${arch}" != "pnacl" ]] ; then
-      arch="x86-${arch}"
-  fi
 
   MakeDir ${publish_dir}
   install ${START_DIR}/xaos.html ${publish_dir}
   install ${START_DIR}/xaos.nmf ${publish_dir}
   # Not used yet
   install ${build_dir}/help/xaos.hlp ${publish_dir}
-  install ${build_dir}/bin/xaos ${publish_dir}/xaos_${arch}.nexe
+  install ${build_dir}/bin/xaos ${publish_dir}/xaos_${NACL_ARCH}.nexe
   DefaultTouchStep
 }
 
@@ -106,7 +102,7 @@ CustomPackageInstall() {
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/bin/xaos
   fi
   CustomInstallStep

@@ -29,7 +29,7 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  if [ ${NACL_PACKAGES_BITSIZE} = "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     extra=
   else
     extra="--enable-sse2"

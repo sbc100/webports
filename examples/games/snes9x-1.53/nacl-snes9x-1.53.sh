@@ -28,7 +28,7 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export CXXFLAGS=""
   export LDFLAGS=""
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"
     export LDFLAGS="-O0 -static"
   fi
@@ -72,7 +72,7 @@ CustomInstallStep(){
   install ${START_DIR}/style.css ${PUBLISH_DIR}
   install ${START_DIR}/snes.nmf ${PUBLISH_DIR}
   install ${BUILD_DIR}/snes9x \
-      ${PUBLISH_DIR}/snes_x86_${NACL_PACKAGES_BITSIZE}.nexe
+      ${PUBLISH_DIR}/snes_x86_${NACL_ARCH}.nexe
   DefaultTouchStep
 }
 
@@ -83,7 +83,7 @@ CustomPackageInstall() {
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     # NOTE: snes9x has unusual dirnames
     DefaultTranslateStep ${PACKAGE_NAME}-src unix/snes9x
   fi

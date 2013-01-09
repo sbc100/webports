@@ -31,7 +31,7 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
   local naclhost
-  if [ "${NACL_PACKAGES_BITSIZE}" == pnacl ]; then
+  if [ "${NACL_ARCH}" = pnacl ]; then
     naclhost=pnacl
   else
     naclhost=x86-nacl-linux

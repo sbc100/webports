@@ -40,7 +40,7 @@ BuildPackage gc
 BuildPackage x264
 BuildPackage thttpd
 
-echo "@@@BUILD_STEP ${NACL_PACKAGES_BITSIZE}-bit Summary@@@"
+echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
 if [[ $RESULT != 0 ]] ; then
   echo "@@@STEP_FAILURE@@@"
 fi

@@ -43,7 +43,7 @@ CustomBuildStep() {
   export CC=${NACLCC}
   export NACLXX=${NACLCXX}
   export CXX=${NACLCXX}
-  if [ ${NACL_PACKAGES_BITSIZE} == "pnacl" ] ; then
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
     export NACL_CCFLAGS="-O3 -g"
     export NACL_LDFLAGS="-O0 -static"
   fi
@@ -66,32 +66,34 @@ CustomInstallStep() {
   install ${START_DIR}/peppermount_helper.js ${PUBLISH_DIR}
   install ${START_DIR}/json2min.js ${PUBLISH_DIR}
   BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp ${BUILD_DIR}/thttpd ${BUILD_DIR}/thttpd_x86-${NACL_PACKAGES_BITSIZE}.nexe
-  install ${BUILD_DIR}/thttpd_x86-${NACL_PACKAGES_BITSIZE}.nexe \
-      ${PUBLISH_DIR}/thttpd_x86-${NACL_PACKAGES_BITSIZE}.nexe
+  cp ${BUILD_DIR}/thttpd ${BUILD_DIR}/thttpd_${NACL_ARCH}.nexe
+  install ${BUILD_DIR}/thttpd_${NACL_ARCH}.nexe \
+      ${PUBLISH_DIR}/thttpd_${NACL_ARCH}.nexe
   ChangeDir ${PUBLISH_DIR}
   local NACL_LIB_PATH=$NACL_TOOLCHAIN_ROOT/x86_64-nacl
-  local NACL_COMPLEMENT_BITSIZE=64
-  if [ ${NACL_PACKAGES_BITSIZE} == "64" ]; then
-    NACL_COMPLEMENT_BITSIZE=32
+  local NACL_COMPLEMENT_ARCH="x86_64"
+  local NACL_COMPLEMENT_LIBDDIR="lib64"
+  if [ ${NACL_ARCH} = "x86_64" ]; then
+    NACL_COMPLEMENT_ARCH="i686"
+    NACL_COMPLEMENT_LIBDIR="lib32"
   fi
-  if [ -f thttpd_x86-${NACL_COMPLEMENT_BITSIZE}.nexe ]; then
+  if [ -f thttpd_${NACL_COMPLEMENT_ARCH}.nexe ]; then
     $NACL_SDK_ROOT/tools/create_nmf.py \
-      -L$NACL_LIB_PATH/usr/lib$NACL_COMPLEMENT_BITSIZE \
-      -L$NACL_LIB_PATH/lib$NACL_COMPLEMENT_BITSIZE \
-      -L$NACL_LIB_PATH/usr/lib$NACL_PACKAGES_BITSIZE \
-      -L$NACL_LIB_PATH/lib$NACL_PACKAGES_BITSIZE \
+      -L$NACL_LIB_PATH/usr/lib$NACL_COMPLEMENT_LIBDIR \
+      -L$NACL_LIB_PATH/lib$NACL_COMPLEMENT_LIBDIR \
+      -L$NACL_LIB_PATH/usr/$NACL_LIBDIR \
+      -L$NACL_LIB_PATH/$NACL_LIBDIR \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \
-      thttpd_x86-${NACL_COMPLEMENT_BITSIZE}.nexe \
-      thttpd_x86-${NACL_PACKAGES_BITSIZE}.nexe
+      thttpd_${NACL_ARCH}.nexe \
+      thttpd_${NACL_COMPLEMENT_ARCH}.nexe
   else
     $NACL_SDK_ROOT/tools/create_nmf.py \
-      -L$NACL_LIB_PATH/usr/lib$NACL_PACKAGES_BITSIZE \
-      -L$NACL_LIB_PATH/lib$NACL_PACKAGES_BITSIZE \
+      -L$NACL_LIB_PATH/usr/$NACL_LIBDIR \
+      -L$NACL_LIB_PATH/$NACL_LIBDIR \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \
-      thttpd_x86-${NACL_PACKAGES_BITSIZE}.nexe
+      thttpd_${NACL_ARCH}.nexe
   fi
   DefaultTouchStep
 }

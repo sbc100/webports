@@ -23,7 +23,7 @@ CustomConfigureStep() {
 
   # Defaults to dynamic lib, but newlib can only link statically.
   LIB_ARG=
-  if [[ ${NACL_GLIBC} == 0 ]]; then
+  if [[ ${NACL_GLIBC} = 0 ]]; then
     LIB_ARG="-DLIBTYPE=STATIC"
   fi
 

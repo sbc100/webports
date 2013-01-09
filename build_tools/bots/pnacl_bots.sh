@@ -19,7 +19,7 @@ cd ${BASE_DIR}
 
 ERROR=0
 
-export NACL_PACKAGES_BITSIZE=pnacl
+export NACL_ARCH=pnacl
 readonly PACKAGES=$(make works_for_pnacl_list)
 
 
