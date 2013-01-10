@@ -2,7 +2,7 @@ diff -Naur OpenSceneGraph-2.9.7/Makefile OpenSceneGraph-2.9.7.nacl/Makefile
 --- OpenSceneGraph-2.9.7/Makefile	1969-12-31 17:00:00.000000000 -0700
 +++ OpenSceneGraph-2.9.7.nacl/Makefile	2010-07-01 17:33:14.000000000 -0600
 @@ -0,0 +1,17 @@
-+export CXXFLAGS = -O3
++export CXXFLAGS += -O3
 +
 +.PHONY: all clean
 +

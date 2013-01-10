@@ -38,7 +38,7 @@ RunSelLdrTests() {
 
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CFLAGS=-I${NACL_SDK_USR_INCLUDE}
+  export CFLAGS="-I${NACL_SDK_USR_INCLUDE} -I${NACL_SDK_ROOT}/include"
 
   LDFLAGS=-L${NACL_SDK_USR_LIB}
   if [ $NACL_GLIBC != "1" ] ; then
@@ -59,7 +59,7 @@ CustomBuildStep() {
   MakeDir ${PACKAGE_DIR}
   ChangeDir ${PACKAGE_DIR}
   set -x
-  export CXXCMD="${NACLCC} -I${START_DIR}/../ -I${START_DIR}"
+  export CXXCMD="${NACLCC} -I${START_DIR}/.. -I${START_DIR} -I${NACL_SDK_ROOT}/include"
   ${CXXCMD} -c ${START_DIR}/net/TcpSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/TcpServerSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/SocketSubSystem.cc

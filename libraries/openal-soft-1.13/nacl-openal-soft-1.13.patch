@@ -204,7 +204,7 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +
 +    data->sample_frame_count =
 +        data->audio_config->RecommendSampleFrameCount(
-+#ifndef PPB_AUDIO_CONFIG_INTERFACE_1_0
++#ifdef PPB_AUDIO_CONFIG_INTERFACE_1_1
 +                                                      gInstance,
 +#endif
 +                                                      rate,
@@ -513,7 +513,7 @@ diff -Naur openal-soft-1.13/OpenAL32/Include/alMain.h openal-soft-1.13-nacl/Open
 diff -Naur openal-soft-1.13/XCompile-nacl.txt openal-soft-1.13-nacl/XCompile-nacl.txt
 --- openal-soft-1.13/XCompile-nacl.txt	1969-12-31 16:00:00.000000000 -0800
 +++ openal-soft-1.13-nacl/XCompile-nacl.txt	2012-01-23 15:45:38.000000000 -0800
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,27 @@
 +# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
 +# this file to set the proper settings and paths. Then use it from build/ like:
 +# cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile.txt \
@@ -539,3 +539,5 @@ diff -Naur openal-soft-1.13/XCompile-nacl.txt openal-soft-1.13-nacl/XCompile-nac
 +set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 +set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 +set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
++set(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
++include_directories(${NACL_SDK_ROOT}/include)

@@ -27,7 +27,7 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
-  export CXXFLAGS="-O2 -g"
+  export CXXFLAGS="-O2 -g -I${NACL_SDK_ROOT}/include"
   export NACL_LDFLAGS=""
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"

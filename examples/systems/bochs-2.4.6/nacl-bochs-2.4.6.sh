@@ -30,7 +30,7 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CXXFLAGS="-O2 -g"
+  export CXXFLAGS="-O2 -g -I${NACL_SDK_ROOT}/include"
   export LDFLAGS=""
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"

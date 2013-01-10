@@ -33,6 +33,7 @@ CustomConfigureStep() {
            -DNACLCXX=${NACLCXX} \
            -DNACLAR=${NACLAR} \
            -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
+           -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
            -DCMAKE_INSTALL_PREFIX=${NACL_SDK_USR} \
            ${LIB_ARG}
 

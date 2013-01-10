@@ -6,7 +6,7 @@
 
 NACLPORTS_ROOT ?= ../../..
 PUBLISH_DIR = $(NACLPORTS_ROOT)/out/publish/openal-ogg
-CFLAGS += -O3 -std=gnu99 -Werror
+CFLAGS += -O3 -std=gnu99 -Werror -I${NACL_SDK_ROOT}/include
 LIBS += -lppapi -lopenal -lvorbisfile -lvorbis -logg -lm -lpthread
 
 all: publish
