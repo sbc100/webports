@@ -52,18 +52,9 @@ else
   export NACL_ARCH=${NACL_ARCH:-"i686"}
 fi
 
-# Set NACL_LIBDIR: the name of the lib folder within the toolchain.
-# For arm and pnacl toolchains this is just 'lib'.  For the x86
-# toolchain this is lib32 or lib64
-if [ ${NACL_ARCH} = "i686" ] ; then
-  export NACL_LIBDIR=lib32
-elif [ ${NACL_ARCH} = "x86_64" ] ; then
-  export NACL_LIBDIR=lib64
-elif [ ${NACL_ARCH} = "arm" ] ; then
-  export NACL_LIBDIR=lib
-elif [ ${NACL_ARCH} = "pnacl" ] ; then
-  export NACL_LIBDIR=lib
-else
+# Check NACL_ARCH
+if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
+     ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" ] ; then
   echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
   exit -1
 fi
@@ -187,7 +178,17 @@ InitializeNaClGccToolchain() {
   # NACL_SDK_USR is where the headers, libraries, etc. will be installed
   readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
   readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
-  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/${NACL_LIBDIR}
+
+  if [ ${NACL_ARCH} = "arm" ] ; then
+    local NACL_LIBDIR=arm-nacl/lib
+  elif [ ${NACL_ARCH} = "x86_64" ] ; then
+    local NACL_LIBDIR=x86_64-nacl/lib64
+  else
+    local NACL_LIBDIR=x86_64-nacl/lib32
+  fi
+
+  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_LIBDIR}
+
   readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
   readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
 

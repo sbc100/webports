@@ -78,16 +78,16 @@ CustomInstallStep() {
     $NACL_SDK_ROOT/tools/create_nmf.py \
       -L$NACL_LIB_PATH/usr/lib$NACL_COMPLEMENT_LIBDIR \
       -L$NACL_LIB_PATH/lib$NACL_COMPLEMENT_LIBDIR \
-      -L$NACL_LIB_PATH/usr/$NACL_LIBDIR \
-      -L$NACL_LIB_PATH/$NACL_LIBDIR \
+      -L$NACL_SDK_USR_LIB \
+      -L$NACL_SDK_LIB \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \
       thttpd_${NACL_ARCH}.nexe \
       thttpd_${NACL_COMPLEMENT_ARCH}.nexe
   else
     $NACL_SDK_ROOT/tools/create_nmf.py \
-      -L$NACL_LIB_PATH/usr/$NACL_LIBDIR \
-      -L$NACL_LIB_PATH/$NACL_LIBDIR \
+      -L$NACL_SDK_USR_LIB \
+      -L$NACL_SDK_LIB \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \
       thttpd_${NACL_ARCH}.nexe
