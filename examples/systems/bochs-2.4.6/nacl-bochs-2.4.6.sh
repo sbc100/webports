@@ -21,6 +21,7 @@ PACKAGE_NAME=bochs-2.4.6
 readonly LINUX_IMG_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
 readonly LINUX_IMG_NAME=linux-img
 
+source pkg_info
 source ../../../build_tools/common.sh
 
 BOCHS_EXAMPLE_DIR=${NACL_SRC}/examples/systems/bochs-2.4.6

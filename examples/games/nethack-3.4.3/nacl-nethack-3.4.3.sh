@@ -11,10 +11,7 @@
 # this script downloads, patches, and builds nethack for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nethack-343-src.tgz
-readonly PATCH_FILE=nacl-nethack-3.4.3.patch
-readonly PACKAGE_NAME=nethack-3.4.3
-
+source pkg_info
 source ../../../build_tools/common.sh
 
 

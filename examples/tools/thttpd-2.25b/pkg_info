@@ -1,0 +1,4 @@
+PACKAGE_NAME=thttpd-2.25b
+URL=http://www.acme.com/software/thttpd/thttpd-2.25b.tar.gz
+URL_FILENAME=thttpd-2.25b.tgz
+PATCH_FILE=nacl-thttpd-2.25b.patch

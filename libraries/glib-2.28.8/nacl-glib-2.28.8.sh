@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds glib for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/glib-2.28.8.tar.bz2
-# readonly URL=http://ftp.gnome.org/pub/gnome/sources/glib/2.28/glib-2.28.8.tar.bz2
-readonly PATCH_FILE=nacl-glib-2.28.8.patch
-readonly PACKAGE_NAME=glib-2.28.8
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

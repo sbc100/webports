@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds gmock for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gmock-1.5.0.tgz
-#readonly URL=http://googlemock.googlecode.com/files/gmock-1.5.0.tar.gz
-readonly PATCH_FILE=nacl-gmock-1.5.0.patch
-readonly PACKAGE_NAME=gmock-1.5.0
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

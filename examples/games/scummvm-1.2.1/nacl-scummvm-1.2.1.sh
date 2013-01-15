@@ -23,6 +23,7 @@ readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
 readonly LURE_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/lure/lure-1.1.zip
 readonly LURE_NAME=lure-1.1
 
+source pkg_info
 source ../../../build_tools/common.sh
 
 SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/examples/games/scummvm-1.2.1

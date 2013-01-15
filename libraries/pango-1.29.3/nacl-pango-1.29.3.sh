@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds glib for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/pango-1.29.3.tar.bz2
-# readonly URL=http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.3.tar.bz2
-readonly PATCH_FILE=nacl-pango-1.29.3.patch
-readonly PACKAGE_NAME=pango-1.29.3
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

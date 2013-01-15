@@ -1,0 +1,3 @@
+PACKAGE_NAME=ffmpeg-0.5
+URL=http://ffmpeg.org/releases/ffmpeg-0.5.tar.bz2
+PATCH_FILE=nacl-ffmpeg-0.5.patch

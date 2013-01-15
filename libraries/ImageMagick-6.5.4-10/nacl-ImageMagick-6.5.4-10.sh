@@ -10,11 +10,7 @@
 # this script downloads, patches, and builds ImageMagick for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ImageMagick-6.5.4-10.tar.gz
-#readonly URL=http://downloads.sourceforge.net/project/imagemagick/ImageMagick/6.5/ImageMagick-6.5.4-10.tar.gz
-readonly PATCH_FILE=nacl-ImageMagick-6.5.4-10.patch
-readonly PACKAGE_NAME=ImageMagick-6.5.4-10
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

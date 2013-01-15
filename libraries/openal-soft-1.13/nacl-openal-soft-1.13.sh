@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds OpenAL for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/openal-soft-1.13.tar.bz2
-#readonly URL=http://kcat.strangesoft.net/openal-releases/openal-soft-1.13.tar.bz2
-readonly PATCH_FILE=nacl-openal-soft-1.13.patch
-readonly PACKAGE_NAME=openal-soft-1.13
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

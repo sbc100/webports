@@ -11,10 +11,7 @@
 # this script downloads, patches, and builds xaos for Native Client.
 #
 
-readonly URL=http://downloads.sourceforge.net/xaos/xaos-3.5.tar.gz
-readonly PATCH_FILE=nacl_xaos-3.5.patch
-PACKAGE_NAME=xaos-3.5
-
+source pkg_info
 source ../../../build_tools/common.sh
 
 EXAMPLE_DIR=${NACL_SRC}/examples/graphics/xaos

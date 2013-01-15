@@ -1,0 +1,3 @@
+PACKAGE_NAME=libmikmod-3.1.11
+URL=http://mikmod.raphnet.net/files/libmikmod-3.1.11.tar.gz
+PATCH_FILE=nacl-libmikmod-3.1.11.patch

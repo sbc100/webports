@@ -13,11 +13,7 @@
 
 # Project homepage: http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/cfitsio3260.tar.gz
-# readonly URL=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3260.tar.gz
-readonly PATCH_FILE=nacl-cfitsio.patch
-readonly PACKAGE_NAME=cfitsio
-
+source pkg_info
 source ../../build_tools/common.sh
 
 DefaultPackageInstall

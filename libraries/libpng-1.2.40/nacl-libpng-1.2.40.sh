@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds libpng for Native Client 
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/libpng-1.2.40.tar.gz
-#readonly URL=http://downloads.sourceforge.net/libpng/libpng-1.2.40.tar.gz
-readonly PATCH_FILE=nacl-libpng-1.2.40.patch
-readonly PACKAGE_NAME=libpng-1.2.40
-
+source pkg_info
 source ../../build_tools/common.sh
 
 export LIBS=-lnosys

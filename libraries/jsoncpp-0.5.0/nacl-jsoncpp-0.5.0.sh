@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds jsoncpp for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/jsoncpp-src-0.5.0.tar.gz
-#readonly URL=http://citylan.dl.sourceforge.net/project/jsoncpp/jsoncpp/0.5.0/jsoncpp-src-0.5.0.tar.gz
-readonly PATCH_FILE=
-readonly PACKAGE_NAME=jsoncpp-src-0.5.0
-
+source pkg_info
 source ../../build_tools/common.sh
 
 

@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds Mesa for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/MesaLib-7.6.tar.gz
-#readonly URL=http://www.sfr-fresh.com/unix/misc/MesaLib-7.6.tar.gz
-readonly PATCH_FILE=nacl-Mesa-7.6.patch
-readonly PACKAGE_NAME=Mesa-7.6
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

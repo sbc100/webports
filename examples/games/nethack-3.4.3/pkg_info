@@ -1,0 +1,3 @@
+PACKAGE_NAME=nethack-3.4.3
+URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nethack-343-src.tgz
+PATCH_FILE=nacl-nethack-3.4.3.patch

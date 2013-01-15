@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds SDL_mixer for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/SDL_image-1.2.10.tar.gz
-# readonly URL=http://www.libsdl.org/projects/SDL_image/release/SDL_image-1.2.10.tar.gz
-readonly PATCH_FILE=nacl-SDL_image-1.2.10.patch
-readonly PACKAGE_NAME=SDL_image-1.2.10
-
+source pkg_info
 source ../../build_tools/common.sh
 
 

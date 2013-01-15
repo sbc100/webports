@@ -10,12 +10,7 @@
 # this script downloads, patches, and builds fontconfig for Native Client.
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/fontconfig-2.7.3.tar.gz
-#readonly URL=http://cgit.freedesktop.org/fontconfig/snapshot/fontconfig-2.7.3.tar.gz
-readonly PATCH_FILE=nacl-fontconfig-2.7.3.patch
-readonly MAKEFILE_PATCH_FILE=nacl-fontconfig-2.7.3.Makefile.patch
-readonly PACKAGE_NAME=fontconfig-2.7.3
-
+source pkg_info
 source ../../build_tools/common.sh
 
 # fontconfig with-arch to be set for cross compiling

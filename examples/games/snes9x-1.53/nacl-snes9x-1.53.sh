@@ -11,11 +11,7 @@
 # This script downloads, patches, and builds an snes9x-based SNES emulator for
 # Native Client.
 
-readonly URL='http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/snes9x-1.53-src.tar.bz2'
-#readonly URL='https://sites.google.com/site/bearoso/snes9x/snes9x-1.53-src.tar.bz2?attredirects=0&d=1'
-readonly PATCH_FILE=nacl-snes-1.53.patch
-PACKAGE_NAME=snes9x-1.53
-
+source pkg_info
 source ../../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/games/snes9x-1.53

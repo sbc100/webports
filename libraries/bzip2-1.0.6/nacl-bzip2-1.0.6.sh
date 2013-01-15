@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds bzip2 for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bzip2-1.0.6.tar.gz
-# readonly URL=http://bzip.org/1.0.6/bzip2-1.0.6.tar.gz
-readonly PATCH_FILE=
-readonly PACKAGE_NAME=bzip2-1.0.6
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

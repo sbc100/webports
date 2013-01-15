@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds dosbox for Native Client.
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/dosbox-0.74.tar.gz
-#readonly URL=http://sourceforge.net/projects/dosbox/files/dosbox/0.74/dosbox-0.74.tar.gz/download
-readonly PATCH_FILE=nacl-dosbox-0.74.patch
-PACKAGE_NAME=dosbox-0.74
-
+source pkg_info
 source ../../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/systems/dosbox-0.74

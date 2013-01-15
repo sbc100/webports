@@ -1,0 +1,3 @@
+PACKAGE_NAME=jpeg-6b
+URL=http://downloads.sourceforge.net/libjpeg/jpegsrc.v6b.tar.gz
+PATCH_FILE=nacl-jpeg-6b.patch

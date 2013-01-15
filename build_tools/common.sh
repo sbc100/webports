@@ -104,6 +104,12 @@ if [ -z "${NACL_SDK_ROOT:-}" ]; then
   exit -1
 fi
 
+# When run by a buildbot force all archives to come from the NaCl mirror
+# rather than using upstream URL.
+if [ -n ${BUILDBOT_BUILDERNAME:-""} ]; then
+   FORCE_MIRROR=${FORCE_MIRROR:-"yes"}
+fi
+
 
 # sha1check python script
 readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
@@ -275,11 +281,11 @@ ReadKey() {
 }
 
 
-Fetch() {
+TryFetch() {
   Banner "Fetching ${PACKAGE_NAME}"
-  if which wget ; then
+  if which wget > /dev/null ; then
     wget $1 -O $2
-  elif which curl ; then
+  elif which curl > /dev/null ; then
     curl --location --url $1 -o $2
   else
      Banner "Problem encountered"
@@ -288,6 +294,25 @@ Fetch() {
      echo
      echo "press any key when done"
      ReadKey
+  fi
+}
+
+
+Fetch() {
+  local MIRROR_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl
+  if echo $1 | grep -qv ${MIRROR_URL} &> /dev/null; then
+    set +o errexit
+    # Try mirrored version first
+    local BASENAME=${URL_FILENAME:-$(basename $1)}
+    TryFetch ${MIRROR_URL}/${BASENAME} $2
+    if [ $? != 0 -a ${FORCE_MIRROR:-no} = "no" ]; then
+      # Fall back to original URL
+      TryFetch $1 $2
+    fi
+    set +o errexit
+  else
+    # The URL is already on commondatastorage do just download it
+    TryFetch $1 $2
   fi
 
   if [ ! -s $2 ] ; then

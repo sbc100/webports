@@ -13,6 +13,7 @@
 
 readonly PACKAGE_NAME=nacl-mounts
 
+source pkg_info
 source ../../build_tools/common.sh
 
 RunTests() {

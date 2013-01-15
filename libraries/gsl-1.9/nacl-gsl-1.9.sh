@@ -11,10 +11,8 @@
 # this script downloads, patches, and builds gsl for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gsl-1.9.tar.gz
-#readonly URL=http://ftp.thaios.net/gnu/gsl/gsl-1.9.tar.gz
-readonly PATCH_FILE=nacl-gsl-1.9.patch
-readonly PACKAGE_NAME=gsl-1.9
+source pkg_info
+
 export LIBS="-lm"
 
 source ../../build_tools/common.sh

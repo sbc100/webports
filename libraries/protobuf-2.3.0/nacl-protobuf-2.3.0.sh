@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds protobuf for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/protobuf-2.3.0.tar.gz
-#readonly URL=http://protobuf.googlecode.com/files/protobuf-2.3.0.tar.gz
-readonly PATCH_FILE=nacl-protobuf-2.3.0.patch
-readonly PACKAGE_NAME=protobuf-2.3.0
-
+source pkg_info
 source ../../build_tools/common.sh
 
 DefaultPackageInstall

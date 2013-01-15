@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds faac for Native Client 
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/faac-1.28.tar.gz
-#readonly URL=http://sourceforge.net/projects/faac/files/faac-src/faac-1.28/faac-1.28.tar.gz/download
-readonly PATCH_FILE=nacl-faac-1.28.patch
-readonly PACKAGE_NAME=faac-1.28
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

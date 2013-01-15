@@ -10,10 +10,7 @@
 #
 # This script downloads, patches, and builds thttpd server for Native Client.
 
-readonly URL='http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/thttpd-2.25b.tgz'
-readonly PATCH_FILE=nacl-thttpd-2.25b.patch
-PACKAGE_NAME=thttpd-2.25b
-
+source pkg_info
 source ../../../build_tools/common.sh
 
 PreConfigureStep() {

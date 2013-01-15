@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds libjpeg for Native Client 
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/jpegsrc.v6b.tar.gz
-#readonly URL=http://downloads.sourceforge.net/libjpeg/jpegsrc.v6b.tar.gz
-readonly PATCH_FILE=nacl-jpeg-6b.patch
-readonly PACKAGE_NAME=jpeg-6b
-
+source pkg_info
 source ../../build_tools/common.sh
 
 

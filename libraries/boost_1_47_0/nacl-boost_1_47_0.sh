@@ -11,10 +11,7 @@
 # this script downloads, patches, and builds boost for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/boost_1_47_0.tar.bz2
-readonly PATCH_FILE=nacl-boost_1_47_0.patch
-readonly PACKAGE_NAME=boost_1_47_0
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

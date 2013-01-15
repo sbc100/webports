@@ -16,6 +16,7 @@ readonly PACKAGE_NAME=glibc-compat-0.1
 readonly LIB_ROOT=`pwd`
 readonly LIB_GLIBC_COMPAT=libglibc-compat.a
 
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomExtractStep() {

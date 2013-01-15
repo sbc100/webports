@@ -13,6 +13,7 @@
 
 readonly PACKAGE_NAME=dreadthread
 
+source pkg_info
 source ../../build_tools/common.sh
 
 

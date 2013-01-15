@@ -1,0 +1,4 @@
+PACKAGE_BASE_NAME=FreeImage
+PACKAGE_NAME=${PACKAGE_BASE_NAME}-3.14.1
+URL=http://downloads.sourceforge.net/freeimage/FreeImage3141.zip
+PATCH_FILE=nacl-FreeImage-3.14.1.patch

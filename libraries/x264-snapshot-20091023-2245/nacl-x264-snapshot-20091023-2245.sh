@@ -10,11 +10,7 @@
 # this script downloads, patches, and builds x264 for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/x264-snapshot-20091023-2245.tar.bz2
-#readonly URL=http://downloads.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20091023-2245.tar.bz2
-readonly PATCH_FILE=nacl-x264-snapshot-20091023-2245.patch
-readonly PACKAGE_NAME=x264-snapshot-20091023-2245
-
+source pkg_info
 source ../../build_tools/common.sh
 
 

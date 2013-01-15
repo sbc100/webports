@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds libgc for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/gc6.8.tar.gz
-#readonly URL=http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/gc6.8.tar.gz
-readonly PATCH_FILE=nacl-gc6.8.patch
-readonly PACKAGE_NAME=gc6.8
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

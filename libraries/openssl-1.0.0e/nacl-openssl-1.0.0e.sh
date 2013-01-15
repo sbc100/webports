@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds openssl for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/openssl-1.0.0e.tar.gz
-#readonly URL=http://www.openssl.org/source/openssl-1.0.0e.tar.gz
-readonly PATCH_FILE=nacl-openssl-1.0.0e.patch
-readonly PACKAGE_NAME=openssl-1.0.0e
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

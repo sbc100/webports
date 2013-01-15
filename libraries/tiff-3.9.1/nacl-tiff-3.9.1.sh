@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds tiff for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/tiff-3.9.1.tar.gz
-#readonly URL=http://www.imagemagick.org/download/delegates/tiff-3.9.1.tar.gz
-readonly PATCH_FILE=nacl-tiff-3.9.1.patch
-readonly PACKAGE_NAME=tiff-3.9.1
-
+source pkg_info
 source ../../build_tools/common.sh
 
 export LIBS="-lnosys -lm"

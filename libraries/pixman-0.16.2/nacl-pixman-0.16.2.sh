@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds pixman for Native Client 
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/pixman-0.16.2.tar.gz
-#readonly URL=http://cairographics.org/releases/pixman-0.16.2.tar.gz
-readonly PATCH_FILE=nacl-pixman-0.16.2.patch
-readonly PACKAGE_NAME=pixman-0.16.2
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {

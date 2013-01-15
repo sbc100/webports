@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds zlib for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ncurses-5.9.tar.gz
-#readonly URL=ftp://ftp.gnu.org/gnu/ncurses/ncurses-5.9.tar.gz
-readonly PATCH_FILE=
-readonly PACKAGE_NAME=ncurses-5.9
-
+source pkg_info
 source ../../build_tools/common.sh
 
 

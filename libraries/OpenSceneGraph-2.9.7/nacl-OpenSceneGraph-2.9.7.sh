@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds OpenSceneGraph for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/OpenSceneGraph-2.9.7.zip
-#readonly URL=http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-2.9.7.zip
-readonly PATCH_FILE=nacl-OpenSceneGraph-2.9.7.patch
-readonly PACKAGE_NAME=OpenSceneGraph-2.9.7
-
+source pkg_info
 source ../../build_tools/common.sh
 
 CustomDownloadStep() {

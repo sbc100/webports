@@ -10,11 +10,7 @@
 # this script downloads, patches, and builds ffmpeg for Native Client 
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/ffmpeg-0.5.tar.bz2
-#readonly URL=http://ffmpeg.org/releases/ffmpeg-0.5.tar.bz2
-readonly PATCH_FILE=nacl-ffmpeg-0.5.patch
-readonly PACKAGE_NAME=ffmpeg-0.5
-
+source pkg_info
 source ../../build_tools/common.sh
 
 

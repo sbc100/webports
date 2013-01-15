@@ -11,11 +11,7 @@
 # this script downloads, patches, and builds SDL for Native Client
 #
 
-readonly URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/SDL-1.2.14.tar.gz
-# readonly URL=http://www.libsdl.org/release/SDL-1.2.14.tar.gz
-readonly PATCH_FILE=nacl-SDL-1.2.14.patch
-readonly PACKAGE_NAME=SDL-1.2.14
-
+source pkg_info
 source ../../build_tools/common.sh
 
 export LIBS=-lnosys
