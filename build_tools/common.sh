@@ -175,10 +175,6 @@ InitializeNaClGccToolchain() {
   # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
   readonly NACL_SDK_GCC_SPECS_PATH=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
 
-  # NACL_SDK_USR is where the headers, libraries, etc. will be installed
-  readonly NACL_SDK_USR=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
-  readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
-
   if [ ${NACL_ARCH} = "arm" ] ; then
     local NACL_LIBDIR=arm-nacl/lib
   elif [ ${NACL_ARCH} = "x86_64" ] ; then
@@ -187,12 +183,20 @@ InitializeNaClGccToolchain() {
     local NACL_LIBDIR=x86_64-nacl/lib32
   fi
 
+  # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
+  # Default to the usr folder within the SDK.
+  readonly NACLPORTS_PREFIX=${NACLPORTS_PREFIX:-${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr}
+  readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
   readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_LIBDIR}
+  readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
+  readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 
-  readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
-  readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
+  readonly NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE}"
+  readonly NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
 
-  # NACL_SDK_MULITARCH_USR is a version of NACL_SDK_USR that gets passed into
+  # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
   # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
   readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
   readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
@@ -230,12 +234,12 @@ InitializePNaClToolchain() {
   # (used only by the cairo package)
   export NACLSTRINGS="$(which strings)"
 
-  # NACL_SDK_USR is where the headers, libraries, etc. will be installed
+  # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
   # FIXME:
-  readonly NACL_SDK_USR=${NACL_SDK_BASE}/usr
-  readonly NACL_SDK_USR_INCLUDE=${NACL_SDK_USR}/include
-  readonly NACL_SDK_USR_LIB=${NACL_SDK_USR}/lib
-  readonly NACL_SDK_USR_BIN=${NACL_SDK_USR}/bin
+  readonly NACLPORTS_PREFIX=${NACL_SDK_BASE}/usr
+  readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
+  readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
+  readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 }
 
 if [ ${NACL_ARCH} = "pnacl" ] ; then
@@ -472,9 +476,9 @@ PatchSpecFile() {
 
 DefaultPreInstallStep() {
   cd ${NACL_NATIVE_CLIENT_SDK}/..
-  MakeDir ${NACL_SDK_USR}
-  MakeDir ${NACL_SDK_USR_INCLUDE}
-  MakeDir ${NACL_SDK_USR_LIB}
+  MakeDir ${NACLPORTS_PREFIX}
+  MakeDir ${NACLPORTS_INCLUDE}
+  MakeDir ${NACLPORTS_LIBDIR}
   MakeDir ${NACL_PACKAGES_REPOSITORY}
   MakeDir ${NACL_PACKAGES_TARBALLS}
   MakeDir ${NACL_PACKAGES_PUBLISH}
@@ -541,9 +545,9 @@ DefaultConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
-  export FREETYPE_CONFIG=${NACL_SDK_USR_BIN}/freetype-config
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
@@ -562,10 +566,10 @@ DefaultConfigureStep() {
   ../configure \
     --host=${conf_host} \
     --disable-shared \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR_LIB} \
-    --oldincludedir=${NACL_SDK_USR_INCLUDE} \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_LIBDIR} \
+    --oldincludedir=${NACLPORTS_INCLUDE} \
     --with-http=off \
     --with-html=off \
     --with-ftp=off \

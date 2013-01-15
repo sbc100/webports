@@ -51,18 +51,19 @@ endif
 endif
 
 NACL_OUT = out
+NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/$(NACL_ARCH)-nacl/usr
+
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
                  $(NACL_OUT)/repository-$(NACL_ARCH) \
-                 $(NACL_OUT)/publish
-
-NACL_SDK_USR = $(NACL_TOOLCHAIN_ROOT)/$(NACL_ARCH)-nacl/usr
+                 $(NACL_OUT)/publish \
+		 $(NACLPORTS_PREFIX)
 
 NACL_DIRS_TO_REMOVE = $(NACL_OUT) \
-		      $(NACL_SDK_USR) \
+		      $(NACLPORTS_PREFIX) \
 
 NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
-		    $(NACL_SDK_USR)/include \
-		    $(NACL_SDK_USR)/lib
+		    $(NACLPORTS_PREFIX)/include \
+		    $(NACLPORTS_PREFIX)/lib
 
 LIBRARIES = \
      libraries/nacl-mounts \

@@ -15,8 +15,8 @@ source ../../build_tools/common.sh
 
 
 CustomConfigureStep() {
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
@@ -48,8 +48,8 @@ CustomConfigureStep() {
     --disable-ffserver \
     --disable-demuxer=rtsp \
     --disable-demuxer=image2 \
-    --prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR_LIB}
+    --prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_LIBDIR}
 }
 
 

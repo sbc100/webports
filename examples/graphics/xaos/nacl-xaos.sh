@@ -48,10 +48,10 @@ CustomConfigureStep() {
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
 
-  export LIBS="-L${NACL_SDK_USR_LIB} -lppapi -lpthread -lstdc++ -lm -lnosys"
+  export LIBS="-L${NACLPORTS_LIBDIR} -lppapi -lpthread -lstdc++ -lm -lnosys"
 
   CONFIG_FLAGS="--with-png=no \
       --with-long-double=no \

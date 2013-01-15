@@ -1,8 +1,7 @@
 #!/bin/bash
 # Copyright (c) 2008 The Native Client Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that be
+# Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 #@ xaos_tool.sh
 #@
@@ -117,7 +116,7 @@ BuildXaos() {
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export LDFLAGS="-static"
-  export CFLAGS=""
+  export CFLAGS="${NACLPORTS_CFLAGS}"
   export CFLAGS="${CFLAGS} -DNACL_DIM_H=${NACL_DIM_H}"
   export CFLAGS="${CFLAGS} -DNACL_DIM_W=${NACL_DIM_W}"
   export CFLAGS="${CFLAGS} -I${DIR_AV_INCLUDE}"

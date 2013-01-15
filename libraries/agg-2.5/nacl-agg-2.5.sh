@@ -17,24 +17,23 @@ source ../../build_tools/common.sh
 
 CustomBuildStep() {
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    extra=""
-  else
-    extra="-O3 -mfpmath=sse -msse -fomit-frame-pointer"
+  local cflags="${NACLPORTS_CFLAGS}"
+  if [ ${NACL_ARCH} != "pnacl" ] ; then
+    cflags="${cflags} -O3 -mfpmath=sse -msse -fomit-frame-pointer"
   fi
-  AGGCXXFLAGS="${extra}" make NACLCXX=${NACLCXX} NACLCC=${NACLCC} NACLAR=${NACLAR}
+  AGGCXXFLAGS="${cflags}" make NACLCXX=${NACLCXX} NACLCC=${NACLCC} NACLAR=${NACLAR}
 }
 
 
 CustomInstallStep() {
   # copy libs and headers manually
-  ChangeDir ${NACL_SDK_USR_INCLUDE}
+  ChangeDir ${NACLPORTS_INCLUDE}
   Remove ${PACKAGE_NAME}
   MakeDir ${PACKAGE_NAME}
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   cp -R ${THIS_PACKAGE_PATH}/include/*.h ${PACKAGE_NAME}/
   cp ${THIS_PACKAGE_PATH}/font_freetype/*.h ${PACKAGE_NAME}/
-  ChangeDir ${NACL_SDK_USR_LIB}
+  ChangeDir ${NACLPORTS_LIBDIR}
   cp ${THIS_PACKAGE_PATH}/src/libagg.a .
   cp ${THIS_PACKAGE_PATH}/font_freetype/libaggfontfreetype.a .
   DefaultTouchStep

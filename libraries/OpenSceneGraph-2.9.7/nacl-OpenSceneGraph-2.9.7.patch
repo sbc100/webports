@@ -6,7 +6,7 @@ diff -Naur OpenSceneGraph-2.9.7/Makefile OpenSceneGraph-2.9.7.nacl/Makefile
 +
 +.PHONY: all clean
 +
-+NACL_SDK_USR_INCLUDE = ../../../toolchain/$(OS_PREFIX)_x86/nacl/usr/include
++NACLPORTS_INCLUDE = ../../../toolchain/$(OS_PREFIX)_x86/nacl/usr/include
 +
 +all:
 +	cd src/osg && $(MAKE) all
@@ -172,11 +172,11 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/Makefile OpenSceneGraph-2.9.7.na
 +
 +INCLUDE = -I$(OSG_ROOT)/include
 +
-+NACL_SDK_USR = ../../../../../toolchain/$(OS_PREFIX)_x86/nacl/usr
++NACL_PORTS_PREFIX = ../../../../../toolchain/$(OS_PREFIX)_x86/nacl/usr
 +
-+NACL_SDK_USR_INCLUDE = $(NACL_SDK_USR)/include
++NACLPORTS_INCLUDE = $(NACL_PORTS_PREFIX)/include
 +
-+NACL_SDK_USR_LIB = $(NACL_SDK_USR)/lib
++NACLPORTS_LIBDIR = $(NACL_PORTS_PREFIX)/lib
 +
 +INCLUDE = -I$(OSG_ROOT)/include
 +
@@ -1050,11 +1050,11 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/Makefile OpenSceneGraph-2.9.7.nacl/src/o
 @@ -0,0 +1,161 @@
 +OSG_ROOT = ../..
 +
-+NACL_SDK_USR = ../../../../../toolchain/$(OS_PREFIX)_x86/nacl/usr
++NACL_PORTS_PREFIX = ../../../../../toolchain/$(OS_PREFIX)_x86/nacl/usr
 +
-+NACL_SDK_USR_INCLUDE = $(NACL_SDK_USR)/include
++NACLPORTS_INCLUDE = $(NACL_PORTS_PREFIX)/include
 +
-+NACL_SDK_USR_LIB = $(NACL_SDK_USR)/lib
++NACLPORTS_LIBDIR = $(NACL_PORTS_PREFIX)/lib
 +
 +INCLUDE = -I$(OSG_ROOT)/include
 +
@@ -1238,11 +1238,11 @@ diff -Naur OpenSceneGraph-2.9.7/src/osgUtil/Makefile OpenSceneGraph-2.9.7.nacl/s
 @@ -0,0 +1,66 @@
 +OSG_ROOT = ../..
 +
-+NACL_SDK_USR = ../../../../../toolchain/$(OS_PREFIX)_x86/nacl/usr
++NACL_PORTS_PREFIX = ../../../../../toolchain/$(OS_PREFIX)_x86/nacl/usr
 +
-+NACL_SDK_USR_INCLUDE = $(NACL_SDK_USR)/include
++NACLPORTS_INCLUDE = $(NACL_PORTS_PREFIX)/include
 +
-+NACL_SDK_USR_LIB = $(NACL_SDK_USR)/lib
++NACLPORTS_LIBDIR = $(NACL_PORTS_PREFIX)/lib
 +
 +INCLUDE = -I$(OSG_ROOT)/include
 +

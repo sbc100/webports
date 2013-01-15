@@ -28,12 +28,12 @@ CustomBuildStep() {
 
 CustomInstallStep() {
   # copy libs and headers manually
-  Banner "Installing ${PACKAGE_NAME} to ${NACL_SDK_USR}"
-  ChangeDir ${NACL_SDK_USR_INCLUDE}
+  Banner "Installing ${PACKAGE_NAME} to ${NACLPORTS_PREFIX}"
+  ChangeDir ${NACLPORTS_INCLUDE}
   Remove ${PACKAGE_NAME}
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   cp ${THIS_PACKAGE_PATH}/src/headers/*.h ./
-  ChangeDir ${NACL_SDK_USR_LIB}
+  ChangeDir ${NACLPORTS_LIBDIR}
   cp ${THIS_PACKAGE_PATH}/*.a .
   DefaultTouchStep
 }

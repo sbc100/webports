@@ -21,8 +21,8 @@ CustomConfigureStep() {
   export AR=${NACLAR}
   export LD=${NACLLD}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR}/lib/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR}/lib
+  export PKG_CONFIG_PATH=${NACLPORTS_PREFIX}/lib/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_PREFIX}/lib
   export PATH=${NACL_BIN_PATH}:${PATH};
   export X11_INCLUDES=
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
@@ -30,11 +30,11 @@ CustomConfigureStep() {
     --host=nacl \
     --disable-shared \
     --enable-static \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR}/lib \
-    --oldincludedir=${NACL_SDK_USR}/include \
-    --datarootdir=${NACL_SDK_USR} \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_PREFIX}/lib \
+    --oldincludedir=${NACLPORTS_PREFIX}/include \
+    --datarootdir=${NACLPORTS_PREFIX} \
     --disable-gl-osmesa \
     --with-x=no \
     --with-driver=osmesa \

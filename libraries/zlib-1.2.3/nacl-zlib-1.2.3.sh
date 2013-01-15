@@ -20,7 +20,7 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   # TODO: side-by-side install
   CC=${NACLCC} AR="${NACLAR} -r" RANLIB=${NACLRANLIB} CFLAGS="-Dunlink=puts" ./configure\
-     --prefix=${NACL_SDK_USR}
+     --prefix=${NACLPORTS_PREFIX}
 }
 
 

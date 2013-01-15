@@ -19,7 +19,7 @@ CustomConfigureStep() {
   local extra_args=""
   if [[ "${NACL_ARCH}" = "pnacl" ||
         "${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
-    readonly GLIBC_COMPAT=${NACL_SDK_USR_INCLUDE}/glibc-compat
+    readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
     if [[ ! -f ${GLIBC_COMPAT}/netdb.h ]]; then
       echo "Please install glibc-compat first"
       exit 1
@@ -29,7 +29,7 @@ CustomConfigureStep() {
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   MACHINE=i686 CC=${NACLCC} AR=${NACLAR} RANLIB=${NACLRANLIB} ./config \
-     --prefix=${NACL_SDK_USR} no-asm no-hw no-krb5 ${extra_args} -D_GNU_SOURCE
+     --prefix=${NACLPORTS_PREFIX} no-asm no-hw no-krb5 ${extra_args} -D_GNU_SOURCE
 }
 
 CustomHackStepForNewlib() {

@@ -30,8 +30,8 @@ diff -bNaur FreeImage/Makefile.nacl FreeImage-nacl/Makefile.nacl
 +include Makefile.srcs
 +
 +# General configuration variables:
-+INCDIR ?= $(NACL_SDK_USR_INCLUDE)
-+INSTALLDIR ?= $(NACL_SDK_USR_LIB)
++INCDIR ?= $(NACLPORTS_INCLUDE)
++INSTALLDIR ?= $(NACLPORTS_LIBDIR)
 +
 +# Converts cr/lf to just lf
 +DOS2UNIX = dos2unix

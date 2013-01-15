@@ -13,6 +13,7 @@
 
 source pkg_info
 source ../../build_tools/common.sh
+set -x
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -21,10 +22,10 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   # Adding target usr/bin for libmikmod-config
-  export PATH=${NACL_BIN_PATH}:${NACL_SDK_USR}/bin:${PATH};
+  export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH};
   export LIBS="-lvorbisfile -lvorbis -logg -lm"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${PACKAGE_NAME}-build
@@ -33,10 +34,10 @@ CustomConfigureStep() {
   ../configure \
     --host=nacl \
     --disable-shared \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR_LIB} \
-    --oldincludedir=${NACL_SDK_USR_INCLUDE} \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_LIBDIR} \
+    --oldincludedir=${NACLPORTS_INCLUDE} \
     --${NACL_OPTION}-mmx \
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \

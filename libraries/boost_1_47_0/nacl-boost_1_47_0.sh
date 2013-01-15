@@ -25,7 +25,7 @@ CustomBuildStep() {
   # TODO(eugenis): build dynamic libraries, too
   if [ $NACL_GLIBC = "1" ] ; then
     ./bjam install \
-      --prefix=${NACL_SDK_USR} \
+      --prefix=${NACLPORTS_PREFIX} \
       link=static \
       -d+2 \
       --without-python \
@@ -33,7 +33,7 @@ CustomBuildStep() {
       --without-mpi
   else
     ./bjam install \
-      --prefix=${NACL_SDK_USR} \
+      --prefix=${NACLPORTS_PREFIX} \
       link=static \
       -d+2 \
       --with-date_time \

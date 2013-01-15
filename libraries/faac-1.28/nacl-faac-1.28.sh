@@ -21,18 +21,18 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   # faac appears to require configure from here, not in build dir
   ./configure \
     --host=nacl \
     --disable-shared \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR_LIB} \
-    --oldincludedir=${NACL_SDK_USR_INCLUDE} \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_LIBDIR} \
+    --oldincludedir=${NACLPORTS_INCLUDE} \
     --with-mp4v2=no \
     --with-x=no
 }

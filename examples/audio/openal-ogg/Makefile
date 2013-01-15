@@ -12,7 +12,7 @@ LIBS += -lppapi -lopenal -lvorbisfile -lvorbis -logg -lm -lpthread
 all: publish
 
 openal_ogg_$(NACL_ARCH).nexe: openal_ogg.c ogg_buffer_reader.c
-	 $(NACLCC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(NACLCC) -o $@ $^ $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 publish: openal_ogg_$(NACL_ARCH).nexe openal_ogg.html openal_ogg.nmf sample.ogg
 	mkdir -p $(PUBLISH_DIR)

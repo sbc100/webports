@@ -22,22 +22,22 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CXXFLAGS="-I${NACL_SDK_ROOT}/include"
-  export LDFLAGS=""
+  export CXXFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include"
+  export LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="-O3 -g"
-    export LDFLAGS="-O0 -static"
+    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g"
+    export LDFLAGS="${NACLPORTS_LDFLAGS} -O0 -static"
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
 
   CONFIG_FLAGS="--host=nacl \
-      --prefix=${NACL_SDK_USR} \
-      --exec-prefix=${NACL_SDK_USR} \
-      --libdir=${NACL_SDK_USR_LIB} \
-      --oldincludedir=${NACL_SDK_USR_INCLUDE} \
+      --prefix=${NACLPORTS_PREFIX} \
+      --exec-prefix=${NACLPORTS_PREFIX} \
+      --libdir=${NACLPORTS_LIBDIR} \
+      --oldincludedir=${NACLPORTS_INCLUDE} \
       --disable-gamepad \
       --disable-gzip \
       --disable-zip \
@@ -47,7 +47,7 @@ CustomConfigureStep() {
       --without-x \
       --enable-sound"
 
-  export LIBS="-L${NACL_SDK_USR_LIB} \
+  export LIBS="-L${NACLPORTS_LIBDIR} \
       -lnacl-mounts -lppapi_cpp -lppapi \
       -lpthread -lstdc++"
 

@@ -39,13 +39,7 @@ RunSelLdrTests() {
 
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CFLAGS="-I${NACL_SDK_USR_INCLUDE} -I${NACL_SDK_ROOT}/include"
-
-  LDFLAGS=-L${NACL_SDK_USR_LIB}
-  if [ $NACL_GLIBC != "1" ] ; then
-      LDFLAGS="${LDFLAGS}"
-  fi
-  export LDFLAGS
+  export CFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include"
 
   MakeDir ${PACKAGE_DIR}/test.nacl
   ChangeDir ${PACKAGE_DIR}/test.nacl
@@ -134,27 +128,27 @@ CustomBuildStep() {
 CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACL_SDK_USR_LIB}
-  mkdir -p ${NACL_SDK_USR_LIB}/nacl-mounts/util
-  cp ${START_DIR}/console/console.js ${NACL_SDK_USR_LIB}/nacl-mounts
-  cp ${START_DIR}/http2/genfs.py ${NACL_SDK_USR_LIB}/nacl-mounts/util
+  cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACLPORTS_LIBDIR}
+  mkdir -p ${NACLPORTS_LIBDIR}/nacl-mounts/util
+  cp ${START_DIR}/console/console.js ${NACLPORTS_LIBDIR}/nacl-mounts
+  cp ${START_DIR}/http2/genfs.py ${NACLPORTS_LIBDIR}/nacl-mounts/util
 
   # GLibC toolchain has termio.h so don't copy stub header.
   if [[ $NACL_GLIBC = 0 ]]; then
-    cp ${START_DIR}/console/termio.h ${NACL_SDK_USR_INCLUDE}
+    cp ${START_DIR}/console/termio.h ${NACLPORTS_INCLUDE}
   fi
 
-  mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts
+  mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts
   for DIR in console base util memory net http2 AppEngine pepper buffer; do
-    mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
-    cp ${START_DIR}/${DIR}/*.h ${NACL_SDK_USR_INCLUDE}/nacl-mounts/${DIR}
+    mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts/${DIR}
+    cp ${START_DIR}/${DIR}/*.h ${NACLPORTS_INCLUDE}/nacl-mounts/${DIR}
   done
-  mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/cpp/private
-  mkdir -p ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/c/private
+  mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/cpp/private
+  mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/c/private
   cp -R ${START_DIR}/ppapi/cpp/private/*.h \
-    ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/cpp/private/
+    ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/cpp/private/
   cp -R ${START_DIR}/ppapi/c/private/*.h \
-    ${NACL_SDK_USR_INCLUDE}/nacl-mounts/ppapi/c/private/
+    ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/c/private/
 }
 
 CustomPackageInstall() {

@@ -21,8 +21,8 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   if [ ${NACL_ARCH} = "pnacl" ] ; then
@@ -31,7 +31,7 @@ CustomConfigureStep() {
     extra="--enable-sse2"
   fi
 
-  ./configure --prefix=${NACL_SDK_USR} --host=nacl ${extra}
+  ./configure --prefix=${NACLPORTS_PREFIX} --host=nacl ${extra}
 }
 
 

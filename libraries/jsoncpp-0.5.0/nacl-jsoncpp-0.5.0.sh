@@ -41,8 +41,8 @@ CustomInstallStep() {
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
 
   set -x
-  cp ${PACKAGE_DIR}/libjsoncpp.a ${NACL_SDK_USR_LIB}
-  cp -R ${PACKAGE_DIR}/include/json ${NACL_SDK_USR_INCLUDE}
+  cp ${PACKAGE_DIR}/libjsoncpp.a ${NACLPORTS_LIBDIR}
+  cp -R ${PACKAGE_DIR}/include/json ${NACLPORTS_INCLUDE}
   set +x
 }
 

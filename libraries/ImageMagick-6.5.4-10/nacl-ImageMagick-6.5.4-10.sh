@@ -20,8 +20,8 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   # Drop /opt/X11/bin (may interfere build on osx).
   export PATH=$(echo $PATH | sed -e 's;/opt/X11/bin;;')
@@ -32,10 +32,10 @@ CustomConfigureStep() {
   ../configure \
     --host=nacl \
     --disable-shared \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR_LIB} \
-    --oldincludedir=${NACL_SDK_USR_INCLUDE} \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_LIBDIR} \
+    --oldincludedir=${NACLPORTS_INCLUDE} \
     --with-x=no \
     --disable-largefile \
     --without-fftw
@@ -45,8 +45,8 @@ CustomConfigureStep() {
 CustomBuildAndInstallStep() {
   # assumes pwd has makefile
   make clean
-  make CFLAGS='-DSSIZE_MAX="((ssize_t)(~((size_t)0)>>1))"' \
-    install-libLTLIBRARIES install-data-am -j${OS_JOBS}
+  cflags="${NACLPORTS_CFLAGS} -DSSIZE_MAX=\"((ssize_t)(~((size_t)0)>>1))\""
+  make CFLAGS="${cflags}" install-libLTLIBRARIES install-data-am -j${OS_JOBS}
   DefaultTouchStep
 }
 

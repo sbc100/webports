@@ -17,11 +17,11 @@ source ../../build_tools/common.sh
 
 CustomBuildStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACL_SDK_USR}" clean
+  make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" clean
   PATH=${NACL_BIN_PATH}:${PATH} \
-  make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACL_SDK_USR}" "MYLIBS=-lnosys"
+  make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" "MYLIBS=-lnosys"
   # TODO: side-by-side install
-  make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACL_SDK_USR}" install
+  make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" install
 }
 
 

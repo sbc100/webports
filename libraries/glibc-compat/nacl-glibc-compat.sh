@@ -35,10 +35,10 @@ CustomConfigureStep() {
 }
 
 CustomInstallStep() {
-  Remove ${NACL_SDK_USR_LIB}/${LIB_GLIBC_COMPAT}
-  Remove ${NACL_SDK_USR_INCLUDE}/glibc-compat
-  install -m 644 out/${LIB_GLIBC_COMPAT} ${NACL_SDK_USR_LIB}/${LIB_GLIBC_COMPAT}
-  cp -r include ${NACL_SDK_USR_INCLUDE}/glibc-compat
+  Remove ${NACLPORTS_LIBDIR}/${LIB_GLIBC_COMPAT}
+  Remove ${NACLPORTS_INCLUDE}/glibc-compat
+  install -m 644 out/${LIB_GLIBC_COMPAT} ${NACLPORTS_LIBDIR}/${LIB_GLIBC_COMPAT}
+  cp -r include ${NACLPORTS_INCLUDE}/glibc-compat
 }
 
 CustomPackageInstall() {

@@ -23,30 +23,30 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
-  export CXXFLAGS="-O2 -g -I${NACL_SDK_ROOT}/include"
-  export NACL_LDFLAGS=""
+  export CXXFLAGS="${NACLPORTS_CFLAGS} -O2 -g -I${NACL_SDK_ROOT}/include"
+  export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="-O3 -g"
-    export NACL_LDFLAGS="-O0 -static"
+    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g"
+    export NACL_LDFLAGS="${NACL_LDFLAGS} -O0 -static"
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export STRIP=${NACLSTRIP}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
 
-  export LIBS="-L${NACL_SDK_USR_LIB} \
+  export LIBS="-L${NACLPORTS_LIBDIR} \
       -lm \
       -lpng \
       -lz"
 
   CONFIG_FLAGS="--host=${NACL_ARCH}-pc-nacl \
-      --prefix=${NACL_SDK_USR} \
-      --exec-prefix=${NACL_SDK_USR} \
-      --libdir=${NACL_SDK_USR_LIB} \
-      --oldincludedir=${NACL_SDK_USR_INCLUDE} \
-      --with-sdl-prefix=${NACL_SDK_USR} \
-      --with-sdl-exec-prefix=${NACL_SDK_USR}"
+      --prefix=${NACLPORTS_PREFIX} \
+      --exec-prefix=${NACLPORTS_PREFIX} \
+      --libdir=${NACLPORTS_LIBDIR} \
+      --oldincludedir=${NACLPORTS_INCLUDE} \
+      --with-sdl-prefix=${NACLPORTS_PREFIX} \
+      --with-sdl-exec-prefix=${NACLPORTS_PREFIX}"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ./autogen.sh

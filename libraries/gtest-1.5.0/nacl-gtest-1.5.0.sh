@@ -28,11 +28,11 @@ CustomConfigureStep() {
 }
 
 CustomInstallStep() {
-  Remove ${NACL_SDK_USR_INCLUDE}/gtest
+  Remove ${NACLPORTS_INCLUDE}/gtest
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  (ChangeDir include; tar cf - --exclude='gtest-death-test.h' --exclude='gtest-death-test-internal.h' gtest | (ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -))
-  Remove ${NACL_SDK_USR_LIB}/${LIB_GTEST}
-  install -m 644 ${LIB_GTEST} ${NACL_SDK_USR_LIB}/${LIB_GTEST}
+  (ChangeDir include; tar cf - --exclude='gtest-death-test.h' --exclude='gtest-death-test-internal.h' gtest | (ChangeDir ${NACLPORTS_INCLUDE}; tar xfp -))
+  Remove ${NACLPORTS_LIBDIR}/${LIB_GTEST}
+  install -m 644 ${LIB_GTEST} ${NACLPORTS_LIBDIR}/${LIB_GTEST}
   DefaultTouchStep
 }
 

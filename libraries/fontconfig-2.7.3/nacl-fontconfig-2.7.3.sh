@@ -39,9 +39,9 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
-  export PATH=${NACL_BIN_PATH}:${NACL_SDK_USR}/bin:${PATH};
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   chmod a+x install-sh
   cd ${PACKAGE_NAME}-build
@@ -51,10 +51,10 @@ CustomConfigureStep() {
     --host=nacl \
     --disable-shared \
     --disable-docs \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR_LIB} \
-    --oldincludedir=${NACL_SDK_USR_INCLUDE} \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_LIBDIR} \
+    --oldincludedir=${NACLPORTS_INCLUDE} \
     --with-http=off \
     --with-html=off \
     --with-ftp=off \

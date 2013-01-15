@@ -32,7 +32,7 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export CXXFLAGS="-O2 -g -I${NACL_SDK_ROOT}/include"
-  export LDFLAGS=""
+  export LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     export CXXFLAGS="-O3 -g"
     export LDFLAGS="-O0 -static"
@@ -41,10 +41,10 @@ CustomConfigureStep() {
   export RANLIB=${NACLRANLIB}
   # path and package magic to make sure we call the right
   # sdl-config, etc.
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  export PATH="${NACL_SDK_USR_BIN}:${PATH}"
+  export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
 
   export NACLBXLIBS="-lnacl-mounts -lpthread"
 
@@ -87,10 +87,10 @@ CustomConfigureStep() {
   ../configure \
     --host=nacl \
     --disable-shared \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR_LIB} \
-    --oldincludedir=${NACL_SDK_USR_INCLUDE} \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_LIBDIR} \
+    --oldincludedir=${NACLPORTS_INCLUDE} \
     --with-x=no \
     --with-x11=no \
     --with-sdl=yes \

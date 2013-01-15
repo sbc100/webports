@@ -28,11 +28,11 @@ CustomConfigureStep() {
 }
 
 CustomInstallStep() {
-  Remove ${NACL_SDK_USR_INCLUDE}/gmock
+  Remove ${NACLPORTS_INCLUDE}/gmock
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  (ChangeDir include; tar cf - gmock | (ChangeDir ${NACL_SDK_USR_INCLUDE}; tar xfp -))
-  Remove ${NACL_SDK_USR_LIB}/${LIB_GMOCK}
-  install -m 644 ${LIB_GMOCK} ${NACL_SDK_USR_LIB}/${LIB_GMOCK}
+  (ChangeDir include; tar cf - gmock | (ChangeDir ${NACLPORTS_INCLUDE}; tar xfp -))
+  Remove ${NACLPORTS_LIBDIR}/${LIB_GMOCK}
+  install -m 644 ${LIB_GMOCK} ${NACLPORTS_LIBDIR}/${LIB_GMOCK}
   DefaultTouchStep
 }
 

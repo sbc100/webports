@@ -46,8 +46,8 @@ CustomBuildStep() {
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
@@ -78,7 +78,7 @@ CustomInstallStep() {
     $NACL_SDK_ROOT/tools/create_nmf.py \
       -L$NACL_LIB_PATH/usr/lib$NACL_COMPLEMENT_LIBDIR \
       -L$NACL_LIB_PATH/lib$NACL_COMPLEMENT_LIBDIR \
-      -L$NACL_SDK_USR_LIB \
+      -L$NACLPORTS_LIBDIR \
       -L$NACL_SDK_LIB \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \
@@ -86,7 +86,7 @@ CustomInstallStep() {
       thttpd_${NACL_COMPLEMENT_ARCH}.nexe
   else
     $NACL_SDK_ROOT/tools/create_nmf.py \
-      -L$NACL_SDK_USR_LIB \
+      -L$NACLPORTS_LIBDIR \
       -L$NACL_SDK_LIB \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \

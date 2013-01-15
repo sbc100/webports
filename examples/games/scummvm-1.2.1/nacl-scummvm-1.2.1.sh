@@ -42,10 +42,10 @@ CustomConfigureStep() {
   # without this setting *make* will not show the full command lines
   export VERBOSE_BUILD=1
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH="${NACL_BIN_PATH}:${PATH}"
-  export PATH="${NACL_SDK_USR_BIN}:${PATH}"
+  export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
   export DEFINES=
   if [ "${NACL_GLIBC}" != "1" ]; then
     export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
@@ -72,7 +72,7 @@ CustomConfigureStep() {
   cd ${PACKAGE_NAME}-build
   ../configure \
     --host=nacl \
-    --libdir=${NACL_SDK_USR_LIB} \
+    --libdir=${NACLPORTS_LIBDIR} \
     --disable-flac \
     --disable-zlib \
     --disable-mt32emu \

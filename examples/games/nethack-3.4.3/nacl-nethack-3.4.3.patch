@@ -257,7 +257,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  
 -CFLAGS = -O -I../include
 -LFLAGS = 
-+CFLAGS := $(NACL_CCFLAGS) -I../include -I$(NACL_SDK_USR_INCLUDE)/ncurses
++CFLAGS := $(NACL_CCFLAGS) -I../include -I$(NACLPORTS_INCLUDE)/ncurses
 +LFLAGS = $(NACL_LDFLAGS)
  
  # The Qt and Be window systems are written in C++, while the rest of

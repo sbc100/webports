@@ -26,20 +26,20 @@ CustomBuildStep() {
   # NOTE: we are using the non-standard vars NACL_CCFLAGS/NACL_LDFLAGS
   # because we are not running ./configure and the Makefile was hacked
   export NACL_CCFLAGS="-O"
-  export NACL_LDFLAGS=""
+  export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     export NACL_CCFLAGS="-O3 -g"
     export NACL_LDFLAGS="-O0 -static"
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR_LIB}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR_LIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   export WINTTYLIB="-Wl,--whole-archive"
   export WINTTYLIB="$WINTTYLIB -lnacl-mounts -lncurses -lppapi -lppapi_cpp"
   export WINTTYLIB="$WINTTYLIB -Wl,--no-whole-archive"
-  export NACL_SDK_USR_INCLUDE
+  export NACLPORTS_INCLUDE
   export STRNCMPI=1
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
@@ -72,7 +72,7 @@ CustomBuildStep() {
   else
     cp ${START_DIR}/nethack.nmf ${ASSEMBLY_DIR}
   fi
-  cp ${NACL_SDK_USR_LIB}/nacl-mounts/*.js ${ASSEMBLY_DIR}
+  cp ${NACLPORTS_LIBDIR}/nacl-mounts/*.js ${ASSEMBLY_DIR}
   cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

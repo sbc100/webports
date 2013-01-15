@@ -22,8 +22,8 @@ CustomConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACL_SDK_USR}/lib/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACL_SDK_USR}/lib
+  export PKG_CONFIG_PATH=${NACLPORTS_PREFIX}/lib/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_PREFIX}/lib
   export PATH=${NACL_BIN_PATH}:${PATH};
   export LIBS="-lnosys"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
@@ -33,10 +33,10 @@ CustomConfigureStep() {
   ../configure \
     --host=nacl \
     --disable-shared \
-    --prefix=${NACL_SDK_USR} \
-    --exec-prefix=${NACL_SDK_USR} \
-    --libdir=${NACL_SDK_USR}/lib \
-    --oldincludedir=${NACL_SDK_USR}/include \
+    --prefix=${NACLPORTS_PREFIX} \
+    --exec-prefix=${NACLPORTS_PREFIX} \
+    --libdir=${NACLPORTS_PREFIX}/lib \
+    --oldincludedir=${NACLPORTS_PREFIX}/include \
     --enable-sse \
     --disable-3dnow \
     --disable-altivec \

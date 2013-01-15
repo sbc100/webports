@@ -18,9 +18,9 @@ CustomInstallStep() {
   # do the regular make install
   make install
   # move freetype up a directory so #include <freetype/freetype.h> works...
-  Remove ${NACL_SDK_USR_INCLUDE}/freetype
-  cp -R ${NACL_SDK_USR_INCLUDE}/freetype2/freetype ${NACL_SDK_USR_INCLUDE}/.
-  Remove ${NACL_SDK_USR_INCLUDE}/freetype2
+  Remove ${NACLPORTS_INCLUDE}/freetype
+  cp -R ${NACLPORTS_INCLUDE}/freetype2/freetype ${NACLPORTS_INCLUDE}/.
+  Remove ${NACLPORTS_INCLUDE}/freetype2
   DefaultTouchStep
 }
 

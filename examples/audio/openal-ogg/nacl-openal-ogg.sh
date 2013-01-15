@@ -8,5 +8,7 @@ source ../../../build_tools/common.sh
 
 # Always 'make clean' because there could be artifacts from a previous build
 # in this sub-folder, 'make clean' from the top-level only clears 'out'.
+export CFLAGS=${NACLPORTS_CFLAGS}
+export LDFLAGS=${NACLPORTS_LDFLAGS}
 make clean
 make

@@ -33,10 +33,10 @@ CustomBuildStep() {
 CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  cp ${PACKAGE_DIR}/libdreadthread.a ${NACL_SDK_USR_LIB}
-  cp ${START_DIR}/dreadthread.h ${NACL_SDK_USR_INCLUDE}
-  cp ${START_DIR}/dreadthread_ctxt.h ${NACL_SDK_USR_INCLUDE}
-  cp ${START_DIR}/dreadthread_chain.h ${NACL_SDK_USR_INCLUDE}
+  cp ${PACKAGE_DIR}/libdreadthread.a ${NACLPORTS_LIBDIR}
+  cp ${START_DIR}/dreadthread.h ${NACLPORTS_INCLUDE}
+  cp ${START_DIR}/dreadthread_ctxt.h ${NACLPORTS_INCLUDE}
+  cp ${START_DIR}/dreadthread_chain.h ${NACLPORTS_INCLUDE}
   DefaultTouchStep
 }
 
