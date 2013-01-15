@@ -152,8 +152,11 @@ default: libraries
 libraries: $(LIBRARIES)
 examples: $(EXAMPLES)
 all: $(PACKAGES)
+# The subset of libraries that are shipped as part of the
+# official NaCl SDK
+sdklibs: zlib jpeg tiff png tinyxml lua
 
-.PHONY: all default libraries examples clean
+.PHONY: all default libraries examples clean sdllibs
 
 
 clean:
