@@ -156,8 +156,9 @@ def DownloadAndInstallSDK(url):
 
   # Calculate pepper_dir by taking common prefix of tar
   # file contents
-  with tarfile.open(bz2_filename) as tar:
-    names = tar.getnames()
+  tar = tarfile.open(bz2_filename)
+  names = tar.getnames()
+  tar.close()
   pepper_dir = os.path.commonprefix(names)
 
   actual_dir = os.path.join(bz2_dir, pepper_dir)
