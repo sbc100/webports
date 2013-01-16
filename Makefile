@@ -111,7 +111,8 @@ LIBRARIES = \
      libraries/libmikmod-3.1.11 \
      libraries/jsoncpp-0.5.0 \
      libraries/openal-soft-1.13 \
-     libraries/gtest-1.5.0
+     libraries/gtest-1.5.0 \
+     libraries/box2d-2.2.1
 
 EXAMPLES = \
      examples/games/scummvm-1.2.1 \
@@ -156,7 +157,7 @@ all: $(PACKAGES)
 # official NaCl SDK
 sdklibs: zlib jpeg tiff png tinyxml lua
 
-.PHONY: all default libraries examples clean sdllibs
+.PHONY: all default libraries examples clean sdklibs
 
 
 clean:
@@ -220,6 +221,7 @@ endif
 # shortcuts libraries (alphabetical)
 agg: libraries/agg-2.5 ;
 boost: libraries/boost_1_47_0 ;
+box2d: libraries/box2d-2.2.1 ;
 bzip2: libraries/bzip2-1.0.6 ;
 cairo: libraries/cairo-1.8.8 ;
 cfitsio: libraries/cfitsio ;

@@ -1,0 +1,58 @@
+diff --git box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt
+index a9dc06c..0efc35f 100644
+--- box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt
++++ box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt
+@@ -19,10 +19,10 @@ set(BOX2D_VERSION 2.1.0)
+ # The Box2D library.
+ add_subdirectory(Box2D)
+ 
+-if(BOX2D_BUILD_EXAMPLES)
+-  # HelloWorld console example.
+-  add_subdirectory(HelloWorld)
++# HelloWorld console example.
++add_subdirectory(HelloWorld)
+ 
++if(BOX2D_BUILD_EXAMPLES)
+   # Testbed and dependencies.
+   find_package(OpenGL REQUIRED)
+   add_subdirectory(freeglut)
+@@ -32,4 +32,4 @@ endif(BOX2D_BUILD_EXAMPLES)
+ 
+ if(BOX2D_INSTALL_DOC)
+   install(DIRECTORY Documentation DESTINATION share/doc/Box2D PATTERN ".svn" EXCLUDE)
+-endif(BOX2D_INSTALL_DOC)
+\ No newline at end of file
++endif(BOX2D_INSTALL_DOC)
+diff --git box2d-2.2.1/Box2D_v2.2.1/XCompile-nacl.txt box2d-2.2.1/Box2D_v2.2.1/XCompile-nacl.txt
+new file mode 100644
+index 0000000..c651a2a
+--- /dev/null
++++ box2d-2.2.1/Box2D_v2.2.1/XCompile-nacl.txt
+@@ -0,0 +1,27 @@
++# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
++# this file to set the proper settings and paths. Then use it from build/ like:
++# cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile.txt \
++#          -DCMAKE_INSTALL_PREFIX=/usr/mingw32/mingw
++# If you already have a toolchain file setup, you may use that instead of this
++# file.
++
++# the name of the target operating system
++SET(CMAKE_SYSTEM_NAME Linux)
++
++# which compilers to use for C and C++
++SET(CMAKE_C_COMPILER ${NACLCC})
++SET(CMAKE_CXX_COMPILER ${NACLCXX})
++set(CMAKE_AR ${NACLAR} CACHE FILEPATH "Archiver")
++SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
++
++# here is the target environment located
++SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
++
++# adjust the default behaviour of the FIND_XXX() commands:
++# search headers and libraries in the target environment, search 
++# programs in the host environment
++set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
++set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
++set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
++set(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
++include_directories(${NACL_SDK_ROOT}/include)
