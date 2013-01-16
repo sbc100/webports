@@ -28,11 +28,11 @@ import time
 import urllib
 
 if sys.version_info < (2, 6, 0):
-  sys.stderr.write("python 2.6 or later is required run this script\n")
+  sys.stderr.write('python 2.6 or later is required run this script\n')
   sys.exit(1)
 
 if sys.version_info >= (3, 0, 0):
-  sys.stderr.write("This script does not support python 3.\n")
+  sys.stderr.write('This script does not support python 3.\n')
   sys.exit(1)
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -50,6 +50,11 @@ LOCAL_GSUTIL = 'gsutil'
 
 GSTORE = 'http://commondatastorage.googleapis.com/'\
          'nativeclient-mirror/nacl/nacl_sdk/'
+
+def ErrorOut(msg):
+    print msg
+    sys.exit(1)
+
 
 def DetermineSdkURL(flavor, base_url, version):
   """Download one Native Client toolchain and extract it.
@@ -77,8 +82,7 @@ def DetermineSdkURL(flavor, base_url, version):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     p_stdout = p.communicate()[0]
     if p.returncode:
-      print 'gsutil command failed: %s' % str(cmd)
-      sys.exit(1)
+      ErrorOut('gsutil command failed: %s' % str(cmd))
 
     elements = p_stdout.splitlines()
     return [os.path.basename(os.path.normpath(e)) for e in elements]
@@ -91,14 +95,16 @@ def DetermineSdkURL(flavor, base_url, version):
     versions = [v for v in versions if v.startswith('trunk')]
 
     # Look backwards through all trunk revisions
-    for version_dir in reversed(sorted(versions)):
+    # Only look back 100 revisions so this script doesn't take
+    # forever.
+    versions = list(reversed(sorted(versions)))
+    for version_dir in versions[:100]:
       contents = GSList(version_dir)
       if path in contents:
         version = version_dir.rsplit('.', 1)[1]
         break
     else:
-      print "No SDK build found looking for: %s" % path
-      sys.exit(1)
+      ErrorOut('No SDK build (%s) found in last 100 trunk builds' % (path))
 
   return GSTORE + 'trunk.' + str(version) + '/' + path
 
@@ -111,15 +117,22 @@ def Untar(bz2_filename):
       tar_file = cygtar.CygTar(bz2_filename, 'r:bz2')
       tar_file.Extract()
     except Exception, err:
-      print 'Error unpacking %s' % str(err)
-      sys.exit(1)
+      ErrorOut('Error unpacking %s' % str(err))
     finally:
       if tar_file:
         tar_file.Close()
   else:
     if subprocess.call(['tar', 'jxf', bz2_filename]):
-      print 'Error unpacking'
-      sys.exit(1)
+      ErrorOut('Error unpacking')
+
+
+def FindCygwin():
+  if os.path.exists(r'\cygwin'):
+    return r'\cygwin'
+  elif os.path.exists(r'C:\cygwin'):
+    return r'C:\cygwin'
+  else:
+    ErrorOut('failed to find cygwin in \cygwin or c:\cygwin')
 
 
 def DownloadAndInstallSDK(url):
@@ -129,12 +142,15 @@ def DownloadAndInstallSDK(url):
   bz2_dir = SCRIPT_DIR
   bz2_filename = os.path.join(bz2_dir, url.split('/')[-1])
 
+  if sys.platform in ['win32', 'cygwin']:
+    cygbin = os.path.join(FindCygwin(), 'bin')
+
   # Drop old versions.
   old_sdks = glob.glob(os.path.join(bz2_dir, 'pepper_*'))
   if old_sdks:
     print 'Cleaning up old SDKs...'
     if sys.platform in ['win32', 'cygwin']:
-      cmd = [r'\cygwin\bin\rm.exe', '-rf']
+      cmd = [os.path.join(cygbin, 'bin', 'rm.exe'), '-rf']
     else:
       cmd = ['rm', '-rf']
     cmd += old_sdks
@@ -162,16 +178,20 @@ def DownloadAndInstallSDK(url):
   pepper_dir = os.path.commonprefix(names)
 
   actual_dir = os.path.join(bz2_dir, pepper_dir)
+
   print 'Create toolchain symlink "%s" -> "%s"' % (actual_dir, target_dir)
   if sys.platform in ['win32', 'cygwin']:
-    cmd = (r'\cygwin\bin\rm.exe -rf ' + target_dir + ' && ' +
-           r'\cygwin\bin\ln.exe -fsn ' + actual_dir + ' ' +  target_dir)
+    ln = os.path.join(cygbin, 'ln.exe')
+    rm = os.path.join(cygbin, 'rm.exe')
   else:
-    cmd = ('rm -rf ' + target_dir + ' && ' +
-           'ln -fsn ' + actual_dir + ' ' + target_dir)
+    ln = 'ln'
+    rm = 'rm'
 
+  cmd = '%s -rf %s && %s -fsn %s %s' % (rm, target_dir, ln,
+                                        actual_dir, target_dir)
   returncode = subprocess.call(cmd, shell=True)
-  assert returncode == 0
+  if returncode:
+    ErrorOut('Error creating symbolic link: %s' % returncode)
 
   # Clean up: remove the sdk bz2.
   time.sleep(2)  # Wait for windows.
@@ -199,9 +219,7 @@ def main(argv):
            'pnaclsdk_linux')
   options, args = parser.parse_args(argv)
   if args:
-    parser.print_help()
-    print 'ERROR: invalid argument'
-    sys.exit(1)
+    parser.error('invalid argument')
 
   flavor = options.flavor
   if flavor == 'auto':
