@@ -25,11 +25,11 @@ CustomBuildStep() {
   export CXX=${NACLCXX}
   # NOTE: we are using the non-standard vars NACL_CCFLAGS/NACL_LDFLAGS
   # because we are not running ./configure and the Makefile was hacked
-  export NACL_CCFLAGS="-O"
+  export NACL_CCFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include -O"
   export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export NACL_CCFLAGS="-O3 -g"
-    export NACL_LDFLAGS="-O0 -static"
+    export NACL_CCFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include -O3 -g"
+    export NACL_LDFLAGS="${NACLPORTS_LDFLAGS} -O0 -static"
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
