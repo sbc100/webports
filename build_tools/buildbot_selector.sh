@@ -90,10 +90,6 @@ make clean
 
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"
-ls
-ls build_tools
-ls build_tools/download_sdk.py
-
 ${PYTHON} build_tools/download_sdk.py
 
 # This a temporary hack until the pnacl support is more mature
