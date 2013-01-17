@@ -254,7 +254,11 @@ export LDFLAGS=${NACLPORTS_LDFLAGS}
 
 CheckPatchVersion() {
   # refuse patch 2.6
-  if [ "`patch --version | sed q`" = "patch 2.6" ]; then
+  if ! which patch > /dev/null; then
+    echo 'patch command not found, please install and try again.'
+    exit 1
+  fi
+  if [ "`patch --version 2> /dev/null | sed q`" = "patch 2.6" ]; then
     echo "patch 2.6 is incompatible with these scripts."
     echo "Please install either version 2.5.9 (or earlier)"
     echo "or version 2.6.1 (or later.)"
@@ -314,7 +318,7 @@ Fetch() {
       # Fall back to original URL
       TryFetch $1 $2
     fi
-    set +o errexit
+    set -o errexit
   else
     # The URL is already on commondatastorage do just download it
     TryFetch $1 $2
