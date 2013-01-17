@@ -28,6 +28,14 @@ StartBuild() {
 # Ignore 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 
+# The SDK builder builds a subset of the ports, but with multiple
+# configurations.
+if [ ${BUILDBOT_BUILDERNAME} = "linux-sdk" ]; then
+  cd ${SCRIPT_DIR}/bots/linux
+  ./nacl-linux-sdk-bundle.sh
+  exit 0
+fi
+
 # Decode buildername.
 readonly BNAME_REGEX="(.+)-(.+)-(.+)"
 if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
