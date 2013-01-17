@@ -29,7 +29,9 @@ BuildPackage() {
   if make $1 ; then
     BuildSuccess $1
   else
-    if [ ${BUILDBOT_BUILDERNAME:0:3} = win ] ; then
+    # On cygwin retry each build 3 times before failing
+    uname=$(uname -s)
+    if [ ${uname:0:6} = "CYGWIN" ]; then
       echo "@@@STEP_WARNINGS@@@"
       for i in 1 2 3 ; do
         if make $1 ; then
