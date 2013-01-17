@@ -52,7 +52,7 @@ GSTORE = 'http://commondatastorage.googleapis.com/'\
          'nativeclient-mirror/nacl/nacl_sdk/'
 
 def ErrorOut(msg):
-    print msg
+    sys.stderr.write("error: %s\n" % str(msg))
     sys.exit(1)
 
 
@@ -66,6 +66,8 @@ def DetermineSdkURL(flavor, base_url, version):
   """
   if os.environ.get('BUILDBOT_BUILDERNAME', ''):
     gsutil = BOT_GSUTIL
+    if not os.path.exists(gsutil):
+      ErrorOut('gsutil not found at: %s' % gsutil)
   else:
     gsutil = LOCAL_GSUTIL
 
