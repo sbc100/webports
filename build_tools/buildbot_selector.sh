@@ -31,6 +31,12 @@ BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 # The SDK builder builds a subset of the ports, but with multiple
 # configurations.
 if [ ${BUILDBOT_BUILDERNAME} = "linux-sdk" ]; then
+  # Goto src/
+  cd ${SCRIPT_DIR}/..
+
+  echo "@@@BUILD_STEP Install Latest SDK@@@"
+  ${PYTHON} build_tools/download_sdk.py
+
   cd ${SCRIPT_DIR}/bots/linux
   ./nacl-linux-sdk-bundle.sh
   exit 0
