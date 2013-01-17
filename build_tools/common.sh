@@ -191,11 +191,6 @@ InitializeNaClGccToolchain() {
   readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
   readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 
-  readonly NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE}"
-  readonly NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-
   # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
   # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
   readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
@@ -247,6 +242,11 @@ if [ ${NACL_ARCH} = "pnacl" ] ; then
 else
   InitializeNaClGccToolchain
 fi
+
+readonly NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE}"
+readonly NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
+export CFLAGS=${NACLPORTS_CFLAGS}
+export LDFLAGS=${NACLPORTS_LDFLAGS}
 
 ######################################################################
 # Always run
