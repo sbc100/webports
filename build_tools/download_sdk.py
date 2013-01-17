@@ -213,17 +213,11 @@ def main(argv):
   parser.add_option(
       '-v', '--version', default='latest',
       help='which version of the toolchain to download')
-  parser.add_option(
-      '-f', '--flavor', default='auto',
-      help='which flavor of the toolchain to download, e.g. naclsdk_linux or ' +
-           'pnaclsdk_linux')
   options, args = parser.parse_args(argv)
   if args:
     parser.error('invalid argument')
 
-  flavor = options.flavor
-  if flavor == 'auto':
-    flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
+  flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
   url = DetermineSdkURL(flavor,
                         base_url='gs://nativeclient-mirror/nacl/nacl_sdk/',

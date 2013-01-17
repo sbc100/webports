@@ -39,26 +39,17 @@ else
   exit 1
 fi
 
-# This a temporary hack until the pnacl support is more mature
-if [ ${LIBC} = "pnacl_newlib" ] ; then
-  ${SCRIPT_DIR}/bots/pnacl_bots.sh
-  exit 0
-fi
-
 # Select platform specific things.
 if [ "$OS" = "mac" ]; then
   readonly PYTHON=python
   # Use linux config on mac too.
   readonly BOT_OS_DIR=linux
-  readonly TOOLCHAIN_CLEANUP='rm -rf ${SCRIPT_DIR}/native_client_sdk_*'
 elif [ "$OS" = "linux" ]; then
   readonly PYTHON=python
   readonly BOT_OS_DIR=linux
-  readonly TOOLCHAIN_CLEANUP='rm -rf ${SCRIPT_DIR}/native_client_sdk_*'
 elif [ "$OS" = "win" ]; then
   readonly PYTHON=python.bat
   readonly BOT_OS_DIR=windows
-  readonly TOOLCHAIN_CLEANUP='rm -rf c:/native_client_sdk'
 else
   echo "Bad OS: ${OS}" 1>&2
   exit 1
@@ -69,26 +60,32 @@ if [ "$LIBC" = "glibc" ]; then
   export NACL_GLIBC=1
 elif [ "$LIBC" = "newlib" ]; then
   export NACL_GLIBC=0
+elif [ "$LIBC" = "pnacl_newlib" ]; then
+  export NACL_GLIBC=0
 else
   echo "Bad LIBC: ${LIBC}" 1>&2
   exit 1
 fi
-
-# Compute script name.
-readonly SCRIPT_NAME="nacl-install-${BOT_OS_DIR}-ports-${SHARD}.sh"
 
 # Goto src/
 cd ${SCRIPT_DIR}/..
 
 # Cleanup.
 echo "@@@BUILD_STEP Cleanup@@@"
-rm -rf ${SCRIPT_DIR}/toolchain
-${TOOLCHAIN_CLEANUP}
 make clean
 
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"
-${PYTHON} build_tools/buildbot_sdk_setup.py
+${PYTHON} ${SCRIPT_DIR}/download_sdk.py
+
+# This a temporary hack until the pnacl support is more mature
+if [ ${LIBC} = "pnacl_newlib" ] ; then
+  ${SCRIPT_DIR}/bots/pnacl_bots.sh
+  exit 0
+fi
+
+# Compute script name.
+readonly SCRIPT_NAME="nacl-install-${BOT_OS_DIR}-ports-${SHARD}.sh"
 
 # Build 32-bit.
 StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} i686

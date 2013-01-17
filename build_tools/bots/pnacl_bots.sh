@@ -32,10 +32,6 @@ StepConfig() {
   done
 }
 
-StepInstallSdk() {
-  build_tools/download_sdk.py -f pnaclsdk_linux
-}
-
 StepBuildEverything() {
   local messages=""
 
@@ -59,7 +55,6 @@ StepBuildEverything() {
 }
 
 StepConfig
-StepInstallSdk
 StepBuildEverything
 
 exit ${ERROR}
