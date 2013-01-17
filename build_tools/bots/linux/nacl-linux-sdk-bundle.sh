@@ -11,9 +11,10 @@
 # This script builds the packages that will be bundled with the NaCl SDK.
 #
 
-source ../bot_common.sh
-
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
+
+source ${SCRIPT_DIR}/../bot_common.sh
+
 OUT_DIR=${SCRIPT_DIR}/../../../out
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle/pepper_XX/ports
 
