@@ -168,8 +168,14 @@ $(NACL_DIRS_TO_MAKE):
 
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
 
+ifdef NACLPORTS_NO_ANNOTATE
+  START_BUILD=echo "*** Building $(NACL_ARCH) $(notdir $*) ***"
+else
+  START_BUILD=echo "@@@BUILD_STEP $(NACL_ARCH) $(notdir $*)@@@"
+endif
+
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
-	@echo "@@@BUILD_STEP $(NACL_ARCH) $(notdir $*)@@@"
+	@$(START_BUILD)
 	cd $* && ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@
