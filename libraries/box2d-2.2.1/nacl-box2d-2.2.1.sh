@@ -58,7 +58,7 @@ CustomBuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   echo "Directory: $(pwd)"
   make clean
-  make Box2D HelloWorld -j${OS_JOBS}
+  make all -j${OS_JOBS}
 }
 
 
