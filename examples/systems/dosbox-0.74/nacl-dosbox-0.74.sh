@@ -26,7 +26,7 @@ CustomConfigureStep() {
   export CXXFLAGS="${NACLPORTS_CFLAGS} -O2 -g -I${NACL_SDK_ROOT}/include"
   export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g I${NACL_SDK_ROOT}/include"
+    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g -I${NACL_SDK_ROOT}/include"
     export NACL_LDFLAGS="${NACL_LDFLAGS} -O0 -static"
   fi
   export AR=${NACLAR}
