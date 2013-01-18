@@ -36,7 +36,7 @@ CustomConfigureStep() {
   export CXXFLAGS="-I${NACL_SDK_ROOT}/include"
   export LDFLAGS=""
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="-O3 -g"
+    export CXXFLAGS="-I${NACL_SDK_ROOT}/include -O3 -g"
     export LDFLAGS="-O0 -static"
   fi
   # without this setting *make* will not show the full command lines
