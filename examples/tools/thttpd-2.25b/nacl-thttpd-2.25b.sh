@@ -37,13 +37,7 @@ Makefile"
 CustomBuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   # export the nacl tools
-  export CC=${NACLCC}
-  export NACLXX=${NACLCXX}
-  export CXX=${NACLCXX}
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export NACL_CCFLAGS="-O3 -g"
-    export NACL_LDFLAGS="-O0 -static"
-  fi
+  # The checked-in Makefile has more configuration for this example.
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
