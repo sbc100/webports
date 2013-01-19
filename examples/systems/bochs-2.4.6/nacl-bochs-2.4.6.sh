@@ -11,12 +11,6 @@
 # this script downloads, patches, and builds bochs for Native Client.
 #
 
-URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bochs-2.4.6.tar.gz
-#readonly URL=http://sourceforge.net/projects/bochs/files/bochs/2.4.6/bochs-2.4.6.tar.gz/download
-readonly PATCH_FILE=nacl-bochs-2.4.6.patch
-PACKAGE_NAME=bochs-2.4.6
-
-
 # Linux disk image
 readonly LINUX_IMG_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
 readonly LINUX_IMG_NAME=linux-img

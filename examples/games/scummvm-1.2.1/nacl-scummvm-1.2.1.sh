@@ -11,11 +11,6 @@
 # this script downloads, patches, and builds scummvm for Native Client.
 #
 
-URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm-1.2.1.tar.bz2
-#readonly URL=http://prdownloads.sourceforge.net/scummvm/scummvm-1.2.1.tar.bz2?download
-readonly PATCH_FILE=nacl-scummvm-1.2.1.patch
-PACKAGE_NAME=scummvm-1.2.1
-
 # Beneath a Steel Sky (floppy version)
 readonly BASS_FLOPPY_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
 readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
