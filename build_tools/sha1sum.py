@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 import hashlib
+import os
 import string
 import sys
 
@@ -28,10 +29,7 @@ for filename in sys.argv[1:]:
     f.close()
     print filehash.lower() + " *" + os.path.basename(filename)
   except IOError:
-    print "sha1sum.py unable to open file " + filename
-    sys.exit(-1)
-  except:
-    print "sha1sum.py encountered an unexpected error"
+    sys.stderr.write("sha1sum.py unable to open file %s\n" % filename)
     sys.exit(-1)
 
 # all files hashed with success

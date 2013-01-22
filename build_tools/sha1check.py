@@ -22,13 +22,19 @@ import sys
 # don't match or filename doesn't exist, sha1check.py will
 # return an error.
 
+def ErrorOut(msg):
+  sys.stdout.write('sha1check.py: %s\n' % msg)
+  sys.exit(1)
 
+
+count = 0
 for s in sys.stdin:
+  count += 1
   # split the hash *filename into a pair
-  hash, name = s.split()
+  sha1sum, name = s.split()
 
   print "Filename: ",  name
-  print "Expected hash: ", hash
+  print "Expected hash: ", sha1sum
   # make sure filename started with '*' (binary mode)
   if name.find('*') == 0:
     # remove leading '*' and any newlines from filename
@@ -41,19 +47,19 @@ for s in sys.stdin:
       filehash = h.hexdigest()
       f.close()
       # verify the generated hash and embedded hash match
-      if hash.lower() != filehash.lower():
+      if sha1sum.lower() != filehash.lower():
         print "Actual hash: ", filehash
-        print "sha1check.py: sha1 checksum failed on file: " + filename
-        sys.exit(-1)
+        ErrorOut("sha1 checksum failed on file: " + filename)
       print "sha1check1.py: "+ filename + " verified"
     except IOError:
-      print "sha1check.py: unable to open file " + filename
-      sys.exit(-1)
+      ErrorOut("unable to open file " + filename)
     except:
-      print "sha1check.py: encountered an unexpected error"
-      sys.exit(-1)
+      ErrorOut("encountered an unexpected error")
   else:
-    print "sha1check.py: input hash is not from a binary file"
-    sys.exit(-1)
+    ErrorOut("input hash is not from a binary file")
+
+if not count:
+  ErrorOut("No file hashes given on input")
+
 # all files hashed with success
 sys.exit(0)
