@@ -6,4 +6,5 @@
     "portable": {
       "pnacl-translate": {"url": "snes.pexe"}
     }
+  }
 }
