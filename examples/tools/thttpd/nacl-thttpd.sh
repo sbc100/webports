@@ -63,15 +63,15 @@ CustomInstallStep() {
   ChangeDir ${PUBLISH_DIR}
   local NACL_LIB_PATH=$NACL_TOOLCHAIN_ROOT/x86_64-nacl
   local NACL_COMPLEMENT_ARCH="x86_64"
-  local NACL_COMPLEMENT_LIBDDIR="lib64"
+  local NACL_COMPLEMENT_LIBDIR="lib64"
   if [ ${NACL_ARCH} = "x86_64" ]; then
     NACL_COMPLEMENT_ARCH="i686"
     NACL_COMPLEMENT_LIBDIR="lib32"
   fi
   if [ -f thttpd_${NACL_COMPLEMENT_ARCH}.nexe ]; then
     $NACL_SDK_ROOT/tools/create_nmf.py \
-      -L$NACL_LIB_PATH/usr/lib$NACL_COMPLEMENT_LIBDIR \
-      -L$NACL_LIB_PATH/lib$NACL_COMPLEMENT_LIBDIR \
+      -L$NACL_LIB_PATH/usr/$NACL_COMPLEMENT_LIBDIR \
+      -L$NACL_LIB_PATH/$NACL_COMPLEMENT_LIBDIR \
       -L$NACLPORTS_LIBDIR \
       -L$NACL_SDK_LIB \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
