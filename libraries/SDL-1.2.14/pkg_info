@@ -1,3 +1,0 @@
-PACKAGE_NAME=SDL-1.2.14
-URL=http://www.libsdl.org/release/SDL-1.2.14.tar.gz
-PATCH_FILE=nacl-SDL-1.2.14.patch

@@ -1,3 +1,0 @@
-PACKAGE_NAME=gsl-1.9
-URL=http://ftp.thaios.net/gnu/gsl/gsl-1.9.tar.gz
-PATCH_FILE=nacl-gsl-1.9.patch

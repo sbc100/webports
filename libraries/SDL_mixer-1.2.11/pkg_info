@@ -1,3 +1,0 @@
-PACKAGE_NAME=SDL_mixer-1.2.11
-URL=http://www.libsdl.org/projects/SDL_mixer/release/SDL_mixer-1.2.11.tar.gz
-PATCH_FILE=nacl-SDL_mixer-1.2.11.patch

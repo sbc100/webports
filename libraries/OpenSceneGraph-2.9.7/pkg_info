@@ -1,3 +1,0 @@
-PACKAGE_NAME=OpenSceneGraph-2.9.7
-URL=http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-2.9.7.zip
-PATCH_FILE=nacl-OpenSceneGraph-2.9.7.patch

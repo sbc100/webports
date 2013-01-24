@@ -1,0 +1,3 @@
+PACKAGE_NAME=openal-soft-1.13
+URL=http://kcat.strangesoft.net/openal-releases/openal-soft-1.13.tar.bz2
+PATCH_FILE=nacl-openal-soft.patch

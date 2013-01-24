@@ -1,0 +1,3 @@
+PACKAGE_NAME=SDL_image-1.2.10
+URL=http://www.libsdl.org/projects/SDL_image/release/SDL_image-1.2.10.tar.gz
+PATCH_FILE=nacl-SDL_image.patch

@@ -1,3 +1,0 @@
-PACKAGE_NAME=openssl-1.0.0e
-URL=http://www.openssl.org/source/openssl-1.0.0e.tar.gz
-PATCH_FILE=nacl-openssl-1.0.0e.patch

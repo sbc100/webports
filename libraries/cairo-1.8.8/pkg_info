@@ -1,3 +1,0 @@
-PACKAGE_NAME=cairo-1.8.8
-URL=http://cairographics.org/releases/cairo-1.8.8.tar.gz
-PATCH_FILE=nacl-cairo-1.8.8.patch

@@ -1,0 +1,4 @@
+PACKAGE_NAME=gtest-1.5.0
+URL=http://code.google.com/p/googletest/downloads/detail?name=gtest-1.5.0.tar.gz
+URL_FILENAME=gtest-1.5.0.tgz
+PATCH_FILE=nacl-gtest.patch

@@ -1,4 +1,0 @@
-PACKAGE_NAME=gmock-1.5.0
-URL=http://googlemock.googlecode.com/files/gmock-1.5.0.tar.gz
-URL_FILENAME=gmock-1.5.0.tgz
-PATCH_FILE=nacl-gmock-1.5.0.patch

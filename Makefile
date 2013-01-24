@@ -40,6 +40,7 @@ endif
 
 ifeq ($(NACL_ARCH), "ARM")
   NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_arm_newlib
+  NACL_LIBC = newlib
 else
 ifeq ($(NACL_GLIBC), 1)
   NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_x86_glibc
@@ -67,71 +68,71 @@ NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
 
 LIBRARIES = \
      libraries/nacl-mounts \
-     libraries/SDL-1.2.14 \
-     libraries/SDL_mixer-1.2.11 \
-     libraries/SDL_image-1.2.10 \
-     libraries/SDL_ttf-2.0.10 \
+     libraries/SDL \
+     libraries/SDL_mixer \
+     libraries/SDL_image \
+     libraries/SDL_ttf \
      libraries/gc6.8 \
-     libraries/fftw-3.2.2 \
-     libraries/libtommath-0.41 \
-     libraries/libtomcrypt-1.17 \
-     libraries/zlib-1.2.3 \
-     libraries/bzip2-1.0.6 \
-     libraries/jpeg-6b \
-     libraries/libpng-1.2.40 \
-     libraries/tiff-3.9.1 \
-     libraries/FreeImage-3.14.1 \
-     libraries/libogg-1.1.4 \
-     libraries/libvorbis-1.2.3 \
-     libraries/lame-398-2 \
-     libraries/faad2-2.7 \
-     libraries/faac-1.28 \
-     libraries/libtheora-1.1.1 \
-     libraries/flac-1.2.1 \
-     libraries/speex-1.2rc1 \
-     libraries/x264-snapshot-20091023-2245 \
-     libraries/lua-5.1.4 \
+     libraries/fftw \
+     libraries/libtommath \
+     libraries/libtomcrypt \
+     libraries/zlib \
+     libraries/bzip2 \
+     libraries/jpeg \
+     libraries/libpng \
+     libraries/tiff \
+     libraries/FreeImage \
+     libraries/libogg \
+     libraries/libvorbis \
+     libraries/lame \
+     libraries/faad2 \
+     libraries/faac \
+     libraries/libtheora \
+     libraries/flac \
+     libraries/speex \
+     libraries/x264 \
+     libraries/lua \
      libraries/tinyxml \
-     libraries/expat-2.0.1 \
-     libraries/pixman-0.16.2 \
-     libraries/gsl-1.9 \
-     libraries/freetype-2.1.10 \
-     libraries/fontconfig-2.7.3 \
-     libraries/agg-2.5 \
-     libraries/cairo-1.8.8 \
-     libraries/ImageMagick-6.5.4-10 \
-     libraries/ffmpeg-0.5 \
-     libraries/Mesa-7.6 \
-     libraries/libmodplug-0.8.7 \
-     libraries/OpenSceneGraph-2.9.7 \
+     libraries/expat \
+     libraries/pixman \
+     libraries/gsl \
+     libraries/freetype \
+     libraries/fontconfig \
+     libraries/agg \
+     libraries/cairo \
+     libraries/ImageMagick \
+     libraries/ffmpeg \
+     libraries/Mesa \
+     libraries/libmodplug \
+     libraries/OpenSceneGraph \
      libraries/cfitsio \
-     libraries/boost_1_47_0 \
-     libraries/protobuf-2.3.0 \
+     libraries/boost \
+     libraries/protobuf \
      libraries/dreadthread \
-     libraries/libmikmod-3.1.11 \
-     libraries/jsoncpp-0.5.0 \
-     libraries/openal-soft-1.13 \
-     libraries/gtest-1.5.0 \
-     libraries/box2d-2.2.1
+     libraries/libmikmod \
+     libraries/jsoncpp \
+     libraries/openal-soft \
+     libraries/gtest \
+     libraries/box2d
 
 EXAMPLES = \
-     examples/games/scummvm-1.2.1 \
-     examples/systems/bochs-2.4.6 \
-     examples/systems/dosbox-0.74 \
+     examples/games/scummvm \
+     examples/systems/bochs \
+     examples/systems/dosbox \
      examples/graphics/xaos
 
 ifeq ($(NACL_GLIBC), 1)
   LIBRARIES += \
-      libraries/SDL_net-1.2.7 \
-      libraries/glib-2.28.8 \
-      libraries/ncurses-5.9 \
-      libraries/pango-1.29.3
+      libraries/SDL_net \
+      libraries/glib \
+      libraries/ncurses \
+      libraries/pango
   EXAMPLES += \
-      examples/games/nethack-3.4.3 \
-      examples/tools/thttpd-2.25b
+      examples/games/nethack \
+      examples/tools/thttpd
 else
   EXAMPLES += \
-      examples/games/snes9x-1.53 \
+      examples/games/snes9x \
       examples/audio/openal-ogg
 endif
 
@@ -140,7 +141,7 @@ ifneq ($(NACL_GLIBC), 1)
 endif
 
 ifeq ($(OS_NAME), Linux)
-  LIBRARIES += libraries/openssl-1.0.0e
+  LIBRARIES += libraries/openssl
 endif
 
 PACKAGES = $(LIBRARIES) $(EXAMPLES)
@@ -171,7 +172,7 @@ $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
 ifdef NACLPORTS_NO_ANNOTATE
   START_BUILD=echo "*** Building $(NACL_ARCH) $(notdir $*) ***"
 else
-  START_BUILD=echo "@@@BUILD_STEP $(NACL_ARCH) $(notdir $*)@@@"
+  START_BUILD=echo "@@@BUILD_STEP $(NACL_ARCH) $(NACL_LIBC) $(notdir $*)@@@"
 endif
 
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
@@ -181,112 +182,112 @@ $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	touch $@
 
 # packages with dependencies
-$(SENT)/libraries/libvorbis-1.2.3: libraries/libogg-1.1.4
-$(SENT)/libraries/libtheora-1.1.1: libraries/libogg-1.1.4
-$(SENT)/libraries/flac-1.2.1: libraries/libogg-1.1.4
-$(SENT)/libraries/speex-1.2rc1: libraries/libogg-1.1.4
-$(SENT)/libraries/fontconfig-2.7.3: libraries/expat-2.0.1 \
-    libraries/freetype-2.1.10
-$(SENT)/libraries/libpng-1.2.40: libraries/zlib-1.2.3
-$(SENT)/libraries/agg-2.5: libraries/freetype-2.1.10
-$(SENT)/libraries/cairo-1.8.8: \
-    libraries/pixman-0.16.2 libraries/fontconfig-2.7.3 libraries/libpng-1.2.40
-$(SENT)/libraries/ffmpeg-0.5: \
-    libraries/lame-398-2 libraries/libvorbis-1.2.3 libraries/libtheora-1.1.1
-$(SENT)/examples/games/nethack-3.4.3: libraries/nacl-mounts
+$(SENT)/libraries/libvorbis: libraries/libogg
+$(SENT)/libraries/libtheora: libraries/libogg
+$(SENT)/libraries/flac: libraries/libogg
+$(SENT)/libraries/speex: libraries/libogg
+$(SENT)/libraries/fontconfig: libraries/expat \
+    libraries/freetype
+$(SENT)/libraries/libpng: libraries/zlib
+$(SENT)/libraries/agg: libraries/freetype
+$(SENT)/libraries/cairo: \
+    libraries/pixman libraries/fontconfig libraries/libpng
+$(SENT)/libraries/ffmpeg: \
+    libraries/lame libraries/libvorbis libraries/libtheora
+$(SENT)/examples/games/nethack: libraries/nacl-mounts
 ifeq ($(NACL_GLIBC), 1)
-  $(SENT)/examples/games/nethack-3.4.3: libraries/ncurses-5.9
+  $(SENT)/examples/games/nethack: libraries/ncurses
 endif
-$(SENT)/examples/tools/thttpd-2.25b: libraries/nacl-mounts \
-    libraries/jsoncpp-0.5.0
-$(SENT)/examples/games/scummvm-1.2.1: \
-    libraries/nacl-mounts libraries/SDL-1.2.14 libraries/libvorbis-1.2.3
-$(SENT)/examples/systems/bochs-2.4.6: \
-    libraries/nacl-mounts libraries/SDL-1.2.14
-$(SENT)/examples/systems/dosbox-0.74: \
-    libraries/nacl-mounts libraries/SDL-1.2.14 libraries/zlib-1.2.3 \
-    libraries/libpng-1.2.40
-$(SENT)/examples/games/snes9x-1.53: libraries/nacl-mounts
-$(SENT)/libraries/glib-2.28.8: libraries/zlib-1.2.3
-$(SENT)/libraries/pango-1.29.3: libraries/glib-2.28.8 libraries/cairo-1.8.8
-$(SENT)/libraries/SDL_mixer-1.2.11: libraries/SDL-1.2.14 \
-    libraries/libogg-1.1.4 libraries/libvorbis-1.2.3 libraries/libmikmod-3.1.11
-$(SENT)/libraries/SDL_image-1.2.10: libraries/SDL-1.2.14 \
-    libraries/libpng-1.2.40 libraries/jpeg-6b
-$(SENT)/libraries/SDL_net-1.2.7: libraries/SDL-1.2.14
-$(SENT)/libraries/SDL_ttf-2.0.10: libraries/SDL-1.2.14 \
-    libraries/freetype-2.1.10
-$(SENT)/libraries/boost_1_47_0: libraries/zlib-1.2.3 libraries/bzip2-1.0.6
+$(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
+    libraries/jsoncpp
+$(SENT)/examples/games/scummvm: \
+    libraries/nacl-mounts libraries/SDL libraries/libvorbis
+$(SENT)/examples/systems/bochs: \
+    libraries/nacl-mounts libraries/SDL
+$(SENT)/examples/systems/dosbox: \
+    libraries/nacl-mounts libraries/SDL libraries/zlib \
+    libraries/libpng
+$(SENT)/examples/games/snes9x: libraries/nacl-mounts
+$(SENT)/libraries/glib: libraries/zlib
+$(SENT)/libraries/pango: libraries/glib libraries/cairo
+$(SENT)/libraries/SDL_mixer: libraries/SDL \
+    libraries/libogg libraries/libvorbis libraries/libmikmod
+$(SENT)/libraries/SDL_image: libraries/SDL \
+    libraries/libpng libraries/jpeg
+$(SENT)/libraries/SDL_net: libraries/SDL
+$(SENT)/libraries/SDL_ttf: libraries/SDL \
+    libraries/freetype
+$(SENT)/libraries/boost: libraries/zlib libraries/bzip2
 $(SENT)/examples/audio/openal-ogg: \
-    libraries/openal-soft-1.13 libraries/libvorbis-1.2.3
-$(SENT)/libraries/nacl-mounts: libraries/gtest-1.5.0
+    libraries/openal-soft libraries/libvorbis
+$(SENT)/libraries/nacl-mounts: libraries/gtest
 ifneq ($(NACL_GLIBC), 1)
-  $(SENT)/libraries/openssl-1.0.0e: libraries/glibc-compat
+  $(SENT)/libraries/openssl: libraries/glibc-compat
 endif
 
 # shortcuts libraries (alphabetical)
-agg: libraries/agg-2.5 ;
-boost: libraries/boost_1_47_0 ;
-box2d: libraries/box2d-2.2.1 ;
-bzip2: libraries/bzip2-1.0.6 ;
-cairo: libraries/cairo-1.8.8 ;
+agg: libraries/agg ;
+boost: libraries/boost ;
+box2d: libraries/box2d ;
+bzip2: libraries/bzip2 ;
+cairo: libraries/cairo ;
 cfitsio: libraries/cfitsio ;
-expat: libraries/expat-2.0.1 ;
-faac: libraries/faac-1.28 ;
-faad: libraries/faad2-2.7 ;
-ffmpeg: libraries/ffmpeg-0.5 ;
-fftw: libraries/fftw-3.2.2 ;
-flac: libraries/flac-1.2.1 ;
-fontconfig: libraries/fontconfig-2.7.3 ;
-freeimage: libraries/FreeImage-3.14.1 ;
-freetype: libraries/freetype-2.1.10 ;
+expat: libraries/expat ;
+faac: libraries/faac ;
+faad: libraries/faad2 ;
+ffmpeg: libraries/ffmpeg ;
+fftw: libraries/fftw ;
+flac: libraries/flac ;
+fontconfig: libraries/fontconfig ;
+freeimage: libraries/FreeImage ;
+freetype: libraries/freetype ;
 gc: libraries/gc6.8 ;
-glib: libraries/glib-2.28.8 ;
+glib: libraries/glib ;
 glibc-compat: libraries/glibc-compat ;
-gtest: libraries/gtest-1.5.0 ;
-gsl: libraries/gsl-1.9 ;
-imagemagick: libraries/ImageMagick-6.5.4-10 ;
-jpeg: libraries/jpeg-6b ;
-jsoncpp: libraries/jsoncpp-0.5.0 ;
-lame: libraries/lame-398-2 ;
-lua: libraries/lua-5.1.4 ;
-mesa: libraries/Mesa-7.6 ;
-mikmod: libraries/libmikmod-3.1.11 ;
-modplug: libraries/libmodplug-0.8.7 ;
+gtest: libraries/gtest ;
+gsl: libraries/gsl ;
+imagemagick: libraries/ImageMagick ;
+jpeg: libraries/jpeg ;
+jsoncpp: libraries/jsoncpp ;
+lame: libraries/lame ;
+lua: libraries/lua ;
+mesa: libraries/Mesa ;
+mikmod: libraries/libmikmod ;
+modplug: libraries/libmodplug ;
 nacl-mounts: libraries/nacl-mounts ;
-ogg: libraries/libogg-1.1.4 ;
-openal: libraries/openal-soft-1.13 ;
-openscenegraph: libraries/OpenSceneGraph-2.9.7 ;
-openssl: libraries/openssl-1.0.0e ;
-pango: libraries/pango-1.29.3 ;
-pixman: libraries/pixman-0.16.2 ;
-png: libraries/libpng-1.2.40 ;
-protobuf: libraries/protobuf-2.3.0 ;
-sdl: libraries/SDL-1.2.14 ;
-sdl_image: libraries/SDL_image-1.2.10 ;
-sdl_mixer: libraries/SDL_mixer-1.2.11 ;
-sdl_net: libraries/SDL_net-1.2.7 ;
-sdl_ttf: libraries/SDL_ttf-2.0.10 ;
-speex: libraries/speex-1.2rc1 ;
-theora: libraries/libtheora-1.1.1 ;
-tiff: libraries/tiff-3.9.1 ;
+ogg: libraries/libogg ;
+openal: libraries/openal-soft ;
+openscenegraph: libraries/OpenSceneGraph ;
+openssl: libraries/openssl ;
+pango: libraries/pango ;
+pixman: libraries/pixman ;
+png: libraries/libpng ;
+protobuf: libraries/protobuf ;
+sdl: libraries/SDL ;
+sdl_image: libraries/SDL_image ;
+sdl_mixer: libraries/SDL_mixer ;
+sdl_net: libraries/SDL_net ;
+sdl_ttf: libraries/SDL_ttf ;
+speex: libraries/speex ;
+theora: libraries/libtheora ;
+tiff: libraries/tiff ;
 tinyxml: libraries/tinyxml ;
-tomcrypt: libraries/libtomcrypt-1.17 ;
-tommath: libraries/libtommath-0.41 ;
-vorbis: libraries/libvorbis-1.2.3 ;
-x264: libraries/x264-snapshot-20091023-2245 ;
-zlib: libraries/zlib-1.2.3 ;
-ncurses: libraries/ncurses-5.9 ;
+tomcrypt: libraries/libtomcrypt ;
+tommath: libraries/libtommath ;
+vorbis: libraries/libvorbis ;
+x264: libraries/x264 ;
+zlib: libraries/zlib ;
+ncurses: libraries/ncurses ;
 
 # shortcuts examples (alphabetical)
-bochs: examples/systems/bochs-2.4.6 ;
-dosbox: examples/systems/dosbox-0.74 ;
+bochs: examples/systems/bochs ;
+dosbox: examples/systems/dosbox ;
 openal-ogg: examples/audio/openal-ogg ;
-nethack: examples/games/nethack-3.4.3 ;
-scummvm: examples/games/scummvm-1.2.1 ;
-snes9x: examples/games/snes9x-1.53 ;
+nethack: examples/games/nethack ;
+scummvm: examples/games/scummvm ;
+snes9x: examples/games/snes9x ;
 xaos: examples/graphics/xaos ;
-thttpd: examples/tools/thttpd-2.25b ;
+thttpd: examples/tools/thttpd ;
 
 ######################################################################
 # testing and regression targets

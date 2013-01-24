@@ -1,3 +1,0 @@
-PACKAGE_NAME=pixman-0.16.2
-URL=http://cairographics.org/releases/pixman-0.16.2.tar.gz
-PATCH_FILE=nacl-pixman-0.16.2.patch

@@ -1,3 +1,0 @@
-PACKAGE_NAME=ImageMagick-6.5.4-10
-URL=http://downloads.sourceforge.net/project/imagemagick/ImageMagick/6.5/ImageMagick-6.5.4-10.tar.gz
-PATCH_FILE=nacl-ImageMagick-6.5.4-10.patch

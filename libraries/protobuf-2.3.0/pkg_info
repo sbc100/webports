@@ -1,3 +1,0 @@
-PACKAGE_NAME=protobuf-2.3.0
-URL=http://protobuf.googlecode.com/files/protobuf-2.3.0.tar.gz
-PATCH_FILE=nacl-protobuf-2.3.0.patch
