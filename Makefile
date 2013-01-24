@@ -113,6 +113,7 @@ LIBRARIES = \
      libraries/jsoncpp \
      libraries/openal-soft \
      libraries/gtest \
+     libraries/libxml2 \
      libraries/box2d
 
 EXAMPLES = \
@@ -276,6 +277,7 @@ tomcrypt: libraries/libtomcrypt ;
 tommath: libraries/libtommath ;
 vorbis: libraries/libvorbis ;
 x264: libraries/x264 ;
+xml2: libraries/libxml2 ;
 zlib: libraries/zlib ;
 ncurses: libraries/ncurses ;
 

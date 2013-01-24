@@ -560,29 +560,36 @@ DefaultConfigureStep() {
   echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
-  if [[ ${NACL_ARCH} = "pnacl" ]]; then
+  if [ ${NACL_ARCH} = "pnacl" ]; then
     # The PNaCl tools use "pnacl-" as the prefix, but config.sub
     # does not know about "pnacl".  It only knows about "le32-nacl".
     # Unfortunately, most of the config.subs here are so old that
     # it doesn't know about that "le32" either.  So we just say "nacl".
     conf_host="nacl"
   fi
-  ../configure \
+  LogExecute ../configure \
     --host=${conf_host} \
     --disable-shared \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \
     --oldincludedir=${NACLPORTS_INCLUDE} \
-    --with-http=off \
-    --with-html=off \
-    --with-ftp=off \
+    --with-http=no \
+    --with-html=no \
+    --with-ftp=no \
     --${NACL_OPTION}-mmx \
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \
     --${NACL_OPTION}-asm \
     --with-x=no  \
-    "${EXTRA_CONFIGURE_OPTS[@]}"
+    "${EXTRA_CONFIGURE_OPTS[@]}" ${EXTRA_CONFIGURE_ARGS:-}
+}
+
+
+# echo a command to stdout and then execute it.
+LogExecute() {
+  echo $*
+  $*
 }
 
 
@@ -590,8 +597,9 @@ DefaultBuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   echo "Directory: $(pwd)"
   # assumes pwd has makefile
-  make clean
-  make -j${OS_JOBS}
+  LogExecute make clean
+  # Build ${MAKE_TARGETS} or default target if it is not defined
+  LogExecute make -j${OS_JOBS} ${MAKE_TARGETS:-}
 }
 
 
@@ -605,7 +613,7 @@ DefaultTouchStep() {
 
 DefaultInstallStep() {
   # assumes pwd has makefile
-  make install
+  LogExecute make ${INSTALL_TARGETS:-install}
   DefaultTouchStep
 }
 
@@ -619,10 +627,12 @@ DefaultCleanUpStep() {
 }
 
 
-RunCommand() {
+# echo a command before exexuting it under 'time'
+TimeCommand() {
   echo "$@"
   time "$@"
 }
+
 
 RunSelLdrCommand() {
   echo "[sel_ldr] $@"
@@ -644,14 +654,14 @@ DefaultTranslateStep() {
   ls -l ${pexe}
 
   echo "stripping pexe"
-  RunCommand ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
+  TimeCommand ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
   ls -l ${pexe}.stripped
 
   for a in ${arches} ; do
     echo
     echo "translating pexe [$a]"
     nexe=${pexe}.$a.nexe
-    RunCommand ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${nexe}
+    TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${nexe}
     ls -l ${nexe}
   done
 
@@ -660,7 +670,7 @@ DefaultTranslateStep() {
     echo
     echo "translating pexe [$a,pic]"
     nexe=${pexe}.$a.pic.nexe
-    RunCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${nexe}
+    TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${nexe}
     ls -l ${nexe}
   done
 
@@ -668,14 +678,14 @@ DefaultTranslateStep() {
   opt_args="-O3 -inline-threshold=100"
   echo
   echo "optimizing pexe [${opt_args}]"
-  RunCommand ${OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
+  TimeCommand ${OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
   ls -l ${pexe}.stripped.opt
 
   for a in ${arches} ; do
     echo
     echo "translating pexe [$a]"
     nexe=${pexe}.opt.$a.nexe
-    RunCommand ${TRANSLATOR} -arch $a ${pexe}.stripped.opt -o ${nexe}
+    TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped.opt -o ${nexe}
     ls -l ${nexe}
   done
 
@@ -684,7 +694,7 @@ DefaultTranslateStep() {
     echo
     echo "translating pexe [$a,pic]"
     nexe=${pexe}.$a.pic.opt.nexe
-    RunCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped.opt -o ${nexe}
+    TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped.opt -o ${nexe}
     ls -l ${nexe}
   done
 
