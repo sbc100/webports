@@ -379,6 +379,7 @@ DefaultDownloadZipStep() {
   fi
 }
 
+
 Patch() {
   local LOCAL_PACKAGE_NAME=$1
   local LOCAL_PATCH_FILE=$2
@@ -520,26 +521,11 @@ DefaultExtractZipStep() {
   unzip -d ${PACKAGE_NAME} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
 }
 
-# TODO(khim): remove this when nacl-gcc -V doesn't lockup.
-# See: http://code.google.com/p/nativeclient/issues/detail?id=2074
-TemporaryVersionWorkaround() {
-  if [ $OS_SUBDIR = "windows" ]; then
-    Banner "TEMPORARY: Replacing -V with --version for ${PACKAGE_NAME}"
-    cd ${NACL_PACKAGES_REPOSITORY}
-    # Generic.
-    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/configure || true
-    # For freetype.
-    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/builds/unix/configure || true
-    sed -i 's/-V/--version/g' ${PACKAGE_NAME}/builds/unix/aclocal.m4 || true
-  fi
-}
-
 
 DefaultPatchStep() {
   if [ -n "${PATCH_FILE:-}" ]; then
     Patch ${PACKAGE_NAME} ${PATCH_FILE}
   fi
-  TemporaryVersionWorkaround
 }
 
 

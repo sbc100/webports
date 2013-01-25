@@ -194,7 +194,6 @@ CustomPatch() {
 
 CustomPatchStep() {
   CustomPatch ${PACKAGE_NAME} ${BOCHS_EXAMPLE_DIR}/${PATCH_FILE}
-  TemporaryVersionWorkaround
 }
 
 CustomPackageInstall() {

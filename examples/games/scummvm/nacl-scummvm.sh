@@ -191,7 +191,6 @@ CustomPatch() {
 
 CustomPatchStep() {
   CustomPatch ${PACKAGE_NAME} ${SCUMMVM_EXAMPLE_DIR}/${PATCH_FILE}
-  TemporaryVersionWorkaround
 }
 
 CustomPackageInstall() {

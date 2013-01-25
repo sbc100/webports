@@ -32,7 +32,6 @@ CustomConfigureStep() {
 
   # TODO(khim): remove this when nacl-gcc -V doesn't lockup.
   # See: http://code.google.com/p/nativeclient/issues/detail?id=2074
-  TemporaryVersionWorkaround
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
   Remove ${PACKAGE_NAME}-build
