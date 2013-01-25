@@ -4,12 +4,11 @@
 # found in the LICENSE file.
 #
 
-# nacl-tiff-3.9.1.sh
+# nacl-tiff.sh
 #
-# usage:  nacl-tiff-3.9.1.sh
+# usage:  nacl-tiff.sh
 #
 # this script downloads, patches, and builds tiff for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh

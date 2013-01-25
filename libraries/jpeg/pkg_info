@@ -1,3 +1,2 @@
-PACKAGE_NAME=jpeg-6b
-URL=http://downloads.sourceforge.net/libjpeg/jpegsrc.v6b.tar.gz
-PATCH_FILE=nacl-jpeg.patch
+PACKAGE_NAME=jpeg-8d
+URL=http://www.ijg.org/files/jpegsrc.v8d.tar.gz

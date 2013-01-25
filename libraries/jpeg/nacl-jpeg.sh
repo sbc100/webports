@@ -13,7 +13,5 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-INSTALL_TARGETS="install-lib install-headers"
-
 DefaultPackageInstall
 exit 0
