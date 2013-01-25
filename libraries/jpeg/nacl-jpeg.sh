@@ -4,34 +4,16 @@
 # found in the LICENSE file.
 #
 
-# nacl-jpeg-6b.sh
+# nacl-jpeg.sh
 #
-# usage:  nacl-jpeg-6b.sh
+# usage:  nacl-jpeg.sh
 #
-# this script downloads, patches, and builds libjpeg for Native Client 
-#
+# this script downloads, patches, and builds libjpeg for Native Client.
 
 source pkg_info
 source ../../build_tools/common.sh
 
+INSTALL_TARGETS="install-lib install-headers"
 
-CustomInstallStep() {
-  make install-lib
-  make install-headers
-  DefaultTouchStep
-}
-
-
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  DefaultConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
-  DefaultCleanUpStep
-}
-
-CustomPackageInstall
+DefaultPackageInstall
 exit 0

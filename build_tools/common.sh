@@ -536,7 +536,9 @@ TemporaryVersionWorkaround() {
 
 
 DefaultPatchStep() {
-  Patch ${PACKAGE_NAME} ${PATCH_FILE}
+  if [ -n "${PATCH_FILE:-}" ]; then
+    Patch ${PACKAGE_NAME} ${PATCH_FILE}
+  fi
   TemporaryVersionWorkaround
 }
 
