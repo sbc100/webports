@@ -63,7 +63,7 @@ CustomInstallStep() {
   ChangeDir ${PUBLISH_DIR}
   local NACL_LIB_PATH=$NACL_TOOLCHAIN_ROOT/x86_64-nacl
   local NACL_COMPLEMENT_ARCH="x86_64"
-  local NACL_COMPLEMENT_LIBDDIR="lib64"
+  local NACL_COMPLEMENT_LIBDIR="lib64"
   if [ ${NACL_ARCH} = "x86_64" ]; then
     NACL_COMPLEMENT_ARCH="i686"
     NACL_COMPLEMENT_LIBDIR="lib32"
