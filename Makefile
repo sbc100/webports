@@ -157,7 +157,7 @@ examples: $(EXAMPLES)
 all: $(PACKAGES)
 # The subset of libraries that are shipped as part of the
 # official NaCl SDK
-sdklibs: zlib jpeg tiff png tinyxml lua
+sdklibs: zlib jpeg tiff png tinyxml lua xml2
 
 .PHONY: all default libraries examples clean sdklibs
 

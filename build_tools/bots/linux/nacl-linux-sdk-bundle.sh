@@ -83,7 +83,7 @@ MoveLibs() {
   done
 }
 
-PACKAGES="zlib jpeg tiff png tinyxml lua"
+PACKAGES="zlib jpeg tiff png tinyxml lua xml2"
 
 for package in $PACKAGES; do
   BuildPackageAll $package
