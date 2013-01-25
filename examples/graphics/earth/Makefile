@@ -5,6 +5,7 @@
 # Build rotating earth demo with Pepper in C, Pepper in C++, and NaCl-SDL
 
 NACLPORTS_ROOT ?= ../../..
+CCFLAGS += -I$(NACL_SDK_ROOT)/include
 CCFLAGS	+= -O3 -msse2 -mfpmath=sse -fomit-frame-pointer
 CCFLAGS += -std=gnu++98 -Wno-long-long -Wall -pedantic -Werror
 LIBS	 += -lpthread -lm -lppruntime -lppapi_cpp -lplatform -lgio -lsrpc
@@ -24,10 +25,10 @@ NACL_TOOLCHAIN_ROOT=$(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)
 SDL_CCFLAGS = -I$(NACL_TOOLCHAIN_ROOT)/nacl/usr/include/SDL \
              -D_GNU_SOURCE=1 -D_REENTRANT $(CCFLAGS)
 # SDL_LIBS is from `$(NACL_TOOLCHAIN_ROOT)/nacl/usr/bin/sdl-config --libs`
-SDL_LIBS = -L$(NACL_TOOLCHAIN_ROOT)/nacl/usr/lib -lSDL -lpthread -lm $(LIBS)
-SDL_LIBS64 = -L$(NACL_TOOLCHAIN_ROOT)/nacl64/usr/lib -lSDL -lpthread -lm $(LIBS)
-LIBSDL=$(NACL_TOOLCHAIN_ROOT)/nacl/usr/lib/libSDL.a
-LIBSDL64=$(NACL_TOOLCHAIN_ROOT)/nacl64/usr/lib/libSDL.a
+SDL_LIBS = -L$(NACL_TOOLCHAIN_ROOT)/i686-nacl/usr/lib -lSDL -lpthread -lm $(LIBS)
+SDL_LIBS64 = -L$(NACL_TOOLCHAIN_ROOT)/x86_64-nacl/usr/lib -lSDL -lpthread -lm $(LIBS)
+LIBSDL=$(NACL_TOOLCHAIN_ROOT)/i686-nacl/usr/lib/libSDL.a
+LIBSDL64=$(NACL_TOOLCHAIN_ROOT)/x86_64-nacl/usr/lib/libSDL.a
 
 earth_sdl_x86_32.nexe: sdl.c earth.cc pepper_plugin.cc $(LIBSDL)
 	 $(CPP) -o $@ $^ $(SDL_CCFLAGS) $(SDL_LIBS)

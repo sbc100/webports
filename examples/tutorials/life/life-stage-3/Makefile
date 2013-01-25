@@ -12,7 +12,7 @@ CCFILES = life_module.cc life.cc
 HFILES = life.h scoped_mutex_lock.h scoped_pixel_lock.h
 
 CFLAGS = -Wall -Wno-long-long -pthread -Werror
-INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
+INCLUDES = -I$(NACL_SDK_ROOT)/include -I$(NACLPORTS_ROOT)
 LDFLAGS = -lppruntime \
           -lppapi_cpp \
           -lgoogle_nacl_platform \

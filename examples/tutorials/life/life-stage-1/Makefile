@@ -11,7 +11,7 @@ INSTALL_DIR ?= $(INSTALL_ROOT)/life-stage-1
 CCFILES = life_module.cc life.cc
 
 CFLAGS = -Wall -Wno-long-long -pthread -Werror
-INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
+INCLUDES = -I$(NACL_SDK_ROOT)/include -I$(NACLPORTS_ROOT)
 LDFLAGS = -lppruntime \
           -lppapi_cpp \
           -lgoogle_nacl_platform \

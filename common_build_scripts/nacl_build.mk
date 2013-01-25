@@ -21,13 +21,14 @@ ifeq ($(origin OS), undefined)
   endif
 endif
 
-# Native Client originally supported only newlib, and is in transition
-# to gnu-libc. Please set LIBCIMPL as follows:
-#     For NaCl SDK v0.1 and v0.2: LIBCIMPL=
-#     For NaCl head-of-tree with glibc: LIBCIMPL=
-#     For NaCl head-of-tree with newlib: LIBCIMPL=_newlib
-ifeq ($(origin LIBCIMPL), undefined)
-  LIBCIMPL=
+ifndef NACL_ARCH
+  NACL_ARCH=i686
+endif
+
+ifeq ($(NACL_GLIBC), 1)
+  LIBCIMPL = _glibc
+else
+  LIBCIMPL = _newlib
 endif
 
 ifeq ($(OS), $(filter $(OS), Windows_NT Cygwin))
@@ -48,8 +49,8 @@ endif
 
 NACL_TOOLCHAIN_DIR = toolchain/$(PLATFORM)_$(TARGET)
 
-CC = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/nacl-gcc
-CPP = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/nacl-g++
+CC = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/$(NACL_ARCH)-nacl-gcc
+CPP = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/$(NACL_ARCH)-nacl-g++
 NACL_STRIP = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/bin/nacl-strip
 
 OBJDIR ?= .

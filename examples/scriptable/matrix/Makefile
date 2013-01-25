@@ -11,7 +11,7 @@ NACLPORTS_ROOT = ../../..
 CCFILES = matrix_comp.cc
 
 CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror
-INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
+INCLUDES = -I$(NACL_SDK_ROOT)/include -I$(NACLPORTS_ROOT)
 
 # PLEASE NOTE: If you are using a NaCl SDK version 0.1 you must use
 # -lgoogle_nacl_platform instead of -lplatform
@@ -27,9 +27,9 @@ OPT_FLAGS = -O2
 
 # The matrix executable depends on boost for math/ublas libraries 
 BOOST_UBLAS_32 = \
-  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl/usr/include/boost/numeric/ublas/matrix.hpp
+  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/i686-nacl/usr/include/boost/numeric/ublas/matrix.hpp
 BOOST_UBLAS_64 = \
-  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl64/usr/include/boost/numeric/ublas/matrix.hpp
+  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/x86_64-nacl/usr/include/boost/numeric/ublas/matrix.hpp
 
 PACKAGES = $(BOOST_UBLAS_32) $(BOOST_UBLAS_64)
 
@@ -53,12 +53,12 @@ clean:
 
 # Build the required packages.
 $(BOOST_UBLAS_32):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
+	(cd $(NACLPORTS_ROOT)/packages/scripts/boost; \
 	export NACL_ARCH=i686; \
-	./nacl-boost_1_43_0.sh)
+	./nacl-boost.sh)
 
 $(BOOST_UBLAS_64):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
+	(cd $(NACLPORTS_ROOT)/packages/scripts/boost; \
 	export NACL_ARCH=x86_64; \
-	./nacl-boost_1_43_0.sh)
+	./nacl-boost.sh)
 

@@ -15,7 +15,7 @@ CCFILES = perf_test.cc
 
 
 CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror
-INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
+INCLUDES = -I$(NACL_SDK_ROOT)/include -I$(NACLPORTS_ROOT)
 
 # PLEASE NOTE: If you are using a NaCl SDK version 0.1 you must use
 # -lgoogle_nacl_platform instead of -lplatform

@@ -22,7 +22,6 @@ HFILES = callback.h \
          surface.h
 
 CCFILES = geturl_handler.cc \
-          jpeg_mem_src.cc \
           loader.cc \
           photo.cc \
           scripting_bridge.cc \
@@ -35,7 +34,7 @@ OBJECTS_X86_64 = $(patsubst %,${OBJDIR}/%,$(CFILES:%.c=%_x86_64.o))
 OBJECTS_X86_64 += $(patsubst %,${OBJDIR}/%,$(CCFILES:%.cc=%_x86_64.o))
 
 CFLAGS = -flax-vector-conversions -Wall -Wno-long-long -pthread -Werror
-INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
+INCLUDES = -I$(NACL_SDK_ROOT)/include -I$(NACLPORTS_ROOT)
 
 # PLEASE NOTE: If you are using a NaCl SDK version 0.1 you must use
 # -lgoogle_nacl_platform instead of -lplatform
@@ -68,12 +67,12 @@ all: all_photo
 # nacl_build.mk has rules to build .o files from .cc files.
 -include $(NACLPORTS_ROOT)/common_build_scripts/nacl_build.mk
 
-LIB_JPEG_32 = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl/usr/lib/libjpeg.a
-LIB_JPEG_64 = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl64/usr/lib/libjpeg.a
+LIB_JPEG_32 = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/i686-nacl/usr/lib/libjpeg.a
+LIB_JPEG_64 = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/x86_64-nacl/usr/lib/libjpeg.a
 BOOST_SMART_PTR_32 = \
-  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl/usr/include/boost/scoped_ptr.hpp
+  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/i686-nacl/usr/include/boost/scoped_ptr.hpp
 BOOST_SMART_PTR_64 = \
-  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl64/usr/include/boost/scoped_ptr.hpp
+  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/x86_64-nacl/usr/include/boost/scoped_ptr.hpp
 
 PACKAGES = $(LIB_JPEG_32) \
            $(LIB_JPEG_64) \
@@ -104,24 +103,24 @@ clean:
 
 # Build the required packages.
 $(LIB_JPEG_32):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/jpeg-6b; \
+	(cd $(NACLPORTS_ROOT)/libraries/jpeg; \
 	export NACL_ARCH=i686; \
-	./nacl-jpeg-6b.sh)
+	./nacl-jpeg.sh)
 
 $(LIB_JPEG_64):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/jpeg-6b; \
+	(cd $(NACLPORTS_ROOT)/libraries/jpeg; \
 	export NACL_ARCH=x86_64; \
-	./nacl-jpeg-6b.sh)
+	./nacl-jpeg.sh)
 
 $(BOOST_SMART_PTR_32):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
+	(cd $(NACLPORTS_ROOT)/libraries/boost; \
 	export NACL_ARCH=i686; \
-	./nacl-boost_1_43_0.sh)
+	./nacl-boost.sh)
 
 $(BOOST_SMART_PTR_64):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/boost_1_43_0; \
+	(cd $(NACLPORTS_ROOT)/libraries/boost; \
 	export NACL_ARCH=x86_64; \
-	./nacl-boost_1_43_0.sh)
+	./nacl-boost.sh)
 
 # Download and patch the Carpe sliders.
 $(CARPE_FILES):

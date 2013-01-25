@@ -21,7 +21,7 @@ OBJECTS_X86_32 = $(CCFILES:%.cc=%_x86_32.o)
 OBJECTS_X86_64 = $(CCFILES:%.cc=%_x86_64.o)
 
 CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror
-INCLUDES = -I$(NACL_SDK_ROOT) -I$(NACLPORTS_ROOT)
+INCLUDES = -I$(NACL_SDK_ROOT)/include -I$(NACLPORTS_ROOT)
 
 LDFLAGS = $(ARCH_FLAGS) \
           -lgoogle_nacl_npruntime \
@@ -35,10 +35,10 @@ OPT_FLAGS = -O2
 # The crypto executable depends on TomCrypt library
 
 TOMCRYPT_64 = \
-  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl64/usr/include/tomcrypt.h
+  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/i686-nacl/usr/include/tomcrypt.h
 
 TOMCRYPT_32 = \
-  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/nacl/usr/include/tomcrypt.h
+  $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/x86_64-nacl/usr/include/tomcrypt.h
 
 PACKAGES = $(TOMCRYPT_32) $(TOMCRYPT_64)
 
@@ -61,12 +61,12 @@ clean:
 
 # Build the required packages.
 $(TOMCRYPT_32):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/libtomcrypt-1.17; \
+	(cd $(NACLPORTS_ROOT)/libraries/libtomcrypt; \
 	export NACL_ARCH=i686; \
-	./nacl-libtomcrypt-1.17.sh)
+	./nacl-libtomcrypt.sh)
 
 $(TOMCRYPT_64):
-	(cd $(NACLPORTS_ROOT)/packages/scripts/libtomcrypt-1.17; \
+	(cd $(NACLPORTS_ROOT)/libraries/libtomcrypt; \
 	export NACL_ARCH=x86_64; \
-	./nacl-libtomcrypt-1.17.sh)
+	./nacl-libtomcrypt.sh)
 
