@@ -32,7 +32,5 @@ export NACL_ARCH=pnacl
 make ${TARGETS}
 
 # ARM
-# Not all ports build for ARM yet.
-# TODO(sbc): fix the ARM ports.
-#export NACL_ARCH=arn
-#make ${TARGETS}
+export NACL_ARCH=arm
+make ${TARGETS}

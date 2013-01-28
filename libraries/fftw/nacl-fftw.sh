@@ -14,9 +14,37 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-if [ ${NACL_ARCH} = "i686" -o ${NACL_ARCH} = 'x86_64' ] ; then
-  EXTRA_CONFIGURE_ARGS="--enable-sse2"
-fi
+CustomConfigureStep() {
+  Banner "Configuring ${PACKAGE_NAME}"
+  # Export the nacl tools.
+  export CC=${NACLCC}
+  export CXX=${NACLCXX}
+  export AR=${NACLAR}
+  export RANLIB=${NACLRANLIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export PATH=${NACL_BIN_PATH}:${PATH};
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  extra=
+  if [ ${NACL_ARCH} = "x86_64" -o ${NACL_ARCH} = "i686" ] ; then
+    extra="--enable-sse2"
+  fi
 
-DefaultPackageInstall
+  LogExecute ./configure --prefix=${NACLPORTS_PREFIX} --host=nacl ${extra}
+}
+
+
+CustomPackageInstall() {
+  DefaultPreInstallStep
+  DefaultDownloadStep
+  DefaultExtractStep
+  DefaultPatchStep
+  CustomConfigureStep
+  DefaultBuildStep
+  DefaultInstallStep
+  DefaultCleanUpStep
+}
+
+
+CustomPackageInstall
 exit 0

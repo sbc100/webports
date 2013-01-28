@@ -22,7 +22,7 @@ RunTests() {
 
 
 RunSelLdrTests() {
-  if [ $OS_SUBDIR = "windows" ]; then;
+  if [ $OS_SUBDIR = "windows" ]; then
     echo "Not running sel_ldr tests on Windows ."
     return
   fi
