@@ -28,8 +28,7 @@ CustomConfigureStep() {
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build
   cd ${PACKAGE_NAME}-build
-  PERL=/bin/true \
-  ../configure \
+  PERL=/bin/true LogExecute ../configure \
     --host=nacl \
     --disable-shared \
     --prefix=${NACLPORTS_PREFIX} \
@@ -41,7 +40,8 @@ CustomConfigureStep() {
     --with-ftp=off \
     --with-x=no \
     --${NACL_OPTION}-mmx \
-    --${NACL_OPTION}-sse2
+    --${NACL_OPTION}-sse2 \
+    --disable-arm-simd
 }
 
 

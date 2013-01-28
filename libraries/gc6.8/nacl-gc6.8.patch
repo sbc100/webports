@@ -111,19 +111,25 @@ diff -Naur gc6.8/include/private/gc_priv.h gc6.8.nacl/include/private/gc_priv.h
 diff -Naur gc6.8/include/private/gcconfig.h gc6.8.nacl/include/private/gcconfig.h
 --- gc6.8/include/private/gcconfig.h	2006-07-07 14:08:05.000000000 -0700
 +++ gc6.8.nacl/include/private/gcconfig.h	2011-01-07 15:30:07.000000000 -0800
-@@ -61,6 +61,11 @@
+@@ -61,9 +61,16 @@
  # endif
  
  /* Determine the machine type: */
 +# if defined(__native_client__)
 +#    define NACL
-+#    define I386
++#    if !defined(__arm__) && !defined(__thumb__)
++#       define I386
++#    endif
 +#    define mach_type_known
 +# endif
  # if defined(__arm__) || defined(__thumb__)
  #    define ARM32
- #    if !defined(LINUX) && !defined(NETBSD)
-@@ -1029,17 +1034,23 @@
+-#    if !defined(LINUX) && !defined(NETBSD)
++#    if !defined(LINUX) && !defined(NETBSD) && !defined(NACL)
+ #      define NOSYS
+ #      define mach_type_known
+ #    endif
+@@ -1029,17 +1036,23 @@
  # endif
  
  # ifdef I386
@@ -133,7 +139,7 @@ diff -Naur gc6.8/include/private/gcconfig.h gc6.8.nacl/include/private/gcconfig.
 -#     define ALIGNMENT 8
 -#   else
 +#   if defined(NACL)
-+#     define MAC_TYPE "NACL"
++#     define MACH_TYPE "NACL"
  #     define CPP_WORDSZ 32
  #     define ALIGNMENT 4
 +#   else
@@ -152,7 +158,7 @@ diff -Naur gc6.8/include/private/gcconfig.h gc6.8.nacl/include/private/gcconfig.
  #   endif
  #   ifndef SMALL_CONFIG
  #     define ALIGN_DOUBLE /* Not strictly necessary, but may give speed   */
-@@ -1131,6 +1142,33 @@
+@@ -1131,6 +1144,33 @@
  #	endif /* USE_MMAP */
  #   endif /* DGUX */
  
@@ -186,7 +192,41 @@ diff -Naur gc6.8/include/private/gcconfig.h gc6.8.nacl/include/private/gcconfig.
  #   ifdef LINUX
  #	ifndef __GNUC__
  	  /* The Intel compiler doesn't like inline assembly */
-@@ -2238,7 +2276,7 @@
+@@ -1862,6 +1902,33 @@
+ #	endif
+ #       define USE_GENERIC_PUSH_REGS
+ #   endif
++#   ifdef NACL
++       /* Copied from NACL x86 block above */
++#      define OS_TYPE "NACL"
++       extern int etext[];
++#      define DATASTART ((ptr_t)((((word) (etext)) + 0xfff) & ~0xfff))
++       extern int _end[];
++#      define DATAEND (_end)
++#      ifdef STACK_GRAN
++#        undef STACK_GRAN
++#      endif /* STACK_GRAN */
++#      define STACK_GRAN 0x10000
++#      define HEURISTIC1
++#      ifdef USE_MMAP
++#        undef USE_MMAP
++#      endif
++#      ifdef USE_MUNMAP
++#        undef USE_MUNMAP
++#      endif
++#      ifdef USE_MMAP_ANON
++#        undef USE_MMAP_ANON
++#      endif
++#      ifdef USE_MMAP_FIXED
++#        undef USE_MMAP_FIXED
++#      endif
++#      define GETPAGESIZE() 65536
++#      define MAX_NACL_GC_THREADS 1024
++#   endif
+ #   ifdef LINUX
+ #       define OS_TYPE "LINUX"
+ #       define LINUX_STACKBOTTOM
+@@ -2238,7 +2304,7 @@
  # if defined(GC_IRIX_THREADS) && !defined(IRIX5)
  	--> inconsistent configuration
  # endif

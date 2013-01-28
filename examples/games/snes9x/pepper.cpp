@@ -5,8 +5,9 @@
  */
 
 #include <cstdio>
-#include <pthread.h>
 #include <cstring>
+#include <pthread.h>
+#include <unistd.h>
 
 // Pepper includes
 #include "ppapi/c/pp_bool.h"

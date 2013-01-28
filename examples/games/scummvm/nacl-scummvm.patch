@@ -63,7 +63,7 @@ diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/module.mk scummvm-1.2.
 diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
 --- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
 +++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -0,0 +1,115 @@
+@@ -0,0 +1,116 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -72,6 +72,7 @@ diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instanc
 +#include "scummvm_pepper_instance.h"
 +#include <assert.h>
 +#include <vector>
++#include <unistd.h>
 +#include <SDL.h>
 +#include <SDL_nacl.h>
 +#include <SDL_video.h>

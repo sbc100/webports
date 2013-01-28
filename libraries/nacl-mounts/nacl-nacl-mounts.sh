@@ -12,17 +12,23 @@
 #
 
 readonly PACKAGE_NAME=nacl-mounts
-
 source ../../build_tools/common.sh
 
+
 RunTests() {
- make clean && make all && ./tests_out/nacl_mounts_tests
- make clean
+  make clean && make all && ./tests_out/nacl_mounts_tests
+  make clean
 }
 
+
 RunSelLdrTests() {
-  if [ $OS_SUBDIR = "windows" ]; then
-    echo "Not running sel_ldr tests on Windows."
+  if [ $OS_SUBDIR = "windows" ]; then;
+    echo "Not running sel_ldr tests on Windows ."
+    return
+  fi
+
+  if [ $NACL_ARCH = "arm" ]; then
+    echo "Not running sel_ldr tests on ARM."
     return
   fi
 
@@ -47,13 +53,16 @@ RunSelLdrTests() {
   RunSelLdrCommand ${PACKAGE_DIR}/test.nacl/nacl_mounts_sel_ldr_tests
 }
 
+
 CustomBuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PACKAGE_DIR}
   ChangeDir ${PACKAGE_DIR}
   set -x
-  export CXXCMD="${NACLCC} -I${START_DIR}/.. -I${START_DIR} -I${NACL_SDK_ROOT}/include"
+  CFLAGS="${CFLAGS} -I${START_DIR}/.. -I${START_DIR} -I${NACL_SDK_ROOT}/include"
+  CXXCMD="${NACLCXX} ${CFLAGS}"
+  CCCMD="${NACLCC} ${CFLAGS}"
   ${CXXCMD} -c ${START_DIR}/net/TcpSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/TcpServerSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/SocketSubSystem.cc
@@ -69,9 +78,6 @@ CustomBuildStep() {
   ${CXXCMD} -c ${START_DIR}/base/MainThreadRunner.cc
   ${CXXCMD} -c ${START_DIR}/base/UrlLoaderJob.cc
   ${CXXCMD} -c ${START_DIR}/util/Path.cc
-  ${CXXCMD} -c ${START_DIR}/util/nacl_simple_tar.c
-  ${CXXCMD} -c ${START_DIR}/console/terminal.c
-  ${CXXCMD} -c ${START_DIR}/console/terminal_stubs.c
   ${CXXCMD} -c ${START_DIR}/memory/MemMount.cc
   ${CXXCMD} -c ${START_DIR}/memory/MemNode.cc
   ${CXXCMD} -c ${START_DIR}/dev/DevMount.cc
@@ -86,6 +92,9 @@ CustomBuildStep() {
   ${CXXCMD} -c ${START_DIR}/console/ConsoleMount.cc
   ${CXXCMD} -c ${START_DIR}/console/JSPipeMount.cc
   ${CXXCMD} -c ${START_DIR}/console/JSPostMessageBridge.cc
+  ${CCCMD} -c ${START_DIR}/util/nacl_simple_tar.c
+  ${CCCMD} -c ${START_DIR}/console/terminal.c
+  ${CCCMD} -c ${START_DIR}/console/terminal_stubs.c
   ${NACLAR} rcs libnacl-mounts.a \
       MountManager.o \
       KernelProxy.o \

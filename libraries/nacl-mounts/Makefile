@@ -9,16 +9,14 @@
 # location of gtest
 GTEST_DIR = ../../testing/gtest
 
-CPPFLAGS += -I$(GTEST_DIR)
-CXXFLAGS += -pthread -g -Wall -Werror -I$(GTEST_DIR)
+CXXFLAGS += -pthread -g -Wall -Werror
 
 # All gtest headers
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 $(GTEST_DIR)/include/gtest/internal/*.h
 
 # Add root of nacl-mounts to the include path
-CPPFLAGS += -I.
-CPPFLAGS += -I..
+CPPFLAGS += -I. -I$(GTEST_DIR)
 
 UTIL_SOURCES = $(addprefix util/, Path.cc)
 BASE_SOURCES = $(addprefix base/, MountManager.cc KernelProxy.cc \

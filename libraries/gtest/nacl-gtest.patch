@@ -40,14 +40,19 @@ diff -Naur gtest-1.5.0/include/gtest/gtest.h gtest-1.5.0.nacl/include/gtest/gtes
  #include <gtest/gtest-param-test.h>
  #include <gtest/gtest_prod.h>
 diff -Naur gtest-1.5.0/include/gtest/internal/gtest-port.h gtest-1.5.0.nacl/include/gtest/internal/gtest-port.h
---- gtest-1.5.0/include/gtest/internal/gtest-port.h	2010-04-15 16:02:02.000000000 -0600
-+++ gtest-1.5.0.nacl/include/gtest/internal/gtest-port.h	2010-07-08 09:49:37.000000000 -0600
-@@ -222,14 +222,13 @@
+--- gtest-1.5.0/include/gtest/internal/gtest-port.h	2010-04-15 15:02:02.000000000 -0700
++++ gtest-1.5.0.nacl/include/gtest/internal/gtest-port.h	2013-01-26 21:12:44.927234326 -0800
+@@ -219,17 +219,18 @@
+ #define GTEST_OS_SOLARIS 1
+ #elif defined(_AIX)
+ #define GTEST_OS_AIX 1
++#elif defined(__native_client__)
++#define GTEST_OS_NACL 1
  #endif  // __CYGWIN__
  
  #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_SYMBIAN || \
 -    GTEST_OS_SOLARIS || GTEST_OS_AIX
-+    GTEST_OS_SOLARIS || GTEST_OS_AIX && !defined(__native_client__)
++    GTEST_OS_SOLARIS || GTEST_OS_AIX || GTEST_OS_NACL
  
  // On some platforms, <regex.h> needs someone to define size_t, and
  // won't compile otherwise.  We can #include it here as we already
@@ -58,7 +63,7 @@ diff -Naur gtest-1.5.0/include/gtest/internal/gtest-port.h gtest-1.5.0.nacl/incl
  #include <sys/types.h>  // NOLINT
  #include <time.h>  // NOLINT
  #include <unistd.h>  // NOLINT
-@@ -485,7 +484,9 @@
+@@ -485,7 +486,9 @@
  #if (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
       (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || \
       GTEST_OS_WINDOWS_MINGW || GTEST_OS_AIX)
@@ -68,7 +73,7 @@ diff -Naur gtest-1.5.0/include/gtest/internal/gtest-port.h gtest-1.5.0.nacl/incl
  #include <vector>  // NOLINT
  #endif
  
-@@ -839,11 +840,7 @@
+@@ -839,11 +842,7 @@
  // testing Google Test's own constructs.  Don't use it in user tests,
  // either directly or indirectly.
  inline void SleepMilliseconds(int n) {
@@ -214,14 +219,3 @@ diff -Naur gtest-1.5.0/src/gtest.cc gtest-1.5.0.nacl/src/gtest.cc
          ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
          ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
          ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
-diff -Naur gtest-1.5.0/src/gtest_main.cc gtest-1.5.0.nacl/src/gtest_main.cc
---- gtest-1.5.0/src/gtest_main.cc	2010-04-15 16:02:04.000000000 -0600
-+++ gtest-1.5.0.nacl/src/gtest_main.cc	2010-07-08 10:14:13.000000000 -0600
-@@ -33,7 +33,6 @@
- 
- int main(int argc, char **argv) {
-   std::cout << "Running main() from gtest_main.cc\n";
--
-   testing::InitGoogleTest(&argc, argv);
-   return RUN_ALL_TESTS();
- }

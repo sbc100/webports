@@ -162,7 +162,7 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/Makefile.in bochs-2.4.6/bochs_ppap
 diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp
 --- temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
 +++ bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp	2011-08-11 15:11:18.000000000 -0700
-@@ -0,0 +1,181 @@
+@@ -0,0 +1,182 @@
 +// Copyright 2011 The Native Client Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can
 +// be found in the LICENSE file.
@@ -181,6 +181,7 @@ diff -Naur temp_bochs/bochs-2.4.6/bochs_ppapi/bochs_pepper_instance.cpp bochs-2.
 +#include <stdio.h>
 +#include <stdlib.h>
 +#include <fcntl.h>
++#include <unistd.h>
 +
 +#include <cassert>
 +#include <cmath>

@@ -14,41 +14,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  # faac appears to require configure from here, not in build dir
-  ./configure \
-    --host=nacl \
-    --disable-shared \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --oldincludedir=${NACLPORTS_INCLUDE} \
-    --with-mp4v2=no \
-    --with-x=no
-}
+EXTRA_CONFIGURE_ARGS="--with-mp4v2=no"
 
-
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultInstallStep
-  DefaultCleanUpStep
-}
-
-
-CustomPackageInstall
+DefaultPackageInstall
 exit 0

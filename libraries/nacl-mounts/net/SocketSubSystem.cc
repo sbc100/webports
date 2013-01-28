@@ -346,7 +346,7 @@ uint32_t SocketSubSystem::gethostbyname(const char* name) {
     return ip;
   } else {
     dbgprintf("getaddrinfo returned AI_FAIL\n");
-    return NULL;
+    return 0;
   }
 }
 

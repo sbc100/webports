@@ -23,15 +23,24 @@ diff -Naur faac-1.28/config.sub faac-1.28.nacl/config.sub
  	-qnx*)
 diff -Naur faac-1.28/frontend/main.c faac-1.28.nacl/frontend/main.c
 --- faac-1.28/frontend/main.c	2009-01-23 17:10:20.000000000 -0800
-+++ faac-1.28.nacl/frontend/main.c	2009-10-22 15:40:25.955500000 -0700
-@@ -1049,13 +1049,15 @@
++++ faac-1.28.nacl/frontend/main.c	2013-01-26 23:04:33.383592895 -0800
+@@ -43,7 +43,7 @@
+ #endif
+ 
+ /* the BSD derivatives don't define __unix__ */
+-#if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
++#if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__native_client__)
+ #define __unix__
+ #endif
+ 
+@@ -1048,14 +1048,14 @@
+             if ((showcnt <= 0) || !bytesWritten)
              {
                  double timeused;
- #ifdef __unix__
-+#if defined(HAVE_GETRUSAGE)
+-#ifdef __unix__
++#if defined(__unix__) && defined(HAVE_GETRUSAGE)
                  struct rusage usage;
  #endif
-+#endif
  #ifdef _WIN32
                  char percent[MAX_PATH + 20];
                  timeused = (GetTickCount() - begin) * 1e-3;

@@ -20,6 +20,11 @@ RunSelLdrTests() {
     return
   fi
 
+  if [ $NACL_ARCH = "arm" ]; then
+    echo "Not running sel_ldr tests on ARM."
+    return
+  fi
+
   if [ ! -e ${NACL_IRT} ]; then
     echo "WARNING: Missing IRT binary. Not running sel_ldr-based tests."
     return
@@ -33,6 +38,7 @@ RunSelLdrTests() {
 
   RunSelLdrCommand ${PACKAGE_DIR}/${PACKAGE_NAME}-build/HelloWorld/HelloWorld
 }
+
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"

@@ -24,7 +24,33 @@ diff -urN pixman-0.16.2/config.sub pixman-0.16.2-nacl/config.sub
 diff -urN pixman-0.16.2/pixman/pixman-cpu.c pixman-0.16.2-nacl/pixman/pixman-cpu.c
 --- pixman-0.16.2/pixman/pixman-cpu.c	2009-09-25 07:38:55.000000000 -0700
 +++ pixman-0.16.2-nacl/pixman/pixman-cpu.c	2011-09-29 17:13:05.553342000 -0700
-@@ -370,7 +370,32 @@
+@@ -230,7 +230,9 @@
+ #include <sys/mman.h>
+ #include <fcntl.h>
+ #include <string.h>
++#ifndef __native_client__
+ #include <elf.h>
++#endif
+ 
+ static pixman_bool_t arm_has_v7 = FALSE;
+ static pixman_bool_t arm_has_v6 = FALSE;
+@@ -242,6 +244,7 @@
+ static void
+ pixman_arm_read_auxv ()
+ {
++#ifndef __native_client__
+     int fd;
+     Elf32_auxv_t aux;
+ 
+@@ -287,6 +290,7 @@
+ 	if (!getenv ("ARM_TRUST_HWCAP") && arm_has_v7)
+ 	    arm_has_neon = TRUE;
+     }
++#endif
+ 
+     arm_tests_initialized = TRUE;
+ }
+@@ -370,7 +374,32 @@
      vendor[0] = 0;
      vendor[12] = 0;
  

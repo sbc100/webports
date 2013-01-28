@@ -17,8 +17,8 @@
 
 /* exports for termcap */
 char PC = 0;
-char *UP = "";
-char *BC = "";
+const char *UP = "";
+const char *BC = "";
 short ospeed = 0;  /* short is used to match termcap definition, ignore lint */
 
 int tgetent(char *bp, const char *name) {

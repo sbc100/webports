@@ -84,13 +84,9 @@ LIBRARIES = \
      libraries/FreeImage \
      libraries/libogg \
      libraries/libvorbis \
-     libraries/lame \
      libraries/faad2 \
      libraries/faac \
-     libraries/libtheora \
-     libraries/flac \
      libraries/speex \
-     libraries/x264 \
      libraries/lua \
      libraries/tinyxml \
      libraries/expat \
@@ -101,7 +97,6 @@ LIBRARIES = \
      libraries/agg \
      libraries/cairo \
      libraries/ImageMagick \
-     libraries/ffmpeg \
      libraries/Mesa \
      libraries/libmodplug \
      libraries/OpenSceneGraph \
@@ -115,6 +110,17 @@ LIBRARIES = \
      libraries/gtest \
      libraries/libxml2 \
      libraries/box2d
+
+ifneq ($(NACL_ARCH), arm)
+# Libraries that currently fail to build on ARM
+# TODO(sbc): fix the build isses and remove this conditional
+  LIBRARIES += \
+     libraries/flac \
+     libraries/x264 \
+     libraries/libtheora \
+     libraries/ffmpeg \
+     libraries/lame
+endif
 
 EXAMPLES = \
      examples/games/scummvm \

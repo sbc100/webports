@@ -18,8 +18,11 @@ source ../../build_tools/common.sh
 CustomBuildStep() {
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   local cflags="${NACLPORTS_CFLAGS}"
-  if [ ${NACL_ARCH} != "pnacl" ] ; then
-    cflags="${cflags} -O3 -mfpmath=sse -msse -fomit-frame-pointer"
+  if [ ${NACL_ARCH} != "pnacl" ]; then
+    cflags="${cflags} -O3 -fomit-frame-pointer"
+  fi
+  if [ ${NACL_ARCH} = "i686" -o ${NACL_ARCH} = "x86_64" ]; then
+    cflags="${cflags} -mfpmath=sse -msse"
   fi
   AGGCXXFLAGS="${cflags}" make NACLCXX=${NACLCXX} NACLCC=${NACLCC} NACLAR=${NACLAR}
 }

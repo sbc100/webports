@@ -36,7 +36,7 @@ if [ $OS_NAME = "Darwin" ]; then
 elif [ $OS_NAME = "Linux" ]; then
   readonly OS_SUBDIR="linux"
   readonly OS_SUBDIR_SHORT="linux"
-  readonly OS_JOBS=4
+  readonly OS_JOBS=$(cat /proc/cpuinfo | grep processor | wc -l)
 else
   readonly OS_SUBDIR="windows"
   readonly OS_SUBDIR_SHORT="win"
@@ -44,9 +44,9 @@ else
 fi
 
 # Set default NACL_ARCH based on legacy NACL_PACKAGES_BITSIZE
-if [ "${NACL_PACKAGES_BITSIZE:-}" = "64" ] ; then
+if [ "${NACL_PACKAGES_BITSIZE:-}" = "64" ]; then
   export NACL_ARCH=${NACL_ARCH:-"x86_64"}
-elif [ "${NACL_PACKAGES_BITSIZE:-}" = "pnacl" ] ; then
+elif [ "${NACL_PACKAGES_BITSIZE:-}" = "pnacl" ]; then
   export NACL_ARCH=${NACL_ARCH:-"pnacl"}
 else
   export NACL_ARCH=${NACL_ARCH:-"i686"}
@@ -54,15 +54,15 @@ fi
 
 # Check NACL_ARCH
 if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
-     ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" ] ; then
+     ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" ]; then
   echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
   exit -1
 fi
 
-if [ ${NACL_ARCH} = "i686" ] ; then
+if [ ${NACL_ARCH} = "i686" ]; then
   readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_32
   readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_core_x86_32.nexe
-else
+elif [ ${NACL_ARCH} != "arm" ]; then
   # TODO(eugenis): Is this correct for PNACL?
   readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_64
   readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_core_x86_64.nexe
@@ -79,7 +79,7 @@ fi
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
 # TODO: Currently only x86-32 will encourage MMX, SSE & SSE2 intrinsics
 #       and handcoded assembly.
-if [ $NACL_ARCH = "i686" ] ; then
+if [ $NACL_ARCH = "i686" ]; then
   readonly NACL_OPTION="enable"
 else
   readonly NACL_OPTION="disable"
@@ -117,15 +117,15 @@ InitializeNaClGccToolchain() {
   # locate default nacl_sdk toolchain
   # TODO: x86 only at the moment
   NACL_GLIBC=${NACL_GLIBC:-0}
-  if [ $NACL_ARCH = "arm" ] ; then
+  if [ $NACL_ARCH = "arm" ]; then
     local TOOLCHAIN_ARCH="arm"
   else
     local TOOLCHAIN_ARCH="x86"
   fi
 
-  if [ $NACL_ARCH = "arm" ] ; then
+  if [ $NACL_ARCH = "arm" ]; then
     local TOOLCHAIN_DIR=${OS_SUBDIR_SHORT}_arm_newlib
-  elif [ $NACL_GLIBC = "1" ] ; then
+  elif [ $NACL_GLIBC = "1" ]; then
     # m15-m17 SDK layouts have the glibc toolchain without the _glibc suffix
     local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_glibc/bin/${NACL_CROSS_PREFIX}-gcc
     local TENTATIVE_NEWLIB_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/${NACL_CROSS_PREFIX}-gcc
@@ -175,9 +175,9 @@ InitializeNaClGccToolchain() {
   # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
   readonly NACL_SDK_GCC_SPECS_PATH=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
 
-  if [ ${NACL_ARCH} = "arm" ] ; then
+  if [ ${NACL_ARCH} = "arm" ]; then
     local NACL_LIBDIR=arm-nacl/lib
-  elif [ ${NACL_ARCH} = "x86_64" ] ; then
+  elif [ ${NACL_ARCH} = "x86_64" ]; then
     local NACL_LIBDIR=x86_64-nacl/lib64
   else
     local NACL_LIBDIR=x86_64-nacl/lib32
@@ -201,7 +201,7 @@ InitializeNaClGccToolchain() {
 
 InitializePNaClToolchain() {
   NACL_GLIBC=${NACL_GLIBC:-0}
-  if [ $NACL_GLIBC = "1" ] ; then
+  if [ $NACL_GLIBC = "1" ]; then
     local TOOLCHAIN_SUFFIX="glibc"
   else
     local TOOLCHAIN_SUFFIX="newlib"
@@ -237,14 +237,21 @@ InitializePNaClToolchain() {
   readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 }
 
-if [ ${NACL_ARCH} = "pnacl" ] ; then
+if [ ${NACL_ARCH} = "pnacl" ]; then
   InitializePNaClToolchain
 else
   InitializeNaClGccToolchain
 fi
 
-readonly NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE}"
-readonly NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
+NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE}"
+NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
+
+# The NaCl version of ARM gcc emits warnings about va_args that
+# are not particularly useful
+if [ $NACL_ARCH = 'arm' ]; then
+  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Wno-psabi"
+fi
+
 export CFLAGS=${NACLPORTS_CFLAGS}
 export LDFLAGS=${NACLPORTS_LDFLAGS}
 
@@ -324,7 +331,7 @@ Fetch() {
     TryFetch $1 $2
   fi
 
-  if [ ! -s $2 ] ; then
+  if [ ! -s $2 ]; then
     echo "ERROR: could not find $2"
     exit -1
   fi
@@ -607,7 +614,7 @@ DefaultInstallStep() {
 
 
 DefaultCleanUpStep() {
-  if [ ${NACL_ARCH} != "pnacl" -a ${NACL_ARCH} != "arm" ] ; then
+  if [ ${NACL_ARCH} != "pnacl" -a ${NACL_ARCH} != "arm" ]; then
     PatchSpecFile
   fi
   AddToInstallFile ${PACKAGE_NAME}
@@ -623,8 +630,12 @@ TimeCommand() {
 
 
 RunSelLdrCommand() {
+  if [ $NACL_ARCH = "arm" ]; then
+    # no sel_ldr for arm
+    return
+  fi
   echo "[sel_ldr] $@"
-  if [ $NACL_GLIBC = "1" ] ; then
+  if [ $NACL_GLIBC = "1" ]; then
     time "${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- \
         "${NACL_SDK_LIB}/runnable-ld.so" --library-path "${NACL_SDK_LIB}" "$@"
   else

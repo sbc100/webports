@@ -79,8 +79,8 @@ CustomConfigureStep() {
 
 CustomBuildStep() {
   # assumes pwd has makefile
-  make OS=nacl clean
-  make OS=nacl -j${OS_JOBS}
+  LogExecute make OS=nacl clean
+  LogExecute make OS=nacl -j${OS_JOBS}
 }
 
 CustomInstallStep() {
