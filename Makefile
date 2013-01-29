@@ -109,6 +109,7 @@ LIBRARIES = \
      libraries/openal-soft \
      libraries/gtest \
      libraries/libxml2 \
+     libraries/x264 \
      libraries/box2d
 
 ifneq ($(NACL_ARCH), arm)
@@ -116,7 +117,6 @@ ifneq ($(NACL_ARCH), arm)
 # TODO(sbc): fix the build isses and remove this conditional
   LIBRARIES += \
      libraries/flac \
-     libraries/x264 \
      libraries/libtheora \
      libraries/ffmpeg \
      libraries/lame

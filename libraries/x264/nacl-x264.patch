@@ -1,3 +1,15 @@
+diff -Naur x264-snapshot-20091023-2245/common/cpu.c x264-snapshot-20091023-2245.nacl/common/cpu.c
+--- x264-snapshot-20091023-2245/common/cpu.c	2013-01-28 17:05:06.963624641 -0800
++++ x264-snapshot-20091023-2245.nacl/common/cpu.c	2009-10-23 13:45:08.000000000 -0700
+@@ -67,7 +67,7 @@
+     {"", 0},
+ };
+ 
+-#if (defined(ARCH_PPC) && defined(SYS_LINUX)) || (defined(ARCH_ARM) && !defined(HAVE_NEON))
++#if (defined(ARCH_PPC) && defined(SYS_LINUX)) || (defined(ARCH_ARM) && !defined(HAVE_NEON) && !defined(__native_client__))
+ #include <signal.h>
+ #include <setjmp.h>
+ static sigjmp_buf jmpbuf;
 diff -Naur x264-snapshot-20091023-2245/config.sub x264-snapshot-20091023-2245.nacl/config.sub
 --- x264-snapshot-20091023-2245/config.sub	2009-10-23 13:45:08.000000000 -0700
 +++ x264-snapshot-20091023-2245.nacl/config.sub	2012-01-27 13:35:28.461732340 -0800
@@ -40,3 +52,19 @@ diff -Naur x264-snapshot-20091023-2245/configure x264-snapshot-20091023-2245.nac
    cygwin*)
      SYS="MINGW"
      EXE=".exe"
+@@ -445,7 +450,14 @@
+ elif [ $ARCH = ARM ]; then
+     # arm-gcc-4.2 produces incorrect output with -ffast-math
+     # and it doesn't save any speed anyway on 4.4, so disable it
+-    CFLAGS="-O4 -fno-fast-math $CFLAGS"
++    if [ "$SYS" = NACL ]; then
++        # nacl gcc arm has known issue with -O4
++        # TODO(sbc): remove this once this issue gets addressed:
++        # https://code.google.com/p/nativeclient/issues/detail?id=3205
++        CFLAGS="-O2 -fno-fast-math $CFLAGS"
++    else
++        CFLAGS="-O4 -fno-fast-math $CFLAGS"
++    fi
+ else
+     CFLAGS="-O4 -ffast-math $CFLAGS"
+ fi

@@ -28,22 +28,12 @@ CustomConfigureStep() {
 
   local naclhost
   if [ "${NACL_ARCH}" = pnacl ]; then
-    naclhost=pnacl
+    conf_host=pnacl
   else
-    naclhost=x86-nacl-linux
+    conf_host=${NACL_CROSS_PREFIX}
   fi
 
-  echo "  ./configure \
-    --cross-prefix=${NACL_CROSS_PREFIX} \
-    --disable-asm \
-    --disable-pthread \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --extra-ldflags='-lnosys -lm' \
-    --host=${naclhost}"
-
-  ./configure \
+  LogExecute ./configure \
     --cross-prefix=${NACL_CROSS_PREFIX} \
     --disable-asm \
     --disable-pthread \
@@ -51,7 +41,7 @@ CustomConfigureStep() {
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \
     --extra-ldflags="-lnosys -lm" \
-    --host=${naclhost}
+    --host=${conf_host}
 }
 
 

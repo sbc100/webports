@@ -248,8 +248,12 @@ NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
 
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
-if [ $NACL_ARCH = 'arm' ]; then
+if [ $NACL_ARCH = "arm" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Wno-psabi"
+fi
+
+if [ ${NACL_DEBUG:-} = "1" ]; then
+  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -g -O0"
 fi
 
 export CFLAGS=${NACLPORTS_CFLAGS}
