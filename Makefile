@@ -155,7 +155,11 @@ PACKAGES = $(LIBRARIES) $(EXAMPLES)
 
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
-SENT = $(SENTINELS_DIR)/$(NACL_ARCH)_$(NACL_LIBC)
+ifeq ($(NACL_DEBUG), 1)
+  SENT = $(SENTINELS_DIR)/$(NACL_ARCH)_$(NACL_LIBC)_debug
+else
+  SENT = $(SENTINELS_DIR)/$(NACL_ARCH)_$(NACL_LIBC)
+endif
 
 default: libraries
 libraries: $(LIBRARIES)

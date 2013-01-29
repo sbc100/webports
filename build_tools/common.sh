@@ -85,6 +85,8 @@ else
   readonly NACL_OPTION="disable"
 fi
 
+NACL_DEBUG=${NACL_DEBUG:-0}
+
 if [ -z "${NACL_SDK_ROOT:-}" ]; then
   echo "-------------------------------------------------------------------"
   echo "NACL_SDK_ROOT is unset."
@@ -101,14 +103,17 @@ if [ -n ${BUILDBOT_BUILDERNAME:-""} ]; then
    FORCE_MIRROR=${FORCE_MIRROR:-"yes"}
 fi
 
-
 # sha1check python script
 readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
 
 # packages subdirectories
 readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
 readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
-readonly NACL_PACKAGES_REPOSITORY=${NACL_PACKAGES_OUT}/repository-${NACL_ARCH}
+REPOSITORY=${NACL_PACKAGES_OUT}/repository-${NACL_ARCH}
+if [ ${NACL_DEBUG} = "1" ]; then
+  REPOSITORY=${REPOSITORY}-debug
+fi
+readonly NACL_PACKAGES_REPOSITORY=${REPOSITORY}
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish
 readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 
@@ -252,7 +257,7 @@ if [ $NACL_ARCH = "arm" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Wno-psabi"
 fi
 
-if [ ${NACL_DEBUG:-} = "1" ]; then
+if [ ${NACL_DEBUG} = "1" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -g -O0"
 fi
 
