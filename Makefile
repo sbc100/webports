@@ -107,6 +107,7 @@ LIBRARIES = \
      libraries/libmikmod \
      libraries/jsoncpp \
      libraries/openal-soft \
+     libraries/freealut \
      libraries/gtest \
      libraries/libxml2 \
      libraries/x264 \
@@ -229,6 +230,7 @@ $(SENT)/libraries/SDL_net: libraries/SDL
 $(SENT)/libraries/SDL_ttf: libraries/SDL \
     libraries/freetype
 $(SENT)/libraries/boost: libraries/zlib libraries/bzip2
+$(SENT)/libraries/freealut: libraries/openal-soft
 $(SENT)/examples/audio/openal-ogg: \
     libraries/openal-soft libraries/libvorbis
 $(SENT)/libraries/nacl-mounts: libraries/gtest
@@ -268,6 +270,7 @@ modplug: libraries/libmodplug ;
 nacl-mounts: libraries/nacl-mounts ;
 ogg: libraries/libogg ;
 openal: libraries/openal-soft ;
+freealut: libraries/freealut ;
 openscenegraph: libraries/OpenSceneGraph ;
 openssl: libraries/openssl ;
 pango: libraries/pango ;
