@@ -206,11 +206,6 @@ void ReadSome(void* data) {
   assert(read_ret == PP_OK_COMPLETIONPENDING);
 }
 
-/* This function is part of the NaCl libopenal port and is
- * required to be called before OpenAL initialization.
- */
-extern void alSetPpapiInfo(PP_Instance, PPB_GetInterface);
-
 void* InitializeOpenAL(void* data) {
   /* PPAPI should be the default device in NaCl, hence 'NULL'. */
   g_MyState.alc_device = alcOpenDevice(NULL);

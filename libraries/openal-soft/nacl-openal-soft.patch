@@ -21,10 +21,10 @@ diff -Naur openal-soft-1.13/Alc/ALc.c openal-soft-1.13-nacl/Alc/ALc.c
      { "null", alc_null_init, alc_null_deinit, alc_null_probe, EmptyFuncs },
  #ifdef HAVE_WAVE
      { "wave", alc_wave_init, alc_wave_deinit, alc_wave_probe, EmptyFuncs },
-diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
+diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13.nacl/Alc/ppapi.c
 --- openal-soft-1.13/Alc/ppapi.c	1969-12-31 16:00:00.000000000 -0800
-+++ openal-soft-1.13-nacl/Alc/ppapi.c	2012-01-23 15:46:21.000000000 -0800
-@@ -0,0 +1,411 @@
++++ openal-soft-1.13.nacl/Alc/ppapi.c	2013-01-31 08:54:09.078478389 -0800
+@@ -0,0 +1,421 @@
 +/**
 + * OpenAL cross platform audio library
 + * Copyright (C) 2012
@@ -84,7 +84,7 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +    PP_Resource audio_config_resource;
 +    PP_Resource audio_resource;
 +    ALuint sample_frame_count;
-+    
++
 +    volatile ALuint read_ptr;
 +    volatile ALuint write_ptr;
 +
@@ -117,10 +117,13 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +    if (data->read_ptr > data->write_ptr)
 +        write_proxy = data->write_ptr + data->size;
 +
-+    if (data->read_ptr + buffer_size_in_bytes > write_proxy)
++    int available_bytes = write_proxy - data->read_ptr;
++    if (available_bytes < buffer_size_in_bytes)
 +    {
-+        AL_PRINT("buffer underrun\n");
-+        return;
++        AL_PRINT("buffer underrun (buffer size=%d) (only buffering %d)\n", buffer_size_in_bytes, available_bytes);
++        /* Zero the part of the buffer that we cannot fill */
++        memset(sample_buffer + available_bytes, 0, buffer_size_in_bytes - available_bytes);
++        buffer_size_in_bytes = available_bytes;
 +    }
 +
 +    if (data->read_ptr + buffer_size_in_bytes > data->size)
@@ -154,11 +157,16 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +
 +    ALuint UpdateSizeInBytes = Device->UpdateSize * kFrameSizeInBytes;
 +    ALuint SampleFrameInBytes = data->sample_frame_count * kFrameSizeInBytes;
++
 +    /* Start to buffer when less than this many bytes are buffered. Keep this
 +     * small for low latency but large enough so we don't starve Pepper.
++     *
++     * SampleFrameInBytes is the size of the buffer that PPAPI asks for each
++     * callback.  We want to keep twice this amount in the buffer at any given
++     * time.
 +     */
-+    const ALuint MinBufferSizeInBytes =
-+        min(max(SampleFrameInBytes*4, UpdateSizeInBytes), data->size/2);
++    const ALuint MinBufferSizeInBytes = max(SampleFrameInBytes*2,
++                                            UpdateSizeInBytes);
 +
 +    while(!data->killNow && Device->Connected)
 +    {
@@ -216,7 +224,7 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +                                              data->sample_frame_count);
 +
 +    if (PP_FALSE == data->audio_config->IsAudioConfig(data->audio_config_resource)) {
-+        AL_PRINT("PPAPI initialization: audio config creation failed."); 
++        AL_PRINT("PPAPI initialization: audio config creation failed.");
 +        data->main_thread_init_status = -1;
 +        return;
 +    }
@@ -227,13 +235,13 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +                                               (void*)data);
 +
 +    if (PP_FALSE == data->audio->IsAudio(data->audio_resource)) {
-+        AL_PRINT("PPAPI initialization: audio resource creation failed."); 
++        AL_PRINT("PPAPI initialization: audio resource creation failed.");
 +        data->main_thread_init_status = -1;
 +        return;
 +    }
 +
 +    if (PP_FALSE == data->audio->StartPlayback(data->audio_resource)) {
-+        AL_PRINT("PPAPI initialization: start playback failed."); 
++        AL_PRINT("PPAPI initialization: start playback failed.");
 +        data->main_thread_init_status = -1;
 +        return;
 +    }
@@ -246,9 +254,9 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +{
 +    ppapi_data *data;
 +
-+    if(!deviceName)
++    if (!deviceName)
 +        deviceName = ppapiDevice;
-+    else if(strcmp(deviceName, ppapiDevice) != 0)
++    else if (strcmp(deviceName, ppapiDevice) != 0)
 +        return ALC_FALSE;
 +
 +    int channels = ChannelsFromDevFmt(device->FmtChans);
@@ -353,13 +361,15 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +    ppapi_data *data = (ppapi_data*)device->ExtraData;
 +
 +    ALuint UpdateSizeInBytes = device->UpdateSize * kFrameSizeInBytes;
++    ALuint SampleFrameInBytes = data->sample_frame_count * kFrameSizeInBytes;
 +    /* kBufferPadMult is added to protect against buffer underruns. */
-+    data->size = UpdateSizeInBytes * kBufferPadMult;
++    data->size = max(UpdateSizeInBytes, SampleFrameInBytes) * kBufferPadMult;
++
 +    /* Extra UpdateSize added so we can read off the end of the buffer in one
 +     * shot from aluMixData, but treat the buffer like it's of size data->size.
 +     */
 +    data->buffer = calloc(1, data->size + UpdateSizeInBytes);
-+    if(!data->buffer)
++    if (!data->buffer)
 +    {
 +        AL_PRINT("buffer malloc failed\n");
 +        return ALC_FALSE;
@@ -369,7 +379,7 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +    data->read_ptr = 0;
 +    data->write_ptr = 0;
 +    data->thread = StartThread(PpapiProc, device);
-+    if(data->thread == NULL)
++    if (data->thread == NULL)
 +    {
 +        free(data->buffer);
 +        data->buffer = NULL;
@@ -383,7 +393,7 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +{
 +    ppapi_data *data = (ppapi_data*)device->ExtraData;
 +
-+    if(!data->thread)
++    if (!data->thread)
 +        return;
 +
 +    data->killNow = 1;
@@ -431,9 +441,9 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13-nacl/Alc/ppapi.c
 +
 +void alc_ppapi_probe(int type)
 +{
-+    if(type == DEVICE_PROBE)
++    if (type == DEVICE_PROBE)
 +        AppendDeviceList(ppapiDevice);
-+    else if(type == ALL_DEVICE_PROBE)
++    else if (type == ALL_DEVICE_PROBE)
 +        AppendAllDeviceList(ppapiDevice);
 +}
 diff -Naur openal-soft-1.13/Alc/wave.c openal-soft-1.13-nacl/Alc/wave.c
@@ -541,3 +551,22 @@ diff -Naur openal-soft-1.13/XCompile-nacl.txt openal-soft-1.13-nacl/XCompile-nac
 +set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 +set(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
 +include_directories(${NACL_SDK_ROOT}/include)
+diff -Naur openal-soft-1.13/include/AL/alc.h openal-soft-1.13.nacl/include/AL/alc.h
+--- openal-soft-1.13/include/AL/alc.h	2010-11-28 14:51:15.000000000 -0800
++++ openal-soft-1.13.nacl/include/AL/alc.h	2013-01-31 11:01:44.812082634 -0800
+@@ -270,6 +270,15 @@
+  #pragma export off
+ #endif
+
++#if defined(__native_client__)
++#include <ppapi/c/ppp.h>
++#include <ppapi/c/ppp_instance.h>
++/* This function is part of the NaCl libopenal port and is
++ * required to be called before OpenAL initialization.
++ */
++extern void alSetPpapiInfo(PP_Instance, PPB_GetInterface);
++#endif
++
+ #if defined(__cplusplus)
+ }
+ #endif
