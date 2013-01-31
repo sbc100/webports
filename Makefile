@@ -72,7 +72,7 @@ LIBRARIES = \
      libraries/SDL_mixer \
      libraries/SDL_image \
      libraries/SDL_ttf \
-     libraries/gc6.8 \
+     libraries/gc \
      libraries/fftw \
      libraries/libtommath \
      libraries/libtomcrypt \
@@ -252,7 +252,7 @@ flac: libraries/flac ;
 fontconfig: libraries/fontconfig ;
 freeimage: libraries/FreeImage ;
 freetype: libraries/freetype ;
-gc: libraries/gc6.8 ;
+gc: libraries/gc ;
 glib: libraries/glib ;
 glibc-compat: libraries/glibc-compat ;
 gtest: libraries/gtest ;
