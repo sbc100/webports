@@ -172,11 +172,14 @@ CustomDownloadStep() {
 
 GameGetStep() {
   PACKAGE_NAME_TEMP=${PACKAGE_NAME}
+  PACKAGE_DIR_TEMP=${PACKAGE_DIR}
   PACKAGE_NAME=$2
+  PACKAGE_DIR=$2
   SHA1=${SCUMMVM_EXAMPLE_DIR}/$2/$2.sha1
   CustomDownloadZipStep $1 $2 ${SHA1}
   DefaultExtractZipStep
   PACKAGE_NAME=${PACKAGE_NAME_TEMP}
+  PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 
 CustomPatch() {

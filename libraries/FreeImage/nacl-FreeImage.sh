@@ -26,12 +26,13 @@ readonly -a CRLF_TRANSLATE_FILES=(
     "Source/Utilities.h")
 
 source pkg_info
-source ../../build_tools/common.sh
 
-CustomPreInstallStep() {
-  DefaultPreInstallStep
-  Remove ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_BASE_NAME}
-}
+# The FreeImage zipfile, unlike other naclports contains a folder
+# called FreeImage rather than FreeImage-X-Y-Z, so we set a customr
+# PACKAGE_DIR here.
+PACKAGE_DIR=FreeImage
+
+source ../../build_tools/common.sh
 
 CustomDownloadStep() {
   cd ${NACL_PACKAGES_TARBALLS}
@@ -48,20 +49,20 @@ CustomDownloadStep() {
 CustomExtractStep() {
   Banner "Unzipping ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
+  Remove ${PACKAGE_DIR}
   unzip ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
   # FreeImage uses CRLF for line-endings.  The patch file has LF (Unix-style)
   # line endings, which means on some versions of patch, the patch fails. Run a
   # recursive tr over all the sources to remedy this.
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_BASE_NAME}
   # Setting LC_CTYPE is a Mac thing.  The locale needs to be set to "C" so that
   # tr interprets the '\r' string as ASCII and not UTF-8.
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   export
   for crlf in ${CRLF_TRANSLATE_FILES[@]}; do
     echo "tr -d '\r' < ${crlf}"
     LC_CTYPE=C tr -d '\r' < ${crlf} > .tmp
     mv .tmp ${crlf}
-    done
+  done
 }
 
 CustomConfigureStep() {
@@ -74,7 +75,7 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export INCDIR=${NACLPORTS_INCLUDE}
   export INSTALLDIR=${NACLPORTS_LIBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_BASE_NAME}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 }
 
 CustomBuildStep() {
@@ -90,7 +91,7 @@ CustomInstallStep() {
 }
 
 CustomPackageInstall() {
-   CustomPreInstallStep
+   DefaultPreInstallStep
    CustomDownloadStep
    CustomExtractStep
    DefaultPatchStep

@@ -12,6 +12,7 @@
 # Native Client.
 
 source pkg_info
+PACKAGE_DIR=${PACKAGE_NAME}-src
 source ../../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/games/snes9x-1.53
@@ -51,7 +52,7 @@ CustomConfigureStep() {
       -lnacl-mounts -lppapi_cpp -lppapi \
       -lpthread -lstdc++"
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}-src/unix
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
   cp -f ${START_DIR}/pepper.cpp .
   cp -f ${START_DIR}/nacl.h .
   cp -f ${START_DIR}/nacl.cpp .
@@ -60,7 +61,7 @@ CustomConfigureStep() {
 }
 
 CustomInstallStep(){
-  BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}-src/unix
+  BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/snes.html ${PUBLISH_DIR}
@@ -81,7 +82,7 @@ CustomPackageInstall() {
   DefaultBuildStep
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     # NOTE: snes9x has unusual dirnames
-    DefaultTranslateStep ${PACKAGE_NAME}-src unix/snes9x
+    DefaultTranslateStep ${PACKAGE_DIR} unix/snes9x
   fi
   CustomInstallStep
   DefaultCleanUpStep

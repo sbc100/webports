@@ -87,6 +87,11 @@ fi
 
 NACL_DEBUG=${NACL_DEBUG:-0}
 
+# PACKAGE_DIR (the folder contained within that archive) defaults to
+# the PACKAGE_NAME.  Packages with non-standard contents can override
+# this before including common.sh
+PACKAGE_DIR=${PACKAGE_DIR:-${PACKAGE_NAME}}
+
 if [ -z "${NACL_SDK_ROOT:-}" ]; then
   echo "-------------------------------------------------------------------"
   echo "NACL_SDK_ROOT is unset."
@@ -397,12 +402,12 @@ DefaultDownloadZipStep() {
 
 
 Patch() {
-  local LOCAL_PACKAGE_NAME=$1
+  local LOCAL_PACKAGE_DIR=$1
   local LOCAL_PATCH_FILE=$2
   if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
-    Banner "Patching ${LOCAL_PACKAGE_NAME}"
-    cd ${NACL_PACKAGES_REPOSITORY}
-    patch -p0 -g0 < ${START_DIR}/${LOCAL_PATCH_FILE}
+    Banner "Patching ${LOCAL_PACKAGE_DIR}"
+    cd ${NACL_PACKAGES_REPOSITORY}/${LOCAL_PACKAGE_DIR}
+    patch -p1 -g0 < ${START_DIR}/${LOCAL_PATCH_FILE}
   fi
 }
 
@@ -503,14 +508,14 @@ DefaultPreInstallStep() {
   MakeDir ${NACL_PACKAGES_REPOSITORY}
   MakeDir ${NACL_PACKAGES_TARBALLS}
   MakeDir ${NACL_PACKAGES_PUBLISH}
-  Remove ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  Remove ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 }
 
 
 DefaultExtractStep() {
   Banner "Untaring ${PACKAGE_NAME}.tgz"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
+  Remove ${PACKAGE_DIR}
   if [ $OS_SUBDIR = "windows" ]; then
     tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
   else
@@ -522,7 +527,7 @@ DefaultExtractStep() {
 DefaultExtractBzipStep() {
   Banner "Untaring ${PACKAGE_NAME}.tbz2"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
+  Remove ${PACKAGE_DIR}
   if [ $OS_SUBDIR = "windows" ]; then
     tar --no-same-owner -jxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tbz2
   else
@@ -533,14 +538,14 @@ DefaultExtractBzipStep() {
 DefaultExtractZipStep() {
   Banner "Unzipping ${PACKAGE_NAME}.zip"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
-  unzip -d ${PACKAGE_NAME} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
+  Remove ${PACKAGE_DIR}
+  unzip -d ${PACKAGE_DIR} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
 }
 
 
 DefaultPatchStep() {
   if [ -n "${PATCH_FILE:-}" ]; then
-    Patch ${PACKAGE_NAME} ${PATCH_FILE}
+    Patch ${PACKAGE_DIR} ${PATCH_FILE}
   fi
 }
 
@@ -557,10 +562,10 @@ DefaultConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  Remove "build-nacl"
+  MakeDir "build-nacl"
+  cd "build-nacl"
   echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
