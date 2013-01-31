@@ -12,6 +12,8 @@
 source pkg_info
 source ../../build_tools/common.sh
 
+CFLAGS="${CFLAGS} -I${NACL_SDK_ROOT}/include"
+
 export LIBS="-lm -lnosys"
 
 DefaultPackageInstall

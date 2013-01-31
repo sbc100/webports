@@ -90,7 +90,7 @@ NACL_DEBUG=${NACL_DEBUG:-0}
 # PACKAGE_DIR (the folder contained within that archive) defaults to
 # the PACKAGE_NAME.  Packages with non-standard contents can override
 # this before including common.sh
-PACKAGE_DIR=${PACKAGE_DIR:-${PACKAGE_NAME}}
+PACKAGE_DIR=${PACKAGE_DIR:-${PACKAGE_NAME:-}}
 
 if [ -z "${NACL_SDK_ROOT:-}" ]; then
   echo "-------------------------------------------------------------------"
