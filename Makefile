@@ -57,14 +57,14 @@ NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/$(NACL_ARCH)-nacl/usr
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
                  $(NACL_OUT)/repository-$(NACL_ARCH) \
                  $(NACL_OUT)/publish \
-		 $(NACLPORTS_PREFIX)
+                 $(NACLPORTS_PREFIX)
 
 NACL_DIRS_TO_REMOVE = $(NACL_OUT) \
-		      $(NACLPORTS_PREFIX) \
+                      $(NACLPORTS_PREFIX) \
 
 NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
-		    $(NACLPORTS_PREFIX)/include \
-		    $(NACLPORTS_PREFIX)/lib
+                    $(NACLPORTS_PREFIX)/include \
+                    $(NACLPORTS_PREFIX)/lib
 
 LIBRARIES = \
      libraries/nacl-mounts \
@@ -168,9 +168,13 @@ examples: $(EXAMPLES)
 all: $(PACKAGES)
 # The subset of libraries that are shipped as part of the
 # official NaCl SDK
-sdklibs: zlib jpeg tiff png tinyxml lua xml2
+SDK_LIBS = zlib jpeg tiff png tinyxml lua xml2 openal freealut freetype vorbis ogg
+sdklibs: $(SDK_LIBS)
 
-.PHONY: all default libraries examples clean sdklibs
+sdklibs_list:
+	@echo $(SDK_LIBS)
+
+.PHONY: all default libraries examples clean sdklibs sdklibs_list
 
 
 clean:

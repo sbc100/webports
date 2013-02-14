@@ -20,6 +20,7 @@ OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle/pepper_XX/ports
 
 cd ${SCRIPT_DIR}/../../..
 make clean
+PACKAGES=$(make sdklibs_list)
 
 CustomBuildPackage() {
   export NACLPORTS_PREFIX=${OUT_DIR}/sdk_bundle/build/$2_$3_$4
@@ -82,8 +83,6 @@ MoveLibs() {
     done
   done
 }
-
-PACKAGES="zlib jpeg tiff png tinyxml lua xml2"
 
 for package in $PACKAGES; do
   BuildPackageAll $package
