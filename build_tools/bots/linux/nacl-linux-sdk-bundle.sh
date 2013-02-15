@@ -22,6 +22,10 @@ cd ${SCRIPT_DIR}/../../..
 make clean
 PACKAGES=$(make sdklibs_list)
 
+# $1 - name of package
+# $2 - arch to build for
+# $3 - 'glibc' or 'newlib'
+# $4 - 'Debug' or 'Release'
 CustomBuildPackage() {
   export NACLPORTS_PREFIX=${OUT_DIR}/sdk_bundle/build/$2_$3_$4
   export NACL_ARCH=$2
@@ -41,20 +45,26 @@ CustomBuildPackage() {
   BuildPackage $1
 }
 
+# $1 - name of package
+# $2 - arch to build for
 BuildPackageArchAll() {
-  CustomBuildPackage $1 $2 newlib Release
-  CustomBuildPackage $1 $2 newlib Debug
-  if [ "$1" != "arm" ]; then
-    CustomBuildPackage $1 $2 glibc Release
-    CustomBuildPackage $1 $2 glibc Debug
+  local package=$1
+  local arch=$2
+  CustomBuildPackage $package $arch newlib Release
+  CustomBuildPackage $package $arch newlib Debug
+  if [ "$arch" != "arm" ]; then
+    CustomBuildPackage $package $arch glibc Release
+    CustomBuildPackage $package $arch glibc Debug
   fi
 }
 
+# $1 - name of package
 BuildPackageAll() {
-  BuildPackageArchAll $1 i686
-  BuildPackageArchAll $1 x86_64
-  BuildPackageArchAll $1 arm
-  echo "naclports Install SUCCEEDED $1"
+  local package=$1
+  BuildPackageArchAll $package i686
+  BuildPackageArchAll $package x86_64
+  BuildPackageArchAll $package arm
+  echo "naclports Install SUCCEEDED $package"
 }
 
 MoveLibs() {

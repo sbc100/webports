@@ -52,11 +52,24 @@ else
   export NACL_ARCH=${NACL_ARCH:-"i686"}
 fi
 
+export NACL_GLIBC=${NACL_GLIBC:-0}
+
 # Check NACL_ARCH
 if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
      ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" ]; then
   echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
   exit -1
+fi
+
+if [ ${NACL_GLIBC} = "1" ]; then
+  if [ ${NACL_ARCH} = "pnacl" ]; then
+    echo "NACL_GLIBC is does not work with pnacl" 1>&2
+    exit -1
+  fi
+  if [ ${NACL_ARCH} = "arm" ]; then
+    echo "NACL_GLIBC is does not work with arm" 1>&2
+    exit -1
+  fi
 fi
 
 if [ ${NACL_ARCH} = "i686" ]; then
@@ -126,7 +139,6 @@ readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 InitializeNaClGccToolchain() {
   # locate default nacl_sdk toolchain
   # TODO: x86 only at the moment
-  NACL_GLIBC=${NACL_GLIBC:-0}
   if [ $NACL_ARCH = "arm" ]; then
     local TOOLCHAIN_ARCH="arm"
   else

@@ -38,7 +38,16 @@ ifndef NACL_SDK_ROOT
   $(error NACL_SDK_ROOT not set, see README.txt)
 endif
 
-ifeq ($(NACL_ARCH), "ARM")
+ifeq ($(NACL_GLIBC), 1)
+  ifeq ($(NACL_ARCH), arm)
+    $(error NACL_GLIBC does not work with arm)
+  endif
+  ifeq ($(NACL_ARCH), pnacl)
+    $(error NACL_GLIBC does not work with pnacl)
+  endif
+endif
+
+ifeq ($(NACL_ARCH), arm)
   NACL_TOOLCHAIN_ROOT = $(NACL_SDK_ROOT)/toolchain/$(OS_SUBDIR)_arm_newlib
   NACL_LIBC = newlib
 else
