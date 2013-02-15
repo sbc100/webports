@@ -48,23 +48,23 @@ CustomBuildPackage() {
 # $1 - name of package
 # $2 - arch to build for
 BuildPackageArchAll() {
-  local package=$1
-  local arch=$2
-  CustomBuildPackage $package $arch newlib Release
-  CustomBuildPackage $package $arch newlib Debug
-  if [ "$arch" != "arm" ]; then
-    CustomBuildPackage $package $arch glibc Release
-    CustomBuildPackage $package $arch glibc Debug
+  local PACKAGE=$1
+  local ARCH=$2
+  CustomBuildPackage $PACKAGE $ARCH newlib Release
+  CustomBuildPackage $PACKAGE $ARCH newlib Debug
+  if [ "$ARCH" != "arm" ]; then
+    CustomBuildPackage $PACKAGE $ARCH glibc Release
+    CustomBuildPackage $PACKAGE $ARCH glibc Debug
   fi
 }
 
 # $1 - name of package
 BuildPackageAll() {
-  local package=$1
-  BuildPackageArchAll $package i686
-  BuildPackageArchAll $package x86_64
-  BuildPackageArchAll $package arm
-  echo "naclports Install SUCCEEDED $package"
+  local PACKAGE=$1
+  BuildPackageArchAll $PACKAGE i686
+  BuildPackageArchAll $PACKAGE x86_64
+  BuildPackageArchAll $PACKAGE arm
+  echo "naclports Install SUCCEEDED $PACKAGE"
 }
 
 MoveLibs() {
@@ -75,7 +75,13 @@ MoveLibs() {
       ARCH_DIR=$ARCH
     fi
 
-    for LIBC in newlib glibc; do
+    if [ "$ARCH" = "arm" ]; then
+      LIBC_VARIANTS="newlib"
+    else
+      LIBC_VARIANTS="newlib glibc"
+    fi
+
+    for LIBC in $LIBC_VARIANTS; do
       for CONFIG in Debug Release; do
         # Copy build results to destination directories.
         SRC_DIR=${OUT_DIR}/sdk_bundle/build/${ARCH}_${LIBC}_${CONFIG}
@@ -98,11 +104,12 @@ for package in $PACKAGES; do
   BuildPackageAll $package
 done
 
+echo "@@@BUILD_STEP move libs@@@"
 for package in $PACKAGES; do
   MoveLibs $package
 done
 
-echo "@@@BUILD_STEP SDK Summary@@@"
+echo "@@@BUILD_STEP summary@@@"
 if [[ $RESULT != 0 ]] ; then
   echo "@@@STEP_FAILURE@@@"
 fi
