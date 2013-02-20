@@ -15,10 +15,11 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 
 source ${SCRIPT_DIR}/../bot_common.sh
 
-OUT_DIR=${SCRIPT_DIR}/../../../out
+NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/../../.. && pwd)"
+OUT_DIR=${NACLPORTS_ROOT}/out
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle/pepper_XX/ports
 
-cd ${SCRIPT_DIR}/../../..
+cd ${NACLPORTS_ROOT}
 make clean
 PACKAGES=$(make sdklibs_list)
 
@@ -87,6 +88,7 @@ MoveLibs() {
         SRC_DIR=${OUT_DIR}/sdk_bundle/build/${ARCH}_${LIBC}_${CONFIG}
 
         # copy includes
+        mkdir -p ${OUT_BUNDLE_DIR}
         cp -d -r ${SRC_DIR}/include ${OUT_BUNDLE_DIR}
 
         # copy libs
