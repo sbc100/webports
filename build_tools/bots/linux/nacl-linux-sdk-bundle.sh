@@ -85,16 +85,20 @@ MoveLibs() {
       for CONFIG in Debug Release; do
         # Copy build results to destination directories.
         SRC_DIR=${OUT_DIR}/sdk_bundle/build/${ARCH}_${LIBC}_${CONFIG}
+
+        # copy includes
+        cp -d -r ${SRC_DIR}/include ${OUT_BUNDLE_DIR}
+
+        # copy libs
         ARCH_LIB_DIR=${OUT_BUNDLE_DIR}/lib/${LIBC}_${ARCH_DIR}/${CONFIG}
-
         mkdir -p ${ARCH_LIB_DIR}
-        cp -d -r ${SRC_DIR}/* ${OUT_BUNDLE_DIR}
-
-        for FILE in ${OUT_BUNDLE_DIR}/lib/* ; do
-          if [ -f "$FILE" ]; then
-            mv ${FILE} ${ARCH_LIB_DIR}
+        for FILE in ${SRC_DIR}/lib/* ; do
+          EXT="${FILE##*.}"
+          if [[ ( -f "${FILE}" || -L "${FILE}" ) && "${EXT}" != "la" ]]; then
+            cp -d -r ${FILE} ${ARCH_LIB_DIR}
           fi
         done
+
       done
     done
   done
@@ -104,7 +108,7 @@ for package in $PACKAGES; do
   BuildPackageAll $package
 done
 
-echo "@@@BUILD_STEP move libs@@@"
+echo "@@@BUILD_STEP copy to bundle@@@"
 for package in $PACKAGES; do
   MoveLibs $package
 done
