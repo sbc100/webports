@@ -669,6 +669,29 @@ RunSelLdrCommand() {
   fi
 }
 
+WriteSelLdrScript() {
+  if [ $NACL_ARCH = "arm" ]; then
+    # no sel_ldr for arm
+    return
+  fi
+  if [ $NACL_GLIBC = "1" ]; then
+    cat > $1 <<HERE
+#!/bin/bash
+export NACLLOG=/dev/null
+"${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- \
+    "${NACL_SDK_LIB}/runnable-ld.so" --library-path "${NACL_SDK_LIB}" "$2" "\$@"
+HERE
+  else
+    cat > $1 <<HERE
+#!/bin/bash
+export NACLLOG=/dev/null
+"${NACL_SEL_LDR}" -B "${NACL_IRT}" -- "$2" "\$@"
+HERE
+  fi
+  chmod 750 $1
+  echo "Wrote script pwd:$PWD $1"
+}
+
 DefaultTranslateStep() {
   local package=$1
   local build_dir="${NACL_PACKAGES_REPOSITORY}/${package}"

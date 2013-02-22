@@ -120,7 +120,8 @@ LIBRARIES = \
      libraries/gtest \
      libraries/libxml2 \
      libraries/x264 \
-     libraries/box2d
+     libraries/box2d \
+     libraries/yajl
 
 ifneq ($(NACL_ARCH), arm)
 # Libraries that currently fail to build on ARM
@@ -304,6 +305,7 @@ tommath: libraries/libtommath ;
 vorbis: libraries/libvorbis ;
 x264: libraries/x264 ;
 xml2: libraries/libxml2 ;
+yajl: libraries/yajl ;
 zlib: libraries/zlib ;
 ncurses: libraries/ncurses ;
 
