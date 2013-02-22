@@ -30,6 +30,7 @@ BuildPackage openal
 BuildPackage ncurses
 BuildPackage box2d
 BuildPackage xml2
+BuildPackage yajl
 
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
 if [[ $RESULT != 0 ]] ; then
