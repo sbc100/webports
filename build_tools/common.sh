@@ -562,6 +562,12 @@ DefaultPatchStep() {
 }
 
 
+PatchConfigSub() {
+  if [ -f config.sub ]; then
+     /bin/cp ${NACL_SRC}/build_tools/config.sub .
+  fi
+}
+
 DefaultConfigureStep() {
   local EXTRA_CONFIGURE_OPTS=("${@:-}")
   Banner "Configuring ${PACKAGE_NAME}"
@@ -575,6 +581,7 @@ DefaultConfigureStep() {
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  PatchConfigSub
   Remove "build-nacl"
   MakeDir "build-nacl"
   cd "build-nacl"

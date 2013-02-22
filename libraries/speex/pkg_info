@@ -1,3 +1,2 @@
 PACKAGE_NAME=speex-1.2rc1
 URL=http://downloads.xiph.org/releases/speex/speex-1.2rc1.tar.gz
-PATCH_FILE=nacl-speex.patch

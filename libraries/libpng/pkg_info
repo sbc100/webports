@@ -1,3 +1,2 @@
 PACKAGE_NAME=libpng-1.2.40
 URL=http://downloads.sourceforge.net/libpng/libpng-1.2.40.tar.gz
-PATCH_FILE=nacl-libpng.patch

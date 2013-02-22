@@ -89,6 +89,7 @@ LIBRARIES = \
      libraries/bzip2 \
      libraries/jpeg \
      libraries/libpng \
+     libraries/webp \
      libraries/tiff \
      libraries/FreeImage \
      libraries/libogg \
@@ -178,7 +179,7 @@ examples: $(EXAMPLES)
 all: $(PACKAGES)
 # The subset of libraries that are shipped as part of the
 # official NaCl SDK
-SDK_LIBS = zlib jpeg tiff png tinyxml lua xml2 openal freealut freetype ogg vorbis
+SDK_LIBS = zlib jpeg tiff png webp tinyxml lua xml2 openal freealut freetype ogg vorbis
 sdklibs: $(SDK_LIBS)
 
 sdklibs_list:
@@ -290,6 +291,7 @@ openssl: libraries/openssl ;
 pango: libraries/pango ;
 pixman: libraries/pixman ;
 png: libraries/libpng ;
+webp: libraries/webp ;
 protobuf: libraries/protobuf ;
 sdl: libraries/SDL ;
 sdl_image: libraries/SDL_image ;
