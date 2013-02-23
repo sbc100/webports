@@ -566,7 +566,7 @@ PatchConfigSub() {
       echo "config.sub already supports NaCl"
     else
       echo "Patching config.sub"
-      /bin/cp ${NACL_SRC}/build_tools/config.sub .
+      /bin/cp -f ${NACL_SRC}/build_tools/config.sub .
     fi
   fi
 }
