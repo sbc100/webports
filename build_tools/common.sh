@@ -547,6 +547,7 @@ DefaultExtractBzipStep() {
   fi
 }
 
+
 DefaultExtractZipStep() {
   Banner "Unzipping ${PACKAGE_NAME}.zip"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
@@ -555,18 +556,29 @@ DefaultExtractZipStep() {
 }
 
 
+PatchConfigSub() {
+  # Replace the package's config.sub one with an up-do-date copy
+  # that includes nacl support.  We only do this if the string
+  # 'nacl' is not already contained in the file.
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  if [ -f config.sub ]; then
+    if grep -q nacl config.sub &>/dev/null; then
+      echo "config.sub already supports NaCl"
+    else
+      echo "Patching config.sub"
+      /bin/cp ${NACL_SRC}/build_tools/config.sub .
+    fi
+  fi
+}
+
+
 DefaultPatchStep() {
   if [ -n "${PATCH_FILE:-}" ]; then
     Patch ${PACKAGE_DIR} ${PATCH_FILE}
   fi
+  PatchConfigSub
 }
 
-
-PatchConfigSub() {
-  if [ -f config.sub ]; then
-     /bin/cp ${NACL_SRC}/build_tools/config.sub .
-  fi
-}
 
 DefaultConfigureStep() {
   local EXTRA_CONFIGURE_OPTS=("${@:-}")
@@ -581,7 +593,6 @@ DefaultConfigureStep() {
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  PatchConfigSub
   Remove "build-nacl"
   MakeDir "build-nacl"
   cd "build-nacl"
