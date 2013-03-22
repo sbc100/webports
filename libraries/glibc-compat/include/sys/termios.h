@@ -64,10 +64,10 @@
 # define ECHOK	 0000040
 # define ECHONL	 0000100
 # define ICANON	 0000002
-# define IEXTEN	 0000400	/* anybody know *what* this does?! */
+# define IEXTEN  0100000   /* anybody know *what* this does?! */
 # define ISIG	 0000001
 # define NOFLSH	 0000200
-# define TOSTOP	 0001000
+# define TOSTOP  0000400
 # define ECHOCTL 0001000
 # define ECHOPRT 0002000
 # define ECHOKE  0004000
