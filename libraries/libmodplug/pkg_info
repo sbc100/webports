@@ -2,3 +2,4 @@ PACKAGE_NAME=libmodplug-0.8.7
 URL=http://sourceforge.net/projects/modplug-xmms/files/libmodplug/0.8.7/libmodplug-0.8.7.tar.gz/download
 URL_FILENAME=libmodplug-0.8.7.tar.gz
 PATCH_FILE=nacl-libmodplug.patch
+LICENSE=CUSTOM:COPYING

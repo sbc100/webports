@@ -1,3 +1,4 @@
 PACKAGE_NAME=freetype-2.1.10
 URL=http://download.savannah.gnu.org/releases/freetype/freetype-2.1.10.tar.gz
 PATCH_FILE=nacl-freetype.patch
+LICENSE=CUSTOM:docs/LICENSE.TXT

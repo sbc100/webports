@@ -3,57 +3,50 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Script synchronise the naclports mirror of upstream archives.
+"""Script to synchronise the naclports mirror of upstream archives.
 
-This script verifies that the URL for every package in mirrored on
-commondatastorage.  If it finds missing URLs it downloads them to
-the local machine and then pushes them out using gsutil.
+This script verifies that the URL for every package is mirrored on
+commondatastorage.  If it finds missing URLs it downloads them to the local
+machine and then pushes them up using gsutil.
 
-gsutil is required the run this script and if any mirroring
-opterations are required then the correct gsutil credentials
-will be required.
+gsutil is required the run this script and if any mirroring operations are
+required then the correct gsutil credentials will be required.
 """
 
+import optparse
 import os
+import shlex
 import subprocess
 import sys
 import urllib
-import shlex
+import urlparse
+
+import naclports
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MIRROR_GS = 'gs://nativeclient-mirror/nacl'
 
 
-def parse_info(info_filename):
-  info = {}
-  for line in open(info_filename):
-    key, value = line.strip().split('=', 1)
-    info[key] = shlex.split(value)[0]
-  return info
+def main(args):
+  parser = optparse.OptionParser()
+  parser.add_option('-n', '--dry-run', action='store_true',
+                    help="Don't actually upload anything")
+  options, _ = parser.parse_args(args)
 
-
-def main():
   ports_root = os.path.dirname(SCRIPT_DIR)
   listing = subprocess.check_output(['gsutil', 'ls', MIRROR_GS])
   listing = listing.splitlines()
   listing = [os.path.basename(l) for l in listing]
 
-  for root, dirs, files in os.walk(ports_root):
-    if 'pkg_info' not in files:
-      continue
-    info = parse_info(os.path.join(root, 'pkg_info'))
-    if 'URL' not in info:
-      continue
-    basename = info.get('URL_FILENAME')
-    if not basename:
-      basename = os.path.basename(info['URL'])
+  def CheckMirror(package):
+    basename = package.GetArchiveFilename()
     if basename in listing:
       # already mirrored
-      continue
+      return
 
     # Download upstream URL
-    print 'Downloading: %s' % info['URL']
-    remote = urllib.urlopen(info['URL'])
+    print 'Downloading: %s' % package.URL
+    remote = urllib.urlopen(package.URL)
     with open(basename, 'w') as tmp:
       tmp.write(remote.read())
 
@@ -61,8 +54,15 @@ def main():
     url = '%s/%s' % (MIRROR_GS, basename)
     print "Uploading to mirror: %s" % url
     cmd = ['gsutil', 'cp', '-a', 'public-read', basename, url]
-    subprocess.check_call(cmd)
+    if options.dry_run:
+      print cmd
+    else:
+      subprocess.check_call(cmd)
 
+  for package in naclports.PackageIterator():
+    CheckMirror(package)
+
+  return 0
 
 if __name__ == '__main__':
-  sys.exit(main())
+  sys.exit(main(sys.argv[1:]))

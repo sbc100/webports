@@ -552,7 +552,7 @@ DefaultExtractZipStep() {
   Banner "Unzipping ${PACKAGE_NAME}.zip"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_DIR}
-  unzip -d ${PACKAGE_DIR} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
+  unzip ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
 }
 
 

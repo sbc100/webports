@@ -45,7 +45,7 @@ RunSelLdrTests() {
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/yajl-2.0.4
+  export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ChangeDir ${PACKAGE_DIR}
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build

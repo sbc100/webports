@@ -2,3 +2,4 @@ PACKAGE_NAME=snes9x-1.53
 URL='https://sites.google.com/site/bearoso/snes9x/snes9x-1.53-src.tar.bz2?attredirects=0&d=1'
 URL_FILENAME=snes9x-1.53-src.tar.bz2
 PATCH_FILE=nacl-snes.patch
+LICENSE=CUSTOM

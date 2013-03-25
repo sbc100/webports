@@ -2,3 +2,4 @@ PACKAGE_NAME=libtommath-0.41
 URL=http://sourceforge.net/projects/tommath/files/libtommath/0.41/ltm-0.41.tar.bz2/download
 URL_FILENAME=ltm-0.41.tar.bz2
 PATCH_FILE=libtommath.patch
+LICENSE=CUSTOM:LICENSE

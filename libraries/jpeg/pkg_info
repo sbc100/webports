@@ -1,2 +1,3 @@
 PACKAGE_NAME=jpeg-8d
 URL=http://www.ijg.org/files/jpegsrc.v8d.tar.gz
+LICENSE=CUSTOM:README

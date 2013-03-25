@@ -1,3 +1,4 @@
 PACKAGE_NAME=libtheora-1.1.1
 URL=http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
 PATCH_FILE=nacl-libtheora.patch
+LICENSE=BSD:COPYING

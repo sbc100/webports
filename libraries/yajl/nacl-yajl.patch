@@ -1,8 +1,8 @@
-diff --git a/yajl-2.0.4/XCompile-nacl.txt b/yajl-2.0.4/XCompile-nacl.txt
+diff --git yajl-2.0.4/XCompile-nacl.txt yajl-2.0.4-nacl/XCompile-nacl.txt
 new file mode 100644
 index 0000000..dbf2917
 --- /dev/null
-+++ b/yajl-2.0.4/XCompile-nacl.txt
++++ yajl-2.0.4-nacl/XCompile-nacl.txt
 @@ -0,0 +1,27 @@
 +# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
 +# this file to set the proper settings and paths. Then use it from build/ like:
@@ -31,10 +31,10 @@ index 0000000..dbf2917
 +set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 +set(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
 +include_directories(${NACL_SDK_ROOT}/include)
-diff --git a/yajl-2.0.4/src/CMakeLists.txt b/yajl-2.0.4/src/CMakeLists.txt
+diff --git yajl-2.0.4/src/CMakeLists.txt yajl-2.0.4-nacl/src/CMakeLists.txt
 index e36b736..4193048 100644
---- a/yajl-2.0.4/src/CMakeLists.txt
-+++ b/yajl-2.0.4/src/CMakeLists.txt
+--- yajl-2.0.4/src/CMakeLists.txt
++++ yajl-2.0.4-nacl/src/CMakeLists.txt
 @@ -37,20 +37,22 @@ SET(LIBRARY_OUTPUT_PATH ${libDir})
  
  ADD_LIBRARY(yajl_s STATIC ${SRCS} ${HDRS} ${PUB_HDRS})
@@ -81,10 +81,10 @@ index e36b736..4193048 100644
    INSTALL(TARGETS yajl_s ARCHIVE DESTINATION lib${LIB_SUFFIX})
    INSTALL(FILES ${PUB_HDRS} DESTINATION include/yajl)
    INSTALL(FILES ${incDir}/yajl_version.h DESTINATION include/yajl)
-diff --git a/yajl-2.0.4/test/run_tests.sh b/yajl-2.0.4/test/run_tests.sh
+diff --git yajl-2.0.4/test/run_tests.sh yajl-2.0.4-nacl/test/run_tests.sh
 index 55a665b..225df99 100755
---- a/yajl-2.0.4/test/run_tests.sh
-+++ b/yajl-2.0.4/test/run_tests.sh
+--- yajl-2.0.4/test/run_tests.sh
++++ yajl-2.0.4-nacl/test/run_tests.sh
 @@ -68,6 +68,8 @@ for file in cases/*.json ; do
    # parse with a read buffer size ranging from 1-31 to stress stream parsing
    while [ $iter -lt 32  ] && [ $success = "SUCCESS" ] ; do

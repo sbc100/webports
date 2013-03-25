@@ -1,3 +1,4 @@
 PACKAGE_NAME=boost_1_47_0
 URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/boost_1_47_0.tar.bz2
 PATCH_FILE=nacl-boost.patch
+LICENSE=CUSTOM:LICENSE_1_0.txt

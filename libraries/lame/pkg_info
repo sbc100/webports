@@ -1,3 +1,4 @@
 PACKAGE_NAME=lame-398-2
 URL=http://sourceforge.net/projects/lame/files/lame/3.98.2/lame-398-2.tar.gz/download
 URL_FILENAME=lame-398-2.tar.gz
+LICENSE=LGPL

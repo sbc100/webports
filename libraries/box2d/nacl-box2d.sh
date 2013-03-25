@@ -60,21 +60,13 @@ CustomConfigureStep() {
 }
 
 
-CustomBuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
-  echo "Directory: $(pwd)"
-  make clean
-  make all -j${OS_JOBS}
-}
-
-
 CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadZipStep
   DefaultExtractZipStep
   DefaultPatchStep
   CustomConfigureStep
-  CustomBuildStep
+  DefaultBuildStep
   DefaultInstallStep
   DefaultCleanUpStep
   RunSelLdrTests

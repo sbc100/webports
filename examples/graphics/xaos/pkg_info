@@ -1,3 +1,4 @@
 PACKAGE_NAME=xaos-3.5
 URL=http://downloads.sourceforge.net/xaos/xaos-3.5.tar.gz
 PATCH_FILE=nacl_xaos.patch
+LICENSE=GPL

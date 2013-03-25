@@ -1,3 +1,4 @@
 PACKAGE_NAME=cfitsio
 URL=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3260.tar.gz
 PATCH_FILE=nacl-cfitsio.patch
+LICENSE=LGPL

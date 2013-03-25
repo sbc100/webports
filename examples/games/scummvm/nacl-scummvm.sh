@@ -170,6 +170,13 @@ CustomDownloadStep() {
   fi
 }
 
+ExtractGameZipStep() {
+  Banner "Unzipping ${PACKAGE_NAME}.zip"
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}
+  Remove ${PACKAGE_DIR}
+  unzip -d ${PACKAGE_DIR} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
+}
+
 GameGetStep() {
   PACKAGE_NAME_TEMP=${PACKAGE_NAME}
   PACKAGE_DIR_TEMP=${PACKAGE_DIR}
@@ -177,7 +184,7 @@ GameGetStep() {
   PACKAGE_DIR=$2
   SHA1=${SCUMMVM_EXAMPLE_DIR}/$2/$2.sha1
   CustomDownloadZipStep $1 $2 ${SHA1}
-  DefaultExtractZipStep
+  ExtractGameZipStep
   PACKAGE_NAME=${PACKAGE_NAME_TEMP}
   PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
