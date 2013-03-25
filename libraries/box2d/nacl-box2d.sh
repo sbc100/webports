@@ -42,7 +42,7 @@ RunSelLdrTests() {
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/Box2D_v2.2.1
+  export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/Box2D_v2.2.1
   ChangeDir ${PACKAGE_DIR}
   Remove ${PACKAGE_NAME}-build
   MakeDir ${PACKAGE_NAME}-build

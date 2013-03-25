@@ -1,7 +1,7 @@
-diff --git box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt
+diff --git Box2D_v2.2.1/CMakeLists.txt Box2D_v2.2.1/CMakeLists.txt
 index a9dc06c..0efc35f 100644
---- box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt
-+++ box2d-2.2.1/Box2D_v2.2.1/CMakeLists.txt
+--- Box2D_v2.2.1/CMakeLists.txt
++++ Box2D_v2.2.1/CMakeLists.txt
 @@ -19,10 +19,10 @@ set(BOX2D_VERSION 2.1.0)
  # The Box2D library.
  add_subdirectory(Box2D)
@@ -23,11 +23,11 @@ index a9dc06c..0efc35f 100644
 -endif(BOX2D_INSTALL_DOC)
 \ No newline at end of file
 +endif(BOX2D_INSTALL_DOC)
-diff --git box2d-2.2.1/Box2D_v2.2.1/XCompile-nacl.txt box2d-2.2.1/Box2D_v2.2.1/XCompile-nacl.txt
+diff --git Box2D_v2.2.1/XCompile-nacl.txt Box2D_v2.2.1/XCompile-nacl.txt
 new file mode 100644
 index 0000000..c651a2a
 --- /dev/null
-+++ box2d-2.2.1/Box2D_v2.2.1/XCompile-nacl.txt
++++ Box2D_v2.2.1/XCompile-nacl.txt
 @@ -0,0 +1,27 @@
 +# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
 +# this file to set the proper settings and paths. Then use it from build/ like:
