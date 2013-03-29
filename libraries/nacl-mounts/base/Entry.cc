@@ -28,6 +28,8 @@ extern "C" {
 #  define STRUCT_NAME(group) __libnacl_irt_##group
 #  define DECLARE_STRUCT(group) \
     extern struct nacl_irt_##group STRUCT_NAME(group);
+#  define DECLARE_STRUCT_VERSION(group, version) \
+    extern struct nacl_irt_##group##_##version STRUCT_NAME(group);
 #  define MUX(group, name) STRUCT_NAME(group).name
 #endif
 #define DECLARE(group, name) typeof(MUX(group, name)) REAL(name);
@@ -39,7 +41,11 @@ extern "C" {
 #ifndef __GLIBC__
   DECLARE_STRUCT(fdio);
   DECLARE_STRUCT(filename);
+#ifdef NACL_IRT_MEMORY_v0_2
+  DECLARE_STRUCT_VERSION(memory, v0_2);
+#else
   DECLARE_STRUCT(memory);
+#endif
   DECLARE_STRUCT(net);
 #endif
 
