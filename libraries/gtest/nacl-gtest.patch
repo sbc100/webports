@@ -29,3 +29,17 @@ diff -Naur gtest-1.6.0/Makefile gtest-1.6.0.nacl/Makefile
 +
 +$(LIB_GTEST): $(OBJ_DIR) $(OBJ_FILES)
 +	cd $(OBJ_DIR) && $(AR) rcs ../$(LIB_GTEST) $(OBJ_FILES)
+diff -Naur gtest-1.6.0/src/gtest-filepath.cc gtest-1.6.0.nacl/src/gtest-filepath.cc
+--- gtest-1.6.0/src/gtest-filepath.cc	2011-04-15 12:49:11.000000000 -0700
++++ gtest-1.6.0.nacl/src/gtest-filepath.cc	2013-03-29 15:44:42.921836637 -0700
+@@ -39,8 +39,8 @@
+ #elif GTEST_OS_WINDOWS
+ # include <direct.h>
+ # include <io.h>
+-#elif GTEST_OS_SYMBIAN || GTEST_OS_NACL
+-// Symbian OpenC and NaCl have PATH_MAX in sys/syslimits.h
++#elif GTEST_OS_SYMBIAN
++// Symbian OpenC has PATH_MAX in sys/syslimits.h
+ # include <sys/syslimits.h>
+ #else
+ # include <limits.h>
