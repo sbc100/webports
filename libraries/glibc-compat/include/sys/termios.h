@@ -26,19 +26,21 @@
 # define TCSADRAIN	_XCSETAW
 # define TCSADFLUSH	_XCSETAF
 
-# define IGNBRK	000001
-# define BRKINT	000002
-# define IGNPAR	000004
-# define PARMRK 000010
-# define INPCK	000020
-# define ISTRIP	000040
-# define INLCR	000100
-# define IGNCR	000200
-# define ICRNL	000400
-# define IXON	002000
-# define IXANY  004000
-# define IUTF8  004000
-# define IXOFF	010000
+#define IGNBRK  0000001
+#define BRKINT  0000002
+#define IGNPAR  0000004
+#define PARMRK  0000010
+#define INPCK   0000020
+#define ISTRIP  0000040
+#define INLCR   0000100
+#define IGNCR   0000200
+#define ICRNL   0000400
+#define IUCLC   0001000
+#define IXON    0002000
+#define IXANY   0004000
+#define IXOFF   0010000
+#define IMAXBEL 0020000
+#define IUTF8   0040000
 
 # define OPOST	000001
 # define OCRNL	000004
