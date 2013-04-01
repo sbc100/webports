@@ -122,16 +122,17 @@ LIBRARIES = \
      libraries/libxml2 \
      libraries/x264 \
      libraries/box2d \
-     libraries/yajl
+     libraries/yajl \
+     libraries/flac \
+     libraries/lame
 
 ifneq ($(NACL_ARCH), arm)
-# Libraries that currently fail to build on ARM
-# TODO(sbc): fix the build isses and remove this conditional
+# Libraries that currently fail to build with ARM gcc.
+# TODO(sbc): remove this conditional once this bug gets fixed:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
   LIBRARIES += \
-     libraries/flac \
      libraries/libtheora \
-     libraries/ffmpeg \
-     libraries/lame
+     libraries/ffmpeg
 endif
 
 EXAMPLES = \
