@@ -20,11 +20,16 @@ CustomConfigureStep() {
 }
 
 CustomInstallStep() {
+  # Add chmod here since gtest archive contains readonly files we don't
+  # want installed files to be readonly
+  LogExecute chmod -R +w .
+
   Remove ${NACLPORTS_LIBDIR}/${LIB_GTEST}
-  install -m 644 ${LIB_GTEST} ${NACLPORTS_LIBDIR}/${LIB_GTEST}
+  LogExecute install -m 644 ${LIB_GTEST} ${NACLPORTS_LIBDIR}/${LIB_GTEST}
 
   Remove ${NACLPORTS_INCLUDE}/gtest
-  cp -r include/gtest ${NACLPORTS_INCLUDE}/gtest
+  LogExecute cp -r include/gtest ${NACLPORTS_INCLUDE}/gtest
+
   DefaultTouchStep
 }
 
