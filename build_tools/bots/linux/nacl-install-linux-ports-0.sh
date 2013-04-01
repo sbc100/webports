@@ -20,6 +20,7 @@ make clean
 
 # ffmpeg also builds lame, vorbis, theora, and ogg
 # sdl_* build sdl, png, freetype
+BuildPackage regal
 BuildPackage ffmpeg
 BuildPackage speex
 BuildPackage flac

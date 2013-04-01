@@ -126,6 +126,11 @@ LIBRARIES = \
      libraries/flac \
      libraries/lame
 
+ifneq ($(NACL_ARCH), pnacl)
+  LIBRARIES += \
+     libraries/Regal
+endif
+
 ifneq ($(NACL_ARCH), arm)
 # Libraries that currently fail to build with ARM gcc.
 # TODO(sbc): remove this conditional once this bug gets fixed:
@@ -302,6 +307,7 @@ sdl_ttf: libraries/SDL_ttf ;
 speex: libraries/speex ;
 theora: libraries/libtheora ;
 tiff: libraries/tiff ;
+regal: libraries/Regal ;
 tinyxml: libraries/tinyxml ;
 tomcrypt: libraries/libtomcrypt ;
 tommath: libraries/libtommath ;
