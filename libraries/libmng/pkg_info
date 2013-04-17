@@ -1,0 +1,3 @@
+PACKAGE_NAME=libmng-1.0.10
+URL=http://downloads.sourceforge.net/project/libmng/libmng-devel/1.0.10/libmng-1.0.10.tar.gz
+LICENSE=CUSTOM:LICENSE

@@ -124,7 +124,8 @@ LIBRARIES = \
      libraries/box2d \
      libraries/yajl \
      libraries/flac \
-     libraries/lame
+     libraries/lame \
+     libraries/libmng
 
 ifneq ($(NACL_ARCH), pnacl)
   LIBRARIES += \
@@ -259,6 +260,7 @@ $(SENT)/libraries/nacl-mounts: libraries/gtest
 ifneq ($(NACL_GLIBC), 1)
   $(SENT)/libraries/openssl: libraries/glibc-compat
 endif
+$(SENT)/libraries/libmng: libraries/zlib libraries/jpeg
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg ;
@@ -288,6 +290,7 @@ lame: libraries/lame ;
 lua: libraries/lua ;
 mesa: libraries/Mesa ;
 mikmod: libraries/libmikmod ;
+mng: libraries/libmng ;
 modplug: libraries/libmodplug ;
 nacl-mounts: libraries/nacl-mounts ;
 ogg: libraries/libogg ;
