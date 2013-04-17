@@ -1,0 +1,4 @@
+PACKAGE_NAME=physfs-2.0.3
+URL=http://icculus.org/physfs/downloads/physfs-2.0.3.tar.bz2
+PATCH_FILE=nacl-physfs.patch
+LICENSE=CUSTOM:LICENSE.txt

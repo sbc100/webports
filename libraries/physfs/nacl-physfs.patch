@@ -1,0 +1,80 @@
+diff --git a/XCompile-nacl.txt b/XCompile-nacl.txt
+new file mode 100644
+index 0000000..c651a2a
+--- /dev/null
++++ b/XCompile-nacl.txt
+@@ -0,0 +1,27 @@
++# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
++# this file to set the proper settings and paths. Then use it from build/ like:
++# cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile.txt \
++#          -DCMAKE_INSTALL_PREFIX=/usr/mingw32/mingw
++# If you already have a toolchain file setup, you may use that instead of this
++# file.
++
++# the name of the target operating system
++SET(CMAKE_SYSTEM_NAME Linux)
++
++# which compilers to use for C and C++
++SET(CMAKE_C_COMPILER ${NACLCC})
++SET(CMAKE_CXX_COMPILER ${NACLCXX})
++set(CMAKE_AR ${NACLAR} CACHE FILEPATH "Archiver")
++SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
++
++# here is the target environment located
++SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
++
++# adjust the default behaviour of the FIND_XXX() commands:
++# search headers and libraries in the target environment, search 
++# programs in the host environment
++set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
++set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
++set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
++set(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
++include_directories(${NACL_SDK_ROOT}/include)
+diff --git a/lzma/C/Archive/7z/7zDecode.c b/lzma/C/Archive/7z/7zDecode.c
+index 524e547..000ce44 100644
+--- a/lzma/C/Archive/7z/7zDecode.c
++++ b/lzma/C/Archive/7z/7zDecode.c
+@@ -1,6 +1,8 @@
+ /* 7zDecode.c */
+ 
++#if !defined(__native_client__) || defined(__GLIBC__)
+ #include <memory.h>
++#endif
+ 
+ /* BEGIN PHYSFS CHANGE */
+ #include <string.h>
+diff --git a/platform/posix.c b/platform/posix.c
+index 652d9f7..2649f3a 100644
+--- a/platform/posix.c
++++ b/platform/posix.c
+@@ -27,6 +27,11 @@
+ #include <linux/unistd.h>
+ #endif
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++// Newlib doesn't define lstat.
++#define lstat stat
++#endif
++
+ #include "physfs_internal.h"
+ 
+ 
+diff --git a/platform/unix.c b/platform/unix.c
+index 093e7eb..1ce171e 100644
+--- a/platform/unix.c
++++ b/platform/unix.c
+@@ -283,8 +283,13 @@ char *__PHYSFS_platformRealPath(const char *path)
+     char resolved_path[MAXPATHLEN];
+     char *retval = NULL;
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++    // TODO(binji): Real implementation for Newlib.
++    strncpy(resolved_path, path, MAXPATHLEN);
++#else
+     errno = 0;
+     BAIL_IF_MACRO(!realpath(path, resolved_path), strerror(errno), NULL);
++#endif
+     retval = (char *) allocator.Malloc(strlen(resolved_path) + 1);
+     BAIL_IF_MACRO(retval == NULL, ERR_OUT_OF_MEMORY, NULL);
+     strcpy(retval, resolved_path);

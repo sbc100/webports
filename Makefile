@@ -127,7 +127,8 @@ LIBRARIES = \
      libraries/lame \
      libraries/libmng \
      libraries/lcms \
-     libraries/DevIL
+     libraries/DevIL \
+     libraries/physfs
 
 ifneq ($(NACL_ARCH), pnacl)
   LIBRARIES += \
@@ -266,6 +267,7 @@ $(SENT)/libraries/libmng: libraries/zlib libraries/jpeg
 $(SENT)/libraries/lcms: libraries/zlib libraries/jpeg libraries/tiff
 $(SENT)/libraries/DevIL: libraries/libpng libraries/jpeg libraries/libmng \
     libraries/tiff libraries/lcms
+$(SENT)/libraries/physfs: libraries/zlib
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg ;
@@ -306,6 +308,7 @@ freealut: libraries/freealut ;
 openscenegraph: libraries/OpenSceneGraph ;
 openssl: libraries/openssl ;
 pango: libraries/pango ;
+physfs: libraries/physfs ;
 pixman: libraries/pixman ;
 png: libraries/libpng ;
 webp: libraries/webp ;
