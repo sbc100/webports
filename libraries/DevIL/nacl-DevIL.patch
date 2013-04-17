@@ -1,0 +1,80 @@
+diff --git a/build-aux/config.sub b/build-aux/config.sub
+index 6759825..17ff876 100755
+--- a/build-aux/config.sub
++++ b/build-aux/config.sub
+@@ -739,6 +739,10 @@ case $basic_machine in
+ 		basic_machine=i370-ibm
+ 		os=-mvs
+ 		;;
++        nacl)
++                basic_machine=i686-pc
++                os=-nacl
++                ;;
+ 	ncr3000)
+ 		basic_machine=i486-ncr
+ 		os=-sysv4
+@@ -1258,7 +1262,7 @@ case $os in
+ 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+-	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
++	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -nacl*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff --git a/src-IL/src/il_alloc.c b/src-IL/src/il_alloc.c
+index 06688ef..0c7b487 100644
+--- a/src-IL/src/il_alloc.c
++++ b/src-IL/src/il_alloc.c
+@@ -123,6 +123,7 @@ static void ILAPIENTRY DefaultFreeFunc(const void * CONST_RESTRICT ptr)
+ {
+ 	if (ptr)
+ 	{
++#ifdef VECTORMEM
+ #ifdef MM_MALLOC
+ 	    _mm_free((void*)ptr);
+ #else
+@@ -132,6 +133,9 @@ static void ILAPIENTRY DefaultFreeFunc(const void * CONST_RESTRICT ptr)
+ 	    free((void*)ptr);
+ #endif //OTHERS...
+ #endif //MM_MALLOC
++#else //VECTORMEM
++            free((void*)ptr);
++#endif
+ 	}
+ }
+ 
+diff --git a/src-IL/src/il_internal.c b/src-IL/src/il_internal.c
+index 35fe939..2f33bf2 100644
+--- a/src-IL/src/il_internal.c
++++ b/src-IL/src/il_internal.c
+@@ -21,7 +21,12 @@ ILimage *iCurImage = NULL;
+ 
+ /* Siigron: added this for Linux... a #define should work, but for some reason
+ 	it doesn't (anyone who knows why?) */
+-#if !_WIN32 || (_WIN32 && __GNUC__) // Cygwin
++#if defined(__native_client__) && defined(__GLIBC__)
++	#define stricmp strcasecmp
++	#define strnicmp strncasecmp
++#elif defined(__native_client__) && !defined(__GLIBC__)
++	// Already defined in string.h
++#elif !_WIN32 || (_WIN32 && __GNUC__) // Cygwin
+ 	int stricmp(const char *src1, const char *src2)
+ 	{
+ 		return strcasecmp(src1, src2);
+diff --git a/test/format_test/format_checks.sh.in b/test/format_test/format_checks.sh.in
+index 4e480b7..2dccdac 100644
+--- a/test/format_test/format_checks.sh.in
++++ b/test/format_test/format_checks.sh.in
+@@ -30,9 +30,9 @@ do
+ 	then # This extension is not considered as supported...
+ 		continue;
+ 	fi
+-	test -n	"$VERBOSE" && echo $WINE ./testil@EXEEXT@ -e $EXTENSION
++	test -n	"$VERBOSE" && echo $WINE ./testil.sh -e $EXTENSION
+ 	# EXEEXT comes in when one compiles on platforms that append extensions to executables (testil.exe)
+-	$WINE ./testil@EXEEXT@ -e$VERBOSE $EXTENSION
++	$WINE ./testil.sh -e$VERBOSE $EXTENSION
+ 	
+ 	# We have to capture whether the test has failed or not
+ 	if [ ! $? -eq 0 ]

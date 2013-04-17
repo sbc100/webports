@@ -126,7 +126,8 @@ LIBRARIES = \
      libraries/flac \
      libraries/lame \
      libraries/libmng \
-     libraries/lcms
+     libraries/lcms \
+     libraries/DevIL
 
 ifneq ($(NACL_ARCH), pnacl)
   LIBRARIES += \
@@ -263,6 +264,8 @@ ifneq ($(NACL_GLIBC), 1)
 endif
 $(SENT)/libraries/libmng: libraries/zlib libraries/jpeg
 $(SENT)/libraries/lcms: libraries/zlib libraries/jpeg libraries/tiff
+$(SENT)/libraries/DevIL: libraries/libpng libraries/jpeg libraries/libmng \
+    libraries/tiff libraries/lcms
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg ;
@@ -271,6 +274,7 @@ box2d: libraries/box2d ;
 bzip2: libraries/bzip2 ;
 cairo: libraries/cairo ;
 cfitsio: libraries/cfitsio ;
+DevIL: libraries/DevIL ;
 expat: libraries/expat ;
 faac: libraries/faac ;
 faad: libraries/faad2 ;
