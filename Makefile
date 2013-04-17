@@ -125,7 +125,8 @@ LIBRARIES = \
      libraries/yajl \
      libraries/flac \
      libraries/lame \
-     libraries/libmng
+     libraries/libmng \
+     libraries/lcms
 
 ifneq ($(NACL_ARCH), pnacl)
   LIBRARIES += \
@@ -261,6 +262,7 @@ ifneq ($(NACL_GLIBC), 1)
   $(SENT)/libraries/openssl: libraries/glibc-compat
 endif
 $(SENT)/libraries/libmng: libraries/zlib libraries/jpeg
+$(SENT)/libraries/lcms: libraries/zlib libraries/jpeg libraries/tiff
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg ;
@@ -287,6 +289,7 @@ imagemagick: libraries/ImageMagick ;
 jpeg: libraries/jpeg ;
 jsoncpp: libraries/jsoncpp ;
 lame: libraries/lame ;
+lcms: libraries/lcms ;
 lua: libraries/lua ;
 mesa: libraries/Mesa ;
 mikmod: libraries/libmikmod ;
