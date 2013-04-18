@@ -128,7 +128,8 @@ LIBRARIES = \
      libraries/libmng \
      libraries/lcms \
      libraries/DevIL \
-     libraries/physfs
+     libraries/physfs \
+     libraries/mpg123
 
 ifneq ($(NACL_ARCH), pnacl)
   LIBRARIES += \
@@ -268,6 +269,7 @@ $(SENT)/libraries/lcms: libraries/zlib libraries/jpeg libraries/tiff
 $(SENT)/libraries/DevIL: libraries/libpng libraries/jpeg libraries/libmng \
     libraries/tiff libraries/lcms
 $(SENT)/libraries/physfs: libraries/zlib
+$(SENT)/libraries/mpg123: libraries/openal-soft
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg ;
@@ -301,6 +303,7 @@ mesa: libraries/Mesa ;
 mikmod: libraries/libmikmod ;
 mng: libraries/libmng ;
 modplug: libraries/libmodplug ;
+mpg123: libraries/mpg123 ;
 nacl-mounts: libraries/nacl-mounts ;
 ogg: libraries/libogg ;
 openal: libraries/openal-soft ;
