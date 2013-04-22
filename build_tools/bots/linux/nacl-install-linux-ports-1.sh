@@ -31,6 +31,11 @@ BuildPackage ncurses
 BuildPackage box2d
 BuildPackage xml2
 BuildPackage yajl
+BuildPackage mng
+BuildPackage lcms
+BuildPackage DevIL
+BuildPackage physfs
+BuildPackage mpg123
 
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
 if [[ $RESULT != 0 ]] ; then
@@ -40,4 +45,3 @@ fi
 echo -e "$MESSAGES"
 
 exit $RESULT
-
