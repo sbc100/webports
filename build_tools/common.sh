@@ -222,7 +222,6 @@ InitializeNaClGccToolchain() {
 
 
 InitializePNaClToolchain() {
-  NACL_GLIBC=${NACL_GLIBC:-0}
   if [ $NACL_GLIBC = "1" ]; then
     local TOOLCHAIN_SUFFIX="glibc"
   else

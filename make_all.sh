@@ -13,24 +13,24 @@ set -e
 TARGETS="$*"
 TARGETS=${TARGETS:-all}
 
-# x86_64 NaCL
+# x86_64 NaCl
 export NACL_ARCH=x86_64
 export NACL_GLIBC=1
 make ${TARGETS}
 unset NACL_GLIBC
 make ${TARGETS}
 
-# i686 NaCL
+# i686 NaCl
 export NACL_ARCH=i686
 export NACL_GLIBC=1
 make ${TARGETS}
 unset NACL_GLIBC
 make ${TARGETS}
 
-# PNaCl
-export NACL_ARCH=pnacl
+# ARM NaCl
+export NACL_ARCH=arm
 make ${TARGETS}
 
-# ARM
-export NACL_ARCH=arm
+# PNaCl
+export NACL_ARCH=pnacl
 make ${TARGETS}
