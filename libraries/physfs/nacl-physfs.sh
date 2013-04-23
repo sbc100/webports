@@ -15,7 +15,9 @@ CustomConfigureStep() {
   cd "build-nacl"
   echo "Directory: $(pwd)"
   if [ ${NACL_GLIBC} = "1" ] ; then
-    local BUILD_SHARED=TRUE
+    # TODO(binji): turn on shared building (need -fPIC)
+#    local BUILD_SHARED=TRUE
+    local BUILD_SHARED=FALSE
     local BUILD_TEST=TRUE
   else
     local BUILD_SHARED=FALSE
