@@ -22,6 +22,37 @@ index 6759825..17ff876 100755
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
+diff --git a/m4/devil-definitions.m4 b/m4/devil-definitions.m4
+index 7616e82..7e8c60d 100644
+--- a/m4/devil-definitions.m4
++++ b/m4/devil-definitions.m4
+@@ -273,15 +273,19 @@ AC_DEFUN([TEST_API],
+ 			[enable_$1="yes"]) ])
+ 
+ dnl Test for restrict c/c++ keyword
++dnl TODO(binji): Turn back on restrict. On clang, this fails below because it
++dnl adds --std=gnu99 to CFLAGS. This works fine with clang, but clang++
++dnl complains that the flag is incompatible. g++ doesn't seem to mind, however.
+ AC_DEFUN([DEVIL_CHECK_RESTRICT],
+          [AC_MSG_CHECKING([restrict keyword])
+-	  AC_COMPILE_IFELSE([[void foo(void * restrict test){}]],
+-	            	    [AC_DEFINE([RESTRICT_KEYWORD],
+-				       [],
+-				       [restric keyword available])
+-                             restrict_keyword="found"
+-	                     AC_MSG_RESULT([yes]) ],
+-			    [AC_MSG_RESULT([no]) ]) ])
++          AC_MSG_RESULT([no])])
++dnl	  AC_COMPILE_IFELSE([[void foo(void * restrict test){}]],
++dnl	            	    [AC_DEFINE([RESTRICT_KEYWORD],
++dnl				       [],
++dnl				       [restric keyword available])
++dnl                             restrict_keyword="found"
++dnl	                     AC_MSG_RESULT([yes]) ],
++dnl			    [AC_MSG_RESULT([no]) ]) ])
+ 
+ AC_DEFUN([DEVIL_CHECK_RESTRICT_GNU99],
+          [TMP_CFLAGS="$CFLAGS"
 diff --git a/src-IL/src/il_alloc.c b/src-IL/src/il_alloc.c
 index 06688ef..0c7b487 100644
 --- a/src-IL/src/il_alloc.c
