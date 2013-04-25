@@ -14,16 +14,12 @@ CustomConfigureStep() {
   MakeDir "build-nacl"
   cd "build-nacl"
   echo "Directory: $(pwd)"
-  if [ ${NACL_GLIBC} = "1" ] ; then
-    # TODO(binji): turn on shared building (need -fPIC)
-#    local BUILD_SHARED=TRUE
-    local BUILD_SHARED=FALSE
-    local BUILD_TEST=TRUE
-  else
-    local BUILD_SHARED=FALSE
-    # TODO(binji): Figure out how to get the Newlib tests building...
-    local BUILD_TEST=FALSE
-  fi
+
+  # TODO(binji): turn on shared building for glibc (need -fPIC)
+  local BUILD_SHARED=FALSE
+  # TODO(binji): The tests don't currently build without zlib as a shared
+  # library.
+  local BUILD_TEST=FALSE
 
   cmake ..  -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
            -DNACLCC=${NACLCC} \
