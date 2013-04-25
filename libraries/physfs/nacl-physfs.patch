@@ -44,6 +44,19 @@ index 524e547..000ce44 100644
  
  /* BEGIN PHYSFS CHANGE */
  #include <string.h>
+diff --git a/physfs_platforms.h b/physfs_platforms.h
+index 112193c..c1120d6 100644
+--- a/physfs_platforms.h
++++ b/physfs_platforms.h
+@@ -38,7 +38,7 @@
+ #  endif
+ #elif defined(macintosh)
+ #  error Classic Mac OS support was dropped from PhysicsFS 2.0. Move to OS X.
+-#elif defined(unix) || defined(__unix__)
++#elif defined(unix) || defined(__unix__) || defined(__native_client__)
+ #  define PHYSFS_PLATFORM_UNIX
+ #  define PHYSFS_PLATFORM_POSIX
+ #else
 diff --git a/platform/posix.c b/platform/posix.c
 index 652d9f7..2649f3a 100644
 --- a/platform/posix.c
