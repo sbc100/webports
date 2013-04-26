@@ -2,23 +2,16 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
-# nacl-bochs.sh
-#
-# usage:  nacl-bochs.sh
-#
-# this script downloads, patches, and builds bochs for Native Client.
-#
+source pkg_info
+source ../../../build_tools/common.sh
 
 # Linux disk image
 readonly LINUX_IMG_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
 readonly LINUX_IMG_NAME=linux-img
 
-source pkg_info
-source ../../../build_tools/common.sh
-
 BOCHS_EXAMPLE_DIR=${NACL_SRC}/examples/systems/bochs
+EXECUTABLES=bochs
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -75,9 +68,9 @@ CustomConfigureStep() {
   export LIBS="$LIBS -Wl,--end-group"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
+  Remove build-nacl
+  MakeDir build-nacl
+  cd build-nacl
   ../configure \
     --host=nacl \
     --disable-shared \
@@ -104,7 +97,7 @@ CustomExtractStep(){
 
 CustomInstallStep(){
   BOCHS_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  BOCHS_BUILD=${BOCHS_DIR}/${PACKAGE_NAME}-build
+  BOCHS_BUILD=${BOCHS_DIR}/build-nacl
 
   ChangeDir ${BOCHS_DIR}
   mkdir -p img/usr/local/share/bochs/
@@ -205,9 +198,8 @@ CustomPackageInstall() {
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/bochs
-  fi
+  DefaultTranslateStep
+  DefaultValidateStep
   CustomInstallStep
   DefaultCleanUpStep
 }

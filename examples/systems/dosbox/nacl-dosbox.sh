@@ -15,6 +15,7 @@ source pkg_info
 source ../../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/systems/dosbox-0.74
+EXECUTABLES=src/dosbox
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -51,9 +52,9 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ./autogen.sh
 
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
+  Remove build-nacl
+  MakeDir build-nacl
+  cd build-nacl
   ../configure ${CONFIG_FLAGS}
 
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
@@ -90,13 +91,12 @@ CustomConfigureStep() {
 
 CustomInstallStep(){
   DOSBOX_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  DOSBOX_BUILD=${DOSBOX_DIR}/${PACKAGE_NAME}-build
+  DOSBOX_BUILD=${DOSBOX_DIR}/build-nacl
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
   install ${START_DIR}/dosbox.nmf ${PUBLISH_DIR}
-  install ${DOSBOX_BUILD}/src/dosbox \
-      ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
+  install ${DOSBOX_BUILD}/src/dosbox ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
   DefaultTouchStep
 }
 
@@ -107,9 +107,8 @@ CustomPackageInstall() {
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/src/dosbox
-  fi
+  DefaultTranslateStep
+  DefaultValidateStep
   CustomInstallStep
   DefaultCleanUpStep
 }

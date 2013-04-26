@@ -2,19 +2,12 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-xaos.sh
-#
-# usage:  nacl-xoas.sh
-#
-# this script downloads, patches, and builds xaos for Native Client.
-#
 
 source pkg_info
 source ../../../build_tools/common.sh
 
 EXAMPLE_DIR=${NACL_SRC}/examples/graphics/xaos
+EXECUTABLES=bin/xaos
 
 CustomPatchStep() {
   local the_patch="${START_DIR}/${PATCH_FILE}"
@@ -63,13 +56,13 @@ CustomConfigureStep() {
 
   # xaos does not work with a build dir which is separate from the
   # src dir - so we copy src -> build
-  Remove ${PACKAGE_NAME}-build
+  Remove build-nacl
   local tmp=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}.tmp
   Remove ${tmp}
   cp -r ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME} ${tmp}
-  mv ${tmp} ${PACKAGE_NAME}-build
+  mv ${tmp} build-nacl
 
-  cd ${PACKAGE_NAME}-build
+  cd build-nacl
   echo "Directory: $(pwd)"
   echo "run autoconf"
   rm ./configure
@@ -80,7 +73,7 @@ CustomConfigureStep() {
 
 CustomInstallStep(){
   local out_dir=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  local build_dir=${out_dir}/${PACKAGE_NAME}-build
+  local build_dir=${out_dir}/build-nacl
   local publish_dir="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
 
   MakeDir ${publish_dir}
@@ -99,9 +92,8 @@ CustomPackageInstall() {
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    DefaultTranslateStep ${PACKAGE_NAME} ${PACKAGE_NAME}-build/bin/xaos
-  fi
+  DefaultTranslateStep
+  DefaultValidateStep
   CustomInstallStep
   DefaultCleanUpStep
 }

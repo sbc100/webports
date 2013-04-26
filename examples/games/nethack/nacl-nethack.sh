@@ -2,21 +2,13 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-nethack-343.sh
-#
-# usage:  nacl-nethack-343.sh
-#
-# this script downloads, patches, and builds nethack for Native Client
-#
 
 source pkg_info
 source ../../../build_tools/common.sh
 
-
 set -x
 
+EXECUTABLES=src/nethack
 
 CustomBuildStep() {
   Banner "Building ${PACKAGE_NAME}"
@@ -79,7 +71,9 @@ CustomBuildStep() {
   cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
   zip -r nethack-3.4.3.zip nethack
+  ChangeDir ${PACKAGE_DIR}
 }
+
 
 CustomPackageInstall() {
   DefaultPreInstallStep
@@ -87,10 +81,8 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    # NOTE: nethack does not use a build subdir
-    DefaultTranslateStep ${PACKAGE_NAME} src/nethack
-  fi
+  DefaultTranslateStep
+  DefaultValidateStep
   DefaultTouchStep
   DefaultCleanUpStep
 }

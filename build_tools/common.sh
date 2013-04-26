@@ -592,9 +592,9 @@ DefaultConfigureStep() {
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  Remove "build-nacl"
-  MakeDir "build-nacl"
-  cd "build-nacl"
+  Remove build-nacl
+  MakeDir build-nacl
+  cd build-nacl
   echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
@@ -672,6 +672,32 @@ TimeCommand() {
 }
 
 
+Validate() {
+  if [ ${NACL_ARCH} = "pnacl" ]; then
+      return
+  elif [ ${NACL_ARCH} = "arm" ]; then
+      NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval_arm
+  elif [ ${NACL_ARCH} = "x86_64" ]; then
+      NACL_VALIDATE="${NACL_SDK_ROOT}/tools/ncval_x86_64 --errors"
+  else
+      NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval_x86_32
+  fi
+  LogExecute ${NACL_VALIDATE} $@
+  if [ $? != 0 ]; then
+      exit 1
+  fi
+}
+
+
+DefaultValidateStep() {
+  if [ ${NACL_ARCH} != "pnacl" -a -n "${EXECUTABLES:-}" ]; then
+    for nexe in $EXECUTABLES ; do
+      Validate $nexe
+    done
+  fi
+}
+
+
 RunSelLdrCommand() {
   if [ $NACL_ARCH = "arm" ]; then
     # no sel_ldr for arm
@@ -686,6 +712,7 @@ RunSelLdrCommand() {
   fi
 }
 
+
 WriteSelLdrScript() {
   if [ $NACL_ARCH = "arm" ]; then
     # no sel_ldr for arm
@@ -695,75 +722,83 @@ WriteSelLdrScript() {
     cat > $1 <<HERE
 #!/bin/bash
 export NACLLOG=/dev/null
-"${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- \
-    "${NACL_SDK_LIB}/runnable-ld.so" --library-path "${NACL_SDK_LIB}" "$2" "\$@"
+
+SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
+SEL_LDR=${NACL_SEL_LDR}
+IRT=${NACL_IRT}
+SDK_LIB_DIR=${NACL_SDK_LIB}
+LIB_PATH=\${SDK_LIB_DIR}:\${SCRIPT_DIR}
+
+"\${SEL_LDR}" -a -B "\${IRT}" -- \\
+    "\${SDK_LIB_DIR}/runnable-ld.so" --library-path "\${LIB_PATH}" \\
+    "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   else
     cat > $1 <<HERE
 #!/bin/bash
 export NACLLOG=/dev/null
-"${NACL_SEL_LDR}" -B "${NACL_IRT}" -- "$2" "\$@"
+
+SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
+SEL_LDR=${NACL_SEL_LDR}
+IRT=${NACL_IRT}
+
+"\${SEL_LDR}" -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   fi
   chmod 750 $1
   echo "Wrote script pwd:$PWD $1"
 }
 
-DefaultTranslateStep() {
-  local package=$1
-  local build_dir="${NACL_PACKAGES_REPOSITORY}/${package}"
-  local pexe=${build_dir}/$2
-  local arches="arm x86-32 x86-64"
 
+TranslatePexe() {
+  local pexe=$1
+  local arches="arm x86-32 x86-64"
   Banner "Translating ${pexe}"
-  ls -l ${pexe}
 
   echo "stripping pexe"
   TimeCommand ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
-  ls -l ${pexe}.stripped
 
   for a in ${arches} ; do
-    echo
     echo "translating pexe [$a]"
     nexe=${pexe}.$a.nexe
     TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${nexe}
-    ls -l ${nexe}
   done
 
   # PIC branch
   for a in ${arches} ; do
-    echo
     echo "translating pexe [$a,pic]"
     nexe=${pexe}.$a.pic.nexe
     TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${nexe}
-    ls -l ${nexe}
   done
 
   # Now the same spiel with an optimized pexe
   opt_args="-O3 -inline-threshold=100"
-  echo
   echo "optimizing pexe [${opt_args}]"
   TimeCommand ${OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
-  ls -l ${pexe}.stripped.opt
 
   for a in ${arches} ; do
-    echo
     echo "translating pexe [$a]"
     nexe=${pexe}.opt.$a.nexe
     TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped.opt -o ${nexe}
-    ls -l ${nexe}
   done
 
   # PIC branch
   for a in ${arches}; do
-    echo
     echo "translating pexe [$a,pic]"
     nexe=${pexe}.$a.pic.opt.nexe
     TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped.opt -o ${nexe}
-    ls -l ${nexe}
   done
 
-  ls -l $(dirname ${pexe})
+  ls -l $(dirname ${pexe})/*.nexe ${pexe}
+}
+
+
+DefaultTranslateStep() {
+  if [ ${NACL_ARCH} = "pnacl" -a -n "${EXECUTABLES:-}" ]; then
+    for pexe in ${EXECUTABLES} ; do
+      TranslatePexe ${pexe}
+    done
+  fi
 }
 
 
@@ -774,6 +809,8 @@ DefaultPackageInstall() {
   DefaultPatchStep
   DefaultConfigureStep
   DefaultBuildStep
+  DefaultTranslateStep
+  DefaultValidateStep
   DefaultInstallStep
   DefaultCleanUpStep
 }

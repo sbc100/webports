@@ -2,14 +2,6 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-yajl.sh
-#
-# usage:  nacl-yajl.sh
-#
-# this script downloads, patches, and builds yajl for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
@@ -35,8 +27,8 @@ RunSelLdrTests() {
     return
   fi
 
-  local script=${PACKAGE_DIR}/${PACKAGE_NAME}-build/yajl_test.sh
-  local nexe=${PACKAGE_DIR}/${PACKAGE_NAME}-build/test/yajl_test
+  local script=${PACKAGE_DIR}/build-nacl/yajl_test.sh
+  local nexe=test/yajl_test
 
   WriteSelLdrScript ${script} ${nexe}
   cd ${PACKAGE_DIR}/test && ./run_tests.sh ${script}
@@ -47,9 +39,9 @@ CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ChangeDir ${PACKAGE_DIR}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
+  Remove build-nacl
+  MakeDir build-nacl
+  cd build-nacl
   echo "Directory: $(pwd)"
 
   cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \

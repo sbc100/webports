@@ -16,6 +16,7 @@ PACKAGE_DIR=${PACKAGE_NAME}-src
 source ../../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/games/snes9x-1.53
+EXECUTABLES=snes9x
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -80,10 +81,8 @@ CustomPackageInstall() {
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    # NOTE: snes9x has unusual dirnames
-    DefaultTranslateStep ${PACKAGE_DIR} unix/snes9x
-  fi
+  DefaultTranslateStep
+  DefaultValidateStep
   CustomInstallStep
   DefaultCleanUpStep
 }
