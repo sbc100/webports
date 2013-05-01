@@ -41,11 +41,7 @@ extern "C" {
 #ifndef __GLIBC__
   DECLARE_STRUCT(fdio);
   DECLARE_STRUCT(filename);
-#ifdef NACL_IRT_MEMORY_v0_2
-  DECLARE_STRUCT_VERSION(memory, v0_2);
-#else
   DECLARE_STRUCT(memory);
-#endif
   DECLARE_STRUCT(net);
 #endif
 
