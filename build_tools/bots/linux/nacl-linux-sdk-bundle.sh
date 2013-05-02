@@ -53,30 +53,32 @@ BuildPackageArchAll() {
   local ARCH=$2
   CustomBuildPackage $PACKAGE $ARCH newlib Release
   CustomBuildPackage $PACKAGE $ARCH newlib Debug
-  if [ "$ARCH" != "arm" ]; then
+  if [ "$ARCH" != "arm" -a "$ARCH" != "pnacl" ]; then
     CustomBuildPackage $PACKAGE $ARCH glibc Release
     CustomBuildPackage $PACKAGE $ARCH glibc Debug
   fi
 }
 
+ARCH_LIST="i686 x86_64 arm pnacl"
+
 # $1 - name of package
 BuildPackageAll() {
   local PACKAGE=$1
-  BuildPackageArchAll $PACKAGE i686
-  BuildPackageArchAll $PACKAGE x86_64
-  BuildPackageArchAll $PACKAGE arm
+  for ARCH in $ARCH_LIST; do
+      BuildPackageArchAll $PACKAGE $ARCH
+  done
   echo "naclports Install SUCCEEDED $PACKAGE"
 }
 
 MoveLibs() {
-  for ARCH in i686 x86_64 arm; do
+  for ARCH in $ARCH_LIST; do
     if [ "$ARCH" = "i686" ]; then
       ARCH_DIR=x86_32
     else
       ARCH_DIR=$ARCH
     fi
 
-    if [ "$ARCH" = "arm" ]; then
+    if [ "$ARCH" = "arm" -o "$ARCH" = "pnacl" ]; then
       LIBC_VARIANTS="newlib"
     else
       LIBC_VARIANTS="newlib glibc"

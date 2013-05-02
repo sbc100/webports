@@ -208,10 +208,7 @@ InitializeNaClGccToolchain() {
   # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
   # Default to the usr folder within the SDK.
   readonly NACLPORTS_PREFIX=${NACLPORTS_PREFIX:-${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr}
-  readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
   readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_LIBDIR}
-  readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
-  readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 
   # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
   # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
@@ -252,10 +249,7 @@ InitializePNaClToolchain() {
 
   # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
   # FIXME:
-  readonly NACLPORTS_PREFIX=${NACL_SDK_BASE}/usr
-  readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
-  readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
-  readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
+  readonly NACLPORTS_PREFIX=${NACLPORTS_PREFIX:-${NACL_SDK_BASE}/usr}
 }
 
 if [ ${NACL_ARCH} = "pnacl" ]; then
@@ -264,6 +258,9 @@ else
   InitializeNaClGccToolchain
 fi
 
+readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
+readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
+readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE}"
 NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
 
