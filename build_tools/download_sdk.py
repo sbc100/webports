@@ -64,7 +64,8 @@ def DetermineSdkURL(flavor, base_url, version):
     base_url: base url to download toolchain tarballs from
     version: version directory to select tarballs from
   """
-  if os.environ.get('BUILDBOT_BUILDERNAME', ''):
+  if (os.environ.get('BUILDBOT_BUILDERNAME') and
+      not os.environ.get('TEST_BUILDBOT')):
     gsutil = BOT_GSUTIL
     if not os.path.exists(gsutil):
       ErrorOut('gsutil not found at: %s' % gsutil)

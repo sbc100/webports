@@ -3,11 +3,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Main entry point for buildbots.
+# For local testing set BUILDBOT_BUILDERNAME and TEST_BUILDBOT, e.g:
+#  export TEST_BUILDBOT=1
+#  export BUILDBOT_BUILDERNAME=linux-newlib-0
+#  ./buildbot_selector.sh
+
 set -x
 set -e
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-export NACL_SDK_ROOT="${SCRIPT_DIR}/../pepper_XX"
+export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/pepper_XX"
 
 RESULT=1
 
@@ -103,9 +109,15 @@ readonly SCRIPT_NAME="nacl-install-${BOT_OS_DIR}-ports-${SHARD}.sh"
 
 # Build 32-bit.
 StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} i686
+
+# Build 64-bit.
 if [[ $RESULT != 0 ]]; then
-  # Build 64-bit.
   StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} x86_64
+fi
+
+# Build ARM.
+if [ $RESULT != 0 -a ${NACL_GLIBC} != "1" ]; then
+  StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} arm
 fi
 
 exit 0
