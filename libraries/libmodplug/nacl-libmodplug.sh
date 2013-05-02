@@ -14,5 +14,6 @@
 source pkg_info
 source ../../build_tools/common.sh
 
+EXTRA_CONFIGURE_ARGS="--disable-shared"
 DefaultPackageInstall
 exit 0

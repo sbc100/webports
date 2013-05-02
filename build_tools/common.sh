@@ -571,10 +571,20 @@ PatchConfigSub() {
 }
 
 
+PatchConfigure() {
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  if [ -f configure ]; then
+    Banner "Patching configure"
+    ${NACL_SRC}/build_tools/patch_configure.py configure
+  fi
+}
+
+
 DefaultPatchStep() {
   if [ -n "${PATCH_FILE:-}" ]; then
     Patch ${PACKAGE_DIR} ${PATCH_FILE}
   fi
+  PatchConfigure
   PatchConfigSub
 }
 
@@ -607,7 +617,6 @@ DefaultConfigureStep() {
   fi
   LogExecute ../configure \
     --host=${conf_host} \
-    --disable-shared \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \

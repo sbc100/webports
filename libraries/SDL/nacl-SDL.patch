@@ -62,7 +62,7 @@ diff -urN SDL-1.2.14/configure.in SDL-1.2.14-nacl/configure.in
          ;;
 +    *-nacl)
 +        ARCH=nacl
-+	CheckNativeClient
++        CheckNativeClient
 +        CheckDummyAudio
 +        CheckDummyVideo
 +        CheckInputEvents
