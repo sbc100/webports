@@ -40,7 +40,7 @@ if [ ${BUILDBOT_BUILDERNAME} = "linux-sdk" ]; then
   # Goto src/
   cd ${SCRIPT_DIR}/..
 
-  if [ -z ${TEST_BUILDBOT} -o ! -d ${NACL_SDK_ROOT} ]; then
+  if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
     echo "@@@BUILD_STEP Install Latest SDK@@@"
     ${PYTHON} build_tools/download_sdk.py
   fi
@@ -98,7 +98,7 @@ make clean
 
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"
-if [ -z ${TEST_BUILDBOT} -o ! -d ${NACL_SDK_ROOT} ]; then
+if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   ${PYTHON} build_tools/download_sdk.py
 fi
 
