@@ -22,7 +22,7 @@ cd ${NACLPORTS_ROOT}
 
 # Don't do a full clean of naclports when we're testing the buildbot scripts
 # locally.
-if [ -z "${TEST_BUILDBOT}" ]; then
+if [ -z "${TEST_BUILDBOT:-}" ]; then
   make clean
   exit 1
 fi
