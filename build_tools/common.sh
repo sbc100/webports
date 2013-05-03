@@ -499,7 +499,7 @@ PatchSpecFile() {
       { print $0; }' |\
     sed "/*cpp:/{
       N
-      s|$| -I${SED_SAFE_SPACES_USR_INCLUDE}|
+      s|$| -isystem ${SED_SAFE_SPACES_USR_INCLUDE}|
     }" |\
     sed "/*link_libgcc:/{
       N
