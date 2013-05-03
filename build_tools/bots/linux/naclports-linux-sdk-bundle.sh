@@ -4,12 +4,7 @@
 # found in the LICENSE file.
 #
 
-# linux_sdk.sh
-#
-# usage:  linux_sdk.sh
-#
 # This script builds the packages that will be bundled with the NaCl SDK.
-#
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 
@@ -17,10 +12,21 @@ source ${SCRIPT_DIR}/../bot_common.sh
 
 NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/../../.. && pwd)"
 OUT_DIR=${NACLPORTS_ROOT}/out
-OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle/pepper_XX/ports
+
+# PEPPER_DIR will be set to the directory name of the SDK. e.g. pepper_28
+PEPPER_DIR=$(basename $(readlink ${NACL_SDK_ROOT}))
+OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
+OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
 
 cd ${NACLPORTS_ROOT}
-make clean
+
+# Don't do a full clean of naclports when we're testing the buildbot scripts
+# locally.
+if [ -z "${TEST_BUILDBOT}" ]; then
+  make clean
+  exit 1
+fi
+
 PACKAGES=$(make sdklibs_list)
 
 # $1 - name of package
@@ -28,7 +34,7 @@ PACKAGES=$(make sdklibs_list)
 # $3 - 'glibc' or 'newlib'
 # $4 - 'Debug' or 'Release'
 CustomBuildPackage() {
-  export NACLPORTS_PREFIX=${OUT_DIR}/sdk_bundle/build/$2_$3_$4
+  export NACLPORTS_PREFIX=${OUT_BUNDLE_DIR}/build/$2_$3_$4
   export NACL_ARCH=$2
 
   if [ "$3" = "glibc" ]; then
@@ -87,14 +93,14 @@ MoveLibs() {
     for LIBC in $LIBC_VARIANTS; do
       for CONFIG in Debug Release; do
         # Copy build results to destination directories.
-        SRC_DIR=${OUT_DIR}/sdk_bundle/build/${ARCH}_${LIBC}_${CONFIG}
+        SRC_DIR=${OUT_BUNDLE_DIR}/build/${ARCH}_${LIBC}_${CONFIG}
 
         # copy includes
-        mkdir -p ${OUT_BUNDLE_DIR}
-        cp -d -r ${SRC_DIR}/include ${OUT_BUNDLE_DIR}
+        mkdir -p ${OUT_PORTS_DIR}
+        cp -d -r ${SRC_DIR}/include ${OUT_PORTS_DIR}
 
         # copy libs
-        ARCH_LIB_DIR=${OUT_BUNDLE_DIR}/lib/${LIBC}_${ARCH_DIR}/${CONFIG}
+        ARCH_LIB_DIR=${OUT_PORTS_DIR}/lib/${LIBC}_${ARCH_DIR}/${CONFIG}
         mkdir -p ${ARCH_LIB_DIR}
         for FILE in ${SRC_DIR}/lib/* ; do
           EXT="${FILE##*.}"
@@ -116,6 +122,18 @@ echo "@@@BUILD_STEP copy to bundle@@@"
 for package in $PACKAGES; do
   MoveLibs $package
 done
+
+if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
+  echo "@@@BUILD_STEP create archive@@@"
+  RunCmd tar -C ${OUT_BUNDLE_DIR} ${PEPPER_DIR} -jcf naclports.tar.bz2
+
+  echo "@@@BUILD_STEP upload archive@@@"
+  UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/${BUILDBOT_REVISION}
+  RunCmd gsutil cp -a public-read naclports.tar.bz2 \
+                                  gs://${UPLOAD_PATH}/naclports.tar.bz2
+  URL="https://commondatastorage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
+  echo "@@@STEP_LINK@download@${URL}@@@"
+fi
 
 echo "@@@BUILD_STEP summary@@@"
 if [[ $RESULT != 0 ]] ; then

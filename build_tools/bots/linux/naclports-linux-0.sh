@@ -2,15 +2,9 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
-# nacl-install-linux-ports-0.sh
-#
-# usage:  nacl-install-linux-ports-0.sh
-#
 # This script builds the packages for Native Client that are designated to
-# the bot named linux-ports-0.
-#
+# the bot named linux-<libc>-0.
 
 source ../bot_common.sh
 

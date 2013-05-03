@@ -196,8 +196,10 @@ def DownloadAndInstallSDK(url):
   if returncode:
     ErrorOut('Error creating symbolic link: %s' % returncode)
 
+  if sys.platform in ['win32', 'cygwin']:
+    time.sleep(2)  # Wait for windows.
+
   # Clean up: remove the sdk bz2.
-  time.sleep(2)  # Wait for windows.
   os.remove(bz2_filename)
 
   print 'Install complete.'

@@ -40,11 +40,13 @@ if [ ${BUILDBOT_BUILDERNAME} = "linux-sdk" ]; then
   # Goto src/
   cd ${SCRIPT_DIR}/..
 
-  echo "@@@BUILD_STEP Install Latest SDK@@@"
-  ${PYTHON} build_tools/download_sdk.py
+  if [ -z ${TEST_BUILDBOT} -o ! -d ${NACL_SDK_ROOT} ]; then
+    echo "@@@BUILD_STEP Install Latest SDK@@@"
+    ${PYTHON} build_tools/download_sdk.py
+  fi
 
   cd ${SCRIPT_DIR}/bots/linux
-  ./nacl-linux-sdk-bundle.sh
+  ./naclports-linux-sdk-bundle.sh
   exit 0
 fi
 
@@ -96,7 +98,9 @@ make clean
 
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"
-${PYTHON} build_tools/download_sdk.py
+if [ -z ${TEST_BUILDBOT} -o ! -d ${NACL_SDK_ROOT} ]; then
+  ${PYTHON} build_tools/download_sdk.py
+fi
 
 # This a temporary hack until the pnacl support is more mature
 if [ ${LIBC} = "pnacl_newlib" ] ; then
@@ -105,7 +109,7 @@ if [ ${LIBC} = "pnacl_newlib" ] ; then
 fi
 
 # Compute script name.
-readonly SCRIPT_NAME="nacl-install-${BOT_OS_DIR}-ports-${SHARD}.sh"
+readonly SCRIPT_NAME="naclports-${BOT_OS_DIR}-${SHARD}.sh"
 
 # Build 32-bit.
 StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} i686

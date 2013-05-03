@@ -25,8 +25,13 @@ BuildFailure() {
   RESULT=1
 }
 
+RunCmd() {
+  echo $*
+  $*
+}
+
 BuildPackage() {
-  if make $1 ; then
+  if RunCmd make $1 ; then
     BuildSuccess $1
   else
     # On cygwin retry each build 3 times before failing

@@ -2,15 +2,9 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
-# nacl-install-windows-ports-5.sh
-#
-# usage:  nacl-install-windows-ports-5.sh
-#
 # This script builds the packages for Native Client that are designated to
-# the bot named windows-ports-5.
-#
+# the bot named windows-<libc>-5.
 
 source ../bot_common.sh
 
