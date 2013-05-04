@@ -26,11 +26,21 @@ CustomConfigureStep() {
   # Drop /opt/X11/bin (may interfere build on osx).
   export PATH=$(echo $PATH | sed -e 's;/opt/X11/bin;;')
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
-  ../configure \
-    --host=nacl \
+  Remove build-nacl
+  MakeDir build-nacl
+  cd build-nacl
+
+  local conf_host=${NACL_CROSS_PREFIX}
+  if [ ${NACL_ARCH} = "pnacl" ]; then
+    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
+    # does not know about "pnacl".  It only knows about "le32-nacl".
+    # Unfortunately, most of the config.subs here are so old that
+    # it doesn't know about that "le32" either.  So we just say "nacl".
+    conf_host="nacl"
+  fi
+
+  LogExecute ../configure \
+    --host=${conf_host} \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \
