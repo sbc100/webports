@@ -141,7 +141,6 @@ DownloadAndPatch() {
   cd jpeg-build
   ../jpeg-6b/configure\
     --host=nacl\
-    --disable-shared\
     --prefix=${URL_JPEG}
   make clean
   make

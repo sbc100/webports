@@ -51,7 +51,6 @@ CustomConfigureStep() {
   CC_FOR_BUILD=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/pseudo-gcc \
   ../configure \
     --host=nacl \
-    --disable-shared \
     --disable-docs \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \

@@ -8,7 +8,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 # TODO(binji): Use assembly
-export EXTRA_CONFIGURE_ARGS="--disable-shared --enable-static \
+export EXTRA_CONFIGURE_ARGS="--enable-static \
     -with-cpu=generic_fpu"
 export LDFLAGS="${LDFLAGS} -static"
 

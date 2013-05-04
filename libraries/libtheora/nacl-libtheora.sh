@@ -13,7 +13,6 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
@@ -33,7 +32,6 @@ CustomConfigureStep() {
   ChangeDir ${PACKAGE_NAME}-build
   ../configure \
     --host=nacl \
-    --disable-shared \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \

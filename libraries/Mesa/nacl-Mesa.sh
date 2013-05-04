@@ -28,7 +28,6 @@ CustomConfigureStep() {
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ./configure \
     --host=nacl \
-    --disable-shared \
     --enable-static \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \

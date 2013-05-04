@@ -24,6 +24,15 @@ CustomInstallStep() {
   DefaultTouchStep
 }
 
+DefaultPatchStep() {
+  if [ -n "${PATCH_FILE:-}" ]; then
+    Patch ${PACKAGE_DIR} ${PATCH_FILE}
+  fi
+  Banner "Patching configure"
+  ${SCRIPT_DIR}/patch_configure.py builds/unix/configure
+  PatchConfigSub
+}
+
 
 CustomPackageInstall() {
   DefaultPreInstallStep

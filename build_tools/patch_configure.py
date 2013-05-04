@@ -9,11 +9,19 @@ Once this patch makes it into upstream libtool it should eventually
 be possible to remove this completely.
 """
 import optparse
+import re
 import sys
 
-CONFIGURE_PATCH = '''
+# There are essentailly three patches here, which will make configure do
+# the right things for shared library support when used with the NaCl
+# GLIBC toolchain.
+CONFIGURE_PATCHS = [
+# Correct result for "dynamic linker characteristics"
+['(\n\*\)\n  dynamic_linker=no)',
+'''
 nacl)
   if $CC -v 2>&1 | grep -q enable-shared; then
+    dynamic_linker="GNU/NaCl ld.so"
     version_type=linux
     library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}${major} ${libname}${shared_ext}'
     soname_spec='${libname}${release}${shared_ext}$major'
@@ -21,7 +29,32 @@ nacl)
     dynamic_linker=no
   fi
   ;;
+\\1'''],
+# Correct result for "supports shared libraries"
+['''(
+  netbsd\*\)
+    if echo __ELF__ \| \$CC -E - \| grep __ELF__ >/dev/null; then
+      archive_cmds_CXX='\$LD -Bshareable  -o \$lib \$predep_objects \$libobjs \$deplibs \$postdep_objects \$linker_flags')
+''',
 '''
+  nacl)
+    if $CC -v 2>&1 | grep -q enable-shared; then
+      ld_shlibs_CXX=yes
+    else
+      ld_shlibs_CXX=no
+    fi
+    ;;
+
+\\1
+'''],
+# Correct result for "how to recognize dependent libraries"
+['''
+(.*linux.*)\)
+  lt_cv_deplibs_check_method=pass_all''',
+'''
+\\1 | nacl*)
+  lt_cv_deplibs_check_method=pass_all''']
+]
 
 def main(args):
   usage = "usage: %prog [options] <configure_script>"
@@ -36,14 +69,14 @@ def main(args):
     filedata = input_file.read()
 
   # Check for patch location
-  pos = filedata.find('\n*)\n  dynamic_linker=no\n')
-  if pos == -1:
-    sys.stderr.write("Failed to find patch location in configure "
-                     "script: %s\n" % configure)
-    return 0
+  for i, (pattern, replacement) in enumerate(CONFIGURE_PATCHS):
+    if not re.search(pattern, filedata):
+      sys.stderr.write("Failed to find patch %s location in configure "
+                       "script: %s\n" % (i, configure))
+      continue
 
-  # Apply patch
-  filedata = filedata[:pos] + CONFIGURE_PATCH + filedata[pos:]
+    # Apply patch
+    filedata = re.sub(pattern, replacement, filedata)
 
   # Overwrite input file with patched file data
   with open(configure, 'w') as output_file:

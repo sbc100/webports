@@ -22,8 +22,9 @@ set -o errexit
 # Note that default build steps reference the packages directory.
 readonly SAVE_PWD=$(pwd)
 
+readonly SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
 readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
-readonly NACL_SRC=$(cd $(dirname $(dirname $BASH_SOURCE)) ; pwd )
+readonly NACL_SRC=$(dirname ${SCRIPT_DIR})
 readonly NACL_PACKAGES=${NACL_SRC}
 readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
 
@@ -122,7 +123,7 @@ if [ -n ${BUILDBOT_BUILDERNAME:-""} ]; then
 fi
 
 # sha1check python script
-readonly SHA1CHECK=${NACL_SRC}/build_tools/sha1check.py
+readonly SHA1CHECK=${SCRIPT_DIR}/sha1check.py
 
 # packages subdirectories
 readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
@@ -562,7 +563,7 @@ PatchConfigSub() {
       echo "config.sub already supports NaCl"
     else
       echo "Patching config.sub"
-      /bin/cp -f ${NACL_SRC}/build_tools/config.sub .
+      /bin/cp -f ${SCRIPT_DIR}/config.sub .
     fi
   fi
 }
@@ -572,7 +573,7 @@ PatchConfigure() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   if [ -f configure ]; then
     Banner "Patching configure"
-    ${NACL_SRC}/build_tools/patch_configure.py configure
+    ${SCRIPT_DIR}/patch_configure.py configure
   fi
 }
 

@@ -31,7 +31,6 @@ CustomConfigureStep() {
     --enable-gpl \
     --enable-static \
     --enable-cross-compile \
-    --disable-shared \
     --disable-ssse3 \
     --disable-mmx \
     --disable-mmx2 \
