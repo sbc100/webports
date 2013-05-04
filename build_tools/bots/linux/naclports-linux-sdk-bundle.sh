@@ -24,7 +24,6 @@ cd ${NACLPORTS_ROOT}
 # locally.
 if [ -z "${TEST_BUILDBOT:-}" ]; then
   make clean
-  exit 1
 fi
 
 PACKAGES=$(make sdklibs_list)
