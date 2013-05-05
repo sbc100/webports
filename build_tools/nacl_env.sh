@@ -20,5 +20,5 @@ echo export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
 echo export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
 echo export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
 echo export PATH=${NACL_BIN_PATH}:${PATH}
-echo export CFLAGS=${NACLPORTS_CFLAGS}
+echo "export CFLAGS=\"${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include\""
 echo export LDFLAGS=${NACLPORTS_LDFLAGS}

@@ -41,13 +41,14 @@ CustomConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
+  export LIBS=-lppapi_cpp
 
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
+  Remove build-nacl
+  MakeDir build-nacl
+  cd build-nacl
 
   set -x
-  ../configure \
+  LogExecute ../configure \
     --host=nacl \
     --disable-assembly \
     --disable-pthread-sem \

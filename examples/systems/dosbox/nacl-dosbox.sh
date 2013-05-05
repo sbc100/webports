@@ -41,12 +41,15 @@ CustomConfigureStep() {
       -lpng \
       -lz"
 
-  CONFIG_FLAGS="--host=${NACL_ARCH}-pc-nacl \
+  export LDFLAGS="$LDFLAGS -Wl,--as-needed"
+
+  CONFIG_FLAGS="--host=${NACL_ARCH}-nacl \
       --prefix=${NACLPORTS_PREFIX} \
       --exec-prefix=${NACLPORTS_PREFIX} \
       --libdir=${NACLPORTS_LIBDIR} \
       --oldincludedir=${NACLPORTS_INCLUDE} \
       --with-sdl-prefix=${NACLPORTS_PREFIX} \
+      --disable-shared \
       --with-sdl-exec-prefix=${NACLPORTS_PREFIX}"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
@@ -55,7 +58,7 @@ CustomConfigureStep() {
   Remove build-nacl
   MakeDir build-nacl
   cd build-nacl
-  ../configure ${CONFIG_FLAGS}
+  LogExecute ../configure ${CONFIG_FLAGS}
 
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
   # would fail due to multiple definitions of main and missing pp::CreateModule.

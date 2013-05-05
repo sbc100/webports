@@ -25,6 +25,8 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   # Drop /opt/X11/bin (may interfere build on osx).
   export PATH=$(echo $PATH | sed -e 's;/opt/X11/bin;;')
+  LDFLAGS+=" -Wl,--as-needed"
+  export LDFLAGS
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove build-nacl
   MakeDir build-nacl
@@ -53,9 +55,10 @@ CustomConfigureStep() {
 
 CustomBuildAndInstallStep() {
   # assumes pwd has makefile
-  make clean
+  LogExecute make clean
   cflags="${NACLPORTS_CFLAGS} -DSSIZE_MAX=\"((ssize_t)(~((size_t)0)>>1))\""
-  make CFLAGS="${cflags}" install-libLTLIBRARIES install-data-am -j${OS_JOBS}
+  CFLAGS="${cflags}" LogExecute make install-libLTLIBRARIES \
+                                     install-data-am -j${OS_JOBS}
   DefaultTouchStep
 }
 
