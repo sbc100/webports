@@ -17,6 +17,7 @@ OUT_DIR=${NACLPORTS_ROOT}/out
 PEPPER_DIR=$(basename $(readlink ${NACL_SDK_ROOT}))
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
 OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
+BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 
 cd ${NACLPORTS_ROOT}
 
@@ -128,7 +129,12 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
 
   echo "@@@BUILD_STEP upload archive@@@"
   UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/${BUILDBOT_REVISION}
-  RunCmd gsutil cp -a public-read naclports.tar.bz2 \
+  if [ -e ${BOT_GSUTIL} ]; then
+    GSUTIL=${BOT_GSUTIL}
+  else
+    GSUTIL=gsutil
+  fi
+  RunCmd ${GSUTIL} cp -a public-read naclports.tar.bz2 \
                                   gs://${UPLOAD_PATH}/naclports.tar.bz2
   URL="https://commondatastorage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
   echo "@@@STEP_LINK@download@${URL}@@@"
