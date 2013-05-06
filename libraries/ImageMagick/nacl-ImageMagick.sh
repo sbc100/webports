@@ -56,9 +56,10 @@ CustomConfigureStep() {
 CustomBuildAndInstallStep() {
   # assumes pwd has makefile
   LogExecute make clean
-  cflags="${NACLPORTS_CFLAGS} -DSSIZE_MAX=\"((ssize_t)(~((size_t)0)>>1))\""
-  CFLAGS="${cflags}" LogExecute make install-libLTLIBRARIES \
-                                     install-data-am -j${OS_JOBS}
+  cflags="${NACLPORTS_CFLAGS} -DSSIZE_MAX='((ssize_t)(~((size_t)0)>>1))'"
+  # Adding -j${OS_JOBS} here causes occational failures when
+  # shared libraries are being built.
+  make CFLAGS="${cflags}" install-libLTLIBRARIES install-data-am
   DefaultTouchStep
 }
 

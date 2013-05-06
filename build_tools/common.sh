@@ -211,6 +211,19 @@ InitializeNaClGccToolchain() {
   readonly NACLPORTS_PREFIX=${NACLPORTS_PREFIX:-${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr}
   readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_LIBDIR}
 
+  # There are a few .la files that ship with the SDK that
+  # contain hardcoded paths that point to the build location
+  # on the machine where the SDK itself was built.
+  # TODO(sbc): remove this hack once these files are removed from the
+  # SDK or fixed.
+  LA_FILES=$(echo ${NACL_SDK_LIB}/*.la)
+  echo ${LA_FILES}
+  if [ "${LA_FILES}" != "${NACL_SDK_LIB}/*.la" ]; then
+    for LA_FILE in ${LA_FILES}; do
+      mv ${LA_FILE} ${LA_FILE}.old
+    done
+  fi
+
   # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
   # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
   readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr

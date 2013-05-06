@@ -31,7 +31,6 @@ CustomConfigureStep() {
   cd ${PACKAGE_NAME}-build
   ../configure \
     --host=nacl \
-    --disable-shared \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \

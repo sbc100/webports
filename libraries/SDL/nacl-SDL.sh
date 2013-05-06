@@ -41,7 +41,10 @@ CustomConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  export LIBS=-lppapi_cpp
+
+  # LIBS and LDFLAGS are needed when linking the shared library.
+  export LIBS="-lppapi_cpp"
+  export LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
   Remove build-nacl
   MakeDir build-nacl
@@ -63,7 +66,6 @@ CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-
   DefaultPatchStep
   AutogenStep
   CustomConfigureStep
