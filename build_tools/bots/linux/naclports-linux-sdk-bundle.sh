@@ -13,8 +13,17 @@ source ${SCRIPT_DIR}/../bot_common.sh
 NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/../../.. && pwd)"
 OUT_DIR=${NACLPORTS_ROOT}/out
 
-# PEPPER_DIR will be set to the directory name of the SDK. e.g. pepper_28
-PEPPER_DIR=$(basename $(readlink ${NACL_SDK_ROOT}))
+# On the naclports builders NACL_SDK_ROOT is a symlink called
+# pepper_XX that points to the real NACL_SDK_ROOT of the
+# downloaded SDK.  In this case we want to follow the link
+# so that the ports bundle can be built into a folder with
+# the same name (not just pepper_XX)
+if [ -L "${NACL_SDK_ROOT}" ]; then
+  NACL_SDK_ROOT=$(readlink ${NACL_SDK_ROOT})
+fi
+
+# PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
+PEPPER_DIR=$(basename ${NACL_SDK_ROOT})
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
 OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
@@ -143,8 +152,7 @@ fi
 echo "@@@BUILD_STEP summary@@@"
 if [[ $RESULT != 0 ]] ; then
   echo "@@@STEP_FAILURE@@@"
+  echo -e "$MESSAGES"
 fi
-
-echo -e "$MESSAGES"
 
 exit $RESULT

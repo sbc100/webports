@@ -76,106 +76,122 @@ NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
                     $(NACLPORTS_PREFIX)/lib
 
 LIBRARIES = \
-     libraries/nacl-mounts \
-     libraries/SDL \
-     libraries/SDL_mixer \
-     libraries/SDL_image \
-     libraries/SDL_ttf \
-     libraries/gc \
-     libraries/fftw \
-     libraries/libtommath \
-     libraries/libtomcrypt \
-     libraries/zlib \
-     libraries/bzip2 \
-     libraries/jpeg \
-     libraries/libpng \
-     libraries/webp \
-     libraries/tiff \
-     libraries/FreeImage \
-     libraries/libogg \
-     libraries/libvorbis \
-     libraries/faad2 \
-     libraries/faac \
-     libraries/speex \
-     libraries/lua \
-     libraries/tinyxml \
-     libraries/expat \
-     libraries/pixman \
-     libraries/gsl \
-     libraries/freetype \
-     libraries/fontconfig \
      libraries/agg \
-     libraries/cairo \
-     libraries/ImageMagick \
-     libraries/Mesa \
-     libraries/libmodplug \
-     libraries/OpenSceneGraph \
-     libraries/cfitsio \
      libraries/boost \
-     libraries/protobuf \
-     libraries/dreadthread \
-     libraries/libmikmod \
-     libraries/jsoncpp \
-     libraries/openal-soft \
-     libraries/freealut \
-     libraries/gtest \
-     libraries/libxml2 \
-     libraries/x264 \
      libraries/box2d \
-     libraries/yajl \
-     libraries/flac \
-     libraries/lame \
-     libraries/libmng \
-     libraries/lcms \
+     libraries/bzip2 \
+     libraries/cairo \
+     libraries/cfitsio \
      libraries/DevIL \
+     libraries/dreadthread \
+     libraries/expat \
+     libraries/faac \
+     libraries/faad2 \
+     libraries/ffmpeg \
+     libraries/fftw \
+     libraries/flac \
+     libraries/fontconfig \
+     libraries/freealut \
+     libraries/FreeImage \
+     libraries/freetype \
+     libraries/gc \
+     libraries/glib \
+     libraries/glibc-compat \
+     libraries/gsl \
+     libraries/gtest \
+     libraries/ImageMagick \
+     libraries/jpeg \
+     libraries/jsoncpp \
+     libraries/lame \
+     libraries/lcms \
+     libraries/libmikmod \
+     libraries/libmng \
+     libraries/libmodplug \
+     libraries/libogg \
+     libraries/libpng \
+     libraries/libtheora \
+     libraries/libtomcrypt \
+     libraries/libtommath \
+     libraries/libvorbis \
+     libraries/libxml2 \
+     libraries/lua \
+     libraries/Mesa \
+     libraries/mpg123 \
+     libraries/nacl-mounts \
+     libraries/ncurses \
+     libraries/openal-soft \
+     libraries/OpenSceneGraph \
+     libraries/openssl \
+     libraries/pango \
      libraries/physfs \
-     libraries/mpg123
+     libraries/pixman \
+     libraries/protobuf \
+     libraries/Regal \
+     libraries/SDL \
+     libraries/SDL_image \
+     libraries/SDL_mixer \
+     libraries/SDL_net \
+     libraries/SDL_ttf \
+     libraries/speex \
+     libraries/tiff \
+     libraries/tinyxml \
+     libraries/webp \
+     libraries/x264 \
+     libraries/yajl \
+     libraries/zlib
 
-ifneq ($(NACL_ARCH), pnacl)
-  LIBRARIES += \
-     libraries/Regal
+ifeq ($(NACL_ARCH), pnacl)
+DISABLED += libraries/Regal
 endif
 
-ifneq ($(NACL_ARCH), arm)
+ifeq ($(NACL_ARCH), arm)
 # Libraries that currently fail to build with ARM gcc.
 # TODO(sbc): remove this conditional once this bug gets fixed:
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
-  LIBRARIES += \
+DISABLED += \
      libraries/libtheora \
      libraries/ffmpeg
+endif
+
+ifneq ($(NACL_GLIBC), 1)
+DISABLED += \
+     libraries/SDL_net \
+     libraries/glib \
+     libraries/ncurses \
+     libraries/pango
+endif
+
+ifeq ($(NACL_GLIBC), 1)
+DISABLED += libraries/glibc-compat
+endif
+
+ifneq ($(OS_NAME), Linux)
+DISABLED += libraries/openssl
 endif
 
 EXAMPLES = \
      examples/games/scummvm \
      examples/systems/bochs \
      examples/systems/dosbox \
-     examples/graphics/xaos
+     examples/graphics/xaos \
+     examples/games/nethack \
+     examples/tools/thttpd \
+     examples/games/snes9x \
+     examples/audio/openal-ogg
 
 ifeq ($(NACL_GLIBC), 1)
-  LIBRARIES += \
-      libraries/SDL_net \
-      libraries/glib \
-      libraries/ncurses \
-      libraries/pango
-  EXAMPLES += \
-      examples/games/nethack \
-      examples/tools/thttpd
+DISABLED += \
+     examples/games/snes9x \
+     examples/audio/openal-ogg
 else
-  EXAMPLES += \
-      examples/games/snes9x \
-      examples/audio/openal-ogg
+DISABLED += \
+     examples/games/nethack \
+     examples/tools/thttpd
 endif
 
-ifneq ($(NACL_GLIBC), 1)
-  LIBRARIES += libraries/glibc-compat
-endif
-
-ifeq ($(OS_NAME), Linux)
-  LIBRARIES += libraries/openssl
-endif
-
-PACKAGES = $(LIBRARIES) $(EXAMPLES)
-
+LIBRARIES := $(filter-out $(DISABLED),$(LIBRARIES))
+EXAMPLES := $(filter-out $(DISABLED),$(EXAMPLES))
+PACKAGES := $(LIBRARIES) $(EXAMPLES)
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
 ifeq ($(NACL_DEBUG), 1)
@@ -194,11 +210,13 @@ SDK_LIBS = freealut freetype jpeg lua modplug ogg openal png theora tiff tinyxml
 SDK_LIBS += vorbis webp xml2 zlib
 sdklibs: $(SDK_LIBS)
 
+package_list:
+	@echo $(PACKAGES)
+
 sdklibs_list:
 	@echo $(SDK_LIBS)
 
-.PHONY: all default libraries examples clean sdklibs sdklibs_list
-
+.PHONY: all default libraries examples clean sdklibs sdklibs_list $(DISABLED)
 
 clean:
 	rm -rf $(NACL_DIRS_TO_REMOVE)
@@ -213,6 +231,9 @@ ifdef NACLPORTS_NO_ANNOTATE
 else
   START_BUILD=echo "@@@BUILD_STEP $(NACL_ARCH) $(NACL_LIBC) $(notdir $*)@@@"
 endif
+
+$(DISABLED):
+	@echo "$@ is disabled for this configuration [NACL_LIBC=$(NACL_LIBC) NACL_ARCH=$(NACL_ARCH)]"
 
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
@@ -344,20 +365,3 @@ scummvm: examples/games/scummvm ;
 snes9x: examples/games/snes9x ;
 xaos: examples/graphics/xaos ;
 thttpd: examples/tools/thttpd ;
-
-######################################################################
-# testing and regression targets
-# NOTE: there is a problem running these in parallel mode (-jN)
-######################################################################
-
-######################################################################
-# PNACL
-######################################################################
-# Libraries and Examples should work for PNaCl, but if new examples
-# do not work, you can filter them here.
-WORKS_FOR_PNACL=$(LIBRARIES) $(EXAMPLES)
-
-works_for_pnacl: $(WORKS_FOR_PNACL)
-
-works_for_pnacl_list:
-	@echo $(WORKS_FOR_PNACL)

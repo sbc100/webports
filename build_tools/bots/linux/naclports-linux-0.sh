@@ -31,8 +31,7 @@ BuildPackage jsoncpp
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
 if [[ $RESULT != 0 ]] ; then
   echo "@@@STEP_FAILURE@@@"
+  echo -e "$MESSAGES"
 fi
-
-echo -e "$MESSAGES"
 
 exit $RESULT

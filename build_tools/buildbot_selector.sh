@@ -9,8 +9,7 @@
 #  export BUILDBOT_BUILDERNAME=linux-newlib-0
 #  ./buildbot_selector.sh
 
-set -x
-set -e
+set -o errexit
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/pepper_XX"
@@ -23,9 +22,10 @@ RESULT=1
 export PATH=${PATH}:/opt/local/bin
 
 StartBuild() {
-  cd $2
-  export NACL_ARCH=$3
-  echo "@@@BUILD_STEP $3 setup@@@"
+  cd ${BOT_DIR}
+  export NACL_ARCH=$2
+
+  echo "@@@BUILD_STEP $2 setup@@@"
   if ! ./$1 ; then
     RESULT=0
   fi
@@ -92,10 +92,6 @@ fi
 # Goto src/
 cd ${SCRIPT_DIR}/..
 
-# Cleanup.
-echo "@@@BUILD_STEP Cleanup@@@"
-make clean
-
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"
 if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
@@ -104,24 +100,26 @@ fi
 
 # This a temporary hack until the pnacl support is more mature
 if [ ${LIBC} = "pnacl_newlib" ] ; then
-  ${SCRIPT_DIR}/bots/pnacl_bots.sh
+  BOT_DIR=${SCRIPT_DIR}/bots
+  StartBuild pnacl_bots.sh pnacl
   exit 0
 fi
 
 # Compute script name.
 readonly SCRIPT_NAME="naclports-${BOT_OS_DIR}-${SHARD}.sh"
+BOT_DIR=${SCRIPT_DIR}/bots/${BOT_OS_DIR}
 
 # Build 32-bit.
-StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} i686
+StartBuild ${SCRIPT_NAME} i686
 
 # Build 64-bit.
 if [[ $RESULT != 0 ]]; then
-  StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} x86_64
+  StartBuild ${SCRIPT_NAME} x86_64
 fi
 
 # Build ARM.
 if [ $RESULT != 0 -a ${NACL_GLIBC} != "1" ]; then
-  StartBuild ${SCRIPT_NAME} ${SCRIPT_DIR}/bots/${BOT_OS_DIR} arm
+  StartBuild ${SCRIPT_NAME} arm
 fi
 
 exit 0

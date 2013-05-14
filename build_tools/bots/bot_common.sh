@@ -14,11 +14,11 @@ RESULT=0
 MESSAGES=
 
 BuildSuccess() {
-  echo "naclports nacl-install-all: Install SUCCEEDED $1 ($NACL_ARCH)"
+  echo "naclports: Install SUCCEEDED $1 ($NACL_ARCH)"
 }
 
 BuildFailure() {
-  MESSAGE="naclports nacl-install-all: Install FAILED for $1 ($NACL_ARCH)"
+  MESSAGE="naclports: Install FAILED for $1 ($NACL_ARCH)"
   echo $MESSAGE
   echo "@@@STEP_FAILURE@@@"
   MESSAGES="$MESSAGES\n$MESSAGE"
