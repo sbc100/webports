@@ -38,8 +38,6 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CFLAGS=-I${NACL_SDK_ROOT}/include
-  export CXXFLAGS=-I${NACL_SDK_ROOT}/include
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PATH=${NACL_BIN_PATH}:${PATH};

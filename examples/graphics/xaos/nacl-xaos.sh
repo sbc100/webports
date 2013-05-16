@@ -28,7 +28,7 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
-  export CFLAGS="-g -D__NO_MATH_INLINES=1 -I${NACL_SDK_ROOT}/include"
+  export CFLAGS="${CFLAGS} -g -D__NO_MATH_INLINES=1"
   export LDFLAGS="-Wl,--undefined=PPP_GetInterface \
                   -Wl,--undefined=PPP_ShutdownModule \
                   -Wl,--undefined=PPP_InitializeModule \

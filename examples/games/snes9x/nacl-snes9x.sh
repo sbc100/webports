@@ -24,10 +24,8 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CXXFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include"
-  export LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include -O3 -g"
+    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g"
     export LDFLAGS="${NACLPORTS_LDFLAGS} -O0 -static"
   fi
   export AR=${NACLAR}
@@ -49,7 +47,7 @@ CustomConfigureStep() {
       --without-x \
       --enable-sound"
 
-  export LIBS="-L${NACLPORTS_LIBDIR} \
+  export LIBS="${LDFLAGS} \
       -lnacl-mounts -lppapi_cpp -lppapi \
       -lpthread -lstdc++"
 

@@ -26,7 +26,7 @@ CustomExtractStep() {
 CustomBuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  CFLAGS="-I${NACL_SDK_ROOT}/include" make -f Makefile SYSTEM=nacl-${NACL_ARCH}
+  make -f Makefile SYSTEM=nacl-${NACL_ARCH}
 }
 
 

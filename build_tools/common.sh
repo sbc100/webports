@@ -32,15 +32,12 @@ readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
 readonly OS_NAME=$(uname -s)
 if [ $OS_NAME = "Darwin" ]; then
   readonly OS_SUBDIR="mac"
-  readonly OS_SUBDIR_SHORT="mac"
   readonly OS_JOBS=4
 elif [ $OS_NAME = "Linux" ]; then
   readonly OS_SUBDIR="linux"
-  readonly OS_SUBDIR_SHORT="linux"
   readonly OS_JOBS=$(cat /proc/cpuinfo | grep processor | wc -l)
 else
-  readonly OS_SUBDIR="windows"
-  readonly OS_SUBDIR_SHORT="win"
+  readonly OS_SUBDIR="win"
   readonly OS_JOBS=1
 fi
 
@@ -62,6 +59,15 @@ if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
   exit -1
 fi
 
+# In some places i686 is also known as x86_32 so we use
+# second variable to store this alternate architecture
+# name
+if [ ${NACL_ARCH} = "i686" ]; then
+  export NACL_ARCH_ALT="x86_32"
+else
+  export NACL_ARCH_ALT=${NACL_ARCH}
+fi
+
 if [ ${NACL_GLIBC} = "1" ]; then
   if [ ${NACL_ARCH} = "pnacl" ]; then
     echo "NACL_GLIBC is does not work with pnacl" 1>&2
@@ -71,6 +77,9 @@ if [ ${NACL_GLIBC} = "1" ]; then
     echo "NACL_GLIBC is does not work with arm" 1>&2
     exit -1
   fi
+  export NACL_LIBC="glibc"
+else
+  export NACL_LIBC="newlib"
 fi
 
 if [ ${NACL_ARCH} = "i686" ]; then
@@ -146,39 +155,7 @@ InitializeNaClGccToolchain() {
     local TOOLCHAIN_ARCH="x86"
   fi
 
-  if [ $NACL_ARCH = "arm" ]; then
-    local TOOLCHAIN_DIR=${OS_SUBDIR_SHORT}_arm_newlib
-  elif [ $NACL_GLIBC = "1" ]; then
-    # m15-m17 SDK layouts have the glibc toolchain without the _glibc suffix
-    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_glibc/bin/${NACL_CROSS_PREFIX}-gcc
-    local TENTATIVE_NEWLIB_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/${NACL_CROSS_PREFIX}-gcc
-
-    if [ -e ${TENTATIVE_NACL_GCC} ]; then
-      local TOOLCHAIN_SUFFIX="_glibc"
-    elif [ -e ${TENTATIVE_NEWLIB_NACL_GCC} ]; then
-      local TOOLCHAIN_SUFFIX=""
-    else
-      # if neither _newlib or _glibc suffixes exist,
-      # this is a pre-m15 release which has no glibc
-      echo "------------------------------------------------------------------"
-      echo "error: glibc toolchain not present"
-      echo "Your SDK appears to be pre pepper_15, please upgrade to use glibc."
-      echo "------------------------------------------------------------------"
-      exit -1
-    fi
-    local TOOLCHAIN_DIR=${OS_SUBDIR_SHORT}_x86${TOOLCHAIN_SUFFIX}
-  else
-    # Fall back to pre-m15 SDK layout if we can't find i686-nacl-gcc.
-    local TENTATIVE_NACL_GCC=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_newlib/bin/${NACL_CROSS_PREFIX}-gcc
-
-    if [ -e ${TENTATIVE_NACL_GCC} ]; then
-      local TOOLCHAIN_SUFFIX="_newlib"
-    else
-      local TOOLCHAIN_SUFFIX=""
-    fi
-    local TOOLCHAIN_DIR=${OS_SUBDIR_SHORT}_x86${TOOLCHAIN_SUFFIX}
-  fi
-
+  local TOOLCHAIN_DIR=${OS_SUBDIR}_${TOOLCHAIN_ARCH}_${NACL_LIBC}
 
   readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${TOOLCHAIN_DIR}}
   # TODO(robertm): can we get rid of NACL_SDK_BASE?
@@ -229,18 +206,14 @@ InitializeNaClGccToolchain() {
   readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
   readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
   readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
+  NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Release"
 }
 
 
 InitializePNaClToolchain() {
-  if [ $NACL_GLIBC = "1" ]; then
-    local TOOLCHAIN_SUFFIX="glibc"
-  else
-    local TOOLCHAIN_SUFFIX="newlib"
-  fi
-  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR_SHORT}_x86_pnacl/${TOOLCHAIN_SUFFIX}}
+  local TC_ROOT=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR}_x86_pnacl/${NACL_LIBC}
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${TC_ROOT}}
   readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
-
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
   # export nacl tools for direct use in patches.
@@ -262,8 +235,9 @@ InitializePNaClToolchain() {
   export NACLSTRINGS="$(which strings)"
 
   # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
-  # FIXME:
+  # Default to the usr folder within the SDK.
   readonly NACLPORTS_PREFIX=${NACLPORTS_PREFIX:-${NACL_SDK_BASE}/usr}
+  NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Release"
 }
 
 if [ ${NACL_ARCH} = "pnacl" ]; then
@@ -275,8 +249,8 @@ fi
 readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
 readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
 readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
-NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE}"
-NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR}"
+NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} -I${NACL_SDK_ROOT}/include"
+NACLPORTS_LDFLAGS=" -L${NACLPORTS_LIBDIR} -L${NACL_SDK_LIBDIR}"
 
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
@@ -289,6 +263,7 @@ if [ ${NACL_DEBUG} = "1" ]; then
 fi
 
 export CFLAGS=${NACLPORTS_CFLAGS}
+export CXXFLAGS=${NACLPORTS_CFLAGS}
 export LDFLAGS=${NACLPORTS_LDFLAGS}
 
 ######################################################################
@@ -538,7 +513,7 @@ DefaultExtractStep() {
   Banner "Untaring ${PACKAGE_NAME}.tgz"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_DIR}
-  if [ $OS_SUBDIR = "windows" ]; then
+  if [ $OS_SUBDIR = "win" ]; then
     tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
   else
     tar zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
@@ -550,7 +525,7 @@ DefaultExtractBzipStep() {
   Banner "Untaring ${PACKAGE_NAME}.tbz2"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_DIR}
-  if [ $OS_SUBDIR = "windows" ]; then
+  if [ $OS_SUBDIR = "win" ]; then
     tar --no-same-owner -jxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tbz2
   else
     tar jxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tbz2
@@ -690,7 +665,6 @@ TimeCommand() {
   echo "$@"
   time "$@"
 }
-
 
 Validate() {
   if [ ${NACL_ARCH} = "pnacl" ]; then

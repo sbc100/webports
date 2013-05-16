@@ -18,11 +18,10 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CXXFLAGS="-O2 -g -I${NACL_SDK_ROOT}/include"
-  export LDFLAGS="${NACLPORTS_LDFLAGS}"
+  export CXXFLAGS="-O2 -g ${NACLPORTS_CFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="-O3 -g -I${NACL_SDK_ROOT}/include"
-    export LDFLAGS="-O0 -static"
+    export CXXFLAGS="-O3 -g ${NACLPORTS_CFLAGS}"
+    export LDFLAGS="-O0 -static ${NACLPORTS_LDFLAGS}"
   fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
@@ -41,15 +40,7 @@ CustomConfigureStep() {
   PWD=$(pwd)
   # TODO(bradnelson): take this out once the sdk is fixed (and do the line
   # after).
-  if [ "$NACL_ARCH" = "x86_64" ]; then
-    ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib
-  elif [ "$NACL_ARCH" = "i686" ]; then
-    ChangeDir ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32
-  elif [ "$NACL_ARCH" = "arm" ]; then
-    ChangeDir ${NACL_TOOLCHAIN_ROOT}/arm-nacl/lib
-  else
-    ChangeDir ${NACL_TOOLCHAIN_ROOT}/sdk/lib
-  fi
+  ChangeDir ${NACL_SDK_LIBDIR}
   cp libppapi_cpp.a libppapi_cpp_COPY.a
   ChangeDir ${PWD}
 

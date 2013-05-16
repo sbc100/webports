@@ -44,7 +44,6 @@ RunSelLdrTests() {
 
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include"
 
   MakeDir ${PACKAGE_DIR}/test.nacl
   ChangeDir ${PACKAGE_DIR}/test.nacl
@@ -60,7 +59,7 @@ CustomBuildStep() {
   MakeDir ${PACKAGE_DIR}
   ChangeDir ${PACKAGE_DIR}
   set -x
-  CFLAGS="${CFLAGS} -I${START_DIR}/.. -I${START_DIR} -I${NACL_SDK_ROOT}/include"
+  CFLAGS="${CFLAGS} -I${START_DIR}/.. -I${START_DIR}"
   CXXCMD="${NACLCXX} ${CFLAGS}"
   CCCMD="${NACLCC} ${CFLAGS}"
   ${CXXCMD} -c ${START_DIR}/net/TcpSocket.cc
