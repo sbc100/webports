@@ -700,7 +700,8 @@ RunSelLdrCommand() {
   echo "[sel_ldr] $@"
   if [ $NACL_GLIBC = "1" ]; then
     time "${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- \
-        "${NACL_SDK_LIB}/runnable-ld.so" --library-path "${NACL_SDK_LIB}" "$@"
+        "${NACL_SDK_LIB}/runnable-ld.so" \
+        --library-path "${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}" "$@"
   else
     time "${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- "$@"
   fi
@@ -721,7 +722,7 @@ SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 SEL_LDR=${NACL_SEL_LDR}
 IRT=${NACL_IRT}
 SDK_LIB_DIR=${NACL_SDK_LIB}
-LIB_PATH=\${SDK_LIB_DIR}:\${SCRIPT_DIR}
+LIB_PATH=${NACL_SDK_LIBDIR}:\${SDK_LIB_DIR}:\${SCRIPT_DIR}
 
 "\${SEL_LDR}" -a -B "\${IRT}" -- \\
     "\${SDK_LIB_DIR}/runnable-ld.so" --library-path "\${LIB_PATH}" \\
