@@ -28,11 +28,9 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
-  export CXXFLAGS="-I${NACL_SDK_ROOT}/include"
-  export LDFLAGS=""
   if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="-I${NACL_SDK_ROOT}/include -O3 -g"
-    export LDFLAGS="-O0 -static"
+    export CXXFLAGS="${NACLPORTS_CXXFLAGS} -O3 -g"
+    export LDFLAGS="${NACLPORTS_LDFLAGS} -O0 -static"
   fi
   # without this setting *make* will not show the full command lines
   export VERBOSE_BUILD=1
@@ -52,10 +50,9 @@ CustomConfigureStep() {
   export DEFINES="$DEFINES -DNACL -DSYSTEM_NOT_SUPPORTING_D_TYPE=1"
   export LIBS=
   export LIBS="$LIBS -Wl,--whole-archive"
-  export LIBS="$LIBS -lppapi"
-  export LIBS="$LIBS -lppapi_cpp"
   export LIBS="$LIBS -lvorbisfile -lvorbis -logg"
   export LIBS="$LIBS -lnacl-mounts"
+  export LIBS="$LIBS -lppapi -lppapi_cpp -lppapi_cpp_private"
   export LIBS="$LIBS -Wl,--no-whole-archive"
   export CPPFLAGS="-I$NACL_PACKAGES_LIBRARIES"
 

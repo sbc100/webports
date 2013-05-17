@@ -43,6 +43,8 @@ CustomBuildStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
+  export NACLPORTS_CFLAGS
+  export NACLPORTS_LDFLAGS
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
   make thttpd
@@ -68,24 +70,20 @@ CustomInstallStep() {
     NACL_COMPLEMENT_ARCH="i686"
     NACL_COMPLEMENT_LIBDIR="lib32"
   fi
-  if [ -f thttpd_${NACL_COMPLEMENT_ARCH}.nexe ]; then
-    $NACL_SDK_ROOT/tools/create_nmf.py \
+  CMD="$NACL_SDK_ROOT/tools/create_nmf.py \
       -L$NACL_LIB_PATH/usr/$NACL_COMPLEMENT_LIBDIR \
       -L$NACL_LIB_PATH/$NACL_COMPLEMENT_LIBDIR \
       -L$NACLPORTS_LIBDIR \
       -L$NACL_SDK_LIB \
+      -L$NACL_SDK_LIBDIR \
       -D$NACL_BIN_PATH/x86_64-nacl-objdump \
       -o thttpd.nmf -s . \
-      thttpd_${NACL_ARCH}.nexe \
-      thttpd_${NACL_COMPLEMENT_ARCH}.nexe
-  else
-    $NACL_SDK_ROOT/tools/create_nmf.py \
-      -L$NACLPORTS_LIBDIR \
-      -L$NACL_SDK_LIB \
-      -D$NACL_BIN_PATH/x86_64-nacl-objdump \
-      -o thttpd.nmf -s . \
-      thttpd_${NACL_ARCH}.nexe
+      thttpd_${NACL_ARCH}.nexe"
+
+  if [ -f thttpd_${NACL_COMPLEMENT_ARCH}.nexe ]; then
+    CMD+= " thttpd_${NACL_COMPLEMENT_ARCH}.nexe"
   fi
+  LogExecute $CMD
   DefaultTouchStep
 }
 
