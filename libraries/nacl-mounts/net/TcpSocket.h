@@ -12,7 +12,7 @@
 #include "../net/Socket.h"
 #include "../net/SocketSubSystem.h"
 #include "ppapi/cpp/completion_callback.h"
-#include "../ppapi/cpp/private/tcp_socket_private.h"
+#include "ppapi/cpp/private/tcp_socket_private.h"
 #include "../util/PthreadHelpers.h"
 
 class TCPSocket : public Socket {

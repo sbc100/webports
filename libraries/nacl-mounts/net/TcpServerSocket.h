@@ -14,7 +14,7 @@
 #endif
 #include "../net/SocketSubSystem.h"
 #include "ppapi/cpp/completion_callback.h"
-#include "../ppapi/cpp/private/tcp_server_socket_private.h"
+#include "ppapi/cpp/private/tcp_server_socket_private.h"
 #include "../util/PthreadHelpers.h"
 
 class TCPServerSocket : public Socket {

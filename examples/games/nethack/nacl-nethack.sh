@@ -29,7 +29,7 @@ CustomBuildStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   export WINTTYLIB="-Wl,--whole-archive"
-  export WINTTYLIB="$WINTTYLIB -lnacl-mounts -lncurses -lppapi -lppapi_cpp"
+  export WINTTYLIB="$WINTTYLIB -lnacl-mounts -lncurses -lppapi -lppapi_cpp -lppapi_cpp_private"
   export WINTTYLIB="$WINTTYLIB -Wl,--no-whole-archive"
   export NACLPORTS_INCLUDE
   export STRNCMPI=1
@@ -56,6 +56,7 @@ CustomBuildStep() {
     python ${TRUE_TOOLCHAIN_DIR}/../tools/create_nmf.py \
         *.nexe \
         -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32 \
+        -L ${NACL_SDK_LIBDIR} \
         -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib64 \
         -D ${NACL_TOOLCHAIN_ROOT}/bin/x86_64-nacl-objdump \
         -s . \

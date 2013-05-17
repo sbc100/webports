@@ -1,4 +1,5 @@
 PACKAGE_NAME=nethack-3.4.3
+MIN_SDK_VERSION=29
 URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/nethack-343-src.tgz
 PATCH_FILE=nacl-nethack.patch
 LICENSE=CUSTOM:dat/license

@@ -1,4 +1,5 @@
 PACKAGE_NAME=scummvm-1.2.1
+MIN_SDK_VERSION=29
 URL=http://prdownloads.sourceforge.net/scummvm/scummvm-1.2.1.tar.bz2?download
 URL_FILENAME=scummvm-1.2.1.tar.bz2
 PATCH_FILE=nacl-scummvm.patch

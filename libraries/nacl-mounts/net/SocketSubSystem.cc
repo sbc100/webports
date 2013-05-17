@@ -16,9 +16,9 @@
 #include <nacl-mounts/net/SocketSubSystem.h>
 #include <nacl-mounts/net/TcpServerSocket.h>
 #include <nacl-mounts/net/TcpSocket.h>
-#include <nacl-mounts/ppapi/cpp/private/net_address_private.h>
 #include <nacl-mounts/util/DebugPrint.h>
 #include <nacl-mounts/util/PthreadHelpers.h>
+#include <ppapi/cpp/private/net_address_private.h>
 #include <signal.h>
 
 SocketSubSystem::SocketSubSystem(pp::Instance* instance)

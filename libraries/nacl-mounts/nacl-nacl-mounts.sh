@@ -2,16 +2,10 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-#
-# nacl-mounts.sh
-#
-# usage:  ./nacl-mounts.sh
-#
-# this script builds nacl-mounts
-#
 
+readonly MIN_SDK_VERSION=29
 readonly PACKAGE_NAME=nacl-mounts
+
 source ../../build_tools/common.sh
 
 
@@ -150,12 +144,6 @@ CustomInstallStep() {
     mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts/${DIR}
     cp ${START_DIR}/${DIR}/*.h ${NACLPORTS_INCLUDE}/nacl-mounts/${DIR}
   done
-  mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/cpp/private
-  mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/c/private
-  cp -R ${START_DIR}/ppapi/cpp/private/*.h \
-    ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/cpp/private/
-  cp -R ${START_DIR}/ppapi/c/private/*.h \
-    ${NACLPORTS_INCLUDE}/nacl-mounts/ppapi/c/private/
 }
 
 CustomPackageInstall() {

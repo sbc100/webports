@@ -286,6 +286,20 @@ CheckPatchVersion() {
 
 CheckPatchVersion
 
+CheckSDKVersion() {
+  if [ -z "${MIN_SDK_VERSION:-}" ]; then
+    return
+  fi
+  local GETOS=${NACL_SDK_ROOT}/tools/getos.py
+  local RESULT=$(${GETOS} --check-version=${MIN_SDK_VERSION} 2>&1)
+  if [ -n "${RESULT:-}" ]; then
+    echo "The SDK in \$NACL_SDK_ROOT is too old to build ${PACKAGE_NAME}."
+    echo ${RESULT}
+    exit -1
+  fi
+}
+
+CheckSDKVersion
 
 ######################################################################
 # Helper functions

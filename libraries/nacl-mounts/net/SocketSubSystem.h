@@ -15,7 +15,7 @@
 #include "../base/KernelProxy.h"
 #include "../net/BaseSocketSubSystem.h"
 #include "../net/Socket.h"
-#include "../ppapi/cpp/private/host_resolver_private.h"
+#include "ppapi/cpp/private/host_resolver_private.h"
 #include "ppapi/utility/completion_callback_factory.h"
 
 // current limitations:
