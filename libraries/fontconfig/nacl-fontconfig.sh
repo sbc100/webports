@@ -69,7 +69,8 @@ CustomPatchMakefileStep() {
   # for Native Client.  This function will patch the generated Makefile
   # to remove them.  (Use fontconfig tools on your build machine instead.)
   echo "CustomPatchMakefileStep"
-  Patch ${PACKAGE_NAME} ${MAKEFILE_PATCH_FILE}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  Patch ${MAKEFILE_PATCH_FILE}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
 }
 

@@ -24,9 +24,11 @@ CustomInstallStep() {
   DefaultTouchStep
 }
 
-DefaultPatchStep() {
+CustomPatchStep() {
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  InitGitRepo
   if [ -n "${PATCH_FILE:-}" ]; then
-    Patch ${PACKAGE_DIR} ${PATCH_FILE}
+    Patch ${PATCH_FILE}
   fi
   Banner "Patching configure"
   ${SCRIPT_DIR}/patch_configure.py builds/unix/configure
@@ -38,7 +40,7 @@ CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-  DefaultPatchStep
+  CustomPatchStep
   DefaultConfigureStep
   DefaultBuildStep
   CustomInstallStep

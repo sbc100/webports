@@ -120,23 +120,11 @@ CustomCheck() {
   fi
 }
 
-CustomDownloadZipStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
-  # if matching zip already exists, don't download again
-  if ! CustomCheck $3; then
-    Fetch $1 $2.zip
-    if ! CustomCheck $3 ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
-
 CustomDownloadStep() {
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching tarball already exists, don't download again
   if ! CustomCheck $3; then
-    Fetch $1 $2.tbz2
+    Fetch $1 $2.tar.gz
     if ! CustomCheck $3 ; then
        Banner "${PACKAGE_NAME} failed checksum!"
        exit -1
@@ -144,25 +132,18 @@ CustomDownloadStep() {
   fi
 }
 
-CustomDownloadStep2() {
-  cd ${NACL_PACKAGES_TARBALLS}
-  # if matching tarball already exists, don't download again
-  if ! CustomCheck $3; then
-    Fetch $1 $2.tgz
-    if ! CustomCheck $3 ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
-
-GameGetStep() {
-  PACKAGE_NAME_TEMP=${PACKAGE_NAME}
-  PACKAGE_NAME=$2
+FetchLinuxStep() {
+  Banner "FetchLinuxStep"
+  ArchiveName
+  ARCHIVE_NAME_TEMP=${ARCHIVE_NAME}
+  PACKAGE_DIR_TEMP=${PACKAGE_DIR}
+  ARCHIVE_NAME=$2.tar.gz
+  PACKAGE_DIR=$2
   SHA1=${BOCHS_EXAMPLE_DIR}/$2/$2.sha1
-  CustomDownloadStep2 $1 $2 ${SHA1}
+  CustomDownloadStep $1 $2 ${SHA1}
   DefaultExtractStep
-  PACKAGE_NAME=${PACKAGE_NAME_TEMP}
+  ARCHIVE_NAME=${ARCHIVE_NAME_TEMP}
+  PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 
 CustomPatch() {
@@ -180,10 +161,9 @@ CustomPatchStep() {
 }
 
 CustomPackageInstall() {
-  GameGetStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
+  FetchLinuxStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
   DefaultPreInstallStep
-  CustomDownloadStep2 ${URL} ${PACKAGE_NAME} \
-    ${BOCHS_EXAMPLE_DIR}/bochs-2.4.6.sha1
+  DefaultDownloadStep
   DefaultExtractStep
   CustomPatchStep
   CustomConfigureStep

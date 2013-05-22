@@ -15,6 +15,7 @@ source ../../build_tools/common.sh
 
 export LIBS="-lnosys -lm"
 
+CONFIG_SUB=config/config.sub
 DefaultPackageInstall
 exit 0
 

@@ -30,6 +30,7 @@ The source code and build output for each package is placed in:
 
   out/repository-i686     for 32-bit builds
   out/repository-x86_64   for 64-bit builds
+  out/repository-arm      for arm builds
 
 NOTE:  These external libraries each have their own licenses for use.
 Please read and understand these licenses before using these packages
@@ -39,15 +40,16 @@ NOTE to Windows users:  These scripts are written in bash and must be
 launched from a Cygwin shell.
 
 To add a package:
-1. Make sure you have a writable version of the repository
+1. If you are using svn, make sure you have a writable version of the
+   repository:
     gclient config https://naclports.googlecode.com/svn/trunk/src
 2. Add a directory to the libraries directory using the name and version of
-    your new package.  For example, nacl-esidl-0.1.5
-3. Add the build script to that directory.
+    your new package.  For example, libraries/nacl-esidl-0.1.5
+3. Add the build script and pkg_info to that directory.
 4. Optionally build a tarball.  If you choose to do this, you will need to
     create a checksum for it using build_tools/sha1sum.py.  Redirect
     the script output to a .sha1 file so that the common.sh script can pick it
     up.  E.g.:
-    sha1sum.py myzip.zip > libraries/nacl-esidl-0.1.5/nacl-esidl-0.1.5.sha1
+      sha1sum.py myzip.zip > libraries/nacl-esidl-0.1.5/nacl-esidl-0.1.5.sha1
 5. Add the invocation of your script to the Makefile
 

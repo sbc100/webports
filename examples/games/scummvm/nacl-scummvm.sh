@@ -142,7 +142,6 @@ CustomCheck() {
   fi
 }
 
-
 CustomDownloadZipStep() {
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching zip already exists, don't download again
@@ -204,9 +203,8 @@ CustomPackageInstall() {
   GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
   GameGetStep ${LURE_URL} ${LURE_NAME}
   DefaultPreInstallStep
-  CustomDownloadStep ${URL} ${PACKAGE_NAME} \
-    ${SCUMMVM_EXAMPLE_DIR}/scummvm-1.2.1.sha1
-  DefaultExtractBzipStep
+  DefaultDownloadStep
+  DefaultExtractStep
   CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep

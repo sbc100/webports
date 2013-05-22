@@ -34,23 +34,8 @@ PACKAGE_DIR=FreeImage
 
 source ../../build_tools/common.sh
 
-CustomDownloadStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
-  # If matching tarball already exists, don't download again
-  if ! Check ; then
-    Fetch ${URL} ${PACKAGE_NAME}.zip
-    if ! Check ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
-
 CustomExtractStep() {
-  Banner "Unzipping ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_DIR}
-  unzip ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
+  DefaultExtractStep
   # FreeImage uses CRLF for line-endings.  The patch file has LF (Unix-style)
   # line endings, which means on some versions of patch, the patch fails. Run a
   # recursive tr over all the sources to remedy this.
@@ -92,7 +77,7 @@ CustomInstallStep() {
 
 CustomPackageInstall() {
    DefaultPreInstallStep
-   CustomDownloadStep
+   DefaultDownloadStep
    CustomExtractStep
    DefaultPatchStep
    CustomConfigureStep

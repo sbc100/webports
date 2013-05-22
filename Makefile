@@ -31,7 +31,7 @@ ifeq ($(OS_SUBDIR), UNKNOWN)
 endif
 
 ifndef NACL_ARCH
-   NACL_ARCH := i686
+   NACL_ARCH := x86_64
 endif
 
 ifndef NACL_SDK_ROOT

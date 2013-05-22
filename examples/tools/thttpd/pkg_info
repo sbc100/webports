@@ -1,6 +1,5 @@
 PACKAGE_NAME=thttpd-2.25b
 MIN_SDK_VERSION=29
 URL=http://www.acme.com/software/thttpd/thttpd-2.25b.tar.gz
-URL_FILENAME=thttpd-2.25b.tgz
 PATCH_FILE=nacl-thttpd.patch
 LICENSE=BSD

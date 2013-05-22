@@ -1,4 +1,3 @@
 PACKAGE_NAME=tiff-4.0.3
 URL=http://download.osgeo.org/libtiff/tiff-4.0.3.tar.gz
-PATCH_FILE=nacl-tiff.patch
 LICENSE=BSD:COPYRIGHT

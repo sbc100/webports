@@ -322,8 +322,14 @@ ReadKey() {
 }
 
 
+ArchiveName() {
+  if [ -z "${ARCHIVE_NAME:-}" ]; then
+    ARCHIVE_NAME=${URL_FILENAME:-$(basename ${URL})}
+  fi
+}
+
 TryFetch() {
-  Banner "Fetching ${PACKAGE_NAME}"
+  Banner "Fetching ${PACKAGE_NAME} ($2)"
   if which wget > /dev/null ; then
     wget $1 -O $2
   elif which curl > /dev/null ; then
@@ -366,6 +372,7 @@ Fetch() {
 Check() {
   # verify sha1 checksum for tarball
   local IN_FILE=${START_DIR}/${PACKAGE_NAME}.sha1
+
   if ${SHA1CHECK} <${IN_FILE} ; then
     return 0
   else
@@ -375,35 +382,11 @@ Check() {
 
 
 DefaultDownloadStep() {
+  ArchiveName
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching tarball already exists, don't download again
   if ! Check ; then
-    Fetch ${URL} ${PACKAGE_NAME}.tgz
-    if ! Check ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
-
-
-DefaultDownloadBzipStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
-  # if matching tarball already exists, don't download again
-  if ! Check ; then
-    Fetch ${URL} ${PACKAGE_NAME}.tbz2
-    if ! Check ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
-
-DefaultDownloadZipStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
-  # if matching zip already exists, don't download again
-  if ! Check ; then
-    Fetch ${URL} ${PACKAGE_NAME}.zip
+    Fetch ${URL} ${ARCHIVE_NAME}
     if ! Check ; then
        Banner "${PACKAGE_NAME} failed checksum!"
        exit -1
@@ -413,12 +396,13 @@ DefaultDownloadZipStep() {
 
 
 Patch() {
-  local LOCAL_PACKAGE_DIR=$1
-  local LOCAL_PATCH_FILE=$2
+  local LOCAL_PATCH_FILE=$1
   if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
-    Banner "Patching ${LOCAL_PACKAGE_DIR}"
-    cd ${NACL_PACKAGES_REPOSITORY}/${LOCAL_PACKAGE_DIR}
-    patch -p1 -g0 < ${START_DIR}/${LOCAL_PATCH_FILE}
+    Banner "Patching $(basename ${PWD})"
+    #git apply ${START_DIR}/${LOCAL_PATCH_FILE}
+    patch -p1 -g0 --no-backup-if-mismatch < ${START_DIR}/${LOCAL_PATCH_FILE}
+    git add .
+    git commit -m "Apply naclports patch"
   fi
 }
 
@@ -468,29 +452,6 @@ MakeDir() {
 }
 
 
-IsInstalled() {
-  local LOCAL_PACKAGE_NAME=$1
-  if [ ${#LOCAL_PACKAGE_NAME} -ne 0 ]; then
-    if grep -qx ${LOCAL_PACKAGE_NAME} ${NACL_PACKAGES_OUT}/installed.txt \
-       &>/dev/null; then
-      return 0
-    else
-      return 1
-    fi
-  else
-    echo "IsInstalled called with possibly unset variable!"
-  fi
-}
-
-
-AddToInstallFile() {
-  local LOCAL_PACKAGE_NAME=$1
-  if ! IsInstalled ${LOCAL_PACKAGE_NAME}; then
-    echo ${LOCAL_PACKAGE_NAME} >> ${NACL_PACKAGES_OUT}/installed.txt
-  fi
-}
-
-
 PatchSpecFile() {
   # fix up spaces so gcc sees entire path
   local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
@@ -523,35 +484,38 @@ DefaultPreInstallStep() {
 }
 
 
+InitGitRepo() {
+  if [ -d .git ]; then
+    # Strangely one of the upstream archives (x264) actually contains a full
+    # .git repo already. In this case we can just skip the initial commit.
+    # TODO(sbc): remove this once x264 is updated.
+    return
+  fi
+  git init
+  git checkout -b "upstream"
+  git add .
+  git commit -m "Upstream version"
+  git checkout -b "master"
+}
+
+
 DefaultExtractStep() {
-  Banner "Untaring ${PACKAGE_NAME}.tgz"
+  ArchiveName
+  Banner "Extracting ${ARCHIVE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_DIR}
-  if [ $OS_SUBDIR = "win" ]; then
-    tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
+
+  local EXTENSION="${ARCHIVE_NAME##*.}"
+  if [ ${EXTENSION} = "zip" ]; then
+    unzip ${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}
   else
-    tar zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
+    if [ $OS_SUBDIR = "win" ]; then
+      tar --no-same-owner -xf ${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}
+    else
+      tar xf ${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}
+    fi
   fi
-}
 
-
-DefaultExtractBzipStep() {
-  Banner "Untaring ${PACKAGE_NAME}.tbz2"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_DIR}
-  if [ $OS_SUBDIR = "win" ]; then
-    tar --no-same-owner -jxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tbz2
-  else
-    tar jxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tbz2
-  fi
-}
-
-
-DefaultExtractZipStep() {
-  Banner "Unzipping ${PACKAGE_NAME}.zip"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_DIR}
-  unzip ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
 }
 
 
@@ -559,20 +523,19 @@ PatchConfigSub() {
   # Replace the package's config.sub one with an up-do-date copy
   # that includes nacl support.  We only do this if the string
   # 'nacl' is not already contained in the file.
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  if [ -f config.sub ]; then
-    if grep -q nacl config.sub &>/dev/null; then
-      echo "config.sub already supports NaCl"
+  local CONFIG_SUB=${CONFIG_SUB:-config.sub}
+  if [ -f $CONFIG_SUB ]; then
+    if grep -q nacl $CONFIG_SUB /dev/null; then
+      echo "$CONFIG_SUB supports NaCl"
     else
       echo "Patching config.sub"
-      /bin/cp -f ${SCRIPT_DIR}/config.sub .
+      /bin/cp -f ${SCRIPT_DIR}/config.sub $CONFIG_SUB
     fi
   fi
 }
 
 
 PatchConfigure() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   if [ -f configure ]; then
     Banner "Patching configure"
     ${SCRIPT_DIR}/patch_configure.py configure
@@ -581,11 +544,17 @@ PatchConfigure() {
 
 
 DefaultPatchStep() {
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  InitGitRepo
   if [ -n "${PATCH_FILE:-}" ]; then
-    Patch ${PACKAGE_DIR} ${PATCH_FILE}
+    Patch ${PATCH_FILE}
   fi
   PatchConfigure
   PatchConfigSub
+  if [ -n "$(git diff)" ]; then
+    git add -u
+    git commit -m "Automatic patch generated by naclports"
+  fi
 }
 
 
@@ -669,7 +638,6 @@ DefaultCleanUpStep() {
   if [ ${NACL_ARCH} != "pnacl" -a ${NACL_ARCH} != "arm" ]; then
     PatchSpecFile
   fi
-  AddToInstallFile ${PACKAGE_NAME}
   ChangeDir ${SAVE_PWD}
 }
 

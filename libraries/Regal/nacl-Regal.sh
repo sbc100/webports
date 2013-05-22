@@ -20,6 +20,7 @@ CustomExtractStep() {
   else
     tar --strip-components=1 -zxf ${tarball}
   fi
+  InitGitRepo
 }
 
 

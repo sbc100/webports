@@ -26,13 +26,6 @@ CustomDownloadStep() {
   fi
 }
 
-CustomExtractStep() {
-  Banner "Unzipping ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
-  unzip ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
-}
-
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
@@ -68,7 +61,7 @@ CustomInstallStep() {
 CustomPackageInstall() {
   DefaultPreInstallStep
   CustomDownloadStep
-  CustomExtractStep
+  DefaultExtractStep
   DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep

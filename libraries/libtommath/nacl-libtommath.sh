@@ -49,8 +49,8 @@ CustomInstallStep() {
 
 CustomPackageInstall() {
   DefaultPreInstallStep
-  DefaultDownloadBzipStep
-  DefaultExtractBzipStep
+  DefaultDownloadStep
+  DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
   CustomInstallStep

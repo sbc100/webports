@@ -2,7 +2,7 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Tool which check the LICENSE field of all packages.
+"""Tool that checks the LICENSE field of all packages.
 
 Currently it preforms the following simple check:
  - LICENSE field exists
@@ -42,12 +42,13 @@ def CheckLicense(package):
     if len(license) > 1:
       package.Download()
       package.Extract()
-      filename = os.path.join(package.BuildLocation(), license[1])
+      filename = os.path.join(package.GetBuildLocation(), license[1])
       if not os.path.exists(filename):
         print 'Missing license file: %s' % filename
         rtn = 1
 
   return rtn
+
 
 def main(args):
   global options
