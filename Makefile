@@ -240,7 +240,7 @@ $(DISABLED):
 
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
-	cd $* && ./nacl-$(notdir $*).sh
+	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@
 

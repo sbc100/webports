@@ -42,12 +42,12 @@ else
 fi
 
 # Set default NACL_ARCH based on legacy NACL_PACKAGES_BITSIZE
-if [ "${NACL_PACKAGES_BITSIZE:-}" = "64" ]; then
-  export NACL_ARCH=${NACL_ARCH:-"x86_64"}
+if [ "${NACL_PACKAGES_BITSIZE:-}" = "32" ]; then
+  export NACL_ARCH=${NACL_ARCH:-"i686"}
 elif [ "${NACL_PACKAGES_BITSIZE:-}" = "pnacl" ]; then
   export NACL_ARCH=${NACL_ARCH:-"pnacl"}
 else
-  export NACL_ARCH=${NACL_ARCH:-"i686"}
+  export NACL_ARCH=${NACL_ARCH:-"x86_64"}
 fi
 
 export NACL_GLIBC=${NACL_GLIBC:-0}
@@ -492,6 +492,14 @@ InitGitRepo() {
     return
   fi
   git init
+  if [ -n ${BUILDBOT_BUILDERNAME:-""} ]; then
+    if [ -z "$(git config user.email)" ]; then
+      git config user.email "naclports_buildbot"
+    fi
+    if [ -z "$(git config user.name)" ]; then
+      git config user.name "naclports buildbot"
+    fi
+  fi
   git checkout -b "upstream"
   git add .
   git commit -m "Upstream version"
