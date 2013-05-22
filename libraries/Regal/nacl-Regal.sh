@@ -9,12 +9,13 @@ source ../../build_tools/common.sh
 # override the extract step since the github generated tarball
 # puts all the files in regal-SHA1HASH folder
 CustomExtractStep() {
-  local tarball=${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tgz
-  Banner "Untaring ${PACKAGE_NAME}.tgz"
+  ArchiveName
+  Banner "Untaring ${ARCHIVE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_NAME}
   MakeDir ${PACKAGE_NAME}
   ChangeDir ${PACKAGE_NAME}
+  local tarball=${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}
   if [ $OS_SUBDIR = "windows" ]; then
     tar --strip-components=1 --no-same-owner -zxf ${tarball}
   else
