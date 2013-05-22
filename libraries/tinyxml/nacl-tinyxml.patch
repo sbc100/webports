@@ -46,6 +46,11 @@ diff -Naur tinyxml/Makefile tinyxml.nacl/Makefile
  
  all: ${OUTPUT}
  
+@@ -93,3 +93,3 @@
+ # Add on the sources for libraries
+-SRCS := ${SRCS}
++SRCS := $(filter-out %test.cpp, ${SRCS})
+ 
 @@ -102,7 +102,7 @@
  #****************************************************************************
  
