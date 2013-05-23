@@ -127,7 +127,7 @@ fi
 
 # When run by a buildbot force all archives to come from the NaCl mirror
 # rather than using upstream URL.
-if [ -n ${BUILDBOT_BUILDERNAME:-""} ]; then
+if [ -n "${BUILDBOT_BUILDERNAME:-}" ]; then
    FORCE_MIRROR=${FORCE_MIRROR:-"yes"}
 fi
 
@@ -484,15 +484,8 @@ DefaultPreInstallStep() {
 }
 
 
-InitGitRepo() {
-  if [ -d .git ]; then
-    # Strangely one of the upstream archives (x264) actually contains a full
-    # .git repo already. In this case we can just skip the initial commit.
-    # TODO(sbc): remove this once x264 is updated.
-    return
-  fi
-  git init
-  if [ -n ${BUILDBOT_BUILDERNAME:-""} ]; then
+CheckGitConfig() {
+  if [ -n "${BUILDBOT_BUILDERNAME:-}" ]; then
     if [ -z "$(git config user.email)" ]; then
       git config user.email "naclports_buildbot"
     fi
@@ -500,6 +493,19 @@ InitGitRepo() {
       git config user.name "naclports buildbot"
     fi
   fi
+}
+
+
+InitGitRepo() {
+  if [ -d .git ]; then
+    # Strangely one of the upstream archives (x264) actually contains a full
+    # .git repo already. In this case we can just skip the initial commit.
+    # TODO(sbc): remove this once x264 is updated.
+    CheckGitConfig
+    return
+  fi
+  git init
+  CheckGitConfig
   git checkout -b "upstream"
   git add .
   git commit -m "Upstream version"
