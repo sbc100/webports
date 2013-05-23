@@ -13,10 +13,6 @@
 #include "nacl-mounts/console/JSPostMessageBridge.h"
 
 
-// Uncomment this to use pseudothread with nethack:
-// #define USE_PSEUDO_THREADS
-
-
 extern "C" int nethack_main(int argc, char *argv[]);
 extern "C" int umount(const char *path);
 extern "C" int mount(const char *source, const char *target,
@@ -85,9 +81,6 @@ class NethackInstance : public pp::Instance {
     runner_ = new MainThreadRunner(this);
     jsbridge_ = new JSPostMessageBridge(runner_);
     jspipe_ = new JSPipeMount();
-#ifdef USE_PSEUDO_THREADS
-    jspipe_->set_using_pseudo_thread(true);
-#endif
     jspipe_->set_outbound_bridge(jsbridge_);
     // Replace stdin, stdout, stderr with js console.
     mount(0, "/jspipe", 0, 0, jspipe_);
@@ -102,12 +95,7 @@ class NethackInstance : public pp::Instance {
     fd = open("/jspipe/2", O_WRONLY);
     assert(fd == 2);
 
-#ifdef USE_PSEUDO_THREADS
-    runner_->PseudoThreadFork(nethack_init, runner_);
-#else
     pthread_create(&nethack_thread_, NULL, nethack_init, runner_);
-#endif
-
     return true;
   }
 

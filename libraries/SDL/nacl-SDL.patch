@@ -471,344 +471,7 @@ diff -urN SDL-1.2.14/src/video/nacl/eventqueue.h SDL-1.2.14-nacl/src/video/nacl/
 +};
 +
 +#endif // _SDL_nacl_eventqueue_h
-diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.cc SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc
---- SDL-1.2.14/src/video/nacl/MainThreadRunner.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.cc	2012-03-21 03:17:01.150449516 +0400
-@@ -0,0 +1,227 @@
-+/*
-+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
-+ * Use of this source code is governed by a BSD-style license that can be
-+ * found in the LICENSE file.
-+ */
-+#include "MainThreadRunner.h"
-+#include <alloca.h>
-+#include <assert.h>
-+#include <errno.h>
-+
-+// Only use pepper in nacl to allow unit testing.
-+#ifdef __native_client__
-+#  include <ppapi/c/pp_errors.h>
-+#  include <ppapi/cpp/completion_callback.h>
-+#  include <ppapi/cpp/module.h>
-+#  define USE_PEPPER
-+#endif
-+
-+// Stack space to allocate by default to the event handler
-+// thread in the presence of an ancillary 'pseudo-thread'.
-+// 640K of stack should be enough for anyone.
-+static const int kDefaultPseudoThreadHeadroom = 640 * 1024;
-+
-+// If we're not using pepper, track main thread's id so
-+// we can do something sensible.
-+#ifndef USE_PEPPER
-+static pthread_t main_thread_id_;
-+#endif
-+
-+struct MainThreadRunner::JobEntry {
-+  pp::Instance* pepper_instance;
-+  MainThreadRunner* runner;
-+  MainThreadJob* job;
-+  pthread_mutex_t done_mutex;
-+  pthread_cond_t done_cond;
-+  bool is_done;
-+  int32_t result;
-+  bool pseudo_thread_job;
-+};
-+
-+
-+MainThreadRunner::MainThreadRunner(pp::Instance *instance) {
-+#ifndef USE_PEPPER
-+  // Record main thread if not using pepper.
-+  main_thread_id_ = pthread_self();
-+#endif
-+
-+  pepper_instance_ = instance;
-+  pthread_mutex_init(&lock_, NULL);
-+}
-+
-+MainThreadRunner::~MainThreadRunner() {
-+  pthread_mutex_destroy(&lock_);
-+}
-+
-+int32_t MainThreadRunner::RunJob(MainThreadJob* job) {
-+  JobEntry entry;
-+
-+  // initialize the entry
-+  entry.runner = this;
-+  entry.pepper_instance = pepper_instance_;
-+  entry.job = job;
-+
-+  bool in_main_thread = IsMainThread();
-+  // Must be off main thread, or on a pseudothread.
-+  assert(!in_main_thread || in_pseudo_thread_);
-+
-+  // Thread type specific initialization.
-+  if (in_main_thread) {
-+    entry.pseudo_thread_job = true;
-+  } else {
-+    entry.pseudo_thread_job = false;
-+    // Init condition variable.
-+    entry.is_done = false;
-+    int ret = pthread_mutex_init(&entry.done_mutex, NULL);
-+    assert(!ret);
-+    ret = pthread_cond_init(&entry.done_cond, NULL);
-+    assert(!ret);
-+  }
-+
-+  // put the job on the queue
-+  pthread_mutex_lock(&lock_);
-+  job_queue_.push_back(&entry);
-+  pthread_mutex_unlock(&lock_);
-+
-+#ifdef USE_PEPPER
-+  // Schedule the job.
-+  pp::Module::Get()->core()->CallOnMainThread(0,
-+      pp::CompletionCallback(&DoWorkShim, this), PP_OK);
-+#endif
-+
-+  // Block differntly on the main thread.
-+  if (entry.pseudo_thread_job) {
-+    // block pseudothread until job is done
-+    PseudoThreadBlock();
-+  } else {
-+    // wait on condition until the job is done
-+    pthread_mutex_lock(&entry.done_mutex);
-+    while (!entry.is_done) {
-+      pthread_cond_wait(&entry.done_cond, &entry.done_mutex);
-+    }
-+    pthread_mutex_unlock(&entry.done_mutex);
-+    pthread_mutex_destroy(&entry.done_mutex);
-+    pthread_cond_destroy(&entry.done_cond);
-+  }
-+
-+  // Cleanup.
-+  delete job;
-+  return entry.result;
-+}
-+
-+void MainThreadRunner::ResultCompletion(void *arg, int32_t result) {
-+  JobEntry* entry = reinterpret_cast<JobEntry*>(arg);
-+  entry->result = result;
-+  // Signal differently depending on if the pseudothread is involved.
-+  if (entry->pseudo_thread_job) {
-+    PseudoThreadResume();
-+  } else {
-+    pthread_mutex_lock(&entry->done_mutex);
-+    entry->is_done = true;
-+    pthread_cond_signal(&entry->done_cond);
-+    pthread_mutex_unlock(&entry->done_mutex);
-+  }
-+}
-+
-+void MainThreadRunner::DoWorkShim(void *p, int32_t unused) {
-+  MainThreadRunner* mtr = static_cast<MainThreadRunner *>(p);
-+  mtr->DoWork();
-+}
-+
-+void MainThreadRunner::DoWork(void) {
-+  pthread_mutex_lock(&lock_);
-+  if (!job_queue_.empty()) {
-+    JobEntry* entry = job_queue_.front();
-+    job_queue_.pop_front();
-+    // Release lock before doing work.
-+    pthread_mutex_unlock(&lock_);
-+    entry->job->Run(entry);
-+    return;
-+  }
-+  pthread_mutex_unlock(&lock_);
-+}
-+
-+pp::Instance *MainThreadRunner::ExtractPepperInstance(
-+    MainThreadRunner::JobEntry *e) {
-+  return e->pepper_instance;
-+}
-+
-+void MainThreadRunner::PseudoThreadFork(void *(*func)(void *arg), void *arg) {
-+  PseudoThreadHeadroomFork(kDefaultPseudoThreadHeadroom, func, arg);
-+}
-+
-+void MainThreadRunner::PseudoThreadHeadroomFork(
-+    int bytes_headroom, void *(*func)(void *arg), void *arg) {
-+  // Must be run from the main thread.
-+  assert(IsMainThread());
-+  // Only one pseudothread can be forked.
-+  assert(!forked_pseudo_thread_);
-+  // Leave a gap of bytes_headroom on the stack between
-+  alloca(bytes_headroom);
-+  // Goto pseudothread, but remeber how to come back here.
-+  if (!setjmp(main_thread_state_)) {
-+    InnerPseudoThreadFork(func, arg);
-+  }
-+  in_pseudo_thread_ = false;
-+}
-+
-+// Put things in another scope to keep above headroom,
-+// even after thread ends.
-+void MainThreadRunner::InnerPseudoThreadFork(
-+    void *(func)(void *arg), void *arg) {
-+  forked_pseudo_thread_ = true;
-+  in_pseudo_thread_ = true;
-+  func(arg);
-+  forked_pseudo_thread_ = false;
-+  in_pseudo_thread_ = false;
-+  // Dead, keep kicking back to the main thread.
-+  for (;;) {
-+    longjmp(main_thread_state_, 1);
-+  }
-+}
-+
-+void MainThreadRunner::PseudoThreadBlock(void) {
-+  // Must be run from the main thread.
-+  assert(IsMainThread());
-+  // Pseudothread must have been forked.
-+  assert(forked_pseudo_thread_);
-+  // Must be run only from the pseudothread.
-+  assert(in_pseudo_thread_);
-+  if (!setjmp(pseudo_thread_state_)) {
-+    // Go back to the main thread after saving state.
-+    longjmp(main_thread_state_, 1);
-+  }
-+  in_pseudo_thread_ = true;
-+}
-+
-+void MainThreadRunner::PseudoThreadResume(void) {
-+  // Must be run from the main thread.
-+  assert(IsMainThread());
-+  // Pseudothread must have been forked.
-+  assert(forked_pseudo_thread_);
-+  // Can only be run from the main thread.
-+  assert(!in_pseudo_thread_);
-+  if (!setjmp(main_thread_state_)) {
-+    // Go back to the pseudo thread after saving state.
-+    longjmp(pseudo_thread_state_, 1);
-+  }
-+  in_pseudo_thread_ = false;
-+}
-+
-+bool MainThreadRunner::IsMainThread(void) {
-+#ifdef USE_PEPPER
-+  return pp::Module::Get()->core()->IsMainThread();
-+#else
-+  return pthread_equal(pthread_self(), main_thread_id_);
-+#endif
-+}
-+
-+bool MainThreadRunner::IsPseudoThread(void) {
-+  return IsMainThread() && in_pseudo_thread_;
-+}
-+
-+// Static variables in MainThreaadRunner.
-+jmp_buf MainThreadRunner::main_thread_state_;
-+jmp_buf MainThreadRunner::pseudo_thread_state_;
-+bool MainThreadRunner::in_pseudo_thread_ = false;
-+bool MainThreadRunner::forked_pseudo_thread_ = false;
-diff -urN SDL-1.2.14/src/video/nacl/MainThreadRunner.h SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h
---- SDL-1.2.14/src/video/nacl/MainThreadRunner.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/MainThreadRunner.h	2012-03-21 03:16:57.140438993 +0400
-@@ -0,0 +1,102 @@
-+/*
-+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
-+ * Use of this source code is governed by a BSD-style license that can be
-+ * found in the LICENSE file.
-+ */
-+#ifndef LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
-+#define LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
-+
-+#include <pthread.h>
-+#include <semaphore.h>
-+#include <setjmp.h>
-+#include <list>
-+
-+// Keep pepper specifics out so we can unit test.
-+namespace pp {
-+  class Instance;
-+};
-+
-+// MainThreadJob is a class that provides a method for running
-+// a MainThreadRunner::JobEntry.
-+class MainThreadJob;
-+
-+// MainThreadRunner executes MainThreadJobs asynchronously
-+// on the main thread.
-+class MainThreadRunner {
-+ public:
-+  explicit MainThreadRunner(pp::Instance *instance);
-+  ~MainThreadRunner();
-+
-+  // RunJob() creates an entry for the job and submits
-+  // that job for execution.
-+  int32_t RunJob(MainThreadJob *job);
-+
-+  // ResultCompletion() is a function for putting result into arg, which
-+  // is reinterpreted as a JobEntry pointer.  ResultCompletion()
-+  // is intended to be used with pp::CompletionCallback()
-+  static void ResultCompletion(void *arg, int32_t result);
-+
-+  // The JobEntry struct provides all of the information for
-+  // a particular job.  It acts as an opaque handle to the job to and
-+  // is used by ResultCompletion().
-+  struct JobEntry;
-+
-+  static pp::Instance *ExtractPepperInstance(MainThreadRunner::JobEntry *e);
-+
-+  // You can have one 'pseudothread' on top of the main thread.
-+  // This coroutine (setjmp) based thread can block on Run.
-+  // You will have to take some amount of re-entrancy into account.
-+  // Assumes 640K of stack is enough for anyone for event handling in the
-+  // main thread.
-+  static void PseudoThreadFork(void *(*func)(void *arg), void *arg);
-+  // Same as above with selectable bytes of headroom.
-+  static void PseudoThreadHeadroomFork(
-+      int bytes_headroom, void *(*func)(void *arg), void *arg);
-+
-+  // Returns:
-+  //   true - main thread or pseudothread.
-+  //   false - other pthreads.
-+  static bool IsMainThread(void);
-+
-+  // Returns true if on the psuedothread.
-+  static bool IsPseudoThread(void);
-+
-+  // Use these directly only if you are interacting with PPAPI
-+  // such that you can guarantee you'll resume because of an
-+  // asynchronous event you issued.
-+  // Block pseudothread until main thread yields.
-+  static void PseudoThreadBlock(void);
-+  // Yield main thread to pseudothread.
-+  static void PseudoThreadResume(void);
-+
-+  // Do at least one main thread job.
-+  // DO NOT use this with pepper (which sets up an event
-+  // cycle to call this automatically).
-+  // Use directly only for testing.
-+  void DoWork(void);
-+
-+ private:
-+  static void DoWorkShim(void *p, int32_t unused);
-+
-+  // Used to keep things above the headroom.
-+  static void InnerPseudoThreadFork(void *(func)(void *arg), void *arg);
-+
-+  pthread_mutex_t lock_;
-+  std::list<JobEntry*> job_queue_;
-+  pp::Instance *pepper_instance_;
-+
-+  static jmp_buf pseudo_thread_state_;
-+  static jmp_buf main_thread_state_;
-+  static bool in_pseudo_thread_;
-+  static bool forked_pseudo_thread_;
-+};
-+
-+class MainThreadJob {
-+ public:
-+  virtual ~MainThreadJob() {}
-+  virtual void Run(MainThreadRunner::JobEntry *entry) = 0;
-+};
-+
-+// MainThreadRunner executes MainThreadJobs asynchronously
-+
-+#endif  // LIBRARIES_NACL_MOUNTS_BASE_MAINTHREADRUNNER_H_
-diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc
+diff -Ndur diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc
 --- SDL-1.2.14/src/video/nacl/SDL_naclevents.cc	1970-01-01 03:00:00.000000000 +0300
 +++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclevents.cc	2012-03-27 05:28:18.539656031 +0400
 @@ -0,0 +1,307 @@
@@ -1130,154 +793,16 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclevents_c.h SDL-1.2.14-nacl/src/video
 +
 +extern void NACL_InitOSKeymap(_THIS);
 +extern void NACL_PumpEvents(_THIS);
-diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.cc SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.cc
---- SDL-1.2.14/src/video/nacl/SDL_nacljob.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.cc	2012-01-16 12:16:39.470269368 +0400
-@@ -0,0 +1,71 @@
-+/*
-+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
-+ * Use of this source code is governed by a BSD-style license that can be
-+ * found in the LICENSE file.
-+ */
-+#include <assert.h>
-+#include <ppapi/cpp/instance.h>
-+#include <ppapi/cpp/graphics_2d.h>
-+#include <ppapi/cpp/completion_callback.h>
-+#include <ppapi/cpp/image_data.h>
-+#include <ppapi/cpp/rect.h>
-+#include <ppapi/c/pp_errors.h>
-+#include "SDL_nacljob.h"
-+
-+void SDLNaclJob::Run(MainThreadRunner::JobEntry *e) {
-+  job_entry_ = e;
-+  factory_ = new pp::CompletionCallbackFactory<SDLNaclJob>(this);
-+  pp::CompletionCallback cc = factory_->NewCallback(&SDLNaclJob::Finish);
-+  pp::Instance *instance = MainThreadRunner::ExtractPepperInstance(e);
-+
-+  int32_t rv;
-+  switch (op_) {
-+  case VIDEO_INIT:
-+    cc.Run(PP_OK);
-+    break;
-+
-+  case CREATE_GRAPHICS_CONTEXT:
-+    if (device_->hidden->context2d)
-+      delete device_->hidden->context2d;
-+    device_->hidden->context2d =
-+      new pp::Graphics2D(instance,
-+			 pp::Size(device_->hidden->w, device_->hidden->h), false);
-+    assert(device_->hidden->context2d != NULL);
-+    
-+    if (!instance->BindGraphics(*device_->hidden->context2d)) {
-+      fprintf(stderr, "***** Couldn't bind the device context *****\n");
-+    }
-+    
-+    if (device_->hidden->image_data)
-+      delete device_->hidden->image_data;
-+
-+    device_->hidden->image_data =
-+      new pp::ImageData(instance,
-+			PP_IMAGEDATAFORMAT_BGRA_PREMUL,
-+			device_->hidden->context2d->size(),
-+			false);
-+    assert(device_->hidden->image_data != NULL);
-+    // TODO: report any errors
-+    cc.Run(PP_OK);
-+    break;
-+
-+  case VIDEO_FLUSH:
-+    for (int i = 0; i < device_->hidden->numrects; ++i) {
-+      SDL_Rect& r = device_->hidden->rects[i];
-+      device_->hidden->context2d->PaintImageData(*device_->hidden->image_data, pp::Point(), pp::Rect(r.x, r.y, r.w, r.h));
-+    }
-+
-+    device_->hidden->context2d->Flush(cc);
-+    break;
-+
-+  case VIDEO_QUIT:
-+    delete device_->hidden->context2d;
-+    delete device_->hidden->image_data;
-+    cc.Run(PP_OK);
-+
-+  }
-+}
-+
-+void SDLNaclJob::Finish(int32_t result) {
-+  MainThreadRunner::ResultCompletion(job_entry_, result);
-+}
-diff -urN SDL-1.2.14/src/video/nacl/SDL_nacljob.h SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.h
---- SDL-1.2.14/src/video/nacl/SDL_nacljob.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_nacljob.h	2012-01-16 12:16:39.470269368 +0400
-@@ -0,0 +1,57 @@
-+/*
-+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
-+ * Use of this source code is governed by a BSD-style license that can be
-+ * found in the LICENSE file.
-+ */
-+#ifndef _SDL_nacljob_h
-+#define _SDL_nacljob_h
-+
-+#include <ppapi/c/pp_errors.h>
-+#include <ppapi/c/pp_file_info.h>
-+#include <ppapi/cpp/completion_callback.h>
-+#include <ppapi/cpp/file_io.h>
-+#include <ppapi/cpp/file_ref.h>
-+#include <ppapi/cpp/file_system.h>
-+#include <ppapi/cpp/url_loader.h>
-+#include <ppapi/cpp/url_request_info.h>
-+#include <ppapi/cpp/url_response_info.h>
-+#include <ppapi/c/ppb_var.h>
-+#include <ppapi/utility/completion_callback_factory.h>
-+#include <string>
-+#include <vector>
-+#include <set>
-+#include "MainThreadRunner.h"
-+
-+#include "SDL_naclvideo.h"
-+extern "C" {
-+#include "../SDL_sysvideo.h"
-+}
-+
-+typedef enum {
-+  NO_OP = 0,
-+  VIDEO_INIT,
-+  CREATE_GRAPHICS_CONTEXT,
-+  VIDEO_FLUSH,
-+  VIDEO_QUIT
-+} SDLNaclOperation;
-+
-+class SDLNaclJob : public MainThreadJob {
-+ public:
-+ SDLNaclJob(SDLNaclOperation op, SDL_VideoDevice* device) : op_(op), device_(device) {}
-+  ~SDLNaclJob() {}
-+
-+  void Run(MainThreadRunner::JobEntry *e);
-+  
-+ private:
-+
-+  SDLNaclOperation op_;
-+  SDL_VideoDevice *device_;
-+
-+  pp::CompletionCallbackFactory<SDLNaclJob> *factory_;
-+
-+  MainThreadRunner::JobEntry *job_entry_;
-+
-+  void Finish(int32_t result);
-+};
-+
-+#endif
-diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc
---- SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.cc	2012-01-16 12:16:39.470269368 +0400
-@@ -0,0 +1,243 @@
+diff -Ndur SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14.nacl/src/video/nacl/SDL_naclvideo.cc
+--- SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc	1969-12-31 16:00:00.000000000 -0800
++++ SDL-1.2.14.nacl/src/video/nacl/SDL_naclvideo.cc	2013-05-22 11:46:24.351768666 -0700
+@@ -0,0 +1,252 @@
 +#include "SDL_config.h"
 +
 +#include <assert.h>
 +
 +#include "SDL_naclvideo.h"
 +#include "SDL_naclevents_c.h"
-+#include "MainThreadRunner.h"
-+#include "SDL_nacljob.h"
 +
 +#include <ppapi/cpp/instance.h>
 +#include <ppapi/cpp/graphics_2d.h>
@@ -1289,7 +814,6 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +pp::Instance* gNaclPPInstance;
 +static int gNaclVideoWidth;
 +static int gNaclVideoHeight;
-+static MainThreadRunner* gNaclMainThreadRunner;
 +
 +static int kNaClFlushDelayMs = 20;
 +
@@ -1310,7 +834,6 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +    (width != gNaclVideoWidth || height != gNaclVideoHeight);
 +  if (!gNaclPPInstance) {
 +    gNaclPPInstance = pp::Module::Get()->InstanceForPPInstance(instance);
-+    gNaclMainThreadRunner = new MainThreadRunner(gNaclPPInstance);
 +  }
 +  gNaclVideoWidth = width;
 +  gNaclVideoHeight = height;
@@ -1435,10 +958,25 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +  _this->hidden->w = width;
 +  _this->hidden->h = height;
 +
-+  SDLNaclJob* job = new SDLNaclJob(CREATE_GRAPHICS_CONTEXT, _this);
-+  int32_t rv = gNaclMainThreadRunner->RunJob(job);
-+  if (rv != PP_OK)
-+    return NULL;
++  if (_this->hidden->context2d)
++    delete _this->hidden->context2d;
++  _this->hidden->context2d =
++    new pp::Graphics2D(gNaclPPInstance, pp::Size(width, height), false);
++  assert(_this->hidden->context2d != NULL);
++
++  if (!gNaclPPInstance->BindGraphics(*_this->hidden->context2d)) {
++    fprintf(stderr, "***** Couldn't bind the device context *****\n");
++    return(NULL);
++  }
++
++  if (_this->hidden->image_data)
++    delete _this->hidden->image_data;
++
++  _this->hidden->image_data = new pp::ImageData(gNaclPPInstance,
++    PP_IMAGEDATAFORMAT_BGRA_PREMUL,
++    _this->hidden->context2d->size(),
++    false);
++  assert(_this->hidden->image_data != NULL);
 +
 +  /* Allocate the new pixel format for the screen */
 +  if ( ! SDL_ReallocFormat(current, bpp, 0xFF0000, 0xFF00, 0xFF, 0) ) {
@@ -1472,15 +1010,13 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +  for (unsigned char* p = start + 3; p < end; p +=4)
 +    *p = 0xFF;
 +
-+  _this->hidden->numrects = numrects;
-+  _this->hidden->rects = rects;
-+
 +  // Flush on the main thread.
-+  SDLNaclJob* job = new SDLNaclJob(VIDEO_FLUSH, _this);
-+  gNaclMainThreadRunner->RunJob(job);
++  for (int i = 0; i < numrects; ++i) {
++    SDL_Rect& r = rects[i];
++    _this->hidden->context2d->PaintImageData(*_this->hidden->image_data, pp::Point(), pp::Rect(r.x, r.y, r.w, r.h));
++  }
 +
-+  _this->hidden->numrects = 0; // sanity
-+  _this->hidden->rects = NULL;
++  _this->hidden->context2d->Flush(pp::BlockUntilComplete());
 +}
 +
 +static void NACL_FreeWMCursor(_THIS, WMcursor *cursor) {
@@ -1509,14 +1045,14 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.cc SDL-1.2.14-nacl/src/video/n
 +    _this->screen->pixels = NULL;
 +  }
 +
-+  SDLNaclJob* job = new SDLNaclJob(VIDEO_QUIT, _this);
-+  gNaclMainThreadRunner->RunJob(job);
++  delete _this->hidden->context2d;
++  delete _this->hidden->image_data;
 +}
 +} // extern "C"
-diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h
---- SDL-1.2.14/src/video/nacl/SDL_naclvideo.h	1970-01-01 03:00:00.000000000 +0300
-+++ SDL-1.2.14-nacl/src/video/nacl/SDL_naclvideo.h	2012-01-16 12:16:39.470269368 +0400
-@@ -0,0 +1,37 @@
+diff -Ndur SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14.nacl/src/video/nacl/SDL_naclvideo.h
+--- SDL-1.2.14/src/video/nacl/SDL_naclvideo.h	1969-12-31 16:00:00.000000000 -0800
++++ SDL-1.2.14.nacl/src/video/nacl/SDL_naclvideo.h	2013-05-22 11:23:49.144583145 -0700
+@@ -0,0 +1,34 @@
 +#include "SDL_config.h"
 +
 +#ifndef _SDL_naclvideo_h
@@ -1548,9 +1084,6 @@ diff -urN SDL-1.2.14/src/video/nacl/SDL_naclvideo.h SDL-1.2.14-nacl/src/video/na
 +
 +  pp::ImageData* image_data;
 +  pp::Graphics2D* context2d;  // The PPAPI 2D drawing context.
-+
-+  int numrects;
-+  SDL_Rect* rects;
 +};
 +
 +#endif /* _SDL_naclvideo_h */

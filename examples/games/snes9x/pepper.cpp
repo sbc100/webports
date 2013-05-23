@@ -105,11 +105,7 @@ class GlobeInstance : public pp::Instance {
                 pixel_buffer_->stride());
 
     runner_ = new MainThreadRunner(this);
-#ifdef USE_PSEUDO_THREADS
-    runner_->PseudoThreadFork(snes_init, runner_);
-#else
     pthread_create(&snes_thread_, NULL, snes_init, runner_);
-#endif
     return true;
   }
 
