@@ -33,7 +33,6 @@ CustomInstallStep() {
   (ChangeDir include; tar cf - gmock | (ChangeDir ${NACLPORTS_INCLUDE}; tar xfp -))
   Remove ${NACLPORTS_LIBDIR}/${LIB_GMOCK}
   install -m 644 ${LIB_GMOCK} ${NACLPORTS_LIBDIR}/${LIB_GMOCK}
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

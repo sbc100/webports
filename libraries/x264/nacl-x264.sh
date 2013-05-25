@@ -3,13 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# nacl-x264-snapshot-20091023-2245.sh
-#
-# usage:  nacl-x264-snapshot-20091023-2245.sh
-#
-# this script downloads, patches, and builds x264 for Native Client
-#
-
 source pkg_info
 source ../../build_tools/common.sh
 
@@ -45,11 +38,16 @@ CustomConfigureStep() {
 }
 
 
+CustomPatchStep() {
+  DefaultPatchStep
+}
+
+
 CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-  DefaultPatchStep
+  CustomPatchStep
   CustomConfigureStep
   DefaultBuildStep
   DefaultInstallStep

@@ -64,7 +64,6 @@ NACL_OUT = out
 NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/$(NACL_ARCH)-nacl/usr
 
 NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
-                 $(NACL_OUT)/repository-$(NACL_ARCH) \
                  $(NACL_OUT)/publish \
                  $(NACLPORTS_PREFIX)
 
@@ -219,7 +218,10 @@ package_list:
 sdklibs_list:
 	@echo $(SDK_LIBS)
 
-.PHONY: all default libraries examples clean sdklibs sdklibs_list $(DISABLED)
+run:
+	./httpd.py
+
+.PHONY: all run default libraries examples clean sdklibs sdklibs_list $(DISABLED)
 
 clean:
 	rm -rf $(NACL_DIRS_TO_REMOVE)

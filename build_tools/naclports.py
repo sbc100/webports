@@ -24,7 +24,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 ARCH = os.environ.get('NACL_ARCH', 'i686')
-BUILD_ROOT = os.path.join(OUT_DIR, 'repository-' + ARCH)
+BUILD_ROOT = os.path.join(OUT_DIR, 'repository')
 ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
 
 

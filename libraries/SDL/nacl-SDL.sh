@@ -45,9 +45,9 @@ CustomConfigureStep() {
   export LIBS="-lppapi_cpp"
   export LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
-  Remove build-nacl
-  MakeDir build-nacl
-  cd build-nacl
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
 
   set -x
   LogExecute ../configure \

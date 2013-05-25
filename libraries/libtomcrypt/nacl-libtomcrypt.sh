@@ -35,7 +35,6 @@ CustomInstallStep() {
   cp ${THIS_PACKAGE_PATH}/src/headers/*.h ./
   ChangeDir ${NACLPORTS_LIBDIR}
   cp ${THIS_PACKAGE_PATH}/*.a .
-  DefaultTouchStep
 }
 
 

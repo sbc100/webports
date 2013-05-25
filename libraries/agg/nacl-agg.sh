@@ -39,7 +39,6 @@ CustomInstallStep() {
   ChangeDir ${NACLPORTS_LIBDIR}
   cp ${THIS_PACKAGE_PATH}/src/libagg.a .
   cp ${THIS_PACKAGE_PATH}/font_freetype/libaggfontfreetype.a .
-  DefaultTouchStep
 }
 
 

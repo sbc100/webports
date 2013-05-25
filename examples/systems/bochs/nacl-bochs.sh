@@ -59,9 +59,9 @@ CustomConfigureStep() {
   export LIBS="$LIBS -Wl,--end-group"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove build-nacl
-  MakeDir build-nacl
-  cd build-nacl
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \
@@ -74,20 +74,20 @@ CustomConfigureStep() {
     --with-gnu-ld
 }
 
-CustomExtractStep(){
-  Banner "Untaring ${PACKAGE_NAME}.tar.gz"
+CustomExtractStep() {
+  Banner "Untaring $1"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_NAME}
   if [ $OS_SUBDIR = "windows" ]; then
-    tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tar.gz
+    tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/$1
   else
-    tar zxf ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.tar.gz
+    tar zxf ${NACL_PACKAGES_TARBALLS}/$1
   fi
 }
 
-CustomInstallStep(){
+CustomInstallStep() {
   BOCHS_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  BOCHS_BUILD=${BOCHS_DIR}/build-nacl
+  BOCHS_BUILD=${BOCHS_DIR}/${NACL_BUILD_SUBDIR}
 
   ChangeDir ${BOCHS_DIR}
   mkdir -p img/usr/local/share/bochs/
@@ -134,15 +134,13 @@ CustomDownloadStep() {
 
 FetchLinuxStep() {
   Banner "FetchLinuxStep"
-  ArchiveName
-  ARCHIVE_NAME_TEMP=${ARCHIVE_NAME}
   PACKAGE_DIR_TEMP=${PACKAGE_DIR}
   ARCHIVE_NAME=$2.tar.gz
   PACKAGE_DIR=$2
   SHA1=${BOCHS_EXAMPLE_DIR}/$2/$2.sha1
   CustomDownloadStep $1 $2 ${SHA1}
-  DefaultExtractStep
-  ARCHIVE_NAME=${ARCHIVE_NAME_TEMP}
+  CustomExtractStep ${ARCHIVE_NAME}
+  unset ARCHIVE_NAME
   PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 

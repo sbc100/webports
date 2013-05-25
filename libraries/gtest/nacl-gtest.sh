@@ -30,7 +30,6 @@ CustomInstallStep() {
   Remove ${NACLPORTS_INCLUDE}/gtest
   LogExecute cp -r include/gtest ${NACLPORTS_INCLUDE}/gtest
 
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

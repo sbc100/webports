@@ -27,9 +27,9 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export LIBS="-lnosys"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  ChangeDir ${PACKAGE_NAME}-build
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \
@@ -72,7 +72,6 @@ CustomInstallStep() {
   # assumes pwd has makefile
   make install-exec
   (cd include; make install)
-  DefaultTouchStep
 }
 
 

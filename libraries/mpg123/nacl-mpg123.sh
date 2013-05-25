@@ -15,24 +15,23 @@ export LDFLAGS="${LDFLAGS} -static"
 CustomBuildStep() {
   Banner "Build ${PACKAGE_NAME}"
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl/src/libmpg123
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
   echo "Directory: $(pwd)"
   LogExecute make clean
   LogExecute make -j${OS_JOBS}
 
   local tests="tests/seek_accuracy tests/seek_whence tests/text"
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl/src
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src
   echo "Directory: $(pwd)"
   LogExecute make clean
   LogExecute make -j${OS_JOBS} ${tests}
 }
 
 CustomInstallStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl/src/libmpg123
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
   LogExecute make install
 
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

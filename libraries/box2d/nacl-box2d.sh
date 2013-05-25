@@ -36,7 +36,7 @@ RunSelLdrTests() {
   fi
 
 
-  RunSelLdrCommand ${PACKAGE_DIR}/${PACKAGE_NAME}-build/HelloWorld/HelloWorld
+  RunSelLdrCommand ${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/HelloWorld/HelloWorld
 }
 
 
@@ -44,9 +44,9 @@ CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/Box2D_v2.2.1
   ChangeDir ${PACKAGE_DIR}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"
 
   cmake .. -DBOX2D_BUILD_EXAMPLES=OFF \

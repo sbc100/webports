@@ -55,9 +55,9 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ./autogen.sh
 
-  Remove build-nacl
-  MakeDir build-nacl
-  cd build-nacl
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
   LogExecute ../configure ${CONFIG_FLAGS}
 
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
@@ -94,13 +94,12 @@ CustomConfigureStep() {
 
 CustomInstallStep(){
   DOSBOX_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  DOSBOX_BUILD=${DOSBOX_DIR}/build-nacl
+  DOSBOX_BUILD=${DOSBOX_DIR}/${NACL_BUILD_SUBDIR}
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
   install ${START_DIR}/dosbox.nmf ${PUBLISH_DIR}
   install ${DOSBOX_BUILD}/src/dosbox ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

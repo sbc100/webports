@@ -39,19 +39,21 @@ RunSelLdrTests() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
 
-  MakeDir ${PACKAGE_DIR}/test.nacl
-  ChangeDir ${PACKAGE_DIR}/test.nacl
+  MakeDir test.nacl
+  ChangeDir test.nacl
   make -f ${START_DIR}/test.nacl/Makefile
 
-  RunSelLdrCommand ${PACKAGE_DIR}/test.nacl/nacl_mounts_sel_ldr_tests
+  ls nacl_mounts_sel_ldr_tests
+  RunSelLdrCommand ${PWD}/nacl_mounts_sel_ldr_tests
 }
 
 
 CustomBuildStep() {
   Banner "Building ${PACKAGE_NAME}"
-  export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  MakeDir ${PACKAGE_DIR}
-  ChangeDir ${PACKAGE_DIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_BUILD_SUBDIR}
   set -x
   CFLAGS="${CFLAGS} -I${START_DIR}/.. -I${START_DIR}"
   CXXCMD="${NACLCXX} ${CFLAGS}"
@@ -128,8 +130,7 @@ CustomBuildStep() {
 
 CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
-  export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  cp ${PACKAGE_DIR}/libnacl-mounts.a ${NACLPORTS_LIBDIR}
+  cp libnacl-mounts.a ${NACLPORTS_LIBDIR}
   mkdir -p ${NACLPORTS_LIBDIR}/nacl-mounts/util
   cp ${START_DIR}/console/console.js ${NACLPORTS_LIBDIR}/nacl-mounts
   cp ${START_DIR}/http2/genfs.py ${NACLPORTS_LIBDIR}/nacl-mounts/util
@@ -146,15 +147,23 @@ CustomInstallStep() {
   done
 }
 
+
+CustomExtractStep() {
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+}
+
+
 CustomPackageInstall() {
 #  RunTests
   DefaultPreInstallStep
+  CustomExtractStep
+  DefaultPatchStep
   CustomBuildStep
   CustomInstallStep
-  DefaultCleanUpStep
-  DefaultTouchStep
   RunSelLdrTests
+  DefaultCleanUpStep
 }
+
 
 CustomPackageInstall
 exit 0

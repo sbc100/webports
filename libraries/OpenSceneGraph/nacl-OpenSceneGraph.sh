@@ -55,7 +55,6 @@ CustomInstallStep() {
   install -m 644 ${LIB_OSG} ${NACLPORTS_LIBDIR}/${LIB_OSG}
   install -m 644 ${LIB_OSGUTIL} ${NACLPORTS_LIBDIR}/${LIB_OSGUTIL}
   install -m 644 ${LIB_OPENTHREADS} ${NACLPORTS_LIBDIR}/${LIB_OPENTHREADS}
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

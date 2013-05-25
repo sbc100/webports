@@ -43,14 +43,13 @@ CustomInstallStep() {
   fi
   LogExecute chmod a+r ${NACLPORTS_PREFIX}/lib/libbz2.*
 
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-  # bzip2 doesn't need patching, so no patch step
+  DefaultPatchStep
   CustomConfigureStep
   CustomBuildStep
   CustomInstallStep

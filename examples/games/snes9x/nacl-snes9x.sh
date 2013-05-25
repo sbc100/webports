@@ -68,8 +68,7 @@ CustomInstallStep(){
   install ${START_DIR}/style.css ${PUBLISH_DIR}
   install ${START_DIR}/snes.nmf ${PUBLISH_DIR}
   install ${BUILD_DIR}/snes9x \
-      ${PUBLISH_DIR}/snes_x86_${NACL_ARCH}.nexe
-  DefaultTouchStep
+      ${PUBLISH_DIR}/snes_${NACL_ARCH}.nexe
 }
 
 CustomPackageInstall() {

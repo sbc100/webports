@@ -25,9 +25,9 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cd ${PACKAGE_NAME}-build
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
   PERL=/bin/true LogExecute ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

@@ -25,10 +25,10 @@ CustomConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  cp nacl.cache ${PACKAGE_NAME}-build/nacl.cache.tmp
-  cd ${PACKAGE_NAME}-build
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cp nacl.cache ${NACL_BUILD_SUBDIR}/nacl.cache.tmp
+  cd ${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

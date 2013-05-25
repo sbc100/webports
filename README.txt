@@ -28,9 +28,7 @@ to add the required extra paths.)
 
 The source code and build output for each package is placed in:
 
-  out/repository-i686     for 32-bit builds
-  out/repository-x86_64   for 64-bit builds
-  out/repository-arm      for arm builds
+  out/repository/<PACKAGE_NAME>
 
 NOTE:  These external libraries each have their own licenses for use.
 Please read and understand these licenses before using these packages

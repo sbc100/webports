@@ -3,13 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# nacl-fontconfig-2.7.3.sh
-#
-# usage:  nacl-fontconfig-2.7.3.sh
-#
-# this script downloads, patches, and builds fontconfig for Native Client.
-#
-
 source pkg_info
 source ../../build_tools/common.sh
 
@@ -44,12 +37,16 @@ CustomConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH};
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   chmod a+x install-sh
-  cd ${PACKAGE_NAME}-build
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cp -ar fontconfig-2.7.3-build/* ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
+  echo "Directory: $(pwd)"
   # We'll not build host anyway
   CC_FOR_BUILD=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/pseudo-gcc \
-  ../configure \
+  LogExecute ../configure \
     --host=nacl \
     --disable-docs \
     --prefix=${NACLPORTS_PREFIX} \
@@ -69,9 +66,8 @@ CustomPatchMakefileStep() {
   # for Native Client.  This function will patch the generated Makefile
   # to remove them.  (Use fontconfig tools on your build machine instead.)
   echo "CustomPatchMakefileStep"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Patch ${MAKEFILE_PATCH_FILE}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${PACKAGE_NAME}-build
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  patch -p1 -g0 --no-backup-if-mismatch < ${START_DIR}/${MAKEFILE_PATCH_FILE}
 }
 
 

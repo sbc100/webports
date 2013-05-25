@@ -81,10 +81,9 @@ CustomInstallStep() {
       thttpd_${NACL_ARCH}.nexe"
 
   if [ -f thttpd_${NACL_COMPLEMENT_ARCH}.nexe ]; then
-    CMD+= " thttpd_${NACL_COMPLEMENT_ARCH}.nexe"
+    CMD+=" thttpd_${NACL_COMPLEMENT_ARCH}.nexe"
   fi
   LogExecute $CMD
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

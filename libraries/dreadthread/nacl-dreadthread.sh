@@ -37,7 +37,6 @@ CustomInstallStep() {
   cp ${START_DIR}/dreadthread.h ${NACLPORTS_INCLUDE}
   cp ${START_DIR}/dreadthread_ctxt.h ${NACLPORTS_INCLUDE}
   cp ${START_DIR}/dreadthread_chain.h ${NACLPORTS_INCLUDE}
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

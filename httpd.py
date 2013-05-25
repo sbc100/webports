@@ -33,8 +33,8 @@ SERVER_HOST = ''
 # multi-user machine and not all users are trusted.  We only serve via
 # the loopback interface.
 
-SAFE_DIR_COMPONENTS = ['out']
-SAFE_DIR_SUFFIX = apply(os.path.join, SAFE_DIR_COMPONENTS)
+SAFE_DIR_COMPONENTS = ['out', 'publish']
+SAFE_DIR_SUFFIX = os.path.join(*SAFE_DIR_COMPONENTS)
 
 def SanityCheckDirectory():
   if os.getcwd().endswith(SAFE_DIR_SUFFIX):
@@ -165,7 +165,7 @@ def Run(server_address,
 
 
 if __name__ == '__main__':
-  os.chdir('out')
+  os.chdir('out/publish')
   SanityCheckDirectory()
   if len(sys.argv) > 1:
     Run((SERVER_HOST, int(sys.argv[1])))

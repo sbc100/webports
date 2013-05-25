@@ -28,12 +28,12 @@ RunSelLdrTests() {
     return
   fi
 
-  local nexe=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl/test/testil
+  local nexe=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test/testil
   local script=${nexe}.sh
 
   WriteSelLdrScript ${script} ${nexe}
 
-  cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl/test && make check
+  cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test && make check
 }
 
 

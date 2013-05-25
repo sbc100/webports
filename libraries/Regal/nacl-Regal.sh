@@ -36,7 +36,6 @@ CustomInstallStep() {
   Banner "Install ${PACKAGE_NAME}"
   cp lib/nacl-${NACL_ARCH}/libRegal*.a ${NACLPORTS_LIBDIR}
   cp -r include/GL ${NACLPORTS_INCLUDE}
-  DefaultTouchStep
 }
 
 

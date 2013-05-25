@@ -27,9 +27,9 @@ CustomConfigureStep() {
   # Windows).
   export HAVE_DOXYGEN="false"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
-  ChangeDir ${PACKAGE_NAME}-build
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

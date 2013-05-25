@@ -72,7 +72,6 @@ CustomBuildStep() {
 CustomInstallStep() {
   # assumes pwd has makefile
   make OS=nacl install
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

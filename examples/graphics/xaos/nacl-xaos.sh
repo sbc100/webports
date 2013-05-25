@@ -10,15 +10,10 @@ EXAMPLE_DIR=${NACL_SRC}/examples/graphics/xaos
 EXECUTABLES=bin/xaos
 
 CustomPatchStep() {
-  local the_patch="${START_DIR}/${PATCH_FILE}"
+  DefaultPatchStep
   local src_dir="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  Banner "Patching ${PACKAGE_NAME}"
-  echo "Patch: ${the_patch}"
-  echo "Src dir: ${src_dir}"
-  cd ${src_dir}
-  patch -p1 -g0 < ${the_patch}
   echo "copy nacl driver"
-  cp -r "${START_DIR}/nacl-ui-driver" "src/ui/ui-drv/nacl"
+  cp -r "${START_DIR}/nacl-ui-driver" "${src_dir}/src/ui/ui-drv/nacl"
 }
 
 CustomConfigureStep() {
@@ -56,13 +51,13 @@ CustomConfigureStep() {
 
   # xaos does not work with a build dir which is separate from the
   # src dir - so we copy src -> build
-  Remove build-nacl
+  Remove ${NACL_BUILD_SUBDIR}
   local tmp=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}.tmp
   Remove ${tmp}
   cp -r ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME} ${tmp}
-  mv ${tmp} build-nacl
+  mv ${tmp} ${NACL_BUILD_SUBDIR}
 
-  cd build-nacl
+  cd ${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"
   echo "run autoconf"
   rm ./configure
@@ -73,7 +68,7 @@ CustomConfigureStep() {
 
 CustomInstallStep(){
   local out_dir=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  local build_dir=${out_dir}/build-nacl
+  local build_dir=${out_dir}/${NACL_BUILD_SUBDIR}
   local publish_dir="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
 
   MakeDir ${publish_dir}
@@ -82,7 +77,6 @@ CustomInstallStep(){
   # Not used yet
   install ${build_dir}/help/xaos.hlp ${publish_dir}
   install ${build_dir}/bin/xaos ${publish_dir}/xaos_${NACL_ARCH}.nexe
-  DefaultTouchStep
 }
 
 CustomPackageInstall() {

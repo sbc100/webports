@@ -48,7 +48,6 @@ CustomConfigureStep() {
 CustomInstallStep() {
   # assumes pwd has makefile
   make install
-  DefaultTouchStep
 }
 
 

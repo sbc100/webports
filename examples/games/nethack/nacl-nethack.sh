@@ -84,7 +84,6 @@ CustomPackageInstall() {
   CustomBuildStep
   DefaultTranslateStep
   DefaultValidateStep
-  DefaultTouchStep
   DefaultCleanUpStep
 }
 

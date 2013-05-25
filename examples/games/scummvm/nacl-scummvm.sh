@@ -2,14 +2,9 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
-# nacl-scummvm-1.2.1.sh
-#
-# usage:  nacl-scummvm-1.2.1.sh
-#
-# this script downloads, patches, and builds scummvm for Native Client.
-#
+source pkg_info
+source ../../../build_tools/common.sh
 
 # Beneath a Steel Sky (floppy version)
 readonly BASS_FLOPPY_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
@@ -17,9 +12,6 @@ readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
 
 readonly LURE_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/lure/lure-1.1.zip
 readonly LURE_NAME=lure-1.1
-
-source pkg_info
-source ../../../build_tools/common.sh
 
 SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/examples/games/scummvm
 
@@ -57,11 +49,11 @@ CustomConfigureStep() {
   export CPPFLAGS="-I$NACL_PACKAGES_LIBRARIES"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${PACKAGE_NAME}-build
-  MakeDir ${PACKAGE_NAME}-build
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
   # NOTE: disabled mt32emu because it using inline assembly that won't
   #     validate.
-  cd ${PACKAGE_NAME}-build
+  cd ${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
     --libdir=${NACLPORTS_LIBDIR} \
@@ -74,21 +66,22 @@ CustomConfigureStep() {
 }
 
 CustomInstallStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   SCUMMVM_DIR=runimage/usr/local/share/scummvm
+  ChangeDir ${SRC_DIR}
 
   mkdir -p ${SCUMMVM_DIR}
-  SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp ${SRC_DIR}/gui/themes/scummclassic.zip \
-     ${SRC_DIR}/dists/engine-data/sky.cpt \
-     ${SRC_DIR}/gui/themes/scummmodern.zip \
-     ${SRC_DIR}/gui/themes/translations.dat \
-     ${SRC_DIR}/dists/engine-data/lure.dat \
-     ${SRC_DIR}/dists/pred.dic \
+  cp gui/themes/scummclassic.zip \
+     dists/engine-data/sky.cpt \
+     gui/themes/scummmodern.zip \
+     gui/themes/translations.dat \
+     dists/engine-data/lure.dat \
+     dists/pred.dic \
      ${SCUMMVM_DIR}
 
-  cp `find ${SRC_DIR}/gui/themes/fonts/ -type f` ${SCUMMVM_DIR}
+  cp `find gui/themes/fonts/ -type f` ${SCUMMVM_DIR}
 
+  Banner "Creating tarballs"
   cd runimage
   tar cf ../runimage.tar ./
   cd ..
@@ -110,6 +103,7 @@ CustomInstallStep() {
   cd ..
 
   export PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
+  Banner "Publishing to ${PUBLISH_DIR}"
   MakeDir ${PUBLISH_DIR}
 
   # Prepare AppEngine app.
@@ -119,7 +113,7 @@ CustomInstallStep() {
   MakeDir ${APPENGINE_DIR}/static
   cp ${START_DIR}/nacl-scumm/static/* ${APPENGINE_DIR}/static
   cp ${SRC_DIR}/*.tar ${APPENGINE_DIR}/static
-  ${NACLSTRIP} ${SRC_DIR}/${PACKAGE_NAME}-build/scummvm \
+  ${NACLSTRIP} ${SRC_DIR}/${NACL_BUILD_SUBDIR}/scummvm \
       -o ${APPENGINE_DIR}/static/scummvm_${NACL_ARCH}.nexe
 
   # Publish chrome web store app (copy to repository to drop .svn etc).
@@ -185,27 +179,13 @@ GameGetStep() {
   PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 
-CustomPatch() {
-  local LOCAL_PACKAGE_NAME=$1
-  local LOCAL_PATCH_FILE=$2
-  if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
-    Banner "Patching ${LOCAL_PACKAGE_NAME}"
-    cd ${NACL_PACKAGES_REPOSITORY}
-    patch -p0 < ${LOCAL_PATCH_FILE}
-  fi
-}
-
-CustomPatchStep() {
-  CustomPatch ${PACKAGE_NAME} ${SCUMMVM_EXAMPLE_DIR}/${PATCH_FILE}
-}
-
 CustomPackageInstall() {
   GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
   GameGetStep ${LURE_URL} ${LURE_NAME}
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-  CustomPatchStep
+  DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
   CustomInstallStep

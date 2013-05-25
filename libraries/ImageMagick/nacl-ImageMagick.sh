@@ -28,9 +28,9 @@ CustomConfigureStep() {
   LDFLAGS+=" -Wl,--as-needed"
   export LDFLAGS
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove build-nacl
-  MakeDir build-nacl
-  cd build-nacl
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then
@@ -60,7 +60,6 @@ CustomBuildAndInstallStep() {
   # Adding -j${OS_JOBS} here causes occational failures when
   # shared libraries are being built.
   make CFLAGS="${cflags}" install-libLTLIBRARIES install-data-am
-  DefaultTouchStep
 }
 
 

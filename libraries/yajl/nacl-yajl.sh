@@ -27,7 +27,7 @@ RunSelLdrTests() {
     return
   fi
 
-  local script=${PACKAGE_DIR}/build-nacl/yajl_test.sh
+  local script=${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/yajl_test.sh
   local nexe=test/yajl_test
 
   WriteSelLdrScript ${script} ${nexe}
@@ -39,9 +39,9 @@ CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ChangeDir ${PACKAGE_DIR}
-  Remove build-nacl
-  MakeDir build-nacl
-  cd build-nacl
+  Remove ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_BUILD_SUBDIR}
+  cd ${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"
 
   cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
