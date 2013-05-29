@@ -515,8 +515,8 @@ InitGitRepo() {
   # across calls to git clean.
   echo "/build-nacl-*" >> .gitignore
   git checkout -b "upstream"
-  git add . > /dev/null
-  git commit -m "Upstream version"
+  git add .
+  git commit -m "Upstream version" > /dev/null
   git checkout -b "master"
 }
 

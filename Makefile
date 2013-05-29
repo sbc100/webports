@@ -163,8 +163,7 @@ endif
 ifeq ($(NACL_GLIBC), 1)
 # TODO: Re-enable regal glibc build once the fix lands upstream
 # to invoke create_nmf correctly.
-DISABLED += libraries/glibc-compat \
-     libraries/Regal
+DISABLED += libraries/glibc-compat
 endif
 
 ifneq ($(OS_NAME), Linux)

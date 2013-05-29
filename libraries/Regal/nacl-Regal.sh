@@ -34,7 +34,10 @@ CustomBuildStep() {
 
 CustomInstallStep() {
   Banner "Install ${PACKAGE_NAME}"
-  cp lib/nacl-${NACL_ARCH}/libRegal*.a ${NACLPORTS_LIBDIR}
+  cp -a lib/nacl-${NACL_ARCH}/libRegal*.a ${NACLPORTS_LIBDIR}
+  if [ "${NACL_GLIBC}" = 1 ]; then
+    cp -a lib/nacl-${NACL_ARCH}/libRegal*.so* ${NACLPORTS_LIBDIR}
+  fi
   cp -r include/GL ${NACLPORTS_INCLUDE}
 }
 
