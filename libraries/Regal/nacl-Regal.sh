@@ -21,7 +21,6 @@ CustomExtractStep() {
   else
     tar --strip-components=1 -zxf ${tarball}
   fi
-  InitGitRepo
 }
 
 
@@ -46,6 +45,7 @@ DefaultPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   CustomExtractStep
+  DefaultPatchStep
   CustomBuildStep
   CustomInstallStep
   DefaultCleanUpStep

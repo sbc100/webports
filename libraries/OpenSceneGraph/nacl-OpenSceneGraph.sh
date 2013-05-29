@@ -2,29 +2,9 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-OpenSceneGraph-2.9.7.sh
-#
-# usage:  nacl-OpenSceneGraph-2.9.7.sh
-#
-# this script downloads, patches, and builds OpenSceneGraph for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
-
-CustomDownloadStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
-  # if matching tarball already exists, don't download again
-  if ! Check ; then
-    Fetch ${URL} ${PACKAGE_NAME}.zip
-    if ! Check ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -59,7 +39,7 @@ CustomInstallStep() {
 
 CustomPackageInstall() {
   DefaultPreInstallStep
-  CustomDownloadStep
+  DefaultDownloadStep
   DefaultExtractStep
   DefaultPatchStep
   CustomConfigureStep

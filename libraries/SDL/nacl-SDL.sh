@@ -49,7 +49,6 @@ CustomConfigureStep() {
   MakeDir ${NACL_BUILD_SUBDIR}
   cd ${NACL_BUILD_SUBDIR}
 
-  set -x
   LogExecute ../configure \
     --host=nacl \
     --disable-assembly \
@@ -58,7 +57,6 @@ CustomConfigureStep() {
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \
     --oldincludedir=${NACLPORTS_INCLUDE}
-  set +x
 }
 
 CustomPackageInstall() {

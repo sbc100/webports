@@ -6,8 +6,6 @@
 source pkg_info
 source ../../../build_tools/common.sh
 
-set -x
-
 EXECUTABLES=src/nethack
 
 CustomBuildStep() {

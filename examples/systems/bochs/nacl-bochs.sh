@@ -144,26 +144,13 @@ FetchLinuxStep() {
   PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 
-CustomPatch() {
-  local LOCAL_PACKAGE_NAME=$1
-  local LOCAL_PATCH_FILE=$2
-  if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
-    Banner "Patching ${LOCAL_PACKAGE_NAME}"
-    cd ${NACL_PACKAGES_REPOSITORY}
-    patch -p0 < ${LOCAL_PATCH_FILE}
-  fi
-}
-
-CustomPatchStep() {
-  CustomPatch ${PACKAGE_NAME} ${BOCHS_EXAMPLE_DIR}/${PATCH_FILE}
-}
 
 CustomPackageInstall() {
   FetchLinuxStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-  CustomPatchStep
+  DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
   DefaultTranslateStep
