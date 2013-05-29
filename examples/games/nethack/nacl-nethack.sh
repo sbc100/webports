@@ -50,21 +50,13 @@ CustomBuildStep() {
   rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
   tar cf ${ASSEMBLY_DIR}/nethack.tar lib
   cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
-  if [ "${NACL_GLIBC}" = "1" ]; then
-    pushd ${ASSEMBLY_DIR}
-    TRUE_TOOLCHAIN_DIR=$(cd ${NACL_SDK_ROOT}/toolchain && pwd -P)
-    python ${TRUE_TOOLCHAIN_DIR}/../tools/create_nmf.py \
-        *.nexe \
-        -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32 \
-        -L ${NACL_SDK_LIBDIR} \
-        -L ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib64 \
-        -D ${NACL_TOOLCHAIN_ROOT}/bin/x86_64-nacl-objdump \
-        -s . \
-        -o nethack.nmf
-    popd
-  else
-    cp ${START_DIR}/nethack.nmf ${ASSEMBLY_DIR}
-  fi
+  pushd ${ASSEMBLY_DIR}
+  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      ${NACL_CREATE_NMF_FLAGS} \
+      *.nexe \
+      -s . \
+      -o nethack.nmf
+  popd
   cp ${NACLPORTS_LIBDIR}/nacl-mounts/*.js ${ASSEMBLY_DIR}
   cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}

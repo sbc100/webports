@@ -253,6 +253,14 @@ readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} -I${NACL_SDK_ROOT}/include"
 NACLPORTS_LDFLAGS=" -L${NACLPORTS_LIBDIR} -L${NACL_SDK_LIBDIR}"
 
+NACL_CREATE_NMF_FLAGS="-L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib \
+-L${NACL_TOOLCHAIN_ROOT}/i686-nacl/usr/lib
+-L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib64 \
+-L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32 \
+-L${NACL_SDK_ROOT}/lib/glibc_x86_64/Release \
+-L${NACL_SDK_ROOT}/lib/glibc_x86_32/Release \
+-D${NACL_BIN_PATH}/x86_64-nacl-objdump"
+
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
 if [ $NACL_ARCH = "arm" ]; then
