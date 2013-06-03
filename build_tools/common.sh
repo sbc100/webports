@@ -555,6 +555,12 @@ TimeCommand() {
 Validate() {
   if [ ${NACL_ARCH} = "pnacl" ]; then
       return
+  fi
+
+  # new SDKs have a single validator called ncval whereas older (<= 28)
+  # have a different validator for each arch.
+  if [ -f ${NACL_SDK_ROOT}/tools/ncval ]; then
+      NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval
   elif [ ${NACL_ARCH} = "arm" ]; then
       NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval_arm
   elif [ ${NACL_ARCH} = "x86_64" ]; then
