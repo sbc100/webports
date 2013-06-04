@@ -12,27 +12,11 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../..
 make clean
 
-# nethack/dosbox also builds nacl-mounts
-BuildPackage nethack
-BuildPackage dosbox
-BuildPackage snes9x
-BuildPackage faac
-BuildPackage lua
-BuildPackage modplug
-BuildPackage fftw
-BuildPackage tommath
-BuildPackage tomcrypt
-BuildPackage jpeg
-BuildPackage tiff
-BuildPackage faad
-BuildPackage tinyxml
-BuildPackage mesa
-BuildPackage cfitsio
-BuildPackage boost
-BuildPackage protobuf
-BuildPackage gc
-BuildPackage x264
-BuildPackage thttpd
+CalculatePackageShards
+
+for PKG in ${PKG_LIST_PART_2}; do
+  BuildPackage ${PKG}
+done
 
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
 if [[ $RESULT != 0 ]] ; then

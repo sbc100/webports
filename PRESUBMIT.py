@@ -5,6 +5,8 @@
 # Documentation on PRESUBMIT.py can be found at:
 # http://www.chromium.org/developers/how-tos/depottools/presubmit-scripts
 
+import subprocess
+
 
 _EXCLUDED_PATHS = (
     # patch_configure.py contains long lines embedded in multi-line
@@ -12,9 +14,19 @@ _EXCLUDED_PATHS = (
     r"^build_tools[\\\/]patch_configure.py",
 )
 
+def CheckBuildbot(input_api, output_api):
+  try:
+    subprocess.check_call('build_tools/bots/test.sh')
+  except subprocess.CalledProcessError as e:
+    return [output_api.PresubmitError('build_tools/bots/test.sh failed')]
+
+  return []
+
+
 def CheckChangeOnUpload(input_api, output_api):
   report = []
   affected_files = input_api.AffectedFiles(include_deletes=False)
+  report.extend(CheckBuildbot(input_api, output_api))
   report.extend(input_api.canned_checks.PanProjectChecks(
       input_api, output_api, project_name='Native Client',
       excluded_paths=_EXCLUDED_PATHS))

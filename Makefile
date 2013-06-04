@@ -190,6 +190,7 @@ DISABLED += \
      examples/tools/thttpd
 endif
 
+ALL_PACKAGES := $(LIBRARIES) $(EXAMPLES)
 LIBRARIES := $(filter-out $(DISABLED),$(LIBRARIES))
 EXAMPLES := $(filter-out $(DISABLED),$(EXAMPLES))
 PACKAGES := $(LIBRARIES) $(EXAMPLES)
@@ -212,7 +213,7 @@ SDK_LIBS += vorbis webp xml2 zlib
 sdklibs: $(SDK_LIBS)
 
 package_list:
-	@echo $(PACKAGES)
+	@echo $(ALL_PACKAGES)
 
 sdklibs_list:
 	@echo $(SDK_LIBS)
@@ -228,7 +229,17 @@ clean:
 $(NACL_DIRS_TO_MAKE):
 	mkdir -p $@
 
+ifdef PRINT_DEPS
+# Defining PRINT_DEPS means that we don't actually build anything
+# but only echo the names of the packages that would have been built.
+# In this case we use a dummy sentinal directory which will always
+# be empty.
+SENT = $(NACL_OUT)/dummy_location
+$(ALL_PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
+else
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
+endif
+
 
 ifdef NACLPORTS_NO_ANNOTATE
   START_BUILD=echo "*** Building $(NACL_ARCH) $(notdir $*) ***"
@@ -236,14 +247,22 @@ else
   START_BUILD=echo "@@@BUILD_STEP $(NACL_ARCH) $(NACL_LIBC) $(notdir $*)@@@"
 endif
 
+ifndef PRINT_DEPS
 $(DISABLED):
 	@echo "$@ is disabled for this configuration [NACL_LIBC=$(NACL_LIBC) NACL_ARCH=$(NACL_ARCH)]"
+endif
 
+
+ifdef PRINT_DEPS
+$(ALL_PACKAGES:%=$(SENT)/%): $(SENT)/%:
+	@echo $(subst $(SENT)/,,$@)
+else
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
 	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./nacl-$(notdir $*).sh
 	mkdir -p $(@D)
 	touch $@
+endif
 
 # packages with dependencies
 $(SENT)/libraries/libvorbis: libraries/libogg

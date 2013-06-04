@@ -12,24 +12,11 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../..
 make clean
 
-# pango also builds glib
-# cairo also builds png, zlib, freetype, fontconfig, expat, and pixman
-BuildPackage agg
-BuildPackage openscenegraph
-BuildPackage freeimage
-BuildPackage imagemagick
-BuildPackage cairo
-BuildPackage pango
-BuildPackage openal
-BuildPackage ncurses
-BuildPackage box2d
-BuildPackage xml2
-BuildPackage yajl
-BuildPackage mng
-BuildPackage lcms
-BuildPackage DevIL
-BuildPackage physfs
-BuildPackage mpg123
+CalculatePackageShards
+
+for PKG in ${PKG_LIST_PART_1}; do
+  BuildPackage ${PKG}
+done
 
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
 if [[ $RESULT != 0 ]] ; then

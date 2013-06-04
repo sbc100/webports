@@ -12,21 +12,11 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../..
 make clean
 
-# ffmpeg also builds lame, vorbis, theora, and ogg
-# sdl_* build sdl, png, freetype
-BuildPackage regal
-BuildPackage ffmpeg
-BuildPackage speex
-BuildPackage flac
-BuildPackage gsl
-BuildPackage sdl_image
-BuildPackage sdl_ttf
-BuildPackage sdl_net
-BuildPackage sdl_mixer
-BuildPackage scummvm
-BuildPackage bochs
-BuildPackage openssl
-BuildPackage jsoncpp
+CalculatePackageShards
+
+for PKG in ${PKG_LIST_PART_0}; do
+  BuildPackage ${PKG}
+done
 
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
 if [[ $RESULT != 0 ]] ; then
