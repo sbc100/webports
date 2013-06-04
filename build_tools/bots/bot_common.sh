@@ -60,6 +60,7 @@ CalculatePackageShards()
     libraries/tiff
     libraries/lcms
     libraries/DevIL
+    libraries/ncurses
     examples/games/scummvm
     examples/games/nethack
     examples/games/snes9x
@@ -70,6 +71,7 @@ CalculatePackageShards()
   for PKG in ${PKG_LIST_PART_0} ${PKG_LIST_PART_1}; do
     if [[ ! "${ALL_PACKAGES}" =~ "${PKG}" ]]; then
       echo "Invalid package name: ${PKG}"
+      echo "@@@STEP_FAILURE@@@"
       exit 1
     fi
   done
@@ -78,6 +80,7 @@ CalculatePackageShards()
   for DEP in ${DEPS}; do
     if [[ ! "${PKG_LIST_PART_0}" =~ "${DEP}" ]]; then
       echo "Shard 0 failed to include dependency: ${DEP}"
+      echo "@@@STEP_FAILURE@@@"
       exit 1
     fi
   done
@@ -86,6 +89,7 @@ CalculatePackageShards()
   for DEP in ${DEPS}; do
     if [[ ! "${PKG_LIST_PART_1}" =~ "${DEP}" ]]; then
       echo "Shard 1 failed to include dependency: ${DEP}"
+      echo "@@@STEP_FAILURE@@@"
       exit 1
     fi
   done

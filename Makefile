@@ -277,10 +277,7 @@ $(SENT)/libraries/cairo: \
     libraries/pixman libraries/fontconfig libraries/libpng
 $(SENT)/libraries/ffmpeg: \
     libraries/lame libraries/libvorbis libraries/libtheora
-$(SENT)/examples/games/nethack: libraries/nacl-mounts
-ifeq ($(NACL_GLIBC), 1)
-  $(SENT)/examples/games/nethack: libraries/ncurses
-endif
+$(SENT)/examples/games/nethack: libraries/nacl-mounts libraries/ncurses
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
     libraries/jsoncpp
 $(SENT)/examples/games/scummvm: \

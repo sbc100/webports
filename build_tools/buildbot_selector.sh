@@ -14,7 +14,7 @@ set -o errexit
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/pepper_XX"
 
-RESULT=1
+RESULT=0
 
 # TODO: Eliminate this dependency if possible.
 # This is required on OSX so that the naclports version of pkg-config can be
@@ -27,7 +27,7 @@ StartBuild() {
 
   echo "@@@BUILD_STEP $2 setup@@@"
   if ! ./$1 ; then
-    RESULT=0
+    RESULT=1
   fi
 }
 
@@ -36,7 +36,7 @@ BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 
 # The SDK builder builds a subset of the ports, but with multiple
 # configurations.
-if [ ${BUILDBOT_BUILDERNAME} = "linux-sdk" ]; then
+if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   # Goto src/
   cd ${SCRIPT_DIR}/..
 
@@ -113,13 +113,11 @@ BOT_DIR=${SCRIPT_DIR}/bots/${BOT_OS_DIR}
 StartBuild ${SCRIPT_NAME} i686
 
 # Build 64-bit.
-if [[ $RESULT != 0 ]]; then
-  StartBuild ${SCRIPT_NAME} x86_64
-fi
+StartBuild ${SCRIPT_NAME} x86_64
 
 # Build ARM.
-if [ $RESULT != 0 -a ${NACL_GLIBC} != "1" ]; then
+if [ ${NACL_GLIBC} != "1" ]; then
   StartBuild ${SCRIPT_NAME} arm
 fi
 
-exit 0
+exit $RESULT
