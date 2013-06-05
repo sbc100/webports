@@ -1,0 +1,4 @@
+PACKAGE_NAME=libav-9.6
+URL=http://libav.org/releases/libav-9.6.tar.xz
+PATCH_FILE=nacl-libav.patch
+LICENSE=GPL,LGPL

@@ -103,6 +103,7 @@ LIBRARIES = \
      libraries/jsoncpp \
      libraries/lame \
      libraries/lcms \
+     libraries/libav \
      libraries/libmikmod \
      libraries/libmng \
      libraries/libmodplug \
@@ -148,6 +149,7 @@ ifeq ($(NACL_ARCH), arm)
 # TODO(sbc): remove this conditional once this bug gets fixed:
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 DISABLED += \
+     libraries/libav \
      libraries/libtheora \
      libraries/ffmpeg
 endif
@@ -277,6 +279,8 @@ $(SENT)/libraries/cairo: \
     libraries/pixman libraries/fontconfig libraries/libpng
 $(SENT)/libraries/ffmpeg: \
     libraries/lame libraries/libvorbis libraries/libtheora
+$(SENT)/libraries/libav: \
+    libraries/lame libraries/libvorbis
 $(SENT)/examples/games/nethack: libraries/nacl-mounts libraries/ncurses
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
     libraries/jsoncpp
@@ -339,6 +343,7 @@ jpeg: libraries/jpeg ;
 jsoncpp: libraries/jsoncpp ;
 lame: libraries/lame ;
 lcms: libraries/lcms ;
+libav: libraries/libav ;
 lua: libraries/lua ;
 mesa: libraries/Mesa ;
 mikmod: libraries/libmikmod ;

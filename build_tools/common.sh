@@ -176,7 +176,7 @@ TryFetch() {
   if which wget > /dev/null ; then
     wget $1 -O $2
   elif which curl > /dev/null ; then
-    curl --location --url $1 -o $2
+    curl --fail --location --url $1 -o $2
   else
      Banner "Problem encountered"
      echo "Please install curl or wget and rerun this script"
