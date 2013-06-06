@@ -315,6 +315,8 @@ $(SENT)/libraries/DevIL: libraries/libpng libraries/jpeg libraries/libmng \
     libraries/tiff libraries/lcms
 $(SENT)/libraries/physfs: libraries/zlib
 $(SENT)/libraries/mpg123: libraries/openal-soft
+$(SENT)/libraries/ImageMagick: libraries/libpng libraries/jpeg \
+    libraries/bzip2 libraries/zlib
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg ;
