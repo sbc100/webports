@@ -2,21 +2,11 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-glibc-compat-0.1.sh
-#
-# usage: nacl-glibc-compat-0.1.sh
-#
-# this script builds glibc comaptibility for Native Client 
-#
 
 readonly PACKAGE_NAME=glibc-compat-0.1
-
 readonly LIB_ROOT=`pwd`
 readonly LIB_GLIBC_COMPAT=libglibc-compat.a
 
-source pkg_info
 source ../../build_tools/common.sh
 
 CustomExtractStep() {
