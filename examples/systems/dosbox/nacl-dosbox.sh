@@ -2,14 +2,6 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-dosbox-0.74.sh
-#
-# usage:  nacl-dosbox-0.74.sh
-#
-# this script downloads, patches, and builds dosbox for Native Client.
-#
 
 source pkg_info
 source ../../../build_tools/common.sh
@@ -67,12 +59,9 @@ CustomConfigureStep() {
   # XXX To avoid symbol conflicts after revision r490, which switches SDL video
   # driver to MainThreadRunner, move -lnacl-mounts to the end of PPAPI_LIBS.
   # This somehow works for me.
-  PPAPI_LIBS="-Wl,--whole-archive \
-      -lppapi \
+  PPAPI_LIBS="-lSDL \
       -lppapi_cpp \
-      -lSDL \
-      -lSDLmain \
-      -Wl,--no-whole-archive \
+      -lppapi \
       ppapi/libppapi.a \
       -lnacl-mounts"
 
