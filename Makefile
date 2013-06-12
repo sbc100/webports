@@ -294,6 +294,7 @@ $(SENT)/examples/systems/dosbox: \
 $(SENT)/examples/games/snes9x: libraries/nacl-mounts
 $(SENT)/libraries/glib: libraries/zlib
 $(SENT)/libraries/pango: libraries/glib libraries/cairo
+$(SENT)/libraries/SDL: libraries/Regal
 $(SENT)/libraries/SDL_mixer: libraries/SDL \
     libraries/libogg libraries/libvorbis libraries/libmikmod
 $(SENT)/libraries/SDL_image: libraries/SDL \

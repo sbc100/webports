@@ -166,6 +166,30 @@ index 0000000..11670fb
 +#include "close_code.h"
 +
 +#endif /* _SDL_nacl_h */
+diff --git a/include/SDL_opengl.h b/include/SDL_opengl.h
+index c479a3a..a0f4962 100644
+--- a/include/SDL_opengl.h
++++ b/include/SDL_opengl.h
+@@ -33,7 +33,7 @@
+ #endif
+ #include <windows.h>
+ #endif
+-#ifndef NO_SDL_GLEXT
++#if !defined(NO_SDL_GLEXT) && !defined(__native_client__)
+ #define __glext_h_  /* Don't let gl.h include glext.h */
+ #endif
+ #if defined(__MACOSX__)
+@@ -42,6 +42,10 @@
+ #elif defined(__MACOS__)
+ #include <gl.h>		/* Header File For The OpenGL Library */
+ #include <glu.h>	/* Header File For The GLU Library */
++#elif defined(__native_client__)
++#include <GL/Regal.h>
++#define APIENTRY
++#define APIENTRYP APIENTRY *
+ #else
+ #include <GL/gl.h>	/* Header File For The OpenGL Library */
+ #include <GL/glu.h>	/* Header File For The GLU Library */
 diff --git a/include/SDL_platform.h b/include/SDL_platform.h
 index 11d8673..dd99403 100644
 --- a/include/SDL_platform.h
@@ -1322,7 +1346,7 @@ index 0000000..0a6a0cd
 +
 +#endif // _SDL_nacl_eventqueue_h
 diff --git a/test/configure.in b/test/configure.in
-index 7c25c17..ce32f98 100644
+index 7c25c17..fa13679 100644
 --- a/test/configure.in
 +++ b/test/configure.in
 @@ -50,6 +50,18 @@ case "$host" in
@@ -1339,7 +1363,7 @@ index 7c25c17..ce32f98 100644
 +                ;;
 +        esac
 +        MATHLIB="-lm"
-+        SYS_GL_LIBS="-lppapi_gles2"
++        SYS_GL_LIBS="-lppapi_gles2 -lRegal -lstdc++"
 +        ;;
      *)
          EXE=""

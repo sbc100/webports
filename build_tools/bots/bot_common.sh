@@ -30,10 +30,13 @@ CalculatePackageShards()
     libraries/gc
     libraries/cfitsio
     libraries/libmodplug
-    libraries/Regal
     libraries/faad2
     libraries/Mesa
     libraries/box2d
+    libraries/gtest
+    libraries/nacl-mounts
+    libraries/ncurses
+    examples/games/nethack
   "
 
   PKG_LIST_PART_1="
@@ -44,6 +47,7 @@ CalculatePackageShards()
     libraries/libmng
     libraries/freetype
     libraries/nacl-mounts
+    libraries/Regal
     libraries/SDL
     libraries/SDL_image
     libraries/SDL_ttf
@@ -60,9 +64,7 @@ CalculatePackageShards()
     libraries/tiff
     libraries/lcms
     libraries/DevIL
-    libraries/ncurses
     examples/games/scummvm
-    examples/games/nethack
     examples/games/snes9x
     examples/systems/dosbox
     examples/systems/bochs
