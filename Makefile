@@ -94,6 +94,7 @@ LIBRARIES = \
      libraries/FreeImage \
      libraries/freetype \
      libraries/gc \
+     libraries/giflib \
      libraries/glib \
      libraries/glibc-compat \
      libraries/gsl \
@@ -337,6 +338,7 @@ fontconfig: libraries/fontconfig ;
 freeimage: libraries/FreeImage ;
 freetype: libraries/freetype ;
 gc: libraries/gc ;
+gif: libraries/giflib ;
 glib: libraries/glib ;
 glibc-compat: libraries/glibc-compat ;
 gtest: libraries/gtest ;
