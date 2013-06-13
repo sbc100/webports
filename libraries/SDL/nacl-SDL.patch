@@ -50,7 +50,7 @@ index 5ecc18b..7693a2a 100755
  		;;
  	-nto*)
 diff --git a/configure.in b/configure.in
-index a7e9b18..60531e7 100644
+index a7e9b18..f13e24a 100644
 --- a/configure.in
 +++ b/configure.in
 @@ -885,6 +885,27 @@ CheckVisibilityHidden()
@@ -66,7 +66,7 @@ index a7e9b18..60531e7 100644
 +    if test x$enable_video = xyes -a x$enable_naclvideo = xyes; then
 +        AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
 +        SOURCES="$SOURCES $srcdir/src/video/nacl/*.cc"
-+        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -Wl,--end-group -lstdc++"
++        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -lRegal -lstdc++"
 +    fi
 +
 +    AC_ARG_ENABLE(naclaudio,
@@ -1005,10 +1005,10 @@ index 0000000..71ae309
 +extern void NACL_PumpEvents(_THIS);
 diff --git a/src/video/nacl/SDL_naclvideo.cc b/src/video/nacl/SDL_naclvideo.cc
 new file mode 100644
-index 0000000..2678ce4
+index 0000000..5404234
 --- /dev/null
 +++ b/src/video/nacl/SDL_naclvideo.cc
-@@ -0,0 +1,250 @@
+@@ -0,0 +1,392 @@
 +#include "SDL_config.h"
 +
 +#include <assert.h>
@@ -1016,12 +1016,13 @@ index 0000000..2678ce4
 +#include "SDL_naclvideo.h"
 +#include "SDL_naclevents_c.h"
 +
++#include <GL/Regal.h>
 +#include <ppapi/cpp/instance.h>
-+#include <ppapi/cpp/graphics_2d.h>
 +#include <ppapi/cpp/completion_callback.h>
 +#include <ppapi/cpp/image_data.h>
 +#include <ppapi/cpp/rect.h>
 +#include <ppapi/c/pp_errors.h>
++#include <ppapi/gles2/gl2ext_ppapi.h>
 +
 +pp::Instance* gNaclPPInstance;
 +static int gNaclVideoWidth;
@@ -1064,6 +1065,9 @@ index 0000000..2678ce4
 +static SDL_Surface *NACL_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
 +static void NACL_VideoQuit(_THIS);
 +static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
++static int NACL_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
++static int NACL_GL_MakeCurrent(_THIS);
++static void NACL_GL_SwapBuffers(_THIS);
 +
 +/* The implementation dependent data for the window manager cursor */
 +struct WMcursor {
@@ -1093,17 +1097,17 @@ index 0000000..2678ce4
 +
 +  /* Initialize all variables that we clean on shutdown */
 +  device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
-+  if ( device ) {
++  if (device) {
 +    SDL_memset(device, 0, (sizeof *device));
 +    device->hidden = (struct SDL_PrivateVideoData *)
 +        SDL_malloc((sizeof *device->hidden));
 +  }
-+  if ( (device == NULL) || (device->hidden == NULL) ) {
++  if (device == NULL || device->hidden == NULL) {
 +    SDL_OutOfMemory();
-+    if ( device ) {
++    if (device) {
 +      SDL_free(device);
 +    }
-+    return(0);
++    return 0;
 +  }
 +  SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 +
@@ -1125,6 +1129,10 @@ index 0000000..2678ce4
 +  device->CreateWMCursor = NACL_CreateWMCursor;
 +  device->ShowWMCursor = NACL_ShowWMCursor;
 +  device->WarpWMCursor = NACL_WarpWMCursor;
++
++  device->GL_GetAttribute = NACL_GL_GetAttribute;
++  device->GL_MakeCurrent = NACL_GL_MakeCurrent;
++  device->GL_SwapBuffers = NACL_GL_SwapBuffers;
 +
 +  device->free = NACL_DeleteDevice;
 +
@@ -1149,7 +1157,7 @@ index 0000000..2678ce4
 +  _this->info.current_h = gNaclVideoHeight;
 +
 +  /* We're done! */
-+  return(0);
++  return 0;
 +}
 +
 +SDL_Rect **NACL_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags) {
@@ -1161,7 +1169,8 @@ index 0000000..2678ce4
 +SDL_Surface *NACL_SetVideoMode(_THIS, SDL_Surface *current,
 +    int width, int height, int bpp, Uint32 flags) {
 +
-+  fprintf(stderr, "SDL: setvideomode %d %d %d %u\n", width, height, bpp, flags);
++  fprintf(stderr, "SDL: setvideomode %dx%d bpp=%d opengl=%d flags=%u\n",
++          width, height, bpp, flags & SDL_OPENGL ? 1 : 0, flags);
 +  fflush(stderr);
 +
 +  if (width > _this->hidden->ow || height > _this->hidden->oh)
@@ -1170,46 +1179,75 @@ index 0000000..2678ce4
 +  _this->hidden->w = width;
 +  _this->hidden->h = height;
 +
-+  if (_this->hidden->context2d)
++  if (_this->hidden->context2d) {
 +    delete _this->hidden->context2d;
-+  _this->hidden->context2d =
-+    new pp::Graphics2D(gNaclPPInstance, pp::Size(width, height), false);
-+  assert(_this->hidden->context2d != NULL);
-+
-+  if (!gNaclPPInstance->BindGraphics(*_this->hidden->context2d)) {
-+    fprintf(stderr, "***** Couldn't bind the device context *****\n");
-+    return(NULL);
++    _this->hidden->context2d = NULL;
 +  }
 +
-+  if (_this->hidden->image_data)
-+    delete _this->hidden->image_data;
++  if (_this->hidden->context3d) {
++    delete _this->hidden->context3d;
++    _this->hidden->context3d = NULL;
++  }
 +
-+  _this->hidden->image_data = new pp::ImageData(gNaclPPInstance,
-+    PP_IMAGEDATAFORMAT_BGRA_PREMUL,
-+    _this->hidden->context2d->size(),
-+    false);
-+  assert(_this->hidden->image_data != NULL);
++  if (flags & SDL_OPENGL) {
++    int32_t attribs[] = {
++      PP_GRAPHICS3DATTRIB_ALPHA_SIZE, 8,
++      PP_GRAPHICS3DATTRIB_DEPTH_SIZE, 24,
++      PP_GRAPHICS3DATTRIB_STENCIL_SIZE, 8,
++      PP_GRAPHICS3DATTRIB_SAMPLES, 0,
++      PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS, 0,
++      PP_GRAPHICS3DATTRIB_WIDTH, width,
++      PP_GRAPHICS3DATTRIB_HEIGHT, height,
++      PP_GRAPHICS3DATTRIB_NONE
++    };
++    _this->hidden->context3d = new pp::Graphics3D(gNaclPPInstance,
++                                                  pp::Graphics3D(),
++                                                  attribs);
++    if (!gNaclPPInstance->BindGraphics(*_this->hidden->context3d)) {
++      fprintf(stderr, "***** Couldn't bind the graphic3d context *****\n");
++      return NULL;
++    }
++  } else {
++    _this->hidden->context2d =
++      new pp::Graphics2D(gNaclPPInstance, pp::Size(width, height), false);
++    assert(_this->hidden->context2d != NULL);
++
++    if (!gNaclPPInstance->BindGraphics(*_this->hidden->context2d)) {
++      fprintf(stderr, "***** Couldn't bind the graphic2d context *****\n");
++      return NULL;
++    }
++
++    if (_this->hidden->image_data)
++      delete _this->hidden->image_data;
++
++    _this->hidden->image_data = new pp::ImageData(gNaclPPInstance,
++      PP_IMAGEDATAFORMAT_BGRA_PREMUL,
++      _this->hidden->context2d->size(),
++      false);
++    assert(_this->hidden->image_data != NULL);
++
++    current->pixels = _this->hidden->image_data->data();
++  }
 +
 +  /* Allocate the new pixel format for the screen */
-+  if ( ! SDL_ReallocFormat(current, bpp, 0xFF0000, 0xFF00, 0xFF, 0) ) {
++  if (!SDL_ReallocFormat(current, bpp, 0xFF0000, 0xFF00, 0xFF, 0)) {
 +    SDL_SetError("Couldn't allocate new pixel format for requested mode");
-+    return(NULL);
++    return NULL;
 +  }
 +
 +  /* Set up the new mode framebuffer */
-+  current->flags = flags & SDL_FULLSCREEN;
++  current->flags = flags & (SDL_FULLSCREEN | SDL_OPENGL);
 +  _this->hidden->bpp = bpp;
 +  _this->hidden->w = current->w = width;
 +  _this->hidden->h = current->h = height;
 +  current->pitch = current->w * (bpp / 8);
-+  current->pixels = _this->hidden->image_data->data();
 +
 +  /* We're done */
-+  return(current);
++  return current;
 +}
 +
 +static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects) {
-+  if (_this->hidden->bpp == 0) // not initialized yet
++  if (_this->hidden->context2d == NULL) // not initialized
 +    return;
 +
 +  assert(_this->hidden->image_data);
@@ -1256,15 +1294,119 @@ index 0000000..2678ce4
 +  _this->screen->pixels = NULL;
 +
 +  delete _this->hidden->context2d;
++  delete _this->hidden->context3d;
 +  delete _this->hidden->image_data;
 +}
++
++static void regalLogCallback(GLenum stream, GLsizei length, const GLchar *message, GLvoid *context) {
++  fprintf(stderr, "regal: %s\n", message);
++}
++
++static int NACL_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
++{
++  int unsupported = 0;
++  int nacl_attrib = 0;
++
++  switch (attrib) {
++    case SDL_GL_RED_SIZE:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_RED_SIZE;
++      break;
++    case SDL_GL_GREEN_SIZE:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_GREEN_SIZE;
++      break;
++    case SDL_GL_BLUE_SIZE:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_BLUE_SIZE;
++      break;
++    case SDL_GL_ALPHA_SIZE:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_ALPHA_SIZE;
++      break;
++    case SDL_GL_DEPTH_SIZE:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_DEPTH_SIZE;
++      break;
++    case SDL_GL_STENCIL_SIZE:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_STENCIL_SIZE;
++      break;
++    case SDL_GL_MULTISAMPLEBUFFERS:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_SAMPLE_BUFFERS;
++      break;
++    case SDL_GL_MULTISAMPLESAMPLES:
++      nacl_attrib = PP_GRAPHICS3DATTRIB_SAMPLES;
++      break;
++    // The rest of the these attributes are not part of PPAPI
++    case SDL_GL_DOUBLEBUFFER:
++    case SDL_GL_BUFFER_SIZE:
++    case SDL_GL_ACCUM_RED_SIZE:
++    case SDL_GL_ACCUM_GREEN_SIZE:
++    case SDL_GL_ACCUM_BLUE_SIZE:
++    case SDL_GL_ACCUM_ALPHA_SIZE:
++    case SDL_GL_STEREO:
++    case SDL_GL_ACCELERATED_VISUAL:
++    case SDL_GL_SWAP_CONTROL:
++    default:
++      unsupported = 1;
++      break;
++  }
++
++  if (unsupported) {
++    SDL_SetError("OpenGL attribute is unsupported by NaCl: %d", attrib);
++    return -1;
++  }
++
++  int32_t attribs[] = {
++    nacl_attrib, 0,
++    PP_GRAPHICS3DATTRIB_NONE,
++  };
++
++  int retval = _this->hidden->context3d->GetAttribs(attribs);
++  if (retval != PP_OK) {
++    // TODO(sbc): GetAttribs seems to always return PP_ERROR_FAILED(-2).
++    //fprintf(stderr, "SDL: GetAttribs failed %#x -> %d\n", nacl_attrib, retval);
++    SDL_SetError("Error getting OpenGL attribute (%d) from NaCl: %d",
++                 attrib, retval);
++    return -1;
++  }
++
++  *value = attribs[1];
++  return 0;
++}
++
++static int NACL_GL_MakeCurrent(_THIS)
++{
++  if (!_this->hidden->context3d)
++  {
++    assert(_this->hidden->context3d);
++    SDL_SetError("GL_MakeCurrent called without an OpenGL video mode set");
++    return -1;
++  }
++  fprintf(stderr, "SDL: making GL context current\n");
++  int32_t pp_resource = _this->hidden->context3d->pp_resource();
++  glSetCurrentContextPPAPI(pp_resource);
++  pp::Module* module = pp::Module::Get();
++  const void* interface = module->GetBrowserInterface(PPB_OPENGLES2_INTERFACE);
++
++  RegalMakeCurrent(pp_resource, (struct PPB_OpenGLES2*)interface);
++  glLogMessageCallbackREGAL(regalLogCallback);
++  return 0;
++}
++
++static void NACL_GL_SwapBuffers(_THIS)
++{
++  if (!_this->hidden->context3d)
++  {
++    assert(_this->hidden->context3d);
++    fprintf(stderr, "SDL: GL_SwapBuffers called without an OpenGL video mode set\n");
++    return;
++  }
++  _this->hidden->context3d->SwapBuffers(pp::BlockUntilComplete());
++}
++
 +} // extern "C"
 diff --git a/src/video/nacl/SDL_naclvideo.h b/src/video/nacl/SDL_naclvideo.h
 new file mode 100644
-index 0000000..94e6586
+index 0000000..a9fb7b5
 --- /dev/null
 +++ b/src/video/nacl/SDL_naclvideo.h
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,36 @@
 +#include "SDL_config.h"
 +
 +#ifndef _SDL_naclvideo_h
@@ -1277,6 +1419,7 @@ index 0000000..94e6586
 +
 +#include <ppapi/cpp/instance.h>
 +#include <ppapi/cpp/graphics_2d.h>
++#include <ppapi/cpp/graphics_3d.h>
 +#include <vector>
 +
 +
@@ -1296,6 +1439,7 @@ index 0000000..94e6586
 +
 +  pp::ImageData* image_data;
 +  pp::Graphics2D* context2d;  // The PPAPI 2D drawing context.
++  pp::Graphics3D* context3d;  // The PPAPI 3D drawing context.
 +};
 +
 +#endif /* _SDL_naclvideo_h */
@@ -1346,7 +1490,7 @@ index 0000000..0a6a0cd
 +
 +#endif // _SDL_nacl_eventqueue_h
 diff --git a/test/configure.in b/test/configure.in
-index 7c25c17..fa13679 100644
+index 7c25c17..82d8f60 100644
 --- a/test/configure.in
 +++ b/test/configure.in
 @@ -50,6 +50,18 @@ case "$host" in
@@ -1363,7 +1507,7 @@ index 7c25c17..fa13679 100644
 +                ;;
 +        esac
 +        MATHLIB="-lm"
-+        SYS_GL_LIBS="-lppapi_gles2 -lRegal -lstdc++"
++        SYS_GL_LIBS=""
 +        ;;
      *)
          EXE=""
