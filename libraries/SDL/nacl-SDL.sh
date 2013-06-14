@@ -2,14 +2,6 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-SDL-1.2.14.sh
-#
-# usage:  nacl-SDL-1.2.14.sh
-#
-# this script downloads, patches, and builds SDL for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
@@ -20,7 +12,7 @@ AutogenStep() {
   # autoconf it doesn't always get updates correctly.  About half
   # the time the old configure script (with no reference to nacl)
   # will remain after ./autogen.sh
-  rm configure
+  rm -f configure
   ./autogen.sh
   PatchConfigure
   PatchConfigSub

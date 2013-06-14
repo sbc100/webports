@@ -50,10 +50,10 @@ index 5ecc18b..7693a2a 100755
  		;;
  	-nto*)
 diff --git a/configure.in b/configure.in
-index a7e9b18..f13e24a 100644
+index a7e9b18..ca1de7e 100644
 --- a/configure.in
 +++ b/configure.in
-@@ -885,6 +885,27 @@ CheckVisibilityHidden()
+@@ -885,6 +885,48 @@ CheckVisibilityHidden()
      fi
  }
  
@@ -66,7 +66,7 @@ index a7e9b18..f13e24a 100644
 +    if test x$enable_video = xyes -a x$enable_naclvideo = xyes; then
 +        AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
 +        SOURCES="$SOURCES $srcdir/src/video/nacl/*.cc"
-+        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -lRegal -lstdc++"
++        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -lstdc++"
 +    fi
 +
 +    AC_ARG_ENABLE(naclaudio,
@@ -78,16 +78,38 @@ index a7e9b18..f13e24a 100644
 +    fi
 +}
 +
++dnl Find Regal OpenGL library
++CheckOpenGLRegal()
++{
++    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
++        AC_MSG_CHECKING(for OpenGL (Regal) support)
++        video_opengl=no
++        AC_TRY_COMPILE([
++         #include <GL/Regal.h>
++        ],[
++        ],[
++        video_opengl=yes
++        ])
++        AC_MSG_RESULT($video_opengl)
++        if test x$video_opengl = xyes; then
++            AC_DEFINE(SDL_VIDEO_OPENGL)
++            AC_DEFINE(SDL_VIDEO_OPENGL_REGAL)
++            SDL_LIBS="$SDL_LIBS -lRegal -lstdc++"
++        fi
++    fi
++}
++
  
  dnl Do the iPod thing
  CheckIPod()
-@@ -2284,6 +2305,21 @@ case "$host" in
+@@ -2284,6 +2326,22 @@ case "$host" in
              have_timers=yes
          fi
          ;;
 +    *-nacl)
 +        ARCH=nacl
 +        CheckNativeClient
++        CheckOpenGLRegal
 +        CheckDummyAudio
 +        CheckDummyVideo
 +        CheckInputEvents
@@ -104,7 +126,7 @@ index a7e9b18..f13e24a 100644
          case "$host" in
              *-*-linux*)         ARCH=linux ;;
 diff --git a/include/SDL_config.h.in b/include/SDL_config.h.in
-index 58593ca..674e421 100644
+index 58593ca..150097d 100644
 --- a/include/SDL_config.h.in
 +++ b/include/SDL_config.h.in
 @@ -174,6 +174,7 @@
@@ -123,6 +145,14 @@ index 58593ca..674e421 100644
  #undef SDL_VIDEO_DRIVER_NANOX
  #undef SDL_VIDEO_DRIVER_OS2FS
  #undef SDL_VIDEO_DRIVER_PHOTON
+@@ -295,6 +297,7 @@
+ /* Enable OpenGL support */
+ #undef SDL_VIDEO_OPENGL
+ #undef SDL_VIDEO_OPENGL_GLX
++#undef SDL_VIDEO_OPENGL_REGAL
+ #undef SDL_VIDEO_OPENGL_WGL
+ #undef SDL_VIDEO_OPENGL_OSMESA
+ #undef SDL_VIDEO_OPENGL_OSMESA_DYNAMIC
 diff --git a/include/SDL_main.h b/include/SDL_main.h
 index b7f6b2c..cdde128 100644
 --- a/include/SDL_main.h
@@ -664,7 +694,7 @@ index 1c72e09..9fc1a85 100644
  extern VideoBootStrap QZ_bootstrap;
  #endif
 diff --git a/src/video/SDL_video.c b/src/video/SDL_video.c
-index e84ef35..927dfa2 100644
+index e84ef35..f8a5090 100644
 --- a/src/video/SDL_video.c
 +++ b/src/video/SDL_video.c
 @@ -33,6 +33,9 @@
@@ -677,6 +707,15 @@ index e84ef35..927dfa2 100644
  #if SDL_VIDEO_DRIVER_QUARTZ
  	&QZ_bootstrap,
  #endif
+@@ -764,6 +767,8 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
+ #define __SDL_NOGETPROCADDR__
+ #elif defined(__MINT__)
+ #define __SDL_NOGETPROCADDR__
++#elif defined(__native_client__)
++#define __SDL_NOGETPROCADDR__
+ #endif
+ #ifdef __SDL_NOGETPROCADDR__
+     #define SDL_PROC(ret,func,params) video->func=func;
 diff --git a/src/video/nacl/SDL_naclevents.cc b/src/video/nacl/SDL_naclevents.cc
 new file mode 100644
 index 0000000..98267e4
@@ -1005,10 +1044,10 @@ index 0000000..71ae309
 +extern void NACL_PumpEvents(_THIS);
 diff --git a/src/video/nacl/SDL_naclvideo.cc b/src/video/nacl/SDL_naclvideo.cc
 new file mode 100644
-index 0000000..5404234
+index 0000000..f44377d
 --- /dev/null
 +++ b/src/video/nacl/SDL_naclvideo.cc
-@@ -0,0 +1,392 @@
+@@ -0,0 +1,401 @@
 +#include "SDL_config.h"
 +
 +#include <assert.h>
@@ -1016,7 +1055,6 @@ index 0000000..5404234
 +#include "SDL_naclvideo.h"
 +#include "SDL_naclevents_c.h"
 +
-+#include <GL/Regal.h>
 +#include <ppapi/cpp/instance.h>
 +#include <ppapi/cpp/completion_callback.h>
 +#include <ppapi/cpp/image_data.h>
@@ -1034,6 +1072,9 @@ index 0000000..5404234
 +
 +extern "C" {
 +
++#ifdef SDL_VIDEO_OPENGL_REGAL
++#include "SDL_opengl.h"
++#endif
 +#include "SDL_video.h"
 +#include "SDL_mouse.h"
 +#include "../SDL_sysvideo.h"
@@ -1065,9 +1106,12 @@ index 0000000..5404234
 +static SDL_Surface *NACL_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
 +static void NACL_VideoQuit(_THIS);
 +static void NACL_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
++
++#ifdef SDL_VIDEO_OPENGL_REGAL
 +static int NACL_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
 +static int NACL_GL_MakeCurrent(_THIS);
 +static void NACL_GL_SwapBuffers(_THIS);
++#endif
 +
 +/* The implementation dependent data for the window manager cursor */
 +struct WMcursor {
@@ -1130,9 +1174,11 @@ index 0000000..5404234
 +  device->ShowWMCursor = NACL_ShowWMCursor;
 +  device->WarpWMCursor = NACL_WarpWMCursor;
 +
++#ifdef SDL_VIDEO_OPENGL_REGAL
 +  device->GL_GetAttribute = NACL_GL_GetAttribute;
 +  device->GL_MakeCurrent = NACL_GL_MakeCurrent;
 +  device->GL_SwapBuffers = NACL_GL_SwapBuffers;
++#endif
 +
 +  device->free = NACL_DeleteDevice;
 +
@@ -1298,6 +1344,7 @@ index 0000000..5404234
 +  delete _this->hidden->image_data;
 +}
 +
++#ifdef SDL_VIDEO_OPENGL_REGAL
 +static void regalLogCallback(GLenum stream, GLsizei length, const GLchar *message, GLvoid *context) {
 +  fprintf(stderr, "regal: %s\n", message);
 +}
@@ -1399,6 +1446,7 @@ index 0000000..5404234
 +  }
 +  _this->hidden->context3d->SwapBuffers(pp::BlockUntilComplete());
 +}
++#endif
 +
 +} // extern "C"
 diff --git a/src/video/nacl/SDL_naclvideo.h b/src/video/nacl/SDL_naclvideo.h
@@ -1490,7 +1538,7 @@ index 0000000..0a6a0cd
 +
 +#endif // _SDL_nacl_eventqueue_h
 diff --git a/test/configure.in b/test/configure.in
-index 7c25c17..82d8f60 100644
+index 7c25c17..f24fb44 100644
 --- a/test/configure.in
 +++ b/test/configure.in
 @@ -50,6 +50,18 @@ case "$host" in
