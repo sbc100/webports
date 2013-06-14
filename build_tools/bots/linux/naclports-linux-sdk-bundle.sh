@@ -148,7 +148,7 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
   else
     GSUTIL=gsutil
   fi
-  BOTO_CONFIG=${BOTO_CONFIG} RunCmd ${GSUTIL} cp -a public-read
+  BOTO_CONFIG=${BOTO_CONFIG} RunCmd ${GSUTIL} cp -a public-read \
       naclports.tar.bz2 gs://${UPLOAD_PATH}/naclports.tar.bz2
   URL="https://commondatastorage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
   echo "@@@STEP_LINK@download@${URL}@@@"
