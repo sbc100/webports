@@ -105,6 +105,7 @@ LIBRARIES = \
      libraries/lame \
      libraries/lcms \
      libraries/libav \
+     libraries/libhangul \
      libraries/libmikmod \
      libraries/libmng \
      libraries/libmodplug \
@@ -343,6 +344,7 @@ glib: libraries/glib ;
 glibc-compat: libraries/glibc-compat ;
 gtest: libraries/gtest ;
 gsl: libraries/gsl ;
+hangul: libraries/libhangul ;
 imagemagick: libraries/ImageMagick ;
 jpeg: libraries/jpeg ;
 jsoncpp: libraries/jsoncpp ;
