@@ -25,6 +25,8 @@ CustomConfigureStep() {
     --enable-gpl \
     --enable-static \
     --enable-cross-compile \
+    --disable-asm \
+    --disable-inline-asm \
     --disable-programs \
     --disable-ssse3 \
     --disable-mmx \
