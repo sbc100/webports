@@ -30,7 +30,7 @@ OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
 # The bots set the BOTO_CONFIG environment variable to a different .boto file
 # (currently /b/build/site-config/.boto). override this to the gsutil default
 # which has access to gs://nativeclient-mirror.
-BOTO_CONFIG='~/.boto'
+BOTO_CONFIG=${HOME}/.boto
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 
 cd ${NACLPORTS_ROOT}
