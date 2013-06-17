@@ -26,8 +26,9 @@ CustomBuildStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  export WINTTYLIB="-Wl,--whole-archive"
-  export WINTTYLIB="$WINTTYLIB -lnacl-mounts -lncurses -lppapi -lppapi_cpp -lppapi_cpp_private"
+  export WINTTYLIB="-Wl,--whole-archive "
+  export WINTTYLIB="$WINTTYLIB -lncurses -lnacl-mounts -lppapi -lppapi_cpp"
+  export WINTTYLIB="$WINTTYLIB -lppapi_cpp_private"
   export WINTTYLIB="$WINTTYLIB -Wl,--no-whole-archive"
   export NACLPORTS_INCLUDE
   export STRNCMPI=1
@@ -55,7 +56,9 @@ CustomBuildStep() {
       -s . \
       -o nethack.nmf
   popd
-  cp ${NACLPORTS_LIBDIR}/nacl-mounts/*.js ${ASSEMBLY_DIR}
+  cp ${NACL_SRC}/libraries/hterm/src/chromeapps/hterm/js/*.js ${ASSEMBLY_DIR}
+  cp ${NACL_SRC}/libraries/hterm/src/chromeapps/libdot/js/*.js ${ASSEMBLY_DIR}
+  cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
   cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

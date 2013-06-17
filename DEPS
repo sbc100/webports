@@ -4,7 +4,7 @@ deps = {
   "src/native_client/build":
     "http://src.chromium.org/native_client/trunk/src/native_client/build",
   "src/libraries/hterm/src":
-    "http://git.chromium.org/chromiumos/platform/assets.git@879a09e261ac4d8fc626be7cfbd3bdf076510ae0",
+    "http://git.chromium.org/chromiumos/platform/assets.git@09228d6ca",
 }
 
 deps_os = {
