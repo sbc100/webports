@@ -47,9 +47,8 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   ./autogen.sh
 
-  Remove ${NACL_BUILD_SUBDIR}
   MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_BUILD_SUBDIR}
   LogExecute ../configure ${CONFIG_FLAGS}
 
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which

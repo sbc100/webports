@@ -27,7 +27,6 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export LIBS="-lnosys"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${NACL_BUILD_SUBDIR}
   MakeDir ${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_BUILD_SUBDIR}
   ../configure \

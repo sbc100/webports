@@ -58,10 +58,9 @@ CustomConfigureStep() {
   fi
   export LIBS="$LIBS -Wl,--end-group"
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

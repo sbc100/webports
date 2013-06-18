@@ -48,12 +48,10 @@ CustomConfigureStep() {
   export LIBS="$LIBS -Wl,--no-whole-archive"
   export CPPFLAGS="-I$NACL_PACKAGES_LIBRARIES"
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   # NOTE: disabled mt32emu because it using inline assembly that won't
   #     validate.
-  cd ${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
     --libdir=${NACLPORTS_LIBDIR} \

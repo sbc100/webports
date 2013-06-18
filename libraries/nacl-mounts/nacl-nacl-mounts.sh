@@ -51,7 +51,6 @@ RunSelLdrTests() {
 CustomBuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  Remove ${NACL_BUILD_SUBDIR}
   MakeDir ${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_BUILD_SUBDIR}
   set -x

@@ -38,11 +38,10 @@ RunSelLdrTests() {
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  ChangeDir ${PACKAGE_DIR}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"
+
+  MakeDir ${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
 
   cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
            -DBUILD_SHARED=${NACL_GLIBC} \

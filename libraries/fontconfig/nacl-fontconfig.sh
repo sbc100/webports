@@ -39,10 +39,9 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   chmod a+x install-sh
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
   cp -ar fontconfig-2.7.3-build/* ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"
   # We'll not build host anyway
   CC_FOR_BUILD=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/pseudo-gcc \

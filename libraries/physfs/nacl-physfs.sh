@@ -9,10 +9,8 @@ source ../../build_tools/common.sh
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"
 
   # TODO(binji): turn on shared building for glibc (need -fPIC)

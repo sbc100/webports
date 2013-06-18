@@ -21,7 +21,6 @@ AutogenStep() {
 
 ConfigureTests() {
   Banner "Configuring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
   # export the nacl tools
   export CC=${NACLCC}
@@ -41,9 +40,9 @@ ConfigureTests() {
     conf_host="nacl"
   fi
 
-  Remove ${NACL_BUILD_SUBDIR}-test
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   MakeDir ${NACL_BUILD_SUBDIR}-test
-  cd ${NACL_BUILD_SUBDIR}-test
+  ChangeDir ${NACL_BUILD_SUBDIR}-test
 
   LIBS="$LDFLAGS" LogExecute ../test/configure \
     --host=${conf_host} \
@@ -58,7 +57,6 @@ ConfigureTests() {
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
   # export the nacl tools
   export CC=${NACLCC}
@@ -78,9 +76,8 @@ CustomConfigureStep() {
     conf_host="nacl-pnacl"
   fi
 
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
 
   LogExecute ../configure \
     --host=${conf_host} \

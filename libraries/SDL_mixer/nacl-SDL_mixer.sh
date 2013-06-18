@@ -27,10 +27,8 @@ CustomConfigureStep() {
   # Adding target usr/bin for libmikmod-config
   export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH};
   export LIBS="-lvorbisfile -lvorbis -logg -lm"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

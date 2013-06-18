@@ -44,7 +44,6 @@ CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/Box2D_v2.2.1
   ChangeDir ${PACKAGE_DIR}
-  Remove ${NACL_BUILD_SUBDIR}
   MakeDir ${NACL_BUILD_SUBDIR}
   cd ${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"

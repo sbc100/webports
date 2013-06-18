@@ -27,10 +27,8 @@ CustomConfigureStep() {
   export PATH=$(echo $PATH | sed -e 's;/opt/X11/bin;;')
   LDFLAGS+=" -Wl,--as-needed"
   export LDFLAGS
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then
