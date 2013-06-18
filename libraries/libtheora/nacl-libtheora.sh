@@ -26,7 +26,7 @@ CustomConfigureStep() {
   # Turn off doxygen (it doesn't exist on Mac & Linux, and has an error on
   # Windows).
   export HAVE_DOXYGEN="false"
-  Makedir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   ../configure \
     --host=nacl \
