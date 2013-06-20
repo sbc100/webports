@@ -148,7 +148,9 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
   # (currently /b/build/site-config/.boto). override this to the gsutil default
   # which has access to gs://nativeclient-mirror.
   # gsutil also looks for AWS_CREDENTIAL_FILE, so clear that too.
-  AWS_CREDENTIAL_FILE= BOTO_CONFIG= RunCmd ${GSUTIL} cp -a public-read \
+  unset AWS_CREDENTIAL_FILE
+  unset BOTO_CONFIG
+  RunCmd ${GSUTIL} cp -a public-read \
       naclports.tar.bz2 gs://${UPLOAD_PATH}/naclports.tar.bz2
   URL="https://commondatastorage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
   echo "@@@STEP_LINK@download@${URL}@@@"
