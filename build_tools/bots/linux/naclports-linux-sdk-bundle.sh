@@ -27,10 +27,6 @@ PEPPER_DIR=$(basename ${NACL_SDK_ROOT})
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
 OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
 
-# The bots set the BOTO_CONFIG environment variable to a different .boto file
-# (currently /b/build/site-config/.boto). override this to the gsutil default
-# which has access to gs://nativeclient-mirror.
-BOTO_CONFIG=${HOME}/.boto
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 
 cd ${NACLPORTS_ROOT}
@@ -148,7 +144,11 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
   else
     GSUTIL=gsutil
   fi
-  BOTO_CONFIG=${BOTO_CONFIG} RunCmd ${GSUTIL} cp -a public-read \
+  # The bots set the BOTO_CONFIG environment variable to a different .boto file
+  # (currently /b/build/site-config/.boto). override this to the gsutil default
+  # which has access to gs://nativeclient-mirror.
+  # gsutil also looks for AWS_CREDENTIAL_FILE, so clear that too.
+  AWS_CREDENTIAL_FILE= BOTO_CONFIG= RunCmd ${GSUTIL} cp -a public-read \
       naclports.tar.bz2 gs://${UPLOAD_PATH}/naclports.tar.bz2
   URL="https://commondatastorage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
   echo "@@@STEP_LINK@download@${URL}@@@"
