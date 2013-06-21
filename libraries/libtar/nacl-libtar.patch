@@ -1,0 +1,130 @@
+diff --git a/configure b/configure
+index 466a189..d817fa9 100755
+--- a/configure
++++ b/configure
+@@ -2602,8 +2602,8 @@ cat >>confdefs.h <<\_ACEOF
+ #define HAVE_STRLCPY 1
+ _ACEOF
+ 
+-else
+-  LIBOBJS="$LIBOBJS strlcpy.$ac_objext"
++#else
++#  LIBOBJS="$LIBOBJS strlcpy.$ac_objext"
+ 
+ fi
+ 
+@@ -6236,7 +6236,8 @@ else
+ See \`config.log' for more details." >&5
+ echo "$as_me: error: cannot run test program while cross compiling
+ See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }
++#   { (exit 1); exit 1; }; }
++}
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ 
+diff --git a/lib/decode.c b/lib/decode.c
+index 794c868..014f32f 100644
+--- a/lib/decode.c
++++ b/lib/decode.c
+@@ -46,6 +46,10 @@ th_get_pathname(TAR *t)
+ uid_t
+ th_get_uid(TAR *t)
+ {
++#ifdef __native_client__
++        /* Since we can't actually get a uid, we return a bogus value */
++        return 1001;
++#else
+ 	int uid;
+ 	struct passwd *pw;
+ 
+@@ -56,12 +60,17 @@ th_get_uid(TAR *t)
+ 	/* if the password entry doesn't exist */
+ 	sscanf(t->th_buf.uid, "%o", &uid);
+ 	return uid;
++#endif
+ }
+ 
+ 
+ gid_t
+ th_get_gid(TAR *t)
+ {
++#ifdef __native_client__
++        /* Since we can't actually get a gid, we return a bogus value */
++        return 1002;
++#else
+ 	int gid;
+ 	struct group *gr;
+ 
+@@ -72,4 +81,5 @@ th_get_gid(TAR *t)
+ 	/* if the group entry doesn't exist */
+ 	sscanf(t->th_buf.gid, "%o", &gid);
+ 	return gid;
++#endif
+ }
+
+diff --git a/lib/extract.c b/lib/extract.c
+index 6bbb801..93033c7 100644
+--- a/lib/extract.c
++++ b/lib/extract.c
+@@ -17,7 +17,6 @@
+ #include <sys/types.h>
+ #include <fcntl.h>
+ #include <errno.h>
+-#include <utime.h>
+ 
+ #ifdef STDC_HEADERS
+ # include <stdlib.h>
+@@ -27,6 +26,9 @@
+ # include <unistd.h>
+ #endif
+ 
++#ifndef __native_client__
++#include <utime.h>
++#endif /* __native_client__ */
+ 
+ struct linkname
+ {
+@@ -42,13 +44,19 @@ tar_set_file_perms(TAR *t, char *realname)
+ 	mode_t mode;
+ 	uid_t uid;
+ 	gid_t gid;
+-	struct utimbuf ut;
+ 	char *filename;
+ 
++#ifndef __native_client__
++	struct utimbuf ut;
++#endif /* __native_client__ */
++
+ 	filename = (realname ? realname : th_get_pathname(t));
+ 	mode = th_get_mode(t);
+ 	uid = th_get_uid(t);
+ 	gid = th_get_gid(t);
++
++#ifndef __native_client__ /* nacl_io doesn't support chown or utime */
++
+ 	ut.modtime = ut.actime = th_get_mtime(t);
+ 
+ 	/* change owner/group */
+@@ -80,6 +88,8 @@ tar_set_file_perms(TAR *t, char *realname)
+ 		return -1;
+ 	}
+ 
++#endif /* __native_client__ */
++
+ 	/* change permissions */
+ 	if (!TH_ISSYM(t) && chmod(filename, mode) == -1)
+ 	{
+diff --git a/Makefile.in b/Makefile.in
+index 29db42a..58a6172 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -19,7 +19,7 @@ PACKAGE_VERSION	= @PACKAGE_VERSION@
+ INSTALL		= @INSTALL@
+ INSTALL_DATA	= @INSTALL_DATA@
+ 
+-SUBDIRS = lib libtar doc
++SUBDIRS = lib doc
+ 
+ all:
+ 	for n in $(SUBDIRS); do \

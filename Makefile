@@ -111,6 +111,7 @@ LIBRARIES = \
      libraries/libmodplug \
      libraries/libogg \
      libraries/libpng \
+     libraries/libtar \
      libraries/libtheora \
      libraries/libtomcrypt \
      libraries/libtommath \
@@ -283,7 +284,9 @@ $(SENT)/libraries/ffmpeg: \
     libraries/lame libraries/libvorbis libraries/libtheora
 $(SENT)/libraries/libav: \
     libraries/lame libraries/libvorbis
-$(SENT)/examples/games/nethack: libraries/nacl-mounts libraries/ncurses
+$(SENT)/libraries/libtar: libraries/zlib
+$(SENT)/examples/games/nethack: \
+    libraries/nacl-mounts libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
     libraries/jsoncpp
 $(SENT)/examples/games/scummvm: \
@@ -378,6 +381,7 @@ sdl_mixer: libraries/SDL_mixer ;
 sdl_net: libraries/SDL_net ;
 sdl_ttf: libraries/SDL_ttf ;
 speex: libraries/speex ;
+tar: libraries/libtar ;
 theora: libraries/libtheora ;
 tiff: libraries/tiff ;
 regal: libraries/Regal ;

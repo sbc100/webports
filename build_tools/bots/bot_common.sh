@@ -35,7 +35,9 @@ CalculatePackageShards()
     libraries/box2d
     libraries/gtest
     libraries/nacl-mounts
+    libraries/zlib
     libraries/ncurses
+    libraries/libtar
     examples/games/nethack
   "
 

@@ -179,9 +179,10 @@ int MemMount::Chmod(ino_t slot, mode_t mode) {
   MemNode *node = slots_.At(slot);
   if (node == NULL) {
     errno = ENOENT;
+    return -1;
   }
 
-  return -1;
+  return 0;
 }
 
 int MemMount::Stat(ino_t slot, struct stat *buf) {

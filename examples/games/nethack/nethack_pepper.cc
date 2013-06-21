@@ -4,6 +4,7 @@
  * found in the LICENSE file.
  */
 
+#include <libtar.h>
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/module.h>
 #include <pthread.h>
@@ -11,7 +12,6 @@
 #include "nacl-mounts/base/UrlLoaderJob.h"
 #include "nacl-mounts/console/JSPipeMount.h"
 #include "nacl-mounts/console/JSPostMessageBridge.h"
-
 
 extern "C" int nethack_main(int argc, char *argv[]);
 extern "C" int umount(const char *path);
@@ -45,8 +45,18 @@ static void *nethack_init(void *arg) {
   mkdir("/usr", 0777);
   mkdir("/usr/games", 0777);
   chdir("/usr/games");
+
   Download(runner, "nethack.tar", "/nethack.tar");
-  simple_tar_extract("/nethack.tar");
+
+  TAR* tar;
+  int ret = tar_open(&tar, "/nethack.tar", NULL, O_RDONLY, 0, 0);
+  assert(ret == 0);
+
+  ret = tar_extract_all(tar, "/usr/games");
+  assert(ret == 0);
+
+  ret = tar_close(tar);
+  assert(ret == 0);
 
   // Setup config file.
   {

@@ -27,8 +27,8 @@ CustomBuildStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   export WINTTYLIB="-Wl,--whole-archive "
-  export WINTTYLIB="$WINTTYLIB -lncurses -lnacl-mounts -lppapi -lppapi_cpp"
-  export WINTTYLIB="$WINTTYLIB -lppapi_cpp_private"
+  export WINTTYLIB="$WINTTYLIB -lncurses -ltar -lnacl-mounts"
+  export WINTTYLIB="$WINTTYLIB -lppapi -lppapi_cpp -lppapi_cpp_private"
   export WINTTYLIB="$WINTTYLIB -Wl,--no-whole-archive"
   export NACLPORTS_INCLUDE
   export STRNCMPI=1
