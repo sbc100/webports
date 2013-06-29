@@ -240,7 +240,7 @@ DefaultDownloadStep() {
 
 Patch() {
   local LOCAL_PATCH_FILE=$1
-  if [ ${#LOCAL_PATCH_FILE} -ne 0 ]; then
+  if [ -e "${START_DIR}/${LOCAL_PATCH_FILE}" ]; then
     Banner "Patching $(basename ${PWD})"
     #git apply ${START_DIR}/${LOCAL_PATCH_FILE}
     patch -p1 -g0 --no-backup-if-mismatch < ${START_DIR}/${LOCAL_PATCH_FILE}
@@ -392,10 +392,7 @@ DefaultExtractStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   local ARCHIVE="${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}"
   if [ -d ${PACKAGE_DIR} ]; then
-    local PATCH=''
-    if [ -n "${PATCH_FILE:-}" ]; then
-      PATCH="${START_DIR}/${PATCH_FILE}"
-    fi
+    local PATCH="${START_DIR}/${PATCH_FILE:-nacl.patch}"
 
     if CheckStamp extract "${ARCHIVE}" "${PATCH}" ; then
       Banner "Skipping extract step"
@@ -457,9 +454,7 @@ DefaultPatchStep() {
   fi
 
   InitGitRepo
-  if [ -n "${PATCH_FILE:-}" ]; then
-    Patch ${PATCH_FILE}
-  fi
+  Patch ${PATCH_FILE:-nacl.patch}
   PatchConfigure
   PatchConfigSub
   if [ -n "$(git diff)" ]; then

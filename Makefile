@@ -129,6 +129,7 @@ LIBRARIES = \
      libraries/physfs \
      libraries/pixman \
      libraries/protobuf \
+     libraries/python \
      libraries/Regal \
      libraries/SDL \
      libraries/SDL_image \
@@ -162,7 +163,8 @@ DISABLED += \
      libraries/SDL_net \
      libraries/glib \
      libraries/ncurses \
-     libraries/pango
+     libraries/pango \
+     libraries/python
 endif
 
 ifeq ($(NACL_GLIBC), 1)
@@ -181,6 +183,7 @@ EXAMPLES = \
      examples/systems/dosbox \
      examples/graphics/xaos \
      examples/games/nethack \
+     examples/tools/python_ppapi \
      examples/tools/thttpd \
      examples/games/snes9x \
      examples/audio/openal-ogg
@@ -192,6 +195,7 @@ DISABLED += \
 else
 DISABLED += \
      examples/games/nethack \
+     examples/tools/python_ppapi \
      examples/tools/thttpd
 endif
 
@@ -289,6 +293,7 @@ $(SENT)/examples/games/nethack: \
     libraries/nacl-mounts libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
     libraries/jsoncpp
+$(SENT)/examples/tools/python_ppapi: libraries/python
 $(SENT)/examples/games/scummvm: \
     libraries/nacl-mounts libraries/SDL libraries/libvorbis
 $(SENT)/examples/systems/bochs: \
@@ -373,6 +378,7 @@ pango: libraries/pango ;
 physfs: libraries/physfs ;
 pixman: libraries/pixman ;
 png: libraries/libpng ;
+python: libraries/python ;
 webp: libraries/webp ;
 protobuf: libraries/protobuf ;
 sdl: libraries/SDL ;
@@ -398,9 +404,10 @@ ncurses: libraries/ncurses ;
 # shortcuts examples (alphabetical)
 bochs: examples/systems/bochs ;
 dosbox: examples/systems/dosbox ;
-openal-ogg: examples/audio/openal-ogg ;
 nethack: examples/games/nethack ;
+openal-ogg: examples/audio/openal-ogg ;
+python_ppapi: examples/tools/python_ppapi ;
 scummvm: examples/games/scummvm ;
 snes9x: examples/games/snes9x ;
-xaos: examples/graphics/xaos ;
 thttpd: examples/tools/thttpd ;
+xaos: examples/graphics/xaos ;
