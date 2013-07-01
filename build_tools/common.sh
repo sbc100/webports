@@ -69,10 +69,6 @@ if [ ${NACL_DEBUG} = "1" ]; then
   NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -g -O0"
 fi
 
-export CFLAGS=${NACLPORTS_CFLAGS}
-export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-export LDFLAGS=${NACLPORTS_LDFLAGS}
-
 # packages subdirectories
 readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
 readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
@@ -87,12 +83,51 @@ readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 readonly NACL_PACKAGES_STAMPDIR=${NACL_PACKAGES_OUT}/stamp
 
 if [ $OS_NAME = "Darwin" ]; then
-  readonly OS_JOBS=4
+  OS_JOBS=4
 elif [ $OS_NAME = "Linux" ]; then
-  readonly OS_JOBS=$(cat /proc/cpuinfo | grep processor | wc -l)
+  OS_JOBS=`nproc`
 else
-  readonly OS_JOBS=1
+  OS_JOBS=1
 fi
+
+GomaTest() {
+  # test the goma compiler
+  if [ "${NACL_GOMA_FORCE:-}" = 1 ]; then
+    return 0
+  fi
+  echo 'int foo = 4;' > goma_test.c
+  GOMA_USE_LOCAL=false GOMA_FALLBACK=false gomacc $1 -c \
+      goma_test.c -o goma_test.o 2> /dev/null
+  local RTN=$?
+  rm -f goma_test.c
+  rm -f goma_test.o
+  return $RTN
+}
+
+# If NACL_GOMA is defined then we check for goma and use it if its found.
+if [ -n "${NACL_GOMA:-}" ]; then
+  if [ ${NACL_ARCH} != "pnacl" -a ${NACL_ARCH} != "arm" ]; then
+    # Assume that if CC is good then so is CXX since GomaTest is actually
+    # quite slow
+    if GomaTest ${NACLCC}; then
+      NACLCC="gomacc ${NACLCC}"
+      NACLCXX="gomacc ${NACLCXX}"
+      # There is a bug in goma right now where the i686 compiler wrapper script
+      # is not correcly handled and gets confiused with the x86_64 version.
+      # We need to pass a redunant -m32, to force it to compiler for i686.
+      if [ "$NACL_ARCH" = "i686" ]; then
+        NACLPORTS_CFLAGS+=" -m32"
+        NACLPORTS_CXXFLAGS+=" -m32"
+      fi
+      OS_JOBS=100
+      echo "Using GOMA!"
+    fi
+  fi
+fi
+
+export CFLAGS=${NACLPORTS_CFLAGS}
+export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+export LDFLAGS=${NACLPORTS_LDFLAGS}
 
 NACL_CREATE_NMF_FLAGS="-L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib \
 -L${NACL_TOOLCHAIN_ROOT}/i686-nacl/usr/lib

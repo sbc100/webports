@@ -19,15 +19,14 @@ CustomConfigureStep() {
   # library.
   local BUILD_TEST=FALSE
 
-  cmake ..  -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
-           -DNACLCC=${NACLCC} \
-           -DNACLCXX=${NACLCXX} \
-           -DNACLAR=${NACLAR} \
-           -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
-           -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
-           -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX} \
-           -DPHYSFS_BUILD_SHARED=${BUILD_SHARED} \
-           -DPHYSFS_BUILD_TEST=${BUILD_TEST}
+  CC="${NACLCC}" CXX="${NACLCXX}" cmake .. \
+      -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
+      -DNACLAR=${NACLAR} \
+      -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
+      -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
+      -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX} \
+      -DPHYSFS_BUILD_SHARED=${BUILD_SHARED} \
+      -DPHYSFS_BUILD_TEST=${BUILD_TEST}
 }
 
 

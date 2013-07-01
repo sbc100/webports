@@ -2,14 +2,6 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-bzip2-1.0.6.sh
-#
-# usage:  nacl-bzip2-1.0.6.sh
-#
-# this script downloads, patches, and builds bzip2 for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
@@ -20,11 +12,11 @@ CustomConfigureStep() {
 
 CustomBuildStep() {
   make clean
-  make CC=${NACLCC} AR=${NACLAR} RANLIB=${NACLRANLIB} -j${OS_JOBS} libbz2.a
+  make CC="${NACLCC}" AR="${NACLAR}" RANLIB="${NACLRANLIB}" -j${OS_JOBS} libbz2.a
   if [ ${NACL_GLIBC} = 1 ]; then
-    make -f Makefile-libbz2_so clean
-    make -f Makefile-libbz2_so CC=${NACLCC} AR=${NACLAR} \
-        RANLIB=${NACLRANLIB} -j${OS_JOBS}
+    LogExecute make -f Makefile-libbz2_so clean
+    LogExecute make -f Makefile-libbz2_so CC="${NACLCC}" AR="${NACLAR}" \
+        RANLIB="${NACLRANLIB}" -j${OS_JOBS}
   fi
 }
 
@@ -42,7 +34,6 @@ CustomInstallStep() {
     LogExecute cp -af libbz2.so* ${NACLPORTS_PREFIX}/lib
   fi
   LogExecute chmod a+r ${NACLPORTS_PREFIX}/lib/libbz2.*
-
 }
 
 CustomPackageInstall() {

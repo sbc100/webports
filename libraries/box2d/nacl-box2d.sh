@@ -2,14 +2,6 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-box2d-2.2.1.sh
-#
-# usage:  nacl-box2d-2.2.1.sh
-#
-# this script downloads, patches, and builds Box2D for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
@@ -35,23 +27,21 @@ RunSelLdrTests() {
     return
   fi
 
-
-  RunSelLdrCommand ${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/HelloWorld/HelloWorld
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  RunSelLdrCommand HelloWorld/HelloWorld
 }
 
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/Box2D_v2.2.1
-  ChangeDir ${PACKAGE_DIR}
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  Remove ${NACL_BUILD_SUBDIR}
   MakeDir ${NACL_BUILD_SUBDIR}
   cd ${NACL_BUILD_SUBDIR}
   echo "Directory: $(pwd)"
 
-  cmake .. -DBOX2D_BUILD_EXAMPLES=OFF \
+  CC="${NACLCC}" CXX="${NACLCXX}" cmake .. -DBOX2D_BUILD_EXAMPLES=OFF \
            -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
-           -DNACLCC=${NACLCC} \
-           -DNACLCXX=${NACLCXX} \
            -DNACLAR=${NACLAR} \
            -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
            -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \

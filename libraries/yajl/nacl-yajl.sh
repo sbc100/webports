@@ -43,14 +43,13 @@ CustomConfigureStep() {
   MakeDir ${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
   ChangeDir ${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
 
-  cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
-           -DBUILD_SHARED=${NACL_GLIBC} \
-           -DNACLCC=${NACLCC} \
-           -DNACLCXX=${NACLCXX} \
-           -DNACLAR=${NACLAR} \
-           -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
-           -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
-           -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX}
+  CC="${NACLCC}" CXX="${NACLCXX}" cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
+    -DBUILD_SHARED=${NACL_GLIBC} \
+    -DNACLAR=${NACLAR} \
+    -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
+    -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
+    -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX}
 }
 
 

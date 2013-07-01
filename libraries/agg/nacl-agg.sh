@@ -24,7 +24,7 @@ CustomBuildStep() {
   if [ ${NACL_ARCH} = "i686" -o ${NACL_ARCH} = "x86_64" ]; then
     cflags="${cflags} -mfpmath=sse -msse"
   fi
-  AGGCXXFLAGS="${cflags}" make NACLCXX=${NACLCXX} NACLCC=${NACLCC} NACLAR=${NACLAR}
+  MAKEFLAGS="-j${OS_JOBS}" AGGCXXFLAGS="${cflags}" LogExecute make -j${OS_JOBS}
 }
 
 
