@@ -50,14 +50,14 @@ struct addrinfo* SocketSubSystem::CreateAddrInfo(
 
   PP_NetAddressFamily_Private family =
       pp::NetAddressPrivate::GetFamily(netaddr);
-  if (family == PP_NETADDRESSFAMILY_IPV4)
+  if (family == PP_NETADDRESSFAMILY_PRIVATE_IPV4)
     ai->ai_addr->sa_family = ai->ai_family = AF_INET;
-  else if (family == PP_NETADDRESSFAMILY_IPV6)
+  else if (family == PP_NETADDRESSFAMILY_PRIVATE_IPV6)
     ai->ai_addr->sa_family = ai->ai_family = AF_INET6;
 
   ai->ai_canonname = strdup(name);
   addr->sin6_port = pp::NetAddressPrivate::GetPort(netaddr);
-  if (family == PP_NETADDRESSFAMILY_IPV6) {
+  if (family == PP_NETADDRESSFAMILY_PRIVATE_IPV6) {
     pp::NetAddressPrivate::GetAddress(
         netaddr, &addr->sin6_addr, sizeof(in6_addr));
   } else {
@@ -205,14 +205,15 @@ void SocketSubSystem::Resolve(int32_t result, GetAddrInfoParams* params,
 
   // In case of JS socket don't use local host resolver.
   if (pp::HostResolverPrivate::IsAvailable()) {
-    PP_HostResolver_Private_Hint hint = { PP_NETADDRESSFAMILY_UNSPECIFIED, 0 };
+    PP_HostResolver_Private_Hint hint =
+      { PP_NETADDRESSFAMILY_PRIVATE_UNSPECIFIED, 0 };
     if (hints) {
       if (hints->ai_family == AF_INET)
-        hint.family = PP_NETADDRESSFAMILY_IPV4;
+        hint.family = PP_NETADDRESSFAMILY_PRIVATE_IPV4;
       else if (hints->ai_family == AF_INET6)
-        hint.family = PP_NETADDRESSFAMILY_IPV6;
+        hint.family = PP_NETADDRESSFAMILY_PRIVATE_IPV6;
       if (hints->ai_flags & AI_CANONNAME)
-        hint.flags = PP_HOST_RESOLVER_FLAGS_CANONNAME;
+        hint.flags = PP_HOST_RESOLVER_PRIVATE_FLAGS_CANONNAME;
     }
 
     assert(host_resolver_ == NULL);

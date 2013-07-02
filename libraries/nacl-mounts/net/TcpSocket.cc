@@ -189,9 +189,9 @@ void TCPSocket::GetAddress(int32_t result, int32_t* pres) {
   socket_->GetRemoteAddress(&netaddr);
   PP_NetAddressFamily_Private family =
     pp::NetAddressPrivate::GetFamily(netaddr);
-  if (family == PP_NETADDRESSFAMILY_IPV4) {
+  if (family == PP_NETADDRESSFAMILY_PRIVATE_IPV4) {
     iaddr->sin_family = AF_INET;
-  } else if (family == PP_NETADDRESSFAMILY_IPV6) {
+  } else if (family == PP_NETADDRESSFAMILY_PRIVATE_IPV6) {
     iaddr->sin_family = AF_INET6;
   } else {
     iaddr->sin_family = AF_UNSPEC;
@@ -199,7 +199,7 @@ void TCPSocket::GetAddress(int32_t result, int32_t* pres) {
     return;
   }
   iaddr6->sin6_port = pp::NetAddressPrivate::GetPort(netaddr);
-  if (family == PP_NETADDRESSFAMILY_IPV6) {
+  if (family == PP_NETADDRESSFAMILY_PRIVATE_IPV6) {
     pp::NetAddressPrivate::GetAddress(
         netaddr, &iaddr6->sin6_addr, sizeof(in6_addr));
   } else {
