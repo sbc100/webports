@@ -14,12 +14,15 @@ CustomBuildStep() {
   export OUTBASE=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   export NACLPORTS_INCLUDE
   export NACL_PACKAGES_PUBLISH
+
   MakeDir ${OUTBASE}
   if [ "${NACL_GLIBC}" = "1" ]; then
-    MAKE_TARGETS+=" TOOLCHAIN=glibc"
+    MAKEFLAGS+=" TOOLCHAIN=glibc"
   else
-    MAKE_TARGETS+=" TOOLCHAIN=newlib"
+    MAKEFLAGS+=" TOOLCHAIN=newlib"
   fi
+  MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
+  export MAKEFLAGS
   ChangeDir ${START_DIR}
   DefaultBuildStep
 }

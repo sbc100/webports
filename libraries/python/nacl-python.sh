@@ -11,7 +11,7 @@ EXECUTABLES=python.nexe
 # The build relies on certain host binaries and pythong's configure
 # requires us to sett --build= as well as --host=.
 EXTRA_CONFIGURE_ARGS="--disable-ipv6 --with-suffix=.nexe --build=x86_64-linux-gnu"
-MAKE_TARGETS="PGEN=../build-nacl-host/Parser/pgen"
+export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
 HERE=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
 
 BuildHostPython() {
@@ -19,7 +19,7 @@ BuildHostPython() {
   MakeDir build-nacl-host
   ChangeDir build-nacl-host
   LogExecute ../configure
-  LogExecute make python Parser/pgen
+  LogExecute make -j${OS_JOBS} python Parser/pgen
 }
 
 CustomConfigureStep() {

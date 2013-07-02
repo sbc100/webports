@@ -554,6 +554,8 @@ DefaultBuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   echo "Directory: $(pwd)"
   # Build ${MAKE_TARGETS} or default target if it is not defined
+  echo "MAKEFLAGS=${MAKEFLAGS}"
+  export MAKEFLAGS
   LogExecute make -j${OS_JOBS} ${MAKE_TARGETS:-}
 }
 
@@ -561,6 +563,8 @@ DefaultBuildStep() {
 DefaultInstallStep() {
   Banner "Installing"
   # assumes pwd has makefile
+  echo "MAKEFLAGS=${MAKEFLAGS}"
+  export MAKEFLAGS
   LogExecute make ${INSTALL_TARGETS:-install}
 }
 
