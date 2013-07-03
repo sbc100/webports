@@ -15,7 +15,7 @@ CustomBuildStep() {
   export CXX=${NACLCXX}
   # NOTE: we are using the non-standard vars NACL_CCFLAGS/NACL_LDFLAGS
   # because we are not running ./configure and the Makefile was hacked
-  export NACL_CCFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include -O"
+  export NACL_CCFLAGS="${NACLPORTS_CFLAGS}"
   export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     export NACL_CCFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include -O3 -g"
@@ -27,7 +27,7 @@ CustomBuildStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   export WINTTYLIB="-Wl,--whole-archive "
-  export WINTTYLIB="$WINTTYLIB -lncurses -ltar -lnacl-mounts"
+  export WINTTYLIB="$WINTTYLIB -lncurses -ltar -lnacl_io -lppapi_simple"
   export WINTTYLIB="$WINTTYLIB -lppapi -lppapi_cpp -lppapi_cpp_private"
   export WINTTYLIB="$WINTTYLIB -Wl,--no-whole-archive"
   export NACLPORTS_INCLUDE

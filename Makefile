@@ -162,6 +162,7 @@ ifneq ($(NACL_GLIBC), 1)
 DISABLED += \
      libraries/SDL_net \
      libraries/glib \
+     libraries/libtar \
      libraries/ncurses \
      libraries/pango \
      libraries/python
@@ -280,6 +281,7 @@ $(SENT)/libraries/flac: libraries/libogg
 $(SENT)/libraries/speex: libraries/libogg
 $(SENT)/libraries/fontconfig: libraries/expat \
     libraries/freetype
+$(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/libraries/libpng: libraries/zlib
 $(SENT)/libraries/agg: libraries/freetype
 $(SENT)/libraries/cairo: \
@@ -290,7 +292,7 @@ $(SENT)/libraries/libav: \
     libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/examples/games/nethack: \
-    libraries/nacl-mounts libraries/ncurses libraries/libtar
+    libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
     libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python

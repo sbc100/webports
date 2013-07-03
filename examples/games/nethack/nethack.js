@@ -36,7 +36,7 @@ var nethackEmbed;
  *
  * @private
  */
-Nethack.prefix_ = 'JSPipeMount:1:';
+Nethack.prefix_ = 'nethack:';
 
 /**
  * Static initialier called from nethack.html.
@@ -76,7 +76,7 @@ Nethack.prototype.handleMessage_ = function(e) {
 
 function got(str) {
   if (str == '\r') { str = '\n'; }
-  nethackEmbed.postMessage('JSPipeMount:0:' + str);
+  nethackEmbed.postMessage(Nethack.prefix_ + str);
 }
 
 /**
@@ -94,6 +94,26 @@ Nethack.prototype.run = function() {
   nethackEmbed.addEventListener('message', this.handleMessage_.bind(this));
   nethackEmbed.data = 'nethack.nmf';
   nethackEmbed.type = 'application/x-nacl';
+
+  var param_tty = document.createElement('param');
+  param_tty.name = 'ps_tty_prefix';
+  param_tty.value = Nethack.prefix_;
+  nethackEmbed.appendChild(param_tty);
+
+  var param_stdin = document.createElement('param');
+  param_stdin.name = 'ps_stdin';
+  param_stdin.value = '/dev/tty';
+  nethackEmbed.appendChild(param_stdin);
+
+  var param_stdout = document.createElement('param');
+  param_stdout.name = 'ps_stdout';
+  param_stdout.value = '/dev/tty';
+  nethackEmbed.appendChild(param_stdout);
+
+  var param_verbosity = document.createElement('param');
+  param_verbosity.name = 'ps_verbosity';
+  param_verbosity.value = '2';
+  nethackEmbed.appendChild(param_verbosity);
 
   document.body.appendChild(nethackEmbed);
 
