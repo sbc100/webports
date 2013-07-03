@@ -1,4 +1,4 @@
 PACKAGE_NAME=glib-2.28.8
 URL=http://ftp.gnome.org/pub/gnome/sources/glib/2.28/glib-2.28.8.tar.bz2
-PATCH_FILE=nacl-glib.patch
 LICENSE=LGPL
+LIBC=glibc

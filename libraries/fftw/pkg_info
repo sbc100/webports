@@ -1,4 +1,3 @@
 PACKAGE_NAME=fftw-3.2.2
 URL=http://www.fftw.org/fftw-3.2.2.tar.gz
-PATCH_FILE=fftw.patch
 LICENSE=GPL

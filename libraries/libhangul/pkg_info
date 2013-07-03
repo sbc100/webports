@@ -1,3 +1,2 @@
 PACKAGE_NAME=libhangul-0.1.0
-PATCH_FILE=nacl-libhangul.patch
 URL=http://libhangul.googlecode.com/files/libhangul-0.1.0.tar.gz

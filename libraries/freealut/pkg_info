@@ -1,4 +1,3 @@
 PACKAGE_NAME=freealut-1.1.0
 URL=http://connect.creativelabs.com/openal/Downloads/ALUT/freealut-1.1.0.tar.gz
-PATCH_FILE=freealut.patch
 LICENSE=LGPL2

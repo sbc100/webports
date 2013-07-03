@@ -3,11 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-readonly PACKAGE_NAME=glibc-compat-0.1
+source pkg_info
+source ../../build_tools/common.sh
+
 readonly LIB_ROOT=`pwd`
 readonly LIB_GLIBC_COMPAT=libglibc-compat.a
-
-source ../../build_tools/common.sh
 
 CustomExtractStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}

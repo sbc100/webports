@@ -1,5 +1,4 @@
 PACKAGE_NAME=tinyxml
 URL=http://sourceforge.net/projects/tinyxml/files/tinyxml/2.5.3/tinyxml_2_5_3.tar.gz/download
 URL_FILENAME=tinyxml_2_5_3.tar.gz
-PATCH_FILE=nacl-tinyxml.patch
 LICENSE=CUSTOM:readme.txt

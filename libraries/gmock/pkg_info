@@ -1,4 +1,3 @@
 PACKAGE_NAME=gmock-1.5.0
 URL=http://googlemock.googlecode.com/files/gmock-1.5.0.tar.gz
-PATCH_FILE=nacl-gmock.patch
 LICENSE=BSD

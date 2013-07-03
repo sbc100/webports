@@ -1,4 +1,3 @@
 PACKAGE_NAME=SDL_ttf-2.0.10
 URL=http://www.libsdl.org/projects/SDL_ttf/release/SDL_ttf-2.0.10.tar.gz
-PATCH_FILE=nacl-SDL_ttf.patch
 LICENSE=LGPL2

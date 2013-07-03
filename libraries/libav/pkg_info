@@ -1,4 +1,6 @@
 PACKAGE_NAME=libav-9.6
 URL=http://libav.org/releases/libav-9.6.tar.xz
-PATCH_FILE=nacl-libav.patch
 LICENSE=GPL,LGPL
+# TODO(sbc): remove this conditional once this bug gets fixed:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+DISABLED_ARCH=arm

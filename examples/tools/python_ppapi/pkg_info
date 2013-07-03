@@ -1,0 +1,3 @@
+PACKAGE_NAME=python_ppapi
+LICENCE=BSD
+LIBC=glibc

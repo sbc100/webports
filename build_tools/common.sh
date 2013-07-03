@@ -161,6 +161,23 @@ CheckPatchVersion() {
   fi
 }
 
+CheckToolchain() {
+  if [ -n "${LIBC:-}" ]; then
+    if [ "${LIBC}" == "glibc" ]; then
+      if [ "${NACL_GLIBC}" != 1 ]; then
+        echo "This package must be built with glibc (\$NACL_GLIBC=1)"
+        exit 1
+      fi
+    elif [ "${LIBC}" == "newlib" ]; then
+      if [ "${NACL_GLIBC}" = 1 ]; then
+        echo "This package must be built with newlib (\$NACL_GLIBC=0)"
+        exit 1
+      fi
+    fi
+  fi
+}
+
+CheckToolchain
 CheckPatchVersion
 
 CheckSDKVersion() {

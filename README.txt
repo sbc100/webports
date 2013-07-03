@@ -50,4 +50,3 @@ To add a package:
     up.  E.g.:
       sha1sum.py myzip.zip > libraries/nacl-esidl-0.1.5/nacl-esidl-0.1.5.sha1
 5. Add the invocation of your script to the Makefile
-

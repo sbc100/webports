@@ -27,6 +27,7 @@ ARCH = os.environ.get('NACL_ARCH', 'i686')
 BUILD_ROOT = os.path.join(OUT_DIR, 'repository')
 ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
 
+NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 
 # TODO(sbc): use this code to replace the bash logic in build_tools/common.sh
 
@@ -132,6 +133,26 @@ class Package(object):
   def GetMirrorURL(self):
     return MIRROR_URL + '/' + self.GetArchiveFilename()
 
+  def Check(self):
+    if hasattr(self, 'LIBC'):
+      if os.environ.get('NACL_GLIBC') == '1':
+        if self.LIBC != 'glibc':
+          raise Error('Package cannot be built with glibc.')
+      else:
+        if self.LIBC != 'newlib':
+          raise Error('Package cannot be built with newlib.')
+
+    if hasattr(self, 'DISABLED_ARCH'):
+      arch = os.environ.get('NACL_ARCH', 'x86_64')
+      if arch == self.DISABLED_ARCH:
+        raise Error('Package is disabled for current arch: %s.' % arch)
+
+    if hasattr(self, 'BUILD_OS'):
+      sys.path.append(os.path.join(NACL_SDK_ROOT, 'tools'))
+      import getos
+      if getos.GetPlatform() != self.BUILD_OS:
+        raise Error('Package can only be built on: %s.' % self.BUILD_OS)
+
   def Download(self):
     filename = self.DownloadLocation()
     if os.path.exists(filename):
@@ -180,9 +201,14 @@ def main(args):
     if options.dirname:
       os.chdir(options.dirname)
 
+    if not NACL_SDK_ROOT:
+      Error("$NACL_SDK_ROOT not set")
+
     p = Package('.')
     if command == 'download':
       p.Download()
+    elif command == 'check':
+      p.Check()
     elif command == 'verify':
       p.Verify()
   except Error as e:

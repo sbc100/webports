@@ -1,4 +1,3 @@
 PACKAGE_NAME=agg-2.5
 URL=http://www.antigrain.com/agg-2.5.tar.gz
-PATCH_FILE=nacl-agg.patch
 LICENSE=GPL

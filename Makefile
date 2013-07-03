@@ -11,7 +11,6 @@
 # file, which can be found at naclports/src/out/sentinels/*
 #
 # The makefile depends on the NACL_SDK_ROOT environment variable
-#
 
 OS_NAME := $(shell uname -s)
 
@@ -144,40 +143,6 @@ LIBRARIES = \
      libraries/yajl \
      libraries/zlib
 
-ifeq ($(NACL_ARCH), pnacl)
-DISABLED += libraries/Regal
-endif
-
-ifeq ($(NACL_ARCH), arm)
-# Libraries that currently fail to build with ARM gcc.
-# TODO(sbc): remove this conditional once this bug gets fixed:
-# https://code.google.com/p/nativeclient/issues/detail?id=3205
-DISABLED += \
-     libraries/libav \
-     libraries/libtheora \
-     libraries/ffmpeg
-endif
-
-ifneq ($(NACL_GLIBC), 1)
-DISABLED += \
-     libraries/SDL_net \
-     libraries/glib \
-     libraries/libtar \
-     libraries/ncurses \
-     libraries/pango \
-     libraries/python
-endif
-
-ifeq ($(NACL_GLIBC), 1)
-# TODO: Re-enable regal glibc build once the fix lands upstream
-# to invoke create_nmf correctly.
-DISABLED += libraries/glibc-compat
-endif
-
-ifneq ($(OS_NAME), Linux)
-DISABLED += libraries/openssl
-endif
-
 EXAMPLES = \
      examples/games/scummvm \
      examples/systems/bochs \
@@ -189,20 +154,7 @@ EXAMPLES = \
      examples/games/snes9x \
      examples/audio/openal-ogg
 
-ifeq ($(NACL_GLIBC), 1)
-DISABLED += \
-     examples/games/snes9x \
-     examples/audio/openal-ogg
-else
-DISABLED += \
-     examples/games/nethack \
-     examples/tools/python_ppapi \
-     examples/tools/thttpd
-endif
-
 ALL_PACKAGES := $(LIBRARIES) $(EXAMPLES)
-LIBRARIES := $(filter-out $(DISABLED),$(LIBRARIES))
-EXAMPLES := $(filter-out $(DISABLED),$(EXAMPLES))
 PACKAGES := $(LIBRARIES) $(EXAMPLES)
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
@@ -231,7 +183,7 @@ sdklibs_list:
 run:
 	./httpd.py
 
-.PHONY: all run default libraries examples clean sdklibs sdklibs_list $(DISABLED)
+.PHONY: all run default libraries examples clean sdklibs sdklibs_list
 
 clean:
 	rm -rf $(NACL_DIRS_TO_REMOVE)
@@ -250,18 +202,11 @@ else
 $(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
 endif
 
-
 ifdef NACLPORTS_NO_ANNOTATE
   START_BUILD=echo "*** Building $(NACL_ARCH) $(notdir $*) ***"
 else
   START_BUILD=echo "@@@BUILD_STEP $(NACL_ARCH) $(NACL_LIBC) $(notdir $*)@@@"
 endif
-
-ifndef PRINT_DEPS
-$(DISABLED):
-	@echo "$@ is disabled for this configuration [NACL_LIBC=$(NACL_LIBC) NACL_ARCH=$(NACL_ARCH)]"
-endif
-
 
 ifdef PRINT_DEPS
 $(ALL_PACKAGES:%=$(SENT)/%): $(SENT)/%:
@@ -269,7 +214,8 @@ $(ALL_PACKAGES:%=$(SENT)/%): $(SENT)/%:
 else
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
-	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./nacl-$(notdir $*).sh
+	if python build_tools/naclports.py check -C $*; then \
+	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./nacl-$(notdir $*).sh; fi
 	mkdir -p $(@D)
 	touch $@
 endif
