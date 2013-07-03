@@ -40,6 +40,9 @@ def main(args):
 
   def CheckMirror(package):
     basename = package.GetArchiveFilename()
+    if not basename:
+      return
+
     if basename in listing:
       # already mirrored
       return
@@ -65,4 +68,8 @@ def main(args):
   return 0
 
 if __name__ == '__main__':
-  sys.exit(main(sys.argv[1:]))
+  try:
+    sys.exit(main(sys.argv[1:]))
+  except naclports.Error as e:
+    sys.stderr.write('%s\n' % e)
+    sys.exit(-1)

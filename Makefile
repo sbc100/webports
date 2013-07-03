@@ -214,7 +214,8 @@ $(ALL_PACKAGES:%=$(SENT)/%): $(SENT)/%:
 else
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
-	if python build_tools/naclports.py check -C $*; then \
+	python build_tools/naclports.py check -C $*
+	if python build_tools/naclports.py enabled -C $*; then \
 	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./nacl-$(notdir $*).sh; fi
 	mkdir -p $(@D)
 	touch $@

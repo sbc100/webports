@@ -47,17 +47,21 @@ class Package(object):
     info = os.path.join(pkg_root, 'pkg_info')
     keys = []
     self.URL_FILENAME = None
+    self.URL = None
     self.LICENSE = None
     if not os.path.exists(info):
       raise Error('Invalid package folder: %s' % pkg_root)
     with open(info) as f:
-      for line in f:
+      for i, line in enumerate(f):
+        if line[0] == '#':
+          continue
+        if '=' not in line:
+          raise Error('Invalid pkg_info line %d: %s' % (i + 1, pkg_root))
         key, value = line.split('=', 1)
         key = key.strip()
         value = shlex.split(value.strip())[0]
         keys.append(key)
         setattr(self, key, value)
-    assert 'URL' in keys
     assert 'PACKAGE_NAME' in keys
 
   def GetBasename(self):
@@ -73,13 +77,20 @@ class Package(object):
   def GetArchiveFilename(self):
     if self.URL_FILENAME:
       return self.URL_FILENAME
-    else:
+    elif self.URL:
       return os.path.basename(urlparse.urlparse(self.URL)[2])
 
   def DownloadLocation(self):
-    return os.path.join(ARCHIVE_ROOT, self.GetArchiveFilename())
+    archive = self.GetArchiveFilename()
+    if not archive:
+      return
+    return os.path.join(ARCHIVE_ROOT, archive)
 
   def Verify(self, verbose=False):
+    if not self.GetArchiveFilename():
+      print "no archive: %s" % self.PACKAGE_NAME
+      return True
+
     self.Download()
     olddir = os.getcwd()
     sha1file = os.path.join(self.root, self.PACKAGE_NAME + '.sha1')
@@ -133,7 +144,7 @@ class Package(object):
   def GetMirrorURL(self):
     return MIRROR_URL + '/' + self.GetArchiveFilename()
 
-  def Check(self):
+  def Enabled(self):
     if hasattr(self, 'LIBC'):
       if os.environ.get('NACL_GLIBC') == '1':
         if self.LIBC != 'glibc':
@@ -155,7 +166,7 @@ class Package(object):
 
   def Download(self):
     filename = self.DownloadLocation()
-    if os.path.exists(filename):
+    if not filename or os.path.exists(filename):
       return
     if not os.path.exists(os.path.dirname(filename)):
       os.makedirs(os.path.dirname(filename))
@@ -198,17 +209,19 @@ def main(args):
 
     command = args[0]
 
-    if options.dirname:
-      os.chdir(options.dirname)
+    if not options.dirname:
+      options.dirname = '.'
 
     if not NACL_SDK_ROOT:
       Error("$NACL_SDK_ROOT not set")
 
-    p = Package('.')
+    p = Package(options.dirname)
     if command == 'download':
       p.Download()
     elif command == 'check':
-      p.Check()
+      pass # simply check that the package is valid.
+    elif command == 'enabled':
+      p.Enabled()
     elif command == 'verify':
       p.Verify()
   except Error as e:
