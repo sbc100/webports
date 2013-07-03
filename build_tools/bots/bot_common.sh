@@ -66,6 +66,7 @@ CalculatePackageShards()
     libraries/tiff
     libraries/lcms
     libraries/DevIL
+    libraries/libtar
     examples/games/scummvm
     examples/games/snes9x
     examples/systems/dosbox
