@@ -150,6 +150,7 @@ EXAMPLES = \
      examples/graphics/mesagl \
      examples/graphics/xaos \
      examples/games/nethack \
+     examples/tools/gdb \
      examples/tools/python_ppapi \
      examples/tools/thttpd \
      examples/games/snes9x \
@@ -356,6 +357,7 @@ ncurses: libraries/ncurses ;
 # shortcuts examples (alphabetical)
 bochs: examples/systems/bochs ;
 dosbox: examples/systems/dosbox ;
+gdb: examples/tools/gdb ;
 nethack: examples/games/nethack ;
 openal-ogg: examples/audio/openal-ogg ;
 python_ppapi: examples/tools/python_ppapi ;

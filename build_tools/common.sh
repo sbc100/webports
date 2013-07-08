@@ -222,6 +222,20 @@ ArchiveName() {
   fi
 }
 
+# Is this a git repo?
+IsGitRepo() {
+  if [ -z "${URL:-}" ]; then
+    return 1;
+  fi
+
+  local GIT_URL=${URL%@*}
+
+  if [[ "${#GIT_URL}" -ge "4" ]] && [[ "${GIT_URL:(-4)}" == ".git" ]]; then
+    return 0;
+  else
+    return 1;
+  fi
+}
 
 TryFetch() {
   Banner "Fetching ${PACKAGE_NAME} ($2)"
@@ -289,6 +303,23 @@ DefaultDownloadStep() {
   fi
 }
 
+GitCloneStep() {
+  if CheckKeyStamp clone "$URL" ; then
+    Banner "Skipping git clone step"
+    return
+  fi
+
+  local GIT_URL=${URL%@*}
+  local COMMIT=${URL#*@}
+
+  cd ${NACL_PACKAGES_REPOSITORY}
+  rm -rf ${PACKAGE_DIR}
+  git clone ${GIT_URL} ${PACKAGE_DIR}
+  cd ${PACKAGE_DIR}
+  git reset --hard ${COMMIT}
+
+  TouchKeyStamp clone "$URL"
+}
 
 Patch() {
   local LOCAL_PATCH_FILE=$1
@@ -366,7 +397,6 @@ PatchSpecFile() {
     }" >${NACL_SDK_GCC_SPECS_PATH}/specs
 }
 
-
 DefaultPreInstallStep() {
   cd ${NACL_NATIVE_CLIENT_SDK}/..
   MakeDir ${NACLPORTS_PREFIX}
@@ -377,15 +407,16 @@ DefaultPreInstallStep() {
   MakeDir ${NACL_PACKAGES_PUBLISH}
 }
 
-
 InitGitRepo() {
   if [ -d .git ]; then
-    # Strangely one of the upstream archives (x264) actually contains a full
-    # .git repo already. In this case we remove it completely and re-initialise
-    # a new git repo.  TODO(sbc): remove this once x264 is updated.
-    rm -rf .git .gitignore
+    local PREEXISTING_REPO=1
+  else
+    local PREEXISTING_REPO=0
   fi
-  git init
+
+  if [ ${PREEXISTING_REPO} = 0 ]; then
+    git init
+  fi
 
   # Setup git username and email in case there is not a system
   # wide one already (git will error out on commit if it is missing).
@@ -397,13 +428,25 @@ InitGitRepo() {
       git config user.name "naclports buildbot"
     fi
   fi
+
   # Ignore the nacl build directories so that are preserved
   # across calls to git clean.
   echo "/build-nacl-*" >> .gitignore
-  git checkout -b "upstream"
-  git add .
-  git commit -m "Upstream version" > /dev/null
-  git checkout -b "master"
+
+  # Ensure that the repo has an upstream and a master branch properly set up.
+  if [ ${PREEXISTING_REPO} = 1 ]; then
+    git checkout -b "placeholder"
+    git show-ref "refs/heads/upstream" > /dev/null && git branch -D "upstream"
+    git checkout -b "upstream"
+    git show-ref "refs/heads/master" > /dev/null && git branch -D "master"
+    git checkout -b "master"
+    git branch -D "placeholder"
+  else
+    git checkout -b "upstream"
+    git add .
+    git commit -m "Upstream version" > /dev/null
+    git checkout -b "master"
+  fi
 }
 
 
@@ -411,7 +454,6 @@ DefaultCleanStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_DIR}
 }
-
 
 CheckStamp() {
   local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
@@ -430,13 +472,45 @@ CheckStamp() {
   return 0
 }
 
-
 TouchStamp() {
   local STAMP_DIR=${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}
   mkdir -p ${STAMP_DIR}
   touch ${STAMP_DIR}/$1
 }
 
+# KeyStamp: just like a stamp, but it puts a value in the file
+# and checks to make sure it's the same when you check it.
+# The value must be the second argument, subsequent arguments
+# can be dependencies, just like stamp.
+CheckKeyStamp() {
+  local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
+  local STAMP_FILE="${STAMP_DIR}/$1"
+  # check the stamp file exists, contains the key, and is newer
+  # than dependencies.
+  if [ ! -f "${STAMP_FILE}" ]; then
+    return 1
+  fi
+
+  if [ ! `cat ${STAMP_FILE}` = $2 ]; then
+    return 1
+  fi
+
+  shift
+  shift
+  while (( "$#" )) ; do
+    if [ "$1" -nt "${STAMP_FILE}" ]; then
+      return 1
+    fi
+    shift
+  done
+  return 0
+}
+
+TouchKeyStamp() {
+  local STAMP_DIR=${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}
+  mkdir -p ${STAMP_DIR}
+  echo $2 > ${STAMP_DIR}/$1
+}
 
 DefaultExtractStep() {
   ArchiveName
@@ -516,7 +590,6 @@ DefaultPatchStep() {
 
   TouchStamp patch
 }
-
 
 DefaultConfigureStep() {
   local EXTRA_CONFIGURE_OPTS=("${@:-}")
@@ -740,8 +813,12 @@ DefaultTranslateStep() {
 
 DefaultPackageInstall() {
   DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
+  if IsGitRepo; then
+    GitCloneStep
+  else
+    DefaultDownloadStep
+    DefaultExtractStep
+  fi
   DefaultPatchStep
   DefaultConfigureStep
   DefaultBuildStep
