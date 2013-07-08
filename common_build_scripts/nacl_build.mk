@@ -22,7 +22,7 @@ ifeq ($(origin OS), undefined)
 endif
 
 ifndef NACL_ARCH
-  NACL_ARCH=i686
+  NACL_ARCH=x86_64
 endif
 
 ifeq ($(NACL_GLIBC), 1)

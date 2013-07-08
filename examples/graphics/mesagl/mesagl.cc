@@ -34,6 +34,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define GL_GLEXT_PROTOTYPES
+
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/osmesa.h>
@@ -41,10 +43,10 @@
 
 PPB_GetInterface g_get_browser_interface = NULL;
 
-const struct PPB_Core* g_core_interface;
-const struct PPB_Graphics2D* g_graphics_2d_interface;
-const struct PPB_ImageData* g_image_data_interface;
-const struct PPB_Instance* g_instance_interface;
+const PPB_Core* g_core_interface;
+const PPB_Graphics2D* g_graphics_2d_interface;
+const PPB_ImageData* g_image_data_interface;
+const PPB_Instance* g_instance_interface;
 struct GLDemo* gldemo;
 
 // PPP_Instance implementation -----------------------------------------------
@@ -343,6 +345,7 @@ void Instance_DidDestroy(PP_Instance instance) {
 void Instance_DidChangeView(PP_Instance pp_instance,
                             const struct PP_Rect* position,
                             const struct PP_Rect* clip) {
+
   struct InstanceInfo* info = FindInstance(pp_instance);
   if (!info)
     return;
@@ -361,29 +364,17 @@ void Instance_DidChangeView(PP_Instance pp_instance,
 void Instance_DidChangeFocus(PP_Instance pp_instance, PP_Bool has_focus) {
 }
 
-PP_Bool Instance_HandleInputEvent(PP_Instance pp_instance,
-                               const struct PP_InputEvent* event) {
-  // We don't handle any events.
-  return PP_FALSE;
-}
-
 PP_Bool Instance_HandleDocumentLoad(PP_Instance pp_instance,
                                     PP_Resource pp_url_loader) {
   return PP_FALSE;
 }
 
-struct PP_Var Instance_GetInstanceObject(PP_Instance pp_instance) {
-  return PP_MakeNull();
-}
-
-static struct PPP_Instance instance_interface = {
+static PPP_Instance_1_0 instance_interface = {
   &Instance_DidCreate,
   &Instance_DidDestroy,
   &Instance_DidChangeView,
   &Instance_DidChangeFocus,
-  &Instance_HandleInputEvent,
   &Instance_HandleDocumentLoad,
-  &Instance_GetInstanceObject,
 };
 
 
@@ -393,13 +384,13 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module module,
                                        PPB_GetInterface get_browser_interface) {
   g_get_browser_interface = get_browser_interface;
 
-  g_core_interface = (const struct PPB_Core*)
+  g_core_interface = (const PPB_Core*)
       get_browser_interface(PPB_CORE_INTERFACE);
-  g_instance_interface = (const struct PPB_Instance*)
+  g_instance_interface = (const PPB_Instance*)
       get_browser_interface(PPB_INSTANCE_INTERFACE);
-  g_image_data_interface = (const struct PPB_ImageData*)
+  g_image_data_interface = (const PPB_ImageData*)
       get_browser_interface(PPB_IMAGEDATA_INTERFACE);
-  g_graphics_2d_interface = (const struct PPB_Graphics2D*)
+  g_graphics_2d_interface = (const PPB_Graphics2D*)
       get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
   if (!g_core_interface || !g_instance_interface || !g_image_data_interface ||
       !g_graphics_2d_interface)
@@ -411,7 +402,7 @@ PP_EXPORT void PPP_ShutdownModule() {
 }
 
 PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
-  if (strcmp(interface_name, PPP_INSTANCE_INTERFACE) == 0)
+  if (strcmp(interface_name, PPP_INSTANCE_INTERFACE_1_0) == 0)
     return &instance_interface;
   return NULL;
 }

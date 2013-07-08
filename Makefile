@@ -147,6 +147,7 @@ EXAMPLES = \
      examples/games/scummvm \
      examples/systems/bochs \
      examples/systems/dosbox \
+     examples/graphics/mesagl \
      examples/graphics/xaos \
      examples/games/nethack \
      examples/tools/python_ppapi \
@@ -251,6 +252,7 @@ $(SENT)/examples/systems/dosbox: \
     libraries/nacl-mounts libraries/SDL libraries/zlib \
     libraries/libpng
 $(SENT)/examples/games/snes9x: libraries/nacl-mounts
+$(SENT)/examples/graphics/mesagl: libraries/Mesa
 $(SENT)/libraries/glib: libraries/zlib
 $(SENT)/libraries/pango: libraries/glib libraries/cairo
 $(SENT)/libraries/Regal: libraries/libpng
@@ -313,6 +315,7 @@ lcms: libraries/lcms ;
 libav: libraries/libav ;
 lua: libraries/lua ;
 mesa: libraries/Mesa ;
+mesagl: examples/graphics/mesagl ;
 mikmod: libraries/libmikmod ;
 mng: libraries/libmng ;
 modplug: libraries/libmodplug ;

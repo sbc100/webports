@@ -6,38 +6,33 @@
 
 NACLPORTS_ROOT ?= ../../..
 
-CFLAGS = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror -DGL_GLEXT_PROTOTYPES
-INCLUDES = -I$(NACL_SDK_ROOT)/include -I$(NACLPORTS_ROOT)
+VALID_TOOLCHAINS := glibc newlib pnacl
+DEFINES = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror -DGL_GLEXT_PROTOTYPES
 # Note that the OpenGL libraries are NOT included.  We use Mesa for rendering.
-LDFLAGS = -lppruntime \
-          -lppapi_cpp \
-          -lplatform \
-          -lgio \
-          -lpthread \
-          -lsrpc \
-          -lOSMesa
-OPT_FLAGS = -O2
+LIBS = nacl_io ppapi_cpp ppapi OSMesa
+PAGE = $(OUTDIR)/mesagl.html
+PAGE_TC_CONFIG = $(PAGE)
 
-# Define this target first so that any targets in nacl_build.mk do not become
-# the default.
-all: all_mesagl
+include $(NACL_SDK_ROOT)/tools/common.mk
 
-# nacl_build.mk has rules to build .o files from .cc files.
--include $(NACLPORTS_ROOT)/common_build_scripts/nacl_build.mk
+TARGET = mesagl
+SOURCES = mesagl.cc
+INSTALL_DIR = $(NACLPORTS_ROOT)/out/publish/$(TARGET)
 
-LIBMESA = $(NACL_SDK_ROOT)/$(NACL_TOOLCHAIN_DIR)/$(NACL_ARCH)-nacl/usr/lib/libOSMesa.a
+$(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
-# The check_variables target is in nacl_build.mk.
-all_mesagl: check_variables $(LIBMESA) mesagl_x86_32.nexe mesagl_x86_64.nexe
+$(eval $(call LINK_RULE,mesagl,$(SOURCES),$(LIBS),$(DEPS)))
 
-mesagl_x86_32.nexe: mesagl.cc
-	$(CPP) $(CFLAGS) -m32 $(INCLUDES) $(OPT_FLAGS) $< $(LDFLAGS) -o $@
+$(eval $(call HTML_RULE,$(TARGET),))
 
-mesagl_x86_64.nexe: mesagl.cc
-	$(CPP) $(CFLAGS) -m64 $(INCLUDES) $(OPT_FLAGS) $< $(LDFLAGS) -o $@
+install:
+	mkdir -p $(INSTALL_DIR)
+ifeq ($(TOOLCHAIN),pnacl)
+	cp $(OUTDIR)/*.pexe $(INSTALL_DIR)
+else
+	cp $(OUTDIR)/*.nexe $(INSTALL_DIR)
+endif
+	cp $(OUTDIR)/$(TARGET).nmf $(INSTALL_DIR)
+	cp $(OUTDIR)/$(TARGET).html $(INSTALL_DIR)
 
-$(LIBMESA):
-	(cd $(NACLPORTS_ROOT)/libraries/Mesa; ./nacl-Mesa.sh)
-
-clean:
-	-rm mesagl_x86_32.nexe mesagl_x86_64.nexe
+.PHONY: install
