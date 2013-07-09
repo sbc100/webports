@@ -174,7 +174,7 @@ InitializePNaClToolchain() {
   # pnacl's translator
   export TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
   # pnacl's pexe optimizer
-  export OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
+  export PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
   # TODO(robertm): figure our why we do not have a pnacl-string
   #export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
   # until then use the host's strings tool

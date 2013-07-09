@@ -783,7 +783,7 @@ TranslatePexe() {
   # Now the same spiel with an optimized pexe
   opt_args="-O3 -inline-threshold=100"
   echo "optimizing pexe [${opt_args}]"
-  TimeCommand ${OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
+  TimeCommand ${PNACL_OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
 
   for a in ${arches} ; do
     echo "translating pexe [$a]"
