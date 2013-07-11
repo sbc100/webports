@@ -161,6 +161,7 @@ void SocketSubSystem::Resolve(int32_t result, GetAddrInfoParams* params,
       cond().broadcast();
       return;
     }
+    pp::NetAddressPrivate::ReplacePort(addr, port, &addr);
     *res = CreateAddrInfo(addr, hints, "");
     *pres = PP_OK;
     cond().broadcast();
