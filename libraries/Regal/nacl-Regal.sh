@@ -48,7 +48,6 @@ DefaultPackageInstall() {
   DefaultPatchStep
   CustomBuildStep
   CustomInstallStep
-  DefaultCleanUpStep
 }
 
 DefaultPackageInstall

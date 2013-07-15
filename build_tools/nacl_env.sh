@@ -106,9 +106,6 @@ InitializeNaClGccToolchain() {
   local TOOLCHAIN_DIR=${OS_SUBDIR}_${TOOLCHAIN_ARCH}_${NACL_LIBC}
 
   readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${TOOLCHAIN_DIR}}
-  # TODO(robertm): can we get rid of NACL_SDK_BASE?
-  readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
-
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
   # export nacl tools for direct use in patches.
@@ -131,9 +128,6 @@ InitializeNaClGccToolchain() {
     local NACL_LIBDIR=x86_64-nacl/lib32
   fi
 
-  # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
-  # Default to the usr folder within the SDK.
-  readonly NACLPORTS_PREFIX=${NACLPORTS_PREFIX:-${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr}
   readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_LIBDIR}
 
   # There are a few .la files that ship with the SDK that
@@ -148,11 +142,6 @@ InitializeNaClGccToolchain() {
     done
   fi
 
-  # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
-  # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
-  readonly NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
-  readonly NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
-  readonly NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
   NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Release"
 }
 
@@ -160,7 +149,6 @@ InitializeNaClGccToolchain() {
 InitializePNaClToolchain() {
   local TC_ROOT=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR}_x86_pnacl/${NACL_LIBC}
   readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${TC_ROOT}}
-  readonly NACL_SDK_BASE=${NACL_SDK_BASE:-${NACL_TOOLCHAIN_ROOT}}
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
   # export nacl tools for direct use in patches.
@@ -181,9 +169,6 @@ InitializePNaClToolchain() {
   # (used only by the cairo package)
   export NACLSTRINGS="$(which strings)"
 
-  # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
-  # Default to the usr folder within the SDK.
-  readonly NACLPORTS_PREFIX=${NACLPORTS_PREFIX:-${NACL_SDK_BASE}/usr}
   NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Release"
 }
 
@@ -205,7 +190,6 @@ if [ $# -gt 0 ]; then
     echo "export RANLIB=${NACLRANLIB}"
     echo "export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig"
     echo "export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}"
-    echo "export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config"
     echo "export PATH=\${PATH}:${NACL_BIN_PATH}"
     echo "export CFLAGS=\"${NACL_CFLAGS}\""
     echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
@@ -216,7 +200,6 @@ if [ $# -gt 0 ]; then
     export RANLIB=${NACLRANLIB}
     export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
     export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-    export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
     export PATH=${PATH}:${NACL_BIN_PATH}
     export CFLAGS=${NACL_CFLAGS}
     exec $@

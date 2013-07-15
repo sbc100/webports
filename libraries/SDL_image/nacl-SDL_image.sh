@@ -23,7 +23,6 @@ CustomPackageInstall() {
   DefaultConfigureStep
   DefaultBuildStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }
 
 

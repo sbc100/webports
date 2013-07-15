@@ -71,7 +71,6 @@ CustomPackageInstall() {
   CustomConfigureStep
   CustomPostConfigureStep
   CustomBuildAndInstallStep
-  DefaultCleanUpStep
 }
 
 

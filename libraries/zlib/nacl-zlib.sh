@@ -86,7 +86,6 @@ CustomPackageInstall() {
     TestStep
     DefaultInstallStep
   fi
-  DefaultCleanUpStep
 }
 
 

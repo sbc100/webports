@@ -121,7 +121,6 @@ CustomPackageInstall() {
   ConfigureTests
   DefaultBuildStep
   PublishStep
-  DefaultCleanUpStep
 }
 
 

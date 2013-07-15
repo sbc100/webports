@@ -28,7 +28,8 @@ RunSelLdrTests() {
   fi
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  RunSelLdrCommand HelloWorld/HelloWorld
+  cd HelloWorld
+  RunSelLdrCommand HelloWorld
 }
 
 
@@ -57,7 +58,6 @@ CustomPackageInstall() {
   CustomConfigureStep
   DefaultBuildStep
   DefaultInstallStep
-  DefaultCleanUpStep
   RunSelLdrTests
 }
 

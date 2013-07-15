@@ -69,7 +69,6 @@ CustomPackageInstall() {
   CustomConfigureStep
   CustomBuildStep
   DefaultInstallStep
-  DefaultCleanUpStep
   RunSelLdrTests
 }
 

@@ -22,7 +22,6 @@ CustomPackageInstall() {
   DefaultConfigureStep --disable-esd
   DefaultBuildStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }
 
 CustomPackageInstall

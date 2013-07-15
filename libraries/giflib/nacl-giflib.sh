@@ -62,7 +62,6 @@ DefaultPackageInstall() {
   DefaultValidateStep
   DefaultInstallStep
   TestStep
-  DefaultCleanUpStep
 }
 
 DefaultPackageInstall

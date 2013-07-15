@@ -56,7 +56,6 @@ CustomPackageInstall() {
   fi
   CustomBuildStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }
 
 CustomPackageInstall

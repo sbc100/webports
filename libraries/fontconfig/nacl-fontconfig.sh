@@ -79,7 +79,6 @@ CustomPackageInstall() {
   CustomPatchMakefileStep
   DefaultBuildStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }
 
 

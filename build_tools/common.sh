@@ -39,13 +39,30 @@ fi
 # sha1check python script
 readonly SHA1CHECK=${SCRIPT_DIR}/sha1check.py
 
+# NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
+# Default to the usr folder within the SDK.
+if [ -n "${NACLPORTS_PREFIX:-}" ]; then
+  readonly DEFAULT_PREFIX=1
+else
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
+  else
+    readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
+  fi
+fi
 readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
 readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
 readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 
-NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CFLAGS}"
-NACLPORTS_CXXFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CXXFLAGS}"
-NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR} ${NACL_LDFLAGS}"
+if [ "${DEFAULT_PREFIX:-}" = "1" ]; then
+  NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CFLAGS}"
+  NACLPORTS_CXXFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CXXFLAGS}"
+  NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR} ${NACL_LDFLAGS}"
+else
+  NACLPORTS_CFLAGS="${NACL_CFLAGS}"
+  NACLPORTS_CXXFLAGS="${NACL_CXXFLAGS}"
+  NACLPORTS_LDFLAGS="${NACL_LDFLAGS}"
+fi
 
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
@@ -177,8 +194,36 @@ CheckToolchain() {
   fi
 }
 
-CheckToolchain
-CheckPatchVersion
+PatchSpecFile() {
+  if [ ${NACL_ARCH} == "pnacl" -o ${NACL_ARCH} == "arm" ]; then
+    # The arm compiler doesn't currently need a patched specs file
+    # as it ships with the correct paths.  As does the pnacl toolchain.
+    return
+  fi
+
+  # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
+  # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
+  local NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
+  local NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
+  local NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
+
+  # fix up spaces so gcc sees entire path
+  local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
+  local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
+  # have nacl-gcc dump specs file & add include & lib search paths
+  ${NACLCC} -dumpspecs |\
+    awk '/\*cpp:/ {\
+      printf("*nacl_arch:\n%%{m64:x86_64-nacl; m32:i686-nacl; :x86_64-nacl}\n\n", $1); } \
+      { print $0; }' |\
+    sed "/*cpp:/{
+      N
+      s|$| -isystem ${SED_SAFE_SPACES_USR_INCLUDE}|
+    }" |\
+    sed "/*link_libgcc:/{
+      N
+      s|$| -L${SED_SAFE_SPACES_USR_LIB}|
+    }" >${NACL_SDK_GCC_SPECS_PATH}/specs
+}
 
 CheckSDKVersion() {
   if [ -z "${MIN_SDK_VERSION:-}" ]; then
@@ -193,7 +238,11 @@ CheckSDKVersion() {
   fi
 }
 
+CheckToolchain
+CheckPatchVersion
 CheckSDKVersion
+PatchSpecFile
+
 
 ######################################################################
 # Helper functions
@@ -377,25 +426,6 @@ MakeDir() {
   fi
 }
 
-
-PatchSpecFile() {
-  # fix up spaces so gcc sees entire path
-  local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
-  local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
-  # have nacl-gcc dump specs file & add include & lib search paths
-  ${NACLCC} -dumpspecs |\
-    awk '/\*cpp:/ {\
-      printf("*nacl_arch:\n%%{m64:x86_64-nacl; m32:i686-nacl; :x86_64-nacl}\n\n", $1); } \
-      { print $0; }' |\
-    sed "/*cpp:/{
-      N
-      s|$| -isystem ${SED_SAFE_SPACES_USR_INCLUDE}|
-    }" |\
-    sed "/*link_libgcc:/{
-      N
-      s|$| -L${SED_SAFE_SPACES_USR_LIB}|
-    }" >${NACL_SDK_GCC_SPECS_PATH}/specs
-}
 
 DefaultPreInstallStep() {
   cd ${NACL_NATIVE_CLIENT_SDK}/..
@@ -644,8 +674,10 @@ DefaultBuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   echo "Directory: $(pwd)"
   # Build ${MAKE_TARGETS} or default target if it is not defined
-  echo "MAKEFLAGS=${MAKEFLAGS}"
-  export MAKEFLAGS
+  if [ -n "${MAKEFLAGS:-}" ]; then
+    echo "MAKEFLAGS=${MAKEFLAGS}"
+    export MAKEFLAGS
+  fi
   LogExecute make -j${OS_JOBS} ${MAKE_TARGETS:-}
 }
 
@@ -653,27 +685,27 @@ DefaultBuildStep() {
 DefaultInstallStep() {
   Banner "Installing"
   # assumes pwd has makefile
-  echo "MAKEFLAGS=${MAKEFLAGS}"
-  export MAKEFLAGS
+  if [ -n "${MAKEFLAGS:-}" ]; then
+    echo "MAKEFLAGS=${MAKEFLAGS}"
+    export MAKEFLAGS
+  fi
   LogExecute make ${INSTALL_TARGETS:-install}
 }
 
 
-DefaultCleanUpStep() {
-  if [ ${NACL_ARCH} != "pnacl" -a ${NACL_ARCH} != "arm" ]; then
-    PatchSpecFile
-  fi
-  ChangeDir ${SAVE_PWD}
-}
-
-
+#
 # echo a command before exexuting it under 'time'
+#
 TimeCommand() {
   echo "$@"
   time "$@"
 }
 
 
+#
+# Validate a given NaCl executable (.nexe file)
+# $1 - Execuatable file (.nexe)
+#
 Validate() {
   if [ ${NACL_ARCH} = "pnacl" ]; then
       return
@@ -697,6 +729,10 @@ Validate() {
 }
 
 
+#
+# Validate (using ncval) any executables specified in the $EXECUTABLES
+# variable.
+#
 DefaultValidateStep() {
   if [ ${NACL_ARCH} != "pnacl" -a -n "${EXECUTABLES:-}" ]; then
     for nexe in $EXECUTABLES ; do
@@ -706,22 +742,29 @@ DefaultValidateStep() {
 }
 
 
+#
+# Run an executable with under sel_ldr.
+# $1 - Executable (.nexe) name
+#
 RunSelLdrCommand() {
   if [ $NACL_ARCH = "arm" ]; then
     # no sel_ldr for arm
     return
   fi
+  local NEXE=$1
+  local SCRIPT=$1.sh
+  WriteSelLdrScript ${SCRIPT} ${NEXE}
   echo "[sel_ldr] $@"
-  if [ $NACL_GLIBC = "1" ]; then
-    time "${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- \
-        "${NACL_SDK_LIB}/runnable-ld.so" \
-        --library-path "${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}" "$@"
-  else
-    time "${NACL_SEL_LDR}" -a -B "${NACL_IRT}" -- "$@"
-  fi
+  shift
+  time ./${SCRIPT} $*
 }
 
 
+#
+# Write a wrapper script that will run a nexe under sel_ldr
+# $1 - Script name
+# $2 - Nexe name
+#
 WriteSelLdrScript() {
   if [ $NACL_ARCH = "arm" ]; then
     # no sel_ldr for arm
@@ -736,7 +779,7 @@ SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 SEL_LDR=${NACL_SEL_LDR}
 IRT=${NACL_IRT}
 SDK_LIB_DIR=${NACL_SDK_LIB}
-LIB_PATH=${NACL_SDK_LIBDIR}:\${SDK_LIB_DIR}:\${SCRIPT_DIR}
+LIB_PATH=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}:\${SDK_LIB_DIR}:\${SCRIPT_DIR}
 
 "\${SEL_LDR}" -a -B "\${IRT}" -- \\
     "\${SDK_LIB_DIR}/runnable-ld.so" --library-path "\${LIB_PATH}" \\
@@ -759,6 +802,11 @@ HERE
 }
 
 
+#
+# Translate a PNaCl executable (.pexe) into one or more
+# native NaCl executables (.nexe).
+# $1 - pexe file
+#
 TranslatePexe() {
   local pexe=$1
   local arches="arm x86-32 x86-64"
@@ -825,5 +873,4 @@ DefaultPackageInstall() {
   DefaultTranslateStep
   DefaultValidateStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }

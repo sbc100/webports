@@ -56,7 +56,6 @@ CustomPackageInstall() {
   DefaultTranslateStep
   DefaultValidateStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }
 
 

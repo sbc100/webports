@@ -47,7 +47,6 @@ CustomPackageInstall() {
   DefaultValidateStep
   CustomTestStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }
 
 CustomPackageInstall

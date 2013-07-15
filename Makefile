@@ -60,16 +60,21 @@ endif
 endif
 
 NACL_OUT = out
+NACL_DIRS_TO_REMOVE = $(NACL_OUT)
+
+ifneq ($(NACL_ARCH),pnacl)
+# The toolchain's 'usr' folder is reserved for naclports and we
+# remove it completely on clean.  Except under 'pnacl' where the
+# toolchain itself uses 'usr' so we can't currenctly cleanup
+# fully.
 NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/$(NACL_ARCH)-nacl/usr
+NACL_DIRS_TO_REMOVE += $(NACLPORTS_PREFIX)
+else
+NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/usr
+endif
 
-NACL_DIRS_BASE = $(NACL_OUT)/tarballs \
-                 $(NACL_OUT)/publish \
-                 $(NACLPORTS_PREFIX)
-
-NACL_DIRS_TO_REMOVE = $(NACL_OUT) \
-                      $(NACLPORTS_PREFIX) \
-
-NACL_DIRS_TO_MAKE = $(NACL_DIRS_BASE) \
+NACL_DIRS_TO_MAKE = $(NACL_OUT)/tarballs \
+                    $(NACL_OUT)/publish \
                     $(NACLPORTS_PREFIX)/include \
                     $(NACLPORTS_PREFIX)/lib
 
