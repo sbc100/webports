@@ -14,6 +14,8 @@ RunTests() {
 
 
 RunSelLdrTests() {
+  Banner "Running tests ${PACKAGE_NAME}"
+
   if [ $OS_SUBDIR = "windows" ]; then
     echo "Not running sel_ldr tests on Windows ."
     return
@@ -41,8 +43,7 @@ RunSelLdrTests() {
   ChangeDir test.nacl
   make -f ${START_DIR}/test.nacl/Makefile
 
-  ls nacl_mounts_sel_ldr_tests
-  RunSelLdrCommand ${PWD}/nacl_mounts_sel_ldr_tests
+  RunSelLdrCommand nacl_mounts_sel_ldr_tests
 }
 
 
@@ -51,6 +52,42 @@ CustomBuildStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   MakeDir ${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_BUILD_SUBDIR}
+  if [ "${NACL_GLIBC}" = "1" ]; then
+    CFLAGS+=" -fPIC"
+  fi
+  local OBJECTS="\
+      MountManager.o \
+      KernelProxy.o \
+      Entry.o \
+      newlib_compat.o \
+      MainThreadRunner.o \
+      UrlLoaderJob.o \
+      Path.o \
+      nacl_simple_tar.o \
+      terminal.o \
+      terminal_stubs.o \
+      MemMount.o \
+      MemNode.o \
+      RandomDevice.o \
+      NullDevice.o \
+      DevMount.o \
+      AppEngineMount.o \
+      AppEngineNode.o \
+      HTTPMount.o \
+      HTTPNode.o \
+      HTTP2Mount.o \
+      HTTP2FSOpenJob.o \
+      HTTP2OpenJob.o \
+      HTTP2ReadJob.o \
+      PepperMount.o \
+      PepperFileIOJob.o \
+      ConsoleMount.o \
+      JSPipeMount.o \
+      JSPostMessageBridge.o \
+      TcpSocket.o \
+      TcpServerSocket.o \
+      SocketSubSystem.o \
+      BufferMount.o"
   set -x
   CFLAGS="${CFLAGS} -I${START_DIR}/.. -I${START_DIR}"
   CXXCMD="${NACLCXX} ${CFLAGS}"
@@ -87,41 +124,14 @@ CustomBuildStep() {
   ${CCCMD} -c ${START_DIR}/util/nacl_simple_tar.c
   ${CCCMD} -c ${START_DIR}/console/terminal.c
   ${CCCMD} -c ${START_DIR}/console/terminal_stubs.c
-  ${NACLAR} rcs libnacl-mounts.a \
-      MountManager.o \
-      KernelProxy.o \
-      Entry.o \
-      newlib_compat.o \
-      MainThreadRunner.o \
-      UrlLoaderJob.o \
-      Path.o \
-      nacl_simple_tar.o \
-      terminal.o \
-      terminal_stubs.o \
-      MemMount.o \
-      MemNode.o \
-      RandomDevice.o \
-      NullDevice.o \
-      DevMount.o \
-      AppEngineMount.o \
-      AppEngineNode.o \
-      HTTPMount.o \
-      HTTPNode.o \
-      HTTP2Mount.o \
-      HTTP2FSOpenJob.o \
-      HTTP2OpenJob.o \
-      HTTP2ReadJob.o \
-      PepperMount.o \
-      PepperFileIOJob.o \
-      ConsoleMount.o \
-      JSPipeMount.o \
-      JSPostMessageBridge.o \
-      TcpSocket.o \
-      TcpServerSocket.o \
-      SocketSubSystem.o \
-      BufferMount.o
 
+  ${NACLAR} rcs libnacl-mounts.a ${OBJECTS}
   ${NACLRANLIB} libnacl-mounts.a
+
+  if [ "${NACL_GLIBC}" = "1" ]; then
+    ${NACLCXX} ${LDFLAGS} -shared -lppapi_cpp -o libnacl-mounts.so ${OBJECTS}
+  fi
+
   set +x
 }
 
@@ -133,8 +143,10 @@ CustomInstallStep() {
   cp ${START_DIR}/http2/genfs.py ${NACLPORTS_LIBDIR}/nacl-mounts/util
 
   # GLibC toolchain has termio.h so don't copy stub header.
-  if [[ $NACL_GLIBC = 0 ]]; then
+  if [[ "${NACL_GLIBC}" = "0" ]]; then
     cp ${START_DIR}/console/termio.h ${NACLPORTS_INCLUDE}
+  else
+    cp libnacl-mounts.so ${NACLPORTS_LIBDIR}
   fi
 
   mkdir -p ${NACLPORTS_INCLUDE}/nacl-mounts

@@ -46,6 +46,10 @@ clean:
 # gtest sources
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
+ifeq (NACL_GLIBC,1)
+CPPFLAGS += -fPIC
+endif
+
 # gtest targets
 $(TESTS_OUT)/gtest-all.o: $(GTEST_SRCS_)
 	mkdir -p $(dir $@)

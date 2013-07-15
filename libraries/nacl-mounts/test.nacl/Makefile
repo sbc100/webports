@@ -26,4 +26,4 @@ all: nacl_mounts_sel_ldr_tests
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 nacl_mounts_sel_ldr_tests: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $^ -o $@ -lgtest -lnacl-mounts -lppapi -lppapi_cpp -lpthread
+	$(CXX) $(LDFLAGS) $^ -o $@ -lgtest -lnacl-mounts -lppapi -lppapi_cpp -lppapi_cpp_private -lpthread
