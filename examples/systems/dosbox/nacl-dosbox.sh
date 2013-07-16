@@ -60,6 +60,7 @@ CustomConfigureStep() {
   # This somehow works for me.
   PPAPI_LIBS="-lSDL \
       -lppapi_cpp \
+      -lppapi_cpp_private \
       -lppapi \
       ppapi/libppapi.a \
       -lnacl-mounts"

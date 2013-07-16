@@ -32,7 +32,7 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
 
-  export NACLBXLIBS="-lnacl-mounts -lpthread"
+  export NACLBXLIBS="-lpthread"
 
   # Hacky way of getting around the bochs configuration tools which don't allow
   # --whole-archive and don't allow for multiple libraries with the same name
@@ -48,6 +48,7 @@ CustomConfigureStep() {
   export LIBS="$LIBS -Wl,--start-group"
   export LIBS="$LIBS -lppapi"
   export LIBS="$LIBS -lppapi_cpp"
+  export LIBS="$LIBS -lppapi_cpp_private"
   export LIBS="$LIBS -Lbochs_ppapi -lbochs_ppapi"
   export LIBS="$LIBS -lnacl-mounts"
   export LIBS="$LIBS -lpthread"
