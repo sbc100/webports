@@ -1,0 +1,95 @@
+diff --git a/src/nano.c b/src/nano.c
+index e4e2222..02076a1 100644
+--- a/src/nano.c
++++ b/src/nano.c
+@@ -2013,7 +2013,11 @@ void do_output(char *output, size_t output_len, bool allow_cntrls)
+ 	update_line(openfile->current, openfile->current_x);
+ }
+ 
++#if defined(__native_client__)
++int nacl_nano_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     int optchr;
+     ssize_t startline = 1;
+diff --git a/src/Makefile.in b/src/Makefile.in
+index acb3389..4865e3e 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -55,7 +55,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
+ PROGRAMS = $(bin_PROGRAMS)
+ am_nano_OBJECTS = browser.$(OBJEXT) chars.$(OBJEXT) color.$(OBJEXT) \
+ 	cut.$(OBJEXT) files.$(OBJEXT) global.$(OBJEXT) help.$(OBJEXT) \
+-	move.$(OBJEXT) nano.$(OBJEXT) prompt.$(OBJEXT) \
++	move.$(OBJEXT) nano.$(OBJEXT) nano_pepper.$(OBJEXT) prompt.$(OBJEXT) \
+ 	rcfile.$(OBJEXT) search.$(OBJEXT) text.$(OBJEXT) \
+ 	utils.$(OBJEXT) winio.$(OBJEXT)
+ nano_OBJECTS = $(am_nano_OBJECTS)
+@@ -203,6 +203,7 @@ nano_SOURCES = browser.c \
+ 		help.c \
+ 		move.c \
+ 		nano.c \
++		nano_pepper.c \
+ 		nano.h \
+ 		prompt.c \
+ 		proto.h \
+@@ -286,7 +287,7 @@ clean-binPROGRAMS:
+ 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+ nano$(EXEEXT): $(nano_OBJECTS) $(nano_DEPENDENCIES) 
+ 	@rm -f nano$(EXEEXT)
+-	$(LINK) $(nano_OBJECTS) $(nano_LDADD) $(LIBS)
++	$(LINK) $(nano_OBJECTS) $(nano_LDADD) $(LIBS) $(EXTRA_LIBS)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+diff --git a/src/winio.c b/src/winio.c
+index 1aef2a9..32e7254 100644
+--- a/src/winio.c
++++ b/src/winio.c
+@@ -112,6 +112,35 @@ void get_key_buffer(WINDOW *win)
+     if (key_buffer != NULL)
+ 	return;
+ 
++    /*
++     * TODO(bradnelson): Figure out why wgetch behaves oddly.
++     * For now, attempt to get entire vt100 keystrokes.
++     */
++#if defined(__native_client__)
++    doupdate();
++
++    input = fgetc(stdin);
++    key_buffer_len++;
++    key_buffer = (int *)nmalloc(sizeof(int));
++    key_buffer[0] = input;
++
++    if (input == '\x1b') {
++      input = fgetc(stdin);
++      key_buffer_len++;
++      key_buffer = (int *)nrealloc(key_buffer, key_buffer_len *
++                                               sizeof(int));
++      key_buffer[key_buffer_len - 1] = input;
++
++      if (input == '[' || input == 'O') {
++        input = fgetc(stdin);
++        key_buffer_len++;
++        key_buffer = (int *)nrealloc(key_buffer, key_buffer_len *
++                                                 sizeof(int));
++        key_buffer[key_buffer_len - 1] = input;
++      }
++    }
++#else
++
+     /* Read in the first character using blocking input. */
+ #ifndef NANO_TINY
+     allow_pending_sigwinch(TRUE);
+@@ -177,6 +195,8 @@ void get_key_buffer(WINDOW *win)
+     /* Switch back to non-blocking input. */
+     nodelay(win, FALSE);
+ 
++#endif
++
+ #ifdef DEBUG
+     fprintf(stderr, "get_key_buffer(): key_buffer_len = %lu\n", (unsigned long)key_buffer_len);
+ #endif

@@ -149,6 +149,7 @@ LIBRARIES = \
      libraries/zlib
 
 EXAMPLES = \
+     examples/editors/nano \
      examples/editors/vim \
      examples/games/scummvm \
      examples/systems/bochs \
@@ -247,6 +248,8 @@ $(SENT)/libraries/libav: \
     libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/examples/games/nethack: \
+    libraries/ncurses libraries/libtar
+$(SENT)/examples/editors/nano: \
     libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/vim: \
     libraries/ncurses libraries/libtar
@@ -366,6 +369,7 @@ ncurses: libraries/ncurses ;
 bochs: examples/systems/bochs ;
 dosbox: examples/systems/dosbox ;
 gdb: examples/tools/gdb ;
+nano: examples/editors/nano ;
 nethack: examples/games/nethack ;
 openal-ogg: examples/audio/openal-ogg ;
 python_ppapi: examples/tools/python_ppapi ;
