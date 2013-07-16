@@ -32,7 +32,7 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
 
-  export NACLBXLIBS="-lpthread"
+  export NACLBXLIBS="-lpthread -lnosys"
 
   # Hacky way of getting around the bochs configuration tools which don't allow
   # --whole-archive and don't allow for multiple libraries with the same name
