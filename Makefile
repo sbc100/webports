@@ -374,3 +374,8 @@ snes9x: examples/games/snes9x ;
 thttpd: examples/tools/thttpd ;
 vim: examples/editors/vim ;
 xaos: examples/graphics/xaos ;
+
+#####################################################################
+# Extra padding to prevent the vim rule above from being interpreted
+# as a vim "modeline".
+#####################################################################
