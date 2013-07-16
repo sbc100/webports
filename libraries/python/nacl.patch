@@ -37,6 +37,42 @@ index 9d55550..09e7a69 100644
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
  		$(PYTHON_FOR_BUILD) -m lib2to3.pgen2.driver $(DESTDIR)$(LIBDEST)/lib2to3/Grammar.txt
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+index 65ade9f..fad16aa 100644
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -216,6 +216,31 @@ extern int lstat(const char *, struct stat *);
+ 
+ #endif /* !_MSC_VER */
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++// NaCl's newlib headers don't declare these functions
++
++// TODO(sbc): add this to newlib's header:
++// https://code.google.com/p/nativeclient/issues/detail?id=3363
++extern int ftruncate(int fd, off_t length);
++
++// TODO(sbc): remove these once this change makes it into the NaCl SDK:
++// https://src.chromium.org/viewvc/native_client?view=rev&revision=11693
++extern int lstat(const char *, struct stat *);
++
++// These functions are missing from NaCl's newlib and nosys libraries.
++// TODO(sbc): remove these once this change makes it into the NaCl SDK:
++// https://codereview.chromium.org/18817002
++int fsync(int fd) {
++  errno = ENOSYS;
++  return -1;
++}
++
++int fdatasync(int fd) {
++  errno = ENOSYS;
++  return -1;
++}
++#endif
++
+ #ifdef HAVE_UTIME_H
+ #include <utime.h>
+ #endif /* HAVE_UTIME_H */
 diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 index c2907f6..9e64898 100644
 --- a/Modules/pwdmodule.c
@@ -89,6 +125,30 @@ index 2739b8b..35f0aa0 100644
 +#endif
  	return Py_Main(argc, argv);
  }
+diff --git a/Python/thread.c b/Python/thread.c
+index dd333e8..33fec81 100644
+--- a/Python/thread.c
++++ b/Python/thread.c
+@@ -14,9 +14,19 @@
+    library (e.g. gnu pth in pthread emulation) */
+ # ifdef HAVE_PTHREAD_H
+ #  include <pthread.h> /* _POSIX_THREADS */
++#  if defined __native_client__ && !defined __GLIBC__
++     /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
++        However this file expects it to be defined if pthreads are present so we
++        define it here after including pthread.h
++        TODO(sbc): remove this hack once newlib is fixed:
++        https://code.google.com/p/nativeclient/issues/detail?id=3551
++        */
++#    define _POSIX_THREADS
++#  endif
+ # endif
+ #endif
+ 
++
+ #ifndef DONT_HAVE_STDIO_H
+ #include <stdio.h>
+ #endif
 diff --git a/configure b/configure
 index dc0dfd0..d45f7b0 100755
 --- a/configure

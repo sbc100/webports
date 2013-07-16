@@ -10,15 +10,19 @@ EXECUTABLES=python.nexe
 # Currently this package only builds on linux.
 # The build relies on certain host binaries and pythong's configure
 # requires us to sett --build= as well as --host=.
-EXTRA_CONFIGURE_ARGS="--disable-ipv6 --with-suffix=.nexe --build=x86_64-linux-gnu"
-export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
 HERE=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
 
 BuildHostPython() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   MakeDir build-nacl-host
   ChangeDir build-nacl-host
-  LogExecute ../configure
+  if [ -f python -a -f Parser/pgen ]; then
+    return
+  fi
+  # Reset CFLAGS and LDFLAGS when configuring the host
+  # version of python since they hold values designed for
+  # building for NaCl.
+  CFLAGS="" LDFLAGS="" LogExecute ../configure
   LogExecute make -j${OS_JOBS} python Parser/pgen
 }
 
@@ -29,6 +33,14 @@ CustomConfigureStep() {
   # since we are doing a cross compile.  The $CONFIG_SITE file is sourced
   # by configure early on.
   export CONFIG_SITE=${HERE}/config.site
+  # Disable ipv6 since configure claims it requires a working getaddrinfo
+  # which we do not provide.  TODO(sbc): remove this once nacl_io supports
+  # getaddrinfo.
+  EXTRA_CONFIGURE_ARGS="--disable-ipv6"
+  EXTRA_CONFIGURE_ARGS+=" --with-suffix=.nexe"
+  EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
+  export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
+  export LIBS="-lc -lnosys"
   DefaultConfigureStep
 }
 
