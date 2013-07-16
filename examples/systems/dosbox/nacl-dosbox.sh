@@ -86,9 +86,10 @@ CustomInstallStep(){
   DOSBOX_BUILD=${DOSBOX_DIR}/${NACL_BUILD_SUBDIR}
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
-  install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
-  install ${START_DIR}/dosbox.nmf ${PUBLISH_DIR}
-  install ${DOSBOX_BUILD}/src/dosbox ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
+  LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
+  LogExecute install ${DOSBOX_BUILD}/src/dosbox ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
+  local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py ${NACL_CREATE_NMF_FLAGS}"
+  LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/*.nexe -o ${PUBLISH_DIR}/dosbox.nmf
 }
 
 CustomPackageInstall() {
