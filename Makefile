@@ -149,6 +149,7 @@ LIBRARIES = \
      libraries/zlib
 
 EXAMPLES = \
+     examples/editors/vim \
      examples/games/scummvm \
      examples/systems/bochs \
      examples/systems/dosbox \
@@ -246,6 +247,8 @@ $(SENT)/libraries/libav: \
     libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/examples/games/nethack: \
+    libraries/ncurses libraries/libtar
+$(SENT)/examples/editors/vim: \
     libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
     libraries/jsoncpp
@@ -369,4 +372,5 @@ python_ppapi: examples/tools/python_ppapi ;
 scummvm: examples/games/scummvm ;
 snes9x: examples/games/snes9x ;
 thttpd: examples/tools/thttpd ;
+vim: examples/editors/vim ;
 xaos: examples/graphics/xaos ;

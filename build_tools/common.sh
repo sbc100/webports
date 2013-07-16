@@ -633,8 +633,11 @@ DefaultConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
+  local PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  local DEFAULT_BUILD_DIR=${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}
+  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
   echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
@@ -645,7 +648,7 @@ DefaultConfigureStep() {
     # it doesn't know about that "le32" either.  So we just say "nacl".
     conf_host="nacl"
   fi
-  LogExecute ../configure \
+  LogExecute ${NACL_CONFIGURE_PATH:-../configure} \
     --host=${conf_host} \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
