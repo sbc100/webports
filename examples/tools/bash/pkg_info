@@ -1,0 +1,4 @@
+PACKAGE_NAME=bash-4.2
+URL=http://ftp.gnu.org/gnu/bash/bash-4.2.tar.gz
+LICENSE=gpl
+LIBC=glibc

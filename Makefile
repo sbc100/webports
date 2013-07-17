@@ -149,6 +149,7 @@ LIBRARIES = \
      libraries/zlib
 
 EXAMPLES = \
+     examples/tools/bash \
      examples/editors/nano \
      examples/editors/vim \
      examples/games/scummvm \
@@ -249,6 +250,8 @@ $(SENT)/libraries/libav: \
     libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/examples/games/nethack: \
+    libraries/ncurses libraries/libtar
+$(SENT)/examples/tools/bash: \
     libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/nano: \
     libraries/ncurses libraries/libtar
@@ -367,6 +370,7 @@ zlib: libraries/zlib ;
 ncurses: libraries/ncurses ;
 
 # shortcuts examples (alphabetical)
+bash: examples/tools/bash ;
 bochs: examples/systems/bochs ;
 dosbox: examples/systems/dosbox ;
 gdb: examples/tools/gdb ;
