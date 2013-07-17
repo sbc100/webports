@@ -6,9 +6,5 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-# Add -lm since webp examples use libpng and libtiff which
-# depend on math functions.
-export LIBS="-lm"
-
 DefaultPackageInstall
 exit 0

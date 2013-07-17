@@ -55,14 +55,20 @@ readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
 readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 
 if [ "${DEFAULT_PREFIX:-}" = "1" ]; then
+  # If the PREFIX is the default one then there is not need to add
+  # the include path explcitily.
   NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CFLAGS}"
   NACLPORTS_CXXFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CXXFLAGS}"
-  NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR} ${NACL_LDFLAGS}"
 else
   NACLPORTS_CFLAGS="${NACL_CFLAGS}"
   NACLPORTS_CXXFLAGS="${NACL_CXXFLAGS}"
-  NACLPORTS_LDFLAGS="${NACL_LDFLAGS}"
 fi
+
+# For the library path we always explicly add to the link flags
+# otherwise 'libtool' won't find the libraries correctly.  This
+# is because libtool uses 'gcc -print-search-dirs' which does
+# not honor the external specs file.
+NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR} ${NACL_LDFLAGS}"
 
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
