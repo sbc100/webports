@@ -64,6 +64,7 @@ CalculatePackageShards()
     libraries/ffmpeg
     libraries/jpeg
     libraries/tiff
+    libraries/webp
     libraries/lcms
     libraries/DevIL
     libraries/libtar

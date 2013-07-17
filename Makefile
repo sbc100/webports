@@ -246,6 +246,7 @@ $(SENT)/libraries/cairo: \
     libraries/pixman libraries/fontconfig libraries/libpng
 $(SENT)/libraries/ffmpeg: \
     libraries/lame libraries/libvorbis libraries/libtheora
+$(SENT)/libraries/webp: libraries/tiff libraries/jpeg
 $(SENT)/libraries/libav: \
     libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
