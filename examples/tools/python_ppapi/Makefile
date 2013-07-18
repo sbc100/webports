@@ -2,12 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-VALID_TOOLCHAINS := glibc
+VALID_TOOLCHAINS := glibc newlib
 NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = python
-LIBS = python2.7 util dl ppapi_simple nacl_io ppapi_cpp ppapi
+LIBS = python2.7 ppapi_simple nacl_io ppapi_cpp ppapi tar
+ifeq ($(TOOLCHAIN),glibc)
+LIBS += util dl
+NACL_LDFLAGS += -Wl,-export-dynamic
+endif
 SOURCES = python.c
 INC_PATHS = $(NACLPORTS_INCLUDE)/python2.7
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/python
@@ -23,11 +27,15 @@ else
 $(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 endif
 
-$(eval $(call HTML_RULE,$(TARGET),))
+$(eval $(call NMF_RULE,$(TARGET),))
 
 install:
 	mkdir -p $(INSTALL_DIR)
+	tar -c -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/pydata.tar lib/python2.7
+	cp $(NACL_SRC)/libraries/hterm/src/chromeapps/hterm/js/*.js $(INSTALL_DIR)
+	cp $(NACL_SRC)/libraries/hterm/src/chromeapps/libdot/js/*.js $(INSTALL_DIR)
 	cp $(OUTDIR)/python_*.nexe $(INSTALL_DIR)
 	cp $(OUTDIR)/python.nmf $(INSTALL_DIR)
-	cp $(OUTDIR)/python.html $(INSTALL_DIR)
+	cp index.html $(INSTALL_DIR)
+	cp python.js $(INSTALL_DIR)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)

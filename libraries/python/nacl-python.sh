@@ -42,6 +42,9 @@ CustomConfigureStep() {
   export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
   export LIBS="-lc -lnosys"
   DefaultConfigureStep
+  if [ "${NACL_GLIBC}" != "1" ]; then
+    LogExecute cp ${START_DIR}/Setup.local Modules/
+  fi
 }
 
 CustomTestStep() {

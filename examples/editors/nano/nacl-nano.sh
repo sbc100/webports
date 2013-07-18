@@ -6,7 +6,6 @@
 source pkg_info
 source ../../../build_tools/common.sh
 
-export CFLAGS="${CFLAGS} -I${NACLPORTS_INCLUDE}/ncurses"
 export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 

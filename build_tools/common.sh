@@ -803,7 +803,7 @@ SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 SEL_LDR=${NACL_SEL_LDR}
 IRT=${NACL_IRT}
 
-"\${SEL_LDR}" -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
+"\${SEL_LDR}" -a -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   fi
   chmod 750 $1

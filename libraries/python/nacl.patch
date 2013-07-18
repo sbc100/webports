@@ -38,14 +38,37 @@ index 9d55550..09e7a69 100644
  		$(PYTHON_FOR_BUILD) -m lib2to3.pgen2.driver $(DESTDIR)$(LIBDEST)/lib2to3/Grammar.txt
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index 65ade9f..fad16aa 100644
+index 65ade9f..6cc1818 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
-@@ -216,6 +216,31 @@ extern int lstat(const char *, struct stat *);
+@@ -216,6 +216,55 @@ extern int lstat(const char *, struct stat *);
  
  #endif /* !_MSC_VER */
  
-+#if defined(__native_client__) && !defined(__GLIBC__)
++#if defined(__native_client__)
++// Dummy implementation of getcwd that always returns '.'.
++// If this is missing under glibc it simply makes os.getcwd()
++// raise an exception for under newlib it failing when
++// recursively loading modules.
++// TODO(sbc): put this in its own library since its not
++// wanted in the pepper case.
++char* getcwd(char* buffer, size_t len) {
++  if (buffer == NULL) {
++    if (len == 0)
++      len = 2;
++    buffer = malloc(len);
++  }
++
++  if (len < 2) {
++    errno = ERANGE;
++    return NULL;
++  }
++
++  sprintf(buffer, ".");
++  return buffer;
++}
++
++#if !defined(__GLIBC__)
 +// NaCl's newlib headers don't declare these functions
 +
 +// TODO(sbc): add this to newlib's header:
@@ -69,10 +92,153 @@ index 65ade9f..fad16aa 100644
 +  return -1;
 +}
 +#endif
++#endif
 +
  #ifdef HAVE_UTIME_H
  #include <utime.h>
  #endif /* HAVE_UTIME_H */
+@@ -663,9 +712,13 @@ posix_error_with_unicode_filename(Py_UNICODE* name)
+ 
+ 
+ static PyObject *
+-posix_error_with_allocated_filename(char* name)
++posix_error_with_allocated_filename(const char* func, char* name)
+ {
+-    PyObject *rc = PyErr_SetFromErrnoWithFilename(PyExc_OSError, name);
++    PyObject *rc;
++    if (errno == ENOSYS)
++      rc = PyErr_SetFromErrnoWithFilename(PyExc_OSError, func);
++    else
++      rc = PyErr_SetFromErrnoWithFilename(PyExc_OSError, name);
+     PyMem_Free(name);
+     return rc;
+ }
+@@ -826,7 +879,7 @@ posix_1str(PyObject *args, char *format, int (*func)(const char*))
+     res = (*func)(path1);
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path1);
++        return posix_error_with_allocated_filename(format, path1);
+     PyMem_Free(path1);
+     Py_INCREF(Py_None);
+     return Py_None;
+@@ -1859,7 +1912,7 @@ posix_chmod(PyObject *self, PyObject *args)
+     res = chmod(path, i);
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("chmod", path);
+     PyMem_Free(path);
+     Py_INCREF(Py_None);
+     return Py_None;
+@@ -1906,7 +1959,7 @@ posix_lchmod(PyObject *self, PyObject *args)
+     res = lchmod(path, i);
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("lchmod", path);
+     PyMem_Free(path);
+     Py_RETURN_NONE;
+ }
+@@ -1931,7 +1984,7 @@ posix_chflags(PyObject *self, PyObject *args)
+     res = chflags(path, flags);
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("chflags", path);
+     PyMem_Free(path);
+     Py_INCREF(Py_None);
+     return Py_None;
+@@ -1957,7 +2010,7 @@ posix_lchflags(PyObject *self, PyObject *args)
+     res = lchflags(path, flags);
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("lchflags", path);
+     PyMem_Free(path);
+     Py_INCREF(Py_None);
+     return Py_None;
+@@ -2028,7 +2081,7 @@ posix_chown(PyObject *self, PyObject *args)
+     res = chown(path, uid, gid);
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("chown", path);
+     PyMem_Free(path);
+     Py_INCREF(Py_None);
+     return Py_None;
+@@ -2083,7 +2136,7 @@ posix_lchown(PyObject *self, PyObject *args)
+     res = lchown(path, uid, gid);
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("lchown", path);
+     PyMem_Free(path);
+     Py_INCREF(Py_None);
+     return Py_None;
+@@ -2478,7 +2531,7 @@ posix_listdir(PyObject *self, PyObject *args)
+     dirp = opendir(name);
+     Py_END_ALLOW_THREADS
+     if (dirp == NULL) {
+-        return posix_error_with_allocated_filename(name);
++        return posix_error_with_allocated_filename("listdir", name);
+     }
+     if ((d = PyList_New(0)) == NULL) {
+         Py_BEGIN_ALLOW_THREADS
+@@ -2500,7 +2553,7 @@ posix_listdir(PyObject *self, PyObject *args)
+                 closedir(dirp);
+                 Py_END_ALLOW_THREADS
+                 Py_DECREF(d);
+-                return posix_error_with_allocated_filename(name);
++                return posix_error_with_allocated_filename("listdir", name);
+             }
+         }
+         if (ep->d_name[0] == '.' &&
+@@ -2660,7 +2713,7 @@ posix_mkdir(PyObject *self, PyObject *args)
+ #endif
+     Py_END_ALLOW_THREADS
+     if (res < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("mkdir", path);
+     PyMem_Free(path);
+     Py_INCREF(Py_None);
+     return Py_None;
+@@ -3059,7 +3112,7 @@ done:
+ #endif /* HAVE_UTIMES */
+     }
+     if (res < 0) {
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("utime", path);
+     }
+     PyMem_Free(path);
+     Py_INCREF(Py_None);
+@@ -6286,7 +6339,7 @@ posix_readlink(PyObject *self, PyObject *args)
+     n = readlink(path, buf, (int) sizeof buf);
+     Py_END_ALLOW_THREADS
+     if (n < 0)
+-        return posix_error_with_allocated_filename(path);
++        return posix_error_with_allocated_filename("readlink", path);
+ 
+     PyMem_Free(path);
+     v = PyString_FromStringAndSize(buf, n);
+@@ -6532,7 +6585,7 @@ posix_open(PyObject *self, PyObject *args)
+     PyErr_Clear();
+ #endif
+ 
+-    if (!PyArg_ParseTuple(args, "eti|i",
++    if (!PyArg_ParseTuple(args, "eti|i:open",
+                           Py_FileSystemDefaultEncoding, &file,
+                           &flag, &mode))
+         return NULL;
+@@ -6541,7 +6594,7 @@ posix_open(PyObject *self, PyObject *args)
+     fd = open(file, flag, mode);
+     Py_END_ALLOW_THREADS
+     if (fd < 0)
+-        return posix_error_with_allocated_filename(file);
++        return posix_error_with_allocated_filename("open", file);
+     PyMem_Free(file);
+     return PyInt_FromLong((long)fd);
+ }
 diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 index c2907f6..9e64898 100644
 --- a/Modules/pwdmodule.c
@@ -124,6 +290,37 @@ index 2739b8b..35f0aa0 100644
 +  setvbuf(stdin, NULL, _IOLBF, 0);
 +#endif
  	return Py_Main(argc, argv);
+ }
+diff --git a/Modules/timemodule.c b/Modules/timemodule.c
+index 12c43b0..b727afa 100644
+--- a/Modules/timemodule.c
++++ b/Modules/timemodule.c
+@@ -34,6 +34,11 @@ extern int ftime(struct timeb *);
+ #endif /* MS_WINDOWS */
+ #endif /* HAVE_FTIME */
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++#define timezone _timezone
++#define daylight _daylight
++#endif
++
+ #if defined(__WATCOMC__) && !defined(__QNX__)
+ #include <i86.h>
+ #else
+diff --git a/Python/getversion.c b/Python/getversion.c
+index 7bd6efd..b4f6702 100644
+--- a/Python/getversion.c
++++ b/Python/getversion.c
+@@ -8,8 +8,8 @@
+ const char *
+ Py_GetVersion(void)
+ {
+-	static char version[250];
+-	PyOS_snprintf(version, sizeof(version), "%.80s (%.80s) %.80s",
++	static char version[270];
++	PyOS_snprintf(version, sizeof(version), "%.80s (%.80s) %.100s",
+ 		      PY_VERSION, Py_GetBuildInfo(), Py_GetCompiler());
+ 	return version;
  }
 diff --git a/Python/thread.c b/Python/thread.c
 index dd333e8..33fec81 100644

@@ -13,7 +13,9 @@ CustomBuildStep() {
   # than alongside the Makefile.
   export OUTBASE=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   export NACLPORTS_INCLUDE
+  export NACLPORTS_PREFIX
   export NACL_PACKAGES_PUBLISH
+  export NACL_SRC
 
   MakeDir ${OUTBASE}
   if [ "${NACL_GLIBC}" = "1" ]; then
