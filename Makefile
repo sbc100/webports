@@ -102,7 +102,6 @@ LIBRARIES = \
      libraries/glib \
      libraries/glibc-compat \
      libraries/gsl \
-     libraries/gtest \
      libraries/ImageMagick \
      libraries/jpeg \
      libraries/jsoncpp \
@@ -287,7 +286,6 @@ $(SENT)/libraries/boost: libraries/zlib libraries/bzip2
 $(SENT)/libraries/freealut: libraries/openal-soft
 $(SENT)/examples/audio/openal-ogg: \
     libraries/openal-soft libraries/libvorbis
-$(SENT)/libraries/nacl-mounts: libraries/gtest
 ifneq ($(NACL_GLIBC), 1)
   $(SENT)/libraries/openssl: libraries/glibc-compat
 endif
@@ -321,7 +319,6 @@ gc: libraries/gc ;
 gif: libraries/giflib ;
 glib: libraries/glib ;
 glibc-compat: libraries/glibc-compat ;
-gtest: libraries/gtest ;
 gsl: libraries/gsl ;
 hangul: libraries/libhangul ;
 imagemagick: libraries/ImageMagick ;

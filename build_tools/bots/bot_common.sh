@@ -33,7 +33,6 @@ CalculatePackageShards()
     libraries/faad2
     libraries/Mesa
     libraries/box2d
-    libraries/gtest
     libraries/nacl-mounts
     libraries/zlib
     libraries/ncurses
@@ -43,7 +42,6 @@ CalculatePackageShards()
 
   PKG_LIST_PART_1="
     libraries/libmikmod
-    libraries/gtest
     libraries/zlib
     libraries/libpng
     libraries/libmng
@@ -76,7 +74,7 @@ CalculatePackageShards()
 
   for PKG in ${PKG_LIST_PART_0} ${PKG_LIST_PART_1}; do
     if [[ ! "${ALL_PACKAGES}" =~ "${PKG}" ]]; then
-      echo "Invalid package name: ${PKG}"
+      echo "bot_common.sh: Invalid package name: ${PKG}"
       echo "@@@STEP_FAILURE@@@"
       exit 1
     fi
@@ -85,7 +83,7 @@ CalculatePackageShards()
   local DEPS=$(make -s PRINT_DEPS=1 ${PKG_LIST_PART_0})
   for DEP in ${DEPS}; do
     if [[ ! "${PKG_LIST_PART_0}" =~ "${DEP}" ]]; then
-      echo "Shard 0 failed to include dependency: ${DEP}"
+      echo "bot_common.sh: Shard 0 failed to include dependency: ${DEP}"
       echo "@@@STEP_FAILURE@@@"
       exit 1
     fi
@@ -94,7 +92,7 @@ CalculatePackageShards()
   local DEPS=$(make -s PRINT_DEPS=1 ${PKG_LIST_PART_1})
   for DEP in ${DEPS}; do
     if [[ ! "${PKG_LIST_PART_1}" =~ "${DEP}" ]]; then
-      echo "Shard 1 failed to include dependency: ${DEP}"
+      echo "bot_common.sh: Shard 1 failed to include dependency: ${DEP}"
       echo "@@@STEP_FAILURE@@@"
       exit 1
     fi
