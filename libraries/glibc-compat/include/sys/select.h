@@ -13,6 +13,6 @@
 extern int select (int __nfds, fd_set *__restrict __readfds,
                    fd_set *__restrict __writefds,
                    fd_set *__restrict __exceptfds,
-                   struct timeval *__restrict __timeout) __THROW;
+                   struct timeval *__restrict __timeout);
 
 #endif /* _GLIBCEMU_SYS_SELECT_H */

@@ -2,34 +2,25 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-openssl-1.0.0e.sh
-#
-# usage:  nacl-openssl-1.0.0e.sh
-#
-# this script downloads, patches, and builds openssl for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  local extra_args=""
-  if [[ "${NACL_ARCH}" = "pnacl" ||
-        "${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
-    readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
-    if [[ ! -f ${GLIBC_COMPAT}/netdb.h ]]; then
+  local EXTRA_ARGS=""
+  if [ "${NACL_GLIBC}" != "1" ] ; then
+    local GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
+    if [ ! -f ${GLIBC_COMPAT}/netdb.h ]; then
       echo "Please install glibc-compat first"
       exit 1
     fi
-    extra_args+=" no-dso -DOPENSSL_NO_SOCK=1 -I${GLIBC_COMPAT}"
+    EXTRA_ARGS+=" no-dso -DOPENSSL_NO_SOCK=1 -I${GLIBC_COMPAT}"
   fi
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   MACHINE=i686 CC=${NACLCC} AR=${NACLAR} RANLIB=${NACLRANLIB} ./config \
-     --prefix=${NACLPORTS_PREFIX} no-asm no-hw no-krb5 ${extra_args} -D_GNU_SOURCE
+     --prefix=${NACLPORTS_PREFIX} no-asm no-hw no-krb5 ${EXTRA_ARGS} -D_GNU_SOURCE
 }
 
 CustomHackStepForNewlib() {
@@ -50,8 +41,7 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomConfigureStep
-  if [[ "${NACL_ARCH}" = "pnacl" ||
-        "${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
+  if [ "${NACL_GLIBC}" != "1" ]; then
     CustomHackStepForNewlib
   fi
   CustomBuildStep

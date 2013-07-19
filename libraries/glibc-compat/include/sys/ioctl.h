@@ -11,8 +11,17 @@
 #include <bits/ioctls.h>
 #endif
 
+#define TCGETS		0x5401
+#define TCSETS		0x5402
+#define TCSETSW		0x5403
+#define TCSETSF		0x5404
+#define TCGETA		0x5405
+#define TCSETA		0x5406
+#define TCSETAW		0x5407
+#define TCSETAF		0x5408
 #define TIOCGPGRP	0x540F
 #define TIOCGWINSZ	0x5413
+#define TIOCSWINSZ	0x5414
 
 struct winsize
   {

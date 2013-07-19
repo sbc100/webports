@@ -1,0 +1,22 @@
+diff --git a/configure b/configure
+index 639b790..0411754 100755
+--- a/configure
++++ b/configure
+@@ -5400,7 +5400,7 @@ irix*) #(vi
+ 		LD_RPATH_OPT="-rpath "
+ 	fi
+ 	;;
+-linux*|gnu*|k*bsd*-gnu) #(vi
++linux*|gnu*|nacl*|k*bsd*-gnu) #(vi
+ 	LD_RPATH_OPT="-Wl,-rpath,"
+ 	;;
+ openbsd[2-9].*) #(vi
+@@ -5662,7 +5662,7 @@ echo "${ECHO_T}$cf_cv_ldflags_search_paths_first" >&6
+ 		fi
+ 		cf_cv_rm_so_locs=yes
+ 		;;
+-	linux*|gnu*|k*bsd*-gnu) #(vi
++	linux*|gnu*|nacl*|k*bsd*-gnu) #(vi
+ 		if test "$DFT_LWR_MODEL" = "shared" ; then
+ 			LOCAL_LDFLAGS="${LD_RPATH_OPT}\$(LOCAL_LIBDIR)"
+ 			LOCAL_LDFLAGS2="$LOCAL_LDFLAGS"

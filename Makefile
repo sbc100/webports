@@ -133,6 +133,7 @@ LIBRARIES = \
      libraries/pixman \
      libraries/protobuf \
      libraries/python \
+     libraries/readline \
      libraries/Regal \
      libraries/SDL \
      libraries/SDL_image \
@@ -260,6 +261,7 @@ $(SENT)/examples/editors/vim: \
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
     libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
+$(SENT)/libraries/python: libraries/ncurses libraries/readline
 $(SENT)/examples/games/scummvm: \
     libraries/nacl-mounts libraries/SDL libraries/libvorbis
 $(SENT)/examples/systems/bochs: \
@@ -286,7 +288,9 @@ $(SENT)/libraries/boost: libraries/zlib libraries/bzip2
 $(SENT)/libraries/freealut: libraries/openal-soft
 $(SENT)/examples/audio/openal-ogg: \
     libraries/openal-soft libraries/libvorbis
+$(SENT)/libraries/readline: libraries/ncurses
 ifneq ($(NACL_GLIBC), 1)
+  $(SENT)/libraries/readline: libraries/glibc-compat
   $(SENT)/libraries/openssl: libraries/glibc-compat
 endif
 $(SENT)/libraries/libmng: libraries/zlib libraries/jpeg
@@ -356,6 +360,7 @@ speex: libraries/speex ;
 tar: libraries/libtar ;
 theora: libraries/libtheora ;
 tiff: libraries/tiff ;
+readline: libraries/readline ;
 regal: libraries/Regal ;
 tinyxml: libraries/tinyxml ;
 tomcrypt: libraries/libtomcrypt ;
@@ -380,10 +385,7 @@ python_ppapi: examples/tools/python_ppapi ;
 scummvm: examples/games/scummvm ;
 snes9x: examples/games/snes9x ;
 thttpd: examples/tools/thttpd ;
-vim: examples/editors/vim ;
+# Deliberate space after vim target to avoid detection
+# as modeline string.
+vim : examples/editors/vim ;
 xaos: examples/graphics/xaos ;
-
-#####################################################################
-# Extra padding to prevent the vim rule above from being interpreted
-# as a vim "modeline".
-#####################################################################
