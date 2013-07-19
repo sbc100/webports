@@ -19,13 +19,8 @@ CustomConfigureStep() {
   fi
   CC=${NACLCC} AR="${NACLAR} -r" RANLIB=${NACLRANLIB} CFLAGS="${CFLAGS}" \
      LogExecute ./configure ${CONFIGURE_ARGS}
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    export MAKEFLAGS="EXE=.pexe"
-    EXECUTABLES="minigzip.pexe example.pexe"
-  else
-    export MAKEFLAGS="EXE=.nexe"
-    EXECUTABLES="minigzip.nexe example.nexe"
-  fi
+  export MAKEFLAGS="EXE=${NACL_EXEEXT}"
+  EXECUTABLES="minigzip${NACL_EXEEXT} example${NACL_EXEEXT}"
 }
 
 

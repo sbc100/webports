@@ -19,7 +19,7 @@ CustomConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
-  local naclhost
+  local conf_host
   if [ "${NACL_ARCH}" = pnacl ]; then
     conf_host=pnacl
   else
@@ -35,11 +35,8 @@ CustomConfigureStep() {
     --libdir=${NACLPORTS_LIBDIR} \
     --extra-ldflags="-lnosys -lm" \
     --host=${conf_host}
-}
 
-
-CustomPatchStep() {
-  DefaultPatchStep
+  make clean
 }
 
 
@@ -47,7 +44,7 @@ CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
-  CustomPatchStep
+  DefaultPatchStep
   CustomConfigureStep
   DefaultBuildStep
   DefaultInstallStep

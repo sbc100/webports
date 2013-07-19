@@ -52,15 +52,14 @@ CustomInstallStep() {
   install ${START_DIR}/peppermount_helper.js ${PUBLISH_DIR}
   install ${START_DIR}/json2min.js ${PUBLISH_DIR}
   BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp ${BUILD_DIR}/thttpd ${BUILD_DIR}/thttpd_${NACL_ARCH}.nexe
-  install ${BUILD_DIR}/thttpd_${NACL_ARCH}.nexe \
-      ${PUBLISH_DIR}/thttpd_${NACL_ARCH}.nexe
+  cp ${BUILD_DIR}/thttpd ${BUILD_DIR}/thttpd_${NACL_ARCH}${NACL_EXEEXT}
+  install ${BUILD_DIR}/thttpd_${NACL_ARCH}${NACL_EXEEXT} ${PUBLISH_DIR}/
   ChangeDir ${PUBLISH_DIR}
 
   CMD="$NACL_SDK_ROOT/tools/create_nmf.py \
        $NACL_CREATE_NMF_FLAGS
       -o thttpd.nmf -s . \
-      thttpd_*.nexe"
+      thttpd_*${NACL_EXEEXT}"
 
   LogExecute $CMD
 }

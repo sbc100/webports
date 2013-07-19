@@ -2,7 +2,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 source pkg_info
 source ../../build_tools/common.sh
@@ -20,7 +19,8 @@ CustomBuildStep() {
   LogExecute make clean
   LogExecute make -j${OS_JOBS}
 
-  local tests="tests/seek_accuracy tests/seek_whence tests/text"
+  Banner "Build Tests"
+  local tests="tests/seek_accuracy${NACL_EXEEXT} tests/seek_whence${NACL_EXEEXT} tests/text${NACL_EXEEXT}"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src
   echo "Directory: $(pwd)"
@@ -29,9 +29,9 @@ CustomBuildStep() {
 }
 
 CustomInstallStep() {
+  Banner "Install"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
   LogExecute make install
-
 }
 
 CustomPackageInstall() {

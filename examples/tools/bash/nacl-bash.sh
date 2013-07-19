@@ -32,7 +32,7 @@ CustomInstallStep() {
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/bashtar
-  cp bin/bash ../bash_${NACL_ARCH}.nexe
+  cp bin/bash ../bash_${NACL_ARCH}${NACL_EXEEXT}
   rm -rf bin
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/bash.tar .
@@ -41,7 +41,7 @@ CustomInstallStep() {
   cd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
-      *.nexe \
+      bash_*${NACL_EXEEXT} \
       -s . \
       -o bash.nmf
   cp ${NACL_SRC}/libraries/hterm/src/chromeapps/hterm/js/*.js ${ASSEMBLY_DIR}

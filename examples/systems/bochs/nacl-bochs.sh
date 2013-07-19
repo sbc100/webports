@@ -62,7 +62,7 @@ CustomConfigureStep() {
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
 
-  ../configure \
+  EXE=${NACL_EXEEXT} LogExecute ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
@@ -75,9 +75,9 @@ CustomConfigureStep() {
 }
 
 CustomExtractStep() {
-  Banner "Untaring $1"
+  Banner "Untaring $1 to $2"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_NAME}
+  Remove $2
   if [ $OS_SUBDIR = "windows" ]; then
     tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/$1
   else
@@ -106,7 +106,7 @@ CustomInstallStep() {
 
   cp ${START_DIR}/bochs.html ${PUBLISH_DIR}
   cp ${START_DIR}/bochs.nmf ${PUBLISH_DIR}
-  cp ${BOCHS_BUILD}/bochs ${PUBLISH_DIR}/bochs_${NACL_ARCH}.nexe
+  cp ${BOCHS_BUILD}/bochs ${PUBLISH_DIR}/bochs_${NACL_ARCH}${NACL_EXEEXT}
 
   cd ..
 }
@@ -134,14 +134,11 @@ CustomDownloadStep() {
 
 FetchLinuxStep() {
   Banner "FetchLinuxStep"
-  PACKAGE_DIR_TEMP=${PACKAGE_DIR}
   ARCHIVE_NAME=$2.tar.gz
-  PACKAGE_DIR=$2
   SHA1=${BOCHS_EXAMPLE_DIR}/$2/$2.sha1
   CustomDownloadStep $1 $2 ${SHA1}
-  CustomExtractStep ${ARCHIVE_NAME}
+  CustomExtractStep ${ARCHIVE_NAME} $2
   unset ARCHIVE_NAME
-  PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 
 

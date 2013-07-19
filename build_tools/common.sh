@@ -22,13 +22,13 @@ set -o errexit
 # Note that default build steps reference the packages directory.
 readonly SAVE_PWD=$(pwd)
 
-readonly SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
+readonly TOOLS_DIR=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
 readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
-readonly NACL_SRC=$(dirname ${SCRIPT_DIR})
+readonly NACL_SRC=$(dirname ${TOOLS_DIR})
 readonly NACL_PACKAGES=${NACL_SRC}
 readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
 
-. ${SCRIPT_DIR}/nacl_env.sh
+. ${TOOLS_DIR}/nacl_env.sh
 
 # When run by a buildbot force all archives to come from the NaCl mirror
 # rather than using upstream URL.
@@ -37,7 +37,7 @@ if [ -n ${BUILDBOT_BUILDERNAME:-""} ]; then
 fi
 
 # sha1check python script
-readonly SHA1CHECK=${SCRIPT_DIR}/sha1check.py
+readonly SHA1CHECK=${TOOLS_DIR}/sha1check.py
 
 # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
 # Default to the usr folder within the SDK.
@@ -184,6 +184,7 @@ CheckPatchVersion() {
   fi
 }
 
+
 CheckToolchain() {
   if [ -n "${LIBC:-}" ]; then
     if [ "${LIBC}" == "glibc" ]; then
@@ -199,6 +200,13 @@ CheckToolchain() {
     fi
   fi
 }
+
+
+InstallConfigSite() {
+  local CONFIG_SITE=${NACLPORTS_PREFIX}/share/config.site
+  echo "ac_cv_exeext=${NACL_EXEEXT}" > ${CONFIG_SITE}
+}
+
 
 PatchSpecFile() {
   if [ ${NACL_ARCH} == "pnacl" -o ${NACL_ARCH} == "arm" ]; then
@@ -244,11 +252,6 @@ CheckSDKVersion() {
   fi
 }
 
-CheckToolchain
-CheckPatchVersion
-CheckSDKVersion
-PatchSpecFile
-
 
 ######################################################################
 # Helper functions
@@ -268,6 +271,13 @@ Usage() {
 
 ReadKey() {
   read
+}
+
+
+# echo a command to stdout and then execute it.
+LogExecute() {
+  echo $*
+  $*
 }
 
 
@@ -291,6 +301,7 @@ IsGitRepo() {
     return 1;
   fi
 }
+
 
 TryFetch() {
   Banner "Fetching ${PACKAGE_NAME} ($2)"
@@ -357,6 +368,7 @@ DefaultDownloadStep() {
     fi
   fi
 }
+
 
 GitCloneStep() {
   if CheckKeyStamp clone "$URL" ; then
@@ -443,6 +455,7 @@ DefaultPreInstallStep() {
   MakeDir ${NACL_PACKAGES_PUBLISH}
 }
 
+
 InitGitRepo() {
   if [ -d .git ]; then
     local PREEXISTING_REPO=1
@@ -491,6 +504,7 @@ DefaultCleanStep() {
   Remove ${PACKAGE_DIR}
 }
 
+
 CheckStamp() {
   local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
   local STAMP_FILE="${STAMP_DIR}/$1"
@@ -507,6 +521,7 @@ CheckStamp() {
   done
   return 0
 }
+
 
 TouchStamp() {
   local STAMP_DIR=${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}
@@ -548,6 +563,10 @@ TouchKeyStamp() {
   echo $2 > ${STAMP_DIR}/$1
 }
 
+
+######################################################################
+# Build Steps
+######################################################################
 DefaultExtractStep() {
   ArchiveName
 
@@ -592,7 +611,7 @@ PatchConfigSub() {
       echo "$CONFIG_SUB supports NaCl"
     else
       echo "Patching config.sub"
-      /bin/cp -f ${SCRIPT_DIR}/config.sub $CONFIG_SUB
+      /bin/cp -f ${TOOLS_DIR}/config.sub $CONFIG_SUB
     fi
   fi
 }
@@ -601,7 +620,7 @@ PatchConfigSub() {
 PatchConfigure() {
   if [ -f configure ]; then
     Banner "Patching configure"
-    ${SCRIPT_DIR}/patch_configure.py configure
+    ${TOOLS_DIR}/patch_configure.py configure
   fi
 }
 
@@ -669,13 +688,6 @@ DefaultConfigureStep() {
     --${NACL_OPTION}-asm \
     --with-x=no  \
     "${EXTRA_CONFIGURE_OPTS[@]}" ${EXTRA_CONFIGURE_ARGS:-}
-}
-
-
-# echo a command to stdout and then execute it.
-LogExecute() {
-  echo $*
-  $*
 }
 
 
@@ -883,3 +895,15 @@ DefaultPackageInstall() {
   DefaultValidateStep
   DefaultInstallStep
 }
+
+
+######################################################################
+# Always run
+# These functions are called when this script is imported to do
+# any essential checking/setup operations.
+######################################################################
+CheckToolchain
+CheckPatchVersion
+CheckSDKVersion
+PatchSpecFile
+InstallConfigSite

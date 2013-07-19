@@ -24,7 +24,7 @@ CustomInstallStep() {
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/nanotar
-  cp bin/nano ../nano_${NACL_ARCH}.nexe
+  cp bin/nano ../nano_${NACL_ARCH}${NACL_EXEEXT}
   rm -rf bin
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/nano.tar .
@@ -33,7 +33,7 @@ CustomInstallStep() {
   cd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
-      *.nexe \
+      nano_*${NACL_EXEEXT} \
       -s . \
       -o nano.nmf
   cp ${NACL_SRC}/libraries/hterm/src/chromeapps/hterm/js/*.js ${ASSEMBLY_DIR}

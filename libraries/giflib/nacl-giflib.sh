@@ -11,9 +11,9 @@ export LIBS='-lnosys'
 
 
 if [ "${NACL_GLIBC}" = "1" ]; then
-  EXECUTABLES=util/.libs/rgb2gif
+  EXECUTABLES=util/.libs/rgb2gif${NACL_EXEEXT}
 else
-  EXECUTABLES=util/rgb2gif
+  EXECUTABLES=util/rgb2gif${NACL_EXEEXT}
 fi
 
 TestStep() {
@@ -28,14 +28,14 @@ TestStep() {
   fi
 
   if [ $NACL_ARCH = "pnacl" ]; then
-    WriteSelLdrScript util/rgb2gif.sh rgb2gif.x86-64.nexe
+    WriteSelLdrScript util/rgb2gif rgb2gif.x86-64.nexe
   elif [ "${NACL_GLIBC}" = "1" ]; then
-    WriteSelLdrScript util/rgb2gif.sh .libs/rgb2gif
+    WriteSelLdrScript util/rgb2gif .libs/rgb2gif${NACL_EXEEXT}
   else
-    WriteSelLdrScript util/rgb2gif.sh rgb2gif
+    WriteSelLdrScript util/rgb2gif rgb2gif${NACL_EXEEXT}
   fi
 
-  util/rgb2gif.sh -s 320 200  < ../tests/porsche.rgb > porsche.gif
+  util/rgb2gif -s 320 200  < ../tests/porsche.rgb > porsche.gif
   # TODO(sbc): do some basic checks on the resulting porsche.gif
 }
 

@@ -44,7 +44,7 @@ CustomBuildStep() {
   local ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
   MakeDir ${ASSEMBLY_DIR}
   cp ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack \
-      ${ASSEMBLY_DIR}/nethack_${NACL_ARCH}.nexe
+      ${ASSEMBLY_DIR}/nethack_${NACL_ARCH}${NACL_EXEEXT}
   ChangeDir ${PACKAGE_DIR}/out/games
   rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
   tar cf ${ASSEMBLY_DIR}/nethack.tar lib
@@ -52,7 +52,7 @@ CustomBuildStep() {
   pushd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
-      *.nexe \
+      nethack_*${NACL_EXEEXT} \
       -s . \
       -o nethack.nmf
   popd

@@ -27,11 +27,7 @@ $(eval $(call HTML_RULE,$(TARGET),))
 
 install:
 	mkdir -p $(INSTALL_DIR)
-ifeq ($(TOOLCHAIN),pnacl)
-	cp $(OUTDIR)/*.pexe $(INSTALL_DIR)
-else
-	cp $(OUTDIR)/*.nexe $(INSTALL_DIR)
-endif
+	cp $(OUTDIR)/*$(NACL_EXEEXT) $(INSTALL_DIR)
 	cp $(OUTDIR)/$(TARGET).nmf $(INSTALL_DIR)
 	cp $(OUTDIR)/$(TARGET).html $(INSTALL_DIR)
 

@@ -11,12 +11,12 @@ NACLPORTS_ROOT ?= ../../..
 PUBLISH_DIR = $(NACLPORTS_ROOT)/out/publish/alut_hello_world
 CFLAGS += -O3 -Werror -I$(NACL_SDK_ROOT)/include
 CCFLAGS += -std=gnu99
-LIBS += -lppapi_main -lnacl_mounts -lppapi -lppapi_cpp -lalut -lopenal -lvorbisfile -lvorbis -logg -lm 
+LIBS += -lppapi_main -lnacl_mounts -lppapi -lppapi_cpp -lalut -lopenal -lvorbisfile -lvorbis -logg -lm
 LDFLAGS += -L$(NACL_SDK_ROOT)/lib/newlib_$(NACL_ARCH)/Debug -pthread
 
 all: publish
 
-NEXE = $(PUBLISH_DIR)/alut_hello_world_$(NACL_ARCH).nexe
+NEXE = $(PUBLISH_DIR)/alut_hello_world_$(NACL_ARCH)$(NACL_EXEEXT}
 
 %.o: %.c
 	$(NACLCC) -o $@ -c $< $(CFLAGS)

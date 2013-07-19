@@ -19,7 +19,7 @@ CustomPatchStep() {
   DefaultPatchStep
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   Banner "Patching configure"
-  ${SCRIPT_DIR}/patch_configure.py builds/unix/configure
+  ${TOOLS_DIR}/patch_configure.py builds/unix/configure
 }
 
 

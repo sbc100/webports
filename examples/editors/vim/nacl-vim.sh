@@ -44,7 +44,7 @@ CustomInstallStep() {
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/vimtar
-  cp bin/vim ../vim_${NACL_ARCH}.nexe
+  cp bin/vim ../vim_${NACL_ARCH}${NACL_EXEEXT}
   rm -rf bin
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/vim.tar .
@@ -53,7 +53,7 @@ CustomInstallStep() {
   cd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
-      *.nexe \
+      vim_*${NACL_EXEEXT} \
       -s . \
       -o vim.nmf
   cp ${NACL_SRC}/libraries/hterm/src/chromeapps/hterm/js/*.js ${ASSEMBLY_DIR}

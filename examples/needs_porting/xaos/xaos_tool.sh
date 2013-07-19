@@ -184,7 +184,7 @@ if [ ${MODE} = 'all' ] ; then
   BuildXaos  ${DIR_TMP} ${DIR_INSTALL}
 
   Banner "Copying relevant files into this directory"
-  cp ${DIR_TMP}/xaos-build/bin/xaos ${SAVE_PWD}/xaos.nexe
+  cp ${DIR_TMP}/xaos-build/bin/xaos ${SAVE_PWD}/xaos${NACL_EXEEXT}
   cp ${DIR_TMP}/xaos-build/help/xaos.hlp ${SAVE_PWD}/
 
   Banner "To view the demo"
@@ -196,7 +196,7 @@ if [ ${MODE} = 'all' ] ; then
   echo "after running tools/httpd.py while in the native_client directory"
   echo "or run"
   echo
-  echo "../../scons-out/opt-linux-x86-32/staging/sel_ldr ./xaos.nexe"
+  echo "../../scons-out/opt-linux-x86-32/staging/sel_ldr ./xaos${NACL_EXEEXT}"
   exit 0
 fi
 

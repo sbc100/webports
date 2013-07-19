@@ -7,21 +7,24 @@
 NACL_ARCH ?= x86_64
 NACLCC ?= $(NACH_ARCH)-nacl-g++
 NACLPORTS_ROOT ?= ../../..
+NACL_EXEEXT ?= ".nexe"
 PUBLISH_DIR = $(NACLPORTS_ROOT)/out/publish/openal-ogg
 CFLAGS += -O3 -std=gnu99 -Werror -I${NACL_SDK_ROOT}/include
 LIBS += -lppapi -lopenal -lvorbisfile -lvorbis -logg -lm -lpthread
 
 all: publish
 
-openal_ogg_$(NACL_ARCH).nexe: openal_ogg.c ogg_buffer_reader.c
+BIN = penal_ogg_$(NACL_ARCH)$(NACL_EXEEXT)
+
+$(BIN): openal_ogg.c ogg_buffer_reader.c
 	$(NACLCC) -o $@ $^ $(CFLAGS) $(LDFLAGS) $(LIBS)
 
-publish: openal_ogg_$(NACL_ARCH).nexe index.html openal_ogg.nmf sample.ogg
+publish: $(BIN) index.html openal_ogg.nmf sample.ogg
 	mkdir -p $(PUBLISH_DIR)
 	cp $^ $(PUBLISH_DIR)
 
 clean:
-	rm -f *.o *.nexe
+	rm -f *.o *$(NACL_EXEEXT)
 
 run:
 	cd $(PUBLISH_DIR) && $(NACL_SDK_ROOT)/tools/httpd.py --no_dir_check

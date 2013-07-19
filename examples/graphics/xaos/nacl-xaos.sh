@@ -76,7 +76,7 @@ CustomInstallStep(){
   install ${START_DIR}/xaos.nmf ${publish_dir}
   # Not used yet
   install ${build_dir}/help/xaos.hlp ${publish_dir}
-  install ${build_dir}/bin/xaos ${publish_dir}/xaos_${NACL_ARCH}.nexe
+  install ${build_dir}/bin/xaos ${publish_dir}/xaos_${NACL_ARCH}${NACL_EXEEXT}
 }
 
 CustomPackageInstall() {

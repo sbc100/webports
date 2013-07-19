@@ -69,7 +69,7 @@ CustomConfigureStep() {
   LDFLAGS="${NACL_LDFLAGS}"
 
   local MAYBE_NOSYS=""
-  if [ "${NACL_GLIBC}" = "0" ]; then
+  if [ "${NACL_GLIBC}" != "1" ]; then
     MAYBE_NOSYS="-lnosys"
   fi
 
@@ -87,9 +87,9 @@ CustomInstallStep(){
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
-  LogExecute install ${DOSBOX_BUILD}/src/dosbox ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
+  LogExecute install ${DOSBOX_BUILD}/src/dosbox${NACL_EXEEXT} ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
   local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py ${NACL_CREATE_NMF_FLAGS}"
-  LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/*.nexe -o ${PUBLISH_DIR}/dosbox.nmf
+  LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/*.${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
 }
 
 CustomPackageInstall() {

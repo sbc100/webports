@@ -6,7 +6,8 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-EXECUTABLES=python.nexe
+EXECUTABLES=python${NACL_EXEEXT}
+
 # Currently this package only builds on linux.
 # The build relies on certain host binaries and pythong's configure
 # requires us to sett --build= as well as --host=.
@@ -37,7 +38,7 @@ CustomConfigureStep() {
   # which we do not provide.  TODO(sbc): remove this once nacl_io supports
   # getaddrinfo.
   EXTRA_CONFIGURE_ARGS="--disable-ipv6"
-  EXTRA_CONFIGURE_ARGS+=" --with-suffix=.nexe"
+  EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
   export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
   export LIBS="-ltermcap -lc -lnosys"
@@ -48,7 +49,7 @@ CustomConfigureStep() {
 }
 
 CustomTestStep() {
-  WriteSelLdrScript python python.nexe
+  WriteSelLdrScript python python${NACL_EXEEXT}
 }
 
 CustomPackageInstall() {
