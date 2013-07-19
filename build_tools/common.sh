@@ -204,6 +204,7 @@ CheckToolchain() {
 
 InstallConfigSite() {
   local CONFIG_SITE=${NACLPORTS_PREFIX}/share/config.site
+  mkdir -p ${NACLPORTS_PREFIX}/share
   echo "ac_cv_exeext=${NACL_EXEEXT}" > ${CONFIG_SITE}
 }
 
