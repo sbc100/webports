@@ -7,7 +7,7 @@ source pkg_info
 source ../../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/systems/dosbox-0.74
-EXECUTABLES=src/dosbox
+EXECUTABLES=src/dosbox${NACL_EXEEXT}
 
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -89,7 +89,7 @@ CustomInstallStep(){
   LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
   LogExecute install ${DOSBOX_BUILD}/src/dosbox${NACL_EXEEXT} ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
   local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py ${NACL_CREATE_NMF_FLAGS}"
-  LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/*.${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
+  LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
 }
 
 CustomPackageInstall() {

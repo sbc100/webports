@@ -831,6 +831,7 @@ HERE
 #
 TranslatePexe() {
   local pexe=$1
+  local basename="${pexe%.*}"
   local arches="arm x86-32 x86-64"
   Banner "Translating ${pexe}"
 
@@ -839,14 +840,14 @@ TranslatePexe() {
 
   for a in ${arches} ; do
     echo "translating pexe [$a]"
-    nexe=${pexe}.$a.nexe
+    nexe=${basename}.$a.nexe
     TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${nexe}
   done
 
   # PIC branch
   for a in ${arches} ; do
     echo "translating pexe [$a,pic]"
-    nexe=${pexe}.$a.pic.nexe
+    nexe=${basename}.$a.pic.nexe
     TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${nexe}
   done
 
@@ -857,14 +858,14 @@ TranslatePexe() {
 
   for a in ${arches} ; do
     echo "translating pexe [$a]"
-    nexe=${pexe}.opt.$a.nexe
+    nexe=${basename}.opt.$a.nexe
     TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped.opt -o ${nexe}
   done
 
   # PIC branch
   for a in ${arches}; do
     echo "translating pexe [$a,pic]"
-    nexe=${pexe}.$a.pic.opt.nexe
+    nexe=${basename}.$a.pic.opt.nexe
     TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped.opt -o ${nexe}
   done
 
