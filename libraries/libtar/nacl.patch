@@ -1,5 +1,5 @@
 diff --git a/configure b/configure
-index 466a189..d817fa9 100755
+index 466a189..3b1fe44 100755
 --- a/configure
 +++ b/configure
 @@ -2602,8 +2602,8 @@ cat >>confdefs.h <<\_ACEOF
@@ -56,23 +56,98 @@ index 794c868..014f32f 100644
  	int gid;
  	struct group *gr;
  
-@@ -72,4 +81,5 @@ th_get_gid(TAR *t)
+@@ -72,6 +81,7 @@ th_get_gid(TAR *t)
  	/* if the group entry doesn't exist */
  	sscanf(t->th_buf.gid, "%o", &gid);
  	return gid;
 +#endif
  }
-
-diff --git a/Makefile.in b/Makefile.in
-index 29db42a..58a6172 100644
---- a/Makefile.in
-+++ b/Makefile.in
-@@ -19,7 +19,7 @@ PACKAGE_VERSION	= @PACKAGE_VERSION@
+ 
+ 
+diff --git a/lib/extract.c b/lib/extract.c
+index 6bbb801..1646191 100644
+--- a/lib/extract.c
++++ b/lib/extract.c
+@@ -28,6 +28,22 @@
+ #endif
+ 
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++struct group *getgrgid(gid_t gid) {
++  errno = ENOSYS;
++  return NULL;
++}
++
++int major(dev_t dev) {
++  return 0;
++}
++
++int minor(dev_t dev) {
++  return 0;
++}
++#endif
++
++
+ struct linkname
+ {
+ 	char ln_save[MAXPATHLEN];
+@@ -117,6 +133,7 @@ tar_extract_file(TAR *t, char *realname)
+ 		if (i == 1)
+ 			i = 0;
+ 	}
++#ifndef __native_client__
+ 	else if (TH_ISLNK(t))
+ 		i = tar_extract_hardlink(t, realname);
+ 	else if (TH_ISSYM(t))
+@@ -127,6 +144,7 @@ tar_extract_file(TAR *t, char *realname)
+ 		i = tar_extract_blockdev(t, realname);
+ 	else if (TH_ISFIFO(t))
+ 		i = tar_extract_fifo(t, realname);
++#endif
+ 	else /* if (TH_ISREG(t)) */
+ 		i = tar_extract_regfile(t, realname);
+ 
+@@ -282,6 +300,7 @@ tar_skip_regfile(TAR *t)
+ }
+ 
+ 
++#ifndef __native_client__
+ /* hardlink */
+ int
+ tar_extract_hardlink(TAR * t, char *realname)
+@@ -436,6 +455,7 @@ tar_extract_blockdev(TAR *t, char *realname)
+ 
+ 	return 0;
+ }
++#endif
+ 
+ 
+ /* directory */
+@@ -493,6 +513,7 @@ tar_extract_dir(TAR *t, char *realname)
+ }
+ 
+ 
++#ifndef __native_client__
+ /* FIFO */
+ int
+ tar_extract_fifo(TAR *t, char *realname)
+@@ -525,5 +546,6 @@ tar_extract_fifo(TAR *t, char *realname)
+ 
+ 	return 0;
+ }
++#endif
+ 
+ 
+diff --git a/libtar/Makefile.in b/libtar/Makefile.in
+index 3128127..c6e42e8 100644
+--- a/libtar/Makefile.in
++++ b/libtar/Makefile.in
+@@ -16,7 +16,7 @@ PACKAGE_VERSION	= @PACKAGE_VERSION@
+ 
+ ### Installation programs and flags
  INSTALL		= @INSTALL@
+-INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
++INSTALL_PROGRAM	= @INSTALL_PROGRAM@
  INSTALL_DATA	= @INSTALL_DATA@
- 
--SUBDIRS = lib libtar doc
-+SUBDIRS = lib doc
- 
- all:
- 	for n in $(SUBDIRS); do \
+ LN_S		= @LN_S@
+ MKDIR		= @MKDIR@

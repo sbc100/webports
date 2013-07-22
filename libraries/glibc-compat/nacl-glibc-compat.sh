@@ -6,13 +6,12 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-readonly LIB_ROOT=`pwd`
 readonly LIB_GLIBC_COMPAT=libglibc-compat.a
 
 CustomExtractStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   mkdir -p ${PACKAGE_NAME}
-  cp -r ${LIB_ROOT}/* ${PACKAGE_NAME}
+  cp -r ${START_DIR}/* ${PACKAGE_NAME}
 }
 
 CustomConfigureStep() {

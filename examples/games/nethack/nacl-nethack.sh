@@ -26,10 +26,15 @@ CustomBuildStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  export WINTTYLIB="-Wl,--whole-archive "
-  export WINTTYLIB="$WINTTYLIB -lncurses -ltar -lnacl_io -lppapi_simple"
-  export WINTTYLIB="$WINTTYLIB -lppapi -lppapi_cpp -lppapi_cpp_private"
-  export WINTTYLIB="$WINTTYLIB -Wl,--no-whole-archive"
+  export WINTTYLIB="-lncurses -ltar -lppapi_simple -lnacl_io"
+  export WINTTYLIB="${WINTTYLIB} -lppapi -lppapi_cpp"
+  if [[ "${NACL_ARCH}" = "pnacl" ||
+        "${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
+    readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
+    export WINTTYLIB="${WINTTYLIB} -lglibc-compat -lnosys"
+    export NACL_CCFLAGS="${NACL_CCFLAGS} -I${GLIBC_COMPAT}"
+  fi
+
   export NACLPORTS_INCLUDE
   export STRNCMPI=1
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
@@ -37,8 +42,16 @@ CustomBuildStep() {
   cp ${START_DIR}/nethack_pepper.cc ${PACKAGE_DIR}/src
   bash sys/unix/setup.sh
   make
-  make install
+}
+
+CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
+
+  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
+  ChangeDir ${PACKAGE_DIR}
+
+  make install
+
   local PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
@@ -58,7 +71,12 @@ CustomBuildStep() {
   popd
   cp ${NACL_SRC}/libraries/hterm/src/chromeapps/hterm/js/*.js ${ASSEMBLY_DIR}
   cp ${NACL_SRC}/libraries/hterm/src/chromeapps/libdot/js/*.js ${ASSEMBLY_DIR}
-  cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
+    sed 's/x-nacl/x-pnacl/' \
+        ${START_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack.js
+  else
+    cp ${START_DIR}/nethack.js ${ASSEMBLY_DIR}
+  fi
   cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
@@ -68,15 +86,16 @@ CustomBuildStep() {
   ChangeDir ${PACKAGE_DIR}
 }
 
-
 CustomPackageInstall() {
   DefaultPreInstallStep
   DefaultDownloadStep
   DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
+  DefaultFinalizeStep
   DefaultTranslateStep
   DefaultValidateStep
+  CustomInstallStep
 }
 
 CustomPackageInstall

@@ -16,7 +16,19 @@ if [ "${NACL_GLIBC}" = 1 ]; then
   EXTRA_CONFIGURE_ARGS+=" --with-shared"
 fi
 
+if [[ "${NACL_ARCH}" = "pnacl" ]] ; then
+  EXTRA_CONFIGURE_ARGS+=" --without-cxx-binding"
+fi
+
 CustomConfigureStep() {
+  if [[ "${NACL_GLIBC}" != "1" ]]; then
+    readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
+    # Changing NACLCC rather than CFLAGS as otherwise the configure script
+    # fails to detect termios and tries to use gtty.
+    NACLCC+=" -I${GLIBC_COMPAT}"
+    export LIBS="-lglibc-compat -lnosys"
+  fi
+
   DefaultConfigureStep
   # Glibc inaccurately reports having sigvec.
   # Change the define

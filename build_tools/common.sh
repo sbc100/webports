@@ -90,6 +90,9 @@ NACL_DEBUG=${NACL_DEBUG:-0}
 if [ ${NACL_DEBUG} = "1" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -g -O0"
   NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -g -O0"
+else
+  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -O2"
+  NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -O2"
 fi
 
 # packages subdirectories
@@ -605,10 +608,10 @@ DefaultExtractStep() {
 PatchConfigSub() {
   # Replace the package's config.sub one with an up-do-date copy
   # that includes nacl support.  We only do this if the string
-  # 'nacl' is not already contained in the file.
+  # 'nacl)' is not already contained in the file.
   local CONFIG_SUB=${CONFIG_SUB:-config.sub}
   if [ -f $CONFIG_SUB ]; then
-    if grep -q nacl $CONFIG_SUB /dev/null; then
+    if grep -q 'nacl)' $CONFIG_SUB /dev/null; then
       echo "$CONFIG_SUB supports NaCl"
     else
       echo "Patching config.sub"
@@ -824,6 +827,22 @@ HERE
 }
 
 
+FinalizePexe() {
+  local pexe=$1
+  Banner "Finalizing ${pexe}"
+  TimeCommand ${PNACLFINALIZE} ${pexe}
+}
+
+
+DefaultFinalizeStep() {
+  if [ ${NACL_ARCH} = "pnacl" -a -n "${EXECUTABLES:-}" ]; then
+    for pexe in ${EXECUTABLES} ; do
+      FinalizePexe ${pexe}
+    done
+  fi
+}
+
+
 #
 # Translate a PNaCl executable (.pexe) into one or more
 # native NaCl executables (.nexe).
@@ -835,38 +854,32 @@ TranslatePexe() {
   local arches="arm x86-32 x86-64"
   Banner "Translating ${pexe}"
 
-  echo "stripping pexe"
-  TimeCommand ${NACLSTRIP} ${pexe} -o ${pexe}.stripped
-
   for a in ${arches} ; do
     echo "translating pexe [$a]"
     nexe=${basename}.$a.nexe
-    TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped -o ${nexe}
+    TimeCommand ${TRANSLATOR} -O0 -arch $a ${pexe} -o ${nexe}
   done
 
   # PIC branch
   for a in ${arches} ; do
     echo "translating pexe [$a,pic]"
     nexe=${basename}.$a.pic.nexe
-    TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped -o ${nexe}
+    TimeCommand ${TRANSLATOR} -O0 -arch $a -fPIC ${pexe} -o ${nexe}
   done
 
-  # Now the same spiel with an optimized pexe
-  opt_args="-O3 -inline-threshold=100"
-  echo "optimizing pexe [${opt_args}]"
-  TimeCommand ${PNACL_OPT} ${opt_args} ${pexe}.stripped -o ${pexe}.stripped.opt
+  # Now the same spiel with -O2
 
   for a in ${arches} ; do
     echo "translating pexe [$a]"
     nexe=${basename}.opt.$a.nexe
-    TimeCommand ${TRANSLATOR} -arch $a ${pexe}.stripped.opt -o ${nexe}
+    TimeCommand ${TRANSLATOR} -O2 -arch $a ${pexe} -o ${nexe}
   done
 
   # PIC branch
   for a in ${arches}; do
     echo "translating pexe [$a,pic]"
     nexe=${basename}.$a.pic.opt.nexe
-    TimeCommand ${TRANSLATOR} -arch $a -fPIC ${pexe}.stripped.opt -o ${nexe}
+    TimeCommand ${TRANSLATOR} -O2 -arch $a -fPIC ${pexe} -o ${nexe}
   done
 
   ls -l $(dirname ${pexe})/*.nexe ${pexe}
@@ -893,6 +906,7 @@ DefaultPackageInstall() {
   DefaultPatchStep
   DefaultConfigureStep
   DefaultBuildStep
+  DefaultFinalizeStep
   DefaultTranslateStep
   DefaultValidateStep
   DefaultInstallStep

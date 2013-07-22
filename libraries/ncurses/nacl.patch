@@ -1,3 +1,58 @@
+diff --git a/ncurses/tinfo/lib_kernel.c b/ncurses/tinfo/lib_kernel.c
+index 37f7084..3a624a2 100644
+--- a/ncurses/tinfo/lib_kernel.c
++++ b/ncurses/tinfo/lib_kernel.c
+@@ -57,7 +57,7 @@ _nc_vdisable(void)
+ #if defined(_POSIX_VDISABLE) && HAVE_UNISTD_H
+     value = _POSIX_VDISABLE;
+ #endif
+-#if defined(_PC_VDISABLE)
++#if defined(_PC_VDISABLE) && !defined(__native_client__)
+     if (value == -1) {
+ 	value = (int) fpathconf(0, _PC_VDISABLE);
+ 	if (value == -1) {
+diff --git a/ncurses/tinfo/lib_baudrate.c b/ncurses/tinfo/lib_baudrate.c
+index 9302f02..ce8c1f6 100644
+--- a/ncurses/tinfo/lib_baudrate.c
++++ b/ncurses/tinfo/lib_baudrate.c
+@@ -219,11 +219,17 @@ NCURSES_SP_NAME(baudrate) (NCURSES_SP_DCL0)
+ 
+     if (IsValidTIScreen(SP_PARM)) {
+ #ifdef USE_OLD_TTY
+-	result = cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
+-	ospeed = _nc_ospeed(result);
++#if defined(__native_client__)
++       ospeed = 0;
++#else
++	result = cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
++	ospeed = _nc_ospeed(result);
++#endif
+ #else /* !USE_OLD_TTY */
+ #ifdef TERMIOS
+-	ospeed = (NCURSES_OSPEED) cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
++#if !defined(__native_client__)
++	ospeed = (NCURSES_OSPEED) cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
++#endif
+ #else
+ 	ospeed = (NCURSES_OSPEED) TerminalOf(SP_PARM)->Nttyb.sg_ospeed;
+ #endif
+diff --git a/progs/tset.c b/progs/tset.c
+index 084e41d..205b88a 100644
+--- a/progs/tset.c
++++ b/progs/tset.c
+@@ -1260,7 +1260,11 @@ main(int argc, char **argv)
+     can_restore = TRUE;
+     original = oldmode = mode;
+ #ifdef TERMIOS
+-    ospeed = (NCURSES_OSPEED) cfgetospeed(&mode);
++#if defined(__native_client__)
++    ospeed = 0;
++#else
++    ospeed = (NCURSES_OSPEED) cfgetospeed(&mode);
++#endif
+ #else
+     ospeed = (NCURSES_OSPEED) mode.sg_ospeed;
+ #endif
 diff --git a/configure b/configure
 index 639b790..0411754 100755
 --- a/configure
@@ -20,3 +75,19 @@ index 639b790..0411754 100755
  		if test "$DFT_LWR_MODEL" = "shared" ; then
  			LOCAL_LDFLAGS="${LD_RPATH_OPT}\$(LOCAL_LIBDIR)"
  			LOCAL_LDFLAGS2="$LOCAL_LDFLAGS"
+diff --git a/ncurses/tty/lib_twait.c b/ncurses/tty/lib_twait.c
+index 329ec29..0879823 100644
+--- a/ncurses/tty/lib_twait.c
++++ b/ncurses/tty/lib_twait.c
+@@ -66,7 +66,10 @@
+ # endif
+ #endif
+ #ifdef __MINGW32__
+-#  include <sys/time.h>
++# include <sys/time.h>
++#endif
++#ifdef __native_client__
++# include <sys/time.h>
+ #endif
+ #undef CUR
+ 

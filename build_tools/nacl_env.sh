@@ -162,6 +162,7 @@ InitializePNaClToolchain() {
   export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
   # pnacl's translator
   export TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
+  export PNACLFINALIZE=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-finalize
   # pnacl's pexe optimizer
   export PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
   # TODO(robertm): figure our why we do not have a pnacl-string

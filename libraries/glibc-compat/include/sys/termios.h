@@ -10,6 +10,8 @@
 # define _TCFLSH (('T'<<8)|7)
 # define _TCXONC (('T'<<8)|6)
 
+# define TCFLSH _TCFLSH
+
 # define TCOOFF	0
 # define TCOON	1
 # define TCIOFF	2
@@ -46,6 +48,7 @@
 # define OCRNL	000004
 # define ONLCR	000010
 # define ONOCR	000020
+# define ONLRET 000040
 # define TAB3	014000
 
 # define CLOCAL	004000

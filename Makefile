@@ -292,6 +292,7 @@ $(SENT)/libraries/readline: libraries/ncurses
 ifneq ($(NACL_GLIBC), 1)
   $(SENT)/libraries/readline: libraries/glibc-compat
   $(SENT)/libraries/openssl: libraries/glibc-compat
+  $(SENT)/libraries/ncurses: libraries/glibc-compat
 endif
 $(SENT)/libraries/libmng: libraries/zlib libraries/jpeg
 $(SENT)/libraries/lcms: libraries/zlib libraries/jpeg libraries/tiff
