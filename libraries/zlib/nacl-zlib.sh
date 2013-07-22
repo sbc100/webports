@@ -38,8 +38,8 @@ TestStep() {
   fi
 
   if [ $NACL_ARCH = "pnacl" ]; then
-    WriteSelLdrScript minigzip minigzip.pexe.x86-64.nexe
-    WriteSelLdrScript example example.pexe.x86-64.nexe
+    WriteSelLdrScript minigzip minigzip.x86-64.nexe
+    WriteSelLdrScript example example.x86-64.nexe
   else
     WriteSelLdrScript minigzip minigzip.nexe
     WriteSelLdrScript example example.nexe
