@@ -13,6 +13,13 @@
 source pkg_info
 source ../../build_tools/common.sh
 
+# TODO: Remove when this is fixed.
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+if [ "$NACL_ARCH" = "arm" ]; then
+  export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
+  export CFLAGS="${CFLAGS//-O2/}"
+fi
+
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools

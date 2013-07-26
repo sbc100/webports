@@ -17,5 +17,17 @@ export LIBS="-lm"
 
 source ../../build_tools/common.sh
 
+# TODO: Remove when this is fixed.
+# https://code.google.com/p/nativeclient/issues/detail?id=3598
+if [ "$NACL_GLIBC" = "1" ]; then
+  export CFLAGS="${CFLAGS//-O2/}"
+fi
+
+# TODO: Remove when this is fixed.
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+if [ "$NACL_ARCH" = "arm" ]; then
+  export CFLAGS="${CFLAGS//-O2/}"
+fi
+
 DefaultPackageInstall
 exit 0
