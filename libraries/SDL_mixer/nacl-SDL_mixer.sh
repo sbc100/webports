@@ -15,6 +15,12 @@ source pkg_info
 source ../../build_tools/common.sh
 set -x
 
+# TODO: Remove when this is fixed.
+# https://code.google.com/p/nativeclient/issues/detail?id=3598
+if [ "$NACL_GLIBC" = "1" ]; then
+  export CFLAGS="${CFLAGS//-O2/}"
+fi
+
 CustomConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools

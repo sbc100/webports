@@ -77,3 +77,34 @@ index a82c65d..a1052be 100644
  #ifdef FEAT_NETBEANS_INTG
      int		nb_fd = netbeans_filedesc();
  #endif
+diff --git a/src/auto/configure b/src/auto/configure
+index 0f73df3..54589cd 100755
+--- a/src/auto/configure
++++ b/src/auto/configure
+@@ -12346,16 +12346,16 @@ $as_echo "yes" >&6; }
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+ $as_echo "no" >&6; }
+   fi
+-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we need -D_FORTIFY_SOURCE=1" >&5
+-$as_echo_n "checking whether we need -D_FORTIFY_SOURCE=1... " >&6; }
+-  if test "$gccmajor" -gt "3"; then
+-    CFLAGS=`echo "$CFLAGS" | sed -e 's/-Wp,-D_FORTIFY_SOURCE=.//g' -e 's/-D_FORTIFY_SOURCE=.//g' -e 's/$/ -D_FORTIFY_SOURCE=1/'`
+-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+-$as_echo "yes" >&6; }
+-  else
+-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+-$as_echo "no" >&6; }
+-  fi
++#        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we need -D_FORTIFY_SOURCE=1" >&5
++#$as_echo_n "checking whether we need -D_FORTIFY_SOURCE=1... " >&6; }
++#  if test "$gccmajor" -gt "3"; then
++#    CFLAGS=`echo "$CFLAGS" | sed -e 's/-Wp,-D_FORTIFY_SOURCE=.//g' -e 's/-D_FORTIFY_SOURCE=.//g' -e 's/$/ -D_FORTIFY_SOURCE=1/'`
++#    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
++#$as_echo "yes" >&6; }
++#  else
++#    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++#$as_echo "no" >&6; }
++#  fi
+ fi
+ 
+ 

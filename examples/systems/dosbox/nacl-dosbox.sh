@@ -35,7 +35,16 @@ CustomConfigureStep() {
 
   export LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
-  CONFIG_FLAGS="--host=${NACL_ARCH}-nacl \
+  local conf_host=${NACL_CROSS_PREFIX}
+  if [ ${NACL_ARCH} = "pnacl" ]; then
+    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
+    # does not know about "pnacl".  It only knows about "le32-nacl".
+    # Unfortunately, most of the config.subs here are so old that
+    # it doesn't know about that "le32" either.  So we just say "nacl".
+    conf_host="nacl"
+  fi
+
+  CONFIG_FLAGS="--host=${conf_host} \
       --prefix=${NACLPORTS_PREFIX} \
       --exec-prefix=${NACLPORTS_PREFIX} \
       --libdir=${NACLPORTS_LIBDIR} \
@@ -87,7 +96,8 @@ CustomInstallStep(){
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
-  LogExecute install ${DOSBOX_BUILD}/src/dosbox${NACL_EXEEXT} ${PUBLISH_DIR}/dosbox_${NACL_ARCH}.nexe
+  LogExecute install ${DOSBOX_BUILD}/src/dosbox${NACL_EXEEXT} \
+    ${PUBLISH_DIR}/dosbox_${NACL_ARCH}${NACL_EXEEXT}
   local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py ${NACL_CREATE_NMF_FLAGS}"
   LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
 }

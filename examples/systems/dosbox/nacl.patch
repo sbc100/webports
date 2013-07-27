@@ -1,16 +1,3 @@
-diff -Naur dosbox-0.74-orig/config.sub dosbox-0.74/config.sub
---- dosbox-0.74-orig/config.sub	2010-05-10 10:43:54.000000000 -0700
-+++ dosbox-0.74/config.sub	2012-01-27 15:16:51.067078164 -0800
-@@ -1234,6 +1234,9 @@
- 	pmac | pmac-mpw)
- 		basic_machine=powerpc-apple
- 		;;
-+	pnacl*)
-+		basic_machine=pnacl-pc
-+		;;
- 	*-unknown)
- 		# Make sure to match an already-canonicalized machine name.
- 		;;
 diff -Naur dosbox-0.74-orig/configure.in dosbox-0.74/configure.in
 --- dosbox-0.74-orig/configure.in	2010-05-10 11:58:57.000000000 -0700
 +++ dosbox-0.74/configure.in	2012-01-27 15:13:47.312313175 -0800
