@@ -860,26 +860,12 @@ TranslatePexe() {
     TimeCommand ${TRANSLATOR} -O0 -arch $a ${pexe} -o ${nexe}
   done
 
-  # PIC branch
-  for a in ${arches} ; do
-    echo "translating pexe [$a,pic]"
-    nexe=${basename}.$a.pic.nexe
-    TimeCommand ${TRANSLATOR} -O0 -arch $a -fPIC ${pexe} -o ${nexe}
-  done
-
   # Now the same spiel with -O2
 
   for a in ${arches} ; do
     echo "translating pexe [$a]"
     nexe=${basename}.opt.$a.nexe
     TimeCommand ${TRANSLATOR} -O2 -arch $a ${pexe} -o ${nexe}
-  done
-
-  # PIC branch
-  for a in ${arches}; do
-    echo "translating pexe [$a,pic]"
-    nexe=${basename}.$a.pic.opt.nexe
-    TimeCommand ${TRANSLATOR} -O2 -arch $a -fPIC ${pexe} -o ${nexe}
   done
 
   ls -l $(dirname ${pexe})/*.nexe ${pexe}
