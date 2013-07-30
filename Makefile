@@ -160,6 +160,7 @@ EXAMPLES = \
      examples/games/nethack \
      examples/tools/gdb \
      examples/tools/git \
+     examples/tools/lua_ppapi \
      examples/tools/python_ppapi \
      examples/tools/thttpd \
      examples/games/snes9x \
@@ -237,8 +238,7 @@ $(SENT)/libraries/libvorbis: libraries/libogg
 $(SENT)/libraries/libtheora: libraries/libogg
 $(SENT)/libraries/flac: libraries/libogg
 $(SENT)/libraries/speex: libraries/libogg
-$(SENT)/libraries/fontconfig: libraries/expat \
-    libraries/freetype
+$(SENT)/libraries/fontconfig: libraries/expat libraries/freetype
 $(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/libraries/libpng: libraries/zlib
 $(SENT)/libraries/agg: libraries/freetype
@@ -247,21 +247,16 @@ $(SENT)/libraries/cairo: \
 $(SENT)/libraries/ffmpeg: \
     libraries/lame libraries/libvorbis libraries/libtheora
 $(SENT)/libraries/webp: libraries/tiff libraries/jpeg
-$(SENT)/libraries/libav: \
-    libraries/lame libraries/libvorbis
+$(SENT)/libraries/libav: libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
-$(SENT)/examples/games/nethack: \
-    libraries/ncurses libraries/libtar
-$(SENT)/examples/tools/bash: \
-    libraries/ncurses libraries/libtar
-$(SENT)/examples/editors/nano: \
-    libraries/ncurses libraries/libtar
-$(SENT)/examples/editors/vim: \
-    libraries/ncurses libraries/libtar
-$(SENT)/examples/tools/thttpd: libraries/nacl-mounts \
-    libraries/jsoncpp
+$(SENT)/examples/games/nethack: libraries/ncurses libraries/libtar
+$(SENT)/examples/tools/bash: libraries/ncurses libraries/libtar
+$(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
+$(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
+$(SENT)/examples/tools/thttpd: libraries/nacl-mounts libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
 $(SENT)/libraries/python: libraries/ncurses libraries/readline
+$(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
 $(SENT)/examples/games/scummvm: \
     libraries/nacl-mounts libraries/SDL libraries/libvorbis
 $(SENT)/examples/systems/bochs: \
@@ -282,8 +277,7 @@ $(SENT)/libraries/SDL_mixer: libraries/SDL \
 $(SENT)/libraries/SDL_image: libraries/SDL \
     libraries/libpng libraries/jpeg
 $(SENT)/libraries/SDL_net: libraries/SDL
-$(SENT)/libraries/SDL_ttf: libraries/SDL \
-    libraries/freetype
+$(SENT)/libraries/SDL_ttf: libraries/SDL libraries/freetype
 $(SENT)/libraries/boost: libraries/zlib libraries/bzip2
 $(SENT)/libraries/freealut: libraries/openal-soft
 $(SENT)/examples/audio/openal-ogg: \
@@ -383,6 +377,7 @@ nano: examples/editors/nano ;
 nethack: examples/games/nethack ;
 openal-ogg: examples/audio/openal-ogg ;
 python_ppapi: examples/tools/python_ppapi ;
+lua_ppapi: examples/tools/lua_ppapi ;
 scummvm: examples/games/scummvm ;
 snes9x: examples/games/snes9x ;
 thttpd: examples/tools/thttpd ;
