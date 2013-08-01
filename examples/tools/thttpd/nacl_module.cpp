@@ -83,18 +83,15 @@ static void DownloadFile(MainThreadRunner* runner, const std::string& path,
 
 #define MAXPATHLEN 256
 void ThttpdInstance::HandleMessage(const pp::Var& var_message) {
-  dbgprintf("HandleMessage called\n");
-  if (var_message == NULL || !var_message.is_string()) {
+  if (!var_message.is_string()) {
+    dbgprintf("error: please send json messages only\n");
     return;
   }
   pp::Var return_var;
   Json::Value null_value;
   int result = 1;  // no thread
-  if (!var_message.is_string()) {
-    dbgprintf("error: please send json messages only\n");
-    return;
-  }
   std::string message = var_message.AsString();
+  dbgprintf("HandleMessage called: '%s'\n", message.c_str());
   Json::Value root;
   try {
     Json::Reader reader;

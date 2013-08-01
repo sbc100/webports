@@ -4,12 +4,14 @@
  * found in the LICENSE file.
  */
 
+var uploadURL = 'http://localhost:8006/upload/'
+
 function moduleDidLoad() {
   $("#status_field").text("SUCCESS")
 }
 
 function is_array(input) {
-  return typeof(input)=='object'&&(input instanceof Array);
+  return typeof(input) == 'object' && (input instanceof Array);
 }
 
 function escapeHTML(szHTML) {
@@ -20,8 +22,7 @@ function escapeHTML(szHTML) {
 
 
 function handleMessage(message_event) {
-  if (message_event.data == null || message_event.data == "null")
-  {
+  if (message_event.data == null || message_event.data == "null") {
     console.log("warning: null message")
     return
   }
@@ -31,11 +32,10 @@ function handleMessage(message_event) {
     console.log("warning: null data")
     return
   }
-  if (is_array(data) && data[0] == "ReadDirectory")
-  {
+
+  if (is_array(data) && data[0] == "ReadDirectory") {
     console.log("calling pepper helper")
     HandlePepperMountMessage(data)
-    return
   } else if (data.result && data.type == "network error") {
     $("#status_field").html("Failure")
     $("#log").html("Network initialization error. Please supply the following "
@@ -51,23 +51,42 @@ function uploadFile(file) {
     function(fileEntry) {
       fileEntry.createWriter(function(fileWriter) {
       fileWriter.write(f); // Note: write() can take a File or Blob object.
-      $("#log").html("File uploaded! Checkout at <a target=\"_blank\" href=\"http://localhost"
-          +":8006/upload/"+file.name+"\">http://localhost:8006/upload/"+file.name+"</a>")
+      var url = uploadURL + file.name;
+      $("#log").html("File uploaded! Checkout at <a target=\"_blank\" href=\"" + url + "\">" + url + "</a>")
       }, errorHandler);
     }, errorHandler);
   })(file);
 }
 
 function handleFileSelect(evt) {
-  // var url = window.URL.createObjectURL(evt.target.files[0]);
   var files = this.files;
   for (var i = 0, file; file = files[i]; ++i) {
     uploadFile(file)
   }
 }
 
+
+function toArray(list) {
+  return Array.prototype.slice.call(list || [], 0);
+}
+
 function onInitFs(fs) {
-  console.log('opened fs: '+fs.name);
+  console.log('opened fs: ' + fs.name);
+
+  fs.root.getDirectory("/", {}, function (dir) { // readdir
+    var dirReader = dir.createReader();
+    var handleEntries = function(results) {
+      if (results.length == 0)
+        return;
+      results = toArray(results);
+      results.forEach(function(entry, i) {
+        var url = uploadURL + entry.name
+        $("#listing").append('<a target="_blank" href="' + url + '">' + entry.name + "</a><br>\n");
+      });
+      dirReader.readEntries(handleEntries)
+    };
+    dirReader.readEntries(handleEntries)
+  });
   window.fs = fs
 }
 
@@ -102,12 +121,16 @@ $(document).ready(function() {
   window.URL = window.URL || window.webkitURL;
   window.requestFileSystem  = window.requestFileSystem
     || window.webkitRequestFileSystem;
-  window.webkitStorageInfo.requestQuota(PERSISTENT, 1024*1024,
+  navigator.webkitPersistentStorage.requestQuota(1024*1024,
   function(grantedBytes) {
     window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
   }, function(e) {
       console.log('Error', e);
   });
+
+  var listener = document.getElementById('listener');
+  listener.addEventListener('load', moduleDidLoad, true);
+  listener.addEventListener('message', handleMessage, true);
 
   document.getElementById('upfile').addEventListener(
     'change', handleFileSelect, false);
