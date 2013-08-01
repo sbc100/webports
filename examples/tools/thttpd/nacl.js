@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2012 The Native Client Authors. All rights reserved.
-  Use of this source code is governed by a BSD-style license that can be
-  found in the LICENSE file.
-*/
+ * Copyright (c) 2012 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 
 function moduleDidLoad() {
   $("#status_field").text("SUCCESS")
@@ -39,8 +39,7 @@ function handleMessage(message_event) {
   } else if (data.result && data.type == "network error") {
     $("#status_field").html("Failure")
     $("#log").html("Network initialization error. Please supply the following "
-    + "flags to chrome: --enable-nacl --allow-nacl-socket-api=localhost "
-    + " --no-sandbox.")
+    + "flags to chrome: --enable-nacl --allow-nacl-socket-api=localhost")
   } else {
     // unknown message
   }

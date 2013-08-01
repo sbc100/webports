@@ -40,16 +40,16 @@ void ThttpdInstance::setKernelProxy(KernelProxy* kp) {
   this->kp->SetSocketSubSystem(ss);
 }
 
-extern "C"  int my_main(int argc, char** argv);
-static const char* path = "/ololo";
+extern "C"  int thttpd_main(int argc, char** argv);
+static const char* command_name = "thttpd";
 static pthread_t thread;
 
 static void* mmain(void* ptr) {
-  char** p = reinterpret_cast<char**>(malloc(sizeof(char**) * 2));
-  if (!p) return NULL;
-  p[1] = 0;
-  p[0] = const_cast<char*>(path);
-  my_main(1, p);
+  int argc = 1;
+  char* argv[2];
+  argv[0] = const_cast<char*>(command_name);
+  argv[1] = NULL;
+  thttpd_main(argc, argv);
   return NULL;
 };
 
@@ -173,4 +173,3 @@ pp::Instance* ThttpdModule::CreateInstance(PP_Instance instance) {
   pthread_create(&thread, NULL, mmain, NULL);
   return result;
 }
-

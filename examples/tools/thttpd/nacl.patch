@@ -52,33 +52,6 @@ diff -Naur thttpd-2.25b/fdwatch.h thttpd-nacl/fdwatch.h
 +#endif
  
  #endif /* _FDWATCH_H_ */
-diff -Naur thttpd-2.25b/index.html thttpd-nacl/index.html
---- thttpd-2.25b/index.html	2005-06-29 21:50:33.000000000 +0400
-+++ thttpd-nacl/index.html	2012-06-21 17:19:39.389661488 +0400
-@@ -1,14 +1,14 @@
--<HTML>
--<HEAD><TITLE>thttpd is running</TITLE></HEAD>
--<BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc">
-+<html>
-+<head><title>thttpd is running</title></head>
-+<body bgcolor="#99cc99" text="#000000" link="#2020ff" vlink="#4040cc">
- 
--<H3>thttpd is running</H3>
-+<h3>thttpd is running</h3>
- 
--<P>
-+<p>
- Looks like you got it working.  Congrats.
- 
--<P>
--Here's a link to the <A HREF="http://www.acme.com/software/thttpd/">thttpd web pages</A>.
-+<p>
-+Here's a link to the <a href="http://www.acme.com/software/thttpd/">thttpd web pages</a>.
- 
--</BODY>
--</HTML>
-+</body>
-+</html>
 diff -Naur thttpd-2.25b/libhttpd.c thttpd-nacl/libhttpd.c
 --- thttpd-2.25b/libhttpd.c	2005-06-29 21:50:39.000000000 +0400
 +++ thttpd-nacl/libhttpd.c	2012-06-29 15:16:54.224231491 +0400
@@ -619,7 +592,7 @@ diff -Naur thttpd-2.25b/thttpd.c thttpd-nacl/thttpd.c
  
  int
 -main( int argc, char** argv )
-+my_main( int argc, char** argv )
++thttpd_main( int argc, char** argv )
      {
      char* cp;
      struct passwd* pwd;

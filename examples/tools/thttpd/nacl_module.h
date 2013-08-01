@@ -4,8 +4,8 @@
  * found in the LICENSE file.
  */
 
-#ifndef __NACL_FSHELL_H__
-#define __NACL_FSHELL_H__
+#ifndef NACL_MODULE_H_
+#define NACL_MODULE_H_
 #include <fcntl.h>
 #include <nacl-mounts/base/BaseMount.h>
 #include <nacl-mounts/base/KernelProxy.h>
@@ -35,7 +35,7 @@
 /// a new Instance for each occurence of the <embed> tag that has these
 /// attributes:
 ///     type="application/x-nacl"
-///     src="nacl_fshell.nmf"
+///     src="thttpd.nmf"
 /// To communicate with the browser, you must override HandleMessage() for
 /// receiving messages from the borwser, and use PostMessage() to send messages
 /// back to the browser.  Note that this interface is entirely asynchronous.
@@ -100,4 +100,3 @@ class ThttpdModule
 };
 
 #endif
-

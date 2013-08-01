@@ -4,8 +4,8 @@
  * found in the LICENSE file.
  */
 
-#ifndef __SHELLJOB_H__
-#define __SHELLJOB_H__
+#ifndef SHELLJOB_H_
+#define SHELLJOB_H_
 #include <nacl-mounts/base/MainThreadRunner.h>
 #include <nacl-mounts/util/DebugPrint.h>
 #include <string>
@@ -36,4 +36,3 @@ class ShellJob : public MainThreadJob {
 };
 
 #endif
-

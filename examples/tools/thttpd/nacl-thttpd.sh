@@ -21,10 +21,11 @@ nacl_module.h
 shelljob.h
 syslog.cpp
 Makefile"
-  for FILE in $FILES
-  do
+  for FILE in $FILES; do
     cp -f ${START_DIR}/${FILE} .
   done
+
+  LogExecute make -j${OS_JOBS} clean
 }
 
 CustomBuildStep() {
@@ -39,11 +40,11 @@ CustomBuildStep() {
   export NACLPORTS_CFLAGS
   export NACLPORTS_LDFLAGS
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  ChangeDir ${PACKAGE_DIR}
-  make thttpd
+  LogExecute make -j${OS_JOBS} thttpd
 }
 
 CustomInstallStep() {
+  Banner "Installing ${PACKAGE_NAME}"
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
@@ -61,6 +62,7 @@ CustomInstallStep() {
       -o thttpd.nmf -s . \
       thttpd_*${NACL_EXEEXT}"
 
+  ChangeDir ${PACKAGE_DIR}
   LogExecute $CMD
 }
 
