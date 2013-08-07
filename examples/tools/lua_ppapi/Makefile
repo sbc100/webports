@@ -28,12 +28,14 @@ endif
 
 $(eval $(call NMF_RULE,$(TARGET),))
 
+CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src/chromeapps
+LIB_DOT = $(CHROMEAPPS)/libdot
+NASSH = $(CHROMEAPPS)/nassh
 
 install:
 	mkdir -p $(INSTALL_DIR)
 	tar -c -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/luadata.tar lib/lua
-	cp $(NACL_SRC)/libraries/hterm/src/chromeapps/hterm/js/*.js $(INSTALL_DIR)
-	cp $(NACL_SRC)/libraries/hterm/src/chromeapps/libdot/js/*.js $(INSTALL_DIR)
+	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/lua*$(NACL_EXEEXT) $(INSTALL_DIR)
 	cp $(OUTDIR)/lua.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)

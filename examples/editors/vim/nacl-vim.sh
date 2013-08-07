@@ -56,8 +56,13 @@ CustomInstallStep() {
       vim_*${NACL_EXEEXT} \
       -s . \
       -o vim.nmf
-  cp ${NACL_SRC}/libraries/hterm/src/chromeapps/hterm/js/*.js ${ASSEMBLY_DIR}
-  cp ${NACL_SRC}/libraries/hterm/src/chromeapps/libdot/js/*.js ${ASSEMBLY_DIR}
+
+  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
+  local LIB_DOT=${CHROMEAPPS}/libdot
+  local NASSH=${CHROMEAPPS}/nassh
+  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
+      -i ${NASSH}/concat/nassh_deps.concat \
+      -o ${ASSEMBLY_DIR}/hterm.concat.js
   cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
   cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}

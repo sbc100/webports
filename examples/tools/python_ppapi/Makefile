@@ -29,12 +29,15 @@ endif
 
 $(eval $(call NMF_RULE,$(TARGET),))
 
+CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src/chromeapps
+LIB_DOT = $(CHROMEAPPS)/libdot
+NASSH = $(CHROMEAPPS)/nassh
+
 install:
 	mkdir -p $(INSTALL_DIR)
-	tar -c -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/pydata.tar lib/python2.7
-	cp $(NACL_SRC)/libraries/hterm/src/chromeapps/hterm/js/*.js $(INSTALL_DIR)
-	cp $(NACL_SRC)/libraries/hterm/src/chromeapps/libdot/js/*.js $(INSTALL_DIR)
-	cp $(OUTDIR)/python_*.nexe $(INSTALL_DIR)
+	tar -h -c -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/pydata.tar lib/python2.7 ${EXTRA_ASSETS}
+	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
+	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
 	cp $(OUTDIR)/python.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
 	cp python.js $(INSTALL_DIR)

@@ -69,8 +69,14 @@ CustomInstallStep() {
       -s . \
       -o nethack.nmf
   popd
-  cp ${NACL_SRC}/libraries/hterm/src/chromeapps/hterm/js/*.js ${ASSEMBLY_DIR}
-  cp ${NACL_SRC}/libraries/hterm/src/chromeapps/libdot/js/*.js ${ASSEMBLY_DIR}
+
+  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
+  local LIB_DOT=${CHROMEAPPS}/libdot
+  local NASSH=${CHROMEAPPS}/nassh
+  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
+      -i ${NASSH}/concat/nassh_deps.concat \
+      -o ${ASSEMBLY_DIR}/hterm.concat.js
+
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     sed 's/x-nacl/x-pnacl/' \
         ${START_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack.js
