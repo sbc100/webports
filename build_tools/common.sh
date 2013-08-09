@@ -212,6 +212,27 @@ InstallConfigSite() {
 }
 
 
+# When configure checks for system headers is doesn't pass CFLAGS
+# to the compiler.  This means that any includes that live in paths added
+# with -I are not found.  Here we push the additional newlib headers
+# into the toolchain itself from $NACL_SDK_ROOT/include/<toolchain>.
+InjectSystemHeaders() {
+  if [ "${NACL_GLIBC}" = 1 ]; then
+    local TC_INCLUDES=${NACL_SDK_ROOT}/include/glibc
+  elif [ "${NACL_ARCH}" = "pnacl" ]; then
+    local TC_INCLUDES=${NACL_SDK_ROOT}/include/pnacl
+  else
+    local TC_INCLUDES=${NACL_SDK_ROOT}/include/newlib
+  fi
+
+  if [ ! -d ${TC_INCLUDES} ]; then
+    return
+  fi
+
+  LogExecute cp -r ${TC_INCLUDES}/* ${NACLPORTS_PREFIX}/include
+}
+
+
 PatchSpecFile() {
   if [ ${NACL_ARCH} == "pnacl" -o ${NACL_ARCH} == "arm" ]; then
     # The arm compiler doesn't currently need a patched specs file
@@ -908,4 +929,5 @@ CheckToolchain
 CheckPatchVersion
 CheckSDKVersion
 PatchSpecFile
+InjectSystemHeaders
 InstallConfigSite
