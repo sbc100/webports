@@ -98,7 +98,6 @@ CustomPackageInstall() {
   DefaultExtractStep
   DefaultPatchStep
   CustomBuildStep
-  DefaultFinalizeStep
   DefaultTranslateStep
   DefaultValidateStep
   CustomInstallStep

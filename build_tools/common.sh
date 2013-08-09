@@ -855,7 +855,7 @@ FinalizePexe() {
 }
 
 
-DefaultFinalizeStep() {
+FinalizePexes() {
   if [ ${NACL_ARCH} = "pnacl" -a -n "${EXECUTABLES:-}" ]; then
     for pexe in ${EXECUTABLES} ; do
       FinalizePexe ${pexe}
@@ -894,6 +894,8 @@ TranslatePexe() {
 
 
 DefaultTranslateStep() {
+  FinalizePexes
+
   if [ ${NACL_ARCH} = "pnacl" -a -n "${EXECUTABLES:-}" ]; then
     for pexe in ${EXECUTABLES} ; do
       TranslatePexe ${pexe}
@@ -913,7 +915,6 @@ DefaultPackageInstall() {
   DefaultPatchStep
   DefaultConfigureStep
   DefaultBuildStep
-  DefaultFinalizeStep
   DefaultTranslateStep
   DefaultValidateStep
   DefaultInstallStep
