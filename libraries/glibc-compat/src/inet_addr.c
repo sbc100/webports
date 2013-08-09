@@ -72,6 +72,9 @@ static char sccsid[] = "@(#)inet_addr.c	8.1 (Berkeley) 6/17/93";
 #include <string.h>
 #include <stdlib.h>
 
+#define inet_addr __inet_addr
+#define inet_aton __inet_aton
+
 /*
  * ASCII internet address interpretation routine.
  * The value returned is in network order.
