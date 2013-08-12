@@ -17,10 +17,6 @@ CustomBuildStep() {
   # because we are not running ./configure and the Makefile was hacked
   export NACL_CCFLAGS="${NACLPORTS_CFLAGS}"
   export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export NACL_CCFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include -O3 -g"
-    export NACL_LDFLAGS="${NACLPORTS_LDFLAGS} -O0 -static"
-  fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig

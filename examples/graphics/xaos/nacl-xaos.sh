@@ -23,17 +23,11 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
-  export CFLAGS="${CFLAGS} -g -D__NO_MATH_INLINES=1"
-  export LDFLAGS="-Wl,--undefined=PPP_GetInterface \
+  export CFLAGS="${NACLPORTS_CFLAGS} -D__NO_MATH_INLINES=1"
+  export LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--undefined=PPP_GetInterface \
                   -Wl,--undefined=PPP_ShutdownModule \
                   -Wl,--undefined=PPP_InitializeModule \
                   -Wl,--undefined=original_main"
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CFLAGS="${CFLAGS} -O3"
-    export LDFLAGS="${LDFLAGS} -O0 -static"
-  else
-     export CFLAGS="${CFLAGS} -O2"
-  fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig

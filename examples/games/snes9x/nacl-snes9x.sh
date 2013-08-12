@@ -24,10 +24,6 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g"
-    export LDFLAGS="${NACLPORTS_LDFLAGS} -O0 -static"
-  fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig

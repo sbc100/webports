@@ -93,6 +93,9 @@ if [ ${NACL_DEBUG} = "1" ]; then
 else
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -O2"
   NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -O2"
+  if [ ${NACL_ARCH} = "pnacl" ]; then
+    NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -O2"
+  fi
 fi
 
 # packages subdirectories

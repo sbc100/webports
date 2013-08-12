@@ -20,10 +20,6 @@ CustomConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g"
-    export LDFLAGS="${NACLPORTS_LDFLAGS} -O0 -static"
-  fi
   # without this setting *make* will not show the full command lines
   export VERBOSE_BUILD=1
   export RANLIB=${NACLRANLIB}

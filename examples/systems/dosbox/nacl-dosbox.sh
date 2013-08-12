@@ -15,13 +15,6 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
-  export CXXFLAGS="${NACLPORTS_CFLAGS} -O2 -g"
-  export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="${NACLPORTS_CFLAGS} -O3 -g"
-    export NACL_LDFLAGS="${NACL_LDFLAGS} -O0 -static"
-  fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export STRIP=${NACLSTRIP}
@@ -73,9 +66,6 @@ CustomConfigureStep() {
       -lppapi \
       ppapi/libppapi.a \
       -lnacl-mounts"
-
-  # linker wrappers, defined in libnacl-mounts
-  LDFLAGS="${NACL_LDFLAGS}"
 
   local MAYBE_NOSYS=""
   if [ "${NACL_GLIBC}" != "1" ]; then

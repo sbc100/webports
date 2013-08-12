@@ -18,11 +18,6 @@ CustomConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export CXXFLAGS="-O2 -g ${NACLPORTS_CFLAGS}"
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export CXXFLAGS="-O3 -g ${NACLPORTS_CFLAGS}"
-    export LDFLAGS="-O0 -static ${NACLPORTS_LDFLAGS}"
-  fi
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   # path and package magic to make sure we call the right
