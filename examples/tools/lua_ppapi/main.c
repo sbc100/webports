@@ -5,8 +5,10 @@
 #include <assert.h>
 #include <libtar.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/mount.h>
 
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"
