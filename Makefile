@@ -257,7 +257,7 @@ $(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
-$(SENT)/libraries/python: libraries/ncurses libraries/readline
+$(SENT)/libraries/python: libraries/ncurses libraries/readline libraries/zlib
 $(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
 $(SENT)/examples/games/scummvm: \
     libraries/nacl-mounts libraries/SDL libraries/libvorbis

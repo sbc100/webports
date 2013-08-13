@@ -75,7 +75,6 @@ Nano.prototype.handleMessage_ = function(e) {
 }
 
 function got(str) {
-  if (str == '\x7f') { str = '\x08'; }
   embed.postMessage(Nano.prefix_ + str);
 }
 

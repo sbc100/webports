@@ -1,3 +1,16 @@
+diff --git a/Include/datetime.h b/Include/datetime.h
+index 47abe5c..4884e79 100644
+--- a/Include/datetime.h
++++ b/Include/datetime.h
+@@ -166,6 +166,8 @@ typedef struct {
+ 
+ #ifdef Py_BUILD_CORE
+ 
++#define PyDataTime_STATIC 1
++
+ /* Macros for type checking when building the Python core. */
+ #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
+ #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
 diff --git a/Makefile.pre.in b/Makefile.pre.in
 index 9d55550..09e7a69 100644
 --- a/Makefile.pre.in
@@ -37,67 +50,33 @@ index 9d55550..09e7a69 100644
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
  		$(PYTHON_FOR_BUILD) -m lib2to3.pgen2.driver $(DESTDIR)$(LIBDEST)/lib2to3/Grammar.txt
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
+diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
+index b0386f0..a5c77b4 100644
+--- a/Modules/_testcapimodule.c
++++ b/Modules/_testcapimodule.c
+@@ -1278,6 +1278,9 @@ static int test_run_counter = 0;
+ 
+ static PyObject *
+ test_datetime_capi(PyObject *self, PyObject *args) {
++#ifdef PyDataTime_STATIC
++    Py_RETURN_NONE;
++#else
+     if (PyDateTimeAPI) {
+         if (test_run_counter) {
+             /* Probably regrtest.py -R */
+@@ -1295,6 +1298,7 @@ test_datetime_capi(PyObject *self, PyObject *args) {
+         Py_RETURN_NONE;
+     else
+         return NULL;
++#endif
+ }
+ 
+ 
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index 65ade9f..6cc1818 100644
+index 65ade9f..1a971dc 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
-@@ -216,6 +216,55 @@ extern int lstat(const char *, struct stat *);
- 
- #endif /* !_MSC_VER */
- 
-+#if defined(__native_client__)
-+// Dummy implementation of getcwd that always returns '.'.
-+// If this is missing under glibc it simply makes os.getcwd()
-+// raise an exception for under newlib it failing when
-+// recursively loading modules.
-+// TODO(sbc): put this in its own library since its not
-+// wanted in the pepper case.
-+char* getcwd(char* buffer, size_t len) {
-+  if (buffer == NULL) {
-+    if (len == 0)
-+      len = 2;
-+    buffer = malloc(len);
-+  }
-+
-+  if (len < 2) {
-+    errno = ERANGE;
-+    return NULL;
-+  }
-+
-+  sprintf(buffer, ".");
-+  return buffer;
-+}
-+
-+#if !defined(__GLIBC__)
-+// NaCl's newlib headers don't declare these functions
-+
-+// TODO(sbc): add this to newlib's header:
-+// https://code.google.com/p/nativeclient/issues/detail?id=3363
-+extern int ftruncate(int fd, off_t length);
-+
-+// TODO(sbc): remove these once this change makes it into the NaCl SDK:
-+// https://src.chromium.org/viewvc/native_client?view=rev&revision=11693
-+extern int lstat(const char *, struct stat *);
-+
-+// These functions are missing from NaCl's newlib and nosys libraries.
-+// TODO(sbc): remove these once this change makes it into the NaCl SDK:
-+// https://codereview.chromium.org/18817002
-+int fsync(int fd) {
-+  errno = ENOSYS;
-+  return -1;
-+}
-+
-+int fdatasync(int fd) {
-+  errno = ENOSYS;
-+  return -1;
-+}
-+#endif
-+#endif
-+
- #ifdef HAVE_UTIME_H
- #include <utime.h>
- #endif /* HAVE_UTIME_H */
-@@ -663,9 +712,13 @@ posix_error_with_unicode_filename(Py_UNICODE* name)
+@@ -663,9 +663,13 @@ posix_error_with_unicode_filename(Py_UNICODE* name)
  
  
  static PyObject *
@@ -113,7 +92,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(name);
      return rc;
  }
-@@ -826,7 +879,7 @@ posix_1str(PyObject *args, char *format, int (*func)(const char*))
+@@ -826,7 +830,7 @@ posix_1str(PyObject *args, char *format, int (*func)(const char*))
      res = (*func)(path1);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -122,7 +101,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path1);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -1859,7 +1912,7 @@ posix_chmod(PyObject *self, PyObject *args)
+@@ -1859,7 +1863,7 @@ posix_chmod(PyObject *self, PyObject *args)
      res = chmod(path, i);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -131,7 +110,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -1906,7 +1959,7 @@ posix_lchmod(PyObject *self, PyObject *args)
+@@ -1906,7 +1910,7 @@ posix_lchmod(PyObject *self, PyObject *args)
      res = lchmod(path, i);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -140,7 +119,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path);
      Py_RETURN_NONE;
  }
-@@ -1931,7 +1984,7 @@ posix_chflags(PyObject *self, PyObject *args)
+@@ -1931,7 +1935,7 @@ posix_chflags(PyObject *self, PyObject *args)
      res = chflags(path, flags);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -149,7 +128,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -1957,7 +2010,7 @@ posix_lchflags(PyObject *self, PyObject *args)
+@@ -1957,7 +1961,7 @@ posix_lchflags(PyObject *self, PyObject *args)
      res = lchflags(path, flags);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -158,7 +137,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -2028,7 +2081,7 @@ posix_chown(PyObject *self, PyObject *args)
+@@ -2028,7 +2032,7 @@ posix_chown(PyObject *self, PyObject *args)
      res = chown(path, uid, gid);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -167,7 +146,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -2083,7 +2136,7 @@ posix_lchown(PyObject *self, PyObject *args)
+@@ -2083,7 +2087,7 @@ posix_lchown(PyObject *self, PyObject *args)
      res = lchown(path, uid, gid);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -176,7 +155,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -2478,7 +2531,7 @@ posix_listdir(PyObject *self, PyObject *args)
+@@ -2478,7 +2482,7 @@ posix_listdir(PyObject *self, PyObject *args)
      dirp = opendir(name);
      Py_END_ALLOW_THREADS
      if (dirp == NULL) {
@@ -185,7 +164,7 @@ index 65ade9f..6cc1818 100644
      }
      if ((d = PyList_New(0)) == NULL) {
          Py_BEGIN_ALLOW_THREADS
-@@ -2500,7 +2553,7 @@ posix_listdir(PyObject *self, PyObject *args)
+@@ -2500,7 +2504,7 @@ posix_listdir(PyObject *self, PyObject *args)
                  closedir(dirp);
                  Py_END_ALLOW_THREADS
                  Py_DECREF(d);
@@ -194,7 +173,7 @@ index 65ade9f..6cc1818 100644
              }
          }
          if (ep->d_name[0] == '.' &&
-@@ -2660,7 +2713,7 @@ posix_mkdir(PyObject *self, PyObject *args)
+@@ -2660,7 +2664,7 @@ posix_mkdir(PyObject *self, PyObject *args)
  #endif
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -203,7 +182,7 @@ index 65ade9f..6cc1818 100644
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -3059,7 +3112,7 @@ done:
+@@ -3059,7 +3063,7 @@ done:
  #endif /* HAVE_UTIMES */
      }
      if (res < 0) {
@@ -212,7 +191,7 @@ index 65ade9f..6cc1818 100644
      }
      PyMem_Free(path);
      Py_INCREF(Py_None);
-@@ -6286,7 +6339,7 @@ posix_readlink(PyObject *self, PyObject *args)
+@@ -6286,7 +6290,7 @@ posix_readlink(PyObject *self, PyObject *args)
      n = readlink(path, buf, (int) sizeof buf);
      Py_END_ALLOW_THREADS
      if (n < 0)
@@ -221,7 +200,7 @@ index 65ade9f..6cc1818 100644
  
      PyMem_Free(path);
      v = PyString_FromStringAndSize(buf, n);
-@@ -6532,7 +6585,7 @@ posix_open(PyObject *self, PyObject *args)
+@@ -6532,7 +6536,7 @@ posix_open(PyObject *self, PyObject *args)
      PyErr_Clear();
  #endif
  
@@ -230,7 +209,7 @@ index 65ade9f..6cc1818 100644
                            Py_FileSystemDefaultEncoding, &file,
                            &flag, &mode))
          return NULL;
-@@ -6541,7 +6594,7 @@ posix_open(PyObject *self, PyObject *args)
+@@ -6541,7 +6545,7 @@ posix_open(PyObject *self, PyObject *args)
      fd = open(file, flag, mode);
      Py_END_ALLOW_THREADS
      if (fd < 0)
@@ -267,21 +246,47 @@ index c2907f6..9e64898 100644
  "getpwuid(uid) -> (pw_name,pw_passwd,pw_uid,\n\
                    pw_gid,pw_gecos,pw_dir,pw_shell)\n\
 diff --git a/Modules/python.c b/Modules/python.c
-index 2739b8b..35f0aa0 100644
+index 2739b8b..c6d607e 100644
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -6,6 +6,10 @@
+@@ -6,6 +6,36 @@
  #include <floatingpoint.h>
  #endif
  
 +#ifdef __native_client__
 +#include <stdio.h>
++#include <sys/utsname.h>
++
++// Dummy implementation of uname.  This is only needed for the sel_ldr
++// version of python.  Otherwise it gets provided by nacl_io.
++int uname(struct utsname *buf) {
++  sprintf(buf->sysname, "NaCl");
++  return 0;
++}
++
++// Dummy implementation of getcwd.  This is only needed for the sel_ldr
++// version of python.  Otherwise it gets provided by nacl_io.
++char* getcwd(char* buffer, size_t len) {
++  if (buffer == NULL) {
++    if (len == 0)
++      len = 2;
++    buffer = malloc(len);
++  }
++
++  if (len < 2) {
++    errno = ERANGE;
++    return NULL;
++  }
++
++  sprintf(buffer, ".");
++  return buffer;
++}
 +#endif
 +
  int
  main(int argc, char **argv)
  {
-@@ -20,5 +24,9 @@ main(int argc, char **argv)
+@@ -20,5 +50,9 @@ main(int argc, char **argv)
  	m = fpgetmask();
  	fpsetmask(m & ~FP_X_OFL);
  #endif
@@ -307,6 +312,30 @@ index 12c43b0..b727afa 100644
  #if defined(__WATCOMC__) && !defined(__QNX__)
  #include <i86.h>
  #else
+diff --git a/Python/dynload_shlib.c b/Python/dynload_shlib.c
+index 17ebab1..93ea45d 100644
+--- a/Python/dynload_shlib.c
++++ b/Python/dynload_shlib.c
+@@ -84,6 +84,11 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *fqname, const char *shortname,
+     PyOS_snprintf(funcname, sizeof(funcname),
+                   LEAD_UNDERSCORE "init%.200s", shortname);
+ 
++
++/* Native Client's fstat() imlemenation doesn't set st_dev
++ * and st_ino correctly so disable the dlopen handle cache.
++ * TODO(sbc): fix NaCl's fstat() */
++#ifndef __native_client__
+     if (fp != NULL) {
+         int i;
+         struct stat statb;
+@@ -107,6 +112,7 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *fqname, const char *shortname,
+ #endif
+         }
+     }
++#endif
+ 
+ #if !(defined(PYOS_OS2) && defined(PYCC_GCC))
+     dlopenflags = PyThreadState_GET()->interp->dlopenflags;
 diff --git a/Python/getversion.c b/Python/getversion.c
 index 7bd6efd..b4f6702 100644
 --- a/Python/getversion.c

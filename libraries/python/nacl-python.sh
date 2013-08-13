@@ -41,7 +41,10 @@ CustomConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
   export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
-  export LIBS="-ltermcap -lc -lnosys"
+  export LIBS="-ltermcap"
+  if [ "${NACL_GLIBC}" != "1" ]; then
+    LIBS+=" -lglibc-compat -lc -lnosys"
+  fi
   DefaultConfigureStep
   if [ "${NACL_GLIBC}" != "1" ]; then
     LogExecute cp ${START_DIR}/Setup.local Modules/

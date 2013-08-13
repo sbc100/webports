@@ -75,9 +75,6 @@ Lua.prototype.handleMessage_ = function(e) {
 }
 
 function got(str) {
-  if (str == '\r') { str = '\n'; }
-  if (str == '\x7f') { str = '\x08'; }
-  term_.io.print(str);
   embed.postMessage(Lua.prefix_ + str);
 }
 

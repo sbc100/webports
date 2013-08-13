@@ -75,8 +75,6 @@ Vim.prototype.handleMessage_ = function(e) {
 }
 
 function got(str) {
-  if (str == '\r') { str = '\n'; }
-  if (str == '\x7f') { str = '\x08'; }
   embed.postMessage(Vim.prefix_ + str);
 }
 

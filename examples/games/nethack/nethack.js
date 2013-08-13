@@ -75,7 +75,6 @@ Nethack.prototype.handleMessage_ = function(e) {
 }
 
 function got(str) {
-  if (str == '\r') { str = '\n'; }
   nethackEmbed.postMessage(Nethack.prefix_ + str);
 }
 

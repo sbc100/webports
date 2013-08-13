@@ -20,10 +20,20 @@ CustomBuildStep() {
   MakeDir ${OUTBASE}
   if [ "${NACL_GLIBC}" = "1" ]; then
     MAKEFLAGS+=" TOOLCHAIN=glibc"
+  elif [ "${NACL_ARCH}" = "pnacl" ]; then
+    MAKEFLAGS+=" TOOLCHAIN=pnacl"
   else
     MAKEFLAGS+=" TOOLCHAIN=newlib"
   fi
-  MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
+  if [ "${NACL_DEBUG}" = "1" ]; then
+    MAKEFLAGS+=" CONFIG=Debug"
+  else
+    MAKEFLAGS+=" CONFIG=Release"
+  fi
+  if [ "${NACL_ARCH}" != "pnacl" ]; then
+    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
+  fi
+  MAKEFLAGS+=" V=1"
   export MAKEFLAGS
   ChangeDir ${START_DIR}
   DefaultBuildStep
