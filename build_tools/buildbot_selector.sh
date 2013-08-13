@@ -37,6 +37,7 @@ Publish() {
     return
   fi
   echo "@@@BUILD_STEP upload binaries@@@"
+  BOT_GSUTIL='/b/build/scripts/slave/gsutil'
   if [ -e "${BOT_GSUTIL}" ]; then
     GSUTIL=${BOT_GSUTIL}
   else
