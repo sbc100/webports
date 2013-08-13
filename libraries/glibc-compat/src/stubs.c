@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -192,6 +193,12 @@ int setsockopt(int sockfd, int level, int optname,
 int shutdown(int sockfd, int how) __attribute__((weak));
 int shutdown(int sockfd, int how) {
   UNIMPLEMENTED_FATAL();
+}
+
+sighandler_t signal(int signum, sighandler_t handler) __attribute__((weak));
+sighandler_t signal(int signum, sighandler_t handler) {
+  UNIMPLEMENTED();
+  return SIG_ERR;
 }
 
 int socketpair(int domain, int type, int protocol,

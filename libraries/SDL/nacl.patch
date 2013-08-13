@@ -494,10 +494,10 @@ index 5c2d81f..7a757a3 100644
  	if ( CPU_haveCPUID() ) {
 diff --git a/src/main/nacl/pepper_instance.cc b/src/main/nacl/pepper_instance.cc
 new file mode 100644
-index 0000000..2ac74de
+index 0000000..7356235
 --- /dev/null
 +++ b/src/main/nacl/pepper_instance.cc
-@@ -0,0 +1,86 @@
+@@ -0,0 +1,87 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -511,6 +511,7 @@ index 0000000..2ac74de
 +#include <SDL_nacl.h>
 +#include <SDL_video.h>
 +#include <SDL_main.h>
++#include <sys/mount.h>
 +
 +#include <ppapi/cpp/module.h>
 +#include "pepper_instance.h"

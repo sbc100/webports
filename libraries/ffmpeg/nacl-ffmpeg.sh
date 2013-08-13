@@ -24,6 +24,15 @@ CustomConfigureStep() {
   if [ "${NACL_ARCH}" = pnacl ]; then
     extra_args="--cc=pnacl-clang --arch=pnacl"
   fi
+
+  if [[ "${NACL_GLIBC}" != "1" ]]; then
+    # This is needed for sys/ioctl.h.
+    # TODO(sbc): Remove once sys/ioctl.h is added to newlib SDK
+    CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+    export CFLAGS
+    extra_args+=" --extra-libs=-lglibc-compat"
+  fi
+
   ../configure \
     --cross-prefix=${NACL_CROSS_PREFIX}- \
     ${extra_args} \

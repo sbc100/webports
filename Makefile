@@ -159,7 +159,6 @@ EXAMPLES = \
      examples/graphics/xaos \
      examples/games/nethack \
      examples/tools/gdb \
-     examples/tools/git \
      examples/tools/lua_ppapi \
      examples/tools/python_ppapi \
      examples/tools/thttpd \
@@ -245,7 +244,8 @@ $(SENT)/libraries/agg: libraries/freetype
 $(SENT)/libraries/cairo: \
     libraries/pixman libraries/fontconfig libraries/libpng
 $(SENT)/libraries/ffmpeg: \
-    libraries/lame libraries/libvorbis libraries/libtheora
+    libraries/lame libraries/libvorbis libraries/libtheora \
+    libraries/glibc-compat
 $(SENT)/libraries/webp: libraries/tiff libraries/jpeg
 $(SENT)/libraries/libav: libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib

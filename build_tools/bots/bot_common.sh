@@ -41,6 +41,7 @@ CalculatePackageShards()
   "
 
   PKG_LIST_PART_1="
+    libraries/glibc-compat
     libraries/libmikmod
     libraries/zlib
     libraries/libpng

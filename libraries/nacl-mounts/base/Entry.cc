@@ -40,7 +40,7 @@ extern "C" {
 
 #ifndef __GLIBC__
   DECLARE_STRUCT(fdio);
-  DECLARE_STRUCT(filename);
+  DECLARE_STRUCT(dev_filename);
   DECLARE_STRUCT(memory);
   DECLARE_STRUCT(net);
 #endif
@@ -54,8 +54,8 @@ extern "C" {
   DECLARE(fdio, dup);
   DECLARE(fdio, dup2);
 
-  DECLARE(filename, open);
-  DECLARE(filename, stat);
+  DECLARE(dev_filename, open);
+  DECLARE(dev_filename, stat);
   DECLARE(memory, mmap);
 
 #ifdef __GLIBC__
@@ -526,8 +526,8 @@ static struct NaClMountsStaticInitializer {
       DO_WRAP(fdio, write);
       DO_WRAP(fdio, dup);
       DO_WRAP(fdio, dup2);
-      DO_WRAP(filename, open);
-      DO_WRAP(filename, stat);
+      DO_WRAP(dev_filename, open);
+      DO_WRAP(dev_filename, stat);
       DO_WRAP(memory, mmap);
 #ifdef __GLIBC__
       DO_WRAP(filepath, chdir);
