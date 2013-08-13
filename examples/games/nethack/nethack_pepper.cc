@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/mount.h>
+#include <unistd.h>
 
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"

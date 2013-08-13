@@ -62,10 +62,10 @@ CustomConfigureStep() {
   # This somehow works for me.
   PPAPI_LIBS="-lSDL \
       -lppapi_cpp \
-      -lppapi_cpp_private \
       -lppapi \
       ppapi/libppapi.a \
-      -lnacl-mounts"
+      -lnacl-mounts \
+      -lppapi_cpp_private"
 
   local MAYBE_NOSYS=""
   if [ "${NACL_GLIBC}" != "1" ]; then
