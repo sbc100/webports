@@ -147,6 +147,8 @@ def FindCygwin():
 
 def DownloadAndInstallSDK(url):
   bz2_dir = OUT_DIR
+  if not os.path.exists(bz2_dir):
+    os.makedirs(bz2_dir)
   bz2_filename = os.path.join(bz2_dir, url.split('/')[-1])
 
   if sys.platform in ['win32', 'cygwin']:
