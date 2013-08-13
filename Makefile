@@ -60,7 +60,7 @@ endif
 endif
 
 NACL_OUT = out
-NACL_DIRS_TO_REMOVE = $(NACL_OUT)
+NACL_DIRS_TO_REMOVE = $(NACL_OUT)/sentinels $(NACL_OUT)/stamp $(NACL_OUT)/repository
 
 ifneq ($(NACL_ARCH),pnacl)
 # The toolchain's 'usr' folder is reserved for naclports and we
@@ -73,8 +73,7 @@ else
 NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/usr
 endif
 
-NACL_DIRS_TO_MAKE = $(NACL_OUT)/tarballs \
-                    $(NACL_OUT)/publish \
+NACL_DIRS_TO_MAKE = $(NACL_OUT)/publish \
                     $(NACLPORTS_PREFIX)/include \
                     $(NACLPORTS_PREFIX)/lib
 
@@ -194,10 +193,13 @@ sdklibs_list:
 run:
 	./httpd.py
 
-.PHONY: all run default libraries examples clean sdklibs sdklibs_list
+.PHONY: all run default libraries examples clean sdklibs sdklibs_list reallyclean
 
 clean:
 	rm -rf $(NACL_DIRS_TO_REMOVE)
+
+reallyclean: clean
+	rm -rf $(NACL_OUT)
 
 $(NACL_DIRS_TO_MAKE):
 	mkdir -p $@
