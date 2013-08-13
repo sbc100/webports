@@ -37,6 +37,8 @@ if sys.version_info >= (3, 0, 0):
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 SRC_DIR = os.path.dirname(SCRIPT_DIR)
+OUT_DIR = os.path.join(SRC_DIR, 'out')
+TARGET_DIR = os.path.join(OUT_DIR, 'nacl_sdk')
 
 if sys.platform == 'win32':
   NACL_BUILD_DIR = os.path.join(SRC_DIR, 'native_client', 'build')
@@ -48,6 +50,7 @@ LOCAL_GSUTIL = 'gsutil'
 # For local testing on Windows
 #LOCAL_GSUTIL = 'python.exe C:\\bin\\gsutil\\gsutil'
 
+GS_URL_BASE = 'gs://nativeclient-mirror/nacl/nacl_sdk/'
 GSTORE = 'http://commondatastorage.googleapis.com/'\
          'nativeclient-mirror/nacl/nacl_sdk/'
 
@@ -56,13 +59,16 @@ def ErrorOut(msg):
     sys.exit(1)
 
 
-def DetermineSdkURL(flavor, base_url, version):
+def DetermineSDKURL(flavor, base_url, version):
   """Download one Native Client toolchain and extract it.
 
   Arguments:
     flavor: flavor of the sdk to download
     base_url: base url to download toolchain tarballs from
     version: version directory to select tarballs from
+
+  Returns:
+    A tuple of the URL and version number.
   """
   if (os.environ.get('BUILDBOT_BUILDERNAME') and
       not os.environ.get('TEST_BUILDBOT')):
@@ -109,7 +115,8 @@ def DetermineSdkURL(flavor, base_url, version):
     else:
       ErrorOut('No SDK build (%s) found in last 100 trunk builds' % (path))
 
-  return GSTORE + 'trunk.' + str(version) + '/' + path
+  version = int(version)
+  return ('%strunk.%d/%s' % (GSTORE, version, path), version)
 
 
 def Untar(bz2_filename):
@@ -139,26 +146,11 @@ def FindCygwin():
 
 
 def DownloadAndInstallSDK(url):
-  # Pick target directory.
-  target_dir = os.path.join(SRC_DIR, 'pepper_XX')
-
-  bz2_dir = SCRIPT_DIR
+  bz2_dir = OUT_DIR
   bz2_filename = os.path.join(bz2_dir, url.split('/')[-1])
 
   if sys.platform in ['win32', 'cygwin']:
     cygbin = os.path.join(FindCygwin(), 'bin')
-
-  # Drop old versions.
-  old_sdks = glob.glob(os.path.join(bz2_dir, 'pepper_*'))
-  if old_sdks:
-    print 'Cleaning up old SDKs...'
-    if sys.platform in ['win32', 'cygwin']:
-      cmd = [os.path.join(cygbin, 'bin', 'rm.exe'), '-rf']
-    else:
-      cmd = ['rm', '-rf']
-    cmd += old_sdks
-    returncode = subprocess.call(cmd)
-    assert returncode == 0
 
   print 'Downloading "%s" to "%s"...' % (url, bz2_filename)
   sys.stdout.flush()
@@ -182,19 +174,19 @@ def DownloadAndInstallSDK(url):
 
   actual_dir = os.path.join(bz2_dir, pepper_dir)
 
-  print 'Create toolchain symlink "%s" -> "%s"' % (actual_dir, target_dir)
-  if sys.platform in ['win32', 'cygwin']:
-    ln = os.path.join(cygbin, 'ln.exe')
-    rm = os.path.join(cygbin, 'rm.exe')
-  else:
-    ln = 'ln'
-    rm = 'rm'
+  # Drop old versions.
+  if os.path.exists(TARGET_DIR):
+    print 'Cleaning up old SDK...'
+    if sys.platform in ['win32', 'cygwin']:
+      cmd = [os.path.join(cygbin, 'bin', 'rm.exe'), '-rf']
+    else:
+      cmd = ['rm', '-rf']
+    cmd.append(TARGET_DIR)
+    returncode = subprocess.call(cmd)
+    assert returncode == 0
 
-  cmd = '%s -rf %s && %s -fsn %s %s' % (rm, target_dir, ln,
-                                        actual_dir, target_dir)
-  returncode = subprocess.call(cmd, shell=True)
-  if returncode:
-    ErrorOut('Error creating symbolic link: %s' % returncode)
+  print 'Renaming toolchain "%s" -> "%s"' % (actual_dir, TARGET_DIR)
+  os.rename(actual_dir, TARGET_DIR)
 
   if sys.platform in ['win32', 'cygwin']:
     time.sleep(2)  # Wait for windows.
@@ -224,10 +216,21 @@ def main(argv):
 
   flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
-  url = DetermineSdkURL(flavor,
-                        base_url='gs://nativeclient-mirror/nacl/nacl_sdk/',
-                        version=options.version)
+  os.environ['NACL_SDK_ROOT'] = TARGET_DIR
+  getos = os.path.join(TARGET_DIR, 'tools', 'getos.py')
+  existing_version = 0
+  if os.path.exists(getos):
+     cmd = [sys.executable, getos, '--sdk-revision']
+     existing_version = int(subprocess.check_output(cmd).strip())
+
+  url, version = DetermineSDKURL(flavor,
+                                 base_url=GS_URL_BASE,
+                                 version=options.version)
   print 'SDK URL is "%s"' % url
+  if version == existing_version:
+    print 'SDK revision %s is already downlaoded' % version
+    return 0
+
 
   DownloadAndInstallSDK(url)
   return 0

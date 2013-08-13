@@ -5,7 +5,5 @@
 
 *.pyc
 /out
-/pepper_XX
-/build_tools/naclsdk_*.tar.bz2
 /examples/*/*/*.o
 /examples/*/*/*.nexe

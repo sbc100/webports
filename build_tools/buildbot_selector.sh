@@ -12,7 +12,7 @@
 set -o errexit
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/pepper_XX"
+export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
 
 RESULT=0
 
