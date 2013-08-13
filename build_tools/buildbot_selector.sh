@@ -29,6 +29,31 @@ StartBuild() {
   if ! ./$1 ; then
     RESULT=1
   fi
+  cd -
+}
+
+Publish() {
+  if [ -n "${NACLPORTS_NO_UPLOAD:-}" ]; then
+    return
+  fi
+  echo "@@@BUILD_STEP upload binaries@@@"
+  if [ -e "${BOT_GSUTIL}" ]; then
+    GSUTIL=${BOT_GSUTIL}
+  else
+    GSUTIL=gsutil
+  fi
+
+  PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
+  PEPPER_DIR=pepper_${PEPPER_VERSION}
+  UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
+  UPLOAD_PATH+=${BUILDBOT_REVISION}/publish/${LIBC}
+  SRC_PATH=out/publish
+  echo "Uploading to ${UPLOAD_PATH}"
+
+  ${GSUTIL} cp -R -a public-read ${SRC_PATH} gs://${UPLOAD_PATH}
+
+  URL="http://gsdview.appspot.com/${UPLOAD_PATH}"
+  echo "@@@STEP_LINK@browse@${URL}@@@"
 }
 
 # Ignore 'periodic-' prefix.
@@ -119,5 +144,7 @@ StartBuild ${SCRIPT_NAME} x86_64
 if [ ${NACL_GLIBC} != "1" ]; then
   StartBuild ${SCRIPT_NAME} arm
 fi
+
+Publish
 
 exit $RESULT

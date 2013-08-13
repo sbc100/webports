@@ -73,6 +73,16 @@ CalculatePackageShards()
     examples/systems/bochs
   "
 
+  if [ -n "${TEST_BUILDBOT:-}" ]; then
+    # In testing mode just build small set of packages.
+    PKG_LIST_PART_0="
+      libraries/libtar
+      libraries/zlib
+      libraries/lua
+      examples/tools/lua_ppapi
+    "
+  fi
+
   for PKG in ${PKG_LIST_PART_0} ${PKG_LIST_PART_1}; do
     if [[ ! "${ALL_PACKAGES}" =~ "${PKG}" ]]; then
       echo "bot_common.sh: Invalid package name: ${PKG}"
