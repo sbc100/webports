@@ -13,13 +13,8 @@ source ${SCRIPT_DIR}/../bot_common.sh
 NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/../../.. && pwd)"
 OUT_DIR=${NACLPORTS_ROOT}/out
 
-# PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
-PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
-PEPPER_DIR=pepper_${PEPPER_VERSION}
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
 OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
-
-BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 
 cd ${NACLPORTS_ROOT}
 
@@ -131,17 +126,6 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
 
   echo "@@@BUILD_STEP upload archive@@@"
   UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/${BUILDBOT_REVISION}
-  if [ -e ${BOT_GSUTIL} ]; then
-    GSUTIL=${BOT_GSUTIL}
-  else
-    GSUTIL=gsutil
-  fi
-  # The bots set the BOTO_CONFIG environment variable to a different .boto file
-  # (currently /b/build/site-config/.boto). override this to the gsutil default
-  # which has access to gs://nativeclient-mirror.
-  # gsutil also looks for AWS_CREDENTIAL_FILE, so clear that too.
-  unset AWS_CREDENTIAL_FILE
-  unset BOTO_CONFIG
   RunCmd ${GSUTIL} cp -a public-read \
       naclports.tar.bz2 gs://${UPLOAD_PATH}/naclports.tar.bz2
   URL="https://commondatastorage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"

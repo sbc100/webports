@@ -13,6 +13,24 @@ set -o errexit
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
+# PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
+export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
+export PEPPER_DIR=pepper_${PEPPER_VERSION}
+
+BOT_GSUTIL='/b/build/scripts/slave/gsutil'
+if [ -e ${BOT_GSUTIL} ]; then
+  export GSUTIL=${BOT_GSUTIL}
+else
+  export GSUTIL=gsutil
+fi
+
+
+# The bots set the BOTO_CONFIG environment variable to a different .boto file
+# (currently /b/build/site-config/.boto). override this to the gsutil default
+# which has access to gs://nativeclient-mirror.
+# gsutil also looks for AWS_CREDENTIAL_FILE, so clear that too.
+unset AWS_CREDENTIAL_FILE
+unset BOTO_CONFIG
 
 RESULT=0
 
@@ -37,15 +55,6 @@ Publish() {
     return
   fi
   echo "@@@BUILD_STEP upload binaries@@@"
-  BOT_GSUTIL='/b/build/scripts/slave/gsutil'
-  if [ -e "${BOT_GSUTIL}" ]; then
-    GSUTIL=${BOT_GSUTIL}
-  else
-    GSUTIL=gsutil
-  fi
-
-  PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
-  PEPPER_DIR=pepper_${PEPPER_VERSION}
   UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
   UPLOAD_PATH+=${BUILDBOT_REVISION}/publish/${LIBC}
   SRC_PATH=out/publish
