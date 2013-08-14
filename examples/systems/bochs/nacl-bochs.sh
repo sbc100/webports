@@ -94,7 +94,6 @@ CustomInstallStep() {
   cp -r ${BOCHS_DIR}/msrs.def img/
   cd img
 
-  PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
 
   tar cf ${PUBLISH_DIR}/img.tar ./

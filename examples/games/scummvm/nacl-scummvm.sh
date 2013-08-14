@@ -96,7 +96,6 @@ CustomInstallStep() {
   tar cf ../lure.tar ./
   cd ..
 
-  export PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   Banner "Publishing to ${PUBLISH_DIR}"
   MakeDir ${PUBLISH_DIR}
 

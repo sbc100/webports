@@ -57,7 +57,6 @@ CustomConfigureStep() {
 
 CustomInstallStep(){
   BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
-  PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/snes.html ${PUBLISH_DIR}
   install ${START_DIR}/snes.js ${PUBLISH_DIR}

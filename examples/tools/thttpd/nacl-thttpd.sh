@@ -45,7 +45,6 @@ CustomBuildStep() {
 
 CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
-  PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/thttpd.html ${PUBLISH_DIR}

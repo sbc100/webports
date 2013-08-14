@@ -83,7 +83,6 @@ CustomConfigureStep() {
 CustomInstallStep(){
   DOSBOX_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   DOSBOX_BUILD=${DOSBOX_DIR}/${NACL_BUILD_SUBDIR}
-  PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
   LogExecute install ${DOSBOX_BUILD}/src/dosbox${NACL_EXEEXT} \

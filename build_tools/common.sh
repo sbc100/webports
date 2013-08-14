@@ -171,6 +171,12 @@ NACL_CREATE_NMF_FLAGS="-L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib \
 # this before including common.sh
 PACKAGE_DIR=${PACKAGE_DIR:-${PACKAGE_NAME:-}}
 
+PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
+if [ "${NACL_ARCH}" = "pnacl" ]; then
+  PUBLISH_DIR+=/pnacl
+else
+  PUBLISH_DIR+=/${NACL_LIBC}
+fi
 
 ######################################################################
 # Always run

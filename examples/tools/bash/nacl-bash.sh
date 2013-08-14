@@ -24,7 +24,6 @@ CustomConfigureStep() {
 }
 
 CustomInstallStep() {
-  local PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/bash"
 

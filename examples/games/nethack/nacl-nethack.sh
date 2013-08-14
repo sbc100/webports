@@ -42,13 +42,11 @@ CustomBuildStep() {
 
 CustomInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
-
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
 
   make install
 
-  local PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
   MakeDir ${ASSEMBLY_DIR}
