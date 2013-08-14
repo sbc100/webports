@@ -28,8 +28,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define inet_pton __inet_pton
-
 /*
  * WARNING: Don't even consider trying to compile this on a system where
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
@@ -216,9 +214,11 @@ inet_pton6(src, dst)
 	return (1);
 }
 
+#if 0
 /*
  * Weak aliases for applications that use certain private entry points,
  * and fail to include <arpa/inet.h>.
  */
 #undef inet_pton
 __weak_reference(__inet_pton, inet_pton);
+#endif

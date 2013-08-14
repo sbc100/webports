@@ -72,9 +72,6 @@ static char sccsid[] = "@(#)inet_addr.c	8.1 (Berkeley) 6/17/93";
 #include <string.h>
 #include <stdlib.h>
 
-#define inet_addr __inet_addr
-#define inet_aton __inet_aton
-
 /*
  * ASCII internet address interpretation routine.
  * The value returned is in network order.
@@ -194,6 +191,7 @@ inet_aton(cp, addr)
 	return (1);
 }
 
+#if 0
 /*
  * Weak aliases for applications that use certain private entry points,
  * and fail to include <arpa/inet.h>.
@@ -202,3 +200,4 @@ inet_aton(cp, addr)
 __weak_reference(__inet_addr, inet_addr);
 #undef inet_aton
 __weak_reference(__inet_aton, inet_aton);
+#endif
