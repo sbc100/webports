@@ -74,6 +74,45 @@ Bash.prototype.handleMessage_ = function(e) {
   term_.io.print(msg);
 }
 
+/**
+ * Handle load end event from NaCl.
+ */
+Bash.prototype.handleLoadEnd_ = function(e) {
+  if (typeof(this.lastUrl) != 'undefined')
+    term_.io.print("\n");
+  term_.io.print("Loaded.\n");
+}
+
+/**
+ * Handle load progress event from NaCl.
+ */
+Bash.prototype.handleProgress_ = function(e) {
+  var url = e.url.substring(e.url.lastIndexOf('/') + 1);
+  //term_.io.print("progress x" + typeof(this.lastUrl) + "x\n");
+  if (this.lastUrl != url) {
+    if (url != '') {
+      if (this.lastUrl)
+        term_.io.print("\n");
+      term_.io.print("Loading " + url + " .");
+    }
+  } else {
+    term_.io.print(".");
+  }
+  if (url)
+  this.lastUrl = url;
+}
+
+/**
+ * Handle crash event from NaCl.
+ */
+Bash.prototype.handleCrash_ = function(e) {
+ if (embed.exitStatus == -1) {
+   term_.io.print("Program crashed (exit status -1)\n")
+ } else {
+   term_.io.print("Program exited (status=" + embed.exitStatus + ")\n");
+ }
+}
+
 function got(str) {
   embed.postMessage(Bash.prefix_ + str);
 }
@@ -88,6 +127,9 @@ Bash.prototype.run = function() {
   embed.width = 0;
   embed.height = 0;
   embed.addEventListener('message', this.handleMessage_.bind(this));
+  embed.addEventListener('progress', this.handleProgress_.bind(this));
+  embed.addEventListener('loadend', this.handleLoadEnd_.bind(this));
+  embed.addEventListener('crash', this.handleCrash_.bind(this));
   embed.data = 'bash.nmf';
   embed.type = 'application/x-nacl';
 
