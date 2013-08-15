@@ -13,9 +13,6 @@ set -o errexit
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
-# PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
-export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
-export PEPPER_DIR=pepper_${PEPPER_VERSION}
 
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 if [ -e ${BOT_GSUTIL} ]; then
@@ -69,59 +66,45 @@ Publish() {
 # Ignore 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 
-# The SDK builder builds a subset of the ports, but with multiple
-# configurations.
-if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
-  # Goto src/
-  cd ${SCRIPT_DIR}/..
-
-  if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
-    echo "@@@BUILD_STEP Install Latest SDK@@@"
-    ${PYTHON} build_tools/download_sdk.py
+if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
+  # Decode buildername.
+  readonly BNAME_REGEX="(.+)-(.+)-(.+)"
+  if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
+    readonly OS=${BASH_REMATCH[1]}
+    readonly LIBC=${BASH_REMATCH[2]}
+    readonly SHARD=${BASH_REMATCH[3]}
+  else
+    echo "Bad BUILDBOT_BUILDERNAME: ${BUILDBOT_BUILDERNAME}" 1>&2
+    exit 1
   fi
 
-  cd ${SCRIPT_DIR}/bots/linux
-  ./naclports-linux-sdk-bundle.sh
-  exit 0
-fi
+  # Select platform specific things.
+  if [ "$OS" = "mac" ]; then
+    readonly PYTHON=python
+    # Use linux config on mac too.
+    readonly BOT_OS_DIR=linux
+  elif [ "$OS" = "linux" ]; then
+    readonly PYTHON=python
+    readonly BOT_OS_DIR=linux
+  elif [ "$OS" = "win" ]; then
+    readonly PYTHON=python.bat
+    readonly BOT_OS_DIR=windows
+  else
+    echo "Bad OS: ${OS}" 1>&2
+    exit 1
+  fi
 
-# Decode buildername.
-readonly BNAME_REGEX="(.+)-(.+)-(.+)"
-if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
-  readonly OS=${BASH_REMATCH[1]}
-  readonly LIBC=${BASH_REMATCH[2]}
-  readonly SHARD=${BASH_REMATCH[3]}
-else
-  echo "Bad BUILDBOT_BUILDERNAME: ${BUILDBOT_BUILDERNAME}" 1>&2
-  exit 1
-fi
-
-# Select platform specific things.
-if [ "$OS" = "mac" ]; then
-  readonly PYTHON=python
-  # Use linux config on mac too.
-  readonly BOT_OS_DIR=linux
-elif [ "$OS" = "linux" ]; then
-  readonly PYTHON=python
-  readonly BOT_OS_DIR=linux
-elif [ "$OS" = "win" ]; then
-  readonly PYTHON=python.bat
-  readonly BOT_OS_DIR=windows
-else
-  echo "Bad OS: ${OS}" 1>&2
-  exit 1
-fi
-
-# Select libc
-if [ "$LIBC" = "glibc" ]; then
-  export NACL_GLIBC=1
-elif [ "$LIBC" = "newlib" ]; then
-  export NACL_GLIBC=0
-elif [ "$LIBC" = "pnacl_newlib" ]; then
-  export NACL_GLIBC=0
-else
-  echo "Bad LIBC: ${LIBC}" 1>&2
-  exit 1
+  # Select libc
+  if [ "$LIBC" = "glibc" ]; then
+    export NACL_GLIBC=1
+  elif [ "$LIBC" = "newlib" ]; then
+    export NACL_GLIBC=0
+  elif [ "$LIBC" = "pnacl_newlib" ]; then
+    export NACL_GLIBC=0
+  else
+    echo "Bad LIBC: ${LIBC}" 1>&2
+    exit 1
+  fi
 fi
 
 # Goto src/
@@ -133,10 +116,22 @@ if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   ${PYTHON} build_tools/download_sdk.py
 fi
 
+# PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
+export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
+export PEPPER_DIR=pepper_${PEPPER_VERSION}
+
 # This a temporary hack until the pnacl support is more mature
 if [ ${LIBC} = "pnacl_newlib" ] ; then
   BOT_DIR=${SCRIPT_DIR}/bots
   StartBuild pnacl_bots.sh pnacl
+  exit 0
+fi
+
+# The SDK builder builds a subset of the ports, but with multiple
+# configurations.
+if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
+  cd ${SCRIPT_DIR}/bots/linux
+  ./naclports-linux-sdk-bundle.sh
   exit 0
 fi
 
