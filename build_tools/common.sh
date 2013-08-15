@@ -249,11 +249,15 @@ PatchSpecFile() {
     return
   fi
 
+  # SPECS_FILE is where nacl-gcc 'specs' file will be installed
+  local SPECS_FILE=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3/specs
+
   # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
   # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
   local NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
   local NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
   local NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
+  local ERROR_MSG="Shared libraries are not supported by newlib toolchain"
 
   # fix up spaces so gcc sees entire path
   local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
@@ -270,7 +274,13 @@ PatchSpecFile() {
     sed "/*link_libgcc:/{
       N
       s|$| -L${SED_SAFE_SPACES_USR_LIB}|
-    }" >${NACL_SDK_GCC_SPECS_PATH}/specs
+    }" > ${SPECS_FILE}
+
+  # For newlib toolchain, modify the specs file to give an error when attempting
+  # to create a shared object.
+  if [ "${NACL_GLIBC}" != "1" ]; then
+    sed -i "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
+  fi
 }
 
 CheckSDKVersion() {

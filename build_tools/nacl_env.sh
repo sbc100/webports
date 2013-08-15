@@ -118,9 +118,6 @@ InitializeNaClGccToolchain() {
   export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
   export NACL_EXEEXT=".nexe"
 
-  # NACL_SDK_GCC_SPECS_PATH is where nacl-gcc 'specs' file will be installed
-  readonly NACL_SDK_GCC_SPECS_PATH=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
-
   if [ ${NACL_ARCH} = "arm" ]; then
     local NACL_LIBDIR=arm-nacl/lib
   elif [ ${NACL_ARCH} = "x86_64" ]; then
