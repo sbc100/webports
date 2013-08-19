@@ -8,13 +8,13 @@ source ../../../build_tools/common.sh
 
 export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 
-CustomPatchStep() {
+PatchStep() {
   DefaultPatchStep
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   cp ${START_DIR}/vim_pepper.c src/vim_pepper.c
 }
 
-CustomConfigureStep() {
+ConfigureStep() {
   export vim_cv_toupper_broken=1
   export vim_cv_terminfo=yes
   export vim_cv_tty_mode=1
@@ -35,7 +35,7 @@ CustomConfigureStep() {
   LogExecute make clean
 }
 
-CustomInstallStep() {
+InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/vim"
 
@@ -71,18 +71,5 @@ CustomInstallStep() {
   zip -r vim-7.3.zip vim
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  CustomPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
-
+PackageInstall
 exit 0

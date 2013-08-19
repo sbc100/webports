@@ -3,13 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# nacl-ImageMagick-6.5.4-10.sh
-#
-# usage:  nacl-ImageMagick-6.5.4-10.sh
-#
-# this script downloads, patches, and builds ImageMagick for Native Client
-#
-
 source pkg_info
 source ../../build_tools/common.sh
 
@@ -20,7 +13,7 @@ if [ "$NACL_ARCH" = "arm" ]; then
   export CFLAGS="${CFLAGS//-O2/}"
 fi
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -58,7 +51,7 @@ CustomConfigureStep() {
 }
 
 
-CustomBuildAndInstallStep() {
+BuildAndInstallStep() {
   # assumes pwd has makefile
   LogExecute make clean
   cflags="${NACLPORTS_CFLAGS} -DSSIZE_MAX='((ssize_t)(~((size_t)0)>>1))'"
@@ -68,14 +61,15 @@ CustomBuildAndInstallStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  CustomBuildAndInstallStep
+PackageInstall() {
+  PreInstallStep
+  DownloadStep
+  ExtractStep
+  PatchStep
+  ConfigureStep
+  BuildAndInstallStep
 }
 
-CustomPackageInstall
+
+PackageInstall
 exit 0

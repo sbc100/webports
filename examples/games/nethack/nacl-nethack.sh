@@ -8,7 +8,7 @@ source ../../../build_tools/common.sh
 
 EXECUTABLES=src/nethack
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -40,7 +40,7 @@ CustomBuildStep() {
   make
 }
 
-CustomInstallStep() {
+InstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
@@ -86,16 +86,5 @@ CustomInstallStep() {
   ChangeDir ${PACKAGE_DIR}
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
+PackageInstall
 exit 0

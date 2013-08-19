@@ -26,7 +26,7 @@ RunTests() {
 }
 
 
-CustomPackageInstall() {
+PackageInstall() {
   DefaultPackageInstall
   if [ "${NACL_GLIBC}" = "1" ]; then
     cd ${NACLPORTS_LIBDIR}
@@ -37,5 +37,5 @@ CustomPackageInstall() {
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0

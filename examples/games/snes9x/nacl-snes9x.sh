@@ -18,7 +18,7 @@ source ../../../build_tools/common.sh
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/games/snes9x-1.53
 EXECUTABLES=snes9x
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
 
   # export the nacl tools
@@ -55,7 +55,7 @@ CustomConfigureStep() {
   autoconf && ./configure ${CONFIG_FLAGS}
 }
 
-CustomInstallStep(){
+InstallStep(){
   BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/snes.html ${PUBLISH_DIR}
@@ -66,17 +66,5 @@ CustomInstallStep(){
       ${PUBLISH_DIR}/snes_${NACL_ARCH}.nexe
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
+PackageInstall
 exit 0

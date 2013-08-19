@@ -9,13 +9,13 @@ source ../../../build_tools/common.sh
 export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 
-CustomPatchStep() {
+PatchStep() {
   DefaultPatchStep
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   cp ${START_DIR}/nano_pepper.c src/nano_pepper.c
 }
 
-CustomInstallStep() {
+InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/nano"
 
@@ -51,18 +51,5 @@ CustomInstallStep() {
   zip -r nano-7.3.zip nano
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  CustomPatchStep
-  DefaultConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
-
+PackageInstall
 exit 0

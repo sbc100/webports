@@ -9,14 +9,14 @@ source ../../../build_tools/common.sh
 EXAMPLE_DIR=${NACL_SRC}/examples/graphics/xaos
 EXECUTABLES=bin/xaos
 
-CustomPatchStep() {
+PatchStep() {
   DefaultPatchStep
   local src_dir="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   echo "copy nacl driver"
   cp -r "${START_DIR}/nacl-ui-driver" "${src_dir}/src/ui/ui-drv/nacl"
 }
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
 
   # export the nacl tools
@@ -60,7 +60,7 @@ CustomConfigureStep() {
   ./configure ${CONFIG_FLAGS}
 }
 
-CustomInstallStep(){
+InstallStep(){
   local out_dir=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   local build_dir=${out_dir}/${NACL_BUILD_SUBDIR}
   local publish_dir="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
@@ -73,17 +73,5 @@ CustomInstallStep(){
   install ${build_dir}/bin/xaos ${publish_dir}/xaos_${NACL_ARCH}${NACL_EXEEXT}
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  CustomPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
+PackageInstall
 exit 0

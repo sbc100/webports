@@ -15,7 +15,7 @@ readonly LURE_NAME=lure-1.1
 
 SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/examples/games/scummvm
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -59,7 +59,7 @@ CustomConfigureStep() {
     --enable-sky
 }
 
-CustomInstallStep() {
+InstallStep() {
   SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   SCUMMVM_DIR=runimage/usr/local/share/scummvm
   ChangeDir ${SRC_DIR}
@@ -129,23 +129,11 @@ CustomCheck() {
   fi
 }
 
-CustomDownloadZipStep() {
+DownloadZipStep() {
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching zip already exists, don't download again
   if ! CustomCheck $3; then
     Fetch $1 $2.zip
-    if ! CustomCheck $3 ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
-
-CustomDownloadStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
-  # if matching tarball already exists, don't download again
-  if ! CustomCheck $3; then
-    Fetch $1 $2.tbz2
     if ! CustomCheck $3 ; then
        Banner "${PACKAGE_NAME} failed checksum!"
        exit -1
@@ -166,23 +154,17 @@ GameGetStep() {
   PACKAGE_NAME=$2
   PACKAGE_DIR=$2
   SHA1=${SCUMMVM_EXAMPLE_DIR}/$2/$2.sha1
-  CustomDownloadZipStep $1 $2 ${SHA1}
+  DownloadZipStep $1 $2 ${SHA1}
   ExtractGameZipStep
   PACKAGE_NAME=${PACKAGE_NAME_TEMP}
   PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 
-CustomPackageInstall() {
+PackageInstall() {
   GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
   GameGetStep ${LURE_URL} ${LURE_NAME}
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
+  DefaultPackageInstall
 }
 
-CustomPackageInstall
+PackageInstall
 exit 0

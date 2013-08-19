@@ -6,7 +6,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -37,22 +37,11 @@ CustomConfigureStep() {
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   # assumes pwd has makefile
   make install
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

@@ -2,19 +2,11 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-openal-soft-1.13.sh
-#
-# usage:  nacl-openal-soft-1.13.sh
-#
-# this script downloads, patches, and builds OpenAL for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
 
   # Defaults to dynamic lib, but newlib can only link statically.
@@ -37,16 +29,6 @@ CustomConfigureStep() {
 
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultInstallStep
-}
 
-CustomPackageInstall
+PackageInstall
 exit 0
-

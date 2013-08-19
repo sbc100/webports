@@ -2,19 +2,11 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-gmock-1.5.0.sh
-#
-# usage:  nacl-gmock-1.5.0.sh
-#
-# this script downloads, patches, and builds gmock for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -27,7 +19,8 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
-CustomInstallStep() {
+
+InstallStep() {
   Remove ${NACLPORTS_INCLUDE}/gmock
   readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   (ChangeDir include; tar cf - gmock | (ChangeDir ${NACLPORTS_INCLUDE}; tar xfp -))
@@ -35,15 +28,6 @@ CustomInstallStep() {
   install -m 644 ${LIB_GMOCK} ${NACLPORTS_LIBDIR}/${LIB_GMOCK}
 }
 
-CustomPackageInstall() {
-   DefaultPreInstallStep
-   DefaultDownloadStep
-   DefaultExtractStep
-   DefaultPatchStep
-   CustomConfigureStep
-   DefaultBuildStep
-   CustomInstallStep
-}
 
-CustomPackageInstall
+PackageInstall
 exit 0

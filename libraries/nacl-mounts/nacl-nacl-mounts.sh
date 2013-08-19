@@ -47,7 +47,7 @@ RunSelLdrTests() {
 }
 
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   MakeDir ${NACL_BUILD_SUBDIR}
@@ -135,7 +135,8 @@ CustomBuildStep() {
   set +x
 }
 
-CustomInstallStep() {
+
+InstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   cp libnacl-mounts.a ${NACLPORTS_LIBDIR}
   mkdir -p ${NACLPORTS_LIBDIR}/nacl-mounts/util
@@ -157,21 +158,21 @@ CustomInstallStep() {
 }
 
 
-CustomExtractStep() {
+ExtractStep() {
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 }
 
 
-CustomPackageInstall() {
+PackageInstall() {
 #  RunTests
-  DefaultPreInstallStep
-  CustomExtractStep
-  DefaultPatchStep
-  CustomBuildStep
-  CustomInstallStep
+  PreInstallStep
+  ExtractStep
+  PatchStep
+  BuildStep
+  InstallStep
   RunSelLdrTests
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0

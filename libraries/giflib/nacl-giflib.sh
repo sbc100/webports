@@ -9,12 +9,12 @@ source ../../build_tools/common.sh
 # Some of the gif command line tools reference 'unlink'
 export LIBS='-lnosys'
 
-
 if [ "${NACL_GLIBC}" = "1" ]; then
   EXECUTABLES=util/.libs/rgb2gif${NACL_EXEEXT}
 else
   EXECUTABLES=util/rgb2gif${NACL_EXEEXT}
 fi
+
 
 TestStep() {
   if [ ${NACL_ARCH} = "arm" ]; then
@@ -40,7 +40,7 @@ TestStep() {
 }
 
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   echo "Directory: $(pwd)"
   # Limit the subdirecorties that get built by make. This is to
@@ -51,18 +51,11 @@ CustomBuildStep() {
 }
 
 
-DefaultPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  DefaultConfigureStep
-  CustomBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  DefaultInstallStep
+PackageInstall() {
+  DefaultPackageInstall
   TestStep
 }
 
-DefaultPackageInstall
+
+PackageInstall
 exit 0

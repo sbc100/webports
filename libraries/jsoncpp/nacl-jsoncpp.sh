@@ -7,7 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
@@ -26,7 +26,7 @@ CustomBuildStep() {
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
 
@@ -35,13 +35,5 @@ CustomInstallStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  CustomBuildStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
+PackageInstall
 exit 0

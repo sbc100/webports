@@ -6,7 +6,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -21,7 +21,7 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
-CustomInstallStep() {
+InstallStep() {
   Remove ${NACLPORTS_INCLUDE}/osg
   Remove ${NACLPORTS_INCLUDE}/osgUtil
   Remove ${NACLPORTS_INCLUDE}/OpenThreads
@@ -37,15 +37,6 @@ CustomInstallStep() {
   install -m 644 ${LIB_OPENTHREADS} ${NACLPORTS_LIBDIR}/${LIB_OPENTHREADS}
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
-}
 
-CustomPackageInstall
+PackageInstall
 exit 0

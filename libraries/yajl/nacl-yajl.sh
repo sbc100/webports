@@ -35,7 +35,7 @@ RunSelLdrTests() {
 }
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   export PACKAGE_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   echo "Directory: $(pwd)"
@@ -53,7 +53,7 @@ CustomConfigureStep() {
 }
 
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   echo "Directory: $(pwd)"
   make clean
@@ -61,17 +61,11 @@ CustomBuildStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  CustomBuildStep
-  DefaultInstallStep
+PackageInstall() {
+  DefaultPackageInstall
   RunSelLdrTests
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0

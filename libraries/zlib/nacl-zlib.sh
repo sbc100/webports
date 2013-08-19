@@ -7,7 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   # TODO: side-by-side install
@@ -62,27 +62,27 @@ TestStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
+PackageInstall() {
+  PreInstallStep
+  DownloadStep
+  ExtractStep
   # zlib doesn't need patching, so no patch step
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
+  ConfigureStep
+  BuildStep
+  TranslateStep
+  ValidateStep
   TestStep
   DefaultInstallStep
   if [ "${NACL_GLIBC}" = "1" ]; then
-    CustomConfigureStep shared
-    DefaultBuildStep
+    ConfigureStep shared
+    BuildStep
     Validate libz.so.1
-    DefaultValidateStep
+    ValidateStep
     TestStep
-    DefaultInstallStep
+    InstallStep
   fi
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0

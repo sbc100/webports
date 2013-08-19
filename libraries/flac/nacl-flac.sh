@@ -2,20 +2,12 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-flac-1.2.1.sh
-#
-# usage:  nacl-flac-1.2.1.sh
-#
-# this script downloads, patches, and builds flac for Native Client 
-#
 
 source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -47,10 +39,12 @@ CustomConfigureStep() {
     --with-html=off \
     --with-ftp=off \
     --with-x=no
+
+  PostConfigureStep
 }
 
 
-CustomPostConfigureStep() {
+PostConfigureStep() {
   # add stub includes
   mkdir netinet
   touch netinet/in.h
@@ -67,25 +61,12 @@ CustomPostConfigureStep() {
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   # assumes pwd has makefile
   make install-exec
   (cd include; make install)
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  CustomPostConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0
-

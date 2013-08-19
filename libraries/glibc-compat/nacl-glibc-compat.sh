@@ -8,13 +8,13 @@ source ../../build_tools/common.sh
 
 readonly LIB_GLIBC_COMPAT=libglibc-compat.a
 
-CustomExtractStep() {
+ExtractStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   mkdir -p ${PACKAGE_NAME}
   cp -r ${START_DIR}/* ${PACKAGE_NAME}
 }
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -23,19 +23,12 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
-CustomInstallStep() {
+InstallStep() {
   Remove ${NACLPORTS_LIBDIR}/${LIB_GLIBC_COMPAT}
   Remove ${NACLPORTS_INCLUDE}/glibc-compat
   install -m 644 out/${LIB_GLIBC_COMPAT} ${NACLPORTS_LIBDIR}/${LIB_GLIBC_COMPAT}
   cp -r include ${NACLPORTS_INCLUDE}/glibc-compat
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  CustomExtractStep
-  CustomConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
+PackageInstall
+exit 0

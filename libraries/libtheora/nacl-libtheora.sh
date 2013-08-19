@@ -3,17 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# nacl-libtheora-1.1.1.sh
-#
-# usage:  nacl-libtheora-1.1.1.sh
-#
-# this script downloads, patches, and builds libtheora for Native Client
-#
-
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -44,16 +37,5 @@ CustomConfigureStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

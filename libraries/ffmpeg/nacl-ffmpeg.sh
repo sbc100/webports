@@ -3,18 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# nacl-ffmpeg-0.5.sh
-#
-# usage:  nacl-ffmpeg-0.5.sh
-#
-# this script downloads, patches, and builds ffmpeg for Native Client 
-#
-
 source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
@@ -61,27 +54,27 @@ CustomConfigureStep() {
 }
 
 
-CustomPostConfigureStep() {
+PostConfigureStep() {
   touch strings.h
 }
 
 
-CustomBuildAndInstallStep() {
+BuildAndInstallStep() {
   DefaultBuildStep
   make install
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  CustomPostConfigureStep
-  CustomBuildAndInstallStep
+PackageInstall() {
+  PreInstallStep
+  DownloadStep
+  ExtractStep
+  PatchStep
+  ConfigureStep
+  PostConfigureStep
+  BuildAndInstallStep
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0

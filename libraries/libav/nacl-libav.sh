@@ -7,7 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
@@ -46,18 +46,5 @@ CustomConfigureStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  DefaultInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

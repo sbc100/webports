@@ -55,7 +55,7 @@ ConfigureTests() {
 }
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
 
   # export the nacl tools
@@ -109,20 +109,20 @@ PublishStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
+PackageInstall() {
+  PreInstallStep
+  DownloadStep
+  ExtractStep
+  PatchStep
   AutogenStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultInstallStep
+  ConfigureStep
+  BuildStep
+  InstallStep
   ConfigureTests
-  DefaultBuildStep
+  BuildStep
   PublishStep
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0

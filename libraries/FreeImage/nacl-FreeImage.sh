@@ -2,15 +2,6 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-FreeImage-3.14.1.sh
-#
-# usage:  nacl-FreeImage-3.14.1.sh
-#
-# This script downloads, patches, and builds FreeImage for Native Client
-# See http://freeimage.sourceforge.net/ for more details.
-#
 
 # This list of files needs to have CRLF (Windows)-style line endings translated
 # to LF (*nix)-style line endings prior to applying the patch.  This list of
@@ -34,7 +25,8 @@ PACKAGE_DIR=FreeImage
 
 source ../../build_tools/common.sh
 
-CustomExtractStep() {
+
+ExtractStep() {
   DefaultExtractStep
   # FreeImage uses CRLF for line-endings.  The patch file has LF (Unix-style)
   # line endings, which means on some versions of patch, the patch fails. Run a
@@ -50,7 +42,8 @@ CustomExtractStep() {
   done
 }
 
-CustomConfigureStep() {
+
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -63,26 +56,19 @@ CustomConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 }
 
-CustomBuildStep() {
+
+BuildStep() {
   # assumes pwd has makefile
   LogExecute make OS=nacl clean
   LogExecute make OS=nacl -j${OS_JOBS}
 }
 
-CustomInstallStep() {
+
+InstallStep() {
   # assumes pwd has makefile
   make OS=nacl install
 }
 
-CustomPackageInstall() {
-   DefaultPreInstallStep
-   DefaultDownloadStep
-   CustomExtractStep
-   DefaultPatchStep
-   CustomConfigureStep
-   CustomBuildStep
-   CustomInstallStep
-}
 
-CustomPackageInstall
+PackageInstall
 exit 0

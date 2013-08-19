@@ -9,7 +9,7 @@ source ../../../build_tools/common.sh
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/systems/dosbox-0.74
 EXECUTABLES=src/dosbox${NACL_EXEEXT}
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
 
   # export the nacl tools
@@ -80,7 +80,7 @@ CustomConfigureStep() {
       -exec sed -i.bak "${SED_REPLACE_LDFLAGS}" {} \;
 }
 
-CustomInstallStep(){
+InstallStep(){
   DOSBOX_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   DOSBOX_BUILD=${DOSBOX_DIR}/${NACL_BUILD_SUBDIR}
   MakeDir ${PUBLISH_DIR}
@@ -91,17 +91,6 @@ CustomInstallStep(){
   LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
 
-CustomPackageInstall
+PackageInstall
 exit 0

@@ -6,8 +6,8 @@
 source pkg_info
 source ../../../build_tools/common.sh
 
-PreConfigureStep() {
-  Banner "Pre-configuring ${PACKAGE_NAME}"
+ConfigureStep() {
+  Banner "Configuring ${PACKAGE_NAME}"
 
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
@@ -28,7 +28,7 @@ Makefile"
   LogExecute make -j${OS_JOBS} clean
 }
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   # export the nacl tools
   # The checked-in Makefile has more configuration for this example.
@@ -43,7 +43,7 @@ CustomBuildStep() {
   LogExecute make -j${OS_JOBS} thttpd
 }
 
-CustomInstallStep() {
+InstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
@@ -65,15 +65,6 @@ CustomInstallStep() {
   LogExecute $CMD
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  PreConfigureStep
-  CustomBuildStep
-  CustomInstallStep
-}
 
-CustomPackageInstall
+PackageInstall
 exit 0

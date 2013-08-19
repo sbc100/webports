@@ -17,7 +17,7 @@ fi
 
 export LDFLAGS="${LDFLAGS} -static"
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Build ${PACKAGE_NAME}"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
@@ -34,21 +34,11 @@ CustomBuildStep() {
   LogExecute make -j${OS_JOBS} ${tests}
 }
 
-CustomInstallStep() {
+InstallStep() {
   Banner "Install"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
   LogExecute make install
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  DefaultConfigureStep
-  CustomBuildStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
+PackageInstall
 exit 0

@@ -11,7 +11,7 @@ export MAKE_TARGETS="V=1"
 
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 
-CustomConfigureStep() {
+ConfigureStep() {
   local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   ChangeDir ${SRC_DIR}
   autoconf
@@ -25,7 +25,7 @@ CustomConfigureStep() {
   LogExecute make clean
 }
 
-CustomInstallStep() {
+InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/tar"
 
@@ -33,18 +33,5 @@ CustomInstallStep() {
   DefaultInstallStep
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
-
+PackageInstall
 exit 0

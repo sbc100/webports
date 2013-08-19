@@ -3,18 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# nacl-libtommath-0.41.sh
-#
-# usage:  nacl-libtommath-0.41.sh
-#
-# this script downloads, patches, and builds libtommath for Native Client
-#
-
 source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   export CC=${NACLCC}
@@ -33,7 +26,7 @@ CustomBuildStep() {
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   # copy libs and headers manually
   Banner "Installing ${PACKAGE_NAME} to ${NACLPORTS_PREFIX}"
   ChangeDir ${NACLPORTS_INCLUDE}
@@ -46,15 +39,5 @@ CustomInstallStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomBuildStep
-  CustomInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

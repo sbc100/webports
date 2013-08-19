@@ -12,7 +12,7 @@ MAKEFILE_PATCH_FILE=nacl-fontconfig.Makefile.patch
 export with_arch=i686
 
 
-CustomPatchStep() {
+PatchStep() {
   ############################################################################
   # Recreation of configure/Makefile.in/config.sub/etc.
   # Will ask for autotools.
@@ -27,7 +27,7 @@ CustomPatchStep() {
 }
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -60,27 +60,27 @@ CustomConfigureStep() {
 }
 
 
-CustomPatchMakefileStep() {
+PatchMakefileStep() {
   # fontconfig wants to build executable tools.  These tools aren't needed
   # for Native Client.  This function will patch the generated Makefile
   # to remove them.  (Use fontconfig tools on your build machine instead.)
-  echo "CustomPatchMakefileStep"
+  echo "PatchMakefileStep"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   patch -p1 -g0 --no-backup-if-mismatch < ${START_DIR}/${MAKEFILE_PATCH_FILE}
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  CustomPatchStep
-  CustomConfigureStep
-  CustomPatchMakefileStep
-  DefaultBuildStep
-  DefaultInstallStep
+PackageInstall() {
+  PreInstallStep
+  DownloadStep
+  ExtractStep
+  PatchStep
+  ConfigureStep
+  PatchMakefileStep
+  BuildStep
+  InstallStep
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0

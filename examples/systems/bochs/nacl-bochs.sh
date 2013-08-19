@@ -13,7 +13,7 @@ readonly LINUX_IMG_NAME=linux-img
 BOCHS_EXAMPLE_DIR=${NACL_SRC}/examples/systems/bochs
 EXECUTABLES=bochs
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -69,7 +69,7 @@ CustomConfigureStep() {
     --with-gnu-ld
 }
 
-CustomExtractStep() {
+ImageExtractStep() {
   Banner "Untaring $1 to $2"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove $2
@@ -80,7 +80,7 @@ CustomExtractStep() {
   fi
 }
 
-CustomInstallStep() {
+InstallStep() {
   BOCHS_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   BOCHS_BUILD=${BOCHS_DIR}/${NACL_BUILD_SUBDIR}
 
@@ -114,7 +114,7 @@ CustomCheck() {
   fi
 }
 
-CustomDownloadStep() {
+ImageDownloadStep() {
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching tarball already exists, don't download again
   if ! CustomCheck $3; then
@@ -130,24 +130,15 @@ FetchLinuxStep() {
   Banner "FetchLinuxStep"
   ARCHIVE_NAME=$2.tar.gz
   SHA1=${BOCHS_EXAMPLE_DIR}/$2/$2.sha1
-  CustomDownloadStep $1 $2 ${SHA1}
-  CustomExtractStep ${ARCHIVE_NAME} $2
+  ImageDownloadStep $1 $2 ${SHA1}
+  ImageExtractStep ${ARCHIVE_NAME} $2
   unset ARCHIVE_NAME
 }
 
-
-CustomPackageInstall() {
+PackageInstall() {
   FetchLinuxStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
+  DefaultPackageInstall
 }
 
-CustomPackageInstall
+PackageInstall
 exit 0

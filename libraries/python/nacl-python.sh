@@ -27,7 +27,7 @@ BuildHostPython() {
   LogExecute make -j${OS_JOBS} python Parser/pgen
 }
 
-CustomConfigureStep() {
+ConfigureStep() {
   BuildHostPython
   export CROSS_COMPILE=true
   # We pre-seed configure with certain results that it cannot determine
@@ -51,22 +51,14 @@ CustomConfigureStep() {
   fi
 }
 
-CustomTestStep() {
+TestStep() {
   WriteSelLdrScript python python${NACL_EXEEXT}
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomTestStep
-  DefaultInstallStep
+PackageInstall() {
+  DefaultPackageInstall
+  TestStep
 }
 
-CustomPackageInstall
+PackageInstall
 exit 0

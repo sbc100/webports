@@ -8,7 +8,7 @@ source ../../build_tools/common.sh
 
 # override the extract step since the github generated tarball
 # puts all the files in regal-SHA1HASH folder
-CustomExtractStep() {
+ExtractStep() {
   ArchiveName
   Banner "Untaring ${ARCHIVE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
@@ -24,14 +24,14 @@ CustomExtractStep() {
 }
 
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   make -f Makefile SYSTEM=nacl-${NACL_ARCH}
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   Banner "Install ${PACKAGE_NAME}"
   cp -a lib/nacl-${NACL_ARCH}/libRegal*.a ${NACLPORTS_LIBDIR}
   if [ "${NACL_GLIBC}" = 1 ]; then
@@ -41,14 +41,5 @@ CustomInstallStep() {
 }
 
 
-DefaultPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  CustomExtractStep
-  DefaultPatchStep
-  CustomBuildStep
-  CustomInstallStep
-}
-
-DefaultPackageInstall
+PackageInstall
 exit 0

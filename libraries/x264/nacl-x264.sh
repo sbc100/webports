@@ -7,7 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -40,16 +40,5 @@ CustomConfigureStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

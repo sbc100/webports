@@ -8,7 +8,7 @@ source ../../build_tools/common.sh
 
 EXECUTABLES="src/lua src/luac"
 
-CustomBuildStep() {
+BuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   LogExecute make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" clean
@@ -16,7 +16,7 @@ CustomBuildStep() {
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   Banner "Install ${PACKAGE_NAME}"
 
   # TODO: side-by-side install
@@ -27,17 +27,5 @@ CustomInstallStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

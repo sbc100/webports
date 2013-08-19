@@ -2,24 +2,16 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-boost_1_47_0.sh
-#
-# usage:  nacl-boost_1_47_0.sh
-#
-# this script downloads, patches, and builds boost for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   echo "using gcc : 4.4.3 : ${NACLCXX} ;" > tools/build/v2/user-config.jam
 }
 
-CustomBuildStep() {
+BuildStep() {
   ./bootstrap.sh
 
   # TODO(eugenis): build dynamic libraries, too
@@ -41,16 +33,9 @@ CustomBuildStep() {
   fi
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  CustomBuildStep
-  # Installation is done in the build step.
+InstallStep() {
+  echo "Install is done by build step"
 }
 
-
-CustomPackageInstall
+PackageInstall
 exit 0

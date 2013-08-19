@@ -6,7 +6,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   local EXTRA_ARGS=""
   if [ "${NACL_GLIBC}" != "1" ] ; then
@@ -23,30 +23,34 @@ CustomConfigureStep() {
      --prefix=${NACLPORTS_PREFIX} no-asm no-hw no-krb5 ${EXTRA_ARGS} -D_GNU_SOURCE
 }
 
-CustomHackStepForNewlib() {
+
+HackStepForNewlib() {
   # These two makefiles build binaries which we do not care about,
   # and they depend on -ldl, so cannot be built with newlib.
   echo "all clean install: " > apps/Makefile
   echo "all clean install: " > test/Makefile
 }
 
-CustomBuildStep() {
+
+BuildStep() {
   make clean
-  make build_libs
+  make -j${OS_JOBS} build_libs
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
+
+PackageInstall() {
+  PreInstallStep
+  DownloadStep
+  ExtractStep
+  PatchStep
+  ConfigureStep
   if [ "${NACL_GLIBC}" != "1" ]; then
-    CustomHackStepForNewlib
+    HackStepForNewlib
   fi
-  CustomBuildStep
-  DefaultInstallStep
+  BuildStep
+  InstallStep
 }
 
-CustomPackageInstall
+
+PackageInstall
 exit 0

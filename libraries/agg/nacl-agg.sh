@@ -2,20 +2,12 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
-
-# nacl-agg-2.5.sh
-#
-# usage:  nacl-agg-2.5.sh
-#
-# this script downloads, patches, and builds agg for Native Client
-#
 
 source pkg_info
 source ../../build_tools/common.sh
 
 
-CustomBuildStep() {
+BuildStep() {
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   local cflags="${NACLPORTS_CFLAGS}"
   if [ ${NACL_ARCH} != "pnacl" ]; then
@@ -28,7 +20,7 @@ CustomBuildStep() {
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   # copy libs and headers manually
   ChangeDir ${NACLPORTS_INCLUDE}
   Remove ${PACKAGE_NAME}
@@ -42,15 +34,5 @@ CustomInstallStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomBuildStep
-  CustomInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

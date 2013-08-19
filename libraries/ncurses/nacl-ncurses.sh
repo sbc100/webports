@@ -20,7 +20,7 @@ if [[ "${NACL_ARCH}" = "pnacl" ]] ; then
   EXTRA_CONFIGURE_ARGS+=" --without-cxx-binding"
 fi
 
-CustomConfigureStep() {
+ConfigureStep() {
   if [[ "${NACL_GLIBC}" != "1" ]]; then
     readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
     # Changing NACLCC rather than CFLAGS as otherwise the configure script
@@ -36,7 +36,7 @@ CustomConfigureStep() {
 }
 
 
-CustomInstallStep() {
+InstallStep() {
   DefaultInstallStep
   cd ${NACLPORTS_LIBDIR}
   ln -sf libncurses.a libtermcap.a
@@ -44,16 +44,5 @@ CustomInstallStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
-
+PackageInstall
 exit 0

@@ -6,7 +6,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomInstallStep() {
+InstallStep() {
   # do the regular make install
   make install
   # move freetype up a directory so #include <freetype/freetype.h> works...
@@ -15,25 +15,12 @@ CustomInstallStep() {
   Remove ${NACLPORTS_INCLUDE}/freetype2
 }
 
-CustomPatchStep() {
+PatchStep() {
   DefaultPatchStep
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   Banner "Patching configure"
   ${TOOLS_DIR}/patch_configure.py builds/unix/configure
 }
 
-
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  CustomPatchStep
-  DefaultConfigureStep
-  DefaultBuildStep
-  CustomInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0
-

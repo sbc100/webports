@@ -325,8 +325,11 @@ LogExecute() {
 }
 
 
+# Set the ARCHIVE_NAME variable to the nacl of the upstream
+# tarball.  If ${URL} is not define (when there is no upstream)
+# then leave ARCHIVE_NAME unset.
 ArchiveName() {
-  if [ -z "${ARCHIVE_NAME:-}" ]; then
+  if [ -z "${ARCHIVE_NAME:-}" -a -n "${URL:-}" ]; then
     ARCHIVE_NAME=${URL_FILENAME:-$(basename ${URL})}
   fi
 }
@@ -402,6 +405,10 @@ Check() {
 
 DefaultDownloadStep() {
   ArchiveName
+  if [ -z "${ARCHIVE_NAME:-}" ]; then
+    return
+  fi
+
   cd ${NACL_PACKAGES_TARBALLS}
   # if matching tarball already exists, don't download again
   if ! Check ; then
@@ -613,6 +620,9 @@ TouchKeyStamp() {
 ######################################################################
 DefaultExtractStep() {
   ArchiveName
+  if [ -z "${ARCHIVE_NAME:-}" ]; then
+    return
+  fi
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   local ARCHIVE="${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}"
@@ -670,12 +680,16 @@ PatchConfigure() {
 
 
 DefaultPatchStep() {
+  if [ -z "${ARCHIVE_NAME:-}" ]; then
+    return
+  fi
+
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 
   if CheckStamp patch ; then
-     Banner "Skipping patch step"
-     git clean -f -d
-     return
+    Banner "Skipping patch step"
+    git clean -f -d
+    return
   fi
 
   InitGitRepo
@@ -703,6 +717,10 @@ DefaultConfigureStep() {
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export PATH=${NACL_BIN_PATH}:${PATH};
   local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  if [ ! -f "${SRC_DIR}/configure" ]; then
+    echo "No configure script found"
+    return
+  fi
   local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
   local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
   MakeDir ${BUILD_DIR}
@@ -924,20 +942,34 @@ DefaultTranslateStep() {
 
 
 DefaultPackageInstall() {
-  DefaultPreInstallStep
+  PreInstallStep
   if IsGitRepo; then
     GitCloneStep
   else
-    DefaultDownloadStep
-    DefaultExtractStep
+    DownloadStep
+    ExtractStep
   fi
-  DefaultPatchStep
-  DefaultConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  DefaultInstallStep
+  PatchStep
+  ConfigureStep
+  BuildStep
+  TranslateStep
+  ValidateStep
+  InstallStep
 }
+
+
+# Function entry points that packages should override in order
+# to customize the build process.
+PreInstallStep() { DefaultPreInstallStep; }
+DownloadStep()   { DefaultDownloadStep;   }
+ExtractStep()    { DefaultExtractStep;    }
+PatchStep()      { DefaultPatchStep;      }
+ConfigureStep()  { DefaultConfigureStep;  }
+BuildStep()      { DefaultBuildStep;      }
+TranslateStep()  { DefaultTranslateStep;  }
+ValidateStep()   { DefaultValidateStep;   }
+InstallStep()    { DefaultInstallStep;    }
+PackageInstall() { DefaultPackageInstall; }
 
 
 ######################################################################

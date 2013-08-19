@@ -12,18 +12,18 @@ export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --with-curses"
 export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 export CONFIG_SUB=support/config.sub
 
-CustomPatchStep() {
+PatchStep() {
   DefaultPatchStep
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   cp ${START_DIR}/bash_pepper.c bash_pepper.c
 }
 
-CustomConfigureStep() {
+ConfigureStep() {
   export CFLAGS="${CFLAGS} -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
   DefaultConfigureStep
 }
 
-CustomInstallStep() {
+InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/bash"
 
@@ -61,18 +61,5 @@ CustomInstallStep() {
   zip -r bash-7.3.zip bash
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  CustomPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultTranslateStep
-  DefaultValidateStep
-  CustomInstallStep
-}
-
-CustomPackageInstall
-
+PackageInstall
 exit 0

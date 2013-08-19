@@ -6,12 +6,11 @@
 source pkg_info
 source ../../../build_tools/common.sh
 
-CustomPackageInstall() {
+PackageInstall() {
   DefaultPreInstallStep
   GitCloneStep
   DefaultPatchStep
 }
 
-CustomPackageInstall
-
+PackageInstall
 exit 0

@@ -6,11 +6,11 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 }
 
-CustomBuildStep() {
+BuildStep() {
   make clean
   make CC="${NACLCC}" AR="${NACLAR}" RANLIB="${NACLRANLIB}" -j${OS_JOBS} libbz2.a
   if [ ${NACL_GLIBC} = 1 ]; then
@@ -20,7 +20,7 @@ CustomBuildStep() {
   fi
 }
 
-CustomInstallStep() {
+InstallStep() {
   # Don't rely on make install, as it implicitly builds executables
   # that need things not available in newlib.
   LogExecute mkdir -p ${NACLPORTS_PREFIX}/include
@@ -36,16 +36,5 @@ CustomInstallStep() {
   LogExecute chmod a+r ${NACLPORTS_PREFIX}/lib/libbz2.*
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  CustomBuildStep
-  CustomInstallStep
-}
-
-
-CustomPackageInstall
+PackageInstall
 exit 0

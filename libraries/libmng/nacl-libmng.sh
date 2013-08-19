@@ -2,12 +2,11 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 source pkg_info
 source ../../build_tools/common.sh
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -20,15 +19,5 @@ CustomConfigureStep() {
     --prefix=${NACLPORTS_PREFIX}
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultInstallStep
-}
-
-CustomPackageInstall
+PackageInstall
 exit 0

@@ -6,8 +6,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-
-CustomBuildStep() {
+BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PACKAGE_DIR}
@@ -20,7 +19,7 @@ CustomBuildStep() {
   ${NACLRANLIB} libdreadthread.a
 }
 
-CustomInstallStep() {
+InstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   cp ${PACKAGE_DIR}/libdreadthread.a ${NACLPORTS_LIBDIR}
@@ -29,11 +28,11 @@ CustomInstallStep() {
   cp ${START_DIR}/dreadthread_chain.h ${NACLPORTS_INCLUDE}
 }
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  CustomBuildStep
-  CustomInstallStep
+PackageInstall() {
+  PreInstallStep
+  BuildStep
+  InstallStep
 }
 
-CustomPackageInstall
+PackageInstall
 exit 0

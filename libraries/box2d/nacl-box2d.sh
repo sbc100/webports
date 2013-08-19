@@ -33,7 +33,7 @@ RunSelLdrTests() {
 }
 
 
-CustomConfigureStep() {
+ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   Remove ${NACL_BUILD_SUBDIR}
@@ -50,17 +50,11 @@ CustomConfigureStep() {
 }
 
 
-CustomPackageInstall() {
-  DefaultPreInstallStep
-  DefaultDownloadStep
-  DefaultExtractStep
-  DefaultPatchStep
-  CustomConfigureStep
-  DefaultBuildStep
-  DefaultInstallStep
+PackageInstall() {
+  DefaultPackageInstall
   RunSelLdrTests
 }
 
 
-CustomPackageInstall
+PackageInstall
 exit 0
