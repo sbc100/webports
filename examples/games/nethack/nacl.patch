@@ -49,33 +49,6 @@ diff -Naur nethack-3.4.3-orig/include/system.h nethack-3.4.3/include/system.h
 diff -Naur nethack-3.4.3-orig/include/unixconf.h nethack-3.4.3/include/unixconf.h
 --- nethack-3.4.3-orig/include/unixconf.h	2003-12-07 15:39:13.000000000 -0800
 +++ nethack-3.4.3/include/unixconf.h	2011-09-27 13:38:17.000000000 -0700
-@@ -34,7 +34,7 @@
- /* define any of the following that are appropriate */
- #define SVR4		/* use in addition to SYSV for System V Release 4 */
- 			/* including Solaris 2+ */
--#define NETWORK		/* if running on a networked system */
-+#define NETWORK 	/* if running on a networked system */
- 			/* e.g. Suns sharing a playground through NFS */
- /* #define SUNOS4 */	/* SunOS 4.x */
- /* #define LINUX */	/* Another Unix clone */
-@@ -47,7 +47,7 @@
- 			 * job control (note that AIX is SYSV otherwise)
- 			 * Also define this for AIX 3.2 */
- 
--#define TERMINFO	/* uses terminfo rather than termcap */
-+#define TERMINFO	/* uses terminfo rather than termcap */
- 			/* Should be defined for most SYSV, SVR4 (including
- 			 * Solaris 2+), HPUX, and Linux systems.  In
- 			 * particular, it should NOT be defined for the UNIXPC
-@@ -58,7 +58,7 @@
- 			/* and/or X11 color */
- #define POSIX_JOB_CONTROL /* use System V / Solaris 2.x / POSIX job control */
- 			/* (e.g., VSUSP) */
--#define POSIX_TYPES	/* use POSIX types for system calls and termios */
-+/* #define POSIX_TYPES*//* use POSIX types for system calls and termios */
- 			/* Define for many recent OS releases, including
- 			 * those with specific defines (since types are
- 			 * changing toward the standard from earlier chaos).
 @@ -95,8 +95,8 @@
   *		Ralf Brown, 7/26/89 (from v2.3 hack of 10/10/88)
   */
@@ -106,7 +79,7 @@ diff -Naur nethack-3.4.3-orig/include/unixconf.h nethack-3.4.3/include/unixconf.
  
  /* The Andrew Message System does mail a little differently from normal
   * UNIX.  Mail is deposited in the user's own directory in ~/Mailbox
-@@ -270,7 +271,7 @@
+@@ -270,6 +271,6 @@
  #endif
  #define tgetch getchar
  
@@ -114,109 +87,28 @@ diff -Naur nethack-3.4.3-orig/include/unixconf.h nethack-3.4.3/include/unixconf.
 +/* #define SHELL */		/* do not delete the '!' command */
  
  #include "system.h"
- 
-diff -Naur nethack-3.4.3-orig/src/options.c nethack-3.4.3/src/options.c
---- nethack-3.4.3-orig/src/options.c	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/src/options.c	2011-09-27 13:38:17.000000000 -0700
-@@ -557,6 +557,7 @@
- # endif
- 	}
- #endif /* UNIX && TTY_GRAPHICS */
-+
- #if defined(UNIX) || defined(VMS)
- # ifdef TTY_GRAPHICS
- 	/* detect whether a "vt" terminal can handle alternate charsets */
 diff -Naur nethack-3.4.3-orig/sys/share/unixtty.c nethack-3.4.3/sys/share/unixtty.c
 --- nethack-3.4.3-orig/sys/share/unixtty.c	2003-12-07 15:39:13.000000000 -0800
 +++ nethack-3.4.3/sys/share/unixtty.c	2011-09-27 13:38:17.000000000 -0700
-@@ -168,8 +168,10 @@
- static void
- setctty()
- {
-+#if 0
- 	if(STTY(&curttyb) < 0 || STTY2(&curttyb2) < 0)
- 		perror("NetHack (setctty)");
-+#endif
- }
- 
- /*
-@@ -180,6 +182,7 @@
- void
- gettty()
- {
-+#if 0
- 	if(GTTY(&inittyb) < 0 || GTTY2(&inittyb2) < 0)
- 		perror("NetHack (gettty)");
- 	curttyb = inittyb;
-@@ -196,6 +199,7 @@
- 		setctty();
- 	}
- 	settty_needed = TRUE;
-+#endif
- }
- 
- /* reset terminal to original state */
-@@ -203,6 +207,7 @@
- settty(s)
- const char *s;
- {
-+#if 0
- 	end_screen();
- 	if(s) raw_print(s);
- 	if(STTY(&inittyb) < 0 || STTY2(&inittyb2) < 0)
-@@ -211,11 +216,13 @@
- 	iflags.cbreak = (CBRKON(inittyb.cbrkflgs & CBRKMASK)) ? ON : OFF;
- 	curttyb.inputflags |= STRIPHI;
- 	setioctls();
-+#endif
- }
- 
- void
- setftty()
- {
-+#if 0
- register int ef = 0;			/* desired value of flags & ECHO */
- #ifdef LINT	/* cf = CBRKON(CBRKMASK); const expr to initialize is ok */
- register int cf = 0;
-@@ -279,11 +286,15 @@
- 
- 	if(change) setctty();
- 	start_screen();
-+#endif
-+	iflags.cbreak = ON;
-+	iflags.echo = OFF;
- }
- 
- void
- intron()		/* enable kbd interupts if enabled when game started */
- {
-+#if 0
- #ifdef TTY_GRAPHICS
- 	/* Ugly hack to keep from changing tty modes for non-tty games -dlc */
- 	if (!strcmp(windowprocs.name, "tty") &&
-@@ -292,11 +303,13 @@
- 	    setctty();
- 	}
- #endif
-+#endif
- }
- 
- void
- introff()		/* disable kbd interrupts if required*/
- {
-+#if 0
- #ifdef TTY_GRAPHICS
- 	/* Ugly hack to keep from changing tty modes for non-tty games -dlc */
- 	if (!strcmp(windowprocs.name, "tty") &&
-@@ -305,6 +318,7 @@
- 	    setctty();
- 	}
- #endif
-+#endif
- }
- 
- #ifdef _M_UNIX		/* SCO UNIX (3.2.4), from Andreas Arens */
-@@ -377,7 +391,7 @@
+@@ -54,7 +54,7 @@
+ # define CBRKMASK	ICANON
+ # define CBRKON		! /* reverse condition */
+ # ifdef POSIX_TYPES
+-#  define OSPEED(x)	(speednum(cfgetospeed(&x)))
++#  define OSPEED(x)	0
+ # else
+ #  ifndef CBAUD
+ #   define CBAUD	_CBAUD /* for POSIX nitpickers (like RS/6000 cc) */
+@@ -82,7 +82,7 @@
+ #  if defined(BSD) && !defined(__DGUX__)
+ #   define nonesuch	_POSIX_VDISABLE
+ #  else
+-#   define nonesuch	(fpathconf(0, _PC_VDISABLE))
++#   define nonesuch	0
+ #  endif
+ # else
+ #  define nonesuch	0
+@@ -377,7 +377,7 @@ init_sco_cons()
  
  
  #ifdef __linux__		/* via Jesse Thilo and Ben Gertzfield */
@@ -225,7 +117,7 @@ diff -Naur nethack-3.4.3-orig/sys/share/unixtty.c nethack-3.4.3/sys/share/unixtt
  
  int linux_flag_console = 0;
  
-@@ -409,11 +423,13 @@
+@@ -409,11 +409,13 @@ linux_mapoff()
  void
  check_linux_console()
  {
@@ -332,8 +224,9 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.utl nethack-3.4.3/sys/unix/Makef
  # CFLAGS = -g -I../include
  
 -CFLAGS = -O -I../include
-+CFLAGS = -O -I../include -DPOSIX_TYPES -DSTRCMPI -DSTRNCMPI
- LFLAGS =
+-LFLAGS =
++CFLAGS = -O -I../include -DSTRCMPI -DSTRNCMPI -m32
++LFLAGS = -m32
  
  LIBS =
   
@@ -381,3 +274,29 @@ diff -Naur nethack-3.4.3-orig/win/tty/termcap.c nethack-3.4.3/win/tty/termcap.c
  # endif
  	if (!term)
  #endif
+
+diff --git a/include/extern.h b/include/extern.h
+index 4e2314d..75c874c 100644
+--- nethack-3.4.3-orig/include/extern.h
++++ nethack-3.4.3/include/extern.h
+@@ -733,7 +733,7 @@ E int FDECL(distmin, (int,int,int,int));
+ E boolean FDECL(online2, (int,int,int,int));
+ E boolean FDECL(pmatch, (const char *,const char *));
+ #ifndef STRNCMPI
+-E int FDECL(strncmpi, (const char *,const char *,int));
++//E int FDECL(strncmpi, (const char *,const char *,int));
+ #endif
+ #ifndef STRSTRI
+ E char *FDECL(strstri, (const char *,const char *));
+diff --git a/src/hacklib.c b/src/hacklib.c
+index 0d08270..9e4902a 100644
+--- nethack-3.4.3-orig/src/hacklib.c
++++ nethack-3.4.3/src/hacklib.c
+@@ -356,6 +356,6 @@ pmatch_top:
+ int
+ strncmpi(s1, s2, n)	/* case insensitive counted string comparison */
+     register const char *s1, *s2;
+-    register int n; /*(should probably be size_t, which is usually unsigned)*/
++    register size_t n; /*(should probably be size_t, which is usually unsigned)*/
+ {					/*{ aka strncasecmp }*/
+     register char t1, t2;
