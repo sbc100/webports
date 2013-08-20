@@ -14,7 +14,7 @@ LIBS += -lppapi -lopenal -lvorbisfile -lvorbis -logg -lm -lpthread
 
 all: publish
 
-BIN = penal_ogg_$(NACL_ARCH)$(NACL_EXEEXT)
+BIN = openal_ogg_$(NACL_ARCH)$(NACL_EXEEXT)
 
 $(BIN): openal_ogg.c ogg_buffer_reader.c
 	$(NACLCC) -o $@ $^ $(CFLAGS) $(LDFLAGS) $(LIBS)
