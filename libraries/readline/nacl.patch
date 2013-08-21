@@ -1,8 +1,8 @@
 diff --git a/rldefs.h b/rldefs.h
-index 0257754..099420c 100644
+index 0257754..991f308 100644
 --- a/rldefs.h
 +++ b/rldefs.h
-@@ -34,6 +34,14 @@
+@@ -34,6 +34,22 @@
  #  undef HAVE_STRCOLL
  #endif
  
@@ -12,6 +12,14 @@ index 0257754..099420c 100644
 + * tcgetattr().  TODO(sbc): remove this patch once either ioctl() is
 + * supported on tty nodes or _POSIX_VERSION is defined by newlib headers. */
 +#define _POSIX_VERSION 199309L
++#endif
++
++#if defined (__native_client__) && !defined (__GLIBC__) && !defined TCOON
++// TODO(sbc): remove once these are added to termios.h in NaCl
++#define TCOOFF    0
++#define TCOON     1
++#define TCIOFF    2
++#define TCION     3
 +#endif
 +
  #if defined (_POSIX_VERSION) && !defined (TERMIOS_MISSING)
