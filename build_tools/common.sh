@@ -680,7 +680,7 @@ PatchConfigure() {
 
 
 DefaultPatchStep() {
-  if [ -z "${ARCHIVE_NAME:-}" ] && !IsGitRepo; then
+  if [ -z "${ARCHIVE_NAME:-}" ] && ! IsGitRepo; then
     return
   fi
 
