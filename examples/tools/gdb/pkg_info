@@ -1,4 +1,4 @@
 PACKAGE_NAME=gdb-6.8
-URL=http://git.chromium.org/native_client/nacl-gdb.git@5540d856ee177a454c2b8871c6498d0524b0c6f9
-PATCH_FILE=nacl-gdb.patch
+URL=http://git.chromium.org/native_client/nacl-gdb.git@9e993e015c2058b9cd7d006641fea96e845eaf8b
 LICENSE=CUSTOM
+LIBC=glibc

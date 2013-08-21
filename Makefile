@@ -298,6 +298,7 @@ $(SENT)/libraries/physfs: libraries/zlib
 $(SENT)/libraries/mpg123: libraries/openal-soft
 $(SENT)/libraries/ImageMagick: libraries/libpng libraries/jpeg \
     libraries/bzip2 libraries/zlib
+$(SENT)/examples/tools/gdb: libraries/ncurses
 
 # shortcuts libraries (alphabetical)
 agg: libraries/agg ;

@@ -1,0 +1,140 @@
+diff --git a/gdb/configure b/gdb/configure
+index b3d3e2d..8e42e2c 100755
+--- a/gdb/configure
++++ b/gdb/configure
+@@ -5054,7 +5054,7 @@ fi
+ gdb_host_obs=posix-hdep.o
+ 
+ if test "${target}" = "${host}"; then
+-  gdb_native=yes
++  gdb_native=no
+ else
+   gdb_native=no
+ fi
+diff --git a/gdb/gdb.c b/gdb/gdb.c
+index e1dcdc6..4582e99 100644
+--- a/gdb/gdb.c
++++ b/gdb/gdb.c
+@@ -22,6 +22,6 @@
+ #include "interps.h"
+ 
+ int
+-main (int argc, char **argv)
++gdb_nacl_main (int argc, char **argv)
+ {
+   struct captured_main_args args;
+diff --git a/gdb/Makefile.in b/gdb/Makefile.in
+index a41cff9..80fd380 100644
+--- a/gdb/Makefile.in
++++ b/gdb/Makefile.in
+@@ -115,10 +115,12 @@ MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
+ MAKEHTML = $(MAKEINFO_CMD) --html
+ MAKEHTMLFLAGS =
+ 
++PEPPER_LIBS = -lncurses -lppapi_simple -lnacl_io -lppapi -lppapi_cpp
++
+ # Set this up with gcc if you have gnu ld and the loader will print out
+ # line numbers for undefined references.
+ #CC_LD=gcc -static
+-CC_LD=$(CC)
++CC_LD=$(CXX)
+ 
+ # Where is our "include" directory?  Typically $(srcdir)/../include.
+ # This is essentially the header file directory for the library
+@@ -1162,11 +1164,11 @@ libgdb.a: $(LIBGDB_OBS)
+ 	$(RANLIB) libgdb.a
+ 
+ # Removing the old gdb first works better if it is running, at least on SunOS.
+-gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
++gdb$(EXEEXT): gdb.o gdb_pepper.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+ 	rm -f gdb$(EXEEXT)
+-	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
++	$(CC_LD) gdb_pepper.o $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+ 		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
+-		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
++		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES) $(PEPPER_LIBS)
+ 
+ # Convenience rule to handle recursion.
+ $(LIBGNU) $(GNULIB_H): all-lib
+diff --git a/gdb/tui/tui-io.c b/gdb/tui/tui-io.c
+index 2fb7bb4..58a4d49 100644
+--- a/gdb/tui/tui-io.c
++++ b/gdb/tui/tui-io.c
+@@ -608,7 +608,7 @@ tui_initialize_io (void)
+      deprecated_init_ui_hook.  */
+   tui_old_uiout = cli_out_new (gdb_stdout);
+ 
+-#ifdef TUI_USE_PIPE_FOR_READLINE
++#if 0 /* TODO: Put this back in once readline works properly. */
+   /* Temporary solution for readline writing to stdout: redirect
+      readline output in a pipe, read that pipe and output the content
+      in the curses command window.  */
+diff --git a/config/dfp.m4 b/config/dfp.m4
+index cc778b1..4cf5dba 100644
+--- a/config/dfp.m4
++++ b/config/dfp.m4
+@@ -21,7 +21,7 @@ Valid choices are 'yes', 'bid', 'dpd', and 'no'.]) ;;
+ [
+   case $1 in
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+-    i?86*-*-mingw* | x86_64*-*-mingw* | \
++    i?86*-*-mingw* | x86_64*-*-mingw* | *nacl* | \
+     i?86*-*-cygwin*)
+       enable_decimal_float=yes
+       ;;
+diff --git a/libdecnumber/configure b/libdecnumber/configure
+index 2b58684..65d933a 100755
+--- a/libdecnumber/configure
++++ b/libdecnumber/configure
+@@ -4611,7 +4611,7 @@ else
+ 
+   case $target in
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+-    i?86*-*-mingw* | x86_64*-*-mingw* | \
++    i?86*-*-mingw* | x86_64*-*-mingw* | *nacl* | \
+     i?86*-*-cygwin*)
+       enable_decimal_float=yes
+       ;;
+diff --git a/gdb/ser-tcp.c b/gdb/ser-tcp.c
+index d96a8e5..e7ebcb0 100644
+--- a/gdb/ser-tcp.c
++++ b/gdb/ser-tcp.c
+@@ -273,38 +273,6 @@ net_open (struct serial *scb, const char *name)
+ 	}
+     }
+ 
+-  /* Got something.  Is it an error?  */
+-  {
+-    int res, err;
+-    socklen_t len;
+-
+-    len = sizeof (err);
+-    /* On Windows, the fourth parameter to getsockopt is a "char *";
+-       on UNIX systems it is generally "void *".  The cast to "void *"
+-       is OK everywhere, since in C "void *" can be implicitly
+-       converted to any pointer type.  */
+-    res = getsockopt (scb->fd, SOL_SOCKET, SO_ERROR, (void *) &err, &len);
+-    if (res < 0 || err)
+-      {
+-	/* Maybe the target still isn't ready to accept the connection.  */
+-	if (tcp_auto_retry
+-#ifdef USE_WIN32API
+-	    && err == WSAECONNREFUSED
+-#else
+-	    && err == ECONNREFUSED
+-#endif
+-	    && wait_for_connect (NULL, &polls) >= 0)
+-	  {
+-	    close (scb->fd);
+-	    goto retry;
+-	  }
+-	if (err)
+-	  errno = err;
+-	net_close (scb);
+-	return -1;
+-      }
+-  } 
+-
+   /* Turn off nonblocking.  */
+   ioarg = 0;
+   ioctl (scb->fd, FIONBIO, &ioarg);
