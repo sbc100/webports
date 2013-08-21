@@ -34,7 +34,10 @@ HackStepForNewlib() {
 
 BuildStep() {
   make clean
-  make -j${OS_JOBS} build_libs
+  # The openssl build can fail when build with -jN.
+  # TODO(sbc): Add -j${OS_JOBS} to this build if/when openssl is upgraded
+  # to a version that supports parallel make.
+  make build_libs
 }
 
 
