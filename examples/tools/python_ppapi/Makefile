@@ -7,7 +7,7 @@ NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = python
-LIBS = python2.7 ppapi_simple nacl_io ppapi_cpp ppapi tar
+LIBS = python2.7 readline ncurses ppapi_simple nacl_io ppapi_cpp ppapi tar
 ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic
@@ -43,9 +43,7 @@ endif
 $(eval $(call NMF_RULE,$(TARGET),))
 
 ifeq ($(TOOLCHAIN),glibc)
-EXTRA_ASSETS = lib/libz.so.1
-# TODO(sbc): enable readline once select() lands in nacl_io
-#lib/libreadline.so lib/libncurses.so.5
+EXTRA_ASSETS = lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
 endif
 
 CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src/chromeapps

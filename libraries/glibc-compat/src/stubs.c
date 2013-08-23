@@ -67,6 +67,30 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
   UNIMPLEMENTED_NOSYS();
 }
 
+speed_t cfgetispeed(const struct termios *termios_p) {
+   return termios_p->c_ispeed;
+}
+
+speed_t cfgetospeed(const struct termios *termios_p) {
+   return termios_p->c_ospeed;
+}
+
+int cfsetispeed(struct termios *termios_p, speed_t speed) {
+   termios_p->c_ispeed = speed;
+   return 0;
+}
+
+int cfsetospeed(struct termios *termios_p, speed_t speed) {
+   termios_p->c_ospeed = speed;
+   return 0;
+}
+
+int cfsetspeed(struct termios *termios_p, speed_t speed) {
+   termios_p->c_ispeed = speed;
+   termios_p->c_ospeed = speed;
+   return 0;
+}
+
 struct hostent *gethostbyaddr(const void *addr,
                               socklen_t len, int type) __attribute__((weak));
 struct hostent *gethostbyaddr(const void *addr,
@@ -208,6 +232,16 @@ int socketpair(int domain, int type, int protocol,
   UNIMPLEMENTED_FATAL();
 }
 
+int tcdrain(int fd) __attribute__((weak));
+int tcdrain(int fd) {
+  UNIMPLEMENTED_NOSYS();
+}
+
+int tcflow(int fd, int action) __attribute__((weak));
+int tcflow(int fd, int action) {
+  UNIMPLEMENTED_NOSYS();
+}
+
 int tcflush(int fd, int queue_selector) __attribute__((weak));
 int tcflush(int fd, int queue_selector) {
   UNIMPLEMENTED_FATAL();
@@ -216,6 +250,11 @@ int tcflush(int fd, int queue_selector) {
 int tcgetattr(int fd, struct termios *termios_p) __attribute__((weak));
 int tcgetattr(int fd, struct termios *termios_p) {
   UNIMPLEMENTED_FATAL();
+}
+
+int tcsendbreak(int fd, int duration) __attribute__((weak));
+int tcsendbreak(int fd, int duration) {
+  UNIMPLEMENTED_NOSYS();
 }
 
 int tcsetattr(int fd, int optional_actions,
