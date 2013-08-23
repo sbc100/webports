@@ -53,7 +53,7 @@ Publish() {
   fi
   echo "@@@BUILD_STEP upload binaries@@@"
   UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
-  UPLOAD_PATH+=${BUILDBOT_REVISION}/publish/${LIBC}
+  UPLOAD_PATH+=${BUILDBOT_REVISION}/publish
   SRC_PATH=out/publish
   echo "Uploading to ${UPLOAD_PATH}"
 
