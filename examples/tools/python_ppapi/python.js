@@ -36,7 +36,7 @@ var embed;
  *
  * @private
  */
-Python.prefix_ = 'python:';
+Python.prefix_ = 'tty_io:';
 
 /**
  * Static initialier called from index.html.
@@ -113,7 +113,9 @@ Python.prototype.handleCrash_ = function(e) {
 }
 
 function onVTKeystroke(str) {
-  embed.postMessage(Python.prefix_ + str);
+  var json = {};
+  json[Python.prefix_] = str;
+  embed.postMessage(json);
 }
 
 /*

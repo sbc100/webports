@@ -36,7 +36,8 @@ var embed;
  *
  * @private
  */
-Vim.prefix_ = 'vim:';
+Vim.tty_io_tag = 'tty_io:';
+
 
 /**
  * Static initialier called from vim.html.
@@ -69,8 +70,8 @@ Vim.init = function() {
  * @private
  */
 Vim.prototype.handleMessage_ = function(e) {
-  if (e.data.indexOf(Vim.prefix_) != 0) return;
-  var msg = e.data.substring(Vim.prefix_.length);
+  if (e.data.indexOf(Vim.tty_io_tag) != 0) return;
+  var msg = e.data.substring(Vim.tty_io_tag.length);
   term_.io.print(msg);
 }
 
@@ -112,8 +113,16 @@ Vim.prototype.handleCrash_ = function(e) {
  }
 }
 
+Vim.prototype.onTerminalResize_ = function() {
+  var width = term_.io.terminal_.screenSize.width;
+  var height = term_.io.terminal_.screenSize.height;
+  embed.postMessage({'tty_resize': [ width, height ]});
+}
+
 function got(str) {
-  embed.postMessage(Vim.prefix_ + str);
+  var json = {}
+  json[Vim.tty_io_tag] = String(str);
+  embed.postMessage(json)
 }
 
 /*
@@ -134,8 +143,13 @@ Vim.prototype.run = function() {
 
   var param_tty = document.createElement('param');
   param_tty.name = 'ps_tty_prefix';
-  param_tty.value = Vim.prefix_;
+  param_tty.value = Vim.tty_io_tag;
   embed.appendChild(param_tty);
+
+  var param_resize = document.createElement('param');
+  param_resize.name = 'ps_tty_resize';
+  param_resize.value = 'tty_resize';
+  embed.appendChild(param_resize);
 
   var param_stdin = document.createElement('param');
   param_stdin.name = 'ps_stdin';
@@ -160,4 +174,5 @@ Vim.prototype.run = function() {
   document.body.appendChild(embed);
 
   this.io.onVTKeystroke = got;
+  this.io.onTerminalResize = this.onTerminalResize_.bind(this);
 };

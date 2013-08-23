@@ -50,7 +50,7 @@ InstallStep() {
   rm -rf ${ASSEMBLY_DIR}/vimtar
   cp ${START_DIR}/vim.html ${ASSEMBLY_DIR}
   cd ${ASSEMBLY_DIR}
-  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       vim_*${NACL_EXEEXT} \
       -s . \
@@ -62,13 +62,13 @@ InstallStep() {
   LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
       -i ${NASSH}/concat/nassh_deps.concat \
       -o ${ASSEMBLY_DIR}/hterm.concat.js
-  cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
-  cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  zip -r vim-7.3.zip vim
+  LogExecute zip -r vim-7.3.zip vim
 }
 
 PackageInstall

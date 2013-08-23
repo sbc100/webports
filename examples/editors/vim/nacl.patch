@@ -51,32 +51,6 @@ index e582eed..c648e92 100644
  objects/mark.o: mark.c
  	$(CCC) -o $@ mark.c
  
-diff --git a/src/os_unix.c b/src/os_unix.c
-index a82c65d..a1052be 100644
---- a/src/os_unix.c
-+++ b/src/os_unix.c
-@@ -4782,6 +4782,21 @@ RealWaitForChar(fd, msec, check_for_gpm)
-     int		*check_for_gpm UNUSED;
- {
-     int		ret;
-+#if defined(__native_client__)
-+    /*
-+     * TODO(bradnelson): Drop this when nacl_io is ready.
-+     * nacl_io currently doesn't support select/poll for the tty.
-+     * Instead, block if the timeout is infinite then return true.
-+     * Otherwise, return false so other non-blocking cases don't stall.
-+     */
-+    if (msec < 0) {
-+      ret = fgetc(stdin);
-+      ungetc(ret, stdin);
-+      return 1;
-+    } else {
-+      return 0;
-+    }
-+#endif
- #ifdef FEAT_NETBEANS_INTG
-     int		nb_fd = netbeans_filedesc();
- #endif
 diff --git a/src/auto/configure b/src/auto/configure
 index 0f73df3..54589cd 100755
 --- a/src/auto/configure

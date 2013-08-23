@@ -158,13 +158,20 @@ export CFLAGS=${NACLPORTS_CFLAGS}
 export CXXFLAGS=${NACLPORTS_CXXFLAGS}
 export LDFLAGS=${NACLPORTS_LDFLAGS}
 
+if [ "${NACL_DEBUG}" = "1" ]; then
+  NACL_CONFIG=Debug
+else
+  NACL_CONFIG=Release
+fi
+
 NACL_CREATE_NMF_FLAGS="-L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib \
 -L${NACL_TOOLCHAIN_ROOT}/i686-nacl/usr/lib
 -L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib64 \
 -L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32 \
--L${NACL_SDK_ROOT}/lib/glibc_x86_64/Release \
--L${NACL_SDK_ROOT}/lib/glibc_x86_32/Release \
+-L${NACL_SDK_ROOT}/lib/glibc_x86_64/${NACL_CONFIG} \
+-L${NACL_SDK_ROOT}/lib/glibc_x86_32/${NACL_CONFIG} \
 -D${NACL_BIN_PATH}/x86_64-nacl-objdump"
+
 
 # PACKAGE_DIR (the folder contained within that archive) defaults to
 # the PACKAGE_NAME.  Packages with non-standard contents can override
