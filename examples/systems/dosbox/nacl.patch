@@ -64,20 +64,6 @@ diff -Naur dosbox-0.74-orig/src/cpu/cpu.cpp dosbox-0.74/src/cpu/cpu.cpp
  #include "debug.h"
  #include "mapper.h"
  #include "setup.h"
-diff -Naur dosbox-0.74-orig/src/dos/drive_local.cpp dosbox-0.74/src/dos/drive_local.cpp
---- dosbox-0.74-orig/src/dos/drive_local.cpp	2010-05-10 10:43:54.000000000 -0700
-+++ dosbox-0.74/src/dos/drive_local.cpp	2012-01-27 15:13:47.312313175 -0800
-@@ -31,6 +31,10 @@
- #include "cross.h"
- #include "inout.h"
- 
-+#ifdef __native_client__
-+extern "C" int ftruncate(int fd, off_t length);
-+#endif  // __native_client__
-+
- class localFile : public DOS_File {
- public:
- 	localFile(const char* name, FILE * handle);
 diff -Naur dosbox-0.74-orig/src/gui/sdlmain.cpp dosbox-0.74/src/gui/sdlmain.cpp
 --- dosbox-0.74-orig/src/gui/sdlmain.cpp	2010-05-10 10:43:54.000000000 -0700
 +++ dosbox-0.74/src/gui/sdlmain.cpp	2012-01-27 15:13:47.312313175 -0800
