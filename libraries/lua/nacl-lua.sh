@@ -11,8 +11,13 @@ EXECUTABLES="src/lua src/luac"
 BuildStep() {
   Banner "Build ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  LogExecute make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" clean
-  LogExecute make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" "MYLIBS=-lnosys" -j ${OS_JOBS}
+  if [ "${NACL_GLIBC}" = "1" ]; then
+    PLAT=nacl-glibc
+  else
+    PLAT=nacl-newlib
+  fi
+  LogExecute make "CC=${NACLCC}" "PLAT=${PLAT}" "INSTALL_TOP=${NACLPORTS_PREFIX}" clean
+  LogExecute make "CC=${NACLCC}" "PLAT=${PLAT}" "INSTALL_TOP=${NACLPORTS_PREFIX}" -j${OS_JOBS}
 }
 
 

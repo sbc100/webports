@@ -1,24 +1,21 @@
-diff -Naur lua-5.1.4/Makefile lua-5.1.4.nacl/Makefile
---- lua-5.1.4/Makefile	2008-08-11 17:40:48.000000000 -0700
-+++ lua-5.1.4.nacl/Makefile	2009-10-20 17:48:46.622628000 -0700
-@@ -5,11 +5,11 @@
- # == CHANGE THE SETTINGS BELOW TO SUIT YOUR ENVIRONMENT =======================
+diff --git a/Makefile b/Makefile
+index 6e78f66..2ceb2f7 100644
+--- a/Makefile
++++ b/Makefile
+@@ -38,7 +38,7 @@ RANLIB= ranlib
+ # == END OF USER SETTINGS. NO NEED TO CHANGE ANYTHING BELOW THIS LINE =========
  
- # Your platform. See PLATS for possible values.
--PLAT= none
-+PLAT?= none
+ # Convenience platforms targets.
+-PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
++PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris nacl-newlib nacl-glibc
  
- # Where to install. The installation starts in the src and doc directories,
- # so take care if INSTALL_TOP is not an absolute path.
--INSTALL_TOP= /usr/local
-+INSTALL_TOP?= /usr/local
- INSTALL_BIN= $(INSTALL_TOP)/bin
- INSTALL_INC= $(INSTALL_TOP)/include
- INSTALL_LIB= $(INSTALL_TOP)/lib
-diff -Naur lua-5.1.4/src/Makefile lua-5.1.4.nacl/src/Makefile
---- lua-5.1.4/src/Makefile	2008-01-19 22:37:58.000000000 +0700
-+++ lua-5.1.4.nacl/src/Makefile	2009-10-20 17:48:46.622628000 -0700
-@@ -9,8 +9,8 @@
+ # What to install.
+ TO_BIN= lua luac
+diff --git a/src/Makefile b/src/Makefile
+index e4a3cd6..82a0bff 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -9,8 +9,8 @@ PLAT= none
  
  CC= gcc
  CFLAGS= -O2 -Wall $(MYCFLAGS)
@@ -28,4 +25,17 @@ diff -Naur lua-5.1.4/src/Makefile lua-5.1.4.nacl/src/Makefile
 +RANLIB= ${NACLRANLIB}
  RM= rm -f
  LIBS= -lm $(MYLIBS)
+ 
+@@ -95,6 +95,12 @@ freebsd:
+ generic:
+ 	$(MAKE) all MYCFLAGS=
+ 
++nacl-newlib:
++	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_READLINE" MYLIBS="-lreadline -lhistory -lncurses -lnosys -lglibc-compat"
++
++nacl-glibc:
++	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-Wl,-E -ldl -lreadline -lhistory -lncurses"
++
+ linux:
+ 	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-Wl,-E -ldl -lreadline -lhistory -lncurses"
  

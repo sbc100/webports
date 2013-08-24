@@ -26,7 +26,11 @@ BuildStep() {
   else
     MAKEFLAGS+=" TOOLCHAIN=newlib"
   fi
-
+  if [ "${NACL_DEBUG}" = "1" ]; then
+    MAKEFLAGS+=" CONFIG=Debug"
+  else
+    MAKEFLAGS+=" CONFIG=Release"
+  fi
   if [ "${NACL_ARCH}" != "pnacl" ]; then
     MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
   fi
