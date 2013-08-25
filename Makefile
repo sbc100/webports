@@ -251,13 +251,14 @@ $(SENT)/libraries/ffmpeg: \
 $(SENT)/libraries/webp: libraries/tiff libraries/jpeg
 $(SENT)/libraries/libav: libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
+$(SENT)/libraries/lua: libraries/readline
+$(SENT)/libraries/python: libraries/readline libraries/zlib
 $(SENT)/examples/games/nethack: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/bash: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
-$(SENT)/libraries/python: libraries/ncurses libraries/readline libraries/zlib
 $(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
 $(SENT)/examples/games/scummvm: \
     libraries/nacl-mounts libraries/SDL libraries/libvorbis
