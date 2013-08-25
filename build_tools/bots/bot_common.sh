@@ -17,6 +17,8 @@ CalculatePackageShards()
 
   PKG_LIST_PART_0="
     libraries/glibc-compat
+    libraries/ncurses
+    libraries/readline
     libraries/gsl
     libraries/faac
     libraries/openssl
@@ -76,6 +78,9 @@ CalculatePackageShards()
   if [ -n "${TEST_BUILDBOT:-}" ]; then
     # In testing mode just build small set of packages.
     PKG_LIST_PART_0="
+      libraries/glibc-compat
+      libraries/ncurses
+      libraries/readline
       libraries/libtar
       libraries/zlib
       libraries/lua
