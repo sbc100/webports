@@ -653,9 +653,16 @@ DefaultExtractStep() {
 
   Banner "Extracting ${ARCHIVE_NAME}"
 
+  if [ -d ${PACKAGE_DIR} ]; then
+    local FULL_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+    echo "Upstream archive or patch has changed."
+    echo "Please remove existing workspace to continue: '${FULL_DIR}'"
+    exit 1
+  fi
+  Remove ${PACKAGE_DIR}
+
   # make sure the patch step is applied
   rm -f ${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch
-  Remove ${PACKAGE_DIR}
   local EXTENSION="${ARCHIVE_NAME##*.}"
   if [ ${EXTENSION} = "zip" ]; then
     unzip ${ARCHIVE}
