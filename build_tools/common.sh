@@ -256,6 +256,7 @@ InjectSystemHeaders() {
     return
   fi
 
+  MakeDir ${NACL_TOOLCHAIN_PREFIX}/include
   LogExecute cp -r ${TC_INCLUDES}/* ${NACL_TOOLCHAIN_PREFIX}/include
 }
 

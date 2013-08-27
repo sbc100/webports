@@ -73,10 +73,6 @@ else
 NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/usr
 endif
 
-NACL_DIRS_TO_MAKE = $(NACL_OUT)/publish \
-                    $(NACLPORTS_PREFIX)/include \
-                    $(NACLPORTS_PREFIX)/lib
-
 LIBRARIES = \
      libraries/agg \
      libraries/boost \
@@ -201,18 +197,15 @@ clean:
 reallyclean: clean
 	rm -rf $(NACL_OUT)
 
-$(NACL_DIRS_TO_MAKE):
-	mkdir -p $@
-
 ifdef PRINT_DEPS
 # Defining PRINT_DEPS means that we don't actually build anything
 # but only echo the names of the packages that would have been built.
 # In this case we use a dummy sentinal directory which will always
 # be empty.
 SENT = $(NACL_OUT)/dummy_location
-$(ALL_PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
+$(ALL_PACKAGES): %: $(SENT)/%
 else
-$(PACKAGES): %: $(NACL_DIRS_TO_MAKE) $(SENT)/%
+$(PACKAGES): %: $(SENT)/%
 endif
 
 ifdef NACLPORTS_NO_ANNOTATE
