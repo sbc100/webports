@@ -39,17 +39,20 @@ fi
 # sha1check python script
 readonly SHA1CHECK=${TOOLS_DIR}/sha1check.py
 
+if [ "${NACL_ARCH}" = "pnacl" ]; then
+  readonly NACL_TOOLCHAIN_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
+else
+  readonly NACL_TOOLCHAIN_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
+fi
+
 # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
 # Default to the usr folder within the SDK.
 if [ -n "${NACLPORTS_PREFIX:-}" ]; then
   readonly DEFAULT_PREFIX=1
 else
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
-  else
-    readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
-  fi
+  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_PREFIX}
 fi
+
 readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
 readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
 readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
@@ -253,7 +256,7 @@ InjectSystemHeaders() {
     return
   fi
 
-  LogExecute cp -r ${TC_INCLUDES}/* ${NACLPORTS_PREFIX}/include
+  LogExecute cp -r ${TC_INCLUDES}/* ${NACL_TOOLCHAIN_PREFIX}/include
 }
 
 
