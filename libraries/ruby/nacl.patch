@@ -1,0 +1,146 @@
+diff --git a/dln.c b/dln.c
+index 9eb659c..4d9458e 100644
+--- a/dln.c
++++ b/dln.c
+@@ -1318,28 +1318,13 @@ dln_load(const char *file)
+ # define RTLD_GLOBAL 0
+ #endif
+ 
+-#ifdef __native_client__
+-	char* p, *orig;
+-        if (file[0] == '.' && file[1] == '/') file+=2;
+-	orig = strdup(file);
+-	for (p = file; *p; ++p) {
+-	    if (*p == '/') *p = '_';
+-	}
+-#endif
+ 	/* Load file */
+ 	if ((handle = (void*)dlopen(file, RTLD_LAZY|RTLD_GLOBAL)) == NULL) {
+-#ifdef __native_client__
+-            free(orig);
+-#endif
+ 	    error = dln_strerror();
+ 	    goto failed;
+ 	}
+ 
+ 	init_fct = (void(*)())(VALUE)dlsym(handle, buf);
+-#ifdef __native_client__
+-	strcpy(file, orig);
+-	free(orig);
+-#endif
+ #if defined __SYMBIAN32__
+ 	if (init_fct == NULL) {
+ 	    init_fct = (void(*)())dlsym(handle, "1"); /* Some Symbian versions do not support symbol table in DLL, ordinal numbers only */
+diff --git a/ext/extmk.rb b/ext/extmk.rb
+index 4e5f64d..566f1d1 100755
+--- a/ext/extmk.rb
++++ b/ext/extmk.rb
+@@ -407,6 +407,12 @@ unless $message
+ end
+ 
+ EXEEXT = CONFIG['EXEEXT']
++
++# Without this ext/ripper will try to use the default miniruby rather
++# than honoring the MINIRUBY set in the envrionment.
++# TODO(sbc): Figure out why this is needed and remove.
++CROSS_COMPILING = 'yes'
++
+ if CROSS_COMPILING
+   $ruby = $mflags.defined?("MINIRUBY") || CONFIG['MINIRUBY']
+ elsif sep = config_string('BUILD_FILE_SEPARATOR')
+diff --git a/file.c b/file.c
+index f0f8348..959ef36 100644
+--- a/file.c
++++ b/file.c
+@@ -1074,6 +1074,14 @@ rb_group_member(GETGROUPS_T gid)
+ #define USE_GETEUID 1
+ #endif
+ 
++#ifdef __native_client__
++// Although the NaCl toolchain contain eaccess() is it not yet
++// overridden by nacl_io.
++// TODO(sbc): Remove this once eaccess() is wired up correctly
++// in NaCl.
++#define eaccess access
++#endif
++
+ #ifndef HAVE_EACCESS
+ int
+ eaccess(const char *path, int mode)
+diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
+index c1aaa36..afef65d 100644
+--- a/nacl/GNUmakefile.in
++++ b/nacl/GNUmakefile.in
+@@ -4,17 +4,41 @@
+ include Makefile
+ -include uncommon.mk
+ 
++# Remove the default -D_FORTIFY_SOURCE=2 from CFLAGS. Without this
++# NaCl's glibc build generates undefined references to __memset_chk.
++# TODO(sbc): Remove this once NaCl's glibc is fixed.
++XCFLAGS := $(filter-out -D_FORTIFY_SOURCE=2,$(XCFLAGS))
++
+ NACL_SDK_ROOT=@NACL_SDK_ROOT@
+ NACL_TOOLCHAIN=@NACL_TOOLCHAIN@
+ NACL_TOOLCHAIN_DIR=$(NACL_SDK_ROOT)/toolchain/$(NACL_TOOLCHAIN)
++
++# Don't override CC/LD/etc if they are already set to absolute
++# paths (this is the case when building in the naclports tree).
++ifeq ($(dir $(CC)),./)
+ CC:=$(NACL_TOOLCHAIN_DIR)/bin/$(CC)
++endif
++ifeq ($(dir $(LD)),./)
+ LD:=$(NACL_TOOLCHAIN_DIR)/bin/$(LD)
++endif
++ifeq ($(dir $(NM)),./)
+ NM:=$(NACL_TOOLCHAIN_DIR)/bin/$(NM)
++endif
++ifeq ($(dir $(AR)),./)
+ AR:=$(NACL_TOOLCHAIN_DIR)/bin/$(AR)
++endif
++ifeq ($(dir $(AS)),./)
+ AS:=$(NACL_TOOLCHAIN_DIR)/bin/$(AS)
++endif
++ifeq ($(dir $(RANLIB)),./)
+ RANLIB:=$(NACL_TOOLCHAIN_DIR)/bin/$(RANLIB)
++endif
++ifeq ($(dir $(OBJDUMP)),./)
+ OBJDUMP:=$(NACL_TOOLCHAIN_DIR)/bin/$(OBJDUMP)
++endif
++ifeq ($(dir $(OBJCOPY)),./)
+ OBJCOPY:=$(NACL_TOOLCHAIN_DIR)/bin/$(OBJCOPY)
++endif
+ PYTHON=@PYTHON@
+ 
+ PPROGRAM=pepper-$(PROGRAM)
+diff --git a/nacl/pepper_main.c b/nacl/pepper_main.c
+index c0e497b..6c41929 100644
+--- a/nacl/pepper_main.c
++++ b/nacl/pepper_main.c
+@@ -210,7 +210,7 @@ pruby_async_return_value(void* data, VALUE value)
+ static struct PP_Var
+ pruby_cstr_to_var(const char* str)
+ {
+-#ifdef PPB_VAR_INTERFACE_1_0
++#ifndef PPB_VAR_INTERFACE_1_1
+   if (var_interface != NULL)
+     return var_interface->VarFromUtf8(module_id, str, strlen(str));
+   return PP_MakeUndefined();
+@@ -252,7 +252,7 @@ pruby_str_to_var(volatile VALUE str)
+     fprintf(stderr, "[BUG] Unexpected object type: %x\n", TYPE(str));
+     exit(EXIT_FAILURE);
+   }
+-#ifdef PPB_VAR_INTERFACE_1_0
++#ifndef PPB_VAR_INTERFACE_1_1
+   if (var_interface != NULL) {
+     return var_interface->VarFromUtf8(module_id, RSTRING_PTR(str), RSTRING_LEN(str));
+   }
+@@ -517,7 +517,7 @@ static void Instance_DidDestroy(PP_Instance instance) {
+  *     the top left of the plugin's coordinate system (not the page).  If the
+  *     plugin is invisible, @a clip will be (0, 0, 0, 0).
+  */
+-#ifdef PPP_INSTANCE_INTERFACE_1_0
++#ifndef PPP_INSTANCE_INTERFACE_1_1
+ static void
+ Instance_DidChangeView(PP_Instance instance,
+                        const struct PP_Rect* position,

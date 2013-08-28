@@ -129,6 +129,7 @@ LIBRARIES = \
      libraries/protobuf \
      libraries/python \
      libraries/readline \
+     libraries/ruby \
      libraries/Regal \
      libraries/SDL \
      libraries/SDL_image \
@@ -156,6 +157,7 @@ EXAMPLES = \
      examples/tools/gdb \
      examples/tools/lua_ppapi \
      examples/tools/python_ppapi \
+     examples/tools/ruby_ppapi \
      examples/tools/thttpd \
      examples/games/snes9x \
      examples/audio/openal-ogg
@@ -246,6 +248,7 @@ $(SENT)/libraries/libav: libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/libraries/lua: libraries/readline
 $(SENT)/libraries/python: libraries/readline libraries/zlib
+$(SENT)/libraries/ruby: libraries/readline libraries/zlib
 $(SENT)/examples/games/nethack: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/bash: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
@@ -253,6 +256,7 @@ $(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
 $(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
+$(SENT)/examples/tools/ruby_ppapi: libraries/ruby libraries/libtar
 $(SENT)/examples/games/scummvm: \
     libraries/nacl-mounts libraries/SDL libraries/libvorbis
 $(SENT)/examples/systems/bochs: \
@@ -341,6 +345,7 @@ physfs: libraries/physfs ;
 pixman: libraries/pixman ;
 png: libraries/libpng ;
 python: libraries/python ;
+ruby: libraries/ruby ;
 webp: libraries/webp ;
 protobuf: libraries/protobuf ;
 sdl: libraries/SDL ;
@@ -373,8 +378,9 @@ git: examples/tools/git ;
 nano: examples/editors/nano ;
 nethack: examples/games/nethack ;
 openal-ogg: examples/audio/openal-ogg ;
-python_ppapi: examples/tools/python_ppapi ;
 lua_ppapi: examples/tools/lua_ppapi ;
+python_ppapi: examples/tools/python_ppapi ;
+ruby_ppapi: examples/tools/ruby_ppapi ;
 scummvm: examples/games/scummvm ;
 snes9x: examples/games/snes9x ;
 thttpd: examples/tools/thttpd ;

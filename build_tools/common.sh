@@ -40,10 +40,12 @@ fi
 readonly SHA1CHECK=${TOOLS_DIR}/sha1check.py
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then
-  readonly NACL_TOOLCHAIN_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
+  readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}
 else
-  readonly NACL_TOOLCHAIN_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
+  readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}
 fi
+
+readonly NACL_TOOLCHAIN_PREFIX=${NACL_TOOLCHAIN_INSTALL}/usr
 
 # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
 # Default to the usr folder within the SDK.

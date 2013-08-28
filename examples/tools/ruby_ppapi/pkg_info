@@ -1,0 +1,3 @@
+PACKAGE_NAME=ruby_ppapi
+MIN_SDK_VERSION=30
+LIBC=glibc
