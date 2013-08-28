@@ -6,11 +6,6 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-if [ ${NACL_GLIBC} != 1 ]; then
-  EXTRA_CONFIGURE_ARGS=--with-static-linked-ext
-  export LIBS=-lnosys
-fi
-
 MAKE_TARGETS="pprogram"
 INSTALL_TARGETS="install-nodoc DESTDIR=${NACL_TOOLCHAIN_INSTALL}"
 EXECUTABLES="ruby.nexe pepper-ruby.nexe"
@@ -20,6 +15,7 @@ ConfigureStep() {
   # build.
   HOST_BUILD=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl-host
   if [ ! -x ${HOST_BUILD}/miniruby ]; then
+    Banner "Building miniruby for host"
     MakeDir ${HOST_BUILD}
     ChangeDir ${HOST_BUILD}
     LogExecute ../configure
@@ -48,6 +44,11 @@ ConfigureStep() {
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
   echo "Directory: $(pwd)"
+
+  if [ ${NACL_GLIBC} != 1 ]; then
+    EXTRA_CONFIGURE_ARGS=--with-static-linked-ext
+    export LIBS="-lglibc-compat -lnosys"
+  fi
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then

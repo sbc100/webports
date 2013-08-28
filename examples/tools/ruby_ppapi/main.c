@@ -4,10 +4,12 @@
 
 #undef RUBY_EXPORT
 #include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <libtar.h>
 #include <locale.h>
-#include <fcntl.h>
-#include "ruby.h"
+#include <ruby.h>
+#include <stdio.h>
 
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"
@@ -24,24 +26,36 @@
 
 #define DATA_ARCHIVE "/mnt/tars/rbdata-" NACL_ARCH ".tar"
 
-int
-ruby_main(int argc, char **argv) {
-  umount("/");
-  mount("foo", "/", "memfs", 0, NULL);
-  mount("./", "/mnt/tars", "httpfs", 0, NULL);
+int ruby_main(int argc, char **argv) {
+  int ret = umount("/");
+  assert(ret == 0);
 
-  mkdir("/myhome", 0777);
+  ret = mount("foo", "/", "memfs", 0, NULL);
+  assert(ret == 0);
+
+  ret = mount("./", "/mnt/tars", "httpfs", 0, NULL);
+  assert(ret == 0);
+
+  ret = mkdir("/myhome", 0777);
+  assert(ret == 0);
 
   /* Setup home directory to a known location. */
-  setenv("HOME", "/myhome", 1);
+  ret = setenv("HOME", "/myhome", 1);
+  assert(ret == 0);
+
   /* Setup terminal type. */
-  setenv("TERM", "xterm-256color", 1);
+  ret = setenv("TERM", "xterm-256color", 1);
+  assert(ret == 0);
+
   /* Blank out USER and LOGNAME. */
-  setenv("USER", "", 1);
-  setenv("LOGNAME", "", 1);
+  ret = setenv("USER", "", 1);
+  assert(ret == 0);
+  ret = setenv("LOGNAME", "", 1);
+  assert(ret == 0);
 
   TAR* tar;
-  int ret = tar_open(&tar, DATA_ARCHIVE, NULL, O_RDONLY, 0, 0);
+  printf("Extracting: %s ...\n", DATA_ARCHIVE);
+  ret = tar_open(&tar, DATA_ARCHIVE, NULL, O_RDONLY, 0, 0);
   assert(ret == 0);
 
   ret = tar_extract_all(tar, "/");
@@ -49,6 +63,8 @@ ruby_main(int argc, char **argv) {
 
   ret = tar_close(tar);
   assert(ret == 0);
+
+  printf("Launching irb ...\n");
 
   setlocale(LC_CTYPE, "");
 

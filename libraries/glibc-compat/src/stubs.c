@@ -44,10 +44,12 @@
   fprintf(stderr, "Function %s is not implemented in glibc-compat!\n", \
           __FUNCTION__);
 
-#define UNIMPLEMENTED_NOSYS() \
+#define UNIMPLEMENTED_NOSYS_RTN(RTN) \
   UNIMPLEMENTED(); \
   errno = ENOSYS; \
-  return -1; \
+  return RTN; \
+
+#define UNIMPLEMENTED_NOSYS() UNIMPLEMENTED_NOSYS_RTN(-1)
 
 
 #undef htonl
@@ -65,6 +67,11 @@ int bind(int sockfd, const struct sockaddr *addr,
          socklen_t addrlen) __attribute__((weak));
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
   UNIMPLEMENTED_NOSYS();
+}
+
+int eaccess(const char *pathname, int mode) __attribute__((weak));
+int eaccess(const char *pathname, int mode) {
+   return access(pathname, mode);
 }
 
 speed_t cfgetispeed(const struct termios *termios_p) {
@@ -91,11 +98,31 @@ int cfsetspeed(struct termios *termios_p, speed_t speed) {
    return 0;
 }
 
+void endgrent(void) __attribute__((weak));
+void endgrent(void) {
+  UNIMPLEMENTED();
+}
+
+struct group *getgrent(void) __attribute__((weak));
+struct group *getgrent(void) {
+  UNIMPLEMENTED_NOSYS_RTN(NULL);
+}
+
+struct group *getgrnam(const char *name) __attribute__((weak));
+struct group *getgrnam(const char *name) {
+  UNIMPLEMENTED_NOSYS_RTN(NULL);
+}
+
+struct group *getgrgid(gid_t gid) __attribute__((weak));
+struct group *getgrgid(gid_t gid) {
+  UNIMPLEMENTED_NOSYS_RTN(NULL);
+}
+
 struct hostent *gethostbyaddr(const void *addr,
                               socklen_t len, int type) __attribute__((weak));
 struct hostent *gethostbyaddr(const void *addr,
                               socklen_t len, int type) {
-  UNIMPLEMENTED_NOSYS();
+  UNIMPLEMENTED_NOSYS_RTN(NULL);
 }
 
 struct hostent *gethostbyname(const char *name) __attribute__((weak));
@@ -205,6 +232,11 @@ ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
                const struct sockaddr *dest_addr,
                socklen_t addrlen) {
   UNIMPLEMENTED_FATAL();
+}
+
+void setgrent(void) __attribute__((weak));
+void setgrent(void) {
+  UNIMPLEMENTED();
 }
 
 int setsockopt(int sockfd, int level, int optname,

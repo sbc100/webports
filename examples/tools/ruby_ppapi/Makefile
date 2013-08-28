@@ -7,9 +7,9 @@ NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = ruby
-LIBS = ruby-static readline ncurses ppapi_simple nacl_io ppapi_cpp ppapi tar rt crypt
+LIBS = ruby-static readline ncurses ppapi_simple tar nacl_io ppapi_cpp ppapi
 ifeq ($(TOOLCHAIN),glibc)
-LIBS += util dl
+LIBS += util dl rt crypt
 NACL_LDFLAGS += -Wl,-export-dynamic
 else
 LIBS += c nosys glibc-compat

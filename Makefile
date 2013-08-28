@@ -256,7 +256,8 @@ $(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/nacl-mounts libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
 $(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
-$(SENT)/examples/tools/ruby_ppapi: libraries/ruby libraries/libtar
+$(SENT)/examples/tools/ruby_ppapi: \
+    libraries/ruby libraries/libtar libraries/glibc-compat
 $(SENT)/examples/games/scummvm: \
     libraries/nacl-mounts libraries/SDL libraries/libvorbis
 $(SENT)/examples/systems/bochs: \

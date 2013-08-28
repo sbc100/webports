@@ -159,9 +159,10 @@ Ruby.prototype.run = function() {
   param_verbosity.value = '2';
   embed.appendChild(param_verbosity);
 
-  var param_arg0 = document.createElement('param');
-  param_stderr.name = 'ARG1';
-  param_stderr.value = '/usr/bin/irb';
+  var param_arg1 = document.createElement('param');
+  param_arg1.name = 'ARG1';
+  param_arg1.value = '/usr/bin/irb';
+  embed.appendChild(param_arg1);
 
   document.body.appendChild(embed);
 
