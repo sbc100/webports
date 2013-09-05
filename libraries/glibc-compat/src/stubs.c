@@ -57,6 +57,11 @@
 #undef ntohl
 #undef ntohs
 
+int access(const char *pathname, int mode) __attribute__((weak));
+int access(const char *pathname, int mode) {
+  UNIMPLEMENTED_NOSYS();
+}
+
 int accept(int sockfd, struct sockaddr *addr,
            socklen_t *addrlen) __attribute__((weak));
 int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
@@ -71,31 +76,31 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 
 int eaccess(const char *pathname, int mode) __attribute__((weak));
 int eaccess(const char *pathname, int mode) {
-   return access(pathname, mode);
+  return access(pathname, mode);
 }
 
 speed_t cfgetispeed(const struct termios *termios_p) {
-   return termios_p->c_ispeed;
+  return termios_p->c_ispeed;
 }
 
 speed_t cfgetospeed(const struct termios *termios_p) {
-   return termios_p->c_ospeed;
+  return termios_p->c_ospeed;
 }
 
 int cfsetispeed(struct termios *termios_p, speed_t speed) {
-   termios_p->c_ispeed = speed;
-   return 0;
+  termios_p->c_ispeed = speed;
+  return 0;
 }
 
 int cfsetospeed(struct termios *termios_p, speed_t speed) {
-   termios_p->c_ospeed = speed;
-   return 0;
+  termios_p->c_ospeed = speed;
+  return 0;
 }
 
 int cfsetspeed(struct termios *termios_p, speed_t speed) {
-   termios_p->c_ispeed = speed;
-   termios_p->c_ospeed = speed;
-   return 0;
+  termios_p->c_ispeed = speed;
+  termios_p->c_ospeed = speed;
+  return 0;
 }
 
 void endgrent(void) __attribute__((weak));
