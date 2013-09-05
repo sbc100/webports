@@ -8,7 +8,8 @@ source ../../build_tools/common.sh
 
 MAKE_TARGETS="pprogram"
 INSTALL_TARGETS="install-nodoc DESTDIR=${NACL_TOOLCHAIN_INSTALL}"
-EXECUTABLES="ruby.nexe pepper-ruby.nexe"
+
+EXECUTABLES="ruby${NACL_EXEEXT} pepper-ruby${NACL_EXEEXT}"
 
 ConfigureStep() {
   # We need to build a host version of ruby for use during the nacl
@@ -18,7 +19,7 @@ ConfigureStep() {
     Banner "Building miniruby for host"
     MakeDir ${HOST_BUILD}
     ChangeDir ${HOST_BUILD}
-    LogExecute ../configure
+    CFLAGS="" LDFLAGS="" LogExecute ../configure
     LogExecute make -j${OS_JOBS} miniruby
   fi
   export MINIRUBY='`cd $(srcdir); pwd`/build-nacl-host/miniruby -I`cd $(srcdir)/lib; pwd` -I.'
@@ -46,7 +47,7 @@ ConfigureStep() {
   echo "Directory: $(pwd)"
 
   if [ ${NACL_GLIBC} != 1 ]; then
-    EXTRA_CONFIGURE_ARGS=--with-static-linked-ext
+    EXTRA_CONFIGURE_ARGS="--with-static-linked-ext --with-newlib"
     export LIBS="-lglibc-compat -lnosys"
   fi
 

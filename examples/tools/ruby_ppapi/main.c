@@ -10,6 +10,7 @@
 #include <locale.h>
 #include <ruby.h>
 #include <stdio.h>
+#include <sys/mount.h>
 
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"
@@ -20,6 +21,8 @@
 #define NACL_ARCH "x86_32"
 #elif defined __arm__
 #define NACL_ARCH "arm"
+#elif defined __pnacl__
+#define NACL_ARCH "pnacl"
 #else
 #error "unknown arch"
 #endif

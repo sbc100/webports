@@ -1,3 +1,73 @@
+diff --git a/configure b/configure
+index a3a1c51..1e3e2ca 100755
+--- a/configure
++++ b/configure
+@@ -3160,11 +3160,13 @@ esac
+ fi
+ 
+ 
+-  case "$build_cpu" in #(
++  case "$target_cpu" in #(
+   x86_64|i?86) :
+     nacl_cv_cpu_nick=x86 ;; #(
++  le32) :
++    nacl_cv_cpu_nick=pnacl ;; #(
+   *) :
+-    nacl_cv_cpu_nick=$build_cpu ;;
++    nacl_cv_cpu_nick=$target_cpu ;;
+ esac
+   case "$build_os" in #(
+   linux*) :
+@@ -3185,6 +3187,9 @@ $as_echo_n "checking NativeClient toolchain... " >&6; }
+   if test -d \
+     "${NACL_SDK_ROOT}/toolchain/${nacl_cv_os_nick}_${nacl_cv_cpu_nick}_${nacl_cv_build_variant}"; then
+     NACL_TOOLCHAIN="${nacl_cv_os_nick}_${nacl_cv_cpu_nick}_${nacl_cv_build_variant}"
++  elif test -d \
++    "${NACL_SDK_ROOT}/toolchain/${nacl_cv_os_nick}_x86_${nacl_cv_cpu_nick}/${nacl_cv_build_variant}"; then
++    NACL_TOOLCHAIN="${nacl_cv_os_nick}_x86_${nacl_cv_cpu_nick}/${nacl_cv_build_variant}"
+   else
+     case "${nacl_cv_build_variant}" in #(
+   glibc) :
+diff --git a/.gitignore b/.gitignore
+index 5bcaeeb..abeccf1 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -50,7 +50,6 @@ y.tab.c
+ /config.h.in
+ /config.status
+ /config.status.lineno
+-/configure
+ /doc/capi
+ /enc.mk
+ /encdb.h
+diff --git a/configure.in b/configure.in
+index 7977aaf..e86b7f6 100644
+--- a/configure.in
++++ b/configure.in
+@@ -90,8 +90,11 @@ AC_DEFUN([RUBY_NACL],
+                        [no], [nacl_cv_build_variant=glibc],
+                        [yes], [nacl_cv_build_variant=newlib])])
+ 
+-  AS_CASE(["$build_cpu"],
+-          [x86_64|i?86], [nacl_cv_cpu_nick=x86], [nacl_cv_cpu_nick=$build_cpu])
++  AS_CASE(["$target_cpu"],
++          [x86_64|i?86], [nacl_cv_cpu_nick=x86],
++          [le32], [nacl_cv_cpu_nick=pnacl
++                   ac_cv_exeext=.pexe],
++          [nacl_cv_cpu_nick=$target_cpu])
+   AS_CASE(["$build_os"],
+           [linux*], [nacl_cv_os_nick=linux],
+           [darwin*], [nacl_cv_os_nick=mac],
+@@ -105,6 +108,9 @@ AC_DEFUN([RUBY_NACL],
+   if test -d \
+     "${NACL_SDK_ROOT}/toolchain/${nacl_cv_os_nick}_${nacl_cv_cpu_nick}_${nacl_cv_build_variant}"; then
+     NACL_TOOLCHAIN="${nacl_cv_os_nick}_${nacl_cv_cpu_nick}_${nacl_cv_build_variant}"
++  elif test -d \
++    "${NACL_SDK_ROOT}/toolchain/${nacl_cv_os_nick}_x86_${nacl_cv_cpu_nick}/${nacl_cv_build_variant}"; then
++    NACL_TOOLCHAIN="${nacl_cv_os_nick}_x86_${nacl_cv_cpu_nick}/${nacl_cv_build_variant}"
+   else
+     AS_CASE(
+       ["${nacl_cv_build_variant}"],
 diff --git a/dln.c b/dln.c
 index 9eb659c..4d9458e 100644
 --- a/dln.c
@@ -49,7 +119,7 @@ index 4e5f64d..566f1d1 100755
    $ruby = $mflags.defined?("MINIRUBY") || CONFIG['MINIRUBY']
  elsif sep = config_string('BUILD_FILE_SEPARATOR')
 diff --git a/file.c b/file.c
-index f0f8348..959ef36 100644
+index f0f8348..95faa09 100644
 --- a/file.c
 +++ b/file.c
 @@ -1074,6 +1074,14 @@ rb_group_member(GETGROUPS_T gid)
@@ -67,11 +137,34 @@ index f0f8348..959ef36 100644
  #ifndef HAVE_EACCESS
  int
  eaccess(const char *path, int mode)
+@@ -5254,7 +5262,7 @@ rb_path_check(const char *path)
+ 
+ #ifndef _WIN32
+ #ifdef __native_client__
+-__attribute__((noinline))
++__attribute__((noinline,weak))
+ #endif
+ int
+ rb_file_load_ok(const char *path)
+diff --git a/io.c b/io.c
+index aa514e3..fbb1607 100644
+--- a/io.c
++++ b/io.c
+@@ -52,9 +52,6 @@
+ #if defined(HAVE_SYS_IOCTL_H) && !defined(_WIN32)
+ #include <sys/ioctl.h>
+ #endif
+-#if defined(__native_client__) && defined(NACL_NEWLIB)
+-# include "nacl/ioctl.h"
+-#endif
+ #if defined(HAVE_FCNTL_H) || defined(_WIN32)
+ #include <fcntl.h>
+ #elif defined(HAVE_SYS_FCNTL_H)
 diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
-index c1aaa36..afef65d 100644
+index c1aaa36..e430100 100644
 --- a/nacl/GNUmakefile.in
 +++ b/nacl/GNUmakefile.in
-@@ -4,17 +4,41 @@
+@@ -4,48 +4,62 @@
  include Makefile
  -include uncommon.mk
  
@@ -113,6 +206,73 @@ index c1aaa36..afef65d 100644
  PYTHON=@PYTHON@
  
  PPROGRAM=pepper-$(PROGRAM)
+ PEPPER_LIBS=-lppapi
+-PROGRAM_NMF=$(PROGRAM:.nexe=.nmf)
+-PPROGRAM_NMF=$(PPROGRAM:.nexe=.nmf)
++PROGRAM_NMF=$(PROGRAM:$(EXEEXT)=.nmf)
++PPROGRAM_NMF=$(PPROGRAM:$(EXEEXT)=.nmf)
+ 
+ GNUmakefile: $(srcdir)/nacl/GNUmakefile.in
+ $(PPROGRAM): $(PROGRAM) pepper_main.$(OBJEXT)
+ 	$(Q)$(MAKE) $(MFLAGS) PROGRAM=$(PPROGRAM) MAINOBJ="pepper_main.$(OBJEXT)" LIBS="$(LIBS) $(PEPPER_LIBS)" program
+-$(PROGRAM_NMF) $(PPROGRAM_NMF): $(@:.nmf=.nexe) nacl/create_nmf.rb
++$(PROGRAM_NMF) $(PPROGRAM_NMF): $(@:.nmf=$(EXEEXT)) nacl/create_nmf.rb
+ 
+ .PHONY: pprogram package show_naclflags
+-.SUFFIXES: .nexe .nmf
+-.nexe.nmf:
++.SUFFIXES: $(EXEEXT) .nmf
++$(EXEEXT).nmf:
+ 	$(ECHO) generating manifest $@
+-	$(Q)$(MINIRUBY) $(srcdir)/nacl/create_nmf.rb --verbose=$(V) $(@:.nmf=.nexe) $@
++	$(Q)$(MINIRUBY) $(srcdir)/nacl/create_nmf.rb --verbose=$(V) $(@:.nmf=$(EXEEXT)) $@
+ 
+ pepper_main.$(OBJEXT): $(srcdir)/nacl/pepper_main.c
+ 	@$(ECHO) compiling nacl/pepper_main.c
+ 	$(Q) $(CC) $(CFLAGS) $(XCFLAGS) $(CPPFLAGS) $(COUTFLAG)$@ -c $(srcdir)/nacl/pepper_main.c
+-ruby.$(OBJEXT):
+-	@$(ECHO) compiling $<
+-	$(Q) $(CC) $(CFLAGS) $(XCFLAGS) $(CPPFLAGS) $(COUTFLAG)$@.tmp -c $<
+-	$(Q) $(OBJCOPY) --weaken-symbol=rb_load_file $@.tmp $@
+-	@-$(RM) $@.tmp
+-file.$(OBJEXT):
+-	@$(ECHO) compiling $<
+-	$(Q) $(CC) $(CFLAGS) $(XCFLAGS) $(CPPFLAGS) $(COUTFLAG)$@.tmp -c $<
+-	$(Q) $(OBJCOPY) --weaken-symbol=rb_file_load_ok $@.tmp $@
+-	@-$(RM) $@.tmp
+ 
+ .rbconfig.time:
+ 	@$(MAKE) .rbconfig.raw.time RBCONFIG=.rbconfig.raw.time
+diff --git a/nacl/nacl-config.rb b/nacl/nacl-config.rb
+index b90c9ed..0747225 100644
+--- a/nacl/nacl-config.rb
++++ b/nacl/nacl-config.rb
+@@ -27,14 +27,17 @@ module NaClConfig
+   INSTALL_PROGRAM = config['INSTALL_PROGRAM']
+   INSTALL_LIBRARY = config['INSTALL_DATA']
+ 
+-  SEL_LDR = [
+-    File.join(SDK_ROOT, 'toolchain', config['NACL_TOOLCHAIN'], 'bin', "sel_ldr_#{cpu_nick}"),
+-    File.join(SDK_ROOT, 'tools', "sel_ldr_#{cpu_nick}")
+-  ].find{|path| File.executable?(path)} or raise "No sel_ldr found"
+-  IRT_CORE = [
+-    File.join(SDK_ROOT, 'toolchain', config['NACL_TOOLCHAIN'], 'bin', "irt_core_#{cpu_nick}.nexe"),
+-    File.join(SDK_ROOT, 'tools', "irt_core_#{cpu_nick}.nexe")
+-  ].find{|path| File.executable?(path)} or raise "No irt_core found"
++  if cpu_nick == 'x86_64' or cpu_nick == 'x86_32'
++    SEL_LDR = [
++      File.join(SDK_ROOT, 'toolchain', config['NACL_TOOLCHAIN'], 'bin', "sel_ldr_#{cpu_nick}"),
++      File.join(SDK_ROOT, 'tools', "sel_ldr_#{cpu_nick}")
++    ].find{|path| File.executable?(path)} or raise "No sel_ldr found"
++    IRT_CORE = [
++      File.join(SDK_ROOT, 'toolchain', config['NACL_TOOLCHAIN'], 'bin', "irt_core_#{cpu_nick}.nexe"),
++      File.join(SDK_ROOT, 'tools', "irt_core_#{cpu_nick}.nexe")
++    ].find{|path| File.executable?(path)} or raise "No irt_core found"
++  end
++
+   RUNNABLE_LD = File.join(HOST_LIB, 'runnable-ld.so')
+ 
+   module_function
 diff --git a/nacl/pepper_main.c b/nacl/pepper_main.c
 index c0e497b..6c41929 100644
 --- a/nacl/pepper_main.c
@@ -144,3 +304,17 @@ index c0e497b..6c41929 100644
  static void
  Instance_DidChangeView(PP_Instance instance,
                         const struct PP_Rect* position,
+diff --git a/ruby.c b/ruby.c
+index 6634229..f99d7fa 100644
+--- a/ruby.c
++++ b/ruby.c
+@@ -1747,6 +1747,9 @@ load_file(VALUE parser, VALUE fname, int script, struct cmdline_options *opt)
+     return (NODE *)rb_ensure(load_file_internal, (VALUE)&arg, restore_lineno, rb_gv_get("$."));
+ }
+ 
++#ifdef __native_client__
++__attribute__((weak))
++#endif
+ void *
+ rb_load_file(const char *fname)
+ {
