@@ -146,14 +146,17 @@ InitializeNaClGccToolchain() {
 
 InitializePNaClToolchain() {
   local TC_ROOT=${NACL_SDK_ROOT}/toolchain
-  # The PNaCl toolchain moved in pepper_30.  Check for
+  # The PNaCl toolchain moved in pepper_31.  Check for
   # the existence of the old folder first and use that
   # if found.
   if [ -d "${TC_ROOT}/${OS_SUBDIR}_x86_pnacl" ]; then
-    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_x86_pnacl/${NACL_LIBC}
+    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_x86_pnacl/newlib
+  elif [ -d "${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib" ]; then
+    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib
   else
     TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl
   fi
+
   readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${TC_ROOT}}
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
