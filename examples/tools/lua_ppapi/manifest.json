@@ -1,0 +1,16 @@
+{
+  "name": "Lua",
+  "description": "Lua interactive shell built using Native Client",
+  "version": "5.1.4.1",
+  "manifest_version": 2,
+  "icons": {
+    "16": "icon_16.png",
+    "48": "icon_48.png",
+    "128": "icon_128.png"
+  },
+  "app": {
+    "launch": {
+      "local_path": "index.html"
+    }
+  }
+}

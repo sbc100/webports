@@ -1,0 +1,14 @@
+Lua for Chrome
+==============
+
+This is package of the Lua interactive shell built to run under
+Native Client within chrome/chromium.
+
+The logo files here are derived from the postscript logo available
+at: http://www.lua.org/images/
+
+Run ./nacl-lua_ppapi.sh to build Lua for use directly within
+chrome (requires the --enable-nacl flag) or via the chome web
+store.  The chrome webstore version is published here:
+
+https://chrome.google.com/webstore/detail/lua/nkcnhkobblkmiampcmimoemaeffjopph
