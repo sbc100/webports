@@ -1,15 +1,10 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
-#CC:=$(NACLCC)
-#CXX:=$(NACLCXX)
-#AR:=$(NACLAR)
-
-CFLAGS:=-Wno-error -pthread -Iinclude -Isrc -D_LIBC
-OUT:=out
-SOURCES:=\
+CFLAGS := -Wno-error -pthread -Iinclude -Isrc -D_LIBC
+OUT := out
+SOURCES := \
   src/getprotobyname_r.c \
   src/getservbyname_r.c \
   src/herrno.c \
@@ -29,7 +24,7 @@ SOURCES:=\
   src/res_send.c \
   src/stubs.c
 
-OBJS:=$(patsubst src/%.c,$(OUT)/%.o,$(SOURCES))
+OBJS := $(patsubst src/%.c,$(OUT)/%.o,$(SOURCES))
 
 $(OUT)/%.o : src/%.c
 	$(CC) -o $@ -c $< $(CFLAGS)
@@ -40,7 +35,6 @@ $(OUT)/libglibc-compat.a: $(OBJS)
 	$(AR) rcs $@ $^
 
 .PHONY: .dirs clean all
-
 
 clean:
 	rm -rf $(OUT)

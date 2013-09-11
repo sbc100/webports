@@ -10,8 +10,8 @@ readonly LIB_GLIBC_COMPAT=libglibc-compat.a
 
 ExtractStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  mkdir -p ${PACKAGE_NAME}
-  cp -r ${START_DIR}/* ${PACKAGE_NAME}
+  MakeDir ${PACKAGE_NAME}
+  LogExecute cp -rf ${START_DIR}/* ${PACKAGE_NAME}
 }
 
 ConfigureStep() {
@@ -21,13 +21,14 @@ ConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  LogExecute rm -rf out
 }
 
 InstallStep() {
   Remove ${NACLPORTS_LIBDIR}/${LIB_GLIBC_COMPAT}
   Remove ${NACLPORTS_INCLUDE}/glibc-compat
-  install -m 644 out/${LIB_GLIBC_COMPAT} ${NACLPORTS_LIBDIR}/${LIB_GLIBC_COMPAT}
-  cp -r include ${NACLPORTS_INCLUDE}/glibc-compat
+  LogExecute install -m 644 out/${LIB_GLIBC_COMPAT} ${NACLPORTS_LIBDIR}/${LIB_GLIBC_COMPAT}
+  LogExecute cp -r include ${NACLPORTS_INCLUDE}/glibc-compat
 }
 
 PackageInstall
