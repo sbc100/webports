@@ -1,0 +1,94 @@
+diff --git a/shell.c b/shell.c
+index c6d7fa3..62da103 100644
+--- a/shell.c
++++ b/shell.c
+@@ -45,6 +45,10 @@
+ # include <sys/types.h>
+ #endif
+ 
++#if defined(__native_client__) && defined(PPAPI)
++# include <sys/mount.h>
++#endif
++
+ #ifdef HAVE_EDITLINE
+ # include <editline/editline.h>
+ #endif
+@@ -2935,6 +2939,10 @@ static char *cmdline_option_value(int argc, char **argv, int i){
+   return argv[i];
+ }
+ 
++#ifdef PPAPI
++#define main sqlite_main
++#endif
++
+ int main(int argc, char **argv){
+   char *zErrMsg = 0;
+   struct callback_data data;
+@@ -2943,6 +2951,16 @@ int main(int argc, char **argv){
+   int i;
+   int rc = 0;
+ 
++#ifdef __native_client__
++  mkdir("/myhome", 0777);
++  setenv("HOME", "/myhome", 1);
++  /* Setup terminal type. */
++  setenv("TERM", "xterm-256color", 1);
++  /* Blank out USER and LOGNAME. */
++  setenv("USER", "", 1);
++  setenv("LOGNAME", "", 1);
++#endif
++
+   if( strcmp(sqlite3_sourceid(),SQLITE_SOURCE_ID)!=0 ){
+     fprintf(stderr, "SQLite header and source version mismatch\n%s\n%s\n",
+             sqlite3_sourceid(), SQLITE_SOURCE_ID);
+@@ -2952,6 +2970,10 @@ int main(int argc, char **argv){
+   main_init(&data);
+   stdin_is_interactive = isatty(0);
+ 
++#if defined __native_client__ && !defined PPAPI
++  stdin_is_interactive = 1;
++#endif
++
+   /* Make sure we have a valid signal handler early, before anything
+   ** else is done.
+   */
+@@ -2959,6 +2981,7 @@ int main(int argc, char **argv){
+   signal(SIGINT, interrupt_handler);
+ #endif
+ 
++
+   /* Do an initial pass through the command-line argument to locate
+   ** the name of the database file, the name of the initialization file,
+   ** the size of the alternative malloc heap,
+@@ -3202,3 +3225,10 @@ int main(int argc, char **argv){
+   }
+   return rc;
+ }
++
++#ifdef PPAPI
++#include "nacl_io/nacl_io.h"
++#include "ppapi_simple/ps_main.h"
++
++PPAPI_SIMPLE_REGISTER_MAIN(sqlite_main)
++#endif
+diff --git a/sqlite3.c b/sqlite3.c
+index 37ee4ad..e317cf5 100644
+--- a/sqlite3.c
++++ b/sqlite3.c
+@@ -22852,6 +22852,16 @@ SQLITE_PRIVATE const char *sqlite3OpcodeName(int i){
+ #include <sys/mman.h>
+ #endif
+ 
++#if defined __native_client__ && !defined __GLIBC__
++struct flock {
++	short	l_type;
++	short	l_whence;
++	off_t	l_start;
++	off_t	l_len;
++	pid_t	l_pid;
++};
++#endif
++
+ 
+ #if SQLITE_ENABLE_LOCKING_STYLE
+ # include <sys/ioctl.h>

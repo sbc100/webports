@@ -137,6 +137,7 @@ LIBRARIES = \
      libraries/SDL_net \
      libraries/SDL_ttf \
      libraries/speex \
+     libraries/sqlite \
      libraries/tiff \
      libraries/tinyxml \
      libraries/webp \
@@ -249,6 +250,7 @@ $(SENT)/libraries/libtar: libraries/zlib
 $(SENT)/libraries/lua: libraries/readline
 $(SENT)/libraries/python: libraries/readline libraries/zlib
 $(SENT)/libraries/ruby: libraries/readline libraries/zlib
+$(SENT)/libraries/sqlite: libraries/readline
 $(SENT)/examples/games/nethack: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/bash: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
@@ -356,6 +358,7 @@ sdl_net: libraries/SDL_net ;
 sdl_ttf: libraries/SDL_ttf ;
 speex: libraries/speex ;
 tar: libraries/libtar ;
+sqlite: libraries/sqlite ;
 theora: libraries/libtheora ;
 tiff: libraries/tiff ;
 readline: libraries/readline ;
