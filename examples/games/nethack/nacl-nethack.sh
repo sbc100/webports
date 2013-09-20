@@ -77,12 +77,13 @@ InstallStep() {
   else
     cp ${START_DIR}/nethack.js ${ASSEMBLY_DIR}
   fi
-  cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${NACL_SRC}/build_tools/naclterm.js ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  zip -r nethack-3.4.3.zip nethack
+  LogExecute zip -r nethack-3.4.3.zip nethack
   ChangeDir ${PACKAGE_DIR}
 }
 

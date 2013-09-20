@@ -75,6 +75,7 @@ install:
 	cp $(OUTDIR)/ruby.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
 	cp ruby.js $(INSTALL_DIR)
+	cp ../../../build_tools/naclterm.js $(INSTALL_DIR)
 	cp manifest.json ${INSTALL_DIR}
 	cp icon_16.png ${INSTALL_DIR}
 	cp icon_48.png ${INSTALL_DIR}

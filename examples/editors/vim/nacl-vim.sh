@@ -67,6 +67,7 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${NACL_SRC}/build_tools/naclterm.js ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r vim-7.3.zip vim
 }

@@ -52,13 +52,14 @@ InstallStep() {
       -i ${NASSH}/concat/nassh_deps.concat \
       -o ${ASSEMBLY_DIR}/hterm.concat.js
 
-  cp ${START_DIR}/bash.js ${ASSEMBLY_DIR}
-  cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
-  cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/bash.js ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${NACL_SRC}/build_tools/naclterm.js ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  zip -r bash-7.3.zip bash
+  LogExecute zip -r bash-7.3.zip bash
 }
 
 PackageInstall
