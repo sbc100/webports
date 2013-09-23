@@ -8,7 +8,6 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -56,11 +55,6 @@
 #undef htons
 #undef ntohl
 #undef ntohs
-
-int access(const char *pathname, int mode) __attribute__((weak));
-int access(const char *pathname, int mode) {
-  UNIMPLEMENTED_NOSYS();
-}
 
 int accept(int sockfd, struct sockaddr *addr,
            socklen_t *addrlen) __attribute__((weak));
@@ -144,12 +138,6 @@ int getpeername(int sockfd, struct sockaddr *addr,
                 socklen_t *addrlen) __attribute__((weak));
 int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
   UNIMPLEMENTED_NOSYS();
-}
-
-struct servent *getservbyname(const char *name,
-                              const char *proto) __attribute__((weak));
-struct servent *getservbyname(const char *name, const char *proto) {
-  UNIMPLEMENTED_FATAL();
 }
 
 struct servent *getservbyport(int port,
@@ -256,12 +244,6 @@ int shutdown(int sockfd, int how) {
   UNIMPLEMENTED_FATAL();
 }
 
-sighandler_t signal(int signum, sighandler_t handler) __attribute__((weak));
-sighandler_t signal(int signum, sighandler_t handler) {
-  UNIMPLEMENTED();
-  return SIG_ERR;
-}
-
 int socketpair(int domain, int type, int protocol,
                int sv[2]) __attribute__((weak));
 int socketpair(int domain, int type, int protocol,
@@ -301,58 +283,6 @@ int tcsetattr(int fd, int optional_actions,
   UNIMPLEMENTED_FATAL();
 }
 
-mode_t umask(mode_t mask) __attribute__ ((weak));
-mode_t umask(mode_t mask) {
-  return 0x12; /* 022 */
-}
-
-int unlink(const char *pathname) __attribute__ ((weak));
-int unlink(const char *pathname) {
-  UNIMPLEMENTED_FATAL();
-}
-
-uid_t getuid(void) __attribute__ ((weak));
-uid_t getuid(void) {
-  return 100;
-}
-
-uid_t geteuid(void) __attribute__ ((weak));
-uid_t geteuid(void) {
-  return 100;
-}
-
-int setgid(gid_t gid) __attribute__ ((weak));
-int setgid(gid_t gid) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int setegid(gid_t gid) __attribute__ ((weak));
-int setegid(gid_t gid) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int setuid(uid_t uid) __attribute__ ((weak));
-int setuid(uid_t uid) {
-  UNIMPLEMENTED_FATAL();
-}
-
-gid_t getgid(void) __attribute__ ((weak));
-gid_t getgid(void) {
-  UNIMPLEMENTED();
-  return 0;
-}
-
-gid_t getegid(void) __attribute__ ((weak));
-gid_t getegid(void) {
-  UNIMPLEMENTED();
-  return 0;
-}
-
-int rmdir(const char *pathname) __attribute__ ((weak));
-int rmdir(const char *pathname) {
-  UNIMPLEMENTED_NOSYS();
-}
-
 FILE *popen(const char *command, const char *type) __attribute__ ((weak));
 FILE *popen(const char *command, const char *type) {
   UNIMPLEMENTED_FATAL();
@@ -380,16 +310,6 @@ int execlp(const char *file, const char *arg, ...) {
 
 int execv(const char *path, char *const argv[]) __attribute__ ((weak));
 int execv(const char *path, char *const argv[]) {
-  UNIMPLEMENTED_NOSYS();
-}
-
-int pipe(int pipefd[2]) __attribute__ ((weak));
-int pipe(int pipefd[2]) {
-  UNIMPLEMENTED_NOSYS();
-}
-
-int link(const char *oldpath, const char *newpath) __attribute__ ((weak));
-int link(const char *oldpath, const char *newpath) {
   UNIMPLEMENTED_NOSYS();
 }
 
@@ -430,36 +350,8 @@ int setgroups(size_t size, const gid_t *list) {
   UNIMPLEMENTED_FATAL();
 }
 
-struct passwd *getpwnam(const char *name) __attribute__ ((weak));
-struct passwd *getpwnam(const char *name) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int utime(const char *filename, const struct utimbuf *times)
-    __attribute__ ((weak));
-int utime(const char *filename, const struct utimbuf *times) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int chdir(const char *path) __attribute__ ((weak));
-int chdir(const char *path) {
-  UNIMPLEMENTED_FATAL();
-}
-
 pid_t setsid(void) __attribute__ ((weak));
 pid_t setsid(void) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int lstat(const char *path, struct stat *buf) __attribute__ ((weak));
-int lstat(const char *path, struct stat *buf) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int select(int nfds, fd_set *readfds, fd_set *writefds,
-           fd_set *exceptfds, struct timeval *timeout) __attribute__ ((weak));
-int select(int nfds, fd_set *readfds, fd_set *writefds,
-           fd_set *exceptfds, struct timeval *timeout) {
   UNIMPLEMENTED_FATAL();
 }
 
@@ -468,25 +360,9 @@ int socket(int domain, int type, int protocol) {
   UNIMPLEMENTED_FATAL();
 }
 
-int ioctl(int d, int request, ...) __attribute__ ((weak));
-int ioctl(int d, int request, ...) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int kill(pid_t pid, int sig) __attribute__ ((weak));
-int kill(pid_t pid, int sig) {
-  UNIMPLEMENTED_FATAL();
-}
-
 int connect(int sockfd, const struct sockaddr *addr,
             socklen_t addrlen) __attribute__ ((weak));
 int connect(int sockfd, const struct sockaddr *addr,
                    socklen_t addrlen) {
-  UNIMPLEMENTED_FATAL();
-}
-
-int utimes(const char *filename, const struct timeval times[2])
-    __attribute__ ((weak));
-int utimes(const char *filename, const struct timeval times[2]) {
   UNIMPLEMENTED_FATAL();
 }

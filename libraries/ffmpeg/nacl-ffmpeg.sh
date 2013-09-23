@@ -23,7 +23,7 @@ ConfigureStep() {
     # TODO(sbc): Remove once sys/ioctl.h is added to newlib SDK
     CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     export CFLAGS
-    extra_args+=" --extra-libs=-lglibc-compat"
+    extra_args+=" --extra-libs=-lglibc-compat --extra-libs=-lnosys"
   fi
 
   ../configure \

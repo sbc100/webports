@@ -219,15 +219,21 @@ index 65ade9f..1a971dc 100644
      return PyInt_FromLong((long)fd);
  }
 diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
-index c2907f6..9e64898 100644
+index c2907f6..faa3ad6 100644
 --- a/Modules/pwdmodule.c
 +++ b/Modules/pwdmodule.c
-@@ -94,6 +94,22 @@ mkpwent(struct passwd *p)
+@@ -94,6 +94,29 @@ mkpwent(struct passwd *p)
      return v;
  }
  
 +#ifdef __native_client__
-+struct passwd *getpwuid(uid_t uid)
++// python relies on a working version of getpwuid(3)
++// which Native Client does not yet provide.
++// TODO(sbc): This should only really be needed when
++// building for the sel_ldr.  It should be possible to
++// use the C-library version (which tries of open files
++// under /etc) when using nacl_io.
++static struct passwd *my_getpwuid(uid_t uid)
 +{
 +    static struct passwd dummy = {
 +      "nacl_user",
@@ -240,16 +246,17 @@ index c2907f6..9e64898 100644
 +    };
 +    return &dummy;
 +}
++#define getpwuid my_getpwuid
 +#endif
 +
  PyDoc_STRVAR(pwd_getpwuid__doc__,
  "getpwuid(uid) -> (pw_name,pw_passwd,pw_uid,\n\
                    pw_gid,pw_gecos,pw_dir,pw_shell)\n\
 diff --git a/Modules/python.c b/Modules/python.c
-index 2739b8b..c6d607e 100644
+index 2739b8b..5a5b753 100644
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -6,6 +6,36 @@
+@@ -6,6 +6,19 @@
  #include <floatingpoint.h>
  #endif
  
@@ -259,40 +266,23 @@ index 2739b8b..c6d607e 100644
 +
 +// Dummy implementation of uname.  This is only needed for the sel_ldr
 +// version of python.  Otherwise it gets provided by nacl_io.
-+int uname(struct utsname *buf) {
-+  sprintf(buf->sysname, "NaCl");
-+  return 0;
-+}
-+
-+// Dummy implementation of getcwd.  This is only needed for the sel_ldr
-+// version of python.  Otherwise it gets provided by nacl_io.
-+char* getcwd(char* buffer, size_t len) {
-+  if (buffer == NULL) {
-+    if (len == 0)
-+      len = 2;
-+    buffer = malloc(len);
-+  }
-+
-+  if (len < 2) {
-+    errno = ERANGE;
-+    return NULL;
-+  }
-+
-+  sprintf(buffer, ".");
-+  return buffer;
++int uname(struct utsname *buf)
++{
++	sprintf(buf->sysname, "NaCl");
++	return 0;
 +}
 +#endif
 +
  int
  main(int argc, char **argv)
  {
-@@ -20,5 +50,9 @@ main(int argc, char **argv)
+@@ -20,5 +33,9 @@ main(int argc, char **argv)
  	m = fpgetmask();
  	fpsetmask(m & ~FP_X_OFL);
  #endif
 +#ifdef __native_client__
-+  setvbuf(stdout, NULL, _IOLBF, 0);
-+  setvbuf(stdin, NULL, _IOLBF, 0);
++	setvbuf(stdout, NULL, _IOLBF, 0);
++	setvbuf(stdin, NULL, _IOLBF, 0);
 +#endif
  	return Py_Main(argc, argv);
  }
