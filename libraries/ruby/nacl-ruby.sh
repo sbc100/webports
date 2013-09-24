@@ -76,7 +76,9 @@ ConfigureStep() {
 
 BuildStep() {
   DefaultBuildStep
-  WriteSelLdrScript ruby ruby.nexe
+  if [ $NACL_ARCH != "pnacl" ]; then
+    WriteSelLdrScript ruby ruby.nexe
+  fi
 }
 
 PackageInstall

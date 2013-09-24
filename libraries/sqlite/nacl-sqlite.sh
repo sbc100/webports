@@ -7,7 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 MAKE_TARGETS="CCLD=\$(CXX) all"
-export LIBS="-lnacl_io"
+export LIBS="-lnacl_io -pthread"
 if [ ${NACL_GLIBC} != "1" ]; then
   LIBS="${LIBS} -lnosys"
   #LDFLAGS="${LDFLAGS} -lncurses -Wl,--whole-archive -lglibc-compat -Wl,--no-whole-archive"
@@ -31,7 +31,7 @@ PackageInstall() {
   touch ${SRC_DIR}/shell.c
   sed -i  "s/sqlite3\$(EXEEXT)/sqlite3_ppapi\$(EXEEXT)/" Makefile
   sed -i  "s/CFLAGS = /CFLAGS = -DPPAPI /" Makefile
-  sed -i  "s/-lnacl_io/-lppapi_simple -lnacl_io -lppapi_cpp -lppapi/" Makefile
+  sed -i  "s/-lnacl_io/-lppapi_simple -lnacl_io -pthread -lppapi_cpp -lppapi/" Makefile
   BuildStep
 
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/sqlite"

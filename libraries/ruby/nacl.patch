@@ -11,7 +11,7 @@ index a3a1c51..1e3e2ca 100755
    x86_64|i?86) :
      nacl_cv_cpu_nick=x86 ;; #(
 +  le32) :
-+    nacl_cv_cpu_nick=pnacl ;; #(
++    nacl_cv_cpu_nick=pnacl; ac_cv_exeext=.pexe ;; #(
    *) :
 -    nacl_cv_cpu_nick=$build_cpu ;;
 +    nacl_cv_cpu_nick=$target_cpu ;;
@@ -111,7 +111,7 @@ index 4e5f64d..566f1d1 100755
  EXEEXT = CONFIG['EXEEXT']
 +
 +# Without this ext/ripper will try to use the default miniruby rather
-+# than honoring the MINIRUBY set in the envrionment.
++# than honoring the MINIRUBY set in the environment.
 +# TODO(sbc): Figure out why this is needed and remove.
 +CROSS_COMPILING = 'yes'
 +
