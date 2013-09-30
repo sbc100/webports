@@ -5,6 +5,10 @@
  */
 #include <errno.h>
 #include <irt.h>
+#include <ppapi/c/pp_macros.h>
+#if PPAPI_RELEASE > 30
+#include <irt_dev.h>
+#endif
 #ifdef __GLIBC__
 #include <irt_syscalls.h>
 #endif
