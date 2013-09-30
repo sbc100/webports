@@ -1,0 +1,62 @@
+diff --git a/lib/hostip4.c b/lib/hostip4.c
+index 3a38b32..f109a28 100644
+--- a/lib/hostip4.c
++++ b/lib/hostip4.c
+@@ -115,6 +115,13 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+ 
+ #if defined(CURLRES_IPV4) && !defined(CURLRES_ARES)
+ 
++#ifdef __native_client__
++// nacl_io does not yet support getaddrinfo() or gethostbyname_r().
++// TODO(sbc): remove this once these functions get added to nacl_io
++#undef HAVE_GETADDRINFO_THREADSAFE
++#undef HAVE_GETHOSTBYNAME_R
++#endif
++
+ /*
+  * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
+  *
+diff --git a/src/tool_main.c b/src/tool_main.c
+index 8f2fbb7..99af87a 100644
+--- a/src/tool_main.c
++++ b/src/tool_main.c
+@@ -82,6 +82,10 @@ static void main_checkfds(void)
+ #endif
+ }
+ 
++#ifdef PPAPI
++#define main curl_main
++#endif
++
+ /*
+ ** curl tool main function.
+ */
+@@ -90,6 +94,16 @@ int main(int argc, char *argv[])
+   int res;
+   struct Configurable config;
+ 
++#ifdef __native_client__
++  mkdir("/myhome", 0777);
++  setenv("HOME", "/myhome", 1);
++  /* Setup terminal type. */
++  setenv("TERM", "xterm-256color", 1);
++  /* Blank out USER and LOGNAME. */
++  setenv("USER", "", 1);
++  setenv("LOGNAME", "", 1);
++#endif
++
+   memset(&config, 0, sizeof(struct Configurable));
+ 
+   config.errors = stderr; /* default errors to stderr */
+@@ -121,4 +135,11 @@ int main(int argc, char *argv[])
+ #endif
+ }
+ 
++#ifdef PPAPI
++#include "nacl_io/nacl_io.h"
++#include "ppapi_simple/ps_main.h"
++
++PPAPI_SIMPLE_REGISTER_MAIN(curl_main)
++#endif
++
+ #endif /* ndef UNITTESTS */

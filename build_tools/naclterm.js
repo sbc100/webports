@@ -148,6 +148,17 @@ NaClTerm.prototype.run = function() {
   addParam('ps_stderr', '/dev/tty');
   addParam('ps_verbosity', '2');
 
+  var args = lib.f.parseQuery(document.location.search);
+  var argn = 1;
+  while (true) {
+    var argname = 'arg' + argn;
+    var arg = args[argname];
+    if (typeof(arg) === 'undefined')
+      break;
+    addParam(argname, arg);
+    argn = argn + 1;
+  }
+
   document.body.appendChild(embed);
 
   this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);

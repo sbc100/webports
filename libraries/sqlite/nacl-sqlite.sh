@@ -29,9 +29,9 @@ PackageInstall() {
   # Build (at least shell.c) again but this time with nacl_io and -DPPAPI
   Banner "Build sqlite3_ppapi"
   touch ${SRC_DIR}/shell.c
-  sed -i  "s/sqlite3\$(EXEEXT)/sqlite3_ppapi\$(EXEEXT)/" Makefile
-  sed -i  "s/CFLAGS = /CFLAGS = -DPPAPI /" Makefile
-  sed -i  "s/-lnacl_io/-lppapi_simple -lnacl_io -pthread -lppapi_cpp -lppapi/" Makefile
+  sed -i.bak "s/sqlite3\$(EXEEXT)/sqlite3_ppapi\$(EXEEXT)/" Makefile
+  sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" Makefile
+  sed -i.bak "s/-lnacl_io/-lppapi_simple -lnacl_io -pthread -lppapi_cpp -lppapi/" Makefile
   BuildStep
 
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/sqlite"
@@ -63,7 +63,7 @@ PackageInstall() {
   LogExecute cp ${START_DIR}/sqlite.js ${PUBLISH_DIR}
   LogExecute cp sqlite.nmf ${PUBLISH_DIR}
   if [ ${NACL_ARCH} = pnacl ]; then
-    sed -i 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/sqlite.js
+    sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/sqlite.js
   fi
 }
 

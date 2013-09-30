@@ -80,6 +80,7 @@ LIBRARIES = \
      libraries/bzip2 \
      libraries/cairo \
      libraries/cfitsio \
+     libraries/curl \
      libraries/DevIL \
      libraries/dreadthread \
      libraries/expat \
@@ -307,6 +308,7 @@ boost: libraries/boost ;
 box2d: libraries/box2d ;
 bzip2: libraries/bzip2 ;
 cairo: libraries/cairo ;
+curl: libraries/curl ;
 cfitsio: libraries/cfitsio ;
 DevIL: libraries/DevIL ;
 expat: libraries/expat ;

@@ -299,8 +299,8 @@ PatchSpecFile() {
 
   # For newlib toolchain, modify the specs file to give an error when attempting
   # to create a shared object.
-  if [ "${NACL_GLIBC}" != "1" ]; then
-    sed -i='' "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
+  if [ ${NACL_GLIBC} != 1 ]; then
+    sed -i.bak "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
   fi
 }
 

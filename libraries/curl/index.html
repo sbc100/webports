@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SQLite</title>
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
+    <META HTTP-EQUIV="Expires" CONTENT="-1" />
+    <script type="text/javascript" src="hterm.concat.js"></script>
+    <script type="text/javascript" src="naclterm.js"></script>
+    <script type="text/javascript" src="curl.js"></script>
+  </head>
+  <body>
+    <h1>curl example application</h1>
+    <p>This page embeds the curl executable (command line interface to libcurl)
+    build with NaCl.  Because it needs to use the chrome socket API, chrome
+    must be lunched with --allow-nacl-socket-api=localhost (or whatever host
+    you are loading this page from).</p>
+    <p>The terminal window below can be used to interact with curl via
+    stdin/stdout/stderr.</p>
+    <div id="terminal"></div>
+  </body>
+</html>
