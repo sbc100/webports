@@ -11,6 +11,18 @@
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"
 
+#ifdef __arm__
+#define DATA_FILE "pydata_arm.tar"
+#elif defined __i386__
+#define DATA_FILE "pydata_x86_32.tar"
+#elif defined __x86_64__
+#define DATA_FILE "pydata_x86_64.tar"
+#elif defined __pnacl__
+#define DATA_FILE "pydata_pnacl.tar"
+#else
+#error "Unknown arch"
+#endif
+
 int python_main(int argc, char **argv) {
   umount("/");
   mount("foo", "/", "memfs", 0, NULL);
@@ -27,7 +39,7 @@ int python_main(int argc, char **argv) {
   setenv("LOGNAME", "", 1);
 
   TAR* tar;
-  int ret = tar_open(&tar, "/mnt/tars/pydata.tar", NULL, O_RDONLY, 0, 0);
+  int ret = tar_open(&tar, "/mnt/tars/" DATA_FILE, NULL, O_RDONLY, 0, 0);
   assert(ret == 0);
 
   ret = tar_extract_all(tar, "/");

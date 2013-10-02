@@ -50,6 +50,36 @@ index 9d55550..09e7a69 100644
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
  		$(PYTHON_FOR_BUILD) -m lib2to3.pgen2.driver $(DESTDIR)$(LIBDEST)/lib2to3/Grammar.txt
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
+diff --git a/Modules/_ctypes/libffi/configure b/Modules/_ctypes/libffi/configure
+index 8230830..1ab4dcb 100755
+--- a/Modules/_ctypes/libffi/configure
++++ b/Modules/_ctypes/libffi/configure
+@@ -13393,7 +13393,7 @@ case "$host" in
+ 	TARGETDIR=x86
+ 	if test $ac_cv_sizeof_size_t = 4; then
+ 	  case "$host" in
+-	    *-gnux32)
++	    *-gnux32 | *-nacl)
+ 	      TARGET=X86_64
+ 	      ;;
+ 	    *)
+diff --git a/Modules/_ctypes/libffi/src/x86/ffi64.c b/Modules/_ctypes/libffi/src/x86/ffi64.c
+index 2014af2..cacf894 100644
+--- a/Modules/_ctypes/libffi/src/x86/ffi64.c
++++ b/Modules/_ctypes/libffi/src/x86/ffi64.c
+@@ -202,10 +202,12 @@ classify_argument (ffi_type *type, enum x86_64_reg_class classes[],
+     case FFI_TYPE_DOUBLE:
+       classes[0] = X86_64_SSEDF_CLASS;
+       return 1;
++#if FFI_TYPE_DOUBLE != FFI_TYPE_LONGDOUBLE
+     case FFI_TYPE_LONGDOUBLE:
+       classes[0] = X86_64_X87_CLASS;
+       classes[1] = X86_64_X87UP_CLASS;
+       return 2;
++#endif
+     case FFI_TYPE_STRUCT:
+       {
+ 	const int UNITS_PER_WORD = 8;
 diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
 index b0386f0..a5c77b4 100644
 --- a/Modules/_testcapimodule.c
