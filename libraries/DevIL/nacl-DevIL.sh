@@ -8,16 +8,6 @@ source pkg_info
 source ../../build_tools/common.sh
 
 RunSelLdrTests() {
-  if [ $OS_SUBDIR = "windows" ]; then
-    echo "Not running sel_ldr tests on Windows."
-    return
-  fi
-
-  if [ $NACL_ARCH = "arm" ]; then
-    echo "Not running sel_ldr tests on ARM."
-    return
-  fi
-
   if [ ${NACL_ARCH} == "pnacl" ]; then
     # Run once for each architecture.
     local pexe=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test/testil

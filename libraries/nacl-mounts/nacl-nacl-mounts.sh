@@ -16,16 +16,6 @@ RunTests() {
 RunSelLdrTests() {
   Banner "Running tests ${PACKAGE_NAME}"
 
-  if [ $OS_SUBDIR = "windows" ]; then
-    echo "Not running sel_ldr tests on Windows ."
-    return
-  fi
-
-  if [ $NACL_ARCH = "arm" ]; then
-    echo "Not running sel_ldr tests on ARM."
-    return
-  fi
-
   if [ ${NACL_ARCH} = "pnacl" ]; then
     echo "FIXME: Not running sel_ldr-based tests with PNaCl."
     echo "Test currently segfaults."

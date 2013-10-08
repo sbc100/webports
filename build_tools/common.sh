@@ -900,6 +900,12 @@ WriteSelLdrScript() {
     # no sel_ldr for arm
     return
   fi
+
+  if [ ! -e ${NACL_IRT} ]; then
+    echo "ERROR: Missing IRT binary. Not running sel_ldr-based tests."
+    exit 1
+  fi
+
   if [ $NACL_GLIBC = "1" ]; then
     cat > $1 <<HERE
 #!/bin/bash
