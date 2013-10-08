@@ -1,0 +1,156 @@
+diff --git a/Extras/Serialize/BulletFileLoader/bChunk.cpp b/Extras/Serialize/BulletFileLoader/bChunk.cpp
+index ac9125a..0eb0946 100644
+--- a/Extras/Serialize/BulletFileLoader/bChunk.cpp
++++ b/Extras/Serialize/BulletFileLoader/bChunk.cpp
+@@ -17,7 +17,7 @@ subject to the following restrictions:
+ #include "bDefines.h"
+ #include "bFile.h"
+ 
+-#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
++#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
+ #include <memory.h>
+ #endif
+ #include <string.h>
+diff --git a/Extras/Serialize/BulletFileLoader/btBulletFile.cpp b/Extras/Serialize/BulletFileLoader/btBulletFile.cpp
+index 0cc668c..e2adc97 100644
+--- a/Extras/Serialize/BulletFileLoader/btBulletFile.cpp
++++ b/Extras/Serialize/BulletFileLoader/btBulletFile.cpp
+@@ -17,7 +17,7 @@ subject to the following restrictions:
+ #include "bDefines.h"
+ #include "bDNA.h"
+ 
+-#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
++#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
+ #include <memory.h>
+ #endif
+ #include <string.h>
+@@ -403,4 +403,4 @@ void	btBulletFile::addStruct(const	char* structType,void* data, int len, void* o
+ 
+ 	mLibPointers.insert(dataChunk.oldPtr, (bStructHandle*)data);
+ 	m_chunks.push_back(dataChunk);
+-}
+\ No newline at end of file
++}
+diff --git a/UnitTests/BulletUnitTests/CMakeLists.txt b/UnitTests/BulletUnitTests/CMakeLists.txt
+index 8f38f05..25fb220 100644
+--- a/UnitTests/BulletUnitTests/CMakeLists.txt
++++ b/UnitTests/BulletUnitTests/CMakeLists.txt
+@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES(
+ 
+ LINK_LIBRARIES(
+ 	cppunit 
+-	BulletMultiThreaded 
++#	BulletMultiThreaded 
+ 	BulletSoftBody
+ 	BulletDynamics  
+ 	BulletCollision 
+diff --git a/UnitTests/BulletUnitTests/Main.cpp b/UnitTests/BulletUnitTests/Main.cpp
+index 1bc8999..11e9cb6 100644
+--- a/UnitTests/BulletUnitTests/Main.cpp
++++ b/UnitTests/BulletUnitTests/Main.cpp
+@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
+   CPPUNIT_NS::CompilerOutputter outputter( &result, CPPUNIT_NS::stdCOut() );
+   outputter.write(); 
+ 
+-  getchar();
++  // getchar();
+ 
+   return result.wasSuccessful() ? 0 : 1;
+ }
+diff --git a/UnitTests/cppunit/CMakeLists.txt b/UnitTests/cppunit/CMakeLists.txt
+index 1468214..4b39b29 100644
+--- a/UnitTests/cppunit/CMakeLists.txt
++++ b/UnitTests/cppunit/CMakeLists.txt
+@@ -48,15 +48,15 @@ ADD_LIBRARY(cppunit
+ 	src/cppunit/XmlOutputterHook.cpp
+ 	
+ #plugin	
+-	src/cppunit/BeOsDynamicLibraryManager.cpp
+-	src/cppunit/DynamicLibraryManager.cpp
+-	src/cppunit/DynamicLibraryManagerException.cpp
+-	src/cppunit/PlugInManager.cpp
+-	src/cppunit/PlugInParameters.cpp
+-	src/cppunit/ShlDynamicLibraryManager.cpp
+-	src/cppunit/TestPlugInDefaultImpl.cpp
+-	src/cppunit/UnixDynamicLibraryManager.cpp
+-	src/cppunit/Win32DynamicLibraryManager.cpp
++#	src/cppunit/BeOsDynamicLibraryManager.cpp
++#	src/cppunit/DynamicLibraryManager.cpp
++#	src/cppunit/DynamicLibraryManagerException.cpp
++#	src/cppunit/PlugInManager.cpp
++#	src/cppunit/PlugInParameters.cpp
++#	src/cppunit/ShlDynamicLibraryManager.cpp
++#	src/cppunit/TestPlugInDefaultImpl.cpp
++#	src/cppunit/UnixDynamicLibraryManager.cpp
++#	src/cppunit/Win32DynamicLibraryManager.cpp
+ 	
+ #protector
+ 	src/cppunit/DefaultProtector.cpp
+@@ -71,4 +71,4 @@ ADD_LIBRARY(cppunit
+ 	src/cppunit/XmlDocument.cpp
+ 	src/cppunit/XmlElement.cpp
+ 	
+-)
+\ No newline at end of file
++)
+diff --git a/XCompile-nacl.txt b/XCompile-nacl.txt
+new file mode 100644
+index 0000000..0cdde21
+--- /dev/null
++++ b/XCompile-nacl.txt
+@@ -0,0 +1,27 @@
++# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
++# this file to set the proper settings and paths. Then use it from build/ like:
++# cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile.txt \
++#          -DCMAKE_INSTALL_PREFIX=/usr/mingw32/mingw
++# If you already have a toolchain file setup, you may use that instead of this
++# file.
++
++# the name of the target operating system
++SET(CMAKE_SYSTEM_NAME Linux)
++
++# which compilers to use for C and C++
++SET(CMAKE_C_COMPILER "${NACLCC}")
++SET(CMAKE_CXX_COMPILER "${NACLCXX}")
++set(CMAKE_AR ${NACLAR} CACHE FILEPATH "Archiver")
++SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
++
++# here is the target environment located
++SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
++
++# adjust the default behaviour of the FIND_XXX() commands:
++# search headers and libraries in the target environment, search
++# programs in the host environment
++set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
++set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
++set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
++set(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
++include_directories(${NACL_SDK_ROOT}/include)
+diff --git a/src/BulletCollision/BroadphaseCollision/btDbvt.h b/src/BulletCollision/BroadphaseCollision/btDbvt.h
+index 1298ed8..262b82c 100644
+--- a/src/BulletCollision/BroadphaseCollision/btDbvt.h
++++ b/src/BulletCollision/BroadphaseCollision/btDbvt.h
+@@ -92,7 +92,8 @@ subject to the following restrictions:
+ #endif
+ 
+ #if DBVT_USE_MEMMOVE
+-#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
++#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
++
+ #include <memory.h>
+ #endif
+ #include <string.h>
+diff --git a/src/LinearMath/btSerializer.h b/src/LinearMath/btSerializer.h
+index 7304c85..e3d6995 100644
+--- a/src/LinearMath/btSerializer.h
++++ b/src/LinearMath/btSerializer.h
+@@ -20,7 +20,8 @@ subject to the following restrictions:
+ #include "btStackAlloc.h"
+ #include "btHashMap.h"
+ 
+-#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
++#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
++
+ #include <memory.h>
+ #endif
+ #include <string.h>

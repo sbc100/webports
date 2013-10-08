@@ -77,6 +77,7 @@ LIBRARIES = \
      libraries/agg \
      libraries/boost \
      libraries/box2d \
+     libraries/bullet \
      libraries/bzip2 \
      libraries/cairo \
      libraries/cfitsio \
@@ -306,6 +307,7 @@ $(SENT)/examples/tools/gdb: libraries/ncurses
 agg: libraries/agg ;
 boost: libraries/boost ;
 box2d: libraries/box2d ;
+bullet: libraries/bullet ;
 bzip2: libraries/bzip2 ;
 cairo: libraries/cairo ;
 curl: libraries/curl ;
