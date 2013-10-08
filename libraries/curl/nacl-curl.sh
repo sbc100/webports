@@ -9,7 +9,7 @@ source ../../build_tools/common.sh
 export ac_cv_func_gethostbyname=yes
 export ac_cv_func_getaddrinfo=no
 export ac_cv_func_connect=yes
-LDFLAGS+=" -Wl,--whole-archive -lnacl_io -Wl,--no-whole-archive -pthread -lstdc++"
+export LIBS="-lnacl_io -lpthread -lstdc++"
 
 if [ $NACL_GLIBC = 1 ]; then
   EXECUTABLE_DIR=.libs
