@@ -27,8 +27,14 @@ InstallStep() {
   # TODO: side-by-side install
   LogExecute make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" install
   cd src
-  WriteSelLdrScript lua.sh lua
-  WriteSelLdrScript luac.sh luac
+  if [ "${NACL_ARCH}" = pnacl ]; then
+    # Just do the x86-64 version for now.
+    TranslateAndWriteSelLdrScript lua x86-64 lua.x86-64.nexe lua.sh
+    TranslateAndWriteSelLdrScript luac x86-64 luac.x86-64.nexe luac.sh
+  else
+    WriteSelLdrScript lua.sh lua
+    WriteSelLdrScript luac.sh luac
+  fi
 }
 
 

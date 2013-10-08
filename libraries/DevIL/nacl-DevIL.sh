@@ -18,22 +18,24 @@ RunSelLdrTests() {
     return
   fi
 
-  if [ ! -e ${NACL_IRT} ]; then
-    echo "WARNING: Missing IRT binary. Not running sel_ldr-based tests."
-    return
+  if [ ${NACL_ARCH} == "pnacl" ]; then
+    # Run once for each architecture.
+    local pexe=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test/testil
+    local script=${pexe}.sh
+
+    TranslateAndWriteSelLdrScript ${pexe} x86-32 ${pexe}.x86-32.nexe ${script}
+    cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test && make check
+
+    TranslateAndWriteSelLdrScript ${pexe} x86-64 ${pexe}.x86-64.nexe ${script}
+    cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test && make check
+  else
+    local nexe=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test/testil
+    local script=${nexe}.sh
+
+    WriteSelLdrScript ${script} ${nexe}
+
+    cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test && make check
   fi
-
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    echo "FIXME: Not running sel_ldr-based tests with PNaCl."
-    return
-  fi
-
-  local nexe=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test/testil
-  local script=${nexe}.sh
-
-  WriteSelLdrScript ${script} ${nexe}
-
-  cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test && make check
 }
 
 

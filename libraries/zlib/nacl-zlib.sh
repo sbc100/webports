@@ -23,6 +23,27 @@ ConfigureStep() {
   EXECUTABLES="minigzip${NACL_EXEEXT} example${NACL_EXEEXT}"
 }
 
+RunMinigzip() {
+  export LD_LIBRARY_PATH=.
+  if echo "hello world" | ./minigzip | ./minigzip -d; then
+    echo '  *** minigzip test OK ***' ; \
+      else
+    echo '  *** minigzip test FAILED ***' ; \
+      exit 1
+  fi
+}
+
+RunExample() {
+  export LD_LIBRARY_PATH=.
+  # This second test does not yet work on nacl (gzopen fails)
+  #if ./example; then \
+    #echo '  *** zlib test OK ***'; \
+  #else \
+    #echo '  *** zlib test FAILED ***'; \
+    #exit 1
+  #fi
+  return
+}
 
 TestStep() {
   if [ $NACL_ARCH = "arm" ]; then
@@ -38,27 +59,28 @@ TestStep() {
   fi
 
   if [ $NACL_ARCH = "pnacl" ]; then
-    WriteSelLdrScript minigzip minigzip.x86-64.nexe
-    WriteSelLdrScript example example.x86-64.nexe
+    local minigzip_pexe="minigzip${NACL_EXEEXT}"
+    local example_pexe="example${NACL_EXEEXT}"
+    local minigzip_script="minigzip"
+    local example_script="example"
+    TranslateAndWriteSelLdrScript ${minigzip_pexe} x86-32 \
+      minigzip.x86-32.nexe ${minigzip_script}
+    RunMinigzip
+    TranslateAndWriteSelLdrScript ${minigzip_pexe} x86-64 \
+      minigzip.x86-64.nexe ${minigzip_script}
+    RunMinigzip
+    TranslateAndWriteSelLdrScript ${example_pexe} x86-32 \
+      example.x86-32.nexe ${example_script}
+    RunExample
+    TranslateAndWriteSelLdrScript ${example_pexe} x86-64 \
+      example.x86-64.nexe ${example_script}
+    RunExample
   else
     WriteSelLdrScript minigzip minigzip.nexe
+    RunMinigzip
     WriteSelLdrScript example example.nexe
+    RunExample
   fi
-  export LD_LIBRARY_PATH=.
-  if echo "hello world" | ./minigzip | ./minigzip -d; then
-    echo '  *** minigzip test OK ***' ; \
-  else
-    echo '  *** minigzip test FAILED ***' ; \
-    exit 1
-  fi
-
-  # This second test does not yet work on nacl (gzopen fails)
-  #if ./example; then \
-    #echo '  *** zlib test OK ***'; \
-  #else \
-    #echo '  *** zlib test FAILED ***'; \
-    #exit 1
-  #fi
 }
 
 
@@ -69,7 +91,6 @@ PackageInstall() {
   # zlib doesn't need patching, so no patch step
   ConfigureStep
   BuildStep
-  TranslateStep
   ValidateStep
   TestStep
   DefaultInstallStep

@@ -24,7 +24,12 @@ PackageInstall() {
   fi
 
   DefaultPackageInstall
-  WriteSelLdrScript sqlite3 ${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}
+  if [ ${NACL_ARCH} != "pnacl" ]; then
+    WriteSelLdrScript sqlite3 ${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}
+  else
+    local pexe=${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}
+    TranslateAndWriteSelLdrScript ${pexe} x86-64 sqlite3.x86-64.nexe sqlite3
+  fi
 
   # Build (at least shell.c) again but this time with nacl_io and -DPPAPI
   Banner "Build sqlite3_ppapi"

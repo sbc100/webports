@@ -26,13 +26,9 @@ RunSelLdrTests() {
     return
   fi
 
-  if [ ! -e ${NACL_IRT} ]; then
-    echo "WARNING: Missing IRT binary. Not running sel_ldr-based tests."
-    return
-  fi
-
   if [ ${NACL_ARCH} = "pnacl" ]; then
     echo "FIXME: Not running sel_ldr-based tests with PNaCl."
+    echo "Test currently segfaults."
     return
   fi
 

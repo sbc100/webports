@@ -17,21 +17,20 @@ RunSelLdrTests() {
     return
   fi
 
-  if [ ! -e ${NACL_IRT} ]; then
-    echo "WARNING: Missing IRT binary. Not running sel_ldr-based tests."
-    return
+  if [ ${NACL_ARCH} == "pnacl" ]; then
+    local pexe=test/yajl_test
+    local script=${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/yajl_test.sh
+    TranslateAndWriteSelLdrScript ${pexe} x86-32 ${pexe}.x86-32.nexe ${script}
+    (cd ${PACKAGE_DIR}/test && ./run_tests.sh ${script})
+    TranslateAndWriteSelLdrScript ${pexe} x86-64 ${pexe}.x86-64.nexe ${script}
+    (cd ${PACKAGE_DIR}/test && ./run_tests.sh ${script})
+  else
+    local script=${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/yajl_test.sh
+    local nexe=test/yajl_test
+
+    WriteSelLdrScript ${script} ${nexe}
+    cd ${PACKAGE_DIR}/test && ./run_tests.sh ${script}
   fi
-
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    echo "FIXME: Not running sel_ldr-based tests with PNaCl."
-    return
-  fi
-
-  local script=${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/yajl_test.sh
-  local nexe=test/yajl_test
-
-  WriteSelLdrScript ${script} ${nexe}
-  cd ${PACKAGE_DIR}/test && ./run_tests.sh ${script}
 }
 
 

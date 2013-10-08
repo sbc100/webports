@@ -51,7 +51,12 @@ ConfigureStep() {
 }
 
 TestStep() {
-  WriteSelLdrScript python python${NACL_EXEEXT}
+  if [ ${NACL_ARCH} != "pnacl" ]; then
+    WriteSelLdrScript python python${NACL_EXEEXT}
+  else
+    local pexe=python${NACL_EXEEXT}
+    TranslateAndWriteSelLdrScript ${pexe} x86-64 python.x86-64.nexe python
+  fi
 }
 
 PackageInstall() {

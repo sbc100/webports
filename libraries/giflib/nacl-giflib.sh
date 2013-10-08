@@ -15,6 +15,10 @@ else
   EXECUTABLES=util/rgb2gif${NACL_EXEEXT}
 fi
 
+RunTest() {
+  util/rgb2gif -s 320 200  < ../tests/porsche.rgb > porsche.gif
+  # TODO(sbc): do some basic checks on the resulting porsche.gif
+}
 
 TestStep() {
   if [ ${NACL_ARCH} = "arm" ]; then
@@ -28,15 +32,20 @@ TestStep() {
   fi
 
   if [ $NACL_ARCH = "pnacl" ]; then
-    WriteSelLdrScript util/rgb2gif rgb2gif.x86-64.nexe
+    local pexe=rgb2gif${NACL_EXEEXT}
+    (cd util;
+     TranslateAndWriteSelLdrScript ${pexe} x86-32 rgb2gif.x86-32.nexe rgb2gif)
+    RunTest
+    (cd util;
+     TranslateAndWriteSelLdrScript ${pexe} x86-64 rgb2gif.x86-64.nexe rgb2gif)
+    RunTest
   elif [ "${NACL_GLIBC}" = "1" ]; then
     WriteSelLdrScript util/rgb2gif .libs/rgb2gif${NACL_EXEEXT}
+    RunTest
   else
     WriteSelLdrScript util/rgb2gif rgb2gif${NACL_EXEEXT}
+    RunTest
   fi
-
-  util/rgb2gif -s 320 200  < ../tests/porsche.rgb > porsche.gif
-  # TODO(sbc): do some basic checks on the resulting porsche.gif
 }
 
 

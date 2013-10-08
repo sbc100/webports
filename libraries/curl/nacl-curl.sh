@@ -43,12 +43,17 @@ BuildStep() {
 
 InstallStep() {
   DefaultInstallStep
-  WriteSelLdrScript src/curl ${EXECUTABLE_DIR}/curl${NACL_EXEEXT}
-
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/curl"
   if [ "${NACL_ARCH}" = "pnacl" ]; then
+    # Just set up the x86-64 version for now.
+    local pexe="${EXECUTABLE_DIR}/curl${NACL_EXEEXT}"
+    (cd src;
+     TranslateAndWriteSelLdrScript ${pexe} x86-64 curl.x86-64.nexe curl
+    )
     PUBLISH_DIR+=/pnacl
   else
+    local nexe="${EXECUTABLE_DIR}/curl${NACL_EXEEXT}"
+    WriteSelLdrScript src/curl ${nexe}
     PUBLISH_DIR+=/${NACL_LIBC}
   fi
 

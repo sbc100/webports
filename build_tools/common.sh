@@ -863,12 +863,30 @@ RunSelLdrCommand() {
     # no sel_ldr for arm
     return
   fi
-  local NEXE=$1
-  local SCRIPT=$1.sh
-  WriteSelLdrScript ${SCRIPT} ${NEXE}
-  echo "[sel_ldr] $@"
-  shift
-  time ./${SCRIPT} $*
+
+  if [ ${NACL_ARCH} = "pnacl" ]; then
+    # For PNaCl we translate to each arch where we have sel_ldr, then run it.
+    local PEXE=$1
+    local NEXE_32=$1_32.nexe
+    local NEXE_64=$1_64.nexe
+    local SCRIPT_32=$1_32.sh
+    local SCRIPT_64=$1_64.sh
+    shift
+    TranslateAndWriteSelLdrScript ${PEXE} x86-32 ${NEXE_32} ${SCRIPT_32}
+    echo "[sel_ldr x86-32] $@"
+    time ./${SCRIPT_32} $*
+    TranslateAndWriteSelLdrScript ${PEXE} x86-64 ${NEXE_64} ${SCRIPT_64}
+    echo "[sel_ldr x86-64] $@"
+    time ./${SCRIPT_64} $*
+  else
+    # Normal NaCl.
+    local NEXE=$1
+    local SCRIPT=$1.sh
+    WriteSelLdrScript ${SCRIPT} ${NEXE}
+    echo "[sel_ldr] $@"
+    shift
+    time ./${SCRIPT} $*
+  fi
 }
 
 
@@ -913,6 +931,57 @@ HERE
   echo "Wrote script pwd:$PWD $1"
 }
 
+TranslateAndWriteSelLdrScript() {
+  local PEXE=$1
+  local PEXE_FINAL=$1_final.pexe
+  local ARCH=$2
+  local NEXE=$3
+  local SCRIPT=$4
+  # Finalize the pexe to make sure it is finalizeable.
+  TimeCommand ${PNACLFINALIZE} ${PEXE} -o ${PEXE_FINAL}
+  # Translate to the appropriate version.
+  TimeCommand ${TRANSLATOR} ${PEXE_FINAL} -arch ${ARCH} -o ${NEXE}
+  WriteSelLdrScriptForPNaCl ${SCRIPT} ${NEXE} ${ARCH}
+}
+
+#
+# Write a wrapper script that will run a nexe under sel_ldr, for PNaCl
+# $1 - Script name
+# $2 - Nexe name
+# $3 - sel_ldr architecture
+#
+WriteSelLdrScriptForPNaCl() {
+  local script_name=$1
+  local nexe_name=$2
+  local arch=$3
+  local nacl_sel_ldr="no-sel-ldr"
+  local irt_core="no-irt-core"
+  case ${arch} in
+    x86-32)
+      nacl_sel_ldr=${NACL_SEL_LDR_X8632}
+      irt_core=${NACL_IRT_X8632}
+      ;;
+    x86-64)
+      nacl_sel_ldr=${NACL_SEL_LDR_X8664}
+      irt_core=${NACL_IRT_X8664}
+      ;;
+    *)
+      echo "No sel_ldr for ${arch}"
+      exit 1
+  esac
+  cat > ${script_name} <<HERE
+#!/bin/bash
+export NACLLOG=/dev/null
+
+SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
+SEL_LDR=${nacl_sel_ldr}
+IRT=${irt_core}
+
+"\${SEL_LDR}" -a -B "\${IRT}" -- "\${SCRIPT_DIR}/${nexe_name}" "\$@"
+HERE
+  chmod 750 ${script_name}
+  echo "Wrote script $PWD/${script_name}"
+}
 
 FinalizePexe() {
   local pexe=$1

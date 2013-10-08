@@ -26,6 +26,9 @@ RunTests() {
   MAKE_TARGETS=examples
   DefaultBuildStep
   cd examples
+  # TODO(jvoung): PNaCl can't use WriteSelLdrScript --
+  # It should use TranslateAndWriteSelLdrScript instead.
+  # It probably shouldn't use .nexe as the extension either.
   for NEXE in *.nexe; do
     WriteSelLdrScript ${NEXE%.*} ${NEXE}
   done
