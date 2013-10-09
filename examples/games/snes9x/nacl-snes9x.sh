@@ -28,6 +28,9 @@ ConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
 
   CONFIG_FLAGS="--host=nacl \
       --prefix=${NACLPORTS_PREFIX} \
@@ -43,7 +46,7 @@ ConfigureStep() {
       --without-x \
       --enable-sound"
 
-  export LIBS="${LDFLAGS} \
+  export LIBS="${NACLPORTS_LDFLAGS} \
       -lnacl-mounts -lppapi_cpp -lppapi \
       -lpthread -lstdc++"
 

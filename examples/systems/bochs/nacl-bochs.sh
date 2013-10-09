@@ -24,6 +24,9 @@ ConfigureStep() {
   # sdl-config, etc.
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
   export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
 

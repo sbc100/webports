@@ -20,13 +20,16 @@ ConfigureStep() {
   export STRIP=${NACLSTRIP}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
 
   export LIBS="-L${NACLPORTS_LIBDIR} \
       -lm \
       -lpng \
       -lz"
 
-  export LDFLAGS="$LDFLAGS -Wl,--as-needed"
+  export LDFLAGS="$NACLPORTS_LDFLAGS -Wl,--as-needed"
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then
@@ -73,7 +76,7 @@ ConfigureStep() {
   fi
 
   SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1 ${MAYBE_NOSYS}|"
-  SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${LDFLAGS}|"
+  SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${NACLPORTS_LDFLAGS}|"
 
   find . -name Makefile -exec cp {} {}.bak \; \
       -exec sed -i.bak "${SED_PREPEND_LIBS}" {} \; \

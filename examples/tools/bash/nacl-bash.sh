@@ -19,7 +19,7 @@ PatchStep() {
 }
 
 ConfigureStep() {
-  export CFLAGS="${CFLAGS} -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
+  export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
   DefaultConfigureStep
 }
 

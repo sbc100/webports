@@ -10,7 +10,6 @@ source ../../build_tools/common.sh
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 if [ "$NACL_ARCH" = "arm" ]; then
   export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
-  export CFLAGS="${CFLAGS//-O2/}"
 fi
 
 ConfigureStep() {
@@ -22,6 +21,9 @@ ConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
   # Drop /opt/X11/bin (may interfere build on osx).
   export PATH=$(echo $PATH | sed -e 's;/opt/X11/bin;;')
