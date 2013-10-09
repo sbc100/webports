@@ -15,7 +15,7 @@ ConfigureStep() {
       echo "Please install glibc-compat first"
       exit 1
     fi
-    EXTRA_ARGS+=" no-dso -DOPENSSL_NO_SOCK=1 -I${GLIBC_COMPAT}"
+    EXTRA_ARGS+=" no-dso -I${GLIBC_COMPAT}"
   fi
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
