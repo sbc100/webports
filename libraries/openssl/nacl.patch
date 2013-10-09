@@ -1,11 +1,11 @@
-diff -Naur openssl-1.0.0e/crypto/rand/rand_unix.c out/repository-pnacl/openssl-1.0.0e/crypto/rand/rand_unix.c
---- openssl-1.0.0e/crypto/rand/rand_unix.c	2012-09-27 10:56:09.982246777 -0700
-+++ out/repository-pnacl/openssl-1.0.0e/crypto/rand/rand_unix.c	2012-09-27 11:18:00.422612770 -0700
+diff -Naur a_orig_ssl/crypto/rand/rand_unix.c b_new_ssl/crypto/rand/rand_unix.c
+--- a_orig_ssl/crypto/rand/rand_unix.c	2013-10-09 12:18:49.808188808 -0700
++++ b_new_ssl/crypto/rand/rand_unix.c	2013-10-09 12:20:17.090644177 -0700
 @@ -133,7 +133,30 @@
  # define FD_SETSIZE (8*sizeof(fd_set))
  #endif
  
--#ifdef __VOS__
+-#if defined(OPENSSL_SYS_VOS)
 +#if defined(__native_client__)
 +#include <stdlib.h>
 +#include <irt.h>
@@ -29,7 +29,7 @@ diff -Naur openssl-1.0.0e/crypto/rand/rand_unix.c out/repository-pnacl/openssl-1
 +  memset(buf, 0, sizeof(buf));
 +  return 1;
 +}
-+#elif defined(__VOS__)
- int RAND_poll(void)
- {
- 	unsigned char buf[ENTROPY_NEEDED];
++#elif defined(OPENSSL_SYS_VOS)
+ 
+ /* The following algorithm repeatedly samples the real-time clock
+    (RTC) to generate a sequence of unpredictable data.  The algorithm
