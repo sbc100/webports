@@ -24,6 +24,10 @@ RunSelLdrTests() {
 
   export CC=${NACLCC}
   export CXX=${NACLCXX}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export PATH=${NACL_BIN_PATH}:${PATH};
 
   MakeDir test.nacl
   ChangeDir test.nacl
@@ -39,7 +43,7 @@ BuildStep() {
   MakeDir ${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_BUILD_SUBDIR}
   if [ "${NACL_GLIBC}" = "1" ]; then
-    CFLAGS+=" -fPIC"
+    NACLPORTS_CFLAGS+=" -fPIC"
   fi
   local OBJECTS="\
       MountManager.o \
@@ -75,9 +79,9 @@ BuildStep() {
       SocketSubSystem.o \
       BufferMount.o"
   set -x
-  CFLAGS="${CFLAGS} -I${START_DIR}/.. -I${START_DIR}"
-  CXXCMD="${NACLCXX} ${CFLAGS}"
-  CCCMD="${NACLCC} ${CFLAGS}"
+  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -I${START_DIR}/.. -I${START_DIR}"
+  CXXCMD="${NACLCXX} ${NACLPORTS_CFLAGS}"
+  CCCMD="${NACLCC} ${NACLPORTS_CFLAGS}"
   ${CXXCMD} -c ${START_DIR}/net/TcpSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/TcpServerSocket.cc
   ${CXXCMD} -c ${START_DIR}/net/SocketSubSystem.cc
@@ -115,7 +119,7 @@ BuildStep() {
   ${NACLRANLIB} libnacl-mounts.a
 
   if [ "${NACL_GLIBC}" = "1" ]; then
-    ${NACLCXX} ${LDFLAGS} -shared -lppapi_cpp -o libnacl-mounts.so ${OBJECTS}
+    ${NACLCXX} ${NACLPORTS_LDFLAGS} -shared -lppapi_cpp -o libnacl-mounts.so ${OBJECTS}
   fi
 
   set +x

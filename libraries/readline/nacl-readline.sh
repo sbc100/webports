@@ -11,7 +11,7 @@ CONFIG_SUB=support/config.sub
 MAKEFLAGS+=" EXEEXT=.nexe"
 
 if [ "${NACL_GLIBC}" != "1" ]; then
-   CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
    EXTRA_CONFIGURE_ARGS="--disable-shared"
    export LIBS=-lglibc-compat
 fi

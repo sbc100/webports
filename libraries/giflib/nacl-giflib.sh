@@ -56,6 +56,7 @@ BuildStep() {
   # avoid the 'doc' directory which has a dependency on 'xmlto'.
   # If 'xmlto' were added to the host build dependencies this could
   # be removed.
+  export PATH=${NACL_BIN_PATH}:${PATH};
   make -j${OS_JOBS} SUBDIRS="lib util"
 }
 

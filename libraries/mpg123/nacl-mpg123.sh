@@ -15,10 +15,11 @@ if [ "${NACL_GLIBC}" != "1" ]; then
   EXTRA_CONFIGURE_ARGS+=" --enable-network=no"
 fi
 
-export LDFLAGS="${LDFLAGS} -static"
+export NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -static"
 
 BuildStep() {
   Banner "Build ${PACKAGE_NAME}"
+  export PATH=${NACL_BIN_PATH}:${PATH};
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
   echo "Directory: $(pwd)"

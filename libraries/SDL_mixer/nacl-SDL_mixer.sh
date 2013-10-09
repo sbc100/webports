@@ -10,7 +10,7 @@ set -x
 # TODO: Remove when this is fixed.
 # https://code.google.com/p/nativeclient/issues/detail?id=3598
 if [ "$NACL_GLIBC" = "1" ]; then
-  export CFLAGS="${CFLAGS//-O2/}"
+  export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
 fi
 
 ConfigureStep() {
@@ -22,6 +22,9 @@ ConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
   # Adding target usr/bin for libmikmod-config
   export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH};
   export LIBS="-lvorbisfile -lvorbis -logg -lm"

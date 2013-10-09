@@ -159,10 +159,6 @@ if [ -n "${NACL_GOMA:-}" ]; then
   fi
 fi
 
-export CFLAGS=${NACLPORTS_CFLAGS}
-export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-export LDFLAGS=${NACLPORTS_LDFLAGS}
-
 if [ "${NACL_DEBUG}" = "1" ]; then
   NACL_CONFIG=Debug
 else
@@ -744,6 +740,9 @@ DefaultConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
   local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   if [ ! -f "${SRC_DIR}/configure" ]; then
@@ -790,6 +789,7 @@ DefaultBuildStep() {
     echo "MAKEFLAGS=${MAKEFLAGS}"
     export MAKEFLAGS
   fi
+  export PATH=${NACL_BIN_PATH}:${PATH};
   LogExecute make -j${OS_JOBS} ${MAKE_TARGETS:-}
 }
 
@@ -801,6 +801,7 @@ DefaultInstallStep() {
     echo "MAKEFLAGS=${MAKEFLAGS}"
     export MAKEFLAGS
   fi
+  export PATH=${NACL_BIN_PATH}:${PATH};
   LogExecute make ${INSTALL_TARGETS:-install}
 }
 

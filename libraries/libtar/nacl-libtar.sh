@@ -6,8 +6,8 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-export CFLAGS="${CFLAGS} -DMAXPATHLEN=512 -DHAVE_STDARG_H"
-export CFLAGS="${CFLAGS} -Dcompat_makedev\(a,b\)"
+export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -DMAXPATHLEN=512 -DHAVE_STDARG_H"
+export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Dcompat_makedev\(a,b\)"
 export LIBS="-lnosys"
 
 DefaultPackageInstall
