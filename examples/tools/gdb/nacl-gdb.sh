@@ -11,8 +11,9 @@ BuildStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
-  export NACL_CCFLAGS="${NACLPORTS_CFLAGS}"
-  export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig

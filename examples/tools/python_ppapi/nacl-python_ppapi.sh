@@ -16,6 +16,9 @@ BuildStep() {
   export NACLPORTS_PREFIX
   export NACL_PACKAGES_PUBLISH
   export NACL_SRC
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
 
   MakeDir ${OUTBASE}
   if [ "${NACL_GLIBC}" = "1" ]; then
