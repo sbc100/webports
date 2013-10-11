@@ -62,11 +62,12 @@ InstallStep() {
 
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     sed 's/x-nacl/x-pnacl/' \
-        ${START_DIR}/gdb.js > ${ASSEMBLY_DIR}/gdb.js
+        ${TOOLS_DIR}/naclterm.js > ${ASSEMBLY_DIR}/naclterm.js
   else
-    LogExecute cp ${START_DIR}/gdb.js ${ASSEMBLY_DIR}
+    LogExecute cp ${TOOLS_DIR}/naclterm.js ${ASSEMBLY_DIR}
   fi
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/gdb.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

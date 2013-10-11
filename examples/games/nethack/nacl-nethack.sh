@@ -71,17 +71,15 @@ InstallStep() {
       -i ${NASSH}/concat/nassh_deps.concat \
       -o ${ASSEMBLY_DIR}/hterm.concat.js
 
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    sed 's/x-nacl/x-pnacl/' \
-        ${START_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack.js
-  else
-    cp ${START_DIR}/nethack.js ${ASSEMBLY_DIR}
-  fi
+  LogExecute cp ${START_DIR}/nethack.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   LogExecute cp ${NACL_SRC}/build_tools/naclterm.js ${ASSEMBLY_DIR}
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
+    sed -i.bak 's/x-nacl/x-pnacl/g' ${ASSEMBLY_DIR}/naclterm.js
+  fi
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r nethack-3.4.3.zip nethack
   ChangeDir ${PACKAGE_DIR}

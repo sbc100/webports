@@ -35,9 +35,17 @@ endif
 
 $(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),$(CFLAGS))))
 
+# Don't bother with the strip rule under PNaCl
+# Its supposed to be harmless but there is bug in nacl_llvm.mk which
+# is causing the _unstripped.pexe to be shipped.
+# TODO(sbc): remove this condiutional once the SDK bug is fixed.
+ifneq ($(TOOLCHAIN),pnacl)
 ifeq ($(CONFIG),Release)
 $(eval $(call LINK_RULE,$(TARGET)_unstripped,$(SOURCES),$(LIBS),$(DEPS)))
 $(eval $(call STRIP_RULE,$(TARGET),$(TARGET)_unstripped))
+else
+$(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
+endif
 else
 $(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 endif
@@ -53,7 +61,7 @@ install:
 	tar -c -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/luadata.tar lib/lua
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/lua*$(NACL_EXEEXT) $(INSTALL_DIR)
-	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
+	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/lua.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
 	cp lua.js $(INSTALL_DIR)
@@ -63,7 +71,7 @@ install:
 	cp icon_48.png ${INSTALL_DIR}
 	cp icon_128.png ${INSTALL_DIR}
 ifeq ($(TOOLCHAIN),pnacl)
-	sed -i 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/lua.js
+	sed -i 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclterm.js
 endif
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)

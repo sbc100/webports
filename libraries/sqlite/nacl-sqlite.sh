@@ -68,7 +68,7 @@ PackageInstall() {
   LogExecute cp ${START_DIR}/sqlite.js ${PUBLISH_DIR}
   LogExecute cp sqlite.nmf ${PUBLISH_DIR}
   if [ ${NACL_ARCH} = pnacl ]; then
-    sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/sqlite.js
+    sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/naclterm.js
   fi
 }
 
