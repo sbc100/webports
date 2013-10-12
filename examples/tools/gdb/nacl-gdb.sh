@@ -24,7 +24,7 @@ BuildStep() {
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
   cp ${START_DIR}/gdb_pepper.cc ${PACKAGE_DIR}/gdb
-  ./configure --with-curses \
+  ./configure --with-curses --with-expat --with-system-readline \
       --prefix=${NACLPORTS_PREFIX} \
       --exec-prefix=${NACLPORTS_PREFIX} \
       --host=${NACL_CROSS_PREFIX} \

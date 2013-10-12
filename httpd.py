@@ -73,6 +73,12 @@ def KeyValuePair(str, sep='='):
 # A small handler that looks for '?quit=1' query in the path and shuts itself
 # down if it finds that parameter.
 class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+  def do_OPTIONS(self):
+    self.send_response(200, 'OK');
+    self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
+    self.send_header('Access-Control-Allow-Headers', 'target');
+    self.end_headers()
+
   def do_GET(self):
     (_, _, _, query, _) = urlparse.urlsplit(self.path)
     url_params = dict([KeyValuePair(key_value)
@@ -106,6 +112,9 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
 
+  def end_headers(self):
+    self.send_header("Access-Control-Allow-Origin", "*")
+    SimpleHTTPServer.SimpleHTTPRequestHandler.end_headers(self)
 
   def send_partial(self, offset, length):
     """

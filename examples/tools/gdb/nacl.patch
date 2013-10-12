@@ -57,9 +57,18 @@ index a41cff9..80fd380 100644
  # Convenience rule to handle recursion.
  $(LIBGNU) $(GNULIB_H): all-lib
 diff --git a/gdb/tui/tui-io.c b/gdb/tui/tui-io.c
-index 2fb7bb4..58a4d49 100644
+index 2fb7bb4..fa5d63c 100644
 --- a/gdb/tui/tui-io.c
 +++ b/gdb/tui/tui-io.c
+@@ -115,7 +115,7 @@ key_is_command_char (int ch)
+ #ifdef HAVE_PIPE
+ #define TUI_USE_PIPE_FOR_READLINE
+ #endif
+-/* #undef TUI_USE_PIPE_FOR_READLINE */
++#undef TUI_USE_PIPE_FOR_READLINE
+ 
+ /* TUI output files.  */
+ static struct ui_file *tui_stdout;
 @@ -608,7 +608,7 @@ tui_initialize_io (void)
       deprecated_init_ui_hook.  */
    tui_old_uiout = cli_out_new (gdb_stdout);
@@ -68,8 +77,7 @@ index 2fb7bb4..58a4d49 100644
 +#if 0 /* TODO: Put this back in once readline works properly. */
    /* Temporary solution for readline writing to stdout: redirect
       readline output in a pipe, read that pipe and output the content
-      in the curses command window.  */
-diff --git a/config/dfp.m4 b/config/dfp.m4
+      in the curses command window.  */diff --git a/config/dfp.m4 b/config/dfp.m4
 index cc778b1..4cf5dba 100644
 --- a/config/dfp.m4
 +++ b/config/dfp.m4
@@ -138,3 +146,20 @@ index d96a8e5..e7ebcb0 100644
    /* Turn off nonblocking.  */
    ioarg = 0;
    ioctl (scb->fd, FIONBIO, &ioarg);
+diff --git a/gdb/event-loop.c b/gdb/event-loop.c
+index 279335a..781a694 100644
+--- a/gdb/event-loop.c
++++ b/gdb/event-loop.c
+@@ -786,6 +786,12 @@ handle_file_event (event_data data)
+ 		 signal more data to read.  */
+ 	      error_mask = POLLHUP | POLLERR | POLLNVAL;
+ 	      mask = file_ptr->ready_mask & (file_ptr->mask | error_mask);
++              /* TODO(bradnelson): Figure out how to remove this.
++              /* Ignore errors on stdin. */
++              if (file_ptr->fd == 0 && (mask & POLLERR)) {
++                mask &= ~POLLERR;
++                rl_resize_terminal();
++              }
+ 
+ 	      if ((mask & (POLLERR | POLLNVAL)) != 0)
+ 		{

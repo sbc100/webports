@@ -17,7 +17,7 @@
     "storage",
     {"socket": [
       "resolve-host",
-      "tcp-connect:localhost:4014"
+      "tcp-connect"
     ]}
   ]
 }

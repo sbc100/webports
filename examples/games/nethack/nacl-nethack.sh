@@ -63,6 +63,25 @@ InstallStep() {
       -s . \
       -o nethack.nmf
   popd
+  # Create a copy of nethack for debugging.
+  cp ${ASSEMBLY_DIR}/nethack.nmf ${ASSEMBLY_DIR}/nethack_debug.nmf
+  sed 's/nethack\.js/nethack_debug.js/' \
+      ${START_DIR}/nethack.html > ${ASSEMBLY_DIR}/nethack_debug.html
+  sed 's/nethack\.nmf/nethack_debug.nmf/' \
+      ${START_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack_debug.js
+
+  # Copy over source tree as a gdb sample.
+  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
+  local ASSEMBLY_SRC_DIR="${PUBLISH_DIR}/nethack_src"
+  local MANIFEST_PATH="${PUBLISH_DIR}/nethack.manifest"
+  rm -f ${MANIFEST_PATH}
+  rm -rf ${ASSEMBLY_SRC_DIR}
+  cp -r ${PACKAGE_DIR} ${ASSEMBLY_SRC_DIR}
+  pushd ${PUBLISH_DIR}
+  python ${NACL_SDK_ROOT}/tools/genhttpfs.py \
+      -r -o /tmp/nethack_manifest.tmp .
+  cp /tmp/nethack_manifest.tmp ${MANIFEST_PATH}
+  popd
 
   local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
   local LIB_DOT=${CHROMEAPPS}/libdot
