@@ -41,6 +41,8 @@ readonly SHA1CHECK=${TOOLS_DIR}/sha1check.py
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then
   readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}
+elif [ "${NACL_ARCH}" = "emscripten" ]; then
+  readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}
 else
   readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}
 fi
@@ -80,6 +82,11 @@ NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR} ${NACL_LDFLAGS}"
 if [ $NACL_ARCH = "arm" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Wno-psabi"
   NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -Wno-psabi"
+fi
+
+if [ "${NACL_ARCH}" = "emscripten" ]; then
+  NACLPORTS_CFLAGS+=" -Wno-warn-absolute-paths"
+  NACLPORTS_CXXFLAGS+=" -Wno-warn-absolute-paths"
 fi
 
 # configure spec for if MMX/SSE/SSE2/Assembly should be enabled/disabled
@@ -246,6 +253,8 @@ InjectSystemHeaders() {
     local TC_INCLUDES=${NACL_SDK_ROOT}/include/glibc
   elif [ "${NACL_ARCH}" = "pnacl" ]; then
     local TC_INCLUDES=${NACL_SDK_ROOT}/include/pnacl
+  elif [ "${NACL_ARCH}" = "emscripten" ]; then
+    return
   else
     local TC_INCLUDES=${NACL_SDK_ROOT}/include/newlib
   fi
@@ -260,7 +269,8 @@ InjectSystemHeaders() {
 
 
 PatchSpecFile() {
-  if [ ${NACL_ARCH} == "pnacl" -o ${NACL_ARCH} == "arm" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "arm" -o \
+       "${NACL_ARCH}" = "emscripten" ]; then
     # The arm compiler doesn't currently need a patched specs file
     # as it ships with the correct paths.  As does the pnacl toolchain.
     return
@@ -756,7 +766,7 @@ DefaultConfigureStep() {
   echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
-  if [ ${NACL_ARCH} = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
     # The PNaCl tools use "pnacl-" as the prefix, but config.sub
     # does not know about "pnacl".  It only knows about "le32-nacl".
     # Unfortunately, most of the config.subs here are so old that
@@ -820,7 +830,7 @@ TimeCommand() {
 # $1 - Execuatable file (.nexe)
 #
 Validate() {
-  if [ ${NACL_ARCH} = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
       return
   fi
 
@@ -847,7 +857,11 @@ Validate() {
 # variable.
 #
 DefaultValidateStep() {
-  if [ ${NACL_ARCH} != "pnacl" -a -n "${EXECUTABLES:-}" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
+      return
+  fi
+
+  if [ -n "${EXECUTABLES:-}" ]; then
     for nexe in $EXECUTABLES ; do
       Validate $nexe
     done
@@ -860,12 +874,17 @@ DefaultValidateStep() {
 # $1 - Executable (.nexe) name
 #
 RunSelLdrCommand() {
-  if [ $NACL_ARCH = "arm" ]; then
+  if [ "${NACL_ARCH}" = "arm" ]; then
     # no sel_ldr for arm
     return
   fi
 
-  if [ ${NACL_ARCH} = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "emscripten" ]; then
+    # TODO(binji): Make this work using node.js?
+    return
+  fi
+
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
     # For PNaCl we translate to each arch where we have sel_ldr, then run it.
     local PEXE=$1
     local NEXE_32=$1_32.nexe
@@ -899,6 +918,11 @@ RunSelLdrCommand() {
 WriteSelLdrScript() {
   if [ $NACL_ARCH = "arm" ]; then
     # no sel_ldr for arm
+    return
+  fi
+
+  if [ "${NACL_ARCH}" = "emscripten" ]; then
+    # TODO(binji): Make this work using node.js?
     return
   fi
 

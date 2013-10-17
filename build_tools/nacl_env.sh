@@ -28,6 +28,16 @@ if [ -z "${NACL_SDK_ROOT:-}" ]; then
   exit -1
 fi
 
+if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
+  echo "-------------------------------------------------------------------"
+  echo "PEPPERJS_SRC_ROOT is unset."
+  echo "This environment variable needs to be pointed at some version of"
+  echo "the pepper.js repository."
+  echo "NOTE: set this to an absolute path."
+  echo "-------------------------------------------------------------------"
+  exit -1
+fi
+
 # Pick platform directory for compiler.
 readonly OS_NAME=$(uname -s)
 if [ $OS_NAME = "Darwin" ]; then
@@ -51,7 +61,8 @@ export NACL_GLIBC=${NACL_GLIBC:-0}
 
 # Check NACL_ARCH
 if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
-     ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" ]; then
+     ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" -a \
+     ${NACL_ARCH} != "emscripten" ]; then
   echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
   exit -1
 fi
@@ -96,6 +107,8 @@ fi
 # toolchain's "bin" directory. For example: i686-nacl-<toolname>.
 if [ ${NACL_ARCH} = "pnacl" ]; then
   export NACL_CROSS_PREFIX=pnacl
+elif [ ${NACL_ARCH} = "emscripten" ]; then
+  export NACL_CROSS_PREFIX=em
 else
   export NACL_CROSS_PREFIX=${NACL_ARCH}-nacl
 fi
@@ -147,6 +160,38 @@ InitializeNaClGccToolchain() {
   NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Release"
 }
 
+InitializeEmscriptenToolchain() {
+  local TC_ROOT=${NACL_SDK_ROOT}/toolchain
+  local EM_ROOT=${PEPPERJS_SRC_ROOT}/emscripten
+
+  # The PNaCl toolchain moved in pepper_31.  Check for
+  # the existence of the old folder first and use that
+  # if found.
+  if [ -d "${TC_ROOT}/${OS_SUBDIR}_x86_pnacl" ]; then
+    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_x86_pnacl/newlib
+  elif [ -d "${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib" ]; then
+    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib
+  else
+    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl
+  fi
+
+  readonly NACL_TOOLCHAIN_ROOT=${EM_ROOT}
+  readonly NACL_BIN_PATH=${EM_ROOT}
+
+  # export emscripten tools for direct use in patches.
+  export NACLCC=${EM_ROOT}/emcc
+  export NACLCXX=${EM_ROOT}/em++
+  export NACLAR=${EM_ROOT}/emar
+  export NACLRANLIB=${EM_ROOT}/emranlib
+  export NACLLD=${EM_ROOT}/em++
+  export NACLSTRINGS=/bin/true
+  export NACLSTRIP=/bin/true
+  export NACL_EXEEXT=".js"
+  export LLVM=${TC_ROOT}/bin
+
+  NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/emscripten/Release"
+}
+
 
 InitializePNaClToolchain() {
   local TC_ROOT=${NACL_SDK_ROOT}/toolchain
@@ -189,6 +234,8 @@ InitializePNaClToolchain() {
 
 if [ ${NACL_ARCH} = "pnacl" ]; then
   InitializePNaClToolchain
+elif [ ${NACL_ARCH} = "emscripten" ]; then
+  InitializeEmscriptenToolchain
 else
   InitializeNaClGccToolchain
 fi

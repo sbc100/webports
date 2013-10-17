@@ -219,6 +219,11 @@ else
   START_BUILD=echo "@@@BUILD_STEP $(NACL_ARCH) $(NACL_LIBC) $(notdir $*)@@@"
 endif
 
+ifdef CLEAN
+.PHONY: $(PACKAGES:%=$(SENT)/%)
+$(PACKAGES:%=$(SENT)/%):
+	@rm $@
+else
 ifdef PRINT_DEPS
 $(ALL_PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@echo $(subst $(SENT)/,,$@)
@@ -230,6 +235,7 @@ $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./nacl-$(notdir $*).sh; fi
 	mkdir -p $(@D)
 	touch $@
+endif
 endif
 
 # packages with dependencies
