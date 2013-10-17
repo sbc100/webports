@@ -48,8 +48,12 @@ PackageInstall() {
 
   MakeDir ${PUBLISH_DIR}
 
-  LogExecute mv ${EXECUTABLE_DIR}/sqlite3_ppapi${NACL_EXEEXT} \
-                ${PUBLISH_DIR}/sqlite3_ppapi_${NACL_ARCH}${NACL_EXEEXT}
+  local exe=${PUBLISH_DIR}/sqlite3_ppapi_${NACL_ARCH}${NACL_EXEEXT}
+
+  LogExecute mv ${EXECUTABLE_DIR}/sqlite3_ppapi${NACL_EXEEXT} ${exe}
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    LogExecute ${PNACLFINALIZE} ${exe}
+  fi
 
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
@@ -67,6 +71,7 @@ PackageInstall() {
   LogExecute cp ${START_DIR}/index.html ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/sqlite.js ${PUBLISH_DIR}
   LogExecute cp sqlite.nmf ${PUBLISH_DIR}
+  LogExecute cp ${TOOLS_DIR}/naclterm.js ${PUBLISH_DIR}
   if [ ${NACL_ARCH} = pnacl ]; then
     sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/naclterm.js
   fi

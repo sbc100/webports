@@ -59,8 +59,12 @@ InstallStep() {
 
   MakeDir ${PUBLISH_DIR}
 
-  LogExecute mv src/${EXECUTABLE_DIR}/curl_ppapi${NACL_EXEEXT} \
-                ${PUBLISH_DIR}/curl_ppapi_${NACL_ARCH}${NACL_EXEEXT}
+  local exe=${PUBLISH_DIR}/curl_ppapi_${NACL_ARCH}${NACL_EXEEXT}
+
+  LogExecute mv src/${EXECUTABLE_DIR}/curl_ppapi${NACL_EXEEXT} ${exe}
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    LogExecute ${PNACLFINALIZE} ${exe}
+  fi
 
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
