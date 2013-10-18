@@ -38,6 +38,7 @@ int python_main(int argc, char **argv) {
   setenv("USER", "", 1);
   setenv("LOGNAME", "", 1);
 
+  printf("Extracting: %s ...\n", "/mnt/tars/" DATA_FILE);
   TAR* tar;
   int ret = tar_open(&tar, "/mnt/tars/" DATA_FILE, NULL, O_RDONLY, 0, 0);
   assert(ret == 0);
@@ -48,23 +49,7 @@ int python_main(int argc, char **argv) {
   ret = tar_close(tar);
   assert(ret == 0);
 
-  /* Ignore standard args passed via ppapi_simple */
-  int new_argc = 0;
-  char* new_argv[argc];
-  int i;
-  for (i = 0; i < argc; i++) {
-    /* Ignore all args that start with -- other then --help and --version.
-     * These are the only two long arguments that python takes.  We assume
-     * the aothers come from the html embed tag attributed.
-     */
-    if (!strncmp(argv[i], "--", 2)) {
-      if (strcmp(argv[i], "--help") && strcmp(argv[i], "--version"))
-        continue;
-    }
-    new_argv[new_argc++] = argv[i];
-  }
-
-  return Py_Main(new_argc, new_argv);
+  return Py_Main(argc, argv);
 }
 
 PPAPI_SIMPLE_REGISTER_MAIN(python_main)
