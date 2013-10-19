@@ -8,43 +8,19 @@ source ../../../build_tools/common.sh
 
 BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-
-  export NACLPORTS_INCLUDE
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  ChangeDir ${PACKAGE_DIR}
-  cp ${START_DIR}/gdb_pepper.cc ${PACKAGE_DIR}/gdb
-  ./configure --with-curses --with-expat --with-system-readline \
-      --prefix=${NACLPORTS_PREFIX} \
-      --exec-prefix=${NACLPORTS_PREFIX} \
-      --host=${NACL_CROSS_PREFIX} \
-      --libdir=${NACLPORTS_LIBDIR}
   make all
 }
 
 InstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  ChangeDir ${PACKAGE_DIR}
-
   make install
 
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/gdb"
   MakeDir ${ASSEMBLY_DIR}
-  cp ${PACKAGE_DIR}/gdb/gdb.nexe \
+  LogExecute cp gdb/gdb.nexe \
       ${ASSEMBLY_DIR}/gdb_${NACL_ARCH}${NACL_EXEEXT}
-  cp ${START_DIR}/gdb.html ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/gdb.html ${ASSEMBLY_DIR}
   pushd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
@@ -73,11 +49,35 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   LogExecute cp ${NACL_SRC}/build_tools/naclterm.js ${ASSEMBLY_DIR}
-  ChangeDir ${PACKAGE_DIR}
 }
 
 ConfigureStep() {
-  : # No-op
+  # export the nacl tools
+  export CC=${NACLCC}
+  export CXX=${NACLCXX}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export AR=${NACLAR}
+  export RANLIB=${NACLRANLIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export PATH=${NACL_BIN_PATH}:${PATH};
+  export NACLPORTS_INCLUDE
+
+  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
+  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
+  echo "Directory: $(pwd)"
+
+  cp ${START_DIR}/gdb_pepper.cc ${SRC_DIR}/gdb
+  ../configure --with-curses --with-expat --with-system-readline \
+      --prefix=${NACLPORTS_PREFIX} \
+      --exec-prefix=${NACLPORTS_PREFIX} \
+      --host=${NACL_CROSS_PREFIX} \
+      --libdir=${NACLPORTS_LIBDIR}
 }
 
 PackageInstall

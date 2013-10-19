@@ -36,8 +36,7 @@ int gdb_pepper_main(int argc, char* argv[]) {
   printf("cont\n");
   printf("\n");
 
-  const char *argv_gdb[] = {"gdb"};
-  return gdb_nacl_main(1, const_cast<char**>(argv_gdb));
+  return gdb_nacl_main(argc, argv);
 }
 
 PPAPI_SIMPLE_REGISTER_MAIN(gdb_pepper_main)

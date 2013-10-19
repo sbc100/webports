@@ -53,18 +53,18 @@ InstallStep() {
   cp ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack \
       ${ASSEMBLY_DIR}/nethack_${NACL_ARCH}${NACL_EXEEXT}
   ChangeDir ${PACKAGE_DIR}/out/games
-  rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
-  tar cf ${ASSEMBLY_DIR}/nethack.tar lib
-  cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
+  LogExecute rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
+  LogExecute tar cf ${ASSEMBLY_DIR}/nethack.tar lib
+  LogExecute cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
   pushd ${ASSEMBLY_DIR}
-  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       nethack_*${NACL_EXEEXT} \
       -s . \
       -o nethack.nmf
   popd
   # Create a copy of nethack for debugging.
-  cp ${ASSEMBLY_DIR}/nethack.nmf ${ASSEMBLY_DIR}/nethack_debug.nmf
+  LogExecute cp ${ASSEMBLY_DIR}/nethack.nmf ${ASSEMBLY_DIR}/nethack_debug.nmf
   sed 's/nethack\.js/nethack_debug.js/' \
       ${START_DIR}/nethack.html > ${ASSEMBLY_DIR}/nethack_debug.html
   sed 's/nethack\.nmf/nethack_debug.nmf/' \
@@ -74,13 +74,13 @@ InstallStep() {
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   local ASSEMBLY_SRC_DIR="${PUBLISH_DIR}/nethack_src"
   local MANIFEST_PATH="${PUBLISH_DIR}/nethack.manifest"
-  rm -f ${MANIFEST_PATH}
-  rm -rf ${ASSEMBLY_SRC_DIR}
-  cp -r ${PACKAGE_DIR} ${ASSEMBLY_SRC_DIR}
+  LogExecute rm -f ${MANIFEST_PATH}
+  LogExecute rm -rf ${ASSEMBLY_SRC_DIR}
+  LogExecute cp -r ${PACKAGE_DIR} ${ASSEMBLY_SRC_DIR}
   pushd ${PUBLISH_DIR}
-  python ${NACL_SDK_ROOT}/tools/genhttpfs.py \
+  LogExecute python ${NACL_SDK_ROOT}/tools/genhttpfs.py \
       -r -o /tmp/nethack_manifest.tmp .
-  cp /tmp/nethack_manifest.tmp ${MANIFEST_PATH}
+  LogExecute cp /tmp/nethack_manifest.tmp ${MANIFEST_PATH}
   popd
 
   local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
