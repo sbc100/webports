@@ -15,76 +15,100 @@ CalculatePackageShards()
 {
   local ALL_PACKAGES=$(make -s package_list)
 
+  # These lists should be topologically sorted by dependency; i.e., each
+  # package should only depend on the packages before it in the list.
   PKG_LIST_PART_0="
-    libraries/glibc-compat
-    libraries/ncurses
-    libraries/readline
-    libraries/gsl
-    libraries/faac
-    libraries/openssl
-    libraries/jsoncpp
-    libraries/lua
-    libraries/fftw
-    libraries/libtommath
-    libraries/libtomcrypt
-    libraries/x264
-    libraries/protobuf
-    libraries/gc
-    libraries/cfitsio
-    libraries/libmodplug
-    libraries/faad2
-    libraries/Mesa
-    libraries/box2d
-    libraries/nacl-mounts
-    libraries/zlib
-    libraries/ncurses
-    libraries/libtar
-    examples/games/nethack
+    bzip2
+    zlib
+    boost
+    glibc-compat
+    openssl
+    libogg
+    libvorbis
+    lame
+    libav
+    OpenSceneGraph
+    ncurses
+    readline
+    sqlite
+    FreeImage
+    fftw
+    curl
+    flac
+    tiff
+    openal-soft
+    mpg123
+    jpeg
+    libpng
+    libmng
+    lcms
+    DevIL
+    cfitsio
+    faad2
+    speex
+    webp
+    libhangul
+    faac
+    gc
+    jsoncpp
+    freealut
+    tinyxml
+    openal-ogg
+    thttpd
+    dreadthread
   "
 
   PKG_LIST_PART_1="
-    libraries/glibc-compat
-    libraries/libmikmod
-    libraries/zlib
-    libraries/libpng
-    libraries/libmng
-    libraries/freetype
-    libraries/nacl-mounts
-    libraries/Regal
-    libraries/SDL
-    libraries/SDL_image
-    libraries/SDL_ttf
-    libraries/SDL_net
-    libraries/SDL_mixer
-    libraries/libogg
-    libraries/libvorbis
-    libraries/speex
-    libraries/flac
-    libraries/lame
-    libraries/libtheora
-    libraries/ffmpeg
-    libraries/jpeg
-    libraries/tiff
-    libraries/webp
-    libraries/lcms
-    libraries/DevIL
-    libraries/libtar
-    examples/games/scummvm
-    examples/games/snes9x
-    examples/systems/dosbox
-    examples/systems/bochs
+    zlib
+    libpng
+    Regal
+    glibc-compat
+    ncurses
+    readline
+    ruby
+    python
+    glib
+    libtar
+    nethack
+    SDL
+    nacl-mounts
+    dosbox
+    libogg
+    libvorbis
+    scummvm
+    vim
+    protobuf
+    libmikmod
+    freetype
+    SDL_ttf
+    SDL_mixer
+    metakit
+    expat
+    drod
+    bochs
+    xaos
+    nano
+    python_ppapi
+    x264
+    agg
+    libtomcrypt
+    ruby_ppapi
+    SDL_net
+    jpeg
+    SDL_image
+    snes9x
   "
 
   if [ -n "${TEST_BUILDBOT:-}" ]; then
     # In testing mode just build small set of packages.
     PKG_LIST_PART_0="
-      libraries/glibc-compat
-      libraries/ncurses
-      libraries/readline
-      libraries/libtar
-      libraries/zlib
-      libraries/lua
-      examples/tools/lua_ppapi
+      glibc-compat
+      ncurses
+      readline
+      libtar
+      zlib
+      lua
+      lua_ppapi
     "
   fi
 

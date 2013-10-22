@@ -136,8 +136,8 @@ LIBRARIES = \
      libraries/protobuf \
      libraries/python \
      libraries/readline \
-     libraries/ruby \
      libraries/Regal \
+     libraries/ruby \
      libraries/SDL \
      libraries/SDL_image \
      libraries/SDL_mixer \
@@ -232,7 +232,7 @@ $(PACKAGES:%=$(SENT)/%):
 else
 ifdef PRINT_DEPS
 $(ALL_PACKAGES:%=$(SENT)/%): $(SENT)/%:
-	@echo $(subst $(SENT)/,,$@)
+	@echo $(notdir $(subst $(SENT)/,,$@))
 else
 $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
@@ -326,71 +326,71 @@ box2d: libraries/box2d ;
 bullet: libraries/bullet ;
 bzip2: libraries/bzip2 ;
 cairo: libraries/cairo ;
-curl: libraries/curl ;
 cfitsio: libraries/cfitsio ;
+curl: libraries/curl ;
 DevIL: libraries/DevIL ;
+dreadthread: libraries/dreadthread ;
 expat: libraries/expat ;
 faac: libraries/faac ;
-faad: libraries/faad2 ;
+faad faad2: libraries/faad2 ;
 ffmpeg: libraries/ffmpeg ;
 fftw: libraries/fftw ;
 flac: libraries/flac ;
 fontconfig: libraries/fontconfig ;
 freealut: libraries/freealut ;
-freeimage: libraries/FreeImage ;
+freeimage FreeImage: libraries/FreeImage ;
 freetype: libraries/freetype ;
 gc: libraries/gc ;
-gif: libraries/giflib ;
+gif giflib: libraries/giflib ;
 glib: libraries/glib ;
 glibc-compat: libraries/glibc-compat ;
 gsl: libraries/gsl ;
-hangul: libraries/libhangul ;
-imagemagick: libraries/ImageMagick ;
+hangul libhangul: libraries/libhangul ;
+imagemagick ImageMagick: libraries/ImageMagick ;
 jpeg: libraries/jpeg ;
 jsoncpp: libraries/jsoncpp ;
 lame: libraries/lame ;
 lcms: libraries/lcms ;
 libav: libraries/libav ;
 lua: libraries/lua ;
-mesa: libraries/Mesa ;
-mesagl: examples/graphics/mesagl ;
+mesa Mesa: libraries/Mesa ;
 metakit: libraries/metakit ;
-mikmod: libraries/libmikmod ;
-mng: libraries/libmng ;
-modplug: libraries/libmodplug ;
+mikmod libmikmod: libraries/libmikmod ;
+mng libmng: libraries/libmng ;
+modplug libmodplug: libraries/libmodplug ;
 mpg123: libraries/mpg123 ;
 nacl-mounts: libraries/nacl-mounts ;
 ncurses: libraries/ncurses ;
-ogg: libraries/libogg ;
-openal: libraries/openal-soft ;
-openscenegraph: libraries/OpenSceneGraph ;
+ogg libogg: libraries/libogg ;
+openal openal-soft: libraries/openal-soft ;
+openscenegraph OpenSceneGraph: libraries/OpenSceneGraph ;
 openssl: libraries/openssl ;
 pango: libraries/pango ;
 physfs: libraries/physfs ;
 pixman: libraries/pixman ;
-png: libraries/libpng ;
+png libpng: libraries/libpng ;
 protobuf: libraries/protobuf ;
 python: libraries/python ;
 readline: libraries/readline ;
-regal: libraries/Regal ;
+regal Regal: libraries/Regal ;
 ruby: libraries/ruby ;
-sdl: libraries/SDL ;
-sdl_image: libraries/SDL_image ;
-sdl_mixer: libraries/SDL_mixer ;
-sdl_net: libraries/SDL_net ;
-sdl_ttf: libraries/SDL_ttf ;
+sdl SDL: libraries/SDL ;
+sdl_image SDL_image: libraries/SDL_image ;
+sdl_mixer SDL_mixer: libraries/SDL_mixer ;
+sdl_net SDL_net: libraries/SDL_net ;
+sdl_ttf SDL_ttf: libraries/SDL_ttf ;
 speex: libraries/speex ;
-tar: libraries/libtar ;
 sqlite: libraries/sqlite ;
-theora: libraries/libtheora ;
+tar libtar: libraries/libtar ;
+theora libtheora: libraries/libtheora ;
 tiff: libraries/tiff ;
 tinyxml: libraries/tinyxml ;
-tomcrypt: libraries/libtomcrypt ;
-tommath: libraries/libtommath ;
-vorbis: libraries/libvorbis ;
+tomcrypt libtomcrypt: libraries/libtomcrypt ;
+tommath libtommath: libraries/libtommath ;
+vorbis libvorbis: libraries/libvorbis ;
 webp: libraries/webp ;
 x264: libraries/x264 ;
-xml2: libraries/libxml2 ;
+xml2 libxml2: libraries/libxml2 ;
 yajl: libraries/yajl ;
 zlib: libraries/zlib ;
 
@@ -401,6 +401,7 @@ dosbox: examples/systems/dosbox ;
 drod: examples/games/drod ;
 gdb: examples/tools/gdb ;
 git: examples/tools/git ;
+mesagl: examples/graphics/mesagl ;
 nano: examples/editors/nano ;
 nethack: examples/games/nethack ;
 openal-ogg: examples/audio/openal-ogg ;
