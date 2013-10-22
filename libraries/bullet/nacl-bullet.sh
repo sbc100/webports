@@ -6,35 +6,30 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-# MAKEFLAGS=VERBOSE=1
-
 RunSelLdrTests() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   pushd UnitTests/BulletUnitTests
-  RunSelLdrCommand AppBulletUnitTests
+  RunSelLdrCommand AppBulletUnitTests${NACL_EXEEXT}
   popd
 
   pushd Demos/HelloWorld
-  RunSelLdrCommand AppHelloWorld
+  RunSelLdrCommand AppHelloWorld${NACL_EXEEXT}
   popd
 }
 
 
-ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
+AutogenStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
-  echo "Directory: $(pwd)"
+  # Remove \r\n from the shell script.
+  sed -i.bak "s/\r$//" ./autogen.sh
+  /bin/sh ./autogen.sh
+  PatchConfigure
+  PatchConfigSub
+}
 
-  CC="${NACLCC}" CXX="${NACLCXX}" cmake .. \
-           -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
-           -DNACLAR=${NACLAR} \
-           -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
-           -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
-           -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX} \
-           -DBUILD_UNIT_TESTS=on
+ConfigureStep() {
+  AutogenStep
+  DefaultConfigureStep
 }
 
 PackageInstall() {
