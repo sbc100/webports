@@ -914,7 +914,7 @@ RunSelLdrCommand() {
 # $2 - Nexe name
 #
 WriteSelLdrScript() {
-  if [ "${SKIP_SEL_LDR_TESTS}" ]; then
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
   fi
 
