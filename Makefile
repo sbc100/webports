@@ -118,6 +118,7 @@ LIBRARIES = \
      libraries/libvorbis \
      libraries/libxml2 \
      libraries/lua \
+     libraries/metakit \
      libraries/Mesa \
      libraries/mpg123 \
      libraries/nacl-mounts \
@@ -148,22 +149,23 @@ LIBRARIES = \
      libraries/zlib
 
 EXAMPLES = \
-     examples/tools/bash \
+     examples/audio/openal-ogg \
      examples/editors/nano \
      examples/editors/vim \
+     examples/games/drod \
+     examples/games/nethack \
      examples/games/scummvm \
-     examples/systems/bochs \
-     examples/systems/dosbox \
+     examples/games/snes9x \
      examples/graphics/mesagl \
      examples/graphics/xaos \
-     examples/games/nethack \
+     examples/systems/bochs \
+     examples/systems/dosbox \
+     examples/tools/bash \
      examples/tools/gdb \
      examples/tools/lua_ppapi \
      examples/tools/python_ppapi \
      examples/tools/ruby_ppapi \
-     examples/tools/thttpd \
-     examples/games/snes9x \
-     examples/audio/openal-ogg
+     examples/tools/thttpd
 
 ALL_PACKAGES := $(LIBRARIES) $(EXAMPLES)
 PACKAGES := $(LIBRARIES) $(EXAMPLES)
@@ -276,6 +278,9 @@ $(SENT)/examples/systems/dosbox: \
     libraries/nacl-mounts libraries/SDL libraries/zlib \
     libraries/libpng
 $(SENT)/examples/games/snes9x: libraries/nacl-mounts
+$(SENT)/examples/games/drod: libraries/SDL libraries/SDL_mixer \
+    libraries/SDL_ttf libraries/zlib libraries/metakit libraries/libtar \
+    libraries/expat
 $(SENT)/examples/graphics/mesagl: libraries/Mesa
 $(SENT)/libraries/glib: libraries/zlib
 $(SENT)/libraries/pango: libraries/glib libraries/cairo
@@ -327,6 +332,7 @@ ffmpeg: libraries/ffmpeg ;
 fftw: libraries/fftw ;
 flac: libraries/flac ;
 fontconfig: libraries/fontconfig ;
+freealut: libraries/freealut ;
 freeimage: libraries/FreeImage ;
 freetype: libraries/freetype ;
 gc: libraries/gc ;
@@ -344,24 +350,26 @@ libav: libraries/libav ;
 lua: libraries/lua ;
 mesa: libraries/Mesa ;
 mesagl: examples/graphics/mesagl ;
+metakit: libraries/metakit ;
 mikmod: libraries/libmikmod ;
 mng: libraries/libmng ;
 modplug: libraries/libmodplug ;
 mpg123: libraries/mpg123 ;
 nacl-mounts: libraries/nacl-mounts ;
+ncurses: libraries/ncurses ;
 ogg: libraries/libogg ;
 openal: libraries/openal-soft ;
-freealut: libraries/freealut ;
 openscenegraph: libraries/OpenSceneGraph ;
 openssl: libraries/openssl ;
 pango: libraries/pango ;
 physfs: libraries/physfs ;
 pixman: libraries/pixman ;
 png: libraries/libpng ;
-python: libraries/python ;
-ruby: libraries/ruby ;
-webp: libraries/webp ;
 protobuf: libraries/protobuf ;
+python: libraries/python ;
+readline: libraries/readline ;
+regal: libraries/Regal ;
+ruby: libraries/ruby ;
 sdl: libraries/SDL ;
 sdl_image: libraries/SDL_image ;
 sdl_mixer: libraries/SDL_mixer ;
@@ -372,22 +380,21 @@ tar: libraries/libtar ;
 sqlite: libraries/sqlite ;
 theora: libraries/libtheora ;
 tiff: libraries/tiff ;
-readline: libraries/readline ;
-regal: libraries/Regal ;
 tinyxml: libraries/tinyxml ;
 tomcrypt: libraries/libtomcrypt ;
 tommath: libraries/libtommath ;
 vorbis: libraries/libvorbis ;
+webp: libraries/webp ;
 x264: libraries/x264 ;
 xml2: libraries/libxml2 ;
 yajl: libraries/yajl ;
 zlib: libraries/zlib ;
-ncurses: libraries/ncurses ;
 
 # shortcuts examples (alphabetical)
 bash: examples/tools/bash ;
 bochs: examples/systems/bochs ;
 dosbox: examples/systems/dosbox ;
+drod: examples/games/drod ;
 gdb: examples/tools/gdb ;
 git: examples/tools/git ;
 nano: examples/editors/nano ;

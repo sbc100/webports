@@ -27,6 +27,7 @@ readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
 readonly NACL_SRC=$(dirname ${TOOLS_DIR})
 readonly NACL_PACKAGES=${NACL_SRC}
 readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
+NACL_DEBUG=${NACL_DEBUG:-0}
 
 . ${TOOLS_DIR}/nacl_env.sh
 
@@ -98,7 +99,6 @@ else
   readonly NACL_OPTION="disable"
 fi
 
-NACL_DEBUG=${NACL_DEBUG:-0}
 if [ ${NACL_DEBUG} = "1" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -g -O0"
   NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -g -O0"
@@ -755,7 +755,7 @@ DefaultConfigureStep() {
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
   local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  if [ ! -f "${SRC_DIR}/configure" ]; then
+  if [ ! -f "${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}" ]; then
     echo "No configure script found"
     return
   fi
