@@ -263,7 +263,7 @@ $(SENT)/examples/games/nethack: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/bash: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
-$(SENT)/examples/tools/thttpd: libraries/nacl-mounts libraries/jsoncpp
+$(SENT)/examples/tools/thttpd: libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
 $(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
 $(SENT)/examples/tools/ruby_ppapi: \

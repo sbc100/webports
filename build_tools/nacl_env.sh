@@ -157,7 +157,11 @@ InitializeNaClGccToolchain() {
     done
   fi
 
-  NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Release"
+  if [ "${NACL_DEBUG:-}" = "1" ]; then
+    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Debug"
+  else
+    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Release"
+  fi
 }
 
 InitializeEmscriptenToolchain() {
@@ -189,7 +193,11 @@ InitializeEmscriptenToolchain() {
   export NACL_EXEEXT=".js"
   export LLVM=${TC_ROOT}/bin
 
-  NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/emscripten/Release"
+  if [ "${NACL_DEBUG:-}" = "1" ]; then
+    NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/emscripten/Debug"
+  else
+    NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/emscripten/Release"
+  fi
 }
 
 
@@ -229,7 +237,11 @@ InitializePNaClToolchain() {
   export NACLSTRINGS="$(which strings)"
   export NACL_EXEEXT=".pexe"
 
-  NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Release"
+  if [ "${NACL_DEBUG:-}" = "1" ]; then
+    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Debug"
+  else
+    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Release"
+  fi
 }
 
 if [ ${NACL_ARCH} = "pnacl" ]; then

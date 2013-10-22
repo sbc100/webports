@@ -33,15 +33,12 @@ function handleMessage(message_event) {
     return
   }
 
-  if (is_array(data) && data[0] == "ReadDirectory") {
-    console.log("calling pepper helper")
-    HandlePepperMountMessage(data)
-  } else if (data.result && data.type == "network error") {
+  if (data.result && data.type == "network error") {
     $("#status_field").html("Failure")
     $("#log").html("Network initialization error. Please supply the following "
     + "flags to chrome: --enable-nacl --allow-nacl-socket-api=localhost")
   } else {
-    // unknown message
+    $("#log").html("<pre>" + message_event.data + "</pre>")
   }
 }
 
@@ -64,7 +61,6 @@ function handleFileSelect(evt) {
     uploadFile(file)
   }
 }
-
 
 function toArray(list) {
   return Array.prototype.slice.call(list || [], 0);

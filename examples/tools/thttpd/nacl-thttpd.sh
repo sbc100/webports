@@ -11,14 +11,10 @@ ConfigureStep() {
 
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
-  FILES="jsdirectoryreader.cpp
-jsdirectoryreader.h
+  FILES="
 my_syslog.h
-mythread.cpp
-mythread.h
 nacl_module.cpp
 nacl_module.h
-shelljob.h
 syslog.cpp
 Makefile"
   for FILE in $FILES; do
@@ -61,7 +57,6 @@ InstallStep() {
       -o thttpd.nmf -s . \
       thttpd_*${NACL_EXEEXT}"
 
-  ChangeDir ${PACKAGE_DIR}
   LogExecute $CMD
 }
 
