@@ -46,8 +46,7 @@ RunExample() {
 }
 
 TestStep() {
-  if [ $NACL_ARCH = "arm" ]; then
-    # no sel_ldr for arm
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
   fi
 

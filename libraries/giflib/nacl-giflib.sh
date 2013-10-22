@@ -21,8 +21,7 @@ RunTest() {
 }
 
 TestStep() {
-  if [ ${NACL_ARCH} = "arm" ]; then
-    # no sel_ldr for arm
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
   fi
 
@@ -31,7 +30,7 @@ TestStep() {
     return
   fi
 
-  if [ $NACL_ARCH = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
     local pexe=rgb2gif${NACL_EXEEXT}
     (cd util;
      TranslateAndWriteSelLdrScript ${pexe} x86-32 rgb2gif.x86-32.nexe rgb2gif)

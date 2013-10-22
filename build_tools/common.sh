@@ -187,7 +187,6 @@ else
   NACL_CREATE_NMF_FLAGS=""
 fi
 
-
 # PACKAGE_DIR (the folder contained within that archive) defaults to
 # the PACKAGE_NAME.  Packages with non-standard contents can override
 # this before including common.sh
@@ -198,6 +197,12 @@ if [ "${NACL_ARCH}" = "pnacl" ]; then
   PUBLISH_DIR+=/pnacl
 else
   PUBLISH_DIR+=/${NACL_LIBC}
+fi
+
+if [ "${NACL_ARCH}" != "pnacl" -a -z "${NACL_SEL_LDR:-}" ]; then
+  SKIP_SEL_LDR_TESTS=1
+else
+  SKIP_SEL_LDR_TESTS=0
 fi
 
 
@@ -868,19 +873,12 @@ DefaultValidateStep() {
   fi
 }
 
-
 #
 # Run an executable with under sel_ldr.
 # $1 - Executable (.nexe) name
 #
 RunSelLdrCommand() {
-  if [ "${NACL_ARCH}" = "arm" ]; then
-    # no sel_ldr for arm
-    return
-  fi
-
-  if [ "${NACL_ARCH}" = "emscripten" ]; then
-    # TODO(binji): Make this work using node.js?
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
   fi
 
@@ -916,19 +914,8 @@ RunSelLdrCommand() {
 # $2 - Nexe name
 #
 WriteSelLdrScript() {
-  if [ $NACL_ARCH = "arm" ]; then
-    # no sel_ldr for arm
+  if [ "${SKIP_SEL_LDR_TESTS}" ]; then
     return
-  fi
-
-  if [ "${NACL_ARCH}" = "emscripten" ]; then
-    # TODO(binji): Make this work using node.js?
-    return
-  fi
-
-  if [ ! -e ${NACL_IRT} ]; then
-    echo "ERROR: Missing IRT binary. Not running sel_ldr-based tests."
-    exit 1
   fi
 
   if [ $NACL_GLIBC = "1" ]; then

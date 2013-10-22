@@ -30,7 +30,11 @@ ifeq ($(OS_SUBDIR), UNKNOWN)
 endif
 
 ifndef NACL_ARCH
+ifeq ($(OS_NAME), Darwin)
+   NACL_ARCH := i686
+else
    NACL_ARCH := x86_64
+endif
 endif
 
 ifndef NACL_SDK_ROOT

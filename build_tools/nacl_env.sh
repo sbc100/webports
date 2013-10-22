@@ -54,7 +54,14 @@ if [ "${NACL_PACKAGES_BITSIZE:-}" = "64" ]; then
 elif [ "${NACL_PACKAGES_BITSIZE:-}" = "pnacl" ]; then
   export NACL_ARCH=${NACL_ARCH:-"pnacl"}
 else
-  export NACL_ARCH=${NACL_ARCH:-"x86_64"}
+  # On mac we default ot i686 rather than x86_64 since
+  # since there is no x86_64 chrome yet and its nice for
+  # the default binaries to run on the host machine.
+  if [ "${OS_NAME}" = "Darwin" ]; then
+    export NACL_ARCH=${NACL_ARCH:-"i686"}
+  else
+    export NACL_ARCH=${NACL_ARCH:-"x86_64"}
+  fi
 fi
 
 export NACL_GLIBC=${NACL_GLIBC:-0}
@@ -98,7 +105,8 @@ elif [ ${NACL_ARCH} = "pnacl" ]; then
   readonly NACL_IRT_X8632=${NACL_SDK_ROOT}/tools/irt_core_x86_32.nexe
   readonly NACL_SEL_LDR_X8664=${NACL_SDK_ROOT}/tools/sel_ldr_x86_64
   readonly NACL_IRT_X8664=${NACL_SDK_ROOT}/tools/irt_core_x86_64.nexe
-elif [ ${NACL_ARCH} != "arm" ]; then
+elif [ ${NACL_ARCH} = "x86_64" -a ${OS_NAME} != "Darwin" ]; then
+  # No 64-bit sel_ldr on darwin today.
   readonly NACL_SEL_LDR=${NACL_SDK_ROOT}/tools/sel_ldr_x86_64
   readonly NACL_IRT=${NACL_SDK_ROOT}/tools/irt_core_x86_64.nexe
 fi
@@ -257,7 +265,7 @@ NACL_CFLAGS="-I${NACL_SDK_ROOT}/include"
 NACL_CXXFLAGS="-I${NACL_SDK_ROOT}/include"
 
 if [ $# -gt 0 ]; then
-  if [ "$1" == '--print' ]; then
+  if [ "$1" = '--print' ]; then
     echo "export CC=${NACLCC}"
     echo "export CXX=${NACLCXX}"
     echo "export AR=${NACLAR}"

@@ -7,11 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 RunSelLdrTests() {
-  # We need an explicit test here for ARM: WriteSelLdrScript won't write a
-  # script, but run_tests.sh will still try to run it.
-
-  if [ $NACL_ARCH = "arm" ]; then
-    echo "Not running sel_ldr tests on ARM."
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
   fi
 
