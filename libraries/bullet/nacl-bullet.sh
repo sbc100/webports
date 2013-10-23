@@ -8,11 +8,18 @@ source ../../build_tools/common.sh
 
 RunSelLdrTests() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  pushd UnitTests/BulletUnitTests
+
+  if [ "${NACL_GLIBC}" = "1" ]; then
+    local exe_dir=.libs
+  else
+    local exe_dir=
+  fi
+
+  pushd UnitTests/BulletUnitTests/${exe_dir}
   RunSelLdrCommand AppBulletUnitTests${NACL_EXEEXT}
   popd
 
-  pushd Demos/HelloWorld
+  pushd Demos/HelloWorld/${exe_dir}
   RunSelLdrCommand AppHelloWorld${NACL_EXEEXT}
   popd
 }

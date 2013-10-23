@@ -192,7 +192,7 @@ SDK_LIBS += vorbis webp xml2 zlib
 sdklibs: $(SDK_LIBS)
 
 package_list:
-	@echo $(ALL_PACKAGES)
+	@echo $(notdir $(ALL_PACKAGES))
 
 sdklibs_list:
 	@echo $(SDK_LIBS)
