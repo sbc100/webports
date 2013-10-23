@@ -78,6 +78,14 @@ ConfigureStep() {
       --exec-prefix=${NACLPORTS_PREFIX} \
       --host=${NACL_CROSS_PREFIX} \
       --libdir=${NACLPORTS_LIBDIR}
+
+  # If the .info files don't exist, "make all" will try to recreate it with the
+  # "makeinfo" tool, which isn't normally installed.
+  # Just copy the ones from the repo to the build directory.
+  mkdir -p ${BUILD_DIR}/{gdb,bfd}/doc
+  pushd ${SRC_DIR}
+  find gdb bfd -name '*.info' -exec cp {} ${BUILD_DIR}/{} \;
+  popd
 }
 
 PackageInstall
