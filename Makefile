@@ -165,6 +165,7 @@ EXAMPLES = \
      examples/systems/bochs \
      examples/systems/dosbox \
      examples/tools/bash \
+     examples/tools/civetweb \
      examples/tools/gdb \
      examples/tools/mongoose \
      examples/tools/lua_ppapi \
@@ -398,6 +399,7 @@ zlib: libraries/zlib ;
 # shortcuts examples (alphabetical)
 bash: examples/tools/bash ;
 bochs: examples/systems/bochs ;
+civetweb: examples/tools/civetweb ;
 dosbox: examples/systems/dosbox ;
 drod: examples/games/drod ;
 gdb: examples/tools/gdb ;
