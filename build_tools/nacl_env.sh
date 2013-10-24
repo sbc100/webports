@@ -28,16 +28,6 @@ if [ -z "${NACL_SDK_ROOT:-}" ]; then
   exit -1
 fi
 
-if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
-  echo "-------------------------------------------------------------------"
-  echo "PEPPERJS_SRC_ROOT is unset."
-  echo "This environment variable needs to be pointed at some version of"
-  echo "the pepper.js repository."
-  echo "NOTE: set this to an absolute path."
-  echo "-------------------------------------------------------------------"
-  exit -1
-fi
-
 # Pick platform directory for compiler.
 readonly OS_NAME=$(uname -s)
 if [ $OS_NAME = "Darwin" ]; then
@@ -62,6 +52,16 @@ else
   else
     export NACL_ARCH=${NACL_ARCH:-"x86_64"}
   fi
+fi
+
+if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
+  echo "-------------------------------------------------------------------"
+  echo "PEPPERJS_SRC_ROOT is unset."
+  echo "This environment variable needs to be pointed at some version of"
+  echo "the pepper.js repository."
+  echo "NOTE: set this to an absolute path."
+  echo "-------------------------------------------------------------------"
+  exit -1
 fi
 
 export NACL_GLIBC=${NACL_GLIBC:-0}

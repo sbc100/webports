@@ -166,6 +166,7 @@ EXAMPLES = \
      examples/systems/dosbox \
      examples/tools/bash \
      examples/tools/gdb \
+     examples/tools/mongoose \
      examples/tools/lua_ppapi \
      examples/tools/python_ppapi \
      examples/tools/ruby_ppapi \
@@ -402,6 +403,7 @@ drod: examples/games/drod ;
 gdb: examples/tools/gdb ;
 git: examples/tools/git ;
 mesagl: examples/graphics/mesagl ;
+mongoose: examples/tools/mongoose ;
 nano: examples/editors/nano ;
 nethack: examples/games/nethack ;
 openal-ogg: examples/audio/openal-ogg ;
