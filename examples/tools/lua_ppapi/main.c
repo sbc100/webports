@@ -18,8 +18,6 @@ int lua_main(int argc, char **argv);
 int lua_ppapi_main(int argc, char **argv) {
   umount("/");
   mount("foo", "/", "memfs", 0, NULL);
-  mount("./", "/mnt/tars", "httpfs", 0, NULL);
-
   mkdir("/home", 0777);
 
   /* Setup home directory to a known location. */
@@ -28,15 +26,32 @@ int lua_ppapi_main(int argc, char **argv) {
   setenv("USER", "", 1);
   setenv("LOGNAME", "", 1);
 
-  TAR* tar;
-  int ret = tar_open(&tar, "/mnt/tars/luadata.tar", NULL, O_RDONLY, 0, 0);
-  assert(ret == 0);
+  const char* data_url = getenv("LUA_DATA_URL");
+  if (!data_url)
+    data_url = "./";
 
-  ret = tar_extract_all(tar, "/");
-  assert(ret == 0);
+  mount(data_url, "/mnt/http", "httpfs", 0,
+       "allow_cross_origin_requests=true,allow_credentials=false");
 
-  ret = tar_close(tar);
-  assert(ret == 0);
+  struct stat buf;
+  if (stat("/mnt/http/luadata.tar", &buf) == 0) {
+    printf("Extracting luadata.tar\n");
+    TAR* tar;
+    int ret = tar_open(&tar, "/mnt/http/luadata.tar", NULL, O_RDONLY, 0, 0);
+    if (ret) {
+      printf("Error opening luadata.tar\n");
+      return 1;
+    }
+
+    ret = tar_extract_all(tar, "/");
+    if (ret) {
+      printf("Error extracting luadata.tar\n");
+      return 1;
+    }
+
+    ret = tar_close(tar);
+    assert(ret == 0);
+  }
 
   return lua_main(argc, argv);
 }
