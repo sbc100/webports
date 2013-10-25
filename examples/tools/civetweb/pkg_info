@@ -1,4 +1,3 @@
 PACKAGE_NAME=civetweb-1.5
 URL=http://downloads.sourceforge.net/project/civetweb/1.5/civetweb-1.5.tar.gz
 LICENSE=MIT
-LIBC=glibc

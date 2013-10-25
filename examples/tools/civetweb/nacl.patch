@@ -1,3 +1,48 @@
+diff --git a/Makefile b/Makefile
+index 133a1ef..ecd1e27 100644
+--- a/Makefile
++++ b/Makefile
+@@ -9,8 +9,8 @@
+ 
+ include resources/Makefile.in-os
+ 
+-CPROG = civetweb
+ #CXXPROG = civetweb
++CPROG = civetweb
+ 
+ BUILD_DIR = out
+ 
+@@ -92,7 +92,11 @@ LIB_OBJECTS = $(filter-out $(MAIN_OBJECTS), $(BUILD_OBJECTS))
+ 
+ LIBS = -lpthread -lm
+ 
+-ifeq ($(TARGET_OS),LINUX) 
++ifeq ($(TARGET_OS),NACL)
++	LIBS += -lppapi_simple -lnacl_io -lppapi_cpp -lppapi
++endif
++
++ifeq ($(TARGET_OS),LINUX)
+ 	LIBS += -ldl
+ endif
+ 
+diff --git a/src/civetweb.c b/src/civetweb.c
+index 3cc395a..675296a 100644
+--- a/src/civetweb.c
++++ b/src/civetweb.c
+@@ -61,6 +61,13 @@
+ #define IGNORE_UNUSED_RESULT(a) (void)((a) && 1)
+ #endif
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++// Newlib doesn't currently implemnt flockfile/funlockfile.
++// TODO(sbc): remove this once newlib is fixed.
++#define flockfile(x)
++#define funlockfile(x)
++#endif
++
+ #ifndef _WIN32_WCE /* Some ANSI #includes are not available on Windows CE */
+ #include <sys/types.h>
+ #include <sys/stat.h>
 diff --git a/src/main.c b/src/main.c
 index c8dff6e..97d3264 100644
 --- a/src/main.c
