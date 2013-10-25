@@ -39,15 +39,11 @@ int ruby_main(int argc, char **argv) {
   ret = mount("./", "/mnt/tars", "httpfs", 0, NULL);
   assert(ret == 0);
 
-  ret = mkdir("/myhome", 0777);
+  ret = mkdir("/home", 0777);
   assert(ret == 0);
 
   /* Setup home directory to a known location. */
-  ret = setenv("HOME", "/myhome", 1);
-  assert(ret == 0);
-
-  /* Setup terminal type. */
-  ret = setenv("TERM", "xterm-256color", 1);
+  ret = setenv("HOME", "/home", 1);
   assert(ret == 0);
 
   /* Blank out USER and LOGNAME. */

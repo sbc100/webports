@@ -17,7 +17,7 @@ index 3a38b32..f109a28 100644
   * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
   *
 diff --git a/src/tool_main.c b/src/tool_main.c
-index 8f2fbb7..99af87a 100644
+index 8f2fbb7..85d4db3 100644
 --- a/src/tool_main.c
 +++ b/src/tool_main.c
 @@ -82,6 +82,10 @@ static void main_checkfds(void)
@@ -31,15 +31,13 @@ index 8f2fbb7..99af87a 100644
  /*
  ** curl tool main function.
  */
-@@ -90,6 +94,16 @@ int main(int argc, char *argv[])
+@@ -90,6 +94,14 @@ int main(int argc, char *argv[])
    int res;
    struct Configurable config;
  
 +#ifdef __native_client__
-+  mkdir("/myhome", 0777);
-+  setenv("HOME", "/myhome", 1);
-+  /* Setup terminal type. */
-+  setenv("TERM", "xterm-256color", 1);
++  mkdir("/home", 0777);
++  setenv("HOME", "/home", 1);
 +  /* Blank out USER and LOGNAME. */
 +  setenv("USER", "", 1);
 +  setenv("LOGNAME", "", 1);
@@ -48,7 +46,7 @@ index 8f2fbb7..99af87a 100644
    memset(&config, 0, sizeof(struct Configurable));
  
    config.errors = stderr; /* default errors to stderr */
-@@ -121,4 +135,11 @@ int main(int argc, char *argv[])
+@@ -121,4 +133,11 @@ int main(int argc, char *argv[])
  #endif
  }
  

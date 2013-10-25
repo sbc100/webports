@@ -26,9 +26,7 @@ int nethack_pepper_main(int argc, char* argv[]) {
   mount("./", "/tars", "httpfs", 0, NULL);
 
   /* Setup home directory to a known location. */
-  setenv("HOME", "/myhome", 1);
-  /* Setup terminal type. */
-  setenv("TERM", "xterm-256color", 1);
+  setenv("HOME", "/home", 1);
   /* Blank out USER and LOGNAME. */
   setenv("USER", "", 1);
   setenv("LOGNAME", "", 1);
@@ -48,13 +46,11 @@ int nethack_pepper_main(int argc, char* argv[]) {
   assert(ret == 0);
 
   // Setup config file.
-  {
-    mkdir("/myhome", 0777);
-    int fh = open("/myhome/.nethackrc", O_CREAT | O_WRONLY);
-    const char config[] = "OPTIONS=color\n";
-    write(fh, config, sizeof(config) - 1);
-    close(fh);
-  }
+  mkdir("/home", 0777);
+  int fh = open("/home/.nethackrc", O_CREAT | O_WRONLY);
+  const char config[] = "OPTIONS=color\n";
+  write(fh, config, sizeof(config) - 1);
+  close(fh);
 
   const char *argv_nethack[] = {"nethack"};
   return nethack_main(1, const_cast<char**>(argv_nethack));

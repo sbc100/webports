@@ -17,7 +17,6 @@
 extern "C" int gdb_nacl_main(int argc, char *argv[]);
 
 int gdb_pepper_main(int argc, char* argv[]) {
-  setenv("TERM", "xterm-256color", 1);
   umount("/");
   mount("foo", "/", "memfs", 0, NULL);
   // TODO(bradnelson): Don't bake in the assumption of debugging only nethack.

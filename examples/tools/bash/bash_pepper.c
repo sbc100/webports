@@ -21,12 +21,10 @@ int bash_pepper_main(int argc, char* argv[]) {
   mount("foo", "/", "memfs", 0, NULL);
   mount("./", "/tars", "httpfs", 0, NULL);
 
-  mkdir("/myhome", 0777);
+  mkdir("/home", 0777);
 
   /* Setup home directory to a known location. */
-  setenv("HOME", "/myhome", 1);
-  /* Setup terminal type. */
-  setenv("TERM", "xterm-256color", 1);
+  setenv("HOME", "/home", 1);
   /* Blank out USER and LOGNAME. */
   setenv("USER", "", 1);
   setenv("LOGNAME", "", 1);

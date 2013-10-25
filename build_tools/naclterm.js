@@ -176,6 +176,7 @@ NaClTerm.prototype.run = function() {
   addParam('ps_stdout', '/dev/tty');
   addParam('ps_stderr', '/dev/tty');
   addParam('ps_verbosity', '2');
+  addParam('TERM', 'xterm-256color');
 
   var args = lib.f.parseQuery(document.location.search);
   var argn = 1;

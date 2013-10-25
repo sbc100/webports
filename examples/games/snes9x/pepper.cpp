@@ -62,7 +62,7 @@ static void *snes_init(void *arg) {
   }
 
   mkdir("/savestate", 0777);
-  mkdir("/myhome", 0777);
+  mkdir("/home", 0777);
 
   MainThreadRunner* runner = reinterpret_cast<MainThreadRunner*>(arg);
   download_rom(runner, rom_url, ROM_FILE);
