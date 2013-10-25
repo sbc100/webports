@@ -64,16 +64,41 @@ NaClTerm.init = function() {
 NaClTerm.prototype.handleMessage_ = function(e) {
   if (e.data.indexOf(NaClTerm.prefix) != 0) return;
   var msg = e.data.substring(NaClTerm.prefix.length);
-  term_.io.print(msg);
+  if (!this.loaded) {
+    this.bufferedOutput += msg;
+  } else {
+    term_.io.print(msg);
+  }
+}
+
+/**
+ * Handle load error event from NaCl.
+ */
+NaClTerm.prototype.handleLoadAbort_ = function(e) {
+  term_.io.print("Load aborted.\n");
+}
+
+/**
+ * Handle load abort event from NaCl.
+ */
+NaClTerm.prototype.handleLoadError_ = function(e) {
+  term_.io.print(embed.lastError + '\n');
 }
 
 /**
  * Handle load end event from NaCl.
  */
-NaClTerm.prototype.handleLoadEnd_ = function(e) {
+NaClTerm.prototype.handleLoad_ = function(e) {
   if (typeof(this.lastUrl) != 'undefined')
     term_.io.print("\n");
   term_.io.print("Loaded.\n");
+
+  // Now that have completed loading and displaying
+  // loading messages we output any messages from the
+  // NaCl module that were buffered up unto this point
+  this.loaded = true;
+  term_.io.print(this.bufferedOutput);
+  this.bufferedOutput = ''
 }
 
 /**
@@ -123,6 +148,8 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
  */
 NaClTerm.prototype.run = function() {
   this.io = this.argv_.io.push();
+  this.bufferedOutput = '';
+  this.loaded = false;
 
   embed = document.createElement('object');
   embed.width = 0;
@@ -131,7 +158,9 @@ NaClTerm.prototype.run = function() {
   embed.type = 'application/x-nacl';
   embed.addEventListener('message', this.handleMessage_.bind(this));
   embed.addEventListener('progress', this.handleProgress_.bind(this));
-  embed.addEventListener('loadend', this.handleLoadEnd_.bind(this));
+  embed.addEventListener('load', this.handleLoad_.bind(this));
+  embed.addEventListener('error', this.handleLoadError_.bind(this));
+  embed.addEventListener('abort', this.handleLoadAbort_.bind(this));
   embed.addEventListener('crash', this.handleCrash_.bind(this));
 
   function addParam(name, value) {
@@ -159,6 +188,7 @@ NaClTerm.prototype.run = function() {
     argn = argn + 1;
   }
 
+  term_.io.print("Loading NaCl module.\n")
   document.body.appendChild(embed);
 
   this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);
