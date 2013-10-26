@@ -276,8 +276,8 @@ $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
 $(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
 $(SENT)/examples/tools/ruby_ppapi: \
     libraries/ruby libraries/libtar libraries/glibc-compat
-$(SENT)/examples/games/scummvm: \
-    libraries/nacl-mounts libraries/SDL libraries/libvorbis
+$(SENT)/examples/games/scummvm: libraries/SDL libraries/libvorbis \
+    libraries/libtar
 $(SENT)/examples/systems/bochs: \
     libraries/nacl-mounts libraries/SDL
 $(SENT)/examples/systems/dosbox: \

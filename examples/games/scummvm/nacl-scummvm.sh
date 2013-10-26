@@ -13,10 +13,15 @@ readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
 readonly LURE_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/lure/lure-1.1.zip
 readonly LURE_NAME=lure-1.1
 
+EXECUTABLES=scummvm
+
 SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/examples/games/scummvm
 
 ConfigureStep() {
+  # NOTE: We can't use the DefaultConfigureStep, because the scummvm
+  # configure script is hand-rolled, and won't accept additional arguments.
   Banner "Configuring ${PACKAGE_NAME}"
+  # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
@@ -30,36 +35,45 @@ ConfigureStep() {
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH="${NACL_BIN_PATH}:${PATH}"
   export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
-  export DEFINES=
-  if [ "${NACL_GLIBC}" != "1" ]; then
-    export DEFINES="-Dstrdup\(a\)=strcpy\(\(char\*\)malloc\(strlen\(a\)+1\),a\)"
-    export DEFINES="$DEFINES -Dvsnprintf\(a,b,c,d\)=vsprintf\(a,c,d\)"
-    export DEFINES="$DEFINES -Dsnprintf\(a,b,c,...\)=sprintf\(a,c,__VA_ARGS__\)"
-    export DEFINES="$DEFINES -Dstrcasecmp=strcmp"
-    export DEFINES="$DEFINES -Dstrncasecmp=strncmp"
+  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  if [ ! -f "${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}" ]; then
+    echo "No configure script found"
+    return
   fi
-  export DEFINES="$DEFINES -DNACL -DSYSTEM_NOT_SUPPORTING_D_TYPE=1"
+  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
+  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
+  echo "Directory: $(pwd)"
+
+  local conf_host=${NACL_CROSS_PREFIX}
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    conf_host="pnacl"
+  elif [ "${NACL_ARCH}" = "arm" ]; then
+    conf_host="nacl-arm"
+  else
+    conf_host="nacl-x86"
+  fi
+  export DEFINES="-DNACL -DSYSTEM_NOT_SUPPORTING_D_TYPE=1"
   export LIBS=
   export LIBS="$LIBS -Wl,--whole-archive"
   export LIBS="$LIBS -lvorbisfile -lvorbis -logg"
-  export LIBS="$LIBS -lnacl-mounts"
+  export LIBS="$LIBS -lnacl_io -ltar"
   export LIBS="$LIBS -lppapi -lppapi_cpp -lppapi_cpp_private"
   export LIBS="$LIBS -Wl,--no-whole-archive"
-  export CPPFLAGS="-I$NACL_PACKAGES_LIBRARIES"
 
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   # NOTE: disabled mt32emu because it using inline assembly that won't
   #     validate.
   ../configure \
-    --host=nacl \
+    --host=${conf_host} \
     --libdir=${NACLPORTS_LIBDIR} \
     --disable-flac \
     --disable-zlib \
     --disable-mt32emu \
+    --disable-timidity \
     --disable-all-engines \
-    --enable-lure \
-    --enable-sky
+    --enable-engine=lure \
+    --enable-engine=sky
 }
 
 InstallStep() {
@@ -101,26 +115,32 @@ InstallStep() {
 
   Banner "Publishing to ${PUBLISH_DIR}"
   MakeDir ${PUBLISH_DIR}
+  local ASSEMBLY_DIR=${PUBLISH_DIR}/scummvm
 
-  # Prepare AppEngine app.
-  APPENGINE_DIR=${PUBLISH_DIR}/appengine
-  MakeDir ${APPENGINE_DIR}
-  cp `find ${START_DIR}/nacl-scumm -type f -maxdepth 1` ${APPENGINE_DIR}
-  MakeDir ${APPENGINE_DIR}/static
-  cp ${START_DIR}/nacl-scumm/static/* ${APPENGINE_DIR}/static
-  cp ${SRC_DIR}/*.tar ${APPENGINE_DIR}/static
-  ${NACLSTRIP} ${SRC_DIR}/${NACL_BUILD_SUBDIR}/scummvm \
-      -o ${APPENGINE_DIR}/static/scummvm_${NACL_ARCH}.nexe
+  MakeDir ${ASSEMBLY_DIR}
 
-  # Publish chrome web store app (copy to repository to drop .svn etc).
-  MakeDir ${SRC_DIR}/hosted_app
-  cp ${START_DIR}/hosted_app/* ${SRC_DIR}/hosted_app
-  ChangeDir ${SRC_DIR}
-  WEBSTORE_DIR=${PUBLISH_DIR}/web_store
-  MakeDir ${WEBSTORE_DIR}
-  zip -r ${WEBSTORE_DIR}/scummvm-1.2.1.zip hosted_app
-  cp ${START_DIR}/screenshots/* ${WEBSTORE_DIR}
-  cp ${START_DIR}/hosted_app/scummvm_128.png ${WEBSTORE_DIR}
+  cp ${START_DIR}/packaged_app/* ${ASSEMBLY_DIR}
+  cp ${SRC_DIR}/*.tar ${ASSEMBLY_DIR}
+  if [ "${NACL_DEBUG}" = "1" ]; then
+    cp ${SRC_DIR}/${NACL_BUILD_SUBDIR}/scummvm \
+        ${ASSEMBLY_DIR}/scummvm_${NACL_ARCH}${NACL_EXEEXT}
+  else
+    ${NACLSTRIP} ${SRC_DIR}/${NACL_BUILD_SUBDIR}/scummvm \
+        -o ${ASSEMBLY_DIR}/scummvm_${NACL_ARCH}${NACL_EXEEXT}
+  fi
+
+  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      ${NACL_CREATE_NMF_FLAGS} \
+      ${ASSEMBLY_DIR}/scummvm_*${NACL_EXEEXT} \
+      -s ${ASSEMBLY_DIR} \
+      -o ${ASSEMBLY_DIR}/scummvm.nmf
+
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    sed -i.bak 's/x-nacl/x-pnacl/' ${ASSEMBLY_DIR}/index.html
+  fi
+
+  ChangeDir ${PUBLISH_DIR}
+  LogExecute zip -r scummvm-1.2.1.zip scummvm
 }
 
 CustomCheck() {

@@ -1,531 +1,207 @@
-diff -Naur scummvm-1.2.1_orig/backends/midi/timidity.cpp scummvm-1.2.1/backends/midi/timidity.cpp
---- scummvm-1.2.1_orig/backends/midi/timidity.cpp	2010-12-11 01:38:09.000000000 -0800
-+++ scummvm-1.2.1/backends/midi/timidity.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -34,8 +34,7 @@
+diff --git a/backends/platform/sdl/posix/posix-main.cpp b/backends/platform/sdl/posix/posix-main.cpp
+index 5f0914e..4f11f2f 100644
+--- a/backends/platform/sdl/posix/posix-main.cpp
++++ b/backends/platform/sdl/posix/posix-main.cpp
+@@ -20,6 +20,13 @@
   *
   */
  
--#if defined (UNIX)
--
-+#if defined (UNIX) && !defined(NACL)
- #include "common/util.h"
- #include "common/endian.h"
- #include "common/str.h"
-diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/main.cpp scummvm-1.2.1/backends/platform/sdl/main.cpp
---- scummvm-1.2.1_orig/backends/platform/sdl/main.cpp	2010-12-11 01:38:11.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/main.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -52,16 +52,18 @@
- }
- #endif
++#define FORBIDDEN_SYMBOL_EXCEPTION_printf
++#define FORBIDDEN_SYMBOL_EXCEPTION_vprintf
++#define FORBIDDEN_SYMBOL_EXCEPTION_vfprintf
++#define FORBIDDEN_SYMBOL_EXCEPTION_mkdir
++#define FORBIDDEN_SYMBOL_EXCEPTION_setenv
++#define FORBIDDEN_SYMBOL_EXCEPTION_unistd_h
++
+ #include "common/scummsys.h"
  
--int main(int argc, char *argv[]) {
--
+ #if defined(POSIX) && !defined(MACOSX) && !defined(SAMSUNGTV) && !defined(MAEMO) && !defined(WEBOS) && !defined(LINUXMOTO) && !defined(GPH_DEVICE) && !defined(GP2X) && !defined(DINGUX) && !defined(OPENPANDORA) && !defined(PLAYSTATION3)
+@@ -28,7 +35,88 @@
+ #include "backends/plugins/sdl/sdl-provider.h"
+ #include "base/main.h"
+ 
 +#if defined(NACL)
-+extern "C" int scummvm_sdl_init(void) {
- 	// Create our OSystem instance
- 	g_system = new OSystem_SDL();
- 	assert(g_system);
++#include <fcntl.h>
++#include <libtar.h>
++#include <stdlib.h>
++#include <sys/mount.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#include <SDL/SDL_main.h>
++
++#include "nacl_io/nacl_io.h"
++#endif
++
++#if defined(NACL)
++
++#define CHECK(x) ret = x; assert(ret == 0)
++
++void ExtractAll(const char* data_file) {
++	printf("Extracting: %s ...\n", data_file);
++	TAR* tar;
++        int ret;
++	CHECK(tar_open(&tar, (char*)data_file, NULL, O_RDONLY, 0, 0));
++	CHECK(tar_extract_all(tar, "/"));
++	CHECK(tar_close(tar));
 +}
++
++void CopyFile(const char* src, const char* dst) {
++	const size_t kBufferSize = 1024;
++	char buffer[kBufferSize];
++	
++	int src_fd = open(src, O_RDONLY);
++	assert(src_fd != -1);
++	int dst_fd = open(dst, O_WRONLY | O_CREAT);
++	assert(dst_fd != -1);
++	
++	int bytes_read;
++	int write_offset;
++	do {
++		bytes_read = read(src_fd, &buffer[0], kBufferSize);
++		assert(bytes_read >= 0);
++		int bytes_to_write = bytes_read;
++		
++		write_offset = 0;
++		while (bytes_to_write > 0) {
++			int bytes_written = write(dst_fd, &buffer[write_offset], bytes_to_write);
++			assert(bytes_written >= 0);
++			bytes_to_write -= bytes_written;
++			write_offset += bytes_written;
++		}
++	} while(bytes_read > 0);
++	
++	close(src_fd);
++	close(dst_fd);
++}
++
++bool FileExists(const char* path) {
++	struct stat buf;
++	return stat(path, &buf) == 0;
++}
++
++int SDL_main(int argc, char *argv[]) {
++	int ret;
++	CHECK(umount("/"));
++	CHECK(mount("", "/", "memfs", 0, NULL));
++	CHECK(mount("./", "/mnt/http", "httpfs", 0, NULL));
++
++	ExtractAll("/mnt/http/runimage.tar");
++	ExtractAll("/mnt/http/bass.tar");
++	ExtractAll("/mnt/http/lure.tar");
++
++	CHECK(mkdir("/home", 0777));
++        CHECK(mount("", "/home", "html5fs", 0, "type=PERSISTENT"));
++	CHECK(setenv("HOME", "/home", 1));
++
++	const char kConfigFile[] = "/home/.scummvmrc";
++	if (!FileExists(kConfigFile)) {
++		// Initialize with a default .scummvmrm that already has the
++		// games loaded.
++		CopyFile("/mnt/http/scummvmrc", kConfigFile);
++        }
++#else
+ int main(int argc, char *argv[]) {
 +#endif
  
-+extern "C" int scummvm_sdl_main(int argc, const char * const argv[]) {
- #ifdef DYNAMIC_MODULES
- 	PluginManager::instance().addPluginProvider(new SDLPluginProvider());
- #endif
--
- 	// Invoke the actual ScummVM main entry point:
- 	int res = scummvm_main(argc, argv);
- 	((OSystem_SDL *)g_system)->deinit();
-diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/module.mk scummvm-1.2.1/backends/platform/sdl/module.mk
---- scummvm-1.2.1_orig/backends/platform/sdl/module.mk	2010-12-11 01:38:11.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/module.mk	2011-09-07 11:47:02.000000000 -0700
-@@ -5,6 +5,8 @@
- 	graphics.o \
- 	hardwarekeys.o \
- 	main.o \
-+	ppapi/scummvm_pepper_instance.o \
-+	ppapi/scummvm_pepper_module.o \
- 	sdl.o
+ 	// Create our OSystem instance
+ 	g_system = new OSystem_POSIX();
+diff --git a/backends/platform/sdl/posix/posix.cpp b/backends/platform/sdl/posix/posix.cpp
+index 7a8b1e7..6a9b94f 100644
+--- a/backends/platform/sdl/posix/posix.cpp
++++ b/backends/platform/sdl/posix/posix.cpp
+@@ -160,6 +160,9 @@ Common::WriteStream *OSystem_POSIX::createLogFile() {
+ }
  
- # We don't use rules.mk but rather manually update OBJS and MODULE_DIRS.
-diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/module.mk scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk
---- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/module.mk	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/module.mk	2011-09-07 11:47:02.000000000 -0700
-@@ -0,0 +1,8 @@
-+MODULE := scummvm_ppapi
-+
-+MODULE_OBJS := \
-+	scummvm_pepper_instance.o \
-+	scummvm_pepper_module.o
-+
-+# Include common rules
-+include $(srcdir)/rules.mk
-diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp
---- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -0,0 +1,116 @@
-+/*
-+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
-+ * Use of this source code is governed by a BSD-style license that can be
-+ * found in the LICENSE file.
-+ */
-+#include "scummvm_pepper_instance.h"
-+#include <assert.h>
-+#include <vector>
-+#include <unistd.h>
-+#include <SDL.h>
-+#include <SDL_nacl.h>
-+#include <SDL_video.h>
-+#include "nacl-mounts/base/UrlLoaderJob.h"
-+#include "nacl-mounts/AppEngine/AppEngineMount.h"
-+
-+extern "C" int mount(const char *source, const char *target, const char *filesystemtype, unsigned long mountflags, const void *data);
-+extern "C" int scummvm_sdl_init(void);
-+extern "C" int scummvm_sdl_main(int argc,const char * const argv[]);
-+extern "C" int simple_tar_extract(const char *path);
-+
-+static void *scummvm_init(void *arg) {
-+  MainThreadRunner *runner = reinterpret_cast<MainThreadRunner*>(arg);
-+
-+  UrlLoaderJob *job = new UrlLoaderJob;
-+  job->set_url("/static/runimage.tar");
-+  std::vector<char> data;
-+  job->set_dst(&data);
-+  runner->RunJob(job);
-+  int fh = open("/runimage.tar", O_CREAT | O_WRONLY);
-+  write(fh, &data[0], data.size());
-+  close(fh);
-+
-+  simple_tar_extract("runimage.tar");
-+
-+  UrlLoaderJob *job2 = new UrlLoaderJob;
-+  job2->set_url("/static/bass.tar");
-+  std::vector<char> data2;
-+  job2->set_dst(&data2);
-+  runner->RunJob(job2);
-+  int fh2 = open("/bass.tar", O_CREAT | O_WRONLY);
-+  write(fh2, &data2[0], data2.size());
-+  close(fh2);
-+
-+  simple_tar_extract("bass.tar");
-+
-+  UrlLoaderJob *job3 = new UrlLoaderJob;
-+  job3->set_url("/static/lure.tar");
-+  std::vector<char> data3;
-+  job3->set_dst(&data3);
-+  runner->RunJob(job3);
-+  int fh3 = open("/lure.tar", O_CREAT | O_WRONLY);
-+  write(fh3, &data3[0], data3.size());
-+  close(fh3);
-+
-+  simple_tar_extract("lure.tar");
-+
-+  int ret;
-+  mkdir("/usr", 0777);
-+  mkdir("/usr/local", 0777);
-+  mkdir("/usr/local/save", 0777);
-+  mkdir("/usr/local/save/AppEngine", 0777);
-+
-+  AppEngineMount *aem = new AppEngineMount(runner, "/_file");
-+  ret = mount(0, "/usr/local/save/AppEngine", 0, 0, aem);
-+  assert(ret == 0);
-+
-+  ret = chdir("/usr/local/save/AppEngine");
-+  assert(ret == 0);
-+
-+  static char const * argv[] = {"scummvm", NULL};
-+  scummvm_sdl_init();
-+  scummvm_sdl_main(1, (const char**)argv);
-+
-+  return 0;
-+}
-+
-+ScummvmPepperInstance::ScummvmPepperInstance(PP_Instance instance)
-+  : pp::Instance(instance),
-+    quit_(false),
-+    width_(0),
-+    height_(0),
-+    runner_(NULL) {
-+  RequestInputEvents(PP_INPUTEVENT_CLASS_MOUSE);
-+  RequestFilteringInputEvents(PP_INPUTEVENT_CLASS_KEYBOARD);
-+}
-+
-+bool ScummvmPepperInstance::Init(uint32_t argc, const char* argn[], const char* argv[]) {
-+  return true;
-+}
-+
-+void ScummvmPepperInstance::DidChangeView(const pp::Rect& position, const pp::Rect& clip) {
-+  if (width_ && height_)
-+    return;
-+
-+  if (position.size().width() == width_ &&
-+      position.size().height() == height_)
-+    return;  // Size didn't change, no need to update anything.
-+
-+  width_ = position.size().width();
-+  height_ = position.size().height();
-+
-+  SDL_NACL_SetInstance(pp_instance(), width_, height_);
-+
-+  int lval = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-+
-+  assert(lval >= 0);
-+
-+  runner_ = new MainThreadRunner(this);
-+  pthread_create(&scummvm_thread_, NULL, scummvm_init, runner_);
-+}
-+
-+bool ScummvmPepperInstance::HandleInputEvent(const pp::InputEvent& event) {
-+  SDL_NACL_PushEvent(event);
-+  return true;
-+}
-+
-diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.h scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h
---- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_instance.h	2011-09-07 11:47:02.000000000 -0700
-@@ -0,0 +1,39 @@
-+/*
-+ * Copyright (c) 2011 The Native Client Authors. All rights reserved.
-+ * Use of this source code is governed by a BSD-style license that can be
-+ * found in the LICENSE file.
-+ */
-+#ifndef EXAMPLES_SCUMMVM_PEPPER_H_
-+#define EXAMPLES_SCUMMVM_PEPPER_H_
-+
-+#include <pthread.h>
-+#include <ppapi/cpp/input_event.h>
-+#include <ppapi/cpp/instance.h>
-+#include <ppapi/cpp/rect.h>
-+#include "nacl-mounts/base/MainThreadRunner.h"
-+
-+class ScummvmPepperInstance : public pp::Instance {
-+ public:
-+  explicit ScummvmPepperInstance(PP_Instance instance);
-+
-+  virtual ~ScummvmPepperInstance() {
-+    if (runner_) delete runner_;
-+  }
-+
-+  virtual bool Init(uint32_t argc, const char* argn[], const char* argv[]);
-+
-+  void DidChangeView(const pp::Rect& position, const pp::Rect& clip);
-+
-+  bool HandleInputEvent(const pp::InputEvent& event);
-+
-+  bool quit() const { return quit_; }
-+
-+ private:
-+  pthread_t scummvm_thread_;
-+  MainThreadRunner *runner_;
-+  int width_;
-+  int height_;
-+  bool quit_;
-+};
-+
-+#endif  // EXAMPLES_SCUMMVM_PEPPER_H_
-diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp
---- scummvm-1.2.1_orig/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/ppapi/scummvm_pepper_module.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -0,0 +1,33 @@
-+// Copyright 2011 The Native Client SDK Authors. All rights reserved.
-+// Use of this source code is governed by a BSD-style license that can
-+// be found in the LICENSE file.
-+
-+#include <ppapi/cpp/module.h>
-+#include <stdio.h>
-+#include "scummvm_pepper_instance.h"
-+
-+namespace scummvm_pepper {
-+  // The Module class.  The browser calls the CreateInstance() method to create
-+  // an instance of you NaCl module on the web page.  The browser creates a new
-+  // instance for each <embed> tag with type="application/x-ppapi-nacl-srpc".
-+  class ScummvmPepperModule : public pp::Module {
-+  public:
-+    ScummvmPepperModule() : pp::Module() {}
-+    virtual ~ScummvmPepperModule() {}
-+
-+    virtual pp::Instance* CreateInstance(PP_Instance instance) {
-+      return new ScummvmPepperInstance(instance);
-+    }
-+  };
-+}  // namespace scummvm_pepper
-+
-+// Factory function called by the browser when the module is first loaded.
-+// The browser keeps a singleton of this module.  It calls the
-+// CreateInstance() method on the object you return to make instances.  There
-+// is one instance per <embed> tag on the page.  This is the main binding
-+// point for your NaCl module with the browser.
-+namespace pp {
-+  Module* CreateModule() {
-+    return new scummvm_pepper::ScummvmPepperModule();
-+  }
-+}  // namespace pp
-diff -Naur scummvm-1.2.1_orig/backends/platform/sdl/sdl.cpp scummvm-1.2.1/backends/platform/sdl/sdl.cpp
---- scummvm-1.2.1_orig/backends/platform/sdl/sdl.cpp	2010-12-11 01:38:11.000000000 -0800
-+++ scummvm-1.2.1/backends/platform/sdl/sdl.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -97,6 +97,8 @@
+ bool OSystem_POSIX::displayLogFile() {
++#ifdef NACL
++	return false;
++#else
+ 	if (_logFilePath.empty())
+ 		return false;
  
- #if !defined(_WIN32_WCE) && !defined(__SYMBIAN32__) && defined(USE_SCALERS)
- static AspectRatio getDesiredAspectRatio() {
-+  return AspectRatio(1, 1);
-+#if !defined(NACL)
- 	const size_t AR_COUNT = 4;
- 	const char*       desiredAspectRatioAsStrings[AR_COUNT] = {            "auto",            "4/3",            "16/9",            "16/10" };
- 	const AspectRatio desiredAspectRatios[AR_COUNT]         = { AspectRatio(0, 0), AspectRatio(4,3), AspectRatio(16,9), AspectRatio(16,10) };
-@@ -113,6 +115,7 @@
+@@ -208,6 +211,7 @@ bool OSystem_POSIX::displayLogFile() {
  	}
- 	// TODO : Report a warning
- 	return AspectRatio(0, 0);
+ 
+ 	return WIFEXITED(status) && WEXITSTATUS(status) == 0;
 +#endif
  }
- #endif
  
-@@ -135,9 +138,11 @@
- 	if (joystick_num > -1)
- 		sdlFlags |= SDL_INIT_JOYSTICK;
  
-+#if !defined(NACL)
- 	if (SDL_Init(sdlFlags) == -1) {
- 		error("Could not initialize SDL: %s", SDL_GetError());
- 	}
-+#endif
- 
- 	_graphicsMutex = createMutex();
- 
-@@ -407,7 +412,8 @@
- 	// from the Springboard, is /. Which we don't want.
- 	const char *home = getenv("HOME");
- 	if (home != NULL && strlen(home) < MAXPATHLEN)
--		snprintf(configFile, MAXPATHLEN, "%s/%s", home, DEFAULT_CONFIG_FILE);
-+		//snprintf(configFile, MAXPATHLEN, "%s/%s", home, DEFAULT_CONFIG_FILE);
-+		sprintf(configFile, "%s/%s", home, DEFAULT_CONFIG_FILE);
- 	else
- 		strcpy(configFile, DEFAULT_CONFIG_FILE);
- #else
-diff -Naur scummvm-1.2.1_orig/base/commandLine.cpp scummvm-1.2.1/base/commandLine.cpp
---- scummvm-1.2.1_orig/base/commandLine.cpp	2010-12-11 01:38:08.000000000 -0800
-+++ scummvm-1.2.1/base/commandLine.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -140,7 +140,8 @@
- 	va_list va;
- 
- 	va_start(va, s);
--	vsnprintf(buf, STRINGBUFLEN, s, va);
-+	//vsnprintf(buf, STRINGBUFLEN, s, va);
-+	vsprintf(buf, s, va);
- 	va_end(va);
- 
- #if !(defined(__GP32__) || defined (__SYMBIAN32__) || defined(__DS__))
-diff -Naur scummvm-1.2.1_orig/base/plugins.cpp scummvm-1.2.1/base/plugins.cpp
---- scummvm-1.2.1_orig/base/plugins.cpp	2010-12-11 01:38:08.000000000 -0800
-+++ scummvm-1.2.1/base/plugins.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -212,7 +212,7 @@
- 		LINK_PLUGIN(AMIGA)
- 		LINK_PLUGIN(APPLEIIGS)
- 		LINK_PLUGIN(TOWNS)
--		#if defined (UNIX)
-+                #if defined (UNIX) && !defined(NACL)
- 		LINK_PLUGIN(TIMIDITY)
- 		#endif
- 
-diff -Naur scummvm-1.2.1_orig/config.log scummvm-1.2.1/config.log
---- scummvm-1.2.1_orig/config.log	1969-12-31 16:00:00.000000000 -0800
-+++ scummvm-1.2.1/config.log	2011-09-07 11:47:02.000000000 -0700
-@@ -0,0 +1 @@
-+Configure run on Thu Aug 18 14:57:56 PDT 2011
-diff -Naur scummvm-1.2.1_orig/configure scummvm-1.2.1/configure
---- scummvm-1.2.1_orig/configure	2010-12-11 01:38:39.000000000 -0800
-+++ scummvm-1.2.1/configure	2011-09-07 11:47:02.000000000 -0700
-@@ -1091,6 +1091,11 @@
- 	_host_cpu=arm
- 	_host_alias=arm-wince-mingw32ce
+diff --git a/configure b/configure
+index 5016a86..96571c1 100755
+--- a/configure
++++ b/configure
+@@ -1338,6 +1338,16 @@ n64)
+ 	_host_cpu=mips
+ 	_host_alias=mips64
  	;;
-+nacl)
++nacl-x86)
 +	_host_os=nacl
 +	_host_cpu=x86
 +	_host_alias=${NACL_CROSS_PREFIX}
 +	;;
- *)
- 	if test -n "$_host"; then
- 		guessed_host=`$_srcdir/config.sub $_host`
-diff -Naur scummvm-1.2.1_orig/engines/scumm/detection.cpp scummvm-1.2.1/engines/scumm/detection.cpp
---- scummvm-1.2.1_orig/engines/scumm/detection.cpp	2010-12-11 01:37:23.000000000 -0800
-+++ scummvm-1.2.1/engines/scumm/detection.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -23,6 +23,11 @@
-  *
-  */
- 
-+
-+#define snprintf4(a,b,c,d) sprintf(a,c,d)
-+#define snprintf5(a,b,c,d,e) sprintf(a,c,d,e)
-+#define snprintf6(a,b,c,d,e,f) sprintf(a,c,d,e,f)
-+
- #include "base/plugins.h"
- 
- #include "common/archive.h"
-@@ -72,20 +77,20 @@
- 
- 	if (_game.version == 4) {
- 		if (room == 0 || room >= 900) {
--			snprintf(buf, sizeof(buf), "%03d.lfl", room);
-+			snprintf4(buf, sizeof(buf), "%03d.lfl", room);
- 		} else {
--			snprintf(buf, sizeof(buf), "disk%02d.lec", diskNumber);
-+			snprintf4(buf, sizeof(buf), "disk%02d.lec", diskNumber);
- 		}
- 	} else {
- 		char id = 0;
- 
- 		switch (_filenamePattern.genMethod) {
- 		case kGenDiskNum:
--			snprintf(buf, sizeof(buf), _filenamePattern.pattern, diskNumber);
-+			snprintf4(buf, sizeof(buf), _filenamePattern.pattern, diskNumber);
- 			break;
- 
- 		case kGenRoomNum:
--			snprintf(buf, sizeof(buf), _filenamePattern.pattern, room);
-+			snprintf4(buf, sizeof(buf), _filenamePattern.pattern, room);
- 			break;
- 
- 		case kGenHEMac:
-@@ -107,15 +112,15 @@
- 					else if (_game.id == GID_TREASUREHUNT)
- 						strcpy(buf, "Blue'sTreasureHunt.(b)");
- 					else
--						snprintf(buf, sizeof(buf), "%s.(b)", _filenamePattern.pattern);
-+						snprintf4(buf, sizeof(buf), "%s.(b)", _filenamePattern.pattern);
- 					break;
- 				case 1:
- 					id = 'a';
--					snprintf(buf, sizeof(buf), "%s.(a)", _filenamePattern.pattern);
-+					snprintf4(buf, sizeof(buf), "%s.(a)", _filenamePattern.pattern);
- 					break;
- 				default:
- 					id = '0';
--					snprintf(buf, sizeof(buf), "%s.he0", _filenamePattern.pattern);
-+					snprintf4(buf, sizeof(buf), "%s.he0", _filenamePattern.pattern);
- 				}
- 			} else if (_game.heversion >= 70) {
- 				id = (room == 0) ? '0' : '1';
-@@ -126,16 +131,16 @@
- 			if (_filenamePattern.genMethod == kGenHEPC) {
- 				// For HE >= 98, we already called snprintf above.
- 				if (_game.heversion < 98 || room < 0)
--					snprintf(buf, sizeof(buf), "%s.he%c", _filenamePattern.pattern, id);
-+					snprintf5(buf, sizeof(buf), "%s.he%c", _filenamePattern.pattern, id);
- 			} else {
- 				if (id == '3') { // special case for cursors
- 					// For mac they're stored in game binary
- 					strncpy(buf, _filenamePattern.pattern, sizeof(buf));
- 				} else {
- 					if (_filenamePattern.genMethod == kGenHEMac)
--						snprintf(buf, sizeof(buf), "%s (%c)", _filenamePattern.pattern, id);
-+						snprintf5(buf, sizeof(buf), "%s (%c)", _filenamePattern.pattern, id);
- 					else
--						snprintf(buf, sizeof(buf), "%s %c", _filenamePattern.pattern, id);
-+						snprintf5(buf, sizeof(buf), "%s %c", _filenamePattern.pattern, id);
- 				}
- 			}
- 
-@@ -159,19 +164,19 @@
- 	switch (genMethod) {
- 	case kGenDiskNum:
- 	case kGenRoomNum:
--		snprintf(buf, sizeof(buf), pattern, 0);
-+		snprintf4(buf, sizeof(buf), pattern, 0);
- 		break;
- 
- 	case kGenHEPC:
--		snprintf(buf, sizeof(buf), "%s.he0", pattern);
-+		snprintf4(buf, sizeof(buf), "%s.he0", pattern);
- 		break;
- 
- 	case kGenHEMac:
--		snprintf(buf, sizeof(buf), "%s (0)", pattern);
-+		snprintf4(buf, sizeof(buf), "%s (0)", pattern);
- 		break;
- 
- 	case kGenHEMacNoParens:
--		snprintf(buf, sizeof(buf), "%s 0", pattern);
-+		snprintf4(buf, sizeof(buf), "%s 0", pattern);
- 		break;
- 
- 	case kGenUnchanged:
-diff -Naur scummvm-1.2.1_orig/engines/sky/control.cpp scummvm-1.2.1/engines/sky/control.cpp
---- scummvm-1.2.1_orig/engines/sky/control.cpp	2010-12-11 01:37:35.000000000 -0800
-+++ scummvm-1.2.1/engines/sky/control.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -1031,7 +1031,7 @@
- 	savenames.resize(MAX_SAVE_GAMES);
- 
- 	Common::InSaveFile *inf;
--	inf = _saveFileMan->openForLoading("SKY-VM.SAV");
-+	inf = _saveFileMan->openForLoading(SKY_VM_SAVE_PATH);
- 	if (inf != NULL) {
- 		char *tmpBuf =  new char[MAX_SAVE_GAMES * MAX_TEXT_LEN];
- 		char *tmpPtr = tmpBuf;
-@@ -1075,7 +1075,7 @@
- void Control::saveDescriptions(const Common::StringArray &list) {
- 	Common::OutSaveFile *outf;
- 
--	outf = _saveFileMan->openForSaving("SKY-VM.SAV");
-+	outf = _saveFileMan->openForSaving(SKY_VM_SAVE_PATH);
- 	bool ioFailed = true;
- 	if (outf) {
- 		for (uint16 cnt = 0; cnt < MAX_SAVE_GAMES; cnt++) {
-diff -Naur scummvm-1.2.1_orig/engines/sky/control.h scummvm-1.2.1/engines/sky/control.h
---- scummvm-1.2.1_orig/engines/sky/control.h	2010-12-11 01:37:35.000000000 -0800
-+++ scummvm-1.2.1/engines/sky/control.h	2011-09-07 11:47:02.000000000 -0700
-@@ -137,6 +137,8 @@
- #define SAVE_FILE_REVISION 6
- #define OLD_SAVEGAME_TYPE 5
- 
-+#define SKY_VM_SAVE_PATH "SKY-VM.SAV"
-+
- struct AllocedMem {
- 	uint16 *mem;
- 	AllocedMem *next;
-diff -Naur scummvm-1.2.1_orig/engines/sky/detection.cpp scummvm-1.2.1/engines/sky/detection.cpp
---- scummvm-1.2.1_orig/engines/sky/detection.cpp	2010-12-11 01:37:35.000000000 -0800
-+++ scummvm-1.2.1/engines/sky/detection.cpp	2011-09-07 11:47:02.000000000 -0700
-@@ -37,6 +37,8 @@
- 
- #include "engines/metaengine.h"
- 
-+#include "control.h"
-+
- static const PlainGameDescriptor skySetting =
- 	{"sky", "Beneath a Steel Sky" };
- 
-@@ -182,7 +184,7 @@
- 	savenames.resize(MAX_SAVE_GAMES+1);
- 
- 	Common::InSaveFile *inf;
--	inf = saveFileMan->openForLoading("SKY-VM.SAV");
-+	inf = saveFileMan->openForLoading(SKY_VM_SAVE_PATH);
- 	if (inf != NULL) {
- 		char *tmpBuf =  new char[MAX_SAVE_GAMES * MAX_TEXT_LEN];
- 		char *tmpPtr = tmpBuf;
-@@ -238,7 +240,7 @@
- 	Common::StringArray savenames;
- 	savenames.resize(MAX_SAVE_GAMES+1);
- 	Common::InSaveFile *inf;
--	inf = saveFileMan->openForLoading("SKY-VM.SAV");
-+	inf = saveFileMan->openForLoading(SKY_VM_SAVE_PATH);
- 	if (inf != NULL) {
- 		char *tmpBuf =  new char[MAX_SAVE_GAMES * MAX_TEXT_LEN];
- 		char *tmpPtr = tmpBuf;
-@@ -257,7 +259,7 @@
- 	// Save the updated descriptions
- 	Common::OutSaveFile *outf;
- 
--	outf = saveFileMan->openForSaving("SKY-VM.SAV");
-+	outf = saveFileMan->openForSaving(SKY_VM_SAVE_PATH);
- 	bool ioFailed = true;
- 	if (outf) {
- 		for (uint16 cnt = 0; cnt < MAX_SAVE_GAMES; cnt++) {
-diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics/scaler/scale2x.cpp
---- scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp	2010-12-11 01:38:07.000000000 -0800
-+++ scummvm-1.2.1/graphics/scaler/scale2x.cpp	2011-09-07 12:14:13.000000000 -0700
-@@ -211,9 +211,15 @@
++nacl-arm)
++	_host_os=nacl
++	_host_cpu=arm
++	_host_alias=${NACL_CROSS_PREFIX}
++	;;
+ neuros)
+ 	_host_os=linux
+ 	_host_cpu=arm
+@@ -1347,6 +1357,11 @@ openpandora)
+ 	_host_cpu=arm
+ 	_host_alias=arm-angstrom-linux-gnueabi
+ 	;;
++pnacl)
++	_host_os=pnacl
++	_host_cpu=le32
++	_host_alias=${NACL_CROSS_PREFIX}
++	;;
+ ppc-amigaos)
+ 	_host_os=amigaos
+ 	_host_cpu=ppc
+@@ -1731,7 +1746,7 @@ if test "$have_gcc" = yes ; then
+ 			case $_host_os in
+ 			# newlib-based system include files suppress non-C89 function
+ 			# declarations under __STRICT_ANSI__
+-			amigaos* | android | bada | dreamcast | ds | gamecube | mingw* | n64 | psp | ps2 | ps3 | wii | wince )
++			amigaos* | android | bada | dreamcast | ds | gamecube | mingw* | n64 | psp | ps2 | ps3 | wii | wince | *nacl* )
+ 				;;
+ 			*)
+ 				CXXFLAGS="$CXXFLAGS -ansi"
+@@ -1808,6 +1823,8 @@ if strings $TMPO.o | grep BIGenDianSyS >/dev/null; then
+ 	_endian=big
+ elif strings $TMPO.o | grep LiTTleEnDian >/dev/null; then
+ 	_endian=little
++elif [ "$_host_cpu" = "le32" ]; then
++	_endian=little
+ fi
+ echo $_endian;
+ cc_check_clean tmp_endianness_check.cpp
+@@ -1991,6 +2008,9 @@ case $_host_cpu in
+ 	amd64 | x86_64)
+ 		echo "x86_64"
+ 		;;
++	le32)
++		echo "Generic le32"
++		;;
+ 	*)
+ 		echo "unknown ($_host_cpu)"
+ 		;;
+@@ -2915,7 +2935,7 @@ case $_host_os in
+ 	amigaos* | cygwin* | dreamcast | ds | gamecube | mingw* | n64 | ps2 | ps3 | psp | wii | wince)
+ 		_posix=no
+ 		;;
+-	android | beos* | bsd* | darwin* | freebsd* | gph-linux | haiku* | hpux* | iphone | irix* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | uclinux* | webos)
++	android | beos* | bsd* | darwin* | freebsd* | gph-linux | haiku* | hpux* | iphone | irix* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | uclinux* | webos | *nacl)
+ 		_posix=yes
+ 		;;
+ 	os2-emx*)
+diff --git a/graphics/scaler/scale2x.cpp b/graphics/scaler/scale2x.cpp
+index ac2dbad..0fc0603 100644
+--- a/graphics/scaler/scale2x.cpp
++++ b/graphics/scaler/scale2x.cpp
+@@ -201,9 +201,15 @@ static inline void scale2x_8_mmx_single(scale2x_uint8* dst, const scale2x_uint8*
  		"0:\n"
  
  		/* set the current, current_pre, current_next registers */
@@ -541,7 +217,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  		"psrlq $56, %%mm0\n"
  		"psllq $56, %%mm1\n"
  		"movq %%mm7, %%mm2\n"
-@@ -224,7 +230,11 @@
+@@ -214,7 +220,11 @@ static inline void scale2x_8_mmx_single(scale2x_uint8* dst, const scale2x_uint8*
  		"por %%mm3, %%mm1\n"
  
  		/* current_upper */
@@ -553,7 +229,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  
  		/* compute the upper-left pixel for dst on %%mm2 */
  		/* compute the upper-right pixel for dst on %%mm4 */
-@@ -234,8 +244,13 @@
+@@ -224,8 +234,13 @@ static inline void scale2x_8_mmx_single(scale2x_uint8* dst, const scale2x_uint8*
  		"movq %%mm1, %%mm5\n"
  		"pcmpeqb %%mm6, %%mm2\n"
  		"pcmpeqb %%mm6, %%mm4\n"
@@ -567,7 +243,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  		"pandn %%mm2, %%mm3\n"
  		"pandn %%mm4, %%mm5\n"
  		"movq %%mm0, %%mm2\n"
-@@ -257,8 +272,13 @@
+@@ -247,8 +262,13 @@ static inline void scale2x_8_mmx_single(scale2x_uint8* dst, const scale2x_uint8*
  		"movq %%mm2, %%mm3\n"
  		"punpcklbw %%mm4, %%mm2\n"
  		"punpckhbw %%mm4, %%mm3\n"
@@ -581,7 +257,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  
  		/* next */
  		"add $8, %0\n"
-@@ -289,9 +309,15 @@
+@@ -278,9 +298,15 @@ static inline void scale2x_16_mmx_single(scale2x_uint16* dst, const scale2x_uint
  		"0:\n"
  
  		/* set the current, current_pre, current_next registers */
@@ -597,7 +273,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  		"psrlq $48, %%mm0\n"
  		"psllq $48, %%mm1\n"
  		"movq %%mm7, %%mm2\n"
-@@ -302,7 +328,11 @@
+@@ -291,7 +317,11 @@ static inline void scale2x_16_mmx_single(scale2x_uint16* dst, const scale2x_uint
  		"por %%mm3, %%mm1\n"
  
  		/* current_upper */
@@ -609,7 +285,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  
  		/* compute the upper-left pixel for dst on %%mm2 */
  		/* compute the upper-right pixel for dst on %%mm4 */
-@@ -312,8 +342,13 @@
+@@ -301,8 +331,13 @@ static inline void scale2x_16_mmx_single(scale2x_uint16* dst, const scale2x_uint
  		"movq %%mm1, %%mm5\n"
  		"pcmpeqw %%mm6, %%mm2\n"
  		"pcmpeqw %%mm6, %%mm4\n"
@@ -623,7 +299,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  		"pandn %%mm2, %%mm3\n"
  		"pandn %%mm4, %%mm5\n"
  		"movq %%mm0, %%mm2\n"
-@@ -335,8 +370,13 @@
+@@ -324,8 +359,13 @@ static inline void scale2x_16_mmx_single(scale2x_uint16* dst, const scale2x_uint
  		"movq %%mm2, %%mm3\n"
  		"punpcklwd %%mm4, %%mm2\n"
  		"punpckhwd %%mm4, %%mm3\n"
@@ -637,7 +313,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  
  		/* next */
  		"add $8, %0\n"
-@@ -367,9 +407,15 @@
+@@ -355,9 +395,15 @@ static inline void scale2x_32_mmx_single(scale2x_uint32* dst, const scale2x_uint
  		"0:\n"
  
  		/* set the current, current_pre, current_next registers */
@@ -653,7 +329,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  		"psrlq $32, %%mm0\n"
  		"psllq $32, %%mm1\n"
  		"movq %%mm7, %%mm2\n"
-@@ -380,7 +426,11 @@
+@@ -368,7 +414,11 @@ static inline void scale2x_32_mmx_single(scale2x_uint32* dst, const scale2x_uint
  		"por %%mm3, %%mm1\n"
  
  		/* current_upper */
@@ -665,7 +341,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  
  		/* compute the upper-left pixel for dst on %%mm2 */
  		/* compute the upper-right pixel for dst on %%mm4 */
-@@ -390,8 +440,13 @@
+@@ -378,8 +428,13 @@ static inline void scale2x_32_mmx_single(scale2x_uint32* dst, const scale2x_uint
  		"movq %%mm1, %%mm5\n"
  		"pcmpeqd %%mm6, %%mm2\n"
  		"pcmpeqd %%mm6, %%mm4\n"
@@ -679,7 +355,7 @@ diff -Naur scummvm-1.2.1_orig/graphics/scaler/scale2x.cpp scummvm-1.2.1/graphics
  		"pandn %%mm2, %%mm3\n"
  		"pandn %%mm4, %%mm5\n"
  		"movq %%mm0, %%mm2\n"
-@@ -413,8 +468,13 @@
+@@ -401,8 +456,13 @@ static inline void scale2x_32_mmx_single(scale2x_uint32* dst, const scale2x_uint
  		"movq %%mm2, %%mm3\n"
  		"punpckldq %%mm4, %%mm2\n"
  		"punpckhdq %%mm4, %%mm3\n"
