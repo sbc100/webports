@@ -128,7 +128,7 @@ index 7a8b1e7..6a9b94f 100644
  
  
 diff --git a/configure b/configure
-index 5016a86..96571c1 100755
+index 5016a86..019faad 100755
 --- a/configure
 +++ b/configure
 @@ -1338,6 +1338,16 @@ n64)
@@ -178,7 +178,24 @@ index 5016a86..96571c1 100755
  fi
  echo $_endian;
  cc_check_clean tmp_endianness_check.cpp
-@@ -1991,6 +2008,9 @@ case $_host_cpu in
+@@ -1965,10 +1982,12 @@ echo_n "Checking host CPU architecture... "
+ case $_host_cpu in
+ 	arm*)
+ 		echo "ARM"
+-		define_in_config_if_yes yes 'USE_ARM_SCALER_ASM'
+-		define_in_config_if_yes yes 'USE_ARM_SOUND_ASM'
+-		define_in_config_if_yes yes 'USE_ARM_SMUSH_ASM'
+-		define_in_config_if_yes yes 'USE_ARM_GFX_ASM'
++		if [ ! $_host_os = "nacl" ]; then
++			define_in_config_if_yes yes 'USE_ARM_SCALER_ASM'
++			define_in_config_if_yes yes 'USE_ARM_SOUND_ASM'
++			define_in_config_if_yes yes 'USE_ARM_SMUSH_ASM'
++			define_in_config_if_yes yes 'USE_ARM_GFX_ASM'
++		fi
+ 		# FIXME: The following feature exhibits a bug during the intro scene of Indy 4
+ 		# (on Pandora and iPhone at least)
+ 		#define_in_config_if_yes yes 'USE_ARM_COSTUME_ASM'
+@@ -1991,6 +2010,9 @@ case $_host_cpu in
  	amd64 | x86_64)
  		echo "x86_64"
  		;;
@@ -188,7 +205,7 @@ index 5016a86..96571c1 100755
  	*)
  		echo "unknown ($_host_cpu)"
  		;;
-@@ -2915,7 +2935,7 @@ case $_host_os in
+@@ -2915,7 +2937,7 @@ case $_host_os in
  	amigaos* | cygwin* | dreamcast | ds | gamecube | mingw* | n64 | ps2 | ps3 | psp | wii | wince)
  		_posix=no
  		;;
