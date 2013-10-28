@@ -240,7 +240,7 @@ $(PACKAGES:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
 	python build_tools/naclports.py check -C $*
 	if python build_tools/naclports.py enabled -C $*; then \
-	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./nacl-$(notdir $*).sh; fi
+	cd $* && NACL_ARCH=$(NACL_ARCH) NACL_GLIBC=$(NACL_GLIBC) ./build.sh; fi
 	mkdir -p $(@D)
 	touch $@
 endif
