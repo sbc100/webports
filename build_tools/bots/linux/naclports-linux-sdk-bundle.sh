@@ -24,6 +24,10 @@ if [ -z "${TEST_BUILDBOT:-}" ]; then
   make clean
 fi
 
+# Don't build lua with readline support. We don't want to include
+# readline and ncurses in the SDK.
+export LUA_NO_READLINE=1
+
 PACKAGES=$(make sdklibs_list)
 
 # $1 - name of package

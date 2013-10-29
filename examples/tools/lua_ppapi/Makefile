@@ -7,14 +7,22 @@ NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = lua
-LIBS = lua ppapi_simple readline ncurses tar nacl_io ppapi_cpp ppapi nosys
+LIBS = lua ppapi_simple tar
+
+ifeq ($(LUA_NO_READLINE),)
+LIBS += readline ncurses
+CFLAGS += -DLUA_USE_READLINE
+endif
+
+LIBS += nacl_io ppapi_cpp ppapi nosys
 ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic
 endif
 SOURCES = lua.c main.c
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/lua/$(TOOLCHAIN)
-CFLAGS = -DLUA_USE_POSIX -DLUA_USE_READLINE
+CFLAGS += -DLUA_USE_POSIX
+
 
 ifeq ($(TOOLCHAIN),pnacl)
 EXEEXT=.pexe

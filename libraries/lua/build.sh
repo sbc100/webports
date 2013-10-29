@@ -16,6 +16,9 @@ BuildStep() {
   else
     PLAT=nacl-newlib
   fi
+  if [ "${LUA_NO_READLINE:-}" = "1" ]; then
+    PLAT+=-basic
+  fi
   LogExecute make "CC=${NACLCC}" "PLAT=${PLAT}" "INSTALL_TOP=${NACLPORTS_PREFIX}" clean
   LogExecute make "CC=${NACLCC}" "PLAT=${PLAT}" "INSTALL_TOP=${NACLPORTS_PREFIX}" -j${OS_JOBS}
 }

@@ -189,8 +189,9 @@ examples: $(EXAMPLES)
 all: $(PACKAGES)
 # The subset of libraries that are shipped as part of the
 # official NaCl SDK
-SDK_LIBS = freealut freetype jpeg lua modplug ogg openal png theora tiff tinyxml
-SDK_LIBS += vorbis webp xml2 zlib
+#SDK_LIBS = freealut freetype jpeg lua modplug ogg openal png theora tiff tinyxml
+#SDK_LIBS += vorbis webp xml2 zlib
+SDK_LIBS = lua
 sdklibs: $(SDK_LIBS)
 
 package_list:
@@ -263,7 +264,11 @@ $(SENT)/libraries/ffmpeg: \
 $(SENT)/libraries/webp: libraries/tiff libraries/jpeg
 $(SENT)/libraries/libav: libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
+ifeq ($(LUA_NO_READLINE),)
 $(SENT)/libraries/lua: libraries/readline
+else
+$(SENT)/libraries/lua: libraries/glibc-compat
+endif
 $(SENT)/libraries/python: libraries/readline libraries/zlib
 $(SENT)/libraries/ruby: libraries/readline libraries/zlib
 $(SENT)/libraries/sqlite: libraries/readline
