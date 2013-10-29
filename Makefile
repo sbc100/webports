@@ -189,9 +189,8 @@ examples: $(EXAMPLES)
 all: $(PACKAGES)
 # The subset of libraries that are shipped as part of the
 # official NaCl SDK
-#SDK_LIBS = freealut freetype jpeg lua modplug ogg openal png theora tiff tinyxml
-#SDK_LIBS += vorbis webp xml2 zlib
-SDK_LIBS = lua
+SDK_LIBS = freealut freetype jpeg lua modplug ogg openal png theora tiff tinyxml
+SDK_LIBS += vorbis webp xml2 zlib
 sdklibs: $(SDK_LIBS)
 
 package_list:
