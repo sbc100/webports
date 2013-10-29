@@ -100,13 +100,12 @@ To add a package:
 Modifying package sources / Working with patches
 ------------------------------------------------
 
-When a package is first built its source is downloaded and extracted to
+When a package is first built, its source is downloaded and extracted to
 ``out/repository/<PKG_NAME>``.  A new git repository is then created in this
 folder with the original archive contents on a branch called ``upstream``.  The
-optional ``nacl.patch`` files is then applied on the ``master`` branch.  To
-make changes to a package patch file the recommended workflow is.  This means
-that at any given time you can see the changes from upstream using ``git diff
-upstream``.
+optional ``nacl.patch`` file is then applied on the ``master`` branch.  This
+means that at any given time you can see the changes from upstream using ``git
+diff upstream``.
 
 To make changes to a package's patch file the recommended workflow is:
 
