@@ -178,10 +178,12 @@ ALL_PACKAGES := $(LIBRARIES) $(EXAMPLES)
 PACKAGES := $(LIBRARIES) $(EXAMPLES)
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
+SENT := $(SENTINELS_DIR)/$(NACL_ARCH)
+ifneq ($(NACL_ARCH), pnacl)
+  SENT := $(SENT)_$(NACL_LIBC)
+endif
 ifeq ($(NACL_DEBUG), 1)
-  SENT = $(SENTINELS_DIR)/$(NACL_ARCH)_$(NACL_LIBC)_debug
-else
-  SENT = $(SENTINELS_DIR)/$(NACL_ARCH)_$(NACL_LIBC)
+  SENT := $(SENT)_debug
 endif
 
 default: libraries
