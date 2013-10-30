@@ -1,7 +1,7 @@
 {
   "name": "Python",
   "description": "Python interactive shell built with Native Client",
-  "version": "2.7.5.1",
+  "version": "2.7.5.2",
   "manifest_version": 2,
   "icons": {
     "16": "icon_16.png",
@@ -9,8 +9,19 @@
     "128": "icon_128.png"
   },
   "app": {
-    "launch": {
-      "local_path": "index.html"
+    "background": {
+      "scripts": ["background.js"]
     }
-  }
+  },
+  "permissions": [
+    "storage",
+    { "socket": [
+        "tcp-listen:*:*",
+        "tcp-connect",
+        "resolve-host",
+        "udp-bind:*:*",
+        "udp-send-to:*:*"
+      ]
+    }
+  ]
 }

@@ -77,6 +77,7 @@ install:
 	cp ruby.js $(INSTALL_DIR)
 	cp ../../../build_tools/naclterm.js $(INSTALL_DIR)
 	cp manifest.json ${INSTALL_DIR}
+	cp background.js ${INSTALL_DIR}
 	cp icon_16.png ${INSTALL_DIR}
 	cp icon_48.png ${INSTALL_DIR}
 	cp icon_128.png ${INSTALL_DIR}

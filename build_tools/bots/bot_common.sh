@@ -107,7 +107,7 @@ CalculatePackageShards()
       readline
       libtar
       zlib
-      lua
+      lua5.2
       lua_ppapi
     "
   fi

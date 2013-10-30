@@ -9,8 +9,19 @@
     "128": "icon_128.png"
   },
   "app": {
-    "launch": {
-      "local_path": "vim.html"
+    "background": {
+      "scripts": ["background.js"]
     }
-  }
+  },
+  "permissions": [
+    "storage",
+    { "socket": [
+        "tcp-listen:*:*",
+        "tcp-connect",
+        "resolve-host",
+        "udp-bind:*:*",
+        "udp-send-to:*:*"
+      ]
+    }
+  ]
 }
