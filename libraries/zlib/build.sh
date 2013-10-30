@@ -10,6 +10,7 @@ source ../../build_tools/common.sh
 ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  LogExecute rm -f libz.*
   # TODO: side-by-side install
   local CONFIGURE_ARGS="--prefix=${NACLPORTS_PREFIX}"
   local CFLAGS="-Dunlink=puts"
@@ -31,6 +32,7 @@ RunMinigzip() {
     echo '  *** minigzip test FAILED ***' ; \
       exit 1
   fi
+  unset LD_LIBRARY_PATH
 }
 
 RunExample() {
@@ -42,7 +44,7 @@ RunExample() {
     #echo '  *** zlib test FAILED ***'; \
     #exit 1
   #fi
-  return
+  unset LD_LIBRARY_PATH
 }
 
 TestStep() {
@@ -87,7 +89,7 @@ PackageInstall() {
   PreInstallStep
   DownloadStep
   ExtractStep
-  # zlib doesn't need patching, so no patch step
+  PatchStep
   ConfigureStep
   BuildStep
   ValidateStep
