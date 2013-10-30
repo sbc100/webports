@@ -1,0 +1,47 @@
+#!/bin/bash
+# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source pkg_info
+source ../../build_tools/common.sh
+
+EXECUTABLES="src/lua src/luac"
+
+BuildStep() {
+  Banner "Build ${PACKAGE_NAME}"
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  if [ "${NACL_GLIBC}" = "1" ]; then
+    PLAT=nacl-glibc
+  else
+    PLAT=nacl-newlib
+  fi
+  if [ "${LUA_NO_READLINE:-}" = "1" ]; then
+    PLAT+=-basic
+  fi
+  LogExecute make PLAT=${PLAT} clean
+  set -x
+  make AR="${NACLAR} rcu" RANLIB="${NACLRANLIB}" CC="${NACLCC}" PLAT=${PLAT} INSTALL_TOP="${NACLPORTS_PREFIX}" -j${OS_JOBS}
+  set +x
+}
+
+
+InstallStep() {
+  Banner "Install ${PACKAGE_NAME}"
+
+  # TODO: side-by-side install
+  LogExecute make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" install
+  cd src
+  if [ "${NACL_ARCH}" = pnacl ]; then
+    # Just do the x86-64 version for now.
+    TranslateAndWriteSelLdrScript lua x86-64 lua.x86-64.nexe lua.sh
+    TranslateAndWriteSelLdrScript luac x86-64 luac.x86-64.nexe luac.sh
+  else
+    WriteSelLdrScript lua.sh lua
+    WriteSelLdrScript luac.sh luac
+  fi
+}
+
+
+PackageInstall
+exit 0

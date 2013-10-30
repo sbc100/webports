@@ -121,7 +121,8 @@ LIBRARIES = \
      libraries/libtommath \
      libraries/libvorbis \
      libraries/libxml2 \
-     libraries/lua \
+     libraries/lua5.1 \
+     libraries/lua5.2 \
      libraries/metakit \
      libraries/Mesa \
      libraries/mpg123 \
@@ -189,7 +190,7 @@ examples: $(EXAMPLES)
 all: $(PACKAGES)
 # The subset of libraries that are shipped as part of the
 # official NaCl SDK
-SDK_LIBS = freealut freetype jpeg lua modplug ogg openal png theora tiff tinyxml
+SDK_LIBS = freealut freetype jpeg lua5.2 modplug ogg openal png theora tiff tinyxml
 SDK_LIBS += vorbis webp xml2 zlib
 sdklibs: $(SDK_LIBS)
 
@@ -264,9 +265,11 @@ $(SENT)/libraries/webp: libraries/tiff libraries/jpeg
 $(SENT)/libraries/libav: libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
 ifeq ($(LUA_NO_READLINE),)
-$(SENT)/libraries/lua: libraries/readline
+$(SENT)/libraries/lua5.1: libraries/readline
+$(SENT)/libraries/lua5.2: libraries/readline
 else
-$(SENT)/libraries/lua: libraries/glibc-compat
+$(SENT)/libraries/lua5.1: libraries/glibc-compat
+$(SENT)/libraries/lua5.2: libraries/glibc-compat
 endif
 $(SENT)/libraries/python: libraries/readline libraries/zlib
 $(SENT)/libraries/ruby: libraries/readline libraries/zlib
@@ -277,7 +280,7 @@ $(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
-$(SENT)/examples/tools/lua_ppapi: libraries/lua libraries/libtar
+$(SENT)/examples/tools/lua_ppapi: libraries/lua5.2 libraries/libtar
 $(SENT)/examples/tools/ruby_ppapi: \
     libraries/ruby libraries/libtar libraries/glibc-compat
 $(SENT)/examples/games/scummvm: libraries/SDL libraries/libvorbis \
@@ -358,7 +361,9 @@ jsoncpp: libraries/jsoncpp ;
 lame: libraries/lame ;
 lcms: libraries/lcms ;
 libav: libraries/libav ;
-lua: libraries/lua ;
+lua5.1: libraries/lua5.1 ;
+lua5.2: libraries/lua5.2 ;
+lua: libraries/lua5.2 ;
 mesa Mesa: libraries/Mesa ;
 metakit: libraries/metakit ;
 mikmod libmikmod: libraries/libmikmod ;
