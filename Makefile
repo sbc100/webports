@@ -269,9 +269,6 @@ $(SENT)/libraries/libtar: libraries/zlib
 ifeq ($(LUA_NO_READLINE),)
 $(SENT)/libraries/lua5.1: libraries/readline
 $(SENT)/libraries/lua5.2: libraries/readline
-else
-$(SENT)/libraries/lua5.1: libraries/glibc-compat
-$(SENT)/libraries/lua5.2: libraries/glibc-compat
 endif
 $(SENT)/libraries/python: libraries/readline libraries/zlib
 $(SENT)/libraries/ruby: libraries/readline libraries/zlib
