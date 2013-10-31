@@ -31,9 +31,12 @@ ConfigureStep() {
 
 
 HackStepForNewlib() {
-  # This makefile link programs that require socket(), etc.
-  # Stub them out until we link against nacl_io or something.
+  # apps/Makefile links programs that require socket(), etc.
+  # Stub it out until we link against nacl_io or something.
   echo "all clean install: " > apps/Makefile
+  # test/Makefile is similar -- stub out, but keep the original for testing.
+  mv test/Makefile test/Makefile.orig
+  echo "all clean install: " > test/Makefile
 }
 
 
@@ -64,9 +67,9 @@ jpaketest srptest asn1test"
     for to_filter in ${broken_tests}; do
       passing_tests=$(echo ${passing_tests} | sed "s/\b${to_filter}//g")
     done
-    make CC=${NACLCC} ${passing_tests}
+    make -f Makefile.orig CC=${NACLCC} ${passing_tests}
     # Special case -- needs an input file =(
-    make CC=${NACLCC} evp_test
+    make -f Makefile.orig CC=${NACLCC} evp_test
   else
     # Plain make works better and doesn't muck with CC, etc.
     # Otherwise, we end up missing -ldl for GLIBC...
@@ -76,7 +79,7 @@ jpaketest srptest asn1test"
     RunSelLdrCommand ${test_name}
   done
   RunSelLdrCommand evp_test evptests.txt
-  popd test
+  popd
 }
 
 PackageInstall() {
