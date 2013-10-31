@@ -31,6 +31,8 @@ def main(args):
   parser = optparse.OptionParser()
   parser.add_option('-n', '--dry-run', action='store_true',
                     help="Don't actually upload anything")
+  parser.add_option('--check', action='store_true',
+                    help="Verify that the mirror is up-to-date.")
   options, _ = parser.parse_args(args)
 
   ports_root = os.path.dirname(SCRIPT_DIR)
@@ -46,6 +48,10 @@ def main(args):
     if basename in listing:
       # already mirrored
       return
+
+    if options.check:
+      print 'update_mirror: Archive missing from mirror: %s' % basename
+      sys.exit(1)
 
     # Download upstream URL
     print 'Downloading: %s' % package.URL

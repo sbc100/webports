@@ -19,9 +19,16 @@ def CheckBuildbot(input_api, output_api):
     subprocess.check_call('build_tools/bots/test.sh')
   except subprocess.CalledProcessError as e:
     return [output_api.PresubmitError('build_tools/bots/test.sh failed')]
-
   return []
 
+def CheckMirror(input_api, output_api):
+  try:
+    subprocess.check_call(['build_tools/update_mirror.py', '--check'])
+  except subprocess.CalledProcessError as e:
+    message = 'update_mirror.py --check failed.'
+    message += '\nRun build_tools/update_mirror.py to update.'
+    return [output_api.PresubmitError(message)]
+  return []
 
 def CheckChangeOnUpload(input_api, output_api):
   report = []
@@ -36,6 +43,7 @@ def CheckChangeOnUpload(input_api, output_api):
 def CheckChangeOnCommit(input_api, output_api):
   report = []
   report.extend(CheckChangeOnUpload(input_api, output_api))
+  report.extend(CheckMirror(input_api, output_api))
   report.extend(input_api.canned_checks.CheckTreeIsOpen(
       input_api, output_api,
       json_url='http://naclports-status.appspot.com/current?format=json'))
