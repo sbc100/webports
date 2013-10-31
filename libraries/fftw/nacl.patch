@@ -1,35 +1,13 @@
-diff -Naur fftw-3.2.2/config.sub fftw-3.2.2.nacl/config.sub
---- fftw-3.2.2/config.sub	2009-05-03 16:55:47.000000000 -0700
-+++ fftw-3.2.2.nacl/config.sub	2011-09-06 14:55:11.434185841 -0700
-@@ -759,6 +759,10 @@
- 		basic_machine=i370-ibm
- 		os=-mvs
- 		;;
-+        nacl)
-+                basic_machine=i686-pc
-+                os=-nacl
-+                ;;
- 	ncr3000)
- 		basic_machine=i486-ncr
- 		os=-sysv4
-@@ -1283,7 +1287,7 @@
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
- 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
- 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
--	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
-+	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -nacl*)
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)
-diff -Naur fftw-3.2.2/simd/sse2.c fftw-3.2.2.nacl/simd/sse2.c
---- fftw-3.2.2/simd/sse2.c	2009-07-12 03:35:49.000000000 -0700
-+++ fftw-3.2.2.nacl/simd/sse2.c	2011-09-06 14:55:06.415003566 -0700
+diff --git a/simd/sse2.c b/simd/sse2.c
+index 7d6362c..910516f 100644
+--- a/simd/sse2.c
++++ b/simd/sse2.c
 @@ -47,6 +47,11 @@
  
    static int sse2_works(void)
    {
 +#ifdef __native_client__
-+    /* NaCl doesn't support signal() to test whether SSE2 works, so we just 
++    /* NaCl doesn't support signal() to test whether SSE2 works, so we just
 +       trust cpuid when it says that SSE2 is supported */
 +    return 1;
 +#else
@@ -44,9 +22,10 @@ diff -Naur fftw-3.2.2/simd/sse2.c fftw-3.2.2.nacl/simd/sse2.c
    }
  
    extern void X(check_alignment_of_sse2_pm)(void);
-diff -Naur fftw-3.2.2/simd/x86-cpuid.h fftw-3.2.2.nacl/simd/x86-cpuid.h
---- fftw-3.2.2/simd/x86-cpuid.h	2009-07-12 03:35:49.000000000 -0700
-+++ fftw-3.2.2.nacl/simd/x86-cpuid.h	2011-09-06 15:18:19.344065183 -0700
+diff --git a/simd/x86-cpuid.h b/simd/x86-cpuid.h
+index edf59f3..68ad86e 100644
+--- a/simd/x86-cpuid.h
++++ b/simd/x86-cpuid.h
 @@ -29,6 +29,13 @@
  
  static inline int is_386() 
@@ -61,7 +40,7 @@ diff -Naur fftw-3.2.2/simd/x86-cpuid.h fftw-3.2.2.nacl/simd/x86-cpuid.h
  #ifdef _MSC_VER
      unsigned int result,tst;
      _asm {
-@@ -63,10 +70,14 @@
+@@ -63,10 +70,14 @@ static inline int is_386()
      );
  #endif
      return (result == tst);
@@ -76,7 +55,7 @@ diff -Naur fftw-3.2.2/simd/x86-cpuid.h fftw-3.2.2.nacl/simd/x86-cpuid.h
  #ifdef _MSC_VER
      unsigned int result,tst;
      _asm {
-@@ -101,6 +112,7 @@
+@@ -101,6 +112,7 @@ static inline int has_cpuid()
      );
  #endif
      return (result != tst);
@@ -84,3 +63,19 @@ diff -Naur fftw-3.2.2/simd/x86-cpuid.h fftw-3.2.2.nacl/simd/x86-cpuid.h
  }
  
  static inline int cpuid_edx(int op)
+diff --git a/threads/threads.c b/threads/threads.c
+index 5112a7b..2c302ac 100644
+--- a/threads/threads.c
++++ b/threads/threads.c
+@@ -138,7 +138,11 @@ static void os_create_thread(FFTW_WORKER (*worker)(void *arg),
+      pthread_t tid;
+ 
+      pthread_attr_init(&attr);
++#if !defined(__native_client__) || defined(__GLIBC__)
++     // NaCl newlib doesn't define PTHREAD_SCOPE_SYSTEM.
++     // See https://code.google.com/p/nativeclient/issues/detail?id=3721
+      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM); 
++#endif
+      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+ 
+      pthread_create(&tid, &attr, worker, (void *)arg);

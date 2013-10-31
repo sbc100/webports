@@ -23,9 +23,9 @@ ConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  extra=
+  extra="--enable-threads"
   if [ ${NACL_ARCH} = "x86_64" -o ${NACL_ARCH} = "i686" ] ; then
-    extra="--enable-sse2"
+    extra="${extra} --enable-sse2"
   fi
 
   LogExecute ./configure --prefix=${NACLPORTS_PREFIX} --host=nacl ${extra}
