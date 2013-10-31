@@ -17,26 +17,8 @@ source ../../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/examples/games/snes9x-1.53
 EXECUTABLES=snes9x
-
-ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-
-  CONFIG_FLAGS="--host=nacl \
-      --prefix=${NACLPORTS_PREFIX} \
-      --exec-prefix=${NACLPORTS_PREFIX} \
-      --libdir=${NACLPORTS_LIBDIR} \
-      --oldincludedir=${NACLPORTS_INCLUDE} \
+NACL_CONFIGURE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix/configure
+EXTRA_CONFIGURE_ARGS="\
       --disable-gamepad \
       --disable-gzip \
       --disable-zip \
@@ -45,28 +27,44 @@ ConfigureStep() {
       --disable-netplay \
       --without-x \
       --enable-sound"
+export LIBS="${NACLPORTS_LDFLAGS} -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
 
-  export LIBS="${NACLPORTS_LDFLAGS} \
-      -lnacl-mounts -lppapi_cpp -lppapi \
-      -lpthread -lstdc++"
+AutogenStep() {
+  echo "Autogen..."
+  pushd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
+  autoconf
+  PatchConfigure
+  PatchConfigSub
+  popd
+}
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
-  cp -f ${START_DIR}/pepper.cpp .
-  cp -f ${START_DIR}/nacl.h .
-  cp -f ${START_DIR}/nacl.cpp .
-  cp -f ${START_DIR}/event_queue.h .
-  autoconf && ./configure ${CONFIG_FLAGS}
+ConfigureStep() {
+  AutogenStep
+  DefaultConfigureStep
+
+  # This configure script generates a Makefile that checks timestamps on
+  # configure.ac, configure and Makefile.in. Copy them from the unix directory.
+  cp ../unix/{configure.ac,configure,Makefile.in} .
+  touch Makefile
 }
 
 InstallStep(){
-  BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
+  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  local BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
   MakeDir ${PUBLISH_DIR}
-  install ${START_DIR}/snes.html ${PUBLISH_DIR}
-  install ${START_DIR}/snes.js ${PUBLISH_DIR}
-  install ${START_DIR}/style.css ${PUBLISH_DIR}
-  install ${START_DIR}/snes.nmf ${PUBLISH_DIR}
-  install ${BUILD_DIR}/snes9x \
-      ${PUBLISH_DIR}/snes_${NACL_ARCH}.nexe
+  install ${START_DIR}/snes9x.html ${PUBLISH_DIR}
+  install ${START_DIR}/snes9x.js ${PUBLISH_DIR}
+  install ${BUILD_DIR}/snes9x ${PUBLISH_DIR}/snes9x_${NACL_ARCH}${NACL_EXEEXT}
+
+  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      ${NACL_CREATE_NMF_FLAGS} \
+      ${PUBLISH_DIR}/snes9x_*${NACL_EXEEXT} \
+      -s ${PUBLISH_DIR} \
+      -o ${PUBLISH_DIR}/snes9x.nmf
+
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    sed -i.bak 's/x-nacl/x-pnacl/' ${PUBLISH_DIR}/snes9x.js
+  fi
 }
 
 PackageInstall

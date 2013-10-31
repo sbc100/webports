@@ -766,8 +766,9 @@ DefaultConfigureStep() {
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
   local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  if [ ! -f "${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}" ]; then
-    echo "No configure script found"
+  local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
+  if [ ! -f "${CONFIGURE}" ]; then
+    echo "No configure script found at ${CONFIGURE}"
     return
   fi
   local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
@@ -784,7 +785,7 @@ DefaultConfigureStep() {
     # it doesn't know about that "le32" either.  So we just say "nacl".
     conf_host="nacl"
   fi
-  LogExecute ${NACL_CONFIGURE_PATH:-../configure} \
+  LogExecute ${CONFIGURE} \
     --host=${conf_host} \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
