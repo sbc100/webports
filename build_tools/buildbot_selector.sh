@@ -57,9 +57,9 @@ Publish() {
   SRC_PATH=out/publish
   echo "Uploading to ${UPLOAD_PATH}"
 
-  ${GSUTIL} cp -R -a public-read ${SRC_PATH} gs://${UPLOAD_PATH}
+  ${GSUTIL} cp -R -a public-read ${SRC_PATH}/* gs://${UPLOAD_PATH}/
 
-  URL="http://gsdview.appspot.com/${UPLOAD_PATH}"
+  URL="http://gsdview.appspot.com/${UPLOAD_PATH}/"
   echo "@@@STEP_LINK@browse@${URL}@@@"
 }
 
@@ -120,13 +120,6 @@ fi
 export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
 export PEPPER_DIR=pepper_${PEPPER_VERSION}
 
-# This a temporary hack until the pnacl support is more mature
-if [ ${LIBC} = "pnacl_newlib" ] ; then
-  BOT_DIR=${SCRIPT_DIR}/bots
-  StartBuild pnacl_bots.sh pnacl
-  exit 0
-fi
-
 # The SDK builder builds a subset of the ports, but with multiple
 # configurations.
 if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
@@ -135,19 +128,25 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   exit 0
 fi
 
-# Compute script name.
-readonly SCRIPT_NAME="naclports-${BOT_OS_DIR}-${SHARD}.sh"
-BOT_DIR=${SCRIPT_DIR}/bots/${BOT_OS_DIR}
+# This a temporary hack until the pnacl support is more mature
+if [ ${LIBC} = "pnacl_newlib" ] ; then
+  BOT_DIR=${SCRIPT_DIR}/bots
+  StartBuild pnacl_bots.sh pnacl
+else
+  # Compute script name.
+  readonly SCRIPT_NAME="naclports-${BOT_OS_DIR}-${SHARD}.sh"
+  BOT_DIR=${SCRIPT_DIR}/bots/${BOT_OS_DIR}
 
-# Build 32-bit.
-StartBuild ${SCRIPT_NAME} i686
+  # Build 32-bit.
+  StartBuild ${SCRIPT_NAME} i686
 
-# Build 64-bit.
-StartBuild ${SCRIPT_NAME} x86_64
+  # Build 64-bit.
+  StartBuild ${SCRIPT_NAME} x86_64
 
-# Build ARM.
-if [ ${NACL_GLIBC} != "1" ]; then
-  StartBuild ${SCRIPT_NAME} arm
+  # Build ARM.
+  if [ ${NACL_GLIBC} != "1" ]; then
+    StartBuild ${SCRIPT_NAME} arm
+  fi
 fi
 
 Publish
