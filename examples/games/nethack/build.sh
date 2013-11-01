@@ -70,13 +70,17 @@ InstallStep() {
   sed 's/nethack\.nmf/nethack_debug.nmf/' \
       ${START_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack_debug.js
 
-  # Copy over source tree as a gdb sample.
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  local ASSEMBLY_SRC_DIR="${PUBLISH_DIR}/nethack_src"
+
+  # Uncomment these lines to copy over source tree as a gdb sample.
+  # Do not submit otherwise nethack source tree will be uploaded to
+  # along with the rest of the 'out/publish' tree.
+  #local ASSEMBLY_SRC_DIR="${PUBLISH_DIR}/nethack_src"
+  #LogExecute rm -rf ${ASSEMBLY_SRC_DIR}
+  #LogExecute cp -r ${PACKAGE_DIR} ${ASSEMBLY_SRC_DIR}
+
   local MANIFEST_PATH="${PUBLISH_DIR}/nethack.manifest"
   LogExecute rm -f ${MANIFEST_PATH}
-  LogExecute rm -rf ${ASSEMBLY_SRC_DIR}
-  LogExecute cp -r ${PACKAGE_DIR} ${ASSEMBLY_SRC_DIR}
   pushd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/genhttpfs.py \
       -r -o /tmp/nethack_manifest.tmp .
