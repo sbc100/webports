@@ -53,7 +53,7 @@ Publish() {
   fi
   echo "@@@BUILD_STEP upload binaries@@@"
   UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
-  UPLOAD_PATH+=${BUILDBOT_REVISION}/publish
+  UPLOAD_PATH+=${BUILDBOT_GOT_REVISION}/publish
   SRC_PATH=out/publish
   echo "Uploading to ${UPLOAD_PATH}"
 
@@ -63,7 +63,13 @@ Publish() {
   echo "@@@STEP_LINK@browse@${URL}@@@"
 }
 
-# Ignore 'periodic-' prefix.
+if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
+  readonly PERIODIC=1
+else
+  readonly PERIODIC=0
+fi
+
+# Strip 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 
 if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
@@ -149,6 +155,8 @@ else
   fi
 fi
 
-Publish
+if [ ${PERIODIC} != "1" ]; then
+  Publish
+fi
 
 exit $RESULT
