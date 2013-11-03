@@ -1,20 +1,20 @@
-diff --git a/simd/sse2.c b/simd/sse2.c
-index 7d6362c..910516f 100644
---- a/simd/sse2.c
-+++ b/simd/sse2.c
-@@ -47,6 +47,11 @@
+diff --git a/simd-support/sse2.c b/simd-support/sse2.c
+index 7bbc3f0..5c6e6e1 100644
+--- a/simd-support/sse2.c
++++ b/simd-support/sse2.c
+@@ -52,6 +52,11 @@
  
    static int sse2_works(void)
    {
 +#ifdef __native_client__
-+    /* NaCl doesn't support signal() to test whether SSE2 works, so we just
-+       trust cpuid when it says that SSE2 is supported */
-+    return 1;
++       /* NaCl doesn't support signal() to test whether SSE2 works, so we
++        * just trust cpuid when it says that SSE2 is supported */
++       return 1;
 +#else
         void (*oldsig)(int);
         oldsig = signal(SIGILL, sighandler);
         if (setjmp(jb)) {
-@@ -62,6 +67,7 @@
+@@ -68,6 +73,7 @@
  	    signal(SIGILL, oldsig);
  	    return 1;
         }
@@ -22,10 +22,10 @@ index 7d6362c..910516f 100644
    }
  
    extern void X(check_alignment_of_sse2_pm)(void);
-diff --git a/simd/x86-cpuid.h b/simd/x86-cpuid.h
-index edf59f3..68ad86e 100644
---- a/simd/x86-cpuid.h
-+++ b/simd/x86-cpuid.h
+diff --git a/simd-support/x86-cpuid.h b/simd-support/x86-cpuid.h
+index 774124c..ae7a4b0 100644
+--- a/simd-support/x86-cpuid.h
++++ b/simd-support/x86-cpuid.h
 @@ -29,6 +29,13 @@
  
  static inline int is_386() 
@@ -50,7 +50,7 @@ index edf59f3..68ad86e 100644
  static inline int has_cpuid() 
  {
 +#ifdef __native_client__
-+  return 1;
++    return 1;
 +#else
  #ifdef _MSC_VER
      unsigned int result,tst;
@@ -64,10 +64,10 @@ index edf59f3..68ad86e 100644
  
  static inline int cpuid_edx(int op)
 diff --git a/threads/threads.c b/threads/threads.c
-index 5112a7b..2c302ac 100644
+index d3a658f..a5b1576 100644
 --- a/threads/threads.c
 +++ b/threads/threads.c
-@@ -138,7 +138,11 @@ static void os_create_thread(FFTW_WORKER (*worker)(void *arg),
+@@ -137,7 +137,11 @@ static void os_create_thread(FFTW_WORKER (*worker)(void *arg),
       pthread_t tid;
  
       pthread_attr_init(&attr);

@@ -6,13 +6,8 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-# TODO: Remove when this is fixed.
-# https://code.google.com/p/nativeclient/issues/detail?id=3205
-if [ "$NACL_ARCH" = "arm" ]; then
-  export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
-fi
-
 ConfigureStep() {
+  local EXTRA_CONFIGURE_OPTS=("${@:-}")
   Banner "Configuring ${PACKAGE_NAME}"
   # Export the nacl tools.
   export CC=${NACLCC}
@@ -24,13 +19,39 @@ ConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   extra="--enable-threads"
-  if [ ${NACL_ARCH} = "x86_64" -o ${NACL_ARCH} = "i686" ] ; then
+  if [ ${NACL_ARCH} = "x86_64" -o ${NACL_ARCH} = "i686" ]; then
     extra="${extra} --enable-sse2"
   fi
 
-  LogExecute ./configure --prefix=${NACLPORTS_PREFIX} --host=nacl ${extra}
+  LogExecute ./configure \
+    --host=nacl \
+    --prefix=${NACLPORTS_PREFIX} \
+    ${EXTRA_CONFIGURE_OPTS[@]} \
+    ${extra}
 }
 
+PackageInstall() {
+  PreInstallStep
+  DownloadStep
+  ExtractStep
+  PatchStep
+
+  # Build fftw (double)
+  EXECUTABLES=tools/fftw-wisdom${NACL_EXEEXT}
+  ConfigureStep
+  BuildStep
+  InstallStep
+  TranslateStep
+  ValidateStep
+
+  # build fftwf (float)
+  EXECUTABLES=tools/fftwf-wisdom${NACL_EXEEXT}
+  ConfigureStep --enable-float
+  BuildStep
+  InstallStep
+  TranslateStep
+  ValidateStep
+}
 
 PackageInstall
 exit 0
