@@ -816,6 +816,11 @@ DefaultBuildStep() {
 }
 
 
+DefaultTestStep() {
+  Banner "Testing ${PACKAGE_NAME} (no tests)"
+}
+
+
 DefaultInstallStep() {
   Banner "Installing"
   # assumes pwd has makefile
@@ -880,6 +885,7 @@ DefaultValidateStep() {
   fi
 }
 
+
 #
 # Run an executable with under sel_ldr.
 # $1 - Executable (.nexe) name
@@ -933,11 +939,13 @@ export NACLLOG=/dev/null
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 SEL_LDR=${NACL_SEL_LDR}
 IRT=${NACL_IRT}
-SDK_LIB_DIR=${NACL_SDK_LIB}
-LIB_PATH=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}:\${SDK_LIB_DIR}:\${SCRIPT_DIR}
+NACL_SDK_LIB=${NACL_SDK_LIB}
+LIB_PATH_DEFAULT=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}
+LIB_PATH_DEFAULT=\${LIB_PATH_DEFAULT}:\${NACL_SDK_LIB}:\${SCRIPT_DIR}
+SEL_LDR_LIB_PATH=\${SEL_LDR_LIB_PATH}:\${LIB_PATH_DEFAULT}
 
 "\${SEL_LDR}" -a -B "\${IRT}" -- \\
-    "\${SDK_LIB_DIR}/runnable-ld.so" --library-path "\${LIB_PATH}" \\
+    "\${NACL_SDK_LIB}/runnable-ld.so" --library-path "\${SEL_LDR_LIB_PATH}" \\
     "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   else
@@ -1077,6 +1085,9 @@ DefaultPackageInstall() {
   BuildStep
   TranslateStep
   ValidateStep
+  if [ "${SKIP_SEL_LDR_TESTS}" != "1" ]; then
+    TestStep
+  fi
   InstallStep
 }
 
@@ -1091,6 +1102,7 @@ ConfigureStep()  { DefaultConfigureStep;  }
 BuildStep()      { DefaultBuildStep;      }
 TranslateStep()  { DefaultTranslateStep;  }
 ValidateStep()   { DefaultValidateStep;   }
+TestStep()       { DefaultTestStep;       }
 InstallStep()    { DefaultInstallStep;    }
 PackageInstall() { DefaultPackageInstall; }
 

@@ -21,9 +21,7 @@ RunTest() {
 }
 
 TestStep() {
-  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
-    return
-  fi
+  Banner "Testing ${PACKAGE_NAME}"
 
   if [ "${NACL_GLIBC}" = "1" ]; then
     # TODO(sbc): find out why glibc version of rgb2gif is crashing
@@ -57,12 +55,6 @@ BuildStep() {
   # be removed.
   export PATH=${NACL_BIN_PATH}:${PATH};
   make -j${OS_JOBS} SUBDIRS="lib util"
-}
-
-
-PackageInstall() {
-  DefaultPackageInstall
-  TestStep
 }
 
 

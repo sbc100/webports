@@ -27,6 +27,10 @@ ConfigureStep() {
   MACHINE=${machine} CC=${NACLCC} AR=${NACLAR} RANLIB=${NACLRANLIB} ./config \
     --prefix=${NACLPORTS_PREFIX} no-asm no-hw no-krb5 ${EXTRA_ARGS} \
     -D_GNU_SOURCE
+
+  if [ "${NACL_GLIBC}" != "1" ]; then
+    HackStepForNewlib
+  fi
 }
 
 
@@ -47,6 +51,7 @@ BuildStep() {
   # to a version that supports parallel make.
   make build_libs
 }
+
 
 TestStep() {
   echo "Running OpenSSL TestStep"
@@ -80,20 +85,6 @@ jpaketest srptest asn1test"
   done
   RunSelLdrCommand evp_test evptests.txt
   popd
-}
-
-PackageInstall() {
-  PreInstallStep
-  DownloadStep
-  ExtractStep
-  PatchStep
-  ConfigureStep
-  if [ "${NACL_GLIBC}" != "1" ]; then
-    HackStepForNewlib
-  fi
-  BuildStep
-  TestStep
-  InstallStep
 }
 
 

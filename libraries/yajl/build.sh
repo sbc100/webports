@@ -6,11 +6,8 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-RunSelLdrTests() {
-  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
-    return
-  fi
-
+TestStep() {
+  Banner "Testing ${PACKAGE_NAME}"
   if [ ${NACL_ARCH} == "pnacl" ]; then
     local pexe=test/yajl_test
     local script=${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/yajl_test.sh
@@ -23,7 +20,7 @@ RunSelLdrTests() {
     local nexe=test/yajl_test
 
     WriteSelLdrScript ${script} ${nexe}
-    cd ${PACKAGE_DIR}/test && ./run_tests.sh ${script}
+    (cd ${PACKAGE_DIR}/test && LogExecute ./run_tests.sh ${script})
   fi
 }
 
@@ -51,12 +48,6 @@ BuildStep() {
   echo "Directory: $(pwd)"
   make clean
   make all -j${OS_JOBS}
-}
-
-
-PackageInstall() {
-  DefaultPackageInstall
-  RunSelLdrTests
 }
 
 

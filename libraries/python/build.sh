@@ -59,10 +59,5 @@ TestStep() {
   fi
 }
 
-PackageInstall() {
-  DefaultPackageInstall
-  TestStep
-}
-
 PackageInstall
 exit 0

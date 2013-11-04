@@ -48,10 +48,7 @@ RunExample() {
 }
 
 TestStep() {
-  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
-    return
-  fi
-
+  Banner "Testing ${PACKAGE_NAME}"
   if [ "${NACL_GLIBC}" = "1" ]; then
     # Tests do not currently run on GLIBC due to fdopen() not working
     # TODO(sbc): Remove this once glibc is fixed:
@@ -86,15 +83,7 @@ TestStep() {
 
 
 PackageInstall() {
-  PreInstallStep
-  DownloadStep
-  ExtractStep
-  PatchStep
-  ConfigureStep
-  BuildStep
-  ValidateStep
-  TestStep
-  DefaultInstallStep
+  DefaultPackageInstall
   if [ "${NACL_GLIBC}" = "1" ]; then
     ConfigureStep shared
     BuildStep

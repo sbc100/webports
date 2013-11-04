@@ -6,7 +6,8 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-RunSelLdrTests() {
+TestStep() {
+  Banner "Testing ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
 
   if [ "${NACL_GLIBC}" = "1" ]; then
@@ -34,14 +35,10 @@ AutogenStep() {
   PatchConfigSub
 }
 
+
 ConfigureStep() {
   AutogenStep
   DefaultConfigureStep
-}
-
-PackageInstall() {
-  DefaultPackageInstall
-  RunSelLdrTests
 }
 
 PackageInstall

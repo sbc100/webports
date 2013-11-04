@@ -6,7 +6,8 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-RunSelLdrTests() {
+TestStep() {
+  Banner "Testing ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   ChangeDir HelloWorld
   RunSelLdrCommand HelloWorld
@@ -28,13 +29,6 @@ ConfigureStep() {
            -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
            -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX}
 }
-
-
-PackageInstall() {
-  DefaultPackageInstall
-  RunSelLdrTests
-}
-
 
 PackageInstall
 exit 0

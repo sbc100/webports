@@ -1,8 +1,8 @@
 diff --git a/Makefile b/Makefile
-index bd9515f..05bfd1b 100644
+index bd9515f..3dd8292 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -36,7 +36,7 @@ RM= rm -f
+@@ -36,10 +36,10 @@ RM= rm -f
  # == END OF USER SETTINGS -- NO NEED TO CHANGE ANYTHING BELOW THIS LINE =======
  
  # Convenience platforms targets.
@@ -10,11 +10,28 @@ index bd9515f..05bfd1b 100644
 +PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris nacl-newlib nacl-newlib-basic nacl-glibc nacl-glibc-basic
  
  # What to install.
- TO_BIN= lua luac
+-TO_BIN= lua luac
++TO_BIN= lua$(EXEEXT) luac$(EXEEXT)
+ TO_INC= lua.h luaconf.h lualib.h lauxlib.h lua.hpp
+ TO_LIB= liblua.a
+ TO_MAN= lua.1 luac.1
 diff --git a/src/Makefile b/src/Makefile
-index fea895b..4f50b78 100644
+index fea895b..6b758ea 100644
 --- a/src/Makefile
 +++ b/src/Makefile
+@@ -36,10 +36,10 @@ LIB_O=	lauxlib.o lbaselib.o lbitlib.o lcorolib.o ldblib.o liolib.o \
+ 	lmathlib.o loslib.o lstrlib.o ltablib.o loadlib.o linit.o
+ BASE_O= $(CORE_O) $(LIB_O) $(MYOBJS)
+ 
+-LUA_T=	lua
++LUA_T=	lua$(EXEEXT)
+ LUA_O=	lua.o
+ 
+-LUAC_T=	luac
++LUAC_T=	luac$(EXEEXT)
+ LUAC_O=	luac.o
+ 
+ ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O)
 @@ -102,6 +102,18 @@ freebsd:
  
  generic: $(ALL)

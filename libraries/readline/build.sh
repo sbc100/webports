@@ -17,7 +17,8 @@ if [ "${NACL_GLIBC}" != "1" ]; then
 fi
 
 
-RunTests() {
+TestStep() {
+  Banner "Testing ${PACKAGE_NAME}"
   if [ "${NACL_GLIBC}" != "1" ]; then
     # readline example don't link under sel_ldr
     # TODO(sbc): find a way to add glibc-compat/nosys to link line for examples.
@@ -42,7 +43,6 @@ PackageInstall() {
     ln -sf libreadline.so.6 libreadline.so
     cd -
   fi
-  RunTests
 }
 
 

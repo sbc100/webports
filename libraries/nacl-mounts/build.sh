@@ -8,13 +8,14 @@ source ../../build_tools/common.sh
 
 
 RunTests() {
-  make clean && make all && ./tests_out/nacl_mounts_tests
-  make clean
+  LogExecute make clean
+  LogExecute make all
+  LogExecute ./tests_out/nacl_mounts_tests
 }
 
 
-RunSelLdrTests() {
-  Banner "Running tests ${PACKAGE_NAME}"
+TestStep() {
+  Banner "Testing ${PACKAGE_NAME}"
 
   if [ ${NACL_ARCH} = "pnacl" ]; then
     echo "FIXME: Not running sel_ldr-based tests with PNaCl."
@@ -26,14 +27,20 @@ RunSelLdrTests() {
   export CXX=${NACLCXX}
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export LDFLAGS="${NACLPORTS_LDFLAGS} -L\"$PWD\""
   export PATH=${NACL_BIN_PATH}:${PATH};
+
+  # Add PWD to SEL_LDR_LIB_PATH so that the local build
+  # of the library can be found when the test runs without
+  # needing to install the into the toolchain.
+  export SEL_LDR_LIB_PATH="$PWD"
 
   MakeDir test.nacl
   ChangeDir test.nacl
-  make -f ${START_DIR}/test.nacl/Makefile
+  LogExecute make -f ${START_DIR}/test.nacl/Makefile
 
   RunSelLdrCommand nacl_mounts_sel_ldr_tests
+  ChangeDir ..
 }
 
 
@@ -150,17 +157,6 @@ InstallStep() {
 
 ExtractStep() {
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-}
-
-
-PackageInstall() {
-#  RunTests
-  PreInstallStep
-  ExtractStep
-  PatchStep
-  BuildStep
-  InstallStep
-  RunSelLdrTests
 }
 
 
