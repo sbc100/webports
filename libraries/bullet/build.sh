@@ -16,6 +16,7 @@ TestStep() {
     local exe_dir=
   fi
 
+  export SEL_LDR_LIB_PATH=$PWD/src/${exe_dir}
   pushd UnitTests/BulletUnitTests/${exe_dir}
   RunSelLdrCommand AppBulletUnitTests${NACL_EXEEXT}
   popd
