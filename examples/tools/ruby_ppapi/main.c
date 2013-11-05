@@ -27,7 +27,7 @@
 #error "unknown arch"
 #endif
 
-#define DATA_ARCHIVE "/mnt/tars/rbdata-" NACL_ARCH ".tar"
+#define DATA_ARCHIVE "/mnt/http/rbdata-" NACL_ARCH ".tar"
 
 int ruby_main(int argc, char **argv) {
   int ret = umount("/");
@@ -36,7 +36,7 @@ int ruby_main(int argc, char **argv) {
   ret = mount("foo", "/", "memfs", 0, NULL);
   assert(ret == 0);
 
-  ret = mount("./", "/mnt/tars", "httpfs", 0, NULL);
+  ret = mount("./", "/mnt/http", "httpfs", 0, NULL);
   assert(ret == 0);
 
   ret = mkdir("/home", 0777);

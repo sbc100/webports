@@ -15,16 +15,16 @@ ConfigureStep() {
   # We need to build a host version of ruby for use during the nacl
   # build.
   HOST_BUILD=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl-host
-  if [ ! -x ${HOST_BUILD}/miniruby ]; then
-    Banner "Building miniruby for host"
+  if [ ! -x ${HOST_BUILD}/inst/bin/ruby ]; then
+    Banner "Building ruby for host"
     MakeDir ${HOST_BUILD}
     ChangeDir ${HOST_BUILD}
-    CFLAGS="" LDFLAGS="" LogExecute ../configure
+    CFLAGS="" LDFLAGS="" LogExecute ../configure --prefix=$PWD/inst
     LogExecute make -j${OS_JOBS} miniruby
+    LogExecute make -j${OS_JOBS} install-nodoc
   fi
-  export MINIRUBY='`cd $(srcdir); pwd`/build-nacl-host/miniruby -I`cd $(srcdir)/lib; pwd` -I.'
 
-  local EXTRA_CONFIGURE_OPTS=("${@:-}")
+  local EXTRA_CONFIGURE_ARGS=""
   Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
@@ -49,10 +49,14 @@ ConfigureStep() {
   ChangeDir ${BUILD_DIR}
   echo "Directory: $(pwd)"
 
+  # TODO(sbc): remove once getaddrinfo() is working
+  EXTRA_CONFIGURE_ARGS=--disable-ipv6
+
   if [ ${NACL_GLIBC} != 1 ]; then
-    EXTRA_CONFIGURE_ARGS="--with-static-linked-ext --with-newlib"
+    EXTRA_CONFIGURE_ARGS+=" --with-static-linked-ext --with-newlib"
     export LIBS="-lglibc-compat -lnosys"
   fi
+
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then
@@ -62,10 +66,12 @@ ConfigureStep() {
     # it doesn't know about that "le32" either.  So we just say "nacl".
     conf_host="nacl"
   fi
+
   LogExecute ${NACL_CONFIGURE_PATH:-../configure} \
     --host=${conf_host} \
     --prefix=/usr \
     --oldincludedir=${NACLPORTS_INCLUDE} \
+    --with-baseruby=$SRC_DIR/build-nacl-host/inst/bin/ruby \
     --with-http=no \
     --with-html=no \
     --with-ftp=no \
@@ -74,7 +80,7 @@ ConfigureStep() {
     --${NACL_OPTION}-sse2 \
     --${NACL_OPTION}-asm \
     --with-x=no  \
-    "${EXTRA_CONFIGURE_OPTS[@]}" ${EXTRA_CONFIGURE_ARGS:-}
+    ${EXTRA_CONFIGURE_ARGS}
 }
 
 BuildStep() {

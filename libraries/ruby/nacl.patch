@@ -1,5 +1,17 @@
+diff --git a/.gitignore b/.gitignore
+index 5bcaeeb..abeccf1 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -50,7 +50,6 @@ y.tab.c
+ /config.h.in
+ /config.status
+ /config.status.lineno
+-/configure
+ /doc/capi
+ /enc.mk
+ /encdb.h
 diff --git a/configure b/configure
-index a3a1c51..1e3e2ca 100755
+index a3a1c51..7cd7e52 100755
 --- a/configure
 +++ b/configure
 @@ -3160,11 +3160,13 @@ esac
@@ -28,20 +40,17 @@ index a3a1c51..1e3e2ca 100755
    else
      case "${nacl_cv_build_variant}" in #(
    glibc) :
-diff --git a/.gitignore b/.gitignore
-index 5bcaeeb..abeccf1 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -50,7 +50,6 @@ y.tab.c
- /config.h.in
- /config.status
- /config.status.lineno
--/configure
- /doc/capi
- /enc.mk
- /encdb.h
+@@ -8292,8 +8297,6 @@ esac
+      XCFLAGS="$XCFLAGS -fPIC" ;;
+ esac
+   fi
+-  ac_cv_func_shutdown=no
+-  ac_cv_func_fcntl=no
+    ;; #(
+   *) :
+     	LIBS="-lm $LIBS" ;;
 diff --git a/configure.in b/configure.in
-index 7977aaf..e86b7f6 100644
+index 7977aaf..ee4230b 100644
 --- a/configure.in
 +++ b/configure.in
 @@ -90,8 +90,11 @@ AC_DEFUN([RUBY_NACL],
@@ -68,6 +77,15 @@ index 7977aaf..e86b7f6 100644
    else
      AS_CASE(
        ["${nacl_cv_build_variant}"],
+@@ -954,8 +960,6 @@ $POSTLINK"
+   else
+     RUBY_APPEND_OPTION(XCFLAGS, -fPIC)
+   fi
+-  ac_cv_func_shutdown=no
+-  ac_cv_func_fcntl=no
+   ],
+ [	LIBS="-lm $LIBS"])
+ 
 diff --git a/dln.c b/dln.c
 index 9eb659c..4d9458e 100644
 --- a/dln.c
@@ -101,23 +119,72 @@ index 9eb659c..4d9458e 100644
  #if defined __SYMBIAN32__
  	if (init_fct == NULL) {
  	    init_fct = (void(*)())dlsym(handle, "1"); /* Some Symbian versions do not support symbol table in DLL, ordinal numbers only */
-diff --git a/ext/extmk.rb b/ext/extmk.rb
-index 4e5f64d..566f1d1 100755
---- a/ext/extmk.rb
-+++ b/ext/extmk.rb
-@@ -407,6 +407,12 @@ unless $message
- end
+diff --git a/ext/socket/addrinfo.h b/ext/socket/addrinfo.h
+index f0b977d..59bf0e4 100644
+--- a/ext/socket/addrinfo.h
++++ b/ext/socket/addrinfo.h
+@@ -140,6 +140,25 @@ struct addrinfo {
+ };
+ #endif
  
- EXEEXT = CONFIG['EXEEXT']
++#ifdef __native_client__
++/*
++ * nacl_io does not yet support getaddrinfo() but it
++ * exists as a stub and so ruby thinks it does.
++ * TODO(sbc): remove once this gets fixed: http://crbug.com/315197
++ */
++#undef HAVE_GETADDRINFO
++#undef HAVE_GETNAMEINFO
++#undef HAVE_FREEHOSTENT
++#undef HAVE_FREEADDRINFO
 +
-+# Without this ext/ripper will try to use the default miniruby rather
-+# than honoring the MINIRUBY set in the environment.
-+# TODO(sbc): Figure out why this is needed and remove.
-+CROSS_COMPILING = 'yes'
++#ifndef __GLIBC__
++/*
++ * TODO(sbc): Remove once this gets fixed: http://crbug.com/315196
++ */
++typedef uint32_t u_int32_t;
++#endif
++#endif
 +
- if CROSS_COMPILING
-   $ruby = $mflags.defined?("MINIRUBY") || CONFIG['MINIRUBY']
- elsif sep = config_string('BUILD_FILE_SEPARATOR')
+ #ifndef HAVE_GETADDRINFO
+ #undef getaddrinfo
+ #define getaddrinfo getaddrinfo__compat
+diff --git a/ext/socket/extconf.rb b/ext/socket/extconf.rb
+index 13937ac..19caf34 100644
+--- a/ext/socket/extconf.rb
++++ b/ext/socket/extconf.rb
+@@ -423,7 +423,7 @@ $objs = [
+ ]
+ 
+ if getaddr_info_ok == :wide or
+-    !have_func("getnameinfo", headers) or !have_func("getaddrinfo", headers)
++    !have_func("getnameinfo", headers) or !have_func("getaddrinfo", headers) or RUBY_PLATFORM =~ /nacl/
+   if have_struct_member("struct in6_addr", "s6_addr8", headers)
+     $defs[-1] = "s6_addr=s6_addr8"
+   end
+diff --git a/ext/socket/rubysocket.h b/ext/socket/rubysocket.h
+index ff91f51..6eed45c 100644
+--- a/ext/socket/rubysocket.h
++++ b/ext/socket/rubysocket.h
+@@ -90,6 +90,18 @@
+ #define EWOULDBLOCK EAGAIN
+ #endif
+ 
++#ifdef __native_client__
++/*
++ * nacl_io does not yet support getaddrinfo() but it
++ * exists as a stub and so ruby thinks it does.
++ * TODO(sbc): remove once getaddrinfo is added to nacl_io.
++ */
++#undef HAVE_GETADDRINFO
++#undef HAVE_GETNAMEINFO
++#undef HAVE_FREEHOSTENT
++#undef HAVE_FREEADDRINFO
++#endif
++
+ /*
+  * workaround for NetBSD, OpenBSD and etc.
+  * The problem is since 4.4BSD-Lite.
 diff --git a/file.c b/file.c
 index f0f8348..95faa09 100644
 --- a/file.c
@@ -147,10 +214,21 @@ index f0f8348..95faa09 100644
  int
  rb_file_load_ok(const char *path)
 diff --git a/io.c b/io.c
-index aa514e3..fbb1607 100644
+index aa514e3..d9f52db 100644
 --- a/io.c
 +++ b/io.c
-@@ -52,9 +52,6 @@
+@@ -31,9 +31,7 @@
+ #if defined HAVE_NET_SOCKET_H
+ # include <net/socket.h>
+ #elif defined HAVE_SYS_SOCKET_H
+-# ifndef __native_client__
+-#  include <sys/socket.h>
+-# endif
++# include <sys/socket.h>
+ #endif
+ 
+ #if defined(__BOW__) || defined(__CYGWIN__) || defined(_WIN32) || defined(__EMX__) || defined(__BEOS__) || defined(__HAIKU__)
+@@ -52,9 +50,6 @@
  #if defined(HAVE_SYS_IOCTL_H) && !defined(_WIN32)
  #include <sys/ioctl.h>
  #endif
@@ -160,6 +238,21 @@ index aa514e3..fbb1607 100644
  #if defined(HAVE_FCNTL_H) || defined(_WIN32)
  #include <fcntl.h>
  #elif defined(HAVE_SYS_FCNTL_H)
+@@ -8534,6 +8529,14 @@ typedef long fcntl_arg_t;
+ typedef int fcntl_arg_t;
+ #endif
+ 
++#if defined __native_client__ && !defined __GLIBC__
++// struct flock is currently missing the NaCl newlib headers
++// TODO(sbc): remove this once it gets added.
++#undef F_GETLK
++#undef F_SETLK
++#undef F_SETLKW
++#endif
++
+ static long
+ fcntl_narg_len(int cmd)
+ {
 diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
 index c1aaa36..e430100 100644
 --- a/nacl/GNUmakefile.in

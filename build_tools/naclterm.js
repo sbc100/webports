@@ -205,14 +205,15 @@ NaClTerm.prototype.run = function() {
     embed.appendChild(param);
   }
 
-  addParam('ps_tty_prefix', NaClTerm.prefix);
-  addParam('ps_tty_resize', 'tty_resize');
-  addParam('ps_stdin', '/dev/tty');
-  addParam('ps_stdout', '/dev/tty');
-  addParam('ps_stderr', '/dev/tty');
-  addParam('ps_verbosity', '2');
+  addParam('PS_TTY_PREFIX', NaClTerm.prefix);
+  addParam('PS_TTY_RESIZE', 'tty_resize');
+  addParam('PS_STDIN', '/dev/tty');
+  addParam('PS_STDOUT', '/dev/tty');
+  addParam('PS_STDERR', '/dev/tty');
+  addParam('PS_VERBOSITY', '2');
   addParam('TERM', 'xterm-256color');
 
+  // Add ARGV arguments from query parameters.
   var args = lib.f.parseQuery(document.location.search);
   var argn = 1;
   while (true) {
@@ -222,6 +223,17 @@ NaClTerm.prototype.run = function() {
       break;
     addParam(argname, arg);
     argn = argn + 1;
+  }
+
+  // If the application has set NaClTerm.argv and there were
+  // no arguments set in the query parameters then add the default
+  // NaClTerm.argv arguments.
+  if (argn === 1 && NaClTerm.argv) {
+    NaClTerm.argv.forEach(function(arg) {
+      var argname = 'arg' + argn;
+      addParam(argname, arg);
+      argn = argn + 1
+    })
   }
 
   this.io.print('Loading NaCl module.\n')

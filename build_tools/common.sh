@@ -582,7 +582,7 @@ InitGitRepo() {
     git branch -D "placeholder"
   else
     git checkout -b "upstream"
-    git add .
+    git add -f .
     git commit -m "Upstream version" > /dev/null
     git checkout -b "master"
   fi
