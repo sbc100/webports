@@ -750,6 +750,7 @@ DefaultPatchStep() {
   TouchStamp patch
 }
 
+
 DefaultConfigureStep() {
   local EXTRA_CONFIGURE_OPTS=("${@:-}")
   Banner "Configuring ${PACKAGE_NAME}"
@@ -775,7 +776,6 @@ DefaultConfigureStep() {
   local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
-  echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
@@ -785,6 +785,7 @@ DefaultConfigureStep() {
     # it doesn't know about that "le32" either.  So we just say "nacl".
     conf_host="nacl"
   fi
+
   LogExecute ${CONFIGURE} \
     --host=${conf_host} \
     --prefix=${NACLPORTS_PREFIX} \
@@ -839,6 +840,24 @@ DefaultInstallStep() {
 TimeCommand() {
   echo "$@"
   time "$@"
+}
+
+
+InstallNaClTerm() {
+  local INSTALL_DIR=$1
+  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
+  local LIB_DOT=${CHROMEAPPS}/libdot
+  local NASSH=${CHROMEAPPS}/nassh
+  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
+      -i ${NASSH}/concat/nassh_deps.concat \
+      -o ${INSTALL_DIR}/hterm.concat.js
+
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
+    sed 's/x-nacl/x-pnacl/' \
+        ${TOOLS_DIR}/naclterm.js > ${INSTALL_DIR}/naclterm.js
+  else
+    LogExecute cp ${TOOLS_DIR}/naclterm.js ${INSTALL_DIR}
+  fi
 }
 
 

@@ -36,14 +36,8 @@ InstallStep() {
       -s . \
       -o nano.nmf
 
-  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
-  local LIB_DOT=${CHROMEAPPS}/libdot
-  local NASSH=${CHROMEAPPS}/nassh
-  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
-      -i ${NASSH}/concat/nassh_deps.concat \
-      -o ${ASSEMBLY_DIR}/hterm.concat.js
+  InstallNaClTerm ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
-  LogExecute cp ${NACL_SRC}/build_tools/naclterm.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

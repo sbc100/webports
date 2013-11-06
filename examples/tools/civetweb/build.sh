@@ -38,19 +38,7 @@ InstallStep() {
       -o civetweb.nmf
   popd
 
-  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
-  local LIB_DOT=${CHROMEAPPS}/libdot
-  local NASSH=${CHROMEAPPS}/nassh
-  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
-      -i ${NASSH}/concat/nassh_deps.concat \
-      -o ${ASSEMBLY_DIR}/hterm.concat.js
-
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    sed 's/x-nacl/x-pnacl/' \
-        ${TOOLS_DIR}/naclterm.js > ${ASSEMBLY_DIR}/naclterm.js
-  else
-    LogExecute cp ${TOOLS_DIR}/naclterm.js ${ASSEMBLY_DIR}
-  fi
+  InstallNaClTerm ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/civetweb.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}

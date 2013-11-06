@@ -72,20 +72,10 @@ InstallStep() {
       -s ${PUBLISH_DIR} \
       -o curl.nmf
 
-  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
-  local LIB_DOT=${CHROMEAPPS}/libdot
-  local NASSH=${CHROMEAPPS}/nassh
-  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
-      -i ${NASSH}/concat/nassh_deps.concat \
-      -o ${PUBLISH_DIR}/hterm.concat.js
-
+  InstallNaClTerm ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/index.html ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/curl.js ${PUBLISH_DIR}
   LogExecute cp curl.nmf ${PUBLISH_DIR}
-  LogExecute cp ${TOOLS_DIR}/naclterm.js ${PUBLISH_DIR}
-  if [ ${NACL_ARCH} = pnacl ]; then
-    sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/naclterm.js
-  fi
 }
 
 PackageInstall
