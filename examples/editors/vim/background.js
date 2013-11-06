@@ -6,11 +6,12 @@
 
 'use strict';
 
-chrome.app.runtime.onLaunched.addListener(function() {
+chrome.app.runtime.onLaunched.addListener(function(launchData) {
   chrome.app.window.create('vim.html', {
+    'id': 'main',
     'bounds': {
-      'width': 400,
-      'height': 500
+      'width': 800,
+      'height': 800
     }
   });
 });

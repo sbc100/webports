@@ -6,7 +6,8 @@
 source pkg_info
 source ../../../build_tools/common.sh
 
-export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
+export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -lstdc++"
+EXECUTABLES=src/vim
 
 PatchStep() {
   DefaultPatchStep
@@ -71,6 +72,9 @@ InstallStep() {
   LogExecute cp ${NACL_SRC}/build_tools/naclterm.js ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r vim-7.3.zip vim
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    sed -i 's/x-nacl/x-pnacl/g' ${ASSEMBLY_DIR}/naclterm.js
+  fi
 }
 
 PackageInstall

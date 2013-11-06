@@ -13,7 +13,27 @@
       "scripts": ["background.js"]
     }
   },
+  "file_handlers": {
+    "edit": {
+      "types": [
+        "text/*"
+      ],
+      "extensions": [
+        "json",
+        "txt",
+        "js",
+        "html",
+        "h",
+        "c",
+        "cc",
+        "cpp",
+        "java"
+      ],
+      "title": "Edit with Vim"
+    }
+  },
   "permissions": [
+    "fileSystem",
     "storage",
     { "socket": [
         "tcp-listen:*:*",
