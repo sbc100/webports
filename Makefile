@@ -170,6 +170,7 @@ EXAMPLES = \
      examples/tools/gdb \
      examples/tools/mongoose \
      examples/tools/lua_ppapi \
+     examples/tools/openssh \
      examples/tools/python_ppapi \
      examples/tools/ruby_ppapi \
      examples/tools/thttpd
@@ -278,6 +279,8 @@ $(SENT)/examples/tools/bash: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
 $(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
 $(SENT)/examples/tools/thttpd: libraries/jsoncpp
+$(SENT)/examples/tools/openssh: \
+    libraries/zlib libraries/openssl libraries/jsoncpp
 $(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
 $(SENT)/examples/tools/lua_ppapi: libraries/lua5.2 libraries/libtar
 $(SENT)/examples/tools/ruby_ppapi: \
@@ -423,6 +426,7 @@ ruby_ppapi: examples/tools/ruby_ppapi ;
 scummvm: examples/games/scummvm ;
 snes9x: examples/games/snes9x ;
 thttpd: examples/tools/thttpd ;
+openssh: examples/tools/openssh ;
 # Deliberate space after vim target to avoid detection
 # as modeline string.
 vim : examples/editors/vim ;
