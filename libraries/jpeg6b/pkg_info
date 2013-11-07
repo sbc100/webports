@@ -1,0 +1,3 @@
+PACKAGE_NAME=jpeg-6b
+URL=http://www.ijg.org/files/jpegsrc.v6b.tar.gz
+LICENSE=CUSTOM:README

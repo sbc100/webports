@@ -104,7 +104,8 @@ LIBRARIES = \
      libraries/glibc-compat \
      libraries/gsl \
      libraries/ImageMagick \
-     libraries/jpeg \
+     libraries/jpeg6b \
+     libraries/jpeg8d \
      libraries/jsoncpp \
      libraries/lame \
      libraries/lcms \
@@ -264,7 +265,7 @@ $(SENT)/libraries/cairo: \
 $(SENT)/libraries/ffmpeg: \
     libraries/lame libraries/libvorbis libraries/libtheora \
     libraries/glibc-compat
-$(SENT)/libraries/webp: libraries/tiff libraries/jpeg
+$(SENT)/libraries/webp: libraries/tiff libraries/jpeg8d
 $(SENT)/libraries/libav: libraries/lame libraries/libvorbis
 $(SENT)/libraries/libtar: libraries/zlib
 ifeq ($(LUA_NO_READLINE),)
@@ -306,7 +307,7 @@ endif
 $(SENT)/libraries/SDL_mixer: libraries/SDL \
     libraries/libogg libraries/libvorbis libraries/libmikmod
 $(SENT)/libraries/SDL_image: libraries/SDL \
-    libraries/libpng libraries/jpeg
+    libraries/libpng libraries/jpeg8d
 $(SENT)/libraries/SDL_net: libraries/SDL
 $(SENT)/libraries/SDL_ttf: libraries/SDL libraries/freetype
 $(SENT)/libraries/boost: libraries/zlib libraries/bzip2
@@ -319,13 +320,13 @@ ifneq ($(NACL_GLIBC), 1)
   $(SENT)/libraries/openssl: libraries/glibc-compat
   $(SENT)/libraries/ncurses: libraries/glibc-compat
 endif
-$(SENT)/libraries/libmng: libraries/zlib libraries/jpeg
-$(SENT)/libraries/lcms: libraries/zlib libraries/jpeg libraries/tiff
-$(SENT)/libraries/DevIL: libraries/libpng libraries/jpeg libraries/libmng \
+$(SENT)/libraries/libmng: libraries/zlib libraries/jpeg8d
+$(SENT)/libraries/lcms: libraries/zlib libraries/jpeg8d libraries/tiff
+$(SENT)/libraries/DevIL: libraries/libpng libraries/jpeg8d libraries/libmng \
     libraries/tiff libraries/lcms
 $(SENT)/libraries/physfs: libraries/zlib
 $(SENT)/libraries/mpg123: libraries/openal-soft
-$(SENT)/libraries/ImageMagick: libraries/libpng libraries/jpeg \
+$(SENT)/libraries/ImageMagick: libraries/libpng libraries/jpeg8d \
     libraries/bzip2 libraries/zlib
 $(SENT)/examples/tools/gdb: \
     libraries/ncurses libraries/expat libraries/readline
@@ -358,7 +359,8 @@ glibc-compat: libraries/glibc-compat ;
 gsl: libraries/gsl ;
 hangul libhangul: libraries/libhangul ;
 imagemagick ImageMagick: libraries/ImageMagick ;
-jpeg: libraries/jpeg ;
+jpeg jpeg8d: libraries/jpeg8d ;
+jpeg6b: libraries/jpeg6b ;
 jsoncpp: libraries/jsoncpp ;
 lame: libraries/lame ;
 lcms: libraries/lcms ;

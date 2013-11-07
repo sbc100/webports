@@ -38,7 +38,7 @@ CalculatePackageShards()
     tiff
     openal-soft
     mpg123
-    jpeg
+    jpeg8d
     libpng
     libmng
     lcms
@@ -94,7 +94,7 @@ CalculatePackageShards()
     libtomcrypt
     ruby_ppapi
     SDL_net
-    jpeg
+    jpeg8d
     SDL_image
     snes9x
   "
