@@ -925,17 +925,25 @@ RunSelLdrCommand() {
     TranslateAndWriteSelLdrScript ${PEXE} x86-32 ${NEXE_32} ${SCRIPT_32}
     echo "[sel_ldr x86-32] $@"
     time ./${SCRIPT_32} $*
-    TranslateAndWriteSelLdrScript ${PEXE} x86-64 ${NEXE_64} ${SCRIPT_64}
-    echo "[sel_ldr x86-64] $@"
-    time ./${SCRIPT_64} $*
+    if [ -f ${NACL_SEL_LDR_X8664} ]; then
+      TranslateAndWriteSelLdrScript ${PEXE} x86-64 ${NEXE_64} ${SCRIPT_64}
+      echo "[sel_ldr x86-64] $@"
+      time ./${SCRIPT_64} $*
+    else
+      echo "WARNING: ${NACL_SEL_LDR_X8664} not found, skipping tests."
+    fi
   else
     # Normal NaCl.
     local NEXE=$1
     local SCRIPT=$1.sh
-    WriteSelLdrScript ${SCRIPT} ${NEXE}
-    echo "[sel_ldr] $@"
-    shift
-    time ./${SCRIPT} $*
+    if [ -f ${NACL_SEL_LDR} ]; then
+      WriteSelLdrScript ${SCRIPT} ${NEXE}
+      echo "[sel_ldr] $@"
+      shift
+      time ./${SCRIPT} $*
+    else
+      echo "WARNING: ${NACL_SEL_LDR} not found, skipping tests."
+    fi
   fi
 }
 

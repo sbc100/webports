@@ -30,8 +30,13 @@ TestStep() {
 AutogenStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   # Remove \r\n from the shell script.
-  sed -i.bak "s/\r$//" ./autogen.sh
+  # The default sed on Mac is broken. Work around it by using $'...' to have
+  # bash convert \r to a carriage return.
+  sed -i.bak $'s/\r//g' ./autogen.sh
   /bin/sh ./autogen.sh
+  # install-sh is extracted without the execute bit set; for some reason this
+  # works OK on Linux, but fails on Mac.
+  chmod +x install-sh
   PatchConfigure
   PatchConfigSub
 }
