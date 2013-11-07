@@ -60,7 +60,7 @@ endif
 
 $(eval $(call NMF_RULE,$(TARGET),))
 
-CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src/chromeapps
+CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src
 LIB_DOT = $(CHROMEAPPS)/libdot
 NASSH = $(CHROMEAPPS)/nassh
 

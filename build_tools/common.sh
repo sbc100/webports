@@ -845,7 +845,7 @@ TimeCommand() {
 
 InstallNaClTerm() {
   local INSTALL_DIR=$1
-  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src/chromeapps
+  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src
   local LIB_DOT=${CHROMEAPPS}/libdot
   local NASSH=${CHROMEAPPS}/nassh
   LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \

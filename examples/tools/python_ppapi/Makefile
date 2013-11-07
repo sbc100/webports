@@ -50,7 +50,7 @@ ifeq ($(TOOLCHAIN),glibc)
 EXTRA_ASSETS = lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
 endif
 
-CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src/chromeapps
+CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src
 LIB_DOT = $(CHROMEAPPS)/libdot
 NASSH = $(CHROMEAPPS)/nassh
 
