@@ -6,6 +6,7 @@
 source pkg_info
 source ../../../build_tools/common.sh
 
+
 BuildStep() {
   # The sample is built using the NaCl SDK common.mk system.
   # We override $(OUTBASE) to force the build system to put

@@ -64,9 +64,18 @@ CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src
 LIB_DOT = $(CHROMEAPPS)/libdot
 NASSH = $(CHROMEAPPS)/nassh
 
-install:
+LUA_TESTS_FILE=lua-5.2.2-tests.tar.gz
+# Mirrored from http://www.lua.org/tests/5.2
+MIRROR_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl
+
+install-tests:
+	cd $(OUTBASE) && wget $(MIRROR_URL)/$(LUA_TESTS_FILE)
+	tar -C $(OUTBASE) -xf $(OUTBASE)/$(LUA_TESTS_FILE)
+	cd $(OUTBASE)/lua-5.2.2-tests && patch -p1 < $(CURDIR)/lua_tests.patch
 	mkdir -p $(INSTALL_DIR)
-	tar -c -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/luadata.tar lib/lua
+	tar -c -f $(INSTALL_DIR)/luadata.tar -C $(OUTBASE) lua-5.2.2-tests
+
+install: install-tests
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/lua*$(NACL_EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)

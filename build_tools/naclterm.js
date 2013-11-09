@@ -155,28 +155,12 @@ NaClTerm.prototype.handleCrash_ = function(e) {
  }
 }
 
-
-NaClTerm.prototype.onTerminalResize_ = function() {
-  var width = term_.io.terminal_.screenSize.width;
-  var height = term_.io.terminal_.screenSize.height;
-  embed.postMessage({'tty_resize': [ width, height ]});
-}
-
-NaClTerm.prototype.onVTKeystroke_ = function(str) {
-  var message = {};
-  message[NaClTerm.prefix] = str;
-  embed.postMessage(message);
-}
-
-/*
- * This is invoked by the terminal as a result of terminal.runCommandClass().
+/**
+ * Create the NaCl embed element.
+ * We delay this until the first terminal resize event so that we start
+ * with the correct size.
  */
-NaClTerm.prototype.run = function() {
-  this.io = this.argv_.io.push();
-  this.bufferedOutput = '';
-  this.loaded = false;
-  this.io.print(ansiCyan);
-
+NaClTerm.prototype.createEmbed = function(width, height) {
   var mimetype = 'application/x-nacl';
   if (navigator.mimeTypes[mimetype] === undefined) {
     if (mimetype.indexOf('pnacl') != -1)
@@ -207,6 +191,8 @@ NaClTerm.prototype.run = function() {
 
   addParam('PS_TTY_PREFIX', NaClTerm.prefix);
   addParam('PS_TTY_RESIZE', 'tty_resize');
+  addParam('PS_TTY_COLS', width);
+  addParam('PS_TTY_ROWS', height);
   addParam('PS_STDIN', '/dev/tty');
   addParam('PS_STDOUT', '/dev/tty');
   addParam('PS_STDERR', '/dev/tty');
@@ -215,20 +201,15 @@ NaClTerm.prototype.run = function() {
 
   // Add ARGV arguments from query parameters.
   var args = lib.f.parseQuery(document.location.search);
-  var argn = 1;
-  while (true) {
-    var argname = 'arg' + argn;
-    var arg = args[argname];
-    if (typeof(arg) === 'undefined')
-      break;
-    addParam(argname, arg);
-    argn = argn + 1;
+  for (var argname in args) {
+    addParam(argname, args[argname]);
   }
 
   // If the application has set NaClTerm.argv and there were
   // no arguments set in the query parameters then add the default
   // NaClTerm.argv arguments.
-  if (argn === 1 && NaClTerm.argv) {
+  if (typeof(args['arg1']) === 'undefined' && NaClTerm.argv) {
+    var argn = 1
     NaClTerm.argv.forEach(function(arg) {
       var argname = 'arg' + argn;
       addParam(argname, arg);
@@ -238,6 +219,29 @@ NaClTerm.prototype.run = function() {
 
   this.io.print('Loading NaCl module.\n')
   document.body.appendChild(embed);
+}
+
+NaClTerm.prototype.onTerminalResize_ = function(width, height) {
+  if (typeof(embed) === 'undefined')
+    this.createEmbed(width, height);
+  else
+    embed.postMessage({'tty_resize': [ width, height ]});
+}
+
+NaClTerm.prototype.onVTKeystroke_ = function(str) {
+  var message = {};
+  message[NaClTerm.prefix] = str;
+  embed.postMessage(message);
+}
+
+/*
+ * This is invoked by the terminal as a result of terminal.runCommandClass().
+ */
+NaClTerm.prototype.run = function() {
+  this.io = this.argv_.io.push();
+  this.bufferedOutput = '';
+  this.loaded = false;
+  this.io.print(ansiCyan);
 
   this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);
   this.io.onTerminalResize = this.onTerminalResize_.bind(this);

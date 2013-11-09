@@ -389,16 +389,23 @@ IsGitRepo() {
 }
 
 
+#
+# Attempt to download a file from a given URL
+# $1 - URL to fetch
+# $2 - Filename to write to.
+#
 TryFetch() {
-  Banner "Fetching ${PACKAGE_NAME} ($2)"
+  local URL=$1
+  local FILENAME=$2
+  Banner "Fetching ${PACKAGE_NAME} (${FILENAME})"
   if which wget > /dev/null ; then
-    wget $1 -O $2
+    wget ${URL} -O ${FILENAME}
   elif which curl > /dev/null ; then
-    curl --fail --location --url $1 -o $2
+    curl --fail --location --url ${URL} -o ${FILENAME}
   else
      Banner "Problem encountered"
      echo "Please install curl or wget and rerun this script"
-     echo "or manually download $1 to $2"
+     echo "or manually download ${URL} to ${FILENAME}"
      echo
      echo "press any key when done"
      ReadKey
@@ -406,25 +413,32 @@ TryFetch() {
 }
 
 
+#
+# Download a file from a given URL
+# $1 - URL to fetch
+# $2 - Filename to write to.
+#
 Fetch() {
+  local URL=$1
+  local FILENAME=$2
   local MIRROR_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl
-  if echo $1 | grep -qv ${MIRROR_URL} &> /dev/null; then
+  if echo ${URL} | grep -qv ${MIRROR_URL} &> /dev/null; then
     set +o errexit
     # Try mirrored version first
-    local BASENAME=${URL_FILENAME:-$(basename $1)}
-    TryFetch ${MIRROR_URL}/${BASENAME} $2
+    local BASENAME=${URL_FILENAME:-$(basename ${URL})}
+    TryFetch ${MIRROR_URL}/${BASENAME} ${FILENAME}
     if [ $? != 0 -a ${FORCE_MIRROR:-no} = "no" ]; then
       # Fall back to original URL
-      TryFetch $1 $2
+      TryFetch ${URL} ${FILENAME}
     fi
     set -o errexit
   else
     # The URL is already on commondatastorage do just download it
-    TryFetch $1 $2
+    TryFetch ${URL} ${FILENAME}
   fi
 
-  if [ ! -s $2 ]; then
-    echo "ERROR: could not find $2"
+  if [ ! -s ${FILENAME} ]; then
+    echo "ERROR: could not find ${FILENAME}"
     exit -1
   fi
 }
@@ -619,10 +633,13 @@ TouchStamp() {
   touch ${STAMP_DIR}/$1
 }
 
+
+#
 # KeyStamp: just like a stamp, but it puts a value in the file
 # and checks to make sure it's the same when you check it.
 # The value must be the second argument, subsequent arguments
 # can be dependencies, just like stamp.
+#
 CheckKeyStamp() {
   local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
   local STAMP_FILE="${STAMP_DIR}/$1"
@@ -647,10 +664,29 @@ CheckKeyStamp() {
   return 0
 }
 
+
 TouchKeyStamp() {
   local STAMP_DIR=${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}
   mkdir -p ${STAMP_DIR}
   echo $2 > ${STAMP_DIR}/$1
+}
+
+
+InstallNaClTerm() {
+  local INSTALL_DIR=$1
+  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src
+  local LIB_DOT=${CHROMEAPPS}/libdot
+  local NASSH=${CHROMEAPPS}/nassh
+  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
+      -i ${NASSH}/concat/nassh_deps.concat \
+      -o ${INSTALL_DIR}/hterm.concat.js
+
+  if [ ${NACL_ARCH} = "pnacl" ] ; then
+    sed 's/x-nacl/x-pnacl/' \
+        ${TOOLS_DIR}/naclterm.js > ${INSTALL_DIR}/naclterm.js
+  else
+    LogExecute cp ${TOOLS_DIR}/naclterm.js ${INSTALL_DIR}
+  fi
 }
 
 
@@ -840,24 +876,6 @@ DefaultInstallStep() {
 TimeCommand() {
   echo "$@"
   time "$@"
-}
-
-
-InstallNaClTerm() {
-  local INSTALL_DIR=$1
-  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src
-  local LIB_DOT=${CHROMEAPPS}/libdot
-  local NASSH=${CHROMEAPPS}/nassh
-  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
-      -i ${NASSH}/concat/nassh_deps.concat \
-      -o ${INSTALL_DIR}/hterm.concat.js
-
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    sed 's/x-nacl/x-pnacl/' \
-        ${TOOLS_DIR}/naclterm.js > ${INSTALL_DIR}/naclterm.js
-  else
-    LogExecute cp ${TOOLS_DIR}/naclterm.js ${INSTALL_DIR}
-  fi
 }
 
 
