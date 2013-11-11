@@ -36,16 +36,15 @@ InstallStep() {
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/bash.tar .
   rm -rf ${ASSEMBLY_DIR}/bashtar
-  cp ${START_DIR}/bash.html ${ASSEMBLY_DIR}
   cd ${ASSEMBLY_DIR}
-  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       bash_*${NACL_EXEEXT} \
       -s . \
       -o bash.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py bash.nmf
 
   InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/bash.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

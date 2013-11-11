@@ -28,16 +28,15 @@ InstallStep() {
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/nano.tar .
   rm -rf ${ASSEMBLY_DIR}/nanotar
-  cp ${START_DIR}/nano.html ${ASSEMBLY_DIR}
   cd ${ASSEMBLY_DIR}
-  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       nano_*${NACL_EXEEXT} \
       -s . \
       -o nano.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py nano.nmf
 
   InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

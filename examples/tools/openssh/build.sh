@@ -75,18 +75,18 @@ InstallStep() {
   MakeDir ${ASSEMBLY_DIR}
   LogExecute cp ssh${NACL_EXEEXT} \
       ${ASSEMBLY_DIR}/ssh_${NACL_ARCH}${NACL_EXEEXT}
-  LogExecute cp ${START_DIR}/index.html ${ASSEMBLY_DIR}
+
   pushd ${ASSEMBLY_DIR}
-  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       ssh_*${NACL_EXEEXT} \
       -s . \
       -o openssh.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py openssh.nmf
   popd
 
   InstallNaClTerm ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/openssh.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
 }
 

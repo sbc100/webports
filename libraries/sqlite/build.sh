@@ -55,16 +55,16 @@ PackageInstall() {
     LogExecute ${PNACLFINALIZE} ${exe}
   fi
 
+  pushd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
-      ${PUBLISH_DIR}/sqlite3_ppapi*${NACL_EXEEXT} \
-      -s ${PUBLISH_DIR} \
+      sqlite3_ppapi*${NACL_EXEEXT} \
+      -s . \
       -o sqlite.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py sqlite.nmf
+  popd
 
   InstallNaClTerm ${PUBLISH_DIR}
-  LogExecute cp ${START_DIR}/index.html ${PUBLISH_DIR}
-  LogExecute cp ${START_DIR}/sqlite.js ${PUBLISH_DIR}
-  LogExecute cp sqlite.nmf ${PUBLISH_DIR}
 }
 
 PackageInstall

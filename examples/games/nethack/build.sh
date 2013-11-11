@@ -55,20 +55,21 @@ InstallStep() {
   ChangeDir ${PACKAGE_DIR}/out/games
   LogExecute rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
   LogExecute tar cf ${ASSEMBLY_DIR}/nethack.tar lib
-  LogExecute cp ${START_DIR}/nethack.html ${ASSEMBLY_DIR}
+
   pushd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       nethack_*${NACL_EXEEXT} \
       -s . \
       -o nethack.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py nethack.nmf
   popd
   # Create a copy of nethack for debugging.
   LogExecute cp ${ASSEMBLY_DIR}/nethack.nmf ${ASSEMBLY_DIR}/nethack_debug.nmf
   sed 's/nethack\.js/nethack_debug.js/' \
-      ${START_DIR}/nethack.html > ${ASSEMBLY_DIR}/nethack_debug.html
+      ${ASSEMBLY_DIR}/nethack.html > ${ASSEMBLY_DIR}/nethack_debug.html
   sed 's/nethack\.nmf/nethack_debug.nmf/' \
-      ${START_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack_debug.js
+      ${ASSEMBLY_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack_debug.js
 
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
 
@@ -88,7 +89,6 @@ InstallStep() {
   popd
 
   InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/nethack.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

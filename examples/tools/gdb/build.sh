@@ -20,18 +20,18 @@ InstallStep() {
   MakeDir ${ASSEMBLY_DIR}
   LogExecute cp gdb/gdb.nexe \
       ${ASSEMBLY_DIR}/gdb_${NACL_ARCH}${NACL_EXEEXT}
-  LogExecute cp ${START_DIR}/gdb.html ${ASSEMBLY_DIR}
+
   pushd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       gdb_*${NACL_EXEEXT} \
       -s . \
       -o gdb.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py gdb.nmf
   popd
 
   InstallNaClTerm ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/gdb.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}

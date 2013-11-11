@@ -49,16 +49,15 @@ InstallStep() {
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/vim.tar .
   rm -rf ${ASSEMBLY_DIR}/vimtar
-  cp ${START_DIR}/vim.html ${ASSEMBLY_DIR}
   cd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${NACL_CREATE_NMF_FLAGS} \
       vim_*${NACL_EXEEXT} \
       -s . \
       -o vim.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py vim.nmf
 
   InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/*.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
