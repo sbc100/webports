@@ -13,30 +13,33 @@
 
 #include "ppapi_simple/ps_main.h"
 
-
 int lua_main(int argc, char **argv);
 
 int lua_ppapi_main(int argc, char **argv) {
-  umount("/");
+  // Mount filesystems
+  int ret = umount("/");
   mount("foo", "/", "memfs", 0, NULL);
-  mkdir("/home", 0777);
-  mkdir("/tmp", 0777);
-
-  setenv("HOME", "/home", 1);
-  setenv("PATH", "/bin", 1);
-  setenv("USER", "user", 1);
-  setenv("LOGNAME", "user", 1);
 
   const char* data_url = getenv("LUA_DATA_URL");
   if (!data_url)
     data_url = "./";
 
-  mount(data_url, "/mnt/http", "httpfs", 0,
+  ret = mount(data_url, "/mnt/http", "httpfs", 0,
         "allow_cross_origin_requests=true,allow_credentials=false");
+  if (ret) {
+    printf("Mounting http filesystem failed\n");
+    return 1;
+  }
 
-  printf("Extracting luadata.tar\n");
+  ret = mount("/", "/mnt/html5", "html5fs", 0, "");
+  if (ret) {
+    printf("Mounting html5 filesystem failed\n");
+    return 1;
+  }
+
+  // Extra tar achive from http filesystem.
   TAR* tar;
-  int ret = tar_open(&tar, "/mnt/http/luadata.tar", NULL, O_RDONLY, 0, 0);
+  ret = tar_open(&tar, "/mnt/http/luadata.tar", NULL, O_RDONLY, 0, 0);
     if (ret) {
     printf("Error opening luadata.tar\n");
     return 1;
@@ -50,8 +53,15 @@ int lua_ppapi_main(int argc, char **argv) {
 
   ret = tar_close(tar);
   assert(ret == 0);
-
   chdir("/lua-5.2.2-tests");
+
+  // Setup environment
+  mkdir("/home", 0777);
+  mkdir("/tmp", 0777);
+  setenv("HOME", "/home", 1);
+  setenv("PATH", "/bin", 1);
+  setenv("USER", "user", 1);
+  setenv("LOGNAME", "user", 1);
 
   return lua_main(argc, argv);
 }

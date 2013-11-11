@@ -25,8 +25,8 @@ window.onload = function() {
  * @param {Object} argv The argument object passed in from the Terminal.
  */
 function NaClTerm(argv) {
+  this.io = argv.io.push();
   this.argv_ = argv;
-  this.io = null;
 };
 
 var embed;
@@ -64,12 +64,21 @@ NaClTerm.init = function() {
  * @private
  */
 NaClTerm.prototype.handleMessage_ = function(e) {
-  if (e.data.indexOf(NaClTerm.prefix) != 0) return;
-  var msg = e.data.substring(NaClTerm.prefix.length);
-  if (!this.loaded) {
-    this.bufferedOutput += msg;
+  if (e.data.indexOf(NaClTerm.prefix) == 0) {
+    var msg = e.data.substring(NaClTerm.prefix.length);
+    if (!this.loaded) {
+      this.bufferedOutput += msg;
+    } else {
+      this.io.print(msg);
+    }
+  } else if (e.data.indexOf('exited') == 0) {
+    var exitCode = e.data.split(':', 2)[1]
+    if (exitCode === undefined)
+      exitCode = 0;
+    this.exit(exitCode);
   } else {
-    term_.io.print(msg);
+    console.log('unexpected message: ' + e.data);
+    return;
   }
 }
 
@@ -77,25 +86,25 @@ NaClTerm.prototype.handleMessage_ = function(e) {
  * Handle load error event from NaCl.
  */
 NaClTerm.prototype.handleLoadAbort_ = function(e) {
-  term_.io.print('Load aborted.\n');
+  this.io.print('Load aborted.\n');
 }
 
 /**
  * Handle load abort event from NaCl.
  */
 NaClTerm.prototype.handleLoadError_ = function(e) {
-  term_.io.print(embed.lastError + '\n');
+  this.io.print(embed.lastError + '\n');
 }
 
 NaClTerm.prototype.doneLoadingUrl = function() {
-  var width = term_.io.terminal_.screenSize.width;
-  term_.io.print('\r' + Array(width+1).join(' '));
+  var width = this.io.terminal_.screenSize.width;
+  this.io.print('\r' + Array(width+1).join(' '));
   var message = '\rLoaded ' + this.lastUrl;
   if (this.lastTotal) {
     var kbsize = Math.round(this.lastTotal/1024)
     message += ' ['+ kbsize + ' KiB]';
   }
-  term_.io.print(message.slice(0, width) + '\n')
+  this.io.print(message.slice(0, width) + '\n')
 }
 
 /**
@@ -105,15 +114,15 @@ NaClTerm.prototype.handleLoad_ = function(e) {
   if (this.lastUrl)
     this.doneLoadingUrl();
   else
-    term_.io.print('Loaded.\n');
+    this.io.print('Loaded.\n');
 
-  term_.io.print(ansiReset);
+  this.io.print(ansiReset);
 
   // Now that have completed loading and displaying
   // loading messages we output any messages from the
   // NaCl module that were buffered up unto this point
   this.loaded = true;
-  term_.io.print(this.bufferedOutput);
+  this.io.print(this.bufferedOutput);
   this.bufferedOutput = ''
 }
 
@@ -137,8 +146,8 @@ NaClTerm.prototype.handleProgress_ = function(e) {
     message += ' [' + kbloaded + ' KiB/' + kbtotal + ' KiB ' + percent + '%]';
   }
 
-  var width = term_.io.terminal_.screenSize.width;
-  term_.io.print('\r' + message.slice(-width));
+  var width = this.io.terminal_.screenSize.width;
+  this.io.print('\r' + message.slice(-width));
   this.lastUrl = url;
   this.lastTotal = e.total;
 }
@@ -147,13 +156,24 @@ NaClTerm.prototype.handleProgress_ = function(e) {
  * Handle crash event from NaCl.
  */
 NaClTerm.prototype.handleCrash_ = function(e) {
- term_.io.print(ansiCyan)
- if (embed.exitStatus == -1) {
-   term_.io.print('Program crashed (exit status -1)\n')
- } else {
-   term_.io.print('Program exited (status=' + embed.exitStatus + ')\n');
- }
+ this.exit(embed.exitStatus);
 }
+
+/**
+ * Exit the command.
+ */
+NaClTerm.prototype.exit = function(code) {
+ this.io.print(ansiCyan)
+ if (code == -1) {
+   this.io.print('Program crashed (exit status -1)\n')
+ } else {
+   this.io.print('Program exited (status=' + code + ')\n');
+ }
+ this.io.pop();
+
+ if (this.argv_.onExit)
+   this.argv_.onExit(code);
+};
 
 /**
  * Create the NaCl embed element.
@@ -197,6 +217,7 @@ NaClTerm.prototype.createEmbed = function(width, height) {
   addParam('PS_STDOUT', '/dev/tty');
   addParam('PS_STDERR', '/dev/tty');
   addParam('PS_VERBOSITY', '2');
+  addParam('PS_EXIT_MESSAGE', 'exited');
   addParam('TERM', 'xterm-256color');
 
   // Add ARGV arguments from query parameters.
@@ -208,7 +229,7 @@ NaClTerm.prototype.createEmbed = function(width, height) {
   // If the application has set NaClTerm.argv and there were
   // no arguments set in the query parameters then add the default
   // NaClTerm.argv arguments.
-  if (typeof(args['arg1']) === 'undefined' && NaClTerm.argv) {
+  if (args['arg1'] === undefined && NaClTerm.argv) {
     var argn = 1
     NaClTerm.argv.forEach(function(arg) {
       var argname = 'arg' + argn;
@@ -222,7 +243,7 @@ NaClTerm.prototype.createEmbed = function(width, height) {
 }
 
 NaClTerm.prototype.onTerminalResize_ = function(width, height) {
-  if (typeof(embed) === 'undefined')
+  if (embed === undefined)
     this.createEmbed(width, height);
   else
     embed.postMessage({'tty_resize': [ width, height ]});
@@ -238,7 +259,6 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
  * This is invoked by the terminal as a result of terminal.runCommandClass().
  */
 NaClTerm.prototype.run = function() {
-  this.io = this.argv_.io.push();
   this.bufferedOutput = '';
   this.loaded = false;
   this.io.print(ansiCyan);

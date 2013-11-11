@@ -64,9 +64,14 @@ CHROMEAPPS = $(NACL_SRC)/libraries/hterm/src
 LIB_DOT = $(CHROMEAPPS)/libdot
 NASSH = $(CHROMEAPPS)/nassh
 
-LUA_TESTS_FILE=lua-5.2.2-tests.tar.gz
-# Mirrored from http://www.lua.org/tests/5.2
 MIRROR_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl
+
+# Mirrored from http://luajit.org/download/scimark.lua
+SCIMARK=scimark.lua
+# Mirrored from http://kripken.github.io/lua.vm.js/binarytrees.lua
+BINARYTREES=binarytrees.lua
+# Mirrored from http://www.lua.org/tests/5.2/lua-5.2.2-tests.tar.gz
+LUA_TESTS_FILE=lua-5.2.2-tests.tar.gz
 
 install-tests:
 	cd $(OUTBASE) && wget $(MIRROR_URL)/$(LUA_TESTS_FILE)
@@ -74,6 +79,8 @@ install-tests:
 	cd $(OUTBASE)/lua-5.2.2-tests && patch -p1 < $(CURDIR)/lua_tests.patch
 	mkdir -p $(INSTALL_DIR)
 	tar -c -f $(INSTALL_DIR)/luadata.tar -C $(OUTBASE) lua-5.2.2-tests
+	cd $(INSTALL_DIR) && wget $(MIRROR_URL)/$(SCIMARK)
+	cd $(INSTALL_DIR) && wget $(MIRROR_URL)/$(BINARYTREES)
 
 install: install-tests
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
