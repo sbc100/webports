@@ -31,11 +31,9 @@ int lua_ppapi_main(int argc, char **argv) {
     return 1;
   }
 
-  ret = mount("/", "/mnt/html5", "html5fs", 0, "");
-  if (ret) {
-    printf("Mounting html5 filesystem failed\n");
-    return 1;
-  }
+  // Ignore failures from mounting html5fs.  For example, it will always
+  // fail in incognito mode.
+  mount("/", "/mnt/html5", "html5fs", 0, "");
 
   // Extra tar achive from http filesystem.
   TAR* tar;
