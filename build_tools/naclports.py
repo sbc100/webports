@@ -70,6 +70,9 @@ class Package(object):
       basename = os.path.splitext(basename)[0]
     return basename
 
+  def __cmp__(self, other):
+    return cmp(self.PACKAGE_NAME, other.PACKAGE_NAME)
+
   def GetBuildLocation(self):
     package_dir = getattr(self, 'PACKAGE_DIR', self.PACKAGE_NAME)
     return os.path.join(BUILD_ROOT, package_dir)
