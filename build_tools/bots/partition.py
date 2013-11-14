@@ -68,8 +68,7 @@ def GetDependencies(name):
   process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd=cwd, env=env)
   stdout, _ = process.communicate()
   names = stdout.split()
-  # names will be "libraries/foo" or "examples/bar/baz". We only want the last
-  # part.
+  # names will be "ports/foo". We only want the last part.
   return set(name.split('/')[-1] for name in names) - set([name])
 
 

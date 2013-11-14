@@ -188,8 +188,7 @@ def PackageIterator(folders=None):
   """Iterator which yield a Package object for each
   naclport package."""
   if not folders:
-    folders = [os.path.join(NACLPORTS_ROOT, 'examples'),
-               os.path.join(NACLPORTS_ROOT, 'libraries')]
+    folders = [os.path.join(NACLPORTS_ROOT, 'ports')]
 
   for folder in folders:
     for root, dirs, files in os.walk(folder):

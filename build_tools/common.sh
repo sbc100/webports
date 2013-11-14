@@ -10,7 +10,7 @@
 # NAMING CONVENTION
 # =================
 #
-# This file is source'd by other scripts especially those inside libraries/
+# This file is source'd by other scripts especially those inside ports/
 # and makes functions env variables available to those scripts.
 # Only variables beginging with "NACL_" are intended to be used by those
 # scripts!
@@ -111,7 +111,6 @@ else
 fi
 
 # packages subdirectories
-readonly NACL_PACKAGES_LIBRARIES=${NACL_PACKAGES}/libraries
 readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
 REPOSITORY=${NACL_PACKAGES_OUT}/repository
 NACL_BUILD_SUBDIR=build-nacl-${NACL_ARCH}
@@ -674,7 +673,7 @@ TouchKeyStamp() {
 
 InstallNaClTerm() {
   local INSTALL_DIR=$1
-  local CHROMEAPPS=${NACL_SRC}/libraries/hterm/src
+  local CHROMEAPPS=${NACL_SRC}/third_party/hterm/src
   local LIB_DOT=${CHROMEAPPS}/libdot
   local NASSH=${CHROMEAPPS}/nassh
   LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \

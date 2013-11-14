@@ -78,103 +78,103 @@ NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/usr
 endif
 
 LIBRARIES = \
-     libraries/agg \
-     libraries/boost \
-     libraries/box2d \
-     libraries/bullet \
-     libraries/bzip2 \
-     libraries/cairo \
-     libraries/cfitsio \
-     libraries/curl \
-     libraries/DevIL \
-     libraries/dreadthread \
-     libraries/expat \
-     libraries/faac \
-     libraries/faad2 \
-     libraries/ffmpeg \
-     libraries/fftw \
-     libraries/flac \
-     libraries/fontconfig \
-     libraries/freealut \
-     libraries/FreeImage \
-     libraries/freetype \
-     libraries/gc \
-     libraries/giflib \
-     libraries/glib \
-     libraries/glibc-compat \
-     libraries/gsl \
-     libraries/ImageMagick \
-     libraries/jpeg6b \
-     libraries/jpeg8d \
-     libraries/jsoncpp \
-     libraries/lame \
-     libraries/lcms \
-     libraries/libav \
-     libraries/libhangul \
-     libraries/libmikmod \
-     libraries/libmng \
-     libraries/libmodplug \
-     libraries/libogg \
-     libraries/libpng \
-     libraries/libtar \
-     libraries/libtheora \
-     libraries/libtomcrypt \
-     libraries/libtommath \
-     libraries/libvorbis \
-     libraries/libxml2 \
-     libraries/lua5.1 \
-     libraries/lua5.2 \
-     libraries/metakit \
-     libraries/Mesa \
-     libraries/mpg123 \
-     libraries/nacl-mounts \
-     libraries/ncurses \
-     libraries/openal-soft \
-     libraries/OpenSceneGraph \
-     libraries/openssl \
-     libraries/pango \
-     libraries/physfs \
-     libraries/pixman \
-     libraries/protobuf \
-     libraries/python \
-     libraries/readline \
-     libraries/Regal \
-     libraries/ruby \
-     libraries/SDL \
-     libraries/SDL_image \
-     libraries/SDL_mixer \
-     libraries/SDL_net \
-     libraries/SDL_ttf \
-     libraries/speex \
-     libraries/sqlite \
-     libraries/tiff \
-     libraries/tinyxml \
-     libraries/webp \
-     libraries/x264 \
-     libraries/yajl \
-     libraries/zlib
+     ports/agg \
+     ports/boost \
+     ports/box2d \
+     ports/bullet \
+     ports/bzip2 \
+     ports/cairo \
+     ports/cfitsio \
+     ports/curl \
+     ports/DevIL \
+     ports/dreadthread \
+     ports/expat \
+     ports/faac \
+     ports/faad2 \
+     ports/ffmpeg \
+     ports/fftw \
+     ports/flac \
+     ports/fontconfig \
+     ports/freealut \
+     ports/FreeImage \
+     ports/freetype \
+     ports/gc \
+     ports/giflib \
+     ports/glib \
+     ports/glibc-compat \
+     ports/gsl \
+     ports/ImageMagick \
+     ports/jpeg6b \
+     ports/jpeg8d \
+     ports/jsoncpp \
+     ports/lame \
+     ports/lcms \
+     ports/libav \
+     ports/libhangul \
+     ports/libmikmod \
+     ports/libmng \
+     ports/libmodplug \
+     ports/libogg \
+     ports/libpng \
+     ports/libtar \
+     ports/libtheora \
+     ports/libtomcrypt \
+     ports/libtommath \
+     ports/libvorbis \
+     ports/libxml2 \
+     ports/lua5.1 \
+     ports/lua5.2 \
+     ports/metakit \
+     ports/Mesa \
+     ports/mpg123 \
+     ports/nacl-mounts \
+     ports/ncurses \
+     ports/openal-soft \
+     ports/OpenSceneGraph \
+     ports/openssl \
+     ports/pango \
+     ports/physfs \
+     ports/pixman \
+     ports/protobuf \
+     ports/python \
+     ports/readline \
+     ports/Regal \
+     ports/ruby \
+     ports/SDL \
+     ports/SDL_image \
+     ports/SDL_mixer \
+     ports/SDL_net \
+     ports/SDL_ttf \
+     ports/speex \
+     ports/sqlite \
+     ports/tiff \
+     ports/tinyxml \
+     ports/webp \
+     ports/x264 \
+     ports/yajl \
+     ports/zlib
 
 EXAMPLES = \
-     examples/audio/openal-ogg \
-     examples/editors/nano \
-     examples/editors/vim \
-     examples/games/drod \
-     examples/games/nethack \
-     examples/games/scummvm \
-     examples/games/snes9x \
-     examples/graphics/mesagl \
-     examples/graphics/xaos \
-     examples/systems/bochs \
-     examples/systems/dosbox \
-     examples/tools/bash \
-     examples/tools/civetweb \
-     examples/tools/gdb \
-     examples/tools/mongoose \
-     examples/tools/lua_ppapi \
-     examples/tools/openssh \
-     examples/tools/python_ppapi \
-     examples/tools/ruby_ppapi \
-     examples/tools/thttpd
+     ports/bash \
+     ports/bochs \
+     ports/civetweb \
+     ports/dosbox \
+     ports/drod \
+     ports/gdb \
+     ports/lua_ppapi \
+     ports/mesagl \
+     ports/mongoose \
+     ports/nano \
+     ports/nethack \
+     ports/openal-ogg \
+     ports/openssh \
+     ports/python_ppapi \
+     ports/ruby_ppapi \
+     ports/scummvm \
+     ports/snes9x \
+     ports/thttpd \
+     ports/vim \
+     ports/xaos \
 
 ALL_PACKAGES := $(LIBRARIES) $(EXAMPLES)
 PACKAGES := $(LIBRARIES) $(EXAMPLES)
@@ -252,184 +252,170 @@ endif
 endif
 
 # packages with dependencies
-$(SENT)/libraries/libvorbis: libraries/libogg
-$(SENT)/libraries/libtheora: libraries/libogg
-$(SENT)/libraries/flac: libraries/libogg
-$(SENT)/libraries/speex: libraries/libogg
-$(SENT)/libraries/fontconfig: libraries/expat libraries/freetype
-$(SENT)/libraries/libtar: libraries/zlib
-$(SENT)/libraries/libpng: libraries/zlib
-$(SENT)/libraries/agg: libraries/freetype
-$(SENT)/libraries/cairo: \
-    libraries/pixman libraries/fontconfig libraries/libpng
-$(SENT)/libraries/ffmpeg: \
-    libraries/lame libraries/libvorbis libraries/libtheora \
-    libraries/glibc-compat
-$(SENT)/libraries/webp: libraries/tiff libraries/jpeg8d
-$(SENT)/libraries/libav: libraries/lame libraries/libvorbis
-$(SENT)/libraries/libtar: libraries/zlib
+$(SENT)/ports/libvorbis: ports/libogg
+$(SENT)/ports/libtheora: ports/libogg
+$(SENT)/ports/flac: ports/libogg
+$(SENT)/ports/speex: ports/libogg
+$(SENT)/ports/fontconfig: ports/expat ports/freetype
+$(SENT)/ports/libtar: ports/zlib
+$(SENT)/ports/libpng: ports/zlib
+$(SENT)/ports/agg: ports/freetype
+$(SENT)/ports/cairo: ports/pixman ports/fontconfig ports/libpng
+$(SENT)/ports/ffmpeg: ports/lame ports/libvorbis ports/libtheora \
+    ports/glibc-compat
+$(SENT)/ports/webp: ports/tiff ports/jpeg8d
+$(SENT)/ports/libav: ports/lame ports/libvorbis
+$(SENT)/ports/libtar: ports/zlib
 ifeq ($(LUA_NO_READLINE),)
-$(SENT)/libraries/lua5.1: libraries/readline
-$(SENT)/libraries/lua5.2: libraries/readline
+$(SENT)/ports/lua5.1: ports/readline
+$(SENT)/ports/lua5.2: ports/readline
 endif
-$(SENT)/libraries/python: libraries/readline libraries/zlib
-$(SENT)/libraries/ruby: libraries/readline libraries/zlib
-$(SENT)/libraries/sqlite: libraries/readline
-$(SENT)/examples/games/nethack: libraries/ncurses libraries/libtar
-$(SENT)/examples/tools/bash: libraries/ncurses libraries/libtar
-$(SENT)/examples/editors/nano: libraries/ncurses libraries/libtar
-$(SENT)/examples/editors/vim: libraries/ncurses libraries/libtar
-$(SENT)/examples/tools/thttpd: libraries/jsoncpp
-$(SENT)/examples/tools/openssh: \
-    libraries/zlib libraries/openssl libraries/jsoncpp
-$(SENT)/examples/tools/python_ppapi: libraries/python libraries/libtar
-$(SENT)/examples/tools/lua_ppapi: libraries/lua5.2 libraries/libtar
-$(SENT)/examples/tools/ruby_ppapi: \
-    libraries/ruby libraries/libtar libraries/glibc-compat
-$(SENT)/examples/games/scummvm: libraries/SDL libraries/libvorbis \
-    libraries/libtar
-$(SENT)/examples/systems/bochs: \
-    libraries/nacl-mounts libraries/SDL
-$(SENT)/examples/systems/dosbox: \
-    libraries/nacl-mounts libraries/SDL libraries/zlib \
-    libraries/libpng
-$(SENT)/examples/games/snes9x: libraries/nacl-mounts
-$(SENT)/examples/games/drod: libraries/SDL libraries/SDL_mixer \
-    libraries/SDL_ttf libraries/zlib libraries/metakit libraries/libtar \
-    libraries/expat
-$(SENT)/examples/graphics/mesagl: libraries/Mesa
-$(SENT)/libraries/glib: libraries/zlib
-$(SENT)/libraries/pango: libraries/glib libraries/cairo
-$(SENT)/libraries/Regal: libraries/libpng
+$(SENT)/ports/python: ports/readline ports/zlib
+$(SENT)/ports/ruby: ports/readline ports/zlib
+$(SENT)/ports/sqlite: ports/readline
+$(SENT)/ports/nethack: ports/ncurses ports/libtar
+$(SENT)/ports/bash: ports/ncurses ports/libtar
+$(SENT)/ports/nano: ports/ncurses ports/libtar
+$(SENT)/ports/vim: ports/ncurses ports/libtar
+$(SENT)/ports/thttpd: ports/jsoncpp
+$(SENT)/ports/openssh: ports/zlib ports/openssl ports/jsoncpp
+$(SENT)/ports/python_ppapi: ports/python ports/libtar
+$(SENT)/ports/lua_ppapi: ports/lua5.2 ports/libtar
+$(SENT)/ports/ruby_ppapi: ports/ruby ports/libtar ports/glibc-compat
+$(SENT)/ports/scummvm: ports/SDL ports/libvorbis ports/libtar
+$(SENT)/ports/bochs: ports/nacl-mounts ports/SDL
+$(SENT)/ports/dosbox: ports/nacl-mounts ports/SDL ports/zlib ports/libpng
+$(SENT)/ports/snes9x: ports/nacl-mounts
+$(SENT)/ports/drod: ports/SDL ports/SDL_mixer ports/SDL_ttf ports/zlib \
+    ports/metakit ports/libtar ports/expat
+$(SENT)/ports/mesagl: ports/Mesa
+$(SENT)/ports/glib: ports/zlib
+$(SENT)/ports/pango: ports/glib ports/cairo
+$(SENT)/ports/Regal: ports/libpng
 ifneq ($(NACL_ARCH), pnacl)
-$(SENT)/libraries/SDL: libraries/Regal
+$(SENT)/ports/SDL: ports/Regal
 endif
-$(SENT)/libraries/SDL_mixer: libraries/SDL \
-    libraries/libogg libraries/libvorbis libraries/libmikmod
-$(SENT)/libraries/SDL_image: libraries/SDL \
-    libraries/libpng libraries/jpeg8d
-$(SENT)/libraries/SDL_net: libraries/SDL
-$(SENT)/libraries/SDL_ttf: libraries/SDL libraries/freetype
-$(SENT)/libraries/boost: libraries/zlib libraries/bzip2
-$(SENT)/libraries/freealut: libraries/openal-soft
-$(SENT)/examples/audio/openal-ogg: \
-    libraries/openal-soft libraries/libvorbis
-$(SENT)/libraries/readline: libraries/ncurses
+$(SENT)/ports/SDL_mixer: ports/SDL ports/libogg ports/libvorbis ports/libmikmod
+$(SENT)/ports/SDL_image: ports/SDL ports/libpng ports/jpeg8d
+$(SENT)/ports/SDL_net: ports/SDL
+$(SENT)/ports/SDL_ttf: ports/SDL ports/freetype
+$(SENT)/ports/boost: ports/zlib ports/bzip2
+$(SENT)/ports/freealut: ports/openal-soft
+$(SENT)/ports/openal-ogg: ports/openal-soft ports/libvorbis
+$(SENT)/ports/readline: ports/ncurses
 ifneq ($(NACL_GLIBC), 1)
-  $(SENT)/libraries/readline: libraries/glibc-compat
-  $(SENT)/libraries/openssl: libraries/glibc-compat
-  $(SENT)/libraries/ncurses: libraries/glibc-compat
+  $(SENT)/ports/readline: ports/glibc-compat
+  $(SENT)/ports/openssl: ports/glibc-compat
+  $(SENT)/ports/ncurses: ports/glibc-compat
 endif
-$(SENT)/libraries/libmng: libraries/zlib libraries/jpeg8d
-$(SENT)/libraries/lcms: libraries/zlib libraries/jpeg8d libraries/tiff
-$(SENT)/libraries/DevIL: libraries/libpng libraries/jpeg8d libraries/libmng \
-    libraries/tiff libraries/lcms
-$(SENT)/libraries/physfs: libraries/zlib
-$(SENT)/libraries/mpg123: libraries/openal-soft
-$(SENT)/libraries/ImageMagick: libraries/libpng libraries/jpeg8d \
-    libraries/bzip2 libraries/zlib
-$(SENT)/examples/tools/gdb: \
-    libraries/ncurses libraries/expat libraries/readline
+$(SENT)/ports/libmng: ports/zlib ports/jpeg8d
+$(SENT)/ports/lcms: ports/zlib ports/jpeg8d ports/tiff
+$(SENT)/ports/DevIL: ports/libpng ports/jpeg8d ports/libmng ports/tiff \
+    ports/lcms
+$(SENT)/ports/physfs: ports/zlib
+$(SENT)/ports/mpg123: ports/openal-soft
+$(SENT)/ports/ImageMagick: ports/libpng ports/jpeg8d ports/bzip2 ports/zlib
+$(SENT)/ports/gdb: ports/ncurses ports/expat ports/readline
 
 # shortcuts libraries (alphabetical)
-agg: libraries/agg ;
-boost: libraries/boost ;
-box2d: libraries/box2d ;
-bullet: libraries/bullet ;
-bzip2: libraries/bzip2 ;
-cairo: libraries/cairo ;
-cfitsio: libraries/cfitsio ;
-curl: libraries/curl ;
-DevIL: libraries/DevIL ;
-dreadthread: libraries/dreadthread ;
-expat: libraries/expat ;
-faac: libraries/faac ;
-faad faad2: libraries/faad2 ;
-ffmpeg: libraries/ffmpeg ;
-fftw: libraries/fftw ;
-flac: libraries/flac ;
-fontconfig: libraries/fontconfig ;
-freealut: libraries/freealut ;
-freeimage FreeImage: libraries/FreeImage ;
-freetype: libraries/freetype ;
-gc: libraries/gc ;
-gif giflib: libraries/giflib ;
-glib: libraries/glib ;
-glibc-compat: libraries/glibc-compat ;
-gsl: libraries/gsl ;
-hangul libhangul: libraries/libhangul ;
-imagemagick ImageMagick: libraries/ImageMagick ;
-jpeg jpeg8d: libraries/jpeg8d ;
-jpeg6b: libraries/jpeg6b ;
-jsoncpp: libraries/jsoncpp ;
-lame: libraries/lame ;
-lcms: libraries/lcms ;
-libav: libraries/libav ;
-lua5.1: libraries/lua5.1 ;
-lua5.2: libraries/lua5.2 ;
-lua: libraries/lua5.2 ;
-mesa Mesa: libraries/Mesa ;
-metakit: libraries/metakit ;
-mikmod libmikmod: libraries/libmikmod ;
-mng libmng: libraries/libmng ;
-modplug libmodplug: libraries/libmodplug ;
-mpg123: libraries/mpg123 ;
-nacl-mounts: libraries/nacl-mounts ;
-ncurses: libraries/ncurses ;
-ogg libogg: libraries/libogg ;
-openal openal-soft: libraries/openal-soft ;
-openscenegraph OpenSceneGraph: libraries/OpenSceneGraph ;
-openssl: libraries/openssl ;
-pango: libraries/pango ;
-physfs: libraries/physfs ;
-pixman: libraries/pixman ;
-png libpng: libraries/libpng ;
-protobuf: libraries/protobuf ;
-python: libraries/python ;
-readline: libraries/readline ;
-regal Regal: libraries/Regal ;
-ruby: libraries/ruby ;
-sdl SDL: libraries/SDL ;
-sdl_image SDL_image: libraries/SDL_image ;
-sdl_mixer SDL_mixer: libraries/SDL_mixer ;
-sdl_net SDL_net: libraries/SDL_net ;
-sdl_ttf SDL_ttf: libraries/SDL_ttf ;
-speex: libraries/speex ;
-sqlite: libraries/sqlite ;
-tar libtar: libraries/libtar ;
-theora libtheora: libraries/libtheora ;
-tiff: libraries/tiff ;
-tinyxml: libraries/tinyxml ;
-tomcrypt libtomcrypt: libraries/libtomcrypt ;
-tommath libtommath: libraries/libtommath ;
-vorbis libvorbis: libraries/libvorbis ;
-webp: libraries/webp ;
-x264: libraries/x264 ;
-xml2 libxml2: libraries/libxml2 ;
-yajl: libraries/yajl ;
-zlib: libraries/zlib ;
+agg: ports/agg ;
+boost: ports/boost ;
+box2d: ports/box2d ;
+bullet: ports/bullet ;
+bzip2: ports/bzip2 ;
+cairo: ports/cairo ;
+cfitsio: ports/cfitsio ;
+curl: ports/curl ;
+DevIL: ports/DevIL ;
+dreadthread: ports/dreadthread ;
+expat: ports/expat ;
+faac: ports/faac ;
+faad faad2: ports/faad2 ;
+ffmpeg: ports/ffmpeg ;
+fftw: ports/fftw ;
+flac: ports/flac ;
+fontconfig: ports/fontconfig ;
+freealut: ports/freealut ;
+freeimage FreeImage: ports/FreeImage ;
+freetype: ports/freetype ;
+gc: ports/gc ;
+gif giflib: ports/giflib ;
+glib: ports/glib ;
+glibc-compat: ports/glibc-compat ;
+gsl: ports/gsl ;
+hangul libhangul: ports/libhangul ;
+imagemagick ImageMagick: ports/ImageMagick ;
+jpeg jpeg8d: ports/jpeg8d ;
+jpeg6b: ports/jpeg6b ;
+jsoncpp: ports/jsoncpp ;
+lame: ports/lame ;
+lcms: ports/lcms ;
+libav: ports/libav ;
+lua5.1: ports/lua5.1 ;
+lua5.2: ports/lua5.2 ;
+lua: ports/lua5.2 ;
+mesa Mesa: ports/Mesa ;
+metakit: ports/metakit ;
+mikmod libmikmod: ports/libmikmod ;
+mng libmng: ports/libmng ;
+modplug libmodplug: ports/libmodplug ;
+mpg123: ports/mpg123 ;
+nacl-mounts: ports/nacl-mounts ;
+ncurses: ports/ncurses ;
+ogg libogg: ports/libogg ;
+openal openal-soft: ports/openal-soft ;
+openscenegraph OpenSceneGraph: ports/OpenSceneGraph ;
+openssl: ports/openssl ;
+pango: ports/pango ;
+physfs: ports/physfs ;
+pixman: ports/pixman ;
+png libpng: ports/libpng ;
+protobuf: ports/protobuf ;
+python: ports/python ;
+readline: ports/readline ;
+regal Regal: ports/Regal ;
+ruby: ports/ruby ;
+sdl SDL: ports/SDL ;
+sdl_image SDL_image: ports/SDL_image ;
+sdl_mixer SDL_mixer: ports/SDL_mixer ;
+sdl_net SDL_net: ports/SDL_net ;
+sdl_ttf SDL_ttf: ports/SDL_ttf ;
+speex: ports/speex ;
+sqlite: ports/sqlite ;
+tar libtar: ports/libtar ;
+theora libtheora: ports/libtheora ;
+tiff: ports/tiff ;
+tinyxml: ports/tinyxml ;
+tomcrypt libtomcrypt: ports/libtomcrypt ;
+tommath libtommath: ports/libtommath ;
+vorbis libvorbis: ports/libvorbis ;
+webp: ports/webp ;
+x264: ports/x264 ;
+xml2 libxml2: ports/libxml2 ;
+yajl: ports/yajl ;
+zlib: ports/zlib ;
 
 # shortcuts examples (alphabetical)
-bash: examples/tools/bash ;
-bochs: examples/systems/bochs ;
-civetweb: examples/tools/civetweb ;
-dosbox: examples/systems/dosbox ;
-drod: examples/games/drod ;
-gdb: examples/tools/gdb ;
-git: examples/tools/git ;
-mesagl: examples/graphics/mesagl ;
-mongoose: examples/tools/mongoose ;
-nano: examples/editors/nano ;
-nethack: examples/games/nethack ;
-openal-ogg: examples/audio/openal-ogg ;
-lua_ppapi: examples/tools/lua_ppapi ;
-python_ppapi: examples/tools/python_ppapi ;
-ruby_ppapi: examples/tools/ruby_ppapi ;
-scummvm: examples/games/scummvm ;
-snes9x: examples/games/snes9x ;
-thttpd: examples/tools/thttpd ;
-openssh: examples/tools/openssh ;
+bash: ports/bash ;
+bochs: ports/bochs ;
+civetweb: ports/civetweb ;
+dosbox: ports/dosbox ;
+drod: ports/drod ;
+gdb: ports/gdb ;
+git: ports/git ;
+mesagl: ports/mesagl ;
+mongoose: ports/mongoose ;
+nano: ports/nano ;
+nethack: ports/nethack ;
+openal-ogg: ports/openal-ogg ;
+lua_ppapi: ports/lua_ppapi ;
+python_ppapi: ports/python_ppapi ;
+ruby_ppapi: ports/ruby_ppapi ;
+scummvm: ports/scummvm ;
+snes9x: ports/snes9x ;
+thttpd: ports/thttpd ;
+openssh: ports/openssh ;
 # Deliberate space after vim target to avoid detection
 # as modeline string.
-vim : examples/editors/vim ;
-xaos: examples/graphics/xaos ;
+vim : ports/vim ;
+xaos: ports/xaos ;
