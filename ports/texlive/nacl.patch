@@ -1,0 +1,527 @@
+diff --git a/configure b/configure
+index 9d3f3b5..18e50ef 100755
+--- a/configure
++++ b/configure
+@@ -955,7 +955,9 @@ XMKMF
+ CXX
+ CXXFLAGS
+ CCC
+-CXXCPP'
++CXXCPP
++AR
++RANLIB'
+ ac_subdirs_all='texk/ptexenc
+ texk/kpathsea
+ auxdir/auxsub libs utils texk'
+diff --git a/configure.ac b/configure.ac
+index c9e3833..0d83b26 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -64,6 +64,13 @@ AC_PROG_MKDIR_P
+ AC_PATH_XTRA
+ 
+ AC_PROG_CXX
++AC_PROG_AR
++AC_PROG_RANLIB
++
++AN_MAKEVAR([AR], [AC_PROG_AR])
++AN_PROGRAM([ar], [AC_PROG_AR])
++AC_DEFUN([AC_PROG_AR], [AC_CHECK_TOOL(AR, ar, :)])
++AC_PROG_AR
+ 
+ AC_PROG_LN_S
+ AC_ARG_WITH([ln-s],
+diff --git a/libs/cairo/cairo-1.12.8/build/configure.ac.warnings b/libs/cairo/cairo-1.12.8/build/configure.ac.warnings
+index f984eb2..553d72b 100644
+--- a/libs/cairo/cairo-1.12.8/build/configure.ac.warnings
++++ b/libs/cairo/cairo-1.12.8/build/configure.ac.warnings
+@@ -49,7 +49,6 @@ AC_TRY_LINK([],[
+ MAYBE_WARN="$MAYBE_WARN -fno-strict-aliasing -fno-common"
+ 
+ dnl Also to turn various gcc/glibc-specific preprocessor checks
+-MAYBE_WARN="$MAYBE_WARN -Wp,-D_FORTIFY_SOURCE=2"
+ 
+ # invalidate cached value if MAYBE_WARN has changed
+ if test "x$cairo_cv_warn_maybe" != "x$MAYBE_WARN"; then
+diff --git a/libs/cairo/cairo-1.12.8/configure b/libs/cairo/cairo-1.12.8/configure
+index ae5c386..015086b 100755
+--- a/libs/cairo/cairo-1.12.8/configure
++++ b/libs/cairo/cairo-1.12.8/configure
+@@ -18490,8 +18490,6 @@ rm -f core conftest.err conftest.$ac_objext \
+ 
+ MAYBE_WARN="$MAYBE_WARN -fno-strict-aliasing -fno-common"
+ 
+-MAYBE_WARN="$MAYBE_WARN -Wp,-D_FORTIFY_SOURCE=2"
+-
+ # invalidate cached value if MAYBE_WARN has changed
+ if test "x$cairo_cv_warn_maybe" != "x$MAYBE_WARN"; then
+ 	unset cairo_cv_warn_cflags
+diff --git a/libs/icu/configure b/libs/icu/configure
+index 8ee28c9..e6d9389 100755
+--- a/libs/icu/configure
++++ b/libs/icu/configure
+@@ -3672,7 +3672,7 @@ do
+   *) icu_list=build ;;
+   esac
+   case $icu_arg in
+-  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=*) ;;
++  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=* | AR=* | RANLIB=*) ;;
+   *) continue ;;
+   esac
+   case $icu_arg in
+diff --git a/libs/icu/configure.ac b/libs/icu/configure.ac
+index 9fa26bd..a5cdb87 100644
+--- a/libs/icu/configure.ac
++++ b/libs/icu/configure.ac
+@@ -54,7 +54,7 @@ do
+   *) icu_list=build ;;
+   esac
+   case $icu_arg in
+-  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=*) ;;
++  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=* | AR=* | RANLIB=*) ;;
+   *) continue ;;
+   esac
+   case $icu_arg in
+diff --git a/libs/icu/icu-51.1/source/aclocal.m4 b/libs/icu/icu-51.1/source/aclocal.m4
+index 7991322..130daaa 100644
+--- a/libs/icu/icu-51.1/source/aclocal.m4
++++ b/libs/icu/icu-51.1/source/aclocal.m4
+@@ -30,7 +30,7 @@ powerpc*-*-linux*)
+ 	else
+ 		icu_cv_host_frag=mh-linux-va
+ 	fi ;;
+-*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu) icu_cv_host_frag=mh-linux ;;
++*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu|*-*-nacl) icu_cv_host_frag=mh-linux ;;
+ *-*-cygwin|*-*-mingw32|*-*-mingw64)
+ 	if test "$GCC" = yes; then
+ 		AC_TRY_COMPILE([
+diff --git a/libs/icu/icu-51.1/source/common/putilimp.h b/libs/icu/icu-51.1/source/common/putilimp.h
+index 9c10f83..c5caa27 100644
+--- a/libs/icu/icu-51.1/source/common/putilimp.h
++++ b/libs/icu/icu-51.1/source/common/putilimp.h
+@@ -120,6 +120,13 @@ typedef size_t uintptr_t;
+     /* __timezone is only available in glibc */
+ #       define U_TIMEZONE __timezone
+ #   endif
++#elif U_PLATFORM == U_PF_NACL
++#   if defined(__GLIBC__)
++    /* __timezone is only available in glibc */
++#       define U_TIMEZONE __timezone
++#   else
++#       define U_TIMEZONE _timezone
++#   endif
+ #elif U_PLATFORM_USES_ONLY_WIN32_API
+ #   define U_TIMEZONE _timezone
+ #elif U_PLATFORM == U_PF_BSD && !defined(__NetBSD__)
+diff --git a/libs/icu/icu-51.1/source/common/unicode/platform.h b/libs/icu/icu-51.1/source/common/unicode/platform.h
+index 26f12f4..843ae2d 100644
+--- a/libs/icu/icu-51.1/source/common/unicode/platform.h
++++ b/libs/icu/icu-51.1/source/common/unicode/platform.h
+@@ -123,6 +123,8 @@
+ #define U_PF_LINUX 4000
+ /** Android is based on Linux. @internal */
+ #define U_PF_ANDROID 4050
++/** Native Client is POSIX based. @internal */
++#define U_PF_NACL 5000
+ /** "Classic" Mac OS (1984-2001) @internal */
+ #define U_PF_CLASSIC_MACOS 8000
+ /** z/OS is the successor to OS/390 which was the successor to MVS. @internal */
+@@ -144,6 +146,8 @@
+ #   include <android/api-level.h>
+ #elif defined(linux) || defined(__linux__) || defined(__linux)
+ #   define U_PLATFORM U_PF_LINUX
++#elif defined(__native_client__)
++#   define U_PLATFORM U_PF_NACL
+ #elif defined(BSD) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__MirBSD__)
+ #   define U_PLATFORM U_PF_BSD
+ #elif defined(sun) || defined(__sun)
+diff --git a/libs/icu/icu-51.1/source/configure b/libs/icu/icu-51.1/source/configure
+index 1a20f41..af3c980 100755
+--- a/libs/icu/icu-51.1/source/configure
++++ b/libs/icu/icu-51.1/source/configure
+@@ -4845,7 +4845,7 @@ powerpc*-*-linux*)
+ 	else
+ 		icu_cv_host_frag=mh-linux-va
+ 	fi ;;
+-*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu) icu_cv_host_frag=mh-linux ;;
++*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu|*-*-nacl) icu_cv_host_frag=mh-linux ;;
+ *-*-cygwin|*-*-mingw32|*-*-mingw64)
+ 	if test "$GCC" = yes; then
+ 		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+diff --git a/libs/icu/icu-51.1/source/data/Makefile.in b/libs/icu/icu-51.1/source/data/Makefile.in
+index 5bcadc3..c8ef742 100644
+--- a/libs/icu/icu-51.1/source/data/Makefile.in
++++ b/libs/icu/icu-51.1/source/data/Makefile.in
+@@ -44,7 +44,7 @@ CURDIR:=$(CURR_FULL_DIR)
+ ifeq ($(CURDIR),)
+ CURDIR=.
+ endif
+-PKGDATA = $(TOOLBINDIR)/pkgdata $(PKGDATA_OPTS) -q -c -s $(CURDIR)/out/build/$(ICUDATA_PLATFORM_NAME) -d $(ICUPKGDATA_OUTDIR)
++PKGDATA = $(TOOLBINDIR)/pkgdata $(PKGDATA_OPTS) -w -q -c -s $(CURDIR)/out/build/$(ICUDATA_PLATFORM_NAME) -d $(ICUPKGDATA_OUTDIR)
+ OS390_PDS_NAME = -z -L $(BATCH_STUB_TARGET)
+ 
+ ifeq ($(OS390_STUBDATA),1)
+diff --git a/texk/bibtex-x/bibtex.c b/texk/bibtex-x/bibtex.c
+index 0964f4d..cf12a06 100644
+--- a/texk/bibtex-x/bibtex.c
++++ b/texk/bibtex-x/bibtex.c
+@@ -107,6 +107,17 @@
+ #include <kpathsea/progname.h>
+ #endif
+ 
++#if defined(__native_client__)
++#include <assert.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <libtar.h>
++#include <sys/mount.h>
++
++#include "nacl_io/nacl_io.h"
++#include "ppapi_simple/ps_main.h"
++#endif
++
+ #include "sysdep.h"
+ #include "bibtex.h"
+ #include "datatype.h"
+@@ -226,11 +237,43 @@ END
+  * In addition, the program sends error messages and other remarks to the
+  * |log_file| and terminal.
+  ***************************************************************************/
++#if defined(__native_client__)
++int                     bibtex_pepper_main (int argc, char **argv)
++#else
+ int                     main (int argc, char **argv)
++#endif
+ BEGIN
+     extern Integer8_T       history;
+     int			    exit_status;
+ 
++#if defined(__native_client__)
++    TAR *tar;
++    int err;
++
++    umount("/");
++    mount("foo", "/", "html5fs", 0, NULL);
++    mount("./", "/mnt/tars", "httpfs", 0, NULL);
++
++    mkdir("/myhome", 0777);
++
++    /* Setup home directory to a known location. */
++    setenv("HOME", "/myhome", 1);
++    /* Setup terminal type. */
++    setenv("TERM", "xterm-256color", 1);
++    /* Blank out USER and LOGNAME. */
++    setenv("USER", "", 1);
++    setenv("LOGNAME", "", 1);
++
++    err = tar_open(&tar, "/mnt/tars/texlive.tar", NULL, O_RDONLY, 0, 0);
++    assert(err == 0);
++
++    err = tar_extract_all(tar, "/");
++    assert(err == 0);
++
++    err = tar_close(tar);
++    assert(err == 0);
++#endif
++
+     /*-
+     **------------------------------------------------------------------------
+     ** Set |log_file| initially to point to NULL.  All writes to the log
+@@ -481,4 +524,8 @@ Exit_Program_Label:
+     return (exit_status);
+ END
+ 
++#if defined(__native_client__)
++PPAPI_SIMPLE_REGISTER_MAIN(bibtex_pepper_main)
++#endif
++
+ /*^^^^^^^^^^^^^^^^^^^^^^^^^^ END OF SECTION  10 ^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+diff --git a/texk/dvipsk/configure b/texk/dvipsk/configure
+index ed4123f..5e78aae 100755
+--- a/texk/dvipsk/configure
++++ b/texk/dvipsk/configure
+@@ -16911,7 +16911,8 @@ if test "x$cross_compiling" = xyes; then :
+   cache_file=/dev/null
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ LIBS='$BUILDLIBS'"
+ fi
+ 
+ # configure is writing to config.log, and then calls config.status.
+diff --git a/texk/dvipsk/configure.ac b/texk/dvipsk/configure.ac
+index 09ccc69..d2d6294 100644
+--- a/texk/dvipsk/configure.ac
++++ b/texk/dvipsk/configure.ac
+@@ -34,6 +34,7 @@ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
+ [cache_file=/dev/null
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"])])
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ LIBS='$BUILDLIBS'"])])
+ 
+ AC_OUTPUT
+diff --git a/texk/kpathsea/progname.c b/texk/kpathsea/progname.c
+index f73cf07..2ade903 100644
+--- a/texk/kpathsea/progname.c
++++ b/texk/kpathsea/progname.c
+@@ -66,6 +66,11 @@
+ #define S_IXOTH 0001
+ #endif
+ 
++#if defined(__native_client__)
++/* Unfortunately symlink support is not yet implemented in nacl_io. */
++#undef S_ISLNK
++#endif
++
+ 
+ #ifndef WIN32
+ /* From a standalone program `ll' to expand symlinks written by Kimbo Mundy.
+diff --git a/texk/kpathsea/xgetcwd.c b/texk/kpathsea/xgetcwd.c
+index dae50dd..77e18be 100644
+--- a/texk/kpathsea/xgetcwd.c
++++ b/texk/kpathsea/xgetcwd.c
+@@ -30,7 +30,7 @@ static void
+ xchdir (string dirname)
+ {
+     if (chdir(dirname) != 0)
+-        _PERROR(dirname);
++        FATAL_PERROR(dirname);
+ }
+ 
+ #endif /* (not HAVE_GETCWD || GETCWD_FORKS) && not HAVE_GETWD */
+@@ -115,7 +115,7 @@ xgetcwd (void)
+             }
+         }
+         if (!found)
+-            LIB_FATAL2("No inode %d/device %d in parent directory",
++            FATAL2("No inode %d/device %d in parent directory",
+                    cwd_stat.st_ino, cwd_stat.st_dev);
+ 
+         xclosedir(parent_dir);
+diff --git a/texk/kpathsea/xstat.h b/texk/kpathsea/xstat.h
+index 59347ba..b46dfb4 100644
+--- a/texk/kpathsea/xstat.h
++++ b/texk/kpathsea/xstat.h
+@@ -24,6 +24,11 @@
+ #include <kpathsea/c-stat.h>
+ #include <kpathsea/types.h>
+ 
++#if defined(__native_client__)
++/* Unfortunately symlink support is not yet implemented in nacl_io. */
++#undef S_ISLNK
++#endif
++
+ /* Two files are indistinguishable if they are on the same device
+    and have the same inode.  This checks two stat buffers for that.  Cf.
+    the `same_file_p' routine in file-p.c, declared in kpathlib.h.  */
+diff --git a/texk/web2c/configure b/texk/web2c/configure
+index fd06395..c2df40f 100755
+--- a/texk/web2c/configure
++++ b/texk/web2c/configure
+@@ -26630,7 +26630,8 @@ if test "x$cross_compiling" = xyes; then :
+   cache_file=/dev/null
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ LIBS='$BUILDLIBS'"
+ fi
+ 
+ # configure is writing to config.log, and then calls config.status.
+diff --git a/texk/web2c/configure.ac b/texk/web2c/configure.ac
+index f6d2763..959174a 100644
+--- a/texk/web2c/configure.ac
++++ b/texk/web2c/configure.ac
+@@ -390,6 +390,7 @@ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
+ [cache_file=/dev/null
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"])])
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ LIBS='$BUILDLIBS'"])])
+ 
+ AC_OUTPUT
+diff --git a/texk/web2c/lib/main.c b/texk/web2c/lib/main.c
+index d3f5a45..ad88bed 100644
+--- a/texk/web2c/lib/main.c
++++ b/texk/web2c/lib/main.c
+@@ -4,6 +4,20 @@
+ #include <w2c/config.h>
+ #include "lib.h"
+ 
++#if defined(__native_client__)
++#include <assert.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <libtar.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mount.h>
++
++#include "nacl_io/nacl_io.h"
++#include "ppapi_simple/ps_main.h"
++#endif
++
+ /* These variables are referenced from the change files.  */
+ char **argv;
+ int argc;
+@@ -12,8 +26,40 @@ int argc;
+    have more to do.  We just have to set up the command line.  web2c
+    transforms Pascal's main block into a procedure `main_body'.  */
+ int
++#if defined(__native_client__)
++main_pepper_main (int ac, string *av)
++#else
+ main (int  ac,  string* av)
++#endif
+ {
++#if defined(__native_client__)
++  TAR *tar;
++  int err;
++
++  umount("/");
++  mount("foo", "/", "html5fs", 0, NULL);
++  mount("./", "/tars", "httpfs", 0, NULL);
++
++  mkdir("/myhome", 0777);
++
++  /* Setup home directory to a known location. */
++  setenv("HOME", "/myhome", 1);
++  /* Setup terminal type. */
++  setenv("TERM", "xterm-256color", 1);
++  /* Blank out USER and LOGNAME. */
++  setenv("USER", "", 1);
++  setenv("LOGNAME", "", 1);
++
++  err = tar_open(&tar, "/tars/texlive.tar", NULL, O_RDONLY, 0, 0);
++  assert(err == 0);
++
++  err = tar_extract_all(tar, "/");
++  assert(err == 0);
++
++  err = tar_close(tar);
++  assert(err == 0);
++#endif
++
+ #ifdef __EMX__
+   _wildcard (&ac, &av);
+   _response (&ac, &av);
+@@ -29,6 +75,10 @@ main (int  ac,  string* av)
+   return EXIT_SUCCESS;
+ }
+ 
++#if defined(__native_client__)
++PPAPI_SIMPLE_REGISTER_MAIN(main_pepper_main)
++#endif
++
+ 
+ /* Return the Nth (counted as in C) argument from the command line.  */
+ 
+diff --git a/texk/web2c/lib/texmfmp.c b/texk/web2c/lib/texmfmp.c
+index 47d5232..a6e149b 100644
+--- a/texk/web2c/lib/texmfmp.c
++++ b/texk/web2c/lib/texmfmp.c
+@@ -33,6 +33,20 @@
+ #include <locale.h>
+ #endif
+ 
++#if defined(__native_client__)
++#include <assert.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <libtar.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mount.h>
++
++#include "nacl_io/nacl_io.h"
++#include "ppapi_simple/ps_main.h"
++#endif
++
+ #include <signal.h> /* Catch interrupts.  */
+ 
+ #include <texmfmp-help.h>
+@@ -871,10 +885,40 @@ maininit (int ac, string *av)
+ int
+ #if defined(WIN32) && !defined(__MINGW32__) && defined(DLLPROC)
+ DLLPROC (int ac, string *av)
++#elif defined(__native_client__)
++texmfmp_pepper_main (int ac, string *av)
+ #else
+ main (int ac, string *av)
+ #endif
+ {
++#if defined(__native_client__)
++  TAR *tar;
++  int err;
++
++  umount("/");
++  mount("foo", "/", "html5fs", 0, NULL);
++  mount("./", "/tars", "httpfs", 0, NULL);
++
++  mkdir("/myhome", 0777);
++
++  /* Setup home directory to a known location. */
++  setenv("HOME", "/myhome", 1);
++  /* Setup terminal type. */
++  setenv("TERM", "xterm-256color", 1);
++  /* Blank out USER and LOGNAME. */
++  setenv("USER", "", 1);
++  setenv("LOGNAME", "", 1);
++
++  err = tar_open(&tar, "/tars/texlive.tar", NULL, O_RDONLY, 0, 0);
++  assert(err == 0);
++
++  err = tar_extract_all(tar, "/");
++  assert(err == 0);
++
++  err = tar_close(tar);
++  assert(err == 0);
++#endif
++
+ #ifdef __EMX__
+   _wildcard (&ac, &av);
+   _response (&ac, &av);
+@@ -892,6 +936,10 @@ main (int ac, string *av)
+ 
+   return EXIT_SUCCESS;
+ }
++
++#if defined(__native_client__)
++PPAPI_SIMPLE_REGISTER_MAIN(texmfmp_pepper_main)
++#endif
+ 
+ /* This is supposed to ``open the terminal for input'', but what we
+    really do is copy command line arguments into TeX's or Metafont's
+diff --git a/texk/xdvik/configure b/texk/xdvik/configure
+index 95cb39f..a31910f 100755
+--- a/texk/xdvik/configure
++++ b/texk/xdvik/configure
+@@ -20709,7 +20709,8 @@ if test "x$cross_compiling" = xyes; then :
+   cache_file=/dev/null
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ LIBS='$BUILDLIBS'"
+ fi
+ 
+ # configure is writing to config.log, and then calls config.status.
+diff --git a/texk/xdvik/configure.ac b/texk/xdvik/configure.ac
+index c795578..da11a7b 100644
+--- a/texk/xdvik/configure.ac
++++ b/texk/xdvik/configure.ac
+@@ -306,6 +306,7 @@ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
+ [cache_file=/dev/null
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"])])
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ LIBS='$BUILDLIBS'"])])
+ 
+ AC_OUTPUT

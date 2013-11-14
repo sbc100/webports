@@ -277,6 +277,7 @@ $(SENT)/ports/nethack: ports/ncurses ports/libtar
 $(SENT)/ports/bash: ports/ncurses ports/libtar
 $(SENT)/ports/nano: ports/ncurses ports/libtar
 $(SENT)/ports/vim: ports/ncurses ports/libtar
+$(SENT)/ports/texlive: ports/libtar
 $(SENT)/ports/thttpd: ports/jsoncpp
 $(SENT)/ports/openssh: ports/zlib ports/openssl ports/jsoncpp
 $(SENT)/ports/python_ppapi: ports/python ports/libtar
@@ -413,6 +414,7 @@ python_ppapi: ports/python_ppapi ;
 ruby_ppapi: ports/ruby_ppapi ;
 scummvm: ports/scummvm ;
 snes9x: ports/snes9x ;
+texlive: ports/texlive ;
 thttpd: ports/thttpd ;
 openssh: ports/openssh ;
 # Deliberate space after vim target to avoid detection

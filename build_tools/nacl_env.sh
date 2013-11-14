@@ -141,6 +141,7 @@ InitializeNaClGccToolchain() {
   export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
   export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
   export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+  export NACLREADELF=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-readelf
   export NACL_EXEEXT=".nexe"
 
   if [ ${NACL_ARCH} = "arm" ]; then
