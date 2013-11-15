@@ -75,4 +75,4 @@ endif
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
 endif
-	cd $(INSTALL_DIR) && zip -r python.zip .
+	cd $(INSTALL_DIR) && rm -f python.zip && zip -r python.zip .

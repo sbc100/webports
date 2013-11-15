@@ -6,7 +6,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
+export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -lstdc++"
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 
 PatchStep() {

@@ -1,7 +1,7 @@
 {
   "name": "Vim",
   "description": "Vim console application running using NativeClient",
-  "version": "7.3.0.3",
+  "version": "7.3.0.4",
   "manifest_version": 2,
   "icons": {
     "16": "icon_16.png",

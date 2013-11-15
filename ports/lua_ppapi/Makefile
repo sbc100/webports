@@ -73,14 +73,21 @@ BINARYTREES=binarytrees.lua
 # Mirrored from http://www.lua.org/tests/5.2/lua-5.2.2-tests.tar.gz
 LUA_TESTS_FILE=lua-5.2.2-tests.tar.gz
 
-install-tests:
+$(OUTBASE)/$(LUA_TESTS_FILE):
 	cd $(OUTBASE) && wget $(MIRROR_URL)/$(LUA_TESTS_FILE)
+
+$(OUTBASE)/$(SCIMARK):
+	cd $(OUTBASE) && wget $(MIRROR_URL)/$(SCIMARK)
+
+$(OUTBASE)/$(BINARYTREES):
+	cd $(OUTBASE) && wget $(MIRROR_URL)/$(BINARYTREES)
+
+install-tests: $(OUTBASE)/$(LUA_TESTS_FILE) $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(BINARYTREES)
 	tar -C $(OUTBASE) -xf $(OUTBASE)/$(LUA_TESTS_FILE)
 	cd $(OUTBASE)/lua-5.2.2-tests && patch -p1 < $(CURDIR)/lua_tests.patch
 	mkdir -p $(INSTALL_DIR)
 	tar -c -f $(INSTALL_DIR)/luadata.tar -C $(OUTBASE) lua-5.2.2-tests
-	cd $(INSTALL_DIR) && wget $(MIRROR_URL)/$(SCIMARK)
-	cd $(INSTALL_DIR) && wget $(MIRROR_URL)/$(BINARYTREES)
+	cp $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(BINARYTREES) $(INSTALL_DIR)
 
 install: install-tests
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
@@ -88,6 +95,7 @@ install: install-tests
 	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/lua.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
+	cp lua.html $(INSTALL_DIR)
 	cp lua.js $(INSTALL_DIR)
 	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
 	cp manifest.json ${INSTALL_DIR}
@@ -101,4 +109,4 @@ endif
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
 endif
-	cd $(INSTALL_DIR) && zip -r lua.zip .
+	cd $(INSTALL_DIR) && rm -f lua.zip && zip -r lua.zip .

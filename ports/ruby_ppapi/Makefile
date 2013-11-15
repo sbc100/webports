@@ -87,4 +87,4 @@ endif
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
 endif
-	cd $(INSTALL_DIR) && zip -r ruby.zip .
+	cd $(INSTALL_DIR) && rm -f ruby.zip && zip -r ruby.zip .

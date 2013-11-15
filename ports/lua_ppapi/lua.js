@@ -35,8 +35,10 @@ function uploadFiles(evt) {
 
 function onInitFS(fs) {
   var upload = document.getElementById('upload');
-  upload.addEventListener('change', uploadFiles, false);
-  window.fs = fs
+  if (upload !== null) {
+    upload.addEventListener('change', uploadFiles, false);
+    window.fs = fs
+  }
   NaClTerm.init();
 }
 

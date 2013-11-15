@@ -821,6 +821,10 @@ DefaultConfigureStep() {
     conf_host="nacl"
   fi
 
+  if [ -n "${CONFIGURE_SENTINEL:-}" -a -f "${CONFIGURE_SENTINEL:-}" ]; then
+    return
+  fi
+
   LogExecute ${CONFIGURE} \
     --host=${conf_host} \
     --prefix=${NACLPORTS_PREFIX} \
