@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
+#include <sys/signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -126,7 +127,7 @@ struct hostent *gethostbyaddr(const void *addr,
 
 struct hostent *gethostbyname(const char *name) __attribute__((weak));
 struct hostent *gethostbyname(const char *name) {
-  UNIMPLEMENTED_NOSYS();
+  UNIMPLEMENTED_NOSYS_RTN(NULL);
 }
 
 int gethostname(char *name, size_t len) __attribute__((weak));
@@ -241,6 +242,18 @@ int setsockopt(int sockfd, int level, int optname,
 
 int shutdown(int sockfd, int how) __attribute__((weak));
 int shutdown(int sockfd, int how) {
+  UNIMPLEMENTED_FATAL();
+}
+
+int sigsuspend(const sigset_t *mask) __attribute__((weak));
+int sigsuspend(const sigset_t *mask) {
+  UNIMPLEMENTED_FATAL();
+}
+
+int sigaction(int signum, const struct sigaction *act,
+                     struct sigaction *oldact) __attribute__((weak));
+int sigaction(int signum, const struct sigaction *act,
+                     struct sigaction *oldact) {
   UNIMPLEMENTED_FATAL();
 }
 
