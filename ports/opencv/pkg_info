@@ -1,0 +1,3 @@
+PACKAGE_NAME=opencv-2.4.7
+URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/opencv-2.4.7.tar.gz
+LICENSE=BSD:doc/license.txt

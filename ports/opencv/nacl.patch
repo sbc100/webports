@@ -1,0 +1,215 @@
+diff --git opencv-v2.4.7/XCompile-nacl.txt opencv-v2.4.7.nacl/XCompile-nacl.txt
+new file mode 100644
+index 0000000..c651a2a
+--- /dev/null
++++ opencv-2.4.7.nacl/XCompile-nacl.txt
+@@ -0,0 +1,17 @@
++# the name of the target operating system
++SET(CMAKE_SYSTEM_NAME Linux)
++
++SET(NACL_CROSS_PREFIX nacl)
++
++# which compilers to use for C and C++
++SET(CMAKE_C_COMPILER "${NACLCC}")
++SET(CMAKE_CXX_COMPILER "${NACLCXX}")
++set(CMAKE_AR ${NACLAR} CACHE FILEPATH "Archiver")
++SET(CMAKE_LINKER "${NACLLD}")
++SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
++
++# here is the target environment located
++SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
++
++# nacl abi says 32bits little endian
++set(CMAKE_SIZEOF_VOID_P 4)
+diff -Naur opencv-2.4.7/modules/contrib/src/inputoutput.cpp opencv-2.4.7.nacl/modules/contrib/src/inputoutput.cpp
+--- opencv-2.4.7/modules/contrib/src/inputoutput.cpp	2013-11-06 15:26:39.000000000 +0100
++++ opencv-2.4.7.nacl/modules/contrib/src/inputoutput.cpp	2013-11-19 21:00:51.000000000 +0100
+@@ -76,7 +76,8 @@
+             {
+                 return list;
+             }
+-
++// NaCl does not define struct fields to deal with folders.
++#ifndef __native_client__
+             while ((dirp = readdir(dp)) != NULL)
+             {
+                 if (dirp->d_type == DT_REG)
+@@ -89,6 +90,7 @@
+                 }
+             }
+             closedir(dp);
++#endif  //#ifndef __native__client__
+         #endif
+ 
+         return list;
+@@ -166,7 +168,8 @@
+             {
+                 return list;
+             }
+-
++// NaCl does not define struct fields to deal with folders.
++#ifndef __native_client__
+             while ((dirp = readdir(dp)) != NULL)
+             {
+                 if (dirp->d_type == DT_DIR &&
+@@ -181,6 +184,8 @@
+                 }
+             }
+             closedir(dp);
++#endif  //#ifndef __native__client__
++
+         #endif
+ 
+         return list;
+diff -Naur opencv-2.4.7/modules/core/include/opencv2/core/operations.hpp opencv-2.4.7.nacl/modules/core/include/opencv2/core/operations.hpp
+--- opencv-2.4.7/modules/core/include/opencv2/core/operations.hpp	2013-11-06 15:26:39.000000000 +0100
++++ opencv-2.4.7.nacl/modules/core/include/opencv2/core/operations.hpp	2013-11-19 21:03:40.000000000 +0100
+@@ -58,7 +58,13 @@
+ 
+   #if defined __clang__ && __clang_major__ >= 3 && !defined __ANDROID__
+     #ifdef __ATOMIC_SEQ_CST
++     // Clang in NaCl "cannot compile this atomic library call yet": use 
++     // instead a programmatic atomic fetch.
++     #ifndef __native_client__
+         #define CV_XADD(addr, delta) __c11_atomic_fetch_add((_Atomic(int)*)(addr), (delta), __ATOMIC_SEQ_CST)
++     #else
++        int CV_XADD(int* addr, int delta) { int tmp = *addr; *addr += delta; return tmp; }
++#endif  //#ifndef __native_client__
+     #else
+         #define CV_XADD(addr, delta) __atomic_fetch_add((_Atomic(int)*)(addr), (delta), 5)
+     #endif
+diff -Naur opencv-2.4.7/modules/flann/include/opencv2/flann/allocator.h opencv-2.4.7.nacl/modules/flann/include/opencv2/flann/allocator.h
+--- opencv-2.4.7/modules/flann/include/opencv2/flann/allocator.h	2013-11-06 15:26:39.000000000 +0100
++++ opencv-2.4.7.nacl/modules/flann/include/opencv2/flann/allocator.h	2013-11-19 21:04:57.000000000 +0100
+@@ -68,7 +68,10 @@
+  *
+  */
+ 
++// In NaCl newlib, this variable is declared elsewhere non-const.
++#if defined(__native_client__) && defined(__GLIBC__)
+ const size_t     WORDSIZE=16;
++#endif  //#ifndef __native__client__
+ const  size_t     BLOCKSIZE=8192;
+ 
+ class PooledAllocator
+diff -Naur opencv-2.4.7/modules/legacy/include/opencv2/legacy/legacy.hpp opencv-2.4.7.nacl/modules/legacy/include/opencv2/legacy/legacy.hpp
+--- opencv-2.4.7/modules/legacy/include/opencv2/legacy/legacy.hpp        2013-11-06 15:26:39.000000000 +0100
++++ opencv-2.4.7.nacl/modules/legacy/include/opencv2/legacy/legacy.hpp   2013-11-19 23:22:11.000000000 +0100
+@@ -519,8 +519,8 @@
+ 
+     /* New part for stereo */
+     CvPoint3D32f epipole[2];
+-    CvPoint2D32f quad[2][4]; /* coordinates of destination quadrangle after
+-                                epipolar geometry rectification */
++    CvPoint2D32f quads[2][4]; /* coordinates of destination quadrangle after
++                                 epipolar geometry rectification */
+     double coeffs[2][3][3];/* coefficients for transformation */
+     CvPoint2D32f border[2][4];
+     CvSize warpSize;
+diff -Naur opencv-2.4.7/modules/legacy/src/calibfilter.cpp opencv-2.4.7.nacl/modules/legacy/src/calibfilter.cpp
+--- opencv-2.4.7/modules/legacy/src/calibfilter.cpp        2013-11-06 15:26:39.000000000 +0100
++++ opencv-2.4.7.nacl/modules/legacy/src/calibfilter.cpp   2013-11-19 23:22:42.000000000 +0100
+@@ -42,7 +42,10 @@
+ #include "precomp.hpp"
+ #include <stdio.h>
+ 
++// PNaCl likes this preprocessor definition active, to use a struct field.
++#ifndef __native_client__
+ #undef quad
++#endif  //#ifndef __native_client__
+ 
+ CvCalibFilter::CvCalibFilter()
+ {
+@@ -686,8 +689,8 @@
+         {
+             for( j = 0; j < 4; j++ )
+             {
+-                fprintf(f, "%15.10f ", stereo.quad[i][j].x );
+-                fprintf(f, "%15.10f ", stereo.quad[i][j].y );
++                fprintf(f, "%15.10f ", stereo.quads[i][j].x );
++                fprintf(f, "%15.10f ", stereo.quads[i][j].y );
+             }
+             fprintf(f, "\n");
+         }
+@@ -743,9 +746,9 @@
+     {
+         for( j = 0; j < 4; j++ )
+         {
+-            int values_read = fscanf(f, "%f ", &(stereo.quad[i][j].x) );
++            int values_read = fscanf(f, "%f ", &(stereo.quads[i][j].x) );
+             CV_Assert(values_read == 1);
+-            values_read = fscanf(f, "%f ", &(stereo.quad[i][j].y) );
++            values_read = fscanf(f, "%f ", &(stereo.quads[i][j].y) );
+             CV_Assert(values_read == 1);
+         }
+     }
+diff -Naur opencv-2.4.7/modules/legacy/src/epilines.cpp opencv-2.4.7.nacl/modules/legacy/src/epilines.cpp
+--- opencv-2.4.7/modules/legacy/src/epilines.cpp        2013-11-06 15:26:39.000000000 +0100
++++ opencv-2.4.7.nacl/modules/legacy/src/epilines.cpp   2013-11-19 23:22:56.000000000 +0100
+@@ -46,7 +46,10 @@
+ 
+ /* Valery Mosyagin */
+ 
++// PNaCl likes this preprocessor definition active, to use a struct field.
++#ifndef __native_client__
+ #undef quad
++#endif  //#ifndef __native_client__
+ 
+ #define EPS64D 1e-9
+ 
+@@ -312,11 +315,11 @@
+     int i;
+     for( i = 0; i < 4; i++ )
+     {
+-        quad1[i][0] = stereoCamera->quad[0][i].x;
+-        quad1[i][1] = stereoCamera->quad[0][i].y;
++        quad1[i][0] = stereoCamera->quads[0][i].x;
++        quad1[i][1] = stereoCamera->quads[0][i].y;
+ 
+-        quad2[i][0] = stereoCamera->quad[1][i].x;
+-        quad2[i][1] = stereoCamera->quad[1][i].y;
++        quad2[i][0] = stereoCamera->quads[1][i].x;
++        quad2[i][1] = stereoCamera->quads[1][i].y;
+     }
+ 
+     icvComputeCoeffForStereoNew(        quad1,
+@@ -1761,8 +1764,8 @@
+     int i;
+     for( i = 0; i < 4; i++ )
+     {
+-        stereoCamera->quad[0][i] = cvPoint2D32f(quad1[i][0],quad1[i][1]);
+-        stereoCamera->quad[1][i] = cvPoint2D32f(quad2[i][0],quad2[i][1]);
++        stereoCamera->quads[0][i] = cvPoint2D32f(quad1[i][0],quad1[i][1]);
++        stereoCamera->quads[1][i] = cvPoint2D32f(quad2[i][0],quad2[i][1]);
+     }
+ 
+     return;
+@@ -3067,12 +3070,12 @@
+     icvGetQuadsTransformStruct(stereoparams);
+ 
+     cvInitPerspectiveTransform( stereoparams->warpSize,
+-                                stereoparams->quad[0],
++                                stereoparams->quads[0],
+                                 stereoparams->coeffs[0],
+                                 0);
+ 
+     cvInitPerspectiveTransform( stereoparams->warpSize,
+-                                stereoparams->quad[1],
++                                stereoparams->quads[1],
+                                 stereoparams->coeffs[1],
+                                 0);
+ 
+diff -Naur opencv-2.4.7/modules/core/src/system.cpp opencv-2.4.7.nacl/modules/core/src/system.cpp
+--- opencv-2.4.7/modules/core/src/system.cpp        2013-11-06 15:26:39.000000000 +0100
++++ opencv-2.4.7.nacl/modules/core/src/system.cpp   2013-11-19 22:18:14.000000000 +0100
+@@ -460,6 +460,10 @@
+     const int fd = mkstemp((char*)fname.c_str());
+     if (fd == -1) return string();
+ 
++# ifndef __native_client__
+     close(fd);
++# else
++    fclose((FILE*)fd);
++# endif  //#ifndef __native_client__
+     remove(fname.c_str());
+ # endif

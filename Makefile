@@ -130,6 +130,7 @@ LIBRARIES = \
      ports/nacl-mounts \
      ports/ncurses \
      ports/openal-soft \
+     ports/opencv \
      ports/OpenSceneGraph \
      ports/openssl \
      ports/pango \
@@ -365,6 +366,7 @@ nacl-mounts: ports/nacl-mounts ;
 ncurses: ports/ncurses ;
 ogg libogg: ports/libogg ;
 openal openal-soft: ports/openal-soft ;
+opencv: ports/opencv ;
 openscenegraph OpenSceneGraph: ports/OpenSceneGraph ;
 openssl: ports/openssl ;
 pango: ports/pango ;
