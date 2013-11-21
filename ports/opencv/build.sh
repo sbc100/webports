@@ -20,24 +20,20 @@ ConfigureStep() {
            -DNACLLD=${NACLLD} \
            -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
            -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
+           -DNACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT} \
            -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX} \
            -DCMAKE_BUILD_TYPE=RELEASE \
-           -DBUILD_SHARED_LIBS=OFF \
            -DWITH_FFMPEG=OFF \
            -DWITH_OPENEXR=OFF \
            -DWITH_CUDA=OFF \
            -DWITH_JASPER=OFF \
-           -DWITH_JPEG=OFF \
            -DWITH_OPENCL=OFF \
            -DBUILD_opencv_apps=OFF \
+           -DBUILD_opencv_java=OFF \
+           -DBUILD_SHARED_LIBS=OFF \
            -DBUILD_TESTS=OFF \
-           -DBUILD_PERF_TESTS=OFF
-}
-
-BuildStep() {
-  make clean
-  # opencv build can fail when build with -jN.
-  make
+           -DBUILD_PERF_TESTS=OFF \
+           -DBUILD_FAT_JAVA_LIB=OFF
 }
 
 PackageInstall
