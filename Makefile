@@ -287,7 +287,6 @@ $(SENT)/ports/ruby_ppapi: ports/ruby ports/libtar ports/glibc-compat
 $(SENT)/ports/scummvm: ports/SDL ports/libvorbis ports/libtar
 $(SENT)/ports/bochs: ports/nacl-mounts ports/SDL
 $(SENT)/ports/dosbox: ports/nacl-mounts ports/SDL ports/zlib ports/libpng
-$(SENT)/ports/snes9x: ports/nacl-mounts
 $(SENT)/ports/drod: ports/SDL ports/SDL_mixer ports/SDL_ttf ports/zlib \
     ports/metakit ports/libtar ports/expat
 $(SENT)/ports/mesagl: ports/Mesa
