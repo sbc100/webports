@@ -27,8 +27,7 @@ LDFLAGS += \
           -lgio \
           -lm \
           -lpthread \
-          -lsrpc \
-          -lnosys
+          -lsrpc
 LDFLAGS32 = $(LDFLAGS) -m32
 LDFLAGS64 = $(LDFLAGS) -m64
 CCFILES := nacl_file.cc geturl_handler.cc quake_module.cc quake_instance.cc

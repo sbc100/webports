@@ -6,9 +6,9 @@
 #
 # usage: 'make [package]'
 #
-# This makefile builds all of the Native Client packages listed below
-# in $(PACKAGES). Each package has a dependency on its own sentinel
-# file, which can be found at naclports/src/out/sentinels/*
+# This makefile builds all of the Native Client ports listed below
+# in $(ALL_PORTS). Each port has a dependency on its own sentinel
+# file, which can be found at out/sentinels/*
 #
 # The makefile depends on the NACL_SDK_ROOT environment variable
 
@@ -77,17 +77,22 @@ else
 NACLPORTS_PREFIX ?= $(NACL_TOOLCHAIN_ROOT)/usr
 endif
 
-LIBRARIES = \
+ALL_PORTS = \
      ports/agg \
+     ports/bash \
+     ports/bochs \
      ports/boost \
      ports/box2d \
      ports/bullet \
      ports/bzip2 \
      ports/cairo \
      ports/cfitsio \
+     ports/civetweb \
      ports/curl \
      ports/DevIL \
+     ports/dosbox \
      ports/dreadthread \
+     ports/drod \
      ports/expat \
      ports/faac \
      ports/faad2 \
@@ -99,6 +104,7 @@ LIBRARIES = \
      ports/FreeImage \
      ports/freetype \
      ports/gc \
+     ports/gdb \
      ports/giflib \
      ports/glib \
      ports/glibc-compat \
@@ -124,61 +130,50 @@ LIBRARIES = \
      ports/libxml2 \
      ports/lua5.1 \
      ports/lua5.2 \
-     ports/metakit \
+     ports/lua_ppapi \
      ports/Mesa \
+     ports/mesagl \
+     ports/metakit \
+     ports/mongoose \
      ports/mpg123 \
      ports/nacl-mounts \
+     ports/nano \
      ports/ncurses \
+     ports/nethack \
+     ports/openal-ogg \
      ports/openal-soft \
      ports/opencv \
      ports/OpenSceneGraph \
+     ports/openssh \
      ports/openssl \
      ports/pango \
      ports/physfs \
      ports/pixman \
      ports/protobuf \
      ports/python \
+     ports/python_ppapi \
      ports/readline \
      ports/Regal \
      ports/ruby \
+     ports/ruby_ppapi \
+     ports/scummvm \
      ports/SDL \
      ports/SDL_image \
      ports/SDL_mixer \
      ports/SDL_net \
      ports/SDL_ttf \
+     ports/snes9x \
      ports/speex \
      ports/sqlite \
+     ports/thttpd \
      ports/tiff \
      ports/tinyxml \
+     ports/vim \
      ports/webp \
      ports/x264 \
+     ports/xaos \
      ports/yajl \
      ports/zlib
-
-EXAMPLES = \
-     ports/bash \
-     ports/bochs \
-     ports/civetweb \
-     ports/dosbox \
-     ports/drod \
-     ports/gdb \
-     ports/lua_ppapi \
-     ports/mesagl \
-     ports/mongoose \
-     ports/nano \
-     ports/nethack \
-     ports/openal-ogg \
-     ports/openssh \
-     ports/python_ppapi \
-     ports/ruby_ppapi \
-     ports/scummvm \
-     ports/snes9x \
-     ports/thttpd \
-     ports/vim \
-     ports/xaos \
-
-ALL_PACKAGES := $(LIBRARIES) $(EXAMPLES)
-PACKAGES := $(LIBRARIES) $(EXAMPLES)
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
 SENT := $(SENTINELS_DIR)/$(NACL_ARCH)
@@ -189,10 +184,7 @@ ifeq ($(NACL_DEBUG), 1)
   SENT := $(SENT)_debug
 endif
 
-default: libraries
-libraries: $(LIBRARIES)
-examples: $(EXAMPLES)
-all: $(PACKAGES)
+all: $(ALL_PORTS)
 # The subset of libraries that are shipped as part of the
 # official NaCl SDK
 SDK_LIBS = freealut freetype jpeg lua5.2 modplug ogg openal png theora tiff tinyxml
@@ -200,7 +192,7 @@ SDK_LIBS += vorbis webp xml2 zlib
 sdklibs: $(SDK_LIBS)
 
 package_list:
-	@echo $(notdir $(ALL_PACKAGES))
+	@echo $(notdir $(ALL_PORTS))
 
 sdklibs_list:
 	@echo $(SDK_LIBS)
@@ -208,7 +200,7 @@ sdklibs_list:
 run:
 	./httpd.py
 
-.PHONY: all run default libraries examples clean sdklibs sdklibs_list reallyclean
+.PHONY: all run clean sdklibs sdklibs_list reallyclean
 
 clean:
 	rm -rf $(NACL_DIRS_TO_REMOVE)
@@ -222,9 +214,9 @@ ifdef PRINT_DEPS
 # In this case we use a dummy sentinal directory which will always
 # be empty.
 SENT = $(NACL_OUT)/dummy_location
-$(ALL_PACKAGES): %: $(SENT)/%
+$(ALL_PORTS): %: $(SENT)/%
 else
-$(PACKAGES): %: $(SENT)/%
+$(ALL_PORTS): %: $(SENT)/%
 endif
 
 ifdef NACLPORTS_NO_ANNOTATE
@@ -234,15 +226,15 @@ else
 endif
 
 ifdef CLEAN
-.PHONY: $(PACKAGES:%=$(SENT)/%)
-$(PACKAGES:%=$(SENT)/%):
+.PHONY: $(ALL_PORTS:%=$(SENT)/%)
+$(ALL_PORTS:%=$(SENT)/%):
 	@rm $@
 else
 ifdef PRINT_DEPS
-$(ALL_PACKAGES:%=$(SENT)/%): $(SENT)/%:
+$(ALL_PORTS:%=$(SENT)/%): $(SENT)/%:
 	@echo $(notdir $(subst $(SENT)/,,$@))
 else
-$(PACKAGES:%=$(SENT)/%): $(SENT)/%:
+$(ALL_PORTS:%=$(SENT)/%): $(SENT)/%:
 	@$(START_BUILD)
 	python build_tools/naclports.py check -C $*
 	if python build_tools/naclports.py enabled -C $*; then \

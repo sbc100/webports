@@ -9,8 +9,6 @@ source ../../build_tools/common.sh
 MAKE_TARGETS="CCLD=\$(CXX) all"
 export LIBS="-lnacl_io -pthread"
 if [ ${NACL_GLIBC} != "1" ]; then
-  LIBS="${LIBS} -lnosys"
-  #LDFLAGS="${LDFLAGS} -lncurses -Wl,--whole-archive -lglibc-compat -Wl,--no-whole-archive"
   EXTRA_CONFIGURE_ARGS=--disable-dynamic-extensions
   EXECUTABLE_DIR=.
 else
@@ -57,7 +55,6 @@ PackageInstall() {
 
   pushd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       sqlite3_ppapi*${NACL_EXEEXT} \
       -s . \
       -o sqlite.nmf

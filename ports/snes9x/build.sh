@@ -56,7 +56,6 @@ InstallStep(){
   install ${BUILD_DIR}/snes9x ${PUBLISH_DIR}/snes9x_${NACL_ARCH}${NACL_EXEEXT}
 
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       ${PUBLISH_DIR}/snes9x_*${NACL_EXEEXT} \
       -s ${PUBLISH_DIR} \
       -o ${PUBLISH_DIR}/snes9x.nmf

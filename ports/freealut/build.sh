@@ -3,16 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# nacl-freealut.sh
-#
-# usage:  nacl-freealut.sh
-#
-# this script downloads, patches, and builds freealut for Native Client.
-
 source pkg_info
 source ../../build_tools/common.sh
 
-export LIBS="-lm -lnosys"
+export LIBS="-lm"
 
 DefaultPackageInstall
 exit 0

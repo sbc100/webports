@@ -39,6 +39,7 @@ HackStepForNewlib() {
   # Stub it out until we link against nacl_io or something.
   echo "all clean install: " > apps/Makefile
   # test/Makefile is similar -- stub out, but keep the original for testing.
+  git checkout test/Makefile
   mv test/Makefile test/Makefile.orig
   echo "all clean install: " > test/Makefile
 }

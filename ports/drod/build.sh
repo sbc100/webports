@@ -2,7 +2,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 source pkg_info
 
@@ -21,8 +20,7 @@ ConfigureStep() {
   export SDL_CONFIG=${NACLPORTS_PREFIX}/bin/sdl-config
   export LDFLAGS_common=${NACLPORTS_LDFLAGS}
   export EXTRA_LIBS="-lSDL_mixer -lSDL -lmikmod -lvorbisfile -lvorbisenc \
-                     -lvorbis -logg -lfreetype -lSDLmain -ltar -lnacl_io \
-                     -lnosys"
+                     -lvorbis -logg -lfreetype -lSDLmain -ltar -lnacl_io"
 }
 
 BuildStep() {
@@ -42,7 +40,6 @@ InstallStep() {
   cp ${START_DIR}/drod.html ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       drod_*${NACL_EXEEXT} \
       -s . \
       -o drod.nmf

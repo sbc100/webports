@@ -29,7 +29,6 @@ InstallStep() {
   LogExecute cp ${START_DIR}/index.html ${ASSEMBLY_DIR}
   pushd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       mongoose_*${NACL_EXEEXT} \
       -s . \
       -o mongoose.nmf

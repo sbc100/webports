@@ -42,7 +42,7 @@ ConfigureStep() {
   export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
   export LIBS="-ltermcap"
   if [ "${NACL_GLIBC}" != "1" ]; then
-    LIBS+=" -lglibc-compat -lc -lnosys"
+    LIBS+=" -lglibc-compat"
   fi
   DefaultConfigureStep
   if [ "${NACL_GLIBC}" != "1" ]; then

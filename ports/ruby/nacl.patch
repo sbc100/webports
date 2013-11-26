@@ -11,7 +11,7 @@ index 5bcaeeb..abeccf1 100644
  /enc.mk
  /encdb.h
 diff --git a/configure b/configure
-index a3a1c51..7cd7e52 100755
+index a3a1c51..f276c37 100755
 --- a/configure
 +++ b/configure
 @@ -3160,11 +3160,13 @@ esac
@@ -40,7 +40,23 @@ index a3a1c51..7cd7e52 100755
    else
      case "${nacl_cv_build_variant}" in #(
    glibc) :
-@@ -8292,8 +8297,6 @@ esac
+@@ -8272,15 +8277,6 @@ esac
+   *) :
+      CPPFLAGS="$CPPFLAGS -DNACL_NEWLIB" ;;
+ esac
+-    # RUBY_APPEND_OPTION(LIBS, '-lnosys')
+-	case " ${LIBS-} " in #(
+-  *' '-lnosys' '*) :
+-     ;; #(
+-  '  ') :
+-     LIBS="'-lnosys'" ;; #(
+-  *) :
+-     LIBS="$LIBS '-lnosys'" ;;
+-esac
+   else
+     # RUBY_APPEND_OPTION(XCFLAGS, -fPIC)
+ 	case " ${XCFLAGS-} " in #(
+@@ -8292,8 +8288,6 @@ esac
       XCFLAGS="$XCFLAGS -fPIC" ;;
  esac
    fi
@@ -50,7 +66,7 @@ index a3a1c51..7cd7e52 100755
    *) :
      	LIBS="-lm $LIBS" ;;
 diff --git a/configure.in b/configure.in
-index 7977aaf..ee4230b 100644
+index 7977aaf..3dc1043 100644
 --- a/configure.in
 +++ b/configure.in
 @@ -90,8 +90,11 @@ AC_DEFUN([RUBY_NACL],
@@ -77,7 +93,11 @@ index 7977aaf..ee4230b 100644
    else
      AS_CASE(
        ["${nacl_cv_build_variant}"],
-@@ -954,8 +960,6 @@ $POSTLINK"
+@@ -950,12 +956,9 @@ $POSTLINK"
+   LIBS="-lm $LIBS"
+   if test "${nacl_cv_build_variant}" = "newlib"; then
+     RUBY_APPEND_OPTION(CPPFLAGS, -DNACL_NEWLIB)
+-    RUBY_APPEND_OPTION(LIBS, '-lnosys')
    else
      RUBY_APPEND_OPTION(XCFLAGS, -fPIC)
    fi

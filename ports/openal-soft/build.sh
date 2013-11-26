@@ -26,7 +26,6 @@ ConfigureStep() {
       -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
       -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX} \
       ${LIB_ARG}
-
 }
 
 

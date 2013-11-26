@@ -78,7 +78,6 @@ InstallStep() {
   cd ${ASSEMBLY_DIR}
   for app in "${apps[@]}"; do
     LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-        ${NACL_CREATE_NMF_FLAGS} \
         ${app}_*${NACL_EXEEXT} \
         -s . \
         -o ${app}.nmf

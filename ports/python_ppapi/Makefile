@@ -7,12 +7,12 @@ NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = python
-LIBS = python2.7 readline ncurses ppapi_simple nacl_io ppapi_cpp ppapi tar
+LIBS = python2.7 readline ncurses ppapi_simple tar nacl_io ppapi_cpp ppapi
 ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic
 else
-LIBS += c nosys glibc-compat
+LIBS += glibc-compat
 endif
 SOURCES = python.c
 INC_PATHS = $(NACLPORTS_INCLUDE)/python2.7

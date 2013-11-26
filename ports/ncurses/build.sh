@@ -26,7 +26,7 @@ ConfigureStep() {
     # Changing NACLCC rather than CFLAGS as otherwise the configure script
     # fails to detect termios and tries to use gtty.
     NACLCC+=" -I${GLIBC_COMPAT}"
-    export LIBS="-lglibc-compat -lnosys"
+    export LIBS="-lglibc-compat"
   fi
 
   DefaultConfigureStep

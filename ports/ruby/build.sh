@@ -54,7 +54,7 @@ ConfigureStep() {
 
   if [ ${NACL_GLIBC} != 1 ]; then
     EXTRA_CONFIGURE_ARGS+=" --with-static-linked-ext --with-newlib"
-    export LIBS="-lglibc-compat -lnosys"
+    export LIBS="-lglibc-compat"
   else
     EXTRA_CONFIGURE_ARGS+=" --with-out-ext=openssl,digest/*"
   fi

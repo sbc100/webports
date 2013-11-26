@@ -1567,7 +1567,7 @@ index 7c25c17..f24fb44 100644
  
 +case "$host" in
 +    *-*-nacl*)
-+        LIBS="$LIBS -lnacl_io -lstdc++ -lc -lnosys"
++        LIBS="$LIBS -lnacl_io -lstdc++"
 +        ;;
 +esac
 +

@@ -23,7 +23,6 @@ InstallStep() {
 
   pushd ${ASSEMBLY_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       gdb_*${NACL_EXEEXT} \
       -s . \
       -o gdb.nmf

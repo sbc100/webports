@@ -12,7 +12,7 @@ ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl rt crypt
 NACL_LDFLAGS += -Wl,-export-dynamic
 else
-LIBS += c nosys glibc-compat
+LIBS += c glibc-compat
 endif
 SOURCES = main.c
 INC_PATHS = $(NACLPORTS_INCLUDE)/ruby-2.0.0

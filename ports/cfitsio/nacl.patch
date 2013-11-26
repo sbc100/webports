@@ -14,7 +14,7 @@ diff -u cfitsio/Makefile.in cfitsio.new/Makefile.in
  LDFLAGS =	$(CFLAGS)
  DEFS =		@DEFS@
 -LIBS =		@LIBS@
-+LIBS =		@LIBS@ -lnosys
++LIBS =		@LIBS@
  FLEX =		flex
  BISON =		bison
  

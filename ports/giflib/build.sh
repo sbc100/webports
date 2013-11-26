@@ -6,9 +6,6 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-# Some of the gif command line tools reference 'unlink'
-export LIBS='-lnosys'
-
 if [ "${NACL_GLIBC}" = "1" ]; then
   EXECUTABLES=util/.libs/rgb2gif${NACL_EXEEXT}
 else

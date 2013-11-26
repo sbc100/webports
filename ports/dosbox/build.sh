@@ -70,12 +70,7 @@ ConfigureStep() {
       -lnacl-mounts \
       -lppapi_cpp_private"
 
-  local MAYBE_NOSYS=""
-  if [ "${NACL_GLIBC}" != "1" ]; then
-    MAYBE_NOSYS="-lnosys"
-  fi
-
-  SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1 ${MAYBE_NOSYS}|"
+  SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1 |"
   SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${NACLPORTS_LDFLAGS}|"
 
   find . -name Makefile -exec cp {} {}.bak \; \
@@ -90,7 +85,7 @@ InstallStep(){
   LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
   LogExecute install ${DOSBOX_BUILD}/src/dosbox${NACL_EXEEXT} \
     ${PUBLISH_DIR}/dosbox_${NACL_ARCH}${NACL_EXEEXT}
-  local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py ${NACL_CREATE_NMF_FLAGS}"
+  local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py"
   LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
 }
 

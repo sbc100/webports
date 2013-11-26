@@ -53,7 +53,6 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
 
   CMD="$NACL_SDK_ROOT/tools/create_nmf.py \
-       $NACL_CREATE_NMF_FLAGS
       -o thttpd.nmf -s . \
       thttpd_*${NACL_EXEEXT}"
 

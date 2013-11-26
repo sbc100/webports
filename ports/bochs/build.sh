@@ -30,7 +30,7 @@ ConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
 
-  export NACLBXLIBS="-lpthread -lnosys"
+  export NACLBXLIBS="-lpthread"
 
   # Hacky way of getting around the bochs configuration tools which don't allow
   # --whole-archive and don't allow for multiple libraries with the same name
@@ -51,10 +51,6 @@ ConfigureStep() {
   export LIBS="$LIBS -lnacl-mounts"
   export LIBS="$LIBS -lpthread"
   export LIBS="$LIBS -lppapi_cpp_COPY"
-  # TOOD(robertm): investigate why this is only necessary for pnacl
-  if [ ${NACL_ARCH} = "pnacl" ] ; then
-    export LIBS="$LIBS -lnosys"
-  fi
   export LIBS="$LIBS -Wl,--end-group"
 
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}

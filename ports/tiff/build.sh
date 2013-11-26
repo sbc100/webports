@@ -6,7 +6,7 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-export LIBS="-lnosys -lm"
+export LIBS="-lm"
 
 CONFIG_SUB=config/config.sub
 DefaultPackageInstall

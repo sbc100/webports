@@ -51,7 +51,6 @@ InstallStep() {
   rm -rf ${ASSEMBLY_DIR}/vimtar
   cd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       vim_*${NACL_EXEEXT} \
       -s . \
       -o vim.nmf

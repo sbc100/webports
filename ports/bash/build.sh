@@ -38,7 +38,6 @@ InstallStep() {
   rm -rf ${ASSEMBLY_DIR}/bashtar
   cd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       bash_*${NACL_EXEEXT} \
       -s . \
       -o bash.nmf

@@ -13,9 +13,5 @@ EXTRA_CONFIGURE_ARGS="--disable-docs --with-arch=x86"
 # system one rather than one in the toolchain.
 EXTRA_CONFIGURE_ARGS+=" --with-freetype-config=${NACLPORTS_PREFIX}/bin/freetype-config"
 
-if [ ${NACL_GLIBC} != 1 ]; then
-  export LIBS=-lnosys
-fi
-
 PackageInstall
 exit 0

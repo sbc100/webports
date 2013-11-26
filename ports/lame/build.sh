@@ -6,7 +6,5 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-export LIBS=-lnosys
-
 DefaultPackageInstall
 exit 0

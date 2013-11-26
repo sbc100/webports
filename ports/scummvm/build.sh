@@ -130,7 +130,6 @@ InstallStep() {
   fi
 
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       ${ASSEMBLY_DIR}/scummvm_*${NACL_EXEEXT} \
       -s ${ASSEMBLY_DIR} \
       -o ${ASSEMBLY_DIR}/scummvm.nmf

@@ -33,7 +33,7 @@ ConfigureStep() {
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR} \
-    --extra-ldflags="-lnosys -lm" \
+    --extra-ldflags="-lm" \
     --host=${conf_host}
 
   make clean

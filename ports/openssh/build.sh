@@ -19,7 +19,7 @@ export ac_cv_func_sigaction=yes
 export SSHLIBS="-lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
 if [ "${NACL_GLIBC}" != 1 ]; then
   CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS=" -lcrypto -lglibc-compat -lnosys"
+  export LIBS=" -lcrypto -lglibc-compat"
   export LD="${NACLCXX}"
 fi
 
@@ -78,7 +78,6 @@ InstallStep() {
 
   pushd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       ssh_*${NACL_EXEEXT} \
       -s . \
       -o openssh.nmf

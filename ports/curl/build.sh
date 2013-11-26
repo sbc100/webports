@@ -67,7 +67,6 @@ InstallStep() {
   fi
 
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       ${PUBLISH_DIR}/curl_ppapi*${NACL_EXEEXT} \
       -s ${PUBLISH_DIR} \
       -o curl.nmf

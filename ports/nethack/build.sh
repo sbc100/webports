@@ -27,7 +27,7 @@ BuildStep() {
   if [[ "${NACL_ARCH}" = "pnacl" ||
         "${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
     readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
-    export WINTTYLIB="${WINTTYLIB} -lglibc-compat -lnosys"
+    export WINTTYLIB="${WINTTYLIB} -lglibc-compat"
     export NACL_CCFLAGS="${NACL_CCFLAGS} -I${GLIBC_COMPAT}"
   fi
 
@@ -58,7 +58,6 @@ InstallStep() {
 
   pushd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       nethack_*${NACL_EXEEXT} \
       -s . \
       -o nethack.nmf

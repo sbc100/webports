@@ -30,7 +30,6 @@ InstallStep() {
   rm -rf ${ASSEMBLY_DIR}/nanotar
   cd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${NACL_CREATE_NMF_FLAGS} \
       nano_*${NACL_EXEEXT} \
       -s . \
       -o nano.nmf

@@ -9,7 +9,7 @@ source ../../build_tools/common.sh
 
 ConfigureStep() {
   if [ "${NACL_GLIBC}" != 1 ]; then
-    export LIBS="-lglibc-compat -lnosys"
+    export LIBS="-lglibc-compat"
   fi
   EXTRA_CONFIGURE_ARGS+=" --disable-oggtest"
   EXTRA_CONFIGURE_ARGS+=" --disable-xmms-plugin"

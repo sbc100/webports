@@ -20,7 +20,7 @@ index e4a3cd6..69b159f 100644
  	$(MAKE) all MYCFLAGS=
  
 +nacl-newlib:
-+	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_READLINE" MYLIBS="-lreadline -lhistory -lncurses -lnosys -lglibc-compat"
++	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_READLINE" MYLIBS="-lreadline -lhistory -lncurses -lglibc-compat"
 +
 +nacl-newlib-basic:
 +	$(MAKE) all MYCFLAGS=-DLUA_USE_POSIX

@@ -1,5 +1,4 @@
 PACKAGE_NAME=texlive-20130530-source
 URL=ftp://tug.org/texlive/historic/2013/texlive-20130530-source.tar.xz
 LICENSE=gpl
-MIN_SDK_VERSION=30
 LIBC=glibc

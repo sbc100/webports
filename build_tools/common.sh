@@ -123,6 +123,9 @@ if [ ${NACL_DEBUG} = "1" ]; then
   NACL_BUILD_SUBDIR+=-debug
 fi
 
+# Don't support building with SDKs older than the current stable release
+MIN_SDK_VERSION=${MIN_SDK_VERSION:-31}
+
 readonly NACL_PACKAGES_REPOSITORY=${REPOSITORY}
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish
 readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
@@ -175,21 +178,6 @@ if [ "${NACL_DEBUG}" = "1" ]; then
   NACL_CONFIG=Debug
 else
   NACL_CONFIG=Release
-fi
-
-NACL_SDK_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
-if [ "${NACL_GLIBC}" = "1" -a ${NACL_SDK_VERSION} -gt 29 ]; then
-  # create_nmf doesn't need any of these flags by default in NaCl SDK
-  # version 30 and above.
-  NACL_CREATE_NMF_FLAGS="-L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib \
-  -L${NACL_TOOLCHAIN_ROOT}/i686-nacl/usr/lib
-  -L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib64 \
-  -L${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32 \
-  -L${NACL_SDK_ROOT}/lib/glibc_x86_64/${NACL_CONFIG} \
-  -L${NACL_SDK_ROOT}/lib/glibc_x86_32/${NACL_CONFIG} \
-  -D${NACL_BIN_PATH}/x86_64-nacl-objdump"
-else
-  NACL_CREATE_NMF_FLAGS=""
 fi
 
 # PACKAGE_DIR (the folder contained within that archive) defaults to
