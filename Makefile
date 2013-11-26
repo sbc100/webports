@@ -152,6 +152,8 @@ ALL_PORTS = \
      ports/protobuf \
      ports/python \
      ports/python_ppapi \
+     ports/python3 \
+     ports/python3_ppapi \
      ports/readline \
      ports/Regal \
      ports/ruby \
@@ -264,6 +266,7 @@ $(SENT)/ports/lua5.1: ports/readline
 $(SENT)/ports/lua5.2: ports/readline
 endif
 $(SENT)/ports/python: ports/readline ports/zlib
+$(SENT)/ports/python3: ports/readline ports/zlib
 $(SENT)/ports/ruby: ports/readline ports/zlib
 $(SENT)/ports/sqlite: ports/readline
 $(SENT)/ports/nethack: ports/ncurses ports/libtar
@@ -274,6 +277,7 @@ $(SENT)/ports/texlive: ports/libtar
 $(SENT)/ports/thttpd: ports/jsoncpp
 $(SENT)/ports/openssh: ports/zlib ports/openssl ports/jsoncpp
 $(SENT)/ports/python_ppapi: ports/python ports/libtar
+$(SENT)/ports/python3_ppapi: ports/python3 ports/libtar
 $(SENT)/ports/lua_ppapi: ports/lua5.2 ports/libtar
 $(SENT)/ports/ruby_ppapi: ports/ruby ports/libtar ports/glibc-compat
 $(SENT)/ports/scummvm: ports/SDL ports/libvorbis ports/libtar
@@ -367,6 +371,7 @@ pixman: ports/pixman ;
 png libpng: ports/libpng ;
 protobuf: ports/protobuf ;
 python: ports/python ;
+python3: ports/python3 ;
 readline: ports/readline ;
 regal Regal: ports/Regal ;
 ruby: ports/ruby ;
@@ -405,6 +410,7 @@ nethack: ports/nethack ;
 openal-ogg: ports/openal-ogg ;
 lua_ppapi: ports/lua_ppapi ;
 python_ppapi: ports/python_ppapi ;
+python3_ppapi: ports/python3_ppapi ;
 ruby_ppapi: ports/ruby_ppapi ;
 scummvm: ports/scummvm ;
 snes9x: ports/snes9x ;

@@ -1,0 +1,519 @@
+diff --git a/Include/datetime.h b/Include/datetime.h
+index 06cbc4a..cc47ca7 100644
+--- a/Include/datetime.h
++++ b/Include/datetime.h
+@@ -169,6 +169,8 @@ typedef struct {
+ 
+ #ifdef Py_BUILD_CORE
+ 
++#define PyDataTime_STATIC 1
++
+ /* Macros for type checking when building the Python core. */
+ #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
+ #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
+diff --git a/Makefile.pre.in b/Makefile.pre.in
+index 6fdea8d..6c84e4f 100644
+--- a/Makefile.pre.in
++++ b/Makefile.pre.in
+@@ -715,14 +715,18 @@ $(IO_OBJS): $(IO_H)
+ 
+ $(GRAMMAR_H): $(GRAMMAR_INPUT) $(PGENSRCS)
+ 		@$(MKDIR_P) Include
++ifndef CROSS_COMPILE
+ 		$(MAKE) $(PGEN)
++endif
+ 		$(PGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
+ $(GRAMMAR_C): $(GRAMMAR_H) $(GRAMMAR_INPUT) $(PGENSRCS)
+ 		$(MAKE) $(GRAMMAR_H)
+ 		touch $(GRAMMAR_C)
+ 
++ifndef CROSS_COMPILE
+ $(PGEN):	$(PGENOBJS)
+ 		$(CC) $(OPT) $(PY_LDFLAGS) $(PGENOBJS) $(LIBS) -o $(PGEN)
++endif
+ 
+ Parser/grammar.o:	$(srcdir)/Parser/grammar.c \
+ 				$(srcdir)/Include/token.h \
+@@ -1460,9 +1464,12 @@ profile-removal:
+ 	rm -rf $(COVERAGE_REPORT)
+ 
+ clobber: clean profile-removal
+-	-rm -f $(BUILDPYTHON) $(PGEN) $(LIBRARY) $(LDLIBRARY) $(DLLLIBRARY) \
++	-rm -f $(BUILDPYTHON) $(LIBRARY) $(LDLIBRARY) $(DLLLIBRARY) \
+ 		tags TAGS \
+ 		config.cache config.log pyconfig.h Modules/config.c
++ifndef CROSS_COMPILE
++	-rm -f $(PGEN)
++endif
+ 	-rm -rf build platform
+ 	-rm -rf $(PYTHONFRAMEWORKDIR)
+ 	-rm -f python-config.py python-config
+diff --git a/Modules/_ctypes/libffi/configure b/Modules/_ctypes/libffi/configure
+index 8230830..1ab4dcb 100755
+--- a/Modules/_ctypes/libffi/configure
++++ b/Modules/_ctypes/libffi/configure
+@@ -13393,7 +13393,7 @@ case "$host" in
+ 	TARGETDIR=x86
+ 	if test $ac_cv_sizeof_size_t = 4; then
+ 	  case "$host" in
+-	    *-gnux32)
++	    *-gnux32 | *-nacl)
+ 	      TARGET=X86_64
+ 	      ;;
+ 	    *)
+diff --git a/Modules/_ctypes/libffi/src/x86/ffi64.c b/Modules/_ctypes/libffi/src/x86/ffi64.c
+index 2014af2..cacf894 100644
+--- a/Modules/_ctypes/libffi/src/x86/ffi64.c
++++ b/Modules/_ctypes/libffi/src/x86/ffi64.c
+@@ -202,10 +202,12 @@ classify_argument (ffi_type *type, enum x86_64_reg_class classes[],
+     case FFI_TYPE_DOUBLE:
+       classes[0] = X86_64_SSEDF_CLASS;
+       return 1;
++#if FFI_TYPE_DOUBLE != FFI_TYPE_LONGDOUBLE
+     case FFI_TYPE_LONGDOUBLE:
+       classes[0] = X86_64_X87_CLASS;
+       classes[1] = X86_64_X87UP_CLASS;
+       return 2;
++#endif
+     case FFI_TYPE_STRUCT:
+       {
+ 	const int UNITS_PER_WORD = 8;
+diff --git a/Modules/_datetimemodule.c b/Modules/_datetimemodule.c
+index 8848432..b74cb26 100644
+--- a/Modules/_datetimemodule.c
++++ b/Modules/_datetimemodule.c
+@@ -7,6 +7,14 @@
+ 
+ #include <time.h>
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++/* TODO(sbc): remove once this gets fixed:
++ * https://code.google.com/p/nativeclient/issues/detail?id=3737
++ */
++#define timezone _timezone
++#define daylight _daylight
++#endif
++
+ /* Differentiate between building the core module and building extension
+  * modules.
+  */
+diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
+index 34b95c0..ba34b88 100644
+--- a/Modules/_testcapimodule.c
++++ b/Modules/_testcapimodule.c
+@@ -1747,6 +1747,9 @@ static int test_run_counter = 0;
+ 
+ static PyObject *
+ test_datetime_capi(PyObject *self, PyObject *args) {
++#ifdef PyDataTime_STATIC
++    Py_RETURN_NONE;
++#else
+     if (PyDateTimeAPI) {
+         if (test_run_counter) {
+             /* Probably regrtest.py -R */
+@@ -1764,6 +1767,7 @@ test_datetime_capi(PyObject *self, PyObject *args) {
+         Py_RETURN_NONE;
+     else
+         return NULL;
++#endif
+ }
+ 
+ 
+diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
+index 47bc9e8..2b1276c 100644
+--- a/Modules/faulthandler.c
++++ b/Modules/faulthandler.c
+@@ -15,6 +15,15 @@
+ #  define FAULTHANDLER_LATER
+ #endif
+ 
++#ifdef __native_client__
++#  ifndef SA_RESTART
++#    define SA_RESTART 0
++#  endif
++#  ifndef SA_NODEFER
++#    define SA_NODEFER 0
++#  endif
++#endif
++
+ #ifndef MS_WINDOWS
+    /* register() is useless on Windows, because only SIGSEGV, SIGABRT and
+       SIGILL can be handled by the process, and these signals can only be used
+diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
+index 46e31cd..c1bb7e7 100644
+--- a/Modules/posixmodule.c
++++ b/Modules/posixmodule.c
+@@ -49,6 +49,13 @@ corresponding Unix manual entries for more information on calls.");
+ #include <sys/uio.h>
+ #endif
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++struct iovec {
++  void *iov_base;
++  size_t iov_len;
++};
++#endif
++
+ #ifdef HAVE_SYS_TYPES_H
+ #include <sys/types.h>
+ #endif /* HAVE_SYS_TYPES_H */
+diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
+index 9909400..2e45df3 100644
+--- a/Modules/pwdmodule.c
++++ b/Modules/pwdmodule.c
+@@ -95,6 +95,29 @@ mkpwent(struct passwd *p)
+     return v;
+ }
+ 
++#ifdef __native_client__
++// python relies on a working version of getpwuid(3)
++// which Native Client does not yet provide.
++// TODO(sbc): This should only really be needed when
++// building for the sel_ldr.  It should be possible to
++// use the C-library version (which tries of open files
++// under /etc) when using nacl_io.
++static struct passwd *my_getpwuid(uid_t uid)
++{
++    static struct passwd dummy = {
++      "nacl_user",
++      "nacl_pass",
++      1,
++      1,
++      "NaCl User",
++      "/home/nacl_user",
++      "/bin/sh",
++    };
++    return &dummy;
++}
++#define getpwuid my_getpwuid
++#endif
++
+ PyDoc_STRVAR(pwd_getpwuid__doc__,
+ "getpwuid(uid) -> (pw_name,pw_passwd,pw_uid,\n\
+                   pw_gid,pw_gecos,pw_dir,pw_shell)\n\
+diff --git a/Modules/python.c b/Modules/python.c
+index 9811c01..29cbb0e 100644
+--- a/Modules/python.c
++++ b/Modules/python.c
+@@ -15,6 +15,19 @@ wmain(int argc, wchar_t **argv)
+ }
+ #else
+ 
++#ifdef __native_client__
++#include <stdio.h>
++#include <sys/utsname.h>
++
++// Dummy implementation of uname.  This is only needed for the sel_ldr
++// version of python.  Otherwise it gets provided by nacl_io.
++int uname(struct utsname *buf)
++{
++	sprintf(buf->sysname, "NaCl");
++	return 0;
++}
++#endif
++
+ int
+ main(int argc, char **argv)
+ {
+diff --git a/Modules/signalmodule.c b/Modules/signalmodule.c
+index 9a0e8e3..ba0fe10 100644
+--- a/Modules/signalmodule.c
++++ b/Modules/signalmodule.c
+@@ -29,7 +29,7 @@
+ #  define PYPTHREAD_SIGMASK
+ #endif
+ 
+-#if defined(PYPTHREAD_SIGMASK) && defined(HAVE_PTHREAD_H)
++#if (defined(PYPTHREAD_SIGMASK) || defined(HAVE_PTHREAD_KILL)) && defined(HAVE_PTHREAD_H)
+ #  include <pthread.h>
+ #endif
+ 
+diff --git a/Modules/socketmodule.c b/Modules/socketmodule.c
+index 0396bf4..ab00381 100644
+--- a/Modules/socketmodule.c
++++ b/Modules/socketmodule.c
+@@ -314,6 +314,14 @@ if_indextoname(index) -- return the corresponding interface name\n\
+ #  include "addrinfo.h"
+ #endif
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++struct iovec {
++  void *iov_base;
++  size_t iov_len;
++};
++#undef CMSG_LEN
++#endif
++
+ #ifndef HAVE_INET_PTON
+ #if !defined(NTDDI_VERSION) || (NTDDI_VERSION < NTDDI_LONGHORN)
+ int inet_pton(int af, const char *src, void *dst);
+diff --git a/Modules/timemodule.c b/Modules/timemodule.c
+index 8d161d4..011f19c 100644
+--- a/Modules/timemodule.c
++++ b/Modules/timemodule.c
+@@ -2,6 +2,7 @@
+ 
+ #include "Python.h"
+ 
++
+ #include <ctype.h>
+ 
+ #ifdef HAVE_SYS_TIMES_H
+@@ -20,6 +21,11 @@
+ #include <io.h>
+ #endif
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++#define timezone _timezone
++#define daylight _daylight
++#endif
++
+ #if defined(__WATCOMC__) && !defined(__QNX__)
+ #include <i86.h>
+ #else
+@@ -41,6 +47,13 @@
+ #include <mach/mach_time.h>
+ #endif
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++int clock_settime(clockid_t clk_id, const struct timespec *tp) {
++  errno = EPERM;
++  return -1;
++}
++#endif
++
+ /* Forward declarations */
+ static int floatsleep(double);
+ static PyObject* floattime(_Py_clock_info_t *info);
+diff --git a/Python/condvar.h b/Python/condvar.h
+index e022dc7..a4c0ac4 100644
+--- a/Python/condvar.h
++++ b/Python/condvar.h
+@@ -49,6 +49,15 @@
+ # ifdef HAVE_PTHREAD_H
+ #  include <pthread.h> /* _POSIX_THREADS */
+ # endif
++# ifdef __native_client__ && !defined _POSIX_THREADS
++#  define _POSIX_THREADS
++   /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
++      However this file expects it to be defined if pthreads are present so we
++      define it here after including pthread.h
++      TODO(sbc): remove this hack once newlib is fixed:
++      https://code.google.com/p/nativeclient/issues/detail?id=3551
++      */
++# endif
+ #endif
+ 
+ #ifdef _POSIX_THREADS
+diff --git a/Python/dynload_shlib.c b/Python/dynload_shlib.c
+index 888fbfc..c7bafd2 100644
+--- a/Python/dynload_shlib.c
++++ b/Python/dynload_shlib.c
+@@ -78,6 +78,11 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
+     PyOS_snprintf(funcname, sizeof(funcname),
+                   LEAD_UNDERSCORE "PyInit_%.200s", shortname);
+ 
++
++/* Native Client's fstat() imlemenation doesn't set st_dev
++ * and st_ino correctly so disable the dlopen handle cache.
++ * TODO(sbc): fix NaCl's fstat() */
++#ifndef __native_client__
+     if (fp != NULL) {
+         int i;
+         struct stat statb;
+@@ -104,6 +109,7 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
+ #endif
+         }
+     }
++#endif
+ 
+     dlopenflags = PyThreadState_GET()->interp->dlopenflags;
+ 
+diff --git a/Python/fileutils.c b/Python/fileutils.c
+index eecbb3b..55211e6 100644
+--- a/Python/fileutils.c
++++ b/Python/fileutils.c
+@@ -621,7 +621,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+ #ifdef MS_WINDOWS
+     HANDLE handle;
+     DWORD flags;
+-#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX)
++#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX) && !defined(__native_client__)
+     int request;
+     int err;
+ #elif defined(HAVE_FCNTL_H)
+@@ -670,7 +670,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+     }
+     return 0;
+ 
+-#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX)
++#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX) && !defined(__native_client__)
+     if (inheritable)
+         request = FIONCLEX;
+     else
+@@ -686,6 +686,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+ #else
+     flags = fcntl(fd, F_GETFD);
+     if (flags < 0) {
++#if defined(__native_client__) && !defined(__GLIBC__)
++        /* When running under NaCl within the sel_ldr this fcntl() will always fail.
++        i  However we don't want to completely remove this block since fcntl() is
++           emulated using nacl_io when running within chrome. */
++        return 0;
++#endif
+         if (raise)
+             PyErr_SetFromErrno(PyExc_OSError);
+         return -1;
+diff --git a/Python/getversion.c b/Python/getversion.c
+index 7bd6efd..b4f6702 100644
+--- a/Python/getversion.c
++++ b/Python/getversion.c
+@@ -8,8 +8,8 @@
+ const char *
+ Py_GetVersion(void)
+ {
+-	static char version[250];
+-	PyOS_snprintf(version, sizeof(version), "%.80s (%.80s) %.80s",
++	static char version[270];
++	PyOS_snprintf(version, sizeof(version), "%.80s (%.80s) %.100s",
+ 		      PY_VERSION, Py_GetBuildInfo(), Py_GetCompiler());
+ 	return version;
+ }
+diff --git a/Python/thread.c b/Python/thread.c
+index 8540942..114b3f7 100644
+--- a/Python/thread.c
++++ b/Python/thread.c
+@@ -13,9 +13,19 @@
+    library (e.g. gnu pth in pthread emulation) */
+ # ifdef HAVE_PTHREAD_H
+ #  include <pthread.h> /* _POSIX_THREADS */
++#  if defined __native_client__ && !defined _POSIX_THREADS
++     /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
++        However this file expects it to be defined if pthreads are present so we
++        define it here after including pthread.h
++        TODO(sbc): remove this hack once newlib is fixed:
++        https://code.google.com/p/nativeclient/issues/detail?id=3551
++        */
++#    define _POSIX_THREADS
++#  endif
+ # endif
+ #endif
+ 
++
+ #ifndef DONT_HAVE_STDIO_H
+ #include <stdio.h>
+ #endif
+diff --git a/configure b/configure
+index 83d0ee2..b0ab7f0 100755
+--- a/configure
++++ b/configure
+@@ -3268,6 +3268,9 @@ then
+        # a lot of different things including 'define_xopen_source'
+        # in the case statement below.
+ 	case "$host" in
++	*-*-nacl*)
++		ac_sys_system=NaCl
++		;;
+ 	*-*-linux*)
+ 		ac_sys_system=Linux
+ 		;;
+@@ -3316,6 +3319,15 @@ if test "$cross_compiling" = yes; then
+ 			_host_cpu=$host_cpu
+ 		esac
+ 		;;
++	*-*-nacl*)
++		case "$host_cpu" in
++		arm*)
++			_host_cpu=arm
++			;;
++		*)
++			_host_cpu=$host_cpu
++		esac
++		;;
+ 	*-*-cygwin*)
+ 		_host_cpu=
+ 		;;
+@@ -8519,7 +8531,7 @@ then
+ 			fi
+ 		fi
+ 		;;
+-	Linux*|GNU*|QNX*)
++	Linux*|GNU*|QNX*|NaCl*)
+ 		LDSHARED='$(CC) -shared'
+ 		LDCXXSHARED='$(CXX) -shared';;
+ 	BSD/OS*/4*)
+@@ -8590,7 +8602,7 @@ then
+ 		 then CCSHARED="-fPIC";
+ 		 else CCSHARED="+z";
+ 		 fi;;
+-	Linux*|GNU*) CCSHARED="-fPIC";;
++	Linux*|GNU*|NaCl*) CCSHARED="-fPIC";;
+ 	BSD/OS*/4*) CCSHARED="-fpic";;
+ 	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
+ 	OpenUNIX*|UnixWare*)
+@@ -8623,7 +8635,7 @@ then
+ 	    LINKFORSHARED="-Wl,-E -Wl,+s";;
+ #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
+ 	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
+-	Linux*|GNU*) LINKFORSHARED="-Xlinker -export-dynamic";;
++	Linux*|GNU*|NaCl*) LINKFORSHARED="-Xlinker -export-dynamic";;
+ 	# -u libsys_s pulls in all symbols in libsys
+ 	Darwin/*)
+ 		LINKFORSHARED="$extra_undefs -framework CoreFoundation"
+diff --git a/configure.ac b/configure.ac
+index e1d3e77..4db8c4e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -366,6 +366,9 @@ then
+ 	*-*-cygwin*)
+ 		ac_sys_system=Cygwin
+ 		;;
++	*-*-nacl*)
++		ac_sys_system=NaCl
++		;;
+ 	*)
+ 		# for now, limit cross builds to known configurations
+ 		MACHDEP="unknown"
+@@ -408,6 +411,15 @@ if test "$cross_compiling" = yes; then
+ 			_host_cpu=$host_cpu
+ 		esac
+ 		;;
++	*-*-nacl*)
++		case "$host_cpu" in
++		arm*)
++			_host_cpu=arm
++			;;
++		*)
++			_host_cpu=$host_cpu
++		esac
++		;;
+ 	*-*-cygwin*)
+ 		_host_cpu=
+ 		;;
+@@ -2015,7 +2027,7 @@ then
+ 			fi
+ 		fi
+ 		;;
+-	Linux*|GNU*|QNX*)
++	Linux*|GNU*|QNX*|NaCl*)
+ 		LDSHARED='$(CC) -shared'
+ 		LDCXXSHARED='$(CXX) -shared';;
+ 	BSD/OS*/4*)
+@@ -2084,7 +2096,7 @@ then
+ 		 then CCSHARED="-fPIC";
+ 		 else CCSHARED="+z";
+ 		 fi;;
+-	Linux*|GNU*) CCSHARED="-fPIC";;
++	Linux*|GNU*|NaCl*) CCSHARED="-fPIC";;
+ 	BSD/OS*/4*) CCSHARED="-fpic";;
+ 	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
+ 	OpenUNIX*|UnixWare*)
+@@ -2115,7 +2127,7 @@ then
+ 	    LINKFORSHARED="-Wl,-E -Wl,+s";;
+ #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
+ 	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
+-	Linux*|GNU*) LINKFORSHARED="-Xlinker -export-dynamic";;
++	Linux*|GNU*|NaCl*) LINKFORSHARED="-Xlinker -export-dynamic";;
+ 	# -u libsys_s pulls in all symbols in libsys
+ 	Darwin/*) 
+ 		LINKFORSHARED="$extra_undefs -framework CoreFoundation"

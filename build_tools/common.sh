@@ -782,6 +782,7 @@ DefaultConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
+  export READELF=${NACLREADELF}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config

@@ -12,20 +12,22 @@ EXECUTABLES=python${NACL_EXEEXT}
 # The build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.
 
+HOST_BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl-host
+
 BuildHostPython() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  MakeDir build-nacl-host
-  ChangeDir build-nacl-host
+  MakeDir ${HOST_BUILD_DIR}
+  ChangeDir ${HOST_BUILD_DIR}
   if [ -f python -a -f Parser/pgen ]; then
     return
   fi
   LogExecute ../configure
-  LogExecute make -j${OS_JOBS} python Parser/pgen
+  LogExecute make -j${OS_JOBS} bininstall libinstall sharedinstall DESTDIR=inst
 }
 
 ConfigureStep() {
   BuildHostPython
   export CROSS_COMPILE=true
+  export PATH=${HOST_BUILD_DIR}/inst/usr/local/bin:${PATH}
   # We pre-seed configure with certain results that it cannot determine
   # since we are doing a cross compile.  The $CONFIG_SITE file is sourced
   # by configure early on.

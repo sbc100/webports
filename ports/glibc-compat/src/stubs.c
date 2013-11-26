@@ -19,7 +19,6 @@
 #include <sys/uio.h>
 #include <termios.h>
 #include <unistd.h>
-#include <utime.h>
 
 /*
  * This file contains stubs for functions that are present in glibc
@@ -247,14 +246,14 @@ int shutdown(int sockfd, int how) {
 
 int sigsuspend(const sigset_t *mask) __attribute__((weak));
 int sigsuspend(const sigset_t *mask) {
-  UNIMPLEMENTED_FATAL();
+  UNIMPLEMENTED_NOSYS();
 }
 
 int sigaction(int signum, const struct sigaction *act,
                      struct sigaction *oldact) __attribute__((weak));
 int sigaction(int signum, const struct sigaction *act,
                      struct sigaction *oldact) {
-  UNIMPLEMENTED_FATAL();
+  UNIMPLEMENTED_NOSYS();
 }
 
 int socketpair(int domain, int type, int protocol,
@@ -276,12 +275,12 @@ int tcflow(int fd, int action) {
 
 int tcflush(int fd, int queue_selector) __attribute__((weak));
 int tcflush(int fd, int queue_selector) {
-  UNIMPLEMENTED_FATAL();
+  UNIMPLEMENTED_NOSYS();
 }
 
 int tcgetattr(int fd, struct termios *termios_p) __attribute__((weak));
 int tcgetattr(int fd, struct termios *termios_p) {
-  UNIMPLEMENTED_FATAL();
+  UNIMPLEMENTED_NOSYS();
 }
 
 int tcsendbreak(int fd, int duration) __attribute__((weak));
@@ -293,7 +292,7 @@ int tcsetattr(int fd, int optional_actions,
               const struct termios *termios_p) __attribute__((weak));
 int tcsetattr(int fd, int optional_actions,
               const struct termios *termios_p) {
-  UNIMPLEMENTED_FATAL();
+  UNIMPLEMENTED_NOSYS();
 }
 
 FILE *popen(const char *command, const char *type) __attribute__ ((weak));
