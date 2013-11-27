@@ -19,7 +19,7 @@
 #include "KernelProxy.h"
 #include "util/DebugPrint.h"
 
-static KernelProxy *kp = KernelProxy::KPInstance();
+#define kp KernelProxy::KPInstance()
 
 extern "C" {
 
