@@ -33,7 +33,8 @@ ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
 
-  export LIBS="-L${NACLPORTS_LIBDIR} -lppapi -lpthread -lstdc++ -lm"
+  export LIBS="-L${NACLPORTS_LIBDIR} -lppapi \
+    -lpthread -l${NACL_CPP_LIB} -lm"
 
   CONFIG_FLAGS="--with-png=no \
       --with-long-double=no \

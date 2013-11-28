@@ -17,7 +17,7 @@
 
 NAME:=naclquake
 NACL_CPP:=nacl-gcc
-STANDALONE_CPP:=gcc -lstdc++
+STANDALONE_CPP:=gcc -l$(NACL_CPP_LIB)
 CCFLAGS := -D_REENTRANT -DSDL -DELF -DPACKAGE=\"naclquake\" -DVERSION=\"1.0.9\" -I.
 
 # if nacl target, copy nexe to "nacl_quake" for quake.html to launch

@@ -40,7 +40,8 @@ ConfigureStep() {
   local build_host=$(${SRC_DIR}/build-aux/config.guess)
 
   (
-    export LIBS="-ltar -lppapi_simple -lnacl_io -lppapi_cpp -lppapi -lstdc++"
+    export LIBS="-ltar -lppapi_simple -lnacl_io \
+      -lppapi_cpp -lppapi -l${NACL_CPP_LIB}"
     DefaultConfigureStep --build=${build_host}
   )
 }

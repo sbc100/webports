@@ -99,6 +99,13 @@ else
   readonly NACL_OPTION="disable"
 fi
 
+# The PNaCl C++ standard library is LLVM's libc++, others use GCC's libstdc++.
+if [ "${NACL_ARCH}" = "pnacl" ]; then
+  readonly NACL_CPP_LIB="c++"
+else
+  readonly NACL_CPP_LIB="stdc++"
+fi
+
 if [ ${NACL_DEBUG} = "1" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -g -O0"
   NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -g -O0"

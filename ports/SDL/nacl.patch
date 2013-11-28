@@ -66,7 +66,7 @@ index a7e9b18..ca1de7e 100644
 +    if test x$enable_video = xyes -a x$enable_naclvideo = xyes; then
 +        AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
 +        SOURCES="$SOURCES $srcdir/src/video/nacl/*.cc"
-+        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -lstdc++"
++        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -l${NACL_CPP_LIB}"
 +    fi
 +
 +    AC_ARG_ENABLE(naclaudio,
@@ -94,7 +94,7 @@ index a7e9b18..ca1de7e 100644
 +        if test x$video_opengl = xyes; then
 +            AC_DEFINE(SDL_VIDEO_OPENGL)
 +            AC_DEFINE(SDL_VIDEO_OPENGL_REGAL)
-+            SDL_LIBS="$SDL_LIBS -lRegal -lstdc++"
++            SDL_LIBS="$SDL_LIBS -lRegal -l${NACL_CPP_LIB}"
 +        fi
 +    fi
 +}
@@ -1567,7 +1567,7 @@ index 7c25c17..f24fb44 100644
  
 +case "$host" in
 +    *-*-nacl*)
-+        LIBS="$LIBS -lnacl_io -lstdc++"
++        LIBS="$LIBS -lnacl_io -l${NACL_CPP_LIB}"
 +        ;;
 +esac
 +

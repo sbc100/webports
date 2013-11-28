@@ -2,3 +2,4 @@ PACKAGE_NAME=drod-213fa47
 URL=https://github.com/binji/drod/archive/213fa47/drod.tar.gz
 URL_FILENAME=drod-213fa47.tar.gz
 LICENSE=MPL
+DISABLED_ARCH=pnacl

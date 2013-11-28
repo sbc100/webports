@@ -36,7 +36,7 @@ diff -bNaur FreeImage/Makefile.nacl FreeImage-nacl/Makefile.nacl
 +# Converts cr/lf to just lf
 +DOS2UNIX = dos2unix
 +
-+LIBRARIES = -lstdc++
++LIBRARIES = -l$(NACL_CPP_LIB)
 +
 +MODULES = $(SRCS:.c=.o)
 +MODULES := $(MODULES:.cpp=.o)

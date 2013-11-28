@@ -1,3 +1,10 @@
+diff --git a/.gitignore b/.gitignore
+index fdedd4a..1fea9a5 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1 +1,2 @@
+ /build-nacl-*
++/build-nacl-*
 diff --git a/build-aux/config.sub b/build-aux/config.sub
 index 6759825..17ff876 100755
 --- a/build-aux/config.sub
@@ -53,6 +60,19 @@ index 7616e82..7e8c60d 100644
  
  AC_DEFUN([DEVIL_CHECK_RESTRICT_GNU99],
           [TMP_CFLAGS="$CFLAGS"
+diff --git a/src-IL/include/il_endian.h b/src-IL/include/il_endian.h
+index 0818948..5e366da 100644
+--- a/src-IL/include/il_endian.h
++++ b/src-IL/include/il_endian.h
+@@ -40,7 +40,7 @@
+ #else
+ 	#undef __BIG_ENDIAN__
+ 	#undef __LITTLE_ENDIAN__  // Not sure if it's defined by any compiler...
+-	#define __LITTLE_ENDIAN__
++	#define __LITTLE_ENDIAN__ 1
+ 	#define Short(s)  
+ 	#define UShort(s)  
+ 	#define Int(i)  
 diff --git a/src-IL/src/il_alloc.c b/src-IL/src/il_alloc.c
 index 06688ef..0c7b487 100644
 --- a/src-IL/src/il_alloc.c

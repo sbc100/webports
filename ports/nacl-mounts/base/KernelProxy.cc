@@ -5,6 +5,7 @@
  */
 #include "base/KernelProxy.h"
 #include <assert.h>
+#include <stdlib.h>
 #ifndef __GLIBC__
 #include <nacl-mounts/net/newlib_compat.h>
 #else

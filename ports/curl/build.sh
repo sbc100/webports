@@ -9,7 +9,7 @@ source ../../build_tools/common.sh
 export ac_cv_func_gethostbyname=yes
 export ac_cv_func_getaddrinfo=no
 export ac_cv_func_connect=yes
-export LIBS="-lnacl_io -lpthread -lstdc++"
+export LIBS="-lnacl_io -lpthread -l${NACL_CPP_LIB}"
 
 if [ $NACL_GLIBC = 1 ]; then
   EXECUTABLE_DIR=.libs
@@ -37,7 +37,8 @@ BuildStep() {
   touch ${SRC_DIR}/src/tool_main.c
   sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" src/Makefile
   sed -i.bak "s/curl\$(EXEEXT)/curl_ppapi\$(EXEEXT)/" src/Makefile
-  sed -i.bak "s/LIBS = \$(BLANK_AT_MAKETIME)/LIBS = -lppapi_simple -lnacl_io -lppapi_cpp -lppapi -lstdc++/" src/Makefile
+  local sedlibs="-lppapi_simple -lnacl_io -lppapi_cpp -lppapi -l${NACL_CPP_LIB}"
+  sed -i.bak "s/LIBS = \$(BLANK_AT_MAKETIME)/LIBS = ${sedlibs}/" src/Makefile
   DefaultBuildStep
 }
 
