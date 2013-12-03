@@ -101,9 +101,9 @@ fi
 
 # The PNaCl C++ standard library is LLVM's libc++, others use GCC's libstdc++.
 if [ "${NACL_ARCH}" = "pnacl" ]; then
-  readonly NACL_CPP_LIB="c++"
+  export NACL_CPP_LIB="c++"
 else
-  readonly NACL_CPP_LIB="stdc++"
+  export NACL_CPP_LIB="stdc++"
 fi
 
 if [ ${NACL_DEBUG} = "1" ]; then
