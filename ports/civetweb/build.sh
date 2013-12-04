@@ -9,20 +9,23 @@ source ../../build_tools/common.sh
 EXECUTABLES=civetweb
 
 BuildStep() {
+  Banner "Building ${PACKAGE_NAME}"
+
   export CFLAGS="${NACL_CFLAGS}"
   export LDFLAGS="${NACL_LDFLAGS}"
+
+  CFLAGS+=" -DNO_SSL -DNO_CGI"
   if [ "${NACL_GLIBC}" = "1" ]; then
     LDFLAGS+=" -ldl"
   fi
-  CFLAGS+=" -DNO_SSL -DNO_CGI"
+
   CC=${NACLCC} LogExecute make clean
   CC=${NACLCC} LogExecute make WITH_DEBUG=${NACL_DEBUG} \
-                               TARGET_OS=NACL WITH_CPP=1
+                               TARGET_OS=NACL WITH_CPP=1 all lib
 }
 
-InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
-
+PublishStep() {
+  Banner "Publishing ${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/civetweb"
   MakeDir ${ASSEMBLY_DIR}
@@ -41,6 +44,16 @@ InstallStep() {
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/civetweb.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
+}
+
+InstallStep() {
+  Banner "Installing ${PACKAGE_NAME}"
+
+  LogExecute cp libcivetweb.a $NACL_TOOLCHAIN_PREFIX/lib
+  MakeDir $NACL_TOOLCHAIN_PREFIX/include/civetweb
+  LogExecute cp include/civetweb.h $NACL_TOOLCHAIN_PREFIX/include/civetweb
+  LogExecute cp include/CivetServer.h $NACL_TOOLCHAIN_PREFIX/include/civetweb
+  PublishStep
 }
 
 PackageInstall
