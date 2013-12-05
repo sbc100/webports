@@ -804,9 +804,9 @@ DefaultConfigureStep() {
     return
   fi
   local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
+  NACL_BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
+  MakeDir ${NACL_BUILD_DIR}
+  ChangeDir ${NACL_BUILD_DIR}
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
@@ -836,6 +836,26 @@ DefaultConfigureStep() {
     --${NACL_OPTION}-asm \
     --with-x=no  \
     "${EXTRA_CONFIGURE_OPTS[@]}" ${EXTRA_CONFIGURE_ARGS:-}
+}
+
+
+CMakeConfigureStep() {
+  Banner "Configuring ${PACKAGE_NAME}"
+  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
+  NACL_BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
+  MakeDir ${NACL_BUILD_DIR}
+  ChangeDir ${NACL_BUILD_DIR}
+
+  CC="${NACLCC}" CXX="${NACLCXX}" LogExecute cmake ..\
+           -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
+           -DNACLAR=${NACLAR} \
+           -DNACLLD=${NACLLD} \
+           -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
+           -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
+           -DNACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT} \
+           -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX} \
+           -DCMAKE_BUILD_TYPE=RELEASE ${EXTRA_CMAKE_ARGS:-}
 }
 
 

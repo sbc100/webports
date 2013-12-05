@@ -520,37 +520,6 @@ diff -Naur openal-soft-1.13/OpenAL32/Include/alMain.h openal-soft-1.13-nacl/Open
  void alc_null_init(BackendFuncs *func_list);
  void alc_null_deinit(void);
  void alc_null_probe(int type);
-diff -Naur openal-soft-1.13/XCompile-nacl.txt openal-soft-1.13-nacl/XCompile-nacl.txt
---- openal-soft-1.13/XCompile-nacl.txt	1969-12-31 16:00:00.000000000 -0800
-+++ openal-soft-1.13-nacl/XCompile-nacl.txt	2012-01-23 15:45:38.000000000 -0800
-@@ -0,0 +1,27 @@
-+# Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
-+# this file to set the proper settings and paths. Then use it from build/ like:
-+# cmake .. -DCMAKE_TOOLCHAIN_FILE=../XCompile.txt \
-+#          -DCMAKE_INSTALL_PREFIX=/usr/mingw32/mingw
-+# If you already have a toolchain file setup, you may use that instead of this
-+# file.
-+
-+# the name of the target operating system
-+SET(CMAKE_SYSTEM_NAME Linux)
-+
-+# which compilers to use for C and C++
-+SET(CMAKE_C_COMPILER ${NACLCC})
-+SET(CMAKE_CXX_COMPILER ${NACLCXX})
-+set(CMAKE_AR ${NACLAR} CACHE FILEPATH "Archiver")
-+SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
-+
-+# here is the target environment located
-+SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
-+
-+# adjust the default behaviour of the FIND_XXX() commands:
-+# search headers and libraries in the target environment, search 
-+# programs in the host environment
-+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-+set(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
-+include_directories(${NACL_SDK_ROOT}/include)
 diff -Naur openal-soft-1.13/include/AL/alc.h openal-soft-1.13.nacl/include/AL/alc.h
 --- openal-soft-1.13/include/AL/alc.h	2010-11-28 14:51:15.000000000 -0800
 +++ openal-soft-1.13.nacl/include/AL/alc.h	2013-01-31 11:01:44.812082634 -0800

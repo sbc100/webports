@@ -13,21 +13,9 @@ TestStep() {
   RunSelLdrCommand HelloWorld
 }
 
-
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  Remove ${NACL_BUILD_SUBDIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
-  echo "Directory: $(pwd)"
-
-  CC="${NACLCC}" CXX="${NACLCXX}" cmake .. -DBOX2D_BUILD_EXAMPLES=OFF \
-           -DCMAKE_TOOLCHAIN_FILE=../XCompile-nacl.txt \
-           -DNACLAR=${NACLAR} \
-           -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
-           -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
-           -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX}
+  EXTRA_CMAKE_ARGS="-DBOX2D_BUILD_EXAMPLES=OFF"
+  CMakeConfigureStep
 }
 
 PackageInstall

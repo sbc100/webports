@@ -1,26 +1,3 @@
-diff --git opencv-v2.4.7/XCompile-nacl.txt opencv-v2.4.7.nacl/XCompile-nacl.txt
-new file mode 100644
-index 0000000..c651a2a
---- /dev/null
-+++ opencv-2.4.7.nacl/XCompile-nacl.txt
-@@ -0,0 +1,17 @@
-+# the name of the target operating system
-+SET(CMAKE_SYSTEM_NAME Linux)
-+
-+SET(NACL_CROSS_PREFIX nacl)
-+
-+# which compilers to use for C and C++
-+SET(CMAKE_C_COMPILER "${NACLCC}")
-+SET(CMAKE_CXX_COMPILER "${NACLCXX}")
-+set(CMAKE_AR ${NACLAR} CACHE FILEPATH "Archiver")
-+SET(CMAKE_LINKER "${NACLLD}")
-+SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
-+
-+# here is the target environment located
-+SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
-+
-+# nacl abi says 32bits little endian
-+set(CMAKE_SIZEOF_VOID_P 4)
 diff -Naur opencv-2.4.7/modules/contrib/src/inputoutput.cpp opencv-2.4.7.nacl/modules/contrib/src/inputoutput.cpp
 --- opencv-2.4.7/modules/contrib/src/inputoutput.cpp	2013-11-06 15:26:39.000000000 +0100
 +++ opencv-2.4.7.nacl/modules/contrib/src/inputoutput.cpp	2013-11-19 21:00:51.000000000 +0100
