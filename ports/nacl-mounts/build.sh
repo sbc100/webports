@@ -17,12 +17,6 @@ RunTests() {
 TestStep() {
   Banner "Testing ${PACKAGE_NAME}"
 
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    echo "FIXME: Not running sel_ldr-based tests with PNaCl."
-    echo "Test currently segfaults."
-    return
-  fi
-
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export CFLAGS=${NACLPORTS_CFLAGS}
