@@ -1,10 +1,100 @@
---- boost_1_47_0/tools/build/v2/tools/gcc.jam	2011-06-06 13:36:21.000000000 -0700
-+++ boost_1_47_0-nacl/tools/build/v2/tools/gcc.jam	2011-09-28 09:09:06.326550000 -0700
-@@ -1064,7 +1064,6 @@
-             case * :
-             {
-                 option = -pthread ;
--                libs = rt ;
-             }
-         }
-     
+diff --git a/boost/config/platform/nacl.hpp b/boost/config/platform/nacl.hpp
+new file mode 100644
+index 0000000..14d472f
+--- /dev/null
++++ b/boost/config/platform/nacl.hpp
+@@ -0,0 +1,79 @@
++// Copyright (c) 2013 The Native Client Authors.
++// Use, modification and distribution are subject to the
++// Boost Software License, Version 1.0. (See accompanying file
++// LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
++
++// See http://www.boost.org for most recent version.
++
++// Native Client specific config options:
++
++#define BOOST_PLATFORM "nacl"
++
++// make sure we have __GLIBC_PREREQ if available at all
++#ifdef __cplusplus
++#include <cstdlib>
++#else
++#include <stdlib.h>
++#endif
++
++#define BOOST_HAS_STDINT_H
++#define BOOST_HAS_GETTIMEOFDAY
++#define BOOST_HAS_NANOSLEEP
++
++#if defined(__LIBCOMO__)
++   //
++   // como on linux doesn't have std:: c functions:
++   // NOTE: versions of libcomo prior to beta28 have octal version numbering,
++   // e.g. version 25 is 21 (dec)
++   //
++#  if __LIBCOMO_VERSION__ <= 20
++#    define BOOST_NO_STDC_NAMESPACE
++#  endif
++
++#  if __LIBCOMO_VERSION__ <= 21
++#    define BOOST_NO_SWPRINTF
++#  endif
++
++#endif
++
++#if defined(__GLIBC__) && defined(__GLIBC_PREREQ)
++// __GLIBC_PREREQ is available since 2.1.2
++
++   // swprintf is available since glibc 2.2.0
++#  if !__GLIBC_PREREQ(2,2) || (!defined(__USE_ISOC99) && !defined(__USE_UNIX98))
++#    define BOOST_NO_SWPRINTF
++#  endif
++#else
++#  define BOOST_NO_SWPRINTF
++#endif
++
++// boilerplate code:
++#define BOOST_HAS_UNISTD_H
++#include <boost/config/posix_features.hpp>
++#define BOOST_HAS_PTHREAD_YIELD
++
++#ifndef __GNUC__
++//
++// if the compiler is not gcc we still need to be able to parse
++// the GNU system headers, some of which (mainly <stdint.h>)
++// use GNU specific extensions:
++//
++#  ifndef __extension__
++#     define __extension__
++#  endif
++#  ifndef __const__
++#     define __const__ const
++#  endif
++#  ifndef __volatile__
++#     define __volatile__ volatile
++#  endif
++#  ifndef __signed__
++#     define __signed__ signed
++#  endif
++#  ifndef __typeof__
++#     define __typeof__ typeof
++#  endif
++#  ifndef __inline__
++#     define __inline__ inline
++#  endif
++#endif
+diff --git a/boost/config/select_platform_config.hpp b/boost/config/select_platform_config.hpp
+index 2af61d2..c1b3eff 100644
+--- a/boost/config/select_platform_config.hpp
++++ b/boost/config/select_platform_config.hpp
+@@ -76,6 +76,10 @@
+ #elif defined(__VMS) 
+ // VMS:
+ #  define BOOST_PLATFORM_CONFIG "boost/config/platform/vms.hpp" 
++
++#elif defined(__native_client__)
++// Native Client:
++#  define BOOST_PLATFORM_CONFIG "boost/config/platform/nacl.hpp"
+ #else
+ 
+ #  if defined(unix) \

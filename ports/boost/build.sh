@@ -6,35 +6,33 @@
 source pkg_info
 source ../../build_tools/common.sh
 
+BUILD_ARGS="\
+  --build-dir=${NACL_BUILD_SUBDIR} \
+  --stagedir=${NACL_BUILD_SUBDIR} \
+  link=static"
+
+# TODO(eugenis): build dynamic libraries, too
+if [ $NACL_GLIBC = "1" ] ; then
+  BUILD_ARGS+=" --without-python --without-signals --without-mpi"
+  BUILD_ARGS+=" --without-context --without-coroutine"
+else
+  BUILD_ARGS+=" --with-date_time --with-program_options"
+fi
+
 ConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   echo "using gcc : 4.4.3 : ${NACLCXX} ;" > tools/build/v2/user-config.jam
+  LogExecute ./bootstrap.sh --prefix="${NACLPORTS_PREFIX}"
 }
 
 BuildStep() {
-  ./bootstrap.sh
-
-  # TODO(eugenis): build dynamic libraries, too
-  if [ $NACL_GLIBC = "1" ] ; then
-    ./bjam install \
-      --prefix=${NACLPORTS_PREFIX} \
-      link=static \
-      -d+2 \
-      --without-python \
-      --without-signals \
-      --without-mpi
-  else
-    ./bjam install \
-      --prefix=${NACLPORTS_PREFIX} \
-      link=static \
-      -d+2 \
-      --with-date_time \
-      --with-program_options
-  fi
+  Banner "Building ${PACKAGE_NAME}"
+  LogExecute ./b2 stage ${BUILD_ARGS}
 }
 
 InstallStep() {
-  echo "Install is done by build step"
+  Banner "Installing ${PACKAGE_NAME}"
+  LogExecute ./b2 install ${BUILD_ARGS}
 }
 
 PackageInstall
