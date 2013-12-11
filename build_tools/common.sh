@@ -99,8 +99,10 @@ else
   readonly NACL_OPTION="disable"
 fi
 
-# The PNaCl C++ standard library is LLVM's libc++, others use GCC's libstdc++.
-if [ "${NACL_ARCH}" = "pnacl" ]; then
+# As of version 33 the PNaCl C++ standard library is LLVM's libc++,
+# others use GCC's libstdc++.
+NACL_SDK_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
+if [ "${NACL_ARCH}" = "pnacl" -a ${NACL_SDK_VERSION} -gt 32 ]; then
   export NACL_CPP_LIB="c++"
 else
   export NACL_CPP_LIB="stdc++"
