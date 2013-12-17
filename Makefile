@@ -299,7 +299,7 @@ $(SENT)/ports/SDL_ttf: ports/SDL ports/freetype
 $(SENT)/ports/boost: ports/zlib ports/bzip2
 $(SENT)/ports/freealut: ports/openal-soft
 $(SENT)/ports/openal-ogg: ports/openal-soft ports/libvorbis
-$(SENT)/ports/opencv: ports/zlib ports/tiff ports/libpng ports/jpeg6b
+$(SENT)/ports/opencv: ports/zlib ports/libpng ports/jpeg6b
 $(SENT)/ports/readline: ports/ncurses
 ifneq ($(NACL_GLIBC), 1)
   $(SENT)/ports/readline: ports/glibc-compat

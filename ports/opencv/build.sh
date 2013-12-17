@@ -13,6 +13,9 @@ ConfigureStep() {
            -DWITH_CUDA=OFF \
            -DWITH_JASPER=OFF \
            -DWITH_OPENCL=OFF \
+           -DWITH_1394=OFF \
+           -DWITH_V4L=OFF \
+           -DWITH_TIFF=OFF \
            -DBUILD_opencv_apps=OFF \
            -DBUILD_opencv_java=OFF \
            -DBUILD_SHARED_LIBS=OFF \
