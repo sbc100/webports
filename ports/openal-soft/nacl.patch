@@ -1,6 +1,7 @@
-diff -Naur openal-soft-1.13/Alc/ALc.c openal-soft-1.13-nacl/Alc/ALc.c
---- openal-soft-1.13/Alc/ALc.c	2011-02-09 11:52:19.000000000 -0800
-+++ openal-soft-1.13-nacl/Alc/ALc.c	2012-01-23 15:45:38.000000000 -0800
+diff --git a/Alc/ALc.c b/Alc/ALc.c
+index 6bdcc66..2a11491 100644
+--- a/Alc/ALc.c
++++ b/Alc/ALc.c
 @@ -23,7 +23,7 @@
  #include <math.h>
  #include <stdlib.h>
@@ -10,7 +11,7 @@ diff -Naur openal-soft-1.13/Alc/ALc.c openal-soft-1.13-nacl/Alc/ALc.c
  #include <ctype.h>
  
  #include "alMain.h"
-@@ -69,7 +69,9 @@
+@@ -69,7 +69,9 @@ static BackendInfo BackendList[] = {
  #ifdef HAVE_PORTAUDIO
      { "port", alc_pa_init, alc_pa_deinit, alc_pa_probe, EmptyFuncs },
  #endif
@@ -21,10 +22,12 @@ diff -Naur openal-soft-1.13/Alc/ALc.c openal-soft-1.13-nacl/Alc/ALc.c
      { "null", alc_null_init, alc_null_deinit, alc_null_probe, EmptyFuncs },
  #ifdef HAVE_WAVE
      { "wave", alc_wave_init, alc_wave_deinit, alc_wave_probe, EmptyFuncs },
-diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13.nacl/Alc/ppapi.c
---- openal-soft-1.13/Alc/ppapi.c	1969-12-31 16:00:00.000000000 -0800
-+++ openal-soft-1.13.nacl/Alc/ppapi.c	2013-01-31 08:54:09.078478389 -0800
-@@ -0,0 +1,421 @@
+diff --git a/Alc/ppapi.c b/Alc/ppapi.c
+new file mode 100644
+index 0000000..486c248
+--- /dev/null
++++ b/Alc/ppapi.c
+@@ -0,0 +1,422 @@
 +/**
 + * OpenAL cross platform audio library
 + * Copyright (C) 2012
@@ -77,9 +80,9 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13.nacl/Alc/ppapi.c
 +    ALvoid *buffer;
 +    ALuint size;
 +
-+    PPB_AudioConfig* audio_config;
-+    PPB_Audio* audio;
-+    PPB_Core* core;
++    struct PPB_AudioConfig_1_1* audio_config;
++    struct PPB_Audio_1_1* audio;
++    struct PPB_Core_1_0* core;
 +
 +    PP_Resource audio_config_resource;
 +    PP_Resource audio_resource;
@@ -108,6 +111,7 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13.nacl/Alc/ppapi.c
 +/* This is the callback from PPAPI to fill in the audio buffer. */
 +void PPAPI_Audio_Callback(void *sample_buffer,
 +                          uint32_t buffer_size_in_bytes,
++                          PP_TimeDelta latency,
 +                          void* user_data)
 +{
 +    ppapi_data* data = (ppapi_data*)user_data;
@@ -284,22 +288,22 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13.nacl/Alc/ppapi.c
 +    device->ExtraData = data;
 +    data->device = device;
 +
-+    data->audio_config =
-+        (PPB_AudioConfig*)gGetInterface(PPB_AUDIO_CONFIG_INTERFACE);
++    data->audio_config = (struct PPB_AudioConfig_1_1 *)gGetInterface(
++        PPB_AUDIO_CONFIG_INTERFACE_1_1);
 +    if (!data->audio_config)
 +    {
 +        free(data);
 +        return ALC_FALSE;
 +    }
 +
-+    data->audio = (PPB_Audio*)gGetInterface(PPB_AUDIO_INTERFACE);
++    data->audio = (struct PPB_Audio_1_1*)gGetInterface(PPB_AUDIO_INTERFACE_1_1);
 +    if (!data->audio)
 +    {
 +        free(data);
 +        return ALC_FALSE;
 +    }
 +
-+    data->core = (PPB_Core*)gGetInterface(PPB_CORE_INTERFACE);
++    data->core = (struct PPB_Core_1_0*)gGetInterface(PPB_CORE_INTERFACE_1_0);
 +    if (!data->core)
 +    {
 +        free(data);
@@ -446,9 +450,10 @@ diff -Naur openal-soft-1.13/Alc/ppapi.c openal-soft-1.13.nacl/Alc/ppapi.c
 +    else if (type == ALL_DEVICE_PROBE)
 +        AppendAllDeviceList(ppapiDevice);
 +}
-diff -Naur openal-soft-1.13/Alc/wave.c openal-soft-1.13-nacl/Alc/wave.c
---- openal-soft-1.13/Alc/wave.c	2010-12-04 17:51:16.000000000 -0800
-+++ openal-soft-1.13-nacl/Alc/wave.c	2012-01-23 15:45:38.000000000 -0800
+diff --git a/Alc/wave.c b/Alc/wave.c
+index 6ba662c..d64bbb4 100644
+--- a/Alc/wave.c
++++ b/Alc/wave.c
 @@ -22,7 +22,7 @@
  
  #include <stdlib.h>
@@ -458,10 +463,11 @@ diff -Naur openal-soft-1.13/Alc/wave.c openal-soft-1.13-nacl/Alc/wave.c
  #include "alMain.h"
  #include "AL/al.h"
  #include "AL/alc.h"
-diff -Naur openal-soft-1.13/CMakeLists.txt openal-soft-1.13-nacl/CMakeLists.txt
---- openal-soft-1.13/CMakeLists.txt	2011-02-15 12:05:40.000000000 -0800
-+++ openal-soft-1.13-nacl/CMakeLists.txt	2012-01-23 15:45:38.000000000 -0800
-@@ -32,6 +32,7 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 44f9ea8..22781d1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -32,6 +32,7 @@ OPTION(DSOUND  "Check for DirectSound backend"         ON)
  OPTION(WINMM   "Check for Windows Multimedia backend"  ON)
  OPTION(PORTAUDIO  "Check for PortAudio backend"        ON)
  OPTION(PULSEAUDIO "Check for PulseAudio backend"       ON)
@@ -469,7 +475,7 @@ diff -Naur openal-soft-1.13/CMakeLists.txt openal-soft-1.13-nacl/CMakeLists.txt
  OPTION(WAVE    "Enable Wave Writer backend"            ON)
  
  OPTION(DLOPEN  "Check for the dlopen API for loading optional libs"  ON)
-@@ -338,6 +339,7 @@
+@@ -338,6 +339,7 @@ SET(HAVE_DSOUND     0)
  SET(HAVE_WINMM      0)
  SET(HAVE_PORTAUDIO  0)
  SET(HAVE_PULSEAUDIO 0)
@@ -477,7 +483,7 @@ diff -Naur openal-soft-1.13/CMakeLists.txt openal-soft-1.13-nacl/CMakeLists.txt
  SET(HAVE_WAVE       0)
  
  # Check ALSA backend
-@@ -444,6 +446,16 @@
+@@ -444,6 +446,16 @@ IF(PULSEAUDIO)
      ENDIF()
  ENDIF()
  
@@ -494,9 +500,24 @@ diff -Naur openal-soft-1.13/CMakeLists.txt openal-soft-1.13-nacl/CMakeLists.txt
  # Optionally enable the Wave Writer backend
  IF(WAVE)
      SET(HAVE_WAVE 1)
-diff -Naur openal-soft-1.13/config.h.in openal-soft-1.13-nacl/config.h.in
---- openal-soft-1.13/config.h.in	2010-06-08 01:56:28.000000000 -0700
-+++ openal-soft-1.13-nacl/config.h.in	2012-01-23 15:45:38.000000000 -0800
+diff --git a/OpenAL32/Include/alMain.h b/OpenAL32/Include/alMain.h
+index 02153a8..ff7c323 100644
+--- a/OpenAL32/Include/alMain.h
++++ b/OpenAL32/Include/alMain.h
+@@ -291,6 +291,9 @@ void alc_wave_probe(int type);
+ void alc_pulse_init(BackendFuncs *func_list);
+ void alc_pulse_deinit(void);
+ void alc_pulse_probe(int type);
++void alc_ppapi_init(BackendFuncs *func_list);
++void alc_ppapi_deinit(void);
++void alc_ppapi_probe(int type);
+ void alc_null_init(BackendFuncs *func_list);
+ void alc_null_deinit(void);
+ void alc_null_probe(int type);
+diff --git a/config.h.in b/config.h.in
+index 3c1e7e6..351142a 100644
+--- a/config.h.in
++++ b/config.h.in
 @@ -25,6 +25,9 @@
  /* Define if we have the PulseAudio backend */
  #cmakedefine HAVE_PULSEAUDIO
@@ -507,26 +528,14 @@ diff -Naur openal-soft-1.13/config.h.in openal-soft-1.13-nacl/config.h.in
  /* Define if we have the Wave Writer backend */
  #cmakedefine HAVE_WAVE
  
-diff -Naur openal-soft-1.13/OpenAL32/Include/alMain.h openal-soft-1.13-nacl/OpenAL32/Include/alMain.h
---- openal-soft-1.13/OpenAL32/Include/alMain.h	2011-02-09 11:50:49.000000000 -0800
-+++ openal-soft-1.13-nacl/OpenAL32/Include/alMain.h	2012-01-23 15:45:38.000000000 -0800
-@@ -291,6 +291,9 @@
- void alc_pulse_init(BackendFuncs *func_list);
- void alc_pulse_deinit(void);
- void alc_pulse_probe(int type);
-+void alc_ppapi_init(BackendFuncs *func_list);
-+void alc_ppapi_deinit(void);
-+void alc_ppapi_probe(int type);
- void alc_null_init(BackendFuncs *func_list);
- void alc_null_deinit(void);
- void alc_null_probe(int type);
-diff -Naur openal-soft-1.13/include/AL/alc.h openal-soft-1.13.nacl/include/AL/alc.h
---- openal-soft-1.13/include/AL/alc.h	2010-11-28 14:51:15.000000000 -0800
-+++ openal-soft-1.13.nacl/include/AL/alc.h	2013-01-31 11:01:44.812082634 -0800
-@@ -270,6 +270,15 @@
+diff --git a/include/AL/alc.h b/include/AL/alc.h
+index 04543a0..ebba9c9 100644
+--- a/include/AL/alc.h
++++ b/include/AL/alc.h
+@@ -270,6 +270,15 @@ typedef void           (ALC_APIENTRY *LPALCCAPTURESAMPLES)( ALCdevice *device, A
   #pragma export off
  #endif
-
+ 
 +#if defined(__native_client__)
 +#include <ppapi/c/ppp.h>
 +#include <ppapi/c/ppp_instance.h>
