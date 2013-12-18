@@ -5,10 +5,10 @@ naclports is collection of open source libraries and applications that have
 been ported to Native Client, along with set to tools for building and maintain
 them.
 
-The packages themselves live in the ``libraries`` and ``examples`` directories.
-Each one contains a description of the package (pkg_info), a bash script for
-building it (build.sh) and an optional patch file (nacl.patch).  The build
-script will download, patch, build and install the application or library.
+The ports themselves live in the ``ports`` directory.  Each one contains a
+description of the package (pkg_info), a bash script for building it (build.sh)
+and an optional patch file (nacl.patch).  The build script will download,
+patch, build and install the application or library.
 
 The scripts require that certain tools are present in the host system.
 You will need at least these (but probably more):
@@ -29,7 +29,7 @@ environment variable to top directory of a version of the Native Client SDK
 The top level Makefile can be used to build one of more of the packages.
 Package dependencies are built into this Makefile. For example, ``make vorbis``
 will build ``libvorbis-1.2.3`` and ``libogg-1.1.4``.  ``make all`` will build
-all of the libraries.
+all of the ports.
 
 There are 4 possible architectures that NaCl modules can be compiled for: i686,
 x86_64, arm, pnacl.  The naclports build system will build just one at at time.
@@ -80,14 +80,14 @@ To add a package:
 
      $ gclient config https://naclports.googlecode.com/svn/trunk/src
 
-2. Add a directory to the libraries directory using the name your new package.
-   For example: ``libraries/openssl``.
+2. Add a directory to the ``ports`` directory using the name your new port.
+   For example: ``ports/openssl``.
 3. Add the build.sh script and pkg_info to that directory.
 4. Optionally include the upstream tarball and create a .sha1 checksum file.
    You can do this using ``build_tools/sha1sum.py``.  Redirect the script
    output to a .sha1 file so that the build system will find it.  E.g.::
 
-     $ sha1sum.py mypkg.tar.gz > libraries/openssl/openssl-0.0.1.sha1
+     $ sha1sum.py mypkg.tar.gz > ports/openssl/openssl-0.0.1.sha1
 
 5. Optionally include a patch file (nacl.patch).  See below for the
    recommended way to generate this patch.
