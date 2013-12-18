@@ -1,5 +1,5 @@
 diff --git a/shell.c b/shell.c
-index c6d7fa3..6b63ecb 100644
+index c6d7fa3..b0a0716 100644
 --- a/shell.c
 +++ b/shell.c
 @@ -45,6 +45,10 @@
@@ -70,14 +70,25 @@ index c6d7fa3..6b63ecb 100644
 +PPAPI_SIMPLE_REGISTER_MAIN(sqlite_main)
 +#endif
 diff --git a/sqlite3.c b/sqlite3.c
-index 37ee4ad..e317cf5 100644
+index 37ee4ad..fdf30df 100644
 --- a/sqlite3.c
 +++ b/sqlite3.c
-@@ -22852,6 +22852,16 @@ SQLITE_PRIVATE const char *sqlite3OpcodeName(int i){
+@@ -22852,6 +22852,27 @@ SQLITE_PRIVATE const char *sqlite3OpcodeName(int i){
  #include <sys/mman.h>
  #endif
  
++/* flock struct was added to PNaCl toolchain in 32 and
++ * newlib toolchain in 33
++ * TODO(sbc): remove this once 33 goes stable */
 +#if defined __native_client__ && !defined __GLIBC__
++  #if defined __PNACL__ && NACL_SDK_VERSION < 32
++    #define MISSING_FLOCK
++  #elif !defined __PNACL__ && NACL_SDK_VERSION < 33
++    #define MISSING_FLOCK
++  #endif
++#endif
++
++#ifdef MISSING_FLOCK
 +struct flock {
 +	short	l_type;
 +	short	l_whence;

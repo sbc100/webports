@@ -7,6 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 MAKE_TARGETS="CCLD=\$(CXX) all"
+NACLPORTS_CFLAGS+=" -DNACL_SDK_VERSION=$NACL_SDK_VERSION"
 export LIBS="-lnacl_io -pthread"
 if [ ${NACL_GLIBC} != "1" ]; then
   EXTRA_CONFIGURE_ARGS=--disable-dynamic-extensions
