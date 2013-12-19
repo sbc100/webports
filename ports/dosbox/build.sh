@@ -22,14 +22,15 @@ ConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
 
   export LIBS="-L${NACLPORTS_LIBDIR} \
       -lm \
       -lpng \
       -lz"
 
-  export LDFLAGS="$NACLPORTS_LDFLAGS -Wl,--as-needed"
+  # --as-needed is needed during confgiure otherwise a lot of tests
+  # will fail to link undefined 'SDLmain'
+  export LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--as-needed"
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then
@@ -50,27 +51,18 @@ ConfigureStep() {
       --with-sdl-exec-prefix=${NACLPORTS_PREFIX}"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  ./autogen.sh
 
   MakeDir ${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_BUILD_SUBDIR}
-  LogExecute ../configure ${CONFIG_FLAGS}
 
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
   # would fail due to multiple definitions of main and missing pp::CreateModule.
   # So we patch auto-generated Makefile after running configure.
-  #
-  # XXX To avoid symbol conflicts after revision r490, which switches SDL video
-  # driver to MainThreadRunner, move -lnacl-mounts to the end of PPAPI_LIBS.
-  # This somehow works for me.
-  PPAPI_LIBS="-lSDL \
-      -lppapi_cpp \
-      -lppapi \
-      ppapi/libppapi.a \
-      -lnacl-mounts \
-      -lppapi_cpp_private"
+  export PPAPI_LIBS=""
+  export LIBS="-lnacl_io"
+  LogExecute ../configure ${CONFIG_FLAGS}
 
-  SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1 |"
+  SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1|"
   SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${NACLPORTS_LDFLAGS}|"
 
   find . -name Makefile -exec cp {} {}.bak \; \

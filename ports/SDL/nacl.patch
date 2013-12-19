@@ -50,7 +50,7 @@ index 5ecc18b..7693a2a 100755
  		;;
  	-nto*)
 diff --git a/configure.in b/configure.in
-index a7e9b18..ca1de7e 100644
+index a7e9b18..e8c24b2 100644
 --- a/configure.in
 +++ b/configure.in
 @@ -885,6 +885,48 @@ CheckVisibilityHidden()
@@ -66,7 +66,7 @@ index a7e9b18..ca1de7e 100644
 +    if test x$enable_video = xyes -a x$enable_naclvideo = xyes; then
 +        AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
 +        SOURCES="$SOURCES $srcdir/src/video/nacl/*.cc"
-+        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -l${NACL_CPP_LIB}"
++        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -ltar -lnacl_io -l${NACL_CPP_LIB}"
 +    fi
 +
 +    AC_ARG_ENABLE(naclaudio,
@@ -494,19 +494,21 @@ index 5c2d81f..7a757a3 100644
  	if ( CPU_haveCPUID() ) {
 diff --git a/src/main/nacl/pepper_instance.cc b/src/main/nacl/pepper_instance.cc
 new file mode 100644
-index 0000000..7356235
+index 0000000..af396e7
 --- /dev/null
 +++ b/src/main/nacl/pepper_instance.cc
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,213 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
 + * found in the LICENSE file.
 + */
 +#include <assert.h>
-+#include <vector>
-+#include <unistd.h>
++#include <errno.h>
 +#include <fcntl.h>
++#include <libtar.h>
++#include <unistd.h>
++#include <vector>
 +#include <SDL.h>
 +#include <SDL_nacl.h>
 +#include <SDL_video.h>
@@ -529,19 +531,146 @@ index 0000000..7356235
 +  nacl_io_init_ppapi(pp_instance(),
 +                     pp::Module::Get()->get_browser_interface());
 +
++  // Copy args so they can be processed later by the SDL thread.
++  argc_ = argc;
++  argn_ = (const char**)malloc(argc*sizeof(char*));
++  argv_ = (const char**)malloc(argc*sizeof(char*));
++  memset(argn_, 0, argc*sizeof(char*));
++  memset(argv_, 0, argc*sizeof(char*));
++
 +  for (int i = 0; i < argc; i++) {
-+    if (!strcmp(argn[i], "ps_stdout")) {
-+      int fd1 = open(argv[i], O_WRONLY);
++    if (argn[i])
++      argn_[i] = strdup(argn[i]);
++    if (argv[i])
++      argv_[i] = strdup(argv[i]);
++  }
++  return true;
++}
++
++void SDLPepperInstance::ProcessArgs() {
++  fprintf(stderr, "SDL: ProcessArgs %d\n", argc_);
++  bool mount_default = true;
++
++  umount("/");
++
++  for (int i = 0; i < argc_; i++) {
++    if (!strcmp(argn_[i], "ps_stdout")) {
++      int fd1 = open(argv_[i], O_WRONLY);
 +      dup2(fd1, 1);
-+    }
-+    if (!strcmp(argn[i], "ps_stderr")) {
-+      int fd2 = open(argv[i], O_WRONLY);
++    } else if (!strcmp(argn_[i], "ps_stderr")) {
++      int fd2 = open(argv_[i], O_WRONLY);
 +      dup2(fd2, 2);
++    } else if (!strcmp(argn_[i], "sdl_mount_http")) {
++      const char* source;
++      const char* target = "/";
++      char* sep;
++      char buf[64];
++
++      const char *q, *p = argv_[i];
++      while (*p) {
++        while (*p && isspace(*p))
++          ++p;
++        if (!*p)
++          break;
++        q = p;
++        while (*p && !isspace(*p))
++          ++p;
++
++        int n = sizeof(buf) - 1;
++        if (p - q < n)
++          n = p - q;
++        strncpy(buf, q, n);
++        buf[n] = '\0';
++
++        sep = strchr(buf, ':');
++        source = buf;
++        if (sep) {
++          target = sep + 1;
++          *sep = '\0';
++        }
++
++        mount_default = false;
++        fprintf(stderr, "SDL: adding http mount '%s' -> '%s'\n", source, target);
++        int rtn = mount(source, target, "httpfs", 0, "");
++        if (rtn != 0)
++          fprintf(stderr, "SDL: mount failed: %s\n", strerror(errno));
++      }
 +    }
 +  }
 +
-+  return true;
++  if (mount_default) {
++    // Create an http mount by default
++    fprintf(stderr, "SDL: creating default http mount\n");
++    int rtn = mount("", "/", "httpfs", 0, "");
++    if (rtn != 0)
++      fprintf(stderr, "SDL: mount failed: %s\n", strerror(errno));
++  } else {
++    // This could fail if the sdl_mount_http attributes
++    // about created a mount on "/".
++    fprintf(stderr, "SDL: creating memfs on root\n");
++    mount("", "/", "memfs", 0, "");
++  }
++
++  for (int i = 0; i < argc_; i++) {
++    if (!strcmp(argn_[i], "sdl_tar_extract")) {
++      const char* source;
++      const char* target = "/";
++      char* sep;
++      char buf[64];
++
++      const char *q, *p = argv_[i];
++      while (*p) {
++        while (*p && isspace(*p))
++          ++p;
++        if (!*p)
++          break;
++        q = p;
++        while (*p && !isspace(*p))
++          ++p;
++
++        int n = sizeof(buf) - 1;
++        if (p - q < n)
++          n = p - q;
++        strncpy(buf, q, n);
++        buf[n] = '\0';
++
++        sep = strchr(buf, ':');
++        source = buf;
++        if (sep) {
++          target = sep + 1;
++          *sep = '\0';
++        }
++
++        fprintf(stderr, "SDL: extracting tar file '%s' -> '%s'\n", source, target);
++
++        TAR* tar;
++        int ret = tar_open(&tar, (char*)source, NULL, O_RDONLY, 0, 0);
++        if (ret != 0) {
++          fprintf(stderr, "SDL: tar_open failed\n");
++          assert(false);
++          continue;
++        }
++
++        ret = mkdir(target, S_IRWXU | S_IRWXG);
++        if (ret != 0) {
++          fprintf(stderr, "SDL: mkdir failed: %s\n", strerror(errno));
++        }
++        ret = tar_extract_all(tar, (char*)target);
++        if (ret != 0) {
++          fprintf(stderr, "SDL: tar_extract_all failed\n");
++          assert(false);
++        }
++
++        ret = tar_close(tar);
++        if (ret != 0) {
++          fprintf(stderr, "SDL: tar_clone failed\n");
++          assert(false);
++        }
++      }
++    }
++  }
 +}
++
 +
 +/*
 + * Entry point for the main SDL thread.  The job of this thread is to
@@ -550,11 +679,8 @@ index 0000000..7356235
 + */
 +static void* sdl_thread_start(void* arg)
 +{
-+  // Create an http mount by default
-+  fprintf(stderr, "SDL: creating http mount\n");
-+  umount("/");
-+  mount("", "/", "httpfs", 0, "");
-+
++  SDLPepperInstance* instance = (SDLPepperInstance*)arg;
++  instance->ProcessArgs();
 +  fprintf(stderr, "SDL: calling SDL_main\n");
 +  char* argv[2];
 +  argv[0] = (char*)"SDL applicaiton";
@@ -577,7 +703,7 @@ index 0000000..7356235
 +  height_ = position.size().height();
 +
 +  SDL_NACL_SetInstance(pp_instance(), width_, height_);
-+  pthread_create(&sdl_thread_, NULL, sdl_thread_start, NULL);
++  pthread_create(&sdl_thread_, NULL, sdl_thread_start, this);
 +}
 +
 +bool SDLPepperInstance::HandleInputEvent(const pp::InputEvent& event) {
@@ -587,10 +713,10 @@ index 0000000..7356235
 +
 diff --git a/src/main/nacl/pepper_instance.h b/src/main/nacl/pepper_instance.h
 new file mode 100644
-index 0000000..b91e637
+index 0000000..1dc9424
 --- /dev/null
 +++ b/src/main/nacl/pepper_instance.h
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,38 @@
 +/*
 + * Copyright (c) 2013 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -616,10 +742,16 @@ index 0000000..b91e637
 +
 +  bool HandleInputEvent(const pp::InputEvent& event);
 +
++  void ProcessArgs();
++
 + private:
 +  pthread_t sdl_thread_;
 +  int width_;
 +  int height_;
++
++  uint32_t argc_;
++  const char** argn_;
++  const char** argv_;
 +};
 +
 +#endif  // SDL_PEPPER_INSTANCE_H_
@@ -1539,7 +1671,7 @@ index 0000000..0a6a0cd
 +
 +#endif // _SDL_nacl_eventqueue_h
 diff --git a/test/configure.in b/test/configure.in
-index 7c25c17..f24fb44 100644
+index 7c25c17..001a4e9 100644
 --- a/test/configure.in
 +++ b/test/configure.in
 @@ -50,6 +50,18 @@ case "$host" in

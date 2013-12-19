@@ -282,13 +282,14 @@ $(SENT)/ports/lua_ppapi: ports/lua5.2 ports/libtar
 $(SENT)/ports/ruby_ppapi: ports/ruby ports/libtar ports/glibc-compat
 $(SENT)/ports/scummvm: ports/SDL ports/libvorbis ports/libtar
 $(SENT)/ports/bochs: ports/nacl-mounts ports/SDL
-$(SENT)/ports/dosbox: ports/nacl-mounts ports/SDL ports/zlib ports/libpng
+$(SENT)/ports/dosbox: ports/SDL ports/zlib ports/libpng
 $(SENT)/ports/drod: ports/SDL ports/SDL_mixer ports/SDL_ttf ports/zlib \
     ports/metakit ports/libtar ports/expat
 $(SENT)/ports/mesagl: ports/Mesa
 $(SENT)/ports/glib: ports/zlib
 $(SENT)/ports/pango: ports/glib ports/cairo
 $(SENT)/ports/Regal: ports/libpng
+$(SENT)/ports/SDL: ports/libtar
 ifneq ($(NACL_ARCH), pnacl)
 $(SENT)/ports/SDL: ports/Regal
 endif
