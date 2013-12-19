@@ -57,11 +57,6 @@ int JSPipeMount::Stat(ino_t node, struct stat *buf) {
 
 ssize_t JSPipeMount::Read(ino_t slot, off_t offset,
                           void* buf, size_t count) {
-  if (slot < 0) {
-    errno = ENOENT;
-    return -1;
-  }
-
   SimpleAutoLock lock(&incoming_lock_);
 
   // TODO(bradnelson): currently this always blocks if nothing is

@@ -8,8 +8,6 @@
 #include <cstring>
 
 int NullDevice::Read(off_t offset, void *buf, size_t count) {
-  if (count < 0)
-    return -1;
   return 0;
 }
 

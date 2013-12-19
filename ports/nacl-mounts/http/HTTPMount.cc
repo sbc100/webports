@@ -60,7 +60,7 @@ int HTTPMount::Creat(const std::string& path, mode_t mode, struct stat* buf) {
 
 int HTTPMount::GetNode(const std::string& path, struct stat* buf) {
   HTTPNode *node = NULL;
-  for (int slot = 0; node = slots_.At(slot); ++slot) {
+  for (int slot = 0; (node = slots_.At(slot)); ++slot) {
     if (node->path == path) {
       return Stat(slot, buf);
     }

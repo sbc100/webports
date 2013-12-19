@@ -292,13 +292,19 @@ extern "C" {
   }
 
   int WRAP(read)(int fd, void *buf, size_t count, size_t *nread) {
-    *nread = kp->read(fd, buf, count);
-    return (*nread < 0) ? errno : 0;
+    ssize_t ret = kp->read(fd, buf, count);
+    if (ret < 0)
+      return errno;
+    *nread = ret;
+    return 0;
   }
 
   int WRAP(write)(int fd, const void *buf, size_t count, size_t *nwrote) {
-    *nwrote = kp->write(fd, buf, count);
-    return (*nwrote < 0) ? errno : 0;
+    ssize_t ret = kp->write(fd, buf, count);
+    if (ret < 0)
+      return errno;
+    *nwrote = ret;
+    return 0;
   }
 
   static void stat_to_nacl_stat(const struct stat* buf,

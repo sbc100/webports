@@ -41,7 +41,7 @@ PepperMount::PepperMount(MainThreadRunner *runner, pp::FileSystem *fs,
 int PepperMount::GetSlot(const std::string& path) {
   std::string p = Path(path).FormulatePath();
   PepperNode *node = NULL;
-  for (int slot = 0; node = slots_.At(slot); ++slot) {
+  for (int slot = 0; (node = slots_.At(slot)); ++slot) {
     if (node->path() == p) {
       return slot;
     }

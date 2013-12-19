@@ -199,9 +199,7 @@ ssize_t BufferMount::GetCachedBlock(ino_t node, off_t offset,
       if (count > (*i)->count() - skip) {
         count = (*i)->count() - skip;
       }
-      if (count >= 0) {
-        memcpy(data, (*i)->data() + skip, count);
-      }
+      memcpy(data, (*i)->data() + skip, count);
       // Bump to the front.
       CachedBlock* block = (*i);
       cache_.erase(i);
