@@ -32,27 +32,6 @@ ConfigureStep() {
 
   export NACLBXLIBS="-lpthread"
 
-  # Hacky way of getting around the bochs configuration tools which don't allow
-  # --whole-archive and don't allow for multiple libraries with the same name
-  # on the linker line
-  PWD=$(pwd)
-  # TODO(bradnelson): take this out once the sdk is fixed (and do the line
-  # after).
-  ChangeDir ${NACL_SDK_LIBDIR}
-  cp libppapi_cpp.a libppapi_cpp_COPY.a
-  ChangeDir ${PWD}
-
-  export LIBS=
-  export LIBS="$LIBS -Wl,--start-group"
-  export LIBS="$LIBS -lppapi"
-  export LIBS="$LIBS -lppapi_cpp"
-  export LIBS="$LIBS -lppapi_cpp_private"
-  export LIBS="$LIBS -Lbochs_ppapi -lbochs_ppapi"
-  export LIBS="$LIBS -lnacl-mounts"
-  export LIBS="$LIBS -lpthread"
-  export LIBS="$LIBS -lppapi_cpp_COPY"
-  export LIBS="$LIBS -Wl,--end-group"
-
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
 
@@ -91,17 +70,26 @@ InstallStep() {
   cp -r ${BOCHS_DIR}/bios/VGABIOS-lgpl-latest img/
   cp -r ${BOCHS_DIR}/bios/BIOS-bochs-latest img/
   cp -r ${BOCHS_DIR}/msrs.def img/
-  cd img
 
   MakeDir ${PUBLISH_DIR}
 
-  tar cf ${PUBLISH_DIR}/img.tar ./
+  cd img
+  tar cf ${PUBLISH_DIR}/img.tar .
+  cd ..
 
   cp ${START_DIR}/bochs.html ${PUBLISH_DIR}
-  cp ${START_DIR}/bochs.nmf ${PUBLISH_DIR}
   cp ${BOCHS_BUILD}/bochs ${PUBLISH_DIR}/bochs_${NACL_ARCH}${NACL_EXEEXT}
 
-  cd ..
+  if [ ${NACL_ARCH} = pnacl ]; then
+    sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/bochs.html
+  fi
+
+  pushd ${PUBLISH_DIR}
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      bochs*${NACL_EXEEXT} \
+      -s . \
+      -o bochs.nmf
+  popd
 }
 
 CustomCheck() {

@@ -66,7 +66,7 @@ index a7e9b18..e8c24b2 100644
 +    if test x$enable_video = xyes -a x$enable_naclvideo = xyes; then
 +        AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
 +        SOURCES="$SOURCES $srcdir/src/video/nacl/*.cc"
-+        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lppapi_gles2 -Wl,--end-group -ltar -lnacl_io -l${NACL_CPP_LIB}"
++        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lSDLmain -lppapi_gles2 -Wl,--end-group -ltar -lnacl_io -l${NACL_CPP_LIB}"
 +    fi
 +
 +    AC_ARG_ENABLE(naclaudio,

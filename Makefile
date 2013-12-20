@@ -281,7 +281,7 @@ $(SENT)/ports/python3_ppapi: ports/python3 ports/libtar
 $(SENT)/ports/lua_ppapi: ports/lua5.2 ports/libtar
 $(SENT)/ports/ruby_ppapi: ports/ruby ports/libtar ports/glibc-compat
 $(SENT)/ports/scummvm: ports/SDL ports/libvorbis ports/libtar
-$(SENT)/ports/bochs: ports/nacl-mounts ports/SDL
+$(SENT)/ports/bochs: ports/SDL
 $(SENT)/ports/dosbox: ports/SDL ports/zlib ports/libpng
 $(SENT)/ports/drod: ports/SDL ports/SDL_mixer ports/SDL_ttf ports/zlib \
     ports/metakit ports/libtar ports/expat
