@@ -125,45 +125,10 @@ index 3568f79..0883c8d 100644
    load_MSRs(msrs_filename);
  #endif
  
-diff --git a/iodev/Makefile.in b/iodev/Makefile.in
-index 8ef3da7..0117a96 100644
---- a/iodev/Makefile.in
-+++ b/iodev/Makefile.in
-@@ -56,7 +56,7 @@ USBDEV_OBJS = @USBDEV_OBJS@
- SCSI_OBJS = @SCSI_OBJS@
- 
- BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
--LOCAL_CXXFLAGS = $(MCH_CFLAGS)
-+LOCAL_CXXFLAGS = $(MCH_CFLAGS) -D__nativeclient__=1
- 
- PCIDEV_CXXFLAGS = -I$(srcdir)/../host/linux/pcidev
- 
-diff --git a/iodev/cdrom.cc b/iodev/cdrom.cc
-index ab524ac..a46430b 100644
---- a/iodev/cdrom.cc
-+++ b/iodev/cdrom.cc
-@@ -236,7 +236,7 @@ typedef struct _CDROM_TOC_SESSION_DATA {
- #else // all others (Irix, Tru64)
- #include <sys/types.h>
- #include <sys/stat.h>
--#include <sys/ioctl.h>
-+//#include <sys/ioctl.h>
- #define BX_CD_FRAMESIZE 2048
- #define CD_FRAMESIZE 2048
- #endif
 diff --git a/iodev/harddrv.cc b/iodev/harddrv.cc
-index 18df144..4504862 100644
+index 18df144..f8db116 100644
 --- a/iodev/harddrv.cc
 +++ b/iodev/harddrv.cc
-@@ -307,7 +307,7 @@ void bx_hard_drive_c::init(void)
-         BX_HD_THIS channels[channel].drives[device].hdimage->sectors = spt;
- 
-         /* open hard drive image file */
--        if ((BX_HD_THIS channels[channel].drives[device].hdimage->open(SIM->get_param_string("path", base)->getptr())) < 0) {
-+	if ((BX_HD_THIS channels[channel].drives[device].hdimage->open(SIM->get_param_string("path", base)->getptr())) < 0) {
-           BX_PANIC(("ata%d-%d: could not open hard drive image file '%s'", channel, device, SIM->get_param_string("path", base)->getptr()));
-           return;
-         }
 @@ -344,7 +344,7 @@ void bx_hard_drive_c::init(void)
              }
            } else {
@@ -173,113 +138,6 @@ index 18df144..4504862 100644
                // workaround large files problem with diskimages
                BX_HD_THIS channels[channel].drives[device].hdimage->hd_size = disk_size;
              }
-diff --git a/iodev/serial.cc b/iodev/serial.cc
-index d04beca..226b151 100644
---- a/iodev/serial.cc
-+++ b/iodev/serial.cc
-@@ -30,6 +30,7 @@
- // is used to know when we are exporting symbols and when we are importing.
- #define BX_PLUGGABLE
- 
-+#ifndef __nativeclient__
- #ifndef WIN32
- #include <sys/socket.h>
- #include <netinet/in.h>
-@@ -37,6 +38,7 @@
- #define closesocket(s)    close(s)
- typedef int SOCKET;
- #endif
-+#endif
- 
- #include "iodev.h"
- #include "serial.h"
-@@ -104,7 +106,6 @@ bx_serial_c::~bx_serial_c(void)
- #endif
-           break;
-         case BX_SER_MODE_SOCKET:
--          if (BX_SER_THIS s[i].socket_id >= 0) closesocket(BX_SER_THIS s[i].socket_id);
-           break;
-         case BX_SER_MODE_PIPE:
- #ifdef WIN32
-@@ -303,11 +304,8 @@ bx_serial_c::init(void)
-         BX_SER_THIS mouse_type = SIM->get_param_enum(BXPN_MOUSE_TYPE)->get();
-       } else if (!strncmp(mode, "socket", 6)) {
-         BX_SER_THIS s[i].io_mode = BX_SER_MODE_SOCKET;
--        struct sockaddr_in  sin;
--        struct hostent      *hp;
-         char                host[BX_PATHNAME_LEN];
-         int                 port;
--        SOCKET              socket;
-         bx_bool             server = !strcmp(mode, "socket-server");
- 
- #if defined(WIN32)
-@@ -332,15 +330,19 @@ bx_serial_c::init(void)
-         }
-         port = atoi(substr);
- 
-+#ifndef __nativeclient__
-         hp = gethostbyname(host);
-         if (!hp) {
-           BX_PANIC(("com%d: gethostbyname failed (%s)", i+1, host));
-         }
- 
-         memset ((char*) &sin, 0, sizeof (sin));
-+#endif
- #if BX_HAVE_SOCKADDR_IN_SIN_LEN
-        sin.sin_len = sizeof sin;
- #endif
-+
-+#ifndef __nativeclient__
-         memcpy ((char*) &(sin.sin_addr), hp->h_addr, hp->h_length);
-         sin.sin_family = hp->h_addrtype;
-         sin.sin_port = htons (port);
-@@ -372,12 +374,17 @@ bx_serial_c::init(void)
-           socket = (SOCKET) -1;
-           BX_INFO(("com%d: connect() failed (host:%s, port:%d)",i+1, host, port));
-         }
-+#endif
- 
-+#ifndef __nativeclient__
-         BX_SER_THIS s[i].socket_id = socket;
-         if (socket > 0)
-           BX_INFO(("com%d - inet %s - socket_id: %d, ip:%s, port:%d",
-             i+1, server ? "server" : "client", socket, host, port));
--      } else if (!strncmp(mode, "pipe", 4)) {
-+#endif
-+      }
-+
-+      else if (!strncmp(mode, "pipe", 4)) {
-         if (strlen(dev) > 0) {
- #ifdef WIN32
-           bx_bool server = !strcmp(mode, "pipe-server");
-@@ -1294,6 +1301,7 @@ bx_serial_c::tx_timer(void)
-         BX_INFO(("com%d: write to mouse ignored: 0x%02x", port+1, BX_SER_THIS s[port].tsrbuffer));
-         break;
-       case BX_SER_MODE_SOCKET:
-+#ifndef __nativeclient__
-         if (BX_SER_THIS s[port].socket_id >= 0) {
- #ifdef WIN32
-           BX_INFO(("attempting to write win32 : %c", BX_SER_THIS s[port].tsrbuffer));
-@@ -1304,6 +1312,7 @@ bx_serial_c::tx_timer(void)
-                   (bx_ptr_t) & BX_SER_THIS s[port].tsrbuffer, 1);
- #endif
-       }
-+#endif
-       case BX_SER_MODE_PIPE:
- #ifdef WIN32
-         if (BX_SER_THIS s[port].pipe) {
-diff --git a/iodev/serial.h b/iodev/serial.h
-index f3b66dc..fa1dc12 100644
---- a/iodev/serial.h
-+++ b/iodev/serial.h
-@@ -112,7 +112,6 @@ typedef struct {
- 
-   int io_mode;
-   int tty_id;
--  SOCKET socket_id;
-   FILE *output;
- #ifdef WIN32
-   HANDLE pipe;
 diff --git a/iodev/slowdown_timer.cc b/iodev/slowdown_timer.cc
 index 0af0608..f700185 100644
 --- a/iodev/slowdown_timer.cc
@@ -305,19 +163,6 @@ index 30ceb66..b27b487 100644
  #else
    hFile = CreateFile(path, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
    if (hFile != INVALID_HANDLE_VALUE) {
-diff --git a/logio.cc b/logio.cc
-index 09d5c1f..3aff4bb 100644
---- a/logio.cc
-+++ b/logio.cc
-@@ -25,6 +25,8 @@
- #include "iodev/iodev.h"
- #include <assert.h>
- 
-+#include "osdep.h"
-+
- #if BX_WITH_CARBON
- #define Float32 KLUDGE_Float32
- #define Float64 KLUDGE_Float64
 diff --git a/main.cc b/main.cc
 index e0c07e1..cad879d 100644
 --- a/main.cc
@@ -336,53 +181,11 @@ index e0c07e1..cad879d 100644
    bx_startup_flags.argc = argc;
    bx_startup_flags.argv = argv;
  #if BX_WITH_SDL && defined(WIN32)
-diff --git a/misc/bxcommit.c b/misc/bxcommit.c
-index 04d6a84..38c3ea9 100644
---- a/misc/bxcommit.c
-+++ b/misc/bxcommit.c
-@@ -26,6 +26,8 @@
- 
- #include <string.h>
- 
-+#include "../osdep.h"
-+
- #if !BX_HAVE_SNPRINTF
- #include <stdarg.h>
- /* XXX use real snprintf */
-@@ -43,11 +45,10 @@ int snprintf(char *s, size_t maxlen, const char *format, ...)
- }
- #endif  /* !BX_HAVE_SNPRINTF */
- 
--#include "../osdep.h"
--
- #define HDIMAGE_HEADERS_ONLY 1
- #include "../iodev/hdimage.h"
- 
-+
- char *EOF_ERR = "ERROR: End of input";
- char *rcsid = "$Id: bxcommit.c,v 1.14 2009/04/14 09:45:22 sshwarts Exp $";
- char *divider = "========================================================================";
-diff --git a/osdep.cc b/osdep.cc
-index 80aee99..9223241 100644
---- a/osdep.cc
-+++ b/osdep.cc
-@@ -54,9 +54,9 @@ int bx_snprintf (char *s, size_t maxlen, const char *format, ...)
- #endif  /* !BX_HAVE_SNPRINTF */
- 
- #if !BX_HAVE_VSNPRINTF
--int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg)
-+int bx_vsnprintf (char *s, size_t maxlen, const char *format, ...)
- {
--  return vsprintf (s, format, arg);
-+  return snprintf(s, maxlen, format);
- }
- #endif /* !BX_HAVE_VSNPRINTF*/
- 
 diff --git a/osdep.h b/osdep.h
-index 7699dbd..f72c504 100644
+index 7699dbd..5c1a778 100644
 --- a/osdep.h
 +++ b/osdep.h
-@@ -152,9 +152,16 @@ extern "C" {
+@@ -152,6 +152,13 @@ extern "C" {
    extern int bx_snprintf (char *s, size_t maxlen, const char *format, ...);
  #endif
  
@@ -395,8 +198,4 @@ index 7699dbd..f72c504 100644
 +#endif
  #if !BX_HAVE_VSNPRINTF
    #define vsnprintf bx_vsnprintf
--  extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);
-+  extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, ...);
- #endif
- 
- #if BX_HAVE_STRTOULL
+   extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);
