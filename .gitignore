@@ -1,9 +1,7 @@
 # DEPS
-/libraries/hterm/
+/third_party/
 /native_client/
 /testing/
 
 *.pyc
 /out
-/examples/*/*/*.o
-/examples/*/*/*.nexe
