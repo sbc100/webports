@@ -73,24 +73,29 @@ int eaccess(const char *pathname, int mode) {
   return access(pathname, mode);
 }
 
+speed_t cfgetispeed(const struct termios *termios_p) __attribute__((weak));
 speed_t cfgetispeed(const struct termios *termios_p) {
   return termios_p->c_ispeed;
 }
 
+speed_t cfgetospeed(const struct termios *termios_p) __attribute__((weak));
 speed_t cfgetospeed(const struct termios *termios_p) {
   return termios_p->c_ospeed;
 }
 
+int cfsetispeed(struct termios *termios_p, speed_t speed) __attribute__((weak));
 int cfsetispeed(struct termios *termios_p, speed_t speed) {
   termios_p->c_ispeed = speed;
   return 0;
 }
 
+int cfsetospeed(struct termios *termios_p, speed_t speed) __attribute__((weak));
 int cfsetospeed(struct termios *termios_p, speed_t speed) {
   termios_p->c_ospeed = speed;
   return 0;
 }
 
+int cfsetspeed(struct termios *termios_p, speed_t speed) __attribute__((weak));
 int cfsetspeed(struct termios *termios_p, speed_t speed) {
   termios_p->c_ispeed = speed;
   termios_p->c_ospeed = speed;
