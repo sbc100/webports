@@ -76,7 +76,8 @@ fi
 # otherwise 'libtool' won't find the libraries correctly.  This
 # is because libtool uses 'gcc -print-search-dirs' which does
 # not honor the external specs file.
-NACLPORTS_LDFLAGS="-L${NACLPORTS_LIBDIR} ${NACL_LDFLAGS}"
+NACLPORTS_LDFLAGS="$NACL_LDFLAGS"
+NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR} -Wl,-rpath-link=${NACLPORTS_LIBDIR}"
 
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
@@ -307,7 +308,7 @@ PatchSpecFile() {
     }" |\
     sed "/*link_libgcc:/{
       N
-      s|$| -L${SED_SAFE_SPACES_USR_LIB}|
+      s|$| -rpath-link=${SED_SAFE_SPACES_USR_LIB} -L${SED_SAFE_SPACES_USR_LIB}|
     }" > ${SPECS_FILE}
 
   # For newlib toolchain, modify the specs file to give an error when attempting

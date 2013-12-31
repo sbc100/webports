@@ -1,8 +1,15 @@
 diff --git a/Makefile.in b/Makefile.in
-index e29dc6d..99321ee 100644
+index e29dc6d..bb485dd 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -42,7 +42,7 @@ SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
+@@ -36,13 +36,13 @@ TARGET  = libSDL.la
+ SOURCES = @SOURCES@
+ OBJECTS = @OBJECTS@
+ 
+-SDLMAIN_TARGET = libSDLmain.a
++SDLMAIN_TARGET = libSDLmain.la
+ SDLMAIN_SOURCES = @SDLMAIN_SOURCES@
+ SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
  
  DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
  
@@ -11,15 +18,47 @@ index e29dc6d..99321ee 100644
  
  LT_AGE      = @LT_AGE@
  LT_CURRENT  = @LT_CURRENT@
-@@ -76,7 +76,7 @@ depend:
- include $(depend)
+@@ -68,9 +68,9 @@ depend:
+ 	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" output="$(depend)" \
+ 	$(SHELL) $(auxdir)/makedep.sh
+ 	@for src in $(SDLMAIN_SOURCES); do \
+-	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.o|'`; \
++	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.lo|'`; \
+ 	    echo "\$$(objects)/$$obj: $$src" >>$(depend); \
+-	    echo "	\$$(CC) \$$(CFLAGS) \$$(EXTRA_CFLAGS) -c $$src -o \$$@" >>$(depend); \
++	    echo "	\$$(LIBTOOL) --mode=compile \$$(CC) \$$(CFLAGS) \$$(EXTRA_CFLAGS) -c $$src -o \$$@" >>$(depend); \
+ 	done
  
- $(objects)/$(TARGET): $(OBJECTS)
--	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
-+	$(LIBTOOL) --mode=link $(CXX) -o $@ $(OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
+ include $(depend)
+@@ -79,8 +79,7 @@ $(objects)/$(TARGET): $(OBJECTS)
+ 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
  
  $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
- 	$(AR) cru $@ $(SDLMAIN_OBJECTS)
+-	$(AR) cru $@ $(SDLMAIN_OBJECTS)
+-	$(RANLIB) $@
++	$(LIBTOOL) --mode=link $(CC) -o $@ $(SDLMAIN_OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
+ 
+ install: all install-bin install-hdrs install-lib install-data install-man
+ install-bin:
+@@ -95,8 +94,7 @@ install-hdrs:
+ install-lib: $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
+ 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(libdir)
+ 	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(TARGET) $(DESTDIR)$(libdir)/$(TARGET)
+-	$(INSTALL) -m 644 $(objects)/$(SDLMAIN_TARGET) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
+-	$(RANLIB) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
++	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(SDLMAIN_TARGET) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
+ install-data:
+ 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(datadir)/aclocal
+ 	$(INSTALL) -m 644 $(srcdir)/sdl.m4 $(DESTDIR)$(datadir)/aclocal/sdl.m4
+@@ -120,7 +118,7 @@ uninstall-hdrs:
+ 	-rmdir $(DESTDIR)$(includedir)/SDL
+ uninstall-lib:
+ 	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$(TARGET)
+-	rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
++	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
+ uninstall-data:
+ 	rm -f $(DESTDIR)$(datadir)/aclocal/sdl.m4
+ 	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl.pc
 diff --git a/build-scripts/config.sub b/build-scripts/config.sub
 index 5ecc18b..7693a2a 100755
 --- a/build-scripts/config.sub
@@ -50,10 +89,10 @@ index 5ecc18b..7693a2a 100755
  		;;
  	-nto*)
 diff --git a/configure.in b/configure.in
-index a7e9b18..e8c24b2 100644
+index a7e9b18..c82d683 100644
 --- a/configure.in
 +++ b/configure.in
-@@ -885,6 +885,48 @@ CheckVisibilityHidden()
+@@ -885,6 +885,50 @@ CheckVisibilityHidden()
      fi
  }
  
@@ -66,7 +105,8 @@ index a7e9b18..e8c24b2 100644
 +    if test x$enable_video = xyes -a x$enable_naclvideo = xyes; then
 +        AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
 +        SOURCES="$SOURCES $srcdir/src/video/nacl/*.cc"
-+        SDL_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS -lppapi -lppapi_cpp -lSDLmain -lppapi_gles2 -Wl,--end-group -ltar -lnacl_io -l${NACL_CPP_LIB}"
++        EXTRA_LDFLAGS="-lnacl_io -l${NACL_CPP_LIB:-stdc++} $EXTRA_LDFLAGS"
++        SDL_LIBS="$SDL_LIBS -lppapi -lppapi_cpp -lSDLmain -ltar"
 +    fi
 +
 +    AC_ARG_ENABLE(naclaudio,
@@ -94,7 +134,8 @@ index a7e9b18..e8c24b2 100644
 +        if test x$video_opengl = xyes; then
 +            AC_DEFINE(SDL_VIDEO_OPENGL)
 +            AC_DEFINE(SDL_VIDEO_OPENGL_REGAL)
-+            SDL_LIBS="$SDL_LIBS -lRegal -l${NACL_CPP_LIB}"
++            EXTRA_LDFLAGS="-lRegal -lppapi_gles2 ${EXTRA_LDFLAGS}"
++            SDL_LIBS="-lRegal -lppapi_gles2 ${SDL_LIBS}"
 +        fi
 +    fi
 +}
@@ -102,7 +143,7 @@ index a7e9b18..e8c24b2 100644
  
  dnl Do the iPod thing
  CheckIPod()
-@@ -2284,6 +2326,22 @@ case "$host" in
+@@ -2284,6 +2328,22 @@ case "$host" in
              have_timers=yes
          fi
          ;;
@@ -125,6 +166,29 @@ index a7e9b18..e8c24b2 100644
      *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
          case "$host" in
              *-*-linux*)         ARCH=linux ;;
+@@ -2838,9 +2898,9 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
+ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.S,$(objects)/\1.lo,g'`
+ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
+ 
+-SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.o,g'`
+-SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.o,g'`
+-SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
++SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
++SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
++SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
+ 
+ # Set runtime shared library paths as needed
+ 
+@@ -2866,6 +2926,9 @@ case "$ARCH" in
+     # Evil hack to allow static linking on Mac OS X
+     SDL_STATIC_LIBS="\${libdir}/libSDLmain.a \${libdir}/libSDL.a $EXTRA_LDFLAGS"
+     ;;
++  nacl)
++    SDL_STATIC_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS $EXTRA_LDFLAGS -lSDLmain -Wl,--end-group"
++    ;;
+   *)
+     SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
+     ;;
 diff --git a/include/SDL_config.h.in b/include/SDL_config.h.in
 index 58593ca..150097d 100644
 --- a/include/SDL_config.h.in

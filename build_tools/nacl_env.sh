@@ -266,6 +266,10 @@ NACL_LDFLAGS="-L${NACL_SDK_LIBDIR}"
 NACL_CFLAGS="-I${NACL_SDK_ROOT}/include"
 NACL_CXXFLAGS="-I${NACL_SDK_ROOT}/include"
 
+if [ ${NACL_GLIBC} = "1" ]; then
+  NACL_LDFLAGS+=" -Wl,-rpath-link=${NACL_SDK_LIBDIR}"
+fi
+
 if [ $# -gt 0 ]; then
   if [ "$1" = '--print' ]; then
     echo "export CC=${NACLCC}"
