@@ -89,7 +89,7 @@ index 5ecc18b..7693a2a 100755
  		;;
  	-nto*)
 diff --git a/configure.in b/configure.in
-index a7e9b18..b3c350f 100644
+index a7e9b18..8c91f91 100644
 --- a/configure.in
 +++ b/configure.in
 @@ -885,6 +885,50 @@ CheckVisibilityHidden()
@@ -184,7 +184,7 @@ index a7e9b18..b3c350f 100644
      SDL_STATIC_LIBS="\${libdir}/libSDLmain.a \${libdir}/libSDL.a $EXTRA_LDFLAGS"
      ;;
 +  nacl)
-+    SDL_STATIC_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS $EXTRA_LDFLAGS -lSDLmain -Wl,--end-group"
++    SDL_STATIC_LIBS="-Wl,--start-group -lSDLmain $SDL_LIBS $EXTRA_LDFLAGS -lSDLmain -ltar -Wl,--end-group"
 +    ;;
    *)
      SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
