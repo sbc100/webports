@@ -20,7 +20,7 @@ TestStep() {
   # `libtool --finish /home/jirka/Bin/nacl_sdk/pepper_31/toolchain/linux_pnacl/usr/lib'"
   (cd src/libsodium;
   /bin/sh ../../libtool   --mode=install /usr/bin/install \
-      -c   libsodium.la `realpath '../../naclport_test/lib'`)
+      -c   libsodium.la `cd ../../naclport_test/lib && pwd`)
 
   if [[ ${NACL_ARCH} == "pnacl" ]]; then
        EXT=.bc
