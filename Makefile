@@ -122,6 +122,7 @@ ALL_PORTS = \
      ports/libmodplug \
      ports/libogg \
      ports/libpng \
+     ports/libsodium \
      ports/libtar \
      ports/libtheora \
      ports/libtomcrypt \
@@ -381,6 +382,7 @@ sdl_image SDL_image: ports/SDL_image ;
 sdl_mixer SDL_mixer: ports/SDL_mixer ;
 sdl_net SDL_net: ports/SDL_net ;
 sdl_ttf SDL_ttf: ports/SDL_ttf ;
+sodium libsodium: ports/libsodium ;
 speex: ports/speex ;
 sqlite: ports/sqlite ;
 tar libtar: ports/libtar ;
