@@ -55,12 +55,6 @@ ConfigureStep() {
     conf_host="nacl-x86"
   fi
   export DEFINES="-DNACL -DSYSTEM_NOT_SUPPORTING_D_TYPE=1"
-  export LIBS=
-  export LIBS="$LIBS -Wl,--whole-archive"
-  export LIBS="$LIBS -lvorbisfile -lvorbis -logg"
-  export LIBS="$LIBS -lnacl_io -ltar"
-  export LIBS="$LIBS -lppapi -lppapi_cpp -lppapi_cpp_private"
-  export LIBS="$LIBS -Wl,--no-whole-archive"
 
   # NOTE: disabled mt32emu because it using inline assembly that won't
   #     validate.
