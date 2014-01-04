@@ -176,6 +176,7 @@ ALL_PORTS = \
      ports/x264 \
      ports/xaos \
      ports/yajl \
+     ports/zeromq \
      ports/zlib
 
 SENTINELS_DIR = $(NACL_OUT)/sentinels
@@ -396,6 +397,7 @@ webp: ports/webp ;
 x264: ports/x264 ;
 xml2 libxml2: ports/libxml2 ;
 yajl: ports/yajl ;
+zeromq: ports/zeromq ;
 zlib: ports/zlib ;
 
 # shortcuts examples (alphabetical)
