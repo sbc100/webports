@@ -1,19 +1,17 @@
-diff -Naur libtommath-0.41/bn_mp_read_radix.c libtommath-0.41.nacl/bn_mp_read_radix.c
---- libtommath-0.41/bn_mp_read_radix.c	2007-03-10 15:45:11.000000000 -0800
-+++ libtommath-0.41.nacl/bn_mp_read_radix.c	2010-07-16 11:45:57.000000000 -0700
-@@ -48,7 +48,7 @@
-      * this allows numbers like 1AB and 1ab to represent the same  value
-      * [e.g. in hex]
-      */
--    ch = (char) ((radix < 36) ? toupper (*str) : *str);
-+    ch = (char) ((radix < 36) ? toupper ((int)*str) : *str);
-     for (y = 0; y < 64; y++) {
-       if (ch == mp_s_rmap[y]) {
-          break;
-diff -Naur libtommath-0.41/makefile libtommath-0.41.nacl/makefile
---- libtommath-0.41/makefile	2007-03-10 15:45:11.000000000 -0800
-+++ libtommath-0.41.nacl/makefile	2010-07-16 11:45:34.000000000 -0700
-@@ -87,7 +87,7 @@
+diff --git a/makefile b/makefile
+index 3e254d4..6316133 100644
+--- a/makefile
++++ b/makefile
+@@ -11,6 +11,8 @@ ifndef MAKE
+    MAKE=make
+ endif
+ 
++RANLIB ?= ranlib
++
+ ifndef IGNORE_SPEED
+ 
+ #for speed 
+@@ -87,7 +89,7 @@ bn_mp_to_signed_bin_n.o bn_mp_to_unsigned_bin_n.o
  
  $(LIBNAME):  $(OBJECTS)
  	$(AR) $(ARFLAGS) $@ $(OBJECTS)
@@ -22,15 +20,55 @@ diff -Naur libtommath-0.41/makefile libtommath-0.41.nacl/makefile
  
  #make a profiled library (takes a while!!!)
  #
-@@ -119,7 +119,7 @@
+@@ -97,17 +99,17 @@ $(LIBNAME):  $(OBJECTS)
+ # So far I've seen improvements in the MP math
+ profiled:
+ 	make CFLAGS="$(CFLAGS) -fprofile-arcs -DTESTING" timing
+-	./ltmtest
+-	rm -f *.a *.o ltmtest
++	./ltmtest$(EXEEXT)
++	rm -f *.a *.o ltmtest$(EXEEXT)
+ 	make CFLAGS="$(CFLAGS) -fbranch-probabilities"
+ 
+ #make a single object profiled library 
+ profiled_single:
+ 	perl gen.pl
+ 	$(CC) $(CFLAGS) -fprofile-arcs -DTESTING -c mpi.c -o mpi.o
+-	$(CC) $(CFLAGS) -DTESTING -DTIMER demo/timing.c mpi.o -o ltmtest
+-	./ltmtest
+-	rm -f *.o ltmtest
++	$(CC) $(CFLAGS) -DTESTING -DTIMER demo/timing.c mpi.o -o ltmtest$(EXEEXT)
++	./ltmtest$(EXEEXT)
++	rm -f *.o ltmtest$(EXEEXT)
+ 	$(CC) $(CFLAGS) -fbranch-probabilities -DTESTING -c mpi.c -o mpi.o
+ 	$(AR) $(ARFLAGS) $(LIBNAME) mpi.o
+ 	ranlib $(LIBNAME)	
+@@ -119,13 +121,13 @@ install: $(LIBNAME)
  	install -g $(GROUP) -o $(USER) $(HEADERS) $(DESTDIR)$(INCPATH)
  
  test: $(LIBNAME) demo/demo.o
 -	$(CC) $(CFLAGS) demo/demo.o $(LIBNAME) -o test
-+	$(CC) $(CFLAGS) demo/demo.o $(LIBNAME) -o test.nexe
++	$(CC) $(CFLAGS) demo/demo.o $(LIBNAME) -o test$(EXEEXT)
  	
  mtest: test	
- 	cd mtest ; $(CC) $(CFLAGS) mtest.c -o mtest
+-	cd mtest ; $(CC) $(CFLAGS) mtest.c -o mtest
++	cd mtest ; $(CC) $(CFLAGS) mtest.c -o mtest$(EXEEXT)
+         
+ timing: $(LIBNAME)
+-	$(CC) $(CFLAGS) -DTIMER demo/timing.c $(LIBNAME) -o ltmtest
++	$(CC) $(CFLAGS) -DTIMER demo/timing.c $(LIBNAME) -o ltmtest$(EXEEXT)
+ 
+ # makes the LTM book DVI file, requires tetex, perl and makeindex [part of tetex I think]
+ docdvi: tommath.src
+@@ -165,7 +167,7 @@ pretty:
+ 	perl pretty.build
+ 
+ clean:
+-	rm -f *.bat *.pdf *.o *.a *.obj *.lib *.exe *.dll etclib/*.o demo/demo.o test ltmtest mpitest mtest/mtest mtest/mtest.exe \
++	rm -f *.bat *.pdf *.o *.a *.obj *.lib *.exe *.dll etclib/*.o demo/demo.o test$(EXEEXT) ltmtest$(EXEEXT) mpitest$(EXEEXT) mtest/mtest$(EXEEXT) \
+         *.idx *.toc *.log *.aux *.dvi *.lof *.ind *.ilg *.ps *.log *.s mpi.c *.da *.dyn *.dpi tommath.tex `find . -type f | grep [~] | xargs` *.lo *.la
+ 	rm -rf .libs
+ 	cd etc ; MAKE=${MAKE} ${MAKE} clean
 diff -Naur libtommath-0.41/tommath.h libtommath-0.41.nacl/tommath.h
 --- libtommath-0.41/tommath.h	2007-03-10 15:45:11.000000000 -0800
 +++ libtommath-0.41.nacl/tommath.h	2010-07-23 11:04:12.000000000 -0700

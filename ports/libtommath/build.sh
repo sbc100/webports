@@ -8,34 +8,26 @@ source ../../build_tools/common.sh
 
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export LD=${NACLLD}
-  export RANLIB=${NACLRANLIB}
-
-  # make clean + make
+  MAKE_TARGETS=mtest
+  export EXEEXT=${NACL_EXEEXT}
   DefaultBuildStep
-
-  # To run tests, build with make -j4 test. Then using mtest from non-NaCl build
-  # run the following:
-  #   mtest/mtest | sel_ldr test.nexe
-  # make -j4
 }
 
 
+#TestStep() {
+  # To run tests, pipe mtest.nexe output into test.nexe input
+  #   mtest/mtest.exe | test.nexe
+  # However, this test is setup to run forever, so we don't run
+  # it as part of the build.
+  #RunSelLdrCommand mtest/mtest.nexe | RunSelLdrCommand test.nexe
+#}
+
+
 InstallStep() {
+  Banner "Installing"
   # copy libs and headers manually
-  Banner "Installing ${PACKAGE_NAME} to ${NACLPORTS_PREFIX}"
-  ChangeDir ${NACLPORTS_INCLUDE}
-  Remove ${PACKAGE_NAME}
-  MakeDir ${PACKAGE_NAME}
-  readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp ${THIS_PACKAGE_PATH}/*.h ${PACKAGE_NAME}/
-  ChangeDir ${NACLPORTS_LIBDIR}
-  cp ${THIS_PACKAGE_PATH}/*.a .
+  LogExecute cp *.h ${NACLPORTS_INCLUDE}
+  LogExecute cp *.a ${NACLPORTS_LIBDIR}
 }
 
 

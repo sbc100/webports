@@ -974,7 +974,7 @@ RunSelLdrCommand() {
     fi
   else
     # Normal NaCl.
-    local NEXE=$1
+    local NEXE=$(basename $1)
     local SCRIPT=$1.sh
     if [ -f ${NACL_SEL_LDR} ]; then
       WriteSelLdrScript ${SCRIPT} ${NEXE}
