@@ -317,6 +317,7 @@ $(SENT)/ports/physfs: ports/zlib
 $(SENT)/ports/mpg123: ports/openal-soft
 $(SENT)/ports/ImageMagick: ports/libpng ports/jpeg8d ports/bzip2 ports/zlib
 $(SENT)/ports/gdb: ports/ncurses ports/expat ports/readline
+$(SENT)/ports/zeromq: ports/glibc-compat
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
