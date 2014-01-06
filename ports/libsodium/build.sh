@@ -19,7 +19,7 @@ TestStep() {
   # the libtool warns "libtool: install: warning: remember to run
   # `libtool --finish /home/jirka/Bin/nacl_sdk/pepper_31/toolchain/linux_pnacl/usr/lib'"
   (cd src/libsodium;
-  /bin/sh ../../libtool   --mode=install /usr/bin/install \
+  /bin/bash ../../libtool   --mode=install /usr/bin/install \
       -c   libsodium.la `cd ../../naclport_test/lib && pwd`)
 
   if [[ ${NACL_ARCH} == "pnacl" ]]; then
