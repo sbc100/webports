@@ -60,6 +60,7 @@ ConfigureStep() {
 
   cp ${START_DIR}/gdb_pepper.cc ${SRC_DIR}/gdb
   ../configure --with-curses --with-expat --with-system-readline \
+      --disable-libmcheck \
       --prefix=${NACLPORTS_PREFIX} \
       --exec-prefix=${NACLPORTS_PREFIX} \
       --host=${NACL_CROSS_PREFIX} \
