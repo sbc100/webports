@@ -35,7 +35,7 @@ diff -Naur openssl-1.0.1e_old/crypto/rand/rand_unix.c openssl-1.0.1e/crypto/rand
 +#if defined(__native_client__)
 +#include <stdlib.h>
 +#include <irt.h>
-+/* TODO(sehr): remove this patch when nacl-mounts can handle /dev/urandom. */
++/* TODO(sehr): remove this patch when nacl_io can handle /dev/urandom. */
 +int RAND_poll(void)
 +{
 +  unsigned char buf[ENTROPY_NEEDED];

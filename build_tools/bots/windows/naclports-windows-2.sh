@@ -12,7 +12,6 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 cd ${SCRIPT_DIR}/../../..
 make clean
 
-# nethack/dosbox also builds nacl-mounts
 BuildPackage nethack
 BuildPackage dosbox
 BuildPackage snes9x

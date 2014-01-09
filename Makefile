@@ -137,7 +137,6 @@ ALL_PORTS = \
      ports/metakit \
      ports/mongoose \
      ports/mpg123 \
-     ports/nacl-mounts \
      ports/nano \
      ports/ncurses \
      ports/nethack \
@@ -362,7 +361,6 @@ mikmod libmikmod: ports/libmikmod ;
 mng libmng: ports/libmng ;
 modplug libmodplug: ports/libmodplug ;
 mpg123: ports/mpg123 ;
-nacl-mounts: ports/nacl-mounts ;
 ncurses: ports/ncurses ;
 ogg libogg: ports/libogg ;
 openal openal-soft: ports/openal-soft ;

@@ -14,7 +14,6 @@ make clean
 
 # ffmpeg also builds lame, vorbis, theora, and ogg
 BuildPackage ffmpeg
-BuildPackage nacl-mounts
 BuildPackage sdl
 BuildPackage scummvm
 BuildPackage bochs

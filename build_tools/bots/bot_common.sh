@@ -71,7 +71,6 @@ CalculatePackageShards()
     libtar
     nethack
     SDL
-    nacl-mounts
     dosbox
     libogg
     libvorbis
