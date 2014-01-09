@@ -36,7 +36,7 @@ TestStep() {
   ${CXX} ${INCLUDES} ${NACLPORTS_CFLAGS} ${NACLPORTS_LDFLAGS} \
     -o naclport_test/crypto_box_test${EXT} \
     ${START_DIR}/crypto_box_test.c naclport_test/lib/libsodium.a \
-    -lnacl_io -lpthread -lstdc++ ${LSSP}
+    -lnacl_io -lpthread ${LSSP}
 
   [[ ${NACL_ARCH} == "pnacl" ]] && ${PNACLFINALIZE} \
     -o naclport_test/crypto_box_test${NACL_EXEEXT} naclport_test/crypto_box_test${EXT}
