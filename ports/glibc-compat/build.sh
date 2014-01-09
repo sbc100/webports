@@ -20,6 +20,7 @@ ConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
+  export NACL_SDK_VERSION
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   LogExecute rm -rf out
 }

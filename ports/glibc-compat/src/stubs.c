@@ -73,6 +73,7 @@ int eaccess(const char *pathname, int mode) {
   return access(pathname, mode);
 }
 
+#if NACL_SDK_VERSION < 34
 speed_t cfgetispeed(const struct termios *termios_p) __attribute__((weak));
 speed_t cfgetispeed(const struct termios *termios_p) {
   return termios_p->c_ispeed;
@@ -101,6 +102,7 @@ int cfsetspeed(struct termios *termios_p, speed_t speed) {
   termios_p->c_ospeed = speed;
   return 0;
 }
+#endif
 
 void endgrent(void) __attribute__((weak));
 void endgrent(void) {
@@ -268,6 +270,7 @@ int socketpair(int domain, int type, int protocol,
   UNIMPLEMENTED_FATAL();
 }
 
+#if NACL_SDK_VERSION < 34
 int tcdrain(int fd) __attribute__((weak));
 int tcdrain(int fd) {
   UNIMPLEMENTED_NOSYS();
@@ -299,6 +302,7 @@ int tcsetattr(int fd, int optional_actions,
               const struct termios *termios_p) {
   UNIMPLEMENTED_NOSYS();
 }
+#endif
 
 FILE *popen(const char *command, const char *type) __attribute__ ((weak));
 FILE *popen(const char *command, const char *type) {
