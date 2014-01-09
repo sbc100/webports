@@ -150,6 +150,7 @@ ALL_PORTS = \
      ports/openssh \
      ports/openssl \
      ports/pango \
+     ports/pcre \
      ports/physfs \
      ports/pixman \
      ports/protobuf \
@@ -376,6 +377,7 @@ opencv: ports/opencv ;
 openscenegraph OpenSceneGraph: ports/OpenSceneGraph ;
 openssl: ports/openssl ;
 pango: ports/pango ;
+pcre libpcre: ports/pcre ;
 physfs: ports/physfs ;
 pixman: ports/pixman ;
 png libpng: ports/libpng ;
