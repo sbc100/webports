@@ -1,0 +1,3 @@
+PACKAGE_NAME=gmp-5.0.2
+URL=ftp://ftp.gmplib.org/pub/gmp/gmp-5.0.2.tar.bz2
+LICENSE=LGPL3

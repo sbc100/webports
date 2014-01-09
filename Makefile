@@ -108,6 +108,7 @@ ALL_PORTS = \
      ports/giflib \
      ports/glib \
      ports/glibc-compat \
+     ports/gmp \
      ports/gsl \
      ports/ImageMagick \
      ports/jpeg6b \
@@ -136,6 +137,8 @@ ALL_PORTS = \
      ports/mesagl \
      ports/metakit \
      ports/mongoose \
+     ports/mpc \
+     ports/mpfr \
      ports/mpg123 \
      ports/nano \
      ports/ncurses \
@@ -317,6 +320,8 @@ $(SENT)/ports/mpg123: ports/openal-soft
 $(SENT)/ports/ImageMagick: ports/libpng ports/jpeg8d ports/bzip2 ports/zlib
 $(SENT)/ports/gdb: ports/ncurses ports/expat ports/readline
 $(SENT)/ports/zeromq: ports/glibc-compat
+$(SENT)/ports/mpc: ports/gmp ports/mpfr
+$(SENT)/ports/mpfr: ports/gmp
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
@@ -343,6 +348,7 @@ gc: ports/gc ;
 gif giflib: ports/giflib ;
 glib: ports/glib ;
 glibc-compat: ports/glibc-compat ;
+gmp: ports/gmp ;
 gsl: ports/gsl ;
 hangul libhangul: ports/libhangul ;
 imagemagick ImageMagick: ports/ImageMagick ;
@@ -360,6 +366,8 @@ metakit: ports/metakit ;
 mikmod libmikmod: ports/libmikmod ;
 mng libmng: ports/libmng ;
 modplug libmodplug: ports/libmodplug ;
+mpc: ports/mpc ;
+mpfr: ports/mpfr ;
 mpg123: ports/mpg123 ;
 ncurses: ports/ncurses ;
 ogg libogg: ports/libogg ;
