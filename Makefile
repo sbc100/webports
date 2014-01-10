@@ -133,6 +133,7 @@ ALL_PORTS = \
      ports/lua5.1 \
      ports/lua5.2 \
      ports/lua_ppapi \
+     ports/make \
      ports/Mesa \
      ports/mesagl \
      ports/metakit \
@@ -423,6 +424,7 @@ nano: ports/nano ;
 nethack: ports/nethack ;
 openal-ogg: ports/openal-ogg ;
 lua_ppapi: ports/lua_ppapi ;
+make: ports/make ;
 python_ppapi: ports/python_ppapi ;
 python3_ppapi: ports/python3_ppapi ;
 ruby_ppapi: ports/ruby_ppapi ;
