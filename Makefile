@@ -88,6 +88,7 @@ ALL_PORTS = \
      ports/cairo \
      ports/cfitsio \
      ports/civetweb \
+     ports/clapack \
      ports/curl \
      ports/DevIL \
      ports/dosbox \
@@ -333,6 +334,7 @@ bullet: ports/bullet ;
 bzip2: ports/bzip2 ;
 cairo: ports/cairo ;
 cfitsio: ports/cfitsio ;
+clapack: ports/clapack ;
 curl: ports/curl ;
 DevIL: ports/DevIL ;
 dreadthread: ports/dreadthread ;
