@@ -84,6 +84,7 @@ ALL_PORTS = \
      ports/boost \
      ports/box2d \
      ports/bullet \
+     ports/busybox \
      ports/bzip2 \
      ports/cairo \
      ports/cfitsio \
@@ -415,6 +416,7 @@ zlib: ports/zlib ;
 # shortcuts examples (alphabetical)
 bash: ports/bash ;
 bochs: ports/bochs ;
+busybox: ports/busybox ;
 civetweb: ports/civetweb ;
 dosbox: ports/dosbox ;
 drod: ports/drod ;
