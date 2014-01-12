@@ -1,0 +1,4 @@
+PACKAGE_NAME=apr-1.5.0
+URL=http://apache.mirrors.pair.com/apr/apr-1.5.0.tar.bz2
+LICENSE=apache
+LIBC=glibc

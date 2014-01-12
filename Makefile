@@ -79,6 +79,8 @@ endif
 
 ALL_PORTS = \
      ports/agg \
+     ports/apr \
+     ports/apr-util \
      ports/bash \
      ports/bochs \
      ports/boost \
@@ -174,6 +176,7 @@ ALL_PORTS = \
      ports/snes9x \
      ports/speex \
      ports/sqlite \
+     ports/subversion \
      ports/thttpd \
      ports/tiff \
      ports/tinyxml \
@@ -277,6 +280,8 @@ $(SENT)/ports/python: ports/readline ports/zlib
 $(SENT)/ports/python3: ports/readline ports/zlib
 $(SENT)/ports/ruby: ports/readline ports/zlib
 $(SENT)/ports/sqlite: ports/readline
+$(SENT)/ports/apr-util: ports/apr
+$(SENT)/ports/subversion: ports/apr ports/apr-util ports/sqlite ports/zlib
 $(SENT)/ports/nethack: ports/ncurses ports/libtar
 $(SENT)/ports/bash: ports/ncurses ports/libtar
 $(SENT)/ports/nano: ports/ncurses ports/libtar
@@ -329,6 +334,8 @@ $(SENT)/ports/mpfr: ports/gmp
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
+apr: ports/apr ;
+apr-util: ports/apr-util ;
 boost: ports/boost ;
 box2d: ports/box2d ;
 bullet: ports/bullet ;
@@ -434,6 +441,7 @@ python3_ppapi: ports/python3_ppapi ;
 ruby_ppapi: ports/ruby_ppapi ;
 scummvm: ports/scummvm ;
 snes9x: ports/snes9x ;
+subversion: ports/subversion ;
 texlive: ports/texlive ;
 thttpd: ports/thttpd ;
 openssh: ports/openssh ;
