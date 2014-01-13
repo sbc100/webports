@@ -148,6 +148,7 @@ ALL_PORTS = \
      ports/mpg123 \
      ports/nano \
      ports/ncurses \
+     ports/netcat \
      ports/nethack \
      ports/openal-ogg \
      ports/openal-soft \
@@ -320,6 +321,7 @@ ifneq ($(NACL_GLIBC), 1)
   $(SENT)/ports/readline: ports/glibc-compat
   $(SENT)/ports/openssl: ports/glibc-compat
   $(SENT)/ports/ncurses: ports/glibc-compat
+  $(SENT)/ports/netcat: ports/glibc-compat
 endif
 $(SENT)/ports/libmng: ports/zlib ports/jpeg8d
 $(SENT)/ports/lcms: ports/zlib ports/jpeg8d ports/tiff
@@ -434,6 +436,7 @@ git: ports/git ;
 mesagl: ports/mesagl ;
 mongoose: ports/mongoose ;
 nano: ports/nano ;
+netcat: ports/netcat ;
 nethack: ports/nethack ;
 openal-ogg: ports/openal-ogg ;
 lua_ppapi: ports/lua_ppapi ;
