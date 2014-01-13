@@ -120,6 +120,7 @@ ALL_PORTS = \
      ports/jsoncpp \
      ports/lame \
      ports/lcms \
+     ports/leveldb \
      ports/libav \
      ports/libhangul \
      ports/libmikmod \
@@ -369,6 +370,7 @@ jpeg6b: ports/jpeg6b ;
 jsoncpp: ports/jsoncpp ;
 lame: ports/lame ;
 lcms: ports/lcms ;
+leveldb: ports/leveldb ;
 libav: ports/libav ;
 lua5.1: ports/lua5.1 ;
 lua5.2: ports/lua5.2 ;

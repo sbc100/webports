@@ -1,0 +1,115 @@
+diff --git a/Makefile b/Makefile
+index 344ff29..5e5249e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -90,7 +90,11 @@ endif  # PLATFORM_SHARED_EXT
+ 
+ all: $(SHARED) $(LIBRARY)
+ 
+-check: all $(PROGRAMS) $(TESTS)
++tests: $(TESTS)
++
++programs: $(PROGRAMS)
++
++check: all programs tests
+ 	for t in $(TESTS); do echo "***** Running $$t"; ./$$t || exit 1; done
+ 
+ clean:
+diff --git a/build_detect_platform b/build_detect_platform
+index 6e59c6f..8bc950a 100755
+--- a/build_detect_platform
++++ b/build_detect_platform
+@@ -98,6 +98,19 @@ case "$TARGET_OS" in
+         PLATFORM_LIBS="-lpthread"
+         PORT_FILE=port/port_posix.cc
+         ;;
++    NaCl)
++        PLATFORM=OS_NACL
++        COMMON_FLAGS="$MEMCMP_FLAG -D_REENTRANT -DOS_NACL -DLEVELDB_PLATFORM_POSIX"
++        PLATFORM_LDFLAGS="-pthread"
++        PORT_FILE=port/port_posix.cc
++        CROSS_COMPILE=true
++        if [ $NACL_ARCH = arm -o $NACL_ARCH = pnacl ]; then
++            COMMON_FLAGS+=" -DLEVELDB_STDATOMIC_PRESENT"
++        fi
++        if [ $NACL_GLIBC != 1 ]; then
++          PLATFORM_SHARED_EXT=""
++        fi
++        ;;
+     NetBSD)
+         PLATFORM=OS_NETBSD
+         COMMON_FLAGS="$MEMCMP_FLAG -D_REENTRANT -DOS_NETBSD"
+diff --git a/port/atomic_pointer.h b/port/atomic_pointer.h
+index a9866b2..20c99b2 100644
+--- a/port/atomic_pointer.h
++++ b/port/atomic_pointer.h
+@@ -23,6 +23,10 @@
+ #ifdef LEVELDB_CSTDATOMIC_PRESENT
+ #include <cstdatomic>
+ #endif
++#ifdef LEVELDB_STDATOMIC_PRESENT
++typedef bool _Bool;
++#include <stdatomic.h>
++#endif
+ #ifdef OS_WIN
+ #include <windows.h>
+ #endif
+@@ -147,6 +151,30 @@ class AtomicPointer {
+   }
+ };
+ 
++// AtomicPointer based on <stdatomic>
++#elif defined(LEVELDB_STDATOMIC_PRESENT)
++class AtomicPointer {
++ private:
++  atomic_intptr_t rep_;
++ public:
++  AtomicPointer() { }
++  explicit AtomicPointer(void* v) {
++    atomic_store(&rep_, (intptr_t)v);
++  }
++  inline void* Acquire_Load() const {
++    return (void*)atomic_load_explicit(&rep_, memory_order_acquire);
++  }
++  inline void Release_Store(void* v) {
++    atomic_store_explicit(&rep_, (intptr_t)v, memory_order_release);
++  }
++  inline void* NoBarrier_Load() const {
++    return (void*)atomic_load_explicit(&rep_, memory_order_relaxed);
++  }
++  inline void NoBarrier_Store(void* v) {
++    atomic_store_explicit(&rep_, (intptr_t)v, memory_order_relaxed);
++  }
++};
++
+ // Atomic pointer based on sparc memory barriers
+ #elif defined(__sparcv9) && defined(__GNUC__)
+ class AtomicPointer {
+diff --git a/port/port_posix.h b/port/port_posix.h
+index f2b89bf..bae495f 100644
+--- a/port/port_posix.h
++++ b/port/port_posix.h
+@@ -37,6 +37,14 @@
+   // See http://code.google.com/p/android/issues/detail?id=39824
+   #include <endian.h>
+   #define PLATFORM_IS_LITTLE_ENDIAN  (_BYTE_ORDER == _LITTLE_ENDIAN)
++#elif defined(OS_NACL)
++  #include <sys/types.h>
++  #if defined(__GLIBC__)
++     #include <endian.h>
++  #else
++    #include <machine/endian.h>
++    #define PLATFORM_IS_LITTLE_ENDIAN  (BYTE_ORDER == LITTLE_ENDIAN)
++  #endif
+ #else
+   #include <endian.h>
+ #endif
+@@ -55,7 +63,7 @@
+ 
+ #if defined(OS_MACOSX) || defined(OS_SOLARIS) || defined(OS_FREEBSD) ||\
+     defined(OS_NETBSD) || defined(OS_OPENBSD) || defined(OS_DRAGONFLYBSD) ||\
+-    defined(OS_ANDROID) || defined(OS_HPUX)
++    defined(OS_ANDROID) || defined(OS_HPUX) || (defined(OS_NACL) && !defined(__GLIBC__))
+ // Use fread/fwrite/fflush on platforms without _unlocked variants
+ #define fread_unlocked fread
+ #define fwrite_unlocked fwrite
