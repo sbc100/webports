@@ -281,7 +281,7 @@ $(SENT)/ports/python: ports/readline ports/zlib
 $(SENT)/ports/python3: ports/readline ports/zlib
 $(SENT)/ports/ruby: ports/readline ports/zlib
 $(SENT)/ports/sqlite: ports/readline
-$(SENT)/ports/apr-util: ports/apr
+$(SENT)/ports/apr-util: ports/apr ports/expat
 $(SENT)/ports/subversion: ports/apr ports/apr-util ports/sqlite ports/zlib
 $(SENT)/ports/nethack: ports/ncurses ports/libtar
 $(SENT)/ports/bash: ports/ncurses ports/libtar

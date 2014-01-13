@@ -7,6 +7,7 @@ source pkg_info
 source ../../build_tools/common.sh
 
 EXTRA_CONFIGURE_ARGS="--with-apr=${NACLPORTS_PREFIX}"
+EXTRA_CONFIGURE_ARGS+=" --with-expat=${NACLPORTS_PREFIX}"
 
 PackageInstall
 exit 0
