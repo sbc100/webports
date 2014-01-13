@@ -16,7 +16,7 @@ index 344ff29..5e5249e 100644
  
  clean:
 diff --git a/build_detect_platform b/build_detect_platform
-index 6e59c6f..8bc950a 100755
+index 6e59c6f..8b52dc2 100755
 --- a/build_detect_platform
 +++ b/build_detect_platform
 @@ -98,6 +98,19 @@ case "$TARGET_OS" in
@@ -30,7 +30,7 @@ index 6e59c6f..8bc950a 100755
 +        PORT_FILE=port/port_posix.cc
 +        CROSS_COMPILE=true
 +        if [ $NACL_ARCH = arm -o $NACL_ARCH = pnacl ]; then
-+            COMMON_FLAGS+=" -DLEVELDB_STDATOMIC_PRESENT"
++            COMMON_FLAGS="$COMMON_FLAGS -DLEVELDB_STDATOMIC_PRESENT"
 +        fi
 +        if [ $NACL_GLIBC != 1 ]; then
 +          PLATFORM_SHARED_EXT=""
