@@ -202,6 +202,12 @@ else
   PUBLISH_DIR+=/${NACL_LIBC}
 fi
 
+if [ "${NACL_ARCH}" != "pnacl" -a -z "${NACL_SEL_LDR:-}" ]; then
+  SKIP_SEL_LDR_TESTS=1
+else
+  SKIP_SEL_LDR_TESTS=0
+fi
+
 
 ######################################################################
 # Always run
@@ -944,6 +950,10 @@ DefaultValidateStep() {
 # $1 - Executable (.nexe) name
 #
 RunSelLdrCommand() {
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
+    return
+  fi
+
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     # For PNaCl we translate to each arch where we have sel_ldr, then run it.
     local PEXE=$1
@@ -984,7 +994,7 @@ RunSelLdrCommand() {
 # $2 - Nexe name
 #
 WriteSelLdrScript() {
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
   fi
 
@@ -1142,7 +1152,9 @@ DefaultPackageInstall() {
   BuildStep
   TranslateStep
   ValidateStep
-  TestStep
+  if [ "${SKIP_SEL_LDR_TESTS}" != "1" ]; then
+    TestStep
+  fi
   InstallStep
 }
 
