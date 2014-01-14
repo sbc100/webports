@@ -146,6 +146,7 @@ ALL_PORTS = \
      ports/mpc \
      ports/mpfr \
      ports/mpg123 \
+     ports/nacl-spawn \
      ports/nano \
      ports/ncurses \
      ports/netcat \
@@ -285,7 +286,7 @@ $(SENT)/ports/sqlite: ports/readline
 $(SENT)/ports/apr-util: ports/apr ports/expat
 $(SENT)/ports/subversion: ports/apr ports/apr-util ports/sqlite ports/zlib
 $(SENT)/ports/nethack: ports/ncurses ports/libtar
-$(SENT)/ports/bash: ports/ncurses ports/libtar
+$(SENT)/ports/bash: ports/ncurses ports/libtar ports/nacl-spawn
 $(SENT)/ports/nano: ports/ncurses ports/libtar
 $(SENT)/ports/vim: ports/ncurses ports/libtar
 $(SENT)/ports/texlive: ports/libtar
@@ -385,6 +386,7 @@ modplug libmodplug: ports/libmodplug ;
 mpc: ports/mpc ;
 mpfr: ports/mpfr ;
 mpg123: ports/mpg123 ;
+nacl-spawn: ports/nacl-spawn ;
 ncurses: ports/ncurses ;
 ogg libogg: ports/libogg ;
 openal openal-soft: ports/openal-soft ;
