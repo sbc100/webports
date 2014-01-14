@@ -183,6 +183,7 @@ ALL_PORTS = \
      ports/thttpd \
      ports/tiff \
      ports/tinyxml \
+     ports/toybox \
      ports/vim \
      ports/webp \
      ports/x264 \
@@ -335,6 +336,7 @@ $(SENT)/ports/gdb: ports/ncurses ports/expat ports/readline
 $(SENT)/ports/zeromq: ports/glibc-compat
 $(SENT)/ports/mpc: ports/gmp ports/mpfr
 $(SENT)/ports/mpfr: ports/gmp
+$(SENT)/ports/toybox: ports/glibc-compat ports/nacl-spawn
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
@@ -450,6 +452,7 @@ scummvm: ports/scummvm ;
 snes9x: ports/snes9x ;
 subversion: ports/subversion ;
 texlive: ports/texlive ;
+toybox: ports/toybox ;
 thttpd: ports/thttpd ;
 openssh: ports/openssh ;
 # Deliberate space after vim target to avoid detection
