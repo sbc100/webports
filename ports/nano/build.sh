@@ -6,9 +6,14 @@
 source pkg_info
 source ../../build_tools/common.sh
 
-export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io \
+export EXTRA_LIBS="-lncurses -ltar -lppapi_simple -lnacl_io \
   -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
+if [ "${NACL_GLIBC}" != "1" ]; then
+  export EXTRA_LIBS="${EXTRA_LIBS} -lglibc-compat"
+  export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --enable-tiny"
+  NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+fi
 
 PatchStep() {
   DefaultPatchStep
@@ -24,7 +29,11 @@ InstallStep() {
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/nanotar
-  cp bin/nano ../nano_${NACL_ARCH}${NACL_EXEEXT}
+  local exe="../nano_${NACL_ARCH}${NACL_EXEEXT}"
+  cp bin/nano ${exe}
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    LogExecute ${PNACLFINALIZE} ${exe}
+  fi
   rm -rf bin
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/nano.tar .

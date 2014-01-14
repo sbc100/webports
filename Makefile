@@ -287,7 +287,7 @@ $(SENT)/ports/apr-util: ports/apr ports/expat
 $(SENT)/ports/subversion: ports/apr ports/apr-util ports/sqlite ports/zlib
 $(SENT)/ports/nethack: ports/ncurses ports/libtar
 $(SENT)/ports/bash: ports/ncurses ports/libtar ports/nacl-spawn
-$(SENT)/ports/nano: ports/ncurses ports/libtar
+$(SENT)/ports/nano: ports/ncurses ports/libtar ports/glibc-compat
 $(SENT)/ports/vim: ports/ncurses ports/libtar
 $(SENT)/ports/texlive: ports/libtar
 $(SENT)/ports/thttpd: ports/jsoncpp
