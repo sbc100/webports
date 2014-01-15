@@ -16,6 +16,12 @@ ConfigureStep() {
   ChangeDir ${SRC_DIR}
   autoconf
 
+  if [[ "${NACL_GLIBC}" != 1 ]]; then
+    readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
+    NACLPORTS_CFLAGS+=" -I${GLIBC_COMPAT}"
+    NACLPORTS_LDFLAGS+=" -lglibc-compat"
+  fi
+
   export NACL_BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   export NACL_CONFIGURE_PATH=./configure
   DefaultConfigureStep

@@ -110,6 +110,7 @@ ALL_PORTS = \
      ports/gc \
      ports/gdb \
      ports/giflib \
+     ports/git \
      ports/glib \
      ports/glibc-compat \
      ports/gmp \
@@ -269,6 +270,7 @@ $(SENT)/ports/speex: ports/libogg
 $(SENT)/ports/fontconfig: ports/expat ports/freetype
 $(SENT)/ports/libtar: ports/zlib
 $(SENT)/ports/libpng: ports/zlib
+$(SENT)/ports/git: ports/zlib ports/nacl-spawn
 $(SENT)/ports/agg: ports/freetype
 $(SENT)/ports/cairo: ports/pixman ports/fontconfig ports/libpng
 $(SENT)/ports/ffmpeg: ports/lame ports/libvorbis ports/libtheora \
@@ -320,6 +322,7 @@ $(SENT)/ports/openal-ogg: ports/openal-soft ports/libvorbis
 $(SENT)/ports/opencv: ports/zlib ports/libpng ports/jpeg6b
 $(SENT)/ports/readline: ports/ncurses
 ifneq ($(NACL_GLIBC), 1)
+  $(SENT)/ports/git: ports/glibc-compat
   $(SENT)/ports/readline: ports/glibc-compat
   $(SENT)/ports/openssl: ports/glibc-compat
   $(SENT)/ports/ncurses: ports/glibc-compat

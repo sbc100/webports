@@ -1,8 +1,190 @@
+diff --git a/Makefile b/Makefile
+index 6b91612..5b6e149 100644
+--- a/Makefile
++++ b/Makefile
+@@ -986,7 +986,7 @@ BUILTIN_OBJS += builtin/verify-tag.o
+ BUILTIN_OBJS += builtin/write-tree.o
+ 
+ GITLIBS = $(LIB_FILE) $(XDIFF_LIB)
+-EXTLIBS =
++EXTLIBS = -Wl,--start-group -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -lcli_main -Wl,--end-group
+ 
+ GIT_USER_AGENT = git/$(GIT_VERSION)
+ 
+@@ -1710,7 +1710,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
+ 	'-DGIT_INFO_PATH="$(infodir_relative_SQ)"'
+ 
+ git$X: git.o GIT-LDFLAGS $(BUILTIN_OBJS) $(GITLIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ git.o \
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ git.o \
+ 		$(BUILTIN_OBJS) $(ALL_LDFLAGS) $(LIBS)
+ 
+ help.sp help.s help.o: common-cmds.h
+@@ -2030,21 +2030,21 @@ compat/nedmalloc/nedmalloc.sp compat/nedmalloc/nedmalloc.o: EXTRA_CPPFLAGS = \
+ endif
+ 
+ git-%$X: %.o GIT-LDFLAGS $(GITLIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS)
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS)
+ 
+ git-imap-send$X: imap-send.o GIT-LDFLAGS $(GITLIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+ 		$(LIBS) $(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIB_4_CRYPTO)
+ 
+ git-http-fetch$X: revision.o http.o http-walker.o http-fetch.o GIT-LDFLAGS $(GITLIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+ 		$(LIBS) $(CURL_LIBCURL)
+ git-http-push$X: revision.o http.o http-push.o GIT-LDFLAGS $(GITLIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+ 		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
+ 
+ git-remote-testsvn$X: remote-testsvn.o GIT-LDFLAGS $(GITLIBS) $(VCSSVN_LIB)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS) \
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS) \
+ 	$(VCSSVN_LIB)
+ 
+ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
+@@ -2054,7 +2054,7 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
+ 	cp $< $@
+ 
+ $(REMOTE_CURL_PRIMARY): remote-curl.o http.o http-walker.o GIT-LDFLAGS $(GITLIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+ 		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
+ 
+ $(LIB_FILE): $(LIB_OBJS)
+@@ -2261,7 +2261,7 @@ test-svn-fe$X: vcs-svn/lib.a
+ .PRECIOUS: $(TEST_OBJS)
+ 
+ test-%$X: test-%.o GIT-LDFLAGS $(GITLIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(filter %.a,$^) $(LIBS)
++	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(filter %.a,$^) $(LIBS)
+ 
+ check-sha1:: test-sha1$X
+ 	./test-sha1.sh
+diff --git a/base85.c b/base85.c
+index 781b575..bb03def 100644
+--- a/base85.c
++++ b/base85.c
+@@ -102,7 +102,11 @@ void encode_85(char *buf, const unsigned char *data, int bytes)
+ }
+ 
+ #ifdef DEBUG_85
++#if defined(__native_client__)
++int nacl_main(int ac, char *av[])
++#else
+ int main(int ac, char **av)
++#endif
+ {
+ 	char buf[1024];
+ 
+diff --git a/builtin/log.c b/builtin/log.c
+index 6e56a50..458060d 100644
+--- a/builtin/log.c
++++ b/builtin/log.c
+@@ -199,7 +199,9 @@ static void show_early_header(struct rev_info *rev, const char *stage, int nr)
+ 	printf(_("Final output: %d %s\n"), nr, stage);
+ }
+ 
++#if !defined(__native_client__) || defined(__GLIBC__)
+ static struct itimerval early_output_timer;
++#endif
+ 
+ static void log_show_early(struct rev_info *revs, struct commit_list *list)
+ {
+@@ -241,9 +243,12 @@ static void log_show_early(struct rev_info *revs, struct commit_list *list)
+ 	 * trigger every second even if we're blocked on a
+ 	 * reader!
+ 	 */
++#if !defined(__native_client__) || defined(__GLIBC__)
++        /* TODO(bradnelson): Turn this back on once nacl_io supports it. */
+ 	early_output_timer.it_value.tv_sec = 0;
+ 	early_output_timer.it_value.tv_usec = 500000;
+ 	setitimer(ITIMER_REAL, &early_output_timer, NULL);
++#endif
+ }
+ 
+ static void early_output(int signal)
+@@ -262,11 +267,14 @@ static void setup_early_output(struct rev_info *rev)
+ 	 * system dependencies and headers), and using
+ 	 * SA_RESTART.
+ 	 */
++#if !defined(__native_client__) || defined(__GLIBC__)
++        /* TODO(bradnelson): Turn this back on once nacl_io supports it. */
+ 	memset(&sa, 0, sizeof(sa));
+ 	sa.sa_handler = early_output;
+ 	sigemptyset(&sa.sa_mask);
+ 	sa.sa_flags = SA_RESTART;
+ 	sigaction(SIGALRM, &sa, NULL);
++#endif
+ 
+ 	/*
+ 	 * If we can get the whole output in less than a
+@@ -275,9 +283,12 @@ static void setup_early_output(struct rev_info *rev)
+ 	 *
+ 	 * This is a one-time-only trigger.
+ 	 */
++#if !defined(__native_client__) || defined(__GLIBC__)
++        /* TODO(bradnelson): Turn this back on once nacl_io supports it. */
+ 	early_output_timer.it_value.tv_sec = 0;
+ 	early_output_timer.it_value.tv_usec = 100000;
+ 	setitimer(ITIMER_REAL, &early_output_timer, NULL);
++#endif
+ }
+ 
+ static void finish_early_output(struct rev_info *rev)
+diff --git a/check-racy.c b/check-racy.c
+index 00d92a1..969f517 100644
+--- a/check-racy.c
++++ b/check-racy.c
+@@ -1,6 +1,10 @@
+ #include "cache.h"
+ 
++#if defined(__native_client__)
++int nacl_main(int ac, char *av[])
++#else
+ int main(int ac, char **av)
++#endif
+ {
+ 	int i;
+ 	int dirty, clean, racy;
 diff --git a/configure.ac b/configure.ac
-index 2f43393..1b6ca2b 100644
+index 2f43393..3f8fc4d 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -815,7 +815,8 @@ AC_RUN_IFELSE(
+@@ -608,11 +608,13 @@ GIT_CONF_SUBST([NO_DEFLATE_BOUND])
+ #
+ # Define NEEDS_SOCKET if linking with libc is not enough (SunOS,
+ # Patrick Mauritz).
+-AC_CHECK_LIB([c], [socket],
+-[NEEDS_SOCKET=],
+-[NEEDS_SOCKET=YesPlease])
+-GIT_CONF_SUBST([NEEDS_SOCKET])
+-test -n "$NEEDS_SOCKET" && LIBS="$LIBS -lsocket"
++# TODO(bradnelson): Do this just for NaCl newlib.
++#AC_CHECK_LIB([c], [socket],
++#[NEEDS_SOCKET=],
++#[NEEDS_SOCKET=YesPlease])
++#GIT_CONF_SUBST([NEEDS_SOCKET])
++#test -n "$NEEDS_SOCKET" && LIBS="$LIBS -lsocket"
++NEEDS_SOCKET=
+ 
+ #
+ # The next few tests will define NEEDS_RESOLV if linking with
+@@ -665,7 +667,8 @@ AC_CHECK_LIB([c], [basename],
+ [NEEDS_LIBGEN=],
+ [NEEDS_LIBGEN=YesPlease])
+ GIT_CONF_SUBST([NEEDS_LIBGEN])
+-test -n "$NEEDS_LIBGEN" && LIBS="$LIBS -lgen"
++# TODO(bradnelson): Do this just for NaCl newlib.
++#test -n "$NEEDS_LIBGEN" && LIBS="$LIBS -lgen"
+ 
+ AC_CHECK_LIB([c], [gettext],
+ [LIBC_CONTAINS_LIBINTL=YesPlease],
+@@ -815,7 +818,8 @@ AC_RUN_IFELSE(
  		FILE *f = fopen(".", "r");
  		return f && fread(&c, 1, 1, f)]])],
  	[ac_cv_fread_reads_directories=no],
@@ -12,7 +194,7 @@ index 2f43393..1b6ca2b 100644
  ])
  if test $ac_cv_fread_reads_directories = yes; then
  	FREAD_READS_DIRECTORIES=UnfortunatelyYes
-@@ -849,7 +850,8 @@ AC_RUN_IFELSE(
+@@ -849,7 +853,8 @@ AC_RUN_IFELSE(
  		  if (snprintf(buf, 3, "%s", "12345") != 5
  		      || strcmp(buf, "12")) return 1]])],
  	[ac_cv_snprintf_returns_bogus=no],
@@ -22,3 +204,727 @@ index 2f43393..1b6ca2b 100644
  ])
  if test $ac_cv_snprintf_returns_bogus = yes; then
  	SNPRINTF_RETURNS_BOGUS=UnfortunatelyYes
+diff --git a/credential-cache--daemon.c b/credential-cache--daemon.c
+index 390f194..7e28ea5 100644
+--- a/credential-cache--daemon.c
++++ b/credential-cache--daemon.c
+@@ -252,7 +252,11 @@ static void check_socket_directory(const char *path)
+ 	free(path_copy);
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	socket_path = argv[1];
+ 
+diff --git a/credential-cache.c b/credential-cache.c
+index 9a03792..9b7fa5b 100644
+--- a/credential-cache.c
++++ b/credential-cache.c
+@@ -83,7 +83,11 @@ static void do_cache(const char *socket, const char *action, int timeout,
+ 	strbuf_release(&buf);
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	char *socket_path = NULL;
+ 	int timeout = 900;
+diff --git a/credential-store.c b/credential-store.c
+index 26f7589..1d687a6 100644
+--- a/credential-store.c
++++ b/credential-store.c
+@@ -114,7 +114,11 @@ static int lookup_credential(const char *fn, struct credential *c)
+ 	return c->username && c->password;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	const char * const usage[] = {
+ 		"git credential-store [options] <action>",
+diff --git a/daemon.c b/daemon.c
+index 6aeddcb..0decdfb 100644
+--- a/daemon.c
++++ b/daemon.c
+@@ -66,7 +66,9 @@ static void logreport(int priority, const char *err, va_list params)
+ 	if (log_syslog) {
+ 		char buf[1024];
+ 		vsnprintf(buf, sizeof(buf), err, params);
++#if !defined(__native_client__) || defined(__GLIBC__)
+ 		syslog(priority, "%s", buf);
++#endif
+ 	} else {
+ 		/*
+ 		 * Since stderr is set to buffered mode, the
+@@ -1160,7 +1162,11 @@ static int serve(struct string_list *listen_addr, int listen_port,
+ 	return service_loop(&socklist);
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	int listen_port = 0;
+ 	struct string_list listen_addr = STRING_LIST_INIT_NODUP;
+@@ -1310,7 +1316,9 @@ int main(int argc, char **argv)
+ 	}
+ 
+ 	if (log_syslog) {
++#if !defined(__native_client__) || defined(__GLIBC__)
+ 		openlog("git-daemon", LOG_PID, LOG_DAEMON);
++#endif
+ 		set_die_routine(daemon_die);
+ 	} else
+ 		/* avoid splitting a message in the middle */
+diff --git a/fast-import.c b/fast-import.c
+index 5f539d7..21e4cd9 100644
+--- a/fast-import.c
++++ b/fast-import.c
+@@ -525,6 +525,8 @@ static void checkpoint_signal(int signo)
+ 
+ static void set_checkpoint_signal(void)
+ {
++#if !defined(__native_client__) || defined(__GLIBC__)
++  /* TODO(bradnelson): Reenable when nacl_io can do this. */
+ 	struct sigaction sa;
+ 
+ 	memset(&sa, 0, sizeof(sa));
+@@ -532,6 +534,7 @@ static void set_checkpoint_signal(void)
+ 	sigemptyset(&sa.sa_mask);
+ 	sa.sa_flags = SA_RESTART;
+ 	sigaction(SIGUSR1, &sa, NULL);
++#endif
+ }
+ 
+ #endif
+@@ -3347,7 +3350,11 @@ static void parse_argv(void)
+ 		read_marks();
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	unsigned int i;
+ 
+diff --git a/git-compat-util.h b/git-compat-util.h
+index 660b7f0..26baa9a 100644
+--- a/git-compat-util.h
++++ b/git-compat-util.h
+@@ -654,8 +654,8 @@ void git_qsort(void *base, size_t nmemb, size_t size,
+ #define ST_CTIME_NSEC(st) ((unsigned int)((st).st_ctimespec.tv_nsec))
+ #define ST_MTIME_NSEC(st) ((unsigned int)((st).st_mtimespec.tv_nsec))
+ #else
+-#define ST_CTIME_NSEC(st) ((unsigned int)((st).st_ctim.tv_nsec))
+-#define ST_MTIME_NSEC(st) ((unsigned int)((st).st_mtim.tv_nsec))
++#define ST_CTIME_NSEC(st) ((unsigned int)((st).st_ctime))
++#define ST_MTIME_NSEC(st) ((unsigned int)((st).st_mtime))
+ #endif
+ #endif
+ 
+@@ -707,4 +707,12 @@ void warn_on_inaccessible(const char *path);
+ /* Get the passwd entry for the UID of the current process. */
+ struct passwd *xgetpwuid_self(void);
+ 
++#if defined(__native_client__) && !defined(__GLIBC__)
++#define gethostname(dst, len) strcpy(dst, "localhost")
++#define getservbyname(dst, len) 0
++#define setsid(n) 0
++#define alarm(n) 0
++#define getgrnam(n) 0
++#endif
++
+ #endif
+diff --git a/git.c b/git.c
+index 88eef5a..12816bc 100644
+--- a/git.c
++++ b/git.c
+@@ -513,8 +513,11 @@ static int run_argv(int *argcp, const char ***argv)
+ 	return done_alias;
+ }
+ 
+-
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	const char *cmd;
+ 
+diff --git a/http-backend.c b/http-backend.c
+index 6b85ffa..2295754 100644
+--- a/http-backend.c
++++ b/http-backend.c
+@@ -563,7 +563,11 @@ static struct service_cmd {
+ 	{"POST", "/git-receive-pack$", service_rpc}
+ };
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	char *method = getenv("REQUEST_METHOD");
+ 	char *dir;
+diff --git a/http-fetch.c b/http-fetch.c
+index ba3ea10..02918d5 100644
+--- a/http-fetch.c
++++ b/http-fetch.c
+@@ -6,7 +6,11 @@
+ static const char http_fetch_usage[] = "git http-fetch "
+ "[-c] [-t] [-a] [-v] [--recover] [-w ref] [--stdin] commit-id url";
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	struct walker *walker;
+ 	int commits_on_stdin = 0;
+diff --git a/http-push.c b/http-push.c
+index 395a8cf..adff8b5 100644
+--- a/http-push.c
++++ b/http-push.c
+@@ -1713,7 +1713,11 @@ static void run_request_queue(void)
+ #endif
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	struct transfer_request *request;
+ 	struct transfer_request *next_request;
+diff --git a/imap-send.c b/imap-send.c
+index d6b65e2..7b66042 100644
+--- a/imap-send.c
++++ b/imap-send.c
+@@ -1376,7 +1376,11 @@ static int git_imap_config(const char *key, const char *val, void *cb)
+ 	return 0;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	struct strbuf all_msgs = STRBUF_INIT;
+ 	struct strbuf msg = STRBUF_INIT;
+diff --git a/progress.c b/progress.c
+index 10652b1..b319303 100644
+--- a/progress.c
++++ b/progress.c
+@@ -45,6 +45,8 @@ static void progress_interval(int signum)
+ 
+ static void set_progress_signal(void)
+ {
++#if !defined(__native_client__) || defined(__GLIBC__)
++  /* TODO(bradnelson): Renable when nacl_io can do this. */
+ 	struct sigaction sa;
+ 	struct itimerval v;
+ 
+@@ -60,14 +62,18 @@ static void set_progress_signal(void)
+ 	v.it_interval.tv_usec = 0;
+ 	v.it_value = v.it_interval;
+ 	setitimer(ITIMER_REAL, &v, NULL);
++#endif
+ }
+ 
+ static void clear_progress_signal(void)
+ {
++#if !defined(__native_client__) || defined(__GLIBC__)
++  /* TODO(bradnelson): Renable when nacl_io can do this. */
+ 	struct itimerval v = {{0,},};
+ 	setitimer(ITIMER_REAL, &v, NULL);
+ 	signal(SIGALRM, SIG_IGN);
+ 	progress_update = 0;
++#endif
+ }
+ 
+ static int display(struct progress *progress, unsigned n, const char *done)
+diff --git a/remote-curl.c b/remote-curl.c
+index 60eda63..444766a 100644
+--- a/remote-curl.c
++++ b/remote-curl.c
+@@ -866,7 +866,11 @@ static void parse_push(struct strbuf *buf)
+ 	free(specs);
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	struct strbuf buf = STRBUF_INIT;
+ 	int nongit;
+diff --git a/remote-testsvn.c b/remote-testsvn.c
+index 5ddf11c..cada21a 100644
+--- a/remote-testsvn.c
++++ b/remote-testsvn.c
+@@ -286,7 +286,11 @@ static int do_command(struct strbuf *line)
+ 	return 0;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	struct strbuf buf = STRBUF_INIT, url_sb = STRBUF_INIT,
+ 			private_ref_sb = STRBUF_INIT, marksfilename_sb = STRBUF_INIT,
+diff --git a/sh-i18n--envsubst.c b/sh-i18n--envsubst.c
+index 5ddd688..98b6e93 100644
+--- a/sh-i18n--envsubst.c
++++ b/sh-i18n--envsubst.c
+@@ -63,8 +63,12 @@ static void print_variables (const char *string);
+ static void note_variables (const char *string);
+ static void subst_from_stdin (void);
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int
+ main (int argc, char *argv[])
++#endif
+ {
+   /* Default values for command line options.  */
+   /* unsigned short int show_variables = 0; */
+diff --git a/shell.c b/shell.c
+index 1429870..88394e3 100644
+--- a/shell.c
++++ b/shell.c
+@@ -142,7 +142,11 @@ static struct commands {
+ 	{ NULL },
+ };
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	char *prog;
+ 	const char **user_argv;
+diff --git a/show-index.c b/show-index.c
+index 5a9eed7..50abfe8 100644
+--- a/show-index.c
++++ b/show-index.c
+@@ -4,7 +4,11 @@
+ static const char show_index_usage[] =
+ "git show-index < <packed archive index>";
+ 
+-int main(int argc, char **argv)
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
++int main(int argc, const char **argv)
++#endif
+ {
+ 	int i;
+ 	unsigned nr;
+diff --git a/test-chmtime.c b/test-chmtime.c
+index 02b42ba..8ae093d 100644
+--- a/test-chmtime.c
++++ b/test-chmtime.c
+@@ -56,7 +56,11 @@ static int timespec_arg(const char *arg, long int *set_time, int *set_eq)
+ 	return 1;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char *argv[])
++#endif
+ {
+ 	static int verbose;
+ 
+diff --git a/test-ctype.c b/test-ctype.c
+index 707a821..50e2cbe 100644
+--- a/test-ctype.c
++++ b/test-ctype.c
+@@ -28,7 +28,11 @@ static int is_in(const char *s, int ch)
+ #define LOWER "abcdefghijklmnopqrstuvwxyz"
+ #define UPPER "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	TEST_CLASS(isdigit, DIGIT);
+ 	TEST_CLASS(isspace, " \n\r\t");
+diff --git a/test-date.c b/test-date.c
+index 10afaab..45763b4 100644
+--- a/test-date.c
++++ b/test-date.c
+@@ -43,7 +43,11 @@ static void parse_approxidate(char **argv, struct timeval *now)
+ 	}
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	struct timeval now;
+ 	const char *x;
+diff --git a/test-delta.c b/test-delta.c
+index 4595cd6..bc6e375 100644
+--- a/test-delta.c
++++ b/test-delta.c
+@@ -15,7 +15,11 @@
+ static const char usage_str[] =
+ 	"test-delta (-d|-p) <from_file> <data_file> <out_file>";
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char *argv[])
++#endif
+ {
+ 	int fd;
+ 	struct stat st;
+diff --git a/test-dump-cache-tree.c b/test-dump-cache-tree.c
+index a6ffdf3..ffcfd45 100644
+--- a/test-dump-cache-tree.c
++++ b/test-dump-cache-tree.c
+@@ -54,7 +54,11 @@ static int dump_cache_tree(struct cache_tree *it,
+ 	return errs;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int ac, char *av[])
++#else
+ int main(int ac, char **av)
++#endif
+ {
+ 	struct cache_tree *another = cache_tree();
+ 	if (read_cache() < 0)
+diff --git a/test-genrandom.c b/test-genrandom.c
+index 54824d0..af891b6 100644
+--- a/test-genrandom.c
++++ b/test-genrandom.c
+@@ -6,7 +6,11 @@
+ 
+ #include "git-compat-util.h"
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char *argv[])
++#endif
+ {
+ 	unsigned long count, next = 0;
+ 	unsigned char *c;
+diff --git a/test-index-version.c b/test-index-version.c
+index bfaad9e..b72ba13 100644
+--- a/test-index-version.c
++++ b/test-index-version.c
+@@ -1,6 +1,10 @@
+ #include "cache.h"
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	struct cache_header hdr;
+ 	int version;
+diff --git a/test-line-buffer.c b/test-line-buffer.c
+index ef1d7ba..673346e 100644
+--- a/test-line-buffer.c
++++ b/test-line-buffer.c
+@@ -50,7 +50,11 @@ static void handle_line(const char *line, struct line_buffer *stdin_buf)
+ 	handle_command(line, arg + 1, stdin_buf);
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char *argv[])
++#endif
+ {
+ 	struct line_buffer stdin_buf = LINE_BUFFER_INIT;
+ 	struct line_buffer file_buf = LINE_BUFFER_INIT;
+diff --git a/test-match-trees.c b/test-match-trees.c
+index a3c4688..b17459c 100644
+--- a/test-match-trees.c
++++ b/test-match-trees.c
+@@ -1,7 +1,11 @@
+ #include "cache.h"
+ #include "tree.h"
+ 
++#if defined(__native_client__)
++int nacl_main(int ac, char *av[])
++#else
+ int main(int ac, char **av)
++#endif
+ {
+ 	unsigned char hash1[20], hash2[20], shifted[20];
+ 	struct tree *one, *two;
+diff --git a/test-mergesort.c b/test-mergesort.c
+index 3f388b4..0eae53f 100644
+--- a/test-mergesort.c
++++ b/test-mergesort.c
+@@ -22,7 +22,11 @@ static int compare_strings(const void *a, const void *b)
+ 	return strcmp(x->text, y->text);
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	struct line *line, *p = NULL, *lines = NULL;
+ 	struct strbuf sb = STRBUF_INIT;
+diff --git a/test-mktemp.c b/test-mktemp.c
+index c8c5421..cf95e33 100644
+--- a/test-mktemp.c
++++ b/test-mktemp.c
+@@ -3,7 +3,11 @@
+  */
+ #include "git-compat-util.h"
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char *argv[])
++#endif
+ {
+ 	if (argc != 2)
+ 		usage("Expected 1 parameter defining the temporary file template");
+diff --git a/test-parse-options.c b/test-parse-options.c
+index 3c9510a..637ee2f 100644
+--- a/test-parse-options.c
++++ b/test-parse-options.c
+@@ -29,7 +29,11 @@ static int number_callback(const struct option *opt, const char *arg, int unset)
+ 	return 0;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, const char **argv)
++#endif
+ {
+ 	const char *prefix = "prefix/";
+ 	const char *usage[] = {
+diff --git a/test-path-utils.c b/test-path-utils.c
+index 0092cbf..58fde37 100644
+--- a/test-path-utils.c
++++ b/test-path-utils.c
+@@ -28,7 +28,11 @@ static int normalize_ceiling_entry(struct string_list_item *item, void *unused)
+ 	return 1;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	if (argc == 3 && !strcmp(argv[1], "normalize_path_copy")) {
+ 		char *buf = xmalloc(PATH_MAX + 1);
+diff --git a/test-regex.c b/test-regex.c
+index b5bfd54..d30769d 100644
+--- a/test-regex.c
++++ b/test-regex.c
+@@ -1,6 +1,10 @@
+ #include <git-compat-util.h>
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	char *pat = "[^={} \t]+";
+ 	char *str = "={}\nfred";
+diff --git a/test-revision-walking.c b/test-revision-walking.c
+index 3ade02c..8a7066b 100644
+--- a/test-revision-walking.c
++++ b/test-revision-walking.c
+@@ -45,7 +45,11 @@ static int run_revision_walk(void)
+ 	return got_revision;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	if (argc < 2)
+ 		return 1;
+diff --git a/test-run-command.c b/test-run-command.c
+index 37918e1..95f3b52 100644
+--- a/test-run-command.c
++++ b/test-run-command.c
+@@ -13,7 +13,11 @@
+ #include <string.h>
+ #include <errno.h>
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	struct child_process proc;
+ 
+diff --git a/test-scrap-cache-tree.c b/test-scrap-cache-tree.c
+index 4728013..8e86834 100644
+--- a/test-scrap-cache-tree.c
++++ b/test-scrap-cache-tree.c
+@@ -4,7 +4,11 @@
+ 
+ static struct lock_file index_lock;
+ 
+-int main(int ac, char **av)
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
++int main(int argc, char **argv)
++#endif
+ {
+ 	int fd = hold_locked_index(&index_lock, 1);
+ 	if (read_cache() < 0)
+diff --git a/test-sha1.c b/test-sha1.c
+index 80daba9..70d865b 100644
+--- a/test-sha1.c
++++ b/test-sha1.c
+@@ -1,6 +1,10 @@
+ #include "cache.h"
+ 
++#if defined(__native_client__)
++int nacl_main(int ac, char *av[])
++#else
+ int main(int ac, char **av)
++#endif
+ {
+ 	git_SHA_CTX ctx;
+ 	unsigned char sha1[20];
+diff --git a/test-sigchain.c b/test-sigchain.c
+index 42db234..cde323d 100644
+--- a/test-sigchain.c
++++ b/test-sigchain.c
+@@ -13,7 +13,11 @@ X(two)
+ X(three)
+ #undef X
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[]) {
++#else
+ int main(int argc, char **argv) {
++#endif
+ 	sigchain_push(SIGTERM, one);
+ 	sigchain_push(SIGTERM, two);
+ 	sigchain_push(SIGTERM, three);
+diff --git a/test-string-list.c b/test-string-list.c
+index 00ce6c9..afeea1c 100644
+--- a/test-string-list.c
++++ b/test-string-list.c
+@@ -41,7 +41,11 @@ static int prefix_cb(struct string_list_item *item, void *cb_data)
+ 	return !prefixcmp(item->string, prefix);
+ }
+ 
+-int main(int argc, char **argv)
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
++int main(int argc, char **argv) {
++#endif
+ {
+ 	if (argc == 5 && !strcmp(argv[1], "split")) {
+ 		struct string_list list = STRING_LIST_INIT_DUP;
+diff --git a/test-subprocess.c b/test-subprocess.c
+index f2d4c0d..e8b274e 100644
+--- a/test-subprocess.c
++++ b/test-subprocess.c
+@@ -1,7 +1,11 @@
+ #include "cache.h"
+ #include "run-command.h"
+ 
+-int main(int argc, const char **argv)
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
++int main(int argc, char **argv) {
++#endif
+ {
+ 	struct child_process cp;
+ 	int nogit = 0;
+diff --git a/test-svn-fe.c b/test-svn-fe.c
+index 120ec96..0b6e614 100644
+--- a/test-svn-fe.c
++++ b/test-svn-fe.c
+@@ -35,7 +35,11 @@ static int apply_delta(int argc, char *argv[])
+ 	return 0;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char *argv[])
++#endif
+ {
+ 	if (argc == 2) {
+ 		if (svndump_init(argv[1]))
+diff --git a/test-wildmatch.c b/test-wildmatch.c
+index a3e2643..202037e 100644
+--- a/test-wildmatch.c
++++ b/test-wildmatch.c
+@@ -73,7 +73,11 @@ static int perf(int ac, char **av)
+ 	return 0;
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	int i;
+ 
+diff --git a/upload-pack.c b/upload-pack.c
+index 127e59a..4b5cc78 100644
+--- a/upload-pack.c
++++ b/upload-pack.c
+@@ -788,7 +788,11 @@ static int upload_pack_config(const char *var, const char *value, void *unused)
+ 	return parse_hide_refs_config(var, value, "uploadpack");
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	char *dir;
+ 	int i;
