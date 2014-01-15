@@ -102,9 +102,7 @@ extern "C" int nacl_spawn_simple(const char** argv) {
     envs.Set(i, environ[i]);
   req.Set("envs", envs);
   char cwd[PATH_MAX + 1];
-  // TODO(hamaji): Investigate why getcwd crashes. As newlib does not
-  // have getwd, nacl-spawn is glibc only right now.
-  if (!getwd(cwd))
+  if (!getcwd(cwd, PATH_MAX))
     assert(0);
   req.Set("cwd", cwd);
 
