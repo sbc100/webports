@@ -11,6 +11,7 @@ EXTRA_CONFIGURE_ARGS+=" --with-fallbacks=xterm-256color,vt100"
 EXTRA_CONFIGURE_ARGS+=" --disable-termcap"
 # Without this ncurses headers will be installed include/ncurses
 EXTRA_CONFIGURE_ARGS+=" --enable-overwrite"
+EXTRA_CONFIGURE_ARGS+=" --without-ada"
 
 if [ "${NACL_GLIBC}" = 1 ]; then
   EXTRA_CONFIGURE_ARGS+=" --with-shared"
