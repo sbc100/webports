@@ -3,9 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
+BUILD_DIR=${SRC_DIR}
 
 InstallStep() {
   Banner "Installing"
@@ -13,7 +11,3 @@ InstallStep() {
   LogExecute cp src/headers/*.h ${NACLPORTS_INCLUDE}
   LogExecute cp *.a ${NACLPORTS_LIBDIR}
 }
-
-
-PackageInstall
-exit 0

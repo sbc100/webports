@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 EXECUTABLES=src/nethack
 
@@ -96,6 +94,3 @@ InstallStep() {
   LogExecute zip -r nethack-3.4.3.zip nethack
   ChangeDir ${PACKAGE_DIR}
 }
-
-PackageInstall
-exit 0

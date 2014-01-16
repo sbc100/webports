@@ -7,10 +7,11 @@ them.
 
 The ports themselves live in the ``ports`` directory.  Each one contains a
 description of the package (pkg_info), a bash script for building it (build.sh)
-and an optional patch file (nacl.patch).  The build script will download,
-patch, build and install the application or library.
+and an optional patch file (nacl.patch).  To build a package run the
+build_port.sh script from the package directory.  The build script will
+download, patch, build and install the application or library.
 
-The scripts require that certain tools are present in the host system.
+The build scripts require that certain tools are present in the host system.
 You will need at least these (but probably more):
 
 - bash
@@ -20,7 +21,7 @@ You will need at least these (but probably more):
 - autoconf, automake
 - pkg-config
 - gettext
-- libglib2.0-dev >= 2.26.0 (if you want to build nacl-glib)
+- libglib2.0-dev >= 2.26.0 (if you want to build glib)
 
 Before you can build any of the package you must set the NACL_SDK_ROOT
 environment variable to top directory of a version of the Native Client SDK
@@ -29,7 +30,7 @@ environment variable to top directory of a version of the Native Client SDK
 The top level Makefile can be used to build one of more of the packages.
 Package dependencies are built into this Makefile. For example, ``make vorbis``
 will build ``libvorbis-1.2.3`` and ``libogg-1.1.4``.  ``make all`` will build
-all of the ports.
+all of the packages.
 
 There are 4 possible architectures that NaCl modules can be compiled for: i686,
 x86_64, arm, pnacl.  The naclports build system will build just one at at time.
@@ -80,7 +81,7 @@ To add a package:
 
      $ gclient config https://naclports.googlecode.com/svn/trunk/src
 
-2. Add a directory to the ``ports`` directory using the name your new port.
+2. Add a directory to the ``ports`` directory using the name your new package.
    For example: ``ports/openssl``.
 3. Add the build.sh script and pkg_info to that directory.
 4. Optionally include the upstream tarball and create a .sha1 checksum file.
@@ -91,8 +92,7 @@ To add a package:
 
 5. Optionally include a patch file (nacl.patch).  See below for the
    recommended way to generate this patch.
-6. Add the invocation of your script, and any dependencies to the top level
-   Makefile.
+6. Add the new package, and any dependencies to the top level Makefile.
 7. Make sure your package builds for all architectures::
 
      $ ./make_all.sh <PACKAGE_NAME>

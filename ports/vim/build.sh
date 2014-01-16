@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 export EXTRA_LIBS="-ltar -lppapi_simple -lnacl_io \
   -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
@@ -29,7 +27,7 @@ ConfigureStep() {
   else
     export STRIP=${NACLSTRIP}
   fi
-  export NACL_BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  export BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   export NACL_CONFIGURE_PATH=./configure
   DefaultConfigureStep --with-tlib=ncurses --prefix= --exec-prefix=
   # Vim's build doesn't support building outside the source tree.
@@ -66,6 +64,3 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r vim-7.3.zip vim
 }
-
-PackageInstall
-exit 0

@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 if [ "${NACL_GLIBC}" != "1" ]; then
    NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
@@ -19,6 +17,3 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --disable-shared --enable-static --with-poller=poll"
   DefaultConfigureStep
 }
-
-PackageInstall
-exit 0

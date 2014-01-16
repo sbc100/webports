@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 ConfigureStep() {
   EXTRA_CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF \
@@ -29,6 +27,3 @@ BuildStep() {
   # opencv build can fail when build with -jN.
   make
 }
-
-PackageInstall
-exit 0

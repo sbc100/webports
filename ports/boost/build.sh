@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 BUILD_ARGS="\
   --build-dir=${NACL_BUILD_SUBDIR} \
@@ -34,6 +32,3 @@ InstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   LogExecute ./b2 install ${BUILD_ARGS}
 }
-
-PackageInstall
-exit 0

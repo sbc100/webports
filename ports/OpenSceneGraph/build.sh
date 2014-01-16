@@ -3,11 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
+BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
+  Banner "No configure step"
+}
+
+BuildStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -20,9 +22,9 @@ ConfigureStep() {
   export LIB_OSG=libosg.a
   export LIB_OSGUTIL=libosgUtil.a
   export LIB_OPENTHREADS=libOpenThreads.a
-
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  DefaultBuildStep
 }
+
 
 InstallStep() {
   Remove ${NACLPORTS_INCLUDE}/osg
@@ -39,7 +41,3 @@ InstallStep() {
   install -m 644 ${LIB_OSGUTIL} ${NACLPORTS_LIBDIR}/${LIB_OSGUTIL}
   install -m 644 ${LIB_OPENTHREADS} ${NACLPORTS_LIBDIR}/${LIB_OPENTHREADS}
 }
-
-
-PackageInstall
-exit 0

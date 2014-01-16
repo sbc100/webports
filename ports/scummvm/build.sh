@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 # Beneath a Steel Sky (floppy version)
 readonly BASS_FLOPPY_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
@@ -35,13 +33,10 @@ ConfigureStep() {
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH="${NACL_BIN_PATH}:${PATH}"
   export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   if [ ! -f "${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}" ]; then
     echo "No configure script found"
     return
   fi
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
   echo "Directory: $(pwd)"
@@ -71,7 +66,6 @@ ConfigureStep() {
 }
 
 InstallStep() {
-  SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   SCUMMVM_DIR=runimage/usr/local/share/scummvm
   ChangeDir ${SRC_DIR}
 
@@ -181,6 +175,3 @@ PackageInstall() {
   GameGetStep ${LURE_URL} ${LURE_NAME}
   DefaultPackageInstall
 }
-
-PackageInstall
-exit 0

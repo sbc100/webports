@@ -3,9 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
+BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -38,7 +36,3 @@ ConfigureStep() {
 
   make clean
 }
-
-
-PackageInstall
-exit 0

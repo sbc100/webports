@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 # Linux disk image
 readonly LINUX_IMG_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
@@ -126,6 +124,3 @@ PackageInstall() {
   FetchLinuxStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
   DefaultPackageInstall
 }
-
-PackageInstall
-exit 0

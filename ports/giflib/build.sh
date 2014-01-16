@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 if [ "${NACL_GLIBC}" = "1" ]; then
   EXECUTABLES=util/.libs/rgb2gif${NACL_EXEEXT}
@@ -53,7 +51,3 @@ BuildStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   make -j${OS_JOBS} SUBDIRS="lib util"
 }
-
-
-PackageInstall
-exit 0

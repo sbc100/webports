@@ -3,16 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
-
-BuildStep() {
-  MAKE_TARGETS=mtest
-  export EXEEXT=${NACL_EXEEXT}
-  DefaultBuildStep
-}
-
+BUILD_DIR=${SRC_DIR}
+MAKE_TARGETS=mtest
+export EXEEXT=${NACL_EXEEXT}
 
 #TestStep() {
   # To run tests, pipe mtest.nexe output into test.nexe input
@@ -22,14 +16,9 @@ BuildStep() {
   #RunSelLdrCommand mtest/mtest.nexe | RunSelLdrCommand test.nexe
 #}
 
-
 InstallStep() {
   Banner "Installing"
   # copy libs and headers manually
   LogExecute cp *.h ${NACLPORTS_INCLUDE}
   LogExecute cp *.a ${NACLPORTS_LIBDIR}
 }
-
-
-PackageInstall
-exit 0

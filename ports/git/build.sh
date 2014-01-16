@@ -3,16 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
 # Do a verbose build so we're confident it's hitting nacl's tools.
-export MAKE_TARGETS="V=1"
-
-export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
+MAKE_TARGETS="V=1"
+EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
+BUILD_DIR=${SRC_DIR}
+NACL_CONFIGURE_PATH=./configure
 
 ConfigureStep() {
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   ChangeDir ${SRC_DIR}
   autoconf
 
@@ -22,13 +19,15 @@ ConfigureStep() {
     NACLPORTS_LDFLAGS+=" -lglibc-compat"
   fi
 
-  export NACL_BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  export NACL_CONFIGURE_PATH=./configure
   DefaultConfigureStep
+}
 
+BuildStep() {
+  ChangeDir ${SRC_DIR}
   # Git's build doesn't support building outside the source tree.
   # Do a clean to make rebuild after failure predictable.
   LogExecute make clean
+  DefaultBuildStep
 }
 
 InstallStep() {
@@ -38,6 +37,3 @@ InstallStep() {
   export INSTALL_TARGETS="DESTDIR=${ASSEMBLY_DIR} install"
   DefaultInstallStep
 }
-
-PackageInstall
-exit 0

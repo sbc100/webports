@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 
 
-source pkg_info
-source ../../build_tools/common.sh
 
 
 BuildStep() {
@@ -32,7 +30,3 @@ InstallStep() {
   ChangeDir ${NACLPORTS_LIBDIR}
   cp ${THIS_PACKAGE_PATH}/*.a .
 }
-
-
-PackageInstall
-exit 0

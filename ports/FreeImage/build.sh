@@ -16,14 +16,12 @@ readonly -a CRLF_TRANSLATE_FILES=(
     "Source/OpenEXR/Imath/ImathMatrix.h"
     "Source/Utilities.h")
 
-source pkg_info
 
 # The FreeImage zipfile, unlike other naclports contains a folder
 # called FreeImage rather than FreeImage-X-Y-Z, so we set a customr
 # PACKAGE_DIR here.
 PACKAGE_DIR=FreeImage
 
-source ../../build_tools/common.sh
 
 
 ExtractStep() {
@@ -68,7 +66,3 @@ InstallStep() {
   # assumes pwd has makefile
   make OS=nacl install
 }
-
-
-PackageInstall
-exit 0

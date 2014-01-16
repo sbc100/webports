@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 # TODO(sbc): Remove this once 32 becomes stable
 # https://code.google.com/p/nativeclient/issues/detail?id=3599
@@ -15,6 +13,3 @@ fi
 export LIBS="-lm"
 
 CONFIG_SUB=config/config.sub
-DefaultPackageInstall
-exit 0
-

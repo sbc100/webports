@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 # TODO(binji): Use assembly
 export EXTRA_CONFIGURE_ARGS="--enable-static -with-cpu=generic_fpu"
@@ -40,6 +38,3 @@ InstallStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
   LogExecute make install
 }
-
-PackageInstall
-exit 0

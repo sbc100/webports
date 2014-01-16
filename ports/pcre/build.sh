@@ -3,9 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
 # There are two additional tests (RunGrepTest and RunTest shell scripts) that
 # make check does but it would be hard to run it here. Especially the first one.
 TestStep() {
@@ -30,6 +27,3 @@ TestStep() {
     echo "Tests OK"
   fi
 }
-
-DefaultPackageInstall
-exit 0

@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 BuildStep() {
   export EXTRA_CFLAGS="${NACL_CFLAGS}"
@@ -39,6 +37,3 @@ InstallStep() {
   LogExecute cp ${START_DIR}/mongoose.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
 }
-
-PackageInstall
-exit 0

@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 TestStep() {
   return 0
@@ -29,7 +27,3 @@ TestStep() {
     cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/test && make check
   fi
 }
-
-
-PackageInstall
-exit 0

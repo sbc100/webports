@@ -270,26 +270,28 @@ if [ ${NACL_GLIBC} = "1" ]; then
   NACL_LDFLAGS+=" -Wl,-rpath-link=${NACL_SDK_LIBDIR}"
 fi
 
-if [ $# -gt 0 ]; then
-  if [ "$1" = '--print' ]; then
-    echo "export CC=${NACLCC}"
-    echo "export CXX=${NACLCXX}"
-    echo "export AR=${NACLAR}"
-    echo "export RANLIB=${NACLRANLIB}"
-    echo "export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig"
-    echo "export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}"
-    echo "export PATH=\${PATH}:${NACL_BIN_PATH}"
-    echo "export CFLAGS=\"${NACL_CFLAGS}\""
-    echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
-  else
-    export CC=${NACLCC}
-    export CXX=${NACLCXX}
-    export AR=${NACLAR}
-    export RANLIB=${NACLRANLIB}
-    export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-    export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-    export PATH=${PATH}:${NACL_BIN_PATH}
-    export CFLAGS=${NACL_CFLAGS}
-    exec $@
+if [ -z "${NACL_ENV_IMPORT:-}" ]; then
+  if [ $# -gt 0 ]; then
+    if [ "$1" = '--print' ]; then
+      echo "export CC=${NACLCC}"
+      echo "export CXX=${NACLCXX}"
+      echo "export AR=${NACLAR}"
+      echo "export RANLIB=${NACLRANLIB}"
+      echo "export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig"
+      echo "export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}"
+      echo "export PATH=\${PATH}:${NACL_BIN_PATH}"
+      echo "export CFLAGS=\"${NACL_CFLAGS}\""
+      echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
+    else
+      export CC=${NACLCC}
+      export CXX=${NACLCXX}
+      export AR=${NACLAR}
+      export RANLIB=${NACLRANLIB}
+      export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+      export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+      export PATH=${PATH}:${NACL_BIN_PATH}
+      export CFLAGS=${NACL_CFLAGS}
+      exec $@
+    fi
   fi
 fi

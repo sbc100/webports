@@ -3,13 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
+# zlib doesn't support custom build directories so we have
+# to build directly in the source dir.
+BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${BUILD_DIR}
   LogExecute rm -f libz.*
   # TODO: side-by-side install
   local CONFIGURE_ARGS="--prefix=${NACLPORTS_PREFIX}"
@@ -24,6 +24,7 @@ ConfigureStep() {
   EXECUTABLES="minigzip${NACL_EXEEXT} example${NACL_EXEEXT}"
 }
 
+
 RunMinigzip() {
   export LD_LIBRARY_PATH=.
   if echo "hello world" | ./minigzip | ./minigzip -d; then
@@ -34,6 +35,7 @@ RunMinigzip() {
   fi
   unset LD_LIBRARY_PATH
 }
+
 
 RunExample() {
   export LD_LIBRARY_PATH=.
@@ -46,6 +48,7 @@ RunExample() {
   #fi
   unset LD_LIBRARY_PATH
 }
+
 
 TestStep() {
   Banner "Testing ${PACKAGE_NAME}"
@@ -93,7 +96,3 @@ PackageInstall() {
     InstallStep
   fi
 }
-
-
-PackageInstall
-exit 0

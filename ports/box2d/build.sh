@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 TestStep() {
   Banner "Testing ${PACKAGE_NAME}"
@@ -17,6 +15,3 @@ ConfigureStep() {
   EXTRA_CMAKE_ARGS="-DBOX2D_BUILD_EXAMPLES=OFF"
   CMakeConfigureStep
 }
-
-PackageInstall
-exit 0

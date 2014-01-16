@@ -10,25 +10,22 @@
 # NAMING CONVENTION
 # =================
 #
-# This file is source'd by other scripts especially those inside ports/
-# and makes functions env variables available to those scripts.
-# Only variables beginging with "NACL_" are intended to be used by those
-# scripts!
+# This file is source'd by the main naclports build script.  Functions
+# and variables defined here are available in the build script for
+# individual ports.  Only variables beginging with "NACL_" are intended
+# to be used by those scripts.
 
 set -o nounset
 set -o errexit
 
-# Scripts that source this file must be run from within the naclports src tree.
-# Note that default build steps reference the packages directory.
-readonly SAVE_PWD=$(pwd)
-
 readonly TOOLS_DIR=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
-readonly START_DIR=$(cd "$(dirname "$0")" ; pwd)
+readonly START_DIR=$PWD
 readonly NACL_SRC=$(dirname ${TOOLS_DIR})
 readonly NACL_PACKAGES=${NACL_SRC}
 readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
 NACL_DEBUG=${NACL_DEBUG:-0}
 
+NACL_ENV_IMPORT=1
 . ${TOOLS_DIR}/nacl_env.sh
 
 # When run by a buildbot force all archives to come from the NaCl mirror
@@ -194,6 +191,10 @@ fi
 # the PACKAGE_NAME.  Packages with non-standard contents can override
 # this before including common.sh
 PACKAGE_DIR=${PACKAGE_DIR:-${PACKAGE_NAME:-}}
+SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
+BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
+
 
 PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
 if [ "${NACL_ARCH}" = "pnacl" ]; then
@@ -344,16 +345,6 @@ Banner() {
 }
 
 
-Usage() {
-  egrep "^#@" $0 | cut --bytes=3-
-}
-
-
-ReadKey() {
-  read
-}
-
-
 # echo a command to stdout and then execute it.
 LogExecute() {
   echo $*
@@ -403,9 +394,7 @@ TryFetch() {
      Banner "Problem encountered"
      echo "Please install curl or wget and rerun this script"
      echo "or manually download ${URL} to ${FILENAME}"
-     echo
-     echo "press any key when done"
-     ReadKey
+     exit 1
   fi
 }
 
@@ -489,6 +478,7 @@ GitCloneStep() {
   TouchKeyStamp clone "$URL"
 }
 
+
 Patch() {
   local LOCAL_PATCH_FILE=$1
   if [ -e "${START_DIR}/${LOCAL_PATCH_FILE}" ]; then
@@ -516,6 +506,7 @@ VerifyPath() {
 ChangeDir() {
   local NAME=$1
   if VerifyPath ${NAME}; then
+    echo "chdir ${NAME}"
     cd ${NAME}
   else
     echo "ChangeDir called with bad path."
@@ -800,16 +791,13 @@ DefaultConfigureStep() {
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
   if [ ! -f "${CONFIGURE}" ]; then
     echo "No configure script found at ${CONFIGURE}"
     return
   fi
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  NACL_BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
-  MakeDir ${NACL_BUILD_DIR}
-  ChangeDir ${NACL_BUILD_DIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
@@ -844,11 +832,8 @@ DefaultConfigureStep() {
 
 CMakeConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  NACL_BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
-  MakeDir ${NACL_BUILD_DIR}
-  ChangeDir ${NACL_BUILD_DIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
 
   CC="${NACLCC}" CXX="${NACLCXX}" LogExecute cmake ..\
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
@@ -864,7 +849,7 @@ CMakeConfigureStep() {
 
 DefaultBuildStep() {
   Banner "Build ${PACKAGE_NAME}"
-  echo "Directory: $(pwd)"
+  ChangeDir ${BUILD_DIR}
   # Build ${MAKE_TARGETS} or default target if it is not defined
   if [ -n "${MAKEFLAGS:-}" ]; then
     echo "MAKEFLAGS=${MAKEFLAGS}"
@@ -1156,6 +1141,16 @@ DefaultPackageInstall() {
     TestStep
   fi
   InstallStep
+}
+
+
+NaclportsMain() {
+  local COMMAND=PackageInstall
+  if [[ $# -gt 0 ]]; then
+    COMMAND=$1
+  fi
+  echo ${COMMAND}
+  ${COMMAND}
 }
 
 

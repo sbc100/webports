@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
@@ -51,7 +49,3 @@ InstallStep() {
   # TODO: side-by-side install
   LogExecute make PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} "INSTALL_TOP=${NACLPORTS_PREFIX}" install
 }
-
-
-PackageInstall
-exit 0

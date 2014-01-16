@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
@@ -30,7 +28,6 @@ export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
 export NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--as-needed"
 
 ConfigureStep() {
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   ChangeDir ${SRC_DIR}
 
   # TODO(phosek): we should be able to run reautoconf at this point, but
@@ -94,6 +91,3 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r texlive-2013.zip texlive
 }
-
-PackageInstall
-exit 0

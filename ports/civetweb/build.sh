@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 EXECUTABLES=civetweb
 
@@ -55,6 +53,3 @@ InstallStep() {
   LogExecute cp include/CivetServer.h $NACL_TOOLCHAIN_PREFIX/include/civetweb
   PublishStep
 }
-
-PackageInstall
-exit 0

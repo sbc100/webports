@@ -3,10 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
 EXECUTABLES="toybox"
+
+# Toybox wants to build in its current directory.
+BUILD_DIR=${SRC_DIR}
 
 NACLPORTS_CFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
 NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
@@ -49,8 +49,7 @@ BuildStep() {
     export CC=gcc
     export LDFLAGS="${LDFLAGS} -l${NACL_CPP_LIB}"
   fi
-  # Toybox wants to build in its current directory.
-  cd ..
+
   make clean
   DefaultBuildStep
 }
@@ -78,6 +77,3 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r toybox-0.4.7.zip toybox
 }
-
-PackageInstall
-exit 0

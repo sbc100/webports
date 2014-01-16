@@ -3,11 +3,5 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
 EXTRA_CONFIGURE_ARGS="--with-apr=${NACLPORTS_PREFIX}"
 EXTRA_CONFIGURE_ARGS+=" --with-apr-util=${NACLPORTS_PREFIX}"
-
-PackageInstall
-exit 0

@@ -3,8 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
+BUILD_DIR=${START_DIR}
 
 BuildStep() {
   # The sample is built using the NaCl SDK common.mk system.
@@ -24,9 +23,5 @@ BuildStep() {
     MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
   fi
   export MAKEFLAGS
-  ChangeDir ${START_DIR}
   DefaultBuildStep
 }
-
-PackageInstall
-exit 0

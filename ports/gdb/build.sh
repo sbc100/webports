@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
@@ -51,9 +49,6 @@ ConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export NACLPORTS_INCLUDE
 
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
   echo "Directory: $(pwd)"
@@ -74,6 +69,3 @@ ConfigureStep() {
   find gdb bfd -name '*.info' -exec cp {} ${BUILD_DIR}/{} \;
   popd
 }
-
-PackageInstall
-exit 0

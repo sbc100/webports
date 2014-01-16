@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 
 BuildStep() {
@@ -32,7 +30,3 @@ InstallStep() {
   cp ${THIS_PACKAGE_PATH}/src/libagg.a .
   cp ${THIS_PACKAGE_PATH}/font_freetype/libaggfontfreetype.a .
 }
-
-
-PackageInstall
-exit 0

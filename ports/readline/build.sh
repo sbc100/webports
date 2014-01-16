@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 # readline has config.sub in a 'support' subfolder
 CONFIG_SUB=support/config.sub
@@ -45,7 +43,3 @@ PackageInstall() {
     cd -
   fi
 }
-
-
-PackageInstall
-exit 0

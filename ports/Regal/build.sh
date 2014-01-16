@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 # override the extract step since the github generated tarball
 # puts all the files in regal-SHA1HASH folder
@@ -39,7 +37,3 @@ InstallStep() {
   fi
   cp -r include/GL ${NACLPORTS_INCLUDE}
 }
-
-
-PackageInstall
-exit 0

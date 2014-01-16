@@ -3,9 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
 export BUILD_CC=cc
 
 ConfigureStep() {
@@ -58,6 +55,3 @@ InstallStep() {
   LogExecute install tmglib.a ${NACLPORTS_LIBDIR}
   LogExecute install F2CLIBS/libf2c.a ${NACLPORTS_LIBDIR}
 }
-
-DefaultPackageInstall
-exit 0

@@ -2,18 +2,10 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
-# nacl-snes-1.53.sh
-#
-# Usage:  nacl-snes-1.53.sh
-#
-# This script downloads, patches, and builds an snes9x-based SNES emulator for
-# Native Client.
-
-source pkg_info
 PACKAGE_DIR=${PACKAGE_NAME}-src
-source ../../build_tools/common.sh
+SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
 
 EXECUTABLES=snes9x
 NACL_CONFIGURE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix/configure
@@ -43,13 +35,11 @@ ConfigureStep() {
 
   # This configure script generates a Makefile that checks timestamps on
   # configure.ac, configure and Makefile.in. Copy them from the unix directory.
-  cp ../unix/{configure.ac,configure,Makefile.in} .
+  LogExecute cp ../unix/{configure.ac,configure,Makefile.in} .
   touch Makefile
 }
 
 InstallStep(){
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  local BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/snes9x.html ${PUBLISH_DIR}
   install ${START_DIR}/snes9x.js ${PUBLISH_DIR}
@@ -64,6 +54,3 @@ InstallStep(){
     sed -i.bak 's/x-nacl/x-pnacl/' ${PUBLISH_DIR}/snes9x.js
   fi
 }
-
-PackageInstall
-exit 0

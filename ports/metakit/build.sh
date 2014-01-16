@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 #
 
-source pkg_info
-source ../../build_tools/common.sh
 
 export NACL_CONFIGURE_PATH=\
 ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix/configure
@@ -28,6 +26,3 @@ ConfigureStep() {
   AutoconfStep
   DefaultConfigureStep
 }
-
-DefaultPackageInstall
-exit 0

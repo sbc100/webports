@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 if [ ${NACL_GLIBC} = "1" ]; then
   EXECUTABLES="rdjpgcom${NACL_EXEEXT} wrjpgcom${NACL_EXEEXT} \
@@ -37,6 +35,3 @@ TestStep() {
     make test
   fi
 }
-
-DefaultPackageInstall
-exit 0

@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 EXECUTABLES="scp${NACL_EXEEXT} ssh${NACL_EXEEXT} \
              ssh-add${NACL_EXEEXT} sshd${NACL_EXEEXT}"
@@ -42,10 +40,7 @@ ConfigureStep() {
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
 
@@ -88,6 +83,3 @@ InstallStep() {
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
 }
-
-PackageInstall
-exit 0

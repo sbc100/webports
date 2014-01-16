@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 AutogenStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
@@ -43,9 +41,9 @@ ConfigureTests() {
     conf_host="nacl"
   fi
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  MakeDir ${NACL_BUILD_SUBDIR}-test
-  ChangeDir ${NACL_BUILD_SUBDIR}-test
+  BUILD_DIR=${BUILD_DIR}-test
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
 
   LIBS="$LDFLAGS" LogExecute ../test/configure \
     --host=${conf_host} \
@@ -82,8 +80,8 @@ ConfigureStep() {
     conf_host="nacl-pnacl"
   fi
 
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
 
   LogExecute ../configure \
     --host=${conf_host} \
@@ -128,7 +126,3 @@ PackageInstall() {
   BuildStep
   PublishStep
 }
-
-
-PackageInstall
-exit 0

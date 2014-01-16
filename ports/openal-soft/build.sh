@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 # Defaults to dynamic lib, but newlib can only link statically.
 if [[ ${NACL_GLIBC} = 0 ]]; then
@@ -14,6 +12,3 @@ fi
 ConfigureStep() {
   CMakeConfigureStep
 }
-
-PackageInstall
-exit 0

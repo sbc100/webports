@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 MAKE_TARGETS="pprogram"
 INSTALL_TARGETS="install-nodoc DESTDIR=${NACL_TOOLCHAIN_INSTALL}"
@@ -38,13 +36,10 @@ ConfigureStep() {
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   if [ ! -f "${SRC_DIR}/configure" ]; then
     echo "No configure script found"
     return
   fi
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  local BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
   echo "Directory: $(pwd)"
@@ -94,6 +89,3 @@ BuildStep() {
     TranslateAndWriteSelLdrScript ruby.pexe x86-64 ruby.x86-64.nexe ruby
   fi
 }
-
-PackageInstall
-exit 0

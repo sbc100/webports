@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 CONFIG_SUB=build-scripts/config.sub
 
@@ -45,7 +43,3 @@ ConfigureStep() {
     --disable-music-flac \
     --disable-music-mp3
 }
-
-
-PackageInstall
-exit 0

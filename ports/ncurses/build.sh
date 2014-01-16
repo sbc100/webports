@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 EXTRA_CONFIGURE_ARGS="--disable-database"
 EXTRA_CONFIGURE_ARGS+=" --with-fallbacks=xterm-256color,vt100"
@@ -43,7 +41,3 @@ InstallStep() {
   ln -sf libncurses.a libtermcap.a
   cd -
 }
-
-
-PackageInstall
-exit 0

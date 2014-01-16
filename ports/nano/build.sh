@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 export EXTRA_LIBS="-lncurses -ltar -lppapi_simple -lnacl_io \
   -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
@@ -53,6 +51,3 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r nano-7.3.zip nano
 }
-
-PackageInstall
-exit 0

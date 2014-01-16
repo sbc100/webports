@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 export ac_cv_func_gethostbyname=yes
 export ac_cv_func_getaddrinfo=no
@@ -27,7 +25,6 @@ BuildStep() {
   # Touch tool_main.c to ensure that it gets rebuilt each time.
   # This is the only file that depends on the PPAPI define and
   # therefore will differ between PPAPI and sel_ldr versions.
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   if [ -f ${SRC_DIR}/src/tool_main.c ]; then
     touch ${SRC_DIR}/src/tool_main.c
   fi
@@ -77,6 +74,3 @@ InstallStep() {
   LogExecute cp ${START_DIR}/curl.js ${PUBLISH_DIR}
   LogExecute cp curl.nmf ${PUBLISH_DIR}
 }
-
-PackageInstall
-exit 0

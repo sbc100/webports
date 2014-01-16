@@ -3,9 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
 BusyBoxDisable() {
   # Switch one option in the busybox config from yes to no.
   sed -i "s/$*=y/$*=n/" .config
@@ -88,6 +85,3 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r busybox-1.22.0.zip busybox
 }
-
-PackageInstall
-exit 0

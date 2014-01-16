@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 ConfigureStep() {
   Banner "Configuring ${PACKAGE_NAME}"
@@ -34,6 +32,3 @@ ConfigureStep() {
     --${NACL_OPTION}-asm \
     --with-x=no
 }
-
-PackageInstall
-exit 0

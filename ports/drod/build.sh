@@ -3,13 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-
 PACKAGE_DIR=drod-213fa477000429fb9a5f4a77673394d47cadbfac
-source ../../build_tools/common.sh
-
-export DESTDIR=${PUBLISH_DIR}/.data
 EXECUTABLES=custom/bin/drod
+BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/Caravel/Master/Linux
+MAKE_TARGETS="drod-custom"
+export DESTDIR=${PUBLISH_DIR}/.data
 
 ConfigureStep() {
   export CC=${NACLCC}
@@ -21,12 +19,6 @@ ConfigureStep() {
   export LDFLAGS_common=${NACLPORTS_LDFLAGS}
   export EXTRA_LIBS="-lSDL_mixer -lSDL -lmikmod -lvorbisfile -lvorbisenc \
                      -lvorbis -logg -lfreetype -lSDLmain -ltar -lnacl_io"
-}
-
-BuildStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/Caravel/Master/Linux
-  export MAKE_TARGETS="drod-custom"
-  DefaultBuildStep
 }
 
 InstallStep() {
@@ -47,6 +39,3 @@ InstallStep() {
     sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/drod.html
   fi
 }
-
-PackageInstall
-exit 0

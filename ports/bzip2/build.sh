@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 ConfigureStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
@@ -35,6 +33,3 @@ InstallStep() {
   fi
   LogExecute chmod a+r ${NACLPORTS_PREFIX}/lib/libbz2.*
 }
-
-PackageInstall
-exit 0

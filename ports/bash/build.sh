@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --with-curses"
@@ -52,6 +50,3 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r bash-7.3.zip bash
 }
-
-PackageInstall
-exit 0

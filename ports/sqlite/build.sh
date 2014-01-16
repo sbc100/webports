@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 MAKE_TARGETS="CCLD=\$(CXX) all"
 NACLPORTS_CFLAGS+=" -DNACL_SDK_VERSION=$NACL_SDK_VERSION"
@@ -17,7 +15,6 @@ else
 fi
 
 PackageInstall() {
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   if [ -f ${SRC_DIR}/shell.c ]; then
     touch ${SRC_DIR}/shell.c
   fi
@@ -64,6 +61,3 @@ PackageInstall() {
 
   InstallNaClTerm ${PUBLISH_DIR}
 }
-
-PackageInstall
-exit 0

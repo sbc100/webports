@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 
 BuildStep() {
@@ -33,7 +31,3 @@ InstallStep() {
   LogExecute cp ${PACKAGE_DIR}/libjsoncpp.a ${NACLPORTS_LIBDIR}
   LogExecute cp -R ${PACKAGE_DIR}/include/json ${NACLPORTS_INCLUDE}
 }
-
-
-PackageInstall
-exit 0

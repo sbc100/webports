@@ -3,8 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
+BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
 ConfigureStep() {
   local EXTRA_CONFIGURE_OPTS=("${@:-}")
@@ -17,7 +16,6 @@ ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   extra="--enable-threads"
   if [ ${NACL_ARCH} = "x86_64" -o ${NACL_ARCH} = "i686" ]; then
     extra="${extra} --enable-sse2"
@@ -52,6 +50,3 @@ PackageInstall() {
   TranslateStep
   ValidateStep
 }
-
-PackageInstall
-exit 0

@@ -3,14 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
-
 BuildStep() {
   Banner "Building ${PACKAGE_NAME}"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_BUILD_SUBDIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
   if [ "${NACL_GLIBC}" = "1" ]; then
     NACLPORTS_CFLAGS+=" -fPIC"
   fi
@@ -44,10 +40,3 @@ InstallStep() {
   fi
   cp libcli_main.a ${NACLPORTS_LIBDIR}
 }
-
-ExtractStep() {
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-}
-
-PackageInstall
-exit 0

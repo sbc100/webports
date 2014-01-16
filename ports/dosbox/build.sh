@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/ports/dosbox-0.74
 EXECUTABLES=src/dosbox${NACL_EXEEXT}
@@ -80,7 +78,3 @@ InstallStep(){
   local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py"
   LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
 }
-
-
-PackageInstall
-exit 0

@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source pkg_info
-source ../../build_tools/common.sh
 
 EXECUTABLES="cjpeg djpeg jpegtran rdjpgcom wrjpgcom"
 
@@ -31,6 +29,3 @@ TestStep() {
     make test
   fi
 }
-
-DefaultPackageInstall
-exit 0
