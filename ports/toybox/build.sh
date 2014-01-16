@@ -12,6 +12,8 @@ NACLPORTS_CFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
 NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
 NACLPORTS_CXXFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
 NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
+export HOSTCC=cc
+
 if [ "${NACL_GLIBC}" != "1" ]; then
   # Toybox includes and defines some items that are not available, so rather
   # than passing positive __GLIBC__ we pass positive __NEWLIB__ to identify
@@ -30,7 +32,6 @@ ConfigureStep() {
 BuildStep() {
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     export CROSS_COMPILE="pnacl-"
-    export HOSTCC=clang
   else
     export CROSS_COMPILE="${NACL_ARCH}-nacl-"
   fi
@@ -42,10 +43,8 @@ BuildStep() {
   # We can't use NACL_CROSS_PREFIX without also redefining the CC and HOSTCC
   # variables.
   if [[ "${NACLCXX}" = *clang++ ]]; then
-    export HOSTCC=clang
     export CC=clang++
   else
-    export HOSTCC=gcc
     export CC=gcc
     export LDFLAGS="${LDFLAGS} -l${NACL_CPP_LIB}"
   fi
