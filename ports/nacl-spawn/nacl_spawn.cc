@@ -126,6 +126,7 @@ extern "C" int nacl_waitpid(int pid, int* status, int options) {
 
   pp::VarDictionary req;
   req.Set("command", "nacl_wait");
+  req.Set("pid", pid);
 
   int result = SendRequest(&req);
   if (result < 0) {
