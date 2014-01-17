@@ -1,17 +1,3 @@
-diff --git a/Makefile b/Makefile
-index 6494a01..8d8cde0 100644
---- a/Makefile
-+++ b/Makefile
-@@ -26,7 +26,8 @@ bloatcheck: toybox_old toybox_unstripped
- 	@scripts/bloatcheck toybox_old toybox_unstripped
- 
- generated/instlist: toybox
--	$(HOSTCC) -I . scripts/install.c -o generated/instlist
-+	echo $(HOSTCC) ${CFLAGS} -I . scripts/install.c -o generated/instlist
-+	$(HOSTCC) ${CFLAGS} -I . scripts/install.c -o generated/instlist
- 
- install_flat: generated/instlist
- 	scripts/install.sh --symlink --force
 diff --git a/configure b/configure
 old mode 100644
 new mode 100755
@@ -131,7 +117,7 @@ index d901a4b..8528485 100644
  }
  #endif
 +
-+#if defined(__native_client__) && !defined(__GLIBC__)
++#if defined(__native_client__)
 +int openat(int dirfd, const char *pathname, int flags)
 +  __attribute__((weak));
 +int fstatat(int dirfd, const char *pathname, struct stat *buf, int flags)
@@ -322,10 +308,20 @@ index 745f8cd..7adcf08 100644
  #include <endian.h>
  
 diff --git a/lib/xwrap.c b/lib/xwrap.c
-index 98b4300..1c7047e 100644
+index 98b4300..2cfb09e 100644
 --- a/lib/xwrap.c
 +++ b/lib/xwrap.c
-@@ -353,7 +353,11 @@ error:
+@@ -224,7 +224,8 @@ off_t xlseek(int fd, off_t offset, int whence)
+ 
+ char *xgetcwd(void)
+ {
+-  char *buf = getcwd(NULL, 0);
++  char *buf = xmalloc(sizeof(char) * (PATH_MAX+1));
++  buf = getcwd(buf, PATH_MAX+1);
+   if (!buf) perror_exit("xgetcwd");
+ 
+   return buf;
+@@ -353,7 +354,11 @@ error:
  // Resolve all symlinks, returning malloc() memory.
  char *xrealpath(char *path)
  {
@@ -338,10 +334,10 @@ index 98b4300..1c7047e 100644
    return new;
  }
 diff --git a/main.c b/main.c
-index 53f670d..3fdb6de 100644
+index 53f670d..3ae7e64 100644
 --- a/main.c
 +++ b/main.c
-@@ -157,9 +157,60 @@ list:
+@@ -157,9 +157,59 @@ list:
    xputc('\n');
  }
  
@@ -358,16 +354,15 @@ index 53f670d..3fdb6de 100644
 +  int ret;
 +  ret = umount("/");
 +  if (ret) {
-+    printf("unmounting root fs failed\n");
++    printf("umounting root fs failed: %s\n", strerror(errno));
 +    return 1;
 +  }
 +  ret = mount("", "/", "memfs", 0, NULL);
 +  if (ret) {
-+    printf("mounting mem fs failed\n");
++    printf("mounting mem fs failed: %s\n", strerror(errno));
 +    return 1;
 +  }
 +
-+  mkdir("/dev", 0777);
 +  mkdir("/home", 0777);
 +  mkdir("/tmp", 0777);
 +  mkdir("/bin", 0777);
@@ -376,7 +371,7 @@ index 53f670d..3fdb6de 100644
 +
 +  // Ignore failures from mounting html5fs.  For example, it will always
 +  // fail in incognito mode.
-+  mount("/", "/home", "html5fs", 0, "type=PERSISTENT");
++  mount("/", "/home", "html5fs", 0, "type=TEMPORARY");
 +
 +  // Setup environment variables
 +  setenv("HOME", "/home", 1);
@@ -403,7 +398,7 @@ index 53f670d..3fdb6de 100644
  
    if (CFG_TOYBOX) {
      // Trim path off of command name
-@@ -178,3 +229,7 @@ int main(int argc, char *argv[])
+@@ -178,3 +228,7 @@ int main(int argc, char *argv[])
  
    return toys.exitval;
  }
@@ -554,7 +549,7 @@ index 4b8a87d..9fdd3ea 100644
  
  static void handler(int i)
 diff --git a/toys/pending/sh.c b/toys/pending/sh.c
-index 2f09f63..53775ce 100644
+index 2f09f63..c3ae36e 100644
 --- a/toys/pending/sh.c
 +++ b/toys/pending/sh.c
 @@ -291,7 +291,11 @@ static void run_pipeline(struct pipeline *line)
@@ -569,13 +564,14 @@ index 2f09f63..53775ce 100644
      struct toy_context temp;
      jmp_buf rebound;
  
-@@ -311,10 +315,14 @@ static void run_pipeline(struct pipeline *line)
+@@ -311,10 +315,15 @@ static void run_pipeline(struct pipeline *line)
    } else {
      int status;
  
 +#ifdef __native_client__
 +    cmd->pid = nacl_spawn_simple(cmd->argv);
-+    waitpid(cmd->pid, &status, 0);
++    if (cmd->pid <= 0) xprintf("error spawning %s\n", cmd->argv[0]);
++    else nacl_waitpid(cmd->pid, &status, 0);
 +#else
      cmd->pid = vfork();
      if (!cmd->pid) xexec(cmd->argv);
@@ -585,7 +581,7 @@ index 2f09f63..53775ce 100644
      if (CFG_SH_FLOWCTL || CFG_SH_PIPES) {
        if (WIFEXITED(status)) cmd->pid = WEXITSTATUS(status);
        if (WIFSIGNALED(status)) cmd->pid = WTERMSIG(status);
-@@ -382,7 +390,12 @@ void sh_main(void)
+@@ -382,7 +391,12 @@ void sh_main(void)
      for (;;) {
        char *command = 0;
        if (!f) xputc('$');
