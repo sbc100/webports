@@ -3,8 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export RUNPROGRAM="${NACL_SEL_LDR} -a -B ${NACL_IRT} --"
-RUNPROGRAM+=" ${NACL_SDK_LIB}/runnable-ld.so"
-RUNPROGRAM+=" --library-path"
-RUNPROGRAM+=" ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
-export NACL_SEL_LDR
+if [ "${NACL_GLIBC}" != "1" ]; then
+  readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
+  NACLPORTS_CFLAGS+=" -I${GLIBC_COMPAT}"
+  EXTRA_CONFIGURE_ARGS="--disable-dso"
+fi

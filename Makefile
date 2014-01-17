@@ -322,6 +322,7 @@ $(SENT)/ports/openal-ogg: ports/openal-soft ports/libvorbis
 $(SENT)/ports/opencv: ports/zlib ports/libpng ports/jpeg6b
 $(SENT)/ports/readline: ports/ncurses
 ifneq ($(NACL_GLIBC), 1)
+  $(SENT)/ports/apr: ports/glibc-compat
   $(SENT)/ports/git: ports/glibc-compat
   $(SENT)/ports/readline: ports/glibc-compat
   $(SENT)/ports/openssl: ports/glibc-compat
