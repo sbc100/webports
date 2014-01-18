@@ -1,0 +1,4 @@
+PACKAGE_NAME=coreutils-8.22
+URL=http://ftp.gnu.org/gnu/coreutils/coreutils-8.22.tar.xz
+LICENSE=GPL
+LIBC=glibc

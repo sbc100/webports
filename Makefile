@@ -92,6 +92,7 @@ ALL_PORTS = \
      ports/cfitsio \
      ports/civetweb \
      ports/clapack \
+     ports/coreutils \
      ports/curl \
      ports/DevIL \
      ports/dosbox \
@@ -341,6 +342,7 @@ $(SENT)/ports/zeromq: ports/glibc-compat
 $(SENT)/ports/mpc: ports/gmp ports/mpfr
 $(SENT)/ports/mpfr: ports/gmp
 $(SENT)/ports/toybox: ports/glibc-compat ports/nacl-spawn
+$(SENT)/ports/coreutils: ports/nacl-spawn
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
@@ -353,6 +355,7 @@ bzip2: ports/bzip2 ;
 cairo: ports/cairo ;
 cfitsio: ports/cfitsio ;
 clapack: ports/clapack ;
+coreutils: ports/coreutils ;
 curl: ports/curl ;
 DevIL: ports/DevIL ;
 dreadthread: ports/dreadthread ;
