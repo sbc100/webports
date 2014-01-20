@@ -82,6 +82,7 @@ ALL_PORTS = \
      ports/apr \
      ports/apr-util \
      ports/bash \
+     ports/binutils \
      ports/bochs \
      ports/boost \
      ports/box2d \
@@ -343,11 +344,13 @@ $(SENT)/ports/mpc: ports/gmp ports/mpfr
 $(SENT)/ports/mpfr: ports/gmp
 $(SENT)/ports/toybox: ports/glibc-compat ports/nacl-spawn
 $(SENT)/ports/coreutils: ports/nacl-spawn
+$(SENT)/ports/binutils: ports/nacl-spawn
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
 apr: ports/apr ;
 apr-util: ports/apr-util ;
+binutils: ports/binutils ;
 boost: ports/boost ;
 box2d: ports/box2d ;
 bullet: ports/bullet ;
