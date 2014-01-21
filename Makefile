@@ -118,6 +118,7 @@ ALL_PORTS = \
      ports/glibc-compat \
      ports/gmp \
      ports/gsl \
+     ports/hdf5 \
      ports/ImageMagick \
      ports/jpeg6b \
      ports/jpeg8d \
@@ -340,6 +341,7 @@ $(SENT)/ports/physfs: ports/zlib
 $(SENT)/ports/mpg123: ports/openal-soft
 $(SENT)/ports/ImageMagick: ports/libpng ports/jpeg8d ports/bzip2 ports/zlib
 $(SENT)/ports/gdb: ports/ncurses ports/expat ports/readline
+$(SENT)/ports/hdf5: ports/glibc-compat
 $(SENT)/ports/zeromq: ports/glibc-compat
 $(SENT)/ports/mpc: ports/gmp ports/mpfr
 $(SENT)/ports/mpfr: ports/gmp
@@ -381,6 +383,7 @@ glib: ports/glib ;
 glibc-compat: ports/glibc-compat ;
 gmp: ports/gmp ;
 gsl: ports/gsl ;
+hdf5: ports/hdf5 ;
 hangul libhangul: ports/libhangul ;
 imagemagick ImageMagick: ports/ImageMagick ;
 jpeg jpeg8d: ports/jpeg8d ;
