@@ -110,6 +110,7 @@ ALL_PORTS = \
      ports/FreeImage \
      ports/freetype \
      ports/gc \
+     ports/gcc \
      ports/gdb \
      ports/giflib \
      ports/git \
@@ -345,6 +346,7 @@ $(SENT)/ports/mpfr: ports/gmp
 $(SENT)/ports/toybox: ports/glibc-compat ports/nacl-spawn
 $(SENT)/ports/coreutils: ports/nacl-spawn
 $(SENT)/ports/binutils: ports/nacl-spawn
+$(SENT)/ports/gcc: ports/nacl-spawn ports/gmp ports/mpfr ports/mpc
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
@@ -373,6 +375,7 @@ freealut: ports/freealut ;
 freeimage FreeImage: ports/FreeImage ;
 freetype: ports/freetype ;
 gc: ports/gc ;
+gcc: ports/gcc ;
 gif giflib: ports/giflib ;
 glib: ports/glib ;
 glibc-compat: ports/glibc-compat ;

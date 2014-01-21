@@ -1,0 +1,194 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..e69de29
+diff --git a/gcc/Makefile.in b/gcc/Makefile.in
+index 2e57082..10a954b 100644
+--- a/gcc/Makefile.in
++++ b/gcc/Makefile.in
+@@ -913,7 +913,7 @@ BUILD_LIBDEPS= $(BUILD_LIBIBERTY)
+ 
+ # How to link with both our special library facilities
+ # and the system's installed libraries.
+-LIBS = @LIBS@ $(CPPLIB) $(LIBINTL) $(LIBICONV) $(LIBIBERTY) $(LIBDECNUMBER)
++LIBS = @LIBS@ $(CPPLIB) $(LIBINTL) $(LIBICONV) $(LIBIBERTY) $(LIBDECNUMBER) $(EXTRA_LIBS)
+ BACKENDLIBS = $(CLOOGLIBS) $(PPLLIBS) $(GMPLIBS)
+ # Any system libraries needed just for GNAT.
+ SYSLIBS = @GNAT_LIBEXC@
+diff --git a/gcc/collect2.c b/gcc/collect2.c
+index 3f62dfe..caff9c2 100644
+--- a/gcc/collect2.c
++++ b/gcc/collect2.c
+@@ -763,7 +763,7 @@ prefix_from_string (const char *p, struct path_prefix *pprefix)
+ /* Main program.  */
+ 
+ int
+-main (int argc, char **argv)
++nacl_main (int argc, char **argv)
+ {
+   static const char *const ld_suffix	= "ld";
+   static const char *const real_ld_suffix = "real-ld";
+diff --git a/gcc/config/i386/cpuid.h b/gcc/config/i386/cpuid.h
+index b525865..37efc4c 100644
+--- a/gcc/config/i386/cpuid.h
++++ b/gcc/config/i386/cpuid.h
+@@ -110,6 +110,10 @@
+ static __inline unsigned int
+ __get_cpuid_max (unsigned int __ext, unsigned int *__sig)
+ {
++  /* NaCl verifier does not allow cpuid. */
++#if defined(__native_client__)
++  return 0;
++#else
+   unsigned int __eax, __ebx, __ecx, __edx;
+ 
+ #ifndef __x86_64__
+@@ -155,6 +159,7 @@ __get_cpuid_max (unsigned int __ext, unsigned int *__sig)
+     *__sig = __ebx;
+ 
+   return __eax;
++#endif
+ }
+ 
+ /* Return cpuid data for requested cpuid level, as found in returned
+diff --git a/gcc/gcc.c b/gcc/gcc.c
+index 6c7f47c..3511ed3 100644
+--- a/gcc/gcc.c
++++ b/gcc/gcc.c
+@@ -6262,10 +6262,10 @@ fatal_error (int signum)
+   kill (getpid (), signum);
+ }
+ 
+-extern int main (int, char **);
++extern int nacl_main (int, char **);
+ 
+ int
+-main (int argc, char **argv)
++nacl_main (int argc, char **argv)
+ {
+   size_t i;
+   int value;
+@@ -6278,6 +6278,15 @@ main (int argc, char **argv)
+   struct user_specs *uptr;
+   char **old_argv = argv;
+ 
++#if defined(__native_client__)
++  /* Use /mnt/html5/tmp as TMPDIR. We cannot use /tmp because /tmp is
++     nacl_io's memory file system and its contents will not be shared
++     among multiple processes (e.g., cc1 and as). */
++  if (mkdir ("/mnt/html5/tmp", 0777) < 0)
++    fatal ("Failed to create /mnt/html5/tmp");
++  setenv ("TMPDIR", "/mnt/html5/tmp", 1  /* overwrite */);
++#endif
++
+   /* Initialize here, not in definition.  The IRIX 6 O32 cc sometimes chokes
+      on ?: in file-scope variable initializations.  */
+   asm_debug = ASM_DEBUG_SPEC;
+diff --git a/gcc/gcov-dump.c b/gcc/gcov-dump.c
+index 8425041..fa736f9 100644
+--- a/gcc/gcov-dump.c
++++ b/gcc/gcov-dump.c
+@@ -37,7 +37,7 @@ static void tag_arcs (const char *, unsigned, unsigned);
+ static void tag_lines (const char *, unsigned, unsigned);
+ static void tag_counters (const char *, unsigned, unsigned);
+ static void tag_summary (const char *, unsigned, unsigned);
+-extern int main (int, char **);
++extern int nacl_main (int, char **);
+ 
+ typedef struct tag_format
+ {
+@@ -73,7 +73,7 @@ static const tag_format_t tag_table[] =
+ };
+ 
+ int
+-main (int argc ATTRIBUTE_UNUSED, char **argv)
++nacl_main (int argc ATTRIBUTE_UNUSED, char **argv)
+ {
+   int opt;
+ 
+diff --git a/gcc/gcov.c b/gcc/gcov.c
+index a697608..b0d88fe 100644
+--- a/gcc/gcov.c
++++ b/gcc/gcov.c
+@@ -349,10 +349,10 @@ static int output_branch_count (FILE *, int, const arc_t *);
+ static void output_lines (FILE *, const source_t *);
+ static char *make_gcov_file_name (const char *, const char *);
+ static void release_structures (void);
+-extern int main (int, char **);
++extern int nacl_main (int, char **);
+ 
+ int
+-main (int argc, char **argv)
++nacl_main (int argc, char **argv)
+ {
+   int argno;
+ 
+diff --git a/gcc/main.c b/gcc/main.c
+index fc5a4db..d0aaeee 100644
+--- a/gcc/main.c
++++ b/gcc/main.c
+@@ -23,14 +23,14 @@ along with GCC; see the file COPYING3.  If not see
+ #include "tm.h"
+ #include "toplev.h"
+ 
+-int main (int argc, char **argv);
++int nacl_main (int argc, char **argv);
+ 
+ /* We define main() to call toplev_main(), which is defined in toplev.c.
+    We do this in a separate file in order to allow the language front-end
+    to define a different main(), if it so desires.  */
+ 
+ int
+-main (int argc, char **argv)
++nacl_main (int argc, char **argv)
+ {
+   return toplev_main (argc, (const char **) argv);
+ }
+diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
+index 366e96e..326b396 100644
+--- a/libiberty/pex-unix.c
++++ b/libiberty/pex-unix.c
+@@ -361,6 +361,12 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
+                      int in, int out, int errdes,
+ 		     int toclose, const char **errmsg, int *err)
+ {
++  /* Use nacl_spawn_simple to spawn a child process.
++     TODO(hamaji): Add support of pipes to nacl-spawn and handle
++     arguments for file descriptors to support -pipe option. */
++#if defined(__native_client__)
++  return nacl_spawn_simple(argv);
++#else
+   pid_t pid;
+ 
+   /* We declare these to be volatile to avoid warnings from gcc about
+@@ -469,6 +475,7 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
+ 
+       return pid;
+     }
++#endif
+ }
+ 
+ /* Wait for a child process to complete.  */
+@@ -478,6 +485,15 @@ pex_unix_wait (struct pex_obj *obj, pid_t pid, int *status,
+ 	       struct pex_time *time, int done, const char **errmsg,
+ 	       int *err)
+ {
++#if defined(__native_client__)
++  if (nacl_waitpid(pid, status, 0) < 0)
++    {
++      *err = errno;
++      *errmsg = "wait";
++      return -1;
++    }
++  return 0;
++#else
+   /* If we are cleaning up when the caller didn't retrieve process
+      status for some reason, encourage the process to go away.  */
+   if (done)
+@@ -491,6 +507,7 @@ pex_unix_wait (struct pex_obj *obj, pid_t pid, int *status,
+     }
+ 
+   return 0;
++#endif
+ }
+ 
+ /* Create a pipe.  */
