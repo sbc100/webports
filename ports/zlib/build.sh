@@ -6,21 +6,20 @@
 # zlib doesn't support custom build directories so we have
 # to build directly in the source dir.
 BUILD_DIR=${SRC_DIR}
+EXECUTABLES="minigzip${NACL_EXEEXT} example${NACL_EXEEXT}"
+if [ "${NACL_GLIBC}" = "1" ]; then
+  EXECUTABLES+=" libz.so.1"
+fi
+MAKEFLAGS="EXE=${NACL_EXEEXT}"
 
 ConfigureStep() {
+  MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
   LogExecute rm -f libz.*
-  # TODO: side-by-side install
   local CONFIGURE_ARGS="--prefix=${NACLPORTS_PREFIX}"
   local CFLAGS="-Dunlink=puts"
-  if [ "${NACL_GLIBC}" = "1" -a "${BUILD_SHARED:-}" = "1" ]; then
-    CONFIGURE_ARGS="${CONFIGURE_ARGS} --shared"
-    CFLAGS="${CFLAGS} -fPIC"
-  fi
-  CC=${NACLCC} AR="${NACLAR} -r" RANLIB=${NACLRANLIB} CFLAGS="${CFLAGS}" \
+  CC=${NACLCC} AR="${NACLAR}" RANLIB=${NACLRANLIB} CFLAGS="${CFLAGS}" \
      LogExecute ./configure ${CONFIGURE_ARGS}
-  export MAKEFLAGS="EXE=${NACL_EXEEXT}"
-  EXECUTABLES="minigzip${NACL_EXEEXT} example${NACL_EXEEXT}"
 }
 
 
@@ -79,19 +78,5 @@ TestStep() {
     RunMinigzip
     WriteSelLdrScript example example.nexe
     RunExample
-  fi
-}
-
-
-PackageInstall() {
-  DefaultPackageInstall
-  if [ "${NACL_GLIBC}" = "1" ]; then
-    BUILD_SHARED=1
-    RunConfigureStep
-    RunBuildStep
-    Validate libz.so.1
-    RunValidateStep
-    RunTestStep
-    RunInstallStep
   fi
 }
