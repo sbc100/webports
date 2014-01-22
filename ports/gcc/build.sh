@@ -29,8 +29,6 @@ ConfigureStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
-
   MakeDir ${PUBLISH_DIR}
   for nexe in gcc/xgcc gcc/g++ gcc/cpp gcc/cc1 gcc/cc1plus gcc/collect2; do
     local name=$(basename $nexe | sed 's/xgcc/gcc/')

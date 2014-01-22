@@ -8,8 +8,6 @@ DOSBOX_EXAMPLE_DIR=${NACL_SRC}/ports/dosbox-0.74
 EXECUTABLES=src/dosbox${NACL_EXEEXT}
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}

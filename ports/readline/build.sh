@@ -16,7 +16,6 @@ fi
 
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
   if [ "${NACL_GLIBC}" != "1" ]; then
     # readline example don't link under sel_ldr
     # TODO(sbc): find a way to add glibc-compat to link line for examples.
@@ -35,8 +34,8 @@ TestStep() {
 }
 
 
-PackageInstall() {
-  DefaultPackageInstall
+InstallStep() {
+  DefaultInstallStep
   if [ "${NACL_GLIBC}" = "1" ]; then
     cd ${NACLPORTS_LIBDIR}
     ln -sf libreadline.so.6 libreadline.so

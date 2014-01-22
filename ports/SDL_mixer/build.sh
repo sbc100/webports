@@ -13,7 +13,6 @@ if [ "$NACL_GLIBC" = "1" ]; then
 fi
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}

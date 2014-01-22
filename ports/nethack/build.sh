@@ -7,7 +7,6 @@
 EXECUTABLES=src/nethack
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -39,7 +38,6 @@ BuildStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
 

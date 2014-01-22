@@ -16,7 +16,6 @@ BuildStep() {
 
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   local PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
 
   MakeDir ${PUBLISH_DIR}

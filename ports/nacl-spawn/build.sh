@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
   if [ "${NACL_GLIBC}" = "1" ]; then
@@ -33,7 +32,6 @@ BuildStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   cp libnacl_spawn.a ${NACLPORTS_LIBDIR}
   if [[ "${NACL_GLIBC}" != "0" ]]; then
     cp libnacl_spawn.so ${NACLPORTS_LIBDIR}

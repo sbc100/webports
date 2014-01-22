@@ -16,8 +16,6 @@ InstallStep() {
 }
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
-
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     return
   fi

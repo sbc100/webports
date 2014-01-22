@@ -8,7 +8,6 @@
 # puts all the files in regal-SHA1HASH folder
 ExtractStep() {
   ArchiveName
-  Banner "Untaring ${ARCHIVE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}
   Remove ${PACKAGE_NAME}
   MakeDir ${PACKAGE_NAME}
@@ -23,14 +22,12 @@ ExtractStep() {
 
 
 BuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
   cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   make -f Makefile SYSTEM=nacl-${NACL_ARCH}
 }
 
 
 InstallStep() {
-  Banner "Install ${PACKAGE_NAME}"
   cp -a lib/nacl-${NACL_ARCH}/libRegal*.a ${NACLPORTS_LIBDIR}
   if [ "${NACL_GLIBC}" = 1 ]; then
     cp -a lib/nacl-${NACL_ARCH}/libRegal*.so* ${NACLPORTS_LIBDIR}

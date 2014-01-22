@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
-
 ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
@@ -49,26 +47,6 @@ ConfigureStep() {
     --disable-demuxer=image2 \
     --prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR}
-}
 
-
-PostConfigureStep() {
   touch strings.h
-}
-
-
-BuildAndInstallStep() {
-  DefaultBuildStep
-  make install
-}
-
-
-PackageInstall() {
-  PreInstallStep
-  DownloadStep
-  ExtractStep
-  PatchStep
-  ConfigureStep
-  PostConfigureStep
-  BuildAndInstallStep
 }

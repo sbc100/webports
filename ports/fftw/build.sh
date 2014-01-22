@@ -3,11 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-
 ConfigureStep() {
-  local EXTRA_CONFIGURE_OPTS=("${@:-}")
   Banner "Configuring ${PACKAGE_NAME}"
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
   # Export the nacl tools.
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -16,37 +15,40 @@ ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export PATH=${NACL_BIN_PATH}:${PATH};
-  extra="--enable-threads"
+  local extra=""
   if [ ${NACL_ARCH} = "x86_64" -o ${NACL_ARCH} = "i686" ]; then
-    extra="${extra} --enable-sse2"
+    extra="--enable-sse2"
   fi
 
-  LogExecute ./configure \
+  LogExecute ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \
-    ${EXTRA_CONFIGURE_OPTS[@]} \
+    --enable-threads \
+    ${EXTRA_CONFIGURE_ARGS:-} \
     ${extra}
 }
 
 PackageInstall() {
-  PreInstallStep
-  DownloadStep
-  ExtractStep
-  PatchStep
+  RunPreInstallStep
+  RunDownloadStep
+  RunExtractStep
+  RunPatchStep
 
   # Build fftw (double)
   EXECUTABLES=tools/fftw-wisdom${NACL_EXEEXT}
-  ConfigureStep
-  BuildStep
-  InstallStep
-  TranslateStep
-  ValidateStep
+  RunConfigureStep
+  RunBuildStep
+  RunInstallStep
+  RunTranslateStep
+  RunValidateStep
 
   # build fftwf (float)
   EXECUTABLES=tools/fftwf-wisdom${NACL_EXEEXT}
-  ConfigureStep --enable-float
-  BuildStep
-  InstallStep
-  TranslateStep
-  ValidateStep
+  EXTRA_CONFIGURE_ARGS=--enable-float
+  BUILD_DIR+="-float"
+  RunConfigureStep
+  RunBuildStep
+  RunInstallStep
+  RunTranslateStep
+  RunValidateStep
 }

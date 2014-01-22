@@ -6,7 +6,7 @@
 BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
 
 ConfigureStep() {
-  Banner "No configure step"
+  return 0
 }
 
 BuildStep() {

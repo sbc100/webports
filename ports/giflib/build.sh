@@ -16,8 +16,6 @@ RunTest() {
 }
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
-
   if [ "${NACL_GLIBC}" = "1" ]; then
     # TODO(sbc): find out why glibc version of rgb2gif is crashing
     return
@@ -42,8 +40,6 @@ TestStep() {
 
 
 BuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
-  echo "Directory: $(pwd)"
   # Limit the subdirecorties that get built by make. This is to
   # avoid the 'doc' directory which has a dependency on 'xmlto'.
   # If 'xmlto' were added to the host build dependencies this could

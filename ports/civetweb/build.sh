@@ -7,8 +7,6 @@
 EXECUTABLES=civetweb
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
-
   export CFLAGS="${NACL_CFLAGS}"
   export LDFLAGS="${NACL_LDFLAGS}"
 
@@ -23,7 +21,6 @@ BuildStep() {
 }
 
 PublishStep() {
-  Banner "Publishing ${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/civetweb"
   MakeDir ${ASSEMBLY_DIR}
@@ -45,8 +42,6 @@ PublishStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
-
   LogExecute cp libcivetweb.a $NACL_TOOLCHAIN_PREFIX/lib
   MakeDir $NACL_TOOLCHAIN_PREFIX/include/civetweb
   LogExecute cp include/civetweb.h $NACL_TOOLCHAIN_PREFIX/include/civetweb

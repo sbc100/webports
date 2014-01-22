@@ -23,8 +23,6 @@ ConfigureStep() {
   fi
 
   local EXTRA_CONFIGURE_ARGS=""
-  Banner "Configuring ${PACKAGE_NAME}"
-  # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
@@ -42,7 +40,6 @@ ConfigureStep() {
   fi
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
-  echo "Directory: $(pwd)"
 
   # TODO(sbc): remove once getaddrinfo() is working
   EXTRA_CONFIGURE_ARGS=--disable-ipv6

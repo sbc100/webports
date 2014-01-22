@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 MAKE_TARGETS="CCLD=\$(CXX) all"
 NACLPORTS_CFLAGS+=" -DNACL_SDK_VERSION=$NACL_SDK_VERSION"
 export LIBS="-lnacl_io -pthread"
@@ -14,12 +13,11 @@ else
   EXECUTABLE_DIR=.libs
 fi
 
-PackageInstall() {
+BuildStep() {
   if [ -f ${SRC_DIR}/shell.c ]; then
     touch ${SRC_DIR}/shell.c
   fi
-
-  DefaultPackageInstall
+  DefaultBuildStep
   if [ ${NACL_ARCH} != "pnacl" ]; then
     WriteSelLdrScript sqlite3 ${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}
   else
@@ -28,12 +26,16 @@ PackageInstall() {
   fi
 
   # Build (at least shell.c) again but this time with nacl_io and -DPPAPI
-  Banner "Build sqlite3_ppapi"
-  touch ${SRC_DIR}/shell.c
+  Banner "Building sqlite3_ppapi"
   sed -i.bak "s/sqlite3\$(EXEEXT)/sqlite3_ppapi\$(EXEEXT)/" Makefile
   sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" Makefile
   sed -i.bak "s/-lnacl_io/-lppapi_simple -lnacl_io -pthread -lppapi_cpp -lppapi/" Makefile
-  BuildStep
+  touch ${SRC_DIR}/shell.c
+  DefaultBuildStep
+}
+
+InstallStep() {
+  DefaultInstallStep
 
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/sqlite"
   if [ "${NACL_ARCH}" = "pnacl" ]; then

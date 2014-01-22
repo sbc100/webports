@@ -5,7 +5,6 @@
 
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}

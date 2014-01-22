@@ -5,7 +5,6 @@
 
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
 
   if [ "${NACL_GLIBC}" = "1" ]; then

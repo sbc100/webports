@@ -3,10 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 TestStep() {
   return 0
-  Banner "Testing ${PACKAGE_NAME}"
 
   if [ ${NACL_ARCH} == "pnacl" ]; then
     # Run once for each architecture.

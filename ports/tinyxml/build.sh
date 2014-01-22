@@ -7,7 +7,6 @@
 
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -21,7 +20,6 @@ BuildStep() {
 
 InstallStep() {
   # copy libs and headers manually
-  Banner "Installing ${PACKAGE_NAME} to ${NACLPORTS_PREFIX}"
   ChangeDir ${NACLPORTS_INCLUDE}
   Remove ${PACKAGE_NAME}
   MakeDir ${PACKAGE_NAME}

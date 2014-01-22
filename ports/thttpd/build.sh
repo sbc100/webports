@@ -5,8 +5,6 @@
 
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
   FILES="
@@ -23,7 +21,6 @@ Makefile"
 }
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   # export the nacl tools
   # The checked-in Makefile has more configuration for this example.
   export AR=${NACLAR}
@@ -38,7 +35,6 @@ BuildStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/thttpd.html ${PUBLISH_DIR}

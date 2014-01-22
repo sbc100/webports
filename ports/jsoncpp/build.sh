@@ -6,7 +6,6 @@
 
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   ChangeDir ${PACKAGE_DIR}
 
@@ -25,7 +24,6 @@ BuildStep() {
 
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
 
   LogExecute cp ${PACKAGE_DIR}/libjsoncpp.a ${NACLPORTS_LIBDIR}

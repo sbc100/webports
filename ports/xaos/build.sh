@@ -15,8 +15,6 @@ PatchStep() {
 }
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -50,11 +48,10 @@ ConfigureStep() {
   cp -r ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME} ${tmp}
   mv ${tmp} ${NACL_BUILD_SUBDIR}
 
-  cd ${NACL_BUILD_SUBDIR}
-  echo "Directory: $(pwd)"
-  echo "run autoconf"
-  rm ./configure
-  autoconf
+  ChangeDir ${NACL_BUILD_SUBDIR}
+  echo "running autoconf"
+  LogExecute rm ./configure
+  LogExecute autoconf
   echo "Configure options: ${CONFIG_FLAGS}"
   ./configure ${CONFIG_FLAGS}
 }

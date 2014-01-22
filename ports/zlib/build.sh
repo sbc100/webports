@@ -8,15 +8,14 @@
 BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   ChangeDir ${BUILD_DIR}
   LogExecute rm -f libz.*
   # TODO: side-by-side install
   local CONFIGURE_ARGS="--prefix=${NACLPORTS_PREFIX}"
   local CFLAGS="-Dunlink=puts"
-  if [ "${NACL_GLIBC}" = "1" -a $# -gt 0 ]; then
-      CONFIGURE_ARGS="${CONFIGURE_ARGS} --shared"
-      CFLAGS="${CFLAGS} -fPIC"
+  if [ "${NACL_GLIBC}" = "1" -a "${BUILD_SHARED:-}" = "1" ]; then
+    CONFIGURE_ARGS="${CONFIGURE_ARGS} --shared"
+    CFLAGS="${CFLAGS} -fPIC"
   fi
   CC=${NACLCC} AR="${NACLAR} -r" RANLIB=${NACLRANLIB} CFLAGS="${CFLAGS}" \
      LogExecute ./configure ${CONFIGURE_ARGS}
@@ -51,7 +50,6 @@ RunExample() {
 
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
   if [ "${NACL_GLIBC}" = "1" ]; then
     # Tests do not currently run on GLIBC due to fdopen() not working
     # TODO(sbc): Remove this once glibc is fixed:
@@ -88,11 +86,12 @@ TestStep() {
 PackageInstall() {
   DefaultPackageInstall
   if [ "${NACL_GLIBC}" = "1" ]; then
-    ConfigureStep shared
-    BuildStep
+    BUILD_SHARED=1
+    RunConfigureStep
+    RunBuildStep
     Validate libz.so.1
-    ValidateStep
-    TestStep
-    InstallStep
+    RunValidateStep
+    RunTestStep
+    RunInstallStep
   fi
 }

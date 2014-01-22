@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 BUILD_DIR=${SRC_DIR}
 MAKE_TARGETS=mtest
 export EXEEXT=${NACL_EXEEXT}
@@ -17,7 +16,6 @@ export EXEEXT=${NACL_EXEEXT}
 #}
 
 InstallStep() {
-  Banner "Installing"
   # copy libs and headers manually
   LogExecute cp *.h ${NACLPORTS_INCLUDE}
   LogExecute cp *.a ${NACLPORTS_LIBDIR}

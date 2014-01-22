@@ -7,7 +7,6 @@
 EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
 BuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   if [ "${NACL_GLIBC}" = "1" ]; then
     PLAT=nacl-glibc
@@ -25,7 +24,6 @@ BuildStep() {
 
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
   pushd src
   if [ "${NACL_ARCH}" = pnacl ]; then
     # Just do the x86-64 version for now.
@@ -44,8 +42,6 @@ TestStep() {
 
 
 InstallStep() {
-  Banner "Install ${PACKAGE_NAME}"
-
   # TODO: side-by-side install
   LogExecute make PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} "INSTALL_TOP=${NACLPORTS_PREFIX}" install
 }

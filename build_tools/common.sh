@@ -757,7 +757,7 @@ DefaultPatchStep() {
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 
   if CheckStamp patch ; then
-    Banner "Skipping patch step"
+    Banner "Skipping patch step (cleaning source tree)"
     git clean -f -d
     return
   fi
@@ -777,7 +777,6 @@ DefaultPatchStep() {
 
 DefaultConfigureStep() {
   local EXTRA_CONFIGURE_OPTS=("${@:-}")
-  Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -831,7 +830,6 @@ DefaultConfigureStep() {
 
 
 CMakeConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
 
@@ -848,7 +846,6 @@ CMakeConfigureStep() {
 
 
 DefaultBuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
   ChangeDir ${BUILD_DIR}
   # Build ${MAKE_TARGETS} or default target if it is not defined
   if [ -n "${MAKEFLAGS:-}" ]; then
@@ -861,12 +858,11 @@ DefaultBuildStep() {
 
 
 DefaultTestStep() {
-  Banner "Testing ${PACKAGE_NAME} (no tests)"
+  echo "No tests defined for ${PACKAGE_NAME}"
 }
 
 
 DefaultInstallStep() {
-  Banner "Installing"
   # assumes pwd has makefile
   if [ -n "${MAKEFLAGS:-}" ]; then
     echo "MAKEFLAGS=${MAKEFLAGS}"
@@ -892,23 +888,23 @@ TimeCommand() {
 #
 Validate() {
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
-      return
+    return
   fi
 
   # new SDKs have a single validator called ncval whereas older (<= 28)
   # have a different validator for each arch.
   if [ -f ${NACL_SDK_ROOT}/tools/ncval ]; then
-      NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval
+    NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval
   elif [ ${NACL_ARCH} = "arm" ]; then
-      NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval_arm
+    NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval_arm
   elif [ ${NACL_ARCH} = "x86_64" ]; then
-      NACL_VALIDATE="${NACL_SDK_ROOT}/tools/ncval_x86_64 --errors"
+    NACL_VALIDATE="${NACL_SDK_ROOT}/tools/ncval_x86_64 --errors"
   else
-      NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval_x86_32
+    NACL_VALIDATE=${NACL_SDK_ROOT}/tools/ncval_x86_32
   fi
   LogExecute ${NACL_VALIDATE} $@
   if [ $? != 0 ]; then
-      exit 1
+    exit 1
   fi
 }
 
@@ -919,7 +915,7 @@ Validate() {
 #
 DefaultValidateStep() {
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
-      return
+    return
   fi
 
   if [ -n "${EXECUTABLES:-}" ]; then
@@ -1125,22 +1121,22 @@ DefaultTranslateStep() {
 
 
 DefaultPackageInstall() {
-  PreInstallStep
+  RunPreInstallStep
   if IsGitRepo; then
-    GitCloneStep
+    RunGitCloneStep
   else
-    DownloadStep
-    ExtractStep
+    RunDownloadStep
+    RunExtractStep
   fi
-  PatchStep
-  ConfigureStep
-  BuildStep
-  TranslateStep
-  ValidateStep
+  RunPatchStep
+  RunConfigureStep
+  RunBuildStep
+  RunTranslateStep
+  RunValidateStep
   if [ "${SKIP_SEL_LDR_TESTS}" != "1" ]; then
-    TestStep
+    RunTestStep
   fi
-  InstallStep
+  RunInstallStep
 }
 
 
@@ -1149,8 +1145,20 @@ NaclportsMain() {
   if [[ $# -gt 0 ]]; then
     COMMAND=$1
   fi
+  echo "NaclportsMain"
   echo ${COMMAND}
   ${COMMAND}
+  echo "done NaclportsMain"
+}
+
+
+RunStep() {
+  local STEP_FUNCTION=$1
+  if [ $# -gt 1 ]; then
+    local TITLE=$2
+    Banner "${TITLE} ${PACKAGE_NAME}"
+  fi
+  ${STEP_FUNCTION}
 }
 
 
@@ -1168,6 +1176,17 @@ TestStep()       { DefaultTestStep;       }
 InstallStep()    { DefaultInstallStep;    }
 PackageInstall() { DefaultPackageInstall; }
 
+RunPreInstallStep() { RunStep PreInstallStep; }
+RunDownloadStep()   { RunStep DownloadStep; }
+RunGitCloneStep()   { RunStep RunGitCloneStep; }
+RunExtractStep()    { RunStep ExtractStep; }
+RunPatchStep()      { RunStep PatchStep; }
+RunConfigureStep()  { RunStep ConfigureStep "Configuring "; }
+RunBuildStep()      { RunStep BuildStep "Building "; }
+RunTranslateStep()  { RunStep TranslateStep "Translating "; }
+RunValidateStep()   { RunStep ValidateStep "Validating "; }
+RunTestStep()       { RunStep TestStep "Testing "; }
+RunInstallStep()    { RunStep InstallStep "Installing "; }
 
 ######################################################################
 # Always run

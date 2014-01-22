@@ -6,7 +6,6 @@
 export BUILD_CC=cc
 
 ConfigureStep() {
-  Banner "Configuring clapack"
   MakeDir ${NACL_BUILD_SUBDIR}
   ChangeDir ${NACL_BUILD_SUBDIR}
   # -u: do not rewrite newer with older files
@@ -49,7 +48,6 @@ TestStep() {
 
 # the Makefile does not contain install target
 InstallStep() {
-  Banner "Installing clapack"
   LogExecute install libblas.a ${NACLPORTS_LIBDIR}
   LogExecute install liblapack.a ${NACLPORTS_LIBDIR}
   LogExecute install tmglib.a ${NACLPORTS_LIBDIR}

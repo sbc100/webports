@@ -6,7 +6,6 @@
 BUILD_DIR=${SRC_DIR}
 
 InstallStep() {
-  Banner "Installing"
   # copy libs and headers manually
   LogExecute cp src/headers/*.h ${NACLPORTS_INCLUDE}
   LogExecute cp *.a ${NACLPORTS_LIBDIR}

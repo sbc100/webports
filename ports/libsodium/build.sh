@@ -11,7 +11,6 @@ RunTest() {
 }
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
   MakeDir naclport_test/lib
 
   # the libtool warns "libtool: install: warning: remember to run

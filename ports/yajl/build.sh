@@ -5,7 +5,6 @@
 
 
 TestStep() {
-  Banner "Testing ${PACKAGE_NAME}"
   if [ ${NACL_ARCH} == "pnacl" ]; then
     local pexe=test/yajl_test
     local script=${BUILD_DIR}/yajl_test.sh
@@ -30,7 +29,5 @@ ConfigureStep() {
 
 
 BuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
-  echo "Directory: $(pwd)"
   make all -j${OS_JOBS}
 }

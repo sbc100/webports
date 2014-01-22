@@ -12,7 +12,6 @@ BOCHS_EXAMPLE_DIR=${NACL_SRC}/ports/bochs
 EXECUTABLES=bochs
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -120,7 +119,7 @@ FetchLinuxStep() {
   unset ARCHIVE_NAME
 }
 
-PackageInstall() {
+DownloadStep() {
+  DefaultDownloadStep
   FetchLinuxStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
-  DefaultPackageInstall
 }

@@ -18,8 +18,6 @@ ConfigureStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
-
   MakeDir ${PUBLISH_DIR}
   for nexe in binutils/*.nexe gas/*.nexe ld/*.nexe; do
     local name=$(basename $nexe .nexe | sed 's/-new//')

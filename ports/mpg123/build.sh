@@ -16,25 +16,21 @@ fi
 export NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -static"
 
 BuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
   export PATH=${NACL_BIN_PATH}:${PATH};
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
-  echo "Directory: $(pwd)"
   LogExecute make clean
   LogExecute make -j${OS_JOBS}
 
-  Banner "Build Tests"
+  Banner "Building Tests"
   local tests="tests/seek_accuracy${NACL_EXEEXT} tests/seek_whence${NACL_EXEEXT} tests/text${NACL_EXEEXT}"
 
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src
-  echo "Directory: $(pwd)"
   LogExecute make clean
   LogExecute make -j${OS_JOBS} ${tests}
 }
 
 InstallStep() {
-  Banner "Install"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
   LogExecute make install
 }

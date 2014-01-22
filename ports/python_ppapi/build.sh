@@ -40,9 +40,3 @@ BuildStep() {
   ChangeDir ${START_DIR}
   DefaultBuildStep
 }
-
-PackageInstall() {
-  PreInstallStep
-  BuildStep
-  InstallStep
-}

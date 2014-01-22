@@ -9,8 +9,6 @@ BusyBoxDisable() {
 }
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-
   local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
   NACL_BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}

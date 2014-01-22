@@ -35,10 +35,3 @@ BuildStep() {
   export MAKEFLAGS
   DefaultBuildStep
 }
-
-
-PackageInstall() {
-  PreInstallStep
-  BuildStep
-  InstallStep
-}

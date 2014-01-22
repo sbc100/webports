@@ -7,7 +7,6 @@
 EXECUTABLES="src/lua src/luac"
 
 BuildStep() {
-  Banner "Build ${PACKAGE_NAME}"
   ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   if [ "${NACL_GLIBC}" = "1" ]; then
     PLAT=nacl-glibc
@@ -25,8 +24,6 @@ BuildStep() {
 
 
 InstallStep() {
-  Banner "Install ${PACKAGE_NAME}"
-
   # TODO: side-by-side install
   LogExecute make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" install
   cd src

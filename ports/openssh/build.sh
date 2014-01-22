@@ -27,7 +27,7 @@ ConfigureStep() {
   # defaults to /usr and then passed DESTDIR= at make install
   # time.  Without this make install will fail as it tries
   # to write to DESTDIR/etc directly (without the prefix).
-  Banner "Configuring ${PACKAGE_NAME}"
+
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}

@@ -18,7 +18,6 @@ SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/ports/scummvm
 ConfigureStep() {
   # NOTE: We can't use the DefaultConfigureStep, because the scummvm
   # configure script is hand-rolled, and won't accept additional arguments.
-  Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -39,7 +38,6 @@ ConfigureStep() {
   fi
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
-  echo "Directory: $(pwd)"
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ "${NACL_ARCH}" = "pnacl" ]; then
@@ -170,8 +168,8 @@ GameGetStep() {
   PACKAGE_DIR=${PACKAGE_DIR_TEMP}
 }
 
-PackageInstall() {
+DownloadStep() {
+  DefaultDownloadStep
   GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
   GameGetStep ${LURE_URL} ${LURE_NAME}
-  DefaultPackageInstall
 }

@@ -18,7 +18,7 @@ AutogenStep() {
 
 
 ConfigureTests() {
-  Banner "Configuring ${PACKAGE_NAME}"
+  Banner "Configuring tests for ${PACKAGE_NAME}"
 
   # export the nacl tools
   export CC=${NACLCC}
@@ -57,8 +57,7 @@ ConfigureTests() {
 
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
-
+  AutogenStep
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -94,9 +93,8 @@ ConfigureStep() {
 }
 
 
-PublishStep() {
+InstallTests() {
   local PUBLISH_DIR=${NACL_PACKAGES_PUBLISH}/sdl-tests/${NACL_ARCH}-${NACL_LIBC}
-  Banner "Publishing Tests ${PUBLISH_DIR}"
   Remove ${PUBLISH_DIR}
   MakeDir ${PUBLISH_DIR}
   LogExecute cp *.?exe ${PUBLISH_DIR}
@@ -114,15 +112,14 @@ PublishStep() {
 
 
 PackageInstall() {
-  PreInstallStep
-  DownloadStep
-  ExtractStep
-  PatchStep
-  AutogenStep
-  ConfigureStep
-  BuildStep
-  InstallStep
+  RunPreInstallStep
+  RunDownloadStep
+  RunExtractStep
+  RunPatchStep
+  RunConfigureStep
+  RunBuildStep
+  RunInstallStep
   ConfigureTests
-  BuildStep
-  PublishStep
+  RunBuildStep
+  InstallTests
 }

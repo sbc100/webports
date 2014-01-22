@@ -3,14 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   make all
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   make install
 
   MakeDir ${PUBLISH_DIR}
@@ -51,7 +48,6 @@ ConfigureStep() {
 
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
-  echo "Directory: $(pwd)"
 
   cp ${START_DIR}/gdb_pepper.cc ${SRC_DIR}/gdb
   ../configure --with-curses --with-expat --with-system-readline \

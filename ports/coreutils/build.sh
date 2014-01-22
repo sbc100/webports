@@ -12,8 +12,6 @@ BuildStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
-
   MakeDir ${PUBLISH_DIR}
   for nexe in src/*${NACL_EXEEXT}; do
     local name=$(basename $nexe .nexe)

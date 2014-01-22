@@ -5,7 +5,6 @@
 
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   local EXTRA_ARGS=""
   local machine="i686"
   if [ "${NACL_GLIBC}" != "1" ] ; then

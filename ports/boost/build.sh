@@ -24,11 +24,9 @@ ConfigureStep() {
 }
 
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   LogExecute ./b2 stage ${BUILD_ARGS}
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   LogExecute ./b2 install ${BUILD_ARGS}
 }

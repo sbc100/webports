@@ -11,7 +11,6 @@ if [ "$NACL_ARCH" = "arm" ]; then
 fi
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -51,7 +50,7 @@ ConfigureStep() {
 }
 
 
-BuildAndInstallStep() {
+BuildStep() {
   # assumes pwd has makefile
   LogExecute make clean
   cflags="${NACLPORTS_CFLAGS} -DSSIZE_MAX='((ssize_t)(~((size_t)0)>>1))'"
@@ -61,11 +60,7 @@ BuildAndInstallStep() {
 }
 
 
-PackageInstall() {
-  PreInstallStep
-  DownloadStep
-  ExtractStep
-  PatchStep
-  ConfigureStep
-  BuildAndInstallStep
+InstallStep() {
+  # installing is done as part of the build step
+  return 0
 }

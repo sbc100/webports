@@ -8,7 +8,6 @@ readonly LIB_GLIBC_COMPAT=libglibc-compat.a
 BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
-  Banner "Configuring ${PACKAGE_NAME}"
   MakeDir ${BUILD_DIR}
   LogExecute cp -rf ${START_DIR}/* ${BUILD_DIR}
   # export the nacl tools

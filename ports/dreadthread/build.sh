@@ -3,9 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 BuildStep() {
-  Banner "Building ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PACKAGE_DIR}
   ChangeDir ${PACKAGE_DIR}
@@ -18,16 +16,9 @@ BuildStep() {
 }
 
 InstallStep() {
-  Banner "Installing ${PACKAGE_NAME}"
   export PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   cp ${PACKAGE_DIR}/libdreadthread.a ${NACLPORTS_LIBDIR}
   cp ${START_DIR}/dreadthread.h ${NACLPORTS_INCLUDE}
   cp ${START_DIR}/dreadthread_ctxt.h ${NACLPORTS_INCLUDE}
   cp ${START_DIR}/dreadthread_chain.h ${NACLPORTS_INCLUDE}
-}
-
-PackageInstall() {
-  PreInstallStep
-  BuildStep
-  InstallStep
 }
