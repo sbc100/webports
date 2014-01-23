@@ -862,6 +862,44 @@ DefaultTestStep() {
 }
 
 
+#
+# Build step for projects based on the NaCl SDK build
+# system (common.mk).
+#
+SDKBuildSystemBuildStep() {
+  # We override $(OUTBASE) to force the build system to put
+  # all its artifacts in ${NACL_PACKAGES_REPOSITORY} rather
+  # than alongside the Makefile.
+  export OUTBASE=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  export CFLAGS=${NACLPORTS_CFLAGS}
+  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export NACLPORTS_INCLUDE
+  export NACLPORTS_PREFIX
+  export NACL_PACKAGES_PUBLISH
+  export NACL_SRC
+
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    MAKEFLAGS+=" TOOLCHAIN=pnacl"
+  elif [ "${NACL_GLIBC}" = "1" ]; then
+    MAKEFLAGS+=" TOOLCHAIN=glibc"
+    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
+  else
+    MAKEFLAGS+=" TOOLCHAIN=newlib"
+    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
+  fi
+  if [ "${NACL_DEBUG}" = "1" ]; then
+    MAKEFLAGS+=" CONFIG=Debug"
+  else
+    MAKEFLAGS+=" CONFIG=Release"
+  fi
+  MAKEFLAGS+=" V=1"
+  export MAKEFLAGS
+  ChangeDir ${START_DIR}
+  DefaultBuildStep
+}
+
+
 DefaultInstallStep() {
   # assumes pwd has makefile
   if [ -n "${MAKEFLAGS:-}" ]; then

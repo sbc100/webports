@@ -6,22 +6,5 @@
 BUILD_DIR=${START_DIR}
 
 BuildStep() {
-  # The sample is built using the NaCl SDK common.mk system.
-  # We override $(OUTBASE) to force the build system to put
-  # all its artifacts in ${NACL_PACKAGES_REPOSITORY} rather
-  # than alongside the Makefile.
-  export OUTBASE=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  export NACLPORTS_INCLUDE
-  export NACL_PACKAGES_PUBLISH
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    MAKEFLAGS+=" TOOLCHAIN=pnacl"
-  elif [ "${NACL_GLIBC}" = "1" ]; then
-    MAKEFLAGS+=" TOOLCHAIN=glibc"
-    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
-  else
-    MAKEFLAGS+=" TOOLCHAIN=newlib"
-    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
-  fi
-  export MAKEFLAGS
-  DefaultBuildStep
+  SDKBuildSystemBuildStep
 }
