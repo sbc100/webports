@@ -27,11 +27,11 @@ CalculatePackageShards()
     libvorbis
     lame
     libav
-    OpenSceneGraph
+    openscenegraph
     ncurses
     readline
     sqlite
-    FreeImage
+    freeimage
     fftw
     curl
     flac
@@ -42,7 +42,7 @@ CalculatePackageShards()
     libpng
     libmng
     lcms
-    DevIL
+    devil
     cfitsio
     faad2
     speex
@@ -61,7 +61,7 @@ CalculatePackageShards()
   PKG_LIST_PART_1="
     zlib
     libpng
-    Regal
+    regal
     glibc-compat
     ncurses
     readline
@@ -70,7 +70,7 @@ CalculatePackageShards()
     glib
     libtar
     nethack
-    SDL
+    sdl
     dosbox
     libogg
     libvorbis
@@ -79,8 +79,8 @@ CalculatePackageShards()
     protobuf
     libmikmod
     freetype
-    SDL_ttf
-    SDL_mixer
+    sdl_ttf
+    sdl_mixer
     metakit
     expat
     drod
@@ -92,9 +92,9 @@ CalculatePackageShards()
     agg
     libtomcrypt
     ruby_ppapi
-    SDL_net
+    sdl_net
     jpeg8d
-    SDL_image
+    sdl_image
     snes9x
   "
 

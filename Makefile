@@ -95,7 +95,7 @@ ALL_PORTS = \
      ports/clapack \
      ports/coreutils \
      ports/curl \
-     ports/DevIL \
+     ports/devil \
      ports/dosbox \
      ports/dreadthread \
      ports/drod \
@@ -107,7 +107,7 @@ ALL_PORTS = \
      ports/flac \
      ports/fontconfig \
      ports/freealut \
-     ports/FreeImage \
+     ports/freeimage \
      ports/freetype \
      ports/gc \
      ports/gcc \
@@ -119,7 +119,7 @@ ALL_PORTS = \
      ports/gmp \
      ports/gsl \
      ports/hdf5 \
-     ports/ImageMagick \
+     ports/imagemagick \
      ports/jpeg6b \
      ports/jpeg8d \
      ports/jsoncpp \
@@ -144,7 +144,7 @@ ALL_PORTS = \
      ports/lua5.2 \
      ports/lua_ppapi \
      ports/make \
-     ports/Mesa \
+     ports/mesa \
      ports/mesagl \
      ports/metakit \
      ports/mongoose \
@@ -159,7 +159,7 @@ ALL_PORTS = \
      ports/openal-ogg \
      ports/openal-soft \
      ports/opencv \
-     ports/OpenSceneGraph \
+     ports/openscenegraph \
      ports/openssh \
      ports/openssl \
      ports/pango \
@@ -172,15 +172,15 @@ ALL_PORTS = \
      ports/python3 \
      ports/python3_ppapi \
      ports/readline \
-     ports/Regal \
+     ports/regal \
      ports/ruby \
      ports/ruby_ppapi \
      ports/scummvm \
-     ports/SDL \
-     ports/SDL_image \
-     ports/SDL_mixer \
-     ports/SDL_net \
-     ports/SDL_ttf \
+     ports/sdl \
+     ports/sdl_image \
+     ports/sdl_mixer \
+     ports/sdl_net \
+     ports/sdl_ttf \
      ports/snes9x \
      ports/speex \
      ports/sqlite \
@@ -303,23 +303,23 @@ $(SENT)/ports/python_ppapi: ports/python ports/libtar
 $(SENT)/ports/python3_ppapi: ports/python3 ports/libtar
 $(SENT)/ports/lua_ppapi: ports/lua5.2 ports/libtar
 $(SENT)/ports/ruby_ppapi: ports/ruby ports/libtar ports/glibc-compat
-$(SENT)/ports/scummvm: ports/SDL ports/libvorbis ports/libtar
-$(SENT)/ports/bochs: ports/SDL
-$(SENT)/ports/dosbox: ports/SDL ports/zlib ports/libpng
-$(SENT)/ports/drod: ports/SDL ports/SDL_mixer ports/SDL_ttf ports/zlib \
+$(SENT)/ports/scummvm: ports/sdl ports/libvorbis ports/libtar
+$(SENT)/ports/bochs: ports/sdl
+$(SENT)/ports/dosbox: ports/sdl ports/zlib ports/libpng
+$(SENT)/ports/drod: ports/sdl ports/sdl_mixer ports/sdl_ttf ports/zlib \
     ports/metakit ports/libtar ports/expat
-$(SENT)/ports/mesagl: ports/Mesa
+$(SENT)/ports/mesagl: ports/mesa
 $(SENT)/ports/glib: ports/zlib
 $(SENT)/ports/pango: ports/glib ports/cairo
-$(SENT)/ports/Regal: ports/libpng
-$(SENT)/ports/SDL: ports/libtar
+$(SENT)/ports/regal: ports/libpng
+$(SENT)/ports/sdl: ports/libtar
 ifneq ($(NACL_ARCH), pnacl)
-$(SENT)/ports/SDL: ports/Regal
+$(SENT)/ports/sdl: ports/regal
 endif
-$(SENT)/ports/SDL_mixer: ports/SDL ports/libogg ports/libvorbis ports/libmikmod
-$(SENT)/ports/SDL_image: ports/SDL ports/libpng ports/jpeg8d
-$(SENT)/ports/SDL_net: ports/SDL
-$(SENT)/ports/SDL_ttf: ports/SDL ports/freetype
+$(SENT)/ports/sdl_mixer: ports/sdl ports/libogg ports/libvorbis ports/libmikmod
+$(SENT)/ports/sdl_image: ports/sdl ports/libpng ports/jpeg8d
+$(SENT)/ports/sdl_net: ports/sdl
+$(SENT)/ports/sdl_ttf: ports/sdl ports/freetype
 $(SENT)/ports/boost: ports/zlib ports/bzip2
 $(SENT)/ports/freealut: ports/openal-soft
 $(SENT)/ports/openal-ogg: ports/openal-soft ports/libvorbis
@@ -335,11 +335,11 @@ ifneq ($(NACL_GLIBC), 1)
 endif
 $(SENT)/ports/libmng: ports/zlib ports/jpeg8d
 $(SENT)/ports/lcms: ports/zlib ports/jpeg8d ports/tiff
-$(SENT)/ports/DevIL: ports/libpng ports/jpeg8d ports/libmng ports/tiff \
+$(SENT)/ports/devil: ports/libpng ports/jpeg8d ports/libmng ports/tiff \
     ports/lcms
 $(SENT)/ports/physfs: ports/zlib
 $(SENT)/ports/mpg123: ports/openal-soft
-$(SENT)/ports/ImageMagick: ports/libpng ports/jpeg8d ports/bzip2 ports/zlib
+$(SENT)/ports/imagemagick: ports/libpng ports/jpeg8d ports/bzip2 ports/zlib
 $(SENT)/ports/gdb: ports/ncurses ports/expat ports/readline
 $(SENT)/ports/hdf5: ports/glibc-compat
 $(SENT)/ports/zeromq: ports/glibc-compat
@@ -364,7 +364,7 @@ cfitsio: ports/cfitsio ;
 clapack: ports/clapack ;
 coreutils: ports/coreutils ;
 curl: ports/curl ;
-DevIL: ports/DevIL ;
+devil: ports/devil ;
 dreadthread: ports/dreadthread ;
 expat: ports/expat ;
 faac: ports/faac ;
@@ -374,7 +374,7 @@ fftw: ports/fftw ;
 flac: ports/flac ;
 fontconfig: ports/fontconfig ;
 freealut: ports/freealut ;
-freeimage FreeImage: ports/FreeImage ;
+freeimage: ports/freeimage ;
 freetype: ports/freetype ;
 gc: ports/gc ;
 gcc: ports/gcc ;
@@ -385,7 +385,7 @@ gmp: ports/gmp ;
 gsl: ports/gsl ;
 hdf5: ports/hdf5 ;
 hangul libhangul: ports/libhangul ;
-imagemagick ImageMagick: ports/ImageMagick ;
+imagemagick: ports/imagemagick ;
 jpeg jpeg8d: ports/jpeg8d ;
 jpeg6b: ports/jpeg6b ;
 jsoncpp: ports/jsoncpp ;
@@ -396,7 +396,7 @@ libav: ports/libav ;
 lua5.1: ports/lua5.1 ;
 lua5.2: ports/lua5.2 ;
 lua: ports/lua5.2 ;
-mesa Mesa: ports/Mesa ;
+mesa: ports/mesa ;
 metakit: ports/metakit ;
 mikmod libmikmod: ports/libmikmod ;
 mng libmng: ports/libmng ;
@@ -409,7 +409,7 @@ ncurses: ports/ncurses ;
 ogg libogg: ports/libogg ;
 openal openal-soft: ports/openal-soft ;
 opencv: ports/opencv ;
-openscenegraph OpenSceneGraph: ports/OpenSceneGraph ;
+openscenegraph: ports/openscenegraph ;
 openssl: ports/openssl ;
 pango: ports/pango ;
 pcre libpcre: ports/pcre ;
@@ -420,13 +420,13 @@ protobuf: ports/protobuf ;
 python: ports/python ;
 python3: ports/python3 ;
 readline: ports/readline ;
-regal Regal: ports/Regal ;
+regal: ports/regal ;
 ruby: ports/ruby ;
-sdl SDL: ports/SDL ;
-sdl_image SDL_image: ports/SDL_image ;
-sdl_mixer SDL_mixer: ports/SDL_mixer ;
-sdl_net SDL_net: ports/SDL_net ;
-sdl_ttf SDL_ttf: ports/SDL_ttf ;
+sdl: ports/sdl ;
+sdl_image: ports/sdl_image ;
+sdl_mixer: ports/sdl_mixer ;
+sdl_net: ports/sdl_net ;
+sdl_ttf: ports/sdl_ttf ;
 sodium libsodium: ports/libsodium ;
 speex: ports/speex ;
 sqlite: ports/sqlite ;
