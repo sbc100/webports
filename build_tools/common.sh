@@ -1183,10 +1183,7 @@ NaclportsMain() {
   if [[ $# -gt 0 ]]; then
     COMMAND=$1
   fi
-  echo "NaclportsMain"
-  echo ${COMMAND}
   ${COMMAND}
-  echo "done NaclportsMain"
 }
 
 
@@ -1216,7 +1213,7 @@ PackageInstall() { DefaultPackageInstall; }
 
 RunPreInstallStep() { RunStep PreInstallStep; }
 RunDownloadStep()   { RunStep DownloadStep; }
-RunGitCloneStep()   { RunStep RunGitCloneStep; }
+RunGitCloneStep()   { RunStep GitCloneStep; }
 RunExtractStep()    { RunStep ExtractStep; }
 RunPatchStep()      { RunStep PatchStep; }
 RunConfigureStep()  { RunStep ConfigureStep "Configuring "; }
