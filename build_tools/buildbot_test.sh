@@ -7,7 +7,7 @@ export TEST_BUILDBOT=1
 export NACLPORTS_NO_UPLOAD=1
 export BUILDBOT_BUILDERNAME=linux-newlib-0
 # BUILDBOT_REVISION is used in the foldername when
-# publishing data to commondatastorage.  Set to a unique
+# publishing data to Google Cloud Storage.  Set to a unique
 # value for testing purposes.
 export BUILDBOT_REVISION=9111111
 

@@ -407,7 +407,7 @@ TryFetch() {
 Fetch() {
   local URL=$1
   local FILENAME=$2
-  local MIRROR_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl
+  local MIRROR_URL=http://storage.googleapis.com/nativeclient-mirror/nacl
   if echo ${URL} | grep -qv ${MIRROR_URL} &> /dev/null; then
     set +o errexit
     # Try mirrored version first
@@ -419,7 +419,7 @@ Fetch() {
     fi
     set -o errexit
   else
-    # The URL is already on commondatastorage do just download it
+    # The URL is already on Google Clound Storage do just download it
     TryFetch ${URL} ${FILENAME}
   fi
 

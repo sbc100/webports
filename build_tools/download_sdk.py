@@ -51,8 +51,7 @@ LOCAL_GSUTIL = 'gsutil'
 #LOCAL_GSUTIL = 'python.exe C:\\bin\\gsutil\\gsutil'
 
 GS_URL_BASE = 'gs://nativeclient-mirror/nacl/nacl_sdk/'
-GSTORE = 'http://commondatastorage.googleapis.com/'\
-         'nativeclient-mirror/nacl/nacl_sdk/'
+GSTORE = 'http://storage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/'
 
 def ErrorOut(msg):
     sys.stderr.write("error: %s\n" % str(msg))

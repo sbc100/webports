@@ -6,7 +6,7 @@
 
 This library can be used to build tools for working with naclports
 packages.  For example, it is used by 'update_mirror.py' to iterate
-through all packages and mirror them on commondatastorage.
+through all packages and mirror them on Google Cloud Storage.
 """
 import optparse
 import os
@@ -19,7 +19,7 @@ import tempfile
 
 import sha1check
 
-MIRROR_URL = 'http://commondatastorage.googleapis.com/nativeclient-mirror/nacl'
+MIRROR_URL = 'http://storage.googleapis.com/nativeclient-mirror/nacl'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')

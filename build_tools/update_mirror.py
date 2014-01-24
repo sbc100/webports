@@ -6,8 +6,8 @@
 """Script to synchronise the naclports mirror of upstream archives.
 
 This script verifies that the URL for every package is mirrored on
-commondatastorage.  If it finds missing URLs it downloads them to the local
-machine and then pushes them up using gsutil.
+Google Cloud Storage.  If it finds missing URLs it downloads them to
+the local machine and then pushes them up using gsutil.
 
 gsutil is required the run this script and if any mirroring operations are
 required then the correct gsutil credentials will be required.

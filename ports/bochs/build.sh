@@ -5,7 +5,7 @@
 
 
 # Linux disk image
-readonly LINUX_IMG_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
+readonly LINUX_IMG_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
 readonly LINUX_IMG_NAME=linux-img
 
 BOCHS_EXAMPLE_DIR=${NACL_SRC}/ports/bochs

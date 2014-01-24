@@ -131,7 +131,7 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
   UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/${BUILDBOT_GOT_REVISION}
   RunCmd ${GSUTIL} cp -a public-read \
       naclports.tar.bz2 gs://${UPLOAD_PATH}/naclports.tar.bz2
-  URL="https://commondatastorage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
+  URL="https://storage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
   echo "@@@STEP_LINK@download@${URL}@@@"
 fi
 

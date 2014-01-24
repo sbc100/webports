@@ -5,10 +5,10 @@
 
 
 # Beneath a Steel Sky (floppy version)
-readonly BASS_FLOPPY_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
+readonly BASS_FLOPPY_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
 readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
 
-readonly LURE_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/lure/lure-1.1.zip
+readonly LURE_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/lure/lure-1.1.zip
 readonly LURE_NAME=lure-1.1
 
 EXECUTABLES=scummvm

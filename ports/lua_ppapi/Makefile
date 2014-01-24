@@ -64,7 +64,7 @@ CHROMEAPPS = $(NACL_SRC)/third_party/hterm/src
 LIB_DOT = $(CHROMEAPPS)/libdot
 NASSH = $(CHROMEAPPS)/nassh
 
-MIRROR_URL=http://commondatastorage.googleapis.com/nativeclient-mirror/nacl
+MIRROR_URL=http://storage.googleapis.com/nativeclient-mirror/nacl
 
 # Mirrored from http://luajit.org/download/scimark.lua
 SCIMARK=scimark.lua
