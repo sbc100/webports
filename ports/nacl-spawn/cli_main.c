@@ -35,6 +35,15 @@ int cli_main(int argc, char* argv[]) {
   mkdir("/mnt/http", 0777);
   mkdir("/mnt/html5", 0777);
 
+  const char* data_url = getenv("NACL_DATA_URL");
+  if (!data_url)
+    data_url = "./";
+
+  if (mount(data_url, "/mnt/http", "httpfs", 0, "") != 0) {
+    perror("mounting http filesystem failed");
+    return 1;
+  }
+
   if (mount("/", "/mnt/html5", "html5fs", 0, "") != 0) {
     perror("Mounting HTML5 filesystem failed. Please use --unlimited-storage");
   }
