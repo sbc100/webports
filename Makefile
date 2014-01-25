@@ -185,6 +185,7 @@ ALL_PORTS = \
      ports/speex \
      ports/sqlite \
      ports/subversion \
+     ports/tar \
      ports/thttpd \
      ports/tiff \
      ports/tinyxml \
@@ -272,7 +273,6 @@ $(SENT)/ports/libtheora: ports/libogg
 $(SENT)/ports/flac: ports/libogg
 $(SENT)/ports/speex: ports/libogg
 $(SENT)/ports/fontconfig: ports/expat ports/freetype
-$(SENT)/ports/libtar: ports/zlib
 $(SENT)/ports/libpng: ports/zlib
 $(SENT)/ports/git: ports/zlib ports/nacl-spawn
 $(SENT)/ports/agg: ports/freetype
@@ -393,6 +393,7 @@ lame: ports/lame ;
 lcms: ports/lcms ;
 leveldb: ports/leveldb ;
 libav: ports/libav ;
+libtar: ports/libtar ;
 lua5.1: ports/lua5.1 ;
 lua5.2: ports/lua5.2 ;
 lua: ports/lua5.2 ;
@@ -430,8 +431,8 @@ sdl_ttf: ports/sdl_ttf ;
 sodium libsodium: ports/libsodium ;
 speex: ports/speex ;
 sqlite: ports/sqlite ;
-tar libtar: ports/libtar ;
 theora libtheora: ports/libtheora ;
+tar: ports/tar ;
 tiff: ports/tiff ;
 tinyxml: ports/tinyxml ;
 tomcrypt libtomcrypt: ports/libtomcrypt ;

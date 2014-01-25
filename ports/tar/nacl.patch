@@ -1,0 +1,42 @@
+diff --git a/lib/mktime.c b/lib/mktime.c
+index 16f5b9a..63d7cb1 100644
+--- a/lib/mktime.c
++++ b/lib/mktime.c
+@@ -141,8 +141,11 @@ ydhms_diff (long int year1, long int yday1, int hour1, int min1, int sec1,
+ 	    int year0, int yday0, int hour0, int min0, int sec0)
+ {
+   verify (C99_integer_division, -1 / 2 == 0);
++  /* This check looks simply wrong. tar-1.27.1 does not have this check. */
++#if !defined(__native_client__)
+   verify (long_int_year_and_yday_are_wide_enough,
+ 	  INT_MAX <= LONG_MAX / 2 || TIME_T_MAX <= UINT_MAX);
++#endif
+ 
+   /* Compute intervening leap days correctly even if year is negative.
+      Take care to avoid integer overflow here.  */
+diff --git a/src/Makefile.in b/src/Makefile.in
+index 86de4cc..64eeb01 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -178,7 +178,7 @@ LDFLAGS = @LDFLAGS@
+ LIBICONV = @LIBICONV@
+ LIBINTL = @LIBINTL@
+ LIBOBJS = @LIBOBJS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ $(EXTRA_LIBS)
+ LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
+ LIB_SETSOCKOPT = @LIB_SETSOCKOPT@
+ LTLIBICONV = @LTLIBICONV@
+diff --git a/src/tar.c b/src/tar.c
+index 31d7d30..7259390 100644
+--- a/src/tar.c
++++ b/src/tar.c
+@@ -1617,7 +1617,7 @@ decode_options (int argc, char **argv)
+
+ /* Main routine for tar.  */
+ int
+-main (int argc, char **argv)
++nacl_main (int argc, char **argv)
+ {
+   set_start_time ();
+   program_name = argv[0];
