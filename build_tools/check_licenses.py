@@ -18,7 +18,7 @@ import sys
 import naclports
 
 KNOWN_LICENSES = ['GPL', 'GPL2', 'LGPL', 'LGPL2', 'ISC',
-                  'MPL', 'BSD', 'MIT', 'CUSTOM']
+                  'MPL', 'BSD', 'MIT', 'ZLIB', 'CUSTOM']
 
 
 options = None
