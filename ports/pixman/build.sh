@@ -3,30 +3,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# without this configure fails with the error
+# checking build system type... Invalid configuration \
+#`x86_64-unknown-linux-': machine `x86_64-unknown-linux' not recognized
+if [ $NACL_ARCH = "arm" ]; then
+  export LIBC=newlib
+fi
 
-ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cd ${NACL_BUILD_SUBDIR}
-  PERL=/bin/true LogExecute ../configure \
-    --host=nacl \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --oldincludedir=${NACLPORTS_INCLUDE} \
-    --with-http=off \
-    --with-html=off \
-    --with-ftp=off \
-    --with-x=no \
-    --${NACL_OPTION}-mmx \
-    --${NACL_OPTION}-sse2 \
-    --disable-arm-simd
-}
+export PERL=/bin/true
+export EXTRA_CONFIGURE_ARGS="--disable-arm-simd"

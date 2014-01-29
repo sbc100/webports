@@ -349,6 +349,7 @@ $(SENT)/ports/toybox: ports/glibc-compat ports/nacl-spawn
 $(SENT)/ports/coreutils: ports/nacl-spawn
 $(SENT)/ports/binutils: ports/nacl-spawn
 $(SENT)/ports/gcc: ports/nacl-spawn ports/gmp ports/mpfr ports/mpc
+$(SENT)/ports/pixman: ports/libpng
 
 # shortcuts libraries (alphabetical)
 agg: ports/agg ;
