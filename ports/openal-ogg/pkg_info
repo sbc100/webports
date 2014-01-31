@@ -1,2 +1,3 @@
 PACKAGE_NAME=openal-ogg
 LIBC=newlib
+DEPENDS=(openal-soft libvorbis)

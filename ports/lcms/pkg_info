@@ -1,3 +1,4 @@
 PACKAGE_NAME=lcms2-2.4
 URL=http://downloads.sourceforge.net/project/lcms/lcms/2.4/lcms2-2.4.tar.gz
 LICENSE=MIT:COPYING
+DEPENDS=(zlib jpeg8d tiff)

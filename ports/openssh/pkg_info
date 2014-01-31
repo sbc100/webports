@@ -1,3 +1,4 @@
 PACKAGE_NAME=openssh-5.9p1
 URL=http://ftp5.usa.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-5.9p1.tar.gz
 LIBC=glibc
+DEPENDS=(zlib openssl jsoncpp)

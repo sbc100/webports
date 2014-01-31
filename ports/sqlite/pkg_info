@@ -1,2 +1,3 @@
 PACKAGE_NAME=sqlite-autoconf-3071601
 URL=http://www.sqlite.org/2013/sqlite-autoconf-3071601.tar.gz
+DEPENDS=(readline)

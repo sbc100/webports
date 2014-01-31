@@ -1,3 +1,4 @@
 PACKAGE_NAME=fontconfig-2.10.2
 URL=http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.10.2.tar.bz2
 LICENSE=CUSTOM:COPYING
+DEPENDS=(expat freetype)

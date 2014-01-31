@@ -56,10 +56,15 @@ def main(args):
   parser.add_option('-v', '--verbose', action='store_true',
                     help='Output extra information.')
   options, _ = parser.parse_args(args)
-  rtn = 0
+  rtn = False
 
+  count = 0
   for package in naclports.PackageIterator():
     rtn |= CheckLicense(package)
+    count += 1
+
+  if not rtn:
+    print "Verfied licenses for %d packages" % count
 
   return rtn
 

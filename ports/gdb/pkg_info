@@ -2,3 +2,4 @@ PACKAGE_NAME=gdb-6.8
 URL=http://git.chromium.org/native_client/nacl-gdb.git@ef0bd30c46a9066309396c37b10a8ff9a726faf3
 LICENSE=CUSTOM
 LIBC=glibc
+DEPENDS=(ncurses expat readline)

@@ -1,2 +1,3 @@
 PACKAGE_NAME=lua_ppapi
-LICENCE=BSD
+LICENSE=BSD
+DEPENDS=(lua5.2 libtar)

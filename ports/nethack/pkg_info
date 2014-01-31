@@ -1,3 +1,4 @@
 PACKAGE_NAME=nethack-3.4.3
 URL=http://storage.googleapis.com/nativeclient-mirror/nacl/nethack-343-src.tgz
 LICENSE=CUSTOM:dat/license
+DEPENDS=(ncurses libtar)

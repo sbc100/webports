@@ -1,3 +1,4 @@
 PACKAGE_NAME=physfs-2.0.3
 URL=http://icculus.org/physfs/downloads/physfs-2.0.3.tar.bz2
 LICENSE=CUSTOM:LICENSE.txt
+DEPENDS=(zlib)

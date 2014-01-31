@@ -2,3 +2,4 @@ PACKAGE_NAME=thttpd-2.25b
 URL=http://www.acme.com/software/thttpd/thttpd-2.25b.tar.gz
 LICENSE=BSD
 LIBC=glibc
+DEPENDS=(jsoncpp)

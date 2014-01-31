@@ -2,11 +2,12 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Library for manipulating naclports packages in python.
+"""Tool for manipulating naclports packages in python.
 
-This library can be used to build tools for working with naclports
-packages.  For example, it is used by 'update_mirror.py' to iterate
-through all packages and mirror them on Google Cloud Storage.
+This tool can be used to for working with naclports packages.
+It can also be incorporated into other tools that need to
+work with packages (e.g. 'update_mirror.py' uses it to iterate
+through all packages and mirror them on Google Cloud Storage).
 """
 import optparse
 import os
@@ -42,36 +43,64 @@ class Package(object):
   Package objects correspond to folders on disk which
   contain a 'pkg_info' file.
   """
+  VALUE_KEYS = ('URL', 'PACKAGE_NAME', 'LICENSE', 'DEPENDS', 'MIN_SDK_VERSION',
+                'LIBC', 'DISABLED_ARCH', 'URL_FILENAME', 'PACKAGE_DIR',
+                'BUILD_OS')
+
   def __init__(self, pkg_root):
     self.root = os.path.abspath(pkg_root)
-    info = os.path.join(pkg_root, 'pkg_info')
+    self.info = os.path.join(pkg_root, 'pkg_info')
     keys = []
     self.URL_FILENAME = None
     self.URL = None
     self.LICENSE = None
-    if not os.path.exists(info):
+    if not os.path.exists(self.info):
       raise Error('Invalid package folder: %s' % pkg_root)
-    with open(info) as f:
+
+    with open(self.info) as f:
       for i, line in enumerate(f):
         if line[0] == '#':
           continue
-        if '=' not in line:
-          raise Error('Invalid pkg_info line %d: %s' % (i + 1, pkg_root))
-        key, value = line.split('=', 1)
-        key = key.strip()
-        value = shlex.split(value.strip())[0]
+        key, value = self.ParsePkgInfoLine(line, i+1)
         keys.append(key)
         setattr(self, key, value)
     assert 'PACKAGE_NAME' in keys
+
+  def __cmp__(self, other):
+    return cmp(self.PACKAGE_NAME, other.PACKAGE_NAME)
+
+  def ParsePkgInfoLine(self, line, line_no):
+    if '=' not in line:
+      raise Error('Invalid pkg_info line %d: %s' % (line_no, self.info))
+    key, value = line.split('=', 1)
+    key = key.strip()
+    if key not in Package.VALUE_KEYS:
+      raise Error("Invalid key '%s' in pkg_info: %s" % (key, self.info))
+    value = value.strip()
+    if value[0] == '(':
+      array_value = []
+      if value[-1] != ')':
+        raise Error('Error parsing %s: %s (%s)' % (self.info, key, value))
+      value = value[1:-1]
+      for single_value in value.split():
+        array_value.append(single_value)
+      value = array_value
+    else:
+      value = shlex.split(value)[0]
+    return (key, value)
+
+  def CheckDeps(self, valid_dependencies):
+    for dep in getattr(self, 'DEPENDS', []):
+      if dep not in valid_dependencies:
+        print '%s: Invalid dependency: %s' % (self.info, dep)
+        return False
+    return True
 
   def GetBasename(self):
     basename = os.path.splitext(self.GetArchiveFilename())[0]
     if basename.endswith('.tar'):
       basename = os.path.splitext(basename)[0]
     return basename
-
-  def __cmp__(self, other):
-    return cmp(self.PACKAGE_NAME, other.PACKAGE_NAME)
 
   def GetBuildLocation(self):
     package_dir = getattr(self, 'PACKAGE_DIR', self.PACKAGE_NAME)
@@ -80,8 +109,11 @@ class Package(object):
   def GetArchiveFilename(self):
     if self.URL_FILENAME:
       return self.URL_FILENAME
-    elif self.URL:
+
+    if self.URL and '.git' not in self.URL:
       return os.path.basename(urlparse.urlparse(self.URL)[2])
+
+    return None
 
   def DownloadLocation(self):
     archive = self.GetArchiveFilename()
@@ -90,6 +122,7 @@ class Package(object):
     return os.path.join(ARCHIVE_ROOT, archive)
 
   def Verify(self, verbose=False):
+    """Download upstream source and verify hash."""
     if not self.GetArchiveFilename():
       print "no archive: %s" % self.PACKAGE_NAME
       return True
@@ -173,15 +206,19 @@ class Package(object):
       return
     if not os.path.exists(os.path.dirname(filename)):
       os.makedirs(os.path.dirname(filename))
+
+    temp_filename = filename + '.partial'
     try:
       mirror = self.GetMirrorURL()
-      print 'Downloading: %s [%s]' % (mirror, filename)
-      cmd = ['wget', '-O', filename, mirror]
+      print 'Downloading: %s [%s]' % (mirror, temp_filename)
+      cmd = ['wget', '-O', temp_filename, mirror]
       subprocess.check_call(cmd)
     except subprocess.CalledProcessError:
-      print 'Downloading: %s [%s]' % (self.URL, filename)
-      cmd = ['wget', '-O', filename, self.URL]
+      print 'Downloading: %s [%s]' % (self.URL, temp_filename)
+      cmd = ['wget', '-O', temp_filename, self.URL]
       subprocess.check_call(cmd)
+
+    os.rename(temp_filename, filename)
 
 
 def PackageIterator(folders=None):
@@ -198,7 +235,7 @@ def PackageIterator(folders=None):
 
 def main(args):
   try:
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(description=__doc__)
     parser.add_option('-v', '--verbose', action='store_true',
                       help='Output extra information.')
     parser.add_option('-C', dest='dirname', default='.',
@@ -221,7 +258,11 @@ def main(args):
     if command == 'download':
       p.Download()
     elif command == 'check':
-      pass # simply check that the package is valid.
+      # Fact that we've got this far means the pkg_info
+      # is basically valid.  This final check verifies the
+      # dependencies are valid.
+      package_names = [os.path.basename(p.root) for p in PackageIterator()]
+      p.CheckDeps(package_names)
     elif command == 'enabled':
       p.Enabled()
     elif command == 'verify':

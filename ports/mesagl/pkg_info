@@ -1,1 +1,2 @@
 PACKAGE_NAME=mesagl
+DEPENDS=(mesa)

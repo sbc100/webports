@@ -2,3 +2,4 @@ PACKAGE_NAME=subversion-1.8.5
 URL=http://apache.mirrors.pair.com/subversion/subversion-1.8.5.tar.bz2
 LICENSE=apache
 LIBC=glibc
+DEPENDS=(apr apr-util sqlite zlib)

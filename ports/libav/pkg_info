@@ -4,3 +4,4 @@ LICENSE=GPL,LGPL
 # TODO(sbc): remove this conditional once this bug gets fixed:
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 DISABLED_ARCH=arm
+DEPENDS=(lame libvorbis)

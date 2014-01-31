@@ -1,3 +1,4 @@
 PACKAGE_NAME=apr-util-1.5.3
 URL=http://apache.mirrors.pair.com/apr/apr-util-1.5.3.tar.bz2
 LICENSE=apache
+DEPENDS=(apr expat)

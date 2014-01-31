@@ -2,3 +2,4 @@ PACKAGE_NAME=scummvm-1.6.0
 URL=http://prdownloads.sourceforge.net/scummvm/scummvm-1.6.0.tar.gz?download
 URL_FILENAME=scummvm-1.6.0.tar.gz
 LICENSE=LGPL,GPL,BSD
+DEPENDS=(sdl libvorbis libtar)

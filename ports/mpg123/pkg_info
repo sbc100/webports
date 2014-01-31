@@ -1,3 +1,4 @@
 PACKAGE_NAME=mpg123-1.14.4
 URL=http://mpg123.orgis.org/download/mpg123-1.14.4.tar.bz2
 LICENSE=LGPL:COPYING
+DEPENDS=(openal-soft)

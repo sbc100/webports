@@ -1,3 +1,4 @@
 PACKAGE_NAME=ncurses-5.9
 URL=ftp://ftp.gnu.org/gnu/ncurses/ncurses-5.9.tar.gz
 LICENSE=CUSTOM
+DEPENDS=(glibc-compat)
