@@ -69,6 +69,27 @@ NaClTerm.init = function() {
 };
 
 /**
+ * Makes the path in a NMF entry to fully specified path.
+ *
+ * @private
+ */
+NaClTerm.prototype.adjustNmfEntry_ = function(entry) {
+  for (var arch in entry) {
+    var path = entry[arch]['url'];
+    var html5_mount_point = '/mnt/html5';
+    if (path.indexOf(html5_mount_point) == 0) {
+      path = path.replace(html5_mount_point,
+                          'filesystem:' + location.origin + '/persistent');
+    } else {
+      // This is for the dynamic loader.
+      var base = location.href.match('.*/')[0];
+      path = base + path;
+    }
+    entry[arch]['url'] = path;
+  }
+}
+
+/**
  * Handle messages sent to us from NaCl.
  *
  * @private
@@ -81,7 +102,17 @@ NaClTerm.prototype.handleMessage_ = function(e) {
     var envs = msg['envs'];
     var cwd = msg['cwd'];
     var executable = args.shift();
-    var nmf = executable + '.nmf';
+    var nmf = msg['nmf'];
+    if (nmf) {
+      if (nmf['files']) {
+        for (var key in nmf['files'])
+          this.adjustNmfEntry_(nmf['files'][key]);
+      }
+      this.adjustNmfEntry_(nmf['program']);
+      nmf = 'data:text/plain,' + JSON.stringify(nmf);
+    } else {
+      nmf = executable + '.nmf';
+    }
     this.spawn(nmf, args, envs, cwd, executable, e);
   } else if (e.data['command'] == 'nacl_wait') {
     var msg = e.data;

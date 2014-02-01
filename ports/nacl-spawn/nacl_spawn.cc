@@ -6,18 +6,25 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <libgen.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <string>
+#include <vector>
 
 #include "ppapi/cpp/instance.h"
 #include "ppapi/cpp/var.h"
 #include "ppapi/cpp/var_array.h"
 #include "ppapi/cpp/var_dictionary.h"
 #include "ppapi_simple/ps_instance.h"
+
+#if defined(__GLIBC__)
+# include "library_dependencies.h"
+#endif
 
 extern char** environ;
 
@@ -27,6 +34,21 @@ struct NaClSpawnReply {
   // Zero or positive on success or -errno on failure.
   int result;
 };
+
+static std::string GetCwd() {
+  char cwd[PATH_MAX + 1];
+  if (!getcwd(cwd, PATH_MAX))
+    assert(0);
+  return cwd;
+}
+
+static std::string GetAbsPath(const std::string& path) {
+  assert(!path.empty());
+  if (path[0] == '/')
+    return path;
+  else
+    return GetCwd() + '/' + path;
+}
 
 // Returns a unique request ID to make all request strings different
 // from each other.
@@ -86,11 +108,100 @@ static int SendRequest(pp::VarDictionary* req) {
   return reply.result;
 }
 
+// Adds a file into nmf. |key| is the key for open_resource IRT or
+// "program". |filepath| is not a URL yet. JavaScript code is
+// responsible to fix them.
+static void AddFileToNmf(const std::string& key,
+                         const std::string& filepath,
+                         pp::VarDictionary* dict) {
+#if defined(__x86_64__)
+  static const char kArch[] = "x86-64";
+#elif defined(__i686__)
+  static const char kArch[] = "x86-32";
+#elif defined(__arm__)
+  static const char kArch[] = "arm";
+#elif defined(__pnacl__)
+  static const char kArch[] = "pnacl";
+#else
+# error "Unknown architecture"
+#endif
+  pp::VarDictionary url;
+  url.Set("url", filepath);
+  pp::VarDictionary arch;
+  arch.Set(kArch, url);
+  dict->Set(key, arch);
+}
+
+static void AddNmfToRequestForShared(
+  std::string prog,
+  const std::vector<std::string>& dependencies,
+  pp::VarDictionary* req) {
+  pp::VarDictionary nmf;
+  pp::VarDictionary files;
+  const char* prog_base = basename(&prog[0]);
+  for (size_t i = 0; i < dependencies.size(); i++) {
+    std::string dep = dependencies[i];
+    const std::string& abspath = GetAbsPath(dep);
+    const char* base = basename(&dep[0]);
+    // nacl_helper does not pass the name of program and the dynamic
+    // loader always uses "main.nexe" as the main binary.
+    if (!strcmp(prog_base, base))
+      base = "main.nexe";
+    AddFileToNmf(base, abspath, &files);
+  }
+  nmf.Set("files", files);
+
+#if defined(__x86_64__)
+  static const char kDynamicLoader[] = "lib64/runnable-ld.so";
+#else
+  static const char kDynamicLoader[] = "lib32/runnable-ld.so";
+#endif
+  AddFileToNmf("program", kDynamicLoader, &nmf);
+
+  req->Set("nmf", nmf);
+}
+
+static void AddNmfToRequestForStatic(const std::string& prog,
+                                     pp::VarDictionary* req) {
+  pp::VarDictionary nmf;
+  AddFileToNmf("program", GetAbsPath(prog), &nmf);
+  req->Set("nmf", nmf);
+}
+
+// Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
+static bool AddNmfToRequest(const std::string& prog, pp::VarDictionary* req) {
+  // If the path does not contain a slash we use NMF served with the
+  // JavaScript.
+  // TODO(hamaji): Handle PATH.
+  if (prog.find('/') == std::string::npos)
+    return true;
+
+  if (access(prog.c_str(), R_OK) != 0) {
+    errno = ENOENT;
+    return false;
+  }
+
+#if defined(__GLIBC__)
+  std::vector<std::string> dependencies;
+  if (!FindLibraryDependencies(prog, &dependencies))
+    return false;
+
+  if (!dependencies.empty()) {
+    AddNmfToRequestForShared(prog, dependencies, req);
+    return true;
+  }
+  // No dependencies means the main binary is statically linked.
+#endif
+  AddNmfToRequestForStatic(prog, req);
+  return true;
+}
+
 // Spawn a new NaCl process by asking JavaScript. This function lacks
 // a lot of features posix_spawn supports (e.g., handling FDs).
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
 extern "C" int nacl_spawn_simple(const char** argv) {
+  assert(argv[0]);
   pp::VarDictionary req;
   req.Set("command", "nacl_spawn");
   pp::VarArray args;
@@ -101,10 +212,12 @@ extern "C" int nacl_spawn_simple(const char** argv) {
   for (int i = 0; environ[i]; i++)
     envs.Set(i, environ[i]);
   req.Set("envs", envs);
-  char cwd[PATH_MAX + 1];
-  if (!getcwd(cwd, PATH_MAX))
-    assert(0);
-  req.Set("cwd", cwd);
+  req.Set("cwd", GetCwd());
+
+  if (!AddNmfToRequest(argv[0], &req)) {
+    errno = ENOENT;
+    return -1;
+  }
 
   int result = SendRequest(&req);
   if (result < 0) {

@@ -3,32 +3,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-BuildStep() {
+ConfigureStep() {
   MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
+  cp -rf ${START_DIR}/* ${BUILD_DIR}
+}
+
+BuildStep() {
+  MAKE_TARGETS="libcli_main.a libnacl_spawn.a"
   if [ "${NACL_GLIBC}" = "1" ]; then
-    NACLPORTS_CFLAGS+=" -fPIC"
+    NACLPORTS_CXXFLAGS+=" -fPIC"
+    MAKE_TARGETS+=" libnacl_spawn.so test"
   fi
-
-  local OBJECTS="nacl_spawn.o"
-  set -x
-  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -I${START_DIR}/.. -I${START_DIR}"
-  CCCMD="${NACLCC} ${NACLPORTS_CFLAGS}"
-  CXXCMD="${NACLCXX} ${NACLPORTS_CFLAGS}"
-
-  ${CXXCMD} -c ${START_DIR}/nacl_spawn.cc
-  ${NACLAR} rcs libnacl_spawn.a ${OBJECTS}
-  ${NACLRANLIB} libnacl_spawn.a
-  if [ "${NACL_GLIBC}" = "1" ]; then
-    ${NACLCXX} ${NACLPORTS_LDFLAGS} -shared  ${OBJECTS} -lppapi_cpp \
-      -o libnacl_spawn.so
-  fi
-
-  ${CCCMD} -c ${START_DIR}/cli_main.c
-  ${NACLAR} rcs libcli_main.a cli_main.o
-  ${NACLRANLIB} libcli_main.a
-
-  set +x
+  SDKBuildSystemBuildStep
 }
 
 InstallStep() {
