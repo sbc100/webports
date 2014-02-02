@@ -267,6 +267,7 @@ $(ALL_PORTS:%=$(SENT)/%): $(SENT)/%:
 endif
 endif
 
+$(shell mkdir -p ${NACL_OUT})
 $(shell python build_tools/gen_deps.py > ${NACL_OUT}/gen.mk)
 include ${NACL_OUT}/gen.mk
 
