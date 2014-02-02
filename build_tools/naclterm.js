@@ -42,6 +42,8 @@ var waiters = {};
 var pid = 0;
 var ansiCyan = '\x1b[36m';
 var ansiReset = '\x1b[0m';
+// We show the loading progress only once for each URL.
+var loadedUrl = {};
 
 /**
  * Static initialier called from index.html.
@@ -163,6 +165,9 @@ NaClTerm.prototype.handleLoadError_ = function(e) {
 }
 
 NaClTerm.prototype.doneLoadingUrl = function() {
+  if (loadedUrl[this.lastUrl])
+    return;
+  loadedUrl[this.lastUrl] = true;
   var width = this.io.terminal_.screenSize.width;
   this.io.print('\r' + Array(width+1).join(' '));
   var message = '\rLoaded ' + this.lastUrl;
@@ -211,6 +216,11 @@ NaClTerm.prototype.handleProgress_ = function(e) {
   if (!url)
     return;
 
+  this.lastUrl = url;
+  this.lastTotal = e.total;
+
+  if (loadedUrl[url])
+    return;
   var message = 'Loading ' + url;
   if (e.lengthComputable && e.total) {
     var percent = Math.round(e.loaded * 100 / e.total);
@@ -221,8 +231,6 @@ NaClTerm.prototype.handleProgress_ = function(e) {
 
   var width = this.io.terminal_.screenSize.width;
   this.io.print('\r' + message.slice(-width));
-  this.lastUrl = url;
-  this.lastTotal = e.total;
 }
 
 /**
@@ -372,7 +380,9 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
     })
   }
 
-  this.io.print('Loading NaCl module.\n')
+  // We show this message only for the first process.
+  if (pid == 1)
+    this.io.print('Loading NaCl module.\n');
   document.body.appendChild(foreground_process);
 }
 
