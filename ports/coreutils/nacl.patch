@@ -1,140 +1,130 @@
 diff --git a/Makefile.in b/Makefile.in
-index dab25d0..04646f6 100644
+index c21ec67..1a5d61d 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -611,8 +611,9 @@ src_libver_a_LIBADD =
- nodist_src_libver_a_OBJECTS = src/version.$(OBJEXT)
- src_libver_a_OBJECTS = $(nodist_src_libver_a_OBJECTS)
- am__EXEEXT_1 = src/arch$(EXEEXT) src/hostname$(EXEEXT)
-+# Removed $(EXEEXT) from libstdbuf.so. This is an upstream bug.
- am__EXEEXT_2 = src/chroot$(EXEEXT) src/df$(EXEEXT) src/hostid$(EXEEXT) \
--	src/libstdbuf.so$(EXEEXT) src/nice$(EXEEXT) src/pinky$(EXEEXT) \
-+	src/libstdbuf.so src/nice$(EXEEXT) src/pinky$(EXEEXT) \
- 	src/stdbuf$(EXEEXT) src/stty$(EXEEXT) src/uptime$(EXEEXT) \
- 	src/users$(EXEEXT) src/who$(EXEEXT)
- am__EXEEXT_3 = src/[$(EXEEXT) src/base64$(EXEEXT) \
-@@ -1493,7 +1494,7 @@ CPP = @CPP@
+@@ -184,7 +184,7 @@ CPP = @CPP@
  CPPFLAGS = @CPPFLAGS@
  CYGPATH_W = @CYGPATH_W@
  DEFAULT_POSIX2_VERSION = @DEFAULT_POSIX2_VERSION@
 -DEFS = @DEFS@
 +DEFS = @DEFS@ -Dmain=nacl_main
  DEPDIR = @DEPDIR@
+ DF_PROG = @DF_PROG@
  ECHO_C = @ECHO_C@
- ECHO_N = @ECHO_N@
-@@ -2306,7 +2307,7 @@ LIBMULTITHREAD = @LIBMULTITHREAD@
+@@ -210,7 +210,7 @@ LDFLAGS = @LDFLAGS@
+ LIBICONV = @LIBICONV@
+ LIBINTL = @LIBINTL@
  LIBOBJS = @LIBOBJS@
- LIBPTH = @LIBPTH@
- LIBPTH_PREFIX = @LIBPTH_PREFIX@
 -LIBS = @LIBS@
 +LIBS = @LIBS@ $(EXTRA_LIBS)
- LIBSOCKET = @LIBSOCKET@
- LIBTESTS_LIBDEPS = @LIBTESTS_LIBDEPS@
- LIBTHREAD = @LIBTHREAD@
-@@ -2749,7 +2750,9 @@ libexecdir = @libexecdir@
- lispdir = @lispdir@
- localedir = @localedir@
- localstatedir = @localstatedir@
--man1_MANS = @man1_MANS@
+ LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
+ LIB_CRYPT = @LIB_CRYPT@
+ LIB_NANOSLEEP = @LIB_NANOSLEEP@
+diff --git a/lib/mktime.c b/lib/mktime.c
+index ce3de58..fea6229 100644
+--- a/lib/mktime.c
++++ b/lib/mktime.c
+@@ -127,8 +127,8 @@ ydhms_diff (long int year1, long int yday1, int hour1, int min1, int sec1,
+ 	    int year0, int yday0, int hour0, int min0, int sec0)
+ {
+   verify (C99_integer_division, -1 / 2 == 0);
+-  verify (long_int_year_and_yday_are_wide_enough,
+-	  INT_MAX <= LONG_MAX / 2 || TIME_T_MAX <= UINT_MAX);
++  /* We removed unnecessary verification. Recent coreutils does not
++   * have this check either. */
+ 
+   /* Compute intervening leap days correctly even if year is negative.
+      Take care to avoid integer overflow here.  */
+diff --git a/man/Makefile.in b/man/Makefile.in
+index 2bfa6f4..30022a9 100644
+--- a/man/Makefile.in
++++ b/man/Makefile.in
+@@ -143,7 +143,9 @@ DIST_SOURCES =
+ man1dir = $(mandir)/man1
+ am__installdirs = "$(DESTDIR)$(man1dir)"
+ NROFF = nroff
+-MANS = $(dist_man_MANS)
 +# The build rule for man pages are broken for NaCl, and we do not need
 +# man pages anyway.
-+#man1_MANS = @man1_MANS@
- mandir = @mandir@
- mkdir_p = @mkdir_p@
- oldincludedir = @oldincludedir@
-@@ -5579,8 +5582,9 @@ src/kill$(EXEEXT): $(src_kill_OBJECTS) $(src_kill_DEPENDENCIES) $(EXTRA_src_kill
- src/src_libstdbuf_so-libstdbuf.$(OBJEXT): src/$(am__dirstamp) \
- 	src/$(DEPDIR)/$(am__dirstamp)
- 
--src/libstdbuf.so$(EXEEXT): $(src_libstdbuf_so_OBJECTS) $(src_libstdbuf_so_DEPENDENCIES) $(EXTRA_src_libstdbuf_so_DEPENDENCIES) src/$(am__dirstamp)
--	@rm -f src/libstdbuf.so$(EXEEXT)
-+# Removed $(EXEEXT) from libstdbuf.so. This is an upstream bug.
-+src/libstdbuf.so: $(src_libstdbuf_so_OBJECTS) $(src_libstdbuf_so_DEPENDENCIES) $(EXTRA_src_libstdbuf_so_DEPENDENCIES) src/$(am__dirstamp)
-+	@rm -f src/libstdbuf.so
- 	$(AM_V_CCLD)$(src_libstdbuf_so_LINK) $(src_libstdbuf_so_OBJECTS) $(src_libstdbuf_so_LDADD) $(LIBS)
- src/link.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
- 
-diff --git a/lib/openat.c b/lib/openat.c
-index fd1ff91..0155f9d 100644
---- a/lib/openat.c
-+++ b/lib/openat.c
-@@ -27,6 +27,11 @@
- #include <sys/types.h>
- #undef __need_system_fcntl_h
- 
-+#if defined(__native_client__)
-+/* We do not have openat. */
-+#undef HAVE_OPENAT
-+#endif
-+
- #if HAVE_OPENAT
- static int
- orig_openat (int fd, char const *filename, int flags, mode_t mode)
-diff --git a/lib/sigaction.c b/lib/sigaction.c
-index 97eb76d..330e0f8 100644
---- a/lib/sigaction.c
-+++ b/lib/sigaction.c
-@@ -15,6 +15,10 @@
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
- 
-+/* ./configure script detects sigaction in nacl-glibc is just a stub,
-+   but we use the stub implementation as the following does not compile. */
-+#if !defined(__native_client__)
-+
- #include <config.h>
- 
- /* Specification.  */
-@@ -202,3 +206,5 @@ sigaction (int sig, const struct sigaction *restrict act,
-   errno = saved_errno;
-   return -1;
- }
-+
-+#endif
-diff --git a/lib/signal.in.h b/lib/signal.in.h
-index a531487..241625a 100644
---- a/lib/signal.in.h
-+++ b/lib/signal.in.h
-@@ -402,6 +402,12 @@ typedef struct siginfo_t siginfo_t;
- /* We assume that platforms which lack the sigaction() function also lack
-    the 'struct sigaction' type, and vice versa.  */
- 
-+/* ./configure script detects sigaction in nacl-glibc is just a stub,
-+   but we do have struct sigaction. */
-+#  if defined(__native_client__)
-+#   define GNULIB_defined_struct_sigaction 1
-+#  endif
-+
- #  if !GNULIB_defined_struct_sigaction
- 
- struct sigaction
++#MANS = $(dist_man_MANS)
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ ACLOCAL = @ACLOCAL@
+ ALLOCA = @ALLOCA@
+diff --git a/src/Makefile.in b/src/Makefile.in
+index 2d4a63f..d4f43bf 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -716,7 +716,7 @@ CPP = @CPP@
+ CPPFLAGS = @CPPFLAGS@
+ CYGPATH_W = @CYGPATH_W@
+ DEFAULT_POSIX2_VERSION = @DEFAULT_POSIX2_VERSION@
+-DEFS = @DEFS@
++DEFS = @DEFS@ -Dmain=nacl_main
+ DEPDIR = @DEPDIR@
+ DF_PROG = @DF_PROG@
+ ECHO_C = @ECHO_C@
+@@ -742,7 +742,7 @@ LDFLAGS = @LDFLAGS@
+ LIBICONV = @LIBICONV@
+ LIBINTL = @LIBINTL@
+ LIBOBJS = @LIBOBJS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ $(EXTRA_LIBS)
+ LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
+ LIB_CRYPT = @LIB_CRYPT@
+ LIB_NANOSLEEP = @LIB_NANOSLEEP@
 diff --git a/src/fs.h b/src/fs.h
-index 8826c4f..7b5b0bf 100644
+index 675dd61..c2eb64b 100644
 --- a/src/fs.h
 +++ b/src/fs.h
 @@ -2,7 +2,10 @@
-    Please send additions to bug-coreutils@gnu.org and meskes@debian.org.
-    This file is generated automatically from ./src/stat.c. */
+    Please send additions to meskes@debian.org.
+    This file is generated automatically from ./stat.c. */
  
 -#if defined __linux__
 +/* nacl_io does not have statfs so the following magic numbers which
 +   specify the type of a filesystem is useless, but we need their
 +   definitions to compile everything in coreutils. */
 +#if defined __linux__ || defined __native_client__
- # define S_MAGIC_ADFS 0xADF5
  # define S_MAGIC_AFFS 0xADFF
- # define S_MAGIC_AFS 0x5346414F
-diff --git a/src/ls.c b/src/ls.c
-index e7d1d93..35f6ee6 100644
---- a/src/ls.c
-+++ b/src/ls.c
-@@ -36,6 +36,9 @@
-    Greg Lee <lee@uhunix.uhcc.hawaii.edu>.  */
+ # define S_MAGIC_DEVPTS 0x1CD1
+ # define S_MAGIC_EXT 0x137D
+diff --git a/src/tee.c b/src/tee.c
+index 5867539..df6859b 100644
+--- a/src/tee.c
++++ b/src/tee.c
+@@ -31,6 +31,8 @@
  
- #include <config.h>
-+/* Disable _FORTIFY_SOURCE in this module to work-around the issue in mempcpy.
-+   https://code.google.com/p/nativeclient/issues/detail?id=3770 */
-+#undef _FORTIFY_SOURCE
- #include <sys/types.h>
+ #define AUTHORS "Mike Parker", "Richard M. Stallman", "David MacKenzie"
  
- #include <termios.h>
++/* Recent coreutils uses tee_files instead of tee to avoid a conflict. */
++#define tee tee_files
+ static int tee (int nfiles, const char **files);
+ 
+ /* If nonzero, append to output files rather than truncating them. */
+@@ -158,7 +160,7 @@ main (int argc, char **argv)
+    Return 0 if successful, 1 if any errors occur. */
+ 
+ static int
+-tee (int nfiles, const char **files)
++tee_files (int nfiles, const char **files)
+ {
+   FILE **descriptors;
+   char buffer[BUFSIZ];
+diff --git a/src/test.c b/src/test.c
+index ef2b35f..35feef0 100644
+--- a/src/test.c
++++ b/src/test.c
+@@ -124,7 +124,13 @@ test_syntax_error (char const *format, char const *arg)
+ #if HAVE_SETREUID && HAVE_SETREGID
+ /* Do the same thing access(2) does, but use the effective uid and gid.  */
+ 
++/* Remove static as nacl-glibc declares this function as non-static
++ * function but does not provide the implementation. */
++#if defined(__native_client__)
++int
++#else
+ static int
++#endif
+ eaccess (char const *file, int mode)
+ {
+   static int have_ids;

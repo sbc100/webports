@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 export EXTRA_LIBS="-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io"
-CONFIG_SUB=support/config.sub
+CONFIG_SUB=config/config.sub
 
 BuildStep() {
   # Disable all assembly code by specifying none-none-none.
@@ -13,8 +13,12 @@ BuildStep() {
 
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
-  for nexe in src/*${NACL_EXEEXT}; do
-    local name=$(basename $nexe .nexe)
+  for nexe in $(find src -type f -executable); do
+    local name=$(basename $nexe)
+    # This is a shell script.
+    if [ "${name}" = "groups" ]; then
+      continue
+    fi
     cp ${nexe} ${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}
 
     pushd ${PUBLISH_DIR}
