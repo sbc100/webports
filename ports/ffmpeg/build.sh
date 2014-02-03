@@ -12,6 +12,10 @@ ConfigureStep() {
   local extra_args=""
   if [ "${NACL_ARCH}" = pnacl ]; then
     extra_args="--cc=pnacl-clang --arch=pnacl"
+  elif [ "${NACL_ARCH}" = arm ]; then
+    extra_args="--arch=arm"
+  else
+    extra_args="--arch=x86"
   fi
 
   if [[ "${NACL_GLIBC}" != "1" ]]; then
@@ -29,9 +33,9 @@ ConfigureStep() {
     --enable-gpl \
     --enable-static \
     --enable-cross-compile \
+    --disable-inline-asm \
     --disable-ssse3 \
     --disable-mmx \
-    --disable-mmx2 \
     --disable-amd3dnow \
     --disable-amd3dnowext \
     --disable-indevs \
@@ -47,6 +51,4 @@ ConfigureStep() {
     --disable-demuxer=image2 \
     --prefix=${NACLPORTS_PREFIX} \
     --libdir=${NACLPORTS_LIBDIR}
-
-  touch strings.h
 }

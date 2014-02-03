@@ -1,5 +1,5 @@
-PACKAGE_NAME=ffmpeg-0.5
-URL=http://ffmpeg.org/releases/ffmpeg-0.5.tar.bz2
+PACKAGE_NAME=ffmpeg-2.1.3
+URL=http://ffmpeg.org/releases/ffmpeg-2.1.3.tar.bz2
 LICENSE=GPL,LGPL
 DISABLED_ARCH=arm
 DEPENDS=(lame libvorbis libtheora glibc-compat)

@@ -1,60 +1,22 @@
-diff -Naur ffmpeg-0.5/configure ffmpeg-0.5.nacl/configure
---- ffmpeg-0.5/configure	2012-06-28 13:59:29.937591494 +0400
-+++ ffmpeg-0.5.nacl/configure	2012-06-28 14:02:14.190691986 +0400
-@@ -1985,14 +1985,17 @@
- enabled libfaac    && require2 libfaac "stdint.h faac.h" faacEncGetVersion -lfaac
- enabled libfaad    && require2 libfaad faad.h faacDecOpen -lfaad
- enabled libgsm     && require  libgsm gsm.h gsm_create -lgsm
-+echo nacl: checking for libmp3lame
- enabled libmp3lame && require  libmp3lame lame/lame.h lame_init -lmp3lame -lm
- enabled libnut     && require  libnut libnut.h nut_demuxer_init -lnut
- enabled libopenjpeg && require libopenjpeg openjpeg.h opj_version -lopenjpeg
- enabled libschroedinger && add_cflags $(pkg-config --cflags schroedinger-1.0) &&
-                            require libschroedinger schroedinger/schro.h schro_init $(pkg-config --libs schroedinger-1.0)
- enabled libspeex   && require  libspeex speex/speex.h speex_decoder_init -lspeex
-+echo nacl: checking for libtheora
- enabled libtheora  && require  libtheora theora/theora.h theora_info_init -ltheora -logg
--enabled libvorbis  && require  libvorbis vorbis/vorbisenc.h vorbis_info_init -lvorbisenc -lvorbis -logg
-+echo nacl: checking for libvorbis...
-+enabled libvorbis  && require  libvorbis vorbis/vorbisenc.h vorbis_info_init -lvorbisenc -lvorbis -logg -lm
- enabled libx264    && require  libx264 x264.h x264_encoder_open -lx264 -lm &&
-                       { check_cpp_condition x264.h "X264_BUILD >= 65" ||
-                         die "ERROR: libx264 version must be >= 0.65."; }
-diff -Naur ffmpeg-0.5/ffmpeg.c ffmpeg-0.5.nacl/ffmpeg.c
---- ffmpeg-0.5/ffmpeg.c	2012-06-28 13:59:29.937591494 +0400
-+++ ffmpeg-0.5.nacl/ffmpeg.c	2012-06-28 14:03:55.652607387 +0400
-@@ -334,8 +334,10 @@
-     signal(SIGQUIT, sigterm_handler); /* Quit (POSIX).  */
- #endif
+diff --git a/ffmpeg.c b/ffmpeg.c
+index dba6089..b67a8c4 100644
+--- a/ffmpeg.c
++++ b/ffmpeg.c
+@@ -3360,7 +3360,7 @@ static int transcode(void)
  
-+#ifdef __GLIBC__
-     signal(SIGINT , sigterm_handler); /* Interrupt (ANSI).  */
-     signal(SIGTERM, sigterm_handler); /* Termination (ANSI).  */
-+#endif
-     /*
-     register a function to be called at normal program termination
-     */
-diff -Naur ffmpeg-0.5/libavformat/metadata.c ffmpeg-0.5.nacl/libavformat/metadata.c
---- ffmpeg-0.5/libavformat/metadata.c	2012-06-28 13:59:29.897590739 +0400
-+++ ffmpeg-0.5.nacl/libavformat/metadata.c	2012-06-28 14:02:14.190691986 +0400
-@@ -18,7 +18,7 @@
-  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+ static int64_t getutime(void)
+ {
+-#if HAVE_GETRUSAGE
++#if HAVE_GETRUSAGE && !defined(__native_client__)
+     struct rusage rusage;
  
--#include <strings.h>
-+#include <string.h>
- #include "avformat.h"
- #include "metadata.h"
+     getrusage(RUSAGE_SELF, &rusage);
+@@ -3378,7 +3378,7 @@ static int64_t getutime(void)
  
-diff -Naur ffmpeg-0.5/libavformat/metadata_compat.c ffmpeg-0.5.nacl/libavformat/metadata_compat.c
---- ffmpeg-0.5/libavformat/metadata_compat.c	2012-06-28 13:59:29.907590928 +0400
-+++ ffmpeg-0.5.nacl/libavformat/metadata_compat.c	2012-06-28 14:02:14.190691986 +0400
-@@ -18,7 +18,7 @@
-  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
- 
--#include <strings.h>
-+#include <string.h>
- #include "avformat.h"
- #include "metadata.h"
- #include "libavutil/avstring.h"
+ static int64_t getmaxrss(void)
+ {
+-#if HAVE_GETRUSAGE && HAVE_STRUCT_RUSAGE_RU_MAXRSS
++#if HAVE_GETRUSAGE && HAVE_STRUCT_RUSAGE_RU_MAXRSS && !defined(__native_client__)
+     struct rusage rusage;
+     getrusage(RUSAGE_SELF, &rusage);
+     return (int64_t)rusage.ru_maxrss * 1024;
