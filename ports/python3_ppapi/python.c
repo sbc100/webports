@@ -25,41 +25,9 @@
 #endif
 
 static int setup_unix_environment(const char* tarfile) {
-  int ret = umount("/");
-  if (ret) {
-    printf("unmounting root fs failed\n");
-    return 1;
-  }
-  ret = mount("", "/", "memfs", 0, NULL);
-  if (ret) {
-    printf("mounting root fs failed\n");
-    return 1;
-  }
-
-  mkdir("/home", 0777);
-  mkdir("/tmp", 0777);
-  mkdir("/bin", 0777);
-  mkdir("/etc", 0777);
-  mkdir("/mnt", 0777);
-  mkdir("/mnt/http", 0777);
-  mkdir("/mnt/html5", 0777);
-
-  const char* data_url = getenv("NACL_DATA_URL");
-  if (!data_url)
-    data_url = "./";
-
-  ret = mount(data_url, "/mnt/http", "httpfs", 0, "");
-  if (ret) {
-    printf("mounting http filesystem failed\n");
-    return 1;
-  }
-
-  // Ignore failures from mounting html5fs.  For example, it will always
-  // fail in incognito mode.
-  mount("/", "/mnt/html5", "html5fs", 0, "");
-
   // Extra tar achive from http filesystem.
   if (tarfile) {
+    int ret;
     TAR* tar;
     char filename[PATH_MAX];
     strcpy(filename, "/mnt/http/");
@@ -90,7 +58,7 @@ static int setup_unix_environment(const char* tarfile) {
   return 0;
 }
 
-int python_main(int argc, char **argv) {
+int nacl_main(int argc, char **argv) {
     printf("Extracting: %s ...\n", DATA_FILE);
     if (setup_unix_environment(DATA_FILE))
         return -1;
@@ -151,5 +119,3 @@ int python_main(int argc, char **argv) {
     PyMem_RawFree(argv_copy2);
     return res;
 }
-
-PPAPI_SIMPLE_REGISTER_MAIN(python_main)

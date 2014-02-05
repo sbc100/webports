@@ -7,8 +7,8 @@
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --with-curses"
 
-export EXTRA_LIBS=\
-"-ltar -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar \
+-lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp"
 CONFIG_SUB=support/config.sub
 
 PatchStep() {

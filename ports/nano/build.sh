@@ -4,8 +4,8 @@
 # found in the LICENSE file.
 
 
-export EXTRA_LIBS="-lncurses -ltar -lppapi_simple -lnacl_io \
-  -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lncurses -ltar -lppapi_simple \
+  -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 if [ "${NACL_GLIBC}" != "1" ]; then
   export EXTRA_LIBS="${EXTRA_LIBS} -lglibc-compat"

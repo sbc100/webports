@@ -1,4 +1,4 @@
 PACKAGE_NAME=python3_ppapi
 LICENSE=BSD
 MIN_SDK_VERSION=31
-DEPENDS=(python3 libtar)
+DEPENDS=(python3 libtar nacl-spawn)

@@ -75,6 +75,7 @@ CalculatePackageShards()
     libogg
     libvorbis
     scummvm
+    nacl-spawn
     vim
     protobuf
     libmikmod
