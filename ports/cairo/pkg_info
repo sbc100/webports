@@ -1,4 +1,4 @@
-PACKAGE_NAME=cairo-1.8.8
-URL=http://cairographics.org/releases/cairo-1.8.8.tar.gz
+PACKAGE_NAME=cairo-1.12.14
+URL=http://cairographics.org/releases/cairo-1.12.14.tar.xz
 LICENSE=GPL,MPL
 DEPENDS=(pixman fontconfig libpng)
