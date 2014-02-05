@@ -37,7 +37,13 @@ struct NaClSpawnReply {
 
 static std::string GetCwd() {
   char cwd[PATH_MAX + 1];
+  // TODO(hamaji): Remove this #if and always call getcwd.
+  // https://code.google.com/p/naclports/issues/detail?id=109
+#if defined(__GLIBC__)
+  if (!getwd(cwd))
+#else
   if (!getcwd(cwd, PATH_MAX))
+#endif
     assert(0);
   return cwd;
 }
