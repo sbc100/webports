@@ -4,7 +4,7 @@
 
 # TODO(hamaji): include $NACL_SDK_ROOT/tools/common.mk.
 
-NACL_SPAWN_OBJS=nacl_spawn.o
+NACL_SPAWN_OBJS=nacl_spawn.o path_util.o
 # For now, we do not support spawning a new glibc process from newlib.
 ifeq ($(TOOLCHAIN),glibc)
 NACL_SPAWN_OBJS+=elf_reader.o library_dependencies.o
@@ -41,7 +41,7 @@ test: $(TEST_EXES) $(TEST_BINARIES)
 
 test/elf_reader: elf_reader.cc
 	$(NACLCXX) -DDEFINE_ELF_READER_MAIN $< -o $@
-test/library_dependencies: elf_reader.cc library_dependencies.cc
+test/library_dependencies: elf_reader.o path_util.o library_dependencies.cc
 	$(NACLCXX) -DDEFINE_LIBRARY_DEPENDENCIES_MAIN $^ -o $@
 
 # We use -nostdlib not to have libc.so in their dependencies.

@@ -11,6 +11,7 @@ ConfigureStep() {
 BuildStep() {
   MAKE_TARGETS="libcli_main.a libnacl_spawn.a"
   if [ "${NACL_GLIBC}" = "1" ]; then
+    NACLPORTS_CFLAGS+=" -fPIC"
     NACLPORTS_CXXFLAGS+=" -fPIC"
     MAKE_TARGETS+=" libnacl_spawn.so test"
   fi

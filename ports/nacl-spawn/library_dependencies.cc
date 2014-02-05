@@ -14,25 +14,16 @@
 #include <set>
 
 #include "elf_reader.h"
+#include "path_util.h"
 
 static bool GetLibraryPaths(std::vector<std::string>* paths) {
   const char* path_env = getenv("LD_LIBRARY_PATH");
-  if (!path_env || !*path_env) {
+  GetPaths(path_env, paths);
+  if (paths->empty()) {
     fprintf(stderr, "LD_LIBRARY_PATH is not set\n");
     errno = ENOENT;
     return false;
   }
-
-  for (const char* p = path_env; *p; p++) {
-    if (*p == ':') {
-      if (p == path_env)
-        paths->push_back(".");
-      else
-        paths->push_back(std::string(path_env, p));
-      path_env = p + 1;
-    }
-  }
-  paths->push_back(path_env);
   return true;
 }
 
@@ -66,18 +57,11 @@ static bool FindLibraryDependenciesImpl(
 
   for (size_t i = 0; i < elf_reader.neededs().size(); i++) {
     const std::string& needed_name = elf_reader.neededs()[i];
-    bool found = false;
-    for (size_t j = 0; j < paths.size(); j++) {
-      const std::string needed_path = paths[j] + '/' + needed_name;
-      if (access(needed_path.c_str(), R_OK) == 0) {
-        if (!FindLibraryDependenciesImpl(needed_path, paths, dependencies))
-          return false;
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
+    std::string needed_path;
+    if (GetFileInPaths(needed_name, paths, &needed_path)) {
+      if (!FindLibraryDependenciesImpl(needed_path, paths, dependencies))
+        return false;
+    } else {
       fprintf(stderr, "%s: library not found\n", needed_name.c_str());
       errno = ENOENT;
       return false;

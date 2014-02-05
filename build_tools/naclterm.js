@@ -103,7 +103,7 @@ NaClTerm.prototype.handleMessage_ = function(e) {
     var args = msg['args'];
     var envs = msg['envs'];
     var cwd = msg['cwd'];
-    var executable = args.shift();
+    var executable = args[0];
     var nmf = msg['nmf'];
     if (nmf) {
       if (nmf['files']) {
@@ -334,7 +334,7 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
       continue;
     }
     var key = env.substring(0, index);
-    if (key == 'SRC' || key == 'DATA' || key.match('^ARG\d+$'))
+    if (key == 'SRC' || key == 'DATA' || key.match(/^ARG\d+$/i))
       continue;
     params[key] = env.substring(index + 1);
   }
@@ -372,7 +372,7 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
   // no arguments set in the query parameters then add the default
   // NaClTerm.argv arguments.
   if (args['arg1'] === undefined && argv) {
-    var argn = 1
+    var argn = 0;
     argv.forEach(function(arg) {
       var argname = 'arg' + argn;
       addParam(argname, arg);
@@ -420,7 +420,9 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
   this.tty_width = width;
   this.tty_height = height;
   if (foreground_process === undefined) {
-    this.createEmbed(NaClTerm.nmf, NaClTerm.argv, [], '/', width, height);
+    var argv = NaClTerm.argv || [];
+    argv = [NaClTerm.nmf].concat(argv);
+    this.createEmbed(NaClTerm.nmf, argv, [], '/', width, height);
     // The root process has no parent.
     foreground_process.parent = null;
     foreground_process.command_name = NaClTerm.prefix;

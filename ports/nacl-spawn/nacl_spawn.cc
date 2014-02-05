@@ -25,6 +25,7 @@
 #if defined(__GLIBC__)
 # include "library_dependencies.h"
 #endif
+#include "path_util.h"
 
 extern char** environ;
 
@@ -175,12 +176,18 @@ static void AddNmfToRequestForStatic(const std::string& prog,
 }
 
 // Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
-static bool AddNmfToRequest(const std::string& prog, pp::VarDictionary* req) {
-  // If the path does not contain a slash we use NMF served with the
-  // JavaScript.
-  // TODO(hamaji): Handle PATH.
-  if (prog.find('/') == std::string::npos)
-    return true;
+static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
+  if (prog.find('/') == std::string::npos) {
+    bool found = false;
+    const char* path_env = getenv("PATH");
+    std::vector<std::string> paths;
+    GetPaths(path_env, &paths);
+    if (paths.empty() || !GetFileInPaths(prog, paths, &prog)) {
+      // If the path does not contain a slash and we cannot find it
+      // from PATH, we use NMF served with the JavaScript.
+      return true;
+    }
+  }
 
   if (access(prog.c_str(), R_OK) != 0) {
     errno = ENOENT;

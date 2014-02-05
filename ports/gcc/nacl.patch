@@ -1,8 +1,5 @@
-diff --git a/.gitignore b/.gitignore
-new file mode 100644
-index 0000000..e69de29
 diff --git a/gcc/Makefile.in b/gcc/Makefile.in
-index 2e57082..10a954b 100644
+index 2e57082..25ca0f4 100644
 --- a/gcc/Makefile.in
 +++ b/gcc/Makefile.in
 @@ -913,7 +913,7 @@ BUILD_LIBDEPS= $(BUILD_LIBIBERTY)
@@ -14,11 +11,38 @@ index 2e57082..10a954b 100644
  BACKENDLIBS = $(CLOOGLIBS) $(PPLLIBS) $(GMPLIBS)
  # Any system libraries needed just for GNAT.
  SYSLIBS = @GNAT_LIBEXC@
+@@ -3654,6 +3654,11 @@ s-fixinc_list : $(GCC_PASSES)
+ 	else \
+ 	  echo ";"; \
+ 	fi > tmp-fixinc_list
++# It seems GCC tries to fix the host system include files as we are
++# using same values (x86_64-nacl) for --host and --target. There seems
++# to be no way to skip this step by adjusting ./configure flags. We
++# disable this step by providing empty fixinc targets.
++	echo > tmp-fixinc_list
+ 	$(SHELL) $(srcdir)/../move-if-change tmp-fixinc_list fixinc_list
+ 	$(STAMP) s-fixinc_list
+ 
 diff --git a/gcc/collect2.c b/gcc/collect2.c
-index 3f62dfe..caff9c2 100644
+index 3f62dfe..c646765 100644
 --- a/gcc/collect2.c
 +++ b/gcc/collect2.c
-@@ -763,7 +763,7 @@ prefix_from_string (const char *p, struct path_prefix *pprefix)
+@@ -47,6 +47,14 @@ along with GCC; see the file COPYING3.  If not see
+ #include "intl.h"
+ #include "version.h"
+ 
++#if defined(__native_client__) && defined(CROSS_DIRECTORY_STRUCTURE)
++/* ./configure of GCC thinks we should find i686-nacl-ld instead of
++   ld on i686 because --target is different from --host. As we always
++   use plain "ld", we undefine the macro which indicates we are
++   cross-compiling. */
++#undef CROSS_DIRECTORY_STRUCTURE
++#endif
++
+ /* On certain systems, we have code that works by scanning the object file
+    directly.  But this code uses system-specific header files and library
+    functions, so turn it off in a cross-compiler.  Likewise, the names of
+@@ -763,7 +771,7 @@ prefix_from_string (const char *p, struct path_prefix *pprefix)
  /* Main program.  */
  
  int
@@ -51,7 +75,7 @@ index b525865..37efc4c 100644
  
  /* Return cpuid data for requested cpuid level, as found in returned
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index 6c7f47c..3511ed3 100644
+index 6c7f47c..1989071 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
 @@ -6262,10 +6262,10 @@ fatal_error (int signum)
@@ -75,7 +99,7 @@ index 6c7f47c..3511ed3 100644
 +  /* Use /mnt/html5/tmp as TMPDIR. We cannot use /tmp because /tmp is
 +     nacl_io's memory file system and its contents will not be shared
 +     among multiple processes (e.g., cc1 and as). */
-+  if (mkdir ("/mnt/html5/tmp", 0777) < 0)
++  if (mkdir ("/mnt/html5/tmp", 0777) < 0 && errno != EEXIST)
 +    fatal ("Failed to create /mnt/html5/tmp");
 +  setenv ("TMPDIR", "/mnt/html5/tmp", 1  /* overwrite */);
 +#endif

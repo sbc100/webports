@@ -1,0 +1,3 @@
+PACKAGE_NAME=mingn
+LIBC=glibc
+DEPENDS=(bash tar coreutils vim binutils gcc)

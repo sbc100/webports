@@ -53,6 +53,20 @@ int cli_main(int argc, char* argv[]) {
   if (getenv("PWD"))
     chdir(getenv("PWD"));
 
+  // Tell the NaCl architecture to /etc/bashrc of mingn.
+#if defined(__x86_64__)
+  static const char kNaClArch[] = "x86_64";
+#elif defined(__i686__)
+  static const char kNaClArch[] = "i686";
+#elif defined(__arm__)
+  static const char kNaClArch[] = "arm";
+#elif defined(__pnacl__)
+  static const char kNaClArch[] = "pnacl";
+#else
+# error "Unknown architecture"
+#endif
+  setenv("NACL_ARCH", kNaClArch, 1);
+
   return nacl_main(argc, argv);
 }
 

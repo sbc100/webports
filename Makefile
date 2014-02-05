@@ -147,6 +147,7 @@ ALL_PORTS = \
      ports/mesa \
      ports/mesagl \
      ports/metakit \
+     ports/mingn \
      ports/mongoose \
      ports/mpc \
      ports/mpfr \
@@ -284,7 +285,6 @@ ogg: ports/libogg ;
 openal: ports/openal-soft ;
 png: ports/libpng ;
 sodium: ports/libsodium ;
-tar: ports/libtar ;
 theora: ports/libtheora ;
 tomcrypt: ports/libtomcrypt ;
 tommath: ports/libtommath ;

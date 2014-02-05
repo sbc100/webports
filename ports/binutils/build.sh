@@ -7,13 +7,8 @@ export EXTRA_LIBS="-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io"
 CONFIG_SUB=support/config.sub
 
 ConfigureStep() {
-  # TODO(hamaji): GCC cannot find its own path so that it cannot
-  # specify correct path info using a relative path from the gcc
-  # binary. For now, we specify sysroot at compile time, but we would
-  # want to remove the --with-sysroot flag.
   DefaultConfigureStep \
     --target=x86_64-nacl \
-    --with-sysroot=/mnt/html5/mingn \
     --disable-werror --enable-deterministic-archives --without-zlib
 }
 

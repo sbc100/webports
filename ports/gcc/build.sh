@@ -12,20 +12,10 @@ ConfigureStep() {
   # properly. Without this option, GCC's build system tries to create
   # "include-fixed" based on the host's include directory, which is
   # not compatible with nacl-gcc.
-  # TODO(hamaji): GCC cannot find its own path so that it cannot
-  # specify correct path info using a relative path from the gcc
-  # binary. For now, we specify sysroot and some other paths at
-  # compile time, but we would want to remove flags which contain
-  # /mnt/html5/mingn.
   DefaultConfigureStep \
     --enable-languages=c,c++ --disable-nls \
     --target=x86_64-nacl \
-    --disable-libstdcxx-pch --enable-threads=nacl \
-    --with-build-sysroot=${NACL_SDK_ROOT} \
-    --with-sysroot=/mnt/html5/mingn \
-    --prefix=/mnt/html5/mingn \
-    --libdir=/mnt/html5/mingn/lib \
-    --with-gxx-include-dir=/mnt/html5/mingn/x86_64-nacl/include/c++/4.4.3
+    --disable-libstdcxx-pch --enable-threads=nacl
 }
 
 InstallStep() {
