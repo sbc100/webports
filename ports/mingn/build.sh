@@ -132,14 +132,7 @@ EOF
   CreateMingnPackage lib all
   popd
 
-  # Update bash.js and bash.tar for /etc/bashrc.
-  # TODO(hamaji): Stop modifying bash.tar.
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/bash
-  pushd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/bash
-  tar -xvf ${BASH_DIR}/bash.tar
-  mkdir -p etc
-  cp ${START_DIR}/bashrc etc
-  tar -cvf ${PUBLISH_DIR}/bash.tar etc share
-  popd
+  # Copy bash.js and bashrc.
   cp ${START_DIR}/bash.js ${PUBLISH_DIR}
+  cp ${START_DIR}/bashrc ${PUBLISH_DIR}
 }

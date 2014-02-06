@@ -1,6 +1,6 @@
 NaClTerm.prefix = 'bash'
 NaClTerm.nmf = 'bash.nmf'
-NaClTerm.argv = ['--init-file', '/etc/bashrc']
+NaClTerm.argv = ['--init-file', '/mnt/http/bashrc']
 
 // We cannot start bash until the storage request is approved.
 NaClTerm.real_init = NaClTerm.init
