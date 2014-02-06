@@ -858,7 +858,7 @@ index 00ce6c9..afeea1c 100644
 +#if defined(__native_client__)
 +int nacl_main(int argc, char *argv[])
 +#else
-+int main(int argc, char **argv) {
++int main(int argc, char **argv)
 +#endif
  {
  	if (argc == 5 && !strcmp(argv[1], "split")) {
