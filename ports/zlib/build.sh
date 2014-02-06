@@ -10,16 +10,16 @@ EXECUTABLES="minigzip${NACL_EXEEXT} example${NACL_EXEEXT}"
 if [ "${NACL_GLIBC}" = "1" ]; then
   EXECUTABLES+=" libz.so.1"
 fi
-MAKEFLAGS="EXE=${NACL_EXEEXT}"
 
 ConfigureStep() {
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
   LogExecute rm -f libz.*
-  local CONFIGURE_ARGS="--prefix=${NACLPORTS_PREFIX}"
-  local CFLAGS="-Dunlink=puts"
-  CC=${NACLCC} AR="${NACLAR}" RANLIB=${NACLRANLIB} CFLAGS="${CFLAGS}" \
-     LogExecute ./configure ${CONFIGURE_ARGS}
+  PATH=${NACL_BIN_PATH}:${PATH} \
+    CC=${NACLCC} \
+    CHOST=${NACL_CROSS_PREFIX} \
+    CFLAGS="${NACLPORTS_CFLAGS}" \
+    LogExecute ./configure --prefix="${NACLPORTS_PREFIX}"
 }
 
 
