@@ -1,4 +1,3 @@
 PACKAGE_NAME=faac-1.28
-URL=http://sourceforge.net/projects/faac/files/faac-src/faac-1.28/faac-1.28.tar.gz/download
-URL_FILENAME=faac-1.28.tar.gz
+URL=http://download.sourceforge.net/faac/faac-src/faac-1.28/faac-1.28.tar.gz
 LICENSE=CUSTOM:README

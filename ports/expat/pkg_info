@@ -1,4 +1,3 @@
 PACKAGE_NAME=expat-2.0.1
-URL=http://sourceforge.net/projects/expat/files/expat/2.0.1/expat-2.0.1.tar.gz/download
-URL_FILENAME=expat-2.0.1.tar.gz
+URL=http://download.sourceforge.net/expat/expat/2.0.1/expat-2.0.1.tar.gz
 LICENSE=CUSTOM:COPYING

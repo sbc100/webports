@@ -1,4 +1,3 @@
 PACKAGE_NAME=tinyxml
-URL=http://sourceforge.net/projects/tinyxml/files/tinyxml/2.5.3/tinyxml_2_5_3.tar.gz/download
-URL_FILENAME=tinyxml_2_5_3.tar.gz
+URL=http://download.sourceforge.net/tinyxml/tinyxml/2.5.3/tinyxml_2_5_3.tar.gz
 LICENSE=CUSTOM:readme.txt
