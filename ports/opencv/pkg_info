@@ -1,5 +1,5 @@
 PACKAGE_NAME=opencv-2.4.7
-URL=http://storage.googleapis.com/nativeclient-mirror/nacl/opencv-2.4.7.tar.gz
+URL=http://storage.googleapis.com/naclports/mirror/opencv-2.4.7.tar.gz
 LICENSE=BSD:doc/license.txt
 DISABLED_ARCH=arm
 DEPENDS=(zlib libpng jpeg6b)

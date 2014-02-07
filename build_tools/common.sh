@@ -412,7 +412,7 @@ TryFetch() {
 Fetch() {
   local URL=$1
   local FILENAME=$2
-  local MIRROR_URL=http://storage.googleapis.com/nativeclient-mirror/nacl
+  local MIRROR_URL=http://storage.googleapis.com/naclports/mirror/
   if echo ${URL} | grep -qv ${MIRROR_URL} &> /dev/null; then
     set +o errexit
     # Try mirrored version first

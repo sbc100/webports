@@ -24,7 +24,7 @@ import urlparse
 import naclports
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MIRROR_GS = 'gs://nativeclient-mirror/nacl'
+MIRROR_GS = 'gs://naclports/mirror'
 
 
 def main(args):
@@ -54,15 +54,12 @@ def main(args):
       sys.exit(1)
 
     # Download upstream URL
-    print 'Downloading: %s' % package.URL
-    remote = urllib.urlopen(package.URL)
-    with open(basename, 'w') as tmp:
-      tmp.write(remote.read())
+    package.Download(mirror=False)
 
     # Upload to gs
     url = '%s/%s' % (MIRROR_GS, basename)
     print "Uploading to mirror: %s" % url
-    cmd = ['gsutil', 'cp', '-a', 'public-read', basename, url]
+    cmd = ['gsutil', 'cp', '-a', 'public-read', package.DownloadLocation(), url]
     if options.dry_run:
       print cmd
     else:

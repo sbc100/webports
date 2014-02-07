@@ -20,7 +20,7 @@ import tempfile
 
 import sha1check
 
-MIRROR_URL = 'http://storage.googleapis.com/nativeclient-mirror/nacl'
+MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror/'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
@@ -200,7 +200,7 @@ class Package(object):
       if getos.GetPlatform() != self.BUILD_OS:
         raise Error('Package can only be built on: %s.' % self.BUILD_OS)
 
-  def Download(self):
+  def Download(self, mirror=True):
     filename = self.DownloadLocation()
     if not filename or os.path.exists(filename):
       return
@@ -208,12 +208,18 @@ class Package(object):
       os.makedirs(os.path.dirname(filename))
 
     temp_filename = filename + '.partial'
-    try:
-      mirror = self.GetMirrorURL()
-      print 'Downloading: %s [%s]' % (mirror, temp_filename)
-      cmd = ['wget', '-O', temp_filename, mirror]
-      subprocess.check_call(cmd)
-    except subprocess.CalledProcessError:
+    mirror_download_successfull = False
+    if mirror:
+      try:
+        mirror = self.GetMirrorURL()
+        print 'Downloading: %s [%s]' % (mirror, temp_filename)
+        cmd = ['wget', '-O', temp_filename, mirror]
+        subprocess.check_call(cmd)
+        mirror_download_successfull = True
+      except subprocess.CalledProcessError:
+        pass
+
+    if not mirror_download_successfull:
       print 'Downloading: %s [%s]' % (self.URL, temp_filename)
       cmd = ['wget', '-O', temp_filename, self.URL]
       subprocess.check_call(cmd)
