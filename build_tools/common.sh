@@ -49,9 +49,8 @@ readonly NACL_TOOLCHAIN_PREFIX=${NACL_TOOLCHAIN_INSTALL}/usr
 
 # NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
 # Default to the usr folder within the SDK.
-if [ -n "${NACLPORTS_PREFIX:-}" ]; then
+if [ -z "${NACLPORTS_PREFIX:-}" ]; then
   readonly DEFAULT_PREFIX=1
-else
   readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_PREFIX}
 fi
 
@@ -62,11 +61,11 @@ readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 if [ "${DEFAULT_PREFIX:-}" = "1" ]; then
   # If the PREFIX is the default one then there is not need to add
   # the include path explcitily.
-  NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CFLAGS}"
-  NACLPORTS_CXXFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CXXFLAGS}"
-else
   NACLPORTS_CFLAGS="${NACL_CFLAGS}"
   NACLPORTS_CXXFLAGS="${NACL_CXXFLAGS}"
+else
+  NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CFLAGS}"
+  NACLPORTS_CXXFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CXXFLAGS}"
 fi
 
 # For the library path we always explicly add to the link flags
@@ -816,6 +815,8 @@ DefaultConfigureStep() {
     return
   fi
 
+  echo "CFLAGS=${CFLAGS}"
+  echo "LDFLAGS=${LDFLAGS}"
   LogExecute ${CONFIGURE} \
     --host=${conf_host} \
     --prefix=${NACLPORTS_PREFIX} \
