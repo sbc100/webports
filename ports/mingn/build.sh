@@ -76,8 +76,6 @@ toolchain/${OS_SUBDIR}_x86_glibc/lib/gcc/x86_64-nacl
 toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/lib32
 toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/lib
 toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
-toolchain/${OS_SUBDIR}_x86_glibc/i686-nacl/usr/lib
-toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/usr/lib
 "
   for d in $dirs; do
     local o=$(dirname mingn/$d | sed "s/${OS_SUBDIR}_/nacl_/")
@@ -88,13 +86,6 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/usr/lib
       mkdir -p mingn/$d
     fi
   done
-
-  # Merge libraries made from native_client_sdk so that you do not
-  # need to specify -L option for them.
-  cp ${NACL_SDK_ROOT}/lib/glibc_x86_32/Release/* \
-      ${TOOLCHAIN_OUT_DIR}/i686-nacl/usr/lib
-  cp ${NACL_SDK_ROOT}/lib/glibc_x86_64/Release/* \
-      ${TOOLCHAIN_OUT_DIR}/x86_64-nacl/usr/lib
 
   # Remove unnecessary files to reduce the size of the archive.
   rm -f ${TOOLCHAIN_OUT_DIR}/x86_64-nacl/lib/32
@@ -110,18 +101,50 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/usr/lib
     fi
   done
 
+  # Create a directory for additional libraries.
+  for arch in i686 x86_64; do
+    local usr_lib_dir=${TOOLCHAIN_OUT_DIR}/${arch}-nacl/usr/lib
+
+    mkdir -p ${usr_lib_dir}
+
+    # Copy libz, libncurses, libnacl-spawn, and libcli_main.
+    if ! cp -f \
+        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libz.so* \
+        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libncurses.so* \
+        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libcli_main.a \
+        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libnacl_spawn.* \
+        ${usr_lib_dir}; then
+      # They may not exist when we are building only for a single arch.
+      if [ ${NACL_ARCH} = ${arch} ]; then
+        echo "Failed to copy ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib"
+        exit 1
+      fi
+    fi
+
+    local arch_alt=${arch}
+    if [ ${arch_alt} = "i686" ]; then
+      arch_alt="x86_32"
+      local ld_format="elf32-i386-nacl"
+    else
+      local ld_format="elf64-x86-64-nacl"
+    fi
+
+    # Merge libraries made from native_client_sdk so that you do not
+    # need to specify -L option for them.
+    cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Release/* \
+        ${TOOLCHAIN_OUT_DIR}/${arch}-nacl/usr/lib
+
+    local mingn_ldflags="-lcli_main -lppapi_simple -lnacl_spawn -lnacl_io"
+    mingn_ldflags+=" -lppapi -lppapi_cpp -lstdc++ -lm"
+    # Create libmingn.so ldscripts.
+    cat <<EOF > ${TOOLCHAIN_OUT_DIR}/${arch}-nacl/usr/lib/libmingn.so
+OUTPUT_FORMAT(${ld_format})
+GROUP(${mingn_ldflags})
+EOF
+  done
+
   # Remove shared objects which are symlinked after we resolve them.
   find mingn -name '*.so.*.*' -exec rm -f {} \;
-
-  # Create libmingn.so ldscripts.
-  cat <<EOF > ${TOOLCHAIN_OUT_DIR}/i686-nacl/usr/lib/libmingn.so
-OUTPUT_FORMAT(elf32-i386-nacl)
-GROUP(-lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -lcli_main -lstdc++ -lm)
-EOF
-  cat <<EOF > ${TOOLCHAIN_OUT_DIR}/x86_64-nacl/usr/lib/libmingn.so
-OUTPUT_FORMAT(elf64-x86-64-nacl)
-GROUP(-lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -lcli_main -lstdc++ -lm)
-EOF
 
   # Modify GCC's specs file. E.g.,
   # /path/to/nacl_sdk/pepper_canary/toolchain/linux_x86_glibc
