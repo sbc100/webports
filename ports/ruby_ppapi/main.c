@@ -10,6 +10,7 @@
 #include <locale.h>
 #include <ruby.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/mount.h>
 
 #include "nacl_io/nacl_io.h"
@@ -39,13 +40,13 @@ static int setup_unix_environment(const char* tarfile) {
     strcat(filename, tarfile);
     ret = tar_open(&tar, filename, NULL, O_RDONLY, 0, 0);
     if (ret) {
-      printf("error opening luadata.tar\n");
+      printf("error opening %s\n", tarfile);
       return 1;
     }
 
     ret = tar_extract_all(tar, "/");
     if (ret) {
-      printf("error extracting luadata.tar\n");
+      printf("error extracting %s\n", tarfile);
       return 1;
     }
 
@@ -69,7 +70,8 @@ int nacl_main(int argc, char **argv) {
   if (setup_unix_environment(DATA_ARCHIVE))
     return 1;
 
-  printf("Launching irb ...\n");
+  if (argc == 2 && !strcmp(argv[1], "/usr/bin/irb"))
+    printf("Launching irb ...\n");
   ruby_sysinit(&argc, &argv);
   {
     RUBY_INIT_STACK;
