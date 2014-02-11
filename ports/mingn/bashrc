@@ -9,7 +9,7 @@
 
 InstallPackage() {
   local package_name="$1.${2:-${NACL_ARCH}}"
-  local archive=/mnt/http/tarballs/${package_name}.tar
+  local archive=/mnt/http/tarballs/${package_name}.zip
   local stamp=stamp/${package_name}
   if [ ! -e /mnt/html5/mingn/${stamp} ]; then
     echo "Installing ${package_name} package..."
@@ -26,7 +26,8 @@ InstallPackage() {
     echo "${archive} does not exist!"
     return
   fi
-  tar -C /mnt/html5 -xf ${archive}
+  # -o: overwrite -q: quiet -d: destination
+  unzip -oqd /mnt/html5 ${archive}
 }
 
 InstallPackage base

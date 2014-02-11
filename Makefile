@@ -191,6 +191,7 @@ ALL_PORTS = \
      ports/tiff \
      ports/tinyxml \
      ports/toybox \
+     ports/unzip \
      ports/vim \
      ports/webp \
      ports/x264 \

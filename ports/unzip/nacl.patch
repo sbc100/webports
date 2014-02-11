@@ -1,0 +1,34 @@
+diff --git a/fileio.c b/fileio.c
+index a01a19c..fe8c655 100644
+--- a/fileio.c
++++ b/fileio.c
+@@ -1956,8 +1956,15 @@ time_t dos_to_unix_time(dosdatetime)
+     /* tzset was already called at start of process_zipfiles() */
+     /* tzset(); */              /* set `timezone' variable */
+ #ifndef __BEOS__                /* BeOS DR8 has no timezones... */
++    /* TODO(hamaji): remove once this gets fixed:
++     * https://code.google.com/p/nativeclient/issues/detail?id=3737
++     */
++#if defined(__native_client__) && !defined(__GLIBC__)
++    m_time += _timezone;         /* seconds WEST of GMT:  add */
++#else
+     m_time += timezone;         /* seconds WEST of GMT:  add */
+ #endif
++#endif
+ #endif /* ?(BSD || MTS || __GO32__) */
+ #endif /* ?WIN32 */
+     TTrace((stderr, "  m_time after timezone =  %lu\n", (ulg)m_time));
+diff --git a/process.c b/process.c
+index c4052f1..cef4ec0 100644
+--- a/process.c
++++ b/process.c
+@@ -739,7 +739,8 @@ static int do_seekable(__G__ lastchance)        /* return PK-type error code */
+     if (open_input_file(__G))   /* this should never happen, given */
+         return PK_NOZIP;        /*  the stat() test above, but... */
+ 
+-#ifdef DO_SAFECHECK_2GB
++    /* nacl_io's HTTP FS does not support lseek so this check will fail */
++#if defined(DO_SAFECHECK_2GB) && !defined(__native_client__)
+     /* Need more care: Do not trust the size returned by stat() but
+        determine it by reading beyond the end of the file. */
+     G.ziplen = file_size(G.zipfd);

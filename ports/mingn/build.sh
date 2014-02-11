@@ -14,7 +14,8 @@ CreateMingnPackage() {
   mkdir -p mingn/stamp
   echo INSTALLED=${stamp} > mingn/stamp/${package_name}
   mkdir -p ${PUBLISH_DIR}/tarballs
-  tar -cvf ${PUBLISH_DIR}/tarballs/${package_name}.tar mingn
+  rm -f ${PUBLISH_DIR}/tarballs/${package_name}.zip
+  zip -r ${PUBLISH_DIR}/tarballs/${package_name}.zip mingn
   mkdir -p ${PUBLISH_DIR}/stamp
   echo LATEST=${stamp} > ${PUBLISH_DIR}/stamp/${package_name}
 }
@@ -24,11 +25,11 @@ InstallStep() {
 
   # Set up files for bootstrap.
   local BASH_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/bash*/${NACL_LIBC}/bash)
-  local TAR_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/tar*/${NACL_LIBC})
+  local UNZIP_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/unzip*/${NACL_LIBC})
   local VIM_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/vim*/${NACL_LIBC}/vim)
 
   cp -fr ${BASH_DIR}/* ${PUBLISH_DIR}
-  cp -fr ${TAR_DIR}/{*.{nexe,nmf},lib*} ${PUBLISH_DIR}
+  cp -fr ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${PUBLISH_DIR}
   # We need to put the tar archive for vim in HTTP FS to run it.
   # TODO(hamaji): Move this to the package to be installed in HTML5 FS.
   cp ${VIM_DIR}/*.tar ${PUBLISH_DIR}
@@ -48,7 +49,7 @@ InstallStep() {
   mkdir -p ${bin_dir} ${libexec_dir}
   for binary in \
       ${BASH_DIR}/*_${NACL_ARCH}.nexe \
-      ${TAR_DIR}/*_${NACL_ARCH}.nexe \
+      ${UNZIP_DIR}/*_${NACL_ARCH}.nexe \
       ${VIM_DIR}/*_${NACL_ARCH}.nexe \
       ${GCC_DIR}/*_${NACL_ARCH}.nexe \
       ${BINUTILS_DIR}/*_${NACL_ARCH}.nexe \
