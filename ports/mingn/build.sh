@@ -10,13 +10,14 @@ BuildStep() {
 
 CreateMingnPackage() {
   local package_name="$1.${2:-${NACL_ARCH}}"
+  echo "CreateMingnPackage $package_name"
   local stamp=\"$(date)\"
-  mkdir -p mingn/stamp
+  MakeDir mingn/stamp
   echo INSTALLED=${stamp} > mingn/stamp/${package_name}
-  mkdir -p ${PUBLISH_DIR}/tarballs
-  rm -f ${PUBLISH_DIR}/tarballs/${package_name}.zip
-  zip -r ${PUBLISH_DIR}/tarballs/${package_name}.zip mingn
-  mkdir -p ${PUBLISH_DIR}/stamp
+  MakeDir ${PUBLISH_DIR}/tarballs
+  LogExecute rm -f ${PUBLISH_DIR}/tarballs/${package_name}.zip
+  LogExecute zip -qr ${PUBLISH_DIR}/tarballs/${package_name}.zip mingn
+  MakeDir ${PUBLISH_DIR}/stamp
   echo LATEST=${stamp} > ${PUBLISH_DIR}/stamp/${package_name}
 }
 
@@ -24,9 +25,9 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
 
   # Set up files for bootstrap.
-  local BASH_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/bash*/${NACL_LIBC}/bash)
-  local UNZIP_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/unzip*/${NACL_LIBC})
-  local VIM_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/vim*/${NACL_LIBC}/vim)
+  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash*/${NACL_LIBC}/bash
+  local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip*/${NACL_LIBC}
+  local VIM_DIR=${NACL_PACKAGES_PUBLISH}/vim*/${NACL_LIBC}/vim
 
   cp -fr ${BASH_DIR}/* ${PUBLISH_DIR}
   cp -fr ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${PUBLISH_DIR}
@@ -36,17 +37,18 @@ InstallStep() {
 
   # Create another archive which contains executables.
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_ARCH}/bin
-  pushd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_ARCH}/bin
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_ARCH}/bin
 
-  local COREUTILS_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/coreutils*/${NACL_LIBC})
-  local BINUTILS_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/binutils/${NACL_LIBC})
-  local GCC_DIR=$(echo ${NACL_PACKAGES_PUBLISH}/gcc/${NACL_LIBC})
+  local COREUTILS_DIR=${NACL_PACKAGES_PUBLISH}/coreutils*/${NACL_LIBC}
+  local BINUTILS_DIR=${NACL_PACKAGES_PUBLISH}/binutils/${NACL_LIBC}
+  local GCC_DIR=${NACL_PACKAGES_PUBLISH}/gcc/${NACL_LIBC}
 
   local TOOLCHAIN_OUT_DIR=mingn/toolchain/nacl_x86_glibc
   local bin_dir=${TOOLCHAIN_OUT_DIR}/bin
   local libexec_dir=${TOOLCHAIN_OUT_DIR}/libexec/gcc/x86_64-nacl/4.4.3
 
-  mkdir -p ${bin_dir} ${libexec_dir}
+  MakeDir ${bin_dir}
+  MakeDir ${libexec_dir}
   for binary in \
       ${BASH_DIR}/*_${NACL_ARCH}.nexe \
       ${UNZIP_DIR}/*_${NACL_ARCH}.nexe \
@@ -65,11 +67,9 @@ InstallStep() {
 
   CreateMingnPackage base
 
-  popd
-
   # Create an archive which contains include files and shared objects.
   MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/lib
-  pushd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/lib
+  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/lib
 
   # Copy files from $NACL_SDK_ROOT to the package.
   local dirs="
@@ -79,26 +79,26 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/lib
 toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
 "
   for d in $dirs; do
-    local o=$(dirname mingn/$d | sed "s/${OS_SUBDIR}_/nacl_/")
-    mkdir -p $o
+    local o=$(echo mingn/$d | sed "s/${OS_SUBDIR}_/nacl_/")
+    echo "Copying libs from: $d -> $o"
+    MakeDir $o
     if [ -d ${NACL_SDK_ROOT}/$d ]; then
-      cp -r ${NACL_SDK_ROOT}/$d $o
+      cp -r ${NACL_SDK_ROOT}/$d $(dirname $o)
     else
-      mkdir -p mingn/$d
+      MakeDir $o
     fi
   done
 
   # Remove unnecessary files to reduce the size of the archive.
-  rm -f ${TOOLCHAIN_OUT_DIR}/x86_64-nacl/lib/32
-  rm -fr ${TOOLCHAIN_OUT_DIR}/x86_64-nacl/lib*/{gconv,libgfortran*}
+  LogExecute rm -f ${TOOLCHAIN_OUT_DIR}/x86_64-nacl/lib/32
+  LogExecute rm -fr ${TOOLCHAIN_OUT_DIR}/x86_64-nacl/lib*/{gconv,libgfortran*}
 
   # Resolve all symlinks as nacl_io does not support symlinks.
-  rm -fr /tmp/mingn-tmp.tmp
   for i in $(find mingn -type l); do
     if [ ! -d $i ]; then
-      cp $i /tmp/mingn-tmp.tmp
+      cp $i $i.tmp
       rm $i
-      mv /tmp/mingn-tmp.tmp $i
+      mv $i.tmp $i
     fi
   done
 
@@ -154,7 +154,6 @@ EOF
       ${TOOLCHAIN_OUT_DIR}/lib/gcc/x86_64-nacl/4.4.3/specs
 
   CreateMingnPackage lib all
-  popd
 
   # Copy bash.js and bashrc.
   cp ${START_DIR}/bash.js ${PUBLISH_DIR}
