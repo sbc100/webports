@@ -42,8 +42,6 @@ var waiters = {};
 var pid = 0;
 var ansiCyan = '\x1b[36m';
 var ansiReset = '\x1b[0m';
-// We show the loading progress only once for each URL.
-var loadedUrl = {};
 
 /**
  * Static initialier called from index.html.
@@ -165,9 +163,6 @@ NaClTerm.prototype.handleLoadError_ = function(e) {
 }
 
 NaClTerm.prototype.doneLoadingUrl = function() {
-  if (loadedUrl[this.lastUrl])
-    return;
-  loadedUrl[this.lastUrl] = true;
   var width = this.io.terminal_.screenSize.width;
   this.io.print('\r' + Array(width+1).join(' '));
   var message = '\rLoaded ' + this.lastUrl;
@@ -189,12 +184,16 @@ NaClTerm.prototype.handleLoad_ = function(e) {
     e.srcElement.parent.postMessage(reply);
   }
 
-  if (this.lastUrl)
-    this.doneLoadingUrl();
-  else
-    this.io.print('Loaded.\n');
+  // Don't print loading messages, except for the
+  // root process.
+  if (!e.srcElement.parent) {
+    if (this.lastUrl)
+      this.doneLoadingUrl();
+    else
+      this.io.print('Loaded.\n');
 
-  this.io.print(ansiReset);
+    this.io.print(ansiReset);
+  }
 
   // Now that have completed loading and displaying
   // loading messages we output any messages from the
@@ -210,7 +209,7 @@ NaClTerm.prototype.handleLoad_ = function(e) {
 NaClTerm.prototype.handleProgress_ = function(e) {
   var url = e.url.substring(e.url.lastIndexOf('/') + 1);
 
-  if (this.lastUrl && this.lastUrl != url)
+  if (!e.srcElement.parent && this.lastUrl && this.lastUrl != url)
     this.doneLoadingUrl()
 
   if (!url)
@@ -219,8 +218,9 @@ NaClTerm.prototype.handleProgress_ = function(e) {
   this.lastUrl = url;
   this.lastTotal = e.total;
 
-  if (loadedUrl[url])
+  if (e.srcElement.parent)
     return;
+
   var message = 'Loading ' + url;
   if (e.lengthComputable && e.total) {
     var percent = Math.round(e.loaded * 100 / e.total);
@@ -244,17 +244,18 @@ NaClTerm.prototype.handleCrash_ = function(e) {
  * Exit the command.
  */
 NaClTerm.prototype.exit = function(code, element) {
-  this.io.print(ansiCyan)
-  if (code == -1) {
-    this.io.print('Program (' + element.command_name +
-                  ') crashed (exit status -1)\n');
-  } else {
-    this.io.print('Program (' + element.command_name + ') exited ' +
-                  '(status=' + code + ')\n');
-  }
-
   if (!element.parent) {
+    this.io.print(ansiCyan)
+
     // The root process finished.
+    if (code == -1) {
+      this.io.print('Program (' + element.command_name +
+                    ') crashed (exit status -1)\n');
+    } else {
+      this.io.print('Program (' + element.command_name + ') exited ' +
+                    '(status=' + code + ')\n');
+    }
+
     this.io.pop();
     if (this.argv_.onExit)
       this.argv_.onExit(code);
