@@ -26,24 +26,10 @@ index 133a1ef..ecd1e27 100644
  endif
  
 diff --git a/src/civetweb.c b/src/civetweb.c
-index 3cc395a..d1ff233 100644
+index 3cc395a..35ca367 100644
 --- a/src/civetweb.c
 +++ b/src/civetweb.c
-@@ -61,6 +61,13 @@
- #define IGNORE_UNUSED_RESULT(a) (void)((a) && 1)
- #endif
- 
-+#if defined(__native_client__) && !defined(__GLIBC__)
-+// Newlib doesn't currently implemnt flockfile/funlockfile.
-+// TODO(sbc): remove this once newlib is fixed.
-+#define flockfile(x)
-+#define funlockfile(x)
-+#endif
-+
- #ifndef _WIN32_WCE /* Some ANSI #includes are not available on Windows CE */
- #include <sys/types.h>
- #include <sys/stat.h>
-@@ -222,7 +229,7 @@ struct pollfd {
+@@ -222,7 +222,7 @@ struct pollfd {
  #else    /* UNIX  specific */
  #include <sys/wait.h>
  #include <sys/socket.h>
@@ -52,6 +38,20 @@ index 3cc395a..d1ff233 100644
  #include <netinet/in.h>
  #include <arpa/inet.h>
  #include <sys/time.h>
+@@ -330,6 +330,13 @@ typedef int socklen_t;
+ #define MGSQLEN 20
+ #endif
+ 
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++// Newlib doesn't currently implemnt flockfile/funlockfile.
++// TODO(sbc): remove this once newlib is fixed.
++#define flockfile(x)
++#define funlockfile(x)
++#endif
++
+ static const char *http_500_error = "Internal Server Error";
+ 
+ #if defined(NO_SSL_DL)
 diff --git a/src/main.c b/src/main.c
 index c8dff6e..97d3264 100644
 --- a/src/main.c

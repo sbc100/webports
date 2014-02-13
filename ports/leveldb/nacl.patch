@@ -109,7 +109,7 @@ index f2b89bf..bae495f 100644
  #if defined(OS_MACOSX) || defined(OS_SOLARIS) || defined(OS_FREEBSD) ||\
      defined(OS_NETBSD) || defined(OS_OPENBSD) || defined(OS_DRAGONFLYBSD) ||\
 -    defined(OS_ANDROID) || defined(OS_HPUX)
-+    defined(OS_ANDROID) || defined(OS_HPUX) || (defined(OS_NACL) && !defined(__GLIBC__))
++    defined(OS_ANDROID) || defined(OS_HPUX) || (defined(OS_NACL) && defined(_NEWLIB_VERSION))
  // Use fread/fwrite/fflush on platforms without _unlocked variants
  #define fread_unlocked fread
  #define fwrite_unlocked fwrite

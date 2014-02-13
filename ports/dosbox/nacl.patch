@@ -183,7 +183,7 @@ index 6bbc24c..cbe0662 100644
  	return 0;
  }
  
-+#if defined(__native_client__) && !defined(__GLIBC__)
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +#include <libgen.h>
 +#include <assert.h>
 +

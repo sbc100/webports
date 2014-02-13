@@ -105,7 +105,7 @@ index 9a3e885..a460b4b 100644
  
  int udphelper_sockets_open(int **sockbuf, in_port_t nport)
  {
-+#if defined(__native_client__) && !defined(__GLIBC__)
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +  /*
 +   * TODO(bradnelson): figure out if nacl_io can support these calls.
 +   */

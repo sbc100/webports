@@ -72,7 +72,7 @@ index 6bbb801..1646191 100644
  #endif
  
  
-+#if defined(__native_client__) && !defined(__GLIBC__)
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +struct group *getgrgid(gid_t gid) {
 +  errno = ENOSYS;
 +  return NULL;
