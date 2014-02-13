@@ -2,3 +2,4 @@ PACKAGE_NAME=lua-5.1.4
 URL=http://www.lua.org/ftp/lua-5.1.4.tar.gz
 LICENSE=MIT
 DEPENDS=(readline)
+SHA1=2b11c8e60306efb7f0734b747588f57995493db7

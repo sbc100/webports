@@ -4,3 +4,4 @@ URL_FILENAME=drod-213fa47.tar.gz
 LICENSE=MPL
 DISABLED_ARCH=pnacl
 DEPENDS=(sdl sdl_mixer sdl_ttf zlib metakit libtar expat)
+SHA1=33b465c4d8fcb09523b97d14833591e1eb5343f2

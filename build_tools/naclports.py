@@ -45,7 +45,7 @@ class Package(object):
   """
   VALUE_KEYS = ('URL', 'PACKAGE_NAME', 'LICENSE', 'DEPENDS', 'MIN_SDK_VERSION',
                 'LIBC', 'DISABLED_ARCH', 'URL_FILENAME', 'PACKAGE_DIR',
-                'BUILD_OS')
+                'BUILD_OS', 'SHA1')
 
   def __init__(self, pkg_root):
     self.root = os.path.abspath(pkg_root)
@@ -123,24 +123,25 @@ class Package(object):
 
   def Verify(self, verbose=False):
     """Download upstream source and verify hash."""
-    if not self.GetArchiveFilename():
+    archive = self.DownloadLocation()
+    if not archive:
       print "no archive: %s" % self.PACKAGE_NAME
       return True
+
+    if not hasattr(self, 'SHA1'):
+      print "missing SHA1 attribute: %s" % self.info
+      return False
 
     self.Download()
     olddir = os.getcwd()
     sha1file = os.path.join(self.root, self.PACKAGE_NAME + '.sha1')
+
     try:
-      os.chdir(ARCHIVE_ROOT)
-      with open(sha1file) as f:
-        try:
-          filenames = sha1check.VerifyFile(f, False)
-          print "verified: %s" % (filenames)
-        except sha1check.Error as e:
-          print "verification failed: %s: %s" % (sha1file, str(e))
-          return False
-    finally:
-      os.chdir(olddir)
+      sha1check.VerifyHash(archive, self.SHA1)
+      print "verified: %s" % archive
+    except sha1check.Error as e:
+      print "verification failed: %s: %s" % (archive, str(e))
+      return False
 
     return True
 

@@ -5,3 +5,4 @@ LICENSE=GPL,LGPL
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 DISABLED_ARCH=arm
 DEPENDS=(lame libvorbis)
+SHA1=7c66e9776e83b13910eae960d63b7b86ad229dfe

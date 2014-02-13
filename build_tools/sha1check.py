@@ -25,20 +25,7 @@ class Error(Exception):
   pass
 
 
-def VerifyLine(line, verbose):
-  # split the hash *filename into a pair
-  parts = line.split()
-  if len(parts) != 2:
-    raise Error("Invalid sha1 line: '%s'" % line)
-
-  sha1sum, name = parts
-
-  # make sure filename started with '*' (binary mode)
-  if not name or name[0] != '*':
-    raise Error("input hash is not from a binary file")
-
-  # remove leading '*' and any newlines from filename
-  filename = name[1:]
+def VerifyHash(filename, sha1sum):
   try:
     # open file in binary mode & sha1 hash it
     h = hashlib.sha1()
@@ -53,11 +40,27 @@ def VerifyLine(line, verbose):
 
   # verify the generated hash and embedded hash match
   if sha1sum.lower() != filehash.lower():
-    print "Filename: ",  name
+    print "Filename: ", filename
     print "Expected hash: ", sha1sum
     print "Actual hash: ", filehash
     raise Error("sha1 checksum failed on file: " + filename)
 
+
+def VerifyLine(line, verbose):
+  # split the hash *filename into a pair
+  parts = line.split()
+  if len(parts) != 2:
+    raise Error("Invalid sha1 line: '%s'" % line)
+
+  sha1sum, name = parts
+
+  # make sure filename started with '*' (binary mode)
+  if not name or name[0] != '*':
+    raise Error("input hash is not from a binary file")
+
+  # remove leading '*' and any newlines from filename
+  filename = name[1:]
+  VerifyHash(filename, sha1sum)
   if verbose:
     print "sha1check.py: %s verified" % filename
 

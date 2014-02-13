@@ -2,3 +2,4 @@ PACKAGE_NAME=bochs-2.4.6
 URL=http://downloads.sourceforge.net/bochs/bochs/2.4.6/bochs-2.4.6.tar.gz
 LICENSE=LGPL
 DEPENDS=(sdl)
+SHA1=eb6dc887ce0f56861301eeb61328782a8275ec8e

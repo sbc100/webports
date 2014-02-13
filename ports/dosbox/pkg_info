@@ -2,3 +2,4 @@ PACKAGE_NAME=dosbox-0.74
 URL=http://download.sourceforge.net/dosbox/dosbox/0.74/dosbox-0.74.tar.gz
 LICENSE=GPL
 DEPENDS=(sdl zlib libpng)
+SHA1=2d99f0013350efb29b769ff19ddc8e4d86f4e77e

@@ -3,3 +3,4 @@ URL=http://ftp.gnu.org/gnu/coreutils/coreutils-5.2.1.tar.bz2
 LICENSE=GPL
 LIBC=glibc
 DEPENDS=(nacl-spawn)
+SHA1=1028755ae0fa9be840576e4837004cf5a9981c45

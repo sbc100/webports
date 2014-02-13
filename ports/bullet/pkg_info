@@ -4,3 +4,4 @@ LICENSE=CUSTOM:License.txt
 # TODO(binji): remove this conditional once this bug gets fixed:
 # https://code.google.com/p/nativeclient/issues/detail?id=3700
 DISABLED_ARCH=arm
+SHA1=da04abea176cd0986108181582e29e725e58c69c

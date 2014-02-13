@@ -438,7 +438,7 @@ Check() {
   # verify sha1 checksum for tarball
   local IN_FILE=${START_DIR}/${PACKAGE_NAME}.sha1
 
-  if ${SHA1CHECK} <${IN_FILE} ; then
+  if echo "${SHA1} *${ARCHIVE_NAME}" | ${SHA1CHECK}; then
     return 0
   else
     return 1

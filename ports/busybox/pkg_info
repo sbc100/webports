@@ -2,3 +2,4 @@ PACKAGE_NAME=busybox-1.22.0
 URL=http://busybox.net/downloads/busybox-1.22.0.tar.bz2
 LICENSE=gpl
 LIBC=glibc
+SHA1=486fb55c3efa71148fe07895fd713ea3a5ae343a

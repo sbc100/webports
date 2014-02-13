@@ -1,3 +1,4 @@
 PACKAGE_NAME=cfitsio
 URL=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3260.tar.gz
 LICENSE=LGPL
+SHA1=42b199dafae359473cf733f1197ad303053e072b

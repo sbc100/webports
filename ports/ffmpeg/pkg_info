@@ -3,3 +3,4 @@ URL=http://ffmpeg.org/releases/ffmpeg-2.1.3.tar.bz2
 LICENSE=GPL,LGPL
 DISABLED_ARCH=arm
 DEPENDS=(lame libvorbis libtheora glibc-compat)
+SHA1=9dc54bbef673f3938e280bf48d07e7b24fe445ab

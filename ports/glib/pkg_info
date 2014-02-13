@@ -3,3 +3,4 @@ URL=http://ftp.gnome.org/pub/gnome/sources/glib/2.28/glib-2.28.8.tar.bz2
 LICENSE=LGPL
 LIBC=glibc
 DEPENDS=(zlib)
+SHA1=20cd63705a8805260da0320c65b979233f2e3c18
