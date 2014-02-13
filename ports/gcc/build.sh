@@ -16,6 +16,7 @@ ConfigureStep() {
     --enable-languages=c,c++ --disable-nls \
     --target=x86_64-nacl \
     --disable-libstdcxx-pch --enable-threads=nacl
+  LogExecute rm -f `find -name config.cache`
 }
 
 InstallStep() {
