@@ -3,6 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXTRA_CMAKE_ARGS="-DBUILD_SHARED=${NACL_GLIBC}"
 
 TestStep() {
   if [ ${NACL_ARCH} == "pnacl" ]; then
@@ -20,13 +21,6 @@ TestStep() {
     (cd ../test && LogExecute ./run_tests.sh ${script})
   fi
 }
-
-
-ConfigureStep() {
-  EXTRA_CMAKE_ARGS="-DBUILD_SHARED=${NACL_GLIBC}"
-  CMakeConfigureStep
-}
-
 
 BuildStep() {
   make all -j${OS_JOBS}

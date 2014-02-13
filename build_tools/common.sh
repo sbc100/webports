@@ -780,6 +780,11 @@ DefaultPatchStep() {
 
 
 DefaultConfigureStep() {
+  if [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
+    CMakeConfigureStep
+    return
+  fi
+
   local EXTRA_CONFIGURE_OPTS=("${@:-}")
   # export the nacl tools
   export CC=${NACLCC}
