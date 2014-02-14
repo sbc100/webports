@@ -3,43 +3,41 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
+EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
+                      --disable-native-texlive-build \
+                      --enable-build-in-source-tree \
+                      --disable-shared \
+                      --disable-lcdf-typetools \
+                      --disable-largefile \
+                      --without-luatex \
+                      --enable-mktextex-default \
+                      --without-x \
+                      --without-system-freetype \
+                      --without-system-freetype2 \
+                      --without-system-gd \
+                      --without-system-graphite \
+                      --without-system-icu \
+                      --without-system-kpathsea \
+                      --without-system-ptexenc \
+                      --without-system-t1lib \
+                      --without-system-teckit \
+                      --without-system-xpdf"
 
-export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
-export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
-                             --disable-native-texlive-build \
-                             --enable-build-in-source-tree \
-                             --disable-shared \
-                             --disable-lcdf-typetools \
-                             --disable-largefile \
-                             --without-luatex \
-                             --enable-mktextex-default \
-                             --without-x \
-                             --without-system-freetype \
-                             --without-system-freetype2 \
-                             --without-system-gd \
-                             --without-system-graphite \
-                             --without-system-icu \
-                             --without-system-kpathsea \
-                             --without-system-ptexenc \
-                             --without-system-t1lib \
-                             --without-system-teckit \
-                             --without-system-xpdf"
-
-export NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--as-needed"
+NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--as-needed"
+BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
-  ChangeDir ${SRC_DIR}
-
   # TODO(phosek): we should be able to run reautoconf at this point, but
   # this requires automake > 1.12 which is not currently shipped in Ubuntu
   #${SRC_DIR}/reautoconf
 
-  local build_host=$(${SRC_DIR}/build-aux/config.guess)
-
   (
+    build_host=$(${SRC_DIR}/build-aux/config.guess)
+    EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --build=${build_host}"
     export LIBS="-ltar -lppapi_simple -lnacl_io \
       -lppapi_cpp -lppapi -l${NACL_CPP_LIB}"
-    DefaultConfigureStep --build=${build_host}
+    DefaultConfigureStep
   )
 }
 

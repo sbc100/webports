@@ -6,5 +6,5 @@
 BUILD_DIR=${START_DIR}
 
 BuildStep() {
-  SDKBuildSystemBuildStep
+  BuildStep_SDKBuildSystem
 }

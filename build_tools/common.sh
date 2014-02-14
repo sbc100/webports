@@ -780,12 +780,15 @@ DefaultPatchStep() {
 
 
 DefaultConfigureStep() {
-  if [ -f "${SRC_DIR}/CMakeLists.txt" -a ! -f "${SRC_DIR}/configure" ]; then
-    CMakeConfigureStep
-    return
+  if [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
+    ConfigureStep_CMake
+  else
+    ConfigureStep_Autotools
   fi
+}
 
-  local EXTRA_CONFIGURE_OPTS=("${@:-}")
+
+ConfigureStep_Autotools() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -835,12 +838,12 @@ DefaultConfigureStep() {
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \
     --${NACL_OPTION}-asm \
-    --with-x=no  \
-    "${EXTRA_CONFIGURE_OPTS[@]}" ${EXTRA_CONFIGURE_ARGS:-}
+    --with-x=no \
+    ${EXTRA_CONFIGURE_ARGS:-}
 }
 
 
-CMakeConfigureStep() {
+ConfigureStep_CMake() {
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
 
@@ -877,7 +880,7 @@ DefaultTestStep() {
 # Build step for projects based on the NaCl SDK build
 # system (common.mk).
 #
-SDKBuildSystemBuildStep() {
+BuildStep_SDKBuildSystem() {
   # We override $(OUTBASE) to force the build system to put
   # all its artifacts in ${NACL_PACKAGES_REPOSITORY} rather
   # than alongside the Makefile.

@@ -4,9 +4,11 @@
 # found in the LICENSE file.
 
 
+BUILD_DIR=${SRC_DIR}
+EXTRA_CONFIGURE_ARGS="--with-tlib=ncurses --prefix= --exec-prefix="
+EXECUTABLES=src/vim
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple -lnacl_io \
   -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
-EXECUTABLES=src/vim
 
 PatchStep() {
   DefaultPatchStep
@@ -27,9 +29,7 @@ ConfigureStep() {
   else
     export STRIP=${NACLSTRIP}
   fi
-  export BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  export NACL_CONFIGURE_PATH=./configure
-  DefaultConfigureStep --with-tlib=ncurses --prefix= --exec-prefix=
+  DefaultConfigureStep
   # Vim's build doesn't support building outside the source tree.
   # Do a clean to make rebuild after failure predictable.
   LogExecute make clean

@@ -15,7 +15,7 @@ BuildStep() {
     NACLPORTS_CXXFLAGS+=" -fPIC"
     MAKE_TARGETS+=" libnacl_spawn.so test"
   fi
-  SDKBuildSystemBuildStep
+  BuildStep_SDKBuildSystem
 }
 
 InstallStep() {
