@@ -780,7 +780,7 @@ DefaultPatchStep() {
 
 
 DefaultConfigureStep() {
-  if [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
+  if [ -f "${SRC_DIR}/CMakeLists.txt" -a ! -f "${SRC_DIR}/configure" ]; then
     CMakeConfigureStep
     return
   fi
