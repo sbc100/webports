@@ -780,10 +780,12 @@ DefaultPatchStep() {
 
 
 DefaultConfigureStep() {
-  if [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
+  if [ -f "${SRC_DIR}/configure" ]; then
+    ConfigureStep_Autotools
+  elif [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
     ConfigureStep_CMake
   else
-    ConfigureStep_Autotools
+    echo "No configure or CMakeLists.txt script found in ${SRC_DIR}"
   fi
 }
 
@@ -803,10 +805,6 @@ ConfigureStep_Autotools() {
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export PATH=${NACL_BIN_PATH}:${PATH};
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
-  if [ ! -f "${CONFIGURE}" ]; then
-    echo "No configure script found at ${CONFIGURE}"
-    return
-  fi
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
 
