@@ -25,13 +25,17 @@ ConfigureStep() {
     --prefix=${NACLPORTS_PREFIX} no-asm no-hw no-krb5 ${EXTRA_ARGS} \
     -D_GNU_SOURCE
 
-  if [ "${NACL_GLIBC}" != "1" ]; then
-    HackStepForNewlib
-  fi
+  HackStepForNewlib
 }
 
 
 HackStepForNewlib() {
+  if [ "${NACL_GLIBC}" = "1" ]; then
+    git checkout apps/Makefile
+    git checkout test/Makefile
+    return
+  fi
+
   # apps/Makefile links programs that require socket(), etc.
   # Stub it out until we link against nacl_io or something.
   echo "all clean install: " > apps/Makefile
