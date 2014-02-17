@@ -780,7 +780,8 @@ DefaultPatchStep() {
 
 
 DefaultConfigureStep() {
-  if [ -f "${SRC_DIR}/configure" ]; then
+  local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
+  if [ -f "${CONFIGURE}" ]; then
     ConfigureStep_Autotools
   elif [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
     ConfigureStep_CMake

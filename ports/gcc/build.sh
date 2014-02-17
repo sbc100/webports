@@ -6,16 +6,17 @@
 export EXTRA_LIBS=\
 "-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io -lnacl_spawn"
 CONFIG_SUB=support/config.sub
-
-ConfigureStep() {
-  # --with-build-sysroot is necessary to run "fixincl"
-  # properly. Without this option, GCC's build system tries to create
-  # "include-fixed" based on the host's include directory, which is
-  # not compatible with nacl-gcc.
-  DefaultConfigureStep \
+# --with-build-sysroot is necessary to run "fixincl"
+# properly. Without this option, GCC's build system tries to create
+# "include-fixed" based on the host's include directory, which is
+# not compatible with nacl-gcc.
+EXTRA_CONFIGURE_ARGS="\
     --enable-languages=c,c++ --disable-nls \
     --target=x86_64-nacl \
-    --disable-libstdcxx-pch --enable-threads=nacl
+    --disable-libstdcxx-pch --enable-threads=nacl"
+
+ConfigureStep() {
+  DefaultConfigureStep
   LogExecute rm -f `find -name config.cache`
 }
 

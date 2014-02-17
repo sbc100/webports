@@ -5,12 +5,11 @@
 
 export EXTRA_LIBS="-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io"
 CONFIG_SUB=support/config.sub
-
-ConfigureStep() {
-  DefaultConfigureStep \
-    --target=x86_64-nacl \
-    --disable-werror --enable-deterministic-archives --without-zlib
-}
+EXTRA_CONFIGURE_ARGS="\
+  --target=x86_64-nacl \
+  --disable-werror \
+  --enable-deterministic-archives \
+  --without-zlib"
 
 InstallStep() {
   MakeDir ${PUBLISH_DIR}

@@ -7,16 +7,16 @@
 EXECUTABLES=civetweb
 
 BuildStep() {
-  export CFLAGS="${NACL_CFLAGS}"
-  export LDFLAGS="${NACL_LDFLAGS}"
+  export CFLAGS="${NACLPORTS_CFLAGS}"
+  export LDFLAGS="${NACLPORTS_LDFLAGS}"
 
   CFLAGS+=" -DNO_SSL -DNO_CGI"
   if [ "${NACL_GLIBC}" = "1" ]; then
     LDFLAGS+=" -ldl"
   fi
 
-  CC=${NACLCC} LogExecute make clean
-  CC=${NACLCC} LogExecute make WITH_DEBUG=${NACL_DEBUG} \
+  CC=${NACLCC} CXX=${NACLCXX} LogExecute make clean
+  CC=${NACLCC} CXX=${NACLCXX} LogExecute make WITH_DEBUG=${NACL_DEBUG} \
                                TARGET_OS=NACL WITH_CPP=1 all lib
 }
 

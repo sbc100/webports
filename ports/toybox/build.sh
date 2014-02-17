@@ -12,7 +12,8 @@ NACLPORTS_CFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
 NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
 NACLPORTS_CXXFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
 NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
-NACL_CONFIGURE_PATH="sh ${SRC_DIR}/configure"
+NACLPORTS_LDFLAGS+=" -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
+
 export HOSTCC=cc
 
 if [ "${NACL_GLIBC}" != "1" ]; then
@@ -24,32 +25,23 @@ if [ "${NACL_GLIBC}" != "1" ]; then
 fi
 
 ConfigureStep() {
-  LogExecute cp ${START_DIR}/toybox.config \
-    ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/.config
-  LogExecute chmod +x ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/configure
-  DefaultConfigureStep
+  LogExecute cp ${START_DIR}/toybox.config ${SRC_DIR}/.config
 }
 
 BuildStep() {
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    export CROSS_COMPILE="pnacl-"
-  else
-    export CROSS_COMPILE="${NACL_ARCH}-nacl-"
-  fi
-
-  export CROSS_COMPILE="${NACL_CROSS_PREFIX}-"
-  export LDFLAGS="${LDFLAGS} -lnacl_spawn -lppapi_simple -lnacl_io -lppapi"
-  export LDFLAGS="${LDFLAGS} -lppapi_cpp"
-
   # We can't use NACL_CROSS_PREFIX without also redefining the CC and HOSTCC
   # variables.
   if [[ "${NACLCXX}" = *clang++ ]]; then
-    export CC=clang++
+    CC=clang++
   else
-    export CC=gcc
-    export LDFLAGS="${LDFLAGS} -l${NACL_CPP_LIB}"
+    CC=gcc
+    NACLPORTS_LDFLAGS+=" -l${NACL_CPP_LIB}"
   fi
 
+  export CROSS_COMPILE="${NACL_CROSS_PREFIX}-"
+  export LDFLAGS="${NACLPORTS_LDFLAGS}"
+  export CFLAGS="${NACLPORTS_CFLAGS}"
+  export CC
   make clean
   DefaultBuildStep
 }

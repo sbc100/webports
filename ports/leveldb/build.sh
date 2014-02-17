@@ -5,6 +5,8 @@
 
 BuildStep() {
   export TARGET_OS=NaCl
+  export CC=${NACLCC}
+  export CXX=${NACLCXX}
   LogExecute make clean
   LogExecute make -j${OS_JOBS}
   LogExecute make -j${OS_JOBS} tests programs
