@@ -134,6 +134,7 @@ ALL_PORTS = \
      ports/libogg \
      ports/libpng \
      ports/libsodium \
+     ports/libssh \
      ports/libtar \
      ports/libtheora \
      ports/libtomcrypt \

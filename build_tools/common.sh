@@ -845,6 +845,14 @@ ConfigureStep_Autotools() {
 ConfigureStep_CMake() {
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
+  if [ "${VERBOSE:-}" = "1" ]; then
+    MAKE_TARGETS+=" VERBOSE=1"
+  fi
+
+  EXTRA_CMAKE_ARGS=${EXTRA_CMAKE_ARGS:-}
+  if [ "${NACL_GLIBC}" != "1" ]; then
+    EXTRA_CMAKE_ARGS+=" -DEXTRA_INCLUDE=${NACLPORTS_INCLUDE}/glibc-compat"
+  fi
 
   CC="${NACLCC}" CXX="${NACLCXX}" LogExecute cmake ..\
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
@@ -906,7 +914,9 @@ BuildStep_SDKBuildSystem() {
   else
     MAKEFLAGS+=" CONFIG=Release"
   fi
-  MAKEFLAGS+=" V=1"
+  if [ "${VERBOSE:-}" = "1" ]; then
+    MAKEFLAGS+=" V=1"
+  fi
   export MAKEFLAGS
   ChangeDir ${START_DIR}
   DefaultBuildStep
