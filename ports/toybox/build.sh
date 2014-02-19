@@ -17,11 +17,9 @@ NACLPORTS_LDFLAGS+=" -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 export HOSTCC=cc
 
 if [ "${NACL_GLIBC}" != "1" ]; then
-  # Toybox includes and defines some items that are not available, so rather
-  # than passing positive __GLIBC__ we pass positive __NEWLIB__ to identify
-  # which features to decline/accept.
-  NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat -D__NEWLIB__"
-  NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat -D__NEWLIB__"
+  NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  NACLPORTS_LDFLAGS+=" -lglibc-compat"
 fi
 
 ConfigureStep() {

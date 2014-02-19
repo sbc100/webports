@@ -1,7 +1,5 @@
 diff --git a/configure b/configure
-old mode 100644
-new mode 100755
-index 6047baf..7cc58e9
+index 6047baf..7cc58e9 100644
 --- a/configure
 +++ b/configure
 @@ -8,7 +8,7 @@
@@ -91,7 +89,7 @@ index a804d5b..7ccae28 100644
    dup2(fd, 1);
    dup2(fd, 2);
 diff --git a/lib/portability.c b/lib/portability.c
-index d901a4b..8528485 100644
+index d901a4b..3063d56 100644
 --- a/lib/portability.c
 +++ b/lib/portability.c
 @@ -6,7 +6,7 @@
@@ -263,7 +261,7 @@ index d901a4b..8528485 100644
 +
 +#endif
 diff --git a/lib/portability.h b/lib/portability.h
-index 745f8cd..7adcf08 100644
+index 745f8cd..bfef70d 100644
 --- a/lib/portability.h
 +++ b/lib/portability.h
 @@ -15,7 +15,7 @@
@@ -275,13 +273,16 @@ index 745f8cd..7adcf08 100644
  #define noreturn	__attribute__((noreturn))
  #else
  #define noreturn
-@@ -26,7 +26,13 @@
+@@ -26,7 +26,16 @@
  
  // This isn't in the spec, but it's how we determine what libc we're using.
  
-+// We don't want to define __GLIBC__ as we don't support all of its functions,
-+// so we instead pass a positive for __NEWLIB__.
-+#if defined(__native_client__) && defined(__NEWLIB__)
++// Include sys/types.h so that we can later check for _NEWLIB_VERSION.
++#if defined(__native_client__)
++#include <sys/types.h>
++#endif
++
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +#include <sys/features.h>
 +#else
  #include <features.h>
@@ -289,7 +290,7 @@ index 745f8cd..7adcf08 100644
  
  // Various constants old build environments might not have even if kernel does
  
-@@ -68,7 +74,7 @@ char *strptime(const char *buf, const char *format, struct tm *tm);
+@@ -68,7 +77,7 @@ char *strptime(const char *buf, const char *format, struct tm *tm);
  ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream);
  
  // When building under obsolete glibc (Ubuntu 8.04-ish), hold its hand a bit.
@@ -298,7 +299,7 @@ index 745f8cd..7adcf08 100644
  #define fstatat fstatat64
  int fstatat64(int dirfd, const char *pathname, void *buf, int flags);
  int readlinkat(int dirfd, const char *pathname, char *buf, size_t bufsiz);
-@@ -102,7 +108,7 @@ int utimensat(int fd, const char *path, const struct timespec times[2], int flag
+@@ -102,7 +111,7 @@ int utimensat(int fd, const char *path, const struct timespec times[2], int flag
  
  // Work out how to do endianness
  
@@ -549,7 +550,7 @@ index 4b8a87d..9fdd3ea 100644
  
  static void handler(int i)
 diff --git a/toys/pending/sh.c b/toys/pending/sh.c
-index 2f09f63..c3ae36e 100644
+index 2f09f63..ef7da08 100644
 --- a/toys/pending/sh.c
 +++ b/toys/pending/sh.c
 @@ -291,7 +291,11 @@ static void run_pipeline(struct pipeline *line)

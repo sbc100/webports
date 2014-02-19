@@ -194,6 +194,21 @@ int listen(int sockfd, int backlog) {
   UNIMPLEMENTED_FATAL();
 }
 
+dev_t makedev(int maj, int min)  __attribute__((weak));
+dev_t makedev(int maj, int min) {
+  return ((maj & 0xff) << 8 | (min & 0xff));
+}
+
+int major(dev_t dev) __attribute__((weak));
+int major(dev_t dev) {
+  return (dev >> 8) & 0xff;
+}
+
+int minor(dev_t dev) __attribute__((weak));
+int minor(dev_t dev) {
+  return dev & 0xff;
+}
+
 uint32_t ntohl(uint32_t netlong) __attribute__((weak));
 uint32_t ntohl(uint32_t netlong) {
   UNIMPLEMENTED_FATAL();
