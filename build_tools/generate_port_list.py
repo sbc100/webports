@@ -34,7 +34,8 @@ def main(args):
   print '[%s/build_tools/generate_port_list.py generate_port_list.py]' % SRC_URL
   print 'script.'
   print ''
-  print '|| *Name* || *Upstream Archive* || *!NaCl Patch* ||'
+  print ('|| *Name* || *Upstream Archive* || *!NaCl Patch* || ' +
+         '*Libc* || *Disabled On* ||')
   total = 0
   for package in sorted(naclports.PackageIterator()):
     if not package.URL:
@@ -53,7 +54,12 @@ def main(args):
     package_url = '[%s/%s %s]' % (SRC_URL,
                                   os.path.relpath(package.root, NACLPORTS_ROOT),
                                   package.PACKAGE_NAME)
-    print '|| %-70s || %-70s || %s ||' % (package_url, url, patch)
+    libc = getattr(package, 'LIBC', '')
+    if libc:
+      libc += '-only'
+    disabled_arch = getattr(package, 'DISABLED_ARCH', '')
+    print '|| %-70s || %-70s || %s || %s || %s ||' % (package_url, url, patch,
+                                                      libc, disabled_arch)
     total += 1
   print '\n_Total = %d_\n' % total
 
