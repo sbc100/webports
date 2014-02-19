@@ -5,63 +5,71 @@
 
 CONFIG_SUB=config/config.sub
 
+if [ "${NACL_GLIBC}" != "1" ]; then
+  # TODO(sbc): remove once this is fixed:
+  # https://code.google.com/p/nativeclient/issues/detail?id=3790
+  NACLPORTS_CFLAGS+=" -DSSIZE_MAX=LONG_MAX"
+  EXE_DIR=""
+else
+  EXE_DIR=".libs/"
+fi
+
 # TODO: Remove when this is fixed.
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 if [ "$NACL_ARCH" = "arm" ]; then
   export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
 fi
 
-ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  # Drop /opt/X11/bin (may interfere build on osx).
-  export PATH=$(echo $PATH | sed -e 's;/opt/X11/bin;;')
-  LDFLAGS+=" -Wl,--as-needed"
-  export LDFLAGS
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+EXTRA_CONFIGURE_ARGS=-"-with-x=no --disable-largefile --without-fftw"
 
-  local conf_host=${NACL_CROSS_PREFIX}
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
-    # does not know about "pnacl".  It only knows about "le32-nacl".
-    # Unfortunately, most of the config.subs here are so old that
-    # it doesn't know about that "le32" either.  So we just say "nacl".
-    conf_host="nacl"
-  fi
+EXECUTABLES="\
+  utilities/${EXE_DIR}animate${NACL_EXEEXT} \
+  utilities/${EXE_DIR}compare${NACL_EXEEXT} \
+  utilities/${EXE_DIR}composite${NACL_EXEEXT} \
+  utilities/${EXE_DIR}conjure${NACL_EXEEXT} \
+  utilities/${EXE_DIR}convert${NACL_EXEEXT} \
+  utilities/${EXE_DIR}display${NACL_EXEEXT} \
+  utilities/${EXE_DIR}identify${NACL_EXEEXT} \
+  utilities/${EXE_DIR}import${NACL_EXEEXT} \
+  utilities/${EXE_DIR}mogrify${NACL_EXEEXT} \
+  utilities/${EXE_DIR}montage${NACL_EXEEXT} \
+  utilities/${EXE_DIR}stream${NACL_EXEEXT}"
 
-  LogExecute ../configure \
-    --host=${conf_host} \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --oldincludedir=${NACLPORTS_INCLUDE} \
-    --with-x=no \
-    --disable-largefile \
-    --without-fftw
-}
+TEST_EXECUTABLES="\
+  tests/${EXE_DIR}wandtest${NACL_EXEEXT} \
+  tests/${EXE_DIR}drawtest${NACL_EXEEXT} \
+  tests/${EXE_DIR}validate${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/flip${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/detrans${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/shapes${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/gravity${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/button${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/zoom${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/piddle${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/demo${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}demo/analyze${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/attributes${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/exceptions${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/readWriteImages${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/coalesceImages${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/color${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/readWriteBlob${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/averageImages${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/morphImages${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/montageImages${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/coderInfo${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/appendImages${NACL_EXEEXT} \
+  Magick++/${EXE_DIR}tests/colorHistogram${NACL_EXEEXT}"
 
-
-BuildStep() {
-  # assumes pwd has makefile
-  LogExecute make clean
-  cflags="${NACLPORTS_CFLAGS} -DSSIZE_MAX='((ssize_t)(~((size_t)0)>>1))'"
-  # Adding -j${OS_JOBS} here causes occational failures when
-  # shared libraries are being built.
-  make CFLAGS="${cflags}" install-libLTLIBRARIES install-data-am
-}
-
-
-InstallStep() {
-  # installing is done as part of the build step
+TestStep() {
+  # The tests as (a) very slow and (b) not all passing at this point.
   return 0
+
+  # As part of 'make check' there will be several test executables built.
+  # We need to create the script that launch them ahead of time.
+  ChangeDir ${BUILD_DIR}
+  for EXE in ${TEST_EXECUTABLES}; do
+    WriteSelLdrScript ${EXE%%${NACL_EXEEXT}} $(basename ${EXE})
+  done
+  LogExecute make check
 }
