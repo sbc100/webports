@@ -48,11 +48,9 @@ InstallStep() {
     (cd src;
      TranslateAndWriteSelLdrScript ${pexe} x86-64 curl.x86-64.nexe curl
     )
-    PUBLISH_DIR+=/pnacl
+    PUBLISH_DIR+="/pnacl"
   else
-    local nexe="${EXECUTABLE_DIR}/curl${NACL_EXEEXT}"
-    WriteSelLdrScript src/curl ${nexe}
-    PUBLISH_DIR+=/${NACL_LIBC}
+    PUBLISH_DIR+="/${NACL_LIBC}"
   fi
 
   MakeDir ${PUBLISH_DIR}

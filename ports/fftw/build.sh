@@ -38,9 +38,8 @@ PackageInstall() {
   EXECUTABLES=tools/fftw-wisdom${NACL_EXEEXT}
   RunConfigureStep
   RunBuildStep
+  RunPostBuildStep
   RunInstallStep
-  RunTranslateStep
-  RunValidateStep
 
   # build fftwf (float)
   EXECUTABLES=tools/fftwf-wisdom${NACL_EXEEXT}
@@ -48,7 +47,6 @@ PackageInstall() {
   BUILD_DIR+="-float"
   RunConfigureStep
   RunBuildStep
+  RunPostBuildStep
   RunInstallStep
-  RunTranslateStep
-  RunValidateStep
 }

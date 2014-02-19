@@ -74,9 +74,7 @@ TestStep() {
       example.x86-64.nexe ${example_script}
     RunExample
   else
-    WriteSelLdrScript minigzip minigzip.nexe
     RunMinigzip
-    WriteSelLdrScript example example.nexe
     RunExample
   fi
 }

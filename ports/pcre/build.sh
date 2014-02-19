@@ -3,26 +3,28 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+if [ "${NACL_GLIBC}" = "1" ]; then
+  EXE_DIR=".libs/"
+else
+  EXE_DIR=""
+fi
+
+EXECUTABLES="${EXE_DIR}pcre_scanner_unittest${NACL_EXEEXT} \
+  ${EXE_DIR}pcre_stringpiece_unittest${NACL_EXEEXT} \
+  ${EXE_DIR}pcrecpp_unittest${NACL_EXEEXT}"
+
 # There are two additional tests (RunGrepTest and RunTest shell scripts) that
 # make check does but it would be hard to run it here. Especially the first one.
 TestStep() {
   # test only pnacl and if target and host architectures match
   if [ "${NACL_ARCH}" = "pnacl" ]; then
-    for test in pcre_scanner_unittest.* pcre_stringpiece_unittest.* pcrecpp_unittest.*; do
+    for test in ${EXECUTABLES}; do
         RunSelLdrCommand ${test}
     done
     echo "Tests OK"
   elif [ `uname -m` == "${NACL_ARCH_ALT}" ]; then
-    for test in pcre_scanner_unittest.* pcre_stringpiece_unittest.* pcrecpp_unittest.*; do
-        # use the binary in .libs instead if there is any
-        if [ -e .libs/${test} ]; then
-          (cd .libs;
-            WriteSelLdrScript run_${test} ${test};
-            ./run_${test})
-        else
-          WriteSelLdrScript run_${test} ${test}
-          ./run_${test}
-        fi
+    for test in ${EXECUTABLES}; do
+      ./${test%%${NACL_EXEEXT}}
     done
     echo "Tests OK"
   fi

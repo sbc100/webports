@@ -961,19 +961,37 @@ Validate() {
 
 
 #
-# Validate (using ncval) any executables specified in the $EXECUTABLES
-# variable.
+# PostBuildStep by default will validae (using ncval) any executables
+# specified in the $EXECUTABLES as well as create wrapper scripts
+# for running them in sel_ldr.
 #
-DefaultValidateStep() {
-  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
+DefaultPostBuildStep() {
+  if [ "${NACL_ARCH}" = "emscripten" ]; then
+    return;
+  fi
+
+  if [ -z "${EXECUTABLES:-}" ]; then
     return
   fi
 
-  if [ -n "${EXECUTABLES:-}" ]; then
-    for nexe in $EXECUTABLES ; do
-      Validate $nexe
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    for pexe in ${EXECUTABLES} ; do
+      FinalizePexe ${pexe}
     done
+    for pexe in ${EXECUTABLES} ; do
+      TranslatePexe ${pexe}
+    done
+    return
   fi
+
+  for nexe in $EXECUTABLES ; do
+    Validate ${nexe}
+    if [[ ${nexe} == *${NACL_EXEEXT} ]]; then
+      WriteSelLdrScript ${nexe%%${NACL_EXEEXT}} $(basename ${nexe})
+    else
+      WriteSelLdrScript $nexe.sh $(basename ${nexe})
+    fi
+  done
 }
 
 
@@ -1060,8 +1078,9 @@ IRT=${NACL_IRT}
 HERE
   fi
   chmod 750 $1
-  echo "Wrote script pwd:$PWD $1"
+  echo "Wrote script $1 -> $2"
 }
+
 
 TranslateAndWriteSelLdrScript() {
   local PEXE=$1
@@ -1075,6 +1094,7 @@ TranslateAndWriteSelLdrScript() {
   TimeCommand ${TRANSLATOR} ${PEXE_FINAL} -arch ${ARCH} -o ${NEXE}
   WriteSelLdrScriptForPNaCl ${SCRIPT} ${NEXE} ${ARCH}
 }
+
 
 #
 # Write a wrapper script that will run a nexe under sel_ldr, for PNaCl
@@ -1115,19 +1135,11 @@ HERE
   echo "Wrote script $PWD/${script_name}"
 }
 
+
 FinalizePexe() {
   local pexe=$1
   Banner "Finalizing ${pexe}"
   TimeCommand ${PNACLFINALIZE} ${pexe}
-}
-
-
-FinalizePexes() {
-  if [ ${NACL_ARCH} = "pnacl" -a -n "${EXECUTABLES:-}" ]; then
-    for pexe in ${EXECUTABLES} ; do
-      FinalizePexe ${pexe}
-    done
-  fi
 }
 
 
@@ -1160,17 +1172,6 @@ TranslatePexe() {
 }
 
 
-DefaultTranslateStep() {
-  FinalizePexes
-
-  if [ ${NACL_ARCH} = "pnacl" -a -n "${EXECUTABLES:-}" ]; then
-    for pexe in ${EXECUTABLES} ; do
-      TranslatePexe ${pexe}
-    done
-  fi
-}
-
-
 DefaultPackageInstall() {
   RunPreInstallStep
   if IsGitRepo; then
@@ -1182,8 +1183,7 @@ DefaultPackageInstall() {
   RunPatchStep
   RunConfigureStep
   RunBuildStep
-  RunTranslateStep
-  RunValidateStep
+  RunPostBuildStep
   if [ "${SKIP_SEL_LDR_TESTS}" != "1" ]; then
     RunTestStep
   fi
@@ -1218,8 +1218,7 @@ ExtractStep()    { DefaultExtractStep;    }
 PatchStep()      { DefaultPatchStep;      }
 ConfigureStep()  { DefaultConfigureStep;  }
 BuildStep()      { DefaultBuildStep;      }
-TranslateStep()  { DefaultTranslateStep;  }
-ValidateStep()   { DefaultValidateStep;   }
+PostBuildStep()  { DefaultPostBuildStep;  }
 TestStep()       { DefaultTestStep;       }
 InstallStep()    { DefaultInstallStep;    }
 PackageInstall() { DefaultPackageInstall; }
@@ -1231,8 +1230,7 @@ RunExtractStep()    { RunStep ExtractStep; }
 RunPatchStep()      { RunStep PatchStep; }
 RunConfigureStep()  { RunStep ConfigureStep "Configuring "; }
 RunBuildStep()      { RunStep BuildStep "Building "; }
-RunTranslateStep()  { RunStep TranslateStep "Translating "; }
-RunValidateStep()   { RunStep ValidateStep "Validating "; }
+RunPostBuildStep()  { RunStep PostBuildStep "Translate/Validate "; }
 RunTestStep()       { RunStep TestStep "Testing "; }
 RunInstallStep()    { RunStep InstallStep "Installing "; }
 

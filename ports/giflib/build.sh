@@ -29,11 +29,7 @@ TestStep() {
     (cd util;
      TranslateAndWriteSelLdrScript ${pexe} x86-64 rgb2gif.x86-64.nexe rgb2gif)
     RunTest
-  elif [ "${NACL_GLIBC}" = "1" ]; then
-    WriteSelLdrScript util/rgb2gif .libs/rgb2gif${NACL_EXEEXT}
-    RunTest
   else
-    WriteSelLdrScript util/rgb2gif rgb2gif${NACL_EXEEXT}
     RunTest
   fi
 }
@@ -44,6 +40,6 @@ BuildStep() {
   # avoid the 'doc' directory which has a dependency on 'xmlto'.
   # If 'xmlto' were added to the host build dependencies this could
   # be removed.
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   make -j${OS_JOBS} SUBDIRS="lib util"
 }

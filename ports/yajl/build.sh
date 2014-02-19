@@ -3,6 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXECUTABLES=test/yajl_test
 EXTRA_CMAKE_ARGS="-DBUILD_SHARED=${NACL_GLIBC}"
 
 TestStep() {
@@ -14,11 +15,7 @@ TestStep() {
     TranslateAndWriteSelLdrScript ${pexe} x86-64 ${pexe}.x86-64.nexe ${script}
     (cd ../test && ./run_tests.sh ${script})
   else
-    local script=${BUILD_DIR}/yajl_test.sh
-    local nexe=test/yajl_test
-
-    WriteSelLdrScript ${script} ${nexe}
-    (cd ../test && LogExecute ./run_tests.sh ${script})
+    (cd ../test && LogExecute ./run_tests.sh ${BUILD_DIR}/test/yajl_test.sh)
   fi
 }
 

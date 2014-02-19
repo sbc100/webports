@@ -4,28 +4,34 @@
 # found in the LICENSE file.
 
 
-EXECUTABLES="cjpeg djpeg jpegtran rdjpgcom wrjpgcom"
+EXECUTABLES="\
+  cjpeg${NACL_EXEEXT} \
+  djpeg${NACL_EXEEXT} \
+  jpegtran${NACL_EXEEXT} \
+  rdjpgcom${NACL_EXEEXT} \
+  wrjpgcom${NACL_EXEEXT}"
+
+BuildStep() {
+  DefaultBuildStep
+  for exe in ${EXECUTABLES}; do
+    mv ${exe%%${NACL_EXEEXT}} ${exe}
+  done
+}
 
 InstallStep() {
   MakeDir ${NACLPORTS_PREFIX}/man
 }
 
 TestStep() {
-  for exe in ${EXECUTABLES}; do
-    mv ${exe} ${exe}${NACL_EXEEXT}
-  done
-
   if [ ${NACL_ARCH} = "pnacl" ]; then
     for arch in x86-32 x86-64; do
       for exe in ${EXECUTABLES}; do
-        WriteSelLdrScriptForPNaCl ${exe} ${exe}.${arch}.nexe ${arch}
+        local exe_noext=${exe%.*}
+        WriteSelLdrScriptForPNaCl ${exe_noext} ${exe_noext}.${arch}.nexe ${arch}
       done
       make test
     done
   else
-    for exe in ${EXECUTABLES}; do
-      WriteSelLdrScript ${exe} ${exe}${NACL_EXEEXT}
-    done
     make test
   fi
 }

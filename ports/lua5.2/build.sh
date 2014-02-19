@@ -29,9 +29,6 @@ TestStep() {
     # Just do the x86-64 version for now.
     TranslateAndWriteSelLdrScript lua.pexe x86-64 lua.x86-64.nexe lua
     TranslateAndWriteSelLdrScript luac.pexe x86-64 luac.x86-64.nexe luac
-  else
-    WriteSelLdrScript lua lua.nexe
-    WriteSelLdrScript luac luac.nexe
   fi
   popd
 

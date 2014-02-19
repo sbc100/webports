@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXECUTABLES="src/lua src/luac"
 
 BuildStep() {
@@ -31,8 +30,5 @@ InstallStep() {
     # Just do the x86-64 version for now.
     TranslateAndWriteSelLdrScript lua x86-64 lua.x86-64.nexe lua.sh
     TranslateAndWriteSelLdrScript luac x86-64 luac.x86-64.nexe luac.sh
-  else
-    WriteSelLdrScript lua.sh lua
-    WriteSelLdrScript luac.sh luac
   fi
 }

@@ -6,7 +6,7 @@
 
 # readline has config.sub in a 'support' subfolder
 CONFIG_SUB=support/config.sub
-MAKEFLAGS+=" EXEEXT=.nexe"
+MAKEFLAGS+=" EXEEXT=.${NACL_EXEEXT}"
 
 if [ "${NACL_GLIBC}" != "1" ]; then
    NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
