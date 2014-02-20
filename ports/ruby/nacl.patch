@@ -357,10 +357,10 @@ index c1aaa36..e430100 100644
  .rbconfig.time:
  	@$(MAKE) .rbconfig.raw.time RBCONFIG=.rbconfig.raw.time
 diff --git a/nacl/nacl-config.rb b/nacl/nacl-config.rb
-index b90c9ed..0747225 100644
+index b90c9ed..abbe96c 100644
 --- a/nacl/nacl-config.rb
 +++ b/nacl/nacl-config.rb
-@@ -27,14 +27,17 @@ module NaClConfig
+@@ -27,14 +27,13 @@ module NaClConfig
    INSTALL_PROGRAM = config['INSTALL_PROGRAM']
    INSTALL_LIBRARY = config['INSTALL_DATA']
  
@@ -373,14 +373,10 @@ index b90c9ed..0747225 100644
 -    File.join(SDK_ROOT, 'tools', "irt_core_#{cpu_nick}.nexe")
 -  ].find{|path| File.executable?(path)} or raise "No irt_core found"
 +  if cpu_nick == 'x86_64' or cpu_nick == 'x86_32'
-+    SEL_LDR = [
-+      File.join(SDK_ROOT, 'toolchain', config['NACL_TOOLCHAIN'], 'bin', "sel_ldr_#{cpu_nick}"),
-+      File.join(SDK_ROOT, 'tools', "sel_ldr_#{cpu_nick}")
-+    ].find{|path| File.executable?(path)} or raise "No sel_ldr found"
-+    IRT_CORE = [
-+      File.join(SDK_ROOT, 'toolchain', config['NACL_TOOLCHAIN'], 'bin', "irt_core_#{cpu_nick}.nexe"),
-+      File.join(SDK_ROOT, 'tools', "irt_core_#{cpu_nick}.nexe")
-+    ].find{|path| File.executable?(path)} or raise "No irt_core found"
++    SEL_LDR = File.join(SDK_ROOT, 'tools', "sel_ldr_#{cpu_nick}")
++    IRT_CORE = File.join(SDK_ROOT, 'tools', "irt_core_#{cpu_nick}.nexe")
++    raise "No sel_ldr found" if not File.executable?(SEL_LDR)
++    raise "No irt_core found" if not File.exists?(IRT_CORE)
 +  end
 +
    RUNNABLE_LD = File.join(HOST_LIB, 'runnable-ld.so')
