@@ -17,6 +17,10 @@ ConfigureStep() {
     readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
     NACLPORTS_CFLAGS+=" -I${GLIBC_COMPAT}"
     NACLPORTS_LDFLAGS+=" -lglibc-compat"
+  else
+    # Because libcrypto.a needs dlsym we need to add this explicitly.
+    # This is not normally needed when libcyrpto is a shared library.
+    NACLPORTS_LDFLAGS+=" -ldl"
   fi
 
   DefaultConfigureStep
