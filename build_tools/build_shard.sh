@@ -9,50 +9,11 @@
 # toolchain injection point:     specified externally via NACL_SDK_ROOT.
 ######################################################################
 
+SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
+source ${SCRIPT_DIR}/bot_common.sh
+
 set -o nounset
 set -o errexit
-
-RESULT=0
-MESSAGES=
-
-readonly BASE_DIR="$(dirname $0)/.."
-cd ${BASE_DIR}
-
-BuildSuccess() {
-  echo "naclports: Build SUCCEEDED $1 ($NACL_ARCH)"
-}
-
-BuildFailure() {
-  MESSAGE="naclports: Build FAILED for $1 ($NACL_ARCH)"
-  echo $MESSAGE
-  echo "@@@STEP_FAILURE@@@"
-  MESSAGES="$MESSAGES\n$MESSAGE"
-  RESULT=1
-}
-
-RunCmd() {
-  echo $*
-  $*
-}
-
-BuildPackage() {
-  if RunCmd make $1 ; then
-    BuildSuccess $1
-  else
-    # On cygwin retry each build 3 times before failing
-    uname=$(uname -s)
-    if [ ${uname:0:6} = "CYGWIN" ]; then
-      echo "@@@STEP_WARNINGS@@@"
-      for i in 1 2 3 ; do
-        if make $1 ; then
-          BuildSuccess $1
-          return
-        fi
-      done
-    fi
-    BuildFailure $1
-  fi
-}
 
 make clean
 readonly PARTCMD="python build_tools/partition.py"

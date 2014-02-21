@@ -6,10 +6,9 @@
 # This script builds the packages that will be bundled with the NaCl SDK.
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-
 source ${SCRIPT_DIR}/bot_common.sh
 
-NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/../.. && pwd)"
+NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/.. && pwd)"
 OUT_DIR=${NACLPORTS_ROOT}/out
 
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
