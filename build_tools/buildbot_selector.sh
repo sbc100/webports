@@ -42,6 +42,8 @@ StartBuild() {
   export SHARDS=$3
 
   echo "@@@BUILD_STEP $1 setup@@@"
+  # Goto src/
+  cd ${SCRIPT_DIR}/..
   if ! ./build_tools/build_shard.sh ; then
     RESULT=1
   fi
