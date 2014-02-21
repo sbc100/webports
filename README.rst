@@ -12,15 +12,20 @@ build_port.sh script from the package directory.  The build script will
 download, patch, build and install the application or library.
 
 The build scripts require that certain tools are present in the host system.
-You will need at least these (but probably more):
+You will need at least these:
 
 - bash
 - make
+- cmake
 - sed
 - git
-- autoconf, automake
 - pkg-config
 - gettext
+
+To build all ports you will also need these:
+
+- texinfo
+- autoconf, automake
 - libglib2.0-dev >= 2.26.0 (if you want to build glib)
 
 Before you can build any of the package you must set the NACL_SDK_ROOT
