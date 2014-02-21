@@ -32,6 +32,7 @@ EXECUTABLES="\
 
 BuildStep() {
   export TARGET_OS=NaCl
+  export AR=${NACLAR}
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   LogExecute make clean
