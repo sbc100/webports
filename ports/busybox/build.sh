@@ -9,14 +9,12 @@ BusyBoxDisable() {
 }
 
 ConfigureStep() {
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-  NACL_BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
-  MakeDir ${NACL_BUILD_DIR}
-  ChangeDir ${NACL_BUILD_DIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
 
   export CROSS_COMPILE="${NACL_CROSS_PREFIX}-"
-  export EXTRA_CFLAGS="${NACLPORTS_CFLAGS}"
+  export CPPFLAGS="${NACLPORTS_CPPFLAGS}"
+  export EXTRA_CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export EXTRA_LDFLAGS="${NACLPORTS_LDFLAGS}"
   EXTRA_LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 
@@ -58,14 +56,11 @@ ConfigureStep() {
 }
 
 InstallStep() {
-  local SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  local DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
-
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/busybox"
   MakeDir ${ASSEMBLY_DIR}
 
-  cp ${DEFAULT_BUILD_DIR}/busybox \
+  cp ${BUILD_DIR}/busybox \
     ${ASSEMBLY_DIR}/busybox_${NACL_ARCH}${NACL_EXEEXT}
 
   ChangeDir ${ASSEMBLY_DIR}

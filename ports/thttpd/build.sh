@@ -3,10 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  ChangeDir ${PACKAGE_DIR}
+  ChangeDir ${SRC_DIR}
   FILES="
 my_syslog.h
 nacl_module.cpp
@@ -27,21 +27,19 @@ BuildStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
+  export NACLPORTS_CPPFLAGS
   export NACLPORTS_CFLAGS
   export NACLPORTS_LDFLAGS
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   LogExecute make -j${OS_JOBS} thttpd
 }
 
 InstallStep() {
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/thttpd.html ${PUBLISH_DIR}
   install ${START_DIR}/nacl.js ${PUBLISH_DIR}
   install ${START_DIR}/peppermount_helper.js ${PUBLISH_DIR}
   install ${START_DIR}/json2min.js ${PUBLISH_DIR}
-  BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
   cp ${BUILD_DIR}/thttpd ${BUILD_DIR}/thttpd_${NACL_ARCH}${NACL_EXEEXT}
   install ${BUILD_DIR}/thttpd_${NACL_ARCH}${NACL_EXEEXT} ${PUBLISH_DIR}/
   ChangeDir ${PUBLISH_DIR}

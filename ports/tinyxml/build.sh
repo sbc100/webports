@@ -3,11 +3,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
-
+BUILD_DIR=${SRC_DIR}
 
 BuildStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${BUILD_DIR}
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
@@ -17,14 +16,10 @@ BuildStep() {
   make OUTPUT=libtinyxml.a
 }
 
-
 InstallStep() {
   # copy libs and headers manually
-  ChangeDir ${NACLPORTS_INCLUDE}
-  Remove ${PACKAGE_NAME}
-  MakeDir ${PACKAGE_NAME}
-  readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp ${THIS_PACKAGE_PATH}/*.h ${PACKAGE_NAME}/
-  ChangeDir ${NACLPORTS_LIBDIR}
-  cp ${THIS_PACKAGE_PATH}/*.a .
+  Remove ${NACLPORTS_INCLUDE}/${PACKAGE_NAME}
+  MakeDir ${NACLPORTS_INCLUDE}/${PACKAGE_NAME}
+  LogExecute cp ${SRC_DIR}/*.h ${NACLPORTS_INCLUDE}/${PACKAGE_NAME}
+  LogExecute cp ${SRC_DIR}/*.a ${NACLPORTS_LIBDIR}
 }

@@ -7,7 +7,7 @@
 EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
 BuildStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${SRC_DIR}
   if [ "${NACL_GLIBC}" = "1" ]; then
     PLAT=nacl-glibc
   else

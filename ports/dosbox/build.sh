@@ -17,6 +17,7 @@ ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export CFLAGS=${NACLPORTS_CFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
 
   export LIBS="-L${NACLPORTS_LIBDIR} \
@@ -46,10 +47,8 @@ ConfigureStep() {
       --disable-shared \
       --with-sdl-exec-prefix=${NACLPORTS_PREFIX}"
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-
-  MakeDir ${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_BUILD_SUBDIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
 
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
   # would fail due to multiple definitions of main and missing pp::CreateModule.
@@ -67,11 +66,9 @@ ConfigureStep() {
 }
 
 InstallStep(){
-  DOSBOX_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  DOSBOX_BUILD=${DOSBOX_DIR}/${NACL_BUILD_SUBDIR}
   MakeDir ${PUBLISH_DIR}
   LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
-  LogExecute install ${DOSBOX_BUILD}/src/dosbox${NACL_EXEEXT} \
+  LogExecute install ${BUILD_DIR}/src/dosbox${NACL_EXEEXT} \
     ${PUBLISH_DIR}/dosbox_${NACL_ARCH}${NACL_EXEEXT}
   local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py"
   LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf

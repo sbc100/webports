@@ -14,7 +14,7 @@ ConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   local extra=""
   if [ ${NACL_ARCH} = "x86_64" -o ${NACL_ARCH} = "i686" ]; then
     extra="--enable-sse2"

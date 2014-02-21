@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 if [ "${NACL_GLIBC}" != "1" ]; then
-  readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
-  NACLPORTS_CFLAGS+=" -I${GLIBC_COMPAT}"
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   export LIBS="-lglibc-compat"
 fi

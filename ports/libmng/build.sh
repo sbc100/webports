@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
   # export the nacl tools

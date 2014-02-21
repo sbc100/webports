@@ -5,8 +5,9 @@
 
 
 BuildStep() {
-  export EXTRA_CFLAGS="${NACL_CFLAGS}"
-  export LDFLAGS="${NACL_LDFLAGS} -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
+  export EXTRA_CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
+  export LDFLAGS="${NACLPORTS_LDFLAGS}"
+  LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
   if [ "$NACL_GLIBC" = "1" ]; then
     LDFLAGS+=" -ldl"
   fi

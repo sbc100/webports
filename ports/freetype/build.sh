@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 InstallStep() {
   # do the regular make install
   make install
@@ -15,7 +14,7 @@ InstallStep() {
 
 PatchStep() {
   DefaultPatchStep
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  ChangeDir ${SRC_DIR}
   Banner "Patching configure"
   ${TOOLS_DIR}/patch_configure.py builds/unix/configure
 }

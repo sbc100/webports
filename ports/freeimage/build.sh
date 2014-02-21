@@ -16,13 +16,13 @@ readonly -a CRLF_TRANSLATE_FILES=(
     "Source/OpenEXR/Imath/ImathMatrix.h"
     "Source/Utilities.h")
 
-
 # The FreeImage zipfile, unlike other naclports contains a folder
 # called FreeImage rather than FreeImage-X-Y-Z, so we set a customr
 # PACKAGE_DIR here.
 PACKAGE_DIR=FreeImage
 
-
+SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+BUILD_DIR=${SRC_DIR}
 
 ExtractStep() {
   DefaultExtractStep
@@ -31,7 +31,7 @@ ExtractStep() {
   # recursive tr over all the sources to remedy this.
   # Setting LC_CTYPE is a Mac thing.  The locale needs to be set to "C" so that
   # tr interprets the '\r' string as ASCII and not UTF-8.
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  ChangeDir ${SRC_DIR}
   export
   for crlf in ${CRLF_TRANSLATE_FILES[@]}; do
     echo "tr -d '\r' < ${crlf}"
@@ -50,12 +50,12 @@ ConfigureStep() {
   export PATH=${NACL_BIN_PATH}:${PATH};
   export INCDIR=${NACLPORTS_INCLUDE}
   export INSTALLDIR=${NACLPORTS_LIBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 }
 
 
 BuildStep() {
   # assumes pwd has makefile
+  ChangeDir ${BUILD_DIR}
   LogExecute make OS=nacl clean
   LogExecute make OS=nacl -j${OS_JOBS}
 }

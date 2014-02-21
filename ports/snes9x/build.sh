@@ -8,7 +8,7 @@ SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
 
 EXECUTABLES=snes9x
-NACL_CONFIGURE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix/configure
+NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 EXTRA_CONFIGURE_ARGS="\
       --disable-gamepad \
       --disable-gzip \
@@ -22,7 +22,7 @@ export LIBS="${NACLPORTS_LDFLAGS} -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
 
 AutogenStep() {
   echo "Autogen..."
-  pushd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/unix
+  pushd ${SRC_DIR}/unix
   autoconf
   PatchConfigure
   PatchConfigSub

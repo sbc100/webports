@@ -16,8 +16,9 @@ BuildStep() {
   # (e.g., libppapi).
   make -j${OS_JOBS} -f unix/Makefile unzips \
       CC=${NACLCC} LD=${NACLCXX} \
-      CFLAGS="${NACL_CFLAGS} -DHAVE_TERMIOS_H -DNO_LCHMOD -Dmain=nacl_main" \
-      LFLAGS1="${NACL_LDFLAGS} ${NACL_CLI_MAIN_LIB} \
+      CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS} \
+      -DHAVE_TERMIOS_H -DNO_LCHMOD -Dmain=nacl_main" \
+      LFLAGS1="${NACLPORTS_LDFLAGS} ${NACL_CLI_MAIN_LIB} \
                -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 }
 

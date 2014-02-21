@@ -8,17 +8,14 @@ EXECUTABLES="toybox"
 # Toybox wants to build in its current directory.
 BUILD_DIR=${SRC_DIR}
 
-NACLPORTS_CFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
-NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
-NACLPORTS_CXXFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
-NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
+NACLPORTS_CPPFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
+NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/nacl-spawn"
 NACLPORTS_LDFLAGS+=" -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 
 export HOSTCC=cc
 
 if [ "${NACL_GLIBC}" != "1" ]; then
-  NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   NACLPORTS_LDFLAGS+=" -lglibc-compat"
 fi
 
@@ -38,7 +35,7 @@ BuildStep() {
 
   export CROSS_COMPILE="${NACL_CROSS_PREFIX}-"
   export LDFLAGS="${NACLPORTS_LDFLAGS}"
-  export CFLAGS="${NACLPORTS_CFLAGS}"
+  export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CC
   make clean
   DefaultBuildStep
@@ -47,10 +44,9 @@ BuildStep() {
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/toybox"
-  local OUTPUT_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
   MakeDir ${ASSEMBLY_DIR}
 
-  cp ${OUTPUT_DIR}/toybox ${ASSEMBLY_DIR}/toybox_${NACL_ARCH}${NACL_EXEEXT}
+  cp ${BUILD_DIR}/toybox ${ASSEMBLY_DIR}/toybox_${NACL_ARCH}${NACL_EXEEXT}
 
   ChangeDir ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \

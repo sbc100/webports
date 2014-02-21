@@ -4,9 +4,8 @@
 # found in the LICENSE file.
 
 
-
 BuildStep() {
-  cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${SRC_DIR}
   local cflags="${NACLPORTS_CFLAGS}"
   if [ ${NACL_ARCH} != "pnacl" ]; then
     cflags="${cflags} -O3 -fomit-frame-pointer"
@@ -23,10 +22,9 @@ InstallStep() {
   ChangeDir ${NACLPORTS_INCLUDE}
   Remove ${PACKAGE_NAME}
   MakeDir ${PACKAGE_NAME}
-  readonly THIS_PACKAGE_PATH=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  cp -R ${THIS_PACKAGE_PATH}/include/*.h ${PACKAGE_NAME}/
-  cp ${THIS_PACKAGE_PATH}/font_freetype/*.h ${PACKAGE_NAME}/
+  cp -R ${SRC_DIR}/include/*.h ${PACKAGE_NAME}/
+  cp ${SRC_DIR}/font_freetype/*.h ${PACKAGE_NAME}/
   ChangeDir ${NACLPORTS_LIBDIR}
-  cp ${THIS_PACKAGE_PATH}/src/libagg.a .
-  cp ${THIS_PACKAGE_PATH}/font_freetype/libaggfontfreetype.a .
+  cp ${SRC_DIR}/src/libagg.a .
+  cp ${SRC_DIR}/font_freetype/libaggfontfreetype.a .
 }

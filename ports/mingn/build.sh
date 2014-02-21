@@ -36,8 +36,8 @@ InstallStep() {
   cp ${VIM_DIR}/*.tar ${PUBLISH_DIR}
 
   # Create another archive which contains executables.
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_ARCH}/bin
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_ARCH}/bin
+  MakeDir ${SRC_DIR}/${NACL_ARCH}/bin
+  ChangeDir ${SRC_DIR}/${NACL_ARCH}/bin
 
   local COREUTILS_DIR=${NACL_PACKAGES_PUBLISH}/coreutils*/${NACL_LIBC}
   local BINUTILS_DIR=${NACL_PACKAGES_PUBLISH}/binutils/${NACL_LIBC}
@@ -68,8 +68,8 @@ InstallStep() {
   CreateMingnPackage base
 
   # Create an archive which contains include files and shared objects.
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/lib
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/lib
+  MakeDir ${SRC_DIR}/lib
+  ChangeDir ${SRC_DIR}/lib
 
   # Copy files from $NACL_SDK_ROOT to the package.
   local dirs="

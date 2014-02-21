@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 CONFIG_SUB=build-scripts/config.sub
 
 # TODO: Remove when this is fixed.
@@ -22,12 +21,13 @@ ConfigureStep() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   # Adding target usr/bin for libmikmod-config
-  export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH};
+  export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH}
   export LIBS="-lvorbisfile -lvorbis -logg -lm"
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

@@ -15,7 +15,7 @@ ConfigureStep() {
 
   if [[ "${NACL_GLIBC}" != 1 ]]; then
     readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
-    NACLPORTS_CFLAGS+=" -I${GLIBC_COMPAT}"
+    NACLPORTS_CPPFLAGS+=" -I${GLIBC_COMPAT}"
     NACLPORTS_LDFLAGS+=" -lglibc-compat"
   else
     # Because libcrypto.a needs dlsym we need to add this explicitly.

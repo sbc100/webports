@@ -13,8 +13,8 @@ ConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  export PATH=${NACL_BIN_PATH}:${PATH}
+  ChangeDir ${BUILD_DIR}
 
   local conf_host
   if [ "${NACL_ARCH}" = pnacl ]; then

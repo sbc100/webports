@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 BUILD_ARGS="\
   --build-dir=${NACL_BUILD_SUBDIR} \
   --stagedir=${NACL_BUILD_SUBDIR} \
@@ -18,7 +17,7 @@ else
 fi
 
 ConfigureStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${SRC_DIR}
   echo "using gcc : 4.4.3 : ${NACLCXX} ;" > tools/build/v2/user-config.jam
   LogExecute ./bootstrap.sh --prefix="${NACLPORTS_PREFIX}"
 }

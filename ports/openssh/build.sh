@@ -38,9 +38,9 @@ ConfigureStep() {
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
+  export PATH=${NACL_BIN_PATH}:${PATH}
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
 
@@ -54,7 +54,7 @@ ConfigureStep() {
   fi
 
   export CONFIG_SITE=$NACLPORTS_PREFIX/share/config.site
-  LogExecute ${CONFIGURE} \
+  LogExecute ../configure \
     --host=${conf_host} \
     --${NACL_OPTION}-mmx \
     --${NACL_OPTION}-sse \

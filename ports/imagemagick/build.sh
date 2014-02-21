@@ -8,7 +8,7 @@ CONFIG_SUB=config/config.sub
 if [ "${NACL_GLIBC}" != "1" ]; then
   # TODO(sbc): remove once this is fixed:
   # https://code.google.com/p/nativeclient/issues/detail?id=3790
-  NACLPORTS_CFLAGS+=" -DSSIZE_MAX=LONG_MAX"
+  NACLPORTS_CPPFLAGS+=" -DSSIZE_MAX=LONG_MAX"
   EXE_DIR=""
 else
   EXE_DIR=".libs/"

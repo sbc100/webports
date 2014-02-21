@@ -5,6 +5,6 @@
 
 if [ "${NACL_GLIBC}" != "1" ]; then
   readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
-  NACLPORTS_CFLAGS+=" -I${GLIBC_COMPAT}"
+  NACLPORTS_CPPFLAGS+=" -I${GLIBC_COMPAT}"
   EXTRA_CONFIGURE_ARGS="--disable-dso"
 fi

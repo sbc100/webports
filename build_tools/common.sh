@@ -58,14 +58,14 @@ readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
 readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
 readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
 
-if [ "${DEFAULT_PREFIX:-}" = "1" ]; then
+NACLPORTS_CFLAGS=""
+NACLPORTS_CXXFLAGS=""
+NACLPORTS_CPPFLAGS="${NACL_CPPFLAGS}"
+
+if [ "${DEFAULT_PREFIX:-}" != "1" ]; then
   # If the PREFIX is the default one then there is not need to add
   # the include path explcitily.
-  NACLPORTS_CFLAGS="${NACL_CFLAGS}"
-  NACLPORTS_CXXFLAGS="${NACL_CXXFLAGS}"
-else
-  NACLPORTS_CFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CFLAGS}"
-  NACLPORTS_CXXFLAGS="-I${NACLPORTS_INCLUDE} ${NACL_CXXFLAGS}"
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}"
 fi
 
 # For the library path we always explicly add to the link flags
@@ -106,13 +106,13 @@ else
 fi
 
 if [ ${NACL_DEBUG} = "1" ]; then
-  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -g -O0"
-  NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -g -O0"
+  NACLPORTS_CFLAGS+=" -g -O0"
+  NACLPORTS_CXXFLAGS+=" -g -O0"
 else
-  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -O2"
-  NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -O2"
+  NACLPORTS_CFLAGS+=" -O2"
+  NACLPORTS_CXXFLAGS+=" -O2"
   if [ ${NACL_ARCH} = "pnacl" ]; then
-    NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -O2"
+    NACLPORTS_LDFLAGS+=" -O2"
   fi
 fi
 
@@ -758,7 +758,7 @@ DefaultPatchStep() {
     return
   fi
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  ChangeDir ${SRC_DIR}
 
   if CheckStamp patch ; then
     Banner "Skipping patch step (cleaning source tree)"
@@ -802,9 +802,10 @@ ConfigureStep_Autotools() {
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export CFLAGS=${NACLPORTS_CFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
@@ -822,7 +823,9 @@ ConfigureStep_Autotools() {
     return
   fi
 
+  echo "CPPFLAGS=${CPPFLAGS}"
   echo "CFLAGS=${CFLAGS}"
+  echo "CXXFLAGS=${CXXFLAGS}"
   echo "LDFLAGS=${LDFLAGS}"
   LogExecute ${CONFIGURE} \
     --host=${conf_host} \
@@ -873,7 +876,10 @@ DefaultBuildStep() {
     echo "MAKEFLAGS=${MAKEFLAGS}"
     export MAKEFLAGS
   fi
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  if [ "${VERBOSE:-}" = "1" ]; then
+    MAKE_TARGETS+=" VERBOSE=1 V=1"
+  fi
+  export PATH=${NACL_BIN_PATH}:${PATH}
   LogExecute make -j${OS_JOBS} ${MAKE_TARGETS:-}
 }
 
@@ -892,8 +898,8 @@ BuildStep_SDKBuildSystem() {
   # all its artifacts in ${NACL_PACKAGES_REPOSITORY} rather
   # than alongside the Makefile.
   export OUTBASE=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
+  export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export NACLPORTS_INCLUDE
   export NACLPORTS_PREFIX
@@ -929,7 +935,7 @@ DefaultInstallStep() {
     echo "MAKEFLAGS=${MAKEFLAGS}"
     export MAKEFLAGS
   fi
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   LogExecute make ${INSTALL_TARGETS:-install}
 }
 

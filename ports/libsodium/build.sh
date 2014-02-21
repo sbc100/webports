@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXTRA_CONFIGURE_ARGS="--disable-pie --disable-shared"
 
 RunTest() {
@@ -30,8 +29,8 @@ TestStep() {
   LSSP="" && [[ ${NACL_ARCH} == "arm" ]] && LSSP="-lssp"
   INCLUDES="-Isrc/libsodium/include -Isrc/libsodium/include/sodium  \
             -I../src/libsodium/include -I../src/libsodium/include/sodium"
-  ${CXX} ${INCLUDES} ${NACLPORTS_CFLAGS} ${NACLPORTS_LDFLAGS} \
-    -o naclport_test/crypto_box_test${EXT} \
+  ${CXX} ${INCLUDES} ${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS} \
+    ${NACLPORTS_LDFLAGS} -o naclport_test/crypto_box_test${EXT} \
     ${START_DIR}/crypto_box_test.c naclport_test/lib/libsodium.a \
     -lnacl_io -lpthread ${LSSP}
 

@@ -12,44 +12,42 @@ BuildStep() {
   export CXX=${NACLCXX}
   # NOTE: we are using the non-standard vars NACL_CCFLAGS/NACL_LDFLAGS
   # because we are not running ./configure and the Makefile was hacked
-  export NACL_CCFLAGS="${NACLPORTS_CFLAGS}"
+  export NACL_CCFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   export WINTTYLIB="-lncurses -ltar -lppapi_simple -lnacl_io"
   export WINTTYLIB="${WINTTYLIB} -lppapi -lppapi_cpp"
   if [[ "${NACL_ARCH}" = "pnacl" ||
         "${NACL_TOOLCHAIN_ROOT}" == *newlib* ]] ; then
     readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
     export WINTTYLIB="${WINTTYLIB} -lglibc-compat"
-    export NACL_CCFLAGS="${NACL_CCFLAGS} -I${GLIBC_COMPAT}"
+    export NACL_CCFLAGS+=" -I${GLIBC_COMPAT}"
   fi
 
   export NACLPORTS_INCLUDE
   export STRNCMPI=1
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  ChangeDir ${PACKAGE_DIR}
-  cp ${START_DIR}/nethack_pepper.cc ${PACKAGE_DIR}/src
+  ChangeDir ${SRC_DIR}
+  cp ${START_DIR}/nethack_pepper.cc ${SRC_DIR}/src
   bash sys/unix/setup.sh
   make
 }
 
 InstallStep() {
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-  ChangeDir ${PACKAGE_DIR}
+  ChangeDir ${SRC_DIR}
 
   make install
 
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/nethack"
   MakeDir ${ASSEMBLY_DIR}
-  cp ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack \
+  cp ${SRC_DIR}/out/games/lib/nethackdir/nethack \
       ${ASSEMBLY_DIR}/nethack_${NACL_ARCH}${NACL_EXEEXT}
-  ChangeDir ${PACKAGE_DIR}/out/games
-  LogExecute rm ${PACKAGE_DIR}/out/games/lib/nethackdir/nethack
+  ChangeDir ${SRC_DIR}/out/games
+  LogExecute rm ${SRC_DIR}/out/games/lib/nethackdir/nethack
   LogExecute tar cf ${ASSEMBLY_DIR}/nethack.tar lib
 
   pushd ${ASSEMBLY_DIR}
@@ -66,14 +64,12 @@ InstallStep() {
   sed 's/nethack\.nmf/nethack_debug.nmf/' \
       ${ASSEMBLY_DIR}/nethack.js > ${ASSEMBLY_DIR}/nethack_debug.js
 
-  local PACKAGE_DIR="${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}"
-
   # Uncomment these lines to copy over source tree as a gdb sample.
   # Do not submit otherwise nethack source tree will be uploaded to
   # along with the rest of the 'out/publish' tree.
   #local ASSEMBLY_SRC_DIR="${PUBLISH_DIR}/nethack_src"
   #LogExecute rm -rf ${ASSEMBLY_SRC_DIR}
-  #LogExecute cp -r ${PACKAGE_DIR} ${ASSEMBLY_SRC_DIR}
+  #LogExecute cp -r ${SRC_DIR} ${ASSEMBLY_SRC_DIR}
 
   local MANIFEST_PATH="${PUBLISH_DIR}/nethack.manifest"
   LogExecute rm -f ${MANIFEST_PATH}
@@ -90,5 +86,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r nethack-3.4.3.zip nethack
-  ChangeDir ${PACKAGE_DIR}
+  ChangeDir ${SRC_DIR}
 }

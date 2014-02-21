@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 BUILD_DIR=${SRC_DIR}
 EXTRA_CONFIGURE_ARGS="--with-tlib=ncurses --prefix= --exec-prefix="
 EXECUTABLES=src/vim
@@ -12,8 +11,7 @@ export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple -lnacl_io \
 
 PatchStep() {
   DefaultPatchStep
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-  cp ${START_DIR}/vim_pepper.c src/vim_pepper.c
+  LogExecute cp ${START_DIR}/vim_pepper.c ${SRC_DIR}/src/vim_pepper.c
 }
 
 ConfigureStep() {

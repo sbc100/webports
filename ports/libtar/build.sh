@@ -3,9 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
-NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -DMAXPATHLEN=512 -DHAVE_STDARG_H"
-NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Dcompat_makedev\(a,b\)"
+NACLPORTS_CPPFLAGS+=" -DMAXPATHLEN=512 -DHAVE_STDARG_H"
+NACLPORTS_CPPFLAGS+=" -Dcompat_makedev\(a,b\)"
 if [ "${NACL_GLIBC}" = "1" ]; then
-  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -fPIC"
+  NACLPORTS_CFLAGS+=" -fPIC"
 fi

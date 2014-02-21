@@ -263,8 +263,7 @@ else
 fi
 
 NACL_LDFLAGS="-L${NACL_SDK_LIBDIR}"
-NACL_CFLAGS="-I${NACL_SDK_ROOT}/include"
-NACL_CXXFLAGS="-I${NACL_SDK_ROOT}/include"
+NACL_CPPFLAGS="-I${NACL_SDK_ROOT}/include"
 
 if [ ${NACL_GLIBC} = "1" ]; then
   NACL_LDFLAGS+=" -Wl,-rpath-link=${NACL_SDK_LIBDIR}"
@@ -280,7 +279,7 @@ if [ -z "${NACL_ENV_IMPORT:-}" ]; then
       echo "export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig"
       echo "export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}"
       echo "export PATH=\${PATH}:${NACL_BIN_PATH}"
-      echo "export CFLAGS=\"${NACL_CFLAGS}\""
+      echo "export CPPFLAGS=\"${NACL_CPPFLAGS}\""
       echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
     else
       export CC=${NACLCC}
@@ -290,7 +289,7 @@ if [ -z "${NACL_ENV_IMPORT:-}" ]; then
       export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
       export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
       export PATH=${PATH}:${NACL_BIN_PATH}
-      export CFLAGS=${NACL_CFLAGS}
+      export CPPFLAGS=${NACL_CPPFLAGS}
       exec $@
     fi
   fi

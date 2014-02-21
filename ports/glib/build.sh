@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 ConfigureStep() {
   # export the nacl tools
   export CC=${NACLCC}
@@ -15,11 +14,10 @@ ConfigureStep() {
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  MakeDir ${NACL_BUILD_SUBDIR}
-  cp nacl.cache ${NACL_BUILD_SUBDIR}/nacl.cache.tmp
-  cd ${NACL_BUILD_SUBDIR}
+  export PATH=${NACL_BIN_PATH}:${PATH}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
+  cp ../nacl.cache nacl.cache.tmp
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

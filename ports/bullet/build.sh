@@ -5,7 +5,7 @@
 
 
 TestStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  ChangeDir ${BUILD_DIR}
 
   if [ "${NACL_GLIBC}" = "1" ]; then
     local exe_dir=.libs
@@ -25,7 +25,7 @@ TestStep() {
 
 
 AutogenStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${SRC_DIR}
   # Remove \r\n from the shell script.
   # The default sed on Mac is broken. Work around it by using $'...' to have
   # bash convert \r to a carriage return.

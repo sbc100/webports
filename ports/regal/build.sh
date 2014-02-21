@@ -22,7 +22,7 @@ ExtractStep() {
 
 
 BuildStep() {
-  cd ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
+  ChangeDir ${SRC_DIR}
   make -f Makefile SYSTEM=nacl-${NACL_ARCH}
 }
 

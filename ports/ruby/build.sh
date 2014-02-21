@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 MAKE_TARGETS="pprogram"
 INSTALL_TARGETS="install-nodoc DESTDIR=${NACL_TOOLCHAIN_INSTALL}"
 
@@ -22,7 +21,6 @@ ConfigureStep() {
     LogExecute make -j${OS_JOBS} install-nodoc
   fi
 
-  local EXTRA_CONFIGURE_ARGS=""
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
@@ -32,8 +30,9 @@ ConfigureStep() {
   export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   if [ ! -f "${SRC_DIR}/configure" ]; then
     echo "No configure script found"
     return
@@ -42,7 +41,7 @@ ConfigureStep() {
   ChangeDir ${BUILD_DIR}
 
   # TODO(sbc): remove once getaddrinfo() is working
-  EXTRA_CONFIGURE_ARGS=--disable-ipv6
+  local EXTRA_CONFIGURE_ARGS=--disable-ipv6
 
   if [ ${NACL_GLIBC} != 1 ]; then
     EXTRA_CONFIGURE_ARGS+=" --with-static-linked-ext --with-newlib"
@@ -50,7 +49,6 @@ ConfigureStep() {
   else
     EXTRA_CONFIGURE_ARGS+=" --with-out-ext=openssl,digest/*"
   fi
-
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then
@@ -61,7 +59,7 @@ ConfigureStep() {
     conf_host="nacl"
   fi
 
-  LogExecute ${NACL_CONFIGURE_PATH:-../configure} \
+  LogExecute ../configure \
     --host=${conf_host} \
     --prefix=/usr \
     --oldincludedir=${NACLPORTS_INCLUDE} \

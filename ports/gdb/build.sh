@@ -37,13 +37,14 @@ ConfigureStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export CFLAGS=${NACLPORTS_CFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   export NACLPORTS_INCLUDE
 
   MakeDir ${BUILD_DIR}

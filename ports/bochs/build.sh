@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 # Linux disk image
 readonly LINUX_IMG_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
 readonly LINUX_IMG_NAME=linux-img
@@ -22,15 +21,16 @@ ConfigureStep() {
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export CFLAGS=${NACLPORTS_CFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
 
   export NACLBXLIBS="-lpthread"
 
-  MakeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
 
   EXE=${NACL_EXEEXT} LogExecute ../configure \
     --host=nacl \
@@ -56,17 +56,14 @@ ImageExtractStep() {
 }
 
 InstallStep() {
-  BOCHS_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}
-  BOCHS_BUILD=${BOCHS_DIR}/${NACL_BUILD_SUBDIR}
-
-  ChangeDir ${BOCHS_DIR}
+  ChangeDir ${SRC_DIR}
   mkdir -p img/usr/local/share/bochs/
   cp -r ${NACL_PACKAGES_REPOSITORY}/${LINUX_IMG_NAME} img/
   mv img/linux-img/bochsrc old-bochsrc
   cp ${START_DIR}/bochsrc img/linux-img/bochsrc
-  cp -r ${BOCHS_DIR}/bios/VGABIOS-lgpl-latest img/
-  cp -r ${BOCHS_DIR}/bios/BIOS-bochs-latest img/
-  cp -r ${BOCHS_DIR}/msrs.def img/
+  cp -r ${SRC_DIR}/bios/VGABIOS-lgpl-latest img/
+  cp -r ${SRC_DIR}/bios/BIOS-bochs-latest img/
+  cp -r ${SRC_DIR}/msrs.def img/
 
   MakeDir ${PUBLISH_DIR}
 
@@ -74,8 +71,8 @@ InstallStep() {
   tar cf ${PUBLISH_DIR}/img.tar .
   cd ..
 
-  cp ${START_DIR}/bochs.html ${PUBLISH_DIR}
-  cp ${BOCHS_BUILD}/bochs ${PUBLISH_DIR}/bochs_${NACL_ARCH}${NACL_EXEEXT}
+  LogExecute cp ${START_DIR}/bochs.html ${PUBLISH_DIR}
+  LogExecute cp ${BUILD_DIR}/bochs ${PUBLISH_DIR}/bochs_${NACL_ARCH}${NACL_EXEEXT}
 
   if [ ${NACL_ARCH} = pnacl ]; then
     sed -i.bak 's/x-nacl/x-pnacl/g' ${PUBLISH_DIR}/bochs.html

@@ -18,7 +18,7 @@ ConfigureStep() {
   PATH=${NACL_BIN_PATH}:${PATH} \
     CC=${NACLCC} \
     CHOST=${NACL_CROSS_PREFIX} \
-    CFLAGS="${NACLPORTS_CFLAGS}" \
+    CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}" \
     LogExecute ./configure --prefix="${NACLPORTS_PREFIX}"
 }
 

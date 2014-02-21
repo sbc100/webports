@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXECUTABLES=python${NACL_EXEEXT}
 
 # Currently this package only builds on linux.
@@ -11,7 +10,7 @@ EXECUTABLES=python${NACL_EXEEXT}
 # requires us to set --build= as well as --host=.
 
 BuildHostPython() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  ChangeDir ${SRC_DIR}
   MakeDir build-nacl-host
   ChangeDir build-nacl-host
   if [ -f python -a -f Parser/pgen ]; then

@@ -3,9 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 # TODO(binji): Use assembly
-export EXTRA_CONFIGURE_ARGS="--enable-static -with-cpu=generic_fpu"
+EXTRA_CONFIGURE_ARGS="--enable-static -with-cpu=generic_fpu"
 
 if [ "${NACL_GLIBC}" != "1" ]; then
   # Disable network support for newlib builds.
@@ -13,24 +12,24 @@ if [ "${NACL_GLIBC}" != "1" ]; then
   EXTRA_CONFIGURE_ARGS+=" --enable-network=no"
 fi
 
-export NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -static"
+NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -static"
 
 BuildStep() {
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
+  ChangeDir ${BUILD_DIR}/src/libmpg123
   LogExecute make clean
   LogExecute make -j${OS_JOBS}
 
   Banner "Building Tests"
   local tests="tests/seek_accuracy${NACL_EXEEXT} tests/seek_whence${NACL_EXEEXT} tests/text${NACL_EXEEXT}"
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src
+  ChangeDir ${BUILD_DIR}/src
   LogExecute make clean
   LogExecute make -j${OS_JOBS} ${tests}
 }
 
 InstallStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/${NACL_BUILD_SUBDIR}/src/libmpg123
+  ChangeDir ${BUILD_DIR}/src/libmpg123
   LogExecute make install
 }

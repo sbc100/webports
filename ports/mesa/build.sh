@@ -14,7 +14,7 @@ ConfigureStep() {
   export RANLIB=${NACLRANLIB}
   export PKG_CONFIG_PATH=${NACLPORTS_PREFIX}/lib/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_PREFIX}/lib
-  export PATH=${NACL_BIN_PATH}:${PATH};
+  export PATH=${NACL_BIN_PATH}:${PATH}
   export X11_INCLUDES=
   ChangeDir ${BUILD_DIR}
   ./configure \

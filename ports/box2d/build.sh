@@ -6,8 +6,6 @@
 EXTRA_CMAKE_ARGS="-DBOX2D_BUILD_EXAMPLES=OFF"
 
 TestStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}/${PACKAGE_NAME}/${NACL_BUILD_SUBDIR}
-  ChangeDir HelloWorld
+  ChangeDir ${BUILD_DIR}/HelloWorld
   RunSelLdrCommand HelloWorld
 }
-
