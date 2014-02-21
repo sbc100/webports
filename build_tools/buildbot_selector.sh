@@ -151,7 +151,7 @@ export PEPPER_DIR=pepper_${PEPPER_VERSION}
 # The SDK builder builds a subset of the ports, but with multiple
 # configurations.
 if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
-  cd ${SCRIPT_DIR}/bots/linux
+  cd ${SCRIPT_DIR}
   ./naclports-linux-sdk-bundle.sh
   exit 0
 fi
