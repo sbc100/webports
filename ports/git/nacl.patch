@@ -1,17 +1,17 @@
 diff --git a/Makefile b/Makefile
-index 6b91612..5b6e149 100644
+index 6b91612..ff11574 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -986,7 +986,7 @@ BUILTIN_OBJS += builtin/verify-tag.o
- BUILTIN_OBJS += builtin/write-tree.o
+@@ -1559,6 +1559,8 @@ ifneq ("$(PROFILE)","")
+ endif
+ endif
  
- GITLIBS = $(LIB_FILE) $(XDIFF_LIB)
--EXTLIBS =
-+EXTLIBS = -Wl,--start-group -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -lcli_main -Wl,--end-group
++EXTLIBS += -Wl,--start-group -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -lcli_main -Wl,--end-group
++
+ # Shell quote (do not use $(call) to accommodate ancient setups);
  
- GIT_USER_AGENT = git/$(GIT_VERSION)
- 
-@@ -1710,7 +1710,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
+ SHA1_HEADER_SQ = $(subst ','\'',$(SHA1_HEADER))
+@@ -1710,7 +1712,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
  	'-DGIT_INFO_PATH="$(infodir_relative_SQ)"'
  
  git$X: git.o GIT-LDFLAGS $(BUILTIN_OBJS) $(GITLIBS)
@@ -20,7 +20,7 @@ index 6b91612..5b6e149 100644
  		$(BUILTIN_OBJS) $(ALL_LDFLAGS) $(LIBS)
  
  help.sp help.s help.o: common-cmds.h
-@@ -2030,21 +2030,21 @@ compat/nedmalloc/nedmalloc.sp compat/nedmalloc/nedmalloc.o: EXTRA_CPPFLAGS = \
+@@ -2030,21 +2032,21 @@ compat/nedmalloc/nedmalloc.sp compat/nedmalloc/nedmalloc.o: EXTRA_CPPFLAGS = \
  endif
  
  git-%$X: %.o GIT-LDFLAGS $(GITLIBS)
@@ -29,8 +29,9 @@ index 6b91612..5b6e149 100644
  
  git-imap-send$X: imap-send.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+-		$(LIBS) $(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIB_4_CRYPTO)
 +	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
- 		$(LIBS) $(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIB_4_CRYPTO)
++		$(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIBS) $(LIB_4_CRYPTO)
  
  git-http-fetch$X: revision.o http.o http-walker.o http-fetch.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
@@ -47,7 +48,7 @@ index 6b91612..5b6e149 100644
  	$(VCSSVN_LIB)
  
  $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
-@@ -2054,7 +2054,7 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
+@@ -2054,7 +2056,7 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
  	cp $< $@
  
  $(REMOTE_CURL_PRIMARY): remote-curl.o http.o http-walker.o GIT-LDFLAGS $(GITLIBS)
@@ -56,7 +57,7 @@ index 6b91612..5b6e149 100644
  		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
  
  $(LIB_FILE): $(LIB_OBJS)
-@@ -2261,7 +2261,7 @@ test-svn-fe$X: vcs-svn/lib.a
+@@ -2261,7 +2263,7 @@ test-svn-fe$X: vcs-svn/lib.a
  .PRECIOUS: $(TEST_OBJS)
  
  test-%$X: test-%.o GIT-LDFLAGS $(GITLIBS)
@@ -847,18 +848,17 @@ index 42db234..cde323d 100644
  	sigchain_push(SIGTERM, two);
  	sigchain_push(SIGTERM, three);
 diff --git a/test-string-list.c b/test-string-list.c
-index 00ce6c9..afeea1c 100644
+index 00ce6c9..725bed7 100644
 --- a/test-string-list.c
 +++ b/test-string-list.c
 @@ -41,7 +41,11 @@ static int prefix_cb(struct string_list_item *item, void *cb_data)
  	return !prefixcmp(item->string, prefix);
  }
  
--int main(int argc, char **argv)
 +#if defined(__native_client__)
 +int nacl_main(int argc, char *argv[])
 +#else
-+int main(int argc, char **argv)
+ int main(int argc, char **argv)
 +#endif
  {
  	if (argc == 5 && !strcmp(argv[1], "split")) {
