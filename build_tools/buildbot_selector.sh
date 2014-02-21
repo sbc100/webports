@@ -37,11 +37,12 @@ RESULT=0
 export PATH=${PATH}:/opt/local/bin
 
 StartBuild() {
-  cd ${BOT_DIR}
-  export NACL_ARCH=$2
+  export NACL_ARCH=$1
+  export SHARD=$2
+  export SHARDS=$3
 
-  echo "@@@BUILD_STEP $2 setup@@@"
-  if ! ./$1 ; then
+  echo "@@@BUILD_STEP $1 setup@@@"
+  if ! ./build_tools/build_shard.sh ; then
     RESULT=1
   fi
   cd -
@@ -78,7 +79,7 @@ if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
   if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
     readonly OS=${BASH_REMATCH[1]}
     readonly LIBC=${BASH_REMATCH[2]}
-    readonly SHARD=${BASH_REMATCH[3]}
+    export SHARD=${BASH_REMATCH[3]}
   else
     echo "Bad BUILDBOT_BUILDERNAME: ${BUILDBOT_BUILDERNAME}" 1>&2
     exit 1
@@ -107,9 +108,30 @@ if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
     export NACL_GLIBC=0
   elif [ "$LIBC" = "pnacl_newlib" ]; then
     export NACL_GLIBC=0
+  elif [ "$LIBC" = "bionic" ]; then
+    export NACL_GLIBC=0
   else
     echo "Bad LIBC: ${LIBC}" 1>&2
     exit 1
+  fi
+
+  # Select shard count
+  if [ "$OS" = "mac" ]; then
+    export SHARDS=1
+  elif [ "$OS" = "linux" ]; then
+    if [ "$LIBC" = "glibc" ]; then
+      export SHARDS=4
+    elif [ "$LIBC" = "newlib" ]; then
+      export SHARDS=3
+    elif [ "$LIBC" = "bionic" ]; then
+      export SHARDS=1
+    elif [ "$LIBC" = "pnacl_newlib" ]; then
+      export SHARDS=4
+    else
+      echo "Unspecified sharding for LIBC: ${LIBC}" 1>&2
+    fi
+  else
+    echo "Unspecified sharding for OS: ${OS}" 1>&2
   fi
 fi
 
@@ -134,24 +156,18 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   exit 0
 fi
 
-# This a temporary hack until the pnacl support is more mature
 if [ ${LIBC} = "pnacl_newlib" ] ; then
-  BOT_DIR=${SCRIPT_DIR}/bots
-  StartBuild pnacl_bots.sh pnacl
+  StartBuild pnacl ${SHARD} ${SHARDS}
 else
-  # Compute script name.
-  readonly SCRIPT_NAME="naclports-${BOT_OS_DIR}-${SHARD}.sh"
-  BOT_DIR=${SCRIPT_DIR}/bots/${BOT_OS_DIR}
-
   # Build 32-bit.
-  StartBuild ${SCRIPT_NAME} i686
+  StartBuild i686 ${SHARD} ${SHARDS}
 
   # Build 64-bit.
-  StartBuild ${SCRIPT_NAME} x86_64
+  StartBuild x86_64 ${SHARD} ${SHARDS}
 
   # Build ARM.
   if [ ${NACL_GLIBC} != "1" ]; then
-    StartBuild ${SCRIPT_NAME} arm
+    StartBuild arm ${SHARD} ${SHARDS}
   fi
 fi
 

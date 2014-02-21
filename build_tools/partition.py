@@ -3,7 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Download historical data from the naclports builders, and use it to
+"""Manage partitioning of port builds.
+
+Download historical data from the naclports builders, and use it to
 partition all of the projects onto the builder shards so each shard builds in
 about the same amount of time.
 
@@ -36,8 +38,15 @@ Example use:
       ...
     Difference between total time of builders: 36
 
-The list for each builder can be copied directly to the PKG_LIST_PART_*
-definitions in bot_common.sh.
+
+Pipe the results above (with appropriate use of -n and -p) into partition*.txt
+so the partition can be used in the future.
+
+The script is also used by the buildbot to read canned partitions.
+
+Example use:
+
+    $ ./partition.py -t <index> -n <number_of_shards>
 """
 
 import json
@@ -48,8 +57,7 @@ import sys
 import urllib2
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-BUILD_TOOLS_DIR = os.path.dirname(SCRIPT_DIR)
-ROOT_DIR = os.path.dirname(BUILD_TOOLS_DIR)
+ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 ARCHES = ('arm', 'i686', 'x86_64')
 
 verbose = False
@@ -59,17 +67,27 @@ class Error(Exception):
   pass
 
 
-def GetDependencies(name):
+def AllProjects():
+  env = {'NACL_SDK_ROOT': 'DUMMY_NACL_SDK_ROOT'}
+  projects = subprocess.check_output(
+      ['make', '-s', 'package_list'], cwd=ROOT_DIR, env=env)
+  return projects.strip().split(' ')
+
+
+def GetBuildOrder(projects):
   # We don't need a valid NACL_SDK_ROOT to get dependencies, but the Makefile
   # checks for it anyway.
   env = {'NACL_SDK_ROOT': 'DUMMY_NACL_SDK_ROOT'}
-  cmd = ['make', '-s', 'PRINT_DEPS=1', name]
-  cwd = ROOT_DIR
-  process = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd=cwd, env=env)
-  stdout, _ = process.communicate()
+  stdout = subprocess.check_output(
+      ['make', '-s', 'PRINT_DEPS=1'] + projects, cwd=ROOT_DIR, env=env)
   names = stdout.split()
   # names will be "ports/foo". We only want the last part.
-  return set(name.split('/')[-1] for name in names) - set([name])
+  return [name.split('/')[-1] for name in names]
+
+
+def GetDependencies(projects):
+  deps = GetBuildOrder(projects)
+  return set(deps) - set(projects)
 
 
 def DownloadDataFromBuilder(builder, build):
@@ -103,7 +121,7 @@ class Project(object):
     self.name = name
     self.time = 0
     self.arch_times = [0] * len(ARCHES)
-    self.dep_names = GetDependencies(name)
+    self.dep_names = GetDependencies([name])
     self.dep_times = [0] * len(self.dep_names)
 
   def UpdateArchTime(self, arch, time):
@@ -215,20 +233,99 @@ def Partition(projects, dims):
   return parts
 
 
+def LoadCanned(parts):
+  # Return an empty partition for the no-sharding case.
+  if parts == 1:
+    return [[]]
+  partitions = []
+  partition = []
+  with open(os.path.join(SCRIPT_DIR, 'partition%d.txt' % parts), 'r') as fh:
+    for line in fh:
+      if line.startswith('  '):
+        partition.append(line[2:].strip())
+      else:
+        if partition:
+          partitions.append(partition)
+          partition = []
+  assert not partition
+  assert len(partitions) == parts, partitions
+  # Return a small set of packages for testing.
+  if os.environ.get('TEST_BUILDBOT'):
+    partitions[0] = [
+        'glibc-compat',
+        'ncurses',
+        'readline',
+        'libtar',
+        'zlib',
+        'lua5.2',
+        'lua_ppapi',
+    ]
+  return partitions
+
+
+def FixupCanned(partitions):
+  all_projects = AllProjects()
+
+  # Blank the last partition and fill it with anything not in the first two.
+  partitions[-1] = []
+  covered = set()
+  for partition in partitions[:-1]:
+    for item in partition:
+      covered.add(item)
+  for item in all_projects:
+    if item not in covered:
+      partitions[-1].append(item)
+  # Order by dependencies.
+  partitions[-1] = GetBuildOrder(partitions[-1])
+
+  # Check that all the items still exist.
+  for partition in partitions:
+    for item in partition:
+      assert item in all_projects, item
+
+  # Check that partitions include all of their dependencies.
+  for partition in partitions:
+    deps = GetDependencies(partition)
+    for dep in deps:
+      assert dep in partition, [dep, partition]
+
+  return partitions
+
+
+def PrintCanned(index, parts):
+  assert index >= 0 and index < parts, [index, parts]
+  partitions = LoadCanned(parts)
+  partitions = FixupCanned(partitions)
+  print ' '.join(partitions[index])
+
+
 def main(args):
   parser = optparse.OptionParser()
   parser.add_option('-v', '--verbose', action='store_true',
                     help='Output extra information.')
+  parser.add_option('-t', '--print-canned', type='int',
+                    help='Print a the canned partition list and exit.')
   parser.add_option('-b', '--bot-prefix', help='builder name prefix.',
                     default='linux-newlib-')
-  parser.add_option('-n', '--num-bots', help='number of builders.',
+  parser.add_option('-n', '--num-bots',
+                    help='Number of builders on the waterfall to collect '
+                    'data from or to print a canned partition for.',
                     type='int', default=3)
-  parser.add_option('--build-number', help='builder number to look at for '
+  parser.add_option('-p', '--num-parts',
+                    help='Number of parts to partition things into '
+                    '(this will differ from --num-bots when changing the '
+                    'number of shards).',
+                    type='int', default=3)
+  parser.add_option('--build-number', help='Builder number to look at for '
                     'historical data on build times.', type='int', default=-1)
   options, _ = parser.parse_args(args)
 
   global verbose
   verbose = options.verbose
+
+  if options.print_canned is not None:
+    PrintCanned(options.print_canned, options.num_bots)
+    return
 
   projects = Projects()
   for bot in range(options.num_bots):
@@ -238,7 +335,7 @@ def main(args):
     projects.AddDataFromBuilder(bot_name, options.build_number)
   projects.PostProcessDeps()
 
-  parts = Partition(projects, 3)
+  parts = Partition(projects, options.num_parts)
   for i, project_times in enumerate(parts):
     print 'builder %d (total: %d)' % (i, project_times.total_time)
     project_names = project_times.TopologicallySortedProjectNames(projects)
