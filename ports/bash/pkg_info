@@ -1,6 +1,6 @@
 PACKAGE_NAME=bash-4.2
 URL=http://ftp.gnu.org/gnu/bash/bash-4.2.tar.gz
-LICENSE=gpl
+LICENSE=GPL
 LIBC=glibc
 DEPENDS=(ncurses libtar nacl-spawn)
 SHA1=487840ab7134eb7901fbb2e49b0ee3d22de15cb8

@@ -1,6 +1,6 @@
 PACKAGE_NAME=bullet-2.81-rev2613
 URL=https://bullet.googlecode.com/files/bullet-2.81-rev2613.zip
-LICENSE=CUSTOM:License.txt
+LICENSE=CUSTOM:COPYING
 # TODO(binji): remove this conditional once this bug gets fixed:
 # https://code.google.com/p/nativeclient/issues/detail?id=3700
 DISABLED_ARCH=arm

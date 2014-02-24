@@ -17,8 +17,8 @@ import sys
 
 import naclports
 
-KNOWN_LICENSES = ['GPL', 'GPL2', 'LGPL', 'LGPL2', 'ISC',
-                  'MPL', 'BSD', 'MIT', 'ZLIB', 'CUSTOM']
+VALID_LICENSES = ['GPL', 'GPL2', 'GPL3', 'LGPL', 'LGPL2', 'LGPL3', 'ISC',
+                  'MPL', 'BSD', 'MIT', 'ZLIB', 'CUSTOM', 'APACHE']
 
 
 options = None
@@ -36,8 +36,8 @@ def CheckLicense(package):
     print '%-27s: %s' % (package.PACKAGE_NAME, licenses)
   licenses = [license.split(':') for license in licenses]
   for license in licenses:
-    if license[0] not in KNOWN_LICENSES:
-      print 'Invalid license: %s' % license
+    if license[0] not in VALID_LICENSES:
+      print '%s: Invalid license: %s' % (package.root, license)
       rtn = 1
     if len(license) > 1:
       package.Download()

@@ -1,4 +1,4 @@
 PACKAGE_NAME=make-3.82
 URL=http://ftp.gnu.org/gnu/make/make-3.82.tar.gz
-LICENSE=gpl
+LICENSE=GPL
 SHA1=92d1b87a30d1c9482e52fb4a68e8a355e7946331
