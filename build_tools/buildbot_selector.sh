@@ -38,8 +38,8 @@ export PATH=${PATH}:/opt/local/bin
 
 StartBuild() {
   export NACL_ARCH=$1
-  export SHARD=$2
-  export SHARDS=$3
+  export SHARD
+  export SHARDS
 
   echo "@@@BUILD_STEP $1 setup@@@"
   # Goto src/
@@ -77,11 +77,11 @@ BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 
 if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
   # Decode buildername.
-  readonly BNAME_REGEX="(.+)-(.+)-(.+)"
+  readonly BNAME_REGEX="(nightly-)?(.+)-(.+)-(.+)"
   if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
-    readonly OS=${BASH_REMATCH[1]}
-    readonly LIBC=${BASH_REMATCH[2]}
-    export SHARD=${BASH_REMATCH[3]}
+    readonly OS=${BASH_REMATCH[2]}
+    readonly LIBC=${BASH_REMATCH[3]}
+    readonly SHARD=${BASH_REMATCH[4]}
   else
     echo "Bad BUILDBOT_BUILDERNAME: ${BUILDBOT_BUILDERNAME}" 1>&2
     exit 1
@@ -119,16 +119,16 @@ if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
 
   # Select shard count
   if [ "$OS" = "mac" ]; then
-    export SHARDS=1
+    readonly SHARDS=1
   elif [ "$OS" = "linux" ]; then
     if [ "$LIBC" = "glibc" ]; then
-      export SHARDS=4
+      readonly SHARDS=4
     elif [ "$LIBC" = "newlib" ]; then
-      export SHARDS=3
+      readonly SHARDS=3
     elif [ "$LIBC" = "bionic" ]; then
-      export SHARDS=1
+      readonly SHARDS=1
     elif [ "$LIBC" = "pnacl_newlib" ]; then
-      export SHARDS=4
+      readonly SHARDS=4
     else
       echo "Unspecified sharding for LIBC: ${LIBC}" 1>&2
     fi
@@ -159,17 +159,17 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
 fi
 
 if [ ${LIBC} = "pnacl_newlib" ] ; then
-  StartBuild pnacl ${SHARD} ${SHARDS}
+  StartBuild pnacl
 else
   # Build 32-bit.
-  StartBuild i686 ${SHARD} ${SHARDS}
+  StartBuild i686
 
   # Build 64-bit.
-  StartBuild x86_64 ${SHARD} ${SHARDS}
+  StartBuild x86_64
 
   # Build ARM.
   if [ ${NACL_GLIBC} != "1" ]; then
-    StartBuild arm ${SHARD} ${SHARDS}
+    StartBuild arm
   fi
 fi
 
