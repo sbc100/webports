@@ -62,28 +62,21 @@ ARCHES = ('arm', 'i686', 'x86_64')
 
 verbose = False
 
+import naclports
+
 
 class Error(Exception):
   pass
 
 
-def AllProjects():
-  env = {'NACL_SDK_ROOT': 'DUMMY_NACL_SDK_ROOT'}
-  projects = subprocess.check_output(
-      ['make', '-s', 'package_list'], cwd=ROOT_DIR, env=env)
-  return projects.strip().split(' ')
-
-
 def GetBuildOrder(projects):
-  # We don't need a valid NACL_SDK_ROOT to get dependencies, but the Makefile
-  # checks for it anyway.
-  env = {'NACL_SDK_ROOT': 'DUMMY_NACL_SDK_ROOT'}
-  stdout = subprocess.check_output(
-      ['make', '-s', 'PRINT_DEPS=1'] + projects, cwd=ROOT_DIR, env=env)
-  names = stdout.split()
-  # names will be "ports/foo". We only want the last part.
-  return [name.split('/')[-1] for name in names]
-
+  rtn = []
+  packages = [naclports.Package(os.path.join('ports', p)) for p in projects]
+  for package in packages:
+    for dep in package.DEPENDS:
+      rtn += GetBuildOrder([dep])
+    rtn.append(package.basename)
+  return rtn
 
 def GetDependencies(projects):
   deps = GetBuildOrder(projects)
@@ -239,7 +232,7 @@ def LoadCanned(parts):
     return [[]]
   partitions = []
   partition = []
-  with open(os.path.join(SCRIPT_DIR, 'partition%d.txt' % parts), 'r') as fh:
+  with open(os.path.join(SCRIPT_DIR, 'partition%d.txt' % parts)) as fh:
     for line in fh:
       if line.startswith('  '):
         partition.append(line[2:].strip())
@@ -264,7 +257,8 @@ def LoadCanned(parts):
 
 
 def FixupCanned(partitions):
-  all_projects = AllProjects()
+  all_projects = [p for p in naclports.PackageIterator()]
+  all_names = [p.basename for p in all_projects if not p.DISABLED]
 
   # Blank the last partition and fill it with anything not in the first two.
   partitions[-1] = []
@@ -272,16 +266,18 @@ def FixupCanned(partitions):
   for partition in partitions[:-1]:
     for item in partition:
       covered.add(item)
-  for item in all_projects:
+
+  for item in all_names:
     if item not in covered:
       partitions[-1].append(item)
+
   # Order by dependencies.
   partitions[-1] = GetBuildOrder(partitions[-1])
 
   # Check that all the items still exist.
   for partition in partitions:
     for item in partition:
-      assert item in all_projects, item
+      assert item in all_names, item
 
   # Check that partitions include all of their dependencies.
   for partition in partitions:

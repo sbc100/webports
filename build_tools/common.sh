@@ -473,10 +473,9 @@ GitCloneStep() {
   local GIT_URL=${URL%@*}
   local COMMIT=${URL#*@}
 
-  cd ${NACL_PACKAGES_REPOSITORY}
-  rm -rf ${PACKAGE_DIR}
-  git clone ${GIT_URL} ${PACKAGE_DIR}
-  cd ${PACKAGE_DIR}
+  Remove ${SRC_DIR}
+  git clone ${GIT_URL} ${SRC_DIR}
+  ChangeDir ${SRC_DIR}
   git reset --hard ${COMMIT}
 
   TouchKeyStamp clone "$URL"
@@ -595,12 +594,6 @@ InitGitRepo() {
 }
 
 
-DefaultCleanStep() {
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
-  Remove ${PACKAGE_DIR}
-}
-
-
 CheckStamp() {
   local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
   local STAMP_FILE="${STAMP_DIR}/$1"
@@ -691,9 +684,8 @@ DefaultExtractStep() {
     return
   fi
 
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
   local ARCHIVE="${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}"
-  if [ -d ${PACKAGE_DIR} ]; then
+  if [ -d ${SRC_DIR} ]; then
     local PATCH="${START_DIR}/${PATCH_FILE:-nacl.patch}"
 
     if CheckStamp extract "${ARCHIVE}" "${PATCH}" ; then
@@ -703,18 +695,17 @@ DefaultExtractStep() {
   fi
 
   Banner "Extracting ${ARCHIVE_NAME}"
-
-  if [ -d ${PACKAGE_DIR} ]; then
-    local FULL_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  if [ -d ${SRC_DIR} ]; then
     echo "Upstream archive or patch has changed."
-    echo "Please remove existing workspace to continue: '${FULL_DIR}'"
+    echo "Please remove existing workspace to continue: '${SRC_DIR}'"
     exit 1
   fi
-  Remove ${PACKAGE_DIR}
+  Remove ${SRC_DIR}
 
   # make sure the patch step is applied
   rm -f ${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch
   local EXTENSION="${ARCHIVE_NAME##*.}"
+  ChangeDir $(dirname ${SRC_DIR})
   if [ ${EXTENSION} = "zip" ]; then
     unzip ${ARCHIVE}
   else
@@ -895,9 +886,9 @@ DefaultTestStep() {
 #
 BuildStep_SDKBuildSystem() {
   # We override $(OUTBASE) to force the build system to put
-  # all its artifacts in ${NACL_PACKAGES_REPOSITORY} rather
-  # than alongside the Makefile.
-  export OUTBASE=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
+  # all its artifacts in ${SRC_DIR} rather than alongside
+  # the Makefile.
+  export OUTBASE=${SRC_DIR}
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   export LDFLAGS=${NACLPORTS_LDFLAGS}
@@ -1200,9 +1191,7 @@ DefaultPackageInstall() {
   RunConfigureStep
   RunBuildStep
   RunPostBuildStep
-  if [ "${SKIP_SEL_LDR_TESTS}" != "1" ]; then
-    RunTestStep
-  fi
+  RunTestStep
   RunInstallStep
 }
 
@@ -1210,7 +1199,10 @@ DefaultPackageInstall() {
 NaclportsMain() {
   local COMMAND=PackageInstall
   if [[ $# -gt 0 ]]; then
-    COMMAND=$1
+    COMMAND=Run$1
+  fi
+  if [ -d "${BUILD_DIR}" ]; then
+    ChangeDir ${BUILD_DIR}
   fi
   ${COMMAND}
 }
@@ -1247,7 +1239,12 @@ RunPatchStep()      { RunStep PatchStep; }
 RunConfigureStep()  { RunStep ConfigureStep "Configuring "; }
 RunBuildStep()      { RunStep BuildStep "Building "; }
 RunPostBuildStep()  { RunStep PostBuildStep "Translate/Validate "; }
-RunTestStep()       { RunStep TestStep "Testing "; }
+RunTestStep()       {
+  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
+    return;
+  fi
+  RunStep TestStep "Testing ";
+}
 RunInstallStep()    { RunStep InstallStep "Installing "; }
 
 ######################################################################

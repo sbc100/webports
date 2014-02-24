@@ -24,17 +24,77 @@ MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror/'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
-ARCH = os.environ.get('NACL_ARCH', 'i686')
+STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'repository')
 ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
+SENTINALS_ROOT = os.path.join(OUT_DIR, 'sentinels')
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 
-# TODO(sbc): use this code to replace the bash logic in build_tools/common.sh
+sys.path.append(os.path.join(NACL_SDK_ROOT, 'tools'))
 
+# TODO(sbc): use this code to replace the bash logic in build_tools/common.sh
 
 class Error(Exception):
   pass
+
+
+class DisabledError(Error):
+  pass
+
+
+def Touch(filename):
+  Trace('touch %s' % filename)
+  open(filename, 'w').close()
+
+
+def Log(message):
+  sys.stdout.write(message + '\n')
+
+
+def Trace(message):
+  if Trace.verbose:
+    Log(message)
+Trace.verbose = False
+
+
+def GetCurrentArch():
+  return os.environ.get('NACL_ARCH') or 'x86_64'
+
+
+def GetCurrentLibc():
+  if os.environ.get('NACL_GLIBC') == '1':
+    return 'glibc'
+  else:
+    return 'newlib'
+
+
+def GetInstallRoot():
+  import getos
+  platform = getos.GetPlatform()
+  if GetCurrentArch() == 'pnacl':
+    tc_dir = '%s_pnacl' % platform
+    subdir = 'sdk'
+  else:
+    arch = {
+      'arm': 'arm',
+      'i686': 'x86',
+      'x86_64': 'x86'
+    }[GetCurrentArch()]
+    tc_dir = '%s_%s_%s' % (platform, arch, GetCurrentLibc())
+    subdir = os.path.join('%s-nacl' % GetCurrentArch(), 'usr')
+
+  return os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir, subdir)
+
+
+def SentinelFile(pkg_basename):
+  arch = GetCurrentArch()
+  sentinel_dir = os.path.join(SENTINALS_ROOT, arch)
+  if arch != 'pnacl':
+    sentinel_dir += '_' + GetCurrentLibc()
+  if not os.path.isdir(sentinel_dir):
+    os.makedirs(sentinel_dir)
+  return os.path.join(sentinel_dir, pkg_basename)
 
 
 class Package(object):
@@ -43,17 +103,18 @@ class Package(object):
   Package objects correspond to folders on disk which
   contain a 'pkg_info' file.
   """
-  VALUE_KEYS = ('URL', 'PACKAGE_NAME', 'LICENSE', 'DEPENDS', 'MIN_SDK_VERSION',
+  VALID_KEYS = ('URL', 'PACKAGE_NAME', 'LICENSE', 'DEPENDS', 'MIN_SDK_VERSION',
                 'LIBC', 'DISABLED_ARCH', 'URL_FILENAME', 'PACKAGE_DIR',
-                'BUILD_OS', 'SHA1')
+                'BUILD_OS', 'SHA1', 'DISABLED')
 
   def __init__(self, pkg_root):
     self.root = os.path.abspath(pkg_root)
+    self.basename = os.path.basename(self.root)
     self.info = os.path.join(pkg_root, 'pkg_info')
     keys = []
-    self.URL_FILENAME = None
-    self.URL = None
-    self.LICENSE = None
+    for key in Package.VALID_KEYS:
+      setattr(self, key, None)
+    self.DEPENDS = []
     if not os.path.exists(self.info):
       raise Error('Invalid package folder: %s' % pkg_root)
 
@@ -74,7 +135,7 @@ class Package(object):
       raise Error('Invalid pkg_info line %d: %s' % (line_no, self.info))
     key, value = line.split('=', 1)
     key = key.strip()
-    if key not in Package.VALUE_KEYS:
+    if key not in Package.VALID_KEYS:
       raise Error("Invalid key '%s' in pkg_info: %s" % (key, self.info))
     value = value.strip()
     if value[0] == '(':
@@ -90,9 +151,9 @@ class Package(object):
     return (key, value)
 
   def CheckDeps(self, valid_dependencies):
-    for dep in getattr(self, 'DEPENDS', []):
+    for dep in self.DEPENDS:
       if dep not in valid_dependencies:
-        print '%s: Invalid dependency: %s' % (self.info, dep)
+        Log('%s: Invalid dependency: %s' % (self.info, dep))
         return False
     return True
 
@@ -103,7 +164,7 @@ class Package(object):
     return basename
 
   def GetBuildLocation(self):
-    package_dir = getattr(self, 'PACKAGE_DIR', self.PACKAGE_NAME)
+    package_dir = self.PACKAGE_DIR or self.PACKAGE_NAME
     return os.path.join(BUILD_ROOT, package_dir)
 
   def GetArchiveFilename(self):
@@ -121,15 +182,76 @@ class Package(object):
       return
     return os.path.join(ARCHIVE_ROOT, archive)
 
+  def Build(self, verbose):
+    self.CheckEnabled()
+    for dep in self.DEPENDS:
+      if not os.path.exists(SentinelFile(dep)):
+        dep_dir = os.path.join(os.path.dirname(self.root), dep)
+        dep = Package(dep_dir)
+        try:
+          dep.Build(verbose)
+        except DisabledError as e:
+          Log(str(e))
+
+    sentinel = SentinelFile(self.basename)
+    arch = GetCurrentArch()
+    if os.path.exists(sentinel):
+      Log("Already built '%s' [%s]" % (self.PACKAGE_NAME, arch))
+      return
+
+    log_root = os.path.join(OUT_DIR, 'logs')
+    if not os.path.isdir(log_root):
+      os.makedirs(log_root)
+
+    stdout = os.path.join(log_root, '%s.log' % self.PACKAGE_NAME)
+    if os.path.exists(stdout):
+      os.remove(stdout)
+
+    if os.environ.get('NACLPORTS_ANNOTATE') == '1':
+      Log('@@@BUILD_STEP %s %s %s@@@' % (arch, GetCurrentLibc(),
+          self.basename))
+    else:
+      if verbose:
+        prefix = '*** '
+      else:
+        prefix = ''
+      Log("%sBuilding '%s' [%s]" % (prefix, self.PACKAGE_NAME, arch))
+    self.RunBuildSh(verbose, stdout)
+
+    # Build successful, write sentinel
+    Touch(sentinel)
+
+  def RunBuildSh(self, verbose, stdout, args=None):
+    build_port = os.path.join(SCRIPT_DIR, 'build_port.sh')
+    cmd = [build_port]
+    if args is not None:
+      cmd += args
+
+    if verbose:
+      rtn = subprocess.call(cmd, cwd=self.root)
+      if rtn != 0:
+        raise Error("Building %s: failed." % (self.PACKAGE_NAME))
+    else:
+      with open(stdout, 'a+') as log_file:
+        rtn = subprocess.call(cmd,
+                              cwd=self.root,
+                              stdout=log_file,
+                              stderr=subprocess.STDOUT)
+      if rtn != 0:
+        with open(stdout) as log_file:
+          sys.stdout.write(log_file.read())
+        raise Error("Building '%s' failed." % (self.PACKAGE_NAME))
+
+
   def Verify(self, verbose=False):
     """Download upstream source and verify hash."""
     archive = self.DownloadLocation()
     if not archive:
-      print "no archive: %s" % self.PACKAGE_NAME
+      Log("no archive: %s" % self.PACKAGE_NAME)
       return True
 
-    if not hasattr(self, 'SHA1'):
-      print "missing SHA1 attribute: %s" % self.info
+    if self.SHA1 is None:
+      Log("missing SHA1 attribute: %s" % self.info)
       return False
 
     self.Download()
@@ -138,12 +260,23 @@ class Package(object):
 
     try:
       sha1check.VerifyHash(archive, self.SHA1)
-      print "verified: %s" % archive
+      Log("verified: %s" % archive)
     except sha1check.Error as e:
-      print "verification failed: %s: %s" % (archive, str(e))
+      Log("verification failed: %s: %s" % (archive, str(e)))
       return False
 
     return True
+
+  def Clean(self):
+    sentinel = SentinelFile(self.basename)
+    Log('removing %s' % sentinel)
+    if os.path.exists(sentinel):
+      os.remove(sentinel)
+
+    stamp_dir = os.path.join(STAMP_DIR, self.basename)
+    Log('removing %s' % stamp_dir)
+    if os.path.exists(stamp_dir):
+      shutil.rmtree(stamp_dir)
 
   def Extract(self):
     self.ExtractInto(BUILD_ROOT)
@@ -170,7 +303,7 @@ class Package(object):
         cmd = ['unzip', '-q', '-d', tmp_output_path, archive]
       else:
         raise Error('unhandled extension: %s' % ext)
-      print cmd
+      Log(cmd)
       subprocess.check_call(cmd)
       src = os.path.join(tmp_output_path, new_foldername)
       dest = os.path.join(output_path, new_foldername)
@@ -181,25 +314,22 @@ class Package(object):
   def GetMirrorURL(self):
     return MIRROR_URL + '/' + self.GetArchiveFilename()
 
-  def Enabled(self):
-    if hasattr(self, 'LIBC'):
-      if os.environ.get('NACL_GLIBC') == '1':
-        if self.LIBC != 'glibc':
-          raise Error('Package cannot be built with glibc.')
-      else:
-        if self.LIBC != 'newlib':
-          raise Error('Package cannot be built with newlib.')
+  def CheckEnabled(self):
+    if self.LIBC is not None and self.LIBC != GetCurrentLibc():
+      raise DisabledError('%s: cannot be built with %s.'
+                          % (self.PACKAGE_NAME, GetCurrentLibc()))
 
-    if hasattr(self, 'DISABLED_ARCH'):
-      arch = os.environ.get('NACL_ARCH', 'x86_64')
+    if self.DISABLED_ARCH is not None:
+      arch = GetCurrentArch()
       if arch == self.DISABLED_ARCH:
-        raise Error('Package is disabled for current arch: %s.' % arch)
+        raise DisabledError('%s: disabled for current arch: %s.'
+                            % (self.PACKAGE_NAME, arch))
 
-    if hasattr(self, 'BUILD_OS'):
-      sys.path.append(os.path.join(NACL_SDK_ROOT, 'tools'))
+    if self.BUILD_OS is not None:
       import getos
       if getos.GetPlatform() != self.BUILD_OS:
-        raise Error('Package can only be built on: %s.' % self.BUILD_OS)
+        raise DisabledError('%s: can only be built on %s.'
+                            % (self.PACKAGE_NAME, self.BUILD_OS))
 
   def Download(self, mirror=True):
     filename = self.DownloadLocation()
@@ -213,7 +343,7 @@ class Package(object):
     if mirror:
       try:
         mirror = self.GetMirrorURL()
-        print 'Downloading: %s [%s]' % (mirror, temp_filename)
+        Log('Downloading: %s [%s]' % (mirror, temp_filename))
         cmd = ['wget', '-O', temp_filename, mirror]
         subprocess.check_call(cmd)
         mirror_download_successfull = True
@@ -221,7 +351,7 @@ class Package(object):
         pass
 
     if not mirror_download_successfull:
-      print 'Downloading: %s [%s]' % (self.URL, temp_filename)
+      Log('Downloading: %s [%s]' % (self.URL, temp_filename))
       cmd = ['wget', '-O', temp_filename, self.URL]
       subprocess.check_call(cmd)
 
@@ -242,38 +372,85 @@ def PackageIterator(folders=None):
 
 def main(args):
   try:
-    parser = optparse.OptionParser(description=__doc__)
+    usage = "Usage: %prog [options] <command> [<package_dir>]"
+    parser = optparse.OptionParser(description=__doc__, usage=usage)
     parser.add_option('-v', '--verbose', action='store_true',
                       help='Output extra information.')
-    parser.add_option('-C', dest='dirname', default='.',
-                      help='Change directory before executing commands.')
+    parser.add_option('--all', action='store_true',
+                      help='Perform action on all known ports.')
+    parser.add_option('--ignore-disabled', action='store_true',
+                      help='Ignore attempts to build disabled packages.\n'
+                      'Normally attempts to build such packages will result\n'
+                      'in an error being returned.')
     options, args = parser.parse_args(args)
     if not args:
-      parser.error("You must specify a build command")
-    if len(args) > 1:
-      parser.error("More than one command specified")
+      parser.error("You must specify a sub-command. See --help.")
 
     command = args[0]
-
-    if not options.dirname:
-      options.dirname = '.'
+    dirname = '.'
+    if len(args) > 1:
+      if options.all:
+        parser.error('Package name and --all cannot be specified together')
+      dirname = args[1]
+      if len(args) > 2:
+        parser.error("More than two arguments specified.")
 
     if not NACL_SDK_ROOT:
       Error("$NACL_SDK_ROOT not set")
 
-    p = Package(options.dirname)
-    if command == 'download':
-      p.Download()
-    elif command == 'check':
-      # Fact that we've got this far means the pkg_info
-      # is basically valid.  This final check verifies the
-      # dependencies are valid.
-      package_names = [os.path.basename(p.root) for p in PackageIterator()]
-      p.CheckDeps(package_names)
-    elif command == 'enabled':
-      p.Enabled()
-    elif command == 'verify':
-      p.Verify()
+    verbose = options.verbose or os.environ.get('VERBOSE') == '1'
+    Trace.verbose = verbose
+
+    def DoCmd(package):
+      try:
+        if command == 'download':
+          package.Download()
+        elif command == 'check':
+          # Fact that we've got this far means the pkg_info
+          # is basically valid.  This final check verifies the
+          # dependencies are valid.
+          package_names = [os.path.basename(p.root) for p in PackageIterator()]
+          package.CheckDeps(package_names)
+        elif command == 'enabled':
+          package.CheckEnabled()
+        elif command == 'verify':
+          package.Verify()
+        elif command == 'clean':
+          package.Clean()
+        elif command == 'build':
+          package.Build(verbose)
+        else:
+          parser.error("Unknown subcommand: '%s'\n"
+                       "See --help for available commands." % command)
+      except DisabledError as e:
+        if options.ignore_disabled:
+          Log('naclports: %s' % e)
+        else:
+          raise e
+
+    def rmtree(path):
+      Log('removing %s' % path)
+      if os.path.exists(path):
+        shutil.rmtree(path)
+
+    if options.all:
+      options.ignore_disabled = True
+      if command == 'clean':
+        rmtree(STAMP_DIR)
+        rmtree(SENTINALS_ROOT)
+        if GetCurrentArch() != 'pnacl':
+          # The install root in the PNaCl toolchain is currently shared with
+          # system libraries and headers so we cant' remove it completely
+          # without breaking the toolchain
+          rmtree(GetInstallRoot())
+      else:
+        for p in PackageIterator():
+          if not p.DISABLED:
+            DoCmd(p)
+    else:
+      p = Package(dirname)
+      DoCmd(p)
+
   except Error as e:
     sys.stderr.write('naclports: %s\n' % e)
     return 1

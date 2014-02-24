@@ -1,6 +1,7 @@
 PACKAGE_NAME=texlive-20130530-source
 URL=ftp://tug.org/texlive/historic/2013/texlive-20130530-source.tar.xz
-LICENSE=gpl
+LICENSE=GPL
 LIBC=glibc
 DEPENDS=(libtar)
 SHA1=42f0a6fa3f49435991182f14e01276b2ee3fce61
+DISABLED=1

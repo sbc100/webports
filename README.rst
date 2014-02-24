@@ -2,14 +2,20 @@ naclports - Ports of open source software to Native Client
 ==========================================================
 
 naclports is collection of open source libraries and applications that have
-been ported to Native Client, along with set to tools for building and maintain
-them.
+been ported to Native Client, along with set to tools for building and
+maintaining them.
 
-The ports themselves live in the ``ports`` directory.  Each one contains a
-description of the package (pkg_info), a bash script for building it (build.sh)
-and an optional patch file (nacl.patch).  To build a package run the
-build_port.sh script from the package directory.  The build script will
-download, patch, build and install the application or library.
+The ports themselves live in the ``ports`` directory.  Each one contains of
+three main file:
+
+- pkg_info: a description of the package.
+- build.sh: a bash script for building it
+- nacl.patch: an optional patch file.
+
+The tools for building packages live in ``build_tools``.  To build a package
+run ``naclports.py build <package_dir>``.  The build script will download,
+patch, build and install the application or library.  By default it will also
+first build any dependencies that that the package has.
 
 The build scripts require that certain tools are present in the host system.
 You will need at least these:
@@ -30,46 +36,46 @@ To build all ports you will also need these:
 
 Before you can build any of the package you must set the NACL_SDK_ROOT
 environment variable to top directory of a version of the Native Client SDK
-(the directory containing toolchain/).  This path should be absolute.
+(the directory containing toolchain/). This path should be absolute.
 
-The top level Makefile can be used to build one of more of the packages.
-Package dependencies are built into this Makefile. For example, ``make vorbis``
-will build ``libvorbis-1.2.3`` and ``libogg-1.1.4``.  ``make all`` will build
-all of the packages.
+The top level Makefile can be used as a quick why to build one or more
+packages. For example, ``make vorbis`` will build ``libvorbis-1.2.3`` and
+``libogg-1.1.4``. ``make all`` will build all the packages.
 
 There are 4 possible architectures that NaCl modules can be compiled for: i686,
-x86_64, arm, pnacl.  The naclports build system will build just one at at time.
-You can control which one by setting the ``NACL_ARCH`` environment variable.
-E.g.::
+x86_64, arm, pnacl. The naclports build system will only build just one at at
+time. You can control which one by setting the ``NACL_ARCH`` environment
+variable. e.g.::
 
   $ NACL_ARCH=arm make openssl
 
 If you want to build a certain package for all architectures you can use the
-top level ``make_all.sh`` script.  E.g.::
+top level ``make_all.sh`` script. e.g.::
 
   $ ./make_all.sh openssl
 
-Headers and libraries are installed into the toolchains themselves so there is
-not add extra -I or -L options in order to use the libraries.  (Currently,
-these scripts will generate a gcc "specs" file to add the required extra
+Headers and libraries are installed into the toolchains directly so there is
+not add extra -I or -L options in order to use the libraries. (Currently,
+the naclports scripts will generate a gcc "specs" file to add the required
 paths.)
 
 The source code and build output for each package is placed in::
 
   out/repository/<PACKAGE_NAME>
 
-**Note**: Each package has its own license.  Please read and understand these
+**Note**: Each package has its own license. Please read and understand these
 licenses before using these packages in your projects.
 
-**Note to Windows users**:  These scripts are written in bash and must be
-launched from a Cygwin shell.
+**Note to Windows users**: These scripts are written in bash and must be
+launched from a Cygwin shell. While many of the script should work under
+Cygwin naclpors is only tested on Linux and Mac so YMMV.
 
 Running the examples
 --------------------
 
-Applications/Examples are installed to ``out/publish``. To run them in chrome
-you need to serve them with a webserver.  The easiest way to do this is to
-run::
+Applications/Examples that build runnable webpages are pushlished to
+``out/publish``. To run them in chrome you need to serve them with a webserver.
+The easiest way to do this is to run::
 
   $ make run
 
@@ -89,16 +95,15 @@ To add a package:
 2. Add a directory to the ``ports`` directory using the name your new package.
    For example: ``ports/openssl``.
 3. Add the build.sh script and pkg_info to that directory.
-4. Optionally include the upstream tarball and add its sha1 checksum to pkg_info.
-   You can do this using ``build_tools/sha1sum.py``.  Redirect the script
-   to append to the pkg_info file.  e.g.::
+4. Optionally include the upstream tarball and add its sha1 checksum to
+   pkg_info. You can do this using ``build_tools/sha1sum.py``.  Redirect the
+   script to append to the pkg_info file.  e.g.::
 
      $ sha1sum.py mypkg.tar.gz >> ports/openssl/pkg_info
 
-5. Optionally include a patch file (nacl.patch).  See below for the
+5. Optionally include a patch file (nacl.patch). See below for the
    recommended way to generate this patch.
-6. Add the new package, and any dependencies to the top level Makefile.
-7. Make sure your package builds for all architectures::
+6. Make sure your package builds for all architectures::
 
      $ ./make_all.sh <PACKAGE_NAME>
 
@@ -106,9 +111,9 @@ Modifying package sources / Working with patches
 ------------------------------------------------
 
 When a package is first built, its source is downloaded and extracted to
-``out/repository/<PKG_NAME>``.  A new git repository is then created in this
-folder with the original archive contents on a branch called ``upstream``.  The
-optional ``nacl.patch`` file is then applied on the ``master`` branch.  This
+``out/repository/<PKG_NAME>``. A new git repository is then created in this
+folder with the original archive contents on a branch called ``upstream``. The
+optional ``nacl.patch`` file is then applied on the ``master`` branch. This
 means that at any given time you can see the changes from upstream using ``git
 diff upstream``.
 
@@ -122,3 +127,5 @@ To make changes to a package's patch file the recommended workflow is:
 Whenever the upstream archive or patch file changes and you try to build the
 package you will be prompted to remove the existing repository and start a new
 one. This is to avoid deleting a repository that might have unsaved changed.
+
+Happy porting!

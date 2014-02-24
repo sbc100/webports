@@ -30,6 +30,8 @@ EXECUTABLES="\
     version_set_test \
     write_batch_test"
 
+BUILD_DIR=${SRC_DIR}
+
 BuildStep() {
   export TARGET_OS=NaCl
   export AR=${NACLAR}
