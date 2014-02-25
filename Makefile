@@ -11,21 +11,28 @@
 # Each port has a dependency on its own sentinel file, which can be found
 # at out/sentinels/*
 
+# The subset of libraries that are shipped as part of the official NaCl SDK.
+# Order is important here since the SDK build with NODEPS=1
+SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libmodplug libogg
+SDK_LIBS += libtheora libvorbis webp libxml2 tinyxml openal-soft freealut
+
 ifeq ($(V),1)
 VERBOSE?=1
 endif
 
-# The subset of libraries that are shipped as part of the
-# official NaCl SDK
-SDK_LIBS = zlib tiff jpeg8d freealut freetype lua5.2 libmodplug libogg
-SDK_LIBS += libpng libtheora libvorbis webp libxml2 tinyxml openal-soft
+ifeq ($(NODEPS),1)
+BUILD_FLAGS+=--no-deps
+endif
 
-export VERBOSE
+ifeq ($(VERBOSE),1)
+BUILD_FLAGS+=-v
+endif
+
 export NACL_ARCH
 export NACL_GLIBC
 
 all:
-	build_tools/naclports.py --all build
+	build_tools/naclports.py --all build $(BUILD_FLAGS)
 
 sdklibs: $(SDK_LIBS)
 
@@ -42,6 +49,6 @@ reallyclean: clean
 	rm -rf $(NACL_OUT)
 
 %:
-	build_tools/naclports.py $(ARGS) build ports/$*
+	build_tools/naclports.py build ports/$* $(BUILD_FLAGS)
 
 .PHONY: all run clean sdklibs sdklibs_list reallyclean

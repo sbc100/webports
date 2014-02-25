@@ -38,7 +38,7 @@ Before you can build any of the package you must set the NACL_SDK_ROOT
 environment variable to top directory of a version of the Native Client SDK
 (the directory containing toolchain/). This path should be absolute.
 
-The top level Makefile can be used as a quick why to build one or more
+The top level Makefile can be used as a quick way to build one or more
 packages. For example, ``make vorbis`` will build ``libvorbis-1.2.3`` and
 ``libogg-1.1.4``. ``make all`` will build all the packages.
 
@@ -67,13 +67,13 @@ The source code and build output for each package is placed in::
 licenses before using these packages in your projects.
 
 **Note to Windows users**: These scripts are written in bash and must be
-launched from a Cygwin shell. While many of the script should work under
-Cygwin naclpors is only tested on Linux and Mac so YMMV.
+launched from a Cygwin shell. While many of the scripts should work under
+Cygwin naclports is only tested on Linux and Mac so YMMV.
 
 Running the examples
 --------------------
 
-Applications/Examples that build runnable webpages are pushlished to
+Applications/Examples that build runnable webpages are published to
 ``out/publish``. To run them in chrome you need to serve them with a webserver.
 The easiest way to do this is to run::
 

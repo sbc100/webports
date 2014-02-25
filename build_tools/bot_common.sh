@@ -27,7 +27,8 @@ RunCmd() {
 }
 
 BuildPackage() {
-  if RunCmd make V=1 $1 ; then
+  export BUILD_FLAGS="-v --ignore-disabled"
+  if RunCmd make $1 ; then
     BuildSuccess $1
   else
     # On cygwin retry each build 3 times before failing
@@ -35,7 +36,7 @@ BuildPackage() {
     if [ ${uname:0:6} = "CYGWIN" ]; then
       echo "@@@STEP_WARNINGS@@@"
       for i in 1 2 3 ; do
-        if make V=1 $1 ; then
+        if make $1 ; then
           BuildSuccess $1
           return
         fi

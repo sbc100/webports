@@ -27,7 +27,7 @@ OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'repository')
 ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
-SENTINALS_ROOT = os.path.join(OUT_DIR, 'sentinels')
+SENTINELS_ROOT = os.path.join(OUT_DIR, 'sentinels')
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 
@@ -89,7 +89,7 @@ def GetInstallRoot():
 
 def SentinelFile(pkg_basename):
   arch = GetCurrentArch()
-  sentinel_dir = os.path.join(SENTINALS_ROOT, arch)
+  sentinel_dir = os.path.join(SENTINELS_ROOT, arch)
   if arch != 'pnacl':
     sentinel_dir += '_' + GetCurrentLibc()
   if not os.path.isdir(sentinel_dir):
@@ -182,19 +182,30 @@ class Package(object):
       return
     return os.path.join(ARCHIVE_ROOT, archive)
 
-  def Build(self, verbose):
+  def Build(self, verbose, build_deps):
+    if build_deps:
+      for dep in self.DEPENDS:
+        if not os.path.exists(SentinelFile(dep)):
+          dep_dir = os.path.join(os.path.dirname(self.root), dep)
+          dep = Package(dep_dir)
+          try:
+            dep.Build(verbose, build_deps)
+          except DisabledError as e:
+            Log(str(e))
+
+    annotate = os.environ.get('NACLPORTS_ANNOTATE') == '1'
+    arch = GetCurrentArch()
+
+    # When the annotator is enabled we print log the start of the build
+    # early, so that even if the package is disabled, or already built
+    # we see a BUILD_STEP for each package.
+    if annotate:
+      Log('@@@BUILD_STEP %s %s %s@@@' % (arch, GetCurrentLibc(),
+          self.basename))
+
     self.CheckEnabled()
-    for dep in self.DEPENDS:
-      if not os.path.exists(SentinelFile(dep)):
-        dep_dir = os.path.join(os.path.dirname(self.root), dep)
-        dep = Package(dep_dir)
-        try:
-          dep.Build(verbose)
-        except DisabledError as e:
-          Log(str(e))
 
     sentinel = SentinelFile(self.basename)
-    arch = GetCurrentArch()
     if os.path.exists(sentinel):
       Log("Already built '%s' [%s]" % (self.PACKAGE_NAME, arch))
       return
@@ -207,15 +218,13 @@ class Package(object):
     if os.path.exists(stdout):
       os.remove(stdout)
 
-    if os.environ.get('NACLPORTS_ANNOTATE') == '1':
-      Log('@@@BUILD_STEP %s %s %s@@@' % (arch, GetCurrentLibc(),
-          self.basename))
-    else:
+    if not annotate:
       if verbose:
         prefix = '*** '
       else:
         prefix = ''
       Log("%sBuilding '%s' [%s]" % (prefix, self.PACKAGE_NAME, arch))
+
     self.RunBuildSh(verbose, stdout)
 
     # Build successful, write sentinel
@@ -378,6 +387,9 @@ def main(args):
                       help='Output extra information.')
     parser.add_option('--all', action='store_true',
                       help='Perform action on all known ports.')
+    parser.add_option('--no-deps', dest='build_deps', action='store_false',
+                      default=True,
+                      help='Disable automatic building of dependencies.')
     parser.add_option('--ignore-disabled', action='store_true',
                       help='Ignore attempts to build disabled packages.\n'
                       'Normally attempts to build such packages will result\n'
@@ -387,13 +399,11 @@ def main(args):
       parser.error("You must specify a sub-command. See --help.")
 
     command = args[0]
-    dirname = '.'
+    package_dirs = ['.']
     if len(args) > 1:
       if options.all:
         parser.error('Package name and --all cannot be specified together')
-      dirname = args[1]
-      if len(args) > 2:
-        parser.error("More than two arguments specified.")
+      package_dirs = args[1:]
 
     if not NACL_SDK_ROOT:
       Error("$NACL_SDK_ROOT not set")
@@ -418,7 +428,7 @@ def main(args):
         elif command == 'clean':
           package.Clean()
         elif command == 'build':
-          package.Build(verbose)
+          package.Build(verbose, options.build_deps)
         else:
           parser.error("Unknown subcommand: '%s'\n"
                        "See --help for available commands." % command)
@@ -437,7 +447,7 @@ def main(args):
       options.ignore_disabled = True
       if command == 'clean':
         rmtree(STAMP_DIR)
-        rmtree(SENTINALS_ROOT)
+        rmtree(SENTINELS_ROOT)
         if GetCurrentArch() != 'pnacl':
           # The install root in the PNaCl toolchain is currently shared with
           # system libraries and headers so we cant' remove it completely
@@ -448,8 +458,9 @@ def main(args):
           if not p.DISABLED:
             DoCmd(p)
     else:
-      p = Package(dirname)
-      DoCmd(p)
+      for package_dir in package_dirs:
+        p = Package(package_dir)
+        DoCmd(p)
 
   except Error as e:
     sys.stderr.write('naclports: %s\n' % e)
