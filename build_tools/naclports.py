@@ -448,6 +448,7 @@ def main(args):
       if command == 'clean':
         rmtree(STAMP_DIR)
         rmtree(SENTINELS_ROOT)
+        rmtree(BUILD_ROOT)
         if GetCurrentArch() != 'pnacl':
           # The install root in the PNaCl toolchain is currently shared with
           # system libraries and headers so we cant' remove it completely
