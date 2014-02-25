@@ -50,6 +50,7 @@ def Touch(filename):
 
 def Log(message):
   sys.stdout.write(message + '\n')
+  sys.stdout.flush()
 
 
 def Trace(message):

@@ -2,4 +2,5 @@ PACKAGE_NAME=tar-1.15
 URL=http://ftp.gnu.org/gnu/tar/tar-1.15.tar.bz2
 LICENSE=GPL
 LIBC=glibc
+DEPENDS=(nacl-spawn)
 SHA1=4ef190122a2c4b28bfd1c74e017c14805f81f0e0
