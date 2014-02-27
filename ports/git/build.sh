@@ -8,6 +8,7 @@ MAKE_TARGETS="V=1"
 EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 BUILD_DIR=${SRC_DIR}
 NACL_CONFIGURE_PATH=./configure
+export CROSS_COMPILE=1
 
 ConfigureStep() {
   ChangeDir ${SRC_DIR}

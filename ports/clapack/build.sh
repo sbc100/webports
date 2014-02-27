@@ -5,20 +5,26 @@
 
 export BUILD_CC=cc
 
+# parallel build usually fails (at least for me)
+OS_JOBS=1
+MAKE_TARGETS="f2clib blaslib lib"
+
 ConfigureStep() {
-  MakeDir ${NACL_BUILD_SUBDIR}
-  ChangeDir ${NACL_BUILD_SUBDIR}
-  # -u: do not rewrite newer with older files
-  cp -u -R ../BLAS ../F2CLIBS ../INSTALL ../TESTING ../INCLUDE ../SRC ./
-  cp -u ../Makefile ../make.inc ./
+  if [ $OS_NAME != "Darwin" ]; then
+    # -u: do not rewrite newer with older files
+    UPDATE=-u
+  else
+    UPDATE=
+  fi
+
+  MakeDir ${BUILD_DIR}
+  ChangeDir ${BUILD_DIR}
+  LogExecute cp ${UPDATE} -R ../BLAS ../F2CLIBS ../INSTALL ../TESTING ../INCLUDE ../SRC ./
+  LogExecute cp ${UPDATE} ../Makefile ../make.inc ./
 
   # make does not create it, but build relays on it being there
-  install -d SRC/VARIANTS/LIB
+  LogExecute install -d SRC/VARIANTS/LIB
 }
-
-# parallel build usually fails (at least for me)
-export OS_JOBS=1
-export MAKE_TARGETS="f2clib blaslib lib"
 
 # Without the -m option the x86_64 and arm builds break with (x86_64)
 #
@@ -37,17 +43,18 @@ LDEMULATION=
 export LDEMULATION
 
 TestStep() {
-  (cd INSTALL;
-   RunSelLdrCommand ./testlsame;
-   RunSelLdrCommand ./testslamch;
-   RunSelLdrCommand ./testdlamch;
-   RunSelLdrCommand ./testsecond;
-   RunSelLdrCommand ./testdsecnd;
-   RunSelLdrCommand ./testversion)
+  ChangeDir ${BUILD_DIR}/INSTALL
+  RunSelLdrCommand ./testlsame
+  RunSelLdrCommand ./testslamch
+  RunSelLdrCommand ./testdlamch
+  RunSelLdrCommand ./testsecond
+  RunSelLdrCommand ./testdsecnd
+  RunSelLdrCommand ./testversion
 }
 
 # the Makefile does not contain install target
 InstallStep() {
+  ChangeDir ${BUILD_DIR}
   LogExecute install libblas.a ${NACLPORTS_LIBDIR}
   LogExecute install liblapack.a ${NACLPORTS_LIBDIR}
   LogExecute install tmglib.a ${NACLPORTS_LIBDIR}

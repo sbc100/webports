@@ -25,13 +25,13 @@ You will need at least these:
 - cmake
 - sed
 - git
-- pkg-config
-- gettext
 
 To build all ports you will also need these:
 
 - texinfo
-- autoconf, automake
+- gettext
+- pkg-config
+- autoconf, automake, libtool
 - libglib2.0-dev >= 2.26.0 (if you want to build glib)
 
 Before you can build any of the package you must set the NACL_SDK_ROOT

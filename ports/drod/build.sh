@@ -9,6 +9,7 @@ SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
 BUILD_DIR=${SRC_DIR}/Caravel/Master/Linux
 MAKE_TARGETS="drod-custom"
 export DESTDIR=${PUBLISH_DIR}/.data
+OS_JOBS=1
 
 ConfigureStep() {
   export CC=${NACLCC}
