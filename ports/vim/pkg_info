@@ -2,5 +2,6 @@ PACKAGE_NAME=vim73
 URL=http://ftp.vim.org/pub/vim/unix/vim-7.3.tar.bz2
 LICENSE=CUSTOM:runtime/doc/uganda.txt
 MIN_SDK_VERSION=31
+BUILD_OS=linux
 DEPENDS=(ncurses libtar nacl-spawn)
 SHA1=46faa96c5fab639899b1c655c23d8755b62f036f

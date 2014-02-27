@@ -22,12 +22,13 @@ You will need at least these:
 
 - bash
 - make
-- cmake
+- curl
 - sed
 - git
 
 To build all ports you will also need these:
 
+- cmake
 - texinfo
 - gettext
 - pkg-config

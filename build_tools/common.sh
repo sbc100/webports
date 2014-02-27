@@ -390,15 +390,11 @@ TryFetch() {
   local URL=$1
   local FILENAME=$2
   Banner "Fetching ${PACKAGE_NAME} (${FILENAME})"
-  if which wget > /dev/null ; then
-    wget ${URL} -O ${FILENAME}
-  elif which curl > /dev/null ; then
-    curl --fail --location --url ${URL} -o ${FILENAME}
+  if which curl > /dev/null ; then
+    curl --fail --location --progress-bar -o ${FILENAME} ${URL}
   else
-     Banner "Problem encountered"
-     echo "Please install curl or wget and rerun this script"
-     echo "or manually download ${URL} to ${FILENAME}"
-     exit 1
+    Banner "ERROR: could not find 'curl' in your PATH"
+    exit 1
   fi
 }
 

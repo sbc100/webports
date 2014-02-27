@@ -74,13 +74,13 @@ BINARYTREES=binarytrees.lua
 LUA_TESTS_FILE=lua-5.2.2-tests.tar.gz
 
 $(OUTBASE)/$(LUA_TESTS_FILE):
-	cd $(OUTBASE) && wget $(MIRROR_URL)/$(LUA_TESTS_FILE)
+	cd $(OUTBASE) && curl -O --progress-bar $(MIRROR_URL)/$(LUA_TESTS_FILE)
 
 $(OUTBASE)/$(SCIMARK):
-	cd $(OUTBASE) && wget $(MIRROR_URL)/$(SCIMARK)
+	cd $(OUTBASE) && curl -O --progress-bar $(MIRROR_URL)/$(SCIMARK)
 
 $(OUTBASE)/$(BINARYTREES):
-	cd $(OUTBASE) && wget $(MIRROR_URL)/$(BINARYTREES)
+	cd $(OUTBASE) && curl -O --progress-bar $(MIRROR_URL)/$(BINARYTREES)
 
 install-tests: $(OUTBASE)/$(LUA_TESTS_FILE) $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(BINARYTREES)
 	tar -C $(OUTBASE) -xf $(OUTBASE)/$(LUA_TESTS_FILE)
