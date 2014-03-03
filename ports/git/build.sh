@@ -10,6 +10,13 @@ BUILD_DIR=${SRC_DIR}
 NACL_CONFIGURE_PATH=./configure
 export CROSS_COMPILE=1
 
+if [ ${OS_NAME} = "Darwin" ]; then
+  # gettext (msgfmt) doesn't exist on darwin by default.  homebrew installs
+  # it to /usr/local/opt/gettext, and we need it to be in the PATH when
+  # building git
+  export PATH=${PATH}:/usr/local/opt/gettext/bin
+fi
+
 ConfigureStep() {
   ChangeDir ${SRC_DIR}
   autoconf

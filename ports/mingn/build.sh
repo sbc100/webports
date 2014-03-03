@@ -29,11 +29,14 @@ InstallStep() {
   local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip*/${NACL_LIBC}
   local VIM_DIR=${NACL_PACKAGES_PUBLISH}/vim*/${NACL_LIBC}/vim
 
-  cp -fr ${BASH_DIR}/* ${PUBLISH_DIR}
-  cp -fr ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${PUBLISH_DIR}
-  # We need to put the tar archive for vim in HTTP FS to run it.
-  # TODO(hamaji): Move this to the package to be installed in HTML5 FS.
-  cp ${VIM_DIR}/*.tar ${PUBLISH_DIR}
+  LogExecute cp -fR ${BASH_DIR}/* ${PUBLISH_DIR}
+  LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${PUBLISH_DIR}
+
+  if [ ${OS_NAME} != "Darwin" ]; then
+    # We need to put the tar archive for vim in HTTP FS to run it.
+    # TODO(hamaji): Move this to the package to be installed in HTML5 FS.
+    cp ${VIM_DIR}/*.tar ${PUBLISH_DIR}
+  fi
 
   # Create another archive which contains executables.
   MakeDir ${SRC_DIR}/${NACL_ARCH}/bin
@@ -49,19 +52,21 @@ InstallStep() {
 
   MakeDir ${bin_dir}
   MakeDir ${libexec_dir}
-  for binary in \
-      ${BASH_DIR}/*_${NACL_ARCH}.nexe \
+  BINARIES="${BASH_DIR}/*_${NACL_ARCH}.nexe \
       ${UNZIP_DIR}/*_${NACL_ARCH}.nexe \
-      ${VIM_DIR}/*_${NACL_ARCH}.nexe \
       ${GCC_DIR}/*_${NACL_ARCH}.nexe \
       ${BINUTILS_DIR}/*_${NACL_ARCH}.nexe \
-      ${COREUTILS_DIR}/*_${NACL_ARCH}.nexe \
-      ; do
+      ${COREUTILS_DIR}/*_${NACL_ARCH}.nexe"
+
+  if [ ${OS_NAME} != "Darwin" ]; then
+    BINARIES+=" ${VIM_DIR}/*_${NACL_ARCH}.nexe"
+  fi
+  for binary in ${BINARIES}; do
     name=$(basename ${binary} | sed "s/_${NACL_ARCH}.nexe//")
     if [ ${name} = "cc1" -o ${name} = "cc1plus" -o ${name} = "collect2" ]; then
-      cp ${binary} ${libexec_dir}/${name}
+      LogExecute cp ${binary} ${libexec_dir}/${name}
     else
-      cp ${binary} ${bin_dir}/${name}
+      LogExecute cp ${binary} ${bin_dir}/${name}
     fi
   done
 
@@ -83,7 +88,7 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
     echo "Copying libs from: $d -> $o"
     MakeDir $o
     if [ -d ${NACL_SDK_ROOT}/$d ]; then
-      cp -r ${NACL_SDK_ROOT}/$d $(dirname $o)
+      cp -R ${NACL_SDK_ROOT}/$d $(dirname $o)
     else
       MakeDir $o
     fi
@@ -150,7 +155,7 @@ EOF
   # Modify GCC's specs file. E.g.,
   # /path/to/nacl_sdk/pepper_canary/toolchain/linux_x86_glibc
   # => /mnt/html5/mingn/toolchain/nacl_x86_glibc.
-  sed -i 's@/\S*/pepper_[^/]*/toolchain/[^/]*_x86_glibc@/mnt/html5/mingn/toolchain/nacl_x86_glibc@g' \
+  sed -i.bak 's@/\S*/pepper_[^/]*/toolchain/[^/]*_x86_glibc@/mnt/html5/mingn/toolchain/nacl_x86_glibc@g' \
       ${TOOLCHAIN_OUT_DIR}/lib/gcc/x86_64-nacl/4.4.3/specs
 
   CreateMingnPackage lib all

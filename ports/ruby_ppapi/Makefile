@@ -58,7 +58,7 @@ endif
 $(eval $(call NMF_RULE,$(TARGET),))
 
 DATA_ARCHIVE = $(INSTALL_DIR)/rbdata-$(NACL_ARCH).tar
-ASSETS = usr/bin/irb $(DATA_ARCHIVE) usr/lib/ruby/2.0.0
+ASSETS = usr/bin/irb usr/lib/ruby/2.0.0
 ifeq ($(TOOLCHAIN),glibc)
 EXTRA_LIBS = lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
 endif
@@ -70,7 +70,9 @@ NASSH = $(CHROMEAPPS)/nassh
 install:
 	mkdir -p $(INSTALL_DIR)
 	tar -h -c -C ${NACLPORTS_PREFIX}/.. -f $(DATA_ARCHIVE) ${ASSETS}
+ifeq ($(TOOLCHAIN),glibc)
 	tar -h -r -C ${NACLPORTS_PREFIX} -f $(DATA_ARCHIVE) ${EXTRA_LIBS}
+endif
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/ruby*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)

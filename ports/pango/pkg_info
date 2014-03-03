@@ -3,4 +3,6 @@ URL=http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.3.tar.bz2
 LICENSE=LGPL2
 LIBC=glibc
 DEPENDS=(glib cairo)
+# No mac support since glibc doesn't build on mac yet
+BUILD_OS=linux
 SHA1=467a3dacc0f3173e6fd457524b9ccd9772039a62

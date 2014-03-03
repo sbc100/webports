@@ -404,7 +404,7 @@ index 8540942..114b3f7 100644
  #include <stdio.h>
  #endif
 diff --git a/configure b/configure
-index 83d0ee2..b0ab7f0 100755
+index 83d0ee2..b975f71 100755
 --- a/configure
 +++ b/configure
 @@ -3268,6 +3268,9 @@ then
@@ -433,7 +433,20 @@ index 83d0ee2..b0ab7f0 100755
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -8519,7 +8531,7 @@ then
+@@ -5345,7 +5357,11 @@ if test -d casesensitivetestdir
+ then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+-    BUILDEXEEXT=.exe
++    if [ -z $EXEEXT ]; then
++        BUILDEXEEXT=.exe
++    else
++        BUILDEXEEXT=$EXEEXT
++    fi
+ else
+ 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+ $as_echo "no" >&6; }
+@@ -8519,7 +8535,7 @@ then
  			fi
  		fi
  		;;
@@ -442,7 +455,7 @@ index 83d0ee2..b0ab7f0 100755
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -8590,7 +8602,7 @@ then
+@@ -8590,7 +8606,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -451,7 +464,7 @@ index 83d0ee2..b0ab7f0 100755
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -8623,7 +8635,7 @@ then
+@@ -8623,7 +8639,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;

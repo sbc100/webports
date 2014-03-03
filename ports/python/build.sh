@@ -5,19 +5,28 @@
 
 EXECUTABLES=python${NACL_EXEEXT}
 
-# Currently this package only builds on linux.
-# The build relies on certain host binaries and python's configure
+# This build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.
 
 BuildHostPython() {
   ChangeDir ${SRC_DIR}
   MakeDir build-nacl-host
+
+  # Seems that python builds to python.exe on mac (!) so they
+  # can avoid a name conflict with the "Python" folder, since
+  # the mac filesystem is case insensistive.
+  if [ ${OS_NAME} != "Linux" ]; then
+    local EXT=.exe
+  else
+    local EXT=
+  fi
+
   ChangeDir build-nacl-host
-  if [ -f python -a -f Parser/pgen ]; then
+  if [ -f python${EXT} -a -f Parser/pgen ]; then
     return
   fi
   LogExecute ../configure
-  LogExecute make -j${OS_JOBS} python Parser/pgen
+  LogExecute make -j${OS_JOBS} python${EXT} Parser/pgen
 }
 
 ConfigureStep() {

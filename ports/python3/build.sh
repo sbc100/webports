@@ -19,7 +19,8 @@ BuildHostPython() {
     return
   fi
   LogExecute ../configure
-  LogExecute make -j${OS_JOBS} bininstall libinstall sharedinstall DESTDIR=inst
+  LogExecute make -j${OS_JOBS} build_all
+  LogExecute make install DESTDIR=inst
 }
 
 ConfigureStep() {

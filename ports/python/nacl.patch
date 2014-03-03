@@ -396,10 +396,10 @@ index dd333e8..33fec81 100644
  #include <stdio.h>
  #endif
 diff --git a/configure b/configure
-index dc0dfd0..d45f7b0 100755
+index dc0dfd0..83a8a73 100755
 --- a/configure
 +++ b/configure
-@@ -2853,19 +2853,26 @@ if test "$cross_compiling" = yes; then
+@@ -2853,19 +2853,27 @@ if test "$cross_compiling" = yes; then
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python interpreter for cross build" >&5
  $as_echo_n "checking for python interpreter for cross build... " >&6; }
      if test -z "$PYTHON_FOR_BUILD"; then
@@ -412,7 +412,8 @@ index dc0dfd0..d45f7b0 100755
 -	done
 +	case "$host" in
 +	*-*-nacl*)
-+	    interp=$(cd ../build-nacl-host && pwd)/python
++	    interp=$(cd ../build-nacl-host && pwd)/python.exe
++	    if [ ! -f $interp ]; then interp=$(cd ../build-nacl-host && pwd)/python; fi
 +	    ;;
 +	*)
 +	    for interp in python$PACKAGE_VERSION python2 python; do
@@ -434,7 +435,7 @@ index dc0dfd0..d45f7b0 100755
      fi
  elif test "$cross_compiling" = maybe; then
      as_fn_error $? "Cross compiling required --host=HOST-TUPLE and --build=ARCH" "$LINENO" 5
-@@ -3168,6 +3175,9 @@ then
+@@ -3168,6 +3176,9 @@ then
         # `define_xopen_source' in the case statement below. For the
         # current supported cross builds, this macro is not adjusted.
  	case "$host" in
@@ -444,7 +445,7 @@ index dc0dfd0..d45f7b0 100755
  	*-*-linux*)
  		ac_sys_system=Linux
  		;;
-@@ -3217,6 +3227,15 @@ if test "$cross_compiling" = yes; then
+@@ -3217,6 +3228,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -460,7 +461,20 @@ index dc0dfd0..d45f7b0 100755
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -8246,7 +8265,7 @@ then
+@@ -5137,7 +5157,11 @@ if test -d casesensitivetestdir
+ then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+-    BUILDEXEEXT=.exe
++    if [ -z $EXEEXT ]; then
++      BUILDEXEEXT=.exe
++    else
++      BUILDEXEEXT=$EXEEXT
++    fi
+ else
+ 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+ $as_echo "no" >&6; }
+@@ -8246,7 +8270,7 @@ then
  			fi
  		fi
  		;;
@@ -469,7 +483,7 @@ index dc0dfd0..d45f7b0 100755
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -8320,7 +8339,7 @@ then
+@@ -8320,7 +8344,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -478,7 +492,7 @@ index dc0dfd0..d45f7b0 100755
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -8354,7 +8373,7 @@ then
+@@ -8354,7 +8378,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
