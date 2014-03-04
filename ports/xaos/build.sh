@@ -38,6 +38,11 @@ ConfigureStep() {
       --host=nacl --with-x11-driver=no --with-sffe=no
 }
 
+BuildStep() {
+  SetupCrossEnvironment
+  DefaultBuildStep
+}
+
 InstallStep(){
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/xaos.html ${PUBLISH_DIR}

@@ -26,7 +26,6 @@ BuildHostPython() {
   fi
   LogExecute ../configure
   LogExecute make -j${OS_JOBS} python${EXT} Parser/pgen
-  ChangeDir ${BUILD_DIR}
 }
 
 ConfigureStep() {
@@ -58,6 +57,11 @@ BuildStep() {
   export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
   SetupCrossEnvironment
   DefaultBuildStep
+}
+
+InstallStep() {
+  export CROSS_COMPILE=true
+  DefaultInstallStep
 }
 
 TestStep() {

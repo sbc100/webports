@@ -19,6 +19,7 @@ ConfigureStep() {
     CFLAGS="" LDFLAGS="" LogExecute ../configure --prefix=$PWD/inst
     LogExecute make -j${OS_JOBS} miniruby
     LogExecute make -j${OS_JOBS} install-nodoc
+    cd -
   fi
 
   SetupCrossEnvironment

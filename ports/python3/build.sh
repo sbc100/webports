@@ -11,6 +11,7 @@ EXECUTABLES=python${NACL_EXEEXT}
 # requires us to set --build= as well as --host=.
 
 HOST_BUILD_DIR=${SRC_DIR}/build-nacl-host
+export PATH=${HOST_BUILD_DIR}/inst/usr/local/bin:${PATH}
 
 BuildHostPython() {
   MakeDir ${HOST_BUILD_DIR}
@@ -21,12 +22,11 @@ BuildHostPython() {
   LogExecute ../configure
   LogExecute make -j${OS_JOBS} build_all
   LogExecute make install DESTDIR=inst
-  ChangeDir ${BUILD_DIR}
 }
 
 ConfigureStep() {
   BuildHostPython
-  export PATH=${HOST_BUILD_DIR}/inst/usr/local/bin:${PATH}
+  ChangeDir ${BUILD_DIR}
   # We pre-seed configure with certain results that it cannot determine
   # since we are doing a cross compile.  The $CONFIG_SITE file is sourced
   # by configure early on.
