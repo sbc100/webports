@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 # Beneath a Steel Sky (floppy version)
 readonly BASS_FLOPPY_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
 readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
@@ -19,26 +18,9 @@ ConfigureStep() {
   # NOTE: We can't use the DefaultConfigureStep, because the scummvm
   # configure script is hand-rolled, and won't accept additional arguments.
   # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
   # without this setting *make* will not show the full command lines
   export VERBOSE_BUILD=1
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH="${NACL_BIN_PATH}:${PATH}"
-  export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
-  if [ ! -f "${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}" ]; then
-    echo "No configure script found"
-    return
-  fi
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
+  SetupCrossEnvironment
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ "${NACL_ARCH}" = "pnacl" ]; then

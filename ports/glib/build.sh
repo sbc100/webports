@@ -4,21 +4,11 @@
 # found in the LICENSE file.
 
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH}
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
+  SetupCrossEnvironment
+
   cp ../nacl.cache nacl.cache.tmp
-  ../configure \
+
+  LogExecute ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \
     --exec-prefix=${NACLPORTS_PREFIX} \

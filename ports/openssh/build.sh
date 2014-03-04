@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXECUTABLES="scp${NACL_EXEEXT} ssh${NACL_EXEEXT} \
              ssh-add${NACL_EXEEXT} sshd${NACL_EXEEXT}"
 INSTALL_TARGETS="install-nokeys DESTDIR=${NACLPORTS_PREFIX}"
@@ -28,21 +27,7 @@ ConfigureStep() {
   # time.  Without this make install will fail as it tries
   # to write to DESTDIR/etc directly (without the prefix).
 
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH}
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
+  SetupCrossEnvironment
 
   local conf_host=${NACL_CROSS_PREFIX}
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
@@ -53,7 +38,6 @@ ConfigureStep() {
     conf_host="nacl"
   fi
 
-  export CONFIG_SITE=$NACLPORTS_PREFIX/share/config.site
   LogExecute ../configure \
     --host=${conf_host} \
     --${NACL_OPTION}-mmx \

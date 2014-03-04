@@ -28,6 +28,10 @@ ifeq ($(VERBOSE),1)
 BUILD_FLAGS+=-v
 endif
 
+ifeq ($(FORCE),1)
+BUILD_FLAGS+=-f
+endif
+
 export NACL_ARCH
 export NACL_GLIBC
 

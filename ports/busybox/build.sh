@@ -9,17 +9,9 @@ BusyBoxDisable() {
 }
 
 ConfigureStep() {
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
+  SetupCrossEnvironment
 
-  export CROSS_COMPILE="${NACL_CROSS_PREFIX}-"
-  export CPPFLAGS="${NACLPORTS_CPPFLAGS}"
-  export EXTRA_CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
-  export EXTRA_LDFLAGS="${NACLPORTS_LDFLAGS}"
-  EXTRA_LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
-
-  LogExecute make KBUILD_SRC=${SRC_DIR} -f ${SRC_DIR}/Makefile defconfig \
-    BUILD_LIBBUSYBOX=y
+  LogExecute make KBUILD_SRC=.. -f ../Makefile defconfig BUILD_LIBBUSYBOX=y
 
   BusyBoxDisable CONFIG_ACPID
   BusyBoxDisable CONFIG_BLOCKDEV
@@ -55,13 +47,21 @@ ConfigureStep() {
   BusyBoxDisable CONFIG_WATCHDOG
 }
 
+BuildStep() {
+  export CROSS_COMPILE=${NACL_CROSS_PREFIX}-
+  export CPPFLAGS="${NACLPORTS_CPPFLAGS}"
+  export EXTRA_CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
+  export EXTRA_LDFLAGS="${NACLPORTS_LDFLAGS}"
+  EXTRA_LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
+  DefaultBuildStep
+}
+
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/busybox"
   MakeDir ${ASSEMBLY_DIR}
 
-  cp ${BUILD_DIR}/busybox \
-    ${ASSEMBLY_DIR}/busybox_${NACL_ARCH}${NACL_EXEEXT}
+  cp busybox ${ASSEMBLY_DIR}/busybox_${NACL_ARCH}${NACL_EXEEXT}
 
   ChangeDir ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \

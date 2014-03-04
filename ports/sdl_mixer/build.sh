@@ -12,22 +12,9 @@ if [ "$NACL_GLIBC" = "1" ]; then
 fi
 
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  # Adding target usr/bin for libmikmod-config
-  export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX}/bin:${PATH}
+  SetupCrossEnvironment
+
   export LIBS="-lvorbisfile -lvorbis -logg -lm"
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
   ../configure \
     --host=nacl \
     --prefix=${NACLPORTS_PREFIX} \

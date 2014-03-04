@@ -5,8 +5,6 @@
 
 
 TestStep() {
-  ChangeDir ${BUILD_DIR}
-
   if [ "${NACL_GLIBC}" = "1" ]; then
     local exe_dir=.libs
   else
@@ -25,7 +23,6 @@ TestStep() {
 
 
 AutogenStep() {
-  ChangeDir ${SRC_DIR}
   # Remove \r\n from the shell script.
   # The default sed on Mac is broken. Work around it by using $'...' to have
   # bash convert \r to a carriage return.
@@ -40,6 +37,8 @@ AutogenStep() {
 
 
 ConfigureStep() {
+  ChangeDir ${SRC_DIR}
   AutogenStep
+  ChangeDir ${BUILD_DIR}
   DefaultConfigureStep
 }

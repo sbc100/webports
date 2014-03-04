@@ -14,8 +14,17 @@ BuildStep() {
     NACLPORTS_CFLAGS+=" -fPIC"
     NACLPORTS_CXXFLAGS+=" -fPIC"
     MAKE_TARGETS+=" libnacl_spawn.so test"
+    MAKEFLAGS+=" TOOLCHAIN=glibc"
+    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
+  elif [ "${NACL_ARCH}" = "pnacl" ]; then
+    MAKEFLAGS+=" TOOLCHAIN=pnacl"
+  else
+    MAKEFLAGS+=" TOOLCHAIN=newlib"
   fi
-  BuildStep_SDKBuildSystem
+
+  export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
+  export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
+  DefaultBuildStep
 }
 
 InstallStep() {

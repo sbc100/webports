@@ -35,6 +35,7 @@ ConfigureStep() {
 }
 
 BuildStep() {
+  SetupCrossEnvironment
   ChangeDir ${SRC_DIR}
   # Git's build doesn't support building outside the source tree.
   # Do a clean to make rebuild after failure predictable.

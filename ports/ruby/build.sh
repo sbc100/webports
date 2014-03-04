@@ -21,24 +21,7 @@ ConfigureStep() {
     LogExecute make -j${OS_JOBS} install-nodoc
   fi
 
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH}
-  if [ ! -f "${SRC_DIR}/configure" ]; then
-    echo "No configure script found"
-    return
-  fi
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
+  SetupCrossEnvironment
 
   # TODO(sbc): remove once getaddrinfo() is working
   local EXTRA_CONFIGURE_ARGS=--disable-ipv6

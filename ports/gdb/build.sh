@@ -4,11 +4,15 @@
 # found in the LICENSE file.
 
 BuildStep() {
-  make all
+  # gdb configures its submodules at build time so we need to setup
+  # the cross enrionment here.  Without this CPPFLAGS doesn't get set
+  # in gdb/Makefile.
+  SetupCrossEnvironment
+  DefaultBuildStep
 }
 
 InstallStep() {
-  make install
+  DefaultInstallStep
 
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/gdb"
@@ -33,25 +37,12 @@ InstallStep() {
 }
 
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH}
-  export NACLPORTS_INCLUDE
+  SetupCrossEnvironment
 
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
-
-  cp ${START_DIR}/gdb_pepper.cc ${SRC_DIR}/gdb
-  ../configure --with-curses --with-expat --with-system-readline \
+  cp ${START_DIR}/gdb_pepper.c ${SRC_DIR}/gdb
+  echo "CPPFLAGS=${CPPFLAGS}"
+  echo "CFLAGS=${CFLAGS}"
+  LogExecute ../configure --with-curses --with-expat --with-system-readline \
       --disable-libmcheck \
       --prefix=${NACLPORTS_PREFIX} \
       --exec-prefix=${NACLPORTS_PREFIX} \

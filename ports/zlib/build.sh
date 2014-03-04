@@ -12,8 +12,6 @@ if [ "${NACL_GLIBC}" = "1" ]; then
 fi
 
 ConfigureStep() {
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
   LogExecute rm -f libz.*
   PATH=${NACL_BIN_PATH}:${PATH} \
     CC=${NACLCC} \

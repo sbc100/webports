@@ -13,34 +13,9 @@ PatchStep() {
 }
 
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  # NOTE: non-standard flag NACL_LDFLAGS because of some more hacking below
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--undefined=PPP_GetInterface \
-                  -Wl,--undefined=PPP_ShutdownModule \
-                  -Wl,--undefined=PPP_InitializeModule \
-                  -Wl,--undefined=original_main"
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-
-  export LIBS="-L${NACLPORTS_LIBDIR} -lppapi \
-    -lpthread -l${NACL_CPP_LIB} -lm"
-
-  CONFIG_FLAGS="--with-png=no \
-      --with-long-double=no \
-      --host=nacl \
-      --with-x11-driver=no \
-      --with-sffe=no"
-
-  ChangeDir ${SRC_DIR}
-
   # xaos does not work with a build dir which is separate from the
   # src dir - so we copy src -> build
+  ChangeDir ${SRC_DIR}
   Remove ${BUILD_DIR}
   local tmp=${SRC_DIR}.tmp
   Remove ${tmp}
@@ -51,8 +26,16 @@ ConfigureStep() {
   echo "running autoconf"
   LogExecute rm ./configure
   LogExecute autoconf
-  echo "Configure options: ${CONFIG_FLAGS}"
-  ./configure ${CONFIG_FLAGS}
+
+  NACLPORTS_LDFLAGS+=" -Wl,--undefined=PPP_GetInterface \
+                  -Wl,--undefined=PPP_ShutdownModule \
+                  -Wl,--undefined=PPP_InitializeModule \
+                  -Wl,--undefined=original_main"
+
+  export LIBS="-L${NACLPORTS_LIBDIR} -lppapi -lpthread -l${NACL_CPP_LIB} -lm"
+  SetupCrossEnvironment
+  LogExecute ./configure --with-png=no --with-long-double=no \
+      --host=nacl --with-x11-driver=no --with-sffe=no
 }
 
 InstallStep(){

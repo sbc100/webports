@@ -5,7 +5,7 @@
 
 BUILD_DIR=${SRC_DIR}
 EXTRA_CONFIGURE_ARGS="--with-tlib=ncurses --prefix= --exec-prefix="
-EXECUTABLES=src/vim
+EXECUTABLES=src/vim${NACL_EXEEXT}
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple -lnacl_io \
   -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
@@ -37,11 +37,11 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/vim"
 
-  export INSTALL_TARGETS="DESTDIR=${ASSEMBLY_DIR}/vimtar install"
+  INSTALL_TARGETS="DESTDIR=${ASSEMBLY_DIR}/vimtar install"
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/vimtar
-  cp bin/vim ../vim_${NACL_ARCH}${NACL_EXEEXT}
+  cp bin/vim${NACL_EXEEXT} ../vim_${NACL_ARCH}${NACL_EXEEXT}
   rm -rf bin
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/vim.tar .

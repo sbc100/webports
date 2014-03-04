@@ -3,19 +3,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
+BUILD_DIR=${SRC_DIR}
 EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
+if [ "${NACL_GLIBC}" = "1" ]; then
+  PLAT=nacl-glibc
+else
+  PLAT=nacl-newlib
+fi
+if [ "${LUA_NO_READLINE:-}" = "1" ]; then
+  PLAT+=-basic
+fi
+
 BuildStep() {
-  ChangeDir ${SRC_DIR}
-  if [ "${NACL_GLIBC}" = "1" ]; then
-    PLAT=nacl-glibc
-  else
-    PLAT=nacl-newlib
-  fi
-  if [ "${LUA_NO_READLINE:-}" = "1" ]; then
-    PLAT+=-basic
-  fi
   LogExecute make PLAT=${PLAT} clean
   set -x
   make AR="${NACLAR} rcu" RANLIB="${NACLRANLIB}" CC="${NACLCC}" PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} -j${OS_JOBS}

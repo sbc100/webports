@@ -7,11 +7,9 @@ EXECUTABLES=python${NACL_EXEEXT}
 
 # This build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.
+HOST_BUILD_DIR=${SRC_DIR}/build-nacl-host
 
 BuildHostPython() {
-  ChangeDir ${SRC_DIR}
-  MakeDir build-nacl-host
-
   # Seems that python builds to python.exe on mac (!) so they
   # can avoid a name conflict with the "Python" folder, since
   # the mac filesystem is case insensistive.
@@ -21,20 +19,23 @@ BuildHostPython() {
     local EXT=
   fi
 
-  ChangeDir build-nacl-host
+  MakeDir ${HOST_BUILD_DIR}
+  ChangeDir ${HOST_BUILD_DIR}
   if [ -f python${EXT} -a -f Parser/pgen ]; then
     return
   fi
   LogExecute ../configure
   LogExecute make -j${OS_JOBS} python${EXT} Parser/pgen
+  ChangeDir ${BUILD_DIR}
 }
 
 ConfigureStep() {
   BuildHostPython
-  export CROSS_COMPILE=true
+  ChangeDir ${BUILD_DIR}
   # We pre-seed configure with certain results that it cannot determine
   # since we are doing a cross compile.  The $CONFIG_SITE file is sourced
   # by configure early on.
+  export CROSS_COMPILE=true
   export CONFIG_SITE=${START_DIR}/config.site
   # Disable ipv6 since configure claims it requires a working getaddrinfo
   # which we do not provide.  TODO(sbc): remove this once nacl_io supports
@@ -42,7 +43,6 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS="--disable-ipv6"
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
-  export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
   export LIBS="-ltermcap"
   if [ "${NACL_GLIBC}" != "1" ]; then
     LIBS+=" -lglibc-compat"
@@ -51,6 +51,13 @@ ConfigureStep() {
   if [ "${NACL_GLIBC}" != "1" ]; then
     LogExecute cp ${START_DIR}/Setup.local Modules/
   fi
+}
+
+BuildStep() {
+  export CROSS_COMPILE=true
+  export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
+  SetupCrossEnvironment
+  DefaultBuildStep
 }
 
 TestStep() {

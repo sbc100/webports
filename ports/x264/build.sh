@@ -6,15 +6,7 @@
 BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH}
-  ChangeDir ${BUILD_DIR}
+  SetupCrossEnvironment
 
   local conf_host
   if [ "${NACL_ARCH}" = pnacl ]; then

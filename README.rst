@@ -71,17 +71,19 @@ licenses before using these packages in your projects.
 launched from a Cygwin shell. While many of the scripts should work under
 Cygwin naclports is only tested on Linux and Mac so YMMV.
 
+
 Running the examples
 --------------------
 
-Applications/Examples that build runnable webpages are published to
-``out/publish``. To run them in chrome you need to serve them with a webserver.
-The easiest way to do this is to run::
+Applications/Examples that build runnable web pages are published to
+``out/publish``. To run them in chrome you need to serve them with a web
+server.  The easiest way to do this is to run::
 
   $ make run
 
-This will start a local webserver serving the content of ``out/publish``
+This will start a local web server serving the content of ``out/publish``
 after which you can navigate to http://localhost:5103 to view the content.
+
 
 Adding a new package
 --------------------
@@ -107,6 +109,32 @@ To add a package:
 6. Make sure your package builds for all architectures::
 
      $ ./make_all.sh <PACKAGE_NAME>
+
+
+Writing build scripts
+---------------------
+
+Each port has an optional build script: ``build.sh``. Some ports, such as
+those that are based on autotools+make don't need a build script at all. The
+build script is run in a bash shell, it can set variables at the global scope
+that override the default behaviour of various steps in the build process. The
+most common steps that implement by package-specific scripts are:
+
+- ConfigureStep()
+- BuildStep()
+- InstallStep()
+- TestStep()
+
+When implementing a given step the default step can be still invoked, e.g.
+by calling DefaultBuildStep() from within BuildStep()
+
+Each build is is run independently in a subshell, so variables set in one
+step are not visible in others, and changing the working directory within a
+step will not effect other steps.
+
+A variety of shared variables and functions are available from with the build
+scripts.  These are defined in build_tools/common.sh.
+
 
 Modifying package sources / Working with patches
 ------------------------------------------------

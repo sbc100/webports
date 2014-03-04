@@ -4,8 +4,6 @@
  * found in the LICENSE file.
  */
 
-#include <ppapi/cpp/instance.h>
-#include <ppapi/cpp/module.h>
 #include <stdio.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
@@ -14,7 +12,8 @@
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"
 
-extern "C" int gdb_nacl_main(int argc, char *argv[]);
+int gdb_nacl_main(int argc, char *argv[]);
+int gdb_pepper_main(int argc, char *argv[]);
 
 int gdb_pepper_main(int argc, char* argv[]) {
   umount("/");

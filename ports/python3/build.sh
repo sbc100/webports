@@ -10,7 +10,7 @@ EXECUTABLES=python${NACL_EXEEXT}
 # The build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.
 
-HOST_BUILD_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl-host
+HOST_BUILD_DIR=${SRC_DIR}/build-nacl-host
 
 BuildHostPython() {
   MakeDir ${HOST_BUILD_DIR}
@@ -21,11 +21,11 @@ BuildHostPython() {
   LogExecute ../configure
   LogExecute make -j${OS_JOBS} build_all
   LogExecute make install DESTDIR=inst
+  ChangeDir ${BUILD_DIR}
 }
 
 ConfigureStep() {
   BuildHostPython
-  export CROSS_COMPILE=true
   export PATH=${HOST_BUILD_DIR}/inst/usr/local/bin:${PATH}
   # We pre-seed configure with certain results that it cannot determine
   # since we are doing a cross compile.  The $CONFIG_SITE file is sourced
@@ -37,7 +37,6 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS="--disable-ipv6"
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
-  export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
   export LIBS="-ltermcap"
   if [ "${NACL_GLIBC}" != "1" ]; then
     LIBS+=" -lglibc-compat"
@@ -46,6 +45,13 @@ ConfigureStep() {
   if [ "${NACL_GLIBC}" != "1" ]; then
     LogExecute cp ${START_DIR}/Setup.local Modules/
   fi
+}
+
+BuildStep() {
+  export CROSS_COMPILE=true
+  export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
+  SetupCrossEnvironment
+  DefaultBuildStep
 }
 
 TestStep() {

@@ -3,22 +3,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
+BUILD_DIR=${SRC_DIR}
 EXECUTABLES=src/nethack
 
 BuildStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
+  SetupCrossEnvironment
+
   # NOTE: we are using the non-standard vars NACL_CCFLAGS/NACL_LDFLAGS
   # because we are not running ./configure and the Makefile was hacked
   export NACL_CCFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH}
   export WINTTYLIB="-lncurses -ltar -lppapi_simple -lnacl_io"
   export WINTTYLIB="${WINTTYLIB} -lppapi -lppapi_cpp"
   if [[ "${NACL_ARCH}" = "pnacl" ||
@@ -30,7 +24,6 @@ BuildStep() {
 
   export NACLPORTS_INCLUDE
   export STRNCMPI=1
-  ChangeDir ${SRC_DIR}
   cp ${START_DIR}/nethack_pepper.cc ${SRC_DIR}/src
   bash sys/unix/setup.sh
   make

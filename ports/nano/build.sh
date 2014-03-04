@@ -26,7 +26,7 @@ InstallStep() {
 
   ChangeDir ${ASSEMBLY_DIR}/nanotar
   local exe="../nano_${NACL_ARCH}${NACL_EXEEXT}"
-  cp bin/nano ${exe}
+  cp bin/nano${NACL_EXEEXT} ${exe}
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     LogExecute ${PNACLFINALIZE} ${exe}
   fi

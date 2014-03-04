@@ -3,9 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-BuildStep() {
-  ChangeDir ${SRC_DIR}
+BUILD_DIR=${SRC_DIR}
 
+BuildStep() {
   make -f unix/Makefile clean
   # "generic" target, which runs unix/configure, is
   # suggested. However, this target does not work well with NaCl. For

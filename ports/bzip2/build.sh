@@ -10,7 +10,6 @@ ConfigureStep() {
 }
 
 BuildStep() {
-  ChangeDir ${BUILD_DIR}
   make clean
   make CC="${NACLCC}" AR="${NACLAR}" RANLIB="${NACLRANLIB}" -j${OS_JOBS} libbz2.a
   if [ ${NACL_GLIBC} = 1 ]; then

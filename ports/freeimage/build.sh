@@ -42,26 +42,26 @@ ExtractStep() {
 
 
 ConfigureStep() {
+  return
+}
+
+
+BuildStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
-  export PATH=${NACL_BIN_PATH}:${PATH};
-  export INCDIR=${NACLPORTS_INCLUDE}
-  export INSTALLDIR=${NACLPORTS_LIBDIR}
-}
+  export PATH=${NACL_BIN_PATH}:${PATH}
 
-
-BuildStep() {
   # assumes pwd has makefile
-  ChangeDir ${BUILD_DIR}
   LogExecute make OS=nacl clean
   LogExecute make OS=nacl -j${OS_JOBS}
 }
 
 
 InstallStep() {
-  # assumes pwd has makefile
-  make OS=nacl install
+  export INCDIR=${NACLPORTS_INCLUDE}
+  export INSTALLDIR=${NACLPORTS_LIBDIR}
+  LogExecute make OS=nacl install
 }

@@ -1,8 +1,8 @@
 diff --git a/gdb/configure b/gdb/configure
-index b3d3e2d..8e42e2c 100755
+index 5300b5a..8472ddd 100755
 --- a/gdb/configure
 +++ b/gdb/configure
-@@ -5054,7 +5054,7 @@ fi
+@@ -5073,7 +5073,7 @@ fi
  gdb_host_obs=posix-hdep.o
  
  if test "${target}" = "${host}"; then
@@ -27,8 +27,21 @@ index d01dc46..88808fc 100644
  {
    struct captured_main_args args;
  
+diff --git a/config/dfp.m4 b/config/dfp.m4
+index 48683f0..93ac2e9 100644
+--- a/config/dfp.m4
++++ b/config/dfp.m4
+@@ -23,7 +23,7 @@ Valid choices are 'yes', 'bid', 'dpd', and 'no'.]) ;;
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+     i?86*-*-gnu* | \
+     i?86*-*-mingw* | x86_64*-*-mingw* | \
+-    i?86*-*-cygwin* | x86_64*-*-cygwin*)
++    i?86*-*-cygwin* | x86_64*-*-cygwin* | *nacl*)
+       enable_decimal_float=yes
+       ;;
+     *)
 diff --git a/gdb/Makefile.in b/gdb/Makefile.in
-index a41cff9..80fd380 100644
+index be30dfd..50ccac8 100644
 --- a/gdb/Makefile.in
 +++ b/gdb/Makefile.in
 @@ -115,10 +115,12 @@ MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
@@ -45,7 +58,7 @@ index a41cff9..80fd380 100644
  
  # Where is our "include" directory?  Typically $(srcdir)/../include.
  # This is essentially the header file directory for the library
-@@ -1162,11 +1164,11 @@ libgdb.a: $(LIBGDB_OBS)
+@@ -1221,11 +1223,11 @@ libgdb.a: $(LIBGDB_OBS)
  	$(RANLIB) libgdb.a
  
  # Removing the old gdb first works better if it is running, at least on SunOS.
@@ -60,20 +73,15 @@ index a41cff9..80fd380 100644
  
  # Convenience rule to handle recursion.
  $(LIBGNU) $(GNULIB_H): all-lib
-diff --git a/config/dfp.m4 b/config/dfp.m4
-index 48683f0..93ac2e9 100644
---- a/config/dfp.m4
-+++ b/config/dfp.m4
-@@ -23,7 +23,7 @@ Valid choices are 'yes', 'bid', 'dpd', and 'no'.]) ;;
-     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
-     i?86*-*-gnu* | \
-     i?86*-*-mingw* | x86_64*-*-mingw* | \
--    i?86*-*-cygwin* | x86_64*-*-cygwin*)
-+    i?86*-*-cygwin* | x86_64*-*-cygwin* | *nacl*)
-       enable_decimal_float=yes
-       ;;
-     *)
-index cc778b1..4cf5dba 100644
+@@ -2309,7 +2311,7 @@ py-value.o: $(srcdir)/python/py-value.c
+ 
+ # A list of all the objects we might care about in this build, for
+ # dependency tracking.
+-all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
++all_object_files = gdb.o gdb_pepper.o $(LIBGDB_OBS) gdbtk-main.o \
+ 	test-cp-name-parser.o
+ 
+ # Ensure that generated files are created early.  Use order-only
 diff --git a/libdecnumber/configure b/libdecnumber/configure
 index 2720f46..39ab4c4 100755
 --- a/libdecnumber/configure
@@ -88,10 +96,10 @@ index 2720f46..39ab4c4 100755
        ;;
      *)
 diff --git a/opcodes/i386-dis.c b/opcodes/i386-dis.c
-index 9abce1a..e465be0 100644
+index 8e55724..4b6576d 100644
 --- a/opcodes/i386-dis.c
 +++ b/opcodes/i386-dis.c
-@@ -11528,7 +11528,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
+@@ -12635,7 +12635,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
      }
  
    /* Check if the REX prefix is used.  */

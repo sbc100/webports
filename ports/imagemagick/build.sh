@@ -67,7 +67,6 @@ TestStep() {
 
   # As part of 'make check' there will be several test executables built.
   # We need to create the script that launch them ahead of time.
-  ChangeDir ${BUILD_DIR}
   for EXE in ${TEST_EXECUTABLES}; do
     WriteSelLdrScript ${EXE%%${NACL_EXEEXT}} $(basename ${EXE})
   done

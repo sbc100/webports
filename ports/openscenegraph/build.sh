@@ -5,23 +5,18 @@
 
 BUILD_DIR=${SRC_DIR}
 
+export LIB_OSG=libosg.a
+export LIB_OSGUTIL=libosgUtil.a
+export LIB_OPENTHREADS=libOpenThreads.a
+
 ConfigureStep() {
   return 0
 }
 
 BuildStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
-  export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH}
-  export LIB_OSG=libosg.a
-  export LIB_OSGUTIL=libosgUtil.a
-  export LIB_OPENTHREADS=libOpenThreads.a
+  SetupCrossEnvironment
+  CFLAGS+=" ${CPPFLAGS}"
+  CXXFLAGS+=" ${CPPFLAGS}"
   DefaultBuildStep
 }
 

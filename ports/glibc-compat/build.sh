@@ -8,15 +8,17 @@ readonly LIB_GLIBC_COMPAT=libglibc-compat.a
 BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
-  MakeDir ${BUILD_DIR}
-  LogExecute cp -rf ${START_DIR}/* ${BUILD_DIR}
+  LogExecute cp -rf ${START_DIR}/* .
+  LogExecute rm -rf out
+}
+
+BuildStep() {
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export NACL_SDK_VERSION
-  ChangeDir ${SRC_DIR}
-  LogExecute rm -rf out
+  DefaultBuildStep
 }
 
 InstallStep() {

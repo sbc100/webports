@@ -3,8 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXECUTABLES=civetweb
+BUILD_DIR=${SRC_DIR}
 
 BuildStep() {
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"

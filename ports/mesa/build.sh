@@ -3,40 +3,26 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Mesa uses autoconf but not automake and its handwritten Makefiles do not
+# support out-of-tree building
 BUILD_DIR=${SRC_DIR}
 
+EXTRA_CONFIGURE_ARGS="\
+  --enable-static \
+  --disable-gl-osmesa \
+  --with-driver=osmesa \
+  --disable-asm \
+  --disable-glut \
+  --disable-gallium \
+  --disable-egl \
+  --disable-glw"
+
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export LD=${NACLLD}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_PREFIX}/lib/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_PREFIX}/lib
-  export PATH=${NACL_BIN_PATH}:${PATH}
   export X11_INCLUDES=
-  ChangeDir ${BUILD_DIR}
-  ./configure \
-    --host=nacl \
-    --enable-static \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_PREFIX}/lib \
-    --oldincludedir=${NACLPORTS_PREFIX}/include \
-    --datarootdir=${NACLPORTS_PREFIX} \
-    --disable-gl-osmesa \
-    --with-x=no \
-    --with-driver=osmesa \
-    --disable-asm \
-    --disable-glut \
-    --disable-gallium \
-    --disable-egl \
-    --disable-glw
+  DefaultConfigureStep
 }
 
-
-InstallStep() {
-  # assumes pwd has makefile
-  make install
+BuildStep() {
+  export AR=${NACLAR}
+  DefaultBuildStep
 }

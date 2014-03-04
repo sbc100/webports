@@ -12,6 +12,7 @@ set -e
 
 TARGETS="$*"
 TARGETS=${TARGETS:-all}
+export BUILD_FLAGS=--ignore-disabled
 
 # x86_64 NaCl
 export NACL_ARCH=x86_64

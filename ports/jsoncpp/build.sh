@@ -6,8 +6,6 @@
 BUILD_DIR=${SRC_DIR}
 
 BuildStep() {
-  ChangeDir ${BUILD_DIR}
-
   export CXXCMD="${NACLCC} -Iinclude -I."
   LogExecute ${CXXCMD} -c src/lib_json/json_reader.cpp
   LogExecute ${CXXCMD} -c src/lib_json/json_value.cpp
@@ -23,6 +21,6 @@ BuildStep() {
 
 
 InstallStep() {
-  LogExecute cp ${BUILD_DIR}/libjsoncpp.a ${NACLPORTS_LIBDIR}
-  LogExecute cp -R ${BUILD_DIR}/include/json ${NACLPORTS_INCLUDE}
+  LogExecute cp libjsoncpp.a ${NACLPORTS_LIBDIR}
+  LogExecute cp -R include/json ${NACLPORTS_INCLUDE}
 }

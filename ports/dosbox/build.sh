@@ -8,17 +8,7 @@ DOSBOX_EXAMPLE_DIR=${NACL_SRC}/ports/dosbox-0.74
 EXECUTABLES=src/dosbox${NACL_EXEEXT}
 
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export STRIP=${NACLSTRIP}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
+  SetupCrossEnvironment
 
   export LIBS="-L${NACLPORTS_LIBDIR} \
       -lm \
@@ -47,9 +37,6 @@ ConfigureStep() {
       --disable-shared \
       --with-sdl-exec-prefix=${NACLPORTS_PREFIX}"
 
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
-
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
   # would fail due to multiple definitions of main and missing pp::CreateModule.
   # So we patch auto-generated Makefile after running configure.
@@ -68,7 +55,7 @@ ConfigureStep() {
 InstallStep(){
   MakeDir ${PUBLISH_DIR}
   LogExecute install ${START_DIR}/dosbox.html ${PUBLISH_DIR}
-  LogExecute install ${BUILD_DIR}/src/dosbox${NACL_EXEEXT} \
+  LogExecute install src/dosbox${NACL_EXEEXT} \
     ${PUBLISH_DIR}/dosbox_${NACL_ARCH}${NACL_EXEEXT}
   local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py"
   LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf

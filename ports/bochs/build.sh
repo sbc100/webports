@@ -11,26 +11,9 @@ BOCHS_EXAMPLE_DIR=${NACL_SRC}/ports/bochs
 EXECUTABLES=bochs
 
 ConfigureStep() {
-  # export the nacl tools
-  export CC=${NACLCC}
-  export CXX=${NACLCXX}
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  # path and package magic to make sure we call the right
-  # sdl-config, etc.
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export CFLAGS=${NACLPORTS_CFLAGS}
-  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
-  export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export PATH=${NACL_BIN_PATH}:${PATH}
-  export PATH="${NACLPORTS_PREFIX_BIN}:${PATH}"
+  SetupCrossEnvironment
 
   export NACLBXLIBS="-lpthread"
-
-  MakeDir ${BUILD_DIR}
-  ChangeDir ${BUILD_DIR}
 
   EXE=${NACL_EXEEXT} LogExecute ../configure \
     --host=nacl \
@@ -53,6 +36,13 @@ ImageExtractStep() {
   else
     tar zxf ${NACL_PACKAGES_TARBALLS}/$1
   fi
+}
+
+BuildStep() {
+  # boch's Makefile runs sdl-config so we need to cross envrionment setup
+  # during build as well as configure.
+  SetupCrossEnvironment
+  DefaultBuildStep
 }
 
 InstallStep() {

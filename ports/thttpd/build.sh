@@ -23,11 +23,7 @@ Makefile"
 BuildStep() {
   # export the nacl tools
   # The checked-in Makefile has more configuration for this example.
-  export AR=${NACLAR}
-  export RANLIB=${NACLRANLIB}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${NACL_BIN_PATH}:${PATH}
+  SetupCrossEnvironment
   export NACLPORTS_CPPFLAGS
   export NACLPORTS_CFLAGS
   export NACLPORTS_LDFLAGS

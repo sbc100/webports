@@ -24,7 +24,7 @@ InstallStep() {
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/bashtar
-  cp bin/bash ../bash_${NACL_ARCH}${NACL_EXEEXT}
+  cp bin/bash${NACL_EXEEXT} ../bash_${NACL_ARCH}${NACL_EXEEXT}
   rm -rf bin
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/bash.tar .

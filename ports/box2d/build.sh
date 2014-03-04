@@ -6,6 +6,6 @@
 EXTRA_CMAKE_ARGS="-DBOX2D_BUILD_EXAMPLES=OFF"
 
 TestStep() {
-  ChangeDir ${BUILD_DIR}/HelloWorld
+  ChangeDir HelloWorld
   RunSelLdrCommand HelloWorld
 }
