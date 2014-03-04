@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 import sha1check
 
@@ -31,7 +32,8 @@ SENTINELS_ROOT = os.path.join(OUT_DIR, 'sentinels')
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 
-sys.path.append(os.path.join(NACL_SDK_ROOT, 'tools'))
+if NACL_SDK_ROOT:
+  sys.path.append(os.path.join(NACL_SDK_ROOT, 'tools'))
 
 # TODO(sbc): use this code to replace the bash logic in build_tools/common.sh
 
@@ -41,6 +43,18 @@ class Error(Exception):
 
 class DisabledError(Error):
   pass
+
+
+def FormatTimeDelta(delta):
+  rtn = ''
+  if delta > 60:
+    mins = delta / 60
+    rtn += '%dm' % mins
+    delta -= mins * 60
+
+  if delta:
+    rtn += '%.0fs' % delta
+  return rtn
 
 
 def Touch(filename):
@@ -183,7 +197,7 @@ class Package(object):
       return
     return os.path.join(ARCHIVE_ROOT, archive)
 
-  def Build(self, verbose, build_deps):
+  def Build(self, verbose, build_deps, force=False):
     if build_deps:
       for dep in self.DEPENDS:
         if not os.path.exists(SentinelFile(dep)):
@@ -207,9 +221,10 @@ class Package(object):
     self.CheckEnabled()
 
     sentinel = SentinelFile(self.basename)
-    if os.path.exists(sentinel):
-      Log("Already built '%s' [%s]" % (self.PACKAGE_NAME, arch))
-      return
+    if not force:
+      if os.path.exists(sentinel):
+        Log("Already built '%s' [%s]" % (self.PACKAGE_NAME, arch))
+        return
 
     log_root = os.path.join(OUT_DIR, 'logs')
     if not os.path.isdir(log_root):
@@ -226,10 +241,15 @@ class Package(object):
         prefix = ''
       Log("%sBuilding '%s' [%s]" % (prefix, self.PACKAGE_NAME, arch))
 
+    start = time.time()
     self.RunBuildSh(verbose, stdout)
 
     # Build successful, write sentinel
     Touch(sentinel)
+
+    duration = FormatTimeDelta(time.time() - start)
+    Log("Build complete '%s' [%s] [took %s]"
+        % (self.PACKAGE_NAME, arch, duration))
 
   def RunBuildSh(self, verbose, stdout, args=None):
     build_port = os.path.join(SCRIPT_DIR, 'build_port.sh')
@@ -388,6 +408,9 @@ def main(args):
                       help='Output extra information.')
     parser.add_option('--all', action='store_true',
                       help='Perform action on all known ports.')
+    parser.add_option('-f', '--force', action='store_true',
+                      help='Force building, even if timestamps would otherwise'
+                      'skip it.')
     parser.add_option('--no-deps', dest='build_deps', action='store_false',
                       default=True,
                       help='Disable automatic building of dependencies.')
@@ -407,7 +430,7 @@ def main(args):
       package_dirs = args[1:]
 
     if not NACL_SDK_ROOT:
-      Error("$NACL_SDK_ROOT not set")
+      raise Error("$NACL_SDK_ROOT not set")
 
     verbose = options.verbose or os.environ.get('VERBOSE') == '1'
     Trace.verbose = verbose
@@ -429,7 +452,7 @@ def main(args):
         elif command == 'clean':
           package.Clean()
         elif command == 'build':
-          package.Build(verbose, options.build_deps)
+          package.Build(verbose, options.build_deps, options.force)
         else:
           parser.error("Unknown subcommand: '%s'\n"
                        "See --help for available commands." % command)
