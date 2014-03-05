@@ -989,7 +989,10 @@ DefaultPostBuildStep() {
 
   for nexe in $EXECUTABLES ; do
     Validate ${nexe}
-    if [[ ${nexe} == *${NACL_EXEEXT} ]]; then
+    # Create a script which will run the executable in sel_ldr.  The name
+    # of the script is the same as the name of the executable, either without
+    # any extension or with the .sh extension.
+    if [[ ${nexe} == *${NACL_EXEEXT} && ! -d ${nexe%%${NACL_EXEEXT}} ]]; then
       WriteSelLdrScript ${nexe%%${NACL_EXEEXT}} $(basename ${nexe})
     else
       WriteSelLdrScript $nexe.sh $(basename ${nexe})

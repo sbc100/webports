@@ -57,7 +57,7 @@ index 55a665b..225df99 100755
    while [ $iter -lt 32  ] && [ $success = "SUCCESS" ] ; do
      $testBin $allowPartials $allowComments $allowGarbage $allowMultiple -b $iter < $file > ${file}.test  2>&1
 +    # sel_ldr poops out extra text to stderr.
-+    sed -i -e"/^DEBUG MODE ENABLED/d" ${file}.test
++    sed -i.bak -e"/^DEBUG MODE ENABLED/d" ${file}.test
      diff ${DIFF_FLAGS} ${file}.gold ${file}.test > ${file}.out
      if [ $? -eq 0 ] ; then
        if [ $iter -eq 31 ] ; then : $(( testsSucceeded += 1)) ; fi

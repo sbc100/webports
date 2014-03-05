@@ -20,7 +20,7 @@ if [ "$NACL_ARCH" = "arm" ]; then
   export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
 fi
 
-EXTRA_CONFIGURE_ARGS=-"-with-x=no --disable-largefile --without-fftw"
+EXTRA_CONFIGURE_ARGS="--disable-largefile --without-fftw --without-xml"
 
 EXECUTABLES="\
   utilities/${EXE_DIR}animate${NACL_EXEEXT} \

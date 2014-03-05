@@ -55,9 +55,7 @@ BuildStep() {
 }
 
 TestStep() {
-  if [ ${NACL_ARCH} != "pnacl" ]; then
-    WriteSelLdrScript python python${NACL_EXEEXT}
-  else
+  if [ ${NACL_ARCH} = "pnacl" ]; then
     local pexe=python${NACL_EXEEXT}
     TranslateAndWriteSelLdrScript ${pexe} x86-64 python.x86-64.nexe python
   fi
