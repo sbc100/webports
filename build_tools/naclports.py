@@ -197,14 +197,14 @@ class Package(object):
       return
     return os.path.join(ARCHIVE_ROOT, archive)
 
-  def Build(self, verbose, build_deps, force=False):
+  def Build(self, verbose, build_deps, force=None):
     if build_deps:
       for dep in self.DEPENDS:
-        if not os.path.exists(SentinelFile(dep)):
+        if force == 'all' or not os.path.exists(SentinelFile(dep)):
           dep_dir = os.path.join(os.path.dirname(self.root), dep)
           dep = Package(dep_dir)
           try:
-            dep.Build(verbose, build_deps)
+            dep.Build(verbose, build_deps, force)
           except DisabledError as e:
             Log(str(e))
 
@@ -221,7 +221,7 @@ class Package(object):
     self.CheckEnabled()
 
     sentinel = SentinelFile(self.basename)
-    if not force:
+    if force is None:
       if os.path.exists(sentinel):
         Log("Already built '%s' [%s]" % (self.PACKAGE_NAME, arch))
         return
@@ -240,6 +240,11 @@ class Package(object):
       else:
         prefix = ''
       Log("%sBuilding '%s' [%s]" % (prefix, self.PACKAGE_NAME, arch))
+
+    # Remove the sentinel file before building. If the build fails and the
+    # sentinel already exists, the next build should not have to be forced.
+    if os.path.exists(sentinel):
+      os.remove(sentinel)
 
     start = time.time()
     self.RunBuildSh(verbose, stdout)
@@ -408,9 +413,13 @@ def main(args):
                       help='Output extra information.')
     parser.add_option('--all', action='store_true',
                       help='Perform action on all known ports.')
-    parser.add_option('-f', '--force', action='store_true',
-                      help='Force building, even if timestamps would otherwise'
-                      'skip it.')
+    parser.add_option('-f', '--force', action='store_const', const='target',
+                      dest='force', help='Force building specified targets, '
+                      'even if timestamps would otherwise skip it.')
+    parser.add_option('-F', '--force-all', action='store_const', const='all',
+                      dest='force', help='Force building target and all '
+                      'dependencies, even if timestamps would otherwise skip '
+                      'them.')
     parser.add_option('--no-deps', dest='build_deps', action='store_false',
                       default=True,
                       help='Disable automatic building of dependencies.')
