@@ -2,3 +2,4 @@ PACKAGE_NAME=curl-7.32.0
 URL=http://curl.haxx.se/download/curl-7.32.0.tar.bz2
 LICENSE=CUSTOM:README
 SHA1=f6989fca0dac0c35628523436fc17869972d4251
+DEPENDS=(openssl)

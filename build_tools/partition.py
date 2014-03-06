@@ -275,15 +275,17 @@ def FixupCanned(partitions):
   partitions[-1] = GetBuildOrder(partitions[-1])
 
   # Check that all the items still exist.
-  for partition in partitions:
+  for i, partition in enumerate(partitions):
     for item in partition:
-      assert item in all_names, item
+      if item not in all_names:
+        raise Error('non-existent package in partion %d: %s' % (i, item))
 
   # Check that partitions include all of their dependencies.
-  for partition in partitions:
+  for i, partition in enumerate(partitions):
     deps = GetDependencies(partition)
     for dep in deps:
-      assert dep in partition, [dep, partition]
+      if not dep in partition:
+        raise Error('dependency missing from partition %d: %s' % (i, dep))
 
   return partitions
 
@@ -345,4 +347,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-  sys.exit(main(sys.argv[1:]))
+  try:
+    sys.exit(main(sys.argv[1:]))
+  except Error, e:
+    sys.stdout.write("%s\n" % e)
+    sys.exit(1)

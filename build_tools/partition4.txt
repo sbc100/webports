@@ -8,7 +8,6 @@ builder 0 (total: 4057)
   snes9x
   libtar
   nethack
-  curl
   mesa
   nacl-spawn
   vim
@@ -43,6 +42,7 @@ builder 1 (total: 3715)
   clapack
   glibc-compat
   openssl
+  curl
   libogg
   libvorbis
   libtheora
