@@ -44,11 +44,21 @@ HackStepForNewlib() {
 
 
 BuildStep() {
-  make clean
+  LogExecute make clean
   # The openssl build can fail when build with -jN.
   # TODO(sbc): Add -j${OS_JOBS} to this build if/when openssl is upgraded
   # to a version that supports parallel make.
-  make build_libs
+  LogExecute make build_libs
+}
+
+
+InstallStep() {
+  DefaultInstallStep
+  # openssl (for some reason) installs shared libraries with 555 (i.e.
+  # not writable.  This causes issues when create_nmf copies the libraries
+  # and then tries to overwrite them later.
+  LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libssl.so.*
+  LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libcrypto.so.*
 }
 
 
