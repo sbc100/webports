@@ -1,4 +1,4 @@
-PACKAGE_NAME=freetype-2.1.10
-URL=http://download.savannah.gnu.org/releases/freetype/freetype-2.1.10.tar.gz
+PACKAGE_NAME=freetype-2.5.2
+URL=http://download.savannah.gnu.org/releases/freetype/freetype-2.5.2.tar.gz
 LICENSE=CUSTOM:docs/LICENSE.TXT
-SHA1=ae1c470b876758e24203a79316d0c6d11fbc0929
+SHA1=a0649cab12662370894599a3f3e7fbe4a6598e1c
