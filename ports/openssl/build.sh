@@ -57,8 +57,10 @@ InstallStep() {
   # openssl (for some reason) installs shared libraries with 555 (i.e.
   # not writable.  This causes issues when create_nmf copies the libraries
   # and then tries to overwrite them later.
-  LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libssl.so.*
-  LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libcrypto.so.*
+  if [ "${NACL_GLIBC}" = "1" ] ; then
+    LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libssl.so.*
+    LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libcrypto.so.*
+  fi
 }
 
 
