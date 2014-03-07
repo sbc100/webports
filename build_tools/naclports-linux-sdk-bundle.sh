@@ -5,6 +5,8 @@
 
 # This script builds the packages that will be bundled with the NaCl SDK.
 
+set -o errexit
+
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 source ${SCRIPT_DIR}/bot_common.sh
 

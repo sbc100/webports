@@ -84,6 +84,13 @@ def GetCurrentLibc():
     return 'newlib'
 
 
+def GetDebug():
+  if os.environ.get('NACL_DEBUG') == '1':
+    return 'debug'
+  else:
+    return 'release'
+
+
 def GetInstallRoot():
   import getos
   platform = getos.GetPlatform()
@@ -107,6 +114,7 @@ def SentinelFile(pkg_basename):
   sentinel_dir = os.path.join(SENTINELS_ROOT, arch)
   if arch != 'pnacl':
     sentinel_dir += '_' + GetCurrentLibc()
+  sentinel_dir += '_' + GetDebug()
   if not os.path.isdir(sentinel_dir):
     os.makedirs(sentinel_dir)
   return os.path.join(sentinel_dir, pkg_basename)
