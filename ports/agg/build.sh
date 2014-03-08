@@ -6,7 +6,7 @@
 
 BuildStep() {
   ChangeDir ${SRC_DIR}
-  local cflags="${NACLPORTS_CFLAGS}"
+  local cflags="${NACLPORTS_CFLAGS} -I${NACLPORTS_INCLUDE}/freetype2"
   if [ ${NACL_ARCH} != "pnacl" ]; then
     cflags="${cflags} -O3 -fomit-frame-pointer"
   fi
