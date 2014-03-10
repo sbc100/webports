@@ -109,7 +109,8 @@ NaClTerm.prototype.handleMessage_ = function(e) {
           this.adjustNmfEntry_(nmf['files'][key]);
       }
       this.adjustNmfEntry_(nmf['program']);
-      nmf = 'data:text/plain,' + JSON.stringify(nmf);
+      var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
+      nmf = window.URL.createObjectURL(blob);
     } else {
       nmf = executable + '.nmf';
     }

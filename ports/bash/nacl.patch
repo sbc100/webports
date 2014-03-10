@@ -31,6 +31,18 @@ index 9f9276d..278ad65 100644
  	ls -l $(Program)
  	-$(SIZE) $(Program)
  
+diff --git a/configure b/configure
+index 7ec72fe..1ad82b6 100755
+--- a/configure
++++ b/configure
+@@ -2201,6 +2201,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
+ *-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
+ *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
+ *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
++*nacl*) 	opt_bash_malloc=no ;;	# Native Client
+ *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
+ esac
+ 
 diff --git a/execute_cmd.c b/execute_cmd.c
 index 485b0c7..0f12331 100644
 --- a/execute_cmd.c
