@@ -6,6 +6,7 @@
 
 DOSBOX_EXAMPLE_DIR=${NACL_SRC}/ports/dosbox-0.74
 EXECUTABLES=src/dosbox${NACL_EXEEXT}
+MAKE_TARGETS="AR=${NACLAR}"
 
 ConfigureStep() {
   SetupCrossEnvironment

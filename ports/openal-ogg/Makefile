@@ -49,5 +49,5 @@ install:
 	cp index.html $(INSTALL_DIR)
 	cp sample.ogg $(INSTALL_DIR)
 ifeq ($(TOOLCHAIN),pnacl)
-	sed -i 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/index.html
+	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/index.html
 endif
