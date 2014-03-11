@@ -50,10 +50,11 @@ StartBuild() {
   cd -
 }
 
+if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
+  NACLPORTS_NO_UPLOAD=1
+fi
+
 Publish() {
-  if [ -n "${NACLPORTS_NO_UPLOAD:-}" ]; then
-    return
-  fi
   echo "@@@BUILD_STEP upload binaries@@@"
   UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
   UPLOAD_PATH+=${BUILDBOT_GOT_REVISION}/publish
@@ -65,12 +66,6 @@ Publish() {
   URL="http://gsdview.appspot.com/${UPLOAD_PATH}/"
   echo "@@@STEP_LINK@browse@${URL}@@@"
 }
-
-if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
-  readonly PERIODIC=1
-else
-  readonly PERIODIC=0
-fi
 
 # Strip 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
@@ -90,14 +85,10 @@ if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
   # Select platform specific things.
   if [ "$OS" = "mac" ]; then
     readonly PYTHON=python
-    # Use linux config on mac too.
-    readonly BOT_OS_DIR=linux
   elif [ "$OS" = "linux" ]; then
     readonly PYTHON=python
-    readonly BOT_OS_DIR=linux
   elif [ "$OS" = "win" ]; then
     readonly PYTHON=python.bat
-    readonly BOT_OS_DIR=windows
   else
     echo "Bad OS: ${OS}" 1>&2
     exit 1
@@ -174,8 +165,16 @@ else
   fi
 fi
 
-if [ ${PERIODIC} != "1" ]; then
+# Publish resulting builds to Google Storage, but only on the
+# linux bots.
+if [ -z "${NACLPORTS_NO_UPLOAD:-}" -a "$OS" = "linux" ]; then
   Publish
+fi
+
+echo "@@@BUILD_STEP Summary@@@"
+if [ $RESULT != 0 ] ; then
+  echo "@@@STEP_FAILURE@@@"
+  echo -e "$MESSAGES"
 fi
 
 exit $RESULT
