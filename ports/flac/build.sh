@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 
-
 ConfigureStep() {
   if [ "${NACL_GLIBC}" != 1 ]; then
     export LIBS="-lglibc-compat"

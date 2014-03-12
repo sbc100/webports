@@ -1,5 +1,5 @@
 PACKAGE_NAME=flac-1.2.1
 URL=http://download.sourceforge.net/flac/flac-src/flac-1.2.1-src/flac-1.2.1.tar.gz
 LICENSE=GPL,LGPL,BSD:COPYING.Xiph
-DEPENDS=(libogg)
+DEPENDS=(libogg glibc-compat)
 SHA1=bd54354900181b59db3089347cc84ad81e410b38
