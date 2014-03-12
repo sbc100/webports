@@ -725,6 +725,7 @@ SetupCrossEnvironment() {
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export AR_FLAGS=cr
   export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX_BIN}:${PATH}
 }
 

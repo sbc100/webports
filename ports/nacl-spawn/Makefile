@@ -18,7 +18,8 @@ all: test
 # Targets for libcli_main
 
 libcli_main.a: cli_main.o
-	$(NACLAR) rcus $@ $^
+	-rm $@
+	$(NACLAR) rcs $@ $^
 
 cli_main.o: cli_main.c
 	$(NACLCC) $(CFLAGS) -c $< -o $@
@@ -29,7 +30,8 @@ libnacl_spawn.so: $(NACL_SPAWN_OBJS)
 	$(NACLCXX) $(LDFLAGS) -shared $^ -o $@
 
 libnacl_spawn.a: $(NACL_SPAWN_OBJS)
-	$(NACLAR) rcus $@ $^
+	-rm $@
+	$(NACLAR) rcs $@ $^
 
 %.o: %.cc
 	$(NACLCXX) $(CXXFLAGS) -c $< -o $@
