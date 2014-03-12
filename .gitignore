@@ -1,7 +1,6 @@
 # DEPS
 /third_party/
 /native_client/
-/testing/
 
 *.pyc
 /out

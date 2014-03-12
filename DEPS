@@ -1,8 +1,6 @@
 deps = {
-  "src/testing/gtest":
-    "http://googletest.googlecode.com/svn/trunk@560",
   "src/third_party/hterm/src":
-    "https://chromium.googlesource.com/apps/libapps.git@b01e9d1a78b750275f60c58944248347cfa23d43"
+    "https://chromium.googlesource.com/apps/libapps.git@b01e9d1a"
 }
 
 deps_os = {
