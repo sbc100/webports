@@ -13,6 +13,7 @@ set -o errexit
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
+. ${SCRIPT_DIR}/bot_common.sh
 
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 if [ -e ${BOT_GSUTIL} ]; then
@@ -42,12 +43,9 @@ StartBuild() {
   export SHARDS
 
   echo "@@@BUILD_STEP $1 setup@@@"
-  # Goto src/
-  cd ${SCRIPT_DIR}/..
   if ! ./build_tools/build_shard.sh ; then
     RESULT=1
   fi
-  cd -
 }
 
 if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
@@ -56,14 +54,11 @@ fi
 
 Publish() {
   echo "@@@BUILD_STEP upload binaries@@@"
-  UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
-  UPLOAD_PATH+=${BUILDBOT_GOT_REVISION}/publish
-  SRC_PATH=out/publish
   echo "Uploading to ${UPLOAD_PATH}"
 
-  ${GSUTIL} cp -R -a public-read ${SRC_PATH}/* gs://${UPLOAD_PATH}/
+  ${GSUTIL} cp -R -a public-read out/publish/* gs://${UPLOAD_PATH}/publish/
 
-  URL="http://gsdview.appspot.com/${UPLOAD_PATH}/"
+  local URL="http://gsdview.appspot.com/${UPLOAD_PATH}/"
   echo "@@@STEP_LINK@browse@${URL}@@@"
 }
 
@@ -127,9 +122,6 @@ if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
     echo "Unspecified sharding for OS: ${OS}" 1>&2
   fi
 fi
-
-# Goto src/
-cd ${SCRIPT_DIR}/..
 
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"

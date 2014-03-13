@@ -9,6 +9,13 @@ MESSAGES=
 readonly BASE_DIR="$(dirname $0)/.."
 cd ${BASE_DIR}
 
+UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
+if [ -d .git ]; then
+  UPLOAD_PATH+=`git number`-`git rev-parse --short HEAD`
+else
+  UPLOAD_PATH+=${BUILDBOT_GOT_REVISION}
+fi
+
 BuildSuccess() {
   echo "naclports: Build SUCCEEDED $1 ($NACL_ARCH)"
 }

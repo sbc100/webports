@@ -133,9 +133,7 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" ]; then
   RunCmd tar -C ${OUT_BUNDLE_DIR} ${PEPPER_DIR} -jcf naclports.tar.bz2
 
   echo "@@@BUILD_STEP upload archive@@@"
-  UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/${BUILDBOT_GOT_REVISION}
-  RunCmd ${GSUTIL} cp -a public-read \
-      naclports.tar.bz2 gs://${UPLOAD_PATH}/naclports.tar.bz2
+  RunCmd ${GSUTIL} cp -a public-read naclports.tar.bz2 gs://${UPLOAD_PATH}/
   URL="https://storage.googleapis.com/${UPLOAD_PATH}/naclports.tar.bz2"
   echo "@@@STEP_LINK@download@${URL}@@@"
 fi
