@@ -10,10 +10,10 @@
 #  ./buildbot_selector.sh
 
 set -o errexit
+set -o nounset
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
-. ${SCRIPT_DIR}/bot_common.sh
 
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 if [ -e ${BOT_GSUTIL} ]; then
@@ -48,10 +48,6 @@ StartBuild() {
   fi
 }
 
-if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
-  NACLPORTS_NO_UPLOAD=1
-fi
-
 Publish() {
   echo "@@@BUILD_STEP upload binaries@@@"
   echo "Uploading to ${UPLOAD_PATH}"
@@ -61,6 +57,10 @@ Publish() {
   local URL="http://gsdview.appspot.com/${UPLOAD_PATH}/"
   echo "@@@STEP_LINK@browse@${URL}@@@"
 }
+
+if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
+  NACLPORTS_NO_UPLOAD=1
+fi
 
 # Strip 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
@@ -126,13 +126,14 @@ fi
 # Install SDK.
 echo "@@@BUILD_STEP Install Latest SDK@@@"
 if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
-  ${PYTHON} build_tools/download_sdk.py
+  ${PYTHON} ${SCRIPT_DIR}/download_sdk.py
 fi
 
 # PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
 export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
 export PEPPER_DIR=pepper_${PEPPER_VERSION}
 export NACLPORTS_ANNOTATE=1
+. ${SCRIPT_DIR}/bot_common.sh
 
 # The SDK builder builds a subset of the ports, but with multiple
 # configurations.
