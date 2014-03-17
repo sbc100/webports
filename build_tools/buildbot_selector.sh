@@ -64,6 +64,7 @@ fi
 
 # Strip 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
+PYTHON=python
 
 if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
   # Decode buildername.
@@ -78,15 +79,8 @@ if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
   fi
 
   # Select platform specific things.
-  if [ "$OS" = "mac" ]; then
-    readonly PYTHON=python
-  elif [ "$OS" = "linux" ]; then
-    readonly PYTHON=python
-  elif [ "$OS" = "win" ]; then
-    readonly PYTHON=python.bat
-  else
-    echo "Bad OS: ${OS}" 1>&2
-    exit 1
+  if [ "$OS" = "win" ]; then
+    PYTHON=python.bat
   fi
 
   # Select libc
