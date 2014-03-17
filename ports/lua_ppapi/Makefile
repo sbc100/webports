@@ -104,7 +104,7 @@ install: install-tests
 	cp icon_48.png ${INSTALL_DIR}
 	cp icon_128.png ${INSTALL_DIR}
 ifeq ($(TOOLCHAIN),pnacl)
-	sed -i 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclterm.js
+	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclterm.js
 endif
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)

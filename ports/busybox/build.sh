@@ -5,7 +5,7 @@
 
 BusyBoxDisable() {
   # Switch one option in the busybox config from yes to no.
-  sed -i "s/$*=y/$*=n/" .config
+  sed -i.bak "s/$*=y/$*=n/" .config
 }
 
 ConfigureStep() {
