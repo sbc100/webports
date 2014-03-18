@@ -19,8 +19,6 @@ import sys
 import urlparse
 import shutil
 
-logging.getLogger().setLevel(logging.INFO)
-
 # Using 'localhost' means that we only accept connections
 # via the loop back interface.
 SERVER_PORT = 5103
@@ -174,6 +172,7 @@ def Run(server_address,
 
 
 if __name__ == '__main__':
+  logging.getLogger().setLevel(logging.INFO)
   os.chdir('out/publish')
   SanityCheckDirectory()
   if len(sys.argv) > 1:

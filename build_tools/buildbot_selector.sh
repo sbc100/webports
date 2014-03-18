@@ -123,6 +123,23 @@ if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   ${PYTHON} ${SCRIPT_DIR}/download_sdk.py
 fi
 
+# Test browser testing harness.
+echo "@@@BUILD_STEP plumbing_tests i686@@@"
+if ! ${PYTHON} ${SCRIPT_DIR}/../chrome_test/plumbing_test.py \
+    -a i686 -x -vv; then
+  RESULT=1
+  echo "@@@STEP_FAILURE@@@"
+fi
+if [ "$OS" = "linux" ]; then
+  echo "@@@BUILD_STEP plumbing_tests x86_64@@@"
+  if ! ${PYTHON} ${SCRIPT_DIR}/../chrome_test/plumbing_test.py \
+      -a x86_64 -x -vv; then
+    RESULT=1
+    echo "@@@STEP_FAILURE@@@"
+  fi
+else
+fi
+
 # PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
 export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
 export PEPPER_DIR=pepper_${PEPPER_VERSION}
