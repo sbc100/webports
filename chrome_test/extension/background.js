@@ -11,9 +11,16 @@
 
 
 /**
+ * The list of all current connections.
+ * @private
+ */
+var g_connections_ = [];
+
+
+/**
  * Kill the browser.
  */
-function Die() {
+function haltBrowser() {
   chrome.processes.getProcessInfo([], false, function(processes) {
     for (var p in processes) {
       if (processes[p].type === 'browser') {
@@ -25,55 +32,116 @@ function Die() {
   chrome.processes.terminate(0);
 }
 
+
+/**
+ * A connection.
+ * @constructor
+ * @param {Port} port for the connection.
+ */
+function Connection(port) {
+  this.proxied_ = null;
+  this.port_ = port;
+  this.port_.onMessage.addListener(this.handleMessage_.bind(this));
+  this.port_.onDisconnect.addListener(this.handleDisconnect_.bind(this));
+  g_connections_.push(this);
+}
+
+/**
+ * Disconnect all ports related to the connection.
+ */
+Connection.prototype.disconnect = function() {
+  try {
+    this.port_.disconnect();
+  } catch (e) {
+  }
+  if (this.proxied_ !== null) {
+    try {
+      this.proxied_.disconnect();
+    } catch (e) {
+    }
+  }
+  for (var i = 0; i < g_connections_.length; i++) {
+    if (g_connections_[i] === this) {
+      g_connections_.splice(i, 1);
+      break;
+    }
+  }
+};
+
+/**
+ * Handle a message from the primary connection port.
+ * @param {Message} msg The inbound message.
+ */
+Connection.prototype.handleMessage_ = function(msg) {
+  var self = this;
+  // When in proxy mode, route all messages.
+  if (self.proxied_ !== null) {
+    self.proxied_.postMessage(msg);
+
+  // Expose a means to halt the entire browser.
+  } else if (msg.name == 'haltBrowser') {
+    haltBrowser();
+
+  // Expose chrome.management.getAll.
+  } else if (msg.name == 'getAllExtensions') {
+    chrome.management.getAll(function(result) {
+       self.port_.postMessage({'name': 'getAllExtensionsResult',
+                               'result': result});
+    });
+
+  // Expose chrome.processes.getProcessInfo.
+  } else if (msg.name == 'getAllProcesses') {
+    chrome.processes.getProcessInfo([], false, function(processes) {
+      self.port_.postMessage({'name': 'getAllProcessesResult',
+                              'result': processes});
+    });
+
+  // Allow proxied access to all extensions / apps for testing.
+  // NOTE: Once you switch to proxy mode, all messages are routed to the
+  // proxied extension. A new connection is required for further access to
+  // other functionality.
+  } else if (msg.name == 'proxy') {
+    var extension = msg.extension;
+    self.proxied_ = chrome.runtime.connect(extension);
+    self.proxied_.onMessage.addListener(function(msg) {
+      self.port_.postMessage(msg);
+    });
+    self.proxied_.onDisconnect.addListener(function(msg) {
+      self.disconnect();
+    });
+
+  // Provide a simple echo for testing of this extension.
+  } else if (msg.name == 'ping') {
+    msg.name = 'pong';
+    self.port_.postMessage(msg);
+
+  // Disconnect all connections, including this one.
+  } else if (msg.name == 'reset') {
+    self.port_.postMessage({'name': 'resetReply',
+                            'count': g_connections_.length});
+    for (var i = 0; i < g_connections_.length; i++) {
+      // Disconnect everything other than the current connection.
+      if (g_connections_[i] !== this) {
+        g_connections_[i].disconnect();
+      }
+    }
+    g_connections_.length = 0;
+    // Close this connection last.
+    self.disconnect();
+  }
+};
+
+/**
+ * Handle disconnect from the primary connection prot.
+ */
+Connection.prototype.handleDisconnect_ = function() {
+  this.disconnect();
+};
+
+
 /**
  * Listen for a number of message types from tests.
  */
 chrome.runtime.onConnectExternal.addListener(function(port) {
-  function initialListener(msg) {
-    // All the test runner to end the session quickly.
-    if (msg.name == 'die') {
-      Die();
-
-    // Expose chrome.management.getAll.
-    } else if (msg.name == 'getAllExtensions') {
-      chrome.management.getAll(function(result) {
-        port.postMessage({'name': 'getAllExtensionsResult',
-                          'result': result});
-      });
-
-    // Expose chrome.processes.getProcessInfo.
-    } else if (msg.name == 'getAllProcesses') {
-      chrome.processes.getProcessInfo([], false, function(processes) {
-        port.postMessage({'name': 'getAllProcessesResult',
-                          'result': processes});
-      });
-
-    // Allow proxied access to all extensions / apps for testing.
-    // NOTE: Once you switch to proxy mode, all messages are routed to the
-    // proxied extension. A new connection is required for further access to
-    // other functionality.
-    } else if (msg.name == 'proxy') {
-      port.onMessage.removeListener(initialListener);
-      var extension = msg.extension;
-      var extensionPort = chrome.runtime.connect(extension);
-      extensionPort.onMessage.addListener(function(msg) {
-        port.postMessage(msg);
-      });
-      extensionPort.onDisconnect.addListener(function(msg) {
-        port.disconnect();
-      });
-      port.onMessage.addListener(function(msg) {
-        extensionPort.postMessage(msg);
-      });
-      port.onDisconnect.addListener(function() {
-        extensionPort.disconnect();
-      });
-
-    // Provide a simple echo for testing of this extension.
-    } else if (msg.name == 'ping') {
-      msg.name = 'pong';
-      port.postMessage(msg);
-    }
-  }
-  port.onMessage.addListener(initialListener);
+  var connection = new Connection(port);
 });

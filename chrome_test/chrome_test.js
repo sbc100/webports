@@ -65,8 +65,28 @@ chrometest.newTestPort = function() {
  */
 chrometest.haltBrowser = function() {
   var port = chrometest.newTestPort();
-  port.postMessage({'name': 'die'});
+  port.postMessage({'name': 'haltBrowser'});
 };
+
+/**
+ * Reset the connection in the testing extension.
+ * @param {function(integer)} callback Called on completion with a count of the
+ *                                     number of connections closed including
+ *                                     the current connection.
+ */
+chrometest.resetExtension = function(callback) {
+  var port = chrometest.newTestPort();
+  var count = null;
+  port.onMessage.addListener(function(msg) {
+    count = msg.count;
+  });
+  port.onDisconnect.addListener(function() {
+    EXPECT_NE(null, count,
+              'a message with the count should happen before disconnect');
+    callback(count);
+  });
+  port.postMessage({'name': 'reset'});
+}
 
 /**
  * Get a list of all loaded extensions.
@@ -215,7 +235,6 @@ chrometest.formatDuration = function(ms) {
 /**
  * Tell the test harness how many test runs to expect.
  * @param {integer} testCount The number of tests to expect.
- * @param {function()} callback Called on completion.
  */
 chrometest.reportTestCount_ = function(testCount, callback) {
   console.log('About to run ' + testCount + ' tests.');
@@ -229,13 +248,22 @@ chrometest.reportTestCount_ = function(testCount, callback) {
  * @param {function()} callback Called on completion.
  */
 chrometest.beginTest_ = function(name, callback) {
-  console.log('[ RUN      ] ' + name);
-  chrometest.passed_ = true;
-  chrometest.currentTestName_ = name;
-  chrometest.startTime_ = new Date();
-  chrometest.httpGet(
-      '/_command?name=' + encodeURIComponent(name) +
-      '&start=1', callback);
+  chrometest.resetExtension(function(count) {
+    if (count != 1) {
+      chrometest.error(
+          'Test extension connections from the last test remain active!',
+          function() {
+        chrometest.haltBrowser();
+      });
+    }
+    console.log('[ RUN      ] ' + name);
+    chrometest.passed_ = true;
+    chrometest.currentTestName_ = name;
+    chrometest.startTime_ = new Date();
+    chrometest.httpGet(
+        '/_command?name=' + encodeURIComponent(name) +
+        '&start=1', callback);
+  });
 };
 
 /**
@@ -243,25 +271,29 @@ chrometest.beginTest_ = function(name, callback) {
  * @param {function()} callback  called on completion.
  */
 chrometest.endTest_ = function(callback) {
-  var endTime = new Date();
-  var duration = endTime.getTime() - chrometest.startTime_.getTime();
-  duration = chrometest.formatDuration(duration);
-  var name = chrometest.currentTestName_;
-  if (chrometest.passed_) {
-    var resultMsg = '      OK';
-    var result = 1;
-  } else {
-    var resultMsg = ' FAILED ';
-    var result = 0;
-  }
-  console.log('[ ' + resultMsg + ' ] ' + name + ' (' + duration + ')');
-  chrometest.startTime_ = null;
-  chrometest.currentTest_ = null;
-  chrometest.currentTestName_ = null;
-  chrometest.httpGet(
-      '/_command?name=' + encodeURIComponent(name) + '&' +
-      'duration=' + encodeURIComponent(duration) + '&' +
-      'result=' + result, callback);
+  chrometest.resetExtension(function(count) {
+    EXPECT_EQ(1, count,
+              'all connection to the test extension should be closed');
+    var endTime = new Date();
+    var duration = endTime.getTime() - chrometest.startTime_.getTime();
+    duration = chrometest.formatDuration(duration);
+    var name = chrometest.currentTestName_;
+    if (chrometest.passed_) {
+      var resultMsg = '      OK';
+      var result = 1;
+    } else {
+      var resultMsg = ' FAILED ';
+      var result = 0;
+    }
+    console.log('[ ' + resultMsg + ' ] ' + name + ' (' + duration + ')');
+      chrometest.startTime_ = null;
+      chrometest.currentTest_ = null;
+      chrometest.currentTestName_ = null;
+      chrometest.httpGet(
+        '/_command?name=' + encodeURIComponent(name) + '&' +
+        'duration=' + encodeURIComponent(duration) + '&' +
+        'result=' + result, callback);
+  });
 };
 
 /**
@@ -542,8 +574,8 @@ function EXPECT_EQ(expected, actual, context) {
 function EXPECT_NE(expected, actual, context) {
   expected = JSON.stringify(expected);
   actual = JSON.stringify(actual);
-  chrometests.expect(expected != actual, 'Did not expect ' + expected +
-                     ' but got ' + actual + ' when ' + context);
+  chrometest.expect(expected != actual, 'Did not expect ' + expected +
+                    ' but got ' + actual + ' when ' + context);
 }
 
 function EXPECT_TRUE(value, context) {
