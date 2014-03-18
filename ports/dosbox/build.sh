@@ -60,4 +60,8 @@ InstallStep(){
     ${PUBLISH_DIR}/dosbox_${NACL_ARCH}${NACL_EXEEXT}
   local CREATE_NMF="${NACL_SDK_ROOT}/tools/create_nmf.py"
   LogExecute ${CREATE_NMF} -s ${PUBLISH_DIR} ${PUBLISH_DIR}/dosbox_*${NACL_EXEEXT} -o ${PUBLISH_DIR}/dosbox.nmf
+
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    sed -i.bak 's/x-nacl/x-pnacl/' ${PUBLISH_DIR}/dosbox.html
+  fi
 }
