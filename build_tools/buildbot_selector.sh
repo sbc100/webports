@@ -70,7 +70,9 @@ fi
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 PYTHON=python
 
-if [ "${BUILDBOT_BUILDERNAME}" != "linux-sdk" ]; then
+if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
+  readonly OS=linux
+else
   # Decode buildername.
   readonly BNAME_REGEX="(nightly-)?(.+)-(.+)-(.+)"
   if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then

@@ -37,6 +37,8 @@ TEST_F(ProcessesTest, 'testProcessTypes', function(done) {
       gpuCount++;
     } else if (type == 'extension') {
       extensionCount++;
+    } else if (type == 'utility') {
+      // There may be utility processes, ignore them.
     } else {
       EXPECT_TRUE(false, 'There should only be ' +
                   'browser, renderer, gpu, and extension, but got ' + type);
