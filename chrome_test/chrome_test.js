@@ -71,19 +71,14 @@ chrometest.haltBrowser = function() {
 /**
  * Reset the connection in the testing extension.
  * @param {function(integer)} callback Called on completion with a count of the
- *                                     number of connections closed including
- *                                     the current connection.
+ *                                     number of connections killed.
  */
 chrometest.resetExtension = function(callback) {
   var port = chrometest.newTestPort();
   var count = null;
   port.onMessage.addListener(function(msg) {
-    count = msg.count;
-  });
-  port.onDisconnect.addListener(function() {
-    EXPECT_NE(null, count,
-              'a message with the count should happen before disconnect');
-    callback(count);
+    port.disconnect();
+    callback(msg.count);
   });
   port.postMessage({'name': 'reset'});
 }
@@ -249,7 +244,7 @@ chrometest.reportTestCount_ = function(testCount, callback) {
  */
 chrometest.beginTest_ = function(name, callback) {
   chrometest.resetExtension(function(count) {
-    if (count != 1) {
+    if (count != 0) {
       chrometest.error(
           'Test extension connections from the last test remain active!',
           function() {
@@ -272,7 +267,7 @@ chrometest.beginTest_ = function(name, callback) {
  */
 chrometest.endTest_ = function(callback) {
   chrometest.resetExtension(function(count) {
-    EXPECT_EQ(1, count,
+    EXPECT_EQ(0, count,
               'all connection to the test extension should be closed');
     var endTime = new Date();
     var duration = endTime.getTime() - chrometest.startTime_.getTime();

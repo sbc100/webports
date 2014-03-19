@@ -115,19 +115,18 @@ Connection.prototype.handleMessage_ = function(msg) {
     msg.name = 'pong';
     self.port_.postMessage(msg);
 
-  // Disconnect all connections, including this one.
+  // Disconnect all connections except the current one.
   } else if (msg.name == 'reset') {
-    self.port_.postMessage({'name': 'resetReply',
-                            'count': g_connections_.length});
-    for (var i = 0; i < g_connections_.length; i++) {
+    var snapshot = g_connections_.slice();
+    var killCount = 0;
+    for (var i = 0; i < snapshot.length; i++) {
       // Disconnect everything other than the current connection.
-      if (g_connections_[i] !== this) {
-        g_connections_[i].disconnect();
+      if (snapshot[i] !== this) {
+        snapshot[i].disconnect();
+        killCount++;
       }
     }
-    g_connections_.length = 0;
-    // Close this connection last.
-    self.disconnect();
+    self.port_.postMessage({'name': 'resetReply', 'count': killCount});
   }
 };
 

@@ -133,7 +133,7 @@ def DownloadChrome(url, destination):
         # Change the executables to be executable.
         for root, _, files in os.walk(destination):
           for filename in files:
-            if (filename.startswith('Chromium ') or
+            if (filename.startswith('Chromium') or
                 filename in ['chrome', 'nacl_helper', 'nacl_helper_bootstrap']):
               path = os.path.join(root, filename)
               os.chmod(path, 0755)
