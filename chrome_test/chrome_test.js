@@ -369,11 +369,15 @@ chrometest.runTests_ = function(testList, callback) {
  * Report the test count and run all register tests and halt the browser.
  */
 chrometest.runAllTests_ = function() {
-  chrometest.reportTestCount_(chrometest.tests_.length, function() {
-    chrometest.runTests_(chrometest.tests_, function() {
-      chrometest.haltBrowser();
+  // Wait 100ms before starting the tests as extensions may not load
+  // simultaneously.
+  setTimeout(function() {
+    chrometest.reportTestCount_(chrometest.tests_.length, function() {
+      chrometest.runTests_(chrometest.tests_, function() {
+        chrometest.haltBrowser();
+      });
     });
-  });
+  }, 100);
 };
 
 /**
