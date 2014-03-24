@@ -43,17 +43,9 @@ endif
 
 $(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),$(CFLAGS))))
 
-# Don't bother with the strip rule under PNaCl
-# Its supposed to be harmless but there is bug in nacl_llvm.mk which
-# is causing the _unstripped.pexe to be shipped.
-# TODO(sbc): remove this condiutional once the SDK bug is fixed.
-ifneq ($(TOOLCHAIN),pnacl)
 ifeq ($(CONFIG),Release)
 $(eval $(call LINK_RULE,$(TARGET)_unstripped,$(SOURCES),$(LIBS),$(DEPS)))
 $(eval $(call STRIP_RULE,$(TARGET),$(TARGET)_unstripped))
-else
-$(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
-endif
 else
 $(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 endif
