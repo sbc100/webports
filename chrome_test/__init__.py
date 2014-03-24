@@ -218,7 +218,15 @@ class ChromeTestServer(httpd.QuittableHTTPServer):
     self.failed_tests = set()
     self.last_test = None
     self.expected_test_count = None
+    self.roots = []
+    self.filter_string = '*'
     httpd.QuittableHTTPServer.__init__(self, server_address, handler)
+
+  def AddRoot(self, path):
+    self.roots.append(os.path.abspath(path))
+
+  def SetFilterString(self, filter_string):
+    self.filter_string = filter_string
 
 
 class ChromeTestHandler(httpd.QuittableHTTPHandler):
@@ -229,6 +237,23 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
     self.send_header('Content-type', 'text/html')
     self.send_header('Content-length', '0')
     self.end_headers()
+
+  def translate_path(self, path):
+    cwd = os.getcwd()
+    tpath = httpd.QuittableHTTPHandler.translate_path(self, path)
+    rpath = os.path.relpath(tpath, cwd)
+    hit = []
+    for root in self.server.roots:
+      npath = os.path.join(root, rpath)
+      if os.path.exists(npath):
+        hit.append(npath)
+    if len(hit) == 0:
+      # Use first root if there is not match, to allow usual favicon.ico
+      # handling.
+      return os.path.join(self.server.roots[0], rpath)
+    if len(hit) > 1:
+      raise Exception('Duplicate resource at path: %s' % rpath)
+    return hit[0]
 
   def do_GET(self):
     parts = self.path.rsplit('?')
@@ -251,6 +276,15 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
         message = params['log'][0]
         logging.log(level, message)
         self.SendEmptyReply()
+        return
+      # Allow the tests to request the current test filter string.
+      elif ('filter' in params and len(params['filter']) == 1 and
+          params['filter'][0] == '1'):
+        self.send_response(200, 'OK')
+        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-length', str(len(self.server.filter_string)))
+        self.end_headers()
+        self.wfile.write(self.server.filter_string)
         return
       # Allow the tests to declare their name on start.
       elif ('start' in params and len(params['start']) == 1 and
@@ -332,7 +366,7 @@ def ChromeAppIdFromPath(path):
   return ''.join([Hex2Alpha(ch) for ch in hexhash])
 
 
-def RunChrome(chrome_path, timeout, use_xvfb,
+def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
               enable_nacl, enable_nacl_debug,
               load_extensions, load_apps, start_path):
   """Run Chrome with a timeout and several options.
@@ -340,6 +374,8 @@ def RunChrome(chrome_path, timeout, use_xvfb,
   Args:
     chrome_path: Path to the chrome executable.
     timeout: Timeout in seconds.
+    filter_string: Filter string to select which tests to run.
+    roots: Directories to serve test from.
     use_xvfb: Boolean indicating if xvfb should be used.
     enable_nacl: Boolean indicating that NaCl should be enabled on regular
                  pages.
@@ -362,6 +398,9 @@ def RunChrome(chrome_path, timeout, use_xvfb,
   start_path += '?_chrome_test=%s' % testing_id
 
   s = ChromeTestServer(('', 0), ChromeTestHandler)
+  for root in roots:
+    s.AddRoot(root)
+  s.SetFilterString(filter_string)
 
   def Target():
     s.serve_forever()
@@ -463,8 +502,8 @@ def Main(argv):
       '-t', '--timeout', default=30, type='float',
       help='Timeout for all tests (in seconds).')
   parser.add_option(
-      '-C', '--chdir', default='.',
-      help='Change to this directory before running.')
+      '-C', '--chdir', default=[], action='append',
+      help='Add a root directory.')
   parser.add_option(
       '--load-extension', default=[], action='append',
       help='Add an extension to load on start.')
@@ -477,6 +516,9 @@ def Main(argv):
   parser.add_option(
       '--enable-nacl-debug', default=False, action='store_true',
       help='Enable NaCl debugging.')
+  parser.add_option(
+      '-f', '--filter', default='*',
+      help='Filter on tests.')
   options, args = parser.parse_args(argv)
   if len(args) == 1:
     start_path = args[0]
@@ -492,12 +534,15 @@ def Main(argv):
   logging.basicConfig(
       format='%(asctime)-15s %(levelname)s: %(message)s',
       datefmt='%Y-%m-%d %H:%M:%S')
-  os.chdir(options.chdir)
+  if not options.chdir:
+    options.chdir.append('.')
 
   DownloadChrome(ChromeUrl(options.arch), ChromeDir(options.arch))
   RunChrome(
       chrome_path=ChromeRunPath(options.arch),
       timeout=options.timeout,
+      filter_string=options.filter,
+      roots=options.chdir,
       use_xvfb=options.xvfb,
       enable_nacl=options.enable_nacl,
       enable_nacl_debug=options.enable_nacl_debug,

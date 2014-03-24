@@ -220,10 +220,10 @@ chrometest.httpGet = function(url, callback) {
  * @return {string} A formatted time.
  */
 chrometest.formatDuration = function(ms) {
-  if (ms < 1000) {
+  if (ms < 1000.0) {
     return ms + 'ms';
   } else {
-    return (ms / 1000.0).toFixed(1) *  + 's';
+    return (ms / 1000.0).toFixed(1) + 's';
   }
 };
 
@@ -254,10 +254,12 @@ chrometest.beginTest_ = function(name, callback) {
     console.log('[ RUN      ] ' + name);
     chrometest.passed_ = true;
     chrometest.currentTestName_ = name;
-    chrometest.startTime_ = new Date();
     chrometest.httpGet(
         '/_command?name=' + encodeURIComponent(name) +
-        '&start=1', callback);
+        '&start=1', function() {
+      chrometest.startTime_ = new Date();
+      callback();
+    });
   });
 };
 
@@ -281,10 +283,10 @@ chrometest.endTest_ = function(callback) {
       var result = 0;
     }
     console.log('[ ' + resultMsg + ' ] ' + name + ' (' + duration + ')');
-      chrometest.startTime_ = null;
-      chrometest.currentTest_ = null;
-      chrometest.currentTestName_ = null;
-      chrometest.httpGet(
+    chrometest.startTime_ = null;
+    chrometest.currentTest_ = null;
+    chrometest.currentTestName_ = null;
+    chrometest.httpGet(
         '/_command?name=' + encodeURIComponent(name) + '&' +
         'duration=' + encodeURIComponent(duration) + '&' +
         'result=' + result, callback);
@@ -359,22 +361,102 @@ chrometest.runTests_ = function(testList, callback) {
     callback();
   } else {
     var rest = testList.slice(1);
-    testList[0](function() {
+    testList[0].call(function() {
       chrometest.runTests_(rest, callback);
     });
   }
 };
 
 /**
+ * Check if a string matches a wildcard string.
+ * @param string filter A wildcard string (* - any string, ? - one char).
+ * @param string s A string to match.
+ */
+chrometest.wildcardMatch = function(filter, s) {
+  filter = filter.replace(/[.]/g, '[.]');
+  filter = filter.replace(/\*/g, '.*');
+  filter = filter.replace(/\?/g, '.');
+  filter = '^' + filter + '$';
+  var re = new RegExp(filter);
+  return re.test(s);
+};
+
+/**
+ * Check if a string matches a googletest style filter.
+ * A filter consists of zero or more ':' separated positive wildcard
+ * strings, followed optionally by a '-' and zero or more ':' separated
+ * negative wildcard strings.
+ * @param string filter A googletest style filter string.
+ * @param string s A string to match.
+ */
+chrometest.filterMatch = function(filter, s) {
+  var parts = filter.split('-');
+  if (parts.length == 1) {
+    var positive = parts[0].split(':');
+    var negative = [];
+  } else if (parts.length == 2) {
+    var positive = parts[0].split(':');
+    var negative = parts[1].split(':');
+  } else {
+    // Treat ill-formated filters as non-matches.
+    return false;
+  }
+  if (positive.length == 1 && positive[0] == '') {
+    positive = ['*'];
+  }
+  if (negative.length == 1 && negative[0] == '') {
+    negative = [];
+  }
+  for (var i = 0; i < positive.length; i++) {
+    if (!chrometest.wildcardMatch(positive[i], s)) {
+      return false;
+    }
+  }
+  for (var i = 0; i < negative.length; i++) {
+    if (chrometest.wildcardMatch(negative[i], s)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/**
+ * Filter tests based on harness filter.
+ * param {function()} callback Called on completion.
+ */
+chrometest.filterTests_ = function(callback) {
+  chrometest.httpGet('/_command?filter=1', function(responseCode, filter) {
+    if (responseCode != 200) {
+      chrometest.error(
+          'Requesting filter from test harness failed!', function() {
+        chrometest.haltBrowser();
+      });
+      return;
+    }
+    var keep = [];
+    var tests = chrometest.tests_;
+    for (var i = 0; i < tests.length; i++) {
+      if (chrometest.filterMatch(filter, tests[i].name)) {
+        keep.push(tests[i]);
+      }
+    }
+    chrometest.tests_ = keep;
+    callback();
+  });
+};
+
+/**
  * Report the test count and run all register tests and halt the browser.
  */
 chrometest.runAllTests_ = function() {
-  // Wait 100ms before starting the tests as extensions may not load
-  // simultaneously.
-  setTimeout(function() {
-    chrometest.reportTestCount_(chrometest.tests_.length, function() {
-      chrometest.runTests_(chrometest.tests_, function() {
-        chrometest.haltBrowser();
+  chrometest.filterTests_(function() {
+    // Wait 100ms before starting the tests as extensions may not load
+    // simultaneously.
+    setTimeout(function() {
+      chrometest.reportTestCount_(chrometest.tests_.length, function() {
+        chrometest.runTests_(chrometest.tests_, function() {
+          chrometest.haltBrowser();
+        });
       });
     });
   }, 100);
@@ -450,6 +532,52 @@ chrometest.Test.prototype.tearDown = function(done) {
 // ----------
 
 /**
+ * Register a test case using a fixture class.
+ * @param {string} fixtureClass The test fixture class object.
+ * @param {string} testName The name of the test.
+ * @param {function(done)} testFunc Called to run the test, calls done on
+ *                                  completion.
+ * @param {string} opt_caseName Optional name for the case, otherwise the
+ *                              fixtureClass class name is used.
+ */
+function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
+  if (opt_caseName == undefined) {
+    opt_caseName = fixtureClass.name;
+  }
+  var fullName = opt_caseName + '.' + testName;
+  chrometest.tests_.push({
+    'name': fullName,
+    'call': function(next) {
+      chrometest.beginTest_(fullName, function() {
+        chrometest.finishTest_ = function() {
+          chrometest.finishTest_ = function() {
+            chrometest.finishTest_ = null;
+            chrometest.endTest_(next);
+          };
+          chrometest.currentTest_.tearDown(chrometest.finishTest_);
+        };
+        chrometest.currentTest_ = new fixtureClass();
+        chrometest.currentTest_.run = testFunc;
+        window.onerror = function(
+          errorMsg, url, lineNumber, columnNumber, error) {
+            chrometest.fail();
+            if (error == 'assert') {
+              chrometest.finishTest_();
+              return;
+            }
+            chrometest.error(error.stack, function() {
+              chrometest.finishTest_();
+            });
+          };
+        chrometest.currentTest_.setUp(function() {
+          chrometest.currentTest_.run(chrometest.finishTest_);
+        });
+      });
+    },
+  });
+}
+
+/**
  * Register a single test.
  * @param {string} testCase A test case name in lieu of a fixture.
  * @param {string} testName The name of the test.
@@ -457,66 +585,9 @@ chrometest.Test.prototype.tearDown = function(done) {
  *                                  completion.
  */
 function TEST(testCase, testName, testFunc) {
-  var fullName = testCase + '.' + testName;
-  chrometest.tests_.push(function(next) {
-    chrometest.beginTest_(fullName, function() {
-      chrometest.finishTest_ = function() {
-        chrometest.finishTest_ = null;
-        chrometest.endTest_(next);
-      };
-      window.onerror = function(
-          errorMsg, url, lineNumber, columnNumber, error) {
-        chrometest.fail();
-        if (error == 'assert') {
-          chrometest.finishTest_();
-          return;
-        }
-        chrometest.error(error.stack, function() {
-          chrometest.finishTest_();
-        });
-      };
-      testFunc(chrometest.finishTest_);
-    });
-  });
+  TEST_F(chrometest.Test, testName, testFunc, testCase);
 }
 
-/**
- * Register a test case using a fixture class.
- * @param {string} fixtureClass The test fixture class object.
- * @param {string} testName The name of the test.
- * @param {function(done)} testFunc Called to run the test, calls done on
- *                                  completion.
- */
-function TEST_F(fixtureClass, testName, testFunc) {
-  var fullName = fixtureClass.name + '.' + testName;
-  chrometest.tests_.push(function(next) {
-    chrometest.beginTest_(fullName, function() {
-      chrometest.finishTest_ = function() {
-        chrometest.finishTest_ = function() {
-          chrometest.finishTest_ = null;
-          chrometest.endTest_(next);
-        };
-        chrometest.currentTest_.tearDown(chrometest.finishTest_);
-      };
-      chrometest.currentTest_ = new fixtureClass();
-      chrometest.currentTest_.run = testFunc;
-      window.onerror = function(
-          errorMsg, url, lineNumber, columnNumber, error) {
-        chrometest.fail();
-        if (error == 'assert') {
-          chrometest.finishTest_();
-          return;
-        }
-        chrometest.error(error.stack, function() {
-          chrometest.finishTest_();
-        });
-      };
-      chrometest.currentTest_.setUp(function() {
-        chrometest.currentTest_.run(chrometest.finishTest_);
-      });
-    });
-  });
-}
 
 // ASSERT VARIANTS
 // ---------------
