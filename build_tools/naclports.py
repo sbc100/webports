@@ -205,6 +205,7 @@ class BinaryPackage(object):
       return
 
     newname = filename[len(PAYLOAD_DIR):]
+    Trace('install: %s' % newname)
 
     newname = os.path.join(new_root, newname)
     dirname = os.path.dirname(newname)

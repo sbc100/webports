@@ -19,12 +19,13 @@ BuildStep() {
 
 InstallStep() {
   # copy libs and headers manually
-  ChangeDir ${NACLPORTS_INCLUDE}
-  Remove ${PACKAGE_NAME}
-  MakeDir ${PACKAGE_NAME}
-  cp -R ${SRC_DIR}/include/*.h ${PACKAGE_NAME}/
-  cp ${SRC_DIR}/font_freetype/*.h ${PACKAGE_NAME}/
-  ChangeDir ${NACLPORTS_LIBDIR}
-  cp ${SRC_DIR}/src/libagg.a .
-  cp ${SRC_DIR}/font_freetype/libaggfontfreetype.a .
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  INCDIR=${DESTDIR_INCLUDE}/${PACKAGE_NAME}
+  Remove ${INCDIR}
+  MakeDir ${INCDIR}
+  cp -R ${SRC_DIR}/include/*.h ${INCDIR}/
+  cp ${SRC_DIR}/font_freetype/*.h ${INCDIR}/
+  cp ${SRC_DIR}/src/libagg.a ${DESTDIR_LIB}
+  cp ${SRC_DIR}/font_freetype/libaggfontfreetype.a ${DESTDIR_LIB}/
 }
