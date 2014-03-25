@@ -9,31 +9,47 @@ BuildStep() {
   # in gdb/Makefile.
   SetupCrossEnvironment
   DefaultBuildStep
+
+  # Build test module.
+  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
+      ${START_DIR}/test_module.cc \
+      -o ${BUILD_DIR}/test_module_${NACL_ARCH}.nexe -lppapi_cpp -lppapi
 }
 
 InstallStep() {
   DefaultInstallStep
 
   MakeDir ${PUBLISH_DIR}
-  local ASSEMBLY_DIR="${PUBLISH_DIR}/gdb"
-  MakeDir ${ASSEMBLY_DIR}
-  LogExecute cp gdb/gdb.nexe \
-      ${ASSEMBLY_DIR}/gdb_${NACL_ARCH}${NACL_EXEEXT}
 
-  pushd ${ASSEMBLY_DIR}
+  # Tests
+  local TEST_OUT_DIR="${PUBLISH_DIR}/tests"
+  MakeDir ${TEST_OUT_DIR}
+  LogExecute cp ${BUILD_DIR}/test_module_*.nexe ${TEST_OUT_DIR}
+  pushd ${TEST_OUT_DIR}
+  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      test_module_*${NACL_EXEEXT} \
+      -s . \
+      -o test_module.nmf
+  popd
+
+  # GDB App
+  local GDB_APP_DIR="${PUBLISH_DIR}/gdb_app"
+  MakeDir ${GDB_APP_DIR}
+  LogExecute cp gdb/gdb.nexe \
+      ${GDB_APP_DIR}/gdb_${NACL_ARCH}${NACL_EXEEXT}
+
+  pushd ${GDB_APP_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       gdb_*${NACL_EXEEXT} \
       -s . \
       -o gdb.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py gdb.nmf
   popd
-
-  InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/background.js ${GDB_APP_DIR}
+  LogExecute cp ${START_DIR}/manifest.json ${GDB_APP_DIR}
+  LogExecute cp ${START_DIR}/icon_16.png ${GDB_APP_DIR}
+  LogExecute cp ${START_DIR}/icon_48.png ${GDB_APP_DIR}
+  LogExecute cp ${START_DIR}/icon_128.png ${GDB_APP_DIR}
 }
 
 ConfigureStep() {
