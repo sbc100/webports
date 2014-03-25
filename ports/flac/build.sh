@@ -29,6 +29,7 @@ PostConfigureStep() {
 
 InstallStep() {
   # assumes pwd has makefile
-  make install-exec
-  (cd include; make install)
+  LogExecute make install-exec DESTDIR=${DESTDIR}
+  ChangeDir include
+  LogExecute make install DESTDIR=${DESTDIR}
 }

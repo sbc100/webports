@@ -13,11 +13,8 @@ fi
 
 ConfigureStep() {
   LogExecute rm -f libz.*
-  PATH=${NACL_BIN_PATH}:${PATH} \
-    CC=${NACLCC} \
-    CHOST=${NACL_CROSS_PREFIX} \
-    CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}" \
-    LogExecute ./configure --prefix="${NACLPORTS_PREFIX}"
+  SetupCrossEnvironment
+  CHOST=${NACL_CROSS_PREFIX} LogExecute ./configure --prefix=${PREFIX}
 }
 
 

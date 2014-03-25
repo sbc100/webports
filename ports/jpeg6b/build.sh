@@ -19,7 +19,9 @@ BuildStep() {
 }
 
 InstallStep() {
-  MakeDir ${NACLPORTS_PREFIX}/man
+  # Don't install jpeg6b by default since it would
+  # conflict with jpeg8.
+  return
 }
 
 TestStep() {

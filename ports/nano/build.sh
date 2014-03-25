@@ -5,11 +5,11 @@
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lncurses -ltar -lppapi_simple \
   -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
-export EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
+
 if [ "${NACL_GLIBC}" != "1" ]; then
-  export EXTRA_LIBS="${EXTRA_LIBS} -lglibc-compat"
-  export EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --enable-tiny"
+  EXTRA_CONFIGURE_ARGS="--enable-tiny"
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  export EXTRA_LIBS+=" -lglibc-compat"
 fi
 
 PatchStep() {
@@ -18,10 +18,13 @@ PatchStep() {
 }
 
 InstallStep() {
+  DefaultInstallStep
+
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/nano"
 
-  export INSTALL_TARGETS="install DESTDIR=${ASSEMBLY_DIR}/nanotar"
+  DESTDIR=${ASSEMBLY_DIR}/nanotar
+  MAKEFLAGS="prefix="
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/nanotar

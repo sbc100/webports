@@ -13,22 +13,23 @@ TestStep() {
   MakeDir naclport_test/lib
 
   # the libtool warns "libtool: install: warning: remember to run
-  # `libtool --finish /home/jirka/Bin/nacl_sdk/pepper_31/toolchain/linux_pnacl/usr/lib'"
+  # `libtool --finish pepper_31/toolchain/linux_pnacl/usr/lib'"
   (cd src/libsodium;
   /bin/bash ../../libtool   --mode=install /usr/bin/install \
       -c   libsodium.la `cd ../../naclport_test/lib && pwd`)
 
   if [[ ${NACL_ARCH} == "pnacl" ]]; then
-       EXT=.bc
+    EXT=.bc
   else
-       EXT=${NACL_EXEEXT}
+    EXT=${NACL_EXEEXT}
   fi
 
   # on newlib_arm compilation crashed when without -lssp,
   # on other platforms it was ok without it
   LSSP="" && [[ ${NACL_ARCH} == "arm" ]] && LSSP="-lssp"
   INCLUDES="-Isrc/libsodium/include -Isrc/libsodium/include/sodium  \
-            -I../src/libsodium/include -I../src/libsodium/include/sodium"
+            -I${SRC_DIR}/src/libsodium/include \
+            -I${SRC_DIR}/src/libsodium/include/sodium"
   ${NACLCXX} ${INCLUDES} ${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS} \
     ${NACLPORTS_LDFLAGS} -o naclport_test/crypto_box_test${EXT} \
     ${START_DIR}/crypto_box_test.c naclport_test/lib/libsodium.a \

@@ -9,7 +9,7 @@ ConfigureStep() {
   if [ "${NACL_ARCH}" = pnacl ]; then
     extra_args="--cc=pnacl-clang --arch=pnacl"
   fi
-  LogExecute ../configure \
+  LogExecute ${SRC_DIR}/configure \
     --cross-prefix=${NACL_CROSS_PREFIX}- \
     --arch="${NACL_ARCH}" \
     --target-os=linux \
@@ -32,6 +32,6 @@ ConfigureStep() {
     --enable-libvorbis \
     --disable-demuxer=rtsp \
     --disable-demuxer=image2 \
-    --prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} ${extra_args}
+    --prefix=${PREFIX} \
+    ${extra_args}
 }

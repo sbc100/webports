@@ -11,13 +11,15 @@ through all packages and mirror them on Google Cloud Storage).
 """
 import optparse
 import os
-import urlparse
+import posixpath
 import shlex
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import time
+import urlparse
 
 import sha1check
 
@@ -28,7 +30,9 @@ OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'repository')
 ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
-SENTINELS_ROOT = os.path.join(OUT_DIR, 'sentinels')
+PACKAGES_ROOT = os.path.join(OUT_DIR, 'packages')
+PUBLISH_ROOT = os.path.join(OUT_DIR, 'publish')
+PAYLOAD_DIR = 'payload/'
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 
@@ -57,9 +61,34 @@ def FormatTimeDelta(delta):
   return rtn
 
 
-def Touch(filename):
-  Trace('touch %s' % filename)
-  open(filename, 'w').close()
+def WriteStamp(filename, contents=''):
+  """Write a file with the give filename and contents."""
+  dirname = os.path.dirname(filename)
+  if not os.path.isdir(dirname):
+    os.makedirs(dirname)
+  Trace('stamp: %s' % filename)
+  with open(filename, 'w') as f:
+    f.write(contents)
+
+
+def CheckStamp(filename, contents=None, timestamp=None):
+  """Check that a given stamp file is up-to-date.
+
+  Returns False is the file does not exists or is older
+  that that given comparison file, or does not contain
+  the given contents.
+
+  Return True otherwise.
+  """
+  if not os.path.exists(filename):
+    return False
+
+  if contents is not None:
+    with open(filename) as f:
+      if f.read() != contents:
+        return False
+
+  return True
 
 
 def Log(message):
@@ -91,33 +120,167 @@ def GetDebug():
     return 'release'
 
 
-def GetInstallRoot():
+def GetToolchainRoot(arch=None, libc=None):
+  """Returns the toolchain folder for a given NaCl toolchain."""
   import getos
   platform = getos.GetPlatform()
-  if GetCurrentArch() == 'pnacl':
+  if arch == 'pnacl':
     tc_dir = '%s_pnacl' % platform
-    subdir = 'sdk'
   else:
-    arch = {
+    tc_arch = {
       'arm': 'arm',
       'i686': 'x86',
       'x86_64': 'x86'
-    }[GetCurrentArch()]
-    tc_dir = '%s_%s_%s' % (platform, arch, GetCurrentLibc())
-    subdir = os.path.join('%s-nacl' % GetCurrentArch(), 'usr')
+    }[arch]
+    tc_dir = '%s_%s_%s' % (platform, tc_arch, libc)
+    tc_dir = os.path.join(tc_dir, '%s-nacl' % arch)
 
-  return os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir, subdir)
+  return os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir)
 
 
-def SentinelFile(pkg_basename):
+def GetInstallRoot(arch, libc):
+  """Returns the installation used by naclports within a given toolchain."""
+  tc_root = GetToolchainRoot(arch, libc)
+  return os.path.join(tc_root, 'usr')
+
+
+def GetInstallStampRoot(arch, libc):
+  tc_root = GetInstallRoot(arch, libc)
+  return os.path.join(tc_root, 'var', 'lib', 'npkg')
+
+
+def GetInstallStamp(pkg_basename):
+  root = GetInstallStampRoot(GetCurrentArch(), GetCurrentLibc())
+  return os.path.join(root, pkg_basename)
+
+
+def IsInstalled(pkg_basename):
+  stamp = GetInstallStamp(pkg_basename)
+  return CheckStamp(stamp)
+
+
+def PackageFile(pkg_basename):
   arch = GetCurrentArch()
-  sentinel_dir = os.path.join(SENTINELS_ROOT, arch)
+  pkg_fullname = os.path.join(PACKAGES_ROOT, pkg_basename) + '-' + GetCurrentArch()
   if arch != 'pnacl':
-    sentinel_dir += '_' + GetCurrentLibc()
-  sentinel_dir += '_' + GetDebug()
-  if not os.path.isdir(sentinel_dir):
-    os.makedirs(sentinel_dir)
-  return os.path.join(sentinel_dir, pkg_basename)
+    pkg_fullname += '-' + GetCurrentLibc()
+  if os.environ.get('NACL_DEBUG') == '1':
+    pkg_fullname += '-debug'
+  return pkg_fullname + '.tar.bz2'
+
+
+
+class BinaryPackage(object):
+  def __init__(self, filename):
+    self.filename = filename
+    if not os.path.exists(self.filename):
+      raise Error('package not found: %s'% self.filename)
+    basename, extension = os.path.splitext(os.path.basename(filename))
+    basename = os.path.splitext(basename)[0]
+    if extension != '.bz2':
+      raise Error('invalid file extension: %s' % extension)
+    if '-' not in basename:
+      raise Error('package filename must contain an hyphen: %s' % basename)
+    parts = basename.split('-')
+    if parts[-1] == 'debug':
+      parts = parts[:-1]
+    if parts[-1] in ('newlib', 'glibc'):
+      self.libc = parts[-1]
+      parts = parts[:-1]
+    else:
+      self.libc = 'newlib'
+    self.arch = parts[-1]
+    parts = parts[:-1]
+    self.name = '-'.join(parts)
+
+  def IsInstalled(self):
+    GetInstallStamp(self.name)
+
+  def InstallFile(self, filename, old_root, new_root):
+    oldname = os.path.join(old_root, filename)
+    if os.path.isdir(oldname):
+      return
+
+    if not filename.startswith(PAYLOAD_DIR):
+      return
+
+    newname = filename[len(PAYLOAD_DIR):]
+
+    newname = os.path.join(new_root, newname)
+    dirname = os.path.dirname(newname)
+    if not os.path.isdir(dirname):
+      os.makedirs(dirname)
+    os.rename(oldname, newname)
+
+  def RelocateFile(self, filename, dest):
+    # Only relocate files in the payload.
+    if not filename.startswith(PAYLOAD_DIR):
+      return
+
+    # Only relocate certain file types.
+    filename = filename[len(PAYLOAD_DIR):]
+    modify = False
+
+    # boost build scripts
+    # TODO(sbc): move this to the boost package metadata
+    if filename.startswith('build-1'):
+      modify = True
+    # pkg_config (.pc) files
+    if filename.startswith('lib/pkgconfig'):
+      modify = True
+    # <foo>-config scripts that live in usr/bin
+    if filename.startswith('bin') and filename.endswith('-config'):
+      modify = True
+    # libtool's .la files which can contain absolute paths to
+    # dependencies.
+    if filename.startswith('lib/') and filename.endswith('.la'):
+      modify = True
+    # headers can sometimes also contain absolute paths.
+    if filename.startswith('include/') and filename.endswith('.h'):
+      modify = True
+
+    filename = os.path.join(dest, filename)
+    if os.path.isdir(filename):
+      return
+
+    if modify:
+      with open(filename) as f:
+        data = f.read()
+      with open(filename, 'r+') as f:
+        f.write(data.replace('/naclports-dummydir', dest))
+
+  def Install(self):
+    """Install binary package into toolchain directory."""
+    dest = GetInstallRoot(self.arch, self.libc)
+    dest_tmp = os.path.join(dest, 'install_tmp')
+    if os.path.exists(dest_tmp):
+      shutil.rmtree(dest_tmp)
+
+    Log("Installing '%s' [%s]" % (self.name, self.arch))
+    os.makedirs(dest_tmp)
+
+    try:
+      with tarfile.open(self.filename) as t:
+        names = [posixpath.normpath(name) for name in t.getnames()]
+        if 'pkg_info' not in names:
+          raise Error('package does not contain pkg_info file')
+        for name in names:
+          if name not in ('.', 'pkg_info', 'payload'):
+            if not name.startswith(PAYLOAD_DIR):
+              raise Error('invalid file in package: %s' % name)
+        t.extractall(dest_tmp)
+
+      for name in names:
+        self.InstallFile(name, dest_tmp, dest)
+
+      for name in names:
+        self.RelocateFile(name, dest)
+
+      with open(os.path.join(dest_tmp, 'pkg_info')) as f:
+        pkg_info = f.read()
+      WriteStamp(GetInstallStamp(self.name), pkg_info)
+    finally:
+      shutil.rmtree(dest_tmp)
 
 
 class Package(object):
@@ -205,16 +368,41 @@ class Package(object):
       return
     return os.path.join(ARCHIVE_ROOT, archive)
 
+  def InstallDeps(self, verbose, force):
+    for dep in self.DEPENDS:
+      if not IsInstalled(dep):
+        dep_dir = os.path.join(os.path.dirname(self.root), dep)
+        dep = Package(dep_dir)
+        try:
+          dep.Install(verbose, True, force)
+        except DisabledError as e:
+          Log(str(e))
+
+  def PackageFile(self):
+    return PackageFile(self.basename)
+
+  def IsInstalled(self):
+    return IsInstalled(self.basename)
+
+  def IsBuilt(self):
+    return os.path.exists(self.PackageFile())
+
+  def Install(self, verbose, build_deps, force=None):
+    force_install = force in ('build', 'install', 'all')
+
+    if not force_install and self.IsInstalled():
+      Log("Already installed '%s' [%s]" % (self.basename, GetCurrentArch()))
+      return
+
+    if not self.IsBuilt() or force:
+      self.Build(verbose, build_deps, force)
+
+    BinaryPackage(self.PackageFile()).Install()
+
+
   def Build(self, verbose, build_deps, force=None):
-    if build_deps:
-      for dep in self.DEPENDS:
-        if force == 'all' or not os.path.exists(SentinelFile(dep)):
-          dep_dir = os.path.join(os.path.dirname(self.root), dep)
-          dep = Package(dep_dir)
-          try:
-            dep.Build(verbose, build_deps, force)
-          except DisabledError as e:
-            Log(str(e))
+    if build_deps or force == 'all':
+      self.InstallDeps(verbose, force)
 
     annotate = os.environ.get('NACLPORTS_ANNOTATE') == '1'
     arch = GetCurrentArch()
@@ -228,17 +416,16 @@ class Package(object):
 
     self.CheckEnabled()
 
-    sentinel = SentinelFile(self.basename)
-    if force is None:
-      if os.path.exists(sentinel):
-        Log("Already built '%s' [%s]" % (self.PACKAGE_NAME, arch))
-        return
+    force_build = force in ('build', 'all')
+    if not force_build and self.IsBuilt():
+      Log("Already built '%s' [%s]" % (self.basename, arch))
+      return
 
     log_root = os.path.join(OUT_DIR, 'logs')
     if not os.path.isdir(log_root):
       os.makedirs(log_root)
 
-    stdout = os.path.join(log_root, '%s.log' % self.PACKAGE_NAME)
+    stdout = os.path.join(log_root, '%s.log' % self.basename)
     if os.path.exists(stdout):
       os.remove(stdout)
 
@@ -247,22 +434,15 @@ class Package(object):
         prefix = '*** '
       else:
         prefix = ''
-      Log("%sBuilding '%s' [%s]" % (prefix, self.PACKAGE_NAME, arch))
-
-    # Remove the sentinel file before building. If the build fails and the
-    # sentinel already exists, the next build should not have to be forced.
-    if os.path.exists(sentinel):
-      os.remove(sentinel)
+      Log("%sBuilding '%s' [%s]" % (prefix, self.basename, arch))
 
     start = time.time()
     self.RunBuildSh(verbose, stdout)
 
-    # Build successful, write sentinel
-    Touch(sentinel)
-
     duration = FormatTimeDelta(time.time() - start)
     Log("Build complete '%s' [%s] [took %s]"
-        % (self.PACKAGE_NAME, arch, duration))
+        % (self.basename, arch, duration))
+
 
   def RunBuildSh(self, verbose, stdout, args=None):
     build_port = os.path.join(SCRIPT_DIR, 'build_port.sh')
@@ -273,7 +453,7 @@ class Package(object):
     if verbose:
       rtn = subprocess.call(cmd, cwd=self.root)
       if rtn != 0:
-        raise Error("Building %s: failed." % (self.PACKAGE_NAME))
+        raise Error("Building %s: failed." % (self.basename))
     else:
       with open(stdout, 'a+') as log_file:
         rtn = subprocess.call(cmd,
@@ -283,14 +463,14 @@ class Package(object):
       if rtn != 0:
         with open(stdout) as log_file:
           sys.stdout.write(log_file.read())
-        raise Error("Building '%s' failed." % (self.PACKAGE_NAME))
+        raise Error("Building '%s' failed." % (self.basename))
 
 
   def Verify(self, verbose=False):
     """Download upstream source and verify hash."""
     archive = self.DownloadLocation()
     if not archive:
-      Log("no archive: %s" % self.PACKAGE_NAME)
+      Log("no archive: %s" % self.basename)
       return True
 
     if self.SHA1 is None:
@@ -298,9 +478,6 @@ class Package(object):
       return False
 
     self.Download()
-    olddir = os.getcwd()
-    sha1file = os.path.join(self.root, self.PACKAGE_NAME + '.sha1')
-
     try:
       sha1check.VerifyHash(archive, self.SHA1)
       Log("verified: %s" % archive)
@@ -311,10 +488,10 @@ class Package(object):
     return True
 
   def Clean(self):
-    sentinel = SentinelFile(self.basename)
-    Log('removing %s' % sentinel)
-    if os.path.exists(sentinel):
-      os.remove(sentinel)
+    pkg = self.PackageFile()
+    Log('removing %s' % pkg)
+    if os.path.exists(pkg):
+      os.remove(pkg)
 
     stamp_dir = os.path.join(STAMP_DIR, self.basename)
     Log('removing %s' % stamp_dir)
@@ -360,19 +537,19 @@ class Package(object):
   def CheckEnabled(self):
     if self.LIBC is not None and self.LIBC != GetCurrentLibc():
       raise DisabledError('%s: cannot be built with %s.'
-                          % (self.PACKAGE_NAME, GetCurrentLibc()))
+                          % (self.basename, GetCurrentLibc()))
 
     if self.DISABLED_ARCH is not None:
       arch = GetCurrentArch()
       if arch == self.DISABLED_ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
-                            % (self.PACKAGE_NAME, arch))
+                            % (self.basename, arch))
 
     if self.BUILD_OS is not None:
       import getos
       if getos.GetPlatform() != self.BUILD_OS:
         raise DisabledError('%s: can only be built on %s.'
-                            % (self.PACKAGE_NAME, self.BUILD_OS))
+                            % (self.basename, self.BUILD_OS))
 
   def Download(self, mirror=True):
     filename = self.DownloadLocation()
@@ -413,103 +590,111 @@ def PackageIterator(folders=None):
         yield Package(root)
 
 
+def run_main(args):
+  usage = "Usage: %prog [options] <command> [<package_dir>]"
+  parser = optparse.OptionParser(description=__doc__, usage=usage)
+  parser.add_option('-v', '--verbose', action='store_true',
+                    help='Output extra information.')
+  parser.add_option('--all', action='store_true',
+                    help='Perform action on all known ports.')
+  parser.add_option('-f', '--force', action='store_const', const='build',
+                    dest='force', help='Force building specified targets, '
+                    'even if timestamps would otherwise skip it.')
+  parser.add_option('-F', '--force-all', action='store_const', const='all',
+                    dest='force', help='Force building target and all '
+                    'dependencies, even if timestamps would otherwise skip '
+                    'them.')
+  parser.add_option('--force-install', action='store_const', const='install',
+                    dest='force', help='Force installing of ports')
+  parser.add_option('--no-deps', dest='build_deps', action='store_false',
+                    default=True,
+                    help='Disable automatic building of dependencies.')
+  parser.add_option('--ignore-disabled', action='store_true',
+                    help='Ignore attempts to build disabled packages.\n'
+                    'Normally attempts to build such packages will result\n'
+                    'in an error being returned.')
+  options, args = parser.parse_args(args)
+  if not args:
+    parser.error("You must specify a sub-command. See --help.")
+
+  command = args[0]
+  package_dirs = ['.']
+  if len(args) > 1:
+    if options.all:
+      parser.error('Package name and --all cannot be specified together')
+    package_dirs = args[1:]
+
+  if not NACL_SDK_ROOT:
+    raise Error("$NACL_SDK_ROOT not set")
+
+  verbose = options.verbose or os.environ.get('VERBOSE') == '1'
+  Trace.verbose = verbose
+
+  def DoCmd(package):
+    try:
+      if command == 'download':
+        package.Download()
+      elif command == 'check':
+        # Fact that we've got this far means the pkg_info
+        # is basically valid.  This final check verifies the
+        # dependencies are valid.
+        package_names = [os.path.basename(p.root) for p in PackageIterator()]
+        package.CheckDeps(package_names)
+      elif command == 'enabled':
+        package.CheckEnabled()
+      elif command == 'verify':
+        package.Verify()
+      elif command == 'clean':
+        package.Clean()
+      elif command == 'build':
+        package.Build(verbose, options.build_deps, options.force)
+      elif command == 'install':
+        package.Install(verbose, options.build_deps, options.force)
+      else:
+        parser.error("Unknown subcommand: '%s'\n"
+                     "See --help for available commands." % command)
+    except DisabledError as e:
+      if options.ignore_disabled:
+        Log('naclports: %s' % e)
+      else:
+        raise e
+
+  def rmtree(path):
+    Log('removing %s' % path)
+    if os.path.exists(path):
+      shutil.rmtree(path)
+
+  if options.all:
+    options.ignore_disabled = True
+    if command == 'clean':
+      rmtree(STAMP_DIR)
+      rmtree(BUILD_ROOT)
+      rmtree(PACKAGES_ROOT)
+      rmtree(PUBLISH_ROOT)
+      rmtree(GetInstallStampRoot(GetCurrentArch(), GetCurrentLibc()))
+      if GetCurrentArch() != 'pnacl':
+        # The install root in the PNaCl toolchain is currently shared with
+        # system libraries and headers so we cant' remove it completely
+        # without breaking the toolchain
+        rmtree(GetInstallRoot(GetCurrentArch(), GetCurrentLibc()))
+    else:
+      for p in PackageIterator():
+        if not p.DISABLED:
+          DoCmd(p)
+  else:
+    for package_dir in package_dirs:
+      p = Package(package_dir)
+      DoCmd(p)
+
+
 def main(args):
   try:
-    usage = "Usage: %prog [options] <command> [<package_dir>]"
-    parser = optparse.OptionParser(description=__doc__, usage=usage)
-    parser.add_option('-v', '--verbose', action='store_true',
-                      help='Output extra information.')
-    parser.add_option('--all', action='store_true',
-                      help='Perform action on all known ports.')
-    parser.add_option('-f', '--force', action='store_const', const='target',
-                      dest='force', help='Force building specified targets, '
-                      'even if timestamps would otherwise skip it.')
-    parser.add_option('-F', '--force-all', action='store_const', const='all',
-                      dest='force', help='Force building target and all '
-                      'dependencies, even if timestamps would otherwise skip '
-                      'them.')
-    parser.add_option('--no-deps', dest='build_deps', action='store_false',
-                      default=True,
-                      help='Disable automatic building of dependencies.')
-    parser.add_option('--ignore-disabled', action='store_true',
-                      help='Ignore attempts to build disabled packages.\n'
-                      'Normally attempts to build such packages will result\n'
-                      'in an error being returned.')
-    options, args = parser.parse_args(args)
-    if not args:
-      parser.error("You must specify a sub-command. See --help.")
-
-    command = args[0]
-    package_dirs = ['.']
-    if len(args) > 1:
-      if options.all:
-        parser.error('Package name and --all cannot be specified together')
-      package_dirs = args[1:]
-
-    if not NACL_SDK_ROOT:
-      raise Error("$NACL_SDK_ROOT not set")
-
-    verbose = options.verbose or os.environ.get('VERBOSE') == '1'
-    Trace.verbose = verbose
-
-    def DoCmd(package):
-      try:
-        if command == 'download':
-          package.Download()
-        elif command == 'check':
-          # Fact that we've got this far means the pkg_info
-          # is basically valid.  This final check verifies the
-          # dependencies are valid.
-          package_names = [os.path.basename(p.root) for p in PackageIterator()]
-          package.CheckDeps(package_names)
-        elif command == 'enabled':
-          package.CheckEnabled()
-        elif command == 'verify':
-          package.Verify()
-        elif command == 'clean':
-          package.Clean()
-        elif command == 'build':
-          package.Build(verbose, options.build_deps, options.force)
-        else:
-          parser.error("Unknown subcommand: '%s'\n"
-                       "See --help for available commands." % command)
-      except DisabledError as e:
-        if options.ignore_disabled:
-          Log('naclports: %s' % e)
-        else:
-          raise e
-
-    def rmtree(path):
-      Log('removing %s' % path)
-      if os.path.exists(path):
-        shutil.rmtree(path)
-
-    if options.all:
-      options.ignore_disabled = True
-      if command == 'clean':
-        rmtree(STAMP_DIR)
-        rmtree(SENTINELS_ROOT)
-        rmtree(BUILD_ROOT)
-        if GetCurrentArch() != 'pnacl':
-          # The install root in the PNaCl toolchain is currently shared with
-          # system libraries and headers so we cant' remove it completely
-          # without breaking the toolchain
-          rmtree(GetInstallRoot())
-      else:
-        for p in PackageIterator():
-          if not p.DISABLED:
-            DoCmd(p)
-    else:
-      for package_dir in package_dirs:
-        p = Package(package_dir)
-        DoCmd(p)
-
+    run_main(args)
   except Error as e:
     sys.stderr.write('naclports: %s\n' % e)
     return 1
 
   return 0
-
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))

@@ -9,7 +9,7 @@ BUILD_DIR=${SRC_DIR}
 # puts all the files in regal-SHA1HASH folder
 ExtractStep() {
   ArchiveName
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
+  ChangeDir ${WORK_DIR}
   Remove ${PACKAGE_NAME}
   MakeDir ${PACKAGE_NAME}
   ChangeDir ${PACKAGE_NAME}

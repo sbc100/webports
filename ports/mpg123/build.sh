@@ -31,5 +31,5 @@ BuildStep() {
 
 InstallStep() {
   ChangeDir src/libmpg123
-  LogExecute make install
+  DefaultInstallStep
 }

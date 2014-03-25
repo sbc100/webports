@@ -19,7 +19,7 @@ make clean
 readonly PARTCMD="python build_tools/partition.py"
 readonly PACKAGE_LIST=$(${PARTCMD} -t ${SHARD} -n ${SHARDS})
 for PKG in ${PACKAGE_LIST}; do
-  BuildPackage ${PKG}
+  InstallPackage ${PKG}
 done
 
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"

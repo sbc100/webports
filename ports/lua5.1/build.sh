@@ -19,15 +19,16 @@ fi
 BuildStep() {
   LogExecute make PLAT=${PLAT} clean
   set -x
-  make AR="${NACLAR} rcu" RANLIB="${NACLRANLIB}" CC="${NACLCC}" PLAT=${PLAT} INSTALL_TOP="${NACLPORTS_PREFIX}" -j${OS_JOBS}
+  make AR="${NACLAR} rcu" RANLIB="${NACLRANLIB}" \
+       CC="${NACLCC}" PLAT=${PLAT} INSTALL_TOP="${DESTDIR}" -j${OS_JOBS}
   set +x
 }
 
 
 InstallStep() {
-  # TODO: side-by-side install
-  LogExecute make "CC=${NACLCC}" "PLAT=generic" "INSTALL_TOP=${NACLPORTS_PREFIX}" install
-  cd src
+  LogExecute make "CC=${NACLCC}" "PLAT=generic" \
+                  "INSTALL_TOP=${DESTDIR}/${PREFIX}" install
+  ChangeDir src
   if [ "${NACL_ARCH}" = pnacl ]; then
     # Just do the x86-64 version for now.
     TranslateAndWriteSelLdrScript lua x86-64 lua.x86-64.nexe lua.sh

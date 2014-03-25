@@ -27,6 +27,7 @@ ConfigureStep() {
   else
     export STRIP=${NACLSTRIP}
   fi
+  NACL_CONFIGURE_PATH=./configure
   DefaultConfigureStep
   # Vim's build doesn't support building outside the source tree.
   # Do a clean to make rebuild after failure predictable.
@@ -37,7 +38,7 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/vim"
 
-  INSTALL_TARGETS="DESTDIR=${ASSEMBLY_DIR}/vimtar install"
+  DESTDIR=${ASSEMBLY_DIR}/vimtar
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/vimtar

@@ -11,7 +11,7 @@ else
 fi
 
 RunTest() {
-  util/rgb2gif -s 320 200  < ../tests/porsche.rgb > porsche.gif
+  util/rgb2gif -s 320 200  < ${SRC_DIR}/tests/porsche.rgb > porsche.gif
   # TODO(sbc): do some basic checks on the resulting porsche.gif
 }
 

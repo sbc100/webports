@@ -5,9 +5,7 @@
 
 # Do a verbose build so we're confident it's hitting nacl's tools.
 MAKE_TARGETS="V=1"
-EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix="
 BUILD_DIR=${SRC_DIR}
-NACL_CONFIGURE_PATH=./configure
 export CROSS_COMPILE=1
 
 if [ ${OS_NAME} = "Darwin" ]; then
@@ -47,6 +45,6 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/tar"
 
-  export INSTALL_TARGETS="DESTDIR=${ASSEMBLY_DIR} install"
+  DESTDIR=${ASSEMBLY_DIR}
   DefaultInstallStep
 }

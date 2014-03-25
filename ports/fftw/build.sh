@@ -15,9 +15,9 @@ ConfigureStep() {
     extra="--enable-sse2"
   fi
 
-  LogExecute ../configure \
+  LogExecute ${SRC_DIR}/configure \
     --host=nacl \
-    --prefix=${NACLPORTS_PREFIX} \
+    --prefix=${PREFIX} \
     --enable-threads \
     ${EXTRA_CONFIGURE_ARGS:-} \
     ${extra}
@@ -44,4 +44,6 @@ PackageInstall() {
   RunBuildStep
   RunPostBuildStep
   RunInstallStep
+
+  PackageStep
 }

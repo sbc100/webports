@@ -32,18 +32,12 @@ ConfigureStep() {
   # this requires automake > 1.12 which is not currently shipped in Ubuntu
   #${SRC_DIR}/reautoconf
 
-  (
-    build_host=$(${SRC_DIR}/build-aux/config.guess)
-    EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} --build=${build_host}"
-    export LIBS="-ltar -lppapi_simple -lnacl_io \
-      -lppapi_cpp -lppapi -l${NACL_CPP_LIB}"
-    DefaultConfigureStep
-  )
-}
+  local build_host=$(${SRC_DIR}/build-aux/config.guess)
+  EXTRA_CONFIGURE_ARGS+=" --build=${build_host}"
 
-BuildStep() {
-  ChangeDir ${NACL_BUILD_SUBDIR}
-  (DefaultBuildStep)
+  export LIBS="-ltar -lppapi_simple -lnacl_io \
+    -lppapi_cpp -lppapi -l${NACL_CPP_LIB}"
+  DefaultConfigureStep
 }
 
 InstallStep() {

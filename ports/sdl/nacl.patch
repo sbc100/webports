@@ -59,35 +59,6 @@ index e29dc6d..bb485dd 100644
  uninstall-data:
  	rm -f $(DESTDIR)$(datadir)/aclocal/sdl.m4
  	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl.pc
-diff --git a/build-scripts/config.sub b/build-scripts/config.sub
-index 5ecc18b..7693a2a 100755
---- a/build-scripts/config.sub
-+++ b/build-scripts/config.sub
-@@ -318,6 +318,14 @@ case $basic_machine in
- 	i*86 | x86_64)
- 	  basic_machine=$basic_machine-pc
- 	  ;;
-+	nacl64*)
-+	  basic_machine=x86_64-pc
-+	  os=-nacl
-+	  ;;
-+	nacl*)
-+	  basic_machine=i686-pc
-+	  os=-nacl
-+	  ;;
- 	# Object if more than one company name word.
- 	*-*-*)
- 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
-@@ -1309,6 +1317,9 @@ case $os in
- 			;;
- 		esac
- 		;;
-+	-nacl*)
-+		os=-nacl
-+		;;
- 	-nto-qnx*)
- 		;;
- 	-nto*)
 diff --git a/configure.in b/configure.in
 index a7e9b18..8c91f91 100644
 --- a/configure.in
@@ -1809,39 +1780,3 @@ index 0000000..0a6a0cd
 +};
 +
 +#endif // _SDL_nacl_eventqueue_h
-diff --git a/test/configure.in b/test/configure.in
-index 7c25c17..001a4e9 100644
---- a/test/configure.in
-+++ b/test/configure.in
-@@ -50,6 +50,18 @@ case "$host" in
-             SYS_GL_LIBS="-lOSMesa"
-         fi
- 		;;
-+    *-*-nacl*)
-+        case "$CC" in
-+            *pnacl*)
-+                EXE=".pexe"
-+                ;;
-+            *)
-+                EXE=".nexe"
-+                ;;
-+        esac
-+        MATHLIB="-lm"
-+        SYS_GL_LIBS=""
-+        ;;
-     *)
-         EXE=""
-         MATHLIB="-lm"
-@@ -68,6 +80,12 @@ AM_PATH_SDL($SDL_VERSION,
- CFLAGS="$CFLAGS $SDL_CFLAGS"
- LIBS="$LIBS $SDL_LIBS"
- 
-+case "$host" in
-+    *-*-nacl*)
-+        LIBS="$LIBS -lnacl_io -l${NACL_CPP_LIB}"
-+        ;;
-+esac
-+
- dnl Check for X11 path, needed for OpenGL on some systems
- AC_PATH_X
- if test x$have_x = xyes; then

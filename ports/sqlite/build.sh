@@ -55,6 +55,7 @@ InstallStep() {
 
   pushd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      -L${DESTDIR_LIB} \
       sqlite3_ppapi*${NACL_EXEEXT} \
       -s . \
       -o sqlite.nmf

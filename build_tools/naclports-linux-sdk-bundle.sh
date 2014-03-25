@@ -6,12 +6,14 @@
 # This script builds the packages that will be bundled with the NaCl SDK.
 
 set -o errexit
+set -o nounset
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 source ${SCRIPT_DIR}/bot_common.sh
 
 NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/.. && pwd)"
 OUT_DIR=${NACLPORTS_ROOT}/out
+PACKAGE_DIR=${OUT_DIR}/packages
 
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
 OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
@@ -39,7 +41,6 @@ PACKAGES=$(make sdklibs_list)
 # $3 - 'glibc' or 'newlib'
 # $4 - 'Debug' or 'Release'
 CustomBuildPackage() {
-  export NACLPORTS_PREFIX=${OUT_BUNDLE_DIR}/build/$2_$3_$4
   export NACL_ARCH=$2
 
   if [ "$3" = "glibc" ]; then
@@ -78,10 +79,11 @@ BuildPackageAll() {
   for ARCH in $ARCH_LIST; do
       BuildPackageArchAll $PACKAGE $ARCH
   done
-  echo "naclports Install SUCCEEDED $PACKAGE"
+  echo "naclports Build SUCCEEDED $PACKAGE"
 }
 
 MoveLibs() {
+  local PACKAGE=$1
   for ARCH in $ARCH_LIST; do
     if [ "$ARCH" = "i686" ]; then
       ARCH_DIR=x86_32
@@ -95,13 +97,26 @@ MoveLibs() {
       LIBC_VARIANTS="newlib glibc"
     fi
 
+    TMP_DIR=out/tmp
+
     for LIBC in $LIBC_VARIANTS; do
       for CONFIG in Debug Release; do
+        PKG_FILE=${PACKAGE_DIR}/${PACKAGE}-${ARCH}
+        if [ ${ARCH} != "pnacl" ]; then
+          PKG_FILE+="-${LIBC}"
+        fi
+        if [ ${CONFIG} = "Debug" ]; then
+          PKG_FILE+="-debug"
+        fi
+        PKG_FILE+=".tar.bz2"
+        mkdir ${TMP_DIR}
+        tar xf $PKG_FILE -C ${TMP_DIR}
+
         # Copy build results to destination directories.
-        SRC_DIR=${OUT_BUNDLE_DIR}/build/${ARCH}_${LIBC}_${CONFIG}
 
         # copy includes
         mkdir -p ${OUT_PORTS_DIR}
+        SRC_DIR=${TMP_DIR}/payload
         cp -d -r ${SRC_DIR}/include ${OUT_PORTS_DIR}
 
         # copy libs
@@ -113,7 +128,7 @@ MoveLibs() {
             cp -d -r ${FILE} ${ARCH_LIB_DIR}
           fi
         done
-
+        rm -rf ${TMP_DIR}
       done
     done
   done

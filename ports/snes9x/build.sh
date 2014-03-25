@@ -4,8 +4,8 @@
 # found in the LICENSE file.
 
 PACKAGE_DIR=${PACKAGE_NAME}-src
-SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
+SRC_DIR=${WORK_DIR}/${PACKAGE_DIR}
+BUILD_DIR=${SRC_DIR}/unix
 
 EXECUTABLES=snes9x
 NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
@@ -20,23 +20,16 @@ EXTRA_CONFIGURE_ARGS="\
       --enable-sound"
 export LIBS="${NACLPORTS_LDFLAGS} -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
 
-AutogenStep() {
-  echo "Autogen..."
-  pushd ${SRC_DIR}/unix
+AutoconfStep() {
+  echo "Autoconf..."
   autoconf
   PatchConfigure
   PatchConfigSub
-  popd
 }
 
 ConfigureStep() {
-  AutogenStep
+  AutoconfStep
   DefaultConfigureStep
-
-  # This configure script generates a Makefile that checks timestamps on
-  # configure.ac, configure and Makefile.in. Copy them from the unix directory.
-  LogExecute cp ../unix/{configure.ac,configure,Makefile.in} .
-  touch Makefile
 }
 
 InstallStep(){

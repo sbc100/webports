@@ -22,15 +22,15 @@ BuildStep() {
 InstallStep() {
   # Don't rely on make install, as it implicitly builds executables
   # that need things not available in newlib.
-  LogExecute mkdir -p ${NACLPORTS_PREFIX}/include
-  LogExecute cp -f bzlib.h ${NACLPORTS_PREFIX}/include
-  LogExecute chmod a+r ${NACLPORTS_PREFIX}/include/bzlib.h
+  MakeDir  ${DESTDIR_INCLUDE}
+  MakeDir  ${DESTDIR_LIB}
+  LogExecute cp -f bzlib.h ${DESTDIR_INCLUDE}
+  LogExecute chmod a+r ${DESTDIR_INCLUDE}/bzlib.h
 
-  LogExecute mkdir -p ${NACLPORTS_PREFIX}/lib
-  LogExecute cp -f libbz2.a ${NACLPORTS_PREFIX}/lib
+  LogExecute cp -f libbz2.a ${DESTDIR_LIB}
   if [ -f libbz2.so.1.0 ]; then
     LogExecute ln -s libbz2.so.1.0 libbz2.so
-    LogExecute cp -af libbz2.so* ${NACLPORTS_PREFIX}/lib
+    LogExecute cp -af libbz2.so* ${DESTDIR_LIB}
   fi
-  LogExecute chmod a+r ${NACLPORTS_PREFIX}/lib/libbz2.*
+  LogExecute chmod a+r ${DESTDIR_LIB}/libbz2.*
 }

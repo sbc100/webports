@@ -15,12 +15,9 @@ ConfigureStep() {
 
   export NACLBXLIBS="-lpthread"
 
-  EXE=${NACL_EXEEXT} LogExecute ../configure \
+  EXE=${NACL_EXEEXT} LogExecute ${SRC_DIR}/configure \
     --host=nacl \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --oldincludedir=${NACLPORTS_INCLUDE} \
+    --prefix=${PREFIX} \
     --with-x=no \
     --with-x11=no \
     --with-sdl=yes \
@@ -29,7 +26,7 @@ ConfigureStep() {
 
 ImageExtractStep() {
   Banner "Untaring $1 to $2"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
+  ChangeDir ${WORK_DIR}
   Remove $2
   if [ $OS_SUBDIR = "windows" ]; then
     tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/$1
@@ -48,7 +45,7 @@ BuildStep() {
 InstallStep() {
   ChangeDir ${SRC_DIR}
   mkdir -p img/usr/local/share/bochs/
-  cp -r ${NACL_PACKAGES_REPOSITORY}/${LINUX_IMG_NAME} img/
+  cp -r ${WORK_DIR}/${LINUX_IMG_NAME} img/
   mv img/linux-img/bochsrc old-bochsrc
   cp ${START_DIR}/bochsrc img/linux-img/bochsrc
   cp -r ${SRC_DIR}/bios/VGABIOS-lgpl-latest img/

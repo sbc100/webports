@@ -21,16 +21,18 @@ BuildStep() {
 }
 
 InstallStep() {
-  Remove ${NACLPORTS_INCLUDE}/osg
-  Remove ${NACLPORTS_INCLUDE}/osgUtil
-  Remove ${NACLPORTS_INCLUDE}/OpenThreads
-  cp -R include/osg ${NACLPORTS_INCLUDE}/osg
-  cp -R include/osgUtil ${NACLPORTS_INCLUDE}/osgUtil
-  cp -R include/OpenThreads ${NACLPORTS_INCLUDE}/OpenThreads
-  Remove ${NACLPORTS_LIBDIR}/libosg.a
-  Remove ${NACLPORTS_LIBDIR}/libosgUtil.a
-  Remove ${NACLPORTS_LIBDIR}/libOpenThreads.a
-  install -m 644 ${LIB_OSG} ${NACLPORTS_LIBDIR}/${LIB_OSG}
-  install -m 644 ${LIB_OSGUTIL} ${NACLPORTS_LIBDIR}/${LIB_OSGUTIL}
-  install -m 644 ${LIB_OPENTHREADS} ${NACLPORTS_LIBDIR}/${LIB_OPENTHREADS}
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  Remove ${DESTDIR_INCLUDE}/osg
+  Remove ${DESTDIR_INCLUDE}/osgUtil
+  Remove ${DESTDIR_INCLUDE}/OpenThreads
+  LogExecute cp -R include/osg ${DESTDIR_INCLUDE}/osg
+  LogExecute cp -R include/osgUtil ${DESTDIR_INCLUDE}/osgUtil
+  LogExecute cp -R include/OpenThreads ${DESTDIR_INCLUDE}/OpenThreads
+  Remove ${DESTDIR_LIB}/libosg.a
+  Remove ${DESTDIR_LIB}/libosgUtil.a
+  Remove ${DESTDIR_LIB}/libOpenThreads.a
+  install -m 644 ${LIB_OSG} ${DESTDIR_LIB}/${LIB_OSG}
+  install -m 644 ${LIB_OSGUTIL} ${DESTDIR_LIB}/${LIB_OSGUTIL}
+  install -m 644 ${LIB_OPENTHREADS} ${DESTDIR_LIB}/${LIB_OPENTHREADS}
 }

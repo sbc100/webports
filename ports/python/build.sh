@@ -7,7 +7,7 @@ EXECUTABLES=python${NACL_EXEEXT}
 
 # This build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.
-HOST_BUILD_DIR=${SRC_DIR}/build-nacl-host
+HOST_BUILD_DIR=${WORK_DIR}/build-nacl-host
 
 BuildHostPython() {
   # Seems that python builds to python.exe on mac (!) so they
@@ -24,7 +24,7 @@ BuildHostPython() {
   if [ -f python${EXT} -a -f Parser/pgen ]; then
     return
   fi
-  LogExecute ../configure
+  LogExecute ${SRC_DIR}/configure
   LogExecute make -j${OS_JOBS} python${EXT} Parser/pgen
 }
 
@@ -54,7 +54,7 @@ ConfigureStep() {
 
 BuildStep() {
   export CROSS_COMPILE=true
-  export MAKEFLAGS="PGEN=../build-nacl-host/Parser/pgen"
+  export MAKEFLAGS="PGEN=${WORK_DIR}/build-nacl-host/Parser/pgen"
   SetupCrossEnvironment
   DefaultBuildStep
 }

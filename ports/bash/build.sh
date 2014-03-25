@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 
-EXTRA_CONFIGURE_ARGS="--prefix= --exec-prefix= --with-curses"
+EXTRA_CONFIGURE_ARGS="--with-curses"
 NACLPORTS_CPPFLAGS+=" -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar \
 -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp"
@@ -20,7 +20,8 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/bash"
 
-  INSTALL_TARGETS="DESTDIR=${ASSEMBLY_DIR}/bashtar install"
+  DESTDIR=${ASSEMBLY_DIR}/bashtar
+  MAKEFLAGS="prefix="
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/bashtar

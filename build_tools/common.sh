@@ -20,9 +20,9 @@ set -o errexit
 
 readonly TOOLS_DIR=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
 readonly START_DIR=$PWD
+readonly PACKAGE_NAME_SHORT=$(basename $PWD)
 readonly NACL_SRC=$(dirname ${TOOLS_DIR})
 readonly NACL_PACKAGES=${NACL_SRC}
-readonly NACL_NATIVE_CLIENT_SDK=$(cd ${NACL_SRC} ; pwd)
 NACL_DEBUG=${NACL_DEBUG:-0}
 
 NACL_ENV_IMPORT=1
@@ -45,28 +45,20 @@ else
   readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}
 fi
 
-readonly NACL_TOOLCHAIN_PREFIX=${NACL_TOOLCHAIN_INSTALL}/usr
-
-# NACLPORTS_PREFIX is where the headers, libraries, etc. will be installed
-# Default to the usr folder within the SDK.
-if [ -z "${NACLPORTS_PREFIX:-}" ]; then
-  readonly DEFAULT_PREFIX=1
-  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_PREFIX}
-fi
-
+readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_INSTALL}/usr
 readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
 readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
-readonly NACLPORTS_PREFIX_BIN=${NACLPORTS_PREFIX}/bin
+readonly NACLPORTS_BIN=${NACLPORTS_PREFIX}/bin
+
+# The prefix used when configuring packages.  Since we want to build re-usable
+# re-locatable binary packages, we use a dummy value here and then modify
+# at install time certain parts of package (e.g. pkgconfig .pc files) that
+# embed this this information.
+readonly PREFIX=/naclports-dummydir
 
 NACLPORTS_CFLAGS=""
 NACLPORTS_CXXFLAGS=""
 NACLPORTS_CPPFLAGS="${NACL_CPPFLAGS}"
-
-if [ "${DEFAULT_PREFIX:-}" != "1" ]; then
-  # If the PREFIX is the default one then there is not need to add
-  # the include path explcitily.
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}"
-fi
 
 # For the library path we always explicly add to the link flags
 # otherwise 'libtool' won't find the libraries correctly.  This
@@ -121,26 +113,33 @@ fi
 # you should use this instead of -lcli_main.
 export NACL_CLI_MAIN_LIB="-Wl,--undefined=PSUserCreateInstance -lcli_main"
 
-# packages subdirectories
+# output directories
 readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
-REPOSITORY=${NACL_PACKAGES_OUT}/repository
-NACL_BUILD_SUBDIR=build-nacl-${NACL_ARCH}
-
-if [ ${NACL_ARCH} != "pnacl" ]; then
-  NACL_BUILD_SUBDIR+=-${NACL_LIBC}
-fi
-
-if [ ${NACL_DEBUG} = "1" ]; then
-  NACL_BUILD_SUBDIR+=-debug
-fi
-
-# Don't support building with SDKs older than the current stable release
-MIN_SDK_VERSION=${MIN_SDK_VERSION:-31}
-
-readonly NACL_PACKAGES_REPOSITORY=${REPOSITORY}
+readonly NACL_PACKAGES_ROOT=${NACL_PACKAGES_OUT}/packages
+readonly NACL_PACKAGES_BUILD=${NACL_PACKAGES_OUT}/build
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish
 readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 readonly NACL_PACKAGES_STAMPDIR=${NACL_PACKAGES_OUT}/stamp
+
+NACL_BUILD_SUBDIR=build
+NACL_INSTALL_SUBDIR=install
+
+PACKAGE_SUFFIX="-${NACL_ARCH}"
+
+if [ ${NACL_ARCH} != "pnacl" ]; then
+  PACKAGE_SUFFIX+=-${NACL_LIBC}
+fi
+
+if [ ${NACL_DEBUG} = "1" ]; then
+  PACKAGE_SUFFIX+=-debug
+fi
+
+NACL_BUILD_SUBDIR+=${PACKAGE_SUFFIX}
+NACL_INSTALL_SUBDIR+=${PACKAGE_SUFFIX}
+PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${PACKAGE_NAME_SHORT}${PACKAGE_SUFFIX}.tar.bz2
+
+# Don't support building with SDKs older than the current stable release
+MIN_SDK_VERSION=${MIN_SDK_VERSION:-31}
 
 if [ $OS_NAME = "Darwin" ]; then
   OS_JOBS=4
@@ -195,10 +194,21 @@ fi
 # the PACKAGE_NAME.  Packages with non-standard contents can override
 # this before including common.sh
 PACKAGE_DIR=${PACKAGE_DIR:-${PACKAGE_NAME:-}}
-SRC_DIR=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}
-DEFAULT_BUILD_DIR=${SRC_DIR}/${NACL_BUILD_SUBDIR}
+WORK_DIR=${NACL_PACKAGES_BUILD}/${PACKAGE_NAME_SHORT}
+SRC_DIR=${WORK_DIR}/${PACKAGE_DIR}
+DEFAULT_BUILD_DIR=${WORK_DIR}/${NACL_BUILD_SUBDIR}
 BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
+INSTALL_DIR=${WORK_DIR}/${NACL_INSTALL_SUBDIR}
 
+# DESTDIR is where the headers, libraries, etc. will be installed
+# Default to the usr folder within the SDK.
+if [ -z "${DESTDIR:-}" ]; then
+  readonly DEFAULT_DESTDIR=1
+  DESTDIR=${INSTALL_DIR}
+fi
+
+DESTDIR_LIB=${DESTDIR}/${PREFIX}/lib
+DESTDIR_INCLUDE=${DESTDIR}/${PREFIX}/include
 
 PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
 if [ "${NACL_ARCH}" = "pnacl" ]; then
@@ -276,8 +286,8 @@ InjectSystemHeaders() {
     return
   fi
 
-  MakeDir ${NACL_TOOLCHAIN_PREFIX}/include
-  LogExecute cp -r ${TC_INCLUDES}/* ${NACL_TOOLCHAIN_PREFIX}/include
+  MakeDir ${NACLPORTS_INCLUDE}
+  LogExecute cp -r ${TC_INCLUDES}/* ${NACLPORTS_INCLUDE}
 }
 
 
@@ -292,8 +302,9 @@ PatchSpecFile() {
   # SPECS_FILE is where nacl-gcc 'specs' file will be installed
   local SPECS_FILE=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3/specs
 
-  # NACL_SDK_MULITARCH_USR is a version of NACLPORTS_PREFIX that gets passed into
-  # the gcc specs file.  It has a gcc spec-file conditional for ${NACL_ARCH}
+  # NACL_SDK_MULITARCH_USR is a version of NACL_TOOLCHAIN_ROOT that gets passed
+  # into the gcc specs file.  It has a gcc spec-file conditional for
+  # ${NACL_ARCH}
   local NACL_SDK_MULTIARCH_USR=${NACL_TOOLCHAIN_ROOT}/\%\(nacl_arch\)/usr
   local NACL_SDK_MULTIARCH_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR}/include
   local NACL_SDK_MULTIARCH_USR_LIB=${NACL_SDK_MULTIARCH_USR}/lib
@@ -432,8 +443,6 @@ Fetch() {
 
 Check() {
   # verify sha1 checksum for tarball
-  local IN_FILE=${START_DIR}/${PACKAGE_NAME}.sha1
-
   if echo "${SHA1} *${ARCHIVE_NAME}" | ${SHA1CHECK}; then
     return 0
   else
@@ -536,13 +545,11 @@ MakeDir() {
 
 
 DefaultPreInstallStep() {
-  cd ${NACL_NATIVE_CLIENT_SDK}/..
-  MakeDir ${NACLPORTS_PREFIX}
-  MakeDir ${NACLPORTS_INCLUDE}
-  MakeDir ${NACLPORTS_LIBDIR}
-  MakeDir ${NACL_PACKAGES_REPOSITORY}
+  MakeDir ${NACL_PACKAGES_ROOT}
+  MakeDir ${NACL_PACKAGES_BUILD}
   MakeDir ${NACL_PACKAGES_TARBALLS}
   MakeDir ${NACL_PACKAGES_PUBLISH}
+  MakeDir ${WORK_DIR}
 }
 
 
@@ -720,13 +727,20 @@ SetupCrossEnvironment() {
   export READELF=${NACLREADELF}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export FREETYPE_CONFIG=${NACLPORTS_PREFIX_BIN}/freetype-config
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export AR_FLAGS=cr
-  export PATH=${NACL_BIN_PATH}:${NACLPORTS_PREFIX_BIN}:${PATH}
+
+  export SDL_CONFIG=${NACLPORTS_BIN}/sdl-config
+  export FREETYPE_CONFIG=${NACLPORTS_BIN}/freetype-config
+  export PATH=${NACL_BIN_PATH}:${NACLPORTS_BIN}:${PATH}
+
+  echo "CPPFLAGS=${CPPFLAGS}"
+  echo "CFLAGS=${CFLAGS}"
+  echo "CXXFLAGS=${CXXFLAGS}"
+  echo "LDFLAGS=${LDFLAGS}"
 }
 
 
@@ -759,7 +773,9 @@ DefaultExtractStep() {
   # make sure the patch step is applied
   rm -f ${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch
   local EXTENSION="${ARCHIVE_NAME##*.}"
-  ChangeDir $(dirname ${SRC_DIR})
+  PARENT_DIR=$(dirname ${SRC_DIR})
+  MakeDir ${PARENT_DIR}
+  ChangeDir ${PARENT_DIR}
   if [ ${EXTENSION} = "zip" ]; then
     unzip ${ARCHIVE}
   else
@@ -854,16 +870,9 @@ ConfigureStep_Autotools() {
     return
   fi
 
-  echo "CPPFLAGS=${CPPFLAGS}"
-  echo "CFLAGS=${CFLAGS}"
-  echo "CXXFLAGS=${CXXFLAGS}"
-  echo "LDFLAGS=${LDFLAGS}"
   LogExecute ${CONFIGURE} \
     --host=${conf_host} \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --oldincludedir=${NACLPORTS_INCLUDE} \
+    --prefix=${PREFIX} \
     --with-http=no \
     --with-html=no \
     --with-ftp=no \
@@ -886,14 +895,15 @@ ConfigureStep_CMake() {
     EXTRA_CMAKE_ARGS+=" -DEXTRA_INCLUDE=${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
-  CC="${NACLCC}" CXX="${NACLCXX}" LogExecute cmake ..\
+  CC="${NACLCC}" CXX="${NACLCXX}" LogExecute cmake ${SRC_DIR} \
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
            -DNACLAR=${NACLAR} \
            -DNACLLD=${NACLLD} \
            -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
            -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
            -DNACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT} \
-           -DCMAKE_INSTALL_PREFIX=${NACLPORTS_PREFIX} \
+           -DCMAKE_PREFIX_PATH=${NACLPORTS_PREFIX} \
+           -DCMAKE_INSTALL_PREFIX=${PREFIX} \
            -DCMAKE_BUILD_TYPE=RELEASE ${EXTRA_CMAKE_ARGS:-}
 }
 
@@ -924,7 +934,7 @@ DefaultInstallStep() {
     export MAKEFLAGS
   fi
   export PATH=${NACL_BIN_PATH}:${PATH}
-  LogExecute make ${INSTALL_TARGETS:-install}
+  LogExecute make ${INSTALL_TARGETS:-install} DESTDIR=${DESTDIR}
 }
 
 
@@ -1179,6 +1189,17 @@ TranslatePexe() {
 }
 
 
+PackageStep() {
+  Banner "Packaging $(basename ${PACKAGE_FILE})"
+  Remove ${PACKAGE_FILE}
+  if [ -d ${DESTDIR}${PREFIX} ]; then
+    mv ${DESTDIR}${PREFIX} ${DESTDIR}/payload
+  fi
+  LogExecute cp ${START_DIR}/pkg_info ${DESTDIR}
+  LogExecute tar cf ${PACKAGE_FILE} -C ${DESTDIR} .
+}
+
+
 DefaultPackageInstall() {
   RunPreInstallStep
   if IsGitRepo; then
@@ -1193,6 +1214,7 @@ DefaultPackageInstall() {
   RunPostBuildStep
   RunTestStep
   RunInstallStep
+  PackageStep
 }
 
 
@@ -1263,7 +1285,12 @@ RunTestStep()       {
   fi
   RunStep TestStep "Testing" ${BUILD_DIR}
 }
-RunInstallStep()    { RunStep InstallStep "Installing" ${BUILD_DIR}; }
+
+RunInstallStep()    {
+  Remove ${DESTDIR}
+  MakeDir ${DESTDIR}
+  RunStep InstallStep "Installing" ${BUILD_DIR};
+}
 
 ######################################################################
 # Always run

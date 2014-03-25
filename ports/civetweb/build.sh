@@ -42,9 +42,11 @@ PublishStep() {
 }
 
 InstallStep() {
-  LogExecute cp libcivetweb.a $NACL_TOOLCHAIN_PREFIX/lib
-  MakeDir $NACL_TOOLCHAIN_PREFIX/include/civetweb
-  LogExecute cp include/civetweb.h $NACL_TOOLCHAIN_PREFIX/include/civetweb
-  LogExecute cp include/CivetServer.h $NACL_TOOLCHAIN_PREFIX/include/civetweb
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  LogExecute cp libcivetweb.a ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}/civetweb
+  LogExecute cp include/civetweb.h ${DESTDIR_INCLUDE}/civetweb
+  LogExecute cp include/CivetServer.h ${DESTDIR_INCLUDE}/civetweb
   PublishStep
 }

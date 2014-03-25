@@ -13,14 +13,10 @@ fi
 
 ConfigureStep() {
   SetupCrossEnvironment
-
   export LIBS="-lvorbisfile -lvorbis -logg -lm"
-  ../configure \
+  ${SRC_DIR}/configure \
     --host=nacl \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --oldincludedir=${NACLPORTS_INCLUDE} \
+    --prefix=${PREFIX} \
     --${NACL_OPTION}-mmx \
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \

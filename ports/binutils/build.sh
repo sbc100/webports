@@ -11,6 +11,11 @@ EXTRA_CONFIGURE_ARGS="\
   --enable-deterministic-archives \
   --without-zlib"
 
+BuildStep() {
+  export CONFIG_SITE
+  DefaultBuildStep
+}
+
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
   for nexe in binutils/*.nexe gas/*.nexe ld/*.nexe; do

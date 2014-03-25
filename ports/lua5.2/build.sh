@@ -39,6 +39,6 @@ TestStep() {
 
 
 InstallStep() {
-  # TODO: side-by-side install
-  LogExecute make PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} "INSTALL_TOP=${NACLPORTS_PREFIX}" install
+  LogExecute make PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} \
+                  INSTALL_TOP=${DESTDIR}/${PREFIX} install
 }

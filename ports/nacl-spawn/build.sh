@@ -28,9 +28,10 @@ BuildStep() {
 }
 
 InstallStep() {
-  cp libnacl_spawn.a ${NACLPORTS_LIBDIR}
+  MakeDir ${DESTDIR_LIB}
+  LogExecute cp libnacl_spawn.a ${DESTDIR_LIB}
   if [[ "${NACL_GLIBC}" != "0" ]]; then
-    cp libnacl_spawn.so ${NACLPORTS_LIBDIR}
+    LogExecute cp libnacl_spawn.so ${DESTDIR_LIB}
   fi
-  cp libcli_main.a ${NACLPORTS_LIBDIR}
+  LogExecute cp libcli_main.a ${DESTDIR_LIB}
 }

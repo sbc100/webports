@@ -11,7 +11,8 @@ BusyBoxDisable() {
 ConfigureStep() {
   SetupCrossEnvironment
 
-  LogExecute make KBUILD_SRC=.. -f ../Makefile defconfig BUILD_LIBBUSYBOX=y
+  LogExecute make -f ${SRC_DIR}/Makefile defconfig BUILD_LIBBUSYBOX=y \
+    KBUILD_SRC=${SRC_DIR}
 
   BusyBoxDisable CONFIG_ACPID
   BusyBoxDisable CONFIG_BLOCKDEV

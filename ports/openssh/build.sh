@@ -5,7 +5,11 @@
 
 EXECUTABLES="scp${NACL_EXEEXT} ssh${NACL_EXEEXT} \
              ssh-add${NACL_EXEEXT} sshd${NACL_EXEEXT}"
-INSTALL_TARGETS="install-nokeys DESTDIR=${NACLPORTS_PREFIX}"
+INSTALL_TARGETS="install-nokeys"
+
+# Add --with-privsep-path otherwise openssh creates /var/empty
+# in the root of DESTDIR.
+EXTRA_CONFIGURE_ARGS="--with-privsep-path=${PREFIX}/var/empty"
 
 # Force configure to recognise the existence of truncate
 # and sigaction.  Normally it will detect that both this functions
@@ -19,32 +23,6 @@ if [ "${NACL_GLIBC}" != 1 ]; then
   export LIBS=" -lcrypto -lglibc-compat"
   export LD="${NACLCXX}"
 fi
-
-ConfigureStep() {
-  # This function differs from the DefaultConfigureStep in that
-  # it does not configure openssh with a --prefix.  Instead it
-  # defaults to /usr and then passed DESTDIR= at make install
-  # time.  Without this make install will fail as it tries
-  # to write to DESTDIR/etc directly (without the prefix).
-
-  SetupCrossEnvironment
-
-  local conf_host=${NACL_CROSS_PREFIX}
-  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
-    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
-    # does not know about "pnacl".  It only knows about "le32-nacl".
-    # Unfortunately, most of the config.subs here are so old that
-    # it doesn't know about that "le32" either.  So we just say "nacl".
-    conf_host="nacl"
-  fi
-
-  LogExecute ../configure \
-    --host=${conf_host} \
-    --${NACL_OPTION}-mmx \
-    --${NACL_OPTION}-sse \
-    --${NACL_OPTION}-sse2 \
-    --${NACL_OPTION}-asm
-}
 
 InstallStep() {
   DefaultInstallStep

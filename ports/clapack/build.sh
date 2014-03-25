@@ -19,8 +19,9 @@ ConfigureStep() {
 
   MakeDir ${BUILD_DIR}
   ChangeDir ${BUILD_DIR}
-  LogExecute cp ${UPDATE} -R ../BLAS ../F2CLIBS ../INSTALL ../TESTING ../INCLUDE ../SRC ./
-  LogExecute cp ${UPDATE} ../Makefile ../make.inc ./
+  LogExecute cp ${UPDATE} -R ${SRC_DIR}/BLAS ${SRC_DIR}/F2CLIBS \
+    ${SRC_DIR}/INSTALL ${SRC_DIR}/TESTING ${SRC_DIR}/INCLUDE ${SRC_DIR}/SRC ./
+  LogExecute cp ${UPDATE} ${SRC_DIR}/Makefile ${SRC_DIR}/make.inc ./
 
   # make does not create it, but build relays on it being there
   LogExecute install -d SRC/VARIANTS/LIB

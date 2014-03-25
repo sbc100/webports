@@ -25,7 +25,7 @@ ConfigureStep() {
     extra_args+=" --extra-libs=-lglibc-compat"
   fi
 
-  LogExecute ../configure \
+  LogExecute ${SRC_DIR}/configure \
     --cross-prefix=${NACL_CROSS_PREFIX}- \
     --target-os=linux \
     --enable-gpl \
@@ -47,7 +47,6 @@ ConfigureStep() {
     --disable-ffserver \
     --disable-demuxer=rtsp \
     --disable-demuxer=image2 \
-    --prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
+    --prefix=${PREFIX} \
     ${extra_args}
 }

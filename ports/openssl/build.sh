@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
+INSTALL_TARGETS="install INSTALL_PREFIX=${DESTDIR}"
 
 ConfigureStep() {
   local machine="i686"
@@ -19,8 +20,7 @@ ConfigureStep() {
 
   MACHINE=${machine} CC=${NACLCC} AR=${NACLAR} RANLIB=${NACLRANLIB} \
     LogExecute ./config \
-    --prefix=${NACLPORTS_PREFIX} no-asm no-hw no-krb5 ${EXTRA_ARGS} \
-    -D_GNU_SOURCE
+    --prefix=${PREFIX} no-asm no-hw no-krb5 ${EXTRA_ARGS} -D_GNU_SOURCE
 
   HackStepForNewlib
 }
@@ -58,8 +58,8 @@ InstallStep() {
   # not writable.  This causes issues when create_nmf copies the libraries
   # and then tries to overwrite them later.
   if [ "${NACL_GLIBC}" = "1" ] ; then
-    LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libssl.so.*
-    LogExecute chmod 644 ${NACLPORTS_PREFIX}/lib/libcrypto.so.*
+    LogExecute chmod 644 ${DESTDIR_LIB}/libssl.so.*
+    LogExecute chmod 644 ${DESTDIR_LIB}/libcrypto.so.*
   fi
 }
 

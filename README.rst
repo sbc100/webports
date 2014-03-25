@@ -12,10 +12,10 @@ three main file:
 - build.sh: a bash script for building it
 - nacl.patch: an optional patch file.
 
-The tools for building packages live in ``build_tools``.  To build a package
-run ``naclports.py build <package_dir>``.  The build script will download,
-patch, build and install the application or library.  By default it will also
-first build any dependencies that that the package has.
+The tools for building packages live in ``build_tools``.  To build and install
+a package into the toolchain run ``naclports.py install <package_dir>``.  This
+script will download, patch, build and install the application or library.  By
+default it will first build any dependencies that that the package has.
 
 The build scripts require that certain tools are present in the host system.
 You will need at least these:
@@ -70,6 +70,17 @@ licenses before using these packages in your projects.
 **Note to Windows users**: These scripts are written in bash and must be
 launched from a Cygwin shell. While many of the scripts should work under
 Cygwin naclports is only tested on Linux and Mac so YMMV.
+
+
+Binary Packages
+---------------
+
+Binary packages for naclports, which will allow packages to be installed
+without having to build from source, are currently being worked on.
+Currently a binary archive is built for each package as part of the standard
+package build process.  The packages live in the ``out/packages`` directory.
+In the future we hope to allow packages to be downloaded and installed from
+external archives, such as the continuous builders.
 
 
 Running the examples
@@ -140,7 +151,7 @@ Modifying package sources / Working with patches
 ------------------------------------------------
 
 When a package is first built, its source is downloaded and extracted to
-``out/repository/<PKG_NAME>``. A new git repository is then created in this
+``out/build/<PKG_NAME>``. A new git repository is then created in this
 folder with the original archive contents on a branch called ``upstream``. The
 optional ``nacl.patch`` file is then applied on the ``master`` branch. This
 means that at any given time you can see the changes from upstream using ``git
@@ -148,7 +159,7 @@ diff upstream``.
 
 To make changes to a package's patch file the recommended workflow is:
 
-1. Directly modify the sources in ``out/repository/PKG_NAME``.
+1. Directly modify the sources in ``out/build/PKG_NAME``.
 2. Build the package and verify the changes.
 3. Use ``git diff upstream.. > ../path/to/nacl.patch`` to regenerate
    the patch file.
@@ -156,5 +167,6 @@ To make changes to a package's patch file the recommended workflow is:
 Whenever the upstream archive or patch file changes and you try to build the
 package you will be prompted to remove the existing repository and start a new
 one. This is to avoid deleting a repository that might have unsaved changed.
+
 
 Happy porting!

@@ -11,12 +11,12 @@ EXECUTABLES="ruby${NACL_EXEEXT} pepper-ruby${NACL_EXEEXT}"
 ConfigureStep() {
   # We need to build a host version of ruby for use during the nacl
   # build.
-  HOST_BUILD=${NACL_PACKAGES_REPOSITORY}/${PACKAGE_DIR}/build-nacl-host
+  HOST_BUILD=${SRC_DIR}/build-nacl-host
   if [ ! -x ${HOST_BUILD}/inst/bin/ruby ]; then
     Banner "Building ruby for host"
     MakeDir ${HOST_BUILD}
     ChangeDir ${HOST_BUILD}
-    CFLAGS="" LDFLAGS="" LogExecute ../configure --prefix=$PWD/inst
+    CFLAGS="" LDFLAGS="" LogExecute ${SRC_DIR}/configure --prefix=$PWD/inst
     LogExecute make -j${OS_JOBS} miniruby
     LogExecute make -j${OS_JOBS} install-nodoc
     cd -
@@ -43,10 +43,9 @@ ConfigureStep() {
     conf_host="nacl"
   fi
 
-  LogExecute ../configure \
+  LogExecute ${SRC_DIR}/configure \
     --host=${conf_host} \
-    --prefix=/usr \
-    --oldincludedir=${NACLPORTS_INCLUDE} \
+    --prefix=${PREFIX} \
     --with-baseruby=$SRC_DIR/build-nacl-host/inst/bin/ruby \
     --with-http=no \
     --with-html=no \
@@ -55,7 +54,7 @@ ConfigureStep() {
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \
     --${NACL_OPTION}-asm \
-    --with-x=no  \
+    --with-x=no \
     ${EXTRA_CONFIGURE_ARGS}
 }
 

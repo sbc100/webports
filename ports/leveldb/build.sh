@@ -43,8 +43,10 @@ BuildStep() {
 }
 
 InstallStep() {
-  LogExecute cp libleveldb.a ${NACLPORTS_LIBDIR}
-  LogExecute cp -r include/leveldb ${NACLPORTS_LIBDIR}
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  LogExecute cp libleveldb.a ${DESTDIR_LIB}
+  LogExecute cp -r include/leveldb ${DESTDIR_INCLUDE}
 }
 
 TestStep() {

@@ -34,6 +34,14 @@ RunCmd() {
 }
 
 BuildPackage() {
+  if RunCmd build_tools/naclports.py build ports/$1 -v --ignore-disabled ; then
+    BuildSuccess $1
+  else
+    BuildFailure $1
+  fi
+}
+
+InstallPackage() {
   export BUILD_FLAGS="-v --ignore-disabled"
   if RunCmd make $1 ; then
     BuildSuccess $1

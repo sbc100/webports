@@ -16,14 +16,12 @@ ConfigureStep() {
   fi
 
   LogExecute ./configure \
+    --host=${conf_host} \
+    --prefix=${PREFIX} \
     --cross-prefix=${NACL_CROSS_PREFIX} \
     --disable-asm \
     --disable-pthread \
-    --prefix=${NACLPORTS_PREFIX} \
-    --exec-prefix=${NACLPORTS_PREFIX} \
-    --libdir=${NACLPORTS_LIBDIR} \
-    --extra-ldflags="-lm" \
-    --host=${conf_host}
+    --extra-ldflags="-lm"
 
   make clean
 }

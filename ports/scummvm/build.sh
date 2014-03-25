@@ -34,7 +34,8 @@ ConfigureStep() {
 
   # NOTE: disabled mt32emu because it using inline assembly that won't
   #     validate.
-  ../configure \
+  ${SRC_DIR}/configure \
+    --prefix=${PREFIX} \
     --host=${conf_host} \
     --libdir=${NACLPORTS_LIBDIR} \
     --disable-flac \
@@ -69,7 +70,7 @@ InstallStep() {
   #Beneath a Steel Sky (Floppy version)
   BASS_DIR=bass/usr/local/share/scummvm/${BASS_FLOPPY_NAME}
   mkdir -p ${BASS_DIR}
-  cp -r ${NACL_PACKAGES_REPOSITORY}/${BASS_FLOPPY_NAME}/* ${BASS_DIR}
+  cp -r ${WORK_DIR}/${BASS_FLOPPY_NAME}/* ${BASS_DIR}
   cd bass
   tar cf ../bass.tar ./
   cd ..
@@ -77,7 +78,7 @@ InstallStep() {
   #Lure of the temptress
   LURE_DIR=lure/usr/local/share/scummvm
   mkdir -p ${LURE_DIR}
-  cp -r ${NACL_PACKAGES_REPOSITORY}/${LURE_NAME}/* ${LURE_DIR}
+  cp -r ${WORK_DIR}/${LURE_NAME}/* ${LURE_DIR}
   cd lure
   tar cf ../lure.tar ./
   cd ..
@@ -91,10 +92,10 @@ InstallStep() {
   cp ${START_DIR}/packaged_app/* ${ASSEMBLY_DIR}
   cp ${SRC_DIR}/*.tar ${ASSEMBLY_DIR}
   if [ "${NACL_DEBUG}" = "1" ]; then
-    cp ${SRC_DIR}/${NACL_BUILD_SUBDIR}/scummvm \
+    cp ${BUILD_DIR}/scummvm \
         ${ASSEMBLY_DIR}/scummvm_${NACL_ARCH}${NACL_EXEEXT}
   else
-    ${NACLSTRIP} ${SRC_DIR}/${NACL_BUILD_SUBDIR}/scummvm \
+    ${NACLSTRIP} ${BUILD_DIR}/scummvm \
         -o ${ASSEMBLY_DIR}/scummvm_${NACL_ARCH}${NACL_EXEEXT}
   fi
 
@@ -134,7 +135,7 @@ DownloadZipStep() {
 
 ExtractGameZipStep() {
   Banner "Unzipping ${PACKAGE_NAME}.zip"
-  ChangeDir ${NACL_PACKAGES_REPOSITORY}
+  ChangeDir ${WORK_DIR}
   Remove ${PACKAGE_DIR}
   unzip -d ${PACKAGE_DIR} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
 }

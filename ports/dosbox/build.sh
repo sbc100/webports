@@ -30,20 +30,17 @@ ConfigureStep() {
   fi
 
   CONFIG_FLAGS="--host=${conf_host} \
-      --prefix=${NACLPORTS_PREFIX} \
-      --exec-prefix=${NACLPORTS_PREFIX} \
-      --libdir=${NACLPORTS_LIBDIR} \
-      --oldincludedir=${NACLPORTS_INCLUDE} \
-      --with-sdl-prefix=${NACLPORTS_PREFIX} \
+      --prefix=${PREFIX} \
+      --with-sdl-prefix=${NACL_TOOLCHAIN_ROOT} \
       --disable-shared \
-      --with-sdl-exec-prefix=${NACLPORTS_PREFIX}"
+      --with-sdl-exec-prefix=${NACL_TOOLCHAIN_ROOT}"
 
   # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
   # would fail due to multiple definitions of main and missing pp::CreateModule.
   # So we patch auto-generated Makefile after running configure.
   export PPAPI_LIBS=""
   export LIBS="-lnacl_io"
-  LogExecute ../configure ${CONFIG_FLAGS}
+  LogExecute ${SRC_DIR}/configure ${CONFIG_FLAGS}
 
   SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1|"
   SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${NACLPORTS_LDFLAGS}|"

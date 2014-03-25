@@ -21,6 +21,8 @@ BuildStep() {
 
 
 InstallStep() {
-  LogExecute cp libjsoncpp.a ${NACLPORTS_LIBDIR}
-  LogExecute cp -R include/json ${NACLPORTS_INCLUDE}
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  LogExecute cp libjsoncpp.a ${DESTDIR_LIB}
+  LogExecute cp -R include/json ${DESTDIR_INCLUDE}
 }

@@ -40,14 +40,11 @@ ConfigureStep() {
   SetupCrossEnvironment
 
   cp ${START_DIR}/gdb_pepper.c ${SRC_DIR}/gdb
-  echo "CPPFLAGS=${CPPFLAGS}"
-  echo "CFLAGS=${CFLAGS}"
-  LogExecute ../configure --with-curses --with-expat --with-system-readline \
+  LogExecute ${SRC_DIR}/configure --with-curses --with-expat \
+      --with-system-readline \
       --disable-libmcheck \
-      --prefix=${NACLPORTS_PREFIX} \
-      --exec-prefix=${NACLPORTS_PREFIX} \
-      --host=${NACL_CROSS_PREFIX} \
-      --libdir=${NACLPORTS_LIBDIR}
+      --prefix=${PREFIX} \
+      --host=${NACL_CROSS_PREFIX}
 
   # If the .info files don't exist, "make all" will try to recreate it with the
   # "makeinfo" tool, which isn't normally installed.
