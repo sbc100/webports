@@ -69,6 +69,11 @@ class Error(Exception):
   pass
 
 
+def Trace(msg):
+  if verbose:
+    sys.stderr.write(msg + '\n')
+
+
 def GetBuildOrder(projects):
   rtn = []
   packages = [naclports.Package(os.path.join('ports', p)) for p in projects]
@@ -89,18 +94,15 @@ def DownloadDataFromBuilder(builder, build):
   for _ in xrange(max_tries):
     url = 'http://build.chromium.org/p/client.nacl.ports/json'
     url += '/builders/%s/builds/%d' % (builder, build)
-    if verbose:
-      sys.stdout.write('Downloading %s\n' % url)
+    Trace('Downloading %s' % url)
     f = urllib2.urlopen(url)
     try:
       data = json.loads(f.read())
       text = data['text']
       if text == ['build', 'successful']:
-        if verbose:
-          sys.stdout.write('  Success!\n')
+        Trace('  Success!')
         return data
-      if verbose:
-        sys.stdout.write('  Not successful, trying previous build.\n')
+      Trace('  Not successful, trying previous build.')
     finally:
       f.close()
     build -= 1
@@ -232,7 +234,9 @@ def LoadCanned(parts):
     return [[]]
   partitions = []
   partition = []
-  with open(os.path.join(SCRIPT_DIR, 'partition%d.txt' % parts)) as fh:
+  input_file = os.path.join(SCRIPT_DIR, 'partition%d.txt' % parts)
+  Trace("LoadCanned: %s" % input_file)
+  with open(input_file) as fh:
     for line in fh:
       if line.startswith('  '):
         partition.append(line[2:].strip())
@@ -294,6 +298,7 @@ def PrintCanned(index, parts):
   assert index >= 0 and index < parts, [index, parts]
   partitions = LoadCanned(parts)
   partitions = FixupCanned(partitions)
+  Trace("Found %d packages for shard %d" % (len(partitions[index]), index))
   print ' '.join(partitions[index])
 
 
@@ -328,8 +333,7 @@ def main(args):
   projects = Projects()
   for bot in range(options.num_bots):
     bot_name = '%s%d' % (options.bot_prefix, bot)
-    if verbose:
-      sys.stdout.write('Attempting to add data from "%s"\n' % bot_name)
+    Trace('Attempting to add data from "%s"' % bot_name)
     projects.AddDataFromBuilder(bot_name, options.build_number)
   projects.PostProcessDeps()
 
@@ -350,5 +354,5 @@ if __name__ == '__main__':
   try:
     sys.exit(main(sys.argv[1:]))
   except Error, e:
-    sys.stdout.write("%s\n" % e)
+    sys.stderr.write("%s\n" % e)
     sys.exit(1)

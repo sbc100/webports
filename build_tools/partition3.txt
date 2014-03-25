@@ -9,6 +9,7 @@ builder 0 (total: 5145)
   snes9x
   libtar
   nethack
+  bzip2
   freetype
   expat
   fontconfig

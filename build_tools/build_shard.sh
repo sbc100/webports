@@ -17,7 +17,15 @@ set -o errexit
 
 make clean
 readonly PARTCMD="python build_tools/partition.py"
-readonly PACKAGE_LIST=$(${PARTCMD} -t ${SHARD} -n ${SHARDS})
+readonly SHARD_CMD="${PARTCMD} -t ${SHARD} -n ${SHARDS}"
+echo "Calculating targets for shard ${SHARD} of ${SHARDS}"
+readonly PACKAGE_LIST=$(${SHARD_CMD})
+if [ -z "${PACKAGE_LIST}" ]; then
+  echo "sharding command failed: ${SHARD_CMD}"
+  exit 1
+fi
+
+echo "Building the following packages: ${PACKAGE_LIST}"
 for PKG in ${PACKAGE_LIST}; do
   InstallPackage ${PKG}
 done
