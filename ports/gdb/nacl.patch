@@ -95,6 +95,63 @@ index 2720f46..39ab4c4 100755
        enable_decimal_float=yes
        ;;
      *)
+diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
+index addf8ee..64fc443 100644
+--- a/libiberty/pex-unix.c
++++ b/libiberty/pex-unix.c
+@@ -593,6 +593,9 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executabl
+                      int in, int out, int errdes,
+                     int toclose, const char **errmsg, int *err)
+ {
++#if defined(__native_client__)
++  return -1;
++#else
+   pid_t pid;
+ 
+   /* We declare these to be volatile to avoid warnings from gcc about
+@@ -720,6 +723,7 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executabl
+ 
+       return pid;
+     }
++#endif
+ }
+ #endif /* SPAWN */
+ 
+diff --git a/gdb/charset.c b/gdb/charset.c
+index 1f44e8f..03a282e 100644
+--- a/gdb/charset.c
++++ b/gdb/charset.c
+@@ -767,6 +767,7 @@ find_charset_names (void)
+    introduction even when stdout is not a tty.  Newer versions omit
+    the intro if stdout is not a tty.  */
+ 
++#if !defined(__native_client__)
+ static int
+ ignore_line_p (const char *line)
+ {
+@@ -790,10 +791,14 @@ ignore_line_p (const char *line)
+ 
+   return 0;
+ }
++#endif
+ 
+ static void
+ find_charset_names (void)
+ {
++#if defined(__native_client__)
++  charsets = NULL;
++#else
+   struct pex_obj *child;
+   char *args[3];
+   int err, status;
+@@ -915,6 +920,7 @@ find_charset_names (void)
+     }
+   else
+     VEC_safe_push (char_ptr, charsets, NULL);
++#endif
+ }
+ 
+ #endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
 diff --git a/opcodes/i386-dis.c b/opcodes/i386-dis.c
 index 8e55724..4b6576d 100644
 --- a/opcodes/i386-dis.c
