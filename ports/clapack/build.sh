@@ -55,7 +55,7 @@ TestStep() {
 
 # the Makefile does not contain install target
 InstallStep() {
-  ChangeDir ${BUILD_DIR}
+  MakeDir ${NACLPORTS_LIBDIR}
   LogExecute install libblas.a ${NACLPORTS_LIBDIR}
   LogExecute install liblapack.a ${NACLPORTS_LIBDIR}
   LogExecute install tmglib.a ${NACLPORTS_LIBDIR}
