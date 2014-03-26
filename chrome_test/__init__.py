@@ -402,7 +402,7 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
   s.SetFilterString(filter_string)
 
   def Target():
-    s.serve_forever()
+    s.serve_forever(poll_interval=0.1)
 
   base_url = 'http://%s:%d' % (s.server_address[0], s.server_address[1])
   quit_url = '%s/?quit=1' % base_url
@@ -448,9 +448,8 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
       logging.info('Chrome exited with return code %d' % returncode)
     finally:
       try:
-        for _ in range(2):
-          with contextlib.closing(urllib2.urlopen(quit_url)) as stream:
-            stream.read()
+        with contextlib.closing(urllib2.urlopen(quit_url)) as stream:
+          stream.read()
       except:
         pass
     thread.join()

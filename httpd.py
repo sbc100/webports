@@ -48,14 +48,7 @@ def SanityCheckDirectory():
 # faster responses.
 class QuittableHTTPServer(SocketServer.ThreadingMixIn,
                           BaseHTTPServer.HTTPServer):
-  def serve_forever(self):
-    self.is_running = True
-    while self.is_running:
-      self.handle_request()
-
-  def shutdown(self):
-    self.is_running = False
-    return 1
+  pass
 
 
 # "Safely" split a string at |sep| into a [key, value] pair.  If |sep| does not
