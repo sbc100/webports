@@ -9,9 +9,10 @@ found in the LICENSE file.
 <script>
 function init() {
   chrometest.run([
+    'user_agent_test.js',  // First as the others will hang if they cannot find
+                           // the test extension.
     'extension_test.js',
     'processes_test.js',
-    'user_agent_test.js',
   ]);
 }
 </script>

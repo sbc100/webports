@@ -392,10 +392,9 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
   load_apps = [os.path.abspath(os.path.expanduser(i))
                for i in load_apps]
 
-  # Add in the chrome_test extension and pass its id.
+  # Add in the chrome_test extension and compute its id.
   load_extensions += [TESTING_EXTENSION]
   testing_id = ChromeAppIdFromPath(TESTING_EXTENSION)
-  start_path += '?_chrome_test=%s' % testing_id
 
   s = ChromeTestServer(('', 0), ChromeTestHandler)
   for root in roots:
@@ -426,7 +425,8 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
                 '-s', '-screen 0 1024x768x24 -ac']
       cmd += [chrome_path]
       cmd += ['--user-data-dir=' + work_dir]
-      cmd += ['--user-agent=ChromeTestAgent']
+      # Pass testing extension id in user agent to make it widely available.
+      cmd += ['--user-agent=ChromeTestAgent/' + testing_id]
       if enable_nacl:
         cmd += ['--enable-nacl']
       if enable_nacl_debug:

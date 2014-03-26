@@ -104,10 +104,8 @@ GdbExtensionTestModuleTest.prototype = new TestModuleTest();
 GdbExtensionTestModuleTest.prototype.setUp = function(done) {
   var self = this;
   TestModuleTest.prototype.setUp.call(self, function() {
-    chrometest.proxyExtension('GDB', function(gdbExt) {
+    self.newGdbExtPort(self.process.naclDebugPort, function(gdbExt) {
       self.gdbExt = gdbExt;
-      self.gdbExt.postMessage(
-          {'name': 'setDebugPort', 'port': self.process.naclDebugPort});
       done();
     });
   });
@@ -118,20 +116,38 @@ GdbExtensionTestModuleTest.prototype.tearDown = function(done) {
   TestModuleTest.prototype.tearDown(done);
 };
 
+/**
+ * Create a new port to the GDB extension.
+ * @param {integer} debugTcpPort Tcp port of the module to manage.
+ * @param {function{Port})} callback Called with a Port object once it is
+ *     created and setup.
+ */
+GdbExtensionTestModuleTest.prototype.newGdbExtPort = function(
+    debugTcpPort, callback) {
+  chrometest.proxyExtension('GDB', function(gdbExtPort) {
+    function handlePortReply(msg) {
+      ASSERT_EQ('setDebugTcpPortReply', msg.name,
+                'expect debug extension port reply');
+      gdbExtPort.onMessage.removeListener(handlePortReply);
+      callback(gdbExtPort);
+    }
+    gdbExtPort.onMessage.addListener(handlePortReply);
+    gdbExtPort.postMessage({'name': 'setDebugTcpPort',
+                            'debugTcpPort': debugTcpPort});
+  });
+};
+
 GdbExtensionTestModuleTest.prototype.runGdb = function(done) {
   var self = this;
   chrometest.getAllProcesses(function(oldProcesses) {
     waitForExtraModuleCount(1, oldProcesses, function(newModules) {
       var gdbProcess = newModules[0];
-      chrometest.proxyExtension('GDB', function(gdbExtForGdb) {
-        // Once the GDB process starts.
+      self.newGdbExtPort(gdbProcess.naclDebugPort, function(gdbExtForGdb) {
         gdbExtForGdb.onMessage.addListener(function(msg) {
           ASSERT_EQ('rspDetachReply', msg.name, 'expect successful detach');
           gdbExtForGdb.disconnect();
           done();
         });
-        gdbExtForGdb.postMessage(
-          {'name': 'setDebugPort', 'port': gdbProcess.naclDebugPort});
         gdbExtForGdb.postMessage({'name': 'rspDetach'});
       });
     });

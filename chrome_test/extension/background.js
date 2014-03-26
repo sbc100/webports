@@ -101,13 +101,28 @@ Connection.prototype.handleMessage_ = function(msg) {
   // proxied extension. A new connection is required for further access to
   // other functionality.
   } else if (msg.name == 'proxy') {
-    var extension = msg.extension;
-    self.proxied_ = chrome.runtime.connect(extension);
-    self.proxied_.onMessage.addListener(function(msg) {
-      self.port_.postMessage(msg);
-    });
-    self.proxied_.onDisconnect.addListener(function(msg) {
-      self.disconnect();
+    chrome.management.getAll(function(extensions) {
+      // Find all extensions with this name.
+      var picks = [];
+      for (var i = 0; i < extensions.length; i++) {
+        if (extensions[i].name == msg.extension) {
+          picks.push(extensions[i]);
+        }
+      }
+      var success = false;
+      if (picks.length == 1) {
+        self.proxied_ = chrome.runtime.connect(picks[0].id);
+        self.proxied_.onMessage.addListener(function(msg) {
+          self.port_.postMessage(msg);
+        });
+        self.proxied_.onDisconnect.addListener(function(msg) {
+          self.disconnect();
+        });
+        success = true;
+      }
+      // Reply in any event.
+      self.port_.postMessage({'name': 'proxyReply', 'success': success,
+                              'matchCount': picks.length});
     });
 
   // Provide a simple echo for testing of this extension.

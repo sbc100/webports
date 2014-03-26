@@ -56,8 +56,9 @@ chrometest.getUrlParameters = function() {
  * @return {Port}.
  */
 chrometest.newTestPort = function() {
-  var extension_id = chrometest.getUrlParameters()['_chrome_test'];
-  return chrome.runtime.connect(extension_id);
+  var parts = navigator.userAgent.split('/');
+  var extensionId = parts[1];
+  return chrome.runtime.connect(extensionId);
 };
 
 /**
@@ -126,19 +127,17 @@ chrometest.getAllProcesses = function(callback) {
  * @returns {Port}.
  */
 chrometest.proxyExtension = function(extensionName, callback) {
-  chrometest.getAllExtensions(function(extensions) {
-    var pick = null;
-    for (var i = 0; i < extensions.length; i++) {
-      if (extensions[i].name == extensionName) {
-        pick = extensions[i];
-        break;
-      }
-    }
-    ASSERT_NE(null, pick, 'must be able to find extension: ' + extensionName);
-    var port = chrometest.newTestPort();
-    port.postMessage({'name': 'proxy', 'extension': pick.id});
+  var port = chrometest.newTestPort();
+  function handleProxyReply(msg) {
+    port.onMessage.removeListener(handleProxyReply);
+    ASSERT_EQ('proxyReply', msg.name, 'expect proxy reply');
+    ASSERT_TRUE(
+        msg.success, 'should find one extension: ' + extensionName +
+        ' found ' + msg.matchCount);
     callback(port);
-  });
+  }
+  port.onMessage.addListener(handleProxyReply);
+  port.postMessage({'name': 'proxy', 'extension': extensionName});
 };
 
 /**
