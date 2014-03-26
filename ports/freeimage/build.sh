@@ -61,7 +61,7 @@ BuildStep() {
 
 
 InstallStep() {
-  export INCDIR=${NACLPORTS_INCLUDE}
-  export INSTALLDIR=${NACLPORTS_LIBDIR}
+  export INCDIR=${DESTDIR_INCLUDE}
+  export INSTALLDIR=${DESTDIR_LIB}
   LogExecute make OS=nacl install
 }

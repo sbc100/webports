@@ -12,9 +12,7 @@ PatchStep() {
 }
 
 InstallStep() {
-  LIB_GMOCK=libgmock.a
-  Remove ${NACLPORTS_INCLUDE}/gmock
-  tar -C ${SRC_DIR}/include -cf - gmock | tar -C ${NACLPORTS_INCLUDE} -xpf -
-  Remove ${NACLPORTS_LIBDIR}/${LIB_GMOCK}
-  install -m 644 lib/.libs/${LIB_GMOCK} ${NACLPORTS_LIBDIR}/${LIB_GMOCK}
+  LogExecute tar -C ${SRC_DIR}/include -cf - gmock | \
+    tar -C ${DESTDIR_INCLUDE} -xpf -
+  LogExecute install -m 644 lib/.libs/libgmock.a ${DESTDIR_LIB}/
 }

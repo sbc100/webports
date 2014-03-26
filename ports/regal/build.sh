@@ -28,9 +28,11 @@ BuildStep() {
 
 
 InstallStep() {
-  cp -a lib/nacl-${NACL_ARCH}/libRegal*.a ${NACLPORTS_LIBDIR}
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  LogExecute cp -a lib/nacl-${NACL_ARCH}/libRegal*.a ${DESTDIR_LIB}/
   if [ "${NACL_GLIBC}" = 1 ]; then
-    cp -a lib/nacl-${NACL_ARCH}/libRegal*.so* ${NACLPORTS_LIBDIR}
+    LogExecute cp -a lib/nacl-${NACL_ARCH}/libRegal*.so* ${DESTDIR_LIB}/
   fi
-  cp -r include/GL ${NACLPORTS_INCLUDE}
+  LogExecute cp -r include/GL ${DESTDIR_INCLUDE}/
 }

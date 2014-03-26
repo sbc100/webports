@@ -15,8 +15,10 @@ BuildStep() {
 }
 
 InstallStep() {
-  cp ${SRC_DIR}/libdreadthread.a ${NACLPORTS_LIBDIR}
-  cp ${START_DIR}/dreadthread.h ${NACLPORTS_INCLUDE}
-  cp ${START_DIR}/dreadthread_ctxt.h ${NACLPORTS_INCLUDE}
-  cp ${START_DIR}/dreadthread_chain.h ${NACLPORTS_INCLUDE}
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  LogExecute cp ${SRC_DIR}/libdreadthread.a ${DESTDIR_LIB}/
+  LogExecute cp ${START_DIR}/dreadthread.h ${DESTDIR_INCLUDE}/
+  LogExecute cp ${START_DIR}/dreadthread_ctxt.h ${DESTDIR_INCLUDE}/
+  LogExecute cp ${START_DIR}/dreadthread_chain.h ${DESTDIR_INCLUDE}/
 }

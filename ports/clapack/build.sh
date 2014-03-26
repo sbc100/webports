@@ -55,9 +55,9 @@ TestStep() {
 
 # the Makefile does not contain install target
 InstallStep() {
-  MakeDir ${NACLPORTS_LIBDIR}
-  LogExecute install libblas.a ${NACLPORTS_LIBDIR}
-  LogExecute install liblapack.a ${NACLPORTS_LIBDIR}
-  LogExecute install tmglib.a ${NACLPORTS_LIBDIR}
-  LogExecute install F2CLIBS/libf2c.a ${NACLPORTS_LIBDIR}
+  MakeDir ${DESTDIR_LIB}
+  LogExecute install libblas.a ${DESTDIR_LIB}/
+  LogExecute install liblapack.a ${DESTDIR_LIB}/
+  LogExecute install tmglib.a ${DESTDIR_LIB}/
+  LogExecute install F2CLIBS/libf2c.a ${DESTDIR_LIB}/
 }

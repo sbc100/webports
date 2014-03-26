@@ -37,7 +37,7 @@ TestStep() {
 InstallStep() {
   DefaultInstallStep
   if [ "${NACL_GLIBC}" = "1" ]; then
-    cd ${NACLPORTS_LIBDIR}
+    cd ${DESTDIR_LIB}
     ln -sf libreadline.so.6 libreadline.so
     cd -
   fi

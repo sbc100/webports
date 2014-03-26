@@ -13,8 +13,7 @@ BuildStep() {
 
 InstallStep() {
   # copy libs and headers manually
-  Remove ${NACLPORTS_INCLUDE}/${PACKAGE_NAME}
-  MakeDir ${NACLPORTS_INCLUDE}/${PACKAGE_NAME}
-  LogExecute cp *.h ${NACLPORTS_INCLUDE}/${PACKAGE_NAME}
-  LogExecute cp *.a ${NACLPORTS_LIBDIR}
+  MakeDir ${DESTDIR_INCLUDE}/${PACKAGE_NAME}
+  LogExecute cp *.h ${DESTDIR_INCLUDE}/${PACKAGE_NAME}/
+  LogExecute cp *.a ${DESTDIR_LIB}
 }

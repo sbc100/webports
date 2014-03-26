@@ -37,7 +37,6 @@ ConfigureStep() {
   ${SRC_DIR}/configure \
     --prefix=${PREFIX} \
     --host=${conf_host} \
-    --libdir=${NACLPORTS_LIBDIR} \
     --disable-flac \
     --disable-zlib \
     --disable-mt32emu \
@@ -50,8 +49,7 @@ ConfigureStep() {
 InstallStep() {
   SCUMMVM_DIR=runimage/usr/local/share/scummvm
   ChangeDir ${SRC_DIR}
-
-  mkdir -p ${SCUMMVM_DIR}
+  MakeDir ${SCUMMVM_DIR}
   cp gui/themes/scummclassic.zip \
      dists/engine-data/sky.cpt \
      gui/themes/scummmodern.zip \

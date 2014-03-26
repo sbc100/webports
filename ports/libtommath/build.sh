@@ -17,6 +17,8 @@ export EXEEXT=${NACL_EXEEXT}
 
 InstallStep() {
   # copy libs and headers manually
-  LogExecute cp *.h ${NACLPORTS_INCLUDE}
-  LogExecute cp *.a ${NACLPORTS_LIBDIR}
+  MakeDir ${DESTDIR_INCLUDE}
+  MakeDir ${DESTDIR_LIB}
+  LogExecute cp *.h ${DESTDIR_INCLUDE}/
+  LogExecute cp *.a ${DESTDIR_LIB}/
 }

@@ -37,7 +37,7 @@ ConfigureStep() {
 
 InstallStep() {
   DefaultInstallStep
-  cd ${NACLPORTS_LIBDIR}
+  cd ${DESTDIR_LIB}
   ln -sf libncurses.a libtermcap.a
   cd -
 }
