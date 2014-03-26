@@ -13,7 +13,8 @@ BuildStep() {
 
 InstallStep() {
   # copy libs and headers manually
+  MakeDir ${DESTDIR_LIB}
   MakeDir ${DESTDIR_INCLUDE}/${PACKAGE_NAME}
   LogExecute cp *.h ${DESTDIR_INCLUDE}/${PACKAGE_NAME}/
-  LogExecute cp *.a ${DESTDIR_LIB}
+  LogExecute cp *.a ${DESTDIR_LIB}/
 }
