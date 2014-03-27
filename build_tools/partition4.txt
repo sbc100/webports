@@ -28,7 +28,7 @@ builder 0 (total: 4057)
   lua_ppapi
   expat
   apr-util
-  mesagl
+  #mesagl
   gmp
   mpfr
   mpc

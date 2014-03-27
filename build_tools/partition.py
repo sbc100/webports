@@ -238,6 +238,8 @@ def LoadCanned(parts):
   Trace("LoadCanned: %s" % input_file)
   with open(input_file) as fh:
     for line in fh:
+      if line.strip()[0] == '#':
+        continue
       if line.startswith('  '):
         partition.append(line[2:].strip())
       else:

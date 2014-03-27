@@ -142,7 +142,7 @@ builder 2 (total: 4952)
   libhangul
   unzip
   jsoncpp
-  mesagl
+  #mesagl
   binutils
   glib
   thttpd
