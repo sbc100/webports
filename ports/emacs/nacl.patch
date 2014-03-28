@@ -1,0 +1,579 @@
+diff --git a/Makefile.in b/Makefile.in
+index 01eb409..edb2998 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -280,7 +280,8 @@ COPYDESTS = $(DESTDIR)${etcdir} $(DESTDIR)${lispdir} $(DESTDIR)${leimdir}/ja-dic
+ 
+ all: ${SUBDIR}
+ 
+-.PHONY: all ${SUBDIR} blessmail epaths-force FRC
++#.PHONY: all ${SUBDIR} blessmail epaths-force FRC
++.PHONY: all ${SUBDIR} epaths-force FRC
+ 
+ removenullpaths=sed -e 's/^://g' -e 's/:$$//g' -e 's/::/:/g'
+ 
+@@ -415,7 +416,8 @@ $(srcdir)/src/stamp-h.in: $(AUTOCONF_INPUTS)
+ ## don't have to duplicate the list of utilities to install in
+ ## this Makefile as well.
+ 
+-install: all install-arch-indep install-doc install-arch-dep blessmail
++#install: all install-arch-indep install-doc install-arch-dep blessmail
++install: all install-arch-indep install-doc install-arch-dep
+ 	@true
+ 
+ ## Ensure that $subdir contains a subdirs.el file.
+diff --git a/configure b/configure
+index 0e2d827..fa16ab2 100755
+--- a/configure
++++ b/configure
+@@ -4631,6 +4631,10 @@ case "${canonical}" in
+     esac
+   ;;
+ 
++  *-nacl  )
++    opsys=nacl
++  ;;
++
+   ## Intel 386 machines where we don't care about the manufacturer.
+   i[3456]86-*-* )
+     case "${canonical}" in
+@@ -8206,6 +8210,7 @@ rm -f core conftest.err conftest.$ac_objext \
+ 
+ test "x$CANNOT_DUMP" = "x" && CANNOT_DUMP=no
+ case "$opsys" in
++  nacl) CANNOT_DUMP=yes ;;
+   your-opsys-here) CANNOT_DUMP=yes ;;
+ esac
+ 
+@@ -15277,7 +15282,7 @@ case $opsys in
+ 
+     ;;
+ 
+-  gnu-linux | gnu-kfreebsd | freebsd | netbsd )
++  nacl | gnu-linux | gnu-kfreebsd | freebsd | netbsd )
+         if test "x$ac_cv_func_grantpt" = xyes; then
+ 
+ $as_echo "#define UNIX98_PTYS 1" >>confdefs.h
+@@ -15430,7 +15435,7 @@ if test $emacs_glibc = yes; then
+   emacs_pending_output=unknown
+ 
+   case $opsys in
+-    gnu | gnu-linux | gnu-kfreebsd )
++    nacl | gnu | gnu-linux | gnu-kfreebsd )
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for style of pending output formalism" >&5
+ $as_echo_n "checking for style of pending output formalism... " >&6; }
+                   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+@@ -24659,7 +24664,7 @@ LD_FIRSTFLAG=
+ ORDINARY_LINK=
+ case "$opsys" in
+   ## gnu: GNU needs its own crt0.
+-  aix4-2|cygwin|darwin|gnu|hpux*|irix6-5|sol2*|unixware) ORDINARY_LINK=yes ;;
++  nacl|aix4-2|cygwin|darwin|gnu|hpux*|irix6-5|sol2*|unixware) ORDINARY_LINK=yes ;;
+ 
+   ## On post 1.3 releases of NetBSD, gcc -nostdlib also clears the
+   ## library search parth, i.e. it won't search /usr/lib for libc and
+diff --git a/leim/Makefile.in b/leim/Makefile.in
+index 56f28b8..c1620dd 100644
+--- a/leim/Makefile.in
++++ b/leim/Makefile.in
+@@ -31,7 +31,7 @@ srcdir=@srcdir@
+ 
+ # Which Emacs to use to convert TIT files to Emacs Lisp files,
+ # byte-compile Emacs Lisp files, and generate the file leim-list.el.
+-EMACS = ../src/emacs
++EMACS = ../src/emacs.nexe
+ 
+ buildlisppath=${srcdir}/../lisp
+ 
+@@ -81,7 +81,8 @@ TIT_MISC=${CHINESE_TIT} ${MISC}
+ 	@echo Compiling $<
+ 	@${RUN_EMACS} -l ${buildlisppath}/international/quail -f batch-byte-compile $<
+ 
+-all: leim-list.el compile-main
++# all: leim-list.el compile-main
++all: leim-list.el
+ .PHONY: all
+ 
+ TIT_SOURCES= \
+diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
+index 8a6960e..ac3ef34 100644
+--- a/lib-src/Makefile.in
++++ b/lib-src/Makefile.in
+@@ -23,7 +23,7 @@
+ SHELL = /bin/sh
+ 
+ # Following ../lisp/Makefile.in.
+-EMACS = ../src/emacs
++EMACS = ../src/emacs${EXEEXT}
+ EMACSOPT = -batch --no-site-file --no-site-lisp
+ 
+ # ==================== Things `configure' will edit ====================
+@@ -183,7 +183,8 @@ config_h = ../src/config.h $(srcdir)/../src/conf_post.h
+ 
+ all: ${EXE_FILES} ${SCRIPTS} ${INSTALLABLE_SCRIPTS}
+ 
+-.PHONY: all need-blessmail maybe-blessmail
++#.PHONY: all need-blessmail maybe-blessmail
++.PHONY: all
+ 
+ LOADLIBES = ../lib/libgnu.a $(LIBS_SYSTEM)
+ $(EXE_FILES): ../lib/libgnu.a
+@@ -290,8 +291,8 @@ TAGS: etags${EXEEXT}
+ ## distribute Emacs.  If they were clobbered, all the .elc files were
+ ## clobbered too.
+ test-distrib${EXEEXT}: ${srcdir}/test-distrib.c
+-	$(CC) ${ALL_CFLAGS} -o test-distrib ${srcdir}/test-distrib.c
+-	./test-distrib ${srcdir}/testfile
++	$(CC) ${ALL_CFLAGS} -o test-distrib${EXEEXT} ${srcdir}/test-distrib.c
++	$(RUNPROGRAM) ./test-distrib${EXEEXT} ${srcdir}/testfile
+ 
+ ../lib/libgnu.a: $(config_h)
+ 	cd ../lib && $(MAKE) libgnu.a
+@@ -303,30 +304,32 @@ regex.o: $(srcdir)/../src/regex.c $(srcdir)/../src/regex.h $(config_h)
+ etags${EXEEXT}: ${srcdir}/etags.c regex.o $(config_h)
+ 	$(CC) ${ALL_CFLAGS} -DEMACS_NAME="\"GNU Emacs\"" \
+ 	  -DVERSION="\"${version}\"" ${srcdir}/etags.c \
+-	  regex.o $(LOADLIBES) -o etags
++	  regex.o $(LOADLIBES) -o etags${EXEEXT}
+ 
+ ebrowse${EXEEXT}: ${srcdir}/ebrowse.c ${srcdir}/../lib/min-max.h $(config_h)
+ 	$(CC) ${ALL_CFLAGS} -DVERSION="\"${version}\"" \
+-	  ${srcdir}/ebrowse.c $(LOADLIBES) -o ebrowse
++	  ${srcdir}/ebrowse.c $(LOADLIBES) -o ebrowse${EXEEXT}
+ 
+ ## We depend on etags to assure that parallel makes do not write two
+ ## etags.o files on top of each other.
+ ctags${EXEEXT}: etags${EXEEXT}
+ 	$(CC) ${ALL_CFLAGS} -DCTAGS -DEMACS_NAME="\"GNU Emacs\"" \
+ 	  -DVERSION="\"${version}\"" ${srcdir}/etags.c \
+-	  regex.o $(LOADLIBES) -o ctags
++	  regex.o $(LOADLIBES) -o ctags${EXEEXT}
+ 
+ profile${EXEEXT}: ${srcdir}/profile.c $(config_h)
++	echo ${ALL_CFLAGS}
++	echo ${BASE_CFLAGS}
+ 	$(CC) ${ALL_CFLAGS} ${srcdir}/profile.c \
+-	  $(LOADLIBES) $(LIB_CLOCK_GETTIME) -o profile
++	  $(LOADLIBES) $(LIB_CLOCK_GETTIME) -o profile${EXEEXT}
+ 
+ make-docfile${EXEEXT}: ${srcdir}/make-docfile.c $(config_h)
+ 	$(CC) ${ALL_CFLAGS} ${srcdir}/make-docfile.c $(LOADLIBES) \
+-	  -o make-docfile
++	  -o make-docfile${EXEEXT}
+ 
+ movemail${EXEEXT}: ${srcdir}/movemail.c pop.o $(config_h)
+ 	$(CC) ${ALL_CFLAGS} ${MOVE_FLAGS} ${srcdir}/movemail.c pop.o \
+-	  $(LOADLIBES) $(LIBS_MOVE) -o movemail
++	  $(LOADLIBES) $(LIBS_MOVE) -o movemail${EXEEXT}
+ 
+ pop.o: ${srcdir}/pop.c ${srcdir}/../lib/min-max.h $(config_h)
+ 	$(CC) -c ${CPP_CFLAGS} ${MOVE_FLAGS} ${srcdir}/pop.c
+@@ -334,13 +337,13 @@ pop.o: ${srcdir}/pop.c ${srcdir}/../lib/min-max.h $(config_h)
+ emacsclient${EXEEXT}: ${srcdir}/emacsclient.c $(config_h)
+ 	$(CC) ${ALL_CFLAGS} ${srcdir}/emacsclient.c \
+ 	   -DVERSION="\"${version}\"" \
+-	   $(LOADLIBES) -o emacsclient
++	   $(LOADLIBES) -o emacsclient${EXEEXT}
+ 
+ hexl${EXEEXT}: ${srcdir}/hexl.c $(config_h)
+-	$(CC) ${ALL_CFLAGS} ${srcdir}/hexl.c $(LOADLIBES) -o hexl
++	$(CC) ${ALL_CFLAGS} ${srcdir}/hexl.c $(LOADLIBES) -o hexl${EXEEXT}
+ 
+ update-game-score${EXEEXT}: ${srcdir}/update-game-score.c $(config_h)
+ 	$(CC) ${ALL_CFLAGS} -DHAVE_SHARED_GAME_DIR="\"$(gamedir)\"" \
+-	  ${srcdir}/update-game-score.c $(LOADLIBES) -o update-game-score
++	  ${srcdir}/update-game-score.c $(LOADLIBES) -o update-game-score${EXEEXT}
+ 
+ ## Makefile ends here.
+diff --git a/lib-src/make-docfile.c b/lib-src/make-docfile.c
+index 54a53c0..a5ecd99 100644
+--- a/lib-src/make-docfile.c
++++ b/lib-src/make-docfile.c
+@@ -166,11 +166,13 @@ main (int argc, char **argv)
+     }
+   if (argc > i + 1 && !strcmp (argv[i], "-d"))
+     {
++      /*
+       if (chdir (argv[i + 1]) != 0)
+ 	{
+ 	  perror (argv[i + 1]);
+ 	  return EXIT_FAILURE;
+ 	}
++        */
+       i += 2;
+     }
+   if (argc > i && !strcmp (argv[i], "-g"))
+diff --git a/lib-src/profile.c b/lib-src/profile.c
+index ab17b52..ae86bf0 100644
+--- a/lib-src/profile.c
++++ b/lib-src/profile.c
+@@ -37,7 +37,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+ #include <stdio.h>
+ 
+ #include <intprops.h>
+-#include <systime.h>
++#include "systime.h"
+ 
+ static EMACS_TIME TV1;
+ static int watch_not_started = 1; /* flag */
+diff --git a/lisp/Makefile.in b/lisp/Makefile.in
+index d8a9146..4acde13 100644
+--- a/lisp/Makefile.in
++++ b/lisp/Makefile.in
+@@ -30,7 +30,7 @@ VPATH = $(srcdir)
+ # We sometimes change directory before running Emacs (typically when
+ # building out-of-tree, we chdir to the source directory), so we need
+ # to use an absolute file name.
+-EMACS = ${abs_top_builddir}/src/emacs
++EMACS = ${abs_top_builddir}/src/emacs.nexe
+ 
+ # Command line flags for Emacs.
+ 
+diff --git a/lisp/emacs-lisp/bytecomp.el b/lisp/emacs-lisp/bytecomp.el
+index ce3a332..1aae0ff 100644
+--- a/lisp/emacs-lisp/bytecomp.el
++++ b/lisp/emacs-lisp/bytecomp.el
+@@ -1781,7 +1781,8 @@ The value is non-nil if there were no errors, nil if errors."
+ 	(with-current-buffer output-buffer
+ 	  (goto-char (point-max))
+ 	  (insert "\n")			; aaah, unix.
+-	  (if (file-writable-p target-file)
++	  ;;(if (file-writable-p target-file)
++	  (if t
+ 	      ;; We must disable any code conversion here.
+ 	      (let* ((coding-system-for-write 'no-conversion)
+ 		     ;; Write to a tempfile so that if another Emacs
+@@ -4546,8 +4547,10 @@ already up-to-date."
+   "Reload any Lisp file that was changed since Emacs was dumped.
+ Use with caution."
+   (let* ((argv0 (car command-line-args))
+-         (emacs-file (executable-find argv0)))
+-    (if (not (and emacs-file (file-executable-p emacs-file)))
++         ;;(emacs-file (executable-find argv0)))
++         (emacs-file argv0))
++    ;;(if (not (and emacs-file (file-executable-p emacs-file)))
++    (if (not emacs-file)
+         (message "Can't find %s to refresh preloaded Lisp files" argv0)
+       (dolist (f (reverse load-history))
+         (setq f (car f))
+diff --git a/lisp/emacs-lisp/bytecomp.elc b/lisp/emacs-lisp/bytecomp.elc
+index 20b1a3d..4402fe0 100644
+Binary files a/lisp/emacs-lisp/bytecomp.elc and b/lisp/emacs-lisp/bytecomp.elc differ
+diff --git a/lisp/files.el b/lisp/files.el
+index 4aa913a..b5e6313 100644
+--- a/lisp/files.el
++++ b/lisp/files.el
+@@ -684,8 +684,8 @@ nil (meaning `default-directory') as the associated list element."
+       (if (file-exists-p dir)
+ 	  (error "%s is not a directory" dir)
+ 	(error "%s: no such directory" dir))
+-    (unless (file-executable-p dir)
+-      (error "Cannot cd to %s:  Permission denied" dir))
++;;    (unless (file-executable-p dir)
++;;      (error "Cannot cd to %s:  Permission denied" dir))
+     (setq default-directory dir)
+     (setq list-buffers-directory dir)))
+ 
+@@ -1098,7 +1098,8 @@ containing it, until no links are left at any level.
+     (while (not done)
+       (setcar counter (1- (car counter)))
+       (if (< (car counter) 0)
+-	  (error "Apparent cycle of symbolic links for %s" filename))
++	  ;;(error "Apparent cycle of symbolic links for %s" filename))
++	  (setq done t))
+       (let ((handler (find-file-name-handler filename 'file-truename)))
+ 	;; For file name that has a special handler, call handler.
+ 	;; This is so that ange-ftp can save time by doing a no-op.
+@@ -1117,10 +1118,14 @@ containing it, until no links are left at any level.
+ 		;; save time--don't recalculate.
+ 		(if (assoc dir (car prev-dirs))
+ 		    (setq dir (cdr (assoc dir (car prev-dirs))))
+-		  (let ((old dir)
+-			(new (file-name-as-directory (file-truename dirfile counter prev-dirs))))
+-		    (setcar prev-dirs (cons (cons old new) (car prev-dirs)))
+-		    (setq dir new))))
++                  ;; Otherwise, we don't have a cached dir, check for . and ..
++                  ;; then recurse we don't have . or ..
++                  (if (not (or (equal ".." (file-name-nondirectory filename))
++                               (equal "."  (file-name-nondirectory filename))))
++                      (let ((old dir)
++                            (new (file-name-as-directory (file-truename dirfile counter prev-dirs))))
++                        (setcar prev-dirs (cons (cons old new) (car prev-dirs)))
++                        (setq dir new)))))
+ 	    (if (equal ".." (file-name-nondirectory filename))
+ 		(setq filename
+ 		      (directory-file-name (file-name-directory (directory-file-name dir)))
+diff --git a/lisp/files.elc b/lisp/files.elc
+index ae6b4d8..7144ffd 100644
+Binary files a/lisp/files.elc and b/lisp/files.elc differ
+diff --git a/lisp/international/quail.elc b/lisp/international/quail.elc
+index 8a5c577..843f582 100644
+Binary files a/lisp/international/quail.elc and b/lisp/international/quail.elc differ
+diff --git a/src/Makefile.in b/src/Makefile.in
+index e96c788..ec789ef 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -288,7 +288,7 @@ INTERVALS_H = dispextern.h intervals.h composite.h
+ 
+ GETLOADAVG_LIBS = @GETLOADAVG_LIBS@
+ 
+-RUN_TEMACS = `/bin/pwd`/temacs
++RUN_TEMACS = $(RUNPROGRAM) `/bin/pwd`/temacs
+ 
+ UNEXEC_OBJ = @UNEXEC_OBJ@
+ 
+@@ -414,7 +414,12 @@ $(leimdir)/leim-list.el: bootstrap-emacs$(EXEEXT)
+ emacs$(EXEEXT): temacs$(EXEEXT) $(etc)/DOC $(lisp) $(leimdir)/leim-list.el
+ 	if test "$(CANNOT_DUMP)" = "yes"; then \
+ 	  rm -f emacs$(EXEEXT); \
+-	  ln temacs$(EXEEXT) emacs$(EXEEXT); \
++	  echo "#!/bin/bash" > emacs$(EXEEXT); \
++	  echo -n "$(NACL_SEL_LDR) -E " >> emacs$(EXEEXT); \
++	  echo -n 'EMACSLOADPATH=$${EMACSLOADPATH} ' >> emacs$(EXEEXT); \
++	  echo -n "$(RUNPROGRAM_ARGS) $(PWD)/temacs$(EXEEXT)" >> emacs$(EXEEXT); \
++	  echo ' "$$@"' >> emacs$(EXEEXT); \
++	  chmod a+x emacs$(EXEEXT); \
+ 	else \
+ 	  LC_ALL=C $(RUN_TEMACS) -batch -l loadup dump || exit 1; \
+ 	  test "X$(PAXCTL)" = X || $(PAXCTL) -zex emacs$(EXEEXT); \
+@@ -438,8 +443,8 @@ emacs$(EXEEXT): temacs$(EXEEXT) $(etc)/DOC $(lisp) $(leimdir)/leim-list.el
+ ##
+ $(etc)/DOC: $(libsrc)/make-docfile$(EXEEXT) $(obj) $(lisp)
+ 	-rm -f $(etc)/DOC
+-	$(libsrc)/make-docfile -d $(srcdir) $(SOME_MACHINE_OBJECTS) $(obj) > $(etc)/DOC
+-	$(libsrc)/make-docfile -a $(etc)/DOC -d $(lispsource) `sed -n -e 's| \\\\||' -e 's|^[ 	]*$$(lispsource)/||p' $(srcdir)/lisp.mk`
++	cd $(srcdir) $(RUNPROGRAM) ${PWD}/$(libsrc)/make-docfile$(EXEEXT) $(SOME_MACHINE_OBJECTS) ${PWD}/$(obj) > ${PWD}/$(etc)/DOC
++	cd $(libspsource) && $(RUNPROGRAM) ${PWD}/$(libsrc)/make-docfile$(EXEEXT) -a ${PWD}/$(etc)/DOC `sed -n -e 's| \\\\||' -e 's|^[ 	]*$$(lispsource)/||p' ${PWD}/$(srcdir)/lisp.mk`
+ 
+ $(libsrc)/make-docfile$(EXEEXT):
+ 	cd $(libsrc); $(MAKE) $(MFLAGS) make-docfile$(EXEEXT)
+@@ -453,7 +458,7 @@ GLOBAL_SOURCES = $(base_obj:.o=.c) $(NS_OBJC_OBJ:.o=.m)
+ 
+ gl-stamp: $(libsrc)/make-docfile$(EXEEXT) $(GLOBAL_SOURCES)
+ 	@rm -f gl-tmp
+-	$(libsrc)/make-docfile -d $(srcdir) -g $(obj) > gl-tmp
++	cd $(srcdir) && $(RUNPROGRAM) ${PWD}/$(libsrc)/make-docfile$(EXEEXT) -g $(obj) > ${PWD}/gl-tmp
+ 	$(srcdir)/../build-aux/move-if-change gl-tmp globals.h
+ 	echo timestamp > $@
+ 
+@@ -464,7 +469,7 @@ $(lib)/libgnu.a: $(config_h)
+ 
+ temacs$(EXEEXT): $(START_FILES) stamp-oldxmenu $(obj) $(otherobj) $(lib)/libgnu.a
+ 	$(CC) $(LD_FIRSTFLAG) $(ALL_CFLAGS) $(TEMACS_LDFLAGS) $(LDFLAGS) \
+-	  -o temacs $(START_FILES) $(obj) $(otherobj) $(lib)/libgnu.a $(LIBES)
++	  -o temacs$(EXEEXT) $(START_FILES) $(obj) $(otherobj) $(lib)/libgnu.a $(LIBES)
+ 	test "$(CANNOT_DUMP)" = "yes" || \
+ 	  test "X$(PAXCTL)" = X || $(PAXCTL) -r temacs$(EXEEXT)
+ 
+@@ -613,8 +618,12 @@ $(lispsource)/loaddefs.el: $(BOOTSTRAPEMACS) $(VCSWITNESS)
+ bootstrap-emacs$(EXEEXT): temacs$(EXEEXT)
+ 	cd ../lisp; $(MAKE) $(MFLAGS) update-subdirs
+ 	if test "$(CANNOT_DUMP)" = "yes"; then \
+-	  rm -f bootstrap-emacs$(EXEEXT); \
+-	  ln temacs$(EXEEXT) bootstrap-emacs$(EXEEXT); \
++	  echo "#!/bin/bash" > bootstrap-emacs$(EXEEXT); \
++	  echo -n "$(NACL_SEL_LDR) -E " >> bootstrap-emacs$(EXEEXT); \
++	  echo -n 'EMACSLOADPATH=$${EMACSLOADPATH} ' >> bootstrap-emacs$(EXEEXT); \
++	  echo -n "$(RUNPROGRAM_ARGS) $(PWD)/temacs$(EXEEXT)" >> bootstrap-emacs$(EXEEXT); \
++	  echo ' "$$@"' >> bootstrap-emacs$(EXEEXT); \
++	  chmod a+x bootstrap-emacs$(EXEEXT); \
+ 	else \
+ 	  $(RUN_TEMACS) --batch --load loadup bootstrap || exit 1; \
+ 	  test "X$(PAXCTL)" = X || $(PAXCTL) -zex emacs$(EXEEXT); \
+diff --git a/src/buffer.c b/src/buffer.c
+index d0dfde4..92db4e6 100644
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -5324,7 +5324,8 @@ init_buffer (void)
+   if (NILP (BVAR (&buffer_defaults, enable_multibyte_characters)))
+     Fset_buffer_multibyte (Qnil);
+ 
+-  pwd = get_current_dir_name ();
++  //pwd = get_current_dir_name ();
++  pwd = strdup("./");
+ 
+   if (!pwd)
+     fatal ("`get_current_dir_name' failed: %s\n", strerror (errno));
+diff --git a/src/charset.c b/src/charset.c
+index 7c67ecb..ca45afe 100644
+--- a/src/charset.c
++++ b/src/charset.c
+@@ -2293,7 +2293,8 @@ init_charset (void)
+ {
+   Lisp_Object tempdir;
+   tempdir = Fexpand_file_name (build_string ("charsets"), Vdata_directory);
+-  if (access (SSDATA (tempdir), 0) < 0)
++  //if (access (SSDATA (tempdir), 0) < 0)
++  if (0)
+     {
+       /* This used to be non-fatal (dir_warning), but it should not
+          happen, and if it does sooner or later it will cause some
+diff --git a/src/emacs.c b/src/emacs.c
+index 71d84ef..8db467c 100644
+--- a/src/emacs.c
++++ b/src/emacs.c
+@@ -2113,7 +2113,7 @@ decode_env_path (const char *evarname, const char *defalt)
+     path = getenv (evarname);
+   else
+     path = 0;
+-  if (!path)
++  if (!path || strlen(path) == 0)
+     {
+       path = defalt;
+ #ifdef WINDOWSNT
+diff --git a/src/fileio.c b/src/fileio.c
+index 0df2abe..40afd8d 100644
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -2131,8 +2131,10 @@ on the system, we copy the SELinux context of FILE to NEWNAME.  */)
+ 		mode_mask |= 02000;
+ 	    }
+ 	}
++#if !defined(__native_client__)
+       if (fchmod (ofd, st.st_mode & mode_mask) != 0)
+ 	report_file_error ("Doing chmod", Fcons (newname, Qnil));
++#endif
+     }
+ #endif	/* not MSDOS */
+ 
+@@ -2149,6 +2151,7 @@ on the system, we copy the SELinux context of FILE to NEWNAME.  */)
+     }
+ #endif
+ 
++#if !defined(__native_client__)
+   if (input_file_statable_p)
+     {
+       if (!NILP (keep_time))
+@@ -2160,6 +2163,7 @@ on the system, we copy the SELinux context of FILE to NEWNAME.  */)
+ 		      build_string ("Cannot set file date"), newname);
+ 	}
+     }
++#endif
+ 
+   if (emacs_close (ofd) < 0)
+     report_file_error ("I/O error", Fcons (newname, Qnil));
+@@ -2272,8 +2276,10 @@ With a prefix argument, TRASH is nil.  */)
+ 
+   encoded_file = ENCODE_FILE (filename);
+ 
++#if !defined(__native_client__)
+   if (unlink (SSDATA (encoded_file)) < 0)
+     report_file_error ("Removing old name", list1 (filename));
++#endif
+   return Qnil;
+ }
+ 
+@@ -2352,7 +2358,8 @@ This is what happens in interactive use with M-x.  */)
+ 				  INTEGERP (ok_if_already_exists), 0, 0);
+   if (rename (SSDATA (encoded_file), SSDATA (encoded_newname)) < 0)
+     {
+-      if (errno == EXDEV)
++      //if (errno == EXDEV)
++      if (1)
+ 	{
+           ptrdiff_t count;
+           symlink_target = Ffile_symlink_p (file);
+@@ -2698,6 +2705,9 @@ DEFUN ("file-writable-p", Ffile_writable_p, Sfile_writable_p, 1, 1, 0,
+        doc: /* Return t if file FILENAME can be written or created by you.  */)
+   (Lisp_Object filename)
+ {
++  return Qt;
++
++#if 0  // PETEWIL - bypass this until sel_ldr is working
+   Lisp_Object absname, dir, encoded;
+   Lisp_Object handler;
+ 
+@@ -2731,6 +2741,8 @@ DEFUN ("file-writable-p", Ffile_writable_p, Sfile_writable_p, 1, 1, 0,
+   return (check_writable (!NILP (dir) ? SSDATA (dir) : "")
+ 	  ? Qt : Qnil);
+ #endif
++
++#endif  // 0
+ }
+ 
+ DEFUN ("access-file", Faccess_file, Saccess_file, 2, 2, 0,
+@@ -4848,6 +4860,7 @@ This calls `write-region-annotate-functions' at the start, and
+ 
+   immediate_quit = 0;
+ 
++#if !defined(__native_client__)
+ #ifdef HAVE_FSYNC
+   /* Note fsync appears to change the modtime on BSD4.2 (both vax and sun).
+      Disk full in NFS may be reported here.  */
+@@ -4862,6 +4875,7 @@ This calls `write-region-annotate-functions' at the start, and
+ 	ok = 0, save_errno = errno;
+     }
+ #endif
++#endif
+ 
+   modtime = invalid_emacs_time ();
+   if (visiting)
+diff --git a/src/lread.c b/src/lread.c
+index e6f29e7..fee624a 100644
+--- a/src/lread.c
++++ b/src/lread.c
+@@ -978,6 +978,42 @@ This uses the variables `load-suffixes' and `load-file-rep-suffixes'.  */)
+   return Fnreverse (lst);
+ }
+ 
++  // Workaround fdopen in glibc failing due to it vetting the provided file
++  // handles with fcntl which is not currently interceptable.
++
++  static ssize_t fdopen_read(void *cookie, char *buf, size_t size) {
++    return read((int) cookie, buf, size);
++  }
++
++  static ssize_t fdopen_write(void *cookie, const char *buf, size_t size) {
++    return write((int) cookie, buf, size);
++  }
++
++  static int fdopen_seek(void *cookie, off_t *offset, int whence) {
++    off_t ret = lseek((int) cookie, *offset, whence);
++    if (ret < 0) {
++      return -1;
++    }
++    *offset = ret;
++    return 0;
++  }
++
++  static int fdopen_close(void *cookie) {
++    return close((int) cookie);
++  }
++
++  static cookie_io_functions_t fdopen_functions = {
++    fdopen_read,
++    fdopen_write,
++    fdopen_seek,
++    fdopen_close,
++  };
++
++  FILE *fdopen(int fildes, const char *mode) {
++    return fopencookie((void *) fildes, mode, fdopen_functions);
++  }
++
++
+ DEFUN ("load", Fload, Sload, 1, 5, 0,
+        doc: /* Execute a file of Lisp code named FILE.
+ First try FILE with `.elc' appended, then try with `.el',
+@@ -4147,7 +4183,6 @@ init_lread (void)
+ #else
+   Vload_path = decode_env_path ("EMACSLOADPATH", normal);
+ #endif
+-
+   load_path_check ();
+ 
+   /* FIXME CANNOT_DUMP platforms should get source-dir/lisp etc added
+diff --git a/src/vm-limit.c b/src/vm-limit.c
+index ca7ac4f..53ed923 100644
+--- a/src/vm-limit.c
++++ b/src/vm-limit.c
+@@ -139,7 +139,9 @@ ret_lim_data (void)
+ static void
+ get_lim_data (void)
+ {
++#ifndef __native_client__
+   lim_data = vlimit (LIM_DATA, -1);
++#endif
+ }
+ #endif /* not MSDOS */
+ 
