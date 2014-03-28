@@ -113,7 +113,7 @@ GdbExtensionTestModuleTest.prototype.setUp = function(done) {
 
 GdbExtensionTestModuleTest.prototype.tearDown = function(done) {
   this.gdbExt.disconnect();
-  TestModuleTest.prototype.tearDown(done);
+  TestModuleTest.prototype.tearDown.call(this, done);
 };
 
 /**
@@ -255,9 +255,10 @@ TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function(done) {
           ASSERT_LE(self.lineCount, 18, 'expect limited test');
         }
       } else if (self.stage == 2) {
-        EXPECT_TRUE(msg.name == 'crash' || msg.name == 'message',
-            'expected crash or message, not ' + msg.name);
-        if (msg.name == 'crash') {
+        EXPECT_TRUE(msg.name == 'exited' || msg.name == 'message',
+            'expected exited or message, not ' + msg.name);
+        if (msg.name == 'exited') {
+          EXPECT_EQ(0, msg.returncode, 'return 0');
           self.stage++;
           done();
         } else if (msg.name == 'message') {

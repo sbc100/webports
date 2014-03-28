@@ -93,15 +93,9 @@ function DebugConnection_(port) {
 }
 
 /**
- * Disconnect connection to the debug stub if any.
- * @param {function()} callback.
+ * Remove the gdb embed if any.
  */
-DebugConnection_.prototype.rspDisconnect_ = function() {
-  if (this.socketId_ != null) {
-    chrome.socket.disconnect(this.socketId_);
-    chrome.socket.destroy(this.socketId_);
-    this.socketId_ = null;
-  }
+DebugConnection_.prototype.removeEmbed_ = function() {
   if (this.gdbEmbed_ != null) {
     var p = this.gdbEmbed_.parentNode;
     // Remove the embed from the parent if there is any.
@@ -110,6 +104,18 @@ DebugConnection_.prototype.rspDisconnect_ = function() {
     }
     this.gdbEmbed_ = null;
   }
+};
+
+/**
+ * Disconnect connection to the debug stub if any.
+ */
+DebugConnection_.prototype.rspDisconnect_ = function() {
+  if (this.socketId_ != null) {
+    chrome.socket.disconnect(this.socketId_);
+    chrome.socket.destroy(this.socketId_);
+    this.socketId_ = null;
+  }
+  this.removeEmbed_();
 };
 
 /**
@@ -287,6 +293,13 @@ DebugConnection_.prototype.rspDisconnect_ = function() {
 
     gdb.addEventListener('message', function(e) {
       if (!self.port_) {
+        return;
+      }
+      if (e.data.indexOf('exited:') == 0) {
+        self.port_.postMessage(
+            {'name': 'exited',
+             'returncode': parseInt(e.data.split(':')[1])});
+        gdb.removeEmbed_();
         return;
       }
       self.port_.postMessage({'name': 'message', 'data': e.data});
