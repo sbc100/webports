@@ -5,5 +5,5 @@ LICENSE=MPL
 DISABLED_ARCH=pnacl
 # metakit is disabled on mac currently so we can't build drod
 BUILD_OS=linux
-DEPENDS=(sdl sdl_mixer sdl_ttf zlib metakit libtar expat)
+DEPENDS=(sdl sdl-mixer sdl-ttf zlib metakit libtar expat)
 SHA1=33b465c4d8fcb09523b97d14833591e1eb5343f2

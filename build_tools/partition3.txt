@@ -30,14 +30,14 @@ builder 0 (total: 5145)
   libmodplug
   make
   nacl-spawn
-  python_ppapi
-  python3_ppapi
+  python-ppapi
+  python3-ppapi
   mpc
   libtomcrypt
   libssh
   physfs
   lua5.2
-  lua_ppapi
+  lua-ppapi
   apr-util
   lua5.1
   gcc
@@ -90,7 +90,7 @@ builder 1 (total: 4994)
   netcat
   libtommath
   civetweb
-  ruby_ppapi
+  ruby-ppapi
   box2d
   tinyxml
   openal-ogg
@@ -124,21 +124,21 @@ builder 2 (total: 4952)
   libxml2
   libmikmod
   freetype
-  sdl_ttf
+  sdl-ttf
   metakit
   expat
-  sdl_mixer
+  sdl-mixer
   drod
   cfitsio
   xaos
   pcre
   toybox
   tiff
-  webp
+  libwebp
   agg
-  sdl_net
+  sdl-net
   giflib
-  sdl_image
+  sdl-image
   libhangul
   unzip
   jsoncpp

@@ -19,13 +19,13 @@ builder 0 (total: 4057)
   cfitsio
   pcre
   nano
-  python_ppapi
-  python3_ppapi
+  python-ppapi
+  python3-ppapi
   libtomcrypt
   libtommath
   physfs
   lua5.2
-  lua_ppapi
+  lua-ppapi
   expat
   apr-util
   #mesagl
@@ -100,7 +100,7 @@ builder 2 (total: 3719)
   zeromq
   libmodplug
   make
-  webp
+  libwebp
   agg
   gc
   giflib
@@ -133,20 +133,20 @@ builder 3 (total: 3860)
   bochs
   libmikmod
   freetype
-  sdl_ttf
+  sdl-ttf
   metakit
   expat
-  sdl_mixer
+  sdl-mixer
   drod
   speex
   x264
   openal-soft
   freealut
-  sdl_net
+  sdl-net
   jpeg8d
-  sdl_image
+  sdl-image
   nacl-spawn
-  ruby_ppapi
+  ruby-ppapi
   openal-ogg
   lua5.1
   apr
