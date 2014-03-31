@@ -26,6 +26,9 @@ BuildFailure() {
   echo "@@@STEP_FAILURE@@@"
   MESSAGES="$MESSAGES\n$MESSAGE"
   RESULT=1
+  if [ "${TEST_BUILDBOT:-}" = "1" ]; then
+    exit 1
+  fi
 }
 
 RunCmd() {
@@ -34,6 +37,12 @@ RunCmd() {
 }
 
 BuildPackage() {
+  if [ ${NACL_GLIBC} = "1" ]; then
+    LIBC=glibc
+  else
+    LIBC=newlib
+  fi
+  echo "@@@BUILD_STEP ${NACL_ARCH} ${LIBC} $1"
   if RunCmd build_tools/naclports.py build ports/$1 -v --ignore-disabled ; then
     BuildSuccess $1
   else
@@ -42,6 +51,12 @@ BuildPackage() {
 }
 
 InstallPackage() {
+  if [ ${NACL_GLIBC} = "1" ]; then
+    LIBC=glibc
+  else
+    LIBC=newlib
+  fi
+  echo "@@@BUILD_STEP ${NACL_ARCH} ${LIBC} $1"
   export BUILD_FLAGS="-v --ignore-disabled"
   if RunCmd make $1 ; then
     BuildSuccess $1

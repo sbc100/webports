@@ -29,10 +29,6 @@ fi
 # Don't build lua with readline support. We don't want to include
 # readline and ncurses in the SDK.
 export LUA_NO_READLINE=1
-# Also, disable automatic building of dependencies, otherwise readline
-# and any other unindented dependencies will get build along eith the
-# libraries we want.
-export NODEPS=1
 
 PACKAGES=$(make sdklibs_list)
 

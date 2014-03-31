@@ -408,13 +408,6 @@ class Package(object):
     annotate = os.environ.get('NACLPORTS_ANNOTATE') == '1'
     arch = GetCurrentArch()
 
-    # When the annotator is enabled we print log the start of the build
-    # early, so that even if the package is disabled, or already built
-    # we see a BUILD_STEP for each package.
-    if annotate:
-      Log('@@@BUILD_STEP %s %s %s@@@' % (arch, GetCurrentLibc(),
-          self.basename))
-
     self.CheckEnabled()
 
     force_build = force in ('build', 'all')
@@ -430,12 +423,11 @@ class Package(object):
     if os.path.exists(stdout):
       os.remove(stdout)
 
-    if not annotate:
-      if verbose:
-        prefix = '*** '
-      else:
-        prefix = ''
-      Log("%sBuilding '%s' [%s]" % (prefix, self.basename, arch))
+    if verbose:
+      prefix = '*** '
+    else:
+      prefix = ''
+    Log("%sBuilding '%s' [%s]" % (prefix, self.basename, arch))
 
     start = time.time()
     self.RunBuildSh(verbose, stdout)
@@ -616,7 +608,7 @@ def run_main(args):
                     'in an error being returned.')
   options, args = parser.parse_args(args)
   if not args:
-    parser.error("You must specify a sub-command. See --help.")
+    parser.error('You must specify a sub-command. See --help.')
 
   command = args[0]
   package_dirs = ['.']
@@ -626,7 +618,7 @@ def run_main(args):
     package_dirs = args[1:]
 
   if not NACL_SDK_ROOT:
-    raise Error("$NACL_SDK_ROOT not set")
+    raise Error('$NACL_SDK_ROOT not set')
 
   verbose = options.verbose or os.environ.get('VERBOSE') == '1'
   Trace.verbose = verbose

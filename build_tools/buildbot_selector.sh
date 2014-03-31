@@ -13,7 +13,8 @@ set -o errexit
 set -o nounset
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-export NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
+DEFAULT_NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
+NACL_SDK_ROOT=${NACL_SDK_ROOT:-${DEFAULT_NACL_SDK_ROOT}}
 
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 if [ -e ${BOT_GSUTIL} ]; then
@@ -41,8 +42,13 @@ RESULT=0
 # found.
 export PATH=${PATH}:/opt/local/bin
 
+if [ "${TEST_BUILDBOT:-}" = "1" -a -z "${BUILDBOT_BUILDERNAME:-}" ]; then
+  export BUILDBOT_BUILDERNAME=linux-newlib-0
+fi
+
 StartBuild() {
   export NACL_ARCH=$1
+  export NACL_GLIBC
   export SHARD
   export SHARDS
 
@@ -91,13 +97,13 @@ else
 
   # Select libc
   if [ "$LIBC" = "glibc" ]; then
-    export NACL_GLIBC=1
+    NACL_GLIBC=1
   elif [ "$LIBC" = "newlib" ]; then
-    export NACL_GLIBC=0
+    NACL_GLIBC=0
   elif [ "$LIBC" = "pnacl_newlib" ]; then
-    export NACL_GLIBC=0
+    NACL_GLIBC=0
   elif [ "$LIBC" = "bionic" ]; then
-    export NACL_GLIBC=0
+    NACL_GLIBC=0
   else
     echo "Bad LIBC: ${LIBC}" 1>&2
     exit 1
@@ -124,26 +130,30 @@ else
 fi
 
 # Install SDK.
-echo "@@@BUILD_STEP Install Latest SDK@@@"
 if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
+  echo "@@@BUILD_STEP Install Latest SDK@@@"
   ${PYTHON} ${SCRIPT_DIR}/download_sdk.py
 fi
 
 # Test browser testing harness.
-echo "@@@BUILD_STEP plumbing_tests i686@@@"
-if ! ${PYTHON} ${SCRIPT_DIR}/../chrome_test/plumbing_test.py \
-    -a i686 -x -vv; then
-  RESULT=1
-  echo "@@@STEP_FAILURE@@@"
-fi
-if [ "$OS" = "linux" ]; then
-  echo "@@@BUILD_STEP plumbing_tests x86_64@@@"
+PlumbingTests() {
+  echo "@@@BUILD_STEP plumbing_tests i686@@@"
   if ! ${PYTHON} ${SCRIPT_DIR}/../chrome_test/plumbing_test.py \
-      -a x86_64 -x -vv; then
+      -a i686 -x -vv; then
     RESULT=1
     echo "@@@STEP_FAILURE@@@"
   fi
-fi
+  if [ "$OS" = "linux" ]; then
+    echo "@@@BUILD_STEP plumbing_tests x86_64@@@"
+    if ! ${PYTHON} ${SCRIPT_DIR}/../chrome_test/plumbing_test.py \
+        -a x86_64 -x -vv; then
+      RESULT=1
+      echo "@@@STEP_FAILURE@@@"
+    fi
+  fi
+}
+
+PlumbingTests()
 
 # PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
 export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
