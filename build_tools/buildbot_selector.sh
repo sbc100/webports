@@ -15,6 +15,7 @@ set -o nounset
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 DEFAULT_NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
 NACL_SDK_ROOT=${NACL_SDK_ROOT:-${DEFAULT_NACL_SDK_ROOT}}
+export NACL_SDK_ROOT
 
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 if [ -e ${BOT_GSUTIL} ]; then
