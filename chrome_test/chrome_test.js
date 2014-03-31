@@ -71,47 +71,55 @@ chrometest.haltBrowser = function() {
 
 /**
  * Reset the connection in the testing extension.
- * @param {function(integer)} callback Called on completion with a count of the
- *                                     number of connections killed.
+ * @returns {Promise.integer} A promise for the number of connections killed.
  */
-chrometest.resetExtension = function(callback) {
-  var port = chrometest.newTestPort();
-  var count = null;
-  port.onMessage.addListener(function(msg) {
-    port.disconnect();
-    callback(msg.count);
+chrometest.resetExtension = function() {
+  return new Promise(function(resolve, reject) {
+    var port = chrometest.newTestPort();
+    var count = null;
+    port.onMessage.addListener(function(msg) {
+      ASSERT_EQ('resetReply', msg.name);
+      port.disconnect();
+      resolve(msg.count);
+    });
+    port.postMessage({'name': 'reset'});
   });
-  port.postMessage({'name': 'reset'});
 }
 
 /**
  * Get a list of all loaded extensions.
  *
  * This exposes the result of chrome.management.getAll for use by tests.
- * @returns {Array.<ExtensionInfo>}.
+ * @returns {Promise.Array.<ExtensionInfo>}.
  */
-chrometest.getAllExtensions = function(callback) {
-  var port = chrometest.newTestPort();
-  port.onMessage.addListener(function(msg) {
-    port.disconnect();
-    callback(msg.result);
+chrometest.getAllExtensions = function() {
+  return new Promise(function(resolve, reject) {
+    var port = chrometest.newTestPort();
+    port.onMessage.addListener(function(msg) {
+      ASSERT_EQ('getAllExtensionsResult', msg.name);
+      port.disconnect();
+      resolve(msg.result);
+    });
+    port.postMessage({'name': 'getAllExtensions'});
   });
-  port.postMessage({'name': 'getAllExtensions'});
 };
 
 /**
  * Get a mapping of process id to process info for all processes running.
  *
  * This exposes the result of chrome.processes.getProcessInfo for use by tests.
- * @return {Object.<ProcessInfo>}.
+ * @return {Promise.Object.<ProcessInfo>}.
  */
-chrometest.getAllProcesses = function(callback) {
-  var port = chrometest.newTestPort();
-  port.onMessage.addListener(function(msg) {
-    port.disconnect();
-    callback(msg.result);
+chrometest.getAllProcesses = function() {
+  return new Promise(function(resolve, reject) {
+    var port = chrometest.newTestPort();
+    port.onMessage.addListener(function(msg) {
+      ASSERT_EQ('getAllProcessesResult', msg.name);
+      port.disconnect();
+      resolve(msg.result);
+    });
+    port.postMessage({'name': 'getAllProcesses'});
   });
-  port.postMessage({'name': 'getAllProcesses'});
 };
 
 /**
@@ -124,93 +132,119 @@ chrometest.getAllProcesses = function(callback) {
  * whitelisted by the extensions under test when in testing mode. This allows
  * the testing extension to offer web pages proxied access to extensions under
  * test without modification.
- * @returns {Port}.
+ * @returns {Promise.Port} A promise for a Port to communicate with the
+ *     extension on.
  */
-chrometest.proxyExtension = function(extensionName, callback) {
-  var port = chrometest.newTestPort();
-  function handleProxyReply(msg) {
-    port.onMessage.removeListener(handleProxyReply);
-    ASSERT_EQ('proxyReply', msg.name, 'expect proxy reply');
-    ASSERT_TRUE(
+chrometest.proxyExtension = function(extensionName) {
+  return new Promise(function(resolve, reject) {
+    var port = chrometest.newTestPort();
+    function handleProxyReply(msg) {
+      port.onMessage.removeListener(handleProxyReply);
+      ASSERT_EQ('proxyReply', msg.name, 'expect proxy reply');
+      ASSERT_TRUE(
         msg.success, 'should find one extension: ' + extensionName +
         ' found ' + msg.matchCount);
-    callback(port);
-  }
-  port.onMessage.addListener(handleProxyReply);
-  port.postMessage({'name': 'proxy', 'extension': extensionName});
+      resolve(port);
+    }
+    port.onMessage.addListener(handleProxyReply);
+    port.postMessage({'name': 'proxy', 'extension': extensionName});
+  });
 };
 
 /**
  * Log a message to the test harness.
  * @param {string} level The python logging level of the message.
  * @param {string} message The message to log.
- * @param {function()} opt_callback Called on completion.
+ * @return {Promise} A promise to log it (or rejects with error code).
  */
-chrometest.log = function(level, message, opt_callback) {
-  var r = new XMLHttpRequest();
-  r.open('GET', '/_command?log=' + encodeURIComponent(message) +
-         '&level=' + encodeURIComponent(level), false);
-  r.onload = function() {
-    if (r.readyState == 4) {
-      if (opt_callback !== undefined) {
-        opt_callback(r.status);
+chrometest.log = function(level, message) {
+  return new Promise(function(resolve, reject) {
+    var r = new XMLHttpRequest();
+    r.open('GET', '/_command?log=' + encodeURIComponent(message) +
+      '&level=' + encodeURIComponent(level), false);
+    r.onload = function() {
+      if (r.readyState == 4) {
+        if (r.status == 200) {
+          resolve();
+        } else {
+          reject(r.status);
+        }
       }
     }
-  }
-  r.send();
+    r.send();
+  });
 };
 
 /**
  * Log an error message.
  * @param {string} message The message to log.
- * @param {function()} opt_callback Called on completion.
+ * @return {Promise} A promise to do it.
  */
-chrometest.error = function(message, opt_callback) {
-  chrometest.log(chrometest.ERROR, message, opt_callback);
+chrometest.error = function(message) {
+  return chrometest.log(chrometest.ERROR, message);
 };
 
 /**
  * Log a warning message.
  * @param {string} message The message to log.
- * @param {function()} opt_callback Called on completion.
+ * @return {Promise} A promise to do it.
  */
-chrometest.warning = function(message, opt_callback) {
-  chrometest.log(chrometest.WARNING, message, opt_callback);
+chrometest.warning = function(message) {
+  return chrometest.log(chrometest.WARNING, message);
 };
 
 /**
  * Log an info message.
  * @param {string} message The message to log.
- * @param {function()} opt_callback Called on completion.
+ * @return {Promise} A promise to do it.
  */
-chrometest.info = function(s, opt_callback) {
-  chrometest.log(chrometest.INFO, message, opt_callback);
+chrometest.info = function(message) {
+  return chrometest.log(chrometest.INFO, message);
 };
 
 /**
  * Log a debug message.
  * @param {string} message The message to log.
- * @param {function()} opt_callback Called on completion.
+ * @return {Promise} A promise to do it.
  */
-chrometest.debug = function(message, opt_callback) {
-  chrometest.log(chrometest.DEBUG, message, opt_callback);
+chrometest.debug = function(message) {
+  return chrometest.log(chrometest.DEBUG, message);
 };
 
 /**
  * Perform an HTTP GET.
  * @param {string} url The URL to fetch.
- * @param {function()} callback The call called with (status, responseText) on
- *                            completion.
+ * @return {Promise.string,integer} A promise for the text at the url on
+ *     resolve or an integer with the error code on reject.
  */
-chrometest.httpGet = function(url, callback) {
-  var r = new XMLHttpRequest();
-  r.open('GET', url, false);
-  r.onload = function() {
-    if (r.readyState == 4) {
-      callback(r.status, r.responseText);
+chrometest.httpGet = function(url) {
+  return new Promise(function(resolve, reject) {
+    var r = new XMLHttpRequest();
+    r.open('GET', url, false);
+    r.onload = function() {
+      if (r.readyState == 4) {
+        if (r.status == 200) {
+          resolve(r.responseText);
+        } else {
+          reject(r.status);
+        }
+      }
     }
-  }
-  r.send();
+    r.send();
+  });
+};
+
+/**
+ * Wait for a duration.
+ * @param {float} ms Timeout in milliseconds.
+ * @return {Promise} A promise to wait.
+ */
+chrometest.wait = function(ms) {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      resolve();
+    }, ms);
+  });
 };
 
 /**
@@ -229,45 +263,41 @@ chrometest.formatDuration = function(ms) {
 /**
  * Tell the test harness how many test runs to expect.
  * @param {integer} testCount The number of tests to expect.
+ * @return {Promise} A promise to do it.
  */
-chrometest.reportTestCount_ = function(testCount, callback) {
+chrometest.reportTestCount_ = function(testCount) {
   console.log('About to run ' + testCount + ' tests.');
-  chrometest.httpGet(
-      '/_command?test_count=' + testCount, callback);
+  return chrometest.httpGet('/_command?test_count=' + testCount);
 };
 
 /**
  * Notify the test harness that a test has begun.
  * @param {string} name The full name of the test.
- * @param {function()} callback Called on completion.
+ * @return {Promise} A promise to do it.
  */
-chrometest.beginTest_ = function(name, callback) {
-  chrometest.resetExtension(function(count) {
+chrometest.beginTest_ = function(name) {
+  return chrometest.resetExtension().then(function(count) {
     if (count != 0) {
-      chrometest.error(
-          'Test extension connections from the last test remain active!',
-          function() {
-        chrometest.haltBrowser();
-      });
+      throw new Error(
+          'Test extension connections from the last test remain active!');
     }
     console.log('[ RUN      ] ' + name);
     chrometest.passed_ = true;
     chrometest.currentTestName_ = name;
-    chrometest.httpGet(
+    return chrometest.httpGet(
         '/_command?name=' + encodeURIComponent(name) +
-        '&start=1', function() {
-      chrometest.startTime_ = new Date();
-      callback();
-    });
+        '&start=1');
+  }).then(function(result) {
+    chrometest.startTime_ = new Date();
   });
 };
 
 /**
  * Notify the test harness that a test has ended.
- * @param {function()} callback  called on completion.
+ * @return {Promise} A promise to do it.
  */
-chrometest.endTest_ = function(callback) {
-  chrometest.resetExtension(function(count) {
+chrometest.endTest_ = function() {
+  return chrometest.resetExtension().then(function(count) {
     EXPECT_EQ(0, count,
               'all connection to the test extension should be closed');
     var endTime = new Date();
@@ -285,10 +315,10 @@ chrometest.endTest_ = function(callback) {
     chrometest.startTime_ = null;
     chrometest.currentTest_ = null;
     chrometest.currentTestName_ = null;
-    chrometest.httpGet(
+    return chrometest.httpGet(
         '/_command?name=' + encodeURIComponent(name) + '&' +
         'duration=' + encodeURIComponent(duration) + '&' +
-        'result=' + result, callback);
+        'result=' + result);
   });
 };
 
@@ -298,6 +328,20 @@ chrometest.endTest_ = function(callback) {
 chrometest.fail = function() {
   chrometest.passed_ = false;
 };
+
+/**
+ * Format an error object as a string.
+ * Error objects use their stack trace.
+ * @param {?} error A thrown value.
+ */
+chrometest.formatError = function(error) {
+  if (error.stack === undefined) {
+    return '' + error;
+  } else {
+    return error.stack;
+  }
+};
+
 
 /**
  * Assert that something must be true to continue the current test.
@@ -323,7 +367,7 @@ chrometest.assert = function(condition, description) {
       description = 'no description';
     }
     var error = new Error('ASSERT FAILED! - ' + description);
-    chrometest.error(error.stack, function() {
+    chrometest.error(chrometest.formatError(error)).then(function() {
       throw 'assert';
     });
   }
@@ -346,22 +390,22 @@ chrometest.expect = function(condition, description) {
       description = 'no description';
     }
     var error = new Error('EXPECT FAILED! - ' + description);
-    chrometest.error(error.stack, function() {});
+    chrometest.error(chrometest.formatError(error));
   }
 };
 
 /**
  * Run a list of tests.
  * param {Array.<Test>} testList The list of tests to run.
- * param {function()} callback Called on completion.
+ * @return {Promise} A promise to do it.
  */
-chrometest.runTests_ = function(testList, callback) {
+chrometest.runTests_ = function(testList) {
   if (testList.length == 0) {
-    callback();
+    return Promise.resolve();
   } else {
     var rest = testList.slice(1);
-    testList[0].call(function() {
-      chrometest.runTests_(rest, callback);
+    return testList[0].call().then(function() {
+      return chrometest.runTests_(rest);
     });
   }
 };
@@ -421,17 +465,10 @@ chrometest.filterMatch = function(filter, s) {
 
 /**
  * Filter tests based on harness filter.
- * param {function()} callback Called on completion.
+ * @returns {Promose} A promise to do it.
  */
-chrometest.filterTests_ = function(callback) {
-  chrometest.httpGet('/_command?filter=1', function(responseCode, filter) {
-    if (responseCode != 200) {
-      chrometest.error(
-          'Requesting filter from test harness failed!', function() {
-        chrometest.haltBrowser();
-      });
-      return;
-    }
+chrometest.filterTests_ = function() {
+  return chrometest.httpGet('/_command?filter=1').then(function(filter) {
     var keep = [];
     var tests = chrometest.tests_;
     for (var i = 0; i < tests.length; i++) {
@@ -440,25 +477,34 @@ chrometest.filterTests_ = function(callback) {
       }
     }
     chrometest.tests_ = keep;
-    callback();
+  }).catch(function(responseCode) {
+    throw new Error(
+        'Requesting filter from test harness failed! (code: ' +
+        responseCode + ')');
   });
 };
 
 /**
  * Report the test count and run all register tests and halt the browser.
+ * @return {Promise} A promise to do it.
  */
 chrometest.runAllTests_ = function() {
-  chrometest.filterTests_(function() {
+  return Promise.resolve().then(function() {
+    return chrometest.filterTests_();
+  }).then(function() {
     // Wait 100ms before starting the tests as extensions may not load
     // simultaneously.
-    setTimeout(function() {
-      chrometest.reportTestCount_(chrometest.tests_.length, function() {
-        chrometest.runTests_(chrometest.tests_, function() {
-          chrometest.haltBrowser();
-        });
-      });
-    });
-  }, 100);
+    return chrometest.wait(100);
+  }).then(function() {
+    return chrometest.reportTestCount_(chrometest.tests_.length);
+  }).then(function() {
+    return chrometest.runTests_(chrometest.tests_);
+  }).catch(function(error) {
+    chrometest.fail();
+    return chrometest.error(chrometest.formatError(error));
+  }).then(function() {
+    chrometest.haltBrowser();
+  });
 };
 
 /**
@@ -472,7 +518,8 @@ chrometest.run = function(sources) {
     chrometest.fail();
     chrometest.error(
         errorMsg + ' in ' + url + ' at ' +
-        lineNumber + ':' + columnNumber + '\n' + error.stack, function() {
+        lineNumber + ':' + columnNumber + '\n' +
+        chrometest.formatError(error)).then(function() {
       chrometest.haltBrowser();
     });
   };
@@ -481,14 +528,15 @@ chrometest.run = function(sources) {
     var script = document.createElement('script');
     script.src = sources[i];
     script.onerror = function(e) {
-      chrometest.error('Error loading ' + e.target.src + '\n', function() {
+      chrometest.error(
+          'Error loading ' + e.target.src + '\n').then(function() {
         chrometest.haltBrowser();
       });
     };
     script.onload = function() {
       fileCount++;
       if (fileCount == sources.length) {
-        chrometest.runAllTests_();
+        chrometest.runAllTests_().then();
       }
     }
     document.body.appendChild(script);
@@ -505,18 +553,16 @@ chrometest.Test = function() {
 
 /**
  * The default setUp method for a test case (does nothing).
- * @param {function()} done Called on completion.
+ * @return {Promise/void} Optionally return a promise to set up.
  */
-chrometest.Test.prototype.setUp = function(done) {
-  done();
+chrometest.Test.prototype.setUp = function() {
 };
 
 /**
  * The default tearDown method for a test case (does nothing).
- * @param {function()} done Called on completion.
+ * @return {Promise/void} Optionally return a promise to tear down.
  */
-chrometest.Test.prototype.tearDown = function(done) {
-  done();
+chrometest.Test.prototype.tearDown = function() {
 };
 
 
@@ -534,10 +580,10 @@ chrometest.Test.prototype.tearDown = function(done) {
  * Register a test case using a fixture class.
  * @param {string} fixtureClass The test fixture class object.
  * @param {string} testName The name of the test.
- * @param {function(done)} testFunc Called to run the test, calls done on
- *                                  completion.
+ * @param {function()} testFunc Called to run the test, may return
+ *                              a Promise.
  * @param {string} opt_caseName Optional name for the case, otherwise the
- *                              fixtureClass class name is used.
+ *     fixtureClass class name is used.
  */
 function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
   if (opt_caseName == undefined) {
@@ -546,31 +592,28 @@ function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
   var fullName = opt_caseName + '.' + testName;
   chrometest.tests_.push({
     'name': fullName,
-    'call': function(next) {
-      chrometest.beginTest_(fullName, function() {
-        chrometest.finishTest_ = function() {
-          chrometest.finishTest_ = function() {
-            chrometest.finishTest_ = null;
-            chrometest.endTest_(next);
-          };
-          chrometest.currentTest_.tearDown(chrometest.finishTest_);
-        };
+    'call': function() {
+      return Promise.resolve().then(function() {
+        return chrometest.beginTest_(fullName);
+      }).then(function() {
         chrometest.currentTest_ = new fixtureClass();
-        chrometest.currentTest_.run = testFunc;
-        window.onerror = function(
-          errorMsg, url, lineNumber, columnNumber, error) {
+        return Promise.resolve().then(function() {
+          return Promise.resolve(chrometest.currentTest_.setUp());
+        }).then(function() {
+          return Promise.resolve().then(function() {
+            return testFunc.call(chrometest.currentTest_);
+          }).catch(function(error) {
             chrometest.fail();
-            if (error == 'assert') {
-              chrometest.finishTest_();
-              return;
-            }
-            chrometest.error(error.stack, function() {
-              chrometest.finishTest_();
-            });
-          };
-        chrometest.currentTest_.setUp(function() {
-          chrometest.currentTest_.run(chrometest.finishTest_);
+            return chrometest.error(chrometest.formatError(error));
+          });
+        }).then(function() {
+          return Promise.resolve(chrometest.currentTest_.tearDown());
+        }).catch(function(error) {
+          chrometest.fail();
+          return chrometest.error(chrometest.formatError(error));
         });
+      }).then(function() {
+        return chrometest.endTest_();
       });
     },
   });
@@ -580,8 +623,8 @@ function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
  * Register a single test.
  * @param {string} testCase A test case name in lieu of a fixture.
  * @param {string} testName The name of the test.
- * @param {function(done)} testFunc Called to run the test, calls done on
- *                                  completion.
+ * @param {function()} testFunc Called to run the test, may return
+ *                              a Promise.
  */
 function TEST(testCase, testName, testFunc) {
   TEST_F(chrometest.Test, testName, testFunc, testCase);

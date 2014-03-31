@@ -15,11 +15,11 @@
  *     wait for.
  * @param {Object.<integer, ProcessInfo>} snapshot A snapshot of the the
  *     process set from getAllProcesses.
- * @param {function(Array.<ProcesssInfo>)} callback Called when the count
- *     matches with a list of extra modules.
+ * @return {Promise.Array.<ProcesssInfo>} Promise to wait until
+ *     the module count matches with a list of extra modules.
  */
-function waitForExtraModuleCount(count, snapshot, callback) {
-  chrometest.getAllProcesses(function(processes) {
+function waitForExtraModuleCount(count, snapshot) {
+  return chrometest.getAllProcesses().then(function(processes) {
     var extraModules = [];
     for (var i in processes) {
       if (processes[i].type != 'nacl') {
@@ -30,31 +30,32 @@ function waitForExtraModuleCount(count, snapshot, callback) {
       }
     }
     if (extraModules.length == count) {
-      callback(extraModules);
+      return Promise.resolve(extraModules);
     } else {
       // Try again in 100ms.
-      setTimeout(function() {
-        waitForExtraModuleCount(count, snapshot, callback);
-      }, 100);
+      return chrometest.wait(100).then(function() {
+        return waitForExtraModuleCount(count, snapshot);
+      });
     }
   });
 }
 
 /**
  * Create a new test module.
- * @param {function(ProcessInfo, Element)} callback Called with result.
+ * @return {Promise.[ProcessInfo, Element]} Promise to create element.
  */
-function createModule(loaded) {
-  chrometest.getAllProcesses(function(oldProcesses) {
-    var object = document.createElement('embed');
+function createModule() {
+  var object = null;
+  return chrometest.getAllProcesses().then(function(oldProcesses) {
+    object = document.createElement('embed');
     object.setAttribute('src', 'test_module.nmf');
     object.setAttribute('type', 'application/x-nacl');
     object.setAttribute('width', '0');
     object.setAttribute('height', '0');
     document.body.appendChild(object);
-    waitForExtraModuleCount(1, oldProcesses, function(newModules) {
-      loaded(newModules[0], object);
-    });
+    return waitForExtraModuleCount(1, oldProcesses);
+  }).then(function(newModules) {
+    return Promise.resolve([newModules[0], object]);
   });
 }
 
@@ -66,31 +67,38 @@ function TestModuleTest() {
 }
 TestModuleTest.prototype = new chrometest.Test();
 
-TestModuleTest.prototype.setUp = function(done) {
+TestModuleTest.prototype.setUp = function() {
   var self = this;
-  // Snapshot the processes that are running before the test begins for later
-  // use.
-  chrometest.getAllProcesses(function(initialProcesses) {
+  return Promise.resolve().then(function() {
+    return chrometest.Test.prototype.setUp.call(self);
+  }).then(function() {
+    // Snapshot the processes that are running before the test begins for later
+    // use.
+    return chrometest.getAllProcesses();
+  }).then(function(initialProcesses) {
     self.initialProcesses = initialProcesses;
-    createModule(function(process, object) {
-      self.process = process;
-      self.object = object;
-      done();
-    });
+    return createModule();
+  }).then(function(args) {
+    self.process = args[0];
+    self.object = args[1];
+    ASSERT_NE(null, self.process, 'there must be a process');
+    // Done with ASSERT_FALSE because otherwise self.object will attempt to
+    // jsonify the DOM element.
+    ASSERT_FALSE(null === self.object, 'there must be a DOM element');
   });
 };
 
-TestModuleTest.prototype.tearDown = function(done) {
+TestModuleTest.prototype.tearDown = function() {
   var self = this;
   // Wait for the test module to exit.
-  waitForExtraModuleCount(0, self.initialProcesses, function() {
+  return waitForExtraModuleCount(0, self.initialProcesses).then(function() {
     // Remove node.
     if (self.object != null) {
       var p = self.object.parentNode;
       p.removeChild(self.object);
       self.object = null;
     }
-    done();
+    return chrometest.Test.prototype.tearDown.call(self);
   });
 };
 
@@ -101,141 +109,157 @@ function GdbExtensionTestModuleTest() {
 }
 GdbExtensionTestModuleTest.prototype = new TestModuleTest();
 
-GdbExtensionTestModuleTest.prototype.setUp = function(done) {
+GdbExtensionTestModuleTest.prototype.setUp = function() {
   var self = this;
-  TestModuleTest.prototype.setUp.call(self, function() {
-    self.newGdbExtPort(self.process.naclDebugPort, function(gdbExt) {
-      self.gdbExt = gdbExt;
-      done();
-    });
+  return Promise.resolve().then(function() {
+    return TestModuleTest.prototype.setUp.call(self);
+  }).then(function() {
+    return self.newGdbExtPort(self.process.naclDebugPort);
+  }).then(function(gdbExt) {
+    self.gdbExt = gdbExt;
   });
 };
 
-GdbExtensionTestModuleTest.prototype.tearDown = function(done) {
-  this.gdbExt.disconnect();
-  TestModuleTest.prototype.tearDown.call(this, done);
+GdbExtensionTestModuleTest.prototype.tearDown = function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.gdbExt.disconnect();
+    return TestModuleTest.prototype.tearDown.call(self);
+  });
 };
 
 /**
  * Create a new port to the GDB extension.
  * @param {integer} debugTcpPort Tcp port of the module to manage.
- * @param {function{Port})} callback Called with a Port object once it is
- *     created and setup.
+ * @return {Promise.Port} Promise a port to the GDB extension.
  */
-GdbExtensionTestModuleTest.prototype.newGdbExtPort = function(
-    debugTcpPort, callback) {
-  chrometest.proxyExtension('GDB', function(gdbExtPort) {
-    function handlePortReply(msg) {
-      ASSERT_EQ('setDebugTcpPortReply', msg.name,
-                'expect debug extension port reply');
-      gdbExtPort.onMessage.removeListener(handlePortReply);
-      callback(gdbExtPort);
-    }
-    gdbExtPort.onMessage.addListener(handlePortReply);
-    gdbExtPort.postMessage({'name': 'setDebugTcpPort',
-                            'debugTcpPort': debugTcpPort});
-  });
-};
-
-GdbExtensionTestModuleTest.prototype.runGdb = function(done) {
-  var self = this;
-  chrometest.getAllProcesses(function(oldProcesses) {
-    waitForExtraModuleCount(1, oldProcesses, function(newModules) {
-      var gdbProcess = newModules[0];
-      self.newGdbExtPort(gdbProcess.naclDebugPort, function(gdbExtForGdb) {
-        gdbExtForGdb.onMessage.addListener(function(msg) {
-          ASSERT_EQ('rspDetachReply', msg.name, 'expect successful detach');
-          gdbExtForGdb.disconnect();
-          done();
-        });
-        gdbExtForGdb.postMessage({'name': 'rspDetach'});
-      });
+GdbExtensionTestModuleTest.prototype.newGdbExtPort = function(debugTcpPort) {
+  return Promise.resolve().then(function() {
+    return chrometest.proxyExtension('GDB');
+  }).then(function(gdbExtPort) {
+    return new Promise(function(resolve) {
+      function handlePortReply(msg) {
+        ASSERT_EQ('setDebugTcpPortReply', msg.name,
+          'expect debug extension port reply');
+        gdbExtPort.onMessage.removeListener(handlePortReply);
+        resolve(gdbExtPort);
+      }
+      gdbExtPort.onMessage.addListener(handlePortReply);
+      gdbExtPort.postMessage({'name': 'setDebugTcpPort',
+        'debugTcpPort': debugTcpPort});
     });
   });
-  // Start gdb on the target process.
-  self.gdbExt.postMessage({'name': 'runGdb'});
+};
+
+GdbExtensionTestModuleTest.prototype.runGdb = function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return chrometest.getAllProcesses();
+  }).then(function(oldProcesses) {
+    // Start gdb on the target process.
+    self.gdbExt.postMessage({'name': 'runGdb'});
+    return waitForExtraModuleCount(1, oldProcesses);
+  }).then(function(newModules) {
+    var gdbProcess = newModules[0];
+    return self.newGdbExtPort(gdbProcess.naclDebugPort);
+  }).then(function(gdbExtForGdb) {
+    return new Promise(function(resolve) {
+      gdbExtForGdb.onMessage.addListener(function(msg) {
+        ASSERT_EQ('rspDetachReply', msg.name, 'expect successful detach');
+        gdbExtForGdb.disconnect();
+        resolve();
+      });
+      gdbExtForGdb.postMessage({'name': 'rspDetach'});
+    });
+  });
 };
 
 
-
-TEST_F(GdbExtensionTestModuleTest, 'testRspKill', function(done) {
+TEST_F(GdbExtensionTestModuleTest, 'testRspKill', function() {
   var self = this;
-  self.gdbExt.onMessage.addListener(function(msg) {
-    EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
-    done();
+  return new Promise(function(resolve) {
+    self.gdbExt.onMessage.addListener(function(msg) {
+      EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
+      resolve();
+    });
+    self.gdbExt.postMessage({'name': 'rspKill'});
   });
-  self.gdbExt.postMessage({'name': 'rspKill'});
 });
 
 
-TEST_F(GdbExtensionTestModuleTest, 'testRspDetach', function(done) {
+TEST_F(GdbExtensionTestModuleTest, 'testRspDetach', function() {
   var self = this;
-  self.gdbExt.onMessage.addListener(function(msg) {
-    EXPECT_EQ('rspDetachReply', msg.name, 'reply should be right');
-    self.gdbExt.disconnect();
+  return new Promise(function(resolve) {
+    self.gdbExt.onMessage.addListener(function(msg) {
+      EXPECT_EQ('rspDetachReply', msg.name, 'reply should be right');
+      setTimeout(function() {
+        self.object.addEventListener('message', function(msg) {
+          EXPECT_EQ('pong', msg.data);
+          self.object.postMessage('exit');
+          resolve();
+        }, true);
+        self.object.postMessage('ping');
+      }, 500);
+    });
+    self.gdbExt.postMessage({'name': 'rspDetach'});
+  });
+});
+
+
+TEST_F(GdbExtensionTestModuleTest, 'testRspContinueOk', function() {
+  var self = this;
+  return new Promise(function(resolve) {
     setTimeout(function() {
       self.object.addEventListener('message', function(msg) {
         EXPECT_EQ('pong', msg.data);
+        self.gdbExt.onMessage.addListener(function(msg) {
+          EXPECT_EQ('rspContinueReply', msg.name);
+          EXPECT_EQ('exited', msg.type,
+            'expected module exit but got: ' + msg.reply);
+          EXPECT_EQ(0, msg.number, 'expected 0 exit code');
+          resolve();
+        });
         self.object.postMessage('exit');
-        done();
       }, true);
       self.object.postMessage('ping');
     }, 500);
+    self.gdbExt.postMessage({'name': 'rspContinue'});
   });
-  self.gdbExt.postMessage({'name': 'rspDetach'});
 });
 
 
-TEST_F(GdbExtensionTestModuleTest, 'testRspContinueOk', function(done) {
+TEST_F(GdbExtensionTestModuleTest, 'testRspContinueFault', function() {
   var self = this;
-  setTimeout(function() {
-    self.object.addEventListener('message', function(msg) {
-      EXPECT_EQ('pong', msg.data);
-      self.gdbExt.onMessage.addListener(function(msg) {
-        EXPECT_EQ('rspContinueReply', msg.name);
-        EXPECT_EQ('exited', msg.type,
-                  'expected module exit but got: ' + msg.reply);
-        EXPECT_EQ(0, msg.number, 'expected 0 exit code');
-        done();
-      });
-      self.object.postMessage('exit');
-    }, true);
-    self.object.postMessage('ping');
-  }, 500);
-  self.gdbExt.postMessage({'name': 'rspContinue'});
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      self.object.addEventListener('message', function(msg) {
+        EXPECT_EQ('pong', msg.data);
+        var handler = function(msg) {
+          EXPECT_EQ('rspContinueReply', msg.name);
+          EXPECT_EQ('signal', msg.type,
+            'expected module signal but got: ' + msg.reply);
+          self.gdbExt.onMessage.removeListener(handler);
+          self.gdbExt.onMessage.addListener(function(msg) {
+            EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
+            resolve();
+          });
+          self.gdbExt.postMessage({'name': 'rspKill'});
+        };
+        self.gdbExt.onMessage.addListener(handler);
+        self.object.postMessage('fault');
+      }, true);
+      self.object.postMessage('ping');
+    }, 500);
+    self.gdbExt.postMessage({'name': 'rspContinue'});
+  });
 });
 
 
-TEST_F(GdbExtensionTestModuleTest, 'testRspContinueFault', function(done) {
+TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function() {
   var self = this;
-  setTimeout(function() {
-    self.object.addEventListener('message', function(msg) {
-      EXPECT_EQ('pong', msg.data);
-      var handler = function(msg) {
-        EXPECT_EQ('rspContinueReply', msg.name);
-        EXPECT_EQ('signal', msg.type,
-                  'expected module signal but got: ' + msg.reply);
-        self.gdbExt.onMessage.removeListener(handler);
-        self.gdbExt.onMessage.addListener(function(msg) {
-          EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
-          done();
-        });
-        self.gdbExt.postMessage({'name': 'rspKill'});
-      };
-      self.gdbExt.onMessage.addListener(handler);
-      self.object.postMessage('fault');
-    }, true);
-    self.object.postMessage('ping');
-  }, 500);
-  self.gdbExt.postMessage({'name': 'rspContinue'});
-});
-
-
-TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function(done) {
-  var self = this;
-  self.stage = 0;
-  self.lineCount = 0;
-  self.runGdb(function() {
+  return new Promise(function(resolve) {
+    self.stage = 0;
+    self.lineCount = 0;
     self.gdbExt.onMessage.addListener(function(msg) {
       if (self.stage == 0) {
         self.stage++;
@@ -249,7 +273,7 @@ TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function(done) {
           ASSERT_GE(self.lineCount, 16, 'expect gdb to emit some text');
           self.stage++;
           self.gdbExt.postMessage(
-              {'name': 'input', 'msg': {'gdb': 'kill\ny\nquit\n'}});
+            {'name': 'input', 'msg': {'gdb': 'kill\ny\nquit\n'}});
         } else {
           self.lineCount++;
           ASSERT_LE(self.lineCount, 18, 'expect limited test');
@@ -260,7 +284,7 @@ TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function(done) {
         if (msg.name == 'exited') {
           EXPECT_EQ(0, msg.returncode, 'return 0');
           self.stage++;
-          done();
+          resolve();
         } else if (msg.name == 'message') {
           // We will receive more output from gdb, but it's echoed keystrokes
           // and exit messages, so we'll ignore it.
@@ -269,5 +293,6 @@ TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function(done) {
         }
       }
     });
+    self.runGdb();
   });
 });

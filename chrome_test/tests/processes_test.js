@@ -12,16 +12,19 @@ function ProcessesTest() {
 }
 ProcessesTest.prototype = new chrometest.Test();
 
-ProcessesTest.prototype.setUp = function(done) {
+ProcessesTest.prototype.setUp = function() {
   var self = this;
-  chrometest.getAllProcesses(function(processes) {
+  return Promise.resolve().then(function() {
+    return chrometest.Test.prototype.setUp.call(self);
+  }).then(function() {
+    return chrometest.getAllProcesses();
+  }).then(function(processes) {
     self.processes = processes;
-    done();
   });
 };
 
 
-TEST_F(ProcessesTest, 'testProcessTypes', function(done) {
+TEST_F(ProcessesTest, 'testProcessTypes', function() {
   var browserCount = 0;
   var rendererCount = 0;
   var gpuCount = 0;
@@ -48,10 +51,9 @@ TEST_F(ProcessesTest, 'testProcessTypes', function(done) {
   EXPECT_EQ(1, gpuCount, 'there should be one gpu');
   EXPECT_GE(rendererCount, 1, 'there should be one or more renderers');
   EXPECT_GE(extensionCount, 2, 'there should be two or more extensions');
-  done();
 });
 
-TEST_F(ProcessesTest, 'testExtensionTitles', function(done) {
+TEST_F(ProcessesTest, 'testExtensionTitles', function() {
   var hasChromeTest = false;
   var hasPingTest = false;
   for (var id in this.processes) {
@@ -66,5 +68,4 @@ TEST_F(ProcessesTest, 'testExtensionTitles', function(done) {
   }
   EXPECT_TRUE(hasChromeTest, 'the chrometest extension should be present');
   EXPECT_TRUE(hasPingTest, 'the ping test extension should be present');
-  done();
 });

@@ -7,8 +7,8 @@
 'use strict';
 
 
-TEST('ExtensionTest', 'testGetAllExtensions', function(done) {
-  chrometest.getAllExtensions(function(extensions) {
+TEST('ExtensionTest', 'testGetAllExtensions', function() {
+  return chrometest.getAllExtensions().then(function(extensions) {
     ASSERT_EQ(2, extensions.length, 'there should be two extensions');
     var expected = [
       'Chrome Testing Extension',
@@ -21,31 +21,34 @@ TEST('ExtensionTest', 'testGetAllExtensions', function(done) {
     }
     actual.sort();
     EXPECT_EQ(expected, actual, 'extensions should have the right names');
-    done();
   });
 });
 
-TEST('ExtensionTest', 'testBuiltInPingPong', function(done) {
+TEST('ExtensionTest', 'testBuiltInPingPong', function() {
   var port = chrometest.newTestPort();
   var data = 'hickory dickory dock';
-  port.onMessage.addListener(function(msg) {
-    EXPECT_EQ('pong', msg.name, 'we should have gotten a pong');
-    EXPECT_EQ(data, msg.data, 'we should get back what we sent');
-    port.disconnect();
-    done();
-  });
-  port.postMessage({'name': 'ping', 'data': data});
-});
-
-TEST('ExtensionTest', 'testExtensionProxy', function(done) {
-  var data = 'fee fi fo fum';
-  chrometest.proxyExtension('Ping Test Extension', function(port) {
+  return new Promise(function(resolve, reject) {
     port.onMessage.addListener(function(msg) {
       EXPECT_EQ('pong', msg.name, 'we should have gotten a pong');
       EXPECT_EQ(data, msg.data, 'we should get back what we sent');
       port.disconnect();
-      done();
+      resolve();
     });
     port.postMessage({'name': 'ping', 'data': data});
+  });
+});
+
+TEST('ExtensionTest', 'testExtensionProxy', function() {
+  var data = 'fee fi fo fum';
+  return chrometest.proxyExtension('Ping Test Extension').then(function(port) {
+    return new Promise(function(resolve, reject) {
+      port.onMessage.addListener(function(msg) {
+        EXPECT_EQ('pong', msg.name, 'we should have gotten a pong');
+        EXPECT_EQ(data, msg.data, 'we should get back what we sent');
+        port.disconnect();
+        resolve();
+      });
+      port.postMessage({'name': 'ping', 'data': data});
+    });
   });
 });

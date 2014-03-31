@@ -6,12 +6,11 @@
 
 'use strict';
 
-TEST('UserAgentTest', 'testInTestMode', function(done) {
+TEST('UserAgentTest', 'testInTestMode', function() {
   var parts = navigator.userAgent.split('/');
   ASSERT_EQ(2, parts.length, 'agent should have 2 parts');
   EXPECT_EQ('ChromeTestAgent', parts[0],
             'first part should be an special string');
   EXPECT_EQ(32, parts[1].length,
             'second part should be a 32 digit extension id');
-  done();
 });
