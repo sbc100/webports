@@ -164,7 +164,8 @@ def KillSubprocessAndChildren(proc):
         [os.path.join(os.environ['SYSTEMROOT'], 'System32', 'taskkill.exe'),
         '/F', '/T', '/PID', str(proc.pid)])
   else:
-    proc.kill()
+    # Send SIGKILL=9 to the entire process group associated with the child.
+    os.kill(-proc.pid, 9)
 
 
 def CommunicateWithTimeout(proc, timeout):
@@ -185,25 +186,30 @@ def CommunicateWithTimeout(proc, timeout):
 
   thread = threading.Thread(target=Target)
   thread.start()
-  thread.join(timeout)
-  if thread.is_alive():
-    logging.error('Attempting to kill test due to timeout of %.1f seconds!' %
-                  timeout)
-    # This will kill the process which should force communicate to return with
-    # any partial output.
-    KillSubprocessAndChildren(proc)
-    # Thus result should ALWAYS contain something after this join.
-    thread.join()
-    logging.error('Killed test due to timeout of %.1f seconds!' % timeout)
-    # Also append to stderr (or stdout).
-    msg = '\n\nKilled test due to timeout of %.1f seconds!\n' % timeout
-    if result[0][1] is not None:
-      result[0][1] += msg
+  try:
+    thread.join(timeout)
+    if thread.is_alive():
+      logging.error('Attempting to kill test due to timeout of %.1f seconds!' %
+                    timeout)
+      # This will kill the process which should force communicate to return with
+      # any partial output.
+      KillSubprocessAndChildren(proc)
+      # Thus result should ALWAYS contain something after this join.
+      thread.join()
+      logging.error('Killed test due to timeout of %.1f seconds!' % timeout)
+      # Also append to stderr (or stdout).
+      msg = '\n\nKilled test due to timeout of %.1f seconds!\n' % timeout
+      if result[0][1] is not None:
+        result[0][1] += msg
+      else:
+        result[0][0] += msg
+      returncode = RETURNCODE_KILL
     else:
-      result[0][0] += msg
-    returncode = RETURNCODE_KILL
-  else:
-    returncode = proc.returncode
+      returncode = proc.returncode
+  finally:
+    # In case something else goes wrong, be sure to bring down the child.
+    if thread.is_alive():
+      KillSubprocessAndChildren(proc)
   assert len(result) == 1
   return tuple(result[0]) + (returncode,)
 
@@ -436,8 +442,16 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
       if len(load_apps) != 0:
         cmd += ['--load-and-launch-app=' + ','.join(load_apps)]
       cmd += [start_url]
+
+      def ProcessGroup():
+        if sys.platform != 'win32':
+          # On non-windows platforms, start a new process group so that we can
+          # be certain we bring down Chrome on a timeout.
+          os.setpgid(0, 0)
+
       p = subprocess.Popen(
-          cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+          cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+          preexec_fn=ProcessGroup)
       logging.info('Started chrome with command line: %s' % (' '.join(cmd)))
       stdout, stderr, returncode = CommunicateWithTimeout(p, timeout=timeout)
       if logging.getLogger().isEnabledFor(logging.DEBUG):
