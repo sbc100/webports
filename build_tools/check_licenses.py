@@ -25,7 +25,7 @@ options = None
 
 def CheckLicense(package):
   if not package.LICENSE:
-    print '%-27s: missing license field' % package.PACKAGE_NAME
+    print '%-27s: missing license field' % package.NAME
     package.Download()
     package.Extract()
     return 1
@@ -33,7 +33,7 @@ def CheckLicense(package):
   rtn = 0
   licenses = package.LICENSE.split(',')
   if options.verbose:
-    print '%-27s: %s' % (package.PACKAGE_NAME, licenses)
+    print '%-27s: %s' % (package.NAME, licenses)
   licenses = [license.split(':') for license in licenses]
   for license in licenses:
     if license[0] not in VALID_LICENSES:

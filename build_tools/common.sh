@@ -2,9 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
-# Environment variable NACL_ARCH should be unset or set to "i686"
-# for a 32-bit build.  It should be set to "x86_64", "pnacl", or "arm"
-# for a 64-bit, pnacl, or arm builds.
+# Environment variable NACL_ARCH should be set to one of the following
+# values: i686 x86_64 pnacl arm
 
 
 # NAMING CONVENTION
@@ -20,7 +19,6 @@ set -o errexit
 
 readonly TOOLS_DIR=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
 readonly START_DIR=$PWD
-readonly PACKAGE_NAME_SHORT=$(basename $PWD)
 readonly NACL_SRC=$(dirname ${TOOLS_DIR})
 readonly NACL_PACKAGES=${NACL_SRC}
 NACL_DEBUG=${NACL_DEBUG:-0}
@@ -124,19 +122,25 @@ readonly NACL_PACKAGES_STAMPDIR=${NACL_PACKAGES_OUT}/stamp
 NACL_BUILD_SUBDIR=build
 NACL_INSTALL_SUBDIR=install
 
-PACKAGE_SUFFIX="-${NACL_ARCH}"
+# The components of package names cannot contain underscore
+# characters so use x86-64 rather then x86_64 for arch component.
+if [ ${NACL_ARCH} = "x86_64" ]; then
+  PACKAGE_SUFFIX="_x86-64"
+else
+  PACKAGE_SUFFIX="_${NACL_ARCH}"
+fi
 
 if [ ${NACL_ARCH} != "pnacl" ]; then
-  PACKAGE_SUFFIX+=-${NACL_LIBC}
+  PACKAGE_SUFFIX+=_${NACL_LIBC}
 fi
 
 if [ ${NACL_DEBUG} = "1" ]; then
-  PACKAGE_SUFFIX+=-debug
+  PACKAGE_SUFFIX+=_debug
 fi
 
 NACL_BUILD_SUBDIR+=${PACKAGE_SUFFIX}
 NACL_INSTALL_SUBDIR+=${PACKAGE_SUFFIX}
-PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${PACKAGE_NAME_SHORT}${PACKAGE_SUFFIX}.tar.bz2
+PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
 
 # Don't support building with SDKs older than the current stable release
 MIN_SDK_VERSION=${MIN_SDK_VERSION:-31}
@@ -190,12 +194,13 @@ else
   NACL_CONFIG=Release
 fi
 
-# PACKAGE_DIR (the folder contained within that archive) defaults to
-# the PACKAGE_NAME.  Packages with non-standard contents can override
+# ARCHIVE_ROOT (the folder contained within that archive) defaults to
+# the NAME-VERSION.  Packages with non-standard contents can override
 # this before including common.sh
-PACKAGE_DIR=${PACKAGE_DIR:-${PACKAGE_NAME:-}}
-WORK_DIR=${NACL_PACKAGES_BUILD}/${PACKAGE_NAME_SHORT}
-SRC_DIR=${WORK_DIR}/${PACKAGE_DIR}
+PACKAGE_NAME=${NAME}
+ARCHIVE_ROOT=${ARCHIVE_ROOT:-${NAME}-${VERSION}}
+WORK_DIR=${NACL_PACKAGES_BUILD}/${NAME}
+SRC_DIR=${WORK_DIR}/${ARCHIVE_ROOT}
 DEFAULT_BUILD_DIR=${WORK_DIR}/${NACL_BUILD_SUBDIR}
 BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
 INSTALL_DIR=${WORK_DIR}/${NACL_INSTALL_SUBDIR}

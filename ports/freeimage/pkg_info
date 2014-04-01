@@ -1,4 +1,6 @@
-PACKAGE_NAME=FreeImage-3.14.1
+NAME=freeimage
+VERSION=3.14.1
 URL=http://downloads.sourceforge.net/freeimage/FreeImage3141.zip
+ARCHIVE_ROOT=FreeImage
 LICENSE=CUSTOM
 SHA1=cc09671e16460c27242280c2b6100f39974c89e1

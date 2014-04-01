@@ -39,6 +39,16 @@ NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 if NACL_SDK_ROOT:
   sys.path.append(os.path.join(NACL_SDK_ROOT, 'tools'))
 
+arch_to_pkgarch = {
+  'x86_64': 'x86-64',
+  'i686': 'i686',
+  'arm': 'arm',
+  'pnacl': 'pnacl',
+}
+
+# Inverse of arch_to_pkgarch
+pkgarch_to_arch = {v:k for k, v in arch_to_pkgarch.items()}
+
 # TODO(sbc): use this code to replace the bash logic in build_tools/common.sh
 
 class Error(Exception):
@@ -92,7 +102,7 @@ def CheckStamp(filename, contents=None, timestamp=None):
 
 
 def Log(message):
-  sys.stdout.write(message + '\n')
+  sys.stdout.write(str(message) + '\n')
   sys.stdout.flush()
 
 
@@ -149,25 +159,14 @@ def GetInstallStampRoot(arch, libc):
   return os.path.join(tc_root, 'var', 'lib', 'npkg')
 
 
-def GetInstallStamp(pkg_basename):
+def GetInstallStamp(package_name):
   root = GetInstallStampRoot(GetCurrentArch(), GetCurrentLibc())
-  return os.path.join(root, pkg_basename)
+  return os.path.join(root, package_name)
 
 
-def IsInstalled(pkg_basename):
-  stamp = GetInstallStamp(pkg_basename)
+def IsInstalled(package_name):
+  stamp = GetInstallStamp(package_name)
   return CheckStamp(stamp)
-
-
-def PackageFile(pkg_basename):
-  arch = GetCurrentArch()
-  pkg_fullname = os.path.join(PACKAGES_ROOT, pkg_basename) + '-' + GetCurrentArch()
-  if arch != 'pnacl':
-    pkg_fullname += '-' + GetCurrentLibc()
-  if os.environ.get('NACL_DEBUG') == '1':
-    pkg_fullname += '-debug'
-  return pkg_fullname + '.tar.bz2'
-
 
 
 class BinaryPackage(object):
@@ -179,19 +178,21 @@ class BinaryPackage(object):
     basename = os.path.splitext(basename)[0]
     if extension != '.bz2':
       raise Error('invalid file extension: %s' % extension)
-    if '-' not in basename:
-      raise Error('package filename must contain an hyphen: %s' % basename)
-    parts = basename.split('-')
+    if '_' not in basename:
+      raise Error('package filename must contain underscores: %s' % basename)
+    parts = basename.split('_')
+    if len(parts) < 3 or len(parts) > 5:
+      raise Error('invalid package filename: %s' % basename)
     if parts[-1] == 'debug':
       parts = parts[:-1]
+
     if parts[-1] in ('newlib', 'glibc'):
       self.libc = parts[-1]
       parts = parts[:-1]
     else:
       self.libc = 'newlib'
-    self.arch = parts[-1]
-    parts = parts[:-1]
-    self.name = '-'.join(parts)
+    self.name, self.version, arch = parts[:3]
+    self.arch = pkgarch_to_arch[arch]
 
   def IsInstalled(self):
     GetInstallStamp(self.name)
@@ -290,13 +291,12 @@ class Package(object):
   Package objects correspond to folders on disk which
   contain a 'pkg_info' file.
   """
-  VALID_KEYS = ('URL', 'PACKAGE_NAME', 'LICENSE', 'DEPENDS', 'MIN_SDK_VERSION',
-                'LIBC', 'DISABLED_ARCH', 'URL_FILENAME', 'PACKAGE_DIR',
+  VALID_KEYS = ('NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
+                'MIN_SDK_VERSION', 'LIBC', 'DISABLED_ARCH', 'URL_FILENAME',
                 'BUILD_OS', 'SHA1', 'DISABLED')
 
   def __init__(self, pkg_root):
     self.root = os.path.abspath(pkg_root)
-    self.basename = os.path.basename(self.root)
     self.info = os.path.join(pkg_root, 'pkg_info')
     keys = []
     for key in Package.VALID_KEYS:
@@ -312,10 +312,21 @@ class Package(object):
         key, value = self.ParsePkgInfoLine(line, i+1)
         keys.append(key)
         setattr(self, key, value)
-    assert 'PACKAGE_NAME' in keys
+
+    for required_key in ('NAME', 'VERSION'):
+      if required_key not in keys:
+        raise Error('%s: pkg_info missing required key: %s' %
+                    (self.info, required_key))
+
+    if '_' in self.NAME:
+      raise Error('%s: package NAME cannot contain underscores' % self.info)
+    if '_' in self.VERSION:
+      raise Error('%s: package VERSION cannot contain underscores' % self.info)
+    if self.NAME != os.path.basename(self.root):
+      raise Error('%s: package NAME must match directory name' % self.info)
 
   def __cmp__(self, other):
-    return cmp(self.PACKAGE_NAME, other.PACKAGE_NAME)
+    return cmp(self.NAME, other.NAME)
 
   def ParsePkgInfoLine(self, line, line_no):
     if '=' not in line:
@@ -351,8 +362,8 @@ class Package(object):
     return basename
 
   def GetBuildLocation(self):
-    package_dir = self.PACKAGE_DIR or self.PACKAGE_NAME
-    return os.path.join(BUILD_ROOT, package_dir)
+    package_dir = self.ARCHIVE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
+    return os.path.join(BUILD_ROOT, self.NAME, package_dir)
 
   def GetArchiveFilename(self):
     if self.URL_FILENAME:
@@ -380,10 +391,18 @@ class Package(object):
           Log(str(e))
 
   def PackageFile(self):
-    return PackageFile(self.basename)
+    arch = GetCurrentArch()
+    fullname = [os.path.join(PACKAGES_ROOT, self.NAME)]
+    fullname.append(self.VERSION)
+    fullname.append(arch_to_pkgarch[arch])
+    if arch != 'pnacl':
+      fullname.append(GetCurrentLibc())
+    if os.environ.get('NACL_DEBUG') == '1':
+      fullname.append('debug')
+    return '_'.join(fullname) + '.tar.bz2'
 
   def IsInstalled(self):
-    return IsInstalled(self.basename)
+    return IsInstalled(self.NAME)
 
   def IsBuilt(self):
     return os.path.exists(self.PackageFile())
@@ -392,7 +411,7 @@ class Package(object):
     force_install = force in ('build', 'install', 'all')
 
     if not force_install and self.IsInstalled():
-      Log("Already installed '%s' [%s]" % (self.basename, GetCurrentArch()))
+      Log("Already installed '%s' [%s]" % (self.NAME, GetCurrentArch()))
       return
 
     if not self.IsBuilt() or force:
@@ -412,14 +431,14 @@ class Package(object):
 
     force_build = force in ('build', 'all')
     if not force_build and self.IsBuilt():
-      Log("Already built '%s' [%s]" % (self.basename, arch))
+      Log("Already built '%s' [%s]" % (self.NAME, arch))
       return
 
     log_root = os.path.join(OUT_DIR, 'logs')
     if not os.path.isdir(log_root):
       os.makedirs(log_root)
 
-    stdout = os.path.join(log_root, '%s.log' % self.basename)
+    stdout = os.path.join(log_root, '%s.log' % self.NAME)
     if os.path.exists(stdout):
       os.remove(stdout)
 
@@ -427,14 +446,14 @@ class Package(object):
       prefix = '*** '
     else:
       prefix = ''
-    Log("%sBuilding '%s' [%s]" % (prefix, self.basename, arch))
+    Log("%sBuilding '%s' [%s]" % (prefix, self.NAME, arch))
 
     start = time.time()
     self.RunBuildSh(verbose, stdout)
 
     duration = FormatTimeDelta(time.time() - start)
     Log("Build complete '%s' [%s] [took %s]"
-        % (self.basename, arch, duration))
+        % (self.NAME, arch, duration))
 
 
   def RunBuildSh(self, verbose, stdout, args=None):
@@ -446,7 +465,7 @@ class Package(object):
     if verbose:
       rtn = subprocess.call(cmd, cwd=self.root)
       if rtn != 0:
-        raise Error("Building %s: failed." % (self.basename))
+        raise Error("Building %s: failed." % (self.NAME))
     else:
       with open(stdout, 'a+') as log_file:
         rtn = subprocess.call(cmd,
@@ -456,14 +475,14 @@ class Package(object):
       if rtn != 0:
         with open(stdout) as log_file:
           sys.stdout.write(log_file.read())
-        raise Error("Building '%s' failed." % (self.basename))
+        raise Error("Building '%s' failed." % (self.NAME))
 
 
   def Verify(self, verbose=False):
     """Download upstream source and verify hash."""
     archive = self.DownloadLocation()
     if not archive:
-      Log("no archive: %s" % self.basename)
+      Log("no archive: %s" % self.NAME)
       return True
 
     if self.SHA1 is None:
@@ -486,29 +505,34 @@ class Package(object):
     if os.path.exists(pkg):
       os.remove(pkg)
 
-    stamp_dir = os.path.join(STAMP_DIR, self.basename)
+    stamp_dir = os.path.join(STAMP_DIR, self.NAME)
     Log('removing %s' % stamp_dir)
     if os.path.exists(stamp_dir):
       shutil.rmtree(stamp_dir)
 
   def Extract(self):
-    self.ExtractInto(BUILD_ROOT)
+    self.ExtractInto(os.path.join(BUILD_ROOT, self.NAME))
 
   def ExtractInto(self, output_path):
     """Extract the package archive into the given location.
 
     This method assumes the package has already been downloaded.
     """
+    archive = self.DownloadLocation()
+    if not archive:
+      return
+
     if not os.path.exists(output_path):
       os.makedirs(output_path)
 
-    new_foldername = os.path.dirname(self.GetBuildLocation())
-    if os.path.exists(os.path.join(output_path, new_foldername)):
+    new_foldername = os.path.basename(self.GetBuildLocation())
+    dest = os.path.join(output_path, new_foldername)
+    if os.path.exists(dest):
+      Trace('Already exists: %s' % dest)
       return
 
     tmp_output_path = tempfile.mkdtemp(dir=OUT_DIR)
     try:
-      archive = self.DownloadLocation()
       ext = os.path.splitext(archive)[1]
       if ext in ('.gz', '.tgz', '.bz2'):
         cmd = ['tar', 'xf', archive, '-C', tmp_output_path]
@@ -516,10 +540,10 @@ class Package(object):
         cmd = ['unzip', '-q', '-d', tmp_output_path, archive]
       else:
         raise Error('unhandled extension: %s' % ext)
-      Log(cmd)
+      Log("Extracting '%s'" % self.NAME)
+      Trace(cmd)
       subprocess.check_call(cmd)
       src = os.path.join(tmp_output_path, new_foldername)
-      dest = os.path.join(output_path, new_foldername)
       os.rename(src, dest)
     finally:
       shutil.rmtree(tmp_output_path)
@@ -530,19 +554,19 @@ class Package(object):
   def CheckEnabled(self):
     if self.LIBC is not None and self.LIBC != GetCurrentLibc():
       raise DisabledError('%s: cannot be built with %s.'
-                          % (self.basename, GetCurrentLibc()))
+                          % (self.NAME, GetCurrentLibc()))
 
     if self.DISABLED_ARCH is not None:
       arch = GetCurrentArch()
       if arch == self.DISABLED_ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
-                            % (self.basename, arch))
+                            % (self.NAME, arch))
 
     if self.BUILD_OS is not None:
       import getos
       if getos.GetPlatform() != self.BUILD_OS:
         raise DisabledError('%s: can only be built on %s.'
-                            % (self.basename, self.BUILD_OS))
+                            % (self.NAME, self.BUILD_OS))
 
   def Download(self, mirror=True):
     filename = self.DownloadLocation()

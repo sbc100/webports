@@ -1,2 +1,3 @@
-PACKAGE_NAME=glibc-compat-0.1
+NAME=glibc-compat
+VERSION=0.1
 LIBC=newlib

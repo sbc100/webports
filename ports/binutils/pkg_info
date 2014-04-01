@@ -1,5 +1,6 @@
-PACKAGE_NAME=binutils
-URL=http://git.chromium.org/native_client/nacl-binutils.git@7dc2f2590e3e0dcec737a0c91e3f86d91c10db7f
+NAME=binutils
+VERSION=7dc2f2590
+URL=http://git.chromium.org/native_client/nacl-binutils.git@7dc2f2590
 LICENSE=GPL
 LIBC=glibc
 DEPENDS=(nacl-spawn)

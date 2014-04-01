@@ -1,4 +1,5 @@
-PACKAGE_NAME=readline-6.2
+NAME=readline
+VERSION=6.2
 URL=ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
 MIN_SDK_VERSION=31
 LICENSE=GPL3

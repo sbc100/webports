@@ -1,4 +1,5 @@
-PACKAGE_NAME=bullet-2.81-rev2613
+NAME=bullet
+VERSION=2.81-rev2613
 URL=https://bullet.googlecode.com/files/bullet-2.81-rev2613.zip
 LICENSE=CUSTOM:COPYING
 # TODO(binji): remove this conditional once this bug gets fixed:

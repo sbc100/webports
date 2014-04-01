@@ -1,4 +1,5 @@
-PACKAGE_NAME=libtheora-1.1.1
+NAME=libtheora
+VERSION=1.1.1
 URL=http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
 LICENSE=BSD:COPYING
 DEPENDS=(libogg)

@@ -62,7 +62,7 @@ paths.)
 
 The source code and build output for each package is placed in::
 
-  out/repository/<PACKAGE_NAME>
+  out/build/<PACKAGE_NAME>
 
 **Note**: Each package has its own license. Please read and understand these
 licenses before using these packages in your projects.

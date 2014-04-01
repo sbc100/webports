@@ -1,5 +1,5 @@
-PACKAGE_NAME=DevIL-1.7.8
-PACKAGE_DIR=devil-1.7.8
+NAME=devil
+VERSION=1.7.8
 URL=http://downloads.sourceforge.net/openil/DevIL-1.7.8.tar.gz
 LICENSE=LGPL:COPYING
 DEPENDS=(libpng jpeg8d libmng tiff lcms)

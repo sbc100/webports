@@ -1,4 +1,5 @@
-PACKAGE_NAME=coreutils-5.2.1
+NAME=coreutils
+VERSION=5.2.1
 URL=http://ftp.gnu.org/gnu/coreutils/coreutils-5.2.1.tar.bz2
 LICENSE=GPL
 LIBC=glibc

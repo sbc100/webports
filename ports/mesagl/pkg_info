@@ -1,3 +1,4 @@
-PACKAGE_NAME=mesagl
+NAME=mesagl
+VERSION=0.1
 DEPENDS=(mesa)
 DISABLED=1

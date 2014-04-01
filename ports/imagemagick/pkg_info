@@ -1,4 +1,6 @@
-PACKAGE_NAME=ImageMagick-6.8.8-5
+NAME=imagemagick
+VERSION=6.8.8-5
+ARCHIVE_ROOT=ImageMagick-6.8.8-5
 URL=http://www.imagemagick.org/download/ImageMagick-6.8.8-5.tar.bz2
 LICENSE=CUSTOM:LICENSE
 DEPENDS=(libpng jpeg8d bzip2 zlib)

@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+BUILD_DIR=${SRC_DIR}
+
 # This list of files needs to have CRLF (Windows)-style line endings translated
 # to LF (*nix)-style line endings prior to applying the patch.  This list of
 # files is taken from nacl-FreeImage-3.14.1.patch.
@@ -16,13 +18,7 @@ readonly -a CRLF_TRANSLATE_FILES=(
     "Source/OpenEXR/Imath/ImathMatrix.h"
     "Source/Utilities.h")
 
-# The FreeImage zipfile, unlike other naclports contains a folder
-# called FreeImage rather than FreeImage-X-Y-Z, so we set a customr
-# PACKAGE_DIR here.
-PACKAGE_DIR=FreeImage
 
-SRC_DIR=${WORK_DIR}/${PACKAGE_DIR}
-BUILD_DIR=${SRC_DIR}
 
 ExtractStep() {
   DefaultExtractStep

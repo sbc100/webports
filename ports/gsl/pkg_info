@@ -1,4 +1,5 @@
-PACKAGE_NAME=gsl-1.9
+NAME=gsl
+VERSION=1.9
 URL=http://ftp.thaios.net/gnu/gsl/gsl-1.9.tar.gz
 LICENSE=GPL2
 SHA1=7541504ed9864b1a278f9392830ecac9e0146258

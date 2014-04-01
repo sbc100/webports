@@ -1,4 +1,6 @@
-PACKAGE_NAME=OpenSceneGraph-2.9.7
+NAME=openscenegraph
+VERSION=2.9.7
+ARCHIVE_ROOT=OpenSceneGraph-2.9.7
 URL=http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-2.9.7.zip
 LICENSE=CUSTOM:LICENSE.txt
 SHA1=5b374ef8459e95fc1b9eeebafedfb9d58a6b2290

@@ -1,4 +1,5 @@
-PACKAGE_NAME=libav-9.6
+NAME=libav
+VERSION=9.6
 URL=http://libav.org/releases/libav-9.6.tar.xz
 LICENSE=GPL,LGPL
 # TODO(sbc): remove this conditional once this bug gets fixed:

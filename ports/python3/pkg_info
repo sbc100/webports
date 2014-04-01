@@ -1,4 +1,6 @@
-PACKAGE_NAME=Python-3.4.0a4
+NAME=python3
+VERSION=3.4.0a4
+ARCHIVE_ROOT=Python-3.4.0a4
 URL=http://python.org/ftp/python/3.4.0/Python-3.4.0a4.tar.bz2
 LICENSE=CUSTOM:LICENSE
 MIN_SDK_VERSION=30

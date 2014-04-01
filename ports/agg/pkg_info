@@ -1,4 +1,5 @@
-PACKAGE_NAME=agg-2.5
+NAME=agg
+VERSION=2.5
 URL=http://www.antigrain.com/agg-2.5.tar.gz
 LICENSE=GPL
 DEPENDS=(freetype)

@@ -20,12 +20,10 @@ BuildStep() {
 InstallStep() {
   # copy libs and headers manually
   MakeDir ${DESTDIR_LIB}
-  MakeDir ${DESTDIR_INCLUDE}
-  INCDIR=${DESTDIR_INCLUDE}/${PACKAGE_NAME}
-  Remove ${INCDIR}
+  INCDIR=${DESTDIR_INCLUDE}/${NAME}-${VERSION}
   MakeDir ${INCDIR}
-  cp -R ${SRC_DIR}/include/*.h ${INCDIR}/
-  cp ${SRC_DIR}/font_freetype/*.h ${INCDIR}/
-  cp ${SRC_DIR}/src/libagg.a ${DESTDIR_LIB}
-  cp ${SRC_DIR}/font_freetype/libaggfontfreetype.a ${DESTDIR_LIB}/
+  LogExecute cp -R ${SRC_DIR}/include/*.h ${INCDIR}/
+  LogExecute cp ${SRC_DIR}/font_freetype/*.h ${INCDIR}/
+  LogExecute cp ${SRC_DIR}/src/libagg.a ${DESTDIR_LIB}
+  LogExecute cp ${SRC_DIR}/font_freetype/libaggfontfreetype.a ${DESTDIR_LIB}/
 }

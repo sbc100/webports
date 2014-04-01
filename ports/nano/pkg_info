@@ -1,4 +1,5 @@
-PACKAGE_NAME=nano-2.2.6
+NAME=nano
+VERSION=2.2.6
 URL=http://www.nano-editor.org/dist/v2.2/nano-2.2.6.tar.gz
 LICENSE=GPL
 DEPENDS=(ncurses libtar glibc-compat nacl-spawn)

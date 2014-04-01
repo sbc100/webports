@@ -1,3 +1,4 @@
-PACKAGE_NAME=openal-ogg
+NAME=openal-ogg
+VERSION=0.1
 LIBC=newlib
 DEPENDS=(openal-soft libvorbis)

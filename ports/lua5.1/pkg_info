@@ -1,4 +1,6 @@
-PACKAGE_NAME=lua-5.1.4
+NAME=lua5.1
+VERSION=5.1.4
+ARCHIVE_ROOT=lua-5.1.4
 URL=http://www.lua.org/ftp/lua-5.1.4.tar.gz
 LICENSE=MIT
 DEPENDS=(readline)

@@ -1,4 +1,5 @@
-PACKAGE_NAME=openssl-1.0.1e
+NAME=openssl
+VERSION=1.0.1e
 URL=http://www.openssl.org/source/openssl-1.0.1e.tar.gz
 LICENSE=CUSTOM:LICENSE
 BUILD_OS=linux

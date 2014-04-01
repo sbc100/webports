@@ -1,5 +1,6 @@
-PACKAGE_NAME=gcc
-URL=http://git.chromium.org/native_client/nacl-gcc.git@396037926cdb6195456a9f0f864f2dbc13de3e60
+NAME=gcc
+VERSION=396037926cd
+URL=http://git.chromium.org/native_client/nacl-gcc.git@396037926cd
 LICENSE=GPL
 LIBC=glibc
 DEPENDS=(nacl-spawn gmp mpfr mpc)

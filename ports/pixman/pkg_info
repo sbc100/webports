@@ -1,4 +1,5 @@
-PACKAGE_NAME=pixman-0.32.4
+NAME=pixman
+VERSION=0.32.4
 URL=http://cairographics.org/releases/pixman-0.32.4.tar.gz
 LICENSE=CUSTOM:COPYING
 DEPENDS=(libpng)

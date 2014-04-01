@@ -1,4 +1,5 @@
-PACKAGE_NAME=libtar-1.2.11
+NAME=libtar
+VERSION=1.2.11
 URL=ftp://ftp.feep.net/pub/software/libtar/libtar-1.2.11.tar.gz
 LICENSE=CUSTOM
 DEPENDS=(zlib)

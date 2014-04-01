@@ -1,4 +1,5 @@
-PACKAGE_NAME=fftw-3.3.3
+NAME=fftw
+VERSION=3.3.3
 URL=http://www.fftw.org/fftw-3.3.3.tar.gz
 LICENSE=GPL
 SHA1=11487180928d05746d431ebe7a176b52fe205cf9

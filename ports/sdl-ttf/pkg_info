@@ -1,4 +1,6 @@
-PACKAGE_NAME=SDL_ttf-2.0.10
+NAME=sdl-ttf
+VERSION=2.0.10
+ARCHIVE_ROOT=SDL_ttf-2.0.10
 URL=http://www.libsdl.org/projects/SDL_ttf/release/SDL_ttf-2.0.10.tar.gz
 LICENSE=LGPL2
 DEPENDS=(sdl freetype)

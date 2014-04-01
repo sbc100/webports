@@ -1,4 +1,6 @@
-PACKAGE_NAME=SDL-1.2.14
+NAME=sdl
+VERSION=1.2.14
+ARCHIVE_ROOT=SDL-1.2.14
 URL=http://www.libsdl.org/release/SDL-1.2.14.tar.gz
 LICENSE=LGPL2
 DEPENDS=(libtar regal)

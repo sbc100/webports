@@ -1,3 +1,4 @@
-PACKAGE_NAME=drawing-demo
+NAME=drawing-demo
+VERSION=0.1
 LICENSE=BSD
 DEPENDS=(agg)

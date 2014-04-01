@@ -1,4 +1,5 @@
-PACKAGE_NAME=leveldb-1.15.0
+NAME=leveldb
+VERSION=1.15.0
 URL=https://leveldb.googlecode.com/files/leveldb-1.15.0.tar.gz
 LICENSE=BSD
 SHA1=74b70a1156d91807d8d84bfdd026e0bb5acbbf23

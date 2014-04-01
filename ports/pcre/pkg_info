@@ -1,4 +1,5 @@
-PACKAGE_NAME=pcre-8.33
+NAME=pcre
+VERSION=8.33
 URL=ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.33.tar.gz
 LICENSE=BSD
 SHA1=bceafb53553219dad2593bb8af06da4d07fd3828

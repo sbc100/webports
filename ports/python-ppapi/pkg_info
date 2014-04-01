@@ -1,3 +1,4 @@
-PACKAGE_NAME=python_ppapi
+NAME=python-ppapi
+VERSION=0.1
 LICENSE=BSD
 DEPENDS=(python libtar nacl-spawn)

@@ -1,4 +1,5 @@
-PACKAGE_NAME=toybox-0.4.7
+NAME=toybox
+VERSION=0.4.7
 URL=http://www.landley.net/toybox/downloads/toybox-0.4.7.tar.bz2
 LICENSE=BSD
 DEPENDS=(glibc-compat nacl-spawn)

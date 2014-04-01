@@ -1,5 +1,6 @@
-PACKAGE_NAME=mongoose-3.8
-PACKAGE_DIR=mongoose
+NAME=mongoose
+VERSION=3.8
+ARCHIVE_ROOT=mongoose
 URL=https://mongoose.googlecode.com/files/mongoose-3.8.tgz
 LICENSE=MIT
 LIBC=glibc

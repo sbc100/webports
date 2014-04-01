@@ -1,4 +1,5 @@
-PACKAGE_NAME=hdf5-1.8.12
+NAME=hdf5
+VERSION=1.8.12
 URL=http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.12.tar.gz
 LICENSE=CUSTOM:COPYING
 DEPENDS=(glibc-compat)

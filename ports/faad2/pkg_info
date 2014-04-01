@@ -1,4 +1,5 @@
-PACKAGE_NAME=faad2-2.7
+NAME=faad2
+VERSION=2.7
 URL=http://sourceforge.net/projects/faac/files/faad2-src/faad2-2.7/faad2-2.7.tar.gz/download
 URL_FILENAME=faad2-2.7.tar.gz
 LICENSE=GPL

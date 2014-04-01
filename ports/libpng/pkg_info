@@ -1,4 +1,5 @@
-PACKAGE_NAME=libpng-1.6.8
+NAME=libpng
+VERSION=1.6.8
 URL=http://download.sourceforge.net/libpng/libpng-1.6.8.tar.gz
 LICENSE=CUSTOM:LICENSE
 DEPENDS=(zlib)

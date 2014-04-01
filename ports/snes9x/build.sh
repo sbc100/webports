@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-PACKAGE_DIR=${PACKAGE_NAME}-src
-SRC_DIR=${WORK_DIR}/${PACKAGE_DIR}
 BUILD_DIR=${SRC_DIR}/unix
 
 EXECUTABLES=snes9x

@@ -1,4 +1,6 @@
-PACKAGE_NAME=texlive-20130530-source
+NAME=texlive
+VERSION=20130530
+ARCHIVE_ROOT=texlive-20130530-source
 URL=ftp://tug.org/texlive/historic/2013/texlive-20130530-source.tar.xz
 LICENSE=GPL
 LIBC=glibc

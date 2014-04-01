@@ -80,7 +80,7 @@ def GetBuildOrder(projects):
   for package in packages:
     for dep in package.DEPENDS:
       rtn += GetBuildOrder([dep])
-    rtn.append(package.basename)
+    rtn.append(package.NAME)
   return rtn
 
 def GetDependencies(projects):
@@ -264,7 +264,7 @@ def LoadCanned(parts):
 
 def FixupCanned(partitions):
   all_projects = [p for p in naclports.PackageIterator()]
-  all_names = [p.basename for p in all_projects if not p.DISABLED]
+  all_names = [p.NAME for p in all_projects if not p.DISABLED]
 
   # Blank the last partition and fill it with anything not in the first two.
   partitions[-1] = []

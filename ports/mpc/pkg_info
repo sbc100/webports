@@ -1,4 +1,5 @@
-PACKAGE_NAME=mpc-1.0.1
+NAME=mpc
+VERSION=1.0.1
 URL=http://www.multiprecision.org/mpc/download/mpc-1.0.1.tar.gz
 LICENSE=LGPL3
 DEPENDS=(gmp mpfr)

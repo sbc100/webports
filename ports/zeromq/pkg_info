@@ -1,4 +1,5 @@
-PACKAGE_NAME=zeromq-4.0.3
+NAME=zeromq
+VERSION=4.0.3
 URL=http://download.zeromq.org/zeromq-4.0.3.tar.gz
 LICENSE=LGPL3
 DEPENDS=(glibc-compat)

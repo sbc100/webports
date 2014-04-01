@@ -1,4 +1,5 @@
-PACKAGE_NAME=libtomcrypt-1.17
+NAME=libtomcrypt
+VERSION=1.17
 URL=http://libtomcrypt.googlecode.com/files/crypt-1.17.tar.bz2
 LICENSE=CUSTOM:LICENSE
 SHA1=9c746822c84e4276e432b64964f94d1d5ddd13ad

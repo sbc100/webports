@@ -1,4 +1,5 @@
-PACKAGE_NAME=Regal-21ad75c
+NAME=regal
+VERSION=21ad75c27b7a3d23e4423585142935756f0dc7b8
 URL=https://github.com/p3/regal/archive/21ad75c/Regal.tar.gz
 URL_FILENAME=Regal-21ad75c.tar.gz
 DISABLED_ARCH=pnacl

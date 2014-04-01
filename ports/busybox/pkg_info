@@ -1,4 +1,5 @@
-PACKAGE_NAME=busybox-1.22.0
+NAME=busybox
+VERSION=1.22.0
 URL=http://busybox.net/downloads/busybox-1.22.0.tar.bz2
 LICENSE=GPL
 BUILD_OS=linux
