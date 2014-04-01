@@ -54,7 +54,7 @@ StartBuild() {
   export SHARDS
 
   echo "@@@BUILD_STEP $1 setup@@@"
-  if ! ./build_tools/build_shard.sh ; then
+  if ! ./build_tools/buildbot_build_shard.sh ; then
     RESULT=1
   fi
 }
@@ -160,13 +160,13 @@ PlumbingTests
 export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
 export PEPPER_DIR=pepper_${PEPPER_VERSION}
 export NACLPORTS_ANNOTATE=1
-. ${SCRIPT_DIR}/bot_common.sh
+. ${SCRIPT_DIR}/buildbot_common.sh
 
 # The SDK builder builds a subset of the ports, but with multiple
 # configurations.
 if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   cd ${SCRIPT_DIR}
-  ./naclports-linux-sdk-bundle.sh
+  ./buildbot_sdk_bundle.sh
   exit 0
 fi
 

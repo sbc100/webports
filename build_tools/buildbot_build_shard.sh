@@ -10,7 +10,7 @@
 ######################################################################
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-source ${SCRIPT_DIR}/bot_common.sh
+source ${SCRIPT_DIR}/buildbot_common.sh
 
 set -o nounset
 set -o errexit
