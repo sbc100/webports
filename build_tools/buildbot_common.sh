@@ -42,7 +42,7 @@ BuildPackage() {
   else
     LIBC=newlib
   fi
-  echo "@@@BUILD_STEP ${NACL_ARCH} ${LIBC} $1"
+  echo "@@@BUILD_STEP ${NACL_ARCH} ${LIBC} $1@@@"
   if RunCmd build_tools/naclports.py build ports/$1 -v --ignore-disabled ; then
     BuildSuccess $1
   else
@@ -56,7 +56,7 @@ InstallPackage() {
   else
     LIBC=newlib
   fi
-  echo "@@@BUILD_STEP ${NACL_ARCH} ${LIBC} $1"
+  echo "@@@BUILD_STEP ${NACL_ARCH} ${LIBC} $1@@@"
   export BUILD_FLAGS="-v --ignore-disabled"
   if RunCmd make $1 ; then
     BuildSuccess $1

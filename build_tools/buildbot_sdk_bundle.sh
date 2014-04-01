@@ -81,10 +81,13 @@ BuildPackageAll() {
 MoveLibs() {
   local PACKAGE=$1
   for ARCH in $ARCH_LIST; do
+    ARCH_PKG=${ARCH}
+    ARCH_DIR=${ARCH}
     if [ "$ARCH" = "i686" ]; then
       ARCH_DIR=x86_32
-    else
-      ARCH_DIR=$ARCH
+    fi
+    if [ "$ARCH" = "x86_64" ]; then
+      ARCH_PKG="x86-64"
     fi
 
     if [ "$ARCH" = "arm" -o "$ARCH" = "pnacl" ]; then
@@ -97,16 +100,23 @@ MoveLibs() {
 
     for LIBC in $LIBC_VARIANTS; do
       for CONFIG in Debug Release; do
-        PKG_FILE=${PACKAGE_DIR}/${PACKAGE}-${ARCH}
+        PKG_FILE=${PACKAGE_DIR}/${PACKAGE}
+        PKG_SUFFIX="_${ARCH_PKG}"
         if [ ${ARCH} != "pnacl" ]; then
-          PKG_FILE+="-${LIBC}"
+          PKG_SUFFIX+="_${LIBC}"
         fi
         if [ ${CONFIG} = "Debug" ]; then
-          PKG_FILE+="-debug"
+          PKG_SUFFIX+="_debug"
         fi
-        PKG_FILE+=".tar.bz2"
+        PKG_SUFFIX+=".tar.bz2"
+        PKG_FILE=${PKG_FILE}_*${PKG_SUFFIX}
+        if [ ! -f $PKG_FILE ]; then
+          echo Missing package file ${PKG_FILE}
+          exit 1
+        fi
+        rm -rf ${TMP_DIR}
         mkdir ${TMP_DIR}
-        tar xf $PKG_FILE -C ${TMP_DIR}
+        tar xf ${PKG_FILE} -C ${TMP_DIR}
 
         # Copy build results to destination directories.
 
@@ -124,7 +134,6 @@ MoveLibs() {
             cp -d -r ${FILE} ${ARCH_LIB_DIR}
           fi
         done
-        rm -rf ${TMP_DIR}
       done
     done
   done
