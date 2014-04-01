@@ -2,6 +2,8 @@ NAME=opencv
 VERSION=2.4.7
 URL=http://storage.googleapis.com/naclports/mirror/opencv-2.4.7.tar.gz
 LICENSE=BSD:doc/license.txt
+# TODO(sbc): remove this conditional once this bug gets fixed:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
 DISABLED_ARCH=arm
 DEPENDS=(zlib libpng jpeg6b)
 SHA1=67ec788943894d4be3dff6efd7720591108feb29

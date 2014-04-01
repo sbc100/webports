@@ -209,13 +209,18 @@ index 0000000..70cadce
 +	src/cppunit/XmlDocument.cpp \
 +	src/cppunit/XmlElement.cpp
 diff --git a/configure.ac b/configure.ac
-index 5598d22..255567a 100644
+index 5598d22..205e333 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -58,6 +58,11 @@ case "$host" in
+@@ -58,6 +58,16 @@ case "$host" in
                  ARCH_SPECIFIC_CFLAGS=""
                  ARCH_STRING="PowerPC"
                  ;;
++        arm-*)
++                AC_DEFINE(ARCH_ARM, 1, [Architecture is ARM])
++                ARCH_SPECIFIC_CFLAGS=""
++                ARCH_STIRNG="ARM"
++                ;;
 +        le32-unknown-nacl*)
 +                AC_DEFINE(ARCH_PNACL, 1, [Architecture is PNaCl])
 +                ARCH_SPECIFIC_CFLAGS=""
@@ -224,7 +229,7 @@ index 5598d22..255567a 100644
          *)
                  AC_MSG_ERROR([Unknown Architecture])
                  ;;
-@@ -163,7 +168,7 @@ CXXFLAGS="$ARCH_SPECIFIC_CFLAGS $CXXFLAGS $CFLAGS"
+@@ -163,7 +173,7 @@ CXXFLAGS="$ARCH_SPECIFIC_CFLAGS $CXXFLAGS $CFLAGS"
  #----------------------------------------------------------------------------
  # Emit generated files.
  #----------------------------------------------------------------------------
