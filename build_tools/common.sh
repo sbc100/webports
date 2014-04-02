@@ -406,8 +406,18 @@ TryFetch() {
   local URL=$1
   local FILENAME=$2
   Banner "Fetching ${PACKAGE_NAME} (${FILENAME})"
+  # Send curl's status messages to stdout rather then stderr
+  CURL_ARGS="--fail --location --stderr -"
+  if [ -t 1 ]; then
+    # Add --progress-bar but only if stdout is a TTY device.
+    CURL_ARGS+=" --progress-bar"
+  else
+    # otherwise suppress all status output, since curl always
+    # assumes a TTY and writes \r and \b characters.
+    CURL_ARGS+=" --silent"
+  fi
   if which curl > /dev/null ; then
-    curl --fail --location --progress-bar -o ${FILENAME} ${URL}
+    curl ${CURL_ARGS} -o ${FILENAME} ${URL}
   else
     Banner "ERROR: could not find 'curl' in your PATH"
     exit 1
@@ -440,7 +450,7 @@ Fetch() {
   fi
 
   if [ ! -s ${FILENAME} ]; then
-    echo "ERROR: could not find ${FILENAME}"
+    echo "ERROR: failed to download ${FILENAME}"
     exit -1
   fi
 }
@@ -782,7 +792,7 @@ DefaultExtractStep() {
   MakeDir ${PARENT_DIR}
   ChangeDir ${PARENT_DIR}
   if [ ${EXTENSION} = "zip" ]; then
-    unzip ${ARCHIVE}
+    unzip -q ${ARCHIVE}
   else
     if [ $OS_SUBDIR = "win" ]; then
       tar --no-same-owner -xf ${ARCHIVE}
