@@ -3,6 +3,24 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ConfigureStep() {
+  SetupCrossEnvironment
+
+  cp ${START_DIR}/gdb_pepper.c ${SRC_DIR}/gdb
+  LogExecute ${SRC_DIR}/configure --with-curses --with-expat \
+      --with-system-readline \
+      --disable-libmcheck \
+      --prefix=${PREFIX} \
+      --host=${NACL_CROSS_PREFIX}
+
+  # If the .info files don't exist, "make all" will try to recreate it with the
+  # "makeinfo" tool, which isn't normally installed.
+  # Just copy the ones from the repo to the build directory.
+  MakeDir ${BUILD_DIR}/{gdb,bfd}/doc
+  ChangeDir ${SRC_DIR}
+  find gdb bfd -name '*.info' -exec cp {} ${BUILD_DIR}/{} \;
+}
+
 BuildStep() {
   # gdb configures its submodules at build time so we need to setup
   # the cross enrionment here.  Without this CPPFLAGS doesn't get set
@@ -52,21 +70,6 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_128.png ${GDB_APP_DIR}
 }
 
-ConfigureStep() {
-  SetupCrossEnvironment
-
-  cp ${START_DIR}/gdb_pepper.c ${SRC_DIR}/gdb
-  LogExecute ${SRC_DIR}/configure --with-curses --with-expat \
-      --with-system-readline \
-      --disable-libmcheck \
-      --prefix=${PREFIX} \
-      --host=${NACL_CROSS_PREFIX}
-
-  # If the .info files don't exist, "make all" will try to recreate it with the
-  # "makeinfo" tool, which isn't normally installed.
-  # Just copy the ones from the repo to the build directory.
-  mkdir -p ${BUILD_DIR}/{gdb,bfd}/doc
-  pushd ${SRC_DIR}
-  find gdb bfd -name '*.info' -exec cp {} ${BUILD_DIR}/{} \;
-  popd
+PostInstallTestStep() {
+  LogExecute python ${START_DIR}/gdb_test.py -x -vv -a ${NACL_ARCH}
 }

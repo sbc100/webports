@@ -9,8 +9,8 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(SCRIPT_DIR, '../..'))
 SRC_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-# TODO(bradnelson): Figure out a way to avoid referencing the version of gdb.
-GDB_OUT_DIR = os.path.join(SRC_DIR, 'out/publish/gdb-6.8/glibc')
+# TODO(bradnelson): Figure out a way to avoid referencing the libc.
+GDB_OUT_DIR = os.path.join(SRC_DIR, 'out/publish/gdb/glibc')
 
 import chrome_test
 

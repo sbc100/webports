@@ -942,6 +942,11 @@ DefaultTestStep() {
 }
 
 
+DefaultPostInstallTestStep() {
+  echo "No post-packaging tests defined for ${PACKAGE_NAME}"
+}
+
+
 DefaultInstallStep() {
   # assumes pwd has makefile
   if [ -n "${MAKEFLAGS:-}" ]; then
@@ -1229,6 +1234,7 @@ DefaultPackageInstall() {
   RunPostBuildStep
   RunTestStep
   RunInstallStep
+  RunPostInstallTestStep
   PackageStep
 }
 
@@ -1273,16 +1279,17 @@ RunStep() {
 
 # Function entry points that packages should override in order
 # to customize the build process.
-PreInstallStep() { DefaultPreInstallStep; }
-DownloadStep()   { DefaultDownloadStep;   }
-ExtractStep()    { DefaultExtractStep;    }
-PatchStep()      { DefaultPatchStep;      }
-ConfigureStep()  { DefaultConfigureStep;  }
-BuildStep()      { DefaultBuildStep;      }
-PostBuildStep()  { DefaultPostBuildStep;  }
-TestStep()       { DefaultTestStep;       }
-InstallStep()    { DefaultInstallStep;    }
-PackageInstall() { DefaultPackageInstall; }
+PreInstallStep()      { DefaultPreInstallStep;      }
+DownloadStep()        { DefaultDownloadStep;        }
+ExtractStep()         { DefaultExtractStep;         }
+PatchStep()           { DefaultPatchStep;           }
+ConfigureStep()       { DefaultConfigureStep;       }
+BuildStep()           { DefaultBuildStep;           }
+PostBuildStep()       { DefaultPostBuildStep;       }
+TestStep()            { DefaultTestStep;            }
+InstallStep()         { DefaultInstallStep;         }
+PostInstallTestStep() { DefaultPostInstallTestStep; }
+PackageInstall()      { DefaultPackageInstall;      }
 
 RunPreInstallStep() { RunStep PreInstallStep; }
 RunDownloadStep()   { RunStep DownloadStep; }
@@ -1299,6 +1306,10 @@ RunTestStep()       {
     return;
   fi
   RunStep TestStep "Testing" ${BUILD_DIR}
+}
+
+RunPostInstallTestStep()       {
+  RunStep PostInstallTestStep "Testing" ${PUBLISH_DIR}
 }
 
 RunInstallStep()    {
