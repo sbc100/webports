@@ -372,9 +372,9 @@ index e96c788..ec789ef 100644
 -	  rm -f bootstrap-emacs$(EXEEXT); \
 -	  ln temacs$(EXEEXT) bootstrap-emacs$(EXEEXT); \
 +	  echo "#!/bin/bash" > bootstrap-emacs$(EXEEXT); \
-+	  echo $(NACL_SEL_LDR) -E \\" >> bootstrap-emacs$(EXEEXT); \
++	  echo "$(NACL_SEL_LDR) -E \\" >> bootstrap-emacs$(EXEEXT); \
 +	  echo 'EMACSLOADPATH=$${EMACSLOADPATH} \' >> bootstrap-emacs$(EXEEXT); \
-+	  echo "$(RUNPROGRAM_ARGS) $(PWD)/temacs$(EXEEXT) \" >> bootstrap-emacs$(EXEEXT); \
++	  echo "$(RUNPROGRAM_ARGS) $(PWD)/temacs$(EXEEXT) \\" >> bootstrap-emacs$(EXEEXT); \
 +	  echo ' "$$@"' >> bootstrap-emacs$(EXEEXT); \
 +	  chmod a+x bootstrap-emacs$(EXEEXT); \
  	else \
