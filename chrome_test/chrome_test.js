@@ -53,20 +53,25 @@ chrometest.getUrlParameters = function() {
 
 /**
  * Create a new messaging port to communicate with the testing extension.
- * @return {Port}.
+ * @return {PortWaiter} A new Port to the testing extension wrapped with
+ *     PortWaiter.
  */
 chrometest.newTestPort = function() {
   var parts = navigator.userAgent.split('/');
   var extensionId = parts[1];
-  return chrome.runtime.connect(extensionId);
+  return new chrometest.PortWaiter(chrome.runtime.connect(extensionId));
 };
 
 /**
  * Kill the browser (to end the testing session).
+ * @return {Promise} A promise to halt (which will never be resolved because
+ *     the browser will be halted by then).
  */
 chrometest.haltBrowser = function() {
   var port = chrometest.newTestPort();
   port.postMessage({'name': 'haltBrowser'});
+  // Wait for a reply that will never come.
+  return port.wait();
 };
 
 /**
@@ -74,15 +79,13 @@ chrometest.haltBrowser = function() {
  * @returns {Promise.integer} A promise for the number of connections killed.
  */
 chrometest.resetExtension = function() {
-  return new Promise(function(resolve, reject) {
-    var port = chrometest.newTestPort();
-    var count = null;
-    port.onMessage.addListener(function(msg) {
-      ASSERT_EQ('resetReply', msg.name);
-      port.disconnect();
-      resolve(msg.count);
-    });
-    port.postMessage({'name': 'reset'});
+  var port = chrometest.newTestPort();
+  var count = null;
+  port.postMessage({'name': 'reset'});
+  return port.wait().then(function(msg) {
+    ASSERT_EQ('resetReply', msg.name);
+    port.disconnect();
+    return msg.count;
   });
 }
 
@@ -93,14 +96,12 @@ chrometest.resetExtension = function() {
  * @returns {Promise.Array.<ExtensionInfo>}.
  */
 chrometest.getAllExtensions = function() {
-  return new Promise(function(resolve, reject) {
-    var port = chrometest.newTestPort();
-    port.onMessage.addListener(function(msg) {
-      ASSERT_EQ('getAllExtensionsResult', msg.name);
-      port.disconnect();
-      resolve(msg.result);
-    });
-    port.postMessage({'name': 'getAllExtensions'});
+  var port = chrometest.newTestPort();
+  port.postMessage({'name': 'getAllExtensions'});
+  return port.wait().then(function(msg) {
+    ASSERT_EQ('getAllExtensionsResult', msg.name);
+    port.disconnect();
+    return msg.result;
   });
 };
 
@@ -111,14 +112,12 @@ chrometest.getAllExtensions = function() {
  * @return {Promise.Object.<ProcessInfo>}.
  */
 chrometest.getAllProcesses = function() {
-  return new Promise(function(resolve, reject) {
-    var port = chrometest.newTestPort();
-    port.onMessage.addListener(function(msg) {
-      ASSERT_EQ('getAllProcessesResult', msg.name);
-      port.disconnect();
-      resolve(msg.result);
-    });
-    port.postMessage({'name': 'getAllProcesses'});
+  var port = chrometest.newTestPort();
+  port.postMessage({'name': 'getAllProcesses'});
+  return port.wait().then(function(msg) {
+    ASSERT_EQ('getAllProcessesResult', msg.name);
+    port.disconnect();
+    return msg.result;
   });
 };
 
@@ -132,22 +131,18 @@ chrometest.getAllProcesses = function() {
  * whitelisted by the extensions under test when in testing mode. This allows
  * the testing extension to offer web pages proxied access to extensions under
  * test without modification.
- * @returns {Promise.Port} A promise for a Port to communicate with the
- *     extension on.
+ * @returns {Promise.PortWaiter} A promise for a PortWaiter to communicate with
+ *     the extension on.
  */
 chrometest.proxyExtension = function(extensionName) {
-  return new Promise(function(resolve, reject) {
-    var port = chrometest.newTestPort();
-    function handleProxyReply(msg) {
-      port.onMessage.removeListener(handleProxyReply);
-      ASSERT_EQ('proxyReply', msg.name, 'expect proxy reply');
-      ASSERT_TRUE(
-        msg.success, 'should find one extension: ' + extensionName +
-        ' found ' + msg.matchCount);
-      resolve(port);
-    }
-    port.onMessage.addListener(handleProxyReply);
-    port.postMessage({'name': 'proxy', 'extension': extensionName});
+  var port = chrometest.newTestPort();
+  port.postMessage({'name': 'proxy', 'extension': extensionName});
+  return port.wait().then(function(msg) {
+    ASSERT_EQ('proxyReply', msg.name, 'expect proxy reply');
+    ASSERT_TRUE(
+      msg.success, 'should find one extension: ' + extensionName +
+      ' found ' + msg.matchCount);
+    return port;
   });
 };
 
@@ -158,20 +153,11 @@ chrometest.proxyExtension = function(extensionName) {
  * @return {Promise} A promise to log it (or rejects with error code).
  */
 chrometest.log = function(level, message) {
-  return new Promise(function(resolve, reject) {
-    var r = new XMLHttpRequest();
-    r.open('GET', '/_command?log=' + encodeURIComponent(message) +
-      '&level=' + encodeURIComponent(level), false);
-    r.onload = function() {
-      if (r.readyState == 4) {
-        if (r.status == 200) {
-          resolve();
-        } else {
-          reject(r.status);
-        }
-      }
-    }
-    r.send();
+  console.log(level + ': ' + message);
+  return chrometest.httpGet(
+    '/_command?log=' + encodeURIComponent(message) +
+    '&level=' + encodeURIComponent(level)).then(function(result) {
+    // Consume the result so theres's no confusion with any chained promises.
   });
 };
 
@@ -363,7 +349,7 @@ chrometest.formatError = function(error) {
 chrometest.assert = function(condition, description) {
   if (!condition) {
     chrometest.fail();
-    if (description == null) {
+    if (description === null) {
       description = 'no description';
     }
     var error = new Error('ASSERT FAILED! - ' + description);
@@ -386,7 +372,7 @@ chrometest.assert = function(condition, description) {
 chrometest.expect = function(condition, description) {
   if (!condition) {
     chrometest.fail();
-    if (description == null) {
+    if (description === null) {
       description = 'no description';
     }
     var error = new Error('EXPECT FAILED! - ' + description);
@@ -401,7 +387,7 @@ chrometest.expect = function(condition, description) {
  */
 chrometest.runTests_ = function(testList) {
   if (testList.length == 0) {
-    return Promise.resolve();
+    return;
   } else {
     var rest = testList.slice(1);
     return testList[0].call().then(function() {
@@ -503,7 +489,7 @@ chrometest.runAllTests_ = function() {
     chrometest.fail();
     return chrometest.error(chrometest.formatError(error));
   }).then(function() {
-    chrometest.haltBrowser();
+    return chrometest.haltBrowser();
   });
 };
 
@@ -540,6 +526,124 @@ chrometest.run = function(sources) {
       }
     }
     document.body.appendChild(script);
+  }
+};
+
+
+/**
+ * An class that monitors an object that behaves like a messaging Port or an
+ * event listener, allowing Promise yielding waits.
+ * Descendants or wrappers will want to perform port type specific setup and
+ * tear down.
+ * @constructor
+ * @param {function()} tearDown A function called to detach any handles
+ *     associated with the port.
+ * @param {Object} port An object that implements postMessage.
+ */
+chrometest.PortlikeWaiter = function(tearDown, port) {
+  var self = this;
+  self.port_ = port;
+  self.messages_ = [];
+  self.waiter_ = null;
+  self.tearDown_ = tearDown;
+};
+
+/**
+ * Enqueue a message to any waiter.
+ * @param {Promise.Object} A Promise for a message.
+ */
+chrometest.PortlikeWaiter.prototype.enqueue = function(msg) {
+  var self = this;
+  if (self.waiter_ !== null) {
+    self.waiter_(msg);
+  } else {
+    self.messages_.push(msg);
+  }
+};
+
+/**
+ * Wait a message.
+ * @return {Promise.Object} A promise for a message.
+ */
+chrometest.PortlikeWaiter.prototype.wait = function() {
+  var self = this;
+  return new Promise(function(resolve) {
+    if (self.messages_.length > 0) {
+      var msg = self.messages_.shift();
+      resolve(msg);
+    } else {
+      if (self.waiter_ !== null) {
+        throw new Error('Multiple waiters on a PortlikeWaiter!');
+      }
+      self.waiter_ = function(msg) {
+        self.waiter_ = null;
+        resolve(msg);
+      };
+    }
+  });
+};
+
+/**
+ * Post a message to the port object associated with this waiter.
+ */
+chrometest.PortlikeWaiter.prototype.postMessage = function() {
+  this.port_.postMessage.apply(this.port_, arguments);
+};
+
+/**
+ * Detach the port object wrapper by this waiter for use.
+ * @return {Object} The port like object managed by this object.
+ */
+chrometest.PortlikeWaiter.prototype.detach = function() {
+  var self = this;
+  var port = self.port_;
+  self.port_ = null;
+  self.messages_ = null;
+  self.waiter_ = null;
+  if (self.tearDown_) {
+    var tearDown = self.tearDown_;
+    self.tearDown_ = null;
+    tearDown();
+  }
+  return port;
+};
+
+
+/**
+ * An object that monitors a messaging port and doles out promises.
+ * Takes ownership of the port. Calls to postMessage and disconnect on the port
+ * should be down to the waiter instead.
+ * Detach can be used to release the underlying Port.
+ * @constructor
+ * @param {Port} port The port to monitor.
+ */
+chrometest.PortWaiter = function(port) {
+  var self = this;
+  function handleMessage(msg) {
+    self.enqueue(Promise.resolve(msg));
+  }
+  function handleDisconnect() {
+    self.enqueue(Promise.reject());
+    self.detach();
+  }
+  chrometest.PortlikeWaiter.call(self, function() {
+    port.onMessage.removeListener(handleMessage);
+    port.onDisconnect.removeListener(handleDisconnect);
+  }, port);
+  self.port_.onMessage.addListener(handleMessage);
+  self.port_.onDisconnect.addListener(handleDisconnect);
+};
+chrometest.PortWaiter.prototype = new chrometest.PortlikeWaiter();
+
+/**
+ * Disconnect the Port object wrapped by this waiter.
+ * @param {Object} msg Message to send.
+ */
+chrometest.PortWaiter.prototype.disconnect = function() {
+  var self = this;
+  var port = self.detach();
+  if (port !== null) {
+    port.disconnect();
   }
 };
 
@@ -598,7 +702,7 @@ function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
       }).then(function() {
         chrometest.currentTest_ = new fixtureClass();
         return Promise.resolve().then(function() {
-          return Promise.resolve(chrometest.currentTest_.setUp());
+          return chrometest.currentTest_.setUp();
         }).then(function() {
           return Promise.resolve().then(function() {
             return testFunc.call(chrometest.currentTest_);
@@ -607,7 +711,7 @@ function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
             return chrometest.error(chrometest.formatError(error));
           });
         }).then(function() {
-          return Promise.resolve(chrometest.currentTest_.tearDown());
+          return chrometest.currentTest_.tearDown();
         }).catch(function(error) {
           chrometest.fail();
           return chrometest.error(chrometest.formatError(error));

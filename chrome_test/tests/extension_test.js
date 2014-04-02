@@ -27,28 +27,26 @@ TEST('ExtensionTest', 'testGetAllExtensions', function() {
 TEST('ExtensionTest', 'testBuiltInPingPong', function() {
   var port = chrometest.newTestPort();
   var data = 'hickory dickory dock';
-  return new Promise(function(resolve, reject) {
-    port.onMessage.addListener(function(msg) {
-      EXPECT_EQ('pong', msg.name, 'we should have gotten a pong');
-      EXPECT_EQ(data, msg.data, 'we should get back what we sent');
-      port.disconnect();
-      resolve();
-    });
-    port.postMessage({'name': 'ping', 'data': data});
+  port.postMessage({'name': 'ping', 'data': data});
+  return port.wait().then(function(msg) {
+    EXPECT_EQ('pong', msg.name, 'we should have gotten a pong');
+    EXPECT_EQ(data, msg.data, 'we should get back what we sent');
+    port.disconnect();
   });
 });
 
 TEST('ExtensionTest', 'testExtensionProxy', function() {
   var data = 'fee fi fo fum';
-  return chrometest.proxyExtension('Ping Test Extension').then(function(port) {
-    return new Promise(function(resolve, reject) {
-      port.onMessage.addListener(function(msg) {
-        EXPECT_EQ('pong', msg.name, 'we should have gotten a pong');
-        EXPECT_EQ(data, msg.data, 'we should get back what we sent');
-        port.disconnect();
-        resolve();
-      });
-      port.postMessage({'name': 'ping', 'data': data});
-    });
+  var keptPort;
+  return Promise.resolve().then(function() {
+    return chrometest.proxyExtension('Ping Test Extension');
+  }).then(function(port) {
+    keptPort = port;
+    keptPort.postMessage({'name': 'ping', 'data': data});
+    return port.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('pong', msg.name, 'we should have gotten a pong');
+    EXPECT_EQ(data, msg.data, 'we should get back what we sent');
+    keptPort.disconnect();
   });
 });

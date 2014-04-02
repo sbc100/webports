@@ -59,6 +59,23 @@ function createModule() {
   });
 }
 
+/**
+ * Create a waiter wrapper around a NaCl module.
+ * @param {Element} module The module to wrap.
+ * @return {chrometest.PortlikeWaiter} A promise based waiter.
+ */
+function moduleMessageWaiter(module) {
+  var waiter;
+  function handleMessage(msg) {
+    waiter.enqueue(Promise.resolve(msg));
+  }
+  waiter = new chrometest.PortlikeWaiter(function() {
+    module.removeEventListener(handleMessage);
+  }, module);
+  module.addEventListener('message', handleMessage, true);
+  return waiter;
+};
+
 
 function TestModuleTest() {
   chrometest.Test.call(this);
@@ -80,11 +97,12 @@ TestModuleTest.prototype.setUp = function() {
     return createModule();
   }).then(function(args) {
     self.process = args[0];
-    self.object = args[1];
+    self.rawObject = args[1];
+    self.object = moduleMessageWaiter(args[1]);
     ASSERT_NE(null, self.process, 'there must be a process');
-    // Done with ASSERT_FALSE because otherwise self.object will attempt to
+    // Done with ASSERT_FALSE because otherwise self.rawObject will attempt to
     // jsonify the DOM element.
-    ASSERT_FALSE(null === self.object, 'there must be a DOM element');
+    ASSERT_FALSE(null === self.rawObject, 'there must be a DOM element');
   });
 };
 
@@ -94,9 +112,11 @@ TestModuleTest.prototype.tearDown = function() {
   return waitForExtraModuleCount(0, self.initialProcesses).then(function() {
     // Remove node.
     if (self.object != null) {
-      var p = self.object.parentNode;
-      p.removeChild(self.object);
+      var object = self.object.detach();
       self.object = null;
+      self.rawObject = null;
+      var p = object.parentNode;
+      p.removeChild(object);
     }
     return chrometest.Test.prototype.tearDown.call(self);
   });
@@ -134,25 +154,24 @@ GdbExtensionTestModuleTest.prototype.tearDown = function() {
  * @return {Promise.Port} Promise a port to the GDB extension.
  */
 GdbExtensionTestModuleTest.prototype.newGdbExtPort = function(debugTcpPort) {
+  var keepPort = null;
   return Promise.resolve().then(function() {
     return chrometest.proxyExtension('GDB');
   }).then(function(gdbExtPort) {
-    return new Promise(function(resolve) {
-      function handlePortReply(msg) {
-        ASSERT_EQ('setDebugTcpPortReply', msg.name,
-          'expect debug extension port reply');
-        gdbExtPort.onMessage.removeListener(handlePortReply);
-        resolve(gdbExtPort);
-      }
-      gdbExtPort.onMessage.addListener(handlePortReply);
-      gdbExtPort.postMessage({'name': 'setDebugTcpPort',
-        'debugTcpPort': debugTcpPort});
-    });
+    keepPort = gdbExtPort;
+    keepPort.postMessage({'name': 'setDebugTcpPort',
+                          'debugTcpPort': debugTcpPort});
+    return keepPort.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('setDebugTcpPortReply', msg.name,
+      'expect debug extension port reply');
+    return Promise.resolve(keepPort);
   });
 };
 
 GdbExtensionTestModuleTest.prototype.runGdb = function() {
   var self = this;
+  var keepPort = null;
   return Promise.resolve().then(function() {
     return chrometest.getAllProcesses();
   }).then(function(oldProcesses) {
@@ -163,136 +182,122 @@ GdbExtensionTestModuleTest.prototype.runGdb = function() {
     var gdbProcess = newModules[0];
     return self.newGdbExtPort(gdbProcess.naclDebugPort);
   }).then(function(gdbExtForGdb) {
-    return new Promise(function(resolve) {
-      gdbExtForGdb.onMessage.addListener(function(msg) {
-        ASSERT_EQ('rspDetachReply', msg.name, 'expect successful detach');
-        gdbExtForGdb.disconnect();
-        resolve();
-      });
-      gdbExtForGdb.postMessage({'name': 'rspDetach'});
-    });
+    keepPort = gdbExtForGdb;
+    keepPort.postMessage({'name': 'rspDetach'});
+    return keepPort.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('rspDetachReply', msg.name, 'expect successful detach');
+    keepPort.disconnect();
   });
 };
 
 
 TEST_F(GdbExtensionTestModuleTest, 'testRspKill', function() {
   var self = this;
-  return new Promise(function(resolve) {
-    self.gdbExt.onMessage.addListener(function(msg) {
-      EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
-      resolve();
-    });
-    self.gdbExt.postMessage({'name': 'rspKill'});
+  self.gdbExt.postMessage({'name': 'rspKill'});
+  return self.gdbExt.wait().then(function(msg) {
+    EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
   });
 });
 
 
 TEST_F(GdbExtensionTestModuleTest, 'testRspDetach', function() {
   var self = this;
-  return new Promise(function(resolve) {
-    self.gdbExt.onMessage.addListener(function(msg) {
-      EXPECT_EQ('rspDetachReply', msg.name, 'reply should be right');
-      setTimeout(function() {
-        self.object.addEventListener('message', function(msg) {
-          EXPECT_EQ('pong', msg.data);
-          self.object.postMessage('exit');
-          resolve();
-        }, true);
-        self.object.postMessage('ping');
-      }, 500);
-    });
-    self.gdbExt.postMessage({'name': 'rspDetach'});
+  self.gdbExt.postMessage({'name': 'rspDetach'});
+  return self.gdbExt.wait().then(function(msg) {
+    EXPECT_EQ('rspDetachReply', msg.name, 'reply should be right');
+    // Wait a bit for the module to start.
+    return chrometest.wait(500);
+  }).then(function() {
+    self.object.postMessage('ping');
+    return self.object.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('pong', msg.data);
+    self.object.postMessage('exit');
   });
 });
 
 
 TEST_F(GdbExtensionTestModuleTest, 'testRspContinueOk', function() {
   var self = this;
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      self.object.addEventListener('message', function(msg) {
-        EXPECT_EQ('pong', msg.data);
-        self.gdbExt.onMessage.addListener(function(msg) {
-          EXPECT_EQ('rspContinueReply', msg.name);
-          EXPECT_EQ('exited', msg.type,
-            'expected module exit but got: ' + msg.reply);
-          EXPECT_EQ(0, msg.number, 'expected 0 exit code');
-          resolve();
-        });
-        self.object.postMessage('exit');
-      }, true);
-      self.object.postMessage('ping');
-    }, 500);
-    self.gdbExt.postMessage({'name': 'rspContinue'});
+  self.gdbExt.postMessage({'name': 'rspContinue'});
+  // Wait a bit for the module to start.
+  return chrometest.wait(500).then(function() {
+    self.object.postMessage('ping');
+    return self.object.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('pong', msg.data);
+    self.object.postMessage('exit');
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('rspContinueReply', msg.name);
+    EXPECT_EQ('exited', msg.type,
+        'expected module exit but got: ' + msg.reply);
+    EXPECT_EQ(0, msg.number, 'expected 0 exit code');
   });
 });
 
 
 TEST_F(GdbExtensionTestModuleTest, 'testRspContinueFault', function() {
   var self = this;
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      self.object.addEventListener('message', function(msg) {
-        EXPECT_EQ('pong', msg.data);
-        var handler = function(msg) {
-          EXPECT_EQ('rspContinueReply', msg.name);
-          EXPECT_EQ('signal', msg.type,
-            'expected module signal but got: ' + msg.reply);
-          self.gdbExt.onMessage.removeListener(handler);
-          self.gdbExt.onMessage.addListener(function(msg) {
-            EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
-            resolve();
-          });
-          self.gdbExt.postMessage({'name': 'rspKill'});
-        };
-        self.gdbExt.onMessage.addListener(handler);
-        self.object.postMessage('fault');
-      }, true);
-      self.object.postMessage('ping');
-    }, 500);
-    self.gdbExt.postMessage({'name': 'rspContinue'});
+  self.gdbExt.postMessage({'name': 'rspContinue'});
+  // Wait a bit for the module to start.
+  return chrometest.wait(500).then(function() {
+    self.object.postMessage('ping');
+    return self.object.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('pong', msg.data);
+    self.object.postMessage('fault');
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('rspContinueReply', msg.name);
+    EXPECT_EQ('signal', msg.type,
+        'expected module signal but got: ' + msg.reply);
+    self.gdbExt.postMessage({'name': 'rspKill'});
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('rspKillReply', msg.name, 'reply should be right');
   });
 });
 
 
 TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function() {
   var self = this;
-  return new Promise(function(resolve) {
-    self.stage = 0;
-    self.lineCount = 0;
-    self.gdbExt.onMessage.addListener(function(msg) {
-      if (self.stage == 0) {
-        self.stage++;
-        EXPECT_EQ('load', msg.name, 'expecting a load');
-      } else if (self.stage == 1) {
-        ASSERT_EQ('message', msg.name, 'expecting a message');
-        var prefix = msg.data.slice(0, 3);
-        var data = msg.data.slice(3);
-        EXPECT_EQ('gdb', prefix, 'expected gdb term message');
-        if (data == '(gdb) ') {
-          ASSERT_GE(self.lineCount, 16, 'expect gdb to emit some text');
-          self.stage++;
-          self.gdbExt.postMessage(
+  self.lineCount = 0;
+  return self.runGdb().then(function() {
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('load', msg.name, 'expecting a load');
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    function checkLine(msg) {
+      ASSERT_EQ('message', msg.name, 'expecting a message');
+      var prefix = msg.data.slice(0, 3);
+      var data = msg.data.slice(3);
+      EXPECT_EQ('gdb', prefix, 'expected gdb term message');
+      if (data == '(gdb) ') {
+        ASSERT_GE(self.lineCount, 16, 'expect gdb to emit some text');
+        self.gdbExt.postMessage(
             {'name': 'input', 'msg': {'gdb': 'kill\ny\nquit\n'}});
-        } else {
-          self.lineCount++;
-          ASSERT_LE(self.lineCount, 18, 'expect limited test');
-        }
-      } else if (self.stage == 2) {
-        EXPECT_TRUE(msg.name == 'exited' || msg.name == 'message',
-            'expected exited or message, not ' + msg.name);
-        if (msg.name == 'exited') {
-          EXPECT_EQ(0, msg.returncode, 'return 0');
-          self.stage++;
-          resolve();
-        } else if (msg.name == 'message') {
-          // We will receive more output from gdb, but it's echoed keystrokes
-          // and exit messages, so we'll ignore it.
-        } else {
-          ASSERT_TRUE(false, 'unexpected message: ' + msg.name);
-        }
+        // Go on to the next clause.
+        return self.gdbExt.wait();
+      } else {
+        self.lineCount++;
+        ASSERT_LE(self.lineCount, 18, 'expect limited test');
+        // Recurse.
+        return self.gdbExt.wait().then(checkLine);
       }
-    });
-    self.runGdb();
+    }
+    return checkLine(msg);
+  }).then(function(msg) {
+    function checkLine(msg) {
+      if (msg.name == 'message') {
+        // Recurse (ignoring this line.
+        return self.gdbExt.wait().then(checkLine);
+      }
+      EXPECT_EQ('exited', msg.name, 'expect exit');
+      EXPECT_EQ(0, msg.returncode, 'expect 0');
+    }
+    return checkLine(msg);
   });
 });
