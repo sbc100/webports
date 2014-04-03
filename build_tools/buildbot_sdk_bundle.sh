@@ -38,7 +38,7 @@ PACKAGES=$(make sdklibs_list)
 # $4 - 'Debug' or 'Release'
 CustomBuildPackage() {
   export NACL_ARCH=$2
-  export TOOLCHAIN=$2
+  export TOOLCHAIN=$3
 
   if [ "$4" = "Debug" ]; then
     export NACL_DEBUG=1
