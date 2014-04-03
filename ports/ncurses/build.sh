@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXTRA_CONFIGURE_ARGS="--disable-database"
 EXTRA_CONFIGURE_ARGS+=" --with-fallbacks=xterm-256color,vt100"
 EXTRA_CONFIGURE_ARGS+=" --disable-termcap"
@@ -15,16 +14,15 @@ if [ "${NACL_GLIBC}" = 1 ]; then
   EXTRA_CONFIGURE_ARGS+=" --with-shared"
 fi
 
-if [[ "${NACL_ARCH}" = "pnacl" ]] ; then
+if [ "${NACL_ARCH}" = "pnacl" ] ; then
   EXTRA_CONFIGURE_ARGS+=" --without-cxx-binding"
 fi
 
 ConfigureStep() {
-  if [[ "${NACL_GLIBC}" != "1" ]]; then
-    readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     # Changing NACLCC rather than CFLAGS as otherwise the configure script
     # fails to detect termios and tries to use gtty.
-    NACLCC+=" -I${GLIBC_COMPAT}"
+    NACLCC+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     export LIBS="-lglibc-compat"
   fi
 
@@ -33,7 +31,6 @@ ConfigureStep() {
   # Change the define
   sed -i.bak 's/HAVE_SIGVEC 1/HAVE_SIGVEC 0/' include/ncurses_cfg.h
 }
-
 
 InstallStep() {
   DefaultInstallStep

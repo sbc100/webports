@@ -117,10 +117,14 @@ def GetCurrentArch():
 
 
 def GetCurrentLibc():
-  if os.environ.get('NACL_GLIBC') == '1':
-    return 'glibc'
-  else:
-    return 'newlib'
+  libc = GetCurrentToolchain()
+  if libc == 'pnacl':
+    libc = 'newlib'
+  return libc
+
+
+def GetCurrentToolchain():
+  return os.environ.get('TOOLCHAIN') or 'newlib'
 
 
 def GetDebug():
@@ -130,11 +134,11 @@ def GetDebug():
     return 'release'
 
 
-def GetToolchainRoot(arch=None, libc=None):
+def GetToolchainRoot(toolchain=None, arch=None):
   """Returns the toolchain folder for a given NaCl toolchain."""
   import getos
   platform = getos.GetPlatform()
-  if arch == 'pnacl':
+  if toolchain == 'pnacl':
     tc_dir = '%s_pnacl' % platform
   else:
     tc_arch = {
@@ -142,25 +146,25 @@ def GetToolchainRoot(arch=None, libc=None):
       'i686': 'x86',
       'x86_64': 'x86'
     }[arch]
-    tc_dir = '%s_%s_%s' % (platform, tc_arch, libc)
+    tc_dir = '%s_%s_%s' % (platform, tc_arch, toolchain)
     tc_dir = os.path.join(tc_dir, '%s-nacl' % arch)
 
   return os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir)
 
 
-def GetInstallRoot(arch, libc):
+def GetInstallRoot(toolchain, arch):
   """Returns the installation used by naclports within a given toolchain."""
-  tc_root = GetToolchainRoot(arch, libc)
+  tc_root = GetToolchainRoot(toolchain, arch)
   return os.path.join(tc_root, 'usr')
 
 
-def GetInstallStampRoot(arch, libc):
-  tc_root = GetInstallRoot(arch, libc)
+def GetInstallStampRoot(toolchain, arch):
+  tc_root = GetInstallRoot(toolchain, arch)
   return os.path.join(tc_root, 'var', 'lib', 'npkg')
 
 
 def GetInstallStamp(package_name):
-  root = GetInstallStampRoot(GetCurrentArch(), GetCurrentLibc())
+  root = GetInstallStampRoot(GetCurrentToolchain(), GetCurrentArch())
   return os.path.join(root, package_name)
 
 
@@ -186,12 +190,12 @@ class BinaryPackage(object):
     if parts[-1] == 'debug':
       parts = parts[:-1]
 
-    if parts[-1] in ('newlib', 'glibc'):
-      self.libc = parts[-1]
+    if parts[-1] in ('newlib', 'glibc', 'bionic'):
+      self.toolchain = parts[-1]
       parts = parts[:-1]
-    else:
-      self.libc = 'newlib'
     self.name, self.version, arch = parts[:3]
+    if arch == 'pnacl':
+      self.toolchain = 'pnacl'
     self.arch = pkgarch_to_arch[arch]
 
   def IsInstalled(self):
@@ -253,12 +257,12 @@ class BinaryPackage(object):
 
   def Install(self):
     """Install binary package into toolchain directory."""
-    dest = GetInstallRoot(self.arch, self.libc)
+    dest = GetInstallRoot(self.toolchain, self.arch)
     dest_tmp = os.path.join(dest, 'install_tmp')
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
-    Log("Installing '%s' [%s]" % (self.name, self.arch))
+    Log("Installing '%s' [%s/%s]" % (self.name, self.arch, self.toolchain))
     os.makedirs(dest_tmp)
 
     try:
@@ -391,12 +395,13 @@ class Package(object):
           Log(str(e))
 
   def PackageFile(self):
+    toolchain = GetCurrentToolchain()
     arch = GetCurrentArch()
     fullname = [os.path.join(PACKAGES_ROOT, self.NAME)]
     fullname.append(self.VERSION)
     fullname.append(arch_to_pkgarch[arch])
-    if arch != 'pnacl':
-      fullname.append(GetCurrentLibc())
+    if toolchain != arch: # for pnacl toolchain and arch are the same
+      fullname.append(toolchain)
     if os.environ.get('NACL_DEBUG') == '1':
       fullname.append('debug')
     return '_'.join(fullname) + '.tar.bz2'
@@ -411,7 +416,8 @@ class Package(object):
     force_install = force in ('build', 'install', 'all')
 
     if not force_install and self.IsInstalled():
-      Log("Already installed '%s' [%s]" % (self.NAME, GetCurrentArch()))
+      Log("Already installed '%s' [%s/%s]" % (self.NAME, GetCurrentArch(),
+          GetCurrentLibc()))
       return
 
     if not self.IsBuilt() or force:
@@ -426,12 +432,13 @@ class Package(object):
 
     annotate = os.environ.get('NACLPORTS_ANNOTATE') == '1'
     arch = GetCurrentArch()
+    libc = GetCurrentLibc()
 
     self.CheckEnabled()
 
     force_build = force in ('build', 'all')
     if not force_build and self.IsBuilt():
-      Log("Already built '%s' [%s]" % (self.NAME, arch))
+      Log("Already built '%s' [%s/%s]" % (self.NAME, arch, libc))
       return
 
     log_root = os.path.join(OUT_DIR, 'logs')
@@ -446,14 +453,14 @@ class Package(object):
       prefix = '*** '
     else:
       prefix = ''
-    Log("%sBuilding '%s' [%s]" % (prefix, self.NAME, arch))
+    Log("%sBuilding '%s' [%s/%s]" % (prefix, self.NAME, arch, libc))
 
     start = time.time()
     self.RunBuildSh(verbose, stdout)
 
     duration = FormatTimeDelta(time.time() - start)
-    Log("Build complete '%s' [%s] [took %s]"
-        % (self.NAME, arch, duration))
+    Log("Build complete '%s' [%s/%s] [took %s]"
+        % (self.NAME, arch, libc, duration))
 
 
   def RunBuildSh(self, verbose, stdout, args=None):
@@ -688,12 +695,12 @@ def run_main(args):
       rmtree(BUILD_ROOT)
       rmtree(PACKAGES_ROOT)
       rmtree(PUBLISH_ROOT)
-      rmtree(GetInstallStampRoot(GetCurrentArch(), GetCurrentLibc()))
+      rmtree(GetInstallStampRoot(GetCurrentToolchain(), GetCurrentArch()))
       if GetCurrentArch() != 'pnacl':
         # The install root in the PNaCl toolchain is currently shared with
         # system libraries and headers so we cant' remove it completely
         # without breaking the toolchain
-        rmtree(GetInstallRoot(GetCurrentArch(), GetCurrentLibc()))
+        rmtree(GetInstallRoot(GetCurrentToolchain(), GetCurrentArch()))
     else:
       for p in PackageIterator():
         if not p.DISABLED:

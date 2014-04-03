@@ -4,7 +4,12 @@
 # found in the LICENSE file.
 
 # Echo the environment variables need to to build/configure standard
-# GNU make/automake/configure projects.
+# GNU make/automake/configure projects.  e.g. CC, CXX, CFLAGS, etc.
+# The values for these variables are calculated based on the following
+# environment variables:
+#
+# $NACL_ARCH - i386, x86_64, arm or pnacl.  Default: x86_64
+# $TOOLAHIN - bionic, newlib, glibc or pnacl.  Default: newlib
 #
 # To import these variables into your environment do:
 # $ . nacl_env.sh
@@ -17,6 +22,7 @@
 # Finally you can run a command within the NaCl environment
 # by passing the command line. e.g:
 # ./nacl_env.sh make
+
 
 if [ -z "${NACL_SDK_ROOT:-}" ]; then
   echo "-------------------------------------------------------------------"
@@ -38,20 +44,36 @@ else
   readonly OS_SUBDIR="win"
 fi
 
-# Set default NACL_ARCH based on legacy NACL_PACKAGES_BITSIZE
-if [ "${NACL_PACKAGES_BITSIZE:-}" = "64" ]; then
-  export NACL_ARCH=${NACL_ARCH:-"x86_64"}
-elif [ "${NACL_PACKAGES_BITSIZE:-}" = "pnacl" ]; then
-  export NACL_ARCH=${NACL_ARCH:-"pnacl"}
+# On mac we default ot i686 rather than x86_64 since
+# since there is no x86_64 chrome yet and its nice for
+# the default binaries to run on the host machine.
+if [ "${OS_NAME}" = "Darwin" ]; then
+  NACL_ARCH=${NACL_ARCH:-i686}
 else
-  # On mac we default ot i686 rather than x86_64 since
-  # since there is no x86_64 chrome yet and its nice for
-  # the default binaries to run on the host machine.
-  if [ "${OS_NAME}" = "Darwin" ]; then
-    export NACL_ARCH=${NACL_ARCH:-"i686"}
-  else
-    export NACL_ARCH=${NACL_ARCH:-"x86_64"}
-  fi
+  NACL_ARCH=${NACL_ARCH:-x86_64}
+fi
+
+# Default Value for TOOLCHAIN, taking into account legacy
+# NACL_GLIBC varible.
+if [ "${NACL_GLIBC:-}" = "1" ]; then
+  TOOLCHAIN=${TOOLCHAIN:-glibc}
+else
+  TOOLCHAIN=${TOOLCHAIN:-newlib}
+fi
+
+# Check NACL_ARCH
+if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
+     ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" -a \
+     ${NACL_ARCH} != "emscripten" ]; then
+  echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
+  exit -1
+fi
+
+# Check TOOLCHAIN
+if [ ${TOOLCHAIN} != "newlib" -a ${TOOLCHAIN} != "pnacl" -a \
+     ${TOOLCHAIN} != "glibc" -a ${TOOLCHAIN} != "bionic" ]; then
+  echo "Unknown value for TOOLCHAIN: '${TOOLCHAIN}'" 1>&2
+  exit -1
 fi
 
 if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
@@ -64,37 +86,33 @@ if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
   exit -1
 fi
 
-export NACL_GLIBC=${NACL_GLIBC:-0}
-
-# Check NACL_ARCH
-if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
-     ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" -a \
-     ${NACL_ARCH} != "emscripten" ]; then
-  echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
-  exit -1
-fi
-
 # In some places i686 is also known as x86_32 so we use
 # second variable to store this alternate architecture
 # name
-if [ ${NACL_ARCH} = "i686" ]; then
-  export NACL_ARCH_ALT="x86_32"
+if [ "${NACL_ARCH}" = "i686" ]; then
+  export NACL_ARCH_ALT=x86_32
 else
   export NACL_ARCH_ALT=${NACL_ARCH}
 fi
 
-if [ ${NACL_GLIBC} = "1" ]; then
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    echo "NACL_GLIBC does not work with pnacl" 1>&2
+if [ "${TOOLCHAIN}" = "glibc" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    echo "PNaCl is not supported by the glibc toolchain" 1>&2
     exit -1
   fi
-  if [ ${NACL_ARCH} = "arm" ]; then
-    echo "NACL_GLIBC does not work with arm" 1>&2
+  if [ "${NACL_ARCH}" = "arm" ]; then
+    echo "ARM is not supported by the glibc toolcahin" 1>&2
     exit -1
   fi
-  export NACL_LIBC="glibc"
+  NACL_LIBC=glibc
+elif [ "${TOOLCHAIN}" = "bionic" ]; then
+  if [ "${NACL_ARCH}" != "arm" ]; then
+    echo "Bionic toolchain only supports ARM" 1>&2
+    exit -1
+  fi
+  NACL_LIBC=bionic
 else
-  export NACL_LIBC="newlib"
+  NACL_LIBC=newlib
 fi
 
 if [ ${NACL_ARCH} = "i686" ]; then
@@ -113,12 +131,16 @@ fi
 # NACL_CROSS_PREFIX is the prefix of the executables in the
 # toolchain's "bin" directory. For example: i686-nacl-<toolname>.
 if [ ${NACL_ARCH} = "pnacl" ]; then
-  export NACL_CROSS_PREFIX=pnacl
+  NACL_CROSS_PREFIX=pnacl
 elif [ ${NACL_ARCH} = "emscripten" ]; then
-  export NACL_CROSS_PREFIX=em
+  NACL_CROSS_PREFIX=em
 else
-  export NACL_CROSS_PREFIX=${NACL_ARCH}-nacl
+  NACL_CROSS_PREFIX=${NACL_ARCH}-nacl
 fi
+
+export NACL_LIBC
+export NACL_ARCH
+export NACL_CROSS_PREFIX
 
 InitializeNaClGccToolchain() {
   if [ $NACL_ARCH = "arm" ]; then
@@ -131,6 +153,11 @@ InitializeNaClGccToolchain() {
 
   readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${TOOLCHAIN_DIR}}
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
+
+  if [ ! -d "${NACL_TOOLCHAIN_ROOT}" ]; then
+    echo "Toolchain not found: ${NACL_TOOLCHAIN_ROOT}"
+    exit -1
+  fi
 
   # export nacl tools for direct use in patches.
   export NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-gcc
@@ -253,9 +280,9 @@ InitializePNaClToolchain() {
   fi
 }
 
-if [ ${NACL_ARCH} = "pnacl" ]; then
+if [ "${NACL_ARCH}" = "pnacl" ]; then
   InitializePNaClToolchain
-elif [ ${NACL_ARCH} = "emscripten" ]; then
+elif [ "${NACL_ARCH}" = "emscripten" ]; then
   InitializeEmscriptenToolchain
 else
   InitializeNaClGccToolchain
@@ -264,7 +291,7 @@ fi
 NACL_LDFLAGS="-L${NACL_SDK_LIBDIR}"
 NACL_CPPFLAGS="-I${NACL_SDK_ROOT}/include"
 
-if [ ${NACL_GLIBC} = "1" ]; then
+if [ "${TOOLCHAIN}" = "glibc" ]; then
   NACL_LDFLAGS+=" -Wl,-rpath-link=${NACL_SDK_LIBDIR}"
 fi
 

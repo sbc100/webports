@@ -27,6 +27,7 @@ BUILD_FLAGS+=-f
 endif
 
 export NACL_ARCH
+export TOOLCHAIN
 export NACL_GLIBC
 
 all:

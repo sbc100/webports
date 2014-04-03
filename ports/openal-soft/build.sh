@@ -4,6 +4,6 @@
 # found in the LICENSE file.
 
 # Defaults to dynamic lib, but newlib can only link statically.
-if [[ ${NACL_GLIBC} = 0 ]]; then
+if [ "${NACL_LIBC}" = "newlib" ]; then
   EXTRA_CMAKE_ARGS="-DLIBTYPE=STATIC"
 fi

@@ -49,7 +49,7 @@ fi
 
 StartBuild() {
   export NACL_ARCH=$1
-  export NACL_GLIBC
+  export TOOLCHAIN
   export SHARD
   export SHARDS
 
@@ -98,13 +98,13 @@ else
 
   # Select libc
   if [ "$LIBC" = "glibc" ]; then
-    NACL_GLIBC=1
+    TOOLCHAIN=glibc
   elif [ "$LIBC" = "newlib" ]; then
-    NACL_GLIBC=0
+    TOOLCHAIN=newlib
   elif [ "$LIBC" = "pnacl_newlib" ]; then
-    NACL_GLIBC=0
+    TOOLCHAIN=pnacl
   elif [ "$LIBC" = "bionic" ]; then
-    NACL_GLIBC=0
+    TOOLCHAIN=bionic
   else
     echo "Bad LIBC: ${LIBC}" 1>&2
     exit 1
@@ -114,16 +114,16 @@ else
   if [ "$OS" = "mac" ]; then
     readonly SHARDS=1
   elif [ "$OS" = "linux" ]; then
-    if [ "$LIBC" = "glibc" ]; then
+    if [ "$TOOLCHAIN" = "glibc" ]; then
       readonly SHARDS=4
-    elif [ "$LIBC" = "newlib" ]; then
+    elif [ "$TOOLCHAIN" = "newlib" ]; then
       readonly SHARDS=3
-    elif [ "$LIBC" = "bionic" ]; then
+    elif [ "$TOOLCHAIN" = "bionic" ]; then
       readonly SHARDS=1
-    elif [ "$LIBC" = "pnacl_newlib" ]; then
+    elif [ "$TOOLCHAIN" = "pnacl" ]; then
       readonly SHARDS=4
     else
-      echo "Unspecified sharding for LIBC: ${LIBC}" 1>&2
+      echo "Unspecified sharding for TOOLCHAIN: ${TOOLCHAIN}" 1>&2
     fi
   else
     echo "Unspecified sharding for OS: ${OS}" 1>&2
@@ -170,17 +170,19 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   exit 0
 fi
 
-if [ ${LIBC} = "pnacl_newlib" ] ; then
+if [ "${LIBC}" = "pnacl_newlib" ] ; then
   StartBuild pnacl
 else
-  # Build 32-bit.
-  StartBuild i686
+  if [ "${TOOLCHAIN}" != "bionic" ]; then
+    # Build 32-bit.
+    StartBuild i686
 
-  # Build 64-bit.
-  StartBuild x86_64
+    # Build 64-bit.
+    StartBuild x86_64
+  fi
 
   # Build ARM.
-  if [ ${NACL_GLIBC} != "1" ]; then
+  if [ "${TOOLCHAIN}" != "glibc" ]; then
     StartBuild arm
   fi
 fi
@@ -192,9 +194,9 @@ if [ -z "${NACLPORTS_NO_UPLOAD:-}" -a "$OS" = "linux" ]; then
 fi
 
 echo "@@@BUILD_STEP Summary@@@"
-if [ $RESULT != 0 ] ; then
+if [ "${RESULT}" != "0" ] ; then
   echo "@@@STEP_FAILURE@@@"
-  echo -e "$MESSAGES"
+  echo -e "${MESSAGES}"
 fi
 
-exit $RESULT
+exit ${RESULT}

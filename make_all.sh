@@ -16,22 +16,28 @@ export BUILD_FLAGS=--ignore-disabled
 
 # x86_64 NaCl
 export NACL_ARCH=x86_64
-export NACL_GLIBC=1
+export TOOLCHAIN=glibc
 make ${TARGETS}
-unset NACL_GLIBC
+export TOOLCHAIN=newlib
 make ${TARGETS}
 
 # i686 NaCl
 export NACL_ARCH=i686
-export NACL_GLIBC=1
+export TOOLCHAIN=glibc
 make ${TARGETS}
-unset NACL_GLIBC
+export TOOLCHAIN=newlib
 make ${TARGETS}
 
 # ARM NaCl
 export NACL_ARCH=arm
+export TOOLCHAIN=newlib
 make ${TARGETS}
+if [ -e ${NACL_SDK_ROOT}/toolchain/*_arm_bionic ]; then
+  export TOOLCHAIN=bionic
+  make ${TARGETS}
+fi
 
 # PNaCl
 export NACL_ARCH=pnacl
+export TOOLCHAIN=pnacl
 make ${TARGETS}

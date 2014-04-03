@@ -50,8 +50,14 @@ variable. e.g.::
 
   $ NACL_ARCH=arm make openssl
 
-If you want to build a certain package for all architectures you can use the
-top level ``make_all.sh`` script. e.g.::
+For some architectures there is more than one toolchain available.  For example
+for x86 you can choose between newlib and glibc.  The toolchain defaults to
+newlib and can be specified by setting the ``TOOLCHAIN`` environment variable::
+
+  $ NACL_ARCH=i686 TOOLCHAIN=glibc make openssl
+
+If you want to build a certain package for all architectures and all toolchains
+you can use the top level ``make_all.sh`` script. e.g.::
 
   $ ./make_all.sh openssl
 

@@ -34,16 +34,11 @@ PACKAGES=$(make sdklibs_list)
 
 # $1 - name of package
 # $2 - arch to build for
-# $3 - 'glibc' or 'newlib'
+# $3 - toolchain ('glibc', 'newlib', 'bionic', 'pnacl')
 # $4 - 'Debug' or 'Release'
 CustomBuildPackage() {
   export NACL_ARCH=$2
-
-  if [ "$3" = "glibc" ]; then
-    export NACL_GLIBC=1
-  else
-    export NACL_GLIBC=0
-  fi
+  export TOOLCHAIN=$2
 
   if [ "$4" = "Debug" ]; then
     export NACL_DEBUG=1

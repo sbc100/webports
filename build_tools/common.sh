@@ -95,6 +95,14 @@ else
   export NACL_CPP_LIB="stdc++"
 fi
 
+# Set NACL_GLIBC to support legacy code that still relies on this
+# variable.
+if [ "${NACL_LIBC}" = "glibc" ]; then
+  export NACL_GLIBC=1
+else
+  export NACL_GLIBC=0
+fi
+
 if [ ${NACL_DEBUG} = "1" ]; then
   NACLPORTS_CFLAGS+=" -g -O0"
   NACLPORTS_CXXFLAGS+=" -g -O0"
@@ -251,13 +259,13 @@ CheckPatchVersion() {
 CheckToolchain() {
   if [ -n "${LIBC:-}" ]; then
     if [ "${LIBC}" == "glibc" ]; then
-      if [ "${NACL_GLIBC}" != 1 ]; then
-        echo "This package must be built with glibc (\$NACL_GLIBC=1)"
+      if [ "${NACL_LIBC}" != "glibc" ]; then
+        echo "This package must be built with glibc (\$TOOLCHAIN=glibc)"
         exit 1
       fi
     elif [ "${LIBC}" == "newlib" ]; then
-      if [ "${NACL_GLIBC}" = 1 ]; then
-        echo "This package must be built with newlib (\$NACL_GLIBC=0)"
+      if [ "${NACL_LIBC}" != "newlib" ]; then
+        echo "This package must be built with newlib (\$TOOLCAHIN=newlib)"
         exit 1
       fi
     fi
@@ -277,9 +285,11 @@ InstallConfigSite() {
 # with -I are not found.  Here we push the additional newlib headers
 # into the toolchain itself from $NACL_SDK_ROOT/include/<toolchain>.
 InjectSystemHeaders() {
-  if [ "${NACL_GLIBC}" = 1 ]; then
+  if [ "${TOOLCHAIN}" = "glibc" ]; then
     local TC_INCLUDES=${NACL_SDK_ROOT}/include/glibc
-  elif [ "${NACL_ARCH}" = "pnacl" ]; then
+  elif [ "${TOOLCHAIN}" = "pnacl" ]; then
+    local TC_INCLUDES=${NACL_SDK_ROOT}/include/pnacl
+  elif [ "${TOOLCHAIN}" = "bionic" ]; then
     local TC_INCLUDES=${NACL_SDK_ROOT}/include/pnacl
   elif [ "${NACL_ARCH}" = "emscripten" ]; then
     return
@@ -334,7 +344,7 @@ PatchSpecFile() {
 
   # For newlib toolchain, modify the specs file to give an error when attempting
   # to create a shared object.
-  if [ ${NACL_GLIBC} != 1 ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     sed -i.bak "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
   fi
 }
@@ -709,15 +719,8 @@ SetupSDKBuildSystem() {
   export NACL_PACKAGES_PUBLISH
   export NACL_SRC
 
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    MAKEFLAGS+=" TOOLCHAIN=pnacl"
-  elif [ "${NACL_GLIBC}" = "1" ]; then
-    MAKEFLAGS+=" TOOLCHAIN=glibc"
-    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
-  else
-    MAKEFLAGS+=" TOOLCHAIN=newlib"
-    MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
-  fi
+  MAKEFLAGS+=" TOOLCHAIN=${TOOLCHAIN}"
+  MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
   if [ "${NACL_DEBUG}" = "1" ]; then
     MAKEFLAGS+=" CONFIG=Debug"
   else
@@ -906,7 +909,7 @@ ConfigureStep_CMake() {
   fi
 
   EXTRA_CMAKE_ARGS=${EXTRA_CMAKE_ARGS:-}
-  if [ "${NACL_GLIBC}" != "1" ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     EXTRA_CMAKE_ARGS+=" -DEXTRA_INCLUDE=${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
@@ -1085,7 +1088,7 @@ WriteSelLdrScript() {
     return
   fi
 
-  if [ $NACL_GLIBC = "1" ]; then
+  if [ "${NACL_LIBC}" = "glibc" ]; then
     cat > $1 <<HERE
 #!/bin/bash
 export NACLLOG=/dev/null

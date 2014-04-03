@@ -43,11 +43,12 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
   export LIBS="-ltermcap"
-  if [ "${NACL_GLIBC}" != "1" ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     LIBS+=" -lglibc-compat"
   fi
   DefaultConfigureStep
-  if [ "${NACL_GLIBC}" != "1" ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
+    # For static linking we copy in a pre-baked Setup.local
     LogExecute cp ${START_DIR}/Setup.local Modules/
   fi
 }
