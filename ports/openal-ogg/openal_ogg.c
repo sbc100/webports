@@ -56,11 +56,11 @@ const char* OGG_FILE = "sample.ogg";
  * Native Client.
  */
 struct PepperState {
-  const PPB_Core* core_interface;
-  const PPB_Instance* instance_interface;
-  const PPB_URLRequestInfo* request_interface;
-  const PPB_URLLoader* loader_interface;
-  const PPB_Var* var_interface;
+  const struct PPB_Core_1_0* core_interface;
+  const struct PPB_Instance_1_0* instance_interface;
+  const struct PPB_URLRequestInfo_1_0* request_interface;
+  const struct PPB_URLLoader_1_0* loader_interface;
+  const struct PPB_Var_1_1* var_interface;
   PP_Instance instance;
   int ready;
   ALCdevice *alc_device;
@@ -198,7 +198,10 @@ void ReadSome(void* data) {
 
   struct PP_CompletionCallback cb =
       PP_MakeCompletionCallback(ReadCallback, data);
-  int32_t read_ret = g_MyState.loader_interface->ReadResponseBody(
+#ifndef NDEBUG
+  int32_t read_ret =
+#endif
+  g_MyState.loader_interface->ReadResponseBody(
       (PP_Resource)data,
       ogg_file_contents + ogg_file_size,
       BUFFER_READ_SIZE,
@@ -263,6 +266,8 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
       PP_MakeCompletionCallback(OpenCallback, (void*)loader);
   int32_t open_ret = g_MyState.loader_interface->Open(loader, request, cb);
   assert(open_ret == PP_OK_COMPLETIONPENDING);
+  if (open_ret != PP_OK_COMPLETIONPENDING)
+    return PP_FALSE;
 
   return PP_TRUE;
 }
@@ -274,10 +279,6 @@ static void Instance_DidDestroy(PP_Instance instance) {
 
 static void Instance_DidChangeView(PP_Instance pp_instance,
                                    PP_Resource view_resource) {
-}
-static void Instance_DidChangeView_1_0(PP_Instance pp_instance,
-                                       const struct PP_Rect* pos,
-                                       const struct PP_Rect* clip) {
 }
 
 static void Instance_DidChangeFocus(PP_Instance pp_instance,
@@ -365,23 +366,20 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module module,
   g_get_browser_interface = get_browser_interface;
   g_module = module;
 
-  g_MyState.core_interface = (const PPB_Core*)
-    get_browser_interface(PPB_CORE_INTERFACE);
-  g_MyState.instance_interface = (const PPB_Instance*)
-    get_browser_interface(PPB_INSTANCE_INTERFACE);
-  g_MyState.request_interface = (const PPB_URLRequestInfo*)
-    get_browser_interface(PPB_URLREQUESTINFO_INTERFACE);
-  g_MyState.loader_interface = (const PPB_URLLoader*)
-    get_browser_interface(PPB_URLLOADER_INTERFACE);
-  g_MyState.var_interface = (const PPB_Var*)
-    get_browser_interface(PPB_VAR_INTERFACE);
-
-  if (!g_MyState.core_interface || !g_MyState.instance_interface ||
-      !g_MyState.request_interface || !g_MyState.loader_interface ||
-      !g_MyState.var_interface) {
-    printf("Required interfaces are not available.\n");
-    return -1;
+#define GET_INTERFFACE(MEMBER_NAME, IFACE_NAME) \
+  g_MyState.MEMBER_NAME = \
+    (typeof(g_MyState.MEMBER_NAME)) get_browser_interface(IFACE_NAME); \
+  if (g_MyState.MEMBER_NAME == NULL) \
+  { \
+    printf("Required interfaces are not available: %s\n", IFACE_NAME); \
+    return -1; \
   }
+
+  GET_INTERFFACE(core_interface, PPB_CORE_INTERFACE_1_0);
+  GET_INTERFFACE(instance_interface, PPB_INSTANCE_INTERFACE_1_0);
+  GET_INTERFFACE(request_interface, PPB_URLREQUESTINFO_INTERFACE_1_0);
+  GET_INTERFFACE(loader_interface, PPB_URLLOADER_INTERFACE_1_0);
+  GET_INTERFFACE(var_interface, PPB_VAR_INTERFACE_1_1);
 
   /* These interfaces are used by OpenAL so check for them here
    * to make sure they're available.

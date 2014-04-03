@@ -8,10 +8,11 @@ VALID_TOOLCHAINS := glibc newlib pnacl
 NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
-TARGET = openal_ogg
+TARGET = openal-ogg-demo
 LIBS = openal vorbisfile vorbis ogg m ppapi pthread
 SOURCES = openal_ogg.c ogg_buffer_reader.c
-INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/openal-ogg/$(TOOLCHAIN)
+INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/openal-ogg-demo/$(TOOLCHAIN)
+CFLAGS = -Wall -Werror
 
 ifeq ($(TOOLCHAIN),pnacl)
 EXEEXT=.pexe
