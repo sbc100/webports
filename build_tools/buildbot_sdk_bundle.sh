@@ -54,11 +54,16 @@ CustomBuildPackage() {
 BuildPackageArchAll() {
   local PACKAGE=$1
   local ARCH=$2
-  CustomBuildPackage $PACKAGE $ARCH newlib Release
-  CustomBuildPackage $PACKAGE $ARCH newlib Debug
-  if [ "$ARCH" != "arm" -a "$ARCH" != "pnacl" ]; then
-    CustomBuildPackage $PACKAGE $ARCH glibc Release
-    CustomBuildPackage $PACKAGE $ARCH glibc Debug
+  if [ "$ARCH" = "pnacl" ]; then
+    CustomBuildPackage $PACKAGE $ARCH pnacl Release
+    CustomBuildPackage $PACKAGE $ARCH pnacl Debug
+  else
+    CustomBuildPackage $PACKAGE $ARCH newlib Release
+    CustomBuildPackage $PACKAGE $ARCH newlib Debug
+    if [ "$ARCH" != "arm" ]; then
+      CustomBuildPackage $PACKAGE $ARCH glibc Release
+      CustomBuildPackage $PACKAGE $ARCH glibc Debug
+    fi
   fi
 }
 
