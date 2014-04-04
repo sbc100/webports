@@ -432,7 +432,11 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
       cmd += [chrome_path]
       cmd += ['--user-data-dir=' + work_dir]
       # Pass testing extension id in user agent to make it widely available.
-      cmd += ['--user-agent=ChromeTestAgent/' + testing_id]
+      # TODO(bradnelson): Drop this when hterm is fixed.
+      # Hterm currently expects "Chrome/[0-9][0-9]" in the User Agent and
+      # faults without it. Using "Chrome/34" so that it goes down one of the
+      # more sensible of its version based code paths.
+      cmd += ['--user-agent=ChromeTestAgent/' + testing_id + ' Chrome/34']
       if enable_nacl:
         cmd += ['--enable-nacl']
       if enable_nacl_debug:

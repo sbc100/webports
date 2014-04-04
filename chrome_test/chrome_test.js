@@ -57,8 +57,8 @@ chrometest.getUrlParameters = function() {
  *     PortWaiter.
  */
 chrometest.newTestPort = function() {
-  var parts = navigator.userAgent.split('/');
-  var extensionId = parts[1];
+  // Pull the id out of: 'ChromeUserAgent/<ID> Chrome/<Ver>'
+  var extensionId = navigator.userAgent.split(' ')[0].split('/')[1];
   return new chrometest.PortWaiter(chrome.runtime.connect(extensionId));
 };
 
@@ -221,11 +221,11 @@ chrometest.httpGet = function(url) {
 };
 
 /**
- * Wait for a duration.
+ * Sleep for a duration.
  * @param {float} ms Timeout in milliseconds.
  * @return {Promise} A promise to wait.
  */
-chrometest.wait = function(ms) {
+chrometest.sleep = function(ms) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
       resolve();
@@ -349,7 +349,7 @@ chrometest.formatError = function(error) {
 chrometest.assert = function(condition, description) {
   if (!condition) {
     chrometest.fail();
-    if (description === null) {
+    if (description === undefined) {
       description = 'no description';
     }
     var error = new Error('ASSERT FAILED! - ' + description);
@@ -372,7 +372,7 @@ chrometest.assert = function(condition, description) {
 chrometest.expect = function(condition, description) {
   if (!condition) {
     chrometest.fail();
-    if (description === null) {
+    if (description === undefined) {
       description = 'no description';
     }
     var error = new Error('EXPECT FAILED! - ' + description);
@@ -386,14 +386,13 @@ chrometest.expect = function(condition, description) {
  * @return {Promise} A promise to do it.
  */
 chrometest.runTests_ = function(testList) {
-  if (testList.length == 0) {
-    return;
-  } else {
-    var rest = testList.slice(1);
-    return testList[0].call().then(function() {
-      return chrometest.runTests_(rest);
+  var p = Promise.resolve();
+  testList.forEach(function(test) {
+    p = p.then(function() {
+      return test.call();
     });
-  }
+  });
+  return p;
 };
 
 /**
@@ -478,9 +477,9 @@ chrometest.runAllTests_ = function() {
   return Promise.resolve().then(function() {
     return chrometest.filterTests_();
   }).then(function() {
-    // Wait 100ms before starting the tests as extensions may not load
+    // Sleep 100ms before starting the tests as extensions may not load
     // simultaneously.
-    return chrometest.wait(100);
+    return chrometest.sleep(100);
   }).then(function() {
     return chrometest.reportTestCount_(chrometest.tests_.length);
   }).then(function() {
@@ -494,39 +493,54 @@ chrometest.runAllTests_ = function() {
 };
 
 /**
+ * Load a javascript module.
+ * @param {string} filename Filename to load.
+ * @return {Promise} A promise to load the module.
+ */
+chrometest.load = function(filename) {
+  return new Promise(function(resolve, reject) {
+    // Register a window wide handler just in case (things leak thru).
+    window.onerror = function(
+        errorMsg, url, lineNumber, columnNumber, error) {
+      chrometest.fail();
+      chrometest.error(
+          errorMsg + ' in ' + url + ' at ' +
+          lineNumber + ':' + columnNumber + '\n' +
+          chrometest.formatError(error)).then(function() {
+        reject(chrometest.haltBrowser());
+      });
+    };
+
+    var script = document.createElement('script');
+    script.src = filename;
+    script.onerror = function(e) {
+      chrometest.error(
+         'Error loading ' + e.target.src + '\n').then(function() {
+        reject(chrometest.haltBrowser());
+      });
+    };
+    script.onload = function() {
+      resolve();
+    };
+    document.body.appendChild(script);
+  });
+};
+
+/**
  * Load a list of javascript files into script tags.
  * @param {Array.<string>} sources A list of javascript files to load tests
  *                                 from.
  */
 chrometest.run = function(sources) {
-  window.onerror = function(
-      errorMsg, url, lineNumber, columnNumber, error) {
-    chrometest.fail();
-    chrometest.error(
-        errorMsg + ' in ' + url + ' at ' +
-        lineNumber + ':' + columnNumber + '\n' +
-        chrometest.formatError(error)).then(function() {
-      chrometest.haltBrowser();
+  var p = Promise.resolve();
+  sources.forEach(function(filename) {
+    p = p.then(function() {
+      return chrometest.load(filename);
     });
-  };
-  var fileCount = 0;
-  for (var i = 0; i < sources.length; i++) {
-    var script = document.createElement('script');
-    script.src = sources[i];
-    script.onerror = function(e) {
-      chrometest.error(
-          'Error loading ' + e.target.src + '\n').then(function() {
-        chrometest.haltBrowser();
-      });
-    };
-    script.onload = function() {
-      fileCount++;
-      if (fileCount == sources.length) {
-        chrometest.runAllTests_().then();
-      }
-    }
-    document.body.appendChild(script);
-  }
+  });
+  return p.then(function() {
+    return chrometest.runAllTests_();
+  });
 };
 
 

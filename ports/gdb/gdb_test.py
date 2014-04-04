@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+"""Tests of gdb app component."""
+
 import os
 import sys
 
@@ -13,8 +15,6 @@ SRC_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 GDB_OUT_DIR = os.path.join(SRC_DIR, 'out/publish/gdb/glibc')
 
 import chrome_test
-
-"""Tests of gdb app component."""
 
 
 gdb_app = os.path.join(GDB_OUT_DIR, 'gdb_app')

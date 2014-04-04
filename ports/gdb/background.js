@@ -430,10 +430,11 @@ DebugConnection_.prototype.handleDisconnect_ = function() {
  */
 chrome.runtime.onConnectExternal.addListener(function(port) {
   // Check the sender only when not in testing mode.
-  if (navigator.userAgent.indexOf('ChromeTestAgent/') != 0) {
+  if (navigator.userAgent.indexOf('ChromeTestAgent/') < 0) {
     // TODO(bradnelson): Enable this check once a production extension id is
     // known for the debugger extension.
     //if (port.sender.id != 'blessed-id') {
+    //  port.disconnect();
     //  return;
     //}
   }

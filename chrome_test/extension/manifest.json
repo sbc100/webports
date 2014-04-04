@@ -13,6 +13,9 @@
     "processes"
   ],
   "externally_connectable": {
+    "ids": [
+      "*"
+    ],
     "matches": [
       "*://localhost/*",
       "*://127.0.0.1/*",

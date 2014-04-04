@@ -136,7 +136,7 @@ Connection.prototype.handleMessage_ = function(msg) {
     var killCount = 0;
     for (var i = 0; i < snapshot.length; i++) {
       // Disconnect everything other than the current connection.
-      if (snapshot[i] !== this) {
+      if (snapshot[i] !== self) {
         snapshot[i].disconnect();
         killCount++;
       }
