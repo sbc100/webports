@@ -113,7 +113,13 @@ Trace.verbose = False
 
 
 def GetCurrentArch():
-  return os.environ.get('NACL_ARCH') or 'x86_64'
+  arch = os.environ.get('NACL_ARCH')
+  if not arch:
+    if GetCurrentToolchain() == 'pnacl':
+      return 'pnacl'
+    else:
+      return 'x86_64'
+  return arch
 
 
 def GetCurrentLibc():

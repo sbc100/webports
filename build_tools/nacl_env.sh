@@ -44,14 +44,8 @@ else
   readonly OS_SUBDIR="win"
 fi
 
-# On mac we default ot i686 rather than x86_64 since
-# since there is no x86_64 chrome yet and its nice for
-# the default binaries to run on the host machine.
-if [ "${OS_NAME}" = "Darwin" ]; then
-  NACL_ARCH=${NACL_ARCH:-i686}
-else
-  NACL_ARCH=${NACL_ARCH:-x86_64}
-fi
+# Default value for NACL_ARCH
+NACL_ARCH=${NACL_ARCH:-x86_64}
 
 # Default Value for TOOLCHAIN, taking into account legacy
 # NACL_GLIBC varible.
@@ -86,15 +80,6 @@ if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
   exit -1
 fi
 
-# In some places i686 is also known as x86_32 so we use
-# second variable to store this alternate architecture
-# name
-if [ "${NACL_ARCH}" = "i686" ]; then
-  export NACL_ARCH_ALT=x86_32
-else
-  export NACL_ARCH_ALT=${NACL_ARCH}
-fi
-
 if [ "${TOOLCHAIN}" = "glibc" ]; then
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     echo "PNaCl is not supported by the glibc toolchain" 1>&2
@@ -111,8 +96,20 @@ elif [ "${TOOLCHAIN}" = "bionic" ]; then
     exit -1
   fi
   NACL_LIBC=bionic
+elif [ "${TOOLCHAIN}" = "pnacl" ]; then
+  NACL_ARCH=pnacl
+  NACL_LIBC=newlib
 else
   NACL_LIBC=newlib
+fi
+
+# In some places i686 is also known as x86_32 so we use
+# second variable to store this alternate architecture
+# name
+if [ "${NACL_ARCH}" = "i686" ]; then
+  export NACL_ARCH_ALT=x86_32
+else
+  export NACL_ARCH_ALT=${NACL_ARCH}
 fi
 
 if [ ${NACL_ARCH} = "i686" ]; then
