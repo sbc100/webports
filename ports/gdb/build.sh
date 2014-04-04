@@ -71,5 +71,9 @@ InstallStep() {
 }
 
 PostInstallTestStep() {
-  LogExecute python ${START_DIR}/gdb_test.py -x -vv -a ${NACL_ARCH}
+  if [[ ${OS_NAME} == Darwin && ${NACL_ARCH} == x86_64 ]]; then
+    echo "Skipping gdb tests on unsupported mac + x86_64 configuration."
+  else
+    LogExecute python ${START_DIR}/gdb_test.py -x -vv -a ${NACL_ARCH}
+  fi
 }

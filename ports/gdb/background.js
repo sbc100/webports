@@ -136,7 +136,7 @@ DebugConnection_.prototype.rspDisconnect_ = function() {
     chrome.socket.create('tcp', function(createInfo) {
       self.socketId_ = createInfo.socketId;
       chrome.socket.connect(
-          self.socketId_, 'localhost', self.debugTcpPort_, function(result) {
+          self.socketId_, '0.0.0.0', self.debugTcpPort_, function(result) {
         callback();
       });
     });
