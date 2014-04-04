@@ -1,8 +1,16 @@
 diff --git a/Makefile.in b/Makefile.in
-index 5349180..8e354ee 100644
+index 5349180..4ea8a5d 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -225,20 +225,20 @@ bochs_plugins:
+@@ -83,6 +83,7 @@ SHELL = /bin/sh
+ 
+ @SET_MAKE@
+ 
++AR = @AR@
+ CC = @CC@
+ CXX = @CXX@
+ CFLAGS = @CFLAGS@ @GUI_CFLAGS@ $(MCH_CFLAGS) $(FLA_FLAGS) @DEFINE_PLUGIN_PATH@ -DBX_SHARE_PATH='"$(sharedir)"'
+@@ -225,20 +226,20 @@ bochs_plugins:
  	@CD_UP_ONE@
  
  bximage@EXE@: misc/bximage.o
@@ -27,6 +35,21 @@ index 5349180..8e354ee 100644
  
  misc/niclist.o: $(srcdir)/misc/niclist.c
  	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(srcdir)/misc/niclist.c @OFP@$@
+@@ -288,12 +289,12 @@ fpu/libfpu.a::
+ 
+ libbochs.a:
+ 	-rm -f libbochs.a
+-	ar rv libbochs.a $(EXTERN_ENVIRONMENT_OBJS)
++	${AR} rv libbochs.a $(EXTERN_ENVIRONMENT_OBJS)
+ 	$(RANLIB) libbochs.a
+ 
+ libbochs_cpu.a: @DEBUGGER_VAR@ $(BX_OBJS)
+ 	-rm -f libbochs_cpu.a
+-	ar rv libbochs_cpu.a $(BX_OBJS)
++	${AR} rv libbochs_cpu.a $(BX_OBJS)
+ 	$(RANLIB) libbochs_cpu.a
+ 
+ # for wxWidgets port, on win32 platform
 diff --git a/config.cc b/config.cc
 index 5b752d7..fd35bdc 100755
 --- a/config.cc
@@ -53,7 +76,7 @@ index 204218c..5bdb7b7 100755
  	| ns16k | ns32k \
  	| or32 \
 diff --git a/configure b/configure
-index 4f28619..d22edad 100755
+index 4f28619..6d69c64 100755
 --- a/configure
 +++ b/configure
 @@ -3748,11 +3748,11 @@ $as_echo "no" >&6; }
@@ -89,6 +112,15 @@ index 4f28619..d22edad 100755
  fi
  rm -f conftest conftest$ac_cv_exeext
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
+@@ -23746,7 +23747,7 @@ SLASH="/"
+ CXXFP=""
+ CFP=""
+ OFP="-o "
+-MAKELIB="ar rv \$@"
++MAKELIB="\$(AR) rv \$@"
+ RMCOMMAND="rm -f "
+ # first define link variables without libtool
+ LINK="\$(CXX) -o \$@ \$(CXXFLAGS) \$(LDFLAGS)"
 @@ -24340,6 +24341,10 @@ fi
  DIALOG_OBJS=""
  EXPORT_DYNAMIC="-export-dynamic"
@@ -100,6 +132,19 @@ index 4f28619..d22edad 100755
    *-pc-windows* | *-pc-winnt* | *-cygwin* | *-mingw*)
      if test "$bx_plugins" = 1; then
        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for opendir in -lmingwex" >&5
+diff --git a/configure.in b/configure.in
+index e8a576b..578103d 100644
+--- a/configure.in
++++ b/configure.in
+@@ -1867,7 +1867,7 @@ SLASH="/"
+ CXXFP=""
+ CFP=""
+ OFP="-o "
+-MAKELIB="ar rv \$@"
++MAKELIB="\$(AR) rv \$@"
+ RMCOMMAND="rm -f "
+ # first define link variables without libtool
+ LINK="\$(CXX) -o \$@ \$(CXXFLAGS) \$(LDFLAGS)"
 diff --git a/cpu/Makefile.in b/cpu/Makefile.in
 index a6541fd..4d657e9 100644
 --- a/cpu/Makefile.in
