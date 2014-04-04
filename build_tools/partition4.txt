@@ -28,7 +28,7 @@ builder 0 (total: 4057)
   lua-ppapi
   expat
   apr-util
-  #mesagl
+  #mesa-demo
   gmp
   mpfr
   mpc
@@ -147,7 +147,7 @@ builder 3 (total: 3860)
   sdl-image
   nacl-spawn
   ruby-ppapi
-  openal-ogg
+  openal-ogg-demo
   lua5.1
   apr
   apr-util

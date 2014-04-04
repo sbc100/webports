@@ -6,7 +6,7 @@ VALID_TOOLCHAINS := glibc newlib pnacl
 NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
-TARGET = drawing-demo
+TARGET = agg-demo
 LIBS = agg ppapi_simple nacl_io ppapi ppapi_cpp
 SOURCES = drawing.cc
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/$(TARGET)/$(TOOLCHAIN)

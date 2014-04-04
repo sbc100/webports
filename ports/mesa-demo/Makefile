@@ -10,18 +10,18 @@ VALID_TOOLCHAINS := glibc newlib pnacl
 DEFINES = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror -DGL_GLEXT_PROTOTYPES
 # Note that the OpenGL libraries are NOT included.  We use Mesa for rendering.
 LIBS = nacl_io ppapi_cpp ppapi OSMesa
-PAGE = $(OUTDIR)/mesagl.html
+PAGE = $(OUTDIR)/mesa-demo.html
 PAGE_TC_CONFIG = $(PAGE)
 
 include $(NACL_SDK_ROOT)/tools/common.mk
 
-TARGET = mesagl
-SOURCES = mesagl.cc
+TARGET = mesa-demo
+SOURCES = mesa-demo.cc
 INSTALL_DIR = $(NACLPORTS_ROOT)/out/publish/$(TARGET)
 
 $(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),)))
 
-$(eval $(call LINK_RULE,mesagl,$(SOURCES),$(LIBS),$(DEPS)))
+$(eval $(call LINK_RULE,$(TARGET),$(SOURCES),$(LIBS),$(DEPS)))
 
 $(eval $(call HTML_RULE,$(TARGET),))
 

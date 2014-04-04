@@ -93,7 +93,7 @@ builder 1 (total: 4994)
   ruby-ppapi
   box2d
   tinyxml
-  openal-ogg
+  openal-ogg-demo
   dreadthread
   expat
   gdb
@@ -142,7 +142,7 @@ builder 2 (total: 4952)
   libhangul
   unzip
   jsoncpp
-  #mesagl
+  #mesa-demo
   binutils
   glib
   thttpd
