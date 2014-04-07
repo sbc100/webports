@@ -9,4 +9,3 @@ boot: c
 log: bochsout.txt
 mouse: enabled=1
 clock: sync=slowdown
-vga_update_interval: 150000

@@ -13,7 +13,7 @@ EXECUTABLES=bochs
 ConfigureStep() {
   SetupCrossEnvironment
 
-  export NACLBXLIBS="-lpthread"
+  export EXTRA_LINK_OPTS="-L${NACLPORTS_LIBDIR} -ltar -lnacl_io -lpthread"
 
   EXE=${NACL_EXEEXT} LogExecute ${SRC_DIR}/configure \
     --host=nacl \

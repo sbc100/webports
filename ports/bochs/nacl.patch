@@ -1,8 +1,8 @@
 diff --git a/Makefile.in b/Makefile.in
-index 5349180..4ea8a5d 100644
+index cb95493..0a8a8d2 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -83,6 +83,7 @@ SHELL = /bin/sh
+@@ -83,6 +83,7 @@ SHELL = @SHELL@
  
  @SET_MAKE@
  
@@ -10,237 +10,73 @@ index 5349180..4ea8a5d 100644
  CC = @CC@
  CXX = @CXX@
  CFLAGS = @CFLAGS@ @GUI_CFLAGS@ $(MCH_CFLAGS) $(FLA_FLAGS) @DEFINE_PLUGIN_PATH@ -DBX_SHARE_PATH='"$(sharedir)"'
-@@ -225,20 +226,20 @@ bochs_plugins:
- 	@CD_UP_ONE@
- 
- bximage@EXE@: misc/bximage.o
--	@LINK_CONSOLE@ $(BXIMAGE_LINK_OPTS) misc/bximage.o
-+	@LINK_CONSOLE@ $(NACLBXLIBS) $(BXIMAGE_LINK_OPTS) misc/bximage.o
- 
- bxcommit@EXE@: misc/bxcommit.o
--	@LINK_CONSOLE@ misc/bxcommit.o
-+	@LINK_CONSOLE@ $(NACLBXLIBS) $(BXIMAGE_LINK_OPTS) misc/bxcommit.o
- 
- niclist@EXE@: misc/niclist.o
- 	@LINK_CONSOLE@ misc/niclist.o
- 
- # compile with console CXXFLAGS, not gui CXXFLAGS
- misc/bximage.o: $(srcdir)/misc/bximage.c $(srcdir)/iodev/hdimage.h
--	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(srcdir)/misc/bximage.c @OFP@$@
-+	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(NACLBXLIBS) $(srcdir)/misc/bximage.c @OFP@$@
- 
- misc/bxcommit.o: $(srcdir)/misc/bxcommit.c $(srcdir)/iodev/hdimage.h
--	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(srcdir)/misc/bxcommit.c @OFP@$@
-+	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(NACLBXLIBS) $(srcdir)/misc/bxcommit.c @OFP@$@
- 
- misc/niclist.o: $(srcdir)/misc/niclist.c
- 	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS_CONSOLE) $(srcdir)/misc/niclist.c @OFP@$@
-@@ -288,12 +289,12 @@ fpu/libfpu.a::
- 
- libbochs.a:
- 	-rm -f libbochs.a
--	ar rv libbochs.a $(EXTERN_ENVIRONMENT_OBJS)
-+	${AR} rv libbochs.a $(EXTERN_ENVIRONMENT_OBJS)
- 	$(RANLIB) libbochs.a
- 
- libbochs_cpu.a: @DEBUGGER_VAR@ $(BX_OBJS)
- 	-rm -f libbochs_cpu.a
--	ar rv libbochs_cpu.a $(BX_OBJS)
-+	${AR} rv libbochs_cpu.a $(BX_OBJS)
- 	$(RANLIB) libbochs_cpu.a
- 
- # for wxWidgets port, on win32 platform
-diff --git a/config.cc b/config.cc
-index 5b752d7..fd35bdc 100755
---- a/config.cc
-+++ b/config.cc
-@@ -292,7 +292,7 @@ void bx_init_options()
-       "ips", "Emulated instructions per second (IPS)",
-       "Emulated instructions per second, used to calibrate bochs emulated time with wall clock time.",
-       BX_MIN_IPS, BX_MAX_BIT32U,
--      4000000);
-+      15000000);
- #if BX_SUPPORT_SMP
-   new bx_param_num_c(cpu_param,
-       "quantum", "Quantum ticks in SMP simulation",
-diff --git a/config.sub b/config.sub
-index 204218c..5bdb7b7 100755
---- a/config.sub
-+++ b/config.sub
-@@ -283,6 +283,7 @@ case $basic_machine in
- 	| moxie \
- 	| mt \
- 	| msp430 \
-+	| nacl \
- 	| nios | nios2 \
- 	| ns16k | ns32k \
- 	| or32 \
-diff --git a/configure b/configure
-index 4f28619..6d69c64 100755
---- a/configure
-+++ b/configure
-@@ -3748,11 +3748,11 @@ $as_echo "no" >&6; }
- $as_echo "$as_me: failed program was:" >&5
- sed 's/^/| /' conftest.$ac_ext >&5
- 
--{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
--$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
--{ as_fn_set_status 77
--as_fn_error "C compiler cannot create executables
--See \`config.log' for more details." "$LINENO" 5; }; }
-+#{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-+#$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-+#{ as_fn_set_status 77
-+#as_fn_error "C compiler cannot create executables
-+#See \`config.log' for more details." "$LINENO" 5; }; }
- else
-   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
- $as_echo "yes" >&6; }
-@@ -3792,10 +3792,11 @@ for ac_file in conftest.exe conftest conftest.*; do
-   esac
- done
- else
--  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
--$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
--as_fn_error "cannot compute suffix of executables: cannot compile and link
--See \`config.log' for more details." "$LINENO" 5; }
-+   echo "skipping suffix of executables check"
-+#  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-+#$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-+#as_fn_error "cannot compute suffix of executables: cannot compile and link
-+#See \`config.log' for more details." "$LINENO" 5; }
- fi
- rm -f conftest conftest$ac_cv_exeext
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
-@@ -23746,7 +23747,7 @@ SLASH="/"
- CXXFP=""
- CFP=""
- OFP="-o "
--MAKELIB="ar rv \$@"
-+MAKELIB="\$(AR) rv \$@"
- RMCOMMAND="rm -f "
- # first define link variables without libtool
- LINK="\$(CXX) -o \$@ \$(CXXFLAGS) \$(LDFLAGS)"
-@@ -24340,6 +24341,10 @@ fi
- DIALOG_OBJS=""
- EXPORT_DYNAMIC="-export-dynamic"
- case $target in
-+  *nacl*)
-+    # nacl does not support the plugin mechanism
-+    EXPORT_DYNAMIC=
-+  ;;
-   *-pc-windows* | *-pc-winnt* | *-cygwin* | *-mingw*)
-     if test "$bx_plugins" = 1; then
-       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for opendir in -lmingwex" >&5
-diff --git a/configure.in b/configure.in
-index e8a576b..578103d 100644
---- a/configure.in
-+++ b/configure.in
-@@ -1867,7 +1867,7 @@ SLASH="/"
- CXXFP=""
- CFP=""
- OFP="-o "
--MAKELIB="ar rv \$@"
-+MAKELIB="\$(AR) rv \$@"
- RMCOMMAND="rm -f "
- # first define link variables without libtool
- LINK="\$(CXX) -o \$@ \$(CXXFLAGS) \$(LDFLAGS)"
-diff --git a/cpu/Makefile.in b/cpu/Makefile.in
-index a6541fd..4d657e9 100644
---- a/cpu/Makefile.in
-+++ b/cpu/Makefile.in
-@@ -35,6 +35,8 @@ X_LIBS = @X_LIBS@
- X_PRE_LIBS = @X_PRE_LIBS@
- RANLIB = @RANLIB@
- 
-+LIBS += $(NACLBXLIBS)
-+
- 
- 
- BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 diff --git a/cpu/init.cc b/cpu/init.cc
-index 3568f79..0883c8d 100644
+index 8ada90b..07432e2 100644
 --- a/cpu/init.cc
 +++ b/cpu/init.cc
-@@ -160,6 +160,7 @@ void BX_CPU_C::initialize(void)
+@@ -111,6 +111,7 @@ void BX_CPU_C::initialize(void)
      BX_CPU_THIS_PTR msrs[n] = 0;
    }
    const char *msrs_filename = SIM->get_param_string(BXPN_CONFIGURABLE_MSRS_PATH)->getptr();
-+  msrs_filename = "/msrs/msrs.def";
++  msrs_filename = "/img/msrs.def";
    load_MSRs(msrs_filename);
  #endif
  
-diff --git a/iodev/harddrv.cc b/iodev/harddrv.cc
-index 18df144..f8db116 100644
---- a/iodev/harddrv.cc
-+++ b/iodev/harddrv.cc
-@@ -344,7 +344,7 @@ void bx_hard_drive_c::init(void)
-             }
-           } else {
-             if (disk_size != BX_HD_THIS channels[channel].drives[device].hdimage->hd_size) {
--              BX_PANIC(("ata%d-%d disk size doesn't match specified geometry", channel, device));
-+              //BX_PANIC(("ata%d-%d disk size doesn't match specified geometry", channel, device));
-               // workaround large files problem with diskimages
-               BX_HD_THIS channels[channel].drives[device].hdimage->hd_size = disk_size;
-             }
-diff --git a/iodev/slowdown_timer.cc b/iodev/slowdown_timer.cc
-index 0af0608..f700185 100644
---- a/iodev/slowdown_timer.cc
-+++ b/iodev/slowdown_timer.cc
-@@ -147,7 +147,7 @@ void bx_slowdown_timer_c::handle_timer()
- #elif BX_HAVE_SLEEP
-     sleep(usectosec(s.Q));
- #else
--#error do not know have to sleep
-+    sleep(usectosec(s.Q));
- #endif    //delay(wanttime-totaltime);
-     /* alternatively: delay(Q);
-      * This works okay because we share the delay between
-diff --git a/iodev/vvfat.cc b/iodev/vvfat.cc
-index 30ceb66..b27b487 100644
---- a/iodev/vvfat.cc
-+++ b/iodev/vvfat.cc
-@@ -1529,7 +1529,6 @@ bx_bool vvfat_image_t::write_file(const char *path, direntry_t *entry, bx_bool c
+diff --git a/iodev/hdimage/vvfat.cc b/iodev/hdimage/vvfat.cc
+index f75ef2d..a5e78fc 100644
+--- a/iodev/hdimage/vvfat.cc
++++ b/iodev/hdimage/vvfat.cc
+@@ -1554,7 +1554,9 @@ bx_bool vvfat_image_t::write_file(const char *path, direntry_t *entry, bx_bool c
    } else {
      ut.actime = ut.modtime;
    }
--  utime(path, &ut);
++# if !defined(__native_client__)
+   utime(path, &ut);
++# endif
  #else
    hFile = CreateFile(path, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
    if (hFile != INVALID_HANDLE_VALUE) {
 diff --git a/main.cc b/main.cc
-index e0c07e1..cad879d 100644
+index 0f11e31..f1a3315 100644
 --- a/main.cc
 +++ b/main.cc
-@@ -475,6 +475,13 @@ int WINAPI WinMain(
+@@ -473,6 +473,12 @@ int WINAPI WinMain(
  // wxWidgets under win32.
  int CDECL main(int argc, char *argv[])
  {
-+#ifdef __native_client__
++#if defined(__native_client__)
 +  chdir("/img");
 +  const char* fake_argv[] = {"bochs", "-qf", "linux-img/bochsrc", NULL};
 +  argv = (char**)fake_argv;
 +  argc = 3;
 +#endif
-+
    bx_startup_flags.argc = argc;
    bx_startup_flags.argv = argv;
- #if BX_WITH_SDL && defined(WIN32)
-diff --git a/osdep.h b/osdep.h
-index 7699dbd..5c1a778 100644
---- a/osdep.h
-+++ b/osdep.h
-@@ -152,6 +152,13 @@ extern "C" {
-   extern int bx_snprintf (char *s, size_t maxlen, const char *format, ...);
+ #ifdef WIN32
+@@ -1341,7 +1347,7 @@ void bx_init_hardware()
  #endif
  
-+/* benfits both nnacl and pnacl, avoids tons of warnings from 
-+   dubious redefine stricmp -> strcmp  in osdep.h */ 
-+#undef BX_HAVE_STRICMP
-+#define BX_HAVE_STRICMP 1
-+#ifdef __GLIBC__
-+#define stricmp strcasecmp
-+#endif
- #if !BX_HAVE_VSNPRINTF
-   #define vsnprintf bx_vsnprintf
-   extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);
+ #if BX_SHOW_IPS
+-#if !defined(WIN32)
++#if !defined(WIN32) && !defined(__native_client__)
+   if (!SIM->is_wx_selected()) {
+     signal(SIGALRM, bx_signal_handler);
+     alarm(1);
+@@ -1387,7 +1393,7 @@ int bx_atexit(void)
+ #endif
+ 
+ #if BX_SHOW_IPS
+-#if !defined(__MINGW32__) && !defined(_MSC_VER)
++#if !defined(__MINGW32__) && !defined(_MSC_VER) && !defined(__native_client__)
+   if (!SIM->is_wx_selected()) {
+     alarm(0);
+     signal(SIGALRM, SIG_DFL);
+@@ -1448,7 +1454,7 @@ void CDECL bx_signal_handler(int signum)
+ #if BX_SHOW_IPS
+   if (signum == SIGALRM) {
+     bx_show_ips_handler();
+-#if !defined(WIN32)
++#if !defined(WIN32) && !defined(__native_client__)
+     if (!SIM->is_wx_selected()) {
+       signal(SIGALRM, bx_signal_handler);
+       alarm(1);
