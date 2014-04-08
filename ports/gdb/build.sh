@@ -68,12 +68,19 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_16.png ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${GDB_APP_DIR}
+
+  # Debug Extension
+  local DEBUG_EXT_DIR="${PUBLISH_DIR}/debug_extension"
+  MakeDir ${DEBUG_EXT_DIR}
+  InstallNaClTerm ${DEBUG_EXT_DIR}
+  LogExecute cp ${START_DIR}/extension/* ${DEBUG_EXT_DIR}
 }
 
 PostInstallTestStep() {
   if [[ ${OS_NAME} == Darwin && ${NACL_ARCH} == x86_64 ]]; then
-    echo "Skipping gdb tests on unsupported mac + x86_64 configuration."
+    echo "Skipping gdb/debug tests on unsupported mac + x86_64 configuration."
   else
     LogExecute python ${START_DIR}/gdb_test.py -x -vv -a ${NACL_ARCH}
+    LogExecute python ${START_DIR}/debugger_test.py -x -vv -a ${NACL_ARCH}
   fi
 }
