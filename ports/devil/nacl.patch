@@ -95,6 +95,19 @@ index 06688ef..0c7b487 100644
  	}
  }
  
+diff --git a/src-IL/src/il_icon.c b/src-IL/src/il_icon.c
+index 2ccb1a3..fd9475d 100644
+--- a/src-IL/src/il_icon.c
++++ b/src-IL/src/il_icon.c
+@@ -525,7 +525,7 @@ ILboolean ico_readpng_get_image(ICOIMAGE *Icon, ILdouble display_exponent)
+ 
+ 	// Expand low-bit-depth grayscale images to 8 bits
+ 	if (ico_color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
+-		png_set_gray_1_2_4_to_8(ico_png_ptr);
++		png_set_expand_gray_1_2_4_to_8(ico_png_ptr);
+ 	}
+ 
+ 	// Expand RGB images with transparency to full alpha channels
 diff --git a/src-IL/src/il_internal.c b/src-IL/src/il_internal.c
 index 35fe939..2f33bf2 100644
 --- a/src-IL/src/il_internal.c
@@ -113,6 +126,19 @@ index 35fe939..2f33bf2 100644
  	int stricmp(const char *src1, const char *src2)
  	{
  		return strcasecmp(src1, src2);
+diff --git a/src-IL/src/il_png.c b/src-IL/src/il_png.c
+index d5b627e..d5fe363 100644
+--- a/src-IL/src/il_png.c
++++ b/src-IL/src/il_png.c
+@@ -278,7 +278,7 @@ ILboolean readpng_get_image(ILdouble display_exponent)
+ 
+ 	// Expand low-bit-depth grayscale images to 8 bits
+ 	if (png_color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
+-		png_set_gray_1_2_4_to_8(png_ptr);
++		png_set_expand_gray_1_2_4_to_8(png_ptr);
+ 	}
+ 
+ 	// Expand RGB images with transparency to full alpha channels
 diff --git a/test/format_test/format_checks.sh.in b/test/format_test/format_checks.sh.in
 index 4e480b7..2dccdac 100644
 --- a/test/format_test/format_checks.sh.in
