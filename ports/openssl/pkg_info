@@ -1,7 +1,7 @@
 NAME=openssl
-VERSION=1.0.1e
-URL=http://www.openssl.org/source/openssl-1.0.1e.tar.gz
+VERSION=1.0.1g
+URL=http://www.openssl.org/source/openssl-1.0.1g.tar.gz
 LICENSE=CUSTOM:LICENSE
 BUILD_OS=linux
 DEPENDS=(glibc-compat)
-SHA1=3f1b1223c9e8189bfe4e186d86449775bd903460
+SHA1=b28b3bcb1dc3ee7b55024c9f795be60eb3183e3c
