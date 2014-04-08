@@ -1,5 +1,5 @@
 deps = {
-  "src/third_party/hterm/src":
+  "src/third_party/libapps":
     "https://chromium.googlesource.com/apps/libapps.git@b01e9d1a"
 }
 

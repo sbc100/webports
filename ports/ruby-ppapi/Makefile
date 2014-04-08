@@ -63,7 +63,7 @@ ifeq ($(TOOLCHAIN),glibc)
 EXTRA_LIBS = lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
 endif
 
-CHROMEAPPS = $(NACL_SRC)/third_party/hterm/src
+CHROMEAPPS = $(NACL_SRC)/third_party/libapps/
 LIB_DOT = $(CHROMEAPPS)/libdot
 NASSH = $(CHROMEAPPS)/nassh
 

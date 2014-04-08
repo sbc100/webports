@@ -686,7 +686,7 @@ TouchKeyStamp() {
 
 InstallNaClTerm() {
   local INSTALL_DIR=$1
-  local CHROMEAPPS=${NACL_SRC}/third_party/hterm/src
+  local CHROMEAPPS=${NACL_SRC}/third_party/libapps/
   local LIB_DOT=${CHROMEAPPS}/libdot
   local NASSH=${CHROMEAPPS}/nassh
   LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
