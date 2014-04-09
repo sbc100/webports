@@ -1312,7 +1312,7 @@ RunTestStep()       {
 }
 
 RunPostInstallTestStep()       {
-  RunStep PostInstallTestStep "Testing" ${PUBLISH_DIR}
+  RunStep PostInstallTestStep "Testing"
 }
 
 RunInstallStep()    {
