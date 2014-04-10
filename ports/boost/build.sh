@@ -11,7 +11,7 @@ BUILD_ARGS="\
   link=static"
 
 # TODO(eugenis): build dynamic libraries, too
-if [ $NACL_GLIBC = "1" ] ; then
+if [ "${NACL_LIBC}" = "glibc" ] ; then
   BUILD_ARGS+=" --without-python --without-signals --without-mpi"
   BUILD_ARGS+=" --without-context --without-coroutine"
 else

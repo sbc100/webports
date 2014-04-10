@@ -24,8 +24,8 @@ NaCl's getenv call seems to return "" instead of NULL if an environment variable
 is not set, but emacs exepcts a NULL, so I have patched the code in one place to
 accept "" instead while the NaCl team investigates.
 
-We are currently building with NACL_GLIBC=1 make emacs to use glibc.  We should
-eventually move to newlib so this will work with pNaCl.
+We are currently building with TOOLCHAIN=glibc make emacs to use glibc.  We
+should eventually move to newlib so this will work with pNaCl.
 
 We have to build twice, the first build sometimes fails but makes something
 that the second build needs.  The build script is set up to do the double build

@@ -5,7 +5,7 @@
 
 NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 
-if [ ${NACL_GLIBC} != "1" ]; then
+if [ "${NACL_SHARED}" = "0" ]; then
   EXTRA_CONFIGURE_ARGS="--disable-shared"
   MAKE_TARGETS="libmk4.a"
 else

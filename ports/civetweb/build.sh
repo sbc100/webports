@@ -11,7 +11,7 @@ BuildStep() {
   export LDFLAGS="${NACLPORTS_LDFLAGS}"
 
   CFLAGS+=" -DNO_SSL -DNO_CGI"
-  if [ "${NACL_GLIBC}" = "1" ]; then
+  if [ "${NACL_LIBC}" = "glibc" ]; then
     LDFLAGS+=" -ldl"
   fi
 

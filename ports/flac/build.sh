@@ -5,7 +5,7 @@
 
 
 ConfigureStep() {
-  if [ "${NACL_GLIBC}" != 1 ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     export LIBS="-lglibc-compat"
   fi
   EXTRA_CONFIGURE_ARGS+=" --disable-oggtest"

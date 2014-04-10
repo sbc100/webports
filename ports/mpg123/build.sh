@@ -6,7 +6,7 @@
 # TODO(binji): Use assembly
 EXTRA_CONFIGURE_ARGS="--enable-static -with-cpu=generic_fpu"
 
-if [ "${NACL_GLIBC}" != "1" ]; then
+if [ "${NACL_LIBC}" != "glibc" ]; then
   # Disable network support for newlib builds.
   # TODO(sbc): remove this once network syscalls land in libnacl
   EXTRA_CONFIGURE_ARGS+=" --enable-network=no"

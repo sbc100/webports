@@ -7,15 +7,20 @@ BUILD_DIR=${SRC_DIR}
 INSTALL_TARGETS="install INSTALL_PREFIX=${DESTDIR}"
 
 ConfigureStep() {
-  local machine="i686"
-  if [ "${NACL_GLIBC}" = "1" ] ; then
+  if [ "${NACL_SHARED}" = "1" ] ; then
     local EXTRA_ARGS="shared"
   else
-    local EXTRA_ARGS="no-dso -I${NACLPORTS_INCLUDE}/glibc-compat"
+    local EXTRA_ARGS="no-dso"
+  fi
+
+  if [ "${NACL_LIBC}" = "newlib" ] ; then
+    EXTRA_ARGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     # The default from MACHINE=i686 is linux-elf, which links things
     # with -ldl. However, newlib does not have -ldl. In that case,
     # make a fake machine where the build rule does not use -ldl.
-    machine="le32newlib"
+    local machine="le32newlib"
+  else
+    local machine="i686"
   fi
 
   MACHINE=${machine} CC=${NACLCC} AR=${NACLAR} RANLIB=${NACLRANLIB} \
@@ -27,7 +32,7 @@ ConfigureStep() {
 
 
 HackStepForNewlib() {
-  if [ "${NACL_GLIBC}" = "1" ]; then
+  if [ "${NACL_SHARED}" = "1" ]; then
     git checkout apps/Makefile
     git checkout test/Makefile
     return
@@ -57,7 +62,7 @@ InstallStep() {
   # openssl (for some reason) installs shared libraries with 555 (i.e.
   # not writable.  This causes issues when create_nmf copies the libraries
   # and then tries to overwrite them later.
-  if [ "${NACL_GLIBC}" = "1" ] ; then
+  if [ "${NACL_SHARED}" = "1" ] ; then
     LogExecute chmod 644 ${DESTDIR_LIB}/libssl.so.*
     LogExecute chmod 644 ${DESTDIR_LIB}/libcrypto.so.*
   fi
@@ -79,7 +84,7 @@ jpaketest srptest asn1test"
   export SEL_LDR_LIB_PATH=$PWD/..
   # Newlib can't build ssltest -- requires socket()
   # md2test, rc5test, jpaketest just segfaults w/ nacl-gcc-newlib and pnacl.
-  if [ "${NACL_GLIBC}" != "1" ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     local broken_tests="md2test rc5test ssltest jpaketest"
     for to_filter in ${broken_tests}; do
       passing_tests=$(echo ${passing_tests} | sed "s/\b${to_filter}//g")

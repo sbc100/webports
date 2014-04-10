@@ -3,13 +3,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 export ac_cv_func_gethostbyname=yes
 export ac_cv_func_getaddrinfo=no
 export ac_cv_func_connect=yes
 export LIBS="-lnacl_io -lpthread -l${NACL_CPP_LIB}"
 
-if [ $NACL_GLIBC = 1 ]; then
+if [ "${NACL_SHARED}" = "1" ]; then
   EXECUTABLE_DIR=.libs
 else
   EXECUTABLE_DIR=.

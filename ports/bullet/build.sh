@@ -5,7 +5,7 @@
 
 
 TestStep() {
-  if [ "${NACL_GLIBC}" = "1" ]; then
+  if [ "${NACL_SHARED}" = "1" ]; then
     local exe_dir=.libs
   else
     local exe_dir=

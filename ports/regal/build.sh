@@ -5,17 +5,15 @@
 
 BUILD_DIR=${SRC_DIR}
 
-
 BuildStep() {
   make -f Makefile SYSTEM=nacl-${NACL_ARCH}
 }
-
 
 InstallStep() {
   MakeDir ${DESTDIR_LIB}
   MakeDir ${DESTDIR_INCLUDE}
   LogExecute cp -a lib/nacl-${NACL_ARCH}/libRegal*.a ${DESTDIR_LIB}/
-  if [ "${NACL_GLIBC}" = 1 ]; then
+  if [ "${NACL_SHARED}" = 1 ]; then
     LogExecute cp -a lib/nacl-${NACL_ARCH}/libRegal*.so* ${DESTDIR_LIB}/
   fi
   LogExecute cp -r include/GL ${DESTDIR_INCLUDE}/

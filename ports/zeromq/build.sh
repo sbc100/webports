@@ -3,10 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 export LIBS="-lnacl_io"
 
-if [ "${NACL_GLIBC}" != "1" ]; then
+if [ "${NACL_LIBC}" = "newlib" ]; then
    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
    export LIBS="${LIBS} -lglibc-compat"
 fi

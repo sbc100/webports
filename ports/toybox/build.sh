@@ -14,7 +14,7 @@ NACLPORTS_LDFLAGS+=" -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 
 export HOSTCC=cc
 
-if [ "${NACL_GLIBC}" != "1" ]; then
+if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   NACLPORTS_LDFLAGS+=" -lglibc-compat"
 fi

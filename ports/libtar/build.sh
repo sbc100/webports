@@ -5,6 +5,6 @@
 
 NACLPORTS_CPPFLAGS+=" -DMAXPATHLEN=512 -DHAVE_STDARG_H"
 NACLPORTS_CPPFLAGS+=" -Dcompat_makedev\(a,b\)"
-if [ "${NACL_GLIBC}" = "1" ]; then
+if [ "${NACL_SHARED}" = "1" ]; then
   NACLPORTS_CFLAGS+=" -fPIC"
 fi

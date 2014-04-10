@@ -12,7 +12,7 @@ ConfigureStep() {
 BuildStep() {
   make clean
   make CC="${NACLCC}" AR="${NACLAR}" RANLIB="${NACLRANLIB}" -j${OS_JOBS} libbz2.a
-  if [ ${NACL_GLIBC} = 1 ]; then
+  if [ "${NACL_SHARED}" = "1" ]; then
     LogExecute make -f Makefile-libbz2_so clean
     LogExecute make -f Makefile-libbz2_so CC="${NACLCC}" AR="${NACLAR}" \
         RANLIB="${NACLRANLIB}" -j${OS_JOBS}
@@ -22,8 +22,8 @@ BuildStep() {
 InstallStep() {
   # Don't rely on make install, as it implicitly builds executables
   # that need things not available in newlib.
-  MakeDir  ${DESTDIR_INCLUDE}
-  MakeDir  ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  MakeDir ${DESTDIR_LIB}
   LogExecute cp -f bzlib.h ${DESTDIR_INCLUDE}
   LogExecute chmod a+r ${DESTDIR_INCLUDE}/bzlib.h
 

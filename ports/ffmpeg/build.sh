@@ -17,14 +17,6 @@ ConfigureStep() {
     extra_args="--arch=x86"
   fi
 
-  if [[ "${NACL_GLIBC}" != "1" ]]; then
-    # This is needed for sys/ioctl.h.
-    # TODO(sbc): Remove once sys/ioctl.h is added to newlib SDK
-    CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-    export CFLAGS
-    extra_args+=" --extra-libs=-lglibc-compat"
-  fi
-
   LogExecute ${SRC_DIR}/configure \
     --cross-prefix=${NACL_CROSS_PREFIX}- \
     --target-os=linux \

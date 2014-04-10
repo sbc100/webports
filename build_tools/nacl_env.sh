@@ -50,6 +50,7 @@ NACL_ARCH=${NACL_ARCH:-x86_64}
 # Default Value for TOOLCHAIN, taking into account legacy
 # NACL_GLIBC varible.
 if [ "${NACL_GLIBC:-}" = "1" ]; then
+  echo "WARNING: \$NACL_GLIBC is deprecated (use \$TOOLCHAIN=glibc instead)"
   TOOLCHAIN=${TOOLCHAIN:-glibc}
 else
   TOOLCHAIN=${TOOLCHAIN:-newlib}

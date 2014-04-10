@@ -5,7 +5,7 @@
 
 CONFIG_SUB=config/config.sub
 
-if [ "${NACL_GLIBC}" != "1" ]; then
+if [ "${NACL_LIBC}" = "newlib" ]; then
   # TODO(sbc): remove once this is fixed:
   # https://code.google.com/p/nativeclient/issues/detail?id=3790
   NACLPORTS_CPPFLAGS+=" -DSSIZE_MAX=LONG_MAX"

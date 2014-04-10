@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 
-if [ "${NACL_GLIBC}" = "1" ]; then
+if [ "${NACL_SHARED}" = "1" ]; then
   EXECUTABLES=util/.libs/rgb2gif${NACL_EXEEXT}
 else
   EXECUTABLES=util/rgb2gif${NACL_EXEEXT}
@@ -16,7 +16,7 @@ RunTest() {
 }
 
 TestStep() {
-  if [ "${NACL_GLIBC}" = "1" ]; then
+  if [ "${NACL_LIBC}" = "glibc" ]; then
     # TODO(sbc): find out why glibc version of rgb2gif is crashing
     return
   fi

@@ -6,7 +6,7 @@
 BUILD_DIR=${SRC_DIR}
 EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
-if [ "${NACL_GLIBC}" = "1" ]; then
+if [ "${NACL_LIBC}" = "glibc" ]; then
   PLAT=nacl-glibc
 else
   PLAT=nacl-newlib

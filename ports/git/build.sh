@@ -19,11 +19,12 @@ ConfigureStep() {
   ChangeDir ${SRC_DIR}
   autoconf
 
-  if [[ "${NACL_GLIBC}" != 1 ]]; then
-    readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
-    NACLPORTS_CPPFLAGS+=" -I${GLIBC_COMPAT}"
+  if [ "${NACL_LIBC}" = "newlib" ]; then
+    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     NACLPORTS_LDFLAGS+=" -lglibc-compat"
-  else
+  fi
+
+  if [ "${NACL_LIBC}" = "glibc" ]; then
     # Because libcrypto.a needs dlsym we need to add this explicitly.
     # This is not normally needed when libcyrpto is a shared library.
     NACLPORTS_LDFLAGS+=" -ldl"

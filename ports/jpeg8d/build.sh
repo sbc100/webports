@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 
-if [ ${NACL_GLIBC} = "1" ]; then
+if [ "${NACL_SHARED}" = "1" ]; then
   EXECUTABLES="rdjpgcom${NACL_EXEEXT} wrjpgcom${NACL_EXEEXT} \
       .libs/cjpeg${NACL_EXEEXT} .libs/djpeg${NACL_EXEEXT} \
       .libs/jpegtran${NACL_EXEEXT}"
@@ -15,7 +15,7 @@ fi
 
 TestStep() {
   export SEL_LDR_LIB_PATH=$PWD/.libs
-  if [ ${NACL_ARCH} = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
     for arch in x86-32 x86-64; do
       for exe in ${EXECUTABLES}; do
         local exe_noext=${exe%.*}
@@ -24,7 +24,7 @@ TestStep() {
       make test
     done
   else
-    if [ ${NACL_GLIBC} = "1" ]; then
+    if [ "${NACL_SHARED}" = "1" ]; then
       for exe in ${EXECUTABLES}; do
        local script=$(basename ${exe%.*})
         WriteSelLdrScript ${script} ${exe}

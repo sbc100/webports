@@ -8,15 +8,17 @@
 CONFIG_SUB=support/config.sub
 MAKEFLAGS+=" EXEEXT=.${NACL_EXEEXT}"
 
-if [ "${NACL_GLIBC}" != "1" ]; then
+if [ "${NACL_LIBC}" = "newlib" ]; then
    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-   EXTRA_CONFIGURE_ARGS="--disable-shared"
    export LIBS="-lglibc-compat"
 fi
 
+if [ "${NACL_SHARED}" = "0" ]; then
+   EXTRA_CONFIGURE_ARGS="--disable-shared"
+fi
 
 TestStep() {
-  if [ "${NACL_GLIBC}" != "1" ]; then
+  if [ "${NACL_LIBC}" != "glibc" ]; then
     # readline example don't link under sel_ldr
     # TODO(sbc): find a way to add glibc-compat to link line for examples.
     return
@@ -36,7 +38,7 @@ TestStep() {
 
 InstallStep() {
   DefaultInstallStep
-  if [ "${NACL_GLIBC}" = "1" ]; then
+  if [ "${NACL_SHARED}" = "1" ]; then
     cd ${DESTDIR_LIB}
     ln -sf libreadline.so.6 libreadline.so
     cd -

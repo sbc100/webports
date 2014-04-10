@@ -15,7 +15,7 @@ BuildStep() {
   export NACL_LDFLAGS="${NACLPORTS_LDFLAGS}"
   export WINTTYLIB="-lncurses -ltar -lppapi_simple -lnacl_io"
   export WINTTYLIB="${WINTTYLIB} -lppapi -lppapi_cpp"
-  if [ "${NACL_GLIBC}" != "1" ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     export WINTTYLIB="${WINTTYLIB} -lglibc-compat"
     export NACL_CCFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi

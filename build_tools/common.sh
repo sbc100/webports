@@ -95,12 +95,11 @@ else
   export NACL_CPP_LIB="stdc++"
 fi
 
-# Set NACL_GLIBC to support legacy code that still relies on this
-# variable.
-if [ "${NACL_LIBC}" = "glibc" ]; then
-  export NACL_GLIBC=1
+# Set NACL_SHARED when we want to build shared libraries.
+if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "bionic" ]; then
+  NACL_SHARED=1
 else
-  export NACL_GLIBC=0
+  NACL_SHARED=0
 fi
 
 if [ ${NACL_DEBUG} = "1" ]; then

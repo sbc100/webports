@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-if [ "${NACL_GLIBC}" = "1" ]; then
+if [ "${NACL_SHARED}" = "1" ]; then
   NACLPORTS_CFLAGS+=" -fPIC"
 fi
 

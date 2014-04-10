@@ -6,7 +6,7 @@
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lncurses -ltar -lppapi_simple \
   -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
-if [ "${NACL_GLIBC}" != "1" ]; then
+if [ "${NACL_LIBC}" = "newlib" ]; then
   EXTRA_CONFIGURE_ARGS="--enable-tiny"
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   export EXTRA_LIBS+=" -lglibc-compat"

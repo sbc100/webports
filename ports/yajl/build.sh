@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 EXECUTABLES=test/yajl_test
-EXTRA_CMAKE_ARGS="-DBUILD_SHARED=${NACL_GLIBC}"
+EXTRA_CMAKE_ARGS="-DBUILD_SHARED=${NACL_SHARED}"
 
 TestStep() {
   if [ ${NACL_ARCH} == "pnacl" ]; then

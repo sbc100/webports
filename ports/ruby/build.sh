@@ -27,7 +27,7 @@ ConfigureStep() {
   # TODO(sbc): remove once getaddrinfo() is working
   local EXTRA_CONFIGURE_ARGS=--disable-ipv6
 
-  if [ ${NACL_GLIBC} != 1 ]; then
+  if [ "${NACL_LIBC}" = "newlib" ]; then
     EXTRA_CONFIGURE_ARGS+=" --with-static-linked-ext --with-newlib"
     export LIBS="-lglibc-compat"
   else

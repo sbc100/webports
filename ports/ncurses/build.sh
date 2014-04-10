@@ -10,7 +10,7 @@ EXTRA_CONFIGURE_ARGS+=" --disable-termcap"
 EXTRA_CONFIGURE_ARGS+=" --enable-overwrite"
 EXTRA_CONFIGURE_ARGS+=" --without-ada"
 
-if [ "${NACL_GLIBC}" = 1 ]; then
+if [ "${NACL_SHARED}" = 1 ]; then
   EXTRA_CONFIGURE_ARGS+=" --with-shared"
 fi
 

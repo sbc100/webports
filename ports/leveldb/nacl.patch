@@ -29,10 +29,10 @@ index 6e59c6f..8b52dc2 100755
 +        PLATFORM_LDFLAGS="-pthread"
 +        PORT_FILE=port/port_posix.cc
 +        CROSS_COMPILE=true
-+        if [ $NACL_ARCH = arm -o $NACL_ARCH = pnacl ]; then
++        if [ "$NACL_ARCH" = arm -o "$NACL_ARCH" = pnacl ]; then
 +            COMMON_FLAGS="$COMMON_FLAGS -DLEVELDB_STDATOMIC_PRESENT"
 +        fi
-+        if [ $NACL_GLIBC != 1 ]; then
++        if [ "$NACL_SHARED" != 1 ]; then
 +          PLATFORM_SHARED_EXT=""
 +        fi
 +        ;;

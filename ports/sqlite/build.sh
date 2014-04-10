@@ -6,11 +6,11 @@
 MAKE_TARGETS="CCLD=\$(CXX) all"
 NACLPORTS_CPPFLAGS+=" -DNACL_SDK_VERSION=$NACL_SDK_VERSION"
 export LIBS="-lnacl_io -pthread"
-if [ ${NACL_GLIBC} != "1" ]; then
+if [ "${NACL_SHARED}" = "1" ]; then
+  EXECUTABLE_DIR=.libs
+else
   EXTRA_CONFIGURE_ARGS=--disable-dynamic-extensions
   EXECUTABLE_DIR=.
-else
-  EXECUTABLE_DIR=.libs
 fi
 
 EXECUTABLES="${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}"
