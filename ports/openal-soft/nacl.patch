@@ -1,5 +1,5 @@
 diff --git a/Alc/ALc.c b/Alc/ALc.c
-index 6bdcc66..2a11491 100644
+index fd5b889..b7c82b3 100644
 --- a/Alc/ALc.c
 +++ b/Alc/ALc.c
 @@ -23,7 +23,7 @@
@@ -9,11 +9,11 @@ index 6bdcc66..2a11491 100644
 -#include <memory.h>
 +#include <string.h>
  #include <ctype.h>
+ #include <signal.h>
  
- #include "alMain.h"
-@@ -69,7 +69,9 @@ static BackendInfo BackendList[] = {
- #ifdef HAVE_PORTAUDIO
-     { "port", alc_pa_init, alc_pa_deinit, alc_pa_probe, EmptyFuncs },
+@@ -77,7 +77,9 @@ static struct BackendInfo BackendList[] = {
+ #ifdef HAVE_OPENSL
+     { "opensl", alc_opensl_init, alc_opensl_deinit, alc_opensl_probe, EmptyFuncs },
  #endif
 -
 +#ifdef HAVE_PPAPI
@@ -22,12 +22,12 @@ index 6bdcc66..2a11491 100644
      { "null", alc_null_init, alc_null_deinit, alc_null_probe, EmptyFuncs },
  #ifdef HAVE_WAVE
      { "wave", alc_wave_init, alc_wave_deinit, alc_wave_probe, EmptyFuncs },
-diff --git a/Alc/ppapi.c b/Alc/ppapi.c
+diff --git a/Alc/backends/ppapi.c b/Alc/backends/ppapi.c
 new file mode 100644
-index 0000000..486c248
+index 0000000..b9703ff
 --- /dev/null
-+++ b/Alc/ppapi.c
-@@ -0,0 +1,422 @@
++++ b/Alc/backends/ppapi.c
+@@ -0,0 +1,447 @@
 +/**
 + * OpenAL cross platform audio library
 + * Copyright (C) 2012
@@ -52,6 +52,7 @@ index 0000000..486c248
 +
 +#include <stdlib.h>
 +#include "alMain.h"
++#include "alu.h"
 +#include "AL/al.h"
 +#include "AL/alc.h"
 +
@@ -95,7 +96,7 @@ index 0000000..486c248
 +
 +    volatile int killNow;
 +    ALvoid *thread;
-+    volatile ALuint main_thread_init_status;
++    volatile ALint main_thread_init_status;
 +    ALuint buffer_ready;
 +} ppapi_data;
 +
@@ -104,6 +105,7 @@ index 0000000..486c248
 +
 +AL_API void AL_APIENTRY alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface)
 +{
++    TRACE("alSetPpapiInfo\n");
 +    gInstance = instance;
 +    gGetInterface = get_interface;
 +}
@@ -121,10 +123,10 @@ index 0000000..486c248
 +    if (data->read_ptr > data->write_ptr)
 +        write_proxy = data->write_ptr + data->size;
 +
-+    int available_bytes = write_proxy - data->read_ptr;
++    ALuint available_bytes = write_proxy - data->read_ptr;
 +    if (available_bytes < buffer_size_in_bytes)
 +    {
-+        AL_PRINT("buffer underrun (buffer size=%d) (only buffering %d)\n", buffer_size_in_bytes, available_bytes);
++        WARN("buffer underrun (buffer size=%d) (only buffering %d)\n", buffer_size_in_bytes, available_bytes);
 +        /* Zero the part of the buffer that we cannot fill */
 +        memset(sample_buffer + available_bytes, 0, buffer_size_in_bytes - available_bytes);
 +        buffer_size_in_bytes = available_bytes;
@@ -169,8 +171,8 @@ index 0000000..486c248
 +     * callback.  We want to keep twice this amount in the buffer at any given
 +     * time.
 +     */
-+    const ALuint MinBufferSizeInBytes = max(SampleFrameInBytes*2,
-+                                            UpdateSizeInBytes);
++    const ALuint MinBufferSizeInBytes = maxu(SampleFrameInBytes*2,
++                                             UpdateSizeInBytes);
 +
 +    while(!data->killNow && Device->Connected)
 +    {
@@ -228,7 +230,7 @@ index 0000000..486c248
 +                                              data->sample_frame_count);
 +
 +    if (PP_FALSE == data->audio_config->IsAudioConfig(data->audio_config_resource)) {
-+        AL_PRINT("PPAPI initialization: audio config creation failed.");
++        ERR("PPAPI initialization: audio config creation failed.");
 +        data->main_thread_init_status = -1;
 +        return;
 +    }
@@ -239,13 +241,13 @@ index 0000000..486c248
 +                                               (void*)data);
 +
 +    if (PP_FALSE == data->audio->IsAudio(data->audio_resource)) {
-+        AL_PRINT("PPAPI initialization: audio resource creation failed.");
++        ERR("PPAPI initialization: audio resource creation failed.");
 +        data->main_thread_init_status = -1;
 +        return;
 +    }
 +
 +    if (PP_FALSE == data->audio->StartPlayback(data->audio_resource)) {
-+        AL_PRINT("PPAPI initialization: start playback failed.");
++        ERR("PPAPI initialization: start playback failed.");
 +        data->main_thread_init_status = -1;
 +        return;
 +    }
@@ -253,38 +255,41 @@ index 0000000..486c248
 +    data->main_thread_init_status = 1;
 +}
 +
-+static ALCboolean ppapi_open_playback(ALCdevice *device,
-+                                      const ALCchar *deviceName)
++static ALCenum ppapi_open_playback(ALCdevice *device,
++                                   const ALCchar *deviceName)
 +{
++    TRACE("ppapi_open_playback\n");
 +    ppapi_data *data;
 +
 +    if (!deviceName)
 +        deviceName = ppapiDevice;
 +    else if (strcmp(deviceName, ppapiDevice) != 0)
-+        return ALC_FALSE;
++        return ALC_INVALID_VALUE;
 +
 +    int channels = ChannelsFromDevFmt(device->FmtChans);
 +    int bytes = BytesFromDevFmt(device->FmtType);
 +
 +    if (channels != 2)
 +    {
-+        AL_PRINT("PPAPI only supports 2 channel output\n");
-+        return ALC_FALSE;
++        WARN("PPAPI only supports 2 channel output "
++             "(%d channels requested)\n", channels);
++        return ALC_INVALID_VALUE;
 +    }
 +    if (bytes != 2)
 +    {
-+        AL_PRINT("PPAPI only supports 16-bit output\n");
-+        return ALC_FALSE;
++        WARN("PPAPI only supports 16-bit output "
++             "(%d bytes-per-channel requested, format=%#x)\n", bytes, device->FmtType);
++        return ALC_INVALID_VALUE;
 +    }
 +    if (device->Frequency != 44100 && device->Frequency != 44800)
 +    {
-+        AL_PRINT("PPAPI only supports 44100 and 44800 sample frequencies\n");
-+        return ALC_FALSE;
++        WARN("PPAPI only supports 44100 and 44800 sample frequencies "
++             "(%d requested)\n", device->Frequency);
++        return ALC_INVALID_VALUE;
 +    }
 +
 +    data = (ppapi_data*)calloc(1, sizeof(*data));
 +
-+    device->szDeviceName = strdup(deviceName);
 +    device->ExtraData = data;
 +    data->device = device;
 +
@@ -293,39 +298,26 @@ index 0000000..486c248
 +    if (!data->audio_config)
 +    {
 +        free(data);
-+        return ALC_FALSE;
++        return ALC_INVALID_VALUE;
 +    }
 +
 +    data->audio = (struct PPB_Audio_1_1*)gGetInterface(PPB_AUDIO_INTERFACE_1_1);
 +    if (!data->audio)
 +    {
 +        free(data);
-+        return ALC_FALSE;
++        return ALC_INVALID_VALUE;
 +    }
 +
 +    data->core = (struct PPB_Core_1_0*)gGetInterface(PPB_CORE_INTERFACE_1_0);
 +    if (!data->core)
 +    {
 +        free(data);
-+        return ALC_FALSE;
++        return ALC_INVALID_VALUE;
 +    }
 +
-+    if (data->core->IsMainThread()) {
-+        ppapi_open_playback_main_thread(data, 0);
-+    } else {
-+        struct PP_CompletionCallback cb =
-+            PP_MakeCompletionCallback(ppapi_open_playback_main_thread, data);
-+        data->core->CallOnMainThread(0, cb, 0);
++    device->DeviceName = strdup(deviceName);
 +
-+        while (data->main_thread_init_status == 0)
-+            Sleep(1);
-+    }
-+
-+    if (data->main_thread_init_status < 0) {
-+        free(data);
-+        return ALC_FALSE;
-+    }
-+    return ALC_TRUE;
++    return ALC_NO_ERROR;
 +}
 +
 +
@@ -367,7 +359,7 @@ index 0000000..486c248
 +    ALuint UpdateSizeInBytes = device->UpdateSize * kFrameSizeInBytes;
 +    ALuint SampleFrameInBytes = data->sample_frame_count * kFrameSizeInBytes;
 +    /* kBufferPadMult is added to protect against buffer underruns. */
-+    data->size = max(UpdateSizeInBytes, SampleFrameInBytes) * kBufferPadMult;
++    data->size = maxu(UpdateSizeInBytes, SampleFrameInBytes) * kBufferPadMult;
 +
 +    /* Extra UpdateSize added so we can read off the end of the buffer in one
 +     * shot from aluMixData, but treat the buffer like it's of size data->size.
@@ -375,13 +367,22 @@ index 0000000..486c248
 +    data->buffer = calloc(1, data->size + UpdateSizeInBytes);
 +    if (!data->buffer)
 +    {
-+        AL_PRINT("buffer malloc failed\n");
++        ERR("buffer malloc failed\n");
 +        return ALC_FALSE;
 +    }
 +    SetDefaultWFXChannelOrder(device);
 +
 +    data->read_ptr = 0;
 +    data->write_ptr = 0;
++    data->buffer_ready = 1;
++    return ALC_TRUE;
++}
++
++static ALCboolean ppapi_start_playback(ALCdevice *device)
++{
++    TRACE("ppapi_start_playback\n");
++    ppapi_data *data = (ppapi_data*)device->ExtraData;
++
 +    data->thread = StartThread(PpapiProc, device);
 +    if (data->thread == NULL)
 +    {
@@ -389,7 +390,23 @@ index 0000000..486c248
 +        data->buffer = NULL;
 +        return ALC_FALSE;
 +    }
-+    data->buffer_ready = 1;
++
++    if (data->core->IsMainThread()) {
++        ppapi_open_playback_main_thread(data, 0);
++    } else {
++        struct PP_CompletionCallback cb =
++            PP_MakeCompletionCallback(ppapi_open_playback_main_thread, data);
++        data->core->CallOnMainThread(0, cb, 0);
++
++        while (data->main_thread_init_status == 0)
++            Sleep(1);
++    }
++
++    if (data->main_thread_init_status < 0) {
++        free(data);
++        return ALC_FALSE;
++    }
++
 +    return ALC_TRUE;
 +}
 +
@@ -412,12 +429,12 @@ index 0000000..486c248
 +}
 +
 +
-+static ALCboolean ppapi_open_capture(ALCdevice *device,
++static ALCenum ppapi_open_capture(ALCdevice *device,
 +                                     const ALCchar *deviceName)
 +{
 +    (void)device;
 +    (void)deviceName;
-+    return ALC_FALSE;
++    return ALC_INVALID_VALUE;
 +}
 +
 +
@@ -425,66 +442,74 @@ index 0000000..486c248
 +    ppapi_open_playback,
 +    ppapi_close_playback,
 +    ppapi_reset_playback,
++    ppapi_start_playback,
 +    ppapi_stop_playback,
 +    ppapi_open_capture,
 +    NULL,
 +    NULL,
 +    NULL,
 +    NULL,
-+    NULL
++    NULL,
++    ALCdevice_LockDefault,
++    ALCdevice_UnlockDefault,
++    ALCdevice_GetLatencyDefault
 +};
 +
-+void alc_ppapi_init(BackendFuncs *func_list)
++ALCboolean alc_ppapi_init(BackendFuncs *func_list)
 +{
++    TRACE("alc_ppapi_init\n");
 +    *func_list = ppapi_funcs;
++    return ALC_TRUE;
 +}
 +
 +void alc_ppapi_deinit(void)
 +{
++    TRACE("alc_ppapi_deinit\n");
 +}
 +
-+void alc_ppapi_probe(int type)
++void alc_ppapi_probe(enum DevProbe type)
 +{
-+    if (type == DEVICE_PROBE)
-+        AppendDeviceList(ppapiDevice);
++    TRACE("alc_ppapi_probe\n");
++    if (type == CAPTURE_DEVICE_PROBE)
++        AppendCaptureDeviceList(ppapiDevice);
 +    else if (type == ALL_DEVICE_PROBE)
-+        AppendAllDeviceList(ppapiDevice);
++        AppendAllDevicesList(ppapiDevice);
 +}
-diff --git a/Alc/wave.c b/Alc/wave.c
-index 6ba662c..d64bbb4 100644
---- a/Alc/wave.c
-+++ b/Alc/wave.c
+diff --git a/Alc/backends/wave.c b/Alc/backends/wave.c
+index be528c9..35e0a7e 100644
+--- a/Alc/backends/wave.c
++++ b/Alc/backends/wave.c
 @@ -22,7 +22,7 @@
  
  #include <stdlib.h>
  #include <stdio.h>
 -#include <memory.h>
 +#include <string.h>
- #include "alMain.h"
- #include "AL/al.h"
- #include "AL/alc.h"
+ #ifdef HAVE_WINDOWS_H
+ #include <windows.h>
+ #endif
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 44f9ea8..22781d1 100644
+index 5389f11..3c7d560 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -32,6 +32,7 @@ OPTION(DSOUND  "Check for DirectSound backend"         ON)
+@@ -42,6 +42,7 @@ OPTION(DSOUND  "Check for DirectSound backend"         ON)
  OPTION(WINMM   "Check for Windows Multimedia backend"  ON)
  OPTION(PORTAUDIO  "Check for PortAudio backend"        ON)
  OPTION(PULSEAUDIO "Check for PulseAudio backend"       ON)
 +OPTION(PPAPI   "Check for PPAPI backend"               ON)
+ OPTION(COREAUDIO  "Check for CoreAudio backend"        ON)
+ OPTION(OPENSL     "Check for OpenSL backend"           ON)
  OPTION(WAVE    "Enable Wave Writer backend"            ON)
- 
- OPTION(DLOPEN  "Check for the dlopen API for loading optional libs"  ON)
-@@ -338,6 +339,7 @@ SET(HAVE_DSOUND     0)
+@@ -504,6 +505,7 @@ SET(HAVE_MMDEVAPI   0)
  SET(HAVE_WINMM      0)
  SET(HAVE_PORTAUDIO  0)
  SET(HAVE_PULSEAUDIO 0)
 +SET(HAVE_PPAPI      0)
+ SET(HAVE_COREAUDIO  0)
+ SET(HAVE_OPENSL     0)
  SET(HAVE_WAVE       0)
- 
- # Check ALSA backend
-@@ -444,6 +446,16 @@ IF(PULSEAUDIO)
-     ENDIF()
+@@ -711,6 +713,16 @@ IF(REQUIRE_OPENSL AND NOT HAVE_OPENSL)
+     MESSAGE(FATAL_ERROR "Failed to enabled required OpenSL backend")
  ENDIF()
  
 +# Check PPAPI backend
@@ -492,7 +517,7 @@ index 44f9ea8..22781d1 100644
 +    CHECK_INCLUDE_FILE(ppapi/c/ppb_audio.h HAVE_PPAPI_PPB_AUDIO_H)
 +    IF(HAVE_PPAPI_PPB_AUDIO_H)
 +      SET(HAVE_PPAPI 1)
-+      SET(ALC_OBJS  ${ALC_OBJS}  Alc/ppapi.c)
++      SET(ALC_OBJS  ${ALC_OBJS}  Alc/backends/ppapi.c)
 +      SET(BACKENDS  "${BACKENDS} PPAPI,")
 +    ENDIF()
 +ENDIF()
@@ -501,26 +526,35 @@ index 44f9ea8..22781d1 100644
  IF(WAVE)
      SET(HAVE_WAVE 1)
 diff --git a/OpenAL32/Include/alMain.h b/OpenAL32/Include/alMain.h
-index 02153a8..ff7c323 100644
+index ec44bde..3d04626 100644
 --- a/OpenAL32/Include/alMain.h
 +++ b/OpenAL32/Include/alMain.h
-@@ -291,6 +291,9 @@ void alc_wave_probe(int type);
- void alc_pulse_init(BackendFuncs *func_list);
+@@ -443,6 +443,9 @@ void alc_wave_probe(enum DevProbe type);
+ ALCboolean alc_pulse_init(BackendFuncs *func_list);
  void alc_pulse_deinit(void);
- void alc_pulse_probe(int type);
-+void alc_ppapi_init(BackendFuncs *func_list);
+ void alc_pulse_probe(enum DevProbe type);
++ALCboolean alc_ppapi_init(BackendFuncs *func_list);
 +void alc_ppapi_deinit(void);
-+void alc_ppapi_probe(int type);
- void alc_null_init(BackendFuncs *func_list);
- void alc_null_deinit(void);
- void alc_null_probe(int type);
++void alc_ppapi_probe(enum DevProbe type);
+ ALCboolean alc_ca_init(BackendFuncs *func_list);
+ void alc_ca_deinit(void);
+ void alc_ca_probe(enum DevProbe type);
+@@ -502,7 +505,7 @@ enum DevFmtType {
+     DevFmtUInt   = ALC_UNSIGNED_INT_SOFT,
+     DevFmtFloat  = ALC_FLOAT_SOFT,
+ 
+-    DevFmtTypeDefault = DevFmtFloat
++    DevFmtTypeDefault = DevFmtShort
+ };
+ enum DevFmtChannels {
+     DevFmtMono   = ALC_MONO_SOFT,
 diff --git a/config.h.in b/config.h.in
-index 3c1e7e6..351142a 100644
+index 06c34c8..eb5127c 100644
 --- a/config.h.in
 +++ b/config.h.in
-@@ -25,6 +25,9 @@
- /* Define if we have the PulseAudio backend */
- #cmakedefine HAVE_PULSEAUDIO
+@@ -62,6 +62,9 @@
+ /* Define if we have the OpenSL backend */
+ #cmakedefine HAVE_OPENSL
  
 +/* Define if we have the PPAPI backend */
 +#cmakedefine HAVE_PPAPI
@@ -529,12 +563,12 @@ index 3c1e7e6..351142a 100644
  #cmakedefine HAVE_WAVE
  
 diff --git a/include/AL/alc.h b/include/AL/alc.h
-index 04543a0..ebba9c9 100644
+index 294e8b3..8b0a235 100644
 --- a/include/AL/alc.h
 +++ b/include/AL/alc.h
-@@ -270,6 +270,15 @@ typedef void           (ALC_APIENTRY *LPALCCAPTURESAMPLES)( ALCdevice *device, A
-  #pragma export off
- #endif
+@@ -230,6 +230,15 @@ typedef void           (ALC_APIENTRY *LPALCCAPTURESTART)(ALCdevice *device);
+ typedef void           (ALC_APIENTRY *LPALCCAPTURESTOP)(ALCdevice *device);
+ typedef void           (ALC_APIENTRY *LPALCCAPTURESAMPLES)(ALCdevice *device, ALCvoid *buffer, ALCsizei samples);
  
 +#if defined(__native_client__)
 +#include <ppapi/c/ppp.h>

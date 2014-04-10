@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <pthread.h>
 #include <stdio.h>
-#include <semaphore.h>
 #include <string.h>
 
 #include "AL/al.h"
@@ -37,8 +36,6 @@
 #include "ppapi/c/ppp_input_event.h"
 #include "ppapi/c/ppp_instance.h"
 #include "ppapi/c/ppp_messaging.h"
-
-#define INITIALIZE_OPENAL_ON_MAIN_THREAD 1
 
 PP_Module g_module = 0;
 PPB_GetInterface g_get_browser_interface = NULL;
@@ -73,7 +70,6 @@ struct PepperState {
   float listener_vel[3];
   float pitch;
   float gain;
-  sem_t audio_init_sem;
 };
 struct PepperState g_MyState;
 int g_MyStateIsValid = 0;
@@ -129,7 +125,7 @@ void SetupAndPlayAudio() {
   assert(alGetError() == AL_NO_ERROR);
 }
 
-void* DecodeAndPlayOggFile(void* data) {
+void DecodeAndPlayOggFile() {
   char* pcm_buffer;
   int buffer_size;
   int num_channels;
@@ -137,10 +133,6 @@ void* DecodeAndPlayOggFile(void* data) {
   DecodeOggBuffer(ogg_file_contents, ogg_file_size,
                   &pcm_buffer, &buffer_size, &num_channels, &rate);
 
-  /* If OpenAL is initialized on a secondary thread, we need to wait
-   * until it is done.
-   */
-  sem_wait(&g_MyState.audio_init_sem);
   /* Pass the decoded PCM buffer to OpenAL. */
   alBufferData(g_MyState.buffer,
                num_channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16,
@@ -158,19 +150,12 @@ void* DecodeAndPlayOggFile(void* data) {
 
   SetupAndPlayAudio();
   g_MyState.ready = 1;
-  return NULL;
 }
 
 static void ReadCallback(void* data, int32_t result) {
   if (result == PP_OK) {
     /* We're done reading the file. */
-#if INITIALIZE_OPENAL_ON_MAIN_THREAD
-    DecodeAndPlayOggFile(NULL);
-#else
-    /* Spawn a new thread so we can wait if needed. */
-    pthread_t p;
-    pthread_create(&p, NULL, DecodeAndPlayOggFile, NULL);
-#endif
+    DecodeAndPlayOggFile();
   } else if (result > 0) {
     /* 'result' bytes were read into memory. */
     ogg_file_size += (size_t)result;
@@ -209,7 +194,7 @@ void ReadSome(void* data) {
   assert(read_ret == PP_OK_COMPLETIONPENDING);
 }
 
-void* InitializeOpenAL(void* data) {
+void InitializeOpenAL() {
   /* PPAPI should be the default device in NaCl, hence 'NULL'. */
   g_MyState.alc_device = alcOpenDevice(NULL);
   assert(g_MyState.alc_device != NULL);
@@ -222,8 +207,6 @@ void* InitializeOpenAL(void* data) {
   assert(alGetError() == AL_NO_ERROR);
   alGenSources(1, &g_MyState.source);
   assert(alGetError() == AL_NO_ERROR);
-  sem_post(&g_MyState.audio_init_sem);
-  return NULL;
 }
 
 static PP_Bool Instance_DidCreate(PP_Instance instance,
@@ -238,19 +221,14 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
   alSetPpapiInfo(instance, g_get_browser_interface);
 
   const ALCchar *devices = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+  setenv("ALSOFT_LOGLEVEL", "3", 0);
   printf("Audio devices available:\n");
   while (devices[0] != '\0') {
     printf("\t%s\n", devices);
     devices = devices + strlen(devices)+1;
   }
 
-  sem_init(&g_MyState.audio_init_sem, 0, 0);
-#if INITIALIZE_OPENAL_ON_MAIN_THREAD
-  InitializeOpenAL(NULL);
-#else
-  pthread_t p;
-  pthread_create(&p, NULL, InitializeOpenAL, NULL);
-#endif
+  InitializeOpenAL();
 
   ogg_file_contents = (char*)malloc(BUFFER_READ_SIZE);
   ogg_file_alloced = BUFFER_READ_SIZE;

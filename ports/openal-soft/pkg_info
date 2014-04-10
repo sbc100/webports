@@ -1,5 +1,5 @@
 NAME=openal-soft
-VERSION=1.13
-URL=http://kcat.strangesoft.net/openal-releases/openal-soft-1.13.tar.bz2
+VERSION=1.15.1
+URL=http://kcat.strangesoft.net/openal-releases/openal-soft-1.15.1.tar.bz2
 LICENSE=LGPL2
-SHA1=0e2449375a12cee65a9cea354533dcaabf9d5068
+SHA1=a0e73a46740c52ccbde38a3912c5b0fd72679ec8
