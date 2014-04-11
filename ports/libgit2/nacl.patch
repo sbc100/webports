@@ -1,0 +1,254 @@
+diff --git a/tests/clar/fs.h b/tests/clar/fs.h
+index b7a1ff9..8707d2a 100644
+--- a/tests/clar/fs.h
++++ b/tests/clar/fs.h
+@@ -250,7 +250,249 @@ cl_fs_cleanup(void)
+ 	fs_rm(fixture_path(_clar_path, "*"));
+ }
+ 
++#elif defined(__native_client__)
++
++#include <dirent.h>
++#include <errno.h>
++#include <sys/stat.h>
++
++static int fs_copy_helper(const char* source, const char* dest);
++
++static int fs_copy_dir(const char* source, const char* dest) {
++  DIR* src_dir = opendir(source);
++  struct dirent* dirent_buf = malloc(sizeof(struct dirent));
++  struct dirent* dir_entry = NULL;
++  int result = 1;
++
++  if (src_dir == NULL) {
++    fprintf(stderr, "Error opening directory %s: %s\n",
++            source, strerror(errno));
++    goto error;
++  }
++
++  // Create the destination directory.
++  if (mkdir(dest, 0700) != 0) {
++    if (errno != EEXIST) {
++      fprintf(stderr, "Error creating directory %s: %s\n",
++              dest, strerror(errno));
++      goto error;
++    }
++  }
++
++  while (1) {
++    char src_entry_path[PATH_MAX];
++    char dst_entry_path[PATH_MAX];
++    const char* entry_name;
++
++    if (readdir_r(src_dir, dirent_buf, &dir_entry) != 0) {
++      fprintf(stderr, "Error reading directory %s: %s\n",
++              source, strerror(errno));
++      goto error;
++    }
++
++    if (dir_entry == NULL) {
++      break;
++    }
++
++    entry_name = dir_entry->d_name;
++
++    if (strcmp(entry_name, ".") == 0 || strcmp(entry_name, "..") == 0)
++      continue;
++
++    snprintf(&src_entry_path[0], PATH_MAX, "%s/%s", source, entry_name);
++    snprintf(&dst_entry_path[0], PATH_MAX, "%s/%s", dest, entry_name);
++
++    if (!fs_copy_helper(src_entry_path, dst_entry_path)) {
++      goto error;
++    }
++  }
++
++  goto cleanup;
++
++error:
++  result = 0;
++
++cleanup:
++  closedir(src_dir);
++  return result;
++}
++
++static int fs_copy_file(const char* source, const char* dest) {
++  const size_t buffer_size = 8192;
++  char buffer[buffer_size];
++  int result = 1;
++
++  FILE* src_file = fopen(source, "r");
++  if (src_file == NULL) {
++    fprintf(stderr, "Error opening file %s for reading: %s\n",
++            source, strerror(errno));
++    goto error;
++  }
++
++  FILE* dst_file = fopen(dest, "w");
++  if (dst_file == NULL) {
++    fprintf(stderr, "Error opening file %s for writing: %s\n",
++            dest, strerror(errno));
++    goto error;
++  }
++
++  while (!feof(src_file)) {
++    ssize_t bytes_read = fread(&buffer[0], 1, buffer_size, src_file);
++    ssize_t bytes_written;
++    if (bytes_read < 0) {
++      fprintf(stderr, "Unable to read from %s: %s\n", source, strerror(errno));
++      goto error;
++    }
++
++    bytes_written = fwrite(&buffer[0], 1, bytes_read, dst_file);
++    if (bytes_written != bytes_read) {
++      fprintf(stderr, "Unable to write %d bytes of %s to %s: %s\n",
++              bytes_read, source, dest, strerror(errno));
++      goto error;
++    }
++  }
++
++  goto cleanup;
++
++error:
++  result = 0;
++
++cleanup:
++  if (src_file)
++    fclose(src_file);
++
++  if (dst_file)
++    fclose(dst_file);
++
++  return result;
++}
++
++static int fs_copy_helper(const char *source, const char *dest) {
++  struct stat statbuf;
++  if (stat(source, &statbuf) != 0) {
++    fprintf(stderr, "Error stat'ing file %s: %s\n", source, strerror(errno));
++    return 0;
++  }
++
++  if (S_ISDIR(statbuf.st_mode)) {
++    if (!fs_copy_dir(source, dest))
++      return 0;
++  } else {
++    if (!fs_copy_file(source, dest))
++      return 0;
++  }
++
++  return 1;
++}
++
++
++static void fs_copy(const char *source, const char *dest) {
++  char real_dest[PATH_MAX];
++  char* last_slash = NULL;
++
++  // Copy the base directory name of source to dest.
++  // e.g. fs_copy("foo/bar/baz", "/tmp/blah") creates "/tmp/blah/baz".
++
++  last_slash = strrchr(source, '/');
++  if (last_slash != NULL) {
++    snprintf(real_dest, PATH_MAX, "%s/%s", dest, last_slash + 1);
++  } else {
++    strncpy(real_dest, dest, PATH_MAX);
++  }
++
++  cl_must_pass_(fs_copy_helper(source, real_dest),
++                "Failed to copy test fixtures to sandbox");
++}
++
++static int fs_rm_helper(const char* source);
++
++static int fs_rm_dir(const char* source) {
++  DIR* src_dir = opendir(source);
++  struct dirent* dir_entry = NULL;
++  int result = 1;
++
++  if (src_dir == NULL) {
++    fprintf(stderr, "Error opening directory %s: %s\n",
++            source, strerror(errno));
++    goto error;
++  }
++
++  for (dir_entry = readdir(src_dir); dir_entry; dir_entry = readdir(src_dir)) {
++    char src_entry_path[PATH_MAX];
++    const char* entry_name = dir_entry->d_name;
++
++    if (strcmp(entry_name, ".") == 0 || strcmp(entry_name, "..") == 0)
++      continue;
++
++    snprintf(&src_entry_path[0], PATH_MAX, "%s/%s", source, entry_name);
++
++    if (!fs_rm_helper(src_entry_path)) {
++      goto error;
++    }
++  }
++
++  // Finally, remove source.
++  if (rmdir(source) != 0) {
++    fprintf(stderr, "Error removing directory %s: %s\n",
++            source, strerror(errno));
++    goto error;
++  }
++
++  goto cleanup;
++
++error:
++  result = 0;
++
++cleanup:
++  closedir(src_dir);
++  return result;
++}
++
++static int fs_rm_file(const char* source) {
++  if (unlink(source) != 0) {
++    fprintf(stderr, "Error removing file %s: %s\n", source, strerror(errno));
++    return 0;
++  }
++
++  return 1;
++}
++
++static int fs_rm_helper(const char* source) {
++  struct stat statbuf;
++  if (stat(source, &statbuf) != 0) {
++    fprintf(stderr, "Error stat'ing file %s: %s\n", source, strerror(errno));
++    return 0;
++  }
++
++  if (S_ISDIR(statbuf.st_mode)) {
++    if (!fs_rm_dir(source))
++      return 0;
++  } else {
++    if (!fs_rm_file(source))
++      return 0;
++  }
++
++  return 1;
++}
++
++static void
++fs_rm(const char *source)
++{
++	cl_must_pass_(
++		fs_rm_helper(source),
++		"Failed to cleanup the sandbox"
++	);
++}
++
++void
++cl_fs_cleanup(void)
++{
++	clar_unsandbox();
++	clar_sandbox();
++}
++
+ #else
++
+ static int
+ shell_out(char * const argv[])
+ {
