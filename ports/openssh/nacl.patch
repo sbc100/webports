@@ -169,7 +169,7 @@ index c717dcf..94ffb2f 100644
   */
  int
 -main(int ac, char **av)
-+ssh_main(int ac, char **av)
++nacl_main(int ac, char **av)
  {
 +	mkdir("/home", 0777);
 +	setenv("HOME", "/home", 1);
@@ -177,12 +177,6 @@ index c717dcf..94ffb2f 100644
  	int i, r, opt, exit_status, use_syslog;
  	char *p, *cp, *line, *argv0, buf[MAXPATHLEN], *host_arg;
  	char thishost[NI_MAXHOST], shorthost[NI_MAXHOST], portstr[NI_MAXSERV];
-@@ -1586,3 +1651,5 @@ main_sigchld_handler(int sig)
- 	errno = save_errno;
- }
- 
-+#include "ppapi_simple/ps_main.h"
-+PPAPI_SIMPLE_REGISTER_MAIN(ssh_main)
 diff --git a/sshconnect.h b/sshconnect.h
 index fd7f7f7..0f03d8a 100644
 --- a/sshconnect.h
