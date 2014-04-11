@@ -625,6 +625,8 @@ def run_main(args):
   parser = optparse.OptionParser(description=__doc__, usage=usage)
   parser.add_option('-v', '--verbose', action='store_true',
                     help='Output extra information.')
+  parser.add_option('-V', '--verbose-build', action='store_true',
+                    help='Make the build itself version (e.g. pass V=1 to make')
   parser.add_option('--all', action='store_true',
                     help='Perform action on all known ports.')
   parser.add_option('-f', '--force', action='store_const', const='build',
@@ -659,6 +661,8 @@ def run_main(args):
 
   verbose = options.verbose or os.environ.get('VERBOSE') == '1'
   Trace.verbose = verbose
+  if options.verbose_build:
+    os.environ['VERBOSE'] = '1'
 
   def DoCmd(package):
     try:
