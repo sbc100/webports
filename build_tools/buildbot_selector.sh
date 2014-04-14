@@ -112,7 +112,7 @@ else
 
   # Select shard count
   if [ "$OS" = "mac" ]; then
-    readonly SHARDS=1
+    readonly SHARDS=2
   elif [ "$OS" = "linux" ]; then
     if [ "$TOOLCHAIN" = "glibc" ]; then
       readonly SHARDS=4
