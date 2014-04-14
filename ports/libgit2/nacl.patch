@@ -1,8 +1,63 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ac1032a..a238fbb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -72,14 +72,21 @@ SET(LIB_INSTALL_DIR lib CACHE PATH "Where to install libraries to.")
+ SET(INCLUDE_INSTALL_DIR include CACHE PATH "Where to install headers to.")
+ 
+ FUNCTION(TARGET_OS_LIBRARIES target)
++	MESSAGE(">>>>>>> Libc = $ENV{NACL_LIBC}")
++
+ 	IF(WIN32)
+ 		TARGET_LINK_LIBRARIES(${target} ws2_32)
+ 	ELSEIF(CMAKE_SYSTEM_NAME MATCHES "(Solaris|SunOS)")
+ 		TARGET_LINK_LIBRARIES(${target} socket nsl)
+ 		SET(LIBGIT2_PC_LIBS "${LIBGIT2_PC_LIBS} -lsocket -lnsl" PARENT_SCOPE)
+ 	ELSEIF(CMAKE_SYSTEM_NAME MATCHES "Linux")
+-		TARGET_LINK_LIBRARIES(${target} rt)
+-		SET(LIBGIT2_PC_LIBS "${LIBGIT2_PC_LIBS} -lrt" PARENT_SCOPE)
++		IF($ENV{NACL_LIBC} STREQUAL "newlib")
++			TARGET_LINK_LIBRARIES(${target} glibc-compat)
++			SET(LIBGIT2_PC_LIBS "${LIBGIT2_PC_LIBS} -lglibc-compat" PARENT_SCOPE)
++		ELSE()
++			TARGET_LINK_LIBRARIES(${target} rt)
++			SET(LIBGIT2_PC_LIBS "${LIBGIT2_PC_LIBS} -lrt" PARENT_SCOPE)
++		ENDIF()
+ 	ENDIF()
+ 
+ 	IF(USE_ICONV)
+diff --git a/src/pool.c b/src/pool.c
+index d484769..287e08e 100644
+--- a/src/pool.c
++++ b/src/pool.c
+@@ -313,7 +313,7 @@ uint32_t git_pool__system_page_size(void)
+ #elif defined(__amigaos4__)
+ 		size = (uint32_t)4096; /* 4K as there is no global value we can query */
+ #else
+-		size = (uint32_t)sysconf(_SC_PAGE_SIZE);
++		size = (uint32_t)sysconf(_SC_PAGESIZE);
+ #endif
+ 
+ 		size -= 2 * sizeof(void *); /* allow space for malloc overhead */
+diff --git a/tests/blame/buffer.c b/tests/blame/buffer.c
+index 912ee98..340b1dc 100644
+--- a/tests/blame/buffer.c
++++ b/tests/blame/buffer.c
+@@ -1,7 +1,7 @@
+ #include "blame_helpers.h"
+ 
+-git_repository *g_repo;
+-git_blame *g_fileblame, *g_bufferblame;
++static git_repository *g_repo;
++static git_blame *g_fileblame, *g_bufferblame;
+ 
+ void test_blame_buffer__initialize(void)
+ {
 diff --git a/tests/clar/fs.h b/tests/clar/fs.h
-index b7a1ff9..8707d2a 100644
+index b7a1ff9..1d508a3 100644
 --- a/tests/clar/fs.h
 +++ b/tests/clar/fs.h
-@@ -250,7 +250,249 @@ cl_fs_cleanup(void)
+@@ -250,7 +250,250 @@ cl_fs_cleanup(void)
  	fs_rm(fixture_path(_clar_path, "*"));
  }
  
@@ -10,6 +65,7 @@ index b7a1ff9..8707d2a 100644
 +
 +#include <dirent.h>
 +#include <errno.h>
++#include <limits.h>
 +#include <sys/stat.h>
 +
 +static int fs_copy_helper(const char* source, const char* dest);
@@ -251,4 +307,17 @@ index b7a1ff9..8707d2a 100644
 +
  static int
  shell_out(char * const argv[])
+ {
+diff --git a/tests/index/addall.c b/tests/index/addall.c
+index 44c5127..abc84b2 100644
+--- a/tests/index/addall.c
++++ b/tests/index/addall.c
+@@ -3,7 +3,7 @@
+ #include "posix.h"
+ #include "fileops.h"
+ 
+-git_repository *g_repo = NULL;
++static git_repository *g_repo = NULL;
+ 
+ void test_index_addall__initialize(void)
  {

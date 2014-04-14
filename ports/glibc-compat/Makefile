@@ -14,6 +14,7 @@ SOURCES := \
   src/ns_name.c \
   src/ns_netint.c \
   src/ns_samedomain.c \
+  src/qsort_r.c \
   src/res_comp.c \
   src/res_data.c \
   src/res_debug.c \

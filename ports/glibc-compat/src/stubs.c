@@ -402,3 +402,26 @@ int connect(int sockfd, const struct sockaddr *addr,
                    socklen_t addrlen) {
   UNIMPLEMENTED_FATAL();
 }
+
+char* realpath(const char* path, const char* resolved) __attribute__ ((weak));
+char* realpath(const char* path, const char* resolved) {
+  UNIMPLEMENTED_NOSYS_RTN(NULL);
+}
+
+int getaddrinfo(const char *, const char *, const struct addrinfo *,
+                struct addrinfo **) __attribute__ ((weak));
+int getaddrinfo(const char *node, const char *service,
+                const struct addrinfo *hints, struct addrinfo **res) {
+  errno = ENOSYS;
+  UNIMPLEMENTED_NOSYS_RTN(EAI_SYSTEM);
+}
+
+void freeaddrinfo(struct addrinfo *) __attribute__ ((weak));
+void freeaddrinfo(struct addrinfo *res) {
+  UNIMPLEMENTED();
+}
+
+char *gai_strerror(int) __attribute__ ((weak));
+char *gai_strerror(int errcode) {
+  UNIMPLEMENTED_NOSYS_RTN(NULL);
+}
