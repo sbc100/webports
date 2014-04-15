@@ -23,7 +23,7 @@ import urlparse
 
 import sha1check
 
-MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror/'
+MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
@@ -590,20 +590,28 @@ class Package(object):
 
     temp_filename = filename + '.partial'
     mirror_download_successfull = False
+    curl_cmd = ['curl', '--fail', '--location', '--stderr', '-',
+                '-o', temp_filename]
+    if os.isatty(sys.stdout.fileno()):
+      # Add --progress-bar but only if stdout is a TTY device.
+      curl_cmd.append('--progress-bar')
+    else:
+      # otherwise suppress all status output, since curl always
+      # assumes a TTY and writes \r and \b characters.
+      curl_cmd.append('--silent')
+
     if mirror:
       try:
-        mirror = self.GetMirrorURL()
-        Log('Downloading: %s [%s]' % (mirror, temp_filename))
-        cmd = ['wget', '-O', temp_filename, mirror]
-        subprocess.check_call(cmd)
+        mirror_url = self.GetMirrorURL()
+        Log('Downloading: %s [%s]' % (mirror_url, temp_filename))
+        subprocess.check_call(curl_cmd + [mirror_url])
         mirror_download_successfull = True
       except subprocess.CalledProcessError:
         pass
 
     if not mirror_download_successfull:
       Log('Downloading: %s [%s]' % (self.URL, temp_filename))
-      cmd = ['wget', '-O', temp_filename, self.URL]
-      subprocess.check_call(cmd)
+      subprocess.check_call(curl_cmd + [self.URL])
 
     os.rename(temp_filename, filename)
 
