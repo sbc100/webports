@@ -1,0 +1,8 @@
+NAME=python-static
+ARCHIVE_ROOT=Python-2.7.5
+VERSION=2.7.5
+URL=http://www.python.org/ftp/python/2.7.5/Python-2.7.5.tar.bz2
+LICENSE=CUSTOM:LICENSE
+LIBC=newlib
+DEPENDS=(readline zlib glibc-compat pyppapi openssl bzip2)
+SHA1=6cfada1a739544a6fa7f2601b500fba02229656b

@@ -1,0 +1,8 @@
+NAME=ipython
+VERSION=1.1.0
+URL=http://archive.ipython.org/release/1.1.0/ipython-1.1.0.tar.gz
+LICENSE=BSD
+LIBC=newlib
+MIN_SDK_VERSION=34
+DEPENDS=(python-host)
+SHA1=8964fe82988f657da70160611504f6b729ff67b1

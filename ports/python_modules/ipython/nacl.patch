@@ -1,0 +1,22 @@
+diff -r f628d005a84e IPython/external/pexpect/_pexpect.py
+--- a/IPython/external/pexpect/_pexpect.py	Wed Dec 25 03:31:05 2013 +0000
++++ b/IPython/external/pexpect/_pexpect.py	Mon Dec 30 16:24:58 2013 +0000
+@@ -70,7 +70,7 @@
+     import select
+     import re
+     import struct
+-    import resource
++    #import resource
+     import types
+     import pty
+     import tty
+@@ -568,7 +568,8 @@
+                 # This is a serious limitation, but not a show stopper.
+                 pass
+             # Do not allow child to inherit open file descriptors from parent.
+-            max_fd = resource.getrlimit(resource.RLIMIT_NOFILE)[0]
++            #max_fd = resource.getrlimit(resource.RLIMIT_NOFILE)[0]
++            max_fd = 1024
+             for i in range (3, max_fd):
+                 try:
+                     os.close (i)

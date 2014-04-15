@@ -48,6 +48,6 @@ reallyclean: clean
 	rm -rf $(NACL_OUT)
 
 %:
-	build_tools/naclports.py install ports/$* $(BUILD_FLAGS)
+	build_tools/naclports.py install $* $(BUILD_FLAGS)
 
 .PHONY: all run clean sdklibs sdklibs_list reallyclean

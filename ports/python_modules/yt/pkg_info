@@ -1,0 +1,7 @@
+NAME=yt
+VERSION=3.0beta1
+URL=http://yt-project.org/upload/yt-3.0beta1.tar.gz
+LICENSE=BSD
+LIBC=newlib
+DEPENDS=(python-host cython h5py matplotlib numpy setuptools sympy )
+SHA1=4c4e2afb532b0ecedd980ae8aa46bf540651460a

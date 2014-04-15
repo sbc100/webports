@@ -26,6 +26,7 @@ import sha1check
 MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
+PORTS_DIR = os.path.join(NACLPORTS_ROOT, "ports")
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'build')
@@ -304,16 +305,24 @@ class Package(object):
   VALID_KEYS = ('NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
                 'MIN_SDK_VERSION', 'LIBC', 'DISABLED_ARCH', 'URL_FILENAME',
                 'BUILD_OS', 'SHA1', 'DISABLED')
+  VALID_SUBDIRS = ('', 'ports', 'python_modules')
 
   def __init__(self, pkg_root):
     self.root = os.path.abspath(pkg_root)
-    self.info = os.path.join(pkg_root, 'pkg_info')
+    self.basename = os.path.basename(self.root)
     keys = []
     for key in Package.VALID_KEYS:
       setattr(self, key, None)
     self.DEPENDS = []
-    if not os.path.exists(self.info):
+    self.info = None
+    for subdir in Package.VALID_SUBDIRS:
+        info = os.path.join(PORTS_DIR, subdir, self.basename, 'pkg_info')
+        if os.path.exists(info):
+          self.info = info
+          break
+    if self.info is None:
       raise Error('Invalid package folder: %s' % pkg_root)
+    self.root = os.path.dirname(self.info)
 
     with open(self.info) as f:
       for i, line in enumerate(f):
