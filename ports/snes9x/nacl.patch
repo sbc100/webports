@@ -47,7 +47,7 @@ index 36cf605..5fa8dae 100644
  OBJECTS   += ../debug.o ../fxdbg.o
  endif
 diff --git a/unix/configure.ac b/unix/configure.ac
-index 75b5bca..c18fcbe 100644
+index 75b5bca..5f6b68a 100644
 --- a/unix/configure.ac
 +++ b/unix/configure.ac
 @@ -38,7 +38,7 @@ AC_DEFUN([AC_S9X_COMPILER_FLAG],
@@ -129,6 +129,15 @@ index 75b5bca..c18fcbe 100644
  		enable_sound="no"
  	fi
  fi
+@@ -406,7 +407,7 @@ fi
+ # Output.
+ 
+ S9XFLGS="$CXXFLAGS $CPPFLAGS $LDFLAGS $S9XFLGS"
+-S9XLIBS="$LIBS $S9XLIBS"
++S9XLIBS="$LIBS $EXTRA_LIBS $S9XLIBS"
+ 
+ S9XFLGS="`echo \"$S9XFLGS\" | sed -e 's/  */ /g'`"
+ S9XDEFS="`echo \"$S9XDEFS\" | sed -e 's/  */ /g'`"
 @@ -422,6 +423,7 @@ AC_SUBST(S9XDEBUGGER)
  AC_SUBST(S9XNETPLAY)
  AC_SUBST(S9XZIP)

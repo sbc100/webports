@@ -16,7 +16,8 @@ EXTRA_CONFIGURE_ARGS="\
       --disable-netplay \
       --without-x \
       --enable-sound"
-export LIBS="${NACLPORTS_LDFLAGS} -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
+export EXTRA_LIBS="${NACLPORTS_LDFLAGS}"
+EXTRA_LIBS+=" -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
 
 AutoconfStep() {
   echo "Autoconf..."
