@@ -131,6 +131,8 @@ def GetCurrentLibc():
 
 
 def GetCurrentToolchain():
+  if os.environ.get('NACL_ARCH') == 'pnacl':
+    return 'pnacl'
   return os.environ.get('TOOLCHAIN') or 'newlib'
 
 
