@@ -17,6 +17,10 @@ a package into the toolchain run ``naclports.py install <package_dir>``.  This
 script will download, patch, build and install the application or library.  By
 default it will first build any dependencies that that the package has.
 
+
+Prerequistes
+------------
+
 The build scripts require that certain tools are present in the host system.
 You will need at least these:
 
@@ -34,6 +38,19 @@ To build all ports you will also need these:
 - pkg-config
 - autoconf, automake, libtool
 - libglib2.0-dev >= 2.26.0 (if you want to build glib)
+
+On Mac OS X you can use homebrew to install these using the following command::
+
+  brew install autoconf automake cmake gettext libtool pkg-config
+
+The build system for some of the native Python modules relies on a 32-bit
+host build of Python itself, which in turn relies on the development version
+of zlib being available.  On 64-bit Ubuntu/Precise this means installing the
+following package: ``lib32z1-dev``.
+
+
+Building
+--------
 
 Before you can build any of the package you must set the NACL_SDK_ROOT
 environment variable to top directory of a version of the Native Client SDK
@@ -173,6 +190,5 @@ To make changes to a package's patch file the recommended workflow is:
 Whenever the upstream archive or patch file changes and you try to build the
 package you will be prompted to remove the existing repository and start a new
 one. This is to avoid deleting a repository that might have unsaved changed.
-
 
 Happy porting!
