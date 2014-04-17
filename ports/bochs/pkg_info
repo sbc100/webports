@@ -1,6 +1,6 @@
 NAME=bochs
 VERSION=2.6.2
-URL=http://downloads.sourceforge.net/bochs/bochs/2.6.2/bochs-2.6.2.tar.gz
+URL=http://downloads.sf.net/bochs/bochs/2.6.2/bochs-2.6.2.tar.gz
 LICENSE=LGPL
 DEPENDS=(sdl)
 SHA1=f82ee01a52367d2a6daffa2774a1297b978f6821

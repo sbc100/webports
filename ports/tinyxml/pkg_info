@@ -1,6 +1,6 @@
 NAME=tinyxml
 VERSION=2.5.3
 ARCHIVE_ROOT=tinyxml
-URL=http://download.sourceforge.net/tinyxml/tinyxml/2.5.3/tinyxml_2_5_3.tar.gz
+URL=http://download.sf.net/tinyxml/tinyxml/2.5.3/tinyxml_2_5_3.tar.gz
 LICENSE=CUSTOM:readme.txt
 SHA1=476f56caad21cd61ac7cc6fd40b503f20e3a66a9

@@ -1,5 +1,5 @@
 NAME=civetweb
 VERSION=1.5
-URL=http://downloads.sourceforge.net/project/civetweb/1.5/civetweb-1.5.tar.gz
+URL=http://downloads.sf.net/project/civetweb/1.5/civetweb-1.5.tar.gz
 LICENSE=MIT
 SHA1=39c18053152f01448047f504f0867251e2c67b06

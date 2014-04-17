@@ -1,6 +1,6 @@
 NAME=unzip
 VERSION=6.0
-URL=http://download.sourceforge.net/project/infozip/UnZip%206.x%20%28latest%29/UnZip%206.0/unzip60.zip
+URL=http://download.sf.net/project/infozip/UnZip%206.x%20%28latest%29/UnZip%206.0/unzip60.zip
 ARCHIVE_ROOT=unzip60
 DEPENDS=(nacl-spawn)
 LICENSE=CUSTOM:LICENSE

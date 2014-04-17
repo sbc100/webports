@@ -1,6 +1,6 @@
 NAME=jsoncpp
 VERSION=0.5.0
 ARCHIVE_ROOT=jsoncpp-src-0.5.0
-URL=http://citylan.dl.sourceforge.net/project/jsoncpp/jsoncpp/0.5.0/jsoncpp-src-0.5.0.tar.gz
+URL=http://citylan.dl.sf.net/project/jsoncpp/jsoncpp/0.5.0/jsoncpp-src-0.5.0.tar.gz
 LICENSE=CUSTOM:LICENSE
 SHA1=7169a50c7615070b6190076a7b5e86c45b7440b7
