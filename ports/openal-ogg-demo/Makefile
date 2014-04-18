@@ -47,6 +47,9 @@ install:
 	cp $(OUTDIR)/$(TARGET)*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
 	cp $(OUTDIR)/$(TARGET).nmf $(INSTALL_DIR)
+ifeq ($(TOOLCHAIN),glibc)
+	  cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
+endif
 	cp index.html $(INSTALL_DIR)
 	cp sample.ogg $(INSTALL_DIR)
 ifeq ($(TOOLCHAIN),pnacl)
