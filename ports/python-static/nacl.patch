@@ -507,6 +507,19 @@ index dc0dfd0..d45f7b0 100755
  	*-*-cygwin*)
  		_host_cpu=
  		;;
+@@ -5137,7 +5157,11 @@ if test -d casesensitivetestdir
+ then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+-    BUILDEXEEXT=.exe
++    if [ -z $EXEEXT ]; then
++      BUILDEXEEXT=.exe
++    else
++      BUILDEXEEXT=$EXEEXT
++    fi
+ else
+ 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+ $as_echo "no" >&6; }
 @@ -8246,7 +8265,7 @@ then
  			fi
  		fi
