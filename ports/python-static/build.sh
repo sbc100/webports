@@ -57,7 +57,7 @@ BuildStep() {
   export CROSS_COMPILE=true
   export MAKEFLAGS="PGEN=${NACL_HOST_PYROOT}/../python-host/build-nacl-host/Parser/pgen"
   DefaultBuildStep
-  ChangeDir ${WORK_DIR}
+  ChangeDir ${BUILD_DIR}
   Banner "Rebuilding libpython2.7.a"
   ${AR} cr libpython2.7.a ${DEST_PYTHON_OBJS}/*.o
   ${RANLIB} libpython2.7.a
