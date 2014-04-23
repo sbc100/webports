@@ -9,11 +9,21 @@
     "128": "icon_128.png"
   },
   "permissions": [
-    "unlimitedStorage"
+    "storage",
+    "unlimitedStorage",
+    {
+      "socket": [
+        "tcp-listen:*:*",
+        "tcp-connect",
+        "resolve-host",
+        "udp-bind:*:*",
+        "udp-send-to:*:*"
+      ]
+    }
   ],
   "app": {
-    "launch": {
-      "local_path": "bash.html"
+    "background": {
+      "scripts": ["background.js"]
     }
   }
 }

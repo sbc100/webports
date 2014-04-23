@@ -2,5 +2,5 @@ NAME=git
 VERSION=1.8.3.3
 URL=https://github.com/git/git/archive/v1.8.3.3/git-1.8.3.3.tar.gz
 LICENSE=GPL
-DEPENDS=(zlib nacl-spawn glibc-compat openssl)
+DEPENDS=(zlib nacl-spawn glibc-compat openssl curl)
 SHA1=9cf8f756b0dfff003b6e83eb7330420de1c90e21

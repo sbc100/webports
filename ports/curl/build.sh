@@ -61,14 +61,15 @@ InstallStep() {
     LogExecute ${PNACLFINALIZE} ${exe}
   fi
 
+  pushd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${PUBLISH_DIR}/curl_ppapi*${NACL_EXEEXT} \
       -L${DESTDIR_LIB} \
-      -s ${PUBLISH_DIR} \
+      -s . \
       -o curl.nmf
+  popd
 
   InstallNaClTerm ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/index.html ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/curl.js ${PUBLISH_DIR}
-  LogExecute cp curl.nmf ${PUBLISH_DIR}
 }

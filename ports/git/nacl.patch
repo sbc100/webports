@@ -507,6 +507,66 @@ index 5ddf11c..cada21a 100644
  {
  	struct strbuf buf = STRBUF_INIT, url_sb = STRBUF_INIT,
  			private_ref_sb = STRBUF_INIT, marksfilename_sb = STRBUF_INIT,
+diff --git a/run-command.c b/run-command.c
+index 1b32a12..8716404 100644
+--- a/run-command.c
++++ b/run-command.c
+@@ -232,7 +232,11 @@ static int wait_or_whine(pid_t pid, const char *argv0)
+ 	pid_t waiting;
+ 	int failed_errno = 0;
+ 
++#if defined(__native_client__)
++	while ((waiting = nacl_waitpid(pid, &status, 0)) < 0 && errno == EINTR)
++#else
+ 	while ((waiting = waitpid(pid, &status, 0)) < 0 && errno == EINTR)
++#endif
+ 		;	/* nothing */
+ 
+ 	if (waiting < 0) {
+@@ -334,7 +338,7 @@ fail_pipe:
+ 	trace_argv_printf(cmd->argv, "trace: run_command:");
+ 	fflush(NULL);
+ 
+-#ifndef WIN32
++#if !defined(WIN32) && !defined(__native_client__)
+ {
+ 	int notify_pipe[2];
+ 	if (pipe(notify_pipe))
+@@ -474,8 +478,10 @@ fail_pipe:
+ 	else if (cmd->out > 1)
+ 		fhout = dup(cmd->out);
+ 
++#if !defined(__native_client__)
+ 	if (cmd->env)
+ 		env = make_augmented_environ(cmd->env);
++#endif
+ 
+ 	if (cmd->git_cmd) {
+ 		cmd->argv = prepare_git_cmd(cmd->argv);
+@@ -483,16 +489,23 @@ fail_pipe:
+ 		cmd->argv = prepare_shell_cmd(cmd->argv);
+ 	}
+ 
++#if defined(__native_client__)
++        // TODO(bradnelson): Support pipes and cwd.
++	cmd->pid = nacl_spawn_simple(cmd->argv);
++#else
+ 	cmd->pid = mingw_spawnvpe(cmd->argv[0], cmd->argv, env, cmd->dir,
+ 				  fhin, fhout, fherr);
++#endif
+ 	failed_errno = errno;
+ 	if (cmd->pid < 0 && (!cmd->silent_exec_failure || errno != ENOENT))
+ 		error("cannot spawn %s: %s", cmd->argv[0], strerror(errno));
+ 	if (cmd->clean_on_exit && cmd->pid >= 0)
+ 		mark_child_for_cleanup(cmd->pid);
+ 
++#if !defined(__native_client__)
+ 	if (cmd->env)
+ 		free_environ(env);
++#endif
+ 	if (cmd->git_cmd)
+ 		free(cmd->argv);
+ 
 diff --git a/sh-i18n--envsubst.c b/sh-i18n--envsubst.c
 index 5ddd688..98b6e93 100644
 --- a/sh-i18n--envsubst.c

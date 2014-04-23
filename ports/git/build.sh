@@ -3,6 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+export EXTRA_LIBS=\
+"-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io -lnacl_spawn"
+
 # Do a verbose build so we're confident it's hitting nacl's tools.
 MAKE_TARGETS="V=1"
 BUILD_DIR=${SRC_DIR}
@@ -44,8 +47,14 @@ BuildStep() {
 
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
-  local ASSEMBLY_DIR="${PUBLISH_DIR}/tar"
+  for name in $(cat ${START_DIR}/git_binaries.txt); do
+    cp ${name} ${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}
 
-  DESTDIR=${ASSEMBLY_DIR}
-  DefaultInstallStep
+    pushd ${PUBLISH_DIR}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        ${PUBLISH_DIR}/${name}_*${NACL_EXEEXT} \
+        -s . \
+        -o ${name}.nmf
+    popd
+  done
 }

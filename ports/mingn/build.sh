@@ -26,10 +26,14 @@ InstallStep() {
 
   # Set up files for bootstrap.
   local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash*/${NACL_LIBC}/bash
+  local CURL_DIR=${NACL_PACKAGES_PUBLISH}/curl*/${NACL_LIBC}
   local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip*/${NACL_LIBC}
+  local GIT_DIR=${NACL_PACKAGES_PUBLISH}/git*/${NACL_LIBC}
   local VIM_DIR=${NACL_PACKAGES_PUBLISH}/vim*/${NACL_LIBC}/vim
 
   LogExecute cp -fR ${BASH_DIR}/* ${PUBLISH_DIR}
+  LogExecute cp -fR ${GIT_DIR}/* ${PUBLISH_DIR}
+  LogExecute cp -fR ${CURL_DIR}/{*.{nexe,nmf},lib*} ${PUBLISH_DIR}
   LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${PUBLISH_DIR}
 
   if [ ${OS_NAME} != "Darwin" ]; then

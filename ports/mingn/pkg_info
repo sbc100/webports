@@ -1,4 +1,4 @@
 NAME=mingn
 VERSION=0.1
 LIBC=glibc
-DEPENDS=(bash unzip coreutils vim binutils gcc)
+DEPENDS=(bash unzip coreutils vim binutils gcc git)
