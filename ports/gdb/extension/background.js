@@ -20,7 +20,7 @@ var GDB_EXTENSION_NAME = 'GDB';
  * ID of GDB app (used to establish contact).
  * @const
  */
-var GDB_EXTENSION_ID = 'mmgaaffjoeedmfdelihjppfdepcpophe';
+var GDB_EXTENSION_ID = 'gkjoooooiaohiceibmdleokniplmbahe';
 
 /**
  * Keep a run running snapshot of running NaCl modules.

@@ -52,13 +52,13 @@ InstallStep() {
 
   # GDB App
   local GDB_APP_DIR="${PUBLISH_DIR}/gdb_app"
-  MakeDir ${GDB_APP_DIR}
+  MakeDir ${GDB_APP_DIR}/_platform_specific/${NACL_ARCH}
   LogExecute cp gdb/gdb.nexe \
-      ${GDB_APP_DIR}/gdb_${NACL_ARCH}${NACL_EXEEXT}
+      ${GDB_APP_DIR}/_platform_specific/${NACL_ARCH}/gdb${NACL_EXEEXT}
 
   pushd ${GDB_APP_DIR}
   python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      gdb_*${NACL_EXEEXT} \
+      _platform_specific/*/gdb*${NACL_EXEEXT} \
       -s . \
       -o gdb.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py gdb.nmf
