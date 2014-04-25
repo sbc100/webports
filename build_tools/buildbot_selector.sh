@@ -26,7 +26,7 @@ fi
 
 # Allows Linux Chromium builds to use the existing SUID Sandbox on the bots.
 # Ignored on other platforms.
-if [ "${TEST_BUILDBOT:-}" = "1" ]; then
+if [ "${TEST_BUILDBOT:-}" != "1" ]; then
   export CHROME_DEVEL_SANDBOX=/opt/chromium/chrome_sandbox
 fi
 
