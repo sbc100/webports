@@ -11,7 +11,6 @@
 #include "json/json.h"
 #include "my_syslog.h"
 #include "nacl_module.h"
-#include "nacl_io/dbgprint.h"
 
 #define MAX_FMT_SIZE 4096
 char formatted_string[MAX_FMT_SIZE];
