@@ -56,7 +56,7 @@ InstallPackageMultiArch() {
     if [ "${TOOLCHAIN}" = "pnacl" -a "${NACL_ARCH}" != "pnacl" ]; then
       continue
     fi
-    if [ "${TOOLCHAIN}" != "pnacl" -a "${NACL_ARCH}" == "pnacl" ]; then
+    if [ "${TOOLCHAIN}" != "pnacl" -a "${NACL_ARCH}" = "pnacl" ]; then
       continue
     fi
     # glibc doesn't work on arm for now.
@@ -77,11 +77,10 @@ InstallPackageMultiArch() {
 
 CleanAll() {
   echo "@@@BUILD_STEP clean all@@@"
-  for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
-    for NACL_ARCH in ${ARCH_LIST}; do
-      export TOOLCHAIN
-      export NACL_ARCH
-      if ! RunCmd build_tools/naclports.py clean --all; then
+  for TC in ${TOOLCHAIN_LIST}; do
+    for ARCH in ${ARCH_LIST}; do
+      if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
+          build_tools/naclports.py clean --all; then
         BuildFailure clean
       fi
     done

@@ -29,7 +29,7 @@ for PKG in ${PACKAGE_LIST}; do
   InstallPackageMultiArch ${PKG}
 done
 
-echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"
+echo "@@@BUILD_STEP Summary@@@"
 if [[ $RESULT != 0 ]] ; then
   echo "@@@STEP_FAILURE@@@"
   echo -e "$MESSAGES"
