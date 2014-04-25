@@ -15,7 +15,6 @@ source ${SCRIPT_DIR}/buildbot_common.sh
 set -o nounset
 set -o errexit
 
-make clean
 readonly PARTCMD="python build_tools/partition.py"
 readonly SHARD_CMD="${PARTCMD} -t ${SHARD} -n ${SHARDS}"
 echo "Calculating targets for shard ${SHARD} of ${SHARDS}"
@@ -27,7 +26,7 @@ fi
 
 echo "Building the following packages: ${PACKAGE_LIST}"
 for PKG in ${PACKAGE_LIST}; do
-  InstallPackage ${PKG}
+  InstallPackageMultiArch ${PKG}
 done
 
 echo "@@@BUILD_STEP ${NACL_ARCH} Summary@@@"

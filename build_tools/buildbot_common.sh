@@ -37,7 +37,6 @@ RunCmd() {
 }
 
 BuildPackage() {
-  echo "@@@BUILD_STEP ${NACL_ARCH} ${TOOLCHAIN} $1@@@"
   if RunCmd build_tools/naclports.py build ports/$1 -v --ignore-disabled ; then
     BuildSuccess $1
   else
@@ -45,23 +44,46 @@ BuildPackage() {
   fi
 }
 
-InstallPackage() {
-  echo "@@@BUILD_STEP ${NACL_ARCH} ${TOOLCHAIN} $1@@@"
+ARCH_LIST="i686 x86_64 arm pnacl"
+TOOLCHAIN_LIST="pnacl newlib glibc"
+
+InstallPackageMultiArch() {
+  echo "@@@BUILD_STEP ${TOOLCHAIN} $1@@@"
   export BUILD_FLAGS="-v --ignore-disabled"
-  if RunCmd make $1 ; then
-    BuildSuccess $1
-  else
-    # On cygwin retry each build 3 times before failing
-    uname=$(uname -s)
-    if [ ${uname:0:6} = "CYGWIN" ]; then
-      echo "@@@STEP_WARNINGS@@@"
-      for i in 1 2 3 ; do
-        if make $1 ; then
-          BuildSuccess $1
-          return
-        fi
-      done
+  for NACL_ARCH in ${ARCH_LIST}; do
+    export NACL_ARCH
+    # pnacl only works on pnacl and nowhere else.
+    if [ "${TOOLCHAIN}" = "pnacl" -a "${NACL_ARCH}" != "pnacl" ]; then
+      continue
     fi
-    BuildFailure $1
-  fi
+    if [ "${TOOLCHAIN}" != "pnacl" -a "${NACL_ARCH}" == "pnacl" ]; then
+      continue
+    fi
+    # glibc doesn't work on arm for now.
+    if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
+      continue
+    fi
+    # bionic only works on arm for now.
+    if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
+      continue
+    fi
+    if ! RunCmd make $1 ; then
+      BuildFailure $1
+    fi
+  done
+  export NACL_ARCH=all
+  BuildSuccess $1
+}
+
+CleanAll() {
+  echo "@@@BUILD_STEP clean all@@@"
+  for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
+    for NACL_ARCH in ${ARCH_LIST}; do
+      export TOOLCHAIN
+      export NACL_ARCH
+      if ! RunCmd build_tools/naclports.py clean --all; then
+        BuildFailure clean
+      fi
+    done
+  done
 }

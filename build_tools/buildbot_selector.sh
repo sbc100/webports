@@ -26,8 +26,9 @@ fi
 
 # Allows Linux Chromium builds to use the existing SUID Sandbox on the bots.
 # Ignored on other platforms.
-export CHROME_DEVEL_SANDBOX=/opt/chromium/chrome_sandbox
-
+if [ "${TEST_BUILDBOT:-}" = "1"]; then
+  export CHROME_DEVEL_SANDBOX=/opt/chromium/chrome_sandbox
+fi
 
 # The bots set the BOTO_CONFIG environment variable to a different .boto file
 # (currently /b/build/site-config/.boto). override this to the gsutil default
@@ -47,13 +48,12 @@ if [ "${TEST_BUILDBOT:-}" = "1" -a -z "${BUILDBOT_BUILDERNAME:-}" ]; then
   export BUILDBOT_BUILDERNAME=linux-newlib-0
 fi
 
-StartBuild() {
-  export NACL_ARCH=$1
+BuildShard() {
   export TOOLCHAIN
   export SHARD
   export SHARDS
 
-  echo "@@@BUILD_STEP $1 setup@@@"
+  echo "@@@BUILD_STEP setup@@@"
   if ! ./build_tools/buildbot_build_shard.sh ; then
     RESULT=1
   fi
@@ -170,22 +170,8 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   exit 0
 fi
 
-if [ "${LIBC}" = "pnacl_newlib" ] ; then
-  StartBuild pnacl
-else
-  if [ "${TOOLCHAIN}" != "bionic" ]; then
-    # Build 32-bit.
-    StartBuild i686
-
-    # Build 64-bit.
-    StartBuild x86_64
-  fi
-
-  # Build ARM.
-  if [ "${TOOLCHAIN}" != "glibc" ]; then
-    StartBuild arm
-  fi
-fi
+CleanAll
+BuildShard
 
 # Publish resulting builds to Google Storage, but only on the
 # linux bots.

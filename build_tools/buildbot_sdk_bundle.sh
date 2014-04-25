@@ -23,7 +23,7 @@ cd ${NACLPORTS_ROOT}
 # Don't do a full clean of naclports when we're testing the buildbot scripts
 # locally.
 if [ -z "${TEST_BUILDBOT:-}" ]; then
-  make clean
+  CleanAll
 fi
 
 # Don't build lua with readline support. We don't want to include
@@ -67,13 +67,12 @@ BuildPackageArchAll() {
   fi
 }
 
-ARCH_LIST="i686 x86_64 arm pnacl"
-
 # $1 - name of package
 BuildPackageAll() {
   local PACKAGE=$1
+  echo "@@@BUILD_STEP ${PACKAGE}@@@"
   for ARCH in $ARCH_LIST; do
-      BuildPackageArchAll $PACKAGE $ARCH
+    BuildPackageArchAll $PACKAGE $ARCH
   done
   echo "naclports Build SUCCEEDED $PACKAGE"
 }
