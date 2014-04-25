@@ -15,6 +15,10 @@
       "persistent": true
     }
   },
+  "externally_connectable": {
+    "ids": ["*"],
+    "matches": ["*://nacltools.storage.googleapis.com"]
+  },
   "permissions": [
     "storage",
     {"socket": [
