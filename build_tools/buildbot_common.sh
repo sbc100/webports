@@ -81,18 +81,18 @@ CleanAll() {
     for ARCH in ${ARCH_LIST}; do
       # TODO(bradnelson): reduce the duplication here.
       # pnacl only works on pnacl and nowhere else.
-      if [ "${TOOLCHAIN}" = "pnacl" -a "${NACL_ARCH}" != "pnacl" ]; then
+      if [ "${TC}" = "pnacl" -a "${ARCH}" != "pnacl" ]; then
         continue
       fi
-      if [ "${TOOLCHAIN}" != "pnacl" -a "${NACL_ARCH}" = "pnacl" ]; then
+      if [ "${TC}" != "pnacl" -a "${ARCH}" = "pnacl" ]; then
         continue
       fi
       # glibc doesn't work on arm for now.
-      if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
+      if [ "${TC}" = "glibc" -a "${ARCH}" = "arm" ]; then
         continue
       fi
       # bionic only works on arm for now.
-      if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
+      if [ "${TC}" = "bionic" -a "${ARCH}" != "arm" ]; then
         continue
       fi
       if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
