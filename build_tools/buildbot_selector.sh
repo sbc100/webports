@@ -130,6 +130,12 @@ else
   fi
 fi
 
+# Optional Clobber (if checked in the buildbot ui).
+if [ "${BUILDBOT_CLOBBER:-}" = "1" ]; then
+  echo "@@@BUILD_STEP Clobber@@@"
+  rm -rf out/
+fi
+
 # Install SDK.
 if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   echo "@@@BUILD_STEP Install Latest SDK@@@"
