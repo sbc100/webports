@@ -101,4 +101,7 @@ CleanAll() {
       fi
     done
   done
+  if ! RunCmd rm -rf out; then
+    BuildFailure clean
+  fi
 }
