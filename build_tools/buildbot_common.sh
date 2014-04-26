@@ -79,6 +79,22 @@ CleanAll() {
   echo "@@@BUILD_STEP clean all@@@"
   for TC in ${TOOLCHAIN_LIST}; do
     for ARCH in ${ARCH_LIST}; do
+      # TODO(bradnelson): reduce the duplication here.
+      # pnacl only works on pnacl and nowhere else.
+      if [ "${TOOLCHAIN}" = "pnacl" -a "${NACL_ARCH}" != "pnacl" ]; then
+        continue
+      fi
+      if [ "${TOOLCHAIN}" != "pnacl" -a "${NACL_ARCH}" = "pnacl" ]; then
+        continue
+      fi
+      # glibc doesn't work on arm for now.
+      if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
+        continue
+      fi
+      # bionic only works on arm for now.
+      if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
+        continue
+      fi
       if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
           build_tools/naclports.py clean --all; then
         BuildFailure clean
