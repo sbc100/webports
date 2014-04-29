@@ -51,15 +51,19 @@ def main(args):
     else:
       patch = '_none_'
     url = '[%s %s]' % (package.URL, package.GetArchiveFilename())
-    package_url = '[%s/%s %s-%s]' % (SRC_URL,
+    package_url = '[%s/%s %s]' % (SRC_URL,
         os.path.relpath(package.root, NACLPORTS_ROOT),
-        package.NAME, package.VERSION)
+        package.NAME)
     libc = getattr(package, 'LIBC', '')
     if libc:
       libc += '-only'
     disabled_arch = getattr(package, 'DISABLED_ARCH', '')
-    print '|| %-70s || %-70s || %s || %s || %s ||' % (package_url, url, patch,
-                                                      libc, disabled_arch)
+    print '|| %-70s || %-10s || %-50s || %s || %s || %s ||' % (package_url,
+                                                               package.VERSION,
+                                                               url,
+                                                               patch,
+                                                               libc,
+                                                               disabled_arch)
     total += 1
   print '\n_Total = %d_\n' % total
 
