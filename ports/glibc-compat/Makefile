@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-CFLAGS := -Wno-error -pthread -Iinclude -Isrc -D_LIBC -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
+CFLAGS := -Wno-error -pthread -Iinclude -Isrc -D_LIBC
+CFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
+CFLAGS += -I$(NACL_SDK_ROOT)/include
 OUT := out
 SOURCES := \
   src/getprotobyname_r.c \

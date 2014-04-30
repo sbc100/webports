@@ -17,6 +17,7 @@ BuildStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export NACL_SDK_VERSION
+  export NACL_SDK_ROOT
   DefaultBuildStep
 }
 

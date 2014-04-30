@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
+#include <sys/poll.h>
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -55,6 +56,11 @@
 #undef htons
 #undef ntohl
 #undef ntohs
+
+int poll(struct pollfd *fds, nfds_t nfds, int timeout) __attribute__((weak));
+int poll(struct pollfd *fds, nfds_t nfds, int timeout) {
+  UNIMPLEMENTED_NOSYS();
+}
 
 int accept(int sockfd, struct sockaddr *addr,
            socklen_t *addrlen) __attribute__((weak));
@@ -420,6 +426,18 @@ void freeaddrinfo(struct addrinfo *) __attribute__ ((weak));
 void freeaddrinfo(struct addrinfo *res) {
   UNIMPLEMENTED();
 }
+
+int getnameinfo(const struct sockaddr *sa, socklen_t salen,
+                char *host, socklen_t hostlen,
+                char *serv, socklen_t servlen,
+                unsigned int flags) __attribute__ ((weak));
+int getnameinfo(const struct sockaddr *sa, socklen_t salen,
+                char *host, socklen_t hostlen,
+                char *serv, socklen_t servlen,
+                unsigned int flags) {
+  UNIMPLEMENTED_NOSYS_RTN();
+}
+
 
 char *gai_strerror(int) __attribute__ ((weak));
 char *gai_strerror(int errcode) {
