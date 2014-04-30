@@ -1,28 +1,26 @@
 diff --git a/Makefile b/Makefile
-index 6b91612..18fe630 100644
+index 6b91612..d75ab62 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -990,7 +990,11 @@ EXTLIBS =
+@@ -986,11 +986,17 @@ BUILTIN_OBJS += builtin/verify-tag.o
+ BUILTIN_OBJS += builtin/write-tree.o
+ 
+ GITLIBS = $(LIB_FILE) $(XDIFF_LIB)
+-EXTLIBS =
++EXTLIBS ?=
  
  GIT_USER_AGENT = git/$(GIT_VERSION)
  
 +ifdef CROSS_COMPILE
 +HAVE_DEV_TTY = YesPlease
++NEEDS_SSL_WITH_CRYPTO = YesPlease
++NEEDS_SSL_WITH_CURL = YesPlease
 +else
  include config.mak.uname
 +endif
  -include config.mak.autogen
  -include config.mak
  
-@@ -1559,6 +1563,8 @@ ifneq ("$(PROFILE)","")
- endif
- endif
- 
-+EXTLIBS += -Wl,--start-group -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -lcli_main -Wl,--end-group
-+
- # Shell quote (do not use $(call) to accommodate ancient setups);
- 
- SHA1_HEADER_SQ = $(subst ','\'',$(SHA1_HEADER))
 @@ -1710,7 +1716,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
  	'-DGIT_INFO_PATH="$(infodir_relative_SQ)"'
  
@@ -43,16 +41,18 @@ index 6b91612..18fe630 100644
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
 -		$(LIBS) $(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIB_4_CRYPTO)
 +	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
-+		$(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIBS) $(LIB_4_CRYPTO)
++		$(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIBS) $(LIB_4_CRYPTO) $(EXTLIBS)
  
  git-http-fetch$X: revision.o http.o http-walker.o http-fetch.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+-		$(LIBS) $(CURL_LIBCURL)
 +	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
- 		$(LIBS) $(CURL_LIBCURL)
++		$(LIBS) $(CURL_LIBCURL) $(EXTLIBS)
  git-http-push$X: revision.o http.o http-push.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+-		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
 +	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
- 		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
++		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT) $(EXTLIBS)
  
  git-remote-testsvn$X: remote-testsvn.o GIT-LDFLAGS $(GITLIBS) $(VCSSVN_LIB)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS) \
@@ -60,15 +60,17 @@ index 6b91612..18fe630 100644
  	$(VCSSVN_LIB)
  
  $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
-@@ -2054,7 +2060,7 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
+@@ -2054,8 +2060,8 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
  	cp $< $@
  
  $(REMOTE_CURL_PRIMARY): remote-curl.o http.o http-walker.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+-		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
 +	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
- 		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
++		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT) $(EXTLIBS)
  
  $(LIB_FILE): $(LIB_OBJS)
+ 	$(QUIET_AR)$(RM) $@ && $(AR) rcs $@ $(LIB_OBJS)
 @@ -2261,7 +2267,7 @@ test-svn-fe$X: vcs-svn/lib.a
  .PRECIOUS: $(TEST_OBJS)
  
