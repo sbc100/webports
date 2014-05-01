@@ -174,7 +174,7 @@ function taskTitle(module) {
   var m = title.match(/^Native Client module: (.*)$/);
   if (isGdb(title)) {
     title = '[GDB]';
-  } else if (!m || m.length != 2) {
+  } else if (!m || m.length !== 2) {
     title = module.title;
   } else {
     title = m[1];
@@ -196,7 +196,10 @@ function taskInfo(module) {
 /**
  * Attempt to attach to the current module.
  */
-function attach() {
+function attach(e) {
+  // Halt events here to prevent a bad interaction with hterm.
+  e.stopPropagation();
+  e.preventDefault();
   var modules = document.getElementById('modules');
   g_backgroundPort.postMessage({
     'name': 'attach',
@@ -207,7 +210,10 @@ function attach() {
 /**
  * Attempt to kill the current module.
  */
-function kill() {
+function kill(e) {
+  // Halt events here to prevent a bad interaction with hterm.
+  e.stopPropagation();
+  e.preventDefault();
   var modules = document.getElementById('modules');
   g_backgroundPort.postMessage({
     'name': 'kill',
@@ -218,7 +224,10 @@ function kill() {
 /**
  * Attempt manual setup of GDB.
  */
-function attachManual() {
+function attachManual(e) {
+  // Halt events here to prevent a bad interaction with hterm.
+  e.stopPropagation();
+  e.preventDefault();
   g_backgroundPort.postMessage({
     'name': 'attachManual',
   });
@@ -275,16 +284,16 @@ window.addEventListener('load', function() {
       'click', configChanged);
   document.getElementById('showGdb').addEventListener(
       'click', configChanged);
-  var attach = document.getElementById('attach');
-  var kill = document.getElementById('kill');
+  var attachElement = document.getElementById('attach');
+  var killElement = document.getElementById('kill');
   var modules = document.getElementById('modules');
-  attach.disabled = true;
-  kill.disabled = true;
-  attach.addEventListener('click', attach);
-  kill.addEventListener('click', kill);
-  modules.addEventListener('change', function() {
-    attach.disabled = false;
-    kill.disabled = false;
+  attachElement.disabled = true;
+  killElement.disabled = true;
+  attachElement.addEventListener('click', attach);
+  killElement.addEventListener('click', kill);
+  modules.addEventListener('click', function() {
+    attachElement.disabled = false;
+    killElement.disabled = false;
     updateSelection();
   });
   modules.addEventListener('dblclick', attach);
@@ -326,15 +335,15 @@ function handleChange(msg) {
     if (!Visible(processId))
       continue;
     var item = document.getElementById(processId);
-    if (item == null) {
+    if (item === null) {
       item = document.createElement('option');
-      item.setAttribute('id', module.process.id);
-      item.appendChild(document.createTextNode(taskTitle(module)));
-      item.setAttribute('title', taskInfo(module));
+      item.setAttribute('id', processId);
       moduleList.appendChild(item);
     } else {
-      // do nothing for now.
+      item.removeChild(item.firstChild);
     }
+    item.appendChild(document.createTextNode(taskTitle(module)));
+    item.setAttribute('title', taskInfo(module));
   }
 }
 
@@ -350,10 +359,10 @@ function setupBackgroundPort() {
   });
 
   g_backgroundPort.onMessage.addListener(function(msg) {
-    if (msg.name == 'change') {
+    if (msg.name === 'change') {
       handleChange(msg);
-    } else if (msg.name == 'message') {
-      if (msg.data.substr(0, 3) == 'gdb') {
+    } else if (msg.name === 'message') {
+      if (msg.data.substr(0, 3) === 'gdb') {
         window.io_.print(msg.data.substr(3));
       }
     }

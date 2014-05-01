@@ -43,15 +43,21 @@ var g_listeners = {};
 var g_listenerId = 0;
 
 /**
- * Keep a use settings in the background page to retain them across ui stop
- * start.
- * TODO(bradnelson): Keep this between sessions in localStorage?
+ * Default user settings values.
+ * @const
  */
-var g_settings = {
+var DEFAULT_SETTINGS = {
   onStartRun: true,  // Run (as opposed to attach) on module start.
   onFaultAttach: true,  // Attach on fault (as opposed to halting).
   showGdb: false,  // Show GDB modules in the list of NaCl apps.
 };
+
+/**
+ * Keep user settings in the background page to retain them across ui stop
+ * start.
+ * TODO(bradnelson): Keep this between sessions in localStorage?
+ */
+var g_settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 
 
 /**
@@ -259,6 +265,11 @@ function handleConnect(port) {
     // Respond to a settings change from the UI.
     if (msg.name === 'settingsChange') {
       g_settings = msg.settings;
+      notifyListeners('settingsChange');
+
+    // Respond to a require to restore default settings (for testing).
+    } else if (msg.name === 'defaultSettings') {
+      g_settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
       notifyListeners('settingsChange');
 
     // Respond to an attach request from the UI.

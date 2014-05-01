@@ -144,6 +144,37 @@ TEST_F(GdbExtensionTestModuleTest, 'testRspContinueFault', function() {
 });
 
 
+TEST_F(GdbExtensionTestModuleTest, 'testRspContinueTwice', function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.gdbExt.postMessage({'name': 'rspContinue'});
+    // Wait a bit for the module to start.
+    return chrometest.sleep(500);
+  }).then(function() {
+    self.object.postMessage('ping');
+    return self.object.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('pong', msg.data);
+    // Continue a second time (should disconnect and reconnect).
+    self.gdbExt.postMessage({'name': 'rspContinue'});
+    // Wait for it to start.
+    return chrometest.sleep(500);
+  }).then(function() {
+    self.object.postMessage('ping');
+    return self.object.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('pong', msg.data);
+    self.object.postMessage('exit');
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('rspContinueReply', msg.name);
+    EXPECT_EQ('exited', msg.type,
+        'expected module exit but got: ' + msg.reply);
+    EXPECT_EQ(0, msg.number, 'expected 0 exit code');
+  });
+});
+
+
 TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function() {
   var self = this;
   self.lineCount = 0;
