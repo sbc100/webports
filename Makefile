@@ -18,8 +18,17 @@ ifeq ($(V),1)
 VERBOSE?=1
 endif
 
+ifeq ($(V),2)
+VERBOSE?=1
+VERBOSE_BUILD?=1
+endif
+
 ifeq ($(VERBOSE),1)
 BUILD_FLAGS+=-v
+endif
+
+ifeq ($(VERBOSE_BUILD),1)
+BUILD_FLAGS+=--verbose-build
 endif
 
 ifeq ($(FORCE),1)

@@ -2,7 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-CFLAGS := -Wno-error -pthread -Iinclude -Isrc -D_LIBC
+CFLAGS := -Werror -Wno-implicit-function-declaration -Wno-unused-value
+CFLAGS += -pthread -Iinclude -Isrc -D_LIBC
 CFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
 CFLAGS += -I$(NACL_SDK_ROOT)/include
 OUT := out
@@ -29,18 +30,24 @@ SOURCES := \
 
 OBJS := $(patsubst src/%.c,$(OUT)/%.o,$(SOURCES))
 
-$(OUT)/%.o : src/%.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+ifeq ($(V),1)
+CC_PREFIX=
+AR_PREFIX=
+else
+CC_PREFIX=@echo " CC $@";
+AR_PREFIX=@echo " AR $@";
+endif
 
-all: .dirs $(OUT)/libglibc-compat.a
+$(OUT)/%.o : src/%.c
+	@mkdir -p $(OUT)
+	$(CC_PREFIX) $(CC) -o $@ -c $< $(CFLAGS)
+
+all: $(OUT)/libglibc-compat.a
 
 $(OUT)/libglibc-compat.a: $(OBJS)
-	$(AR) rcs $@ $^
+	@echo " AR $@"; $(AR) rcs $@ $^
 
-.PHONY: .dirs clean all
+.PHONY: clean all
 
 clean:
 	rm -rf $(OUT)
-
-.dirs:
-	mkdir -p $(OUT)

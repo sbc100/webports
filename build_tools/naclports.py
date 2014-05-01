@@ -682,6 +682,9 @@ def run_main(args):
   Trace.verbose = verbose
   if options.verbose_build:
     os.environ['VERBOSE'] = '1'
+  else:
+    os.environ['VERBOSE'] = '0'
+    os.environ['V'] = '0'
 
   def DoCmd(package):
     try:

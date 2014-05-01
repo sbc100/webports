@@ -435,7 +435,7 @@ int getnameinfo(const struct sockaddr *sa, socklen_t salen,
                 char *host, socklen_t hostlen,
                 char *serv, socklen_t servlen,
                 unsigned int flags) {
-  UNIMPLEMENTED_NOSYS_RTN();
+  UNIMPLEMENTED_NOSYS();
 }
 
 

@@ -142,9 +142,9 @@ unsigned long long int __res_initstamp attribute_hidden;
  *
  * Return 0 if completes successfully, -1 on error
  */
+extern int __res_vinit(res_state, int);
 int
 res_ninit(res_state statp) {
-	extern int __res_vinit(res_state, int);
 
 	return (__res_vinit(statp, 0));
 }

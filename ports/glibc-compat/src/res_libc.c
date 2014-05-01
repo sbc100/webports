@@ -53,9 +53,9 @@ __libc_lock_define_initialized (static, lock);
 #endif
 #endif
 
+extern int __res_vinit(res_state, int);
 int
 res_init(void) {
-	extern int __res_vinit(res_state, int);
 
 	/*
 	 * These three fields used to be statically initialized.  This made
