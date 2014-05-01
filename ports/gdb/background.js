@@ -414,6 +414,8 @@ DebugConnection_.prototype.handleMessage_ = function(msg) {
     self.rspContinue_(function(reply) {
       self.port_.postMessage(reply);
     });
+  } else if (msg.name === 'installCheck') {
+    self.port_.postMessage({'name': 'installCheckReply'});
   }
 };
 

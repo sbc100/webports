@@ -215,3 +215,18 @@ TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function() {
     return checkLine(msg);
   });
 });
+
+
+TEST('GdbTest', 'testInstallCheck', function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return chrometest.proxyExtension('GDB');
+  }).then(function(gdbExt) {
+    self.gdbExt = gdbExt;
+    self.gdbExt.postMessage({name: 'installCheck'});
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('installCheckReply', msg.name, 'we are installed');
+    self.gdbExt.disconnect();
+  });
+});

@@ -199,3 +199,22 @@ TEST_F(DebugExtensionTest, 'testRunningAttach', function() {
     return self.checkQuitGdb();
   });
 });
+
+
+TEST('DebugExtensionTest', 'testInstallCheck', function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return chrometest.proxyExtension('NaCl Debugger');
+  }).then(function(debugExt) {
+    self.debugExt = debugExt;
+    return self.debugExt.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('change', msg.name);
+    ASSERT_EQ('join', msg.cause);
+    self.debugExt.postMessage({name: 'installCheck'});
+    return self.debugExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('installCheckReply', msg.name, 'we are installed');
+    self.debugExt.disconnect();
+  });
+});

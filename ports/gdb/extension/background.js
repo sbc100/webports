@@ -301,6 +301,10 @@ function handleConnect(port) {
           g_naclModules[tune].debugConnection.postMessage(msg);
         }
       }
+
+    // Respond to an install check message.
+    } else if (msg.name === 'installCheck') {
+      port.postMessage({'name': 'installCheckReply'});
     }
   });
 
@@ -319,13 +323,17 @@ function handleConnect(port) {
 chrome.runtime.onConnect.addListener(handleConnect);
 
 /**
- * Allow an external connection for testing only.
+ * Allow an external connection only for testing and install check.
  */
 chrome.runtime.onConnectExternal.addListener(function(port) {
   // Check the sender only when not in testing mode.
   if (navigator.userAgent.indexOf('ChromeTestAgent/') < 0) {
-    port.disconnect();
-    return;
+    // Reject if the sender is an extension (unsupported for now).
+    // Allow urls (as we're only whitelisted the install page).
+    if (port.sender.id !== undefined) {
+      port.disconnect();
+      return;
+    }
   }
   handleConnect(port);
 });
