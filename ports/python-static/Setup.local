@@ -49,7 +49,7 @@ fcntl fcntlmodule.c	# fcntl(2) and ioctl(2)
 select selectmodule.c	# select(2); not on ancient System V
 
 # Memory-mapped files (also works on Win32).
-#mmap mmapmodule.c
+mmap mmapmodule.c
 
 # CSV file helper
 _csv _csv.c

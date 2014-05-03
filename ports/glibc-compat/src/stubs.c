@@ -215,6 +215,11 @@ int minor(dev_t dev) {
   return dev & 0xff;
 }
 
+int msync(void *addr, size_t length, int flags) __attribute__((weak));
+int msync(void *addr, size_t length, int flags) {
+  UNIMPLEMENTED();
+}
+
 uint32_t ntohl(uint32_t netlong) __attribute__((weak));
 uint32_t ntohl(uint32_t netlong) {
   UNIMPLEMENTED_FATAL();

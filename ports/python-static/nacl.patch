@@ -148,7 +148,24 @@ index b0386f0..a5c77b4 100644
 +#endif
  }
  
- 
+
+diff --git a/Modules/mmapmodule.c b/Modules/mmapmodule.c
+index 67e4000..ed688aa 100644
+--- a/Modules/mmapmodule.c
++++ b/Modules/mmapmodule.c
+@@ -78,6 +78,12 @@ my_getpagesize(void)
+ #  define MAP_ANONYMOUS MAP_ANON
+ #endif
+
++#ifdef __native_client__
++#define MS_SYNC 0
++/* Defined in glibc-compat */
++int msync(void *addr, size_t length, int flags);
++#endif
++
+ static PyObject *mmap_module_error;
+
+ typedef enum
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
 index 65ade9f..1a971dc 100644
 --- a/Modules/posixmodule.c
