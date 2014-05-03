@@ -217,7 +217,7 @@ int minor(dev_t dev) {
 
 int msync(void *addr, size_t length, int flags) __attribute__((weak));
 int msync(void *addr, size_t length, int flags) {
-  UNIMPLEMENTED();
+  UNIMPLEMENTED_NOSYS();
 }
 
 uint32_t ntohl(uint32_t netlong) __attribute__((weak));
