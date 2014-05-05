@@ -52,6 +52,10 @@ GdbExtensionTestModuleTest.prototype.newGdbExtPort = function(debugTcpPort) {
   });
 };
 
+/**
+ * Start up GDB and detach.
+ * @return {Promise} A promise to wait.
+ */
 GdbExtensionTestModuleTest.prototype.runGdb = function() {
   var self = this;
   var keepPort = null;
@@ -71,6 +75,125 @@ GdbExtensionTestModuleTest.prototype.runGdb = function() {
   }).then(function(msg) {
     ASSERT_EQ('rspDetachReply', msg.name, 'expect successful detach');
     keepPort.disconnect();
+    // Wait for load.
+    return self.gdbExt.wait();
+  }).then(function(msg) {
+    EXPECT_EQ('load', msg.name, 'expecting a load');
+    // Expecting 16-18 lines out.
+    return self.waitForGdbPrompt(16, 18);
+  });
+};
+
+/**
+ * Wait for the gdb prompt.
+ *
+ * Expect variable (within a range) amount of output from GDB prior to the
+ * "(gdb)" prompt returning.
+ * @param {integer} min Minimum number of writes (lines plus echo) expected
+ *                      from GDB.
+ * @param {integer} max Maximum number of writes (lines plus echo) expected
+ *                      from GDB.
+ * @return {Promise} A promise to wait.
+ */
+GdbExtensionTestModuleTest.prototype.waitForGdbPrompt = function(min, max) {
+  var self = this;
+  var lineCount = 0;
+  function checkLine(msg) {
+    ASSERT_EQ('message', msg.name, 'expecting a message');
+    var prefix = msg.data.slice(0, 3);
+    var data = msg.data.slice(3);
+    EXPECT_EQ('gdb', prefix, 'expected gdb term message');
+    if (data == '(gdb) ') {
+      ASSERT_GE(lineCount, min, 'expect gdb to emit more lines first');
+      // Done.
+      return;
+    } else {
+      lineCount++;
+      ASSERT_LE(lineCount, max, 'expect limited text, got extra: ' + data);
+      // Recurse.
+      return self.gdbExt.wait().then(checkLine);
+    }
+  }
+  return self.gdbExt.wait().then(checkLine);
+};
+
+/**
+ * Wait for expected writes from gdb.
+ * @param {Array.String} writes A list of writes to expect from GDB.
+ * @return {Promise} A promise to wait.
+ */
+GdbExtensionTestModuleTest.prototype.waitForGdbReply = function(lines) {
+  var self = this;
+  function checkLine() {
+    if (lines.length == 0) {
+      return;
+    }
+    return Promise.resolve().then(function() {
+      return self.gdbExt.wait();
+    }).then(function(msg) {
+      ASSERT_EQ('message', msg.name, 'expecting a message');
+      var prefix = msg.data.slice(0, 3);
+      var data = msg.data.slice(3);
+      EXPECT_EQ('gdb', prefix, 'expected gdb term message');
+      EXPECT_EQ(lines[0], data, 'expect matching line');
+      lines = lines.slice(1);
+      return checkLine();
+    });
+  }
+  return checkLine();
+};
+
+/**
+ * Send a command to gdb (as keystrokes).
+ * @param {String} cmd.
+ */
+GdbExtensionTestModuleTest.prototype.sendGdbCommand = function(cmd) {
+  var self = this;
+  self.gdbExt.postMessage(
+      {'name': 'input', 'msg': {'gdb': cmd}});
+};
+
+/**
+ * Send a command to gdb and wait for echo followed by a reply.
+ *
+ * Checks for (gdb) prompt after the command.
+ * @param {String} cmd The command to send.
+ * @param {Array.String} expected A list of expected write back from gdb.
+ * @return {Promise} A promise to do it.
+ */
+GdbExtensionTestModuleTest.prototype.gdbCommand = function(cmd, expected) {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.sendGdbCommand(cmd);
+    var response = [];
+    for (var i = 0; i < cmd.length; i++) {
+      response.push(cmd[i]);
+    }
+    response = response.concat(expected);
+    response.push('(gdb) ');
+    return self.waitForGdbReply(response);
+  });
+};
+
+/**
+ * Exit GDB and check for expected behavior.
+ * @return {Promise} A promise to do it.
+ */
+GdbExtensionTestModuleTest.prototype.exitGdb = function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    var msg = 'kill\ny\n';
+    self.sendGdbCommand(msg);
+    // The kill y/n prompt comes back with one less write than the number of
+    // character for some reason.
+    var len = msg.length - 1;
+    return self.waitForGdbPrompt(len, len);
+  }).then(function() {
+    self.sendGdbCommand('quit\n');
+    return waitIgnoringTerminal(self.gdbExt);
+  }).then(function(msg) {
+    EXPECT_EQ('exited', msg.name, 'expect exit');
+    EXPECT_EQ(0, msg.returncode, 'expect 0');
   });
 };
 
@@ -177,42 +300,35 @@ TEST_F(GdbExtensionTestModuleTest, 'testRspContinueTwice', function() {
 
 TEST_F(GdbExtensionTestModuleTest, 'testGdbStart', function() {
   var self = this;
-  self.lineCount = 0;
   return self.runGdb().then(function() {
-    return self.gdbExt.wait();
-  }).then(function(msg) {
-    EXPECT_EQ('load', msg.name, 'expecting a load');
-    return self.gdbExt.wait();
-  }).then(function(msg) {
-    function checkLine(msg) {
-      ASSERT_EQ('message', msg.name, 'expecting a message');
-      var prefix = msg.data.slice(0, 3);
-      var data = msg.data.slice(3);
-      EXPECT_EQ('gdb', prefix, 'expected gdb term message');
-      if (data == '(gdb) ') {
-        ASSERT_GE(self.lineCount, 16, 'expect gdb to emit some text');
-        self.gdbExt.postMessage(
-            {'name': 'input', 'msg': {'gdb': 'kill\ny\nquit\n'}});
-        // Go on to the next clause.
-        return self.gdbExt.wait();
-      } else {
-        self.lineCount++;
-        ASSERT_LE(self.lineCount, 18, 'expect limited test');
-        // Recurse.
-        return self.gdbExt.wait().then(checkLine);
-      }
-    }
-    return checkLine(msg);
-  }).then(function(msg) {
-    function checkLine(msg) {
-      if (msg.name == 'message') {
-        // Recurse (ignoring this line.
-        return self.gdbExt.wait().then(checkLine);
-      }
-      EXPECT_EQ('exited', msg.name, 'expect exit');
-      EXPECT_EQ(0, msg.returncode, 'expect 0');
-    }
-    return checkLine(msg);
+    return self.exitGdb();
+  });
+});
+
+
+TEST_F(GdbExtensionTestModuleTest, 'testGdbLoadSymbols', function() {
+  var self = this;
+  return self.runGdb().then(function() {
+    return self.gdbCommand('remote get irt irt\n', [
+        'Successfully fetched file "irt".\n',
+    ]);
+  }).then(function() {
+    return self.gdbCommand('nacl-irt irt\n', [
+        'Reading symbols from irt...',
+        '(no debugging symbols found)...done.\n',
+    ]);
+  }).then(function()  {
+    return self.gdbCommand('remote get nexe nexe\n', [
+        'Successfully fetched file "nexe".\n',
+    ]);
+  }).then(function() {
+    // Loads symbols from nexe without prompting.
+    return self.gdbCommand('nacl-irt nexe\n', [
+        'Reading symbols from nexe...',
+        'done.\n',
+    ]);
+  }).then(function() {
+    return self.exitGdb();
   });
 });
 

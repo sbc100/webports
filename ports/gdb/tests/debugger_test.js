@@ -44,7 +44,7 @@ DebugExtensionTest.prototype.tearDown = function() {
     // Put extension back in default state.
     self.debugExt.postMessage({'name': 'defaultSettings'});
     // Also skip over remaining terminal messages.
-    return self.waitIgnoringTerminal(self.debugExt);
+    return waitIgnoringTerminal(self.debugExt);
   }).then(function(msg) {
     ASSERT_EQ('change', msg.name);
     ASSERT_EQ('settingsChange', msg.cause);
@@ -57,17 +57,6 @@ DebugExtensionTest.prototype.tearDown = function() {
     self.debugExt.disconnect();
     return TestModuleTest.prototype.tearDown.call(self);
   });
-};
-
-DebugExtensionTest.prototype.waitIgnoringTerminal = function(portLike) {
-  function waitForReply(msg) {
-    // Ignore left over terminal messages.
-    if (msg.name == 'message') {
-      return portLike.wait().then(waitForReply);
-    }
-    return msg;
-  }
-  return portLike.wait().then(waitForReply);
 };
 
 DebugExtensionTest.prototype.checkAttach = function() {
@@ -98,7 +87,7 @@ DebugExtensionTest.prototype.checkQuitGdb = function() {
   return Promise.resolve().then(function() {
     self.debugExt.postMessage(
       {'name': 'input', 'msg': {'gdb': 'kill\ny\n'}});
-    return self.waitIgnoringTerminal(self.debugExt);
+    return waitIgnoringTerminal(self.debugExt);
   }).then(function(msg) {
     ASSERT_EQ('change', msg.name);
     ASSERT_EQ('exit', msg.cause);
@@ -106,7 +95,7 @@ DebugExtensionTest.prototype.checkQuitGdb = function() {
     ASSERT_EQ(1, ids.length);
     self.debugExt.postMessage(
       {'name': 'input', 'msg': {'gdb': 'quit\n'}});
-    return self.waitIgnoringTerminal(self.debugExt);
+    return waitIgnoringTerminal(self.debugExt);
   }).then(function(msg) {
     ASSERT_EQ('change', msg.name);
     ASSERT_EQ('exit', msg.cause);

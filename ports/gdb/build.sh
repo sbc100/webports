@@ -11,7 +11,9 @@ ConfigureStep() {
       --with-system-readline \
       --disable-libmcheck \
       --prefix=${PREFIX} \
-      --host=${NACL_CROSS_PREFIX}
+      --enable-targets=arm-none-eabi-nacl \
+      --host=${NACL_CROSS_PREFIX} \
+      --target=x86_64-nacl
 
   # If the .info files don't exist, "make all" will try to recreate it with the
   # "makeinfo" tool, which isn't normally installed.

@@ -152,17 +152,3 @@ index 1f44e8f..03a282e 100644
  }
  
  #endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
-diff --git a/opcodes/i386-dis.c b/opcodes/i386-dis.c
-index 8e55724..4b6576d 100644
---- a/opcodes/i386-dis.c
-+++ b/opcodes/i386-dis.c
-@@ -12635,7 +12635,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
-     }
- 
-   /* Check if the REX prefix is used.  */
--  if (rex_ignored == 0 && (rex ^ rex_used) == 0)
-+  /* TODO(bradnelson): Upstream or figure out why this is a problem. */
-+  if (rex && rex_ignored == 0 && (rex ^ rex_used) == 0)
-     all_prefixes[last_rex_prefix] = 0;
- 
-   /* Check if the SEG prefix is used.  */

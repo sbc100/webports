@@ -76,6 +76,23 @@ function moduleMessageWaiter(module) {
 };
 
 
+/**
+ * Wait for a message other the name 'message' (from terminal).
+ * @param {Port} portLike a port like waiter object to wait on.
+ * @return {Promise} Promise to wait for a message.
+ */
+function waitIgnoringTerminal(portLike) {
+  function waitForReply(msg) {
+    // Ignore terminal messages.
+    if (msg.name == 'message') {
+      return portLike.wait().then(waitForReply);
+    }
+    return msg;
+  }
+  return portLike.wait().then(waitForReply);
+}
+
+
 function TestModuleTest() {
   chrometest.Test.call(this);
   this.process = null;

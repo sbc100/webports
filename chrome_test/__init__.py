@@ -28,7 +28,7 @@ import httpd
 
 # Pinned chrome revision. Update this to pull in a new chrome.
 # Try to select a version that exists on all platforms.
-CHROME_REVISION = 256094
+CHROME_REVISION = 268103
 
 OUT_DIR = os.path.join(SRC_DIR, 'out')
 CHROME_SYNC_DIR = os.path.join(OUT_DIR, 'downloaded_chrome')
