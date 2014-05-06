@@ -135,7 +135,6 @@ readonly NACL_PACKAGES_STAMPDIR=${NACL_PACKAGES_OUT}/stamp
 readonly NACL_HOST_PYROOT=${NACL_PACKAGES_BUILD}/host_python-2.7.5
 readonly NACL_HOST_PYTHON=${NACL_HOST_PYROOT}/bin/python2.7
 readonly NACL_DEST_PYROOT=${NACLPORTS_PREFIX}
-readonly DEST_PYTHON_OBJS=${NACL_HOST_PYROOT}/${NACL_BUILD_SUBDIR}
 readonly SITE_PACKAGES="lib/python2.7/site-packages/"
 
 # The components of package names cannot contain underscore
@@ -156,6 +155,7 @@ fi
 
 NACL_BUILD_SUBDIR+=${PACKAGE_SUFFIX}
 NACL_INSTALL_SUBDIR+=${PACKAGE_SUFFIX}
+readonly DEST_PYTHON_OBJS=${NACL_PACKAGES_BUILD}/python-modules/${NACL_BUILD_SUBDIR}
 PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
 
 # Don't support building with SDKs older than the current stable release
