@@ -9,6 +9,7 @@
     "48": "icon_48.png",
     "128": "icon_128.png"
   },
+  %(key)s
   "app": {
     "background": {
       "scripts": ["background.js"],

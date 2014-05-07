@@ -11,12 +11,6 @@
 // - Store and update global g_settings choices.
 
 /**
- * Name of the GDB app (used to establish contact for testing).
- * @const
- */
-var GDB_EXTENSION_NAME = 'GDB';
-
-/**
  * ID of GDB app (used to establish contact).
  * @const
  */
@@ -94,39 +88,18 @@ function notifyListeners(cause, opt_addedProcessId) {
 }
 
 /**
- * Create a connection to the GDB app.
- * @param {function(Port)} callback Called with a Port to the GDB app.
- */
-function newGdbAppPort(callback) {
-  // In testing mode connect via the test extension.
-  if (navigator.userAgent.indexOf('ChromeTestAgent/') >= 0) {
-    var testExt = navigator.userAgent.split(' ')[0].split('/')[1];
-    var port = chrome.runtime.connect(testExt);
-    var handleMessage = function(msg) {
-      port.onMessage.removeListener(handleMessage);
-      callback(port);
-    };
-    port.onMessage.addListener(handleMessage);
-    port.postMessage({'name': 'proxy', 'extension': GDB_EXTENSION_NAME});
-    return;
-  }
-  callback(chrome.runtime.connect(GDB_EXTENSION_ID));
-}
-
-/**
  * Create a new connect to the GDB app for a particular debug port.
  * @param {integer} debugTcpPort The port to debug on.
  * @param {function(Port)} callback Called with a setup port to the GDB app.
  */
 function newGdbConnection(debugTcpPort, callback) {
-  newGdbAppPort(function(port) {
-    var handleMessage = function(msg) {
-      port.onMessage.removeListener(handleMessage);
-      callback(port);
-    };
-    port.onMessage.addListener(handleMessage);
-    port.postMessage({'name': 'setDebugTcpPort', 'debugTcpPort': debugTcpPort});
-  });
+  var port = chrome.runtime.connect(GDB_EXTENSION_ID);
+  var handleMessage = function(msg) {
+    port.onMessage.removeListener(handleMessage);
+    callback(port);
+  };
+  port.onMessage.addListener(handleMessage);
+  port.postMessage({'name': 'setDebugTcpPort', 'debugTcpPort': debugTcpPort});
 }
 
 /**
@@ -329,7 +302,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   // Check the sender only when not in testing mode.
   if (navigator.userAgent.indexOf('ChromeTestAgent/') < 0) {
     // Reject if the sender is an extension (unsupported for now).
-    // Allow urls (as we're only whitelisted the install page).
+    // Allow urls (as we're only whitelisting the install page).
     if (port.sender.id !== undefined) {
       port.disconnect();
       return;

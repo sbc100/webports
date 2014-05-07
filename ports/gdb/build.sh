@@ -75,14 +75,26 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_16.png ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${GDB_APP_DIR}
+  # Generate a manifest.json (with key included).
   ${TEMPLATE_EXPAND} \
     ${START_DIR}/manifest.json.template \
     version=${VERSION} \
+    key="$(cat ${START_DIR}/key.txt)" \
     >${GDB_APP_DIR}/manifest.json
+
+  # Create uploadable version (key not included).
+  local GDB_APP_UPLOAD_DIR="${PUBLISH_DIR}/gdb_app_upload"
+  rm -rf ${GDB_APP_UPLOAD_DIR}
+  LogExecute cp -r ${GDB_APP_DIR} ${GDB_APP_UPLOAD_DIR}
+  ${TEMPLATE_EXPAND} \
+    ${START_DIR}/manifest.json.template \
+    version=${VERSION} \
+    key="" \
+    >${GDB_APP_UPLOAD_DIR}/manifest.json
   # Zip for upload to the web store.
   pushd ${PUBLISH_DIR}
-  rm -f gdb_app.zip
-  zip -r gdb_app.zip gdb_app/
+  rm -f gdb_app_upload.zip
+  zip -r gdb_app_upload.zip gdb_app_upload/
   popd
 
   # Debug Extension
