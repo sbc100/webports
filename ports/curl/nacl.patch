@@ -24,36 +24,9 @@ index 8f2fbb7..5a11d00 100644
  }
  
 +#ifdef PPAPI
-+#define main curl_main
++#define main nacl_main
 +#endif
 +
  /*
  ** curl tool main function.
  */
-@@ -90,6 +94,14 @@ int main(int argc, char *argv[])
-   int res;
-   struct Configurable config;
- 
-+#ifdef __native_client__
-+  mkdir("/home", 0777);
-+  setenv("HOME", "/home", 1);
-+  /* Blank out USER and LOGNAME. */
-+  setenv("USER", "", 1);
-+  setenv("LOGNAME", "", 1);
-+#endif
-+
-   memset(&config, 0, sizeof(struct Configurable));
- 
-   config.errors = stderr; /* default errors to stderr */
-@@ -121,4 +133,11 @@ int main(int argc, char *argv[])
- #endif
- }
- 
-+#ifdef PPAPI
-+#include "nacl_io/nacl_io.h"
-+#include "ppapi_simple/ps_main.h"
-+
-+PPAPI_SIMPLE_REGISTER_MAIN(curl_main)
-+#endif
-+
- #endif /* ndef UNITTESTS */

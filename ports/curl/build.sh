@@ -6,7 +6,7 @@
 export ac_cv_func_gethostbyname=yes
 export ac_cv_func_getaddrinfo=no
 export ac_cv_func_connect=yes
-export LIBS="-lnacl_io -lpthread -l${NACL_CPP_LIB}"
+export LIBS="-lnacl_io -pthread -l${NACL_CPP_LIB}"
 
 if [ "${NACL_SHARED}" = "1" ]; then
   EXECUTABLE_DIR=.libs
@@ -33,7 +33,8 @@ BuildStep() {
   touch ${SRC_DIR}/src/tool_main.c
   sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" src/Makefile
   sed -i.bak "s/curl\$(EXEEXT)/curl_ppapi\$(EXEEXT)/" src/Makefile
-  local sedlibs="-lppapi_simple -lnacl_io -lppapi_cpp -lppapi -l${NACL_CPP_LIB}"
+  local sedlibs="-lppapi_simple,-lnacl_io,-lppapi_cpp,-lppapi,-lcli_main"
+  sedlibs="-Wl,--start-group,$sedlibs,--end-group -l${NACL_CPP_LIB}"
   sed -i.bak "s/LIBS = \$(BLANK_AT_MAKETIME)/LIBS = ${sedlibs}/" src/Makefile
   DefaultBuildStep
 }
