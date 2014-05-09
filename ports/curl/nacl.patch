@@ -1,15 +1,14 @@
 diff --git a/lib/hostip4.c b/lib/hostip4.c
-index 3a38b32..f109a28 100644
+index 3a38b32..8223556 100644
 --- a/lib/hostip4.c
 +++ b/lib/hostip4.c
-@@ -115,6 +115,13 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+@@ -115,6 +115,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
  
  #if defined(CURLRES_IPV4) && !defined(CURLRES_ARES)
  
 +#ifdef __native_client__
-+// nacl_io does not yet support getaddrinfo() or gethostbyname_r().
-+// TODO(sbc): remove this once these functions get added to nacl_io
-+#undef HAVE_GETADDRINFO_THREADSAFE
++// nacl_io does not yet support gethostbyname_r().
++// TODO(sbc): remove this once it is added to nacl_io
 +#undef HAVE_GETHOSTBYNAME_R
 +#endif
 +
@@ -17,7 +16,7 @@ index 3a38b32..f109a28 100644
   * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
   *
 diff --git a/src/tool_main.c b/src/tool_main.c
-index 8f2fbb7..85d4db3 100644
+index 8f2fbb7..5a11d00 100644
 --- a/src/tool_main.c
 +++ b/src/tool_main.c
 @@ -82,6 +82,10 @@ static void main_checkfds(void)
