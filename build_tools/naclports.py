@@ -678,6 +678,9 @@ def run_main(args):
   if not NACL_SDK_ROOT:
     raise Error('$NACL_SDK_ROOT not set')
 
+  if not os.path.isdir(NACL_SDK_ROOT):
+    raise Error('$NACL_SDK_ROOT does not exist: %s' % NACL_SDK_ROOT)
+
   verbose = options.verbose or os.environ.get('VERBOSE') == '1'
   Trace.verbose = verbose
   if options.verbose_build:
