@@ -3,8 +3,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# The openssl build can fail when build with -jN.
+# TODO(sbc): Remove this if/when openssl is upgraded to a version that supports
+# parallel make.
+OS_JOBS=1
 BUILD_DIR=${SRC_DIR}
-INSTALL_TARGETS="install INSTALL_PREFIX=${DESTDIR}"
+INSTALL_TARGETS="install_sw INSTALL_PREFIX=${DESTDIR}"
 
 ConfigureStep() {
   if [ "${NACL_SHARED}" = "1" ] ; then
@@ -50,10 +54,7 @@ HackStepForNewlib() {
 
 BuildStep() {
   LogExecute make clean
-  # The openssl build can fail when build with -jN.
-  # TODO(sbc): Add -j${OS_JOBS} to this build if/when openssl is upgraded
-  # to a version that supports parallel make.
-  LogExecute make build_libs
+  DefaultBuildStep
 }
 
 

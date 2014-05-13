@@ -947,13 +947,11 @@ DefaultBuildStep() {
   LogExecute make -j${OS_JOBS} ${MAKE_TARGETS:-}
 }
 
+
 DefaultPythonModuleBuildStep() {
   SetupCrossEnvironment
   Banner "Build ${PACKAGE_NAME} python module"
   ChangeDir ${SRC_DIR}
-  if CheckStamp install_dest_${PACKAGE_NAME} ; then
-    return
-  fi
   LogExecute rm -rf build dist
   export PYTHONPATH="${NACL_HOST_PYROOT}/${SITE_PACKAGES}"
   export PYTHONPATH="${PYTHONPATH}:${NACL_DEST_PYROOT}/${SITE_PACKAGES}"
@@ -967,8 +965,8 @@ DefaultPythonModuleBuildStep() {
     install --prefix=${NACL_DEST_PYROOT}
   MakeDir ${DEST_PYTHON_OBJS}
   LogExecute find build -name "*.o" -exec cp -v {} ${DEST_PYTHON_OBJS} \;
-  TouchStamp install_dest_${PACKAGE_NAME}
 }
+
 
 DefaultTestStep() {
   echo "No tests defined for ${PACKAGE_NAME}"
