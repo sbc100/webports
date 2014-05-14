@@ -10,18 +10,15 @@ BuildStep() {
   export LAPACK=None
   export BLAS=None
   ChangeDir ${SRC_DIR}
-  if ! CheckStamp install_host_${PACKAGE_NAME} ; then
-    LogExecute rm -rf build dist
-    export NACL_PORT_BUILD=host
-    # Force 32 bits here for Py_ssize_t correctness.
-    export CC="gcc -m32 -msse"
-    export CXX="g++ -m32 -msse"
-    export LD="gcc -m32 -msse"
-    LogExecute ${NACL_HOST_PYTHON} setup.py \
-      ${NACL_PYSETUP_ARGS} \
-      install --prefix=${NACL_HOST_PYROOT}
-    TouchStamp install_host_${PACKAGE_NAME}
-  fi
+  LogExecute rm -rf build dist
+  export NACL_PORT_BUILD=host
+  # Force 32 bits here for Py_ssize_t correctness.
+  export CC="gcc -m32 -msse"
+  export CXX="g++ -m32 -msse"
+  export LD="gcc -m32 -msse"
+  LogExecute ${NACL_HOST_PYTHON} setup.py \
+    ${NACL_PYSETUP_ARGS} \
+    install --prefix=${NACL_HOST_PYROOT}
   DefaultPythonModuleBuildStep bootstrap
 }
 
