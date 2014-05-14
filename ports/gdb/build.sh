@@ -3,6 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  export LIBS="-lglibc-compat"
+fi
+
 ConfigureStep() {
   SetupCrossEnvironment
 
@@ -124,6 +129,8 @@ InstallStep() {
 PostInstallTestStep() {
   if [[ ${OS_NAME} == Darwin && ${NACL_ARCH} == x86_64 ]]; then
     echo "Skipping gdb/debug tests on unsupported mac + x86_64 configuration."
+  elif [[ ${NACL_ARCH} == arm ]]; then
+    echo "Skipping gdb/debug tests on arm for now."
   else
     LogExecute python ${START_DIR}/gdb_test.py -x -vv -a ${NACL_ARCH}
     LogExecute python ${START_DIR}/debugger_test.py -x -vv -a ${NACL_ARCH}

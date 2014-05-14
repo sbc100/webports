@@ -1,32 +1,26 @@
-diff --git a/gdb/configure b/gdb/configure
-index 5300b5a..8472ddd 100755
---- a/gdb/configure
-+++ b/gdb/configure
-@@ -5073,7 +5073,7 @@ fi
- gdb_host_obs=posix-hdep.o
- 
- if test "${target}" = "${host}"; then
--  gdb_native=yes
-+  gdb_native=no
- else
-   gdb_native=no
- fi
-diff --git a/gdb/gdb.c b/gdb/gdb.c
-index d01dc46..88808fc 100644
---- a/gdb/gdb.c
-+++ b/gdb/gdb.c
-@@ -21,8 +21,9 @@
- #include <string.h>
- #include "interps.h"
- 
--int
--main (int argc, char **argv)
-+extern int gdb_nacl_main(int argc, char **argv);
-+
-+int gdb_nacl_main(int argc, char **argv)
+diff --git a/bfd/opncls.c b/bfd/opncls.c
+index 54744ce..631eaa9 100644
+--- a/bfd/opncls.c
++++ b/bfd/opncls.c
+@@ -673,6 +673,10 @@ bfd_openw (const char *filename, const char *target)
+ static inline void
+ _maybe_make_executable (bfd * abfd)
  {
-   struct captured_main_args args;
++#if defined(__native_client__)
++  /* TODO(bradnelson): Fix nacl_io and remove. */
++  (void) abfd;
++#else
+   /* If the file was open for writing and is now executable,
+      make it so.  */
+   if (abfd->direction == write_direction
+@@ -694,6 +698,7 @@ _maybe_make_executable (bfd * abfd)
+ 		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
+ 	}
+     }
++#endif
+ }
  
+ /*
 diff --git a/config/dfp.m4 b/config/dfp.m4
 index 48683f0..93ac2e9 100644
 --- a/config/dfp.m4
@@ -41,10 +35,10 @@ index 48683f0..93ac2e9 100644
        ;;
      *)
 diff --git a/gdb/Makefile.in b/gdb/Makefile.in
-index be30dfd..50ccac8 100644
+index d2bbbd5..e3447dc 100644
 --- a/gdb/Makefile.in
 +++ b/gdb/Makefile.in
-@@ -115,10 +115,12 @@ MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
+@@ -120,10 +120,12 @@ MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
  MAKEHTML = $(MAKEINFO_CMD) --html
  MAKEHTMLFLAGS =
  
@@ -58,7 +52,7 @@ index be30dfd..50ccac8 100644
  
  # Where is our "include" directory?  Typically $(srcdir)/../include.
  # This is essentially the header file directory for the library
-@@ -1221,11 +1223,11 @@ libgdb.a: $(LIBGDB_OBS)
+@@ -1233,11 +1235,11 @@ libgdb.a: $(LIBGDB_OBS)
  	$(RANLIB) libgdb.a
  
  # Removing the old gdb first works better if it is running, at least on SunOS.
@@ -69,11 +63,11 @@ index be30dfd..50ccac8 100644
 +	$(CC_LD) gdb_pepper.o $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
  		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
 -		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
-+		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES) $(PEPPER_LIBS)
++		$(TDEPLIBS) $(TUI_LIBRARY) $(subst -lglibc-compat,,$(CLIBS)) $(LOADLIBES) $(PEPPER_LIBS)
  
  # Convenience rule to handle recursion.
  $(LIBGNU) $(GNULIB_H): all-lib
-@@ -2309,7 +2311,7 @@ py-value.o: $(srcdir)/python/py-value.c
+@@ -2321,7 +2323,7 @@ py-value.o: $(srcdir)/python/py-value.c
  
  # A list of all the objects we might care about in this build, for
  # dependency tracking.
@@ -82,43 +76,8 @@ index be30dfd..50ccac8 100644
  	test-cp-name-parser.o
  
  # Ensure that generated files are created early.  Use order-only
-diff --git a/libdecnumber/configure b/libdecnumber/configure
-index 2720f46..39ab4c4 100755
---- a/libdecnumber/configure
-+++ b/libdecnumber/configure
-@@ -4616,7 +4616,7 @@ else
-     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
-     i?86*-*-gnu* | \
-     i?86*-*-mingw* | x86_64*-*-mingw* | \
--    i?86*-*-cygwin* | x86_64*-*-cygwin*)
-+    i?86*-*-cygwin* | x86_64*-*-cygwin* | *nacl*)
-       enable_decimal_float=yes
-       ;;
-     *)
-diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
-index addf8ee..64fc443 100644
---- a/libiberty/pex-unix.c
-+++ b/libiberty/pex-unix.c
-@@ -593,6 +593,9 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executabl
-                      int in, int out, int errdes,
-                     int toclose, const char **errmsg, int *err)
- {
-+#if defined(__native_client__)
-+  return -1;
-+#else
-   pid_t pid;
- 
-   /* We declare these to be volatile to avoid warnings from gcc about
-@@ -720,6 +723,7 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executabl
- 
-       return pid;
-     }
-+#endif
- }
- #endif /* SPAWN */
- 
 diff --git a/gdb/charset.c b/gdb/charset.c
-index 1f44e8f..03a282e 100644
+index 3e4ed47..0e28d01 100644
 --- a/gdb/charset.c
 +++ b/gdb/charset.c
 @@ -767,6 +767,7 @@ find_charset_names (void)
@@ -152,3 +111,215 @@ index 1f44e8f..03a282e 100644
  }
  
  #endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
+diff --git a/gdb/configure b/gdb/configure
+index 9349917..ddbca17 100755
+--- a/gdb/configure
++++ b/gdb/configure
+@@ -5188,7 +5188,7 @@ fi
+ gdb_host_obs=posix-hdep.o
+ 
+ if test "${target}" = "${host}"; then
+-  gdb_native=yes
++  gdb_native=no
+ else
+   gdb_native=no
+ fi
+diff --git a/gdb/gdb.c b/gdb/gdb.c
+index e708b34..7a0617a 100644
+--- a/gdb/gdb.c
++++ b/gdb/gdb.c
+@@ -21,8 +21,9 @@
+ #include <string.h>
+ #include "interps.h"
+ 
+-int
+-main (int argc, char **argv)
++extern int gdb_nacl_main(int argc, char **argv);
++
++int gdb_nacl_main(int argc, char **argv)
+ {
+   struct captured_main_args args;
+ 
+diff --git a/gdb/inflow.c b/gdb/inflow.c
+index 9e2444c..0ae0a4a 100644
+--- a/gdb/inflow.c
++++ b/gdb/inflow.c
+@@ -121,6 +121,7 @@ gdb_getpgrp (void)
+ {
+   int process_group = -1;
+ 
++#if !defined(__native_client__)
+ #ifdef HAVE_TERMIOS
+   process_group = tcgetpgrp (0);
+ #endif
+@@ -130,6 +131,7 @@ gdb_getpgrp (void)
+ #ifdef HAVE_SGTTY
+   ioctl (0, TIOCGPGRP, &process_group);
+ #endif
++#endif
+   return process_group;
+ }
+ #endif
+@@ -327,11 +329,13 @@ terminal_inferior (void)
+ 
+       if (job_control)
+ 	{
++#if !defined(__native_client__)
+ #ifdef HAVE_TERMIOS
+ 	  result = tcsetpgrp (0, tinfo->process_group);
+ 	  if (!inf->attach_flag)
+ 	    OOPSY ("tcsetpgrp");
+ #endif
++#endif
+ 
+ #ifdef HAVE_SGTTY
+ 	  result = ioctl (0, TIOCSPGRP, &tinfo->process_group);
+@@ -437,6 +441,7 @@ terminal_ours_1 (int output_only)
+ 
+       if (job_control)
+ 	{
++#if !defined(__native_client__)
+ #ifdef HAVE_TERMIOS
+ 	  result = tcsetpgrp (0, our_terminal_info.process_group);
+ #if 0
+@@ -450,6 +455,7 @@ terminal_ours_1 (int output_only)
+ 				safe_strerror (errno));
+ #endif
+ #endif /* termios */
++#endif
+ 
+ #ifdef HAVE_SGTTY
+ 	  result = ioctl (0, TIOCSPGRP, &our_terminal_info.process_group);
+@@ -808,7 +814,8 @@ clear_sigint_trap (void)
+ pid_t
+ create_tty_session (void)
+ {
+-#ifdef HAVE_SETSID
++  /* TODO(bradnelson): Remove once nacl_io has a setsid implementation. */
++#if defined(HAVE_SETSID) && !defined(__native_client__)
+   pid_t ret;
+ 
+   if (!job_control || inferior_thisrun_terminal == 0)
+diff --git a/gdb/ser-pipe.c b/gdb/ser-pipe.c
+index 9c5b99b..313006f 100644
+--- a/gdb/ser-pipe.c
++++ b/gdb/ser-pipe.c
+@@ -100,7 +100,8 @@ pipe_open (struct serial *scb, const char *name)
+   if (pid == 0)
+     {
+       /* We don't want ^c to kill the connection.  */
+-#ifdef HAVE_SETSID
++      /* TODO(bradnelson): Remove once nacl_io has a setsid implementation. */
++#if defined(HAVE_SETSID) && !defined(__native_client__)
+       pid_t sid = setsid ();
+       if (sid == -1)
+ 	signal (SIGINT, SIG_IGN);
+diff --git a/gdb/utils.c b/gdb/utils.c
+index 80a99a8..f0846b0 100644
+--- a/gdb/utils.c
++++ b/gdb/utils.c
+@@ -3168,7 +3168,8 @@ gdb_realpath (const char *filename)
+      path.  Use that and realpath() to canonicalize the name.  This is
+      the most common case.  Note that, if there isn't a compile time
+      upper bound, you want to avoid realpath() at all costs.  */
+-#if defined (HAVE_REALPATH) && defined (PATH_MAX)
++  /* TODO(bradnelson): Drop this once nacl_io has realpath. */
++#if defined (HAVE_REALPATH) && defined (PATH_MAX) && !defined(__native_client__)
+   {
+     char buf[PATH_MAX];
+     const char *rp = realpath (filename, buf);
+@@ -3209,7 +3210,8 @@ gdb_realpath (const char *filename)
+      pathconf()) making it impossible to pass a correctly sized buffer
+      to realpath() (it could always overflow).  On those systems, we
+      skip this.  */
+-#if defined (HAVE_REALPATH) && defined (_PC_PATH_MAX) && defined(HAVE_ALLOCA)
++  /* TODO(bradnelson): Drop this once nacl_io has realpath. */
++#if defined (HAVE_REALPATH) && defined (_PC_PATH_MAX) && defined(HAVE_ALLOCA) && !defined(__native_client__)
+   {
+     /* Find out the max path size.  */
+     long path_max = pathconf ("/", _PC_PATH_MAX);
+@@ -3770,6 +3772,7 @@ substitute_path_component (char **stringp, const char *from, const char *to)
+ 
+ #ifdef HAVE_WAITPID
+ 
++#if !defined(__native_client__)
+ #ifdef SIGALRM
+ 
+ /* SIGALRM handler for waitpid_with_timeout.  */
+@@ -3781,6 +3784,7 @@ sigalrm_handler (int signo)
+ }
+ 
+ #endif
++#endif
+ 
+ /* Wrapper to wait for child PID to die with TIMEOUT.
+    TIMEOUT is the time to stop waiting in seconds.
+@@ -3801,6 +3805,9 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
+ 
+   if (timeout > 0)
+     {
++#ifdef __native_client__
++#undef SIGALRM
++#endif
+ #ifdef SIGALRM
+ #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
+       struct sigaction sa, old_sa;
+diff --git a/libdecnumber/configure b/libdecnumber/configure
+index 2720f46..39ab4c4 100755
+--- a/libdecnumber/configure
++++ b/libdecnumber/configure
+@@ -4616,7 +4616,7 @@ else
+     powerpc*-*-linux* | i?86*-*-linux* | x86_64*-*-linux* | s390*-*-linux* | \
+     i?86*-*-gnu* | \
+     i?86*-*-mingw* | x86_64*-*-mingw* | \
+-    i?86*-*-cygwin* | x86_64*-*-cygwin*)
++    i?86*-*-cygwin* | x86_64*-*-cygwin* | *nacl*)
+       enable_decimal_float=yes
+       ;;
+     *)
+diff --git a/libiberty/lrealpath.c b/libiberty/lrealpath.c
+index b27c8de..8829bbb 100644
+--- a/libiberty/lrealpath.c
++++ b/libiberty/lrealpath.c
+@@ -79,7 +79,8 @@ lrealpath (const char *filename)
+      path.  Use that and realpath() to canonicalize the name.  This is
+      the most common case.  Note that, if there isn't a compile time
+      upper bound, you want to avoid realpath() at all costs.  */
+-#if defined(REALPATH_LIMIT)
++  /* TODO(bradnelson): Drop this once nacl_io supports realpath. */
++#if defined(REALPATH_LIMIT) && !defined(__native_client__)
+   {
+     char buf[REALPATH_LIMIT];
+     const char *rp = realpath (filename, buf);
+@@ -109,7 +110,8 @@ lrealpath (const char *filename)
+      pathconf()) making it impossible to pass a correctly sized buffer
+      to realpath() (it could always overflow).  On those systems, we
+      skip this.  */
+-#if defined (HAVE_REALPATH) && defined (HAVE_UNISTD_H)
++  /* TODO(bradnelson): Drop this once nacl_io supports realpath. */
++#if defined (HAVE_REALPATH) && defined (HAVE_UNISTD_H) && !defined(__native_client__)
+   {
+     /* Find out the max path size.  */
+     long path_max = pathconf ("/", _PC_PATH_MAX);
+diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
+index addf8ee..64fc443 100644
+--- a/libiberty/pex-unix.c
++++ b/libiberty/pex-unix.c
+@@ -593,6 +593,9 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
+                      int in, int out, int errdes,
+ 		     int toclose, const char **errmsg, int *err)
+ {
++#if defined(__native_client__)
++  return -1;
++#else
+   pid_t pid;
+ 
+   /* We declare these to be volatile to avoid warnings from gcc about
+@@ -720,6 +723,7 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
+ 
+       return pid;
+     }
++#endif
+ }
+ #endif /* SPAWN */
+ 

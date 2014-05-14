@@ -19,7 +19,7 @@ class TestModuleInstance : public pp::Instance {
   virtual void HandleMessage(const pp::Var& var_message) {
     std::string msg = var_message.AsString();
     if (msg == "exit") {
-      _exit(0);
+      exit(0);
     } else if (msg == "ping") {
       pp::Module::Get()->core()->CallOnMainThread(
           0, callback_factory_.NewCallback(&TestModuleInstance::Pong), 0);

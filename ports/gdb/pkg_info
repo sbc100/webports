@@ -2,5 +2,5 @@ NAME=gdb
 VERSION=7.7
 URL=http://git.chromium.org/native_client/nacl-binutils.git@41afdf9d511d95073c4403c838d8ccba582d8eed
 LICENSE=CUSTOM
-LIBC=glibc
-DEPENDS=(ncurses expat readline)
+DISABLED_ARCH=pnacl
+DEPENDS=(ncurses expat readline zlib glibc-compat)

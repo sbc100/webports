@@ -79,8 +79,8 @@ GdbExtensionTestModuleTest.prototype.runGdb = function() {
     return self.gdbExt.wait();
   }).then(function(msg) {
     EXPECT_EQ('load', msg.name, 'expecting a load');
-    // Expecting 16-18 lines out.
-    return self.waitForGdbPrompt(16, 18);
+    // Expecting 16-19 lines out.
+    return self.waitForGdbPrompt(16, 19);
   });
 };
 
