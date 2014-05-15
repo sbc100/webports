@@ -305,8 +305,8 @@ class Package(object):
   contain a 'pkg_info' file.
   """
   VALID_KEYS = ('NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
-                'MIN_SDK_VERSION', 'LIBC', 'DISABLED_ARCH', 'URL_FILENAME',
-                'BUILD_OS', 'SHA1', 'DISABLED')
+                'MIN_SDK_VERSION', 'LIBC', 'ARCH', 'DISABLED_ARCH',
+                'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED')
   VALID_SUBDIRS = ('', 'ports', 'python_modules')
 
   def __init__(self, pkg_root):
@@ -345,6 +345,8 @@ class Package(object):
       raise Error('%s: package VERSION cannot contain underscores' % self.info)
     if self.NAME != os.path.basename(self.root):
       raise Error('%s: package NAME must match directory name' % self.info)
+    if self.DISABLED_ARCH is not None and self.ARCH is not None:
+      raise Error('%s: contains both ARCH and DISABLED_ARCH' % self.info)
 
   def __cmp__(self, other):
     return cmp(self.NAME, other.NAME)
@@ -444,14 +446,14 @@ class Package(object):
 
 
   def Build(self, verbose, build_deps, force=None):
+    self.CheckEnabled()
+
     if build_deps or force == 'all':
       self.InstallDeps(verbose, force)
 
     annotate = os.environ.get('NACLPORTS_ANNOTATE') == '1'
     arch = GetCurrentArch()
     libc = GetCurrentLibc()
-
-    self.CheckEnabled()
 
     force_build = force in ('build', 'all')
     if not force_build and self.IsBuilt():
@@ -580,9 +582,15 @@ class Package(object):
       raise DisabledError('%s: cannot be built with %s.'
                           % (self.NAME, GetCurrentLibc()))
 
+    if self.ARCH is not None:
+      arch = GetCurrentArch()
+      if arch not in self.ARCH:
+        raise DisabledError('%s: disabled for current arch: %s.'
+                            % (self.NAME, arch))
+
     if self.DISABLED_ARCH is not None:
       arch = GetCurrentArch()
-      if arch == self.DISABLED_ARCH:
+      if arch in self.DISABLED_ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
                             % (self.NAME, arch))
 

@@ -4,7 +4,7 @@ URL=https://github.com/binji/drod/archive/213fa47/drod.tar.gz
 URL_FILENAME=drod-213fa47.tar.gz
 ARCHIVE_ROOT=drod-213fa477000429fb9a5f4a77673394d47cadbfac
 LICENSE=MPL
-DISABLED_ARCH=pnacl
+DISABLED_ARCH=(pnacl)
 # metakit is disabled on mac currently so we can't build drod
 BUILD_OS=linux
 DEPENDS=(sdl sdl-mixer sdl-ttf zlib metakit libtar expat)
