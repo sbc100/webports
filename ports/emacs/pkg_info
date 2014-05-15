@@ -3,5 +3,6 @@ VERSION=24.3
 URL=http://mirrors.kernel.org/gnu/emacs/emacs-24.3.tar.gz
 LICENSE=GPL
 DEPENDS=(ncurses libtar nacl-spawn)
+DISABLED=1
 LIBC=glibc
 SHA1=3c672a176df06e20d2661058ad49893f184b4956

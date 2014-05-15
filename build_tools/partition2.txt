@@ -86,7 +86,6 @@ builder 0 (total: 10579)
   unzip
   dreadthread
   gdb
-  emacs
   coreutils
   gcc
   glib

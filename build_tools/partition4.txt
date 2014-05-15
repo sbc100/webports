@@ -135,7 +135,6 @@ builder 2 (total: 5950)
   mongoose
   unzip
   dreadthread
-  emacs
   coreutils
   gmp
   mpfr
