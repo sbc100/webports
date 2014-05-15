@@ -1,0 +1,4 @@
+NAME=ipython-ppapi
+VERSION=0.1
+LICENSE=BSD
+DEPENDS=(numpy matplotlib python-static libtar nacl-spawn freetype openssl libpng readline ncurses bzip2)
