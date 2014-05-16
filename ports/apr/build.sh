@@ -4,8 +4,7 @@
 # found in the LICENSE file.
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  readonly GLIBC_COMPAT=${NACLPORTS_INCLUDE}/glibc-compat
-  NACLPORTS_CPPFLAGS+=" -I${GLIBC_COMPAT}"
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi
 
 if [ "${NACL_SHARED}" = "0" ]; then
