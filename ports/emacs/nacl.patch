@@ -216,6 +216,19 @@ index ab17b52..ae86bf0 100644
  
  static EMACS_TIME TV1;
  static int watch_not_started = 1; /* flag */
+diff --git a/lib/symlink.c b/lib/symlink.c
+index d3c9f21..bc815d7 100644
+--- a/lib/symlink.c
++++ b/lib/symlink.c
+@@ -23,7 +23,7 @@
+ #include <string.h>
+ #include <sys/stat.h>
+ 
+-
++#undef HAVE_SYMLINK
+ #if HAVE_SYMLINK
+ 
+ # undef symlink
 diff --git a/lisp/Makefile.in b/lisp/Makefile.in
 index d8a9146..4acde13 100644
 --- a/lisp/Makefile.in
