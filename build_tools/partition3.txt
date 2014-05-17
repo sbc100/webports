@@ -172,6 +172,7 @@ builder 2 (total: 6438)
   unzip
   dreadthread
   gdb
+  emacs
   coreutils
   glib
   pango
