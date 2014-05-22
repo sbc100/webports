@@ -57,6 +57,12 @@ BuildStep() {
 TestStep() {
   if [ ${NACL_ARCH} = "pnacl" ]; then
     local pexe=python${NACL_EXEEXT}
-    TranslateAndWriteSelLdrScript ${pexe} x86-64 python.x86-64.nexe python
+    local script=python
+    # on Mac/Windows the folder called Python prevents us from creating a
+    # script called python (lowercase).
+    if [ ${OS_NAME} != "Linux" ]; then
+      script+=".sh"
+    fi
+    TranslateAndWriteSelLdrScript ${pexe} x86-64 python.x86-64.nexe ${script}
   fi
 }

@@ -1,4 +1,6 @@
 NAME=mingn
 VERSION=0.1
 LIBC=glibc
+# Disable on mac since not all constituents build.
+BUILD_OS=linux
 DEPENDS=(bash unzip coreutils vim binutils gcc git)
