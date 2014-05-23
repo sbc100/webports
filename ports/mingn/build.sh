@@ -56,8 +56,7 @@ InstallStep() {
 
   MakeDir ${bin_dir}
   MakeDir ${libexec_dir}
-  BINARIES="${BASH_DIR}/*_${NACL_ARCH}.nexe \
-      ${UNZIP_DIR}/*_${NACL_ARCH}.nexe \
+  BINARIES="${UNZIP_DIR}/*_${NACL_ARCH}.nexe \
       ${GCC_DIR}/*_${NACL_ARCH}.nexe \
       ${BINUTILS_DIR}/*_${NACL_ARCH}.nexe \
       ${COREUTILS_DIR}/*_${NACL_ARCH}.nexe"

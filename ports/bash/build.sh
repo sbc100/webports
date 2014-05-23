@@ -25,14 +25,16 @@ InstallStep() {
   DefaultInstallStep
 
   ChangeDir ${ASSEMBLY_DIR}/bashtar
-  cp bin/bash${NACL_EXEEXT} ../bash_${NACL_ARCH}${NACL_EXEEXT}
+  MakeDir ${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}
+  LogExecute cp bin/bash${NACL_EXEEXT} \
+      ${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}/bash${NACL_EXEEXT}
   rm -rf bin
   rm -rf share/man
   tar cf ${ASSEMBLY_DIR}/bash.tar .
   rm -rf ${ASSEMBLY_DIR}/bashtar
   cd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      bash_*${NACL_EXEEXT} \
+      _platform_specific/*/bash*${NACL_EXEEXT} \
       -s . \
       -o bash.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py bash.nmf
