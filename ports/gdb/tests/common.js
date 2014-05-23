@@ -9,7 +9,7 @@
 /**
  * Wait until a certain number of NaCl modules start/stop.
  * Waits until the number of extra modules vs a snapshot equals a certain
- * number.
+ * number. Also, waits until the debug port is known.
  * @param {integer} count Number of modules in addition to the snapshot to
  *     wait for.
  * @param {Object.<integer, ProcessInfo>} snapshot A snapshot of the the
@@ -22,6 +22,10 @@ function waitForExtraModuleCount(count, snapshot) {
     var extraModules = [];
     for (var i in processes) {
       if (processes[i].type != 'nacl') {
+        continue;
+      }
+      // Ignore modules until they have a known debug port.
+      if (processes[i].naclDebugPort < 0) {
         continue;
       }
       if (!(i in snapshot)) {

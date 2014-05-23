@@ -91,10 +91,20 @@ Connection.prototype.handleMessage_ = function(msg) {
 
   // Expose chrome.processes.getProcessInfo.
   } else if (msg.name == 'getAllProcesses') {
+    // TODO(bradnelson): Remove this when chrome is fixed.
+    // Currently the task manager does not pump out notification of updates to
+    // the chrome.processes api when there are no pending listeners.
+    // Oddly the listeners seem to need to be started after a getProcessInfo
+    // request.
+    var doNothing = function(processes) {};
     chrome.processes.getProcessInfo([], false, function(processes) {
       self.port_.postMessage({'name': 'getAllProcessesResult',
                               'result': processes});
+    // TODO(bradnelson): Remove this when chrome is fixed. See above.
+      chrome.processes.onUpdated.removeListener(doNothing);
     });
+    // TODO(bradnelson): Remove this when chrome is fixed. See above.
+    chrome.processes.onUpdated.addListener(doNothing);
 
   // Allow proxied access to all extensions / apps for testing.
   // NOTE: Once you switch to proxy mode, all messages are routed to the

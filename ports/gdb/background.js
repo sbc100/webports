@@ -335,7 +335,8 @@ DebugConnection_.prototype.createGdb_ = function() {
   params['PS_STDIN'] = '/dev/tty';
   params['PS_STDOUT'] = '/dev/tty';
   params['PS_STDERR'] = '/dev/tty';
-  params['PS_VERBOSITY'] = '2';
+  // TODO(bradnelson): Sort out how to cope with higher verbosity here.
+  params['PS_VERBOSITY'] = '0';
   params['PS_EXIT_MESSAGE'] = 'exited';
   params['TERM'] = 'xterm-256color';
   params['PWD'] = '/';

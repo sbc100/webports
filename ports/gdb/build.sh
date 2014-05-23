@@ -47,7 +47,10 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
 
   readonly TEMPLATE_EXPAND="${START_DIR}/../../build_tools/template_expand.py"
-  readonly REVISION=$(cd ${START_DIR} && git number 2>/dev/null || svnversion)
+  readonly REV_RAW=$(cd ${START_DIR} && git number 2>/dev/null || svnversion)
+  # The svn revision can have a trailing M when there are modifications, such
+  # as during a try run. Remove it so we get a valid extension version.
+  readonly REVISION=${REV_RAW/M/}
   readonly REV_H=$(expr $REVISION / 65536)
   readonly REV_L=$(expr $REVISION % 65536)
   readonly VERSION=0.1.${REV_H}.${REV_L}

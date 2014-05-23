@@ -69,7 +69,10 @@ DebugExtensionTest.prototype.checkAttach = function() {
     return self.debugExt.wait();
   }).then(function(msg) {
     ASSERT_EQ('change', msg.name);
-    ASSERT_EQ('create', msg.cause);
+    // In cases where the debug port is not immediately known,
+    // a later 'updated' event may trigger attach instead of the initial
+    // 'create'.
+    ASSERT_TRUE('create' ==  msg.cause || 'updated' == msg.cause);
     return self.debugExt.wait();
   }).then(function(msg) {
     ASSERT_EQ('change', msg.name);

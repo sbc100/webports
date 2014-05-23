@@ -113,6 +113,10 @@ function addProcess(process) {
   if (process.type !== 'nacl') {
     return false;
   }
+  // Ignore NaCl modules until they have a stable debug port.
+  if (process.naclDebugPort < 0) {
+    return false;
+  }
   // Ignore process ids that are already present.
   var processId = process.id.toString();
   if (processId in g_naclModules) {
