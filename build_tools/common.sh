@@ -963,8 +963,9 @@ DefaultPythonModuleBuildStep() {
   LogExecute ${NACL_HOST_PYTHON} setup.py \
     ${NACL_PYSETUP_ARGS:-} \
     install --prefix=${NACL_DEST_PYROOT}
-  MakeDir ${DEST_PYTHON_OBJS}
-  LogExecute find build -name "*.o" -exec cp -v {} ${DEST_PYTHON_OBJS} \;
+  MakeDir ${DEST_PYTHON_OBJS}/${PACKAGE_NAME}
+  LogExecute find build -name "*.o" -execdir cp -v {} \
+    ${DEST_PYTHON_OBJS}/${PACKAGE_NAME}/{} \;
 }
 
 

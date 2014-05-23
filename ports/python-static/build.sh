@@ -46,7 +46,7 @@ ConfigureStep() {
     fi
   done
   LogExecute rm -vf libpython2.7.a
-  PY_LINK_LINE+="ppapi_simple ${DEST_PYTHON_OBJS}/\*.o"
+  PY_LINK_LINE+="ppapi_simple ${DEST_PYTHON_OBJS}/\*/\*.o"
   PY_LINK_LINE+=" ${PY_MOD_LIBS} -lz -lppapi -lppapi_cpp -lnacl"
   PY_LINK_LINE+=" -lnacl_io -lc -lbz2"
   if [ "${NACL_LIBC}" = "newlib" ]; then
@@ -64,7 +64,7 @@ BuildStep() {
   DefaultBuildStep
   ChangeDir ${BUILD_DIR}
   Banner "Rebuilding libpython2.7.a"
-  ${AR} cr libpython2.7.a ${DEST_PYTHON_OBJS}/*.o
+  ${AR} cr libpython2.7.a ${DEST_PYTHON_OBJS}/*/*.o
   ${RANLIB} libpython2.7.a
   # To avoid rebuilding python.nexe with the new libpython2.7.a and duplicating
   # symbols
