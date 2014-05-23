@@ -38,14 +38,13 @@ fi
 readonly SHA1CHECK=${TOOLS_DIR}/sha1check.py
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then
-  readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}
+  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
 elif [ "${NACL_ARCH}" = "emscripten" ]; then
-  readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}
+  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
 else
-  readonly NACL_TOOLCHAIN_INSTALL=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}
+  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
 fi
 
-readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_INSTALL}/usr
 readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
 readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
 readonly NACLPORTS_BIN=${NACLPORTS_PREFIX}/bin
@@ -315,6 +314,17 @@ InjectSystemHeaders() {
 
 
 PatchSpecFile() {
+  # Temporary PNaCl toolchain hack to add usr/local/lib to the library
+  # path. TODO(sbc): remove this once this change makes it into pepper_canary:
+  # https://codereview.chromium.org/299273002/
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    local LD=${NACL_TOOLCHAIN_ROOT}/bin/pydir/pnacl-ld.py
+    if ! grep -q "local\/lib" "$LD"; then
+      sed -i.bak \
+          "s:\${BASE_USR}/lib/:\${BASE_USR}/local/lib/ \${BASE_USR}/lib/:" "$LD"
+    fi
+  fi
+
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "arm" -o \
        "${NACL_ARCH}" = "emscripten" ]; then
     # The arm compiler doesn't currently need a patched specs file

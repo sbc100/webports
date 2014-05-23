@@ -164,7 +164,11 @@ def GetToolchainRoot(toolchain=None, arch=None):
 def GetInstallRoot(toolchain, arch):
   """Returns the installation used by naclports within a given toolchain."""
   tc_root = GetToolchainRoot(toolchain, arch)
-  return os.path.join(tc_root, 'usr')
+  if toolchain == 'pnacl':
+    return os.path.join(tc_root, 'usr', 'local')
+  else:
+    return os.path.join(tc_root, 'usr')
+
 
 
 def GetInstallStampRoot(toolchain, arch):
@@ -739,11 +743,7 @@ def run_main(args):
       rmtree(PACKAGES_ROOT)
       rmtree(PUBLISH_ROOT)
       rmtree(GetInstallStampRoot(GetCurrentToolchain(), GetCurrentArch()))
-      if GetCurrentArch() != 'pnacl':
-        # The install root in the PNaCl toolchain is currently shared with
-        # system libraries and headers so we cant' remove it completely
-        # without breaking the toolchain
-        rmtree(GetInstallRoot(GetCurrentToolchain(), GetCurrentArch()))
+      rmtree(GetInstallRoot(GetCurrentToolchain(), GetCurrentArch()))
     else:
       for p in PackageIterator():
         if not p.DISABLED:

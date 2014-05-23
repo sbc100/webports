@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 MAKE_TARGETS="pprogram"
-INSTALL_TARGETS="install-nodoc DESTDIR=${NACL_TOOLCHAIN_INSTALL}"
+INSTALL_TARGETS="install-nodoc"
 
 EXECUTABLES="ruby${NACL_EXEEXT} pepper-ruby${NACL_EXEEXT}"
 
