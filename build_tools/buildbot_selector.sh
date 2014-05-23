@@ -69,7 +69,8 @@ Publish() {
   echo "@@@STEP_LINK@browse@${URL}@@@"
 }
 
-if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
+# Don't upload periodic or trybot builds.
+if [[ ${BUILDBOT_BUILDERNAME} =~ (periodic-|naclports-)* ]]; then
   NACLPORTS_NO_UPLOAD=1
 fi
 
@@ -81,7 +82,7 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   readonly OS=linux
 else
   # Decode buildername.
-  readonly BNAME_REGEX="(nightly-)?(.+)-(.+)-(.+)"
+  readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
   if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
     readonly OS=${BASH_REMATCH[2]}
     readonly LIBC=${BASH_REMATCH[3]}

@@ -53,3 +53,24 @@ def CheckChangeOnCommit(input_api, output_api):
       input_api, output_api,
       json_url='http://naclports-status.appspot.com/current?format=json'))
   return report
+
+
+TRYBOTS = [
+    'naclports-linux-glibc-0',
+    'naclports-linux-glibc-1',
+    'naclports-linux-glibc-2',
+    'naclports-linux-glibc-3',
+    'naclports-linux-newlib-0',
+    'naclports-linux-newlib-1',
+    'naclports-linux-newlib-2',
+    'naclports-linux-pnacl_newlib-0',
+    'naclports-linux-pnacl_newlib-1',
+    'naclports-linux-pnacl_newlib-2',
+    'naclports-linux-pnacl_newlib-3',
+]
+
+
+def GetPreferredTryMasters(_, change):
+  return {
+    'tryserver.chromium': { t: set(['defaulttests']) for t in TRYBOTS },
+  }
