@@ -46,8 +46,8 @@ ConfigureStep() {
     fi
   done
   LogExecute rm -vf libpython2.7.a
-  PY_LINK_LINE+="ppapi_simple ${DEST_PYTHON_OBJS}/\*/\*.o"
-  PY_LINK_LINE+=" ${PY_MOD_LIBS} -lz -lppapi -lppapi_cpp -lnacl"
+  PY_LINK_LINE+="ppapi_wrapper ${DEST_PYTHON_OBJS}/\*/\*.o"
+  PY_LINK_LINE+=" ${PY_MOD_LIBS} -lz -lppapi_simple -lppapi -lppapi_cpp -lnacl"
   PY_LINK_LINE+=" -lnacl_io -lc -lbz2"
   if [ "${NACL_LIBC}" = "newlib" ]; then
     PY_LINK_LINE+=" -lglibc-compat"

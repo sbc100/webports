@@ -1,7 +1,7 @@
 NAME=pyppapi
-VERSION=0.1
-URL=http://zeropy.org/pyppapi-0.1.tar.gz
+VERSION=0.4
+URL=https://pypi.python.org/packages/source/p/pyppapi/pyppapi-0.4.tar.gz
 LICENSE=BSD
 BUILD_OS=linux
-DEPENDS=(python-host cython)
-SHA1=140926b640aa423d7f53fe71e2d4d2629228eafb
+DEPENDS=(python-host cython numpy)
+SHA1=203f78ad9ad4208fadc824c64915ae31633d878e

@@ -73,48 +73,58 @@ static int setup_unix_environment() {
 
 extern "C" {
 
-  static PyObject * post_json_message(PyObject * self, PyObject * args) {
-    char * stream;
-    char * json;
-    if (!PyArg_ParseTuple(args, "ss", &stream, &json)) {
-      return NULL;
-    }
+static PyObject * post_json_message(PyObject * self, PyObject * args) {
+  char * stream;
+  char * json;
+  if (!PyArg_ParseTuple(args, "ss", &stream, &json)) {
+    return NULL;
+  }
 
-    pp::VarDictionary message;
-    message.Set("stream", pp::Var(stream));
-    message.Set("json", pp::Var(json));
+  pp::VarDictionary message;
+  message.Set("stream", pp::Var(stream));
+  message.Set("json", pp::Var(json));
 
-    const PPB_Messaging * messaging = PSInterfaceMessaging();
-    PP_Instance instance = PSGetInstanceId();
-    messaging->PostMessage(instance, message.pp_var());
+  const PPB_Messaging * messaging = PSInterfaceMessaging();
+  PP_Instance instance = PSGetInstanceId();
+  messaging->PostMessage(instance, message.pp_var());
 
+  Py_RETURN_NONE;
+}
+
+static PyObject * acquire_json_message_wait(PyObject *self, PyObject * args) {
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  const PPB_Messaging * messaging = PSInterfaceMessaging();
+  PP_Instance instance = PSGetInstanceId();
+  PSEventSetFilter(PSE_INSTANCE_HANDLEMESSAGE);
+  PSEvent *event = PSEventWaitAcquire();
+  if (event->type != PSE_INSTANCE_HANDLEMESSAGE)
     Py_RETURN_NONE;
+
+  pp::Var message(event->as_var);
+
+  if (!message.is_dictionary())
+    Py_RETURN_NONE;
+
+  pp::VarDictionary request(message);
+  pp::Var json(request.Get("json"));
+  if (!json.is_string())
+    Py_RETURN_NONE;
+
+  return PyString_FromString(json.AsString().c_str());
+}
+
+const PPB_Messaging *setup_ppapi_connection(PP_Instance *instance) {
+  printf("Initializing external PPAPI signals for PyPPAPI\n");
+  (*instance) = PSGetInstanceId();
+  const PPB_Messaging *msg = PSInterfaceMessaging();
+  if (msg == NULL) {
+    printf("PPB Messaging is NULL, which will cause a failure.\n");
   }
-
-  static PyObject * acquire_json_message_wait(PyObject *self, PyObject * args) {
-    if (!PyArg_ParseTuple(args, "")) {
-      return NULL;
-    }
-
-    const PPB_Messaging * messaging = PSInterfaceMessaging();
-    PP_Instance instance = PSGetInstanceId();
-    PSEventSetFilter(PSE_INSTANCE_HANDLEMESSAGE);
-    PSEvent *event = PSEventWaitAcquire();
-    if (event->type != PSE_INSTANCE_HANDLEMESSAGE)
-      Py_RETURN_NONE;
-
-    pp::Var message(event->as_var);
-
-    if (!message.is_dictionary())
-      Py_RETURN_NONE;
-
-    pp::VarDictionary request(message);
-    pp::Var json(request.Get("json"));
-    if (!json.is_string())
-      Py_RETURN_NONE;
-
-    return PyString_FromString(json.AsString().c_str());
-  }
+  return msg;
+}
 
 }
 
