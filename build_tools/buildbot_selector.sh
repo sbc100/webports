@@ -70,7 +70,10 @@ Publish() {
 }
 
 # Don't upload periodic or trybot builds.
-if [[ ${BUILDBOT_BUILDERNAME} =~ (periodic-|naclports-)* ]]; then
+if [[ ${BUILDBOT_BUILDERNAME} =~ periodic-* ]]; then
+  NACLPORTS_NO_UPLOAD=1
+fi
+if [[ ${BUILDBOT_BUILDERNAME} =~ naclports-* ]]; then
   NACLPORTS_NO_UPLOAD=1
 fi
 
