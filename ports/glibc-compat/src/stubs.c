@@ -414,8 +414,8 @@ int connect(int sockfd, const struct sockaddr *addr,
   UNIMPLEMENTED_FATAL();
 }
 
-char* realpath(const char* path, const char* resolved) __attribute__ ((weak));
-char* realpath(const char* path, const char* resolved) {
+char* realpath(const char* path, char* resolved) __attribute__ ((weak));
+char* realpath(const char* path, char* resolved) {
   UNIMPLEMENTED_NOSYS_RTN(NULL);
 }
 
