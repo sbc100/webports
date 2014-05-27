@@ -95,3 +95,22 @@ diff -Naur protobuf-2.5.0/src/google/protobuf/io/coded_stream.h protobuf-2.5.0.n
  #include <string>
  #ifdef _MSC_VER
    #if defined(_M_IX86) && \
+
+--- protobuf-2.5.0/src/google/protobuf/stubs/atomicops.h
++++ protobuf-2.5.0.nacl/src/google/protobuf/stubs/atomicops.h
+@@ -176,13 +176,13 @@ GOOGLE_PROTOBUF_ATOMICOPS_ERROR
+ #elif defined(__GNUC__)
+ #if defined(GOOGLE_PROTOBUF_ARCH_IA32) || defined(GOOGLE_PROTOBUF_ARCH_X64)
+ #include <google/protobuf/stubs/atomicops_internals_x86_gcc.h>
+-#elif defined(GOOGLE_PROTOBUF_ARCH_ARM)
++#elif defined(GOOGLE_PROTOBUF_ARCH_ARM) && !defined(__native_client__)
+ #include <google/protobuf/stubs/atomicops_internals_arm_gcc.h>
+ #elif defined(GOOGLE_PROTOBUF_ARCH_ARM_QNX)
+ #include <google/protobuf/stubs/atomicops_internals_arm_qnx.h>
+ #elif defined(GOOGLE_PROTOBUF_ARCH_MIPS)
+ #include <google/protobuf/stubs/atomicops_internals_mips_gcc.h>
+-#elif defined(__pnacl__)
++#elif defined(__native_client__)
+ #include <google/protobuf/stubs/atomicops_internals_pnacl.h>
+ #else
+ GOOGLE_PROTOBUF_ATOMICOPS_ERROR
