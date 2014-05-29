@@ -46,7 +46,7 @@ CustomBuildPackage() {
     export NACL_DEBUG=0
   fi
 
-  BuildPackage $1
+  BuildPackage $1 --no-deps
 }
 
 # $1 - name of package

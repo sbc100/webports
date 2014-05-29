@@ -36,11 +36,18 @@ RunCmd() {
   $*
 }
 
+#
+# Build a single package for a single architecture
+# $1 - Name of package to build
+#
 BuildPackage() {
-  if RunCmd build_tools/naclports.py build ports/$1 -v --ignore-disabled ; then
-    BuildSuccess $1
+  PACKAGE=$1
+  shift
+  ARGS="-v --ignore-disabled $*"
+  if RunCmd build_tools/naclports.py install ports/$PACKAGE $ARGS; then
+    BuildSuccess $PACKAGE
   else
-    BuildFailure $1
+    BuildFailure $PACKAGE
   fi
 }
 
