@@ -1271,6 +1271,11 @@ PackageStep() {
     mv ${DESTDIR}${PREFIX} ${DESTDIR}/payload
   fi
   LogExecute cp ${START_DIR}/pkg_info ${DESTDIR}
+  if [ ${NACL_DEBUG} = "1" ]; then
+    echo "CONFIG=debug" >> ${DESTDIR}/pkg_info
+  else
+    echo "CONFIG=release" >> ${DESTDIR}/pkg_info
+  fi
   LogExecute tar cf ${PACKAGE_FILE} -C ${DESTDIR} .
 }
 

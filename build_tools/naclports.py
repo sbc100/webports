@@ -143,6 +143,16 @@ def GetDebug():
     return 'release'
 
 
+def BuildConfigurationString(arch, libc, config):
+  return '%s/%s/%s' % (arch, libc, config)
+
+
+def GetConfigurationString():
+  return BuildConfigurationString(GetCurrentArch(),
+                                  GetCurrentLibc(),
+                                  GetDebug())
+
+
 def GetToolchainRoot(toolchain=None, arch=None):
   """Returns the toolchain folder for a given NaCl toolchain."""
   import getos
@@ -181,9 +191,9 @@ def GetInstallStamp(package_name):
   return os.path.join(root, package_name)
 
 
-def IsInstalled(package_name):
+def IsInstalled(package_name, stamp_content=''):
   stamp = GetInstallStamp(package_name)
-  return CheckStamp(stamp)
+  return CheckStamp(stamp, stamp_content)
 
 
 class BinaryPackage(object):
@@ -202,6 +212,9 @@ class BinaryPackage(object):
       raise Error('invalid package filename: %s' % basename)
     if parts[-1] == 'debug':
       parts = parts[:-1]
+      self.config = 'debug'
+    else:
+      self.config = 'release'
 
     if parts[-1] in ('newlib', 'glibc', 'bionic'):
       self.toolchain = parts[-1]
@@ -268,6 +281,9 @@ class BinaryPackage(object):
       with open(filename, 'r+') as f:
         f.write(data.replace('/naclports-dummydir', dest))
 
+  def GetConfigurationString(self):
+    return BuildConfigurationString(self.arch, self.toolchain, self.config)
+
   def Install(self):
     """Install binary package into toolchain directory."""
     dest = GetInstallRoot(self.toolchain, self.arch)
@@ -275,7 +291,7 @@ class BinaryPackage(object):
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
-    Log("Installing '%s' [%s/%s]" % (self.name, self.arch, self.toolchain))
+    Log("Installing '%s' [%s]" % (self.name, self.GetConfigurationString()))
     os.makedirs(dest_tmp)
 
     try:
@@ -430,7 +446,10 @@ class Package(object):
     return '_'.join(fullname) + '.tar.bz2'
 
   def IsInstalled(self):
-    return IsInstalled(self.NAME)
+    with open(self.info) as f:
+      stamp_content = f.read()
+    stamp_content += 'CONFIG=' + GetDebug() + '\n'
+    return IsInstalled(self.NAME, stamp_content)
 
   def IsBuilt(self):
     return os.path.exists(self.PackageFile())
@@ -439,15 +458,13 @@ class Package(object):
     force_install = force in ('build', 'install', 'all')
 
     if not force_install and self.IsInstalled():
-      Log("Already installed '%s' [%s/%s]" % (self.NAME, GetCurrentArch(),
-          GetCurrentLibc()))
+      Log("Already installed '%s' [%s]" % (self.NAME, GetConfigurationString()))
       return
 
     if not self.IsBuilt() or force:
       self.Build(verbose, build_deps, force)
 
     BinaryPackage(self.PackageFile()).Install()
-
 
   def Build(self, verbose, build_deps, force=None):
     self.CheckEnabled()
@@ -461,7 +478,7 @@ class Package(object):
 
     force_build = force in ('build', 'all')
     if not force_build and self.IsBuilt():
-      Log("Already built '%s' [%s/%s]" % (self.NAME, arch, libc))
+      Log("Already built '%s' [%s]" % (self.NAME, GetConfigurationString()))
       return
 
     log_root = os.path.join(OUT_DIR, 'logs')
@@ -476,15 +493,14 @@ class Package(object):
       prefix = '*** '
     else:
       prefix = ''
-    Log("%sBuilding '%s' [%s/%s]" % (prefix, self.NAME, arch, libc))
+    Log("%sBuilding '%s' [%s]" % (prefix, self.NAME, GetConfigurationString()))
 
     start = time.time()
     self.RunBuildSh(verbose, stdout)
 
     duration = FormatTimeDelta(time.time() - start)
-    Log("Build complete '%s' [%s/%s] [took %s]"
-        % (self.NAME, arch, libc, duration))
-
+    Log("Build complete '%s' [%s] [took %s]"
+        % (self.NAME, GetConfigurationString(), duration))
 
   def RunBuildSh(self, verbose, stdout, args=None):
     build_port = os.path.join(SCRIPT_DIR, 'build_port.sh')
@@ -506,7 +522,6 @@ class Package(object):
         with open(stdout) as log_file:
           sys.stdout.write(log_file.read())
         raise Error("Building '%s' failed." % (self.NAME))
-
 
   def Verify(self, verbose=False):
     """Download upstream source and verify hash."""
