@@ -2,15 +2,6 @@ diff --git a/Alc/ALc.c b/Alc/ALc.c
 index fd5b889..b7c82b3 100644
 --- a/Alc/ALc.c
 +++ b/Alc/ALc.c
-@@ -23,7 +23,7 @@
- #include <math.h>
- #include <stdlib.h>
- #include <stdio.h>
--#include <memory.h>
-+#include <string.h>
- #include <ctype.h>
- #include <signal.h>
- 
 @@ -77,7 +77,9 @@ static struct BackendInfo BackendList[] = {
  #ifdef HAVE_OPENSL
      { "opensl", alc_opensl_init, alc_opensl_deinit, alc_opensl_probe, EmptyFuncs },
@@ -475,19 +466,6 @@ index 0000000..b9703ff
 +    else if (type == ALL_DEVICE_PROBE)
 +        AppendAllDevicesList(ppapiDevice);
 +}
-diff --git a/Alc/backends/wave.c b/Alc/backends/wave.c
-index be528c9..35e0a7e 100644
---- a/Alc/backends/wave.c
-+++ b/Alc/backends/wave.c
-@@ -22,7 +22,7 @@
- 
- #include <stdlib.h>
- #include <stdio.h>
--#include <memory.h>
-+#include <string.h>
- #ifdef HAVE_WINDOWS_H
- #include <windows.h>
- #endif
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 5389f11..3c7d560 100644
 --- a/CMakeLists.txt

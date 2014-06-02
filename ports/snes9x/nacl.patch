@@ -2,16 +2,6 @@ diff --git a/port.h b/port.h
 index 0e8192e..a00b402 100644
 --- a/port.h
 +++ b/port.h
-@@ -182,7 +182,9 @@
- #include <stdio.h>
- #include <stdlib.h>
- #include <limits.h>
-+#if !defined(__native_client__) || defined(__GLIBC__)
- #include <memory.h>
-+#endif
- #include <time.h>
- #include <string.h>
- #ifdef HAVE_STRINGS_H
 @@ -331,7 +333,7 @@ void SetInfoDlgColor(unsigned char, unsigned char, unsigned char);
  #define TITLE "Snes9x"
  #endif

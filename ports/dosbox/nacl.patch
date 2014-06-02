@@ -33,21 +33,6 @@ index 849b433..2247e8a 100644
  }
 -
 -
-diff --git a/src/cpu/cpu.cpp b/src/cpu/cpu.cpp
-index 363b091..63ff25c 100644
---- a/src/cpu/cpu.cpp
-+++ b/src/cpu/cpu.cpp
-@@ -22,7 +22,9 @@
- #include <sstream>
- #include "dosbox.h"
- #include "cpu.h"
--#include "memory.h"
-+#ifndef __native_client__
-+#  include "memory.h"
-+#endif  /* __native_client__ */
- #include "debug.h"
- #include "mapper.h"
- #include "setup.h"
 diff --git a/src/gui/sdl_mapper.cpp b/src/gui/sdl_mapper.cpp
 index c905c05..82c1b14 100644
 --- a/src/gui/sdl_mapper.cpp

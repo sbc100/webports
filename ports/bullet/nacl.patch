@@ -24,39 +24,6 @@ index 7f2bb95..4568758 100644
 -SUBDIRS=OpenGL BasicDemo TerrainDemo VehicleDemo CcdPhysicsDemo SoftDemo AllBulletDemos
 +SUBDIRS+=MultiThreadedDemo
  endif
-diff --git a/Extras/Serialize/BulletFileLoader/bChunk.cpp b/Extras/Serialize/BulletFileLoader/bChunk.cpp
-index ac9125a..0eb0946 100644
---- a/Extras/Serialize/BulletFileLoader/bChunk.cpp
-+++ b/Extras/Serialize/BulletFileLoader/bChunk.cpp
-@@ -17,7 +17,7 @@ subject to the following restrictions:
- #include "bDefines.h"
- #include "bFile.h"
- 
--#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
-+#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
- #include <memory.h>
- #endif
- #include <string.h>
-diff --git a/Extras/Serialize/BulletFileLoader/btBulletFile.cpp b/Extras/Serialize/BulletFileLoader/btBulletFile.cpp
-index 0cc668c..e2adc97 100644
---- a/Extras/Serialize/BulletFileLoader/btBulletFile.cpp
-+++ b/Extras/Serialize/BulletFileLoader/btBulletFile.cpp
-@@ -17,7 +17,7 @@ subject to the following restrictions:
- #include "bDefines.h"
- #include "bDNA.h"
- 
--#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
-+#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
- #include <memory.h>
- #endif
- #include <string.h>
-@@ -403,4 +403,4 @@ void	btBulletFile::addStruct(const	char* structType,void* data, int len, void* o
- 
- 	mLibPointers.insert(dataChunk.oldPtr, (bStructHandle*)data);
- 	m_chunks.push_back(dataChunk);
--}
-\ No newline at end of file
-+}
 diff --git a/Makefile.am b/Makefile.am
 index fe2625f..9c90c3d 100644
 --- a/Makefile.am
@@ -238,31 +205,3 @@ index 5598d22..205e333 100644
  AC_OUTPUT
  
  AC_MSG_NOTICE([
-diff --git a/src/BulletCollision/BroadphaseCollision/btDbvt.h b/src/BulletCollision/BroadphaseCollision/btDbvt.h
-index 1298ed8..262b82c 100644
---- a/src/BulletCollision/BroadphaseCollision/btDbvt.h
-+++ b/src/BulletCollision/BroadphaseCollision/btDbvt.h
-@@ -92,7 +92,8 @@ subject to the following restrictions:
- #endif
- 
- #if DBVT_USE_MEMMOVE
--#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
-+#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
-+
- #include <memory.h>
- #endif
- #include <string.h>
-diff --git a/src/LinearMath/btSerializer.h b/src/LinearMath/btSerializer.h
-index 7304c85..e3d6995 100644
---- a/src/LinearMath/btSerializer.h
-+++ b/src/LinearMath/btSerializer.h
-@@ -20,7 +20,8 @@ subject to the following restrictions:
- #include "btStackAlloc.h"
- #include "btHashMap.h"
- 
--#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__)
-+#if !defined( __CELLOS_LV2__) && !defined(__MWERKS__) && !(defined(__native_client__) && !defined(__GLIBC__))
-+
- #include <memory.h>
- #endif
- #include <string.h>

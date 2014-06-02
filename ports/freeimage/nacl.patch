@@ -87,29 +87,6 @@ diff -bNaur FreeImage/Makefile.nacl FreeImage-nacl/Makefile.nacl
 +clean:
 +	rm -f core Dist/*.* u2dtmp* $(MODULES) $(STATICLIB) $(SHAREDLIB) $(LIBNAME)
 +
-diff -bNaur FreeImage/Source/LibOpenJPEG/opj_includes.h FreeImage-nacl/Source/LibOpenJPEG/opj_includes.h
---- FreeImage/Source/LibOpenJPEG/opj_includes.h	2010-05-16 07:59:08.000000000 -0600
-+++ FreeImage-nacl/Source/LibOpenJPEG/opj_includes.h	2010-12-01 16:51:33.000000000 -0700
-@@ -31,7 +31,6 @@
-    Standard includes used by the library
-  ==========================================================
- */
--#include <memory.h>
- #include <stdlib.h>
- #include <string.h>
- #include <math.h>
-diff -bNaur FreeImage/Source/LibRawLite/libraw/libraw.h FreeImage-nacl/Source/LibRawLite/libraw/libraw.h
---- FreeImage/Source/LibRawLite/libraw/libraw.h	2010-08-07 01:48:42.000000000 -0600
-+++ FreeImage-nacl/Source/LibRawLite/libraw/libraw.h	2010-12-01 16:58:19.000000000 -0700
-@@ -28,7 +28,7 @@
- #endif
- 
- #include <limits.h>
--#include <memory.h>
-+#include <string.h>
- #include <stdio.h>
- #include <stdlib.h>
- 
 diff -bNaur FreeImage/Source/OpenEXR/Imath/ImathMatrix.h FreeImage-nacl/Source/OpenEXR/Imath/ImathMatrix.h
 --- FreeImage/Source/OpenEXR/Imath/ImathMatrix.h	2010-07-17 13:48:40.000000000 -0600
 +++ FreeImage-nacl/Source/OpenEXR/Imath/ImathMatrix.h	2010-12-01 17:05:48.000000000 -0700
@@ -121,14 +98,3 @@ diff -bNaur FreeImage/Source/OpenEXR/Imath/ImathMatrix.h FreeImage-nacl/Source/O
  #include <iostream>
  #include <iomanip>
  
-diff -bNaur FreeImage/Source/Utilities.h FreeImage-nacl/Source/Utilities.h
---- FreeImage/Source/Utilities.h	2010-08-13 01:42:02.000000000 -0600
-+++ FreeImage-nacl/Source/Utilities.h	2010-12-01 16:55:14.000000000 -0700
-@@ -30,7 +30,6 @@
- 
- #include <math.h>
- #include <stdlib.h> 
--#include <memory.h>
- #include <stdio.h>
- #include <string.h>
- #include <stdarg.h>
