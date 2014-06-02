@@ -33,7 +33,7 @@ BUILD_ROOT = os.path.join(OUT_DIR, 'build')
 ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
 PACKAGES_ROOT = os.path.join(OUT_DIR, 'packages')
 PUBLISH_ROOT = os.path.join(OUT_DIR, 'publish')
-PAYLOAD_DIR = 'payload/'
+PAYLOAD_DIR = 'payload'
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 
@@ -72,8 +72,16 @@ def FormatTimeDelta(delta):
   return rtn
 
 
-def WriteStamp(filename, contents=''):
+def WriteFileList(package_name, file_names):
+  filename = GetFileList(package_name)
+  with open(filename, 'w') as f:
+    for name in file_names:
+      f.write(name + '\n')
+
+
+def WriteStamp(package_name, contents=''):
   """Write a file with the give filename and contents."""
+  filename = GetInstallStamp(package_name)
   dirname = os.path.dirname(filename)
   if not os.path.isdir(dirname):
     os.makedirs(dirname)
@@ -105,6 +113,10 @@ def CheckStamp(filename, contents=None, timestamp=None):
 def Log(message):
   sys.stdout.write(str(message) + '\n')
   sys.stdout.flush()
+
+
+def Warn(message):
+  Log('warning: ' + message)
 
 
 def Trace(message):
@@ -155,6 +167,10 @@ def GetConfigurationString():
 
 def GetToolchainRoot(toolchain=None, arch=None):
   """Returns the toolchain folder for a given NaCl toolchain."""
+  if toolchain is None:
+    toolchain = GetCurrentToolchain()
+  if arch is None:
+    arch = GetCurrentArch()
   import getos
   platform = getos.GetPlatform()
   if toolchain == 'pnacl':
@@ -171,7 +187,7 @@ def GetToolchainRoot(toolchain=None, arch=None):
   return os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir)
 
 
-def GetInstallRoot(toolchain, arch):
+def GetInstallRoot(toolchain=None, arch=None):
   """Returns the installation used by naclports within a given toolchain."""
   tc_root = GetToolchainRoot(toolchain, arch)
   if toolchain == 'pnacl':
@@ -180,20 +196,31 @@ def GetInstallRoot(toolchain, arch):
     return os.path.join(tc_root, 'usr')
 
 
-
-def GetInstallStampRoot(toolchain, arch):
+def GetInstallStampRoot(toolchain=None, arch=None):
   tc_root = GetInstallRoot(toolchain, arch)
   return os.path.join(tc_root, 'var', 'lib', 'npkg')
 
 
 def GetInstallStamp(package_name):
-  root = GetInstallStampRoot(GetCurrentToolchain(), GetCurrentArch())
-  return os.path.join(root, package_name)
+  root = GetInstallStampRoot()
+  return os.path.join(root, package_name + '.info')
+
+
+def GetFileList(package_name):
+  root = GetInstallStampRoot()
+  return os.path.join(root, package_name + '.list')
 
 
 def IsInstalled(package_name, stamp_content=''):
   stamp = GetInstallStamp(package_name)
   return CheckStamp(stamp, stamp_content)
+
+
+def RemoveEmptryDirs(dirname):
+  '''Recursively remove a directoy and its parents if they are empty.'''
+  while not os.listdir(dirname):
+    os.rmdir(dirname)
+    dirname = os.path.dirname(dirname)
 
 
 class BinaryPackage(object):
@@ -232,25 +259,16 @@ class BinaryPackage(object):
     if os.path.isdir(oldname):
       return
 
-    if not filename.startswith(PAYLOAD_DIR):
-      return
+    Trace('install: %s' % filename)
 
-    newname = filename[len(PAYLOAD_DIR):]
-    Trace('install: %s' % newname)
-
-    newname = os.path.join(new_root, newname)
+    newname = os.path.join(new_root, filename)
     dirname = os.path.dirname(newname)
     if not os.path.isdir(dirname):
       os.makedirs(dirname)
     os.rename(oldname, newname)
 
   def RelocateFile(self, filename, dest):
-    # Only relocate files in the payload.
-    if not filename.startswith(PAYLOAD_DIR):
-      return
-
     # Only relocate certain file types.
-    filename = filename[len(PAYLOAD_DIR):]
     modify = False
 
     # boost build scripts
@@ -295,25 +313,36 @@ class BinaryPackage(object):
     os.makedirs(dest_tmp)
 
     try:
-      with tarfile.open(self.filename) as t:
-        names = [posixpath.normpath(name) for name in t.getnames()]
-        if 'pkg_info' not in names:
+      with tarfile.open(self.filename) as tar:
+        if './pkg_info' not in tar.getnames():
           raise Error('package does not contain pkg_info file')
-        for name in names:
-          if name not in ('.', 'pkg_info', 'payload'):
-            if not name.startswith(PAYLOAD_DIR):
-              raise Error('invalid file in package: %s' % name)
-        t.extractall(dest_tmp)
 
+        names = []
+        for info in tar:
+          if info.isdir():
+            continue
+          name = posixpath.normpath(info.name)
+          if name == 'pkg_info':
+            continue
+          if not name.startswith(PAYLOAD_DIR + '/'):
+            raise Error('invalid file in package: %s' % name)
+
+          name = name[len(PAYLOAD_DIR) + 1:]
+          names.append(name)
+
+        tar.extractall(dest_tmp)
+
+      payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
       for name in names:
-        self.InstallFile(name, dest_tmp, dest)
+        self.InstallFile(name, payload_tree, dest)
 
       for name in names:
         self.RelocateFile(name, dest)
 
       with open(os.path.join(dest_tmp, 'pkg_info')) as f:
         pkg_info = f.read()
-      WriteStamp(GetInstallStamp(self.name), pkg_info)
+      WriteStamp(self.name, pkg_info)
+      WriteFileList(self.name, names)
     finally:
       shutil.rmtree(dest_tmp)
 
@@ -465,6 +494,32 @@ class Package(object):
       self.Build(verbose, build_deps, force)
 
     BinaryPackage(self.PackageFile()).Install()
+
+  def Uninstall(self, ignore_missing):
+    config = GetConfigurationString()
+    if not os.path.exists(GetInstallStamp(self.NAME)):
+      if ignore_missing:
+        return
+      raise Error('Package is not installed: %s [%s]' % (self.NAME, config))
+
+    Log("Uninstalling '%s' [%s]" % (self.NAME, config))
+    file_list = GetFileList(self.NAME)
+    if not os.path.exists(file_list):
+      Log('No files to uninstall')
+    else:
+      root = GetInstallRoot()
+      with open(file_list) as f:
+        for line in f:
+          filename = os.path.join(root, line.strip())
+          if not os.path.lexists(filename):
+            Warn('File not found while uninstalling: %s' % filename)
+            continue
+          Trace('rm %s' % filename)
+          os.remove(filename)
+          RemoveEmptryDirs(os.path.dirname(filename))
+
+      os.remove(file_list)
+      os.remove(GetInstallStamp(self.NAME))
 
   def Build(self, verbose, build_deps, force=None):
     self.CheckEnabled()
@@ -736,6 +791,8 @@ def run_main(args):
         package.Build(verbose, options.build_deps, options.force)
       elif command == 'install':
         package.Install(verbose, options.build_deps, options.force)
+      elif command == 'uninstall':
+        package.Uninstall(options.all)
       else:
         parser.error("Unknown subcommand: '%s'\n"
                      "See --help for available commands." % command)
@@ -750,23 +807,30 @@ def run_main(args):
     if os.path.exists(path):
       shutil.rmtree(path)
 
-  if options.all:
-    options.ignore_disabled = True
-    if command == 'clean':
-      rmtree(STAMP_DIR)
-      rmtree(BUILD_ROOT)
-      rmtree(PACKAGES_ROOT)
-      rmtree(PUBLISH_ROOT)
-      rmtree(GetInstallStampRoot(GetCurrentToolchain(), GetCurrentArch()))
-      rmtree(GetInstallRoot(GetCurrentToolchain(), GetCurrentArch()))
-    else:
-      for p in PackageIterator():
-        if not p.DISABLED:
-          DoCmd(p)
+  if command == 'list':
+    for filename in os.listdir(GetInstallStampRoot()):
+      basename, ext = os.path.splitext(filename)
+      if ext != '.info':
+        continue
+      Log(basename)
   else:
-    for package_dir in package_dirs:
-      p = Package(package_dir)
-      DoCmd(p)
+    if options.all:
+      options.ignore_disabled = True
+      if command == 'clean':
+        rmtree(STAMP_DIR)
+        rmtree(BUILD_ROOT)
+        rmtree(PACKAGES_ROOT)
+        rmtree(PUBLISH_ROOT)
+        rmtree(GetInstallStampRoot())
+        rmtree(GetInstallRoot())
+      else:
+        for p in PackageIterator():
+          if not p.DISABLED:
+            DoCmd(p)
+    else:
+      for package_dir in package_dirs:
+        p = Package(package_dir)
+        DoCmd(p)
 
 
 def main(args):
