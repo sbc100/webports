@@ -189,6 +189,8 @@ def GetToolchainRoot(toolchain=None, arch=None):
 
 def GetInstallRoot(toolchain=None, arch=None):
   """Returns the installation used by naclports within a given toolchain."""
+  if toolchain is None:
+    toolchain = GetCurrentToolchain()
   tc_root = GetToolchainRoot(toolchain, arch)
   if toolchain == 'pnacl':
     return os.path.join(tc_root, 'usr', 'local')
