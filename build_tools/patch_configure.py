@@ -12,6 +12,10 @@ import optparse
 import re
 import sys
 
+# Shell fragment for detecting shared library support in the compiler.
+detect_so_support = \
+    'libc_so=`$CC -print-file-name=libc.so` && [ "$libc_so" != libc.so ]'
+
 # There are essentailly three patches here, which will make configure do
 # the right things for shared library support when used with the NaCl
 # GLIBC toolchain.
@@ -20,7 +24,8 @@ CONFIGURE_PATCHS = [
 ['(\n\*\)\n  dynamic_linker=no)',
 '''
 nacl)
-  if $CC -v 2>&1 | grep -q enable-shared; then
+  # Patched by naclports using patch_configure.py
+  if %s; then
     dynamic_linker="GNU/NaCl ld.so"
     version_type=linux
     library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}${major} ${libname}${shared_ext}'
@@ -29,7 +34,7 @@ nacl)
     dynamic_linker=no
   fi
   ;;
-\\1'''],
+\\1''' % detect_so_support],
 # Correct result for "supports shared libraries"
 ['''(
   netbsd\*\)
@@ -37,8 +42,9 @@ nacl)
       archive_cmds_CXX='\$LD -Bshareable  -o \$lib \$predep_objects \$libobjs \$deplibs \$postdep_objects \$linker_flags')
 ''',
 '''
+  # Patched by naclports using patch_configure.py
   nacl)
-    if $CC -v 2>&1 | grep -q enable-shared; then
+    if %s; then
       ld_shlibs_CXX=yes
     else
       ld_shlibs_CXX=no
@@ -46,22 +52,23 @@ nacl)
     ;;
 
 \\1
-'''],
+''' % detect_so_support],
 # Correct result for "how to recognize dependent libraries"
 ['''
 (.*linux.*)\)
   lt_cv_deplibs_check_method=pass_all''',
 '''
+# Patched by naclports using patch_configure.py
 \\1 | nacl*)
   lt_cv_deplibs_check_method=pass_all''']
 ]
 
 def main(args):
-  usage = "usage: %prog [options] <configure_script>"
-  parser = optparse.OptionParser(usage=usage)
+  usage = 'usage: %prog [options] <configure_script>'
+  parser = optparse.OptionParser(usage=usage, description=__doc__)
   args = parser.parse_args(args)[1]
   if not args:
-    parser.error("no configure script specified")
+    parser.error('no configure script specified')
   configure = args[0]
 
   # Read configure
@@ -71,8 +78,8 @@ def main(args):
   # Check for patch location
   for i, (pattern, replacement) in enumerate(CONFIGURE_PATCHS):
     if not re.search(pattern, filedata):
-      sys.stderr.write("Failed to find patch %s location in configure "
-                       "script: %s\n" % (i, configure))
+      sys.stderr.write('Failed to find patch %s location in configure '
+                       'script: %s\n' % (i, configure))
       continue
 
     # Apply patch
