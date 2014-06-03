@@ -1,6 +1,6 @@
 NAME=gdb
 VERSION=7.7
-URL=http://git.chromium.org/native_client/nacl-binutils.git@41afdf9d511d95073c4403c838d8ccba582d8eed
+URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@41afdf9d5
 LICENSE=CUSTOM
 DISABLED_ARCH=(pnacl)
 BUILD_OS=linux

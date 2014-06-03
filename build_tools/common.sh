@@ -521,9 +521,9 @@ GitCloneStep() {
   local COMMIT=${URL#*@}
 
   Remove ${SRC_DIR}
-  git clone ${GIT_URL} ${SRC_DIR}
+  LogExecute git clone ${GIT_URL} ${SRC_DIR}
   ChangeDir ${SRC_DIR}
-  git reset --hard ${COMMIT}
+  LogExecute git reset --hard ${COMMIT}
 
   TouchKeyStamp clone "$URL"
 }
