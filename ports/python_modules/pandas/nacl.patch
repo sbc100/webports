@@ -1,3 +1,42 @@
+diff --git a/pandas/__init__.py b/pandas/__init__.py
+index ff5588e..d83cf0d 100644
+--- a/pandas/__init__.py
++++ b/pandas/__init__.py
+@@ -3,7 +3,7 @@
+ __docformat__ = 'restructuredtext'
+ 
+ try:
+-    from . import hashtable, tslib, lib
++    import hashtable, tslib, lib
+ except Exception:  # pragma: no cover
+     import sys
+     e = sys.exc_info()[1]  # Py25 and Py3 current exception syntax conflict
+@@ -15,6 +15,8 @@ except Exception:  # pragma: no cover
+     else:
+         raise
+ 
++import compat
++import core
+ from datetime import datetime
+ import numpy as np
+ 
+diff --git a/pandas/io/packers.py b/pandas/io/packers.py
+index 105bea9..0c50469 100644
+--- a/pandas/io/packers.py
++++ b/pandas/io/packers.py
+@@ -60,7 +60,11 @@ from pandas.io.common import get_filepath_or_buffer
+ from pandas.core.internals import BlockManager, make_block
+ import pandas.core.internals as internals
+ 
+-from pandas.msgpack import Unpacker as _Unpacker, Packer as _Packer
++try:
++    from pandas.msgpack import Unpacker as _Unpacker, Packer as _Packer
++except ImportError:
++    _Unpacker = object
++    _Packer = object
+ import zlib
+ 
+ try:
 diff --git a/pandas/io/parsers.py b/pandas/io/parsers.py
 index 6b0d56b..f7c198c 100644
 --- a/pandas/io/parsers.py
@@ -596,10 +635,35 @@ index 210e56e..aadd1e9 100644
  
  from pandas.util.testing import (assert_almost_equal,
 diff --git a/setup.py b/setup.py
-index c91242c..48fe7cd 100755
+index c91242c..95b1b7d 100755
 --- a/setup.py
 +++ b/setup.py
-@@ -435,7 +435,7 @@ ext_data = dict(
+@@ -75,6 +75,7 @@ from distutils.extension import Extension
+ from distutils.command.build import build
+ from distutils.command.sdist import sdist
+ from distutils.command.build_ext import build_ext as _build_ext
++from numpy.distutils.misc_util import get_numpy_include_dirs
+ 
+ try:
+     from Cython.Distutils import build_ext as _build_ext
+@@ -88,11 +89,11 @@ from os.path import join as pjoin
+ 
+ class build_ext(_build_ext):
+     def build_extensions(self):
+-        numpy_incl = pkg_resources.resource_filename('numpy', 'core/include')
+-
+-        for ext in self.extensions:
+-            if hasattr(ext, 'include_dirs') and not numpy_incl in ext.include_dirs:
+-                ext.include_dirs.append(numpy_incl)
++        numpy_incl_dirs = get_numpy_include_dirs()
++        for numpy_incl in numpy_incl_dirs:
++            for ext in self.extensions:
++                if hasattr(ext, 'include_dirs') and not numpy_incl in ext.include_dirs:
++                    ext.include_dirs.append(numpy_incl)
+         _build_ext.build_extensions(self)
+ 
+ 
+@@ -435,7 +436,7 @@ ext_data = dict(
                         'pandas/src/datetime/np_datetime_strings.c']},
      algos={'pyxfile': 'algos',
             'depends': [srcpath('generated', suffix='.pyx')]},
@@ -608,7 +672,7 @@ index c91242c..48fe7cd 100755
                  depends=['pandas/src/parser/tokenizer.h',
                           'pandas/src/parser/io.h',
                           'pandas/src/numpy_helper.h'],
-@@ -444,6 +444,8 @@ ext_data = dict(
+@@ -444,6 +445,8 @@ ext_data = dict(
  )
  
  extensions = []
@@ -617,7 +681,7 @@ index c91242c..48fe7cd 100755
  
  for name, data in ext_data.items():
      sources = [srcpath(data['pyxfile'], suffix=suffix, subdir='')]
-@@ -451,7 +453,10 @@ for name, data in ext_data.items():
+@@ -451,7 +454,10 @@ for name, data in ext_data.items():
      if suffix == '.pyx' and pxds:
          sources.extend(pxds)
  
@@ -629,7 +693,7 @@ index c91242c..48fe7cd 100755
  
      include = data.get('include', common_include)
  
-@@ -493,7 +498,7 @@ msgpack_ext = Extension('pandas.msgpack',
+@@ -493,7 +499,7 @@ msgpack_ext = Extension('pandas.msgpack',
                          include_dirs=common_include,
                          define_macros=macros)
  
@@ -638,7 +702,7 @@ index c91242c..48fe7cd 100755
  
  # if not ISRELEASED:
  #     extensions.extend([sandbox_ext])
-@@ -514,7 +519,8 @@ ujson_ext = Extension('pandas.json',
+@@ -514,7 +520,8 @@ ujson_ext = Extension('pandas.json',
                                 'pandas/src/ujson/lib/ultrajsonenc.c',
                                 'pandas/src/ujson/lib/ultrajsondec.c',
                                 'pandas/src/datetime/np_datetime.c',

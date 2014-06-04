@@ -11,8 +11,10 @@ fi
 BuildStep() {
   DefaultPythonModuleBuildStep
   # This avoids name conflicts with Python's parser.o
-  LogExecute mv ${DEST_PYTHON_OBJS}/${PACKAGE_NAME}/parser.o \
-                ${DEST_PYTHON_OBJS}/${PACKAGE_NAME}/pandas_parser.o
+  for OBJ in parser tokenizer; do
+    LogExecute mv ${DEST_PYTHON_OBJS}/${PACKAGE_NAME}/${OBJ}.o \
+                  ${DEST_PYTHON_OBJS}/${PACKAGE_NAME}/p_${OBJ}.o
+  done
 }
 
 InstallStep() {
