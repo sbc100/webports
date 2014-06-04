@@ -512,9 +512,11 @@ DefaultDownloadStep() {
 
 
 GitCloneStep() {
-  if CheckKeyStamp clone "$URL" ; then
-    Banner "Skipping git clone step"
-    return
+  if [ -d ${SRC_DIR} ]; then
+    if CheckKeyStamp clone "$URL" ; then
+      Banner "Skipping git clone step"
+      return
+    fi
   fi
 
   local GIT_URL=${URL%@*}
