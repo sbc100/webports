@@ -69,9 +69,9 @@ NASSH = $(CHROMEAPPS)/nassh
 
 install:
 	mkdir -p $(INSTALL_DIR)
-	tar -h -c -C ${NACLPORTS_PREFIX}/.. -f $(DATA_ARCHIVE) ${ASSETS}
+	tar -h -c -C ${NACL_PREFIX}/.. -f $(DATA_ARCHIVE) ${ASSETS}
 ifeq ($(TOOLCHAIN),glibc)
-	tar -h -r -C ${NACLPORTS_PREFIX} -f $(DATA_ARCHIVE) ${EXTRA_LIBS}
+	tar -h -r -C ${NACL_PREFIX} -f $(DATA_ARCHIVE) ${EXTRA_LIBS}
 endif
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/ruby*$(EXEEXT) $(INSTALL_DIR)

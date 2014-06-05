@@ -26,7 +26,7 @@ readonly NACL_PACKAGES=${NACL_SRC}
 NACL_DEBUG=${NACL_DEBUG:-0}
 
 NACL_ENV_IMPORT=1
-. ${TOOLS_DIR}/nacl_env.sh
+. ${TOOLS_DIR}/nacl-env.sh
 
 # When run by a buildbot force all archives to come from the NaCl mirror
 # rather than using upstream URL.
@@ -37,17 +37,9 @@ fi
 # sha1check python script
 readonly SHA1CHECK=${TOOLS_DIR}/sha1check.py
 
-if [ "${NACL_ARCH}" = "pnacl" ]; then
-  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
-elif [ "${NACL_ARCH}" = "emscripten" ]; then
-  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
-else
-  readonly NACLPORTS_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
-fi
-
-readonly NACLPORTS_INCLUDE=${NACLPORTS_PREFIX}/include
-readonly NACLPORTS_LIBDIR=${NACLPORTS_PREFIX}/lib
-readonly NACLPORTS_BIN=${NACLPORTS_PREFIX}/bin
+readonly NACLPORTS_INCLUDE=${NACL_PREFIX}/include
+readonly NACLPORTS_LIBDIR=${NACL_PREFIX}/lib
+readonly NACLPORTS_BIN=${NACL_PREFIX}/bin
 
 # The prefix used when configuring packages.  Since we want to build re-usable
 # re-locatable binary packages, we use a dummy value here and then modify
@@ -87,15 +79,6 @@ else
   readonly NACL_OPTION="disable"
 fi
 
-# As of version 33 the PNaCl C++ standard library is LLVM's libc++,
-# others use GCC's libstdc++.
-NACL_SDK_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
-if [ "${NACL_ARCH}" = "pnacl" -a ${NACL_SDK_VERSION} -gt 32 ]; then
-  export NACL_CPP_LIB="c++"
-else
-  export NACL_CPP_LIB="stdc++"
-fi
-
 # Set NACL_SHARED when we want to build shared libraries.
 if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "bionic" ]; then
   NACL_SHARED=1
@@ -133,7 +116,7 @@ readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
 readonly NACL_PACKAGES_STAMPDIR=${NACL_PACKAGES_OUT}/stamp
 readonly NACL_HOST_PYROOT=${NACL_PACKAGES_BUILD}/host_python-2.7.5
 readonly NACL_HOST_PYTHON=${NACL_HOST_PYROOT}/bin/python2.7
-readonly NACL_DEST_PYROOT=${NACLPORTS_PREFIX}
+readonly NACL_DEST_PYROOT=${NACL_PREFIX}
 readonly SITE_PACKAGES="lib/python2.7/site-packages/"
 
 # The components of package names cannot contain underscore
@@ -281,8 +264,8 @@ CheckToolchain() {
 
 
 InstallConfigSite() {
-  CONFIG_SITE=${NACLPORTS_PREFIX}/share/config.site
-  mkdir -p ${NACLPORTS_PREFIX}/share
+  CONFIG_SITE=${NACL_PREFIX}/share/config.site
+  mkdir -p ${NACL_PREFIX}/share
   echo "ac_cv_exeext=${NACL_EXEEXT}" > ${CONFIG_SITE}
 }
 
@@ -735,7 +718,7 @@ SetupSDKBuildSystem() {
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export NACLPORTS_INCLUDE
-  export NACLPORTS_PREFIX
+  export NACL_PREFIX
   export NACL_PACKAGES_PUBLISH
   export NACL_SRC
 
@@ -940,7 +923,7 @@ ConfigureStep_CMake() {
            -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
            -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
            -DNACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT} \
-           -DCMAKE_PREFIX_PATH=${NACLPORTS_PREFIX} \
+           -DCMAKE_PREFIX_PATH=${NACL_PREFIX} \
            -DCMAKE_INSTALL_PREFIX=${PREFIX} \
            -DCMAKE_BUILD_TYPE=RELEASE ${EXTRA_CMAKE_ARGS:-}
 }

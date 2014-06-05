@@ -61,7 +61,7 @@ index 0000000..2531255
 +# Uncomment to override the default basedir in setupext.py.
 +# This can be a single directory or a comma-delimited list of directories.
 +# This will be set inside setupext.py if we are inside a NaCl build.
-+#basedirlist=%(NACLPORTS_PREFIX)s
++#basedirlist=%(NACL_PREFIX)s
 +
 +[status]
 +# To suppress display of the dependencies and their versions

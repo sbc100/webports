@@ -20,7 +20,7 @@ fi
 
 ConfigureStep() {
   echo "using gcc : 4.4.3 : ${NACLCXX} ;" > tools/build/v2/user-config.jam
-  LogExecute ./bootstrap.sh --prefix=${NACLPORTS_PREFIX}
+  LogExecute ./bootstrap.sh --prefix=${NACL_PREFIX}
 }
 
 BuildStep() {

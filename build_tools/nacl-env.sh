@@ -12,16 +12,16 @@
 # $TOOLAHIN - bionic, newlib, glibc or pnacl.  Default: newlib
 #
 # To import these variables into your environment do:
-# $ . nacl_env.sh
+# $ . nacl-env.sh
 #
 # Alternatively you can see just the essential environment
 # variables by passing --print.  This can by used within
 # a script using:
-# eval `./nacl_env.sh --print`
+# eval `./nacl-env.sh --print`
 #
 # Finally you can run a command within the NaCl environment
 # by passing the command line. e.g:
-# ./nacl_env.sh make
+# ./nacl-env.sh make
 
 
 if [ -z "${NACL_SDK_ROOT:-}" ]; then
@@ -233,7 +233,6 @@ InitializeEmscriptenToolchain() {
   fi
 }
 
-
 InitializePNaClToolchain() {
   local TC_ROOT=${NACL_SDK_ROOT}/toolchain
   # The PNaCl toolchain moved in pepper_31.  Check for
@@ -278,6 +277,18 @@ InitializePNaClToolchain() {
   fi
 }
 
+NaClEnvExport() {
+  export CC=${NACLCC}
+  export CXX=${NACLCXX}
+  export AR=${NACLAR}
+  export RANLIB=${NACLRANLIB}
+  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
+  export PATH=${PATH}:${NACL_BIN_PATH}
+  export CPPFLAGS=${NACL_CPPFLAGS}
+  export LDFLAGS=${NACL_LDFLAGS}
+}
+
 if [ "${NACL_ARCH}" = "pnacl" ]; then
   InitializePNaClToolchain
 elif [ "${NACL_ARCH}" = "emscripten" ]; then
@@ -286,11 +297,28 @@ else
   InitializeNaClGccToolchain
 fi
 
+# As of version 33 the PNaCl C++ standard library is LLVM's libc++,
+# others use GCC's libstdc++.
+NACL_SDK_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
+if [ "${NACL_ARCH}" = "pnacl" -a ${NACL_SDK_VERSION} -gt 32 ]; then
+  export NACL_CPP_LIB="c++"
+else
+  export NACL_CPP_LIB="stdc++"
+fi
+
 NACL_LDFLAGS="-L${NACL_SDK_LIBDIR}"
 NACL_CPPFLAGS="-I${NACL_SDK_ROOT}/include"
 
 if [ "${TOOLCHAIN}" = "glibc" ]; then
   NACL_LDFLAGS+=" -Wl,-rpath-link=${NACL_SDK_LIBDIR}"
+fi
+
+if [ "${NACL_ARCH}" = "pnacl" ]; then
+  readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
+elif [ "${NACL_ARCH}" = "emscripten" ]; then
+  readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
+else
+  readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
 fi
 
 if [ -z "${NACL_ENV_IMPORT:-}" ]; then
@@ -306,14 +334,7 @@ if [ -z "${NACL_ENV_IMPORT:-}" ]; then
       echo "export CPPFLAGS=\"${NACL_CPPFLAGS}\""
       echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
     else
-      export CC=${NACLCC}
-      export CXX=${NACLCXX}
-      export AR=${NACLAR}
-      export RANLIB=${NACLRANLIB}
-      export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
-      export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-      export PATH=${PATH}:${NACL_BIN_PATH}
-      export CPPFLAGS=${NACL_CPPFLAGS}
+      NaClEnvExport
       exec $@
     fi
   fi

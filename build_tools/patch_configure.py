@@ -9,6 +9,7 @@ Once this patch makes it into upstream libtool it should eventually
 be possible to remove this completely.
 """
 import optparse
+import os
 import re
 import sys
 
@@ -71,9 +72,17 @@ def main(args):
     parser.error('no configure script specified')
   configure = args[0]
 
+  if not os.path.exists(configure):
+    sys.stderr.write('configure script not found: %s\n' % configure)
+    sys.exit(1)
+
   # Read configure
   with open(configure) as input_file:
     filedata = input_file.read()
+
+  if 'Patched by naclports' in filedata:
+    sys.stderr.write('Configure script already patched\n')
+    return 0
 
   # Check for patch location
   for i, (pattern, replacement) in enumerate(CONFIGURE_PATCHS):

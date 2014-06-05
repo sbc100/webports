@@ -58,7 +58,7 @@ NASSH = $(CHROMEAPPS)/nassh
 
 install:
 	mkdir -p $(INSTALL_DIR)
-	tar -h -c --exclude=*.pyc --exclude=__pycache__ -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python3.4 ${EXTRA_ASSETS}
+	tar -h -c --exclude=*.pyc --exclude=__pycache__ -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python3.4 ${EXTRA_ASSETS}
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)

@@ -54,7 +54,7 @@ endif
 
 install:
 	mkdir -p $(INSTALL_DIR)
-	tar -h -c -C ${NACLPORTS_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python2.7 ${EXTRA_ASSETS}
+	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python2.7 ${EXTRA_ASSETS}
 	cp $(OUTDIR)/$(TARGET)*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
 	cp $(OUTDIR)/$(TARGET).nmf $(INSTALL_DIR)
