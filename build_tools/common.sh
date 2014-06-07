@@ -1264,6 +1264,16 @@ PackageStep() {
   LogExecute tar cf ${PACKAGE_FILE} -C ${DESTDIR} .
 }
 
+ZipPublishDir() {
+  # If something exists in the publish directory, zip it for download by mingn.
+  if [ -d "${PUBLISH_DIR}" ]; then
+    # Remove existing zip as it may contain only some architectures.
+    LogExecute rm -f ${PUBLISH_DIR}.zip
+    pushd ${PUBLISH_DIR}
+    LogExecute zip -rq ${PUBLISH_DIR}.zip ./
+    popd
+  fi
+}
 
 DefaultPackageInstall() {
   RunPreInstallStep
@@ -1280,6 +1290,7 @@ DefaultPackageInstall() {
   RunTestStep
   RunInstallStep
   RunPostInstallTestStep
+  ZipPublishDir
   PackageStep
 }
 
