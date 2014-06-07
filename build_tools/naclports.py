@@ -213,7 +213,7 @@ def GetFileList(package_name):
   return os.path.join(root, package_name + '.list')
 
 
-def IsInstalled(package_name, stamp_content=''):
+def IsInstalled(package_name, stamp_content=None):
   stamp = GetInstallStamp(package_name)
   return CheckStamp(stamp, stamp_content)
 
@@ -456,7 +456,7 @@ class Package(object):
 
   def InstallDeps(self, verbose, force):
     for dep in self.DEPENDS:
-      if not IsInstalled(dep):
+      if not IsInstalled(dep) or force == 'all':
         dep_dir = os.path.join(os.path.dirname(self.root), dep)
         dep = Package(dep_dir)
         try:
@@ -486,11 +486,12 @@ class Package(object):
     return os.path.exists(self.PackageFile())
 
   def Install(self, verbose, build_deps, force=None):
-    force_install = force in ('build', 'install', 'all')
-
-    if not force_install and self.IsInstalled():
+    if force is None and self.IsInstalled():
       Log("Already installed '%s' [%s]" % (self.NAME, GetConfigurationString()))
       return
+
+    if build_deps:
+      self.InstallDeps(verbose, force)
 
     if not self.IsBuilt() or force:
       self.Build(verbose, build_deps, force)
@@ -526,15 +527,14 @@ class Package(object):
   def Build(self, verbose, build_deps, force=None):
     self.CheckEnabled()
 
-    if build_deps or force == 'all':
+    if build_deps:
       self.InstallDeps(verbose, force)
 
     annotate = os.environ.get('NACLPORTS_ANNOTATE') == '1'
     arch = GetCurrentArch()
     libc = GetCurrentLibc()
 
-    force_build = force in ('build', 'all')
-    if not force_build and self.IsBuilt():
+    if not force and self.IsBuilt():
       Log("Already built '%s' [%s]" % (self.NAME, GetConfigurationString()))
       return
 
@@ -739,8 +739,6 @@ def run_main(args):
                     dest='force', help='Force building target and all '
                     'dependencies, even if timestamps would otherwise skip '
                     'them.')
-  parser.add_option('--force-install', action='store_const', const='install',
-                    dest='force', help='Force installing of ports')
   parser.add_option('--no-deps', dest='build_deps', action='store_false',
                     default=True,
                     help='Disable automatic building of dependencies.')
