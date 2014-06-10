@@ -15,6 +15,7 @@ deps_os = {
 hooks = [
   {
     "name": "bin_scripts",
+    "pattern": ".",
     "action": [
         "python", "src/build_tools/make_bin_wrappers.py",
     ],
