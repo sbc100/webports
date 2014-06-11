@@ -72,16 +72,16 @@ def FormatTimeDelta(delta):
   return rtn
 
 
-def WriteFileList(package_name, file_names):
-  filename = GetFileList(package_name)
+def WriteFileList(package_name, file_names, config):
+  filename = GetFileList(package_name, config)
   with open(filename, 'w') as f:
     for name in file_names:
       f.write(name + '\n')
 
 
-def WriteStamp(package_name, contents=''):
+def WriteStamp(package_name, config, contents=''):
   """Write a file with the give filename and contents."""
-  filename = GetInstallStamp(package_name)
+  filename = GetInstallStamp(package_name, config)
   dirname = os.path.dirname(filename)
   if not os.path.isdir(dirname):
     os.makedirs(dirname)
@@ -111,6 +111,7 @@ def CheckStamp(filename, contents=None, timestamp=None):
 
 
 def Log(message):
+  """Log a message to the console (stdout)."""
   sys.stdout.write(str(message) + '\n')
   sys.stdout.flush()
 
@@ -125,107 +126,141 @@ def Trace(message):
 Trace.verbose = False
 
 
-def GetCurrentArch():
-  arch = os.environ.get('NACL_ARCH')
-  if not arch:
-    if GetCurrentToolchain() == 'pnacl':
-      return 'pnacl'
-    else:
-      return 'x86_64'
-  return arch
-
-
-def GetCurrentLibc():
-  libc = GetCurrentToolchain()
-  if libc == 'pnacl':
-    libc = 'newlib'
-  return libc
-
-
-def GetCurrentToolchain():
-  if os.environ.get('NACL_ARCH') == 'pnacl':
-    return 'pnacl'
-  return os.environ.get('TOOLCHAIN') or 'newlib'
-
-
-def GetDebug():
-  if os.environ.get('NACL_DEBUG') == '1':
-    return 'debug'
-  else:
-    return 'release'
-
-
-def BuildConfigurationString(arch, libc, config):
-  return '%s/%s/%s' % (arch, libc, config)
-
-
-def GetConfigurationString():
-  return BuildConfigurationString(GetCurrentArch(),
-                                  GetCurrentLibc(),
-                                  GetDebug())
-
-
-def GetToolchainRoot(toolchain=None, arch=None):
+def GetToolchainRoot(config):
   """Returns the toolchain folder for a given NaCl toolchain."""
-  if toolchain is None:
-    toolchain = GetCurrentToolchain()
-  if arch is None:
-    arch = GetCurrentArch()
   import getos
   platform = getos.GetPlatform()
-  if toolchain == 'pnacl':
+  if config.toolchain == 'pnacl':
     tc_dir = '%s_pnacl' % platform
   else:
     tc_arch = {
       'arm': 'arm',
       'i686': 'x86',
       'x86_64': 'x86'
-    }[arch]
-    tc_dir = '%s_%s_%s' % (platform, tc_arch, toolchain)
-    tc_dir = os.path.join(tc_dir, '%s-nacl' % arch)
+    }[config.arch]
+    tc_dir = '%s_%s_%s' % (platform, tc_arch, config.toolchain)
+    tc_dir = os.path.join(tc_dir, '%s-nacl' % config.arch)
 
   return os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir)
 
 
-def GetInstallRoot(toolchain=None, arch=None):
+def GetInstallRoot(config):
   """Returns the installation used by naclports within a given toolchain."""
-  if toolchain is None:
-    toolchain = GetCurrentToolchain()
-  tc_root = GetToolchainRoot(toolchain, arch)
-  if toolchain == 'pnacl':
+  tc_root = GetToolchainRoot(config)
+  if config.toolchain == 'pnacl':
     return os.path.join(tc_root, 'usr', 'local')
   else:
     return os.path.join(tc_root, 'usr')
 
 
-def GetInstallStampRoot(toolchain=None, arch=None):
-  tc_root = GetInstallRoot(toolchain, arch)
+def GetInstallStampRoot(config):
+  """Returns the installation metadata folder for the give configuration."""
+  tc_root = GetInstallRoot(config)
   return os.path.join(tc_root, 'var', 'lib', 'npkg')
 
 
-def GetInstallStamp(package_name):
-  root = GetInstallStampRoot()
+def GetInstallStamp(package_name, config):
+  """Returns the filename of the install stamp for for a given package.
+
+  This file is written at install time and contains metadata
+  about the installed package.
+  """
+  root = GetInstallStampRoot(config)
   return os.path.join(root, package_name + '.info')
 
 
-def GetFileList(package_name):
-  root = GetInstallStampRoot()
+def GetFileList(package_name, config):
+  """Returns the filename of the list of installed files for a given package.
+
+  This file is written at install time.
+  """
+  root = GetInstallStampRoot(config)
   return os.path.join(root, package_name + '.list')
 
 
-def IsInstalled(package_name, stamp_content=None):
-  stamp = GetInstallStamp(package_name)
+def IsInstalled(package_name, config, stamp_content=None):
+  """Returns True if the given package is installed."""
+  stamp = GetInstallStamp(package_name, config)
   return CheckStamp(stamp, stamp_content)
 
 
 def RemoveEmptryDirs(dirname):
-  '''Recursively remove a directoy and its parents if they are empty.'''
+  """Recursively remove a directoy and its parents if they are empty."""
   while not os.listdir(dirname):
     os.rmdir(dirname)
     dirname = os.path.dirname(dirname)
 
 
+class Configuration(object):
+  """Class representing the build configuration for naclports packages.
+
+  This consists of the following attributes:
+    toolchain   - newlib, glibc, pnacl
+    arch        - x86_64, x86_32, arm, pnacl
+    debug       - True/False
+    config_name - 'debug' or 'release'
+
+  If not specified in the constructor these are read from the
+  environment variables (TOOLCHAIN, NACL_ARCH, NACL_DEBUG).
+  """
+  default_toolchain = 'newlib'
+  default_arch = 'x86_64'
+
+  def __init__(self, arch=None, toolchain=None, debug=None):
+    self.SetConfig(debug)
+
+    if arch is None:
+      arch = os.environ.get('NACL_ARCH')
+
+    if toolchain is None:
+      toolchain = os.environ.get('TOOLCHAIN')
+
+    if not toolchain:
+      if arch == 'pnacl':
+        toolchain = 'pnacl'
+      else:
+        toolchain = self.default_toolchain
+    self.toolchain = toolchain
+
+    if not arch:
+      if self.toolchain == 'pnacl':
+        arch = 'pnacl'
+      else:
+        arch = self.default_arch
+    self.arch = arch
+
+    self.SetLibc()
+
+  def SetConfig(self, debug):
+    if debug is None:
+      if os.environ.get('NACL_DEBUG') == '1':
+        debug = True
+      else:
+        debug = False
+    self.debug = debug
+    if self.debug:
+      self.config_name = 'debug'
+    else:
+      self.config_name = 'release'
+
+  def SetLibc(self):
+    if self.toolchain == 'pnacl':
+      self.libc = 'newlib'
+    else:
+      self.libc = self.toolchain
+
+  def __str__(self):
+    return '%s/%s/%s' % (self.arch, self.libc, self.config_name)
+
+
 class BinaryPackage(object):
+  """Representation of binary package packge file.
+
+  This class is initialised with the filename of a binary package
+  and its attributes are set according the file name and contents.
+
+  Operations such as installation can be performed on the package.
+  """
   def __init__(self, filename):
     self.filename = filename
     if not os.path.exists(self.filename):
@@ -241,20 +276,22 @@ class BinaryPackage(object):
       raise Error('invalid package filename: %s' % basename)
     if parts[-1] == 'debug':
       parts = parts[:-1]
-      self.config = 'debug'
+      debug = True
     else:
-      self.config = 'release'
+      debug = False
 
     if parts[-1] in ('newlib', 'glibc', 'bionic'):
-      self.toolchain = parts[-1]
+      toolchain = parts[-1]
       parts = parts[:-1]
     self.name, self.version, arch = parts[:3]
     if arch == 'pnacl':
-      self.toolchain = 'pnacl'
-    self.arch = pkgarch_to_arch[arch]
+      toolchain = 'pnacl'
+    arch = pkgarch_to_arch[arch]
+
+    self.config = Configuration(arch, toolchain, debug)
 
   def IsInstalled(self):
-    GetInstallStamp(self.name)
+    GetInstallStamp(self.name, self.config)
 
   def InstallFile(self, filename, old_root, new_root):
     oldname = os.path.join(old_root, filename)
@@ -301,17 +338,14 @@ class BinaryPackage(object):
       with open(filename, 'r+') as f:
         f.write(data.replace('/naclports-dummydir', dest))
 
-  def GetConfigurationString(self):
-    return BuildConfigurationString(self.arch, self.toolchain, self.config)
-
   def Install(self):
     """Install binary package into toolchain directory."""
-    dest = GetInstallRoot(self.toolchain, self.arch)
+    dest = GetInstallRoot(self.config)
     dest_tmp = os.path.join(dest, 'install_tmp')
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
-    Log("Installing '%s' [%s]" % (self.name, self.GetConfigurationString()))
+    Log("Installing '%s' [%s]" % (self.name, self.config))
     os.makedirs(dest_tmp)
 
     try:
@@ -343,14 +377,14 @@ class BinaryPackage(object):
 
       with open(os.path.join(dest_tmp, 'pkg_info')) as f:
         pkg_info = f.read()
-      WriteStamp(self.name, pkg_info)
-      WriteFileList(self.name, names)
+      WriteStamp(self.name, self.config, pkg_info)
+      WriteFileList(self.name, names, self.config)
     finally:
       shutil.rmtree(dest_tmp)
 
 
 class Package(object):
-  """Representation of a single naclports package.
+  """Representation of a single naclports source package.
 
   Package objects correspond to folders on disk which
   contain a 'pkg_info' file.
@@ -360,7 +394,10 @@ class Package(object):
                 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED')
   VALID_SUBDIRS = ('', 'ports', 'python_modules')
 
-  def __init__(self, pkg_root):
+  def __init__(self, pkg_root, config=None):
+    if config is None:
+      config = Configuration()
+    self.config = config
     self.root = os.path.abspath(pkg_root)
     self.basename = os.path.basename(self.root)
     keys = []
@@ -456,22 +493,21 @@ class Package(object):
 
   def InstallDeps(self, verbose, force):
     for dep in self.DEPENDS:
-      if not IsInstalled(dep) or force == 'all':
+      if not IsInstalled(dep, self.config) or force == 'all':
         dep_dir = os.path.join(os.path.dirname(self.root), dep)
-        dep = Package(dep_dir)
+        dep = Package(dep_dir, self.config)
         try:
           dep.Install(verbose, True, force)
         except DisabledError as e:
           Log(str(e))
 
   def PackageFile(self):
-    toolchain = GetCurrentToolchain()
-    arch = GetCurrentArch()
     fullname = [os.path.join(PACKAGES_ROOT, self.NAME)]
     fullname.append(self.VERSION)
-    fullname.append(arch_to_pkgarch[arch])
-    if toolchain != arch: # for pnacl toolchain and arch are the same
-      fullname.append(toolchain)
+    fullname.append(arch_to_pkgarch[self.config.arch])
+    # for pnacl toolchain and arch are the same
+    if self.config.toolchain != self.config.arch:
+      fullname.append(self.config.toolchain)
     if os.environ.get('NACL_DEBUG') == '1':
       fullname.append('debug')
     return '_'.join(fullname) + '.tar.bz2'
@@ -479,15 +515,15 @@ class Package(object):
   def IsInstalled(self):
     with open(self.info) as f:
       stamp_content = f.read()
-    stamp_content += 'CONFIG=' + GetDebug() + '\n'
-    return IsInstalled(self.NAME, stamp_content)
+    stamp_content += 'CONFIG=' + self.config.config_name + '\n'
+    return IsInstalled(self.NAME, self.config, stamp_content)
 
   def IsBuilt(self):
     return os.path.exists(self.PackageFile())
 
   def Install(self, verbose, build_deps, force=None):
     if force is None and self.IsInstalled():
-      Log("Already installed '%s' [%s]" % (self.NAME, GetConfigurationString()))
+      Log("Already installed '%s' [%s]" % (self.NAME, self.config))
       return
 
     if build_deps:
@@ -499,18 +535,17 @@ class Package(object):
     BinaryPackage(self.PackageFile()).Install()
 
   def Uninstall(self, ignore_missing):
-    config = GetConfigurationString()
-    if not os.path.exists(GetInstallStamp(self.NAME)):
+    if not os.path.exists(GetInstallStamp(self.NAME, self.config)):
       if ignore_missing:
         return
-      raise Error('Package is not installed: %s [%s]' % (self.NAME, config))
+      raise Error('Package not installed: %s [%s]' % (self.NAME, self.config))
 
-    Log("Uninstalling '%s' [%s]" % (self.NAME, config))
-    file_list = GetFileList(self.NAME)
+    Log("Uninstalling '%s' [%s]" % (self.NAME, self.config))
+    file_list = GetFileList(self.NAME, self.config)
     if not os.path.exists(file_list):
       Log('No files to uninstall')
     else:
-      root = GetInstallRoot()
+      root = GetInstallRoot(self.config)
       with open(file_list) as f:
         for line in f:
           filename = os.path.join(root, line.strip())
@@ -530,12 +565,8 @@ class Package(object):
     if build_deps:
       self.InstallDeps(verbose, force)
 
-    annotate = os.environ.get('NACLPORTS_ANNOTATE') == '1'
-    arch = GetCurrentArch()
-    libc = GetCurrentLibc()
-
     if not force and self.IsBuilt():
-      Log("Already built '%s' [%s]" % (self.NAME, GetConfigurationString()))
+      Log("Already built '%s' [%s]" % (self.NAME, self.config))
       return
 
     log_root = os.path.join(OUT_DIR, 'logs')
@@ -550,14 +581,14 @@ class Package(object):
       prefix = '*** '
     else:
       prefix = ''
-    Log("%sBuilding '%s' [%s]" % (prefix, self.NAME, GetConfigurationString()))
+    Log("%sBuilding '%s' [%s]" % (prefix, self.NAME, self.config))
 
     start = time.time()
     self.RunBuildSh(verbose, stdout)
 
     duration = FormatTimeDelta(time.time() - start)
     Log("Build complete '%s' [%s] [took %s]"
-        % (self.NAME, GetConfigurationString(), duration))
+        % (self.NAME, self.config, duration))
 
   def RunBuildSh(self, verbose, stdout, args=None):
     build_port = os.path.join(SCRIPT_DIR, 'build_port.sh')
@@ -565,14 +596,19 @@ class Package(object):
     if args is not None:
       cmd += args
 
+    env = os.environ.copy()
+    env['TOOLCHAIN'] = self.config.toolchain
+    env['NACL_ARCH'] = self.config.arch
+    env['NACL_DEBUG'] = self.config.debug and '1' or '0'
     if verbose:
-      rtn = subprocess.call(cmd, cwd=self.root)
+      rtn = subprocess.call(cmd, cwd=self.root, env=env)
       if rtn != 0:
         raise Error("Building %s: failed." % (self.NAME))
     else:
       with open(stdout, 'a+') as log_file:
         rtn = subprocess.call(cmd,
                               cwd=self.root,
+                              env=env,
                               stdout=log_file,
                               stderr=subprocess.STDOUT)
       if rtn != 0:
@@ -654,18 +690,16 @@ class Package(object):
     return MIRROR_URL + '/' + self.GetArchiveFilename()
 
   def CheckEnabled(self):
-    if self.LIBC is not None and self.LIBC != GetCurrentLibc():
+    if self.LIBC is not None and self.LIBC != self.config.libc:
       raise DisabledError('%s: cannot be built with %s.'
-                          % (self.NAME, GetCurrentLibc()))
+                          % (self.NAME, self.config.libc))
 
     if self.ARCH is not None:
-      arch = GetCurrentArch()
-      if arch not in self.ARCH:
+      if self.config.arch not in self.ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
                             % (self.NAME, arch))
 
     if self.DISABLED_ARCH is not None:
-      arch = GetCurrentArch()
       if arch in self.DISABLED_ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
                             % (self.NAME, arch))
@@ -746,6 +780,14 @@ def run_main(args):
                     help='Ignore attempts to build disabled packages.\n'
                     'Normally attempts to build such packages will result\n'
                     'in an error being returned.')
+  parser.add_option('--toolchain',
+                    help='Set toolchain to use when building (newlib, glibc, or'
+                    ' pnacl)"')
+  parser.add_option('--debug',
+                    help='Build debug configuration (release is the default)')
+  parser.add_option('--arch',
+                    help='Set architecture to use when building (x86_64,'
+                    ' x86_32, arm, pnacl)')
   options, args = parser.parse_args(args)
   if not args:
     parser.error('You must specify a sub-command. See --help.')
@@ -802,13 +844,14 @@ def run_main(args):
       else:
         raise e
 
+  config = Configuration(options.arch, options.toolchain, options.debug)
   def rmtree(path):
     Log('removing %s' % path)
     if os.path.exists(path):
       shutil.rmtree(path)
 
   if command == 'list':
-    for filename in os.listdir(GetInstallStampRoot()):
+    for filename in os.listdir(GetInstallStampRoot(config)):
       basename, ext = os.path.splitext(filename)
       if ext != '.info':
         continue
@@ -821,15 +864,15 @@ def run_main(args):
         rmtree(BUILD_ROOT)
         rmtree(PACKAGES_ROOT)
         rmtree(PUBLISH_ROOT)
-        rmtree(GetInstallStampRoot())
-        rmtree(GetInstallRoot())
+        rmtree(GetInstallStampRoot(config))
+        rmtree(GetInstallRoot(config))
       else:
         for p in PackageIterator():
           if not p.DISABLED:
             DoCmd(p)
     else:
       for package_dir in package_dirs:
-        p = Package(package_dir)
+        p = Package(package_dir, config)
         DoCmd(p)
 
 

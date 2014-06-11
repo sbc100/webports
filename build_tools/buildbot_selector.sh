@@ -3,6 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 # Main entry point for buildbots.
 # For local testing set BUILDBOT_BUILDERNAME and TEST_BUILDBOT, e.g:
 #  export TEST_BUILDBOT=1
@@ -143,6 +146,16 @@ if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   ${PYTHON} ${SCRIPT_DIR}/download_sdk.py
 fi
 
+Unittests() {
+  echo "@@@BUILD_STEP naclports unittests@@@"
+  CMD=${SCRIPT_DIR}/naclports_test.py
+  echo "Running ${CMD}"
+  if ! ${PYTHON} ${CMD}; then
+    RESULT=1
+    echo "@@@STEP_FAILURE@@@"
+  fi
+}
+
 # Test browser testing harness.
 PlumbingTests() {
   echo "@@@BUILD_STEP plumbing_tests i686@@@"
@@ -161,6 +174,7 @@ PlumbingTests() {
   fi
 }
 
+Unittests
 PlumbingTests
 
 # PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28

@@ -26,6 +26,7 @@ def CheckBuildbot(input_api, output_api):
         return [output_api.PresubmitError('%s failed' % str(cmd))]
   return []
 
+
 def CheckMirror(input_api, output_api):
   try:
     subprocess.check_call(['build_tools/update_mirror.py', '--check'])
@@ -35,9 +36,19 @@ def CheckMirror(input_api, output_api):
     return [output_api.PresubmitError(message)]
   return []
 
+
+def RunUnittests(input_api, output_api):
+  try:
+    subprocess.check_call(['build_tools/naclports_test.py'])
+  except subprocess.CalledProcessError as e:
+    return [output_api.PresubmitError(message)]
+  return []
+
+
 def CheckChangeOnUpload(input_api, output_api):
   report = []
   affected_files = input_api.AffectedFiles(include_deletes=False)
+  report.extend(RunUnittests(input_api, output_api))
   report.extend(CheckBuildbot(input_api, output_api))
   report.extend(input_api.canned_checks.PanProjectChecks(
       input_api, output_api, project_name='Native Client',
