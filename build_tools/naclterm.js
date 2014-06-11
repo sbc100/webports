@@ -208,7 +208,8 @@ NaClTerm.prototype.handleLoad_ = function(e) {
  * Handle load progress event from NaCl.
  */
 NaClTerm.prototype.handleProgress_ = function(e) {
-  var url = e.url.substring(e.url.lastIndexOf('/') + 1);
+  if (e.url !== undefined)
+    var url = e.url.substring(e.url.lastIndexOf('/') + 1);
 
   if (!e.srcElement.parent && this.lastUrl && this.lastUrl != url)
     this.doneLoadingUrl()

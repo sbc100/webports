@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
-EXTRA_CONFIGURE_ARGS="--with-tlib=ncurses --prefix= --exec-prefix="
+EXTRA_CONFIGURE_ARGS="--with-tlib=ncurses --prefix=/usr --exec-prefix=/usr"
 EXECUTABLES=src/vim${NACL_EXEEXT}
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple -lnacl_io \
   -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
@@ -40,11 +40,13 @@ InstallStep() {
 
   DESTDIR=${ASSEMBLY_DIR}/vimtar
   DefaultInstallStep
+  mkdir -p ${DESTDIR}/etc/vim
 
   ChangeDir ${ASSEMBLY_DIR}/vimtar
-  cp bin/vim${NACL_EXEEXT} ../vim_${NACL_ARCH}${NACL_EXEEXT}
-  rm -rf bin
-  rm -rf share/man
+  cp usr/bin/vim${NACL_EXEEXT} ../vim_${NACL_ARCH}${NACL_EXEEXT}
+  cp $SRC_DIR/runtime/vimrc_example.vim usr/share/vim/vimrc
+  rm -rf usr/bin
+  rm -rf usr/share/man
   tar cf ${ASSEMBLY_DIR}/vim.tar .
   rm -rf ${ASSEMBLY_DIR}/vimtar
   cd ${ASSEMBLY_DIR}
@@ -57,6 +59,9 @@ InstallStep() {
   InstallNaClTerm ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/vim.html ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/vim_app.html ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/vim.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}

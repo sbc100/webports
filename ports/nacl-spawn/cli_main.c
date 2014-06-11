@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,7 +28,16 @@ int cli_main(int argc, char* argv[]) {
   umount("/");
   mount("", "/", "memfs", 0, NULL);
 
+  // Setup common environment variables, but don't override those
+  // set already by ppapi_simple.
+  setenv("HOME", "/home/user", 0);
+  setenv("PATH", "/bin", 0);
+  setenv("USER", "user", 0);
+  setenv("LOGNAME", "user", 0);
+
+  const char* home = getenv("HOME");
   mkdir("/home", 0777);
+  mkdir(home, 0777);
   mkdir("/tmp", 0777);
   mkdir("/bin", 0777);
   mkdir("/etc", 0777);
@@ -44,7 +54,15 @@ int cli_main(int argc, char* argv[]) {
     return 1;
   }
 
-  if (mount("/", "/mnt/html5", "html5fs", 0, "") != 0) {
+  if (mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
+    perror("Mounting HTML5 filesystem failed. Please use --unlimited-storage");
+  }
+
+  if (mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
+    perror("Mounting HTML5 filesystem failed. Please use --unlimited-storage");
+  }
+
+  if (mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
     perror("Mounting HTML5 filesystem failed. Please use --unlimited-storage");
   }
 
@@ -67,6 +85,7 @@ int cli_main(int argc, char* argv[]) {
 #endif
   setenv("NACL_ARCH", kNaClArch, 1);
 
+  setlocale(LC_CTYPE, "");
   return nacl_main(argc, argv);
 }
 

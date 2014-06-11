@@ -9,7 +9,6 @@
 #include <fcntl.h>
 #include <libtar.h>
 #include <limits.h>
-#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,35 +25,25 @@ static int setup_unix_environment(const char* tarfile) {
     return 0;
   }
   // Extra tar achive from http filesystem.
-  if (tarfile) {
-    int ret;
-    TAR* tar;
-    char filename[PATH_MAX];
-    strcpy(filename, "/mnt/http/");
-    strcat(filename, tarfile);
-    ret = tar_open(&tar, filename, NULL, O_RDONLY, 0, 0);
-    if (ret) {
-      printf("error opening %s\n", filename);
-      return 1;
-    }
-
-    ret = tar_extract_all(tar, "/");
-    if (ret) {
-      printf("error extracting %s\n", filename);
-      return 1;
-    }
-
-    ret = tar_close(tar);
-    assert(ret == 0);
+  int ret;
+  TAR* tar;
+  char filename[PATH_MAX];
+  strcpy(filename, "/mnt/http/");
+  strcat(filename, tarfile);
+  ret = tar_open(&tar, filename, NULL, O_RDONLY, 0, 0);
+  if (ret) {
+    printf("error opening %s\n", filename);
+    return 1;
   }
 
-  // Setup environment variables
-  setenv("HOME", "/home", 1);
-  setenv("PATH", "/bin", 1);
-  setenv("USER", "user", 1);
-  setenv("LOGNAME", "user", 1);
+  ret = tar_extract_all(tar, "/");
+  if (ret) {
+    printf("error extracting %s\n", filename);
+    return 1;
+  }
 
-  setlocale(LC_CTYPE, "");
+  ret = tar_close(tar);
+  assert(ret == 0);
   return 0;
 }
 
