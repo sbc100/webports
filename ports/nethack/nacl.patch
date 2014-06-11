@@ -139,7 +139,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  
  # Normally, the C compiler driver is used for linking:
 -LINK=$(CC)
-+LINK=$(CXX)
++LINK=$(CC)
  
  # Pick the SYSSRC and SYSOBJ lines corresponding to your desired operating
  # system.
@@ -157,7 +157,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  # the C++ libraries linked in.
  CXXFLAGS = $(CFLAGS) -I. -I$(QTDIR)/include
 -CXX=g++
-+#CXX=g++
++CXX=g++
  #LINK=g++
  #	For cross-compiling, eg. with gcc on Linux (see also CC further up):
  #CXX=arm-linux-g++
@@ -168,7 +168,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
 -	../win/tty/wintty.c
 -WINTTYOBJ = getline.o termcap.o topl.o wintty.o
 +	../win/tty/wintty.c \
-+        nethack_pepper.cc
++        nethack_pepper.c
 +WINTTYOBJ = getline.o termcap.o topl.o wintty.o \
 +        nethack_pepper.o
  #

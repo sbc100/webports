@@ -17,6 +17,11 @@
 int lua_main(int argc, char **argv);
 
 static int setup_unix_environment(const char* tarfile) {
+  // Rely on installed files for MinGN.
+  char* mingn = getenv("MINGN");
+  if (mingn && strcmp(mingn, "0") != 0) {
+    return 0;
+  }
   int ret = umount("/");
   if (ret) {
     printf("unmounting root fs failed\n");
@@ -78,14 +83,15 @@ static int setup_unix_environment(const char* tarfile) {
   setenv("PATH", "/bin", 1);
   setenv("USER", "user", 1);
   setenv("LOGNAME", "user", 1);
+
+  chdir("/lua-5.2.2-tests");
+
   return 0;
 }
 
 int lua_ppapi_main(int argc, char **argv) {
   if (setup_unix_environment("luadata.tar"))
     return 1;
-
-  chdir("/lua-5.2.2-tests");
 
   return lua_main(argc, argv);
 }

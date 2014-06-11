@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <locale.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "nacl_io/nacl_io.h"
@@ -19,6 +20,11 @@
 extern int nacl_vim_main(int argc, char *argv[]);
 
 static int setup_unix_environment(const char* tarfile) {
+  // Rely on installed files for MinGN.
+  char* mingn = getenv("MINGN");
+  if (mingn && strcmp(mingn, "0") != 0) {
+    return 0;
+  }
   // Extra tar achive from http filesystem.
   if (tarfile) {
     int ret;

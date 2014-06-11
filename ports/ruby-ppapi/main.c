@@ -10,6 +10,7 @@
 #include <locale.h>
 #include <ruby.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/mount.h>
 
@@ -31,8 +32,14 @@
 #define DATA_ARCHIVE "rbdata-" NACL_ARCH ".tar"
 
 static int setup_unix_environment(const char* tarfile) {
+  // Rely on installed files for MinGN.
+  char* mingn = getenv("MINGN");
+  if (mingn && strcmp(mingn, "0") != 0) {
+    return 0;
+  }
   // Extra tar achive from http filesystem.
   if (tarfile) {
+    printf("Extracting: %s ...\n", tarfile);
     int ret;
     TAR* tar;
     char filename[PATH_MAX];
@@ -66,7 +73,6 @@ static int setup_unix_environment(const char* tarfile) {
 }
 
 int nacl_main(int argc, char **argv) {
-  printf("Extracting: %s ...\n", DATA_ARCHIVE);
   if (setup_unix_environment(DATA_ARCHIVE))
     return 1;
 

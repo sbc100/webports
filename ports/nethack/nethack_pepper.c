@@ -4,23 +4,27 @@
  * found in the LICENSE file.
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <libtar.h>
-#include <ppapi/cpp/instance.h>
-#include <ppapi/cpp/module.h>
-#include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <sys/mount.h>
 #include <unistd.h>
 
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"
 
-extern "C" int nethack_main(int argc, char *argv[]);
+extern int nethack_main(int argc, char *argv[]);
 
-int nethack_pepper_main(int argc, char* argv[]) {
+static void setup_unix_environment(void) {
+  // Rely on installed files for MinGN.
+  char* mingn = getenv("MINGN");
+  if (mingn && strcmp(mingn, "0") != 0) {
+    return;
+  }
+
   umount("/");
   mount("foo", "/", "memfs", 0, NULL);
   mount("./", "/tars", "httpfs", 0, NULL);
@@ -51,9 +55,9 @@ int nethack_pepper_main(int argc, char* argv[]) {
   const char config[] = "OPTIONS=color\n";
   write(fh, config, sizeof(config) - 1);
   close(fh);
-
-  const char *argv_nethack[] = {"nethack"};
-  return nethack_main(1, const_cast<char**>(argv_nethack));
 }
 
-PPAPI_SIMPLE_REGISTER_MAIN(nethack_pepper_main)
+int nacl_main(int argc, char* argv[]) {
+  setup_unix_environment();
+  return nethack_main(argc, argv);
+}
