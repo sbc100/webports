@@ -697,12 +697,12 @@ class Package(object):
     if self.ARCH is not None:
       if self.config.arch not in self.ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
-                            % (self.NAME, arch))
+                            % (self.NAME, self.config.arch))
 
     if self.DISABLED_ARCH is not None:
-      if arch in self.DISABLED_ARCH:
+      if self.config.arch in self.DISABLED_ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
-                            % (self.NAME, arch))
+                            % (self.NAME, self.config.arch))
 
     if self.BUILD_OS is not None:
       import getos
