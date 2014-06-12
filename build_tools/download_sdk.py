@@ -2,15 +2,14 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
-"""Download all Native Client toolchains for this platform.
+"""Download Native Client SDK for the current platform.
 
-This module downloads toolchain bz2's and expands them. It requires
+This script downloads toolchain bz2's and expands them. It requires
 gsutil to be in the bin PATH and assumes if building on windows that
-cygwin is installed to \cygwin
+cygwin is installed to \cygwin.
 
-On windows this script also required access to the cygtar python
+On Windows this script also required access to the cygtar python
 module which gets included by the gclient DEPS.
 """
 
@@ -207,15 +206,19 @@ PLATFORM_COLLAPSE = {
 }
 
 def main(argv):
-  parser = optparse.OptionParser()
-  parser.add_option(
-      '-v', '--version', default='latest',
-      help='which version of the toolchain to download')
+  parser = optparse.OptionParser(description=__doc__)
+  parser.add_option('-v', '--version', default='latest',
+      help='which version of the SDK to download')
+  parser.add_option('--bionic', action='store_true',
+      help='download bionic version of the SDK (linux only).')
   options, args = parser.parse_args(argv)
   if args:
     parser.error('invalid argument')
 
-  flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
+  if options.bionic:
+    flavor = 'naclsdk_bionic'
+  else:
+    flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
   os.environ['NACL_SDK_ROOT'] = TARGET_DIR
   getos = os.path.join(TARGET_DIR, 'tools', 'getos.py')

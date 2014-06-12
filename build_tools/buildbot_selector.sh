@@ -143,7 +143,12 @@ fi
 # Install SDK.
 if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   echo "@@@BUILD_STEP Install Latest SDK@@@"
-  ${PYTHON} ${SCRIPT_DIR}/download_sdk.py
+  ARGS=""
+  if [ ${TOOLCHAIN:-} = bionic ]; then
+    ARGS="--bionic"
+  fi
+  echo ${PYTHON} ${SCRIPT_DIR}/download_sdk.py ${ARGS}
+  ${PYTHON} ${SCRIPT_DIR}/download_sdk.py ${ARGS}
 fi
 
 Unittests() {
