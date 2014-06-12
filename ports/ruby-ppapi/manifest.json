@@ -1,7 +1,7 @@
 {
   "name": "Ruby (IRB)",
   "description": "Ruby IRB interactive shell built with Native Client",
-  "version": "2.0.0.2",
+  "version": "2.0.0.%(version)s",
   "manifest_version": 2,
   "icons": {
     "16": "icon_16.png",

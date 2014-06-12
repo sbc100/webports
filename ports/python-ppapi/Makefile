@@ -58,6 +58,7 @@ NASSH = $(CHROMEAPPS)/nassh
 
 install:
 	mkdir -p $(INSTALL_DIR)
+	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
 	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python2.7 ${EXTRA_ASSETS}
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
@@ -67,10 +68,10 @@ install:
 	cp python.js $(INSTALL_DIR)
 	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
 	cp manifest.json ${INSTALL_DIR}
-	cp background.js ${INSTALL_DIR}
-	cp icon_16.png ${INSTALL_DIR}
-	cp icon_48.png ${INSTALL_DIR}
-	cp icon_128.png ${INSTALL_DIR}
+	cp background.js $(INSTALL_DIR)
+	cp icon_16.png $(INSTALL_DIR)
+	cp icon_48.png $(INSTALL_DIR)
+	cp icon_128.png $(INSTALL_DIR)
 ifeq ($(TOOLCHAIN),pnacl)
 	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclterm.js
 endif

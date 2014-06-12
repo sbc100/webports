@@ -46,15 +46,6 @@ InstallStep() {
 
   MakeDir ${PUBLISH_DIR}
 
-  readonly TEMPLATE_EXPAND="${START_DIR}/../../build_tools/template_expand.py"
-  readonly REV_RAW=$(cd ${START_DIR} && git number 2>/dev/null || svnversion)
-  # The svn revision can have a trailing M when there are modifications, such
-  # as during a try run. Remove it so we get a valid extension version.
-  readonly REVISION=${REV_RAW/M/}
-  readonly REV_H=$(expr $REVISION / 65536)
-  readonly REV_L=$(expr $REVISION % 65536)
-  readonly VERSION=0.1.${REV_H}.${REV_L}
-
   # Tests
   local TEST_OUT_DIR="${PUBLISH_DIR}/tests"
   MakeDir ${TEST_OUT_DIR}
@@ -83,22 +74,16 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_16.png ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${GDB_APP_DIR}
+
   # Generate a manifest.json (with key included).
-  ${TEMPLATE_EXPAND} \
-    ${START_DIR}/manifest.json.template \
-    version=${VERSION} \
-    key="$(cat ${START_DIR}/key.txt)" \
-    >${GDB_APP_DIR}/manifest.json
+  GenerateManifest ${START_DIR}/manifest.json.template \
+    ${GDB_APP_DIR} ${START_DIR}/key.txt
 
   # Create uploadable version (key not included).
   local GDB_APP_UPLOAD_DIR="${PUBLISH_DIR}/gdb_app_upload"
   rm -rf ${GDB_APP_UPLOAD_DIR}
   LogExecute cp -r ${GDB_APP_DIR} ${GDB_APP_UPLOAD_DIR}
-  ${TEMPLATE_EXPAND} \
-    ${START_DIR}/manifest.json.template \
-    version=${VERSION} \
-    key="" \
-    >${GDB_APP_UPLOAD_DIR}/manifest.json
+  GenerateManifest ${START_DIR}/manifest.json.template ${GDB_APP_UPLOAD_DIR}
   # Zip for upload to the web store.
   pushd ${PUBLISH_DIR}
   rm -f gdb_app_upload.zip
@@ -118,10 +103,9 @@ InstallStep() {
   LogExecute cp ${START_DIR}/extension/main.css ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/main.html ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/main.js ${DEBUG_EXT_DIR}
-  ${TEMPLATE_EXPAND} \
-    ${START_DIR}/extension/manifest.json.template \
-    version=${VERSION} \
-    >${DEBUG_EXT_DIR}/manifest.json
+  GenerateManifest ${START_DIR}/extension/manifest.json.template \
+    ${DEBUG_EXT_DIR}
+
   # Zip for upload to the web store.
   pushd ${PUBLISH_DIR}
   rm -f debug_extension.zip

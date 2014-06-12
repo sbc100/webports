@@ -1,7 +1,7 @@
 {
   "name": "Lua",
   "description": "Lua interactive shell built using Native Client",
-  "version": "5.2.2.1",
+  "version": "5.2.2.%(version)s",
   "manifest_version": 2,
   "icons": {
     "16": "icon_16.png",

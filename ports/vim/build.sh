@@ -40,7 +40,6 @@ InstallStep() {
 
   DESTDIR=${ASSEMBLY_DIR}/vimtar
   DefaultInstallStep
-  mkdir -p ${DESTDIR}/etc/vim
 
   ChangeDir ${ASSEMBLY_DIR}/vimtar
   cp usr/bin/vim${NACL_EXEEXT} ../vim_${NACL_ARCH}${NACL_EXEEXT}
@@ -56,8 +55,8 @@ InstallStep() {
       -o vim.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py vim.nmf
 
+  GenerateManifest ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/vim.html ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/vim_app.html ${ASSEMBLY_DIR}

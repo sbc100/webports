@@ -82,6 +82,7 @@ install-tests: $(OUTBASE)/$(LUA_TESTS_FILE) $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(B
 	cp $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(BINARYTREES) $(INSTALL_DIR)
 
 install: install-tests
+	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/lua*$(NACL_EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
@@ -90,7 +91,6 @@ install: install-tests
 	cp lua.html $(INSTALL_DIR)
 	cp lua.js $(INSTALL_DIR)
 	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
-	cp manifest.json ${INSTALL_DIR}
 	cp background.js ${INSTALL_DIR}
 	cp icon_16.png ${INSTALL_DIR}
 	cp icon_48.png ${INSTALL_DIR}

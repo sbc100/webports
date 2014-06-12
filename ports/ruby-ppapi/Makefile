@@ -69,6 +69,7 @@ NASSH = $(CHROMEAPPS)/nassh
 
 install:
 	mkdir -p $(INSTALL_DIR)
+	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
 	tar -h -c -C ${NACL_PREFIX}/.. -f $(DATA_ARCHIVE) ${ASSETS}
 ifeq ($(TOOLCHAIN),glibc)
 	tar -h -r -C ${NACL_PREFIX} -f $(DATA_ARCHIVE) ${EXTRA_LIBS}
@@ -80,7 +81,6 @@ endif
 	cp index.html $(INSTALL_DIR)
 	cp ruby.js $(INSTALL_DIR)
 	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
-	cp manifest.json ${INSTALL_DIR}
 	cp background.js ${INSTALL_DIR}
 	cp icon_16.png ${INSTALL_DIR}
 	cp icon_48.png ${INSTALL_DIR}

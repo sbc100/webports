@@ -713,14 +713,16 @@ SetupSDKBuildSystem() {
   # We override $(OUTBASE) to force the build system to put
   # all its artifacts in ${SRC_DIR} rather than alongside
   # the Makefile.
+  GetRevision
   export OUTBASE=${SRC_DIR}
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export NACLPORTS_INCLUDE
   export NACL_PREFIX
   export NACL_PACKAGES_PUBLISH
   export NACL_SRC
+  export NACLPORTS_INCLUDE
+  export NACLPORTS_REVISION=${REVISION}
 
   MAKEFLAGS+=" TOOLCHAIN=${TOOLCHAIN}"
   MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
@@ -764,6 +766,39 @@ SetupCrossEnvironment() {
   echo "LDFLAGS=${LDFLAGS}"
 }
 
+
+GetRevision() {
+  local REV_RAW=$(cd ${START_DIR} && git number 2>/dev/null || svnversion)
+  # The svn revision can have a trailing M when there are modifications, such
+  # as during a try run. Remove it so we get a valid extension version.
+  REVISION=${REV_RAW/M/}
+}
+
+
+GenerateManifest() {
+  local SOURCE_FILE=$1
+  shift
+  local TARGET_DIR=$1
+  shift
+  local TEMPLATE_EXPAND="${START_DIR}/../../build_tools/template_expand.py"
+  GetRevision
+
+  # TODO(sbc): deal with versions greater than 16bit.
+  if (( ${REVISION} >= 65536 )); then
+    echo "Version too great to store in revision field on manifest.json"
+    exit 1
+  fi
+
+  if [ $# -gt 0 ]; then
+    local KEY="$(cat $1)"
+  else
+    local KEY=""
+  fi
+  echo "Expanding ${SOURCE_FILE} > ${TARGET_DIR}/manifest.json"
+  # Generate a manifest.json
+  ${TEMPLATE_EXPAND} ${SOURCE_FILE} \
+    version=${REVISION} key="${KEY}" > ${TARGET_DIR}/manifest.json
+}
 
 ######################################################################
 # Build Steps
@@ -845,7 +880,7 @@ DefaultPatchStep() {
 
   if CheckStamp patch ; then
     Banner "Skipping patch step (cleaning source tree)"
-    git clean -f -d
+    #git clean -f -d
     return
   fi
 

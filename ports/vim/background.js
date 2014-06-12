@@ -20,7 +20,6 @@ function copyFile(srcFile, destFile) {
   console.log("copyFile: " + srcFile.name + " -> " + destFile.name);
 
   srcFile.file(function(file) {
-    console.log("saving file: " + file.toString());
     destFile.createWriter(function(writer) {
       writer.onerror = fsErrorHandler;
       var doneTruncate = false;
@@ -41,8 +40,8 @@ function copyFile(srcFile, destFile) {
 }
 
 function saveFile(saveFileEntry) {
-  window.webkitRequestFileSystem(window.TEMPORARAY, 0, function(tempFS) {
-    tempFS.root.getFile(saveFileEntry.name, {create: false},
+  window.webkitRequestFileSystem(window.TEMPORARAY, 0, function(tmpFS) {
+    tmpFS.root.getFile(saveFileEntry.name, {create: false},
       function(tmpFileEntry) {
         copyFile(tmpFileEntry, saveFileEntry);
       }
@@ -73,8 +72,8 @@ function onLaunchedListener(launchData) {
   }
 
   var props = {
-      'id': 'main',
-      'bounds': { 'width': 800, 'height': 800 }
+    width: 600,
+    height: 600
   };
 
   chrome.app.window.create('vim_app.html', props, onWindowCreated);
