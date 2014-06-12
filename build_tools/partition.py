@@ -58,7 +58,7 @@ import urllib2
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
-ARCHES = ('arm', 'i686', 'x86_64')
+TOOLCHAINS = ('bionic', 'newlib', 'glibc', 'pnacl')
 
 verbose = False
 
@@ -115,14 +115,8 @@ class Project(object):
   def __init__(self, name):
     self.name = name
     self.time = 0
-    self.arch_times = [0] * len(ARCHES)
     self.dep_names = GetDependencies([name])
     self.dep_times = [0] * len(self.dep_names)
-
-  def UpdateArchTime(self, arch, time):
-    index = ARCHES.index(arch)
-    self.arch_times[index] = max(self.arch_times[index], time)
-    self.time = sum(self.arch_times)
 
   def UpdateDepTimes(self, project_map):
     for i, dep_name in enumerate(self.dep_names):
@@ -155,12 +149,11 @@ class Projects(object):
     for step in data['steps']:
       text = step['text'][0]
       text_tuple = text.split()
-      if len(text_tuple) != 3 or text_tuple[0] not in ARCHES:
+      if len(text_tuple) != 2 or text_tuple[0] not in TOOLCHAINS:
         continue
-      arch, _, name = text_tuple
+      _, name = text_tuple
       project = self.AddProject(name)
-      time = step['times'][1] - step['times'][0]
-      project.UpdateArchTime(arch, time)
+      project.time = step['times'][1] - step['times'][0]
 
   def PostProcessDeps(self):
     for project in self.projects:
@@ -323,7 +316,9 @@ def main(args):
                     type='int', default=3)
   parser.add_option('--build-number', help='Builder number to look at for '
                     'historical data on build times.', type='int', default=-1)
-  options, _ = parser.parse_args(args)
+  options, args = parser.parse_args(args)
+  if len(args):
+    parser.error("Script does not take any arguments (see --help)");
 
   global verbose
   verbose = options.verbose
