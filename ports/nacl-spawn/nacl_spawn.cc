@@ -34,6 +34,7 @@ struct NaClSpawnReply {
   pthread_cond_t cond;
   // Zero or positive on success or -errno on failure.
   int result;
+  int status;
 };
 
 static std::string GetCwd() {
@@ -76,23 +77,29 @@ static std::string GetRequestId() {
 static void HandleNaClSpawnReply(const pp::Var& key,
                                  const pp::Var& value,
                                  void* user_data) {
-  if (!key.is_string() || !value.is_int()) {
+  if (!key.is_string() || !value.is_dictionary()) {
     fprintf(stderr, "Invalid parameter for HandleNaClSpawnReply\n");
     fprintf(stderr, "key=%s\n", key.DebugString().c_str());
     fprintf(stderr, "value=%s\n", value.DebugString().c_str());
   }
   assert(key.is_string());
-  assert(value.is_int());
+  assert(value.is_dictionary());
+
+  pp::VarDictionary valDict(value);
+  assert(valDict.HasKey("pid"));
 
   NaClSpawnReply* reply = static_cast<NaClSpawnReply*>(user_data);
   pthread_mutex_lock(&reply->mu);
-  reply->result = value.AsInt();
+  reply->result = valDict.Get("pid").AsInt();
+  if (valDict.HasKey("status")) {
+    reply->status = valDict.Get("status").AsInt();
+  }
   pthread_cond_signal(&reply->cond);
   pthread_mutex_unlock(&reply->mu);
 }
 
 // Sends a spawn/wait request to JavaScript and returns the result.
-static int SendRequest(pp::VarDictionary* req) {
+static int SendRequest(pp::VarDictionary* req, int* status) {
   const std::string& req_id = GetRequestId();
   req->Set("id", req_id);
 
@@ -112,6 +119,9 @@ static int SendRequest(pp::VarDictionary* req) {
   pthread_mutex_destroy(&reply.mu);
 
   instance->RegisterMessageHandler(req_id, NULL, &reply);
+  if (status != NULL) {
+    *status = reply.status;
+  }
   return reply.result;
 }
 
@@ -232,7 +242,7 @@ extern "C" int nacl_spawn_simple(const char** argv) {
     return -1;
   }
 
-  int result = SendRequest(&req);
+  int result = SendRequest(&req, NULL);
   if (result < 0) {
     errno = -result;
     return -1;
@@ -245,16 +255,14 @@ extern "C" int nacl_spawn_simple(const char** argv) {
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
 extern "C" int nacl_waitpid(int pid, int* status, int options) {
-  // We only support waiting for a single process.
-  assert(pid > 0);
-  // No options are supported yet.
-  assert(options == 0);
 
   pp::VarDictionary req;
   req.Set("command", "nacl_wait");
   req.Set("pid", pid);
+  req.Set("options", options);
 
-  int result = SendRequest(&req);
+  int rawStatus;
+  int result = SendRequest(&req, &rawStatus);
   if (result < 0) {
     errno = -result;
     return -1;
@@ -262,6 +270,6 @@ extern "C" int nacl_waitpid(int pid, int* status, int options) {
 
   // WEXITSTATUS(s) is defined as ((s >> 8) & 0xff).
   if (status)
-    *status = (result & 0xff) << 8;
-  return 0;
+    *status = (rawStatus & 0xff) << 8;
+  return result;
 }

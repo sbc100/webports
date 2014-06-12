@@ -29,19 +29,49 @@ function NaClTerm(argv) {
   this.argv_ = argv;
 };
 
+/**
+ * The "no hang" flag for waitpid().
+ * @type {number}
+ */
+NaClTerm.WNOHANG = 1;
+
+/**
+ * Signal when a process cannot be found.
+ * @type {number}
+ */
+NaClTerm.ENOENT = -2;
+
+/**
+ * Error when a process does not have unwaited-for children.
+ * @type {number}
+ */
+NaClTerm.ECHILD= -10;
+
+/**
+ * Flag for cyan coloring in the terminal.
+ * @const
+ */
+NaClTerm.ANSI_CYAN = '\x1b[36m';
+
+/**
+ * Flag for color reset in the terminal.
+ * @const
+ */
+NaClTerm.ANSI_RESET = '\x1b[0m';
+
+// TODO(bradnelson): Rename in line with style guide once we have tests.
 // The process which gets the input from the user.
 var foreground_process;
 // Process information keyed by PID. The value is an embed DOM object
 // if the process is running. Once the process has finished, the value
 // will be the exit code.
 var processes = {};
+
 // Waiter processes keyed by the PID of the waited process. The waiter
 // is represented by a hash like
 // { element: embed DOM object, wait_req_id: the request ID string }
 var waiters = {};
 var pid = 0;
-var ansiCyan = '\x1b[36m';
-var ansiReset = '\x1b[0m';
 
 /**
  * Static initialier called from index.html.
@@ -118,8 +148,7 @@ NaClTerm.prototype.handleMessage_ = function(e) {
   } else if (e.data['command'] == 'nacl_wait') {
     var msg = e.data;
     console.log('nacl_wait: ' + JSON.stringify(msg));
-    var pid = msg['pid'];
-    this.waitpid(pid, e);
+    this.waitpid(msg['pid'], msg['options'], e);
   } else if (e.data.indexOf(NaClTerm.prefix) == 0) {
     var msg = e.data.substring(NaClTerm.prefix.length);
     if (!this.loaded) {
@@ -152,7 +181,9 @@ NaClTerm.prototype.handleLoadError_ = function(e) {
   console.log('load error: ' + e.srcElement.spawn_req_id);
   if (e.srcElement.spawn_req_id) {
     var reply = {};
-    reply[e.srcElement.spawn_req_id] = -2;  // -ENOENT
+    reply[e.srcElement.spawn_req_id] = {
+      pid: NaClTerm.ENOENT,  // -ENOENT
+    };
     console.log('handleLoadError: ' + JSON.stringify(reply));
     e.srcElement.parent.postMessage(reply);
     foreground_process = e.srcElement.parent;
@@ -180,7 +211,9 @@ NaClTerm.prototype.doneLoadingUrl = function() {
 NaClTerm.prototype.handleLoad_ = function(e) {
   if (e.srcElement.spawn_req_id) {
     var reply = {};
-    reply[e.srcElement.spawn_req_id] = e.srcElement.pid;
+    reply[e.srcElement.spawn_req_id] = {
+      pid: e.srcElement.pid,
+    };
     console.log('handleLoad: ' + JSON.stringify(reply));
     e.srcElement.parent.postMessage(reply);
   }
@@ -193,7 +226,7 @@ NaClTerm.prototype.handleLoad_ = function(e) {
     else
       this.io.print('Loaded.\n');
 
-    this.io.print(ansiReset);
+    this.io.print(NaClTerm.ANSI_RESET);
   }
 
   // Now that have completed loading and displaying
@@ -247,7 +280,7 @@ NaClTerm.prototype.handleCrash_ = function(e) {
  */
 NaClTerm.prototype.exit = function(code, element) {
   if (!element.parent) {
-    this.io.print(ansiCyan)
+    this.io.print(NaClTerm.ANSI_CYAN)
 
     // The root process finished.
     if (code == -1) {
@@ -265,17 +298,33 @@ NaClTerm.prototype.exit = function(code, element) {
   }
 
   var pid = element.pid;
-  if (waiters[pid]) {
-    for (var i = 0; i < waiters[pid].length; i++) {
-      var waiter = waiters[pid][i];
+  function wakeWaiters(waiters) {
+    for (var i = 0; i < waiters.length; i++) {
+      var waiter = waiters[i];
       var reply = {};
-      reply[waiter.wait_req_id] = code;
+      reply[waiter.wait_req_id] = {
+        pid: pid,
+        status: code,
+      };
       console.log('exit: ' + JSON.stringify(reply));
       waiter.element.postMessage(reply);
       waiter = null;
     }
   }
-  processes[pid] = code;
+  if (waiters[pid] || waiters[-1]) {
+    if (waiters[pid]) {
+      wakeWaiters(waiters[pid]);
+      delete waiters[pid];
+    }
+    if (waiters[-1]) {
+      wakeWaiters(waiters[-1]);
+      delete waiters[-1];
+    }
+
+    delete processes[pid];
+  } else {
+    processes[pid] = code;
+  }
 
   // Mark as terminated.
   element.pid = -1;
@@ -397,25 +446,64 @@ NaClTerm.prototype.spawn = function(nmf, argv, envs, cwd,
   foreground_process.spawn_req_id = e.data['id'];
 }
 
-NaClTerm.prototype.waitpid = function(pid, e) {
-  if (!processes[pid]) {
+NaClTerm.prototype.waitpid = function(pid, options, e) {
+  var finishedProcess = null;
+  Object.keys(processes).some(function(pid) {
+    if (typeof processes[pid] == 'number') {
+      finishedProcess = pid;
+      return true;
+    }
+    return false;
+  });
+
+  if (pid == -1 && finishedProcess !== null) {
+    var reply = {};
+    reply[e.data['id']] = {
+      pid: finishedProcess,
+      status: processes[finishedProcess],
+    };
+    delete processes[finishedProcess];
+    e.srcElement.postMessage(reply);
+  } else if (pid >= 0 && !processes[pid]) {
     // The process does not exist.
     var reply = {};
-    reply[e.data['id']] = -10;  // -ECHILD
+    reply[e.data['id']] = {
+      pid: pid,
+      status: NaClTerm.ECHILD,
+    };
     console.log('waitpid (ECHILD): ' + JSON.stringify(reply));
     e.srcElement.postMessage(reply);
   } else if (typeof processes[pid] == 'number') {
     // The process has already finished.
     var reply = {};
-    reply[e.data['id']] = processes[pid];
+    reply[e.data['id']] = {
+      pid: pid,
+      status: processes[pid],
+    };
+
     delete processes[pid];
+
     console.log('waitpid: ' + JSON.stringify(reply));
     e.srcElement.postMessage(reply);
   } else {
     // Add the current process to the waiter list.
-    if (!waiters[pid])
+    if (options & this.WNOHANG != 0) {
+      var reply = {};
+      reply[e.data['id']] = {
+        pid: 0,
+        status: 0,
+      };
+      e.srcElement.postMessage(reply);
+      return;
+    }
+    if (!waiters[pid]) {
       waiters[pid] = [];
-    waiters[pid].push({ element: e.srcElement, wait_req_id: e.data['id'] });
+    }
+    waiters[pid].push({
+      element: e.srcElement,
+      wait_req_id: e.data['id'],
+      options: options
+    });
   }
 }
 
@@ -446,7 +534,7 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
 NaClTerm.prototype.run = function() {
   this.bufferedOutput = '';
   this.loaded = false;
-  this.io.print(ansiCyan);
+  this.io.print(NaClTerm.ANSI_CYAN);
 
   this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);
   this.io.onTerminalResize = this.onTerminalResize_.bind(this);
