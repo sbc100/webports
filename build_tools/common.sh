@@ -880,7 +880,7 @@ DefaultPatchStep() {
 
   if CheckStamp patch ; then
     Banner "Skipping patch step (cleaning source tree)"
-    #git clean -f -d
+    git clean -f -d
     return
   fi
 
