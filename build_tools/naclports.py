@@ -195,7 +195,7 @@ class Configuration(object):
   """Class representing the build configuration for naclports packages.
 
   This consists of the following attributes:
-    toolchain   - newlib, glibc, pnacl
+    toolchain   - newlib, glibc, bionic, pnacl
     arch        - x86_64, x86_32, arm, pnacl
     debug       - True/False
     config_name - 'debug' or 'release'
@@ -390,8 +390,8 @@ class Package(object):
   contain a 'pkg_info' file.
   """
   VALID_KEYS = ('NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
-                'MIN_SDK_VERSION', 'LIBC', 'ARCH', 'DISABLED_ARCH',
-                'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED')
+                'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH',
+                'DISABLED_ARCH', 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED')
   VALID_SUBDIRS = ('', 'ports', 'python_modules')
 
   def __init__(self, pkg_root, config=None):
@@ -435,6 +435,8 @@ class Package(object):
       raise Error('%s: package NAME must match directory name' % self.info)
     if self.DISABLED_ARCH is not None and self.ARCH is not None:
       raise Error('%s: contains both ARCH and DISABLED_ARCH' % self.info)
+    if self.DISABLED_LIBC is not None and self.LIBC is not None:
+      raise Error('%s: contains both LIBC and DISABLED_LIBC' % self.info)
 
   def __cmp__(self, other):
     return cmp(self.NAME, other.NAME)
@@ -693,6 +695,11 @@ class Package(object):
     if self.LIBC is not None and self.LIBC != self.config.libc:
       raise DisabledError('%s: cannot be built with %s.'
                           % (self.NAME, self.config.libc))
+
+    if self.DISABLED_LIBC is not None:
+      if self.config.libc in self.DISABLED_LIBC:
+        raise DisabledError('%s: cannot be built with %s.'
+                            % (self.NAME, self.config.libc))
 
     if self.ARCH is not None:
       if self.config.arch not in self.ARCH:
