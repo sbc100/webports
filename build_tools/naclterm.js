@@ -143,7 +143,7 @@ NaClTerm.prototype.handleMessage_ = function(e) {
       nmf = window.URL.createObjectURL(blob);
     } else {
       if (NaClTerm.nmfWhitelist !== undefined &&
-          NaClTerm.nmfWhitelist.indexOf(executable) < 0) {
+          NaClTerm.nmfWhitelist.indexOf(executable) === -1) {
         var reply = {};
         reply[e.data['id']] = {
           pid: -NaClTerm.ENOENT,

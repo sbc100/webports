@@ -119,7 +119,7 @@ static int SendRequest(pp::VarDictionary* req, int* status) {
   pthread_mutex_destroy(&reply.mu);
 
   instance->RegisterMessageHandler(req_id, NULL, &reply);
-  if (reply.result >=0 && status != NULL) {
+  if (reply.result >= 0 && status != NULL) {
     *status = reply.status;
   }
   return reply.result;
