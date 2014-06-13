@@ -72,11 +72,6 @@ Publish() {
   echo "@@@STEP_LINK@browse@${URL}@@@"
 }
 
-# Don't upload periodic or trybot builds.
-if [[ ${BUILDBOT_BUILDERNAME} =~ (nightly-*|naclports-*) ]]; then
-  NACLPORTS_NO_UPLOAD=1
-fi
-
 # Strip 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 PYTHON=python
@@ -87,12 +82,28 @@ else
   # Decode buildername.
   readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
   if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
+    readonly PREFIX=${BASH_REMATCH[1]}
+    if [ ${PREFIX} = "naclports-" ]; then
+      readonly TRYBOT=1
+      readonly NIGHTLY=0
+    elif [ ${PREFIX} = "nightly-" ]; then
+      readonly TRYBOT=0
+      readonly NIGHTLY=1
+    else
+      readonly TRYBOT=0
+      readonly NIGHTLY=0
+    fi
     readonly OS=${BASH_REMATCH[2]}
     readonly LIBC=${BASH_REMATCH[3]}
     readonly SHARD=${BASH_REMATCH[4]}
   else
     echo "Bad BUILDBOT_BUILDERNAME: ${BUILDBOT_BUILDERNAME}" 1>&2
     exit 1
+  fi
+
+  # Don't upload periodic or trybot builds.
+  if [ "${TRYBOT}" = "1" -o "${NIGHTLY}" = "1" ]; then
+    NACLPORTS_NO_UPLOAD=1
   fi
 
   # Select platform specific things.
@@ -119,18 +130,23 @@ else
     readonly SHARDS=2
   elif [ "$OS" = "linux" ]; then
     if [ "$TOOLCHAIN" = "glibc" ]; then
-      readonly SHARDS=4
+      SHARDS=4
     elif [ "$TOOLCHAIN" = "newlib" ]; then
-      readonly SHARDS=3
+      SHARDS=3
     elif [ "$TOOLCHAIN" = "bionic" ]; then
-      readonly SHARDS=1
+      SHARDS=1
     elif [ "$TOOLCHAIN" = "pnacl" ]; then
-      readonly SHARDS=4
+      SHARDS=4
     else
       echo "Unspecified sharding for TOOLCHAIN: ${TOOLCHAIN}" 1>&2
     fi
   else
     echo "Unspecified sharding for OS: ${OS}" 1>&2
+  fi
+
+  # For the trybots we have 5 shards for each toolchain
+  if [ "$TRYBOT" = "1" ]; then
+    SHARDS=5
   fi
 fi
 

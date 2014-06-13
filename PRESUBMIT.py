@@ -71,13 +71,22 @@ TRYBOTS = [
     'naclports-linux-glibc-1',
     'naclports-linux-glibc-2',
     'naclports-linux-glibc-3',
+    'naclports-linux-glibc-4',
     'naclports-linux-newlib-0',
     'naclports-linux-newlib-1',
     'naclports-linux-newlib-2',
+    'naclports-linux-newlib-3',
+    'naclports-linux-newlib-4',
     'naclports-linux-pnacl_newlib-0',
     'naclports-linux-pnacl_newlib-1',
     'naclports-linux-pnacl_newlib-2',
     'naclports-linux-pnacl_newlib-3',
+    'naclports-linux-pnacl_newlib-4',
+    'naclports-linux-bionic-0',
+    'naclports-linux-bionic-1',
+    'naclports-linux-bionic-2',
+    'naclports-linux-bionic-3',
+    'naclports-linux-bionic-4',
 ]
 
 
