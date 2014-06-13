@@ -39,13 +39,13 @@ NaClTerm.WNOHANG = 1;
  * Signal when a process cannot be found.
  * @type {number}
  */
-NaClTerm.ENOENT = -2;
+NaClTerm.ENOENT = 2;
 
 /**
  * Error when a process does not have unwaited-for children.
  * @type {number}
  */
-NaClTerm.ECHILD= -10;
+NaClTerm.ECHILD= 10;
 
 /**
  * Flag for cyan coloring in the terminal.
@@ -71,7 +71,7 @@ var processes = {};
 // is represented by a hash like
 // { element: embed DOM object, wait_req_id: the request ID string }
 var waiters = {};
-var pid = 0;
+var pid = 1;
 
 /**
  * Static initialier called from index.html.
@@ -142,6 +142,16 @@ NaClTerm.prototype.handleMessage_ = function(e) {
       var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
       nmf = window.URL.createObjectURL(blob);
     } else {
+      if (NaClTerm.nmfWhitelist !== undefined &&
+          NaClTerm.nmfWhitelist.indexOf(executable) < 0) {
+        var reply = {};
+        reply[e.data['id']] = {
+          pid: -NaClTerm.ENOENT,
+        };
+        console.log('nacl_spawn(error): ' + JSON.stringify(reply));
+        e.srcElement.postMessage(reply);
+        return;
+      }
       nmf = executable + '.nmf';
     }
     this.spawn(nmf, args, envs, cwd, executable, e);
@@ -182,7 +192,7 @@ NaClTerm.prototype.handleLoadError_ = function(e) {
   if (e.srcElement.spawn_req_id) {
     var reply = {};
     reply[e.srcElement.spawn_req_id] = {
-      pid: NaClTerm.ENOENT,  // -ENOENT
+      pid: -NaClTerm.ENOENT,
     };
     console.log('handleLoadError: ' + JSON.stringify(reply));
     e.srcElement.parent.postMessage(reply);
@@ -468,8 +478,7 @@ NaClTerm.prototype.waitpid = function(pid, options, e) {
     // The process does not exist.
     var reply = {};
     reply[e.data['id']] = {
-      pid: pid,
-      status: NaClTerm.ECHILD,
+      pid: -NaClTerm.ECHILD,
     };
     console.log('waitpid (ECHILD): ' + JSON.stringify(reply));
     e.srcElement.postMessage(reply);

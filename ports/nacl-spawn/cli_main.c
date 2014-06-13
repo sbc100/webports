@@ -36,6 +36,9 @@ int cli_main(int argc, char* argv[]) {
   setenv("LOGNAME", "user", 0);
 
   const char* home = getenv("HOME");
+  if (home == NULL) {
+    home = "/home";
+  }
   mkdir("/home", 0777);
   mkdir(home, 0777);
   mkdir("/tmp", 0777);
@@ -50,20 +53,23 @@ int cli_main(int argc, char* argv[]) {
     data_url = "./";
 
   if (mount(data_url, "/mnt/http", "httpfs", 0, "") != 0) {
-    perror("mounting http filesystem failed");
+    perror("mounting http filesystem in /mnt/http failed");
     return 1;
   }
 
   if (mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
-    perror("Mounting HTML5 filesystem failed. Please use --unlimited-storage");
+    perror("Mounting HTML5 filesystem in /mnt/html5 failed. "
+           "Please use --unlimited-storage");
   }
 
   if (mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
-    perror("Mounting HTML5 filesystem failed. Please use --unlimited-storage");
+    fprintf(stderr, "Mounting HTML5 filesystem in %s failed. "
+           "Please use --unlimited-storage", home);
   }
 
   if (mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
-    perror("Mounting HTML5 filesystem failed. Please use --unlimited-storage");
+    perror("Mounting HTML5 filesystem in /tmp failed. "
+           "Please use --unlimited-storage");
   }
 
   /* naclterm.js sends the current working directory using this
