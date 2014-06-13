@@ -16,10 +16,10 @@ index 344ff29..5e5249e 100644
  
  clean:
 diff --git a/build_detect_platform b/build_detect_platform
-index 6e59c6f..8b52dc2 100755
+index 6e59c6f..bf10dc4 100755
 --- a/build_detect_platform
 +++ b/build_detect_platform
-@@ -98,6 +98,19 @@ case "$TARGET_OS" in
+@@ -98,6 +98,22 @@ case "$TARGET_OS" in
          PLATFORM_LIBS="-lpthread"
          PORT_FILE=port/port_posix.cc
          ;;
@@ -30,7 +30,10 @@ index 6e59c6f..8b52dc2 100755
 +        PORT_FILE=port/port_posix.cc
 +        CROSS_COMPILE=true
 +        if [ "$NACL_ARCH" = arm -o "$NACL_ARCH" = pnacl ]; then
-+            COMMON_FLAGS="$COMMON_FLAGS -DLEVELDB_STDATOMIC_PRESENT"
++            COMMON_FLAGS="$COMMON_FLAGS -DLEVELDB_ATOMIC_PRESENT"
++            # Would use -std=c++11 here but its broken on PNaCl:
++            # http://crbug.com/314944
++            PLATFORM_CXXFLAGS="-std=gnu++11"
 +        fi
 +        if [ "$NACL_SHARED" != 1 ]; then
 +          PLATFORM_SHARED_EXT=""
@@ -40,53 +43,32 @@ index 6e59c6f..8b52dc2 100755
          PLATFORM=OS_NETBSD
          COMMON_FLAGS="$MEMCMP_FLAG -D_REENTRANT -DOS_NETBSD"
 diff --git a/port/atomic_pointer.h b/port/atomic_pointer.h
-index a9866b2..20c99b2 100644
+index a9866b2..5e80b34 100644
 --- a/port/atomic_pointer.h
 +++ b/port/atomic_pointer.h
-@@ -23,6 +23,10 @@
+@@ -20,6 +20,9 @@
+ #define PORT_ATOMIC_POINTER_H_
+ 
+ #include <stdint.h>
++#ifdef LEVELDB_ATOMIC_PRESENT
++#include <atomic>
++#endif
  #ifdef LEVELDB_CSTDATOMIC_PRESENT
  #include <cstdatomic>
  #endif
-+#ifdef LEVELDB_STDATOMIC_PRESENT
-+typedef bool _Bool;
-+#include <stdatomic.h>
-+#endif
- #ifdef OS_WIN
- #include <windows.h>
- #endif
-@@ -147,6 +151,30 @@ class AtomicPointer {
+@@ -125,8 +128,8 @@ class AtomicPointer {
    }
  };
  
-+// AtomicPointer based on <stdatomic>
-+#elif defined(LEVELDB_STDATOMIC_PRESENT)
-+class AtomicPointer {
-+ private:
-+  atomic_intptr_t rep_;
-+ public:
-+  AtomicPointer() { }
-+  explicit AtomicPointer(void* v) {
-+    atomic_store(&rep_, (intptr_t)v);
-+  }
-+  inline void* Acquire_Load() const {
-+    return (void*)atomic_load_explicit(&rep_, memory_order_acquire);
-+  }
-+  inline void Release_Store(void* v) {
-+    atomic_store_explicit(&rep_, (intptr_t)v, memory_order_release);
-+  }
-+  inline void* NoBarrier_Load() const {
-+    return (void*)atomic_load_explicit(&rep_, memory_order_relaxed);
-+  }
-+  inline void NoBarrier_Store(void* v) {
-+    atomic_store_explicit(&rep_, (intptr_t)v, memory_order_relaxed);
-+  }
-+};
-+
- // Atomic pointer based on sparc memory barriers
- #elif defined(__sparcv9) && defined(__GNUC__)
+-// AtomicPointer based on <cstdatomic>
+-#elif defined(LEVELDB_CSTDATOMIC_PRESENT)
++// AtomicPointer based on <cstdatomic> or <atomic>
++#elif defined(LEVELDB_CSTDATOMIC_PRESENT) || defined(LEVELDB_ATOMIC_PRESENT)
  class AtomicPointer {
+  private:
+   std::atomic<void*> rep_;
 diff --git a/port/port_posix.h b/port/port_posix.h
-index f2b89bf..bae495f 100644
+index f2b89bf..8976acb 100644
 --- a/port/port_posix.h
 +++ b/port/port_posix.h
 @@ -37,6 +37,14 @@
