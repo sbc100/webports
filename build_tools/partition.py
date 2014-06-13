@@ -79,9 +79,13 @@ def GetBuildOrder(projects):
   packages = [naclports.Package(os.path.join('ports', p)) for p in projects]
   for package in packages:
     for dep in package.DEPENDS:
-      rtn += GetBuildOrder([dep])
-    rtn.append(package.NAME)
+      for ordered_dep in GetBuildOrder([dep]):
+        if ordered_dep not in rtn:
+          rtn.append(ordered_dep)
+    if package.NAME not in rtn:
+      rtn.append(package.NAME)
   return rtn
+
 
 def GetDependencies(projects):
   deps = GetBuildOrder(projects)
