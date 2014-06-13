@@ -392,6 +392,7 @@ ArchiveName() {
   fi
 }
 
+
 # Is this a git repo?
 IsGitRepo() {
   if [ -z "${URL:-}" ]; then
@@ -800,6 +801,7 @@ GenerateManifest() {
     version=${REVISION} key="${KEY}" > ${TARGET_DIR}/manifest.json
 }
 
+
 ######################################################################
 # Build Steps
 ######################################################################
@@ -1019,6 +1021,7 @@ DefaultInstallStep() {
   LogExecute make ${INSTALL_TARGETS:-install} DESTDIR=${DESTDIR}
 }
 
+
 DefaultPythonModuleInstallStep() {
   Banner "Installing ${PACKAGE_NAME}"
   # We've installed already previously.  We just need to collect our modules.
@@ -1032,6 +1035,7 @@ DefaultPythonModuleInstallStep() {
                   ${DEST_PYTHON_OBJS}/${PACKAGE_NAME}.libs
   fi
 }
+
 
 #
 # echo a command before exexuting it under 'time'
@@ -1299,6 +1303,7 @@ PackageStep() {
   LogExecute tar cf ${PACKAGE_FILE} -C ${DESTDIR} .
 }
 
+
 ZipPublishDir() {
   # If something exists in the publish directory, zip it for download by mingn.
   if [ -d "${PUBLISH_DIR}" ]; then
@@ -1309,6 +1314,7 @@ ZipPublishDir() {
     popd
   fi
 }
+
 
 DefaultPackageInstall() {
   RunPreInstallStep
@@ -1399,15 +1405,18 @@ RunTestStep()       {
   RunStep TestStep "Testing" ${BUILD_DIR}
 }
 
+
 RunPostInstallTestStep()       {
   RunStep PostInstallTestStep "Testing"
 }
+
 
 RunInstallStep()    {
   Remove ${DESTDIR}
   MakeDir ${DESTDIR}
   RunStep InstallStep "Installing" ${BUILD_DIR};
 }
+
 
 ######################################################################
 # Always run

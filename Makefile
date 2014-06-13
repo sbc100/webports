@@ -18,6 +18,10 @@ ifeq ($(V),1)
 VERBOSE?=1
 endif
 
+ifeq ($(F),1)
+FORCE?=1
+endif
+
 ifeq ($(V),2)
 VERBOSE?=1
 VERBOSE_BUILD?=1
