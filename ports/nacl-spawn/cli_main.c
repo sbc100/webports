@@ -52,9 +52,22 @@ int cli_main(int argc, char* argv[]) {
   if (!data_url)
     data_url = "./";
 
-  if (mount(data_url, "/mnt/http", "httpfs", 0, "") != 0) {
-    perror("Mounting http filesystem in /mnt/http failed.");
-    return 1;
+  const char* nacl_alt_http = getenv("NACL_ALT_HTTP");
+  if (nacl_alt_http && strcmp(nacl_alt_http, "0") != 0) {
+    if (mount("/alt_http", "/mnt/http", "html5fs", 0, "type=PERSISTENT") != 0) {
+      perror("Mounting HTML5 filesystem at /mnt/http failed. "
+             "Please use --unlimited-storage");
+    }
+
+    if (mount(data_url, "/mnt/real_http", "httpfs", 0, "") != 0) {
+      perror("mounting http filesystem at /mnt/real_http failed");
+      return 1;
+    }
+  } else {
+    if (mount(data_url, "/mnt/http", "httpfs", 0, "") != 0) {
+      perror("mounting http filesystem at /mnt/http failed");
+      return 1;
+    }
   }
 
   if (mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {

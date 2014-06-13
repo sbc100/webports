@@ -19,11 +19,6 @@
 extern int nacl_vim_main(int argc, char *argv[]);
 
 static int setup_unix_environment(const char* tarfile) {
-  // Rely on installed files for MinGN.
-  char* mingn = getenv("MINGN");
-  if (mingn && strcmp(mingn, "0") != 0) {
-    return 0;
-  }
   // Extra tar achive from http filesystem.
   int ret;
   TAR* tar;

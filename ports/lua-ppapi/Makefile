@@ -8,6 +8,8 @@ include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = lua
 LIBS = lua ppapi_simple tar
+NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
+PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 
 ifeq ($(LUA_NO_READLINE),)
 LIBS += readline ncurses

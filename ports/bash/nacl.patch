@@ -7,7 +7,7 @@ index 9f9276d..278ad65 100644
  
  # The main source code for the Bourne Again SHell.
 -CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
-+CSOURCES = bash_pepper.c \
++CSOURCES = \
 +	   shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
  	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
  	   expr.c copy_cmd.c flags.c subst.c hashcmd.c hashlib.c mailcheck.c \
@@ -17,7 +17,7 @@ index 9f9276d..278ad65 100644
  
  # Matching object files.
 -OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
-+OBJECTS	 = bash_pepper.o \
++OBJECTS	 = \
 +	   shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
  	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
  	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
@@ -111,7 +111,7 @@ index 9e74f3b..343ebd7 100644
  
 +#if defined(__native_client__)
 +int
-+nacl_bash_main (argc, argv)
++nacl_main (argc, argv)
 +     int argc;
 +     char **argv;
 +#else /* !__native_client__ */

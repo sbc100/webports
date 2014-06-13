@@ -6,33 +6,23 @@
 
 EXTRA_CONFIGURE_ARGS="--with-curses"
 NACLPORTS_CPPFLAGS+=" -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar \
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
 -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp"
 CONFIG_SUB=support/config.sub
 
 PatchStep() {
   DefaultPatchStep
   ChangeDir ${SRC_DIR}
-  cp ${START_DIR}/bash_pepper.c bash_pepper.c
 }
 
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/bash"
 
-  DESTDIR=${ASSEMBLY_DIR}/bashtar
-  MAKEFLAGS="prefix="
-  DefaultInstallStep
-
-  ChangeDir ${ASSEMBLY_DIR}/bashtar
   MakeDir ${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}
-  LogExecute cp bin/bash${NACL_EXEEXT} \
+  LogExecute cp ${BUILD_DIR}/bash${NACL_EXEEXT} \
       ${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}/bash${NACL_EXEEXT}
-  rm -rf bin
-  rm -rf share/man
-  tar cf ${ASSEMBLY_DIR}/bash.tar .
-  rm -rf ${ASSEMBLY_DIR}/bashtar
-  cd ${ASSEMBLY_DIR}
+  ChangeDir ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       _platform_specific/*/bash*${NACL_EXEEXT} \
       -s . \
@@ -45,6 +35,4 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
-  ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r bash-7.3.zip bash
 }

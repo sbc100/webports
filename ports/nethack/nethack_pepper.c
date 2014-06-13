@@ -19,28 +19,11 @@
 extern int nethack_main(int argc, char *argv[]);
 
 static void setup_unix_environment(void) {
-  // Rely on installed files for MinGN.
-  char* mingn = getenv("MINGN");
-  if (mingn && strcmp(mingn, "0") != 0) {
-    return;
-  }
-
-  umount("/");
-  mount("foo", "/", "memfs", 0, NULL);
-  mount("./", "/tars", "httpfs", 0, NULL);
-
-  /* Setup home directory to a known location. */
-  setenv("HOME", "/home", 1);
-  /* Blank out USER and LOGNAME. */
-  setenv("USER", "", 1);
-  setenv("LOGNAME", "", 1);
-
   mkdir("/usr", 0777);
   mkdir("/usr/games", 0777);
-  chdir("/usr/games");
 
   TAR* tar;
-  int ret = tar_open(&tar, "/tars/nethack.tar", NULL, O_RDONLY, 0, 0);
+  int ret = tar_open(&tar, "/mnt/http/nethack.tar", NULL, O_RDONLY, 0, 0);
   assert(ret == 0);
 
   ret = tar_extract_all(tar, "/usr/games");
@@ -50,11 +33,17 @@ static void setup_unix_environment(void) {
   assert(ret == 0);
 
   // Setup config file.
-  mkdir("/home", 0777);
-  int fh = open("/home/.nethackrc", O_CREAT | O_WRONLY);
-  const char config[] = "OPTIONS=color\n";
-  write(fh, config, sizeof(config) - 1);
-  close(fh);
+  ret = chdir(getenv("HOME"));
+  assert(ret == 0);
+  if (access(".nethackrc", R_OK) < 0) {
+    int fh = open(".nethackrc", O_CREAT | O_WRONLY);
+    const char config[] = "OPTIONS=color\n";
+    write(fh, config, sizeof(config) - 1);
+    close(fh);
+  }
+
+  ret = chdir("/usr/games");
+  assert(ret == 0);
 }
 
 int nacl_main(int argc, char* argv[]) {
