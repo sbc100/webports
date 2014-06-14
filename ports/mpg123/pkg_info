@@ -1,6 +1,6 @@
 NAME=mpg123
-VERSION=1.14.4
-URL=http://mpg123.orgis.org/download/mpg123-1.14.4.tar.bz2
+VERSION=1.20.0
+URL=http://www.mpg123.de/download/mpg123-1.20.0.tar.bz2
 LICENSE=LGPL:COPYING
 DEPENDS=(openal-soft)
-SHA1=9f53e27bb40b8df3d3b6df25f5f9a8a83b1fccfe
+SHA1=f8060769e60c88fa2debf6c998773880e57b31a6
