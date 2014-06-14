@@ -36,9 +36,6 @@ int cli_main(int argc, char* argv[]) {
   setenv("LOGNAME", "user", 0);
 
   const char* home = getenv("HOME");
-  if (home == NULL) {
-    home = "/home";
-  }
   mkdir("/home", 0777);
   mkdir(home, 0777);
   mkdir("/tmp", 0777);
@@ -52,6 +49,8 @@ int cli_main(int argc, char* argv[]) {
   if (!data_url)
     data_url = "./";
 
+  // TODO(bradnelson): Drop this hack once tar extraction first checks relative
+  // to the nexe.
   const char* nacl_alt_http = getenv("NACL_ALT_HTTP");
   if (nacl_alt_http && strcmp(nacl_alt_http, "0") != 0) {
     if (mount("/alt_http", "/mnt/http", "html5fs", 0, "type=PERSISTENT") != 0) {
@@ -59,6 +58,7 @@ int cli_main(int argc, char* argv[]) {
              "Please use --unlimited-storage");
     }
 
+    mkdir("/mnt/real_http", 0777);
     if (mount(data_url, "/mnt/real_http", "httpfs", 0, "") != 0) {
       perror("mounting http filesystem at /mnt/real_http failed");
       return 1;

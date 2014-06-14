@@ -1,0 +1,202 @@
+#!/bin/bash
+# Copyright (c) 2014 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# This is for bash on NaCl. Note that you cannot use external commands
+# until the installation is completed. Also, you cannot use features
+# which nacl_io does not support yet (e.g., pipes and sub-shells).
+
+set -e
+shopt -s nullglob
+
+SetupEnvironment() {
+  # Set up environment variables so that we can use installed binaries.
+  LIB_DIR=lib32
+  export PACKAGE_LIB_DIR=lib32
+  if [ ${NACL_ARCH} = "x86_64" ]; then
+    LIB_DIR=lib
+    export PACKAGE_LIB_DIR=lib64
+  fi
+  export NACL_SDK_ROOT=/mnt/html5/mingn
+  NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
+  LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
+  LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
+  export LD_LIBRARY_PATH
+  export LIBRARY_PATH=${LD_LIBRARY_PATH}
+  export PATH=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
+
+  mkdir -p /mnt/html5/home
+  mkdir -p /mnt/html5/alt_http
+
+  export PYTHONHOME=/lib/python2.7
+  export PYTHONPATH=/lib/python2.7
+
+  export RUBYLIB=/usr/lib/ruby/2.0.0
+  export RUBYLIB=${RUBYLIB}:${RUBYLIB}/${NACL_ARCH}-nacl
+  alias ruby='ruby /usr/bin/irb'
+
+  # Make vim emit directly until we have pipes.
+  export PAGER=cat
+}
+
+RemoveDir() {
+  local path="$1"
+  if [ -d ${path} ]; then
+    rm -rf ${path}/* || true
+    rm -rf ${path}
+  fi
+}
+
+InstallCorePackages() {
+  local package="core"
+  local storage_url=http://nativeclient-mirror.storage.googleapis.com
+  local sdk_version=${DEFAULT_SDK_VERSION}
+  local revision=${DEFAULT_REVISION}
+  local rev_url=${storage_url}/naclports/${sdk_version}/${revision}/publish
+
+  local base_url=${rev_url}/mingn/glibc/tarballs/base.${NACL_ARCH}.zip
+  local lib_url=${rev_url}/mingn/glibc/tarballs/lib.all.zip
+
+  local stamp_dir=/mnt/html5/mingn/stamp/${package}
+  local base_url_stamp="${stamp_dir}/${base_url//\//_}"
+  local lib_url_stamp="${stamp_dir}/${lib_url//\//_}"
+
+  if [[ -d ${base_url_stamp} && -d ${lib_url_stamp} ]]; then
+    # Package is up to date.
+    return
+  fi
+
+  local archive=/mnt/html5/.package.zip
+
+  echo "Downloading ${base_url}..."
+  curl -s ${base_url} -o ${archive}
+  echo "Extracting base..."
+  unzip -oqd /mnt/html5 ${archive}
+
+  echo "Downloading ${lib_url}..."
+  curl -s ${lib_url} -o ${archive}
+  echo "Extracting lib..."
+  unzip -oqd /mnt/html5 ${archive}
+
+  # Setup environment here so rm works.
+  SetupEnvironment
+
+  rm ${archive}
+
+  # Remove out stamps and write out new one.
+  RemoveDir ${stamp_dir}
+  mkdir -p ${base_url_stamp}
+  mkdir -p ${lib_url_stamp}
+  echo "Done."
+}
+
+InstallPackage() {
+  local package="$1"
+  local toolchain="$2"
+  local zip_path="${3:-${toolchain}.zip}"
+  local sdk_version="${4:-${DEFAULT_SDK_VERSION}}"
+  local revision="${5:-${DEFAULT_REVISION}}"
+  local storage_url=http://nativeclient-mirror.storage.googleapis.com
+  local rev_url=${storage_url}/naclports/${sdk_version}/${revision}/publish
+  local url=${rev_url}/${package}/${zip_path}
+  local stamp_dir=/mnt/html5/mingn/stamp/${package}
+  local url_stamp="${stamp_dir}/${url//\//_}"
+  local package_dir=/mnt/html5/packages/${package}
+
+  if [ -d ${package_dir}/${package} ]; then
+    local package_inside=${package_dir}/${package}
+  else
+    local package_inside=${package_dir}
+  fi
+
+  if [ -d ${url_stamp} ]; then
+    # TODO(bradnelson): Do something better.
+    # Add to PATH and LD_LIBRARY_PATH.
+    export PATH=${PATH}:${package_inside}
+    local package_libs=${package_inside}/${PACKAGE_LIB_DIR}
+    if [ -d ${package_libs} ]; then
+      export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+    fi
+
+    # Package is up to date.
+    return
+  fi
+
+  if [ -d ${stamp_dir} ]; then
+    echo "Updating ${package} package..."
+  else
+    echo "Installing ${package} package..."
+  fi
+  local archive=/mnt/html5/.package.zip
+  echo "Downloading ${url}..."
+  # -s: silent -o: output
+  curl -s ${url} -o ${archive}
+  if [ ! -e ${archive} ]; then
+    echo "${archive} does not exist!"
+    return
+  fi
+  # -o: overwrite -q: quiet -d: destination
+  echo "Extracting ${package}..."
+  RemoveDir ${package_dir}
+  mkdir -p ${package_dir}
+  unzip -oqd ${package_dir} ${archive}
+  rm ${archive}
+
+  # Update package_inside.
+  if [ -d ${package_dir}/${package} ]; then
+    local package_inside=${package_dir}/${package}
+  else
+    local package_inside=${package_dir}
+  fi
+  # TODO(bradnelson): Do something better.
+  # Add to PATH and LD_LIBRARY_PATH.
+  export PATH=${PATH}:${package_inside}
+  local package_libs=${package_inside}/${PACKAGE_LIB_DIR}
+  if [ -d ${package_libs} ]; then
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+  fi
+
+  # Copy tar files to /mnt/http.
+  for p in ${package_inside}/*.tar; do
+    cp ${p} /mnt/http/
+  done
+
+  # TODO(bradnelson): Do something better.
+  # Rename nexe for arch.
+  local package_nexe=${package_inside}/${package}_${NACL_ARCH}.nexe
+  if [ -e ${package_nexe} ]; then
+    mv ${package_nexe} ${package_inside}/${package}
+  fi
+
+  # Remove out stamps and write out new one.
+  RemoveDir ${stamp_dir}
+  mkdir -p ${url_stamp}
+  echo "Done."
+}
+
+DEFAULT_SDK_VERSION=pepper_37
+DEFAULT_REVISION=1328
+
+InstallCorePackages
+SetupEnvironment
+InstallPackage tar glibc
+InstallPackage git glibc
+InstallPackage nano newlib
+InstallPackage nethack newlib
+InstallPackage vim newlib
+InstallPackage python newlib newlib/python.zip
+InstallPackage ruby newlib newlib/ruby.zip
+InstallPackage lua newlib newlib/lua.zip
+
+# TODO(bradnelson): Remove this when nacl_io html5fs prefix issues are fixed.
+export HOME=/mnt/html5/home
+
+cd ${HOME}
+
+set +e
+shopt -u nullglob
+
+if [ -e ${HOME}/.bashrc ]; then
+  source ${HOME}/.bashrc
+fi

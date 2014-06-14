@@ -71,7 +71,7 @@ var processes = {};
 // is represented by a hash like
 // { element: embed DOM object, wait_req_id: the request ID string }
 var waiters = {};
-var pid = 1;
+var pid = 0;
 
 /**
  * Static initialier called from index.html.
@@ -412,6 +412,11 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
   params['PS_EXIT_MESSAGE'] = 'exited';
   params['TERM'] = 'xterm-256color';
   params['PWD'] = cwd;
+  // TODO(bradnelson): Drop this hack once tar extraction first checks relative
+  // to the nexe.
+  if (NaClTerm.useNaClAltHttp === true) {
+    params['NACL_ALT_HTTP'] = '1';
+  }
 
   function addParam(name, value) {
     var param = document.createElement('param');
