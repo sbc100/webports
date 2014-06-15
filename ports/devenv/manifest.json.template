@@ -3,6 +3,7 @@
   "description": "In-browser development environment for Native Client",
   "version": "0.1.0.%(version)s",
   "manifest_version": 2,
+  "minimum_chrome_version": "28",
   "icons": {
     "16": "icon_16.png",
     "48": "icon_48.png",
@@ -27,10 +28,6 @@
     }
   },
   "platforms": [
-    {
-      "nacl_arch": "arm",
-      "sub_package_path": "_platform_specific/arm/"
-    },
     {
       "nacl_arch": "x86-32",
       "sub_package_path": "_platform_specific/i686/"

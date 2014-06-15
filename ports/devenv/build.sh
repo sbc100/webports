@@ -29,4 +29,8 @@ InstallStep() {
 
   # Generate a manifest.json.
   GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR}
+
+  # Zip the full app for upload.
+  ChangeDir ${PUBLISH_DIR}
+  LogExecute zip -r devenv_app.zip app
 }
