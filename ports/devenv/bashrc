@@ -174,7 +174,7 @@ InstallPackage() {
 }
 
 DEFAULT_SDK_VERSION=pepper_37
-DEFAULT_REVISION=1332
+DEFAULT_REVISION=1334
 
 InstallCorePackages
 SetupEnvironment
