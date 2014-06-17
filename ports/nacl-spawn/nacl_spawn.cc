@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
 #include <stdint.h>
@@ -185,25 +186,125 @@ static void AddNmfToRequestForStatic(const std::string& prog,
   req->Set("nmf", nmf);
 }
 
-// Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
-static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
-  if (prog.find('/') == std::string::npos) {
+static void VarArrayInsert(
+    uint32_t index, pp::Var value, pp::VarArray* dst) {
+  dst->SetLength(dst->GetLength() + 1);
+  for (uint32_t i = dst->GetLength() - 1; i > index; --i) {
+    dst->Set(i, dst->Get(i - 1));
+  }
+  dst->Set(index, value);
+}
+
+static void FindInterpreter(std::string* path) {
+  // Check if the path exists.
+  if (access(path->c_str(), R_OK) == 0) {
+    return;
+  }
+  // As /bin and /usr/bin are currently only mounted to a memory filesystem
+  // in nacl_spawn, programs usually located there are installed to some other
+  // location which is included in the PATH.
+  // For now, do something non-standard.
+  // If the program cannot be found at its full path, strip the program path
+  // down to the basename and relying on later path search steps to find the
+  // actual program location.
+  size_t i = path->find_last_of('/');
+  if (i == std::string::npos) {
+    return;
+  }
+  *path = path->substr(i + 1);
+}
+
+static bool ExpandShBang(std::string* prog, pp::VarDictionary* req) {
+  // Open script.
+  int fh = open(prog->c_str(), O_RDONLY);
+  if (fh < 0) {
+    return false;
+  }
+  // Read first 4k.
+  char buffer[4096];
+  ssize_t len = read(fh, buffer, sizeof buffer);
+  if (len < 0) {
+    close(fh);
+    return false;
+  }
+  // Close script.
+  if (close(fh) < 0) {
+    return false;
+  }
+  // At least must have room for #!.
+  if (len < 2) {
+    errno = ENOEXEC;
+    return false;
+  }
+  // Check if it's a script.
+  if (memcmp(buffer, "#!", 2) != 0) {
+    // Not a script.
+    return true;
+  }
+  const char* start = buffer + 2;
+  // Find the end of the line while also looking for the first space.
+  // Mimicking Linux behavior, in which the first space marks a split point
+  // where everything before is the interpreter path and everything after is
+  // (including spaces) is treated as a single extra argument.
+  const char* end = start;
+  const char* split = NULL;
+  while (buffer - end < len && *end != '\n' && *end != '\r') {
+    if (*end == ' ' && split == NULL) {
+      split = end;
+    }
+    ++end;
+  }
+  // Update command to run.
+  pp::Var argsv = req->Get("args");
+  assert(argsv.is_array());
+  pp::VarArray args(argsv);
+  // Set argv[0] in case it was path expanded.
+  args.Set(0, *prog);
+  std::string interpreter;
+  if (split) {
+    interpreter = std::string(start, split - start);
+    std::string arg(split + 1, end - (split + 1));
+    VarArrayInsert(0, arg, &args);
+  } else {
+    interpreter = std::string(start, end - start);
+  }
+  FindInterpreter(&interpreter);
+  VarArrayInsert(0, interpreter, &args);
+  *prog = interpreter;
+  return true;
+}
+
+static bool UseBuiltInFallback(std::string* prog) {
+  if (prog->find('/') == std::string::npos) {
     bool found = false;
     const char* path_env = getenv("PATH");
     std::vector<std::string> paths;
     GetPaths(path_env, &paths);
-    if (paths.empty() || !GetFileInPaths(prog, paths, &prog)) {
+    if (!GetFileInPaths(*prog, paths, prog)) {
       // If the path does not contain a slash and we cannot find it
       // from PATH, we use NMF served with the JavaScript.
       return true;
     }
   }
+  return false;
+}
 
+// Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
+static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
+  if (UseBuiltInFallback(&prog)) {
+    return true;
+  }
   if (access(prog.c_str(), R_OK) != 0) {
     errno = ENOENT;
     return false;
   }
-
+  if (!ExpandShBang(&prog, req)) {
+    return false;
+  }
+  // Check fallback again in case of #! expanded to something relying on it.
+  if (UseBuiltInFallback(&prog)) {
+    return true;
+  }
 #if defined(__GLIBC__)
   std::vector<std::string> dependencies;
   if (!FindLibraryDependencies(prog, &dependencies))
