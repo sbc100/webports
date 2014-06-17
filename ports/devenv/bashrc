@@ -70,14 +70,14 @@ InstallCorePackages() {
   local archive=/mnt/html5/.package.zip
 
   echo "Downloading ${base_url}..."
-  curl -s ${base_url} -o ${archive}
+  curl ${base_url} -o ${archive}
   echo "Extracting base..."
-  unzip -oqd /mnt/html5 ${archive}
+  unzip -od /mnt/html5 ${archive}
 
   echo "Downloading ${lib_url}..."
-  curl -s ${lib_url} -o ${archive}
+  curl ${lib_url} -o ${archive}
   echo "Extracting lib..."
-  unzip -oqd /mnt/html5 ${archive}
+  unzip -od /mnt/html5 ${archive}
 
   # Setup environment here so rm works.
   SetupEnvironment
@@ -130,17 +130,15 @@ InstallPackage() {
   fi
   local archive=/mnt/html5/.package.zip
   echo "Downloading ${url}..."
-  # -s: silent -o: output
-  curl -s ${url} -o ${archive}
+  curl ${url} -o ${archive}
   if [ ! -e ${archive} ]; then
     echo "${archive} does not exist!"
     return
   fi
-  # -o: overwrite -q: quiet -d: destination
   echo "Extracting ${package}..."
   RemoveDir ${package_dir}
   mkdir -p ${package_dir}
-  unzip -oqd ${package_dir} ${archive}
+  unzip -od ${package_dir} ${archive}
   rm ${archive}
 
   # Update package_inside.
@@ -176,18 +174,15 @@ InstallPackage() {
 }
 
 DEFAULT_SDK_VERSION=pepper_37
-DEFAULT_REVISION=1328
+DEFAULT_REVISION=1332
 
 InstallCorePackages
 SetupEnvironment
 InstallPackage tar glibc
 InstallPackage git glibc
 InstallPackage nano newlib
-InstallPackage nethack newlib
 InstallPackage vim newlib
 InstallPackage python newlib newlib/python.zip
-InstallPackage ruby newlib newlib/ruby.zip
-InstallPackage lua newlib newlib/lua.zip
 
 # TODO(bradnelson): Remove this when nacl_io html5fs prefix issues are fixed.
 export HOME=/mnt/html5/home
