@@ -72,6 +72,44 @@ def FormatTimeDelta(delta):
   return rtn
 
 
+def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
+  """Parse the contents of the given file-object as a pkg_info file.
+  """
+  rtn = {}
+
+  def ParsePkgInfoLine(line, line_no):
+    if '=' not in line:
+      raise Error('Invalid info line %s:%d' % (line_no, filename,
+                                                   line_no))
+    key, value = line.split('=', 1)
+    key = key.strip()
+    if key not in valid_keys:
+      raise Error("Invalid key '%s' in info file %s:%d" % (key, filename,
+                                                           line_no))
+    value = value.strip()
+    if value[0] == '(':
+      array_value = []
+      if value[-1] != ')':
+        raise Error('Error parsing %s:%d: %s (%s)' % (filename, line_no, key,
+                                                      value))
+      value = value[1:-1].split()
+    else:
+      value = shlex.split(value)[0]
+    return (key, value)
+
+  for i, line in enumerate(info_file):
+    if line[0] == '#':
+      continue
+    key, value = ParsePkgInfoLine(line, i+1)
+    rtn[key] = value
+
+  for required_key in required_keys:
+    if required_key not in rtn:
+      raise Error("Required key '%s' missing from info file: '%s'" %
+                  (required_key, filename))
+  return rtn
+
+
 def WriteFileList(package_name, file_names, config):
   filename = GetFileList(package_name, config)
   with open(filename, 'w') as f:
@@ -104,7 +142,7 @@ def CheckStamp(filename, contents=None, timestamp=None):
 
   if contents is not None:
     with open(filename) as f:
-      if f.read() != contents:
+      if not f.read().startswith(contents):
         return False
 
   return True
@@ -124,6 +162,12 @@ def Trace(message):
   if Trace.verbose:
     Log(message)
 Trace.verbose = False
+
+
+def GetSDKVersion():
+  getos = os.path.join(NACL_SDK_ROOT, 'tools', 'getos.py')
+  version = subprocess.check_output([getos, '--sdk-version']).strip()
+  return version
 
 
 def GetToolchainRoot(config):
@@ -181,7 +225,9 @@ def GetFileList(package_name, config):
 def IsInstalled(package_name, config, stamp_content=None):
   """Returns True if the given package is installed."""
   stamp = GetInstallStamp(package_name, config)
-  return CheckStamp(stamp, stamp_content)
+  result = CheckStamp(stamp, stamp_content)
+  Trace("IsInstalled: %s -> %s" % (package_name, result))
+  return result
 
 
 def RemoveEmptryDirs(dirname):
@@ -261,6 +307,8 @@ class BinaryPackage(object):
 
   Operations such as installation can be performed on the package.
   """
+  EXTRA_KEYS = ['BUILD_CONFIG', 'BUILD_ARCH', 'BUILD_TOOLCHAIN',
+                'BUILD_SDK_VERSION', 'BUILD_NACLPORTS_REVISION']
   def __init__(self, filename):
     self.filename = filename
     if not os.path.exists(self.filename):
@@ -269,29 +317,29 @@ class BinaryPackage(object):
     basename = os.path.splitext(basename)[0]
     if extension != '.bz2':
       raise Error('invalid file extension: %s' % extension)
-    if '_' not in basename:
-      raise Error('package filename must contain underscores: %s' % basename)
-    parts = basename.split('_')
-    if len(parts) < 3 or len(parts) > 5:
-      raise Error('invalid package filename: %s' % basename)
-    if parts[-1] == 'debug':
-      parts = parts[:-1]
-      debug = True
-    else:
-      debug = False
 
-    if parts[-1] in ('newlib', 'glibc', 'bionic'):
-      toolchain = parts[-1]
-      parts = parts[:-1]
-    self.name, self.version, arch = parts[:3]
-    if arch == 'pnacl':
-      toolchain = 'pnacl'
-    arch = pkgarch_to_arch[arch]
+    with tarfile.open(self.filename) as tar:
+      if './pkg_info' not in tar.getnames():
+        raise Error('package does not contain pkg_info file')
+      info = tar.extractfile('./pkg_info')
+      valid_keys = Package.VALID_KEYS + BinaryPackage.EXTRA_KEYS
+      required_keys = Package.REQUIRED_KEYS + BinaryPackage.EXTRA_KEYS
+      info = ParsePkgInfo(info, filename, valid_keys, required_keys)
+      for key, value in info.iteritems():
+        setattr(self, key, value)
 
-    self.config = Configuration(arch, toolchain, debug)
+    self.config = Configuration(self.BUILD_ARCH,
+                                self.BUILD_TOOLCHAIN,
+                                self.BUILD_CONFIG == 'debug')
 
-  def IsInstalled(self):
-    GetInstallStamp(self.name, self.config)
+  def IsInstallable(self):
+    """Determine if a binary package can be installed in the
+    currently configured SDK.
+
+    Currently only packages built with the same SDK major version
+    are installable.
+    """
+    return self.BUILD_SDK_VERSION == GetSDKVersion()
 
   def InstallFile(self, filename, old_root, new_root):
     oldname = os.path.join(old_root, filename)
@@ -345,7 +393,7 @@ class BinaryPackage(object):
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
-    Log("Installing '%s' [%s]" % (self.name, self.config))
+    Log("Installing '%s' [%s]" % (self.NAME, self.config))
     os.makedirs(dest_tmp)
 
     try:
@@ -377,8 +425,8 @@ class BinaryPackage(object):
 
       with open(os.path.join(dest_tmp, 'pkg_info')) as f:
         pkg_info = f.read()
-      WriteStamp(self.name, self.config, pkg_info)
-      WriteFileList(self.name, names, self.config)
+      WriteStamp(self.NAME, self.config, pkg_info)
+      WriteFileList(self.NAME, names, self.config)
     finally:
       shutil.rmtree(dest_tmp)
 
@@ -389,10 +437,12 @@ class Package(object):
   Package objects correspond to folders on disk which
   contain a 'pkg_info' file.
   """
-  VALID_KEYS = ('NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
+  VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
                 'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH',
-                'DISABLED_ARCH', 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED')
+                'DISABLED_ARCH', 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED']
+  REQUIRED_KEYS = ['NAME', 'VERSION']
   VALID_SUBDIRS = ('', 'ports', 'python_modules')
+
 
   def __init__(self, pkg_root, config=None):
     if config is None:
@@ -400,7 +450,6 @@ class Package(object):
     self.config = config
     self.root = os.path.abspath(pkg_root)
     self.basename = os.path.basename(self.root)
-    keys = []
     for key in Package.VALID_KEYS:
       setattr(self, key, None)
     self.DEPENDS = []
@@ -414,18 +463,14 @@ class Package(object):
       raise Error('Invalid package folder: %s' % pkg_root)
     self.root = os.path.dirname(self.info)
 
+    # Parse pkg_info file
     with open(self.info) as f:
-      for i, line in enumerate(f):
-        if line[0] == '#':
-          continue
-        key, value = self.ParsePkgInfoLine(line, i+1)
-        keys.append(key)
-        setattr(self, key, value)
+      info = ParsePkgInfo(f, self.info, Package.VALID_KEYS,
+                          Package.REQUIRED_KEYS)
 
-    for required_key in ('NAME', 'VERSION'):
-      if required_key not in keys:
-        raise Error('%s: pkg_info missing required key: %s' %
-                    (self.info, required_key))
+    # Set attributres based on pkg_info setttings.
+    for key, value in info.items():
+      setattr(self, key, value)
 
     if '_' in self.NAME:
       raise Error('%s: package NAME cannot contain underscores' % self.info)
@@ -440,26 +485,6 @@ class Package(object):
 
   def __cmp__(self, other):
     return cmp(self.NAME, other.NAME)
-
-  def ParsePkgInfoLine(self, line, line_no):
-    if '=' not in line:
-      raise Error('Invalid pkg_info line %d: %s' % (line_no, self.info))
-    key, value = line.split('=', 1)
-    key = key.strip()
-    if key not in Package.VALID_KEYS:
-      raise Error("Invalid key '%s' in pkg_info: %s" % (key, self.info))
-    value = value.strip()
-    if value[0] == '(':
-      array_value = []
-      if value[-1] != ')':
-        raise Error('Error parsing %s: %s (%s)' % (self.info, key, value))
-      value = value[1:-1]
-      for single_value in value.split():
-        array_value.append(single_value)
-      value = array_value
-    else:
-      value = shlex.split(value)[0]
-    return (key, value)
 
   def CheckDeps(self, valid_dependencies):
     for dep in self.DEPENDS:
@@ -514,14 +539,25 @@ class Package(object):
       fullname.append('debug')
     return '_'.join(fullname) + '.tar.bz2'
 
-  def IsInstalled(self):
+  def InstalledInfoContents(self):
+    """Generate content of the .info file to install based on source
+    pkg_info file and current build configuration."""
     with open(self.info) as f:
-      stamp_content = f.read()
-    stamp_content += 'CONFIG=' + self.config.config_name + '\n'
-    return IsInstalled(self.NAME, self.config, stamp_content)
+      info_content = f.read()
+    info_content += 'BUILD_CONFIG=%s\n' % self.config.config_name
+    info_content += 'BUILD_ARCH=%s\n' % self.config.arch
+    info_content += 'BUILD_TOOLCHAIN=%s\n' % self.config.toolchain
+    info_content += 'BUILD_SDK_VERSION=%s\n' % GetSDKVersion()
+    return info_content
+
+  def IsInstalled(self):
+    return IsInstalled(self.NAME, self.config, self.InstalledInfoContents())
 
   def IsBuilt(self):
-    return os.path.exists(self.PackageFile())
+    package_file = self.PackageFile()
+    if not os.path.exists(package_file):
+      return False
+    return BinaryPackage(package_file).IsInstallable()
 
   def Install(self, verbose, build_deps, force=None):
     if force is None and self.IsInstalled():
@@ -800,17 +836,6 @@ def run_main(args):
     parser.error('You must specify a sub-command. See --help.')
 
   command = args[0]
-  package_dirs = ['.']
-  if len(args) > 1:
-    if options.all:
-      parser.error('Package name and --all cannot be specified together')
-    package_dirs = args[1:]
-
-  if not NACL_SDK_ROOT:
-    raise Error('$NACL_SDK_ROOT not set')
-
-  if not os.path.isdir(NACL_SDK_ROOT):
-    raise Error('$NACL_SDK_ROOT does not exist: %s' % NACL_SDK_ROOT)
 
   verbose = options.verbose or os.environ.get('VERBOSE') == '1'
   Trace.verbose = verbose
@@ -819,6 +844,49 @@ def run_main(args):
   else:
     os.environ['VERBOSE'] = '0'
     os.environ['V'] = '0'
+
+  if not NACL_SDK_ROOT:
+    raise Error('$NACL_SDK_ROOT not set')
+
+  if not os.path.isdir(NACL_SDK_ROOT):
+    raise Error('$NACL_SDK_ROOT does not exist: %s' % NACL_SDK_ROOT)
+
+  config = Configuration(options.arch, options.toolchain, options.debug)
+
+  if command == 'list':
+    for filename in os.listdir(GetInstallStampRoot(config)):
+      basename, ext = os.path.splitext(filename)
+      if ext != '.info':
+        continue
+      Log(basename)
+    return 0
+  elif command == 'info':
+    if len(args) != 2:
+      parser.error('info command takes a single package name')
+    package_name = args[1]
+    info_file = GetInstallStamp(package_name, config)
+    print "Install receipt: %s" % info_file
+    if not os.path.exists(info_file):
+      raise Error('package not installed: %s [%s]' % (package_name, config))
+    with open(info_file) as f:
+      sys.stdout.write(f.read())
+    return 0
+  elif command == 'contents':
+    if len(args) != 2:
+      parser.error('contents command takes a single package name')
+    package_name = args[1]
+    list_file = GetFileList(package_name, config)
+    if not os.path.exists(list_file):
+      raise Error('package not installed: %s [%s]' % (package_name, config))
+    with open(list_file) as f:
+      sys.stdout.write(f.read())
+    return 0
+
+  package_dirs = ['.']
+  if len(args) > 1:
+    if options.all:
+      parser.error('Package name and --all cannot be specified together')
+    package_dirs = args[1:]
 
   def DoCmd(package):
     try:
@@ -851,36 +919,28 @@ def run_main(args):
       else:
         raise e
 
-  config = Configuration(options.arch, options.toolchain, options.debug)
   def rmtree(path):
     Log('removing %s' % path)
     if os.path.exists(path):
       shutil.rmtree(path)
 
-  if command == 'list':
-    for filename in os.listdir(GetInstallStampRoot(config)):
-      basename, ext = os.path.splitext(filename)
-      if ext != '.info':
-        continue
-      Log(basename)
-  else:
-    if options.all:
-      options.ignore_disabled = True
-      if command == 'clean':
-        rmtree(STAMP_DIR)
-        rmtree(BUILD_ROOT)
-        rmtree(PACKAGES_ROOT)
-        rmtree(PUBLISH_ROOT)
-        rmtree(GetInstallStampRoot(config))
-        rmtree(GetInstallRoot(config))
-      else:
-        for p in PackageIterator():
-          if not p.DISABLED:
-            DoCmd(p)
+  if options.all:
+    options.ignore_disabled = True
+    if command == 'clean':
+      rmtree(STAMP_DIR)
+      rmtree(BUILD_ROOT)
+      rmtree(PACKAGES_ROOT)
+      rmtree(PUBLISH_ROOT)
+      rmtree(GetInstallStampRoot(config))
+      rmtree(GetInstallRoot(config))
     else:
-      for package_dir in package_dirs:
-        p = Package(package_dir, config)
-        DoCmd(p)
+      for p in PackageIterator():
+        if not p.DISABLED:
+          DoCmd(p)
+  else:
+    for package_dir in package_dirs:
+      p = Package(package_dir, config)
+      DoCmd(p)
 
 
 def main(args):

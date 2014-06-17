@@ -714,7 +714,6 @@ SetupSDKBuildSystem() {
   # We override $(OUTBASE) to force the build system to put
   # all its artifacts in ${SRC_DIR} rather than alongside
   # the Makefile.
-  GetRevision
   export OUTBASE=${SRC_DIR}
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
@@ -782,7 +781,6 @@ GenerateManifest() {
   local TARGET_DIR=$1
   shift
   local TEMPLATE_EXPAND="${START_DIR}/../../build_tools/template_expand.py"
-  GetRevision
 
   # TODO(sbc): deal with versions greater than 16bit.
   if (( ${REVISION} >= 65536 )); then
@@ -1296,10 +1294,14 @@ PackageStep() {
   fi
   LogExecute cp ${START_DIR}/pkg_info ${DESTDIR}
   if [ ${NACL_DEBUG} = "1" ]; then
-    echo "CONFIG=debug" >> ${DESTDIR}/pkg_info
+    echo "BUILD_CONFIG=debug" >> ${DESTDIR}/pkg_info
   else
-    echo "CONFIG=release" >> ${DESTDIR}/pkg_info
+    echo "BUILD_CONFIG=release" >> ${DESTDIR}/pkg_info
   fi
+  echo "BUILD_ARCH=${NACL_ARCH}" >> ${DESTDIR}/pkg_info
+  echo "BUILD_TOOLCHAIN=${TOOLCHAIN}" >> ${DESTDIR}/pkg_info
+  echo "BUILD_SDK_VERSION=${NACL_SDK_VERSION}" >> ${DESTDIR}/pkg_info
+  echo "BUILD_NACLPORTS_REVISION=${REVISION}" >> ${DESTDIR}/pkg_info
   LogExecute tar cf ${PACKAGE_FILE} -C ${DESTDIR} .
 }
 
@@ -1429,3 +1431,4 @@ CheckSDKVersion
 PatchSpecFile
 InjectSystemHeaders
 InstallConfigSite
+GetRevision

@@ -12,8 +12,8 @@ three main file:
 - build.sh: a bash script for building it
 - nacl.patch: an optional patch file.
 
-The tools for building packages live in ``build_tools``.  To build and install
-a package into the toolchain run ``naclports.py install <package_dir>``.  This
+The tools for building packages live in ``bin``.  To build and install
+a package into the toolchain run ``naclports install <package_dir>``.  This
 script will download, patch, build and install the application or library.  By
 default it will first build any dependencies that that the package has.
 
@@ -52,13 +52,13 @@ following package: ``lib32z1-dev``.
 Building
 --------
 
-Before you can build any of the package you must set the NACL_SDK_ROOT
+Before you can build any of the package you must set the ``NACL_SDK_ROOT``
 environment variable to top directory of a version of the Native Client SDK
 (the directory containing toolchain/). This path should be absolute.
 
 The top level Makefile can be used as a quick way to build one or more
-packages. For example, ``make vorbis`` will build ``libvorbis-1.2.3`` and
-``libogg-1.1.4``. ``make all`` will build all the packages.
+packages. For example, ``make libvorbis`` will build ``libvorbis`` and
+``libogg``. ``make all`` will build all the packages.
 
 There are 4 possible architectures that NaCl modules can be compiled for: i686,
 x86_64, arm, pnacl. The naclports build system will only build just one at at
@@ -79,13 +79,15 @@ you can use the top level ``make_all.sh`` script. e.g.::
   $ ./make_all.sh openssl
 
 Headers and libraries are installed into the toolchains directly so there is
-not add extra -I or -L options in order to use the libraries. (Currently,
-the naclports scripts will generate a gcc "specs" file to add the required
-paths.)
+not add extra -I or -L options in order to use the libraries.
 
 The source code and build output for each package is placed in::
 
   out/build/<PACKAGE_NAME>
+
+By default all builds are in release configuration.  If you want to build
+debug packages set ``NACL_DEBUG=1`` or pass ``--debug`` to the naclports
+script.
 
 **Note**: Each package has its own license. Please read and understand these
 licenses before using these packages in your projects.

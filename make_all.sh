@@ -12,32 +12,36 @@ set -e
 
 TARGETS="$*"
 TARGETS=${TARGETS:-all}
-export BUILD_FLAGS=--ignore-disabled
+BUILD_FLAGS=--ignore-disabled
+
+export TOOLCHAIN
+export NACL_ARCH
+export BUILD_FLAGS
 
 # x86_64 NaCl
-export NACL_ARCH=x86_64
-export TOOLCHAIN=glibc
+NACL_ARCH=x86_64
+TOOLCHAIN=glibc
 make ${TARGETS}
-export TOOLCHAIN=newlib
+TOOLCHAIN=newlib
 make ${TARGETS}
 
 # i686 NaCl
-export NACL_ARCH=i686
-export TOOLCHAIN=glibc
+NACL_ARCH=i686
+TOOLCHAIN=glibc
 make ${TARGETS}
-export TOOLCHAIN=newlib
+TOOLCHAIN=newlib
 make ${TARGETS}
 
 # ARM NaCl
-export NACL_ARCH=arm
-export TOOLCHAIN=newlib
+NACL_ARCH=arm
+TOOLCHAIN=newlib
 make ${TARGETS}
 if [ -e ${NACL_SDK_ROOT}/toolchain/*_arm_bionic ]; then
-  export TOOLCHAIN=bionic
+  TOOLCHAIN=bionic
   make ${TARGETS}
 fi
 
 # PNaCl
-export NACL_ARCH=pnacl
-export TOOLCHAIN=pnacl
+NACL_ARCH=pnacl
+TOOLCHAIN=pnacl
 make ${TARGETS}
