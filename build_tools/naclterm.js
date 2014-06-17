@@ -474,7 +474,7 @@ NaClTerm.prototype.waitpid = function(pid, options, e) {
   if (pid == -1 && finishedProcess !== null) {
     var reply = {};
     reply[e.data['id']] = {
-      pid: finishedProcess,
+      pid: parseInt(finishedProcess),
       status: processes[finishedProcess],
     };
     delete processes[finishedProcess];
