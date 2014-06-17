@@ -17,11 +17,11 @@ else
 fi
 
 BuildSuccess() {
-  echo "naclports: Build SUCCEEDED $1 ($NACL_ARCH)"
+  echo "naclports: Build SUCCEEDED $1 (${NACL_ARCH}/${TOOLCHAIN})"
 }
 
 BuildFailure() {
-  MESSAGE="naclports: Build FAILED for $1 ($NACL_ARCH)"
+  MESSAGE="naclports: Build FAILED for $1 (${NACL_ARCH}/${TOOLCHAIN})"
   echo $MESSAGE
   echo "@@@STEP_FAILURE@@@"
   MESSAGES="$MESSAGES\n$MESSAGE"
@@ -75,7 +75,10 @@ InstallPackageMultiArch() {
       continue
     fi
     if ! RunCmd make $1 ; then
+      # Early exit if one of the architecures fails. This mean the
+      # failure is always at the end of the build step.
       BuildFailure $1
+      return
     fi
   done
   export NACL_ARCH=all
