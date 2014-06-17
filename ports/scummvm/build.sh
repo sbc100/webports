@@ -3,11 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+MIRROR_URL=http://storage.googleapis.com/naclports/mirror
+
 # Beneath a Steel Sky (floppy version)
-readonly BASS_FLOPPY_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/bass/BASS-Floppy-1.3.zip
+readonly BASS_FLOPPY_URL=${MIRROR_URL}/scummvm_games/bass/BASS-Floppy-1.3.zip
 readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
 
-readonly LURE_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/scummvm_games/lure/lure-1.1.zip
+readonly LURE_URL=${MIRROR_URL}/scummvm_games/lure/lure-1.1.zip
 readonly LURE_NAME=lure-1.1
 
 EXECUTABLES=scummvm
