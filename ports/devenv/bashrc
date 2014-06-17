@@ -10,6 +10,11 @@
 set -e
 shopt -s nullglob
 
+# This URL has changing. Next time a new revision is integrated
+# this should be updated to:
+# STORAGE_URL=http://naclports.storage.googleapis.com/builds
+STORAGE_URL=http://nativeclient-mirror.storage.googleapis.com/naclports
+
 SetupEnvironment() {
   # Set up environment variables so that we can use installed binaries.
   LIB_DIR=lib32
@@ -50,10 +55,9 @@ RemoveDir() {
 
 InstallCorePackages() {
   local package="core"
-  local storage_url=http://nativeclient-mirror.storage.googleapis.com
   local sdk_version=${DEFAULT_SDK_VERSION}
   local revision=${DEFAULT_REVISION}
-  local rev_url=${storage_url}/naclports/${sdk_version}/${revision}/publish
+  local rev_url=${STORAGE_URL}/${sdk_version}/${revision}/publish
 
   local base_url=${rev_url}/mingn/glibc/tarballs/base.${NACL_ARCH}.zip
   local lib_url=${rev_url}/mingn/glibc/tarballs/lib.all.zip
@@ -97,8 +101,7 @@ InstallPackage() {
   local zip_path="${3:-${toolchain}.zip}"
   local sdk_version="${4:-${DEFAULT_SDK_VERSION}}"
   local revision="${5:-${DEFAULT_REVISION}}"
-  local storage_url=http://nativeclient-mirror.storage.googleapis.com
-  local rev_url=${storage_url}/naclports/${sdk_version}/${revision}/publish
+  local rev_url=${STORAGE_URL}/${sdk_version}/${revision}/publish
   local url=${rev_url}/${package}/${zip_path}
   local stamp_dir=/mnt/html5/mingn/stamp/${package}
   local url_stamp="${stamp_dir}/${url//\//_}"

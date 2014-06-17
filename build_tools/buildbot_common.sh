@@ -9,7 +9,7 @@ MESSAGES=
 readonly BASE_DIR="$(dirname $0)/.."
 cd ${BASE_DIR}
 
-UPLOAD_PATH=nativeclient-mirror/naclports/${PEPPER_DIR}/
+UPLOAD_PATH=naclports/builds/${PEPPER_DIR}/
 if [ -d .git ]; then
   UPLOAD_PATH+=`git number`-`git rev-parse --short HEAD`
 else
