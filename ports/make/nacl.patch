@@ -1,12 +1,12 @@
 diff --git a/Makefile.in b/Makefile.in
-index 6481e99..a1b3672 100644
+index 6481e99..ea6f0ab 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -332,8 +332,11 @@ EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
  noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
  		debug.h getopt.h gettext.h hash.h
  
-+NACL_LIBS = ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi -lppapi_cpp \
++NACL_LIBS = ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp \
 +    -l${NACL_CPP_LIB}
 +
  make_LDADD = @LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
@@ -15,6 +15,77 @@ index 6481e99..a1b3672 100644
  man_MANS = make.1
  AM_CPPFLAGS = $(GLOBINC) $(am__append_2)
  
+diff --git a/job.c b/job.c
+index aacfb84..06568e1 100644
+--- a/job.c
++++ b/job.c
+@@ -119,7 +119,11 @@ static void vmsWaitForChildren (int *);
+ #endif
+ 
+ #ifdef HAVE_WAITPID
+-# define WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
++# if defined(__native_client__)
++#  define WAIT_NOHANG(status)	nacl_waitpid (-1, (status), WNOHANG)
++# else
++#  define WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
++# endif
+ #else	/* Don't have waitpid.  */
+ # ifdef HAVE_WAIT3
+ #  ifndef wait3
+@@ -614,7 +618,11 @@ reap_children (int block, int err)
+ 		pid = WAIT_NOHANG (&status);
+ 	      else
+ #endif
++# if defined(__native_client__)
++		EINTRLOOP(pid, nacl_waitpid (-1, &status, 0));
++# else
+ 		EINTRLOOP(pid, wait (&status));
++# endif
+ #endif /* !VMS */
+ 	    }
+ 	  else
+@@ -1320,8 +1328,17 @@ start_job_command (struct child *child)
+       if (job_rfd >= 0)
+ 	fcntl (job_rfd, F_SETFD, 0);
+ 
+-#else  /* !__EMX__ */
+-
++# else  /* !__EMX__ */
++#  if defined(__native_client__)
++      environ = child->environment;
++      child->pid = nacl_spawn_simple(argv);
++      if (child->pid < 0) {
++        environ = parent_environ;
++        perror_with_name ("nacl_spawn_simple", "");
++        goto error;
++      }
++      environ = parent_environ;
++#  else
+       child->pid = vfork ();
+       environ = parent_environ;	/* Restore value child may have clobbered.  */
+       if (child->pid == 0)
+@@ -1339,11 +1356,11 @@ start_job_command (struct child *child)
+           if (job_rfd >= 0)
+             close (job_rfd);
+ 
+-#ifdef SET_STACK_SIZE
++#   ifdef SET_STACK_SIZE
+           /* Reset limits, if necessary.  */
+           if (stack_limit.rlim_cur)
+             setrlimit (RLIMIT_STACK, &stack_limit);
+-#endif
++#   endif
+ 
+ 	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
+                              argv, child->environment);
+@@ -1355,6 +1372,7 @@ start_job_command (struct child *child)
+ 	  perror_with_name ("vfork", "");
+ 	  goto error;
+ 	}
++#  endif
+ # endif  /* !__EMX__ */
+ #endif /* !VMS */
+     }
 diff --git a/main.c b/main.c
 index c6989e3..d070b47 100644
 --- a/main.c
