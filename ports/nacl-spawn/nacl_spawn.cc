@@ -23,9 +23,7 @@
 #include "ppapi/cpp/var_dictionary.h"
 #include "ppapi_simple/ps_instance.h"
 
-#if defined(__GLIBC__)
-# include "library_dependencies.h"
-#endif
+#include "library_dependencies.h"
 #include "path_util.h"
 
 extern char** environ;
@@ -305,7 +303,6 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
   if (UseBuiltInFallback(&prog)) {
     return true;
   }
-#if defined(__GLIBC__)
   std::vector<std::string> dependencies;
   if (!FindLibraryDependencies(prog, &dependencies))
     return false;
@@ -315,7 +312,6 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
     return true;
   }
   // No dependencies means the main binary is statically linked.
-#endif
   AddNmfToRequestForStatic(prog, req);
   return true;
 }

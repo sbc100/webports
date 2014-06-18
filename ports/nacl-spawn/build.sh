@@ -18,6 +18,8 @@ BuildStep() {
 
   if [ "${NACL_LIBC}" = "glibc" ]; then
     MAKE_TARGETS+=" test"
+  else
+    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
   MAKEFLAGS+=" TOOLCHAIN=${TOOLCHAIN}"

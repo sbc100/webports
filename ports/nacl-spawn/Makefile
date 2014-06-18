@@ -6,9 +6,8 @@
 
 NACL_SPAWN_OBJS=nacl_spawn.o path_util.o
 # For now, we do not support spawning a new glibc process from newlib.
-ifeq ($(TOOLCHAIN),glibc)
+
 NACL_SPAWN_OBJS+=elf_reader.o library_dependencies.o
-endif
 
 TEST_EXES=test/elf_reader test/library_dependencies
 TEST_BINARIES=test/test_exe test/libtest1.so test/libtest2.so test/libtest3.so
