@@ -23,8 +23,6 @@
 #  define ELF_MACHINE EM_386
 # elif defined(__arm__)
 #  define ELF_MACHINE EM_ARM
-# else
-#  error "Unknown architecture"
 # endif
 #endif
 

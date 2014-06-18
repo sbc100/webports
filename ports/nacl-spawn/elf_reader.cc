@@ -70,10 +70,12 @@ bool ElfReader::ReadPhdrs(FILE* fp, std::vector<ElfW(Phdr)>* phdrs) {
     return false;
   }
 
+#if !defined(__pnacl__)
   if (ehdr.e_machine != ELF_MACHINE) {
     PrintError("unsupported architecture: e_machine=%d", ehdr.e_machine);
     return false;
   }
+#endif
 
   if (fseek(fp, ehdr.e_phoff, SEEK_SET) < 0) {
     PrintError("failed to seek to program header");
