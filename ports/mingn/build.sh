@@ -131,6 +131,9 @@ GROUP(${mingn_ldflags})
 EOF
   done
 
+  # Copy in SDK includes.
+  LogExecute cp -r ${NACL_SDK_ROOT}/include mingn/
+
   # Remove shared objects which are symlinked after we resolve them.
   find mingn -name '*.so.*.*' -exec rm -f {} \;
 
