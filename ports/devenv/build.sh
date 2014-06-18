@@ -23,6 +23,13 @@ InstallStep() {
   LogExecute cp -fR ${CURL_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
   LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
 
+  # Download old version of python.
+  local python_url=https://nacltools.storage.googleapis.com/python
+  curl ${python_url}/python_store-2.7.5.3/pydata_x86_32.tar \
+    -o ${APP_DIR}/pydata_x86_32.tar
+  curl ${python_url}/python_store-2.7.5.3/pydata_x86_64.tar \
+    -o ${APP_DIR}/pydata_x86_64.tar
+
   # Copy bash.js and bashrc.
   cp ${START_DIR}/bash.js ${APP_DIR}
   cp ${START_DIR}/bashrc ${APP_DIR}

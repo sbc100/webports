@@ -95,6 +95,37 @@ InstallCorePackages() {
   echo "Done."
 }
 
+InstallPython() {
+  local package="python"
+  local nacl_tools=http://nacltools.storage.googleapis.com
+  local url=${nacl_tools}/python/python_store-2.7.5.3/python_${NACL_ARCH}.zip
+  local package_dir=/mnt/html5/packages/${package}
+  local stamp_dir=/mnt/html5/mingn/stamp/${package}
+  local url_stamp="${stamp_dir}/${url//\//_}"
+
+  export PATH=${PATH}:${package_dir}
+
+  if [[ -d ${url_stamp} ]]; then
+    # Package is up to date.
+    return
+  fi
+
+  local archive=/mnt/html5/.package.zip
+
+  echo "Downloading ${url}..."
+  curl ${url} -o ${archive}
+  echo "Extracting ${package}..."
+  RemoveDir ${package_dir}
+  mkdir -p ${package_dir}
+  unzip -od ${package_dir} ${archive}
+  rm ${archive}
+
+  # Remove out stamps and write out new one.
+  RemoveDir ${stamp_dir}
+  mkdir -p ${url_stamp}
+  echo "Done."
+}
+
 InstallPackage() {
   local package="$1"
   local toolchain="$2"
@@ -185,7 +216,7 @@ InstallPackage tar glibc
 InstallPackage git glibc
 InstallPackage nano newlib
 InstallPackage vim newlib
-InstallPackage python newlib newlib/python.zip
+InstallPython
 
 # TODO(bradnelson): Remove this when nacl_io html5fs prefix issues are fixed.
 export HOME=/mnt/html5/home
