@@ -10,8 +10,9 @@ ConfigureStep() {
 }
 
 BuildStep() {
-  make clean
-  make CC="${NACLCC}" AR="${NACLAR}" RANLIB="${NACLRANLIB}" -j${OS_JOBS} libbz2.a
+  LogExecute make clean
+  LogExecute make CC="${NACLCC}" AR="${NACLAR}" RANLIB="${NACLRANLIB}" \
+      -j${OS_JOBS} libbz2.a
   if [ "${NACL_SHARED}" = "1" ]; then
     LogExecute make -f Makefile-libbz2_so clean
     LogExecute make -f Makefile-libbz2_so CC="${NACLCC}" AR="${NACLAR}" \
