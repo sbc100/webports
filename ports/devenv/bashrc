@@ -24,12 +24,25 @@ SetupEnvironment() {
     export PACKAGE_LIB_DIR=lib64
   fi
   export NACL_SDK_ROOT=/mnt/html5/mingn
-  NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
+  export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
   LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
   LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
   export LD_LIBRARY_PATH
   export LIBRARY_PATH=${LD_LIBRARY_PATH}
   export PATH=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
+
+  # Allow cross development by exporting alternate library paths.
+  LIBRARY_PATH32=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32
+  LIBRARY_PATH32+=:${NACL_TOOLCHAIN_ROOT}/i686-nacl/usr/lib
+  export LIBRARY_PATH32
+  LIBRARY_PATH64=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib
+  LIBRARY_PATH64+=:${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib
+  export LIBRARY_PATH64
+
+  # TODO(bradnelson): Figure out why it can't find them normally.
+  # Compiler has trouble finding its c++ headers, workaround.
+  local tc_inc=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/include/c++/4.4.3
+  export CPLUS_INCLUDE_PATH=${tc_inc}:${tc_inc}/x86_64-nacl
 
   mkdir -p /mnt/html5/home
   mkdir -p /mnt/html5/alt_http
