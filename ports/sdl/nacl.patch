@@ -544,10 +544,10 @@ index 5c2d81f..7a757a3 100644
  	if ( CPU_haveCPUID() ) {
 diff --git a/src/main/nacl/pepper_instance.c b/src/main/nacl/pepper_instance.c
 new file mode 100644
-index 0000000..7d4c5c6
+index 0000000..0a3ca79
 --- /dev/null
 +++ b/src/main/nacl/pepper_instance.c
-@@ -0,0 +1,277 @@
+@@ -0,0 +1,310 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -572,6 +572,8 @@ index 0000000..7d4c5c6
 +#include <ppapi/c/pp_instance.h>
 +#include <ppapi/c/ppb.h>
 +#include <ppapi/c/ppb_input_event.h>
++#include <ppapi/c/ppb_messaging.h>
++#include <ppapi/c/ppb_var.h>
 +#include <ppapi/c/ppb_view.h>
 +#include <ppapi/c/ppp.h>
 +#include <ppapi/c/ppp_input_event.h>
@@ -579,9 +581,13 @@ index 0000000..7d4c5c6
 +#include <ppapi/c/pp_rect.h>
 +
 +#include "nacl_io/nacl_io.h"
++#include "nacl_io/ioctl.h"
++#include "nacl_io/log.h"
 +
 +static PP_Instance g_instance;
 +static PPB_GetInterface g_get_browser_interface;
++static struct PPB_Messaging_1_0* g_messaging_interface;
++static struct PPB_Var_1_1* g_var_interface;
 +static struct PPB_InputEvent_1_0* g_input_event_interface;
 +static struct PPB_View_1_1* g_view_interface;
 +static int g_width = 0;
@@ -589,6 +595,7 @@ index 0000000..7d4c5c6
 +static int g_argc;
 +static const char** g_argn;
 +static const char** g_argv;
++static const char* g_tty_prefix;
 +static pthread_t g_sdl_thread;
 +
 +static void* sdl_thread_start(void*);
@@ -662,11 +669,24 @@ index 0000000..7d4c5c6
 +  return NULL;
 +}
 +
++static ssize_t TtyOutputHandler(const char* buf, size_t count, void* user_data) {
++  // We prepend the prefix_ to the data in buf, then package it up
++  // and post it as a message to javascript.
++  char* message = (char*)malloc(count + strlen(g_tty_prefix));
++  strcpy(message, g_tty_prefix);
++  memcpy(message + strlen(g_tty_prefix), buf, count);
++  struct PP_Var var = g_var_interface->VarFromUtf8(message, count + strlen(g_tty_prefix));
++  g_messaging_interface->PostMessage(g_instance, var);
++  g_var_interface->Release(var);
++  free(message);
++  return count;
++}
++
 +static void ProcessArgs() {
 +  int i;
 +  int rtn;
 +  int mount_default = 1;
-+  fprintf(stderr, "SDL: ProcessArgs %d\n", g_argc);
++  nacl_io_log("SDL: ProcessArgs %d\n", g_argc);
 +
 +  umount("/");
 +
@@ -677,6 +697,16 @@ index 0000000..7d4c5c6
 +    } else if (!strcmp(g_argn[i], "ps_stderr")) {
 +      int fd2 = open(g_argv[i], O_WRONLY);
 +      dup2(fd2, 2);
++    } else if (!strcmp(g_argn[i], "ps_tty_prefix")) {
++      g_tty_prefix = g_argv[i];
++      struct tioc_nacl_output handler;
++      handler.handler = TtyOutputHandler;
++      handler.user_data = NULL;
++      int tty_fd = open("/dev/tty", O_WRONLY);
++      if (tty_fd != -1) {
++        ioctl(tty_fd, TIOCNACLOUTPUT, &handler);
++        close(tty_fd);
++      }
 +    } else if (!strcmp(g_argn[i], "sdl_mount_http")) {
 +      const char* source;
 +      const char* target = "/";
@@ -801,6 +831,9 @@ index 0000000..7d4c5c6
 +  g_get_browser_interface = get_browser;
 +  g_input_event_interface =
 +      (struct PPB_InputEvent_1_0*)get_browser(PPB_INPUT_EVENT_INTERFACE_1_0);
++  g_messaging_interface =
++      (struct PPB_InputEvent_1_0*)get_browser(PPB_MESSAGING_INTERFACE_1_0);
++  g_var_interface = (struct PPB_Var_1_1*)get_browser(PPB_VAR_INTERFACE_1_1);
 +  g_view_interface = (struct PPB_View_1_1*)get_browser(PPB_VIEW_INTERFACE_1_1);
 +  return PP_OK;
 +}
