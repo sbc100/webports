@@ -15,7 +15,13 @@
   },
   "externally_connectable": {
     "ids": ["*"],
-    "matches": ["*://nacltools.storage.googleapis.com/*"]
+    "matches": [
+      "*://nacltools.storage.googleapis.com/*",
+      "*://*.chrome.com/*",
+      "*://localhost/*",
+      "*://127.0.0.1/*",
+      "*://0.0.0.0/*"
+    ]
   },
   "permissions": [
     "processes"
