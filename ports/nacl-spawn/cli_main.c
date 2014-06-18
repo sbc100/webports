@@ -61,21 +61,25 @@ int cli_main(int argc, char* argv[]) {
     mkdir("/mnt/real_http", 0777);
     if (mount(data_url, "/mnt/real_http", "httpfs", 0, "") != 0) {
       perror("mounting http filesystem at /mnt/real_http failed");
-      return 1;
     }
   } else {
     if (mount(data_url, "/mnt/http", "httpfs", 0, "") != 0) {
       perror("mounting http filesystem at /mnt/http failed");
-      return 1;
     }
   }
 
   if (mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
     perror("Mounting HTML5 filesystem in /mnt/html5 failed.");
-  }
-
-  if (mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
-    fprintf(stderr, "Mounting HTML5 filesystem in %s failed.", home);
+  } else {
+    mkdir("/mnt/html5/home", 0777);
+    struct stat st;
+    if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
+      perror("Unable to create home directory in persistent storage.");
+    } else {
+      if (mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
+        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
+      }
+    }
   }
 
   if (mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {

@@ -218,9 +218,6 @@ InstallPackage nano newlib
 InstallPackage vim newlib
 InstallPython
 
-# TODO(bradnelson): Remove this when nacl_io html5fs prefix issues are fixed.
-export HOME=/mnt/html5/home
-
 cd ${HOME}
 
 set +e
