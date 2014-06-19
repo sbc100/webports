@@ -8,7 +8,7 @@
 
 function fsErrorHandler(error) {
   // TODO(sbc): Add popup that tells the user there was an error.
-  console.log("Filesystem error: "+ error);
+  console.log('Filesystem error: ' + error);
 }
 
 /**
@@ -17,7 +17,7 @@ function fsErrorHandler(error) {
  * to the entry that was passed at launch time.
  */
 function copyFile(srcFile, destFile) {
-  console.log("copyFile: " + srcFile.name + " -> " + destFile.name);
+  console.log('copyFile: ' + srcFile.name + ' -> ' + destFile.name);
 
   srcFile.file(function(file) {
     destFile.createWriter(function(writer) {
@@ -25,12 +25,12 @@ function copyFile(srcFile, destFile) {
       var doneTruncate = false;
       writer.onwriteend = function(e) {
         if (!doneTruncate) {
-          console.log("done truncate");
+          console.log('done truncate');
           doneTruncate = true;
           writer.seek(0);
           writer.write(file);
         } else {
-          console.log("done write");
+          console.log('done write');
           console.log(e);
         }
       };
@@ -49,26 +49,23 @@ function saveFile(saveFileEntry) {
   });
 }
 
-function onLaunchedListener(launchData) {
-
+function launchVim(fileEntry) {
   function onWindowCreated(win) {
-    if (launchData.items) {
-      var fileEntry = launchData.items[0].entry;
-      console.log("Lauching vim with item: " + fileEntry)
-      win.contentWindow.fileEntryToLoad = fileEntry;
-    } else {
-      console.log("Lauching vim")
-    }
+    win.contentWindow.fileEntryToLoad = fileEntry;
+    if (fileEntry)
+      console.log('Lauching vim with item: ' + fileEntry);
+    else
+      console.log('Lauching vim without items');
 
     function onWindowClosed() {
-      console.log("onWindowClosed");
-      var fileEntry = win.contentWindow.fileEntryToLoad;
-      if (fileEntry) {
-        saveFile(fileEntry);
+      console.log('onWindowClosed');
+
+      if (win.contentWindow.fileEntryToSave) {
+        saveFile(win.contentWindow.fileEntryToSave);
       }
     }
 
-    win.onClosed.addListener(onWindowClosed)
+    win.onClosed.addListener(onWindowClosed);
   }
 
   var props = {
@@ -77,6 +74,13 @@ function onLaunchedListener(launchData) {
   };
 
   chrome.app.window.create('vim_app.html', props, onWindowCreated);
+}
+
+function onLaunchedListener(launchData) {
+  var fileEntry;
+  if (launchData.items)
+    fileEntry = launchData.items[0].entry;
+  launchVim(fileEntry);
 }
 
 chrome.app.runtime.onLaunched.addListener(onLaunchedListener);
