@@ -10,10 +10,7 @@
 set -e
 shopt -s nullglob
 
-# This URL has changing. Next time a new revision is integrated
-# this should be updated to:
-# STORAGE_URL=http://naclports.storage.googleapis.com/builds
-STORAGE_URL=http://nativeclient-mirror.storage.googleapis.com/naclports
+STORAGE_URL=http://naclports.storage.googleapis.com/builds
 
 SetupEnvironment() {
   # Set up environment variables so that we can use installed binaries.
@@ -221,7 +218,7 @@ InstallPackage() {
 }
 
 DEFAULT_SDK_VERSION=pepper_37
-DEFAULT_REVISION=1334
+DEFAULT_REVISION=1352
 
 InstallCorePackages
 SetupEnvironment
@@ -229,6 +226,7 @@ InstallPackage tar glibc
 InstallPackage git glibc
 InstallPackage nano newlib
 InstallPackage vim newlib
+InstallPackage make newlib
 InstallPython
 
 cd ${HOME}
