@@ -106,10 +106,21 @@ NaClTerm.init = function() {
 NaClTerm.prototype.adjustNmfEntry_ = function(entry) {
   for (var arch in entry) {
     var path = entry[arch]['url'];
-    var html5_mount_point = '/mnt/html5';
+    // TODO(bradnelson): Generalize this.
+    var html5_mount_point = '/mnt/html5/';
+    var home_mount_point = '/home/user/';
+    var tmp_mount_point = '/tmp/';
     if (path.indexOf(html5_mount_point) == 0) {
       path = path.replace(html5_mount_point,
-                          'filesystem:' + location.origin + '/persistent');
+                          'filesystem:' + location.origin + '/persistent/');
+    } else if (path.indexOf(home_mount_point) == 0) {
+      path = path.replace(home_mount_point,
+                          'filesystem:' + location.origin +
+                          '/persistent/home/');
+    } else if (path.indexOf(tmp_mount_point) == 0) {
+      path = path.replace(tmp_mount_point,
+                          'filesystem:' + location.origin +
+                          '/temporary/');
     } else {
       // This is for the dynamic loader.
       var base = location.href.match('.*/')[0];
