@@ -1,5 +1,5 @@
 diff --git a/Include/datetime.h b/Include/datetime.h
-index 47abe5c..4884e79 100644
+index c0e7ffd..b6d6036 100644
 --- a/Include/datetime.h
 +++ b/Include/datetime.h
 @@ -166,6 +166,8 @@ typedef struct {
@@ -12,10 +12,10 @@ index 47abe5c..4884e79 100644
  #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
  #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
 diff --git a/Makefile.pre.in b/Makefile.pre.in
-index 9d55550..09e7a69 100644
+index a70119a..3cb02a5 100644
 --- a/Makefile.pre.in
 +++ b/Makefile.pre.in
-@@ -592,14 +592,18 @@ Modules/pwdmodule.o: $(srcdir)/Modules/pwdmodule.c $(srcdir)/Modules/posixmodule
+@@ -597,14 +597,18 @@ Modules/pwdmodule.o: $(srcdir)/Modules/pwdmodule.c $(srcdir)/Modules/posixmodule
  
  $(GRAMMAR_H): $(GRAMMAR_INPUT) $(PGENSRCS)
  		@$(MKDIR_P) Include
@@ -34,7 +34,7 @@ index 9d55550..09e7a69 100644
  
  Parser/grammar.o:	$(srcdir)/Parser/grammar.c \
  				$(srcdir)/Include/token.h \
-@@ -1000,6 +1004,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
+@@ -1009,6 +1013,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
  		$(INSTALL_DATA) $(srcdir)/Modules/xxmodule.c \
  			$(DESTDIR)$(LIBDEST)/distutils/tests ; \
  	fi
@@ -42,7 +42,7 @@ index 9d55550..09e7a69 100644
  	PYTHONPATH=$(DESTDIR)$(LIBDEST)  $(RUNSHARED) \
  		$(PYTHON_FOR_BUILD) -Wi -tt $(DESTDIR)$(LIBDEST)/compileall.py \
  		-d $(LIBDEST) -f \
-@@ -1018,6 +1023,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
+@@ -1027,6 +1032,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
  		$(PYTHON_FOR_BUILD) -Wi -t -O $(DESTDIR)$(LIBDEST)/compileall.py \
  		-d $(LIBDEST)/site-packages -f \
  		-x badsyntax $(DESTDIR)$(LIBDEST)/site-packages
@@ -81,7 +81,7 @@ index 2014af2..cacf894 100644
        {
  	const int UNITS_PER_WORD = 8;
 diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
-index b0386f0..a5c77b4 100644
+index e4885d1..8f27a5b 100644
 --- a/Modules/_testcapimodule.c
 +++ b/Modules/_testcapimodule.c
 @@ -1278,6 +1278,9 @@ static int test_run_counter = 0;
@@ -103,7 +103,7 @@ index b0386f0..a5c77b4 100644
  
  
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index 65ade9f..1a971dc 100644
+index cd4672c..9bacfad 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
 @@ -663,9 +663,13 @@ posix_error_with_unicode_filename(Py_UNICODE* name)
@@ -221,7 +221,7 @@ index 65ade9f..1a971dc 100644
      }
      PyMem_Free(path);
      Py_INCREF(Py_None);
-@@ -6286,7 +6290,7 @@ posix_readlink(PyObject *self, PyObject *args)
+@@ -6316,7 +6320,7 @@ posix_readlink(PyObject *self, PyObject *args)
      n = readlink(path, buf, (int) sizeof buf);
      Py_END_ALLOW_THREADS
      if (n < 0)
@@ -230,7 +230,7 @@ index 65ade9f..1a971dc 100644
  
      PyMem_Free(path);
      v = PyString_FromStringAndSize(buf, n);
-@@ -6532,7 +6536,7 @@ posix_open(PyObject *self, PyObject *args)
+@@ -6562,7 +6566,7 @@ posix_open(PyObject *self, PyObject *args)
      PyErr_Clear();
  #endif
  
@@ -239,7 +239,7 @@ index 65ade9f..1a971dc 100644
                            Py_FileSystemDefaultEncoding, &file,
                            &flag, &mode))
          return NULL;
-@@ -6541,7 +6545,7 @@ posix_open(PyObject *self, PyObject *args)
+@@ -6571,7 +6575,7 @@ posix_open(PyObject *self, PyObject *args)
      fd = open(file, flag, mode);
      Py_END_ALLOW_THREADS
      if (fd < 0)
@@ -396,10 +396,10 @@ index dd333e8..33fec81 100644
  #include <stdio.h>
  #endif
 diff --git a/configure b/configure
-index dc0dfd0..83a8a73 100755
+index 2e32be2..29b7eef 100755
 --- a/configure
 +++ b/configure
-@@ -2853,19 +2853,27 @@ if test "$cross_compiling" = yes; then
+@@ -2861,19 +2861,27 @@ if test "$cross_compiling" = yes; then
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python interpreter for cross build" >&5
  $as_echo_n "checking for python interpreter for cross build... " >&6; }
      if test -z "$PYTHON_FOR_BUILD"; then
@@ -435,7 +435,7 @@ index dc0dfd0..83a8a73 100755
      fi
  elif test "$cross_compiling" = maybe; then
      as_fn_error $? "Cross compiling required --host=HOST-TUPLE and --build=ARCH" "$LINENO" 5
-@@ -3168,6 +3176,9 @@ then
+@@ -3177,6 +3185,9 @@ then
         # `define_xopen_source' in the case statement below. For the
         # current supported cross builds, this macro is not adjusted.
  	case "$host" in
@@ -445,7 +445,7 @@ index dc0dfd0..83a8a73 100755
  	*-*-linux*)
  		ac_sys_system=Linux
  		;;
-@@ -3217,6 +3228,15 @@ if test "$cross_compiling" = yes; then
+@@ -3226,6 +3237,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -461,7 +461,7 @@ index dc0dfd0..83a8a73 100755
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -5137,7 +5157,11 @@ if test -d casesensitivetestdir
+@@ -5146,7 +5166,11 @@ if test -d casesensitivetestdir
  then
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
  $as_echo "yes" >&6; }
@@ -474,7 +474,7 @@ index dc0dfd0..83a8a73 100755
  else
  	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
  $as_echo "no" >&6; }
-@@ -8246,7 +8270,7 @@ then
+@@ -8235,7 +8259,7 @@ then
  			fi
  		fi
  		;;
@@ -483,7 +483,7 @@ index dc0dfd0..83a8a73 100755
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -8320,7 +8344,7 @@ then
+@@ -8309,7 +8333,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -492,7 +492,7 @@ index dc0dfd0..83a8a73 100755
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -8354,7 +8378,7 @@ then
+@@ -8343,7 +8367,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
@@ -502,7 +502,7 @@ index dc0dfd0..83a8a73 100755
  	Darwin/*)
  		# -u _PyMac_Error is needed to pull in the mac toolbox glue,
 diff --git a/configure.ac b/configure.ac
-index 30f5bf4..4a8f64c 100644
+index ee7e5fc..eacd03d 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -19,18 +19,25 @@ AC_SUBST(host)
@@ -539,7 +539,7 @@ index 30f5bf4..4a8f64c 100644
      fi
  elif test "$cross_compiling" = maybe; then
      AC_MSG_ERROR([Cross compiling required --host=HOST-TUPLE and --build=ARCH])
-@@ -318,6 +325,9 @@ then
+@@ -319,6 +326,9 @@ then
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
@@ -549,7 +549,7 @@ index 30f5bf4..4a8f64c 100644
  	*)
  		# for now, limit cross builds to known configurations
  		MACHDEP="unknown"
-@@ -361,6 +371,15 @@ if test "$cross_compiling" = yes; then
+@@ -362,6 +372,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -565,7 +565,7 @@ index 30f5bf4..4a8f64c 100644
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -2024,7 +2043,7 @@ then
+@@ -2017,7 +2036,7 @@ then
  			fi
  		fi
  		;;
@@ -574,7 +574,7 @@ index 30f5bf4..4a8f64c 100644
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -2096,7 +2115,7 @@ then
+@@ -2089,7 +2108,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -583,7 +583,7 @@ index 30f5bf4..4a8f64c 100644
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -2128,7 +2147,7 @@ then
+@@ -2121,7 +2140,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
