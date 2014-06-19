@@ -15,19 +15,20 @@ PatchStep() {
 }
 
 ConfigureStep() {
-  export vim_cv_toupper_broken=1
+  # These settings are required by vim's configure when cross compiling.
+  # These are the standard valued detected when configuring for linux/glibc.
+  export vim_cv_toupper_broken=no
   export vim_cv_terminfo=yes
-  export vim_cv_tty_mode=1
-  export vim_cv_tty_group=1
-  export vim_cv_getcwd_broken=yes
-  export vim_cv_stat_ignores_slash=yes
+  export vim_cv_tty_mode=0620
+  export vim_cv_tty_group=world
+  export vim_cv_getcwd_broken=no
+  export vim_cv_stat_ignores_slash=no
   export vim_cv_memmove_handles_overlap=yes
   if [ "${NACL_DEBUG}" == "1" ]; then
     export STRIP=echo
   else
     export STRIP=${NACLSTRIP}
   fi
-  NACL_CONFIGURE_PATH=./configure
   DefaultConfigureStep
   # Vim's build doesn't support building outside the source tree.
   # Do a clean to make rebuild after failure predictable.
@@ -65,5 +66,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r vim-7.3.zip vim
+  LogExecute zip -r vim-${VERSION}.zip vim
 }

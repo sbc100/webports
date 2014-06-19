@@ -18,7 +18,7 @@
 
 extern int nacl_vim_main(int argc, char *argv[]);
 
-static int setup_unix_environment(const char* tarfile) {
+static int extract_archive(const char* tarfile) {
   // Extra tar achive from http filesystem.
   int ret;
   TAR* tar;
@@ -43,7 +43,7 @@ static int setup_unix_environment(const char* tarfile) {
 }
 
 int nacl_main(int argc, char* argv[]) {
-  if (setup_unix_environment("vim.tar"))
+  if (extract_archive("vim.tar"))
     return 1;
   return nacl_vim_main(argc, argv);
 }
