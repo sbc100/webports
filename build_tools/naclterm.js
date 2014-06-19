@@ -47,6 +47,12 @@ NaClTerm.ENOENT = 2;
  */
 NaClTerm.ECHILD= 10;
 
+/*
+ * Character code for Control+C in the terminal.
+ * @type {number}
+ */
+NaClTerm.CONTROL_C = 3;
+
 /**
  * Flag for cyan coloring in the terminal.
  * @const
@@ -58,6 +64,20 @@ NaClTerm.ANSI_CYAN = '\x1b[36m';
  * @const
  */
 NaClTerm.ANSI_RESET = '\x1b[0m';
+
+/**
+ * This environmnent variable should be set to 1 to enable Control+C quitting
+ * of processes.
+ * @const
+ */
+NaClTerm.ABORT_ENV = 'ENABLE_CONTROL_C';
+
+/**
+ * This is the value to which the ABORT_ENV environment variable should be set
+ * in order to enable Control+C.
+ * @const
+ */
+NaClTerm.ABORT_ENV_VALUE = '1';
 
 // TODO(bradnelson): Rename in line with style guide once we have tests.
 // The process which gets the input from the user.
@@ -364,6 +384,20 @@ NaClTerm.prototype.exit = function(code, element) {
 };
 
 /**
+* Force quit a process.
+*/
+NaClTerm.prototype.abort = function(element) {
+  // If a process is still spawning, notify the parent spawning has stopped.
+  var spawnReply = {};
+  spawnReply[element.spawn_req_id] = {
+    pid: element.pid
+  };
+  element.parent.postMessage(spawnReply);
+
+  this.exit(1, element);
+}
+
+/**
  * Create the NaCl embed element.
  * We delay this until the first terminal resize event so that we start
  * with the correct size.
@@ -548,9 +582,22 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
 }
 
 NaClTerm.prototype.onVTKeystroke_ = function(str) {
-  var message = {};
-  message[NaClTerm.prefix] = str;
-  foreground_process.postMessage(message);
+  // TODO(bradnelson): Change this once we support signals.
+  // Abort on Control+C, but don't quit bash.
+  if (str.charCodeAt(0) === NaClTerm.CONTROL_C &&
+      foreground_process.parent !== null) {
+    // Only exit if the appropriate environment variable is set.
+    var query = 'param[name="' + NaClTerm.ABORT_ENV + '"]';
+    var enabledEnv = foreground_process.querySelector(query);
+    if (enabledEnv && enabledEnv.value === NaClTerm.ABORT_ENV_VALUE) {
+      this.abort(foreground_process);
+      this.io.print('\n');
+    }
+  } else {
+    var message = {};
+    message[NaClTerm.prefix] = str;
+    foreground_process.postMessage(message);
+  }
 }
 
 /*
