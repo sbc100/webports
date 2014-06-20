@@ -92,19 +92,21 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
   # Create a directory for additional libraries.
   for arch in i686 x86_64; do
     local usr_lib_dir=${TOOLCHAIN_OUT_DIR}/${arch}-nacl/usr/lib
+    local usr_lib_ports=${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib
 
     mkdir -p ${usr_lib_dir}
+    mkdir -p ${usr_lib_dir}-dbg
 
     # Copy libz, libncurses, libnacl-spawn, and libcli_main.
     if ! cp -f \
-        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libz.so* \
-        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libncurses.so* \
-        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libcli_main.a \
-        ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib/libnacl_spawn.* \
+        ${usr_lib_ports}/libz.so* \
+        ${usr_lib_ports}/libncurses.so* \
+        ${usr_lib_ports}/libcli_main.a \
+        ${usr_lib_ports}/libnacl_spawn.* \
         ${usr_lib_dir}; then
       # They may not exist when we are building only for a single arch.
       if [ ${NACL_ARCH} = ${arch} ]; then
-        echo "Failed to copy ${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib"
+        echo "Failed to copy ${usr_lib_ports}"
         exit 1
       fi
     fi
@@ -119,8 +121,9 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
 
     # Merge libraries made from native_client_sdk so that you do not
     # need to specify -L option for them.
-    cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Release/* \
-        ${TOOLCHAIN_OUT_DIR}/${arch}-nacl/usr/lib
+    cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Release/* ${usr_lib_dir}
+    # But also copy the debug ones.
+    cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Debug/* ${usr_lib_dir}-dbg
 
     local mingn_ldflags="-lcli_main -lppapi_simple -lnacl_spawn -lnacl_io"
     mingn_ldflags+=" -lppapi -lppapi_cpp -lstdc++ -lm"
