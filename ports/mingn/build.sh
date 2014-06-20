@@ -93,7 +93,7 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
     local usr_lib_ports=${NACL_TOOLCHAIN_ROOT}/${arch}-nacl/usr/lib
 
     mkdir -p ${usr_lib_dir}
-    mkdir -p ${usr_lib_dir}-dbg
+    mkdir -p ${usr_lib_dir}/debug
 
     # Copy libz, libncurses, libnacl-spawn, and libcli_main.
     if ! cp -f \
@@ -121,7 +121,7 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
     # need to specify -L option for them.
     cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Release/* ${usr_lib_dir}
     # But also copy the debug ones.
-    cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Debug/* ${usr_lib_dir}-dbg
+    cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Debug/* ${usr_lib_dir}/debug
 
     local mingn_ldflags="-lcli_main -lppapi_simple -lnacl_spawn -lnacl_io"
     mingn_ldflags+=" -lppapi -lppapi_cpp -lstdc++ -lm"
