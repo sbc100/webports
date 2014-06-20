@@ -20,6 +20,90 @@ index c21ec67..1a5d61d 100644
  LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
  LIB_CRYPT = @LIB_CRYPT@
  LIB_NANOSLEEP = @LIB_NANOSLEEP@
+diff --git a/configure b/configure
+index a8b69e0..46e6c49 100755
+--- a/configure
++++ b/configure
+@@ -27324,11 +27324,15 @@ _ACEOF
+ fi
+ 
+ if test -z "$ac_list_mounted_fs"; then
+-  { { echo "$as_me:$LINENO: error: could not determine how to read list of mounted filesystems" >&5
+-echo "$as_me: error: could not determine how to read list of mounted filesystems" >&2;}
+-   { (exit 1); exit 1; }; }
++  # For nacl, countinue even if we don't know how to read a list of mounted
++  # filesystems.
++  if [[ "$host" != *nacl* ]]; then
++    { { echo "$as_me:$LINENO: error: could not determine how to read list of mounted filesystems" >&5
++    echo "$as_me: error: could not determine how to read list of mounted filesystems" >&2;}
++    { (exit 1); exit 1; }; }
+   # FIXME -- no need to abort building the whole package
+   # Can't build mountlist.c or anything that needs its functions
++  fi
+ fi
+ 
+ if test $ac_list_mounted_fs = found; then
+diff --git a/lib/__fpending.c b/lib/__fpending.c
+index a872102..f7e47d8 100644
+--- a/lib/__fpending.c
++++ b/lib/__fpending.c
+@@ -23,8 +23,10 @@
+ 
+ #include "__fpending.h"
+ 
++#if !defined(__pnacl__)
+ size_t
+ __fpending (FILE *fp)
+ {
+   return PENDING_OUTPUT_N_BYTES;
+ }
++#endif
+diff --git a/lib/getopt.c b/lib/getopt.c
+index 6dcdbeb..032168d 100644
+--- a/lib/getopt.c
++++ b/lib/getopt.c
+@@ -51,6 +51,11 @@
+ # endif
+ #endif
+ 
++/* All our libc's have this. */
++#if defined(__native_client__)
++# define ELIDE_CODE
++#endif
++
+ #ifndef ELIDE_CODE
+ 
+ 
+diff --git a/lib/getopt1.c b/lib/getopt1.c
+index 3288c72..4a7bc24 100644
+--- a/lib/getopt1.c
++++ b/lib/getopt1.c
+@@ -47,6 +47,11 @@
+ #endif
+ #endif
+ 
++/* All our libc's have this. */
++#if defined(__native_client__)
++# define ELIDE_CODE
++#endif
++
+ #ifndef ELIDE_CODE
+ 
+ 
+diff --git a/lib/getpass.c b/lib/getpass.c
+index 8a993d3..dcd5f5d 100644
+--- a/lib/getpass.c
++++ b/lib/getpass.c
+@@ -106,7 +106,9 @@ getpass (const char *prompt)
+   else
+     {
+       /* We do the locking ourselves.  */
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+       __fsetlocking (tty, FSETLOCKING_BYCALLER);
++#endif
+ 
+       out = in = tty;
+     }
 diff --git a/lib/mktime.c b/lib/mktime.c
 index ce3de58..fea6229 100644
 --- a/lib/mktime.c
@@ -35,6 +119,19 @@ index ce3de58..fea6229 100644
  
    /* Compute intervening leap days correctly even if year is negative.
       Take care to avoid integer overflow here.  */
+diff --git a/lib/regex.c b/lib/regex.c
+index ac70b90..67f6d33 100644
+--- a/lib/regex.c
++++ b/lib/regex.c
+@@ -8181,7 +8181,7 @@ regerror (int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
+     {
+       if (msg_size > errbuf_size)
+         {
+-#if defined HAVE_MEMPCPY || defined _LIBC
++#if (defined HAVE_MEMPCPY || defined _LIBC) && !defined(__native_client__) && !defined(_NEWLIB_VERSION)
+ 	  *((char *) __mempcpy (errbuf, msg, errbuf_size - 1)) = '\0';
+ #else
+           memcpy (errbuf, msg, errbuf_size - 1);
 diff --git a/man/Makefile.in b/man/Makefile.in
 index 2bfa6f4..30022a9 100644
 --- a/man/Makefile.in
@@ -72,6 +169,45 @@ index 2d4a63f..d4f43bf 100644
  LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
  LIB_CRYPT = @LIB_CRYPT@
  LIB_NANOSLEEP = @LIB_NANOSLEEP@
+diff --git a/src/copy.c b/src/copy.c
+index 51c5f6d..bca274e 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -1436,23 +1436,34 @@ copy_internal (const char *src_path, const char *dst_path,
+ #ifdef S_ISFIFO
+   if (S_ISFIFO (src_type))
+     {
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++      error (0, ENOSYS, _("cannot create fifo %s"), quote (dst_path));
++      goto un_backup;
++#else
+       if (mkfifo (dst_path, get_dest_mode (x, src_mode)))
+ 	{
+ 	  error (0, errno, _("cannot create fifo %s"), quote (dst_path));
+ 	  goto un_backup;
+ 	}
++#endif
+     }
+   else
+ #endif
+     if (S_ISBLK (src_type) || S_ISCHR (src_type)
+ 	|| S_ISSOCK (src_type))
+     {
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++      error (0, ENOSYS, _("cannot create special file %s"),
++             quote (dst_path));
++      goto un_backup;
++#else
+       if (mknod (dst_path, get_dest_mode (x, src_mode), src_sb.st_rdev))
+ 	{
+ 	  error (0, errno, _("cannot create special file %s"),
+ 		 quote (dst_path));
+ 	  goto un_backup;
+ 	}
++#endif
+     }
+   else
+ #ifdef S_ISLNK
 diff --git a/src/fs.h b/src/fs.h
 index 675dd61..c2eb64b 100644
 --- a/src/fs.h
@@ -88,6 +224,185 @@ index 675dd61..c2eb64b 100644
  # define S_MAGIC_AFFS 0xADFF
  # define S_MAGIC_DEVPTS 0x1CD1
  # define S_MAGIC_EXT 0x137D
+diff --git a/src/md5sum.c b/src/md5sum.c
+index 561f2a5..d0b1247 100644
+--- a/src/md5sum.c
++++ b/src/md5sum.c
+@@ -49,7 +49,7 @@
+ #  define TEXT1TO1 "rb", "ctx=stm"
+ #  define TEXTCNVT "r", "ctx=stm"
+ # else
+-#  if UNIX || __UNIX__ || unix || __unix__ || _POSIX_VERSION
++#  if UNIX || __UNIX__ || unix || __unix__ || _POSIX_VERSION || defined(__native_client__)
+ #   define OPENOPTS(BINARY) "r"
+ #  else
+     /* The following line is intended to evoke an error.
+diff --git a/src/mkfifo.c b/src/mkfifo.c
+index ff94108..c213b41 100644
+--- a/src/mkfifo.c
++++ b/src/mkfifo.c
+@@ -129,7 +129,11 @@ main (int argc, char **argv)
+ 
+   for (; optind < argc; ++optind)
+     {
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++      int fail = ENOSYS;
++#else
+       int fail = mkfifo (argv[optind], newmode);
++#endif
+       if (fail)
+ 	error (0, errno, _("cannot create fifo %s"), quote (argv[optind]));
+ 
+diff --git a/src/mknod.c b/src/mknod.c
+index fdf2b0e..67d8341 100644
+--- a/src/mknod.c
++++ b/src/mknod.c
+@@ -197,8 +197,12 @@ numbers must be specified"));
+ 	  error (EXIT_FAILURE, 0, _("invalid device %s %s"), s_major, s_minor);
+ #endif
+ 
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++        error (EXIT_FAILURE, ENOSYS, "%s", quote (argv[optind]));
++#else
+ 	if (mknod (argv[optind], newmode | node_type, device) != 0)
+ 	  error (EXIT_FAILURE, errno, "%s", quote (argv[optind]));
++#endif
+       }
+       break;
+ 
+@@ -212,9 +216,13 @@ numbers must be specified"));
+ major and minor device numbers may not be specified for fifo files"));
+ 	  usage (EXIT_FAILURE);
+ 	}
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++      error (EXIT_FAILURE, ENOSYS, "%s", quote (argv[optind]));
++#else
+       if (mkfifo (argv[optind], newmode))
+ 	error (EXIT_FAILURE, errno, "%s", quote (argv[optind]));
+ #endif
++#endif
+       break;
+ 
+     default:
+diff --git a/src/shred.c b/src/shred.c
+index bc89567..792b4c7 100644
+--- a/src/shred.c
++++ b/src/shred.c
+@@ -1398,7 +1398,11 @@ wipename (char *oldname, char const *qoldname, struct Options const *flags)
+ 		{
+ 		  if (dir_fd < 0
+ 		      || (fdatasync (dir_fd) < 0 && fsync (dir_fd) < 0))
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++                    {}
++#else
+ 		    sync ();	/* Force directory out */
++#endif
+ 		  if (flags->verbose)
+ 		    {
+ 		      /*
+@@ -1431,7 +1435,11 @@ wipename (char *oldname, char const *qoldname, struct Options const *flags)
+   free (newname);
+   err = unlink (oldname);
+   if (dir_fd < 0 || (fdatasync (dir_fd) < 0 && fsync (dir_fd) < 0))
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++    {}
++#else
+     sync ();
++#endif
+   close (dir_fd);
+   if (!err && flags->verbose)
+     error (0, 0, _("%s: removed"), qoldname);
+diff --git a/src/stat.c b/src/stat.c
+index 527ccf2..2be9759 100644
+--- a/src/stat.c
++++ b/src/stat.c
+@@ -106,6 +106,7 @@ static int G_fail;
+ 
+ char *program_name;
+ 
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+ /* Return the type of the specified file system.
+    Some systems have statfvs.f_basetype[FSTYPSZ]. (AIX, HP-UX, and Solaris)
+    Others have statfs.f_fstypename[MFSNAMELEN]. (NetBSD 1.5.2)
+@@ -316,6 +317,7 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+   }
+ #endif
+ }
++#endif
+ 
+ static char *
+ human_access (struct stat const *statbuf)
+@@ -342,6 +344,7 @@ human_time (time_t t, int t_ns)
+   return str;
+ }
+ 
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+ /* print statfs info */
+ static void
+ print_statfs (char *pformat, char m, char const *filename,
+@@ -407,13 +410,13 @@ print_statfs (char *pformat, char m, char const *filename,
+       strcat (pformat, PRIdMAX);
+       printf (pformat, (intmax_t) (statfsbuf->f_ffree));
+       break;
+-
+     default:
+       strcat (pformat, "c");
+       printf (pformat, m);
+       break;
+     }
+ }
++#endif
+ 
+ /* print stat info */
+ static void
+@@ -617,6 +620,7 @@ print_it (char const *masterformat, char const *filename,
+ static void
+ do_statfs (char const *filename, int terse, char const *format)
+ {
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+   STRUCT_STATVFS statfsbuf;
+   int i = statfs (filename, &statfsbuf);
+ 
+@@ -638,6 +642,10 @@ do_statfs (char const *filename, int terse, char const *format)
+     }
+ 
+   print_it (format, filename, print_statfs, &statfsbuf);
++#else
++  error (0, ENOSYS, _("cannot read file system information for %s"),
++         quote (filename));
++#endif
+ }
+ 
+ /* stat the file and print what we find */
+diff --git a/src/su.c b/src/su.c
+index d15d96a..961da0c 100644
+--- a/src/su.c
++++ b/src/su.c
+@@ -291,7 +291,11 @@ correct_password (const struct passwd *pw)
+       error (0, 0, _("getpass: cannot open /dev/tty"));
+       return 0;
+     }
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++  encrypted = unencrypted;
++#else
+   encrypted = crypt (unencrypted, correct);
++#endif
+   memset (unencrypted, 0, strlen (unencrypted));
+   return strcmp (encrypted, correct) == 0;
+ }
+diff --git a/src/sync.c b/src/sync.c
+index 7dbbc55..97b11a2 100644
+--- a/src/sync.c
++++ b/src/sync.c
+@@ -70,6 +70,8 @@ main (int argc, char **argv)
+   if (1 < argc)
+     error (0, 0, _("ignoring all arguments"));
+ 
++#if !defined(__native_client__)
+   sync ();
++#endif
+   exit (EXIT_SUCCESS);
+ }
 diff --git a/src/tee.c b/src/tee.c
 index 5867539..df6859b 100644
 --- a/src/tee.c

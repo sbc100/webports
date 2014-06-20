@@ -3,8 +3,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
+  -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 CONFIG_SUB=config/config.sub
+
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  export EXTRA_LIBS+=" -lglibc-compat"
+fi
+
 
 BuildStep() {
   # Disable all assembly code by specifying none-none-none.
@@ -13,6 +20,7 @@ BuildStep() {
 
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
+  MakeDir ${PUBLISH_DIR}/${NACL_ARCH}
   # -executable is not supported on BSD and -perm +nn is not
   # supported on linux
   if [ ${OS_NAME} != "Darwin" ]; then
@@ -26,13 +34,9 @@ InstallStep() {
     if [ "${name}" = "groups" ]; then
       continue
     fi
-    cp ${nexe} ${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}
-
-    pushd ${PUBLISH_DIR}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-        ${PUBLISH_DIR}/${name}_*${NACL_EXEEXT} \
-        -s . \
-        -o ${name}.nmf
-    popd
+    LogExecute cp ${nexe} ${PUBLISH_DIR}/${NACL_ARCH}/${name}
   done
+  ChangeDir ${PUBLISH_DIR}/${NACL_ARCH}
+  LogExecute rm -f ${PUBLISH_DIR}/${NACL_ARCH}.zip
+  LogExecute zip -r ${PUBLISH_DIR}/${NACL_ARCH}.zip .
 }

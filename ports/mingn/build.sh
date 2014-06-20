@@ -28,7 +28,6 @@ InstallStep() {
   MakeDir ${SRC_DIR}/${NACL_ARCH}/bin
   ChangeDir ${SRC_DIR}/${NACL_ARCH}/bin
 
-  local COREUTILS_DIR=${NACL_PACKAGES_PUBLISH}/coreutils*/${NACL_LIBC}
   local BINUTILS_DIR=${NACL_PACKAGES_PUBLISH}/binutils/${NACL_LIBC}
   local GCC_DIR=${NACL_PACKAGES_PUBLISH}/gcc/${NACL_LIBC}
 
@@ -40,8 +39,7 @@ InstallStep() {
   MakeDir ${libexec_dir}
   BINARIES="\
       ${GCC_DIR}/*_${NACL_ARCH}.nexe \
-      ${BINUTILS_DIR}/*_${NACL_ARCH}.nexe \
-      ${COREUTILS_DIR}/*_${NACL_ARCH}.nexe"
+      ${BINUTILS_DIR}/*_${NACL_ARCH}.nexe"
 
   for binary in ${BINARIES}; do
     name=$(basename ${binary} | sed "s/_${NACL_ARCH}.nexe//")
