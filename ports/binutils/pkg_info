@@ -2,5 +2,5 @@ NAME=binutils
 VERSION=7dc2f2590
 URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@7dc2f2590
 LICENSE=GPL
-LIBC=glibc
 DEPENDS=(nacl-spawn)
+DISABLED_ARCH=(pnacl)

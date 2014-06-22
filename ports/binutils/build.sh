@@ -3,7 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
+  -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 CONFIG_SUB=support/config.sub
 EXTRA_CONFIGURE_ARGS="\
   --target=x86_64-nacl \
