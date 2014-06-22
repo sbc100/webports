@@ -1,5 +1,5 @@
 diff --git a/Makefile.in b/Makefile.in
-index 9f9276d..278ad65 100644
+index 9f9276d..896f71d 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -414,7 +414,8 @@ LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(GLOB_LDFLAGS) \
@@ -32,7 +32,7 @@ index 9f9276d..278ad65 100644
  	-$(SIZE) $(Program)
  
 diff --git a/configure b/configure
-index 7ec72fe..1ad82b6 100755
+index 7ec72fe..6d1d53d 100755
 --- a/configure
 +++ b/configure
 @@ -2201,6 +2201,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
@@ -42,6 +42,41 @@ index 7ec72fe..1ad82b6 100755
 +*nacl*) 	opt_bash_malloc=no ;;	# Native Client
  *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
  esac
+ 
+@@ -5563,7 +5564,7 @@ if test "${ac_cv_rl_version+set}" = set; then
+   $as_echo_n "(cached) " >&6
+ else
+   if test "$cross_compiling" = yes; then
+-  ac_cv_rl_version='4.2'
++  ac_cv_rl_version='6.2'
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */
+diff --git a/eval.c b/eval.c
+index 9011e0b..0f54f48 100644
+--- a/eval.c
++++ b/eval.c
+@@ -261,7 +261,10 @@ read_command ()
+ 	  if (tmout_len > 0)
+ 	    {
+ 	      old_alrm = set_signal_handler (SIGALRM, alrm_catcher);
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++              /* TODO(bradnelson): Drop once we emulate signals. */
+ 	      alarm (tmout_len);
++#endif
+ 	    }
+ 	}
+     }
+@@ -273,7 +276,10 @@ read_command ()
+ 
+   if (interactive && tmout_var && (tmout_len > 0))
+     {
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++      /* TODO(bradnelson): Drop once we emulate signals. */
+       alarm(0);
++#endif
+       set_signal_handler (SIGALRM, old_alrm);
+     }
  
 diff --git a/execute_cmd.c b/execute_cmd.c
 index 485b0c7..de77f14 100644
@@ -101,8 +136,99 @@ index 485b0c7..de77f14 100644
  }
  
  /* CPP defines to decide whether a particular index into the #! line
+diff --git a/jobs.h b/jobs.h
+index 39da61e..3c21c6a 100644
+--- a/jobs.h
++++ b/jobs.h
+@@ -56,7 +56,11 @@
+ typedef struct process {
+   struct process *next;	/* Next process in the pipeline.  A circular chain. */
+   pid_t pid;		/* Process ID. */
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++  int status;		/* The status of this command as returned by wait. */
++#else
+   WAIT status;		/* The status of this command as returned by wait. */
++#endif
+   int running;		/* Non-zero if this process is running. */
+   char *command;	/* The particular program that is running. */
+ } PROCESS;
+diff --git a/lib/sh/oslib.c b/lib/sh/oslib.c
+index b3470d1..8227fb0 100644
+--- a/lib/sh/oslib.c
++++ b/lib/sh/oslib.c
+@@ -240,7 +240,12 @@ mkfifo (path, mode)
+      int mode;
+ {
+ #if defined (S_IFIFO)
++#  if defined(__native_client__) && defined(_NEWLIB_VERSION)
++  errno = ENOSYS;
++  return (-1);
++#  else 
+   return (mknod (path, (mode | S_IFIFO), 0));
++#  endif
+ #else /* !S_IFIFO */
+   return (-1);
+ #endif /* !S_IFIFO */
+diff --git a/lib/sh/ufuncs.c b/lib/sh/ufuncs.c
+index ed526fe..dd52657 100644
+--- a/lib/sh/ufuncs.c
++++ b/lib/sh/ufuncs.c
+@@ -65,6 +65,10 @@ int
+ falarm (secs, usecs)
+      unsigned int secs, usecs;
+ {
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++  /* TODO(bradnelson): Remove this once we emulate signals. */
++  return 0;
++#else
+   if (secs == 0 && usecs == 0)
+     return (alarm (0));
+ 
+@@ -74,6 +78,7 @@ falarm (secs, usecs)
+       usecs = 0;
+     }
+   return (alarm (secs));
++#endif
+ }
+ #endif /* !HAVE_SETITIMER */
+ 
+diff --git a/nojobs.c b/nojobs.c
+index d43d1d4..eff6d86 100644
+--- a/nojobs.c
++++ b/nojobs.c
+@@ -65,6 +65,10 @@
+ #  define WAITPID(pid, statusp, options) wait (statusp)
+ #endif /* !HAVE_WAITPID */
+ 
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++#  define WAIT int
++#endif
++
+ /* Return the fd from which we are actually getting input. */
+ #define input_tty() (shell_tty != -1) ? shell_tty : fileno (stderr)
+ 
+@@ -753,7 +757,7 @@ wait_for (pid)
+       CHECK_TERMSIG;
+       if (got_pid < 0 && errno == ECHILD)
+ 	{
+-#if !defined (_POSIX_VERSION)
++#if !defined (_POSIX_VERSION) && (!defined(__native_client__) || !defined(_NEWLIB_VERSION))
+ 	  status.w_termsig = status.w_retcode = 0;
+ #else
+ 	  status = 0;
+@@ -810,8 +814,10 @@ wait_for (pid)
+ #endif
+     {
+       fprintf (stderr, "%s", j_strsignal (WTERMSIG (status)));
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+       if (WIFCORED (status))
+ 	fprintf (stderr, _(" (core dumped)"));
++#endif
+       fprintf (stderr, "\n");
+     }
+ 
 diff --git a/shell.c b/shell.c
-index 9e74f3b..343ebd7 100644
+index 9e74f3b..065bf43 100644
 --- a/shell.c
 +++ b/shell.c
 @@ -339,6 +339,12 @@ _cygwin32_check_tmp ()

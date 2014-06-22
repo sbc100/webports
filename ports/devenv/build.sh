@@ -20,8 +20,11 @@ InstallStep() {
   local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip*/${NACL_LIBC}
 
   LogExecute cp -fR ${BASH_DIR}/* ${APP_DIR}
+  # On newlib there won't be libs, so turn on null glob for these copies.
+  shopt -s nullglob
   LogExecute cp -fR ${CURL_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
   LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
+  shopt -u nullglob
 
   # Download old version of python.
   local python_url=https://nacltools.storage.googleapis.com/python
