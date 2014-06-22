@@ -1,13 +1,83 @@
-builder 0 (total: 10579)
+builder 0 (total: 6073)
   glibc-compat
+  gmp
+  mpfr
+  mpc
+  nacl-spawn
+  gcc
   ncurses
   zlib
+  libtar
+  emacs
+  libpng
+  regal
+  libogg
+  libvorbis
+  libtheora
+  lame
+  ffmpeg
+  binutils
+  fftw
+  yajl
+  libmikmod
+  bzip2
+  expat
+  sdl
+  sdl-mixer
+  freetype
+  metakit
+  sdl-ttf
+  drod
+  readline
+  sqlite
+  apr
+  apr-util
+  subversion
+  nethack
+  glib
+  snes9x
+  dosbox
+  scummvm
+  busybox
+  bash
+  mingn
+  bochs
+  libxml2
+  tar
+  toybox
+  nano
+  leveldb
+  faad2
+  civetweb
+  xaos
+  libsodium
+  sdl-tests
+  make
+  libmodplug
+  faac
+  jpeg8d
+  sdl-image
+  sdl-net
+  x264
+  mongoose
+  physfs
+  lua5.1
+  tinyxml
+  dreadthread
+builder 1 (total: 6079)
+  zlib
+  libpng
+  jpeg6b
+  opencv
+  glibc-compat
+  ncurses
   readline
   python-host
   numpy
-  python3
-  libpng
-  regal
+  clapack
+  expat
+  gdb
+  openssl
   cython
   bzip2
   hdf5
@@ -16,160 +86,45 @@ builder 0 (total: 10579)
   distribute
   freetype
   nose
+  setuptools
   six
   python-dateutil
   matplotlib
-  setuptools
   sympy
   yt
-  python
-  libogg
-  libvorbis
-  libtheora
-  lame
-  ffmpeg
-  fftw
-  libmikmod
-  expat
-  libtar
-  sdl
-  sdl-mixer
-  metakit
-  sdl-ttf
-  drod
-  dosbox
-  scummvm
-  freeimage
-  bullet
-  mesa
-  nacl-spawn
-  vim
-  bochs
+  pyppapi
+  python-static
   fontconfig
   pixman
   cairo
-  flac
-  tiff
-  gmp
-  leveldb
-  jpeg8d
-  libmng
-  lcms
-  devil
-  yajl
-  libsodium
-  pcre
-  faad2
-  mpfr
-  libwebp
-  sdl-tests
-  nano
-  giflib
-  python3-ppapi
-  sdl-net
-  libhangul
-  netcat
-  sdl-image
-  python-ppapi
-  mpc
-  lua5.2
-  lua-ppapi
-  tinyxml
-  ipython
-  libtomcrypt
-  physfs
-  lua5.1
-  tar
-  binutils
-  busybox
-  mongoose
-  unzip
-  dreadthread
-  gdb
-  emacs
-  coreutils
-  gcc
-  glib
-  sqlite
-  apr
-  apr-util
-  subversion
-  pango
-builder 1 (total: 10650)
-  zlib
-  libpng
-  jpeg6b
-  opencv
-  clapack
-  glibc-compat
-  ncurses
-  readline
-  ruby
-  openssl
-  python-host
-  numpy
-  cython
-  bzip2
-  pyppapi
-  python-static
-  jpeg8d
-  imagemagick
-  boost
-  openscenegraph
-  gsl
-  libogg
-  libvorbis
-  lame
-  libav
-  snes9x
-  libtar
-  nethack
-  libssh
-  libgit2
-  curl
   nacl-spawn
-  git
-  apr
-  libxml2
-  sqlite
-  openal-soft
-  mpg123
-  protobuf
-  zeromq
-  xaos
-  cfitsio
-  toybox
-  speex
-  pyzmq
-  freetype
-  agg
-  x264
-  make
-  libmodplug
-  gc
-  faac
-  civetweb
-  freealut
-  ruby-ppapi
-  expat
-  apr-util
-  agg-demo
-  box2d
-  libtommath
-  jsoncpp
-  openal-ogg-demo
-  markupsafe
-  jinja2
-  thttpd
-  openssh
-  gmp
-  mpfr
-  mpc
-  gcc
-  unzip
+  curl
+  libtar
   vim
   coreutils
-  bash
-  binutils
-  mingn
-Difference between total time of builders: 70
+  git
+  libogg
+  flac
+  protobuf
+  glib
+  pango
+  cfitsio
+  zeromq
+  pcre
+  lua5.2
+  lua-ppapi
+  jpeg8d
+  pyzmq
+  gc
+  libtomcrypt
+  agg
+  unzip
+  openal-soft
+  freealut
+  libtommath
+  libhangul
+  agg-demo
+  markupsafe
+  ipython
+  jinja2
+Difference between total time of builders: 5

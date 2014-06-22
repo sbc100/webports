@@ -1,10 +1,93 @@
-builder 0 (total: 5759)
+builder 0 (total: 3277)
+  glibc-compat
+  gmp
+  mpfr
+  mpc
+  nacl-spawn
+  gcc
+  libogg
+  libvorbis
+  libtheora
+  lame
+  ffmpeg
+  fftw
+  ncurses
+  readline
+  sqlite
+  expat
+  apr
+  zlib
+  apr-util
+  subversion
+  bzip2
+  freetype
+  fontconfig
+  libpng
+  pixman
+  cairo
+  bash
+  binutils
+  mingn
+  leveldb
+  zeromq
+  pcre
+  lua5.2
+  libtar
+  lua-ppapi
+  jpeg8d
+  make
+  faac
+  agg
+  openal-soft
+  freealut
+  mongoose
+  agg-demo
+  lua5.1
+builder 1 (total: 3269)
+  zlib
+  libpng
+  jpeg6b
+  opencv
+  clapack
+  glibc-compat
+  nacl-spawn
+  binutils
+  yajl
+  ncurses
+  libtar
+  nethack
+  glib
+  vim
+  busybox
+  coreutils
+  libogg
+  flac
+  protobuf
+  libxml2
+  bzip2
+  expat
+  freetype
+  fontconfig
+  pixman
+  cairo
+  pango
+  gc
+  libtomcrypt
+  unzip
+  x264
+  libtommath
+  physfs
+  tinyxml
+  dreadthread
+builder 2 (total: 3391)
   glibc-compat
   ncurses
   zlib
   readline
   python-host
   numpy
+  expat
+  gdb
   cython
   bzip2
   hdf5
@@ -14,179 +97,59 @@ builder 0 (total: 5759)
   freetype
   libpng
   nose
+  setuptools
   six
   python-dateutil
   matplotlib
-  setuptools
   sympy
   yt
-  libtar
-  nacl-spawn
-  vim
-  expat
-  fontconfig
-  pixman
-  cairo
-  apr
-  libxml2
-  gmp
-  protobuf
-  xaos
-  yajl
-  pcre
-  mpfr
-  agg
-  gc
-  openal-soft
-  freealut
-  mpc
-  apr-util
-  agg-demo
-  ipython
-  markupsafe
-  jinja2
-  gdb
-  gcc
-  sqlite
-  subversion
-  glib
-  pango
-builder 1 (total: 5661)
-  zlib
-  libpng
-  jpeg6b
-  opencv
-  glibc-compat
   openssl
-  ncurses
-  readline
-  python-host
-  numpy
-  cython
-  bzip2
   pyppapi
   python-static
-  libogg
-  flac
-  sqlite
-  leveldb
   zeromq
-  nacl-spawn
-  toybox
   pyzmq
-  x264
-  make
-  libmodplug
-  civetweb
-  libhangul
-  lua5.2
-  libtar
-  lua-ppapi
-  tinyxml
-  libtomcrypt
-  lua5.1
-  glib
-builder 2 (total: 5950)
-  clapack
+  markupsafe
+  ipython
+  jinja2
+builder 3 (total: 3270)
+  glibc-compat
+  ncurses
   zlib
+  libtar
+  nacl-spawn
+  emacs
   libpng
   regal
-  libogg
-  libvorbis
-  glibc-compat
-  libtheora
-  lame
-  ffmpeg
-  fftw
+  openssl
   libmikmod
   bzip2
   expat
-  libtar
+  libogg
   sdl
+  libvorbis
   sdl-mixer
   freetype
   metakit
   sdl-ttf
   drod
+  snes9x
   dosbox
   scummvm
-  snes9x
-  ncurses
-  nethack
-  openssl
   curl
-  nacl-spawn
   git
   bochs
-  cfitsio
-  libsodium
-  faad2
-  sdl-tests
+  tar
+  toybox
   nano
-  faac
-  sdl-net
+  cfitsio
+  faad2
+  civetweb
+  xaos
+  libsodium
+  sdl-tests
+  libmodplug
   jpeg8d
   sdl-image
-  libtommath
-  physfs
-  tar
-  binutils
-  busybox
-  mongoose
-  unzip
-  dreadthread
-  emacs
-  coreutils
-  gmp
-  mpfr
-  mpc
-  gcc
-  vim
-  bash
-  mingn
-builder 3 (total: 5662)
-  glibc-compat
-  ncurses
-  zlib
-  readline
-  python3
-  ruby
-  python
-  libpng
-  jpeg8d
-  bzip2
-  imagemagick
-  boost
-  openscenegraph
-  gsl
-  libogg
-  libvorbis
-  lame
-  libav
-  freeimage
-  bullet
-  mesa
-  openssl
-  libssh
-  libgit2
-  tiff
-  openal-soft
-  mpg123
-  libmng
-  lcms
-  devil
-  speex
-  libwebp
-  nacl-spawn
-  giflib
-  libtar
-  python3-ppapi
-  netcat
-  python-ppapi
-  ruby-ppapi
-  box2d
-  jsoncpp
-  openal-ogg-demo
-  thttpd
-  openssh
-Difference between total time of builders: 288
+  sdl-net
+  libhangul
+Difference between total time of builders: 122
