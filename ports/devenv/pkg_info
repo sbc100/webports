@@ -1,3 +1,5 @@
 NAME=devenv
 VERSION=0.1
+# Currently only builds on linux (due to dependency on openssl)
+BUILD_OS=linux
 DEPENDS=(bash unzip curl)
