@@ -1,6 +1,6 @@
 deps = {
   "src/third_party/libapps":
-    "https://chromium.googlesource.com/apps/libapps.git@b01e9d1a"
+    "https://chromium.googlesource.com/apps/libapps.git@0bec09b"
 }
 
 deps_os = {
