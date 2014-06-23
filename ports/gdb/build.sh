@@ -71,9 +71,9 @@ InstallStep() {
   LogExecute python ${TOOLS_DIR}/create_term.py gdb.nmf
   popd
   LogExecute cp ${START_DIR}/background.js ${GDB_APP_DIR}
-  LogExecute cp ${START_DIR}/icon_16.png ${GDB_APP_DIR}
-  LogExecute cp ${START_DIR}/icon_48.png ${GDB_APP_DIR}
-  LogExecute cp ${START_DIR}/icon_128.png ${GDB_APP_DIR}
+  LogExecute cp ${START_DIR}/ladybug_16.png ${GDB_APP_DIR}
+  LogExecute cp ${START_DIR}/ladybug_48.png ${GDB_APP_DIR}
+  LogExecute cp ${START_DIR}/ladybug_128.png ${GDB_APP_DIR}
 
   # Generate a manifest.json (with key included).
   GenerateManifest ${START_DIR}/manifest.json.template \
@@ -97,9 +97,9 @@ InstallStep() {
   LogExecute cp ${START_DIR}/extension/background.js ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/devtools.html ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/devtools.js ${DEBUG_EXT_DIR}
-  LogExecute cp ${START_DIR}/extension/icon_128.png ${DEBUG_EXT_DIR}
-  LogExecute cp ${START_DIR}/extension/icon_16.png ${DEBUG_EXT_DIR}
-  LogExecute cp ${START_DIR}/extension/icon_48.png ${DEBUG_EXT_DIR}
+  LogExecute cp ${START_DIR}/extension/ladybug_gear_128.png ${DEBUG_EXT_DIR}
+  LogExecute cp ${START_DIR}/extension/ladybug_gear_16.png ${DEBUG_EXT_DIR}
+  LogExecute cp ${START_DIR}/extension/ladybug_gear_48.png ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/main.css ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/main.html ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/main.js ${DEBUG_EXT_DIR}

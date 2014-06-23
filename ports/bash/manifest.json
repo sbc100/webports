@@ -4,9 +4,9 @@
   "version": "0.0.0.1",
   "manifest_version": 2,
   "icons": {
-    "16": "icon_16.png",
-    "48": "icon_48.png",
-    "128": "icon_128.png"
+    "16": "devenv_16.png",
+    "48": "devenv_48.png",
+    "128": "devenv_128.png"
   },
   "permissions": [
     "storage",

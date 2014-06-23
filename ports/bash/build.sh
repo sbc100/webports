@@ -38,7 +38,7 @@ InstallStep() {
   InstallNaClTerm ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/devenv_16.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/devenv_48.png ${ASSEMBLY_DIR}
+  LogExecute cp ${START_DIR}/devenv_128.png ${ASSEMBLY_DIR}
 }
