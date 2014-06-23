@@ -79,6 +79,15 @@ bool FindLibraryDependencies(const std::string& filename,
   if (!FindLibraryDependenciesImpl(filename.c_str(), paths, &dep_set))
     return false;
   dependencies->assign(dep_set.begin(), dep_set.end());
+
+  // If we find any, also add runnable-ld.so, which we will also need.
+  if (!dependencies->empty()) {
+    std::string needed_path;
+    if (GetFileInPaths("runnable-ld.so", paths, &needed_path)) {
+      dependencies->push_back(needed_path);
+    }
+  }
+
   return true;
 }
 
@@ -103,8 +112,7 @@ int main(int argc, char* argv[]) {
   }
 
   // For test.
-  if (!getenv("LD_LIBRARY_PATH"))
-    setenv("LD_LIBRARY_PATH", ".", 1);
+  setenv("LD_LIBRARY_PATH", ".", 0);
 
   std::vector<std::string> dependencies;
   if (!FindLibraryDependencies(argv[1], &dependencies)) {

@@ -163,19 +163,15 @@ static void AddNmfToRequestForShared(
     const char* base = basename(&dep[0]);
     // nacl_helper does not pass the name of program and the dynamic
     // loader always uses "main.nexe" as the main binary.
-    if (!strcmp(prog_base, base))
+    if (strcmp(prog_base, base) == 0)
       base = "main.nexe";
-    AddFileToNmf(base, abspath, &files);
+    if (strcmp(base, "runnable-ld.so") == 0) {
+      AddFileToNmf("program", abspath, &nmf);
+    } else {
+      AddFileToNmf(base, abspath, &files);
+    }
   }
   nmf.Set("files", files);
-
-#if defined(__x86_64__)
-  static const char kDynamicLoader[] = "lib64/runnable-ld.so";
-#else
-  static const char kDynamicLoader[] = "lib32/runnable-ld.so";
-#endif
-  AddFileToNmf("program", kDynamicLoader, &nmf);
-
   req->Set("nmf", nmf);
 }
 
