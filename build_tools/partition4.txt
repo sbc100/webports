@@ -1,93 +1,38 @@
-builder 0 (total: 3277)
-  glibc-compat
-  gmp
-  mpfr
-  mpc
-  nacl-spawn
-  gcc
-  libogg
-  libvorbis
-  libtheora
-  lame
-  ffmpeg
-  fftw
-  ncurses
-  readline
-  sqlite
-  expat
-  apr
-  zlib
-  apr-util
-  subversion
-  bzip2
-  freetype
-  fontconfig
-  libpng
-  pixman
-  cairo
-  bash
-  binutils
-  mingn
-  leveldb
-  zeromq
-  pcre
-  lua5.2
-  libtar
-  lua-ppapi
-  jpeg8d
-  make
-  faac
-  agg
-  openal-soft
-  freealut
-  mongoose
-  agg-demo
-  lua5.1
-builder 1 (total: 3269)
+builder 0 (total: 2730)
   zlib
   libpng
   jpeg6b
   opencv
-  clapack
+  libogg
+  libvorbis
   glibc-compat
-  nacl-spawn
-  binutils
+  libtheora
+  lame
+  ffmpeg
   yajl
   ncurses
   libtar
+  nacl-spawn
   nethack
-  glib
-  vim
-  busybox
-  coreutils
-  libogg
-  flac
-  protobuf
-  libxml2
   bzip2
   expat
   freetype
   fontconfig
   pixman
   cairo
+  busybox
+  coreutils
+  flac
+  libxml2
+  glib
   pango
-  gc
-  libtomcrypt
-  unzip
-  x264
-  libtommath
-  physfs
-  tinyxml
-  dreadthread
-builder 2 (total: 3391)
+builder 1 (total: 2707)
   glibc-compat
   ncurses
   zlib
   readline
   python-host
   numpy
-  expat
-  gdb
   cython
   bzip2
   hdf5
@@ -103,53 +48,71 @@ builder 2 (total: 3391)
   matplotlib
   sympy
   yt
-  openssl
-  pyppapi
-  python-static
+  leveldb
+  libtar
+  nacl-spawn
+  make
+  pcre
   zeromq
   pyzmq
-  markupsafe
+  openal-soft
+  x264
+  freealut
+  agg
   ipython
+  agg-demo
+  markupsafe
   jinja2
-builder 3 (total: 3270)
+builder 2 (total: 2684)
+  zlib
+  libtar
+  gmp
+  mpfr
+  mpc
+  glibc-compat
+  nacl-spawn
+  gcc
+  binutils
+  fftw
+  glib
+  ncurses
+  readline
+  sqlite
+  expat
+  apr
+  apr-util
+  subversion
+  vim
+  bash
+  mingn
+  protobuf
+  lua5.2
+  lua-ppapi
+  zeromq
+  gc
+  mongoose
+  faac
+  jpeg8d
+  libtomcrypt
+  unzip
+  libtommath
+  tinyxml
+  lua5.1
+  physfs
+  dreadthread
+builder 3 (total: 3053)
+  clapack
   glibc-compat
   ncurses
   zlib
-  libtar
-  nacl-spawn
-  emacs
-  libpng
-  regal
-  openssl
-  libmikmod
-  bzip2
   expat
-  libogg
-  sdl
-  libvorbis
-  sdl-mixer
-  freetype
-  metakit
-  sdl-ttf
-  drod
-  snes9x
-  dosbox
-  scummvm
-  curl
-  git
-  bochs
-  tar
-  toybox
-  nano
-  cfitsio
-  faad2
-  civetweb
-  xaos
-  libsodium
-  sdl-tests
-  libmodplug
-  jpeg8d
-  sdl-image
-  sdl-net
-  libhangul
-Difference between total time of builders: 122
+  readline
+  gdb
+  python-host
+  numpy
+  cython
+  bzip2
+  openssl
+  pyppapi
+  python-static
+Difference between total time of builders: 368

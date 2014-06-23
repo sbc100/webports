@@ -1,102 +1,46 @@
-builder 0 (total: 4382)
-  glibc-compat
-  gmp
-  mpfr
-  mpc
-  nacl-spawn
-  gcc
-  clapack
-  ncurses
-  zlib
-  expat
-  readline
-  gdb
-  fftw
-  yajl
-  sqlite
-  apr
-  apr-util
-  subversion
-  libtar
-  nethack
-  glib
-  snes9x
-  bzip2
-  freetype
-  fontconfig
-  libpng
-  pixman
-  cairo
-  coreutils
-  binutils
-  mingn
-  pango
-  pcre
-  libsodium
-  make
-  gc
-  agg
-  openal-soft
-  freealut
-  physfs
-  agg-demo
-builder 1 (total: 4379)
+builder 0 (total: 3227)
   zlib
   libpng
   jpeg6b
   opencv
-  glibc-compat
-  ncurses
-  libtar
-  nacl-spawn
-  emacs
+  clapack
   libogg
   libvorbis
+  glibc-compat
   libtheora
   lame
   ffmpeg
-  binutils
-  libmikmod
+  yajl
+  ncurses
+  libtar
+  nacl-spawn
+  nethack
   bzip2
   expat
-  regal
-  sdl
-  sdl-mixer
   freetype
-  metakit
-  sdl-ttf
-  drod
-  dosbox
-  vim
-  busybox
+  fontconfig
+  pixman
+  cairo
   readline
   bash
-  bochs
+  flac
   protobuf
-  toybox
-  leveldb
-  faad2
-  civetweb
-  xaos
-  sdl-tests
-  libmodplug
+  glib
+  pango
   faac
-  unzip
-  sdl-net
-  libtommath
-  libhangul
+  libtomcrypt
+  agg
   tinyxml
-  dreadthread
-builder 2 (total: 4390)
+  lua5.1
+  physfs
+  agg-demo
+builder 1 (total: 3227)
   glibc-compat
   ncurses
   zlib
   readline
   python-host
   numpy
-  libpng
-  regal
-  openssl
   cython
   bzip2
   hdf5
@@ -104,6 +48,7 @@ builder 2 (total: 4390)
   pyparsing
   distribute
   freetype
+  libpng
   nose
   setuptools
   six
@@ -111,32 +56,54 @@ builder 2 (total: 4390)
   matplotlib
   sympy
   yt
+  openssl
   pyppapi
   python-static
-  libtar
-  libogg
-  sdl
-  libvorbis
-  scummvm
-  nacl-spawn
-  curl
-  git
-  flac
-  libxml2
-  tar
-  nano
-  cfitsio
+  pcre
   zeromq
+  pyzmq
+  libtar
+  nacl-spawn
+  unzip
+  libtommath
+  ipython
+  markupsafe
+  jinja2
+builder 2 (total: 3222)
+  zlib
+  libtar
+  gmp
+  mpfr
+  mpc
+  glibc-compat
+  nacl-spawn
+  gcc
+  ncurses
+  expat
+  readline
+  gdb
+  binutils
+  fftw
+  glib
+  sqlite
+  apr
+  apr-util
+  subversion
+  vim
+  busybox
+  coreutils
+  mingn
+  libxml2
+  leveldb
   lua5.2
   lua-ppapi
-  jpeg8d
-  pyzmq
-  libtomcrypt
-  sdl-image
-  x264
+  make
+  zeromq
+  gc
   mongoose
-  lua5.1
-  markupsafe
-  ipython
-  jinja2
-Difference between total time of builders: 10
+  jpeg8d
+  openal-soft
+  x264
+  freealut
+  dreadthread
+Difference between total time of builders: 4

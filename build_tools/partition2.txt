@@ -1,16 +1,15 @@
-builder 0 (total: 6073)
-  glibc-compat
+builder 0 (total: 4697)
+  zlib
+  libpng
+  jpeg6b
+  opencv
+  libtar
   gmp
   mpfr
   mpc
+  glibc-compat
   nacl-spawn
   gcc
-  ncurses
-  zlib
-  libtar
-  emacs
-  libpng
-  regal
   libogg
   libvorbis
   libtheora
@@ -19,65 +18,48 @@ builder 0 (total: 6073)
   binutils
   fftw
   yajl
-  libmikmod
-  bzip2
-  expat
-  sdl
-  sdl-mixer
-  freetype
-  metakit
-  sdl-ttf
-  drod
+  glib
+  ncurses
   readline
   sqlite
+  expat
   apr
   apr-util
   subversion
   nethack
-  glib
-  snes9x
-  dosbox
-  scummvm
-  busybox
+  bzip2
+  freetype
+  fontconfig
+  pixman
+  cairo
   bash
   mingn
-  bochs
-  libxml2
-  tar
-  toybox
-  nano
-  leveldb
-  faad2
-  civetweb
-  xaos
-  libsodium
-  sdl-tests
-  make
-  libmodplug
+  protobuf
+  pango
+  lua5.2
+  lua-ppapi
+  zeromq
+  gc
+  mongoose
   faac
   jpeg8d
-  sdl-image
-  sdl-net
-  x264
-  mongoose
-  physfs
-  lua5.1
+  openal-soft
+  freealut
+  libtommath
   tinyxml
+  lua5.1
+  physfs
   dreadthread
-builder 1 (total: 6079)
-  zlib
-  libpng
-  jpeg6b
-  opencv
+builder 1 (total: 4703)
   glibc-compat
   ncurses
+  zlib
   readline
   python-host
   numpy
   clapack
   expat
   gdb
-  openssl
   cython
   bzip2
   hdf5
@@ -85,6 +67,7 @@ builder 1 (total: 6079)
   pyparsing
   distribute
   freetype
+  libpng
   nose
   setuptools
   six
@@ -92,39 +75,28 @@ builder 1 (total: 6079)
   matplotlib
   sympy
   yt
+  openssl
   pyppapi
   python-static
-  fontconfig
-  pixman
-  cairo
-  nacl-spawn
-  curl
   libtar
+  nacl-spawn
   vim
+  busybox
   coreutils
-  git
   libogg
   flac
-  protobuf
-  glib
-  pango
-  cfitsio
-  zeromq
+  libxml2
+  leveldb
+  make
   pcre
-  lua5.2
-  lua-ppapi
-  jpeg8d
+  zeromq
   pyzmq
-  gc
   libtomcrypt
-  agg
   unzip
-  openal-soft
-  freealut
-  libtommath
-  libhangul
+  x264
+  agg
+  ipython
   agg-demo
   markupsafe
-  ipython
   jinja2
 Difference between total time of builders: 5

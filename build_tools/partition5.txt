@@ -1,66 +1,42 @@
-builder 0 (total: 2451)
-  glibc-compat
-  gmp
-  mpfr
-  mpc
-  nacl-spawn
-  gcc
-  binutils
-  ncurses
-  zlib
-  libtar
-  nethack
-  bzip2
-  expat
-  freetype
-  fontconfig
-  libpng
-  pixman
-  cairo
-  coreutils
-  mingn
-  protobuf
-  glib
-  pango
-  agg
-  mongoose
-  agg-demo
-builder 1 (total: 2448)
+builder 0 (total: 2218)
   zlib
   libpng
   jpeg6b
   opencv
-  libogg
-  libvorbis
+  fftw
   glibc-compat
-  libtheora
-  lame
-  ffmpeg
-  glib
-  snes9x
-  openssl
+  ncurses
+  readline
+  sqlite
+  expat
+  apr
+  apr-util
+  subversion
+  protobuf
+  leveldb
+  lua5.2
+  libtar
   nacl-spawn
-  curl
-  git
-  faad2
-  civetweb
-  libsodium
-  jpeg8d
+  lua-ppapi
+  make
   gc
-  unzip
+  mongoose
+  jpeg8d
+  openal-soft
   x264
-  libtommath
-  physfs
-  tinyxml
-  dreadthread
-builder 2 (total: 2934)
+  freealut
+  python-host
+  ipython
+  markupsafe
+  setuptools
+  jinja2
+builder 1 (total: 2512)
   glibc-compat
   ncurses
   zlib
   readline
   python-host
   numpy
-  openssl
   cython
   bzip2
   hdf5
@@ -76,79 +52,74 @@ builder 2 (total: 2934)
   matplotlib
   sympy
   yt
-  pyppapi
-  python-static
   zeromq
   pyzmq
-builder 3 (total: 2613)
+builder 2 (total: 2099)
+  zlib
+  libtar
+  gmp
+  mpfr
+  mpc
+  glibc-compat
+  nacl-spawn
+  gcc
+  yajl
+  ncurses
+  nethack
+  vim
+  busybox
+  readline
+  bash
+  binutils
+  mingn
+  lua5.1
+builder 3 (total: 2049)
+  clapack
+  libogg
+  libvorbis
+  glibc-compat
+  libtheora
+  lame
+  ffmpeg
+  zlib
+  libtar
+  nacl-spawn
+  binutils
+  glib
+  bzip2
+  expat
+  freetype
+  fontconfig
+  libpng
+  pixman
+  cairo
+  coreutils
+  flac
+  libxml2
+  pango
+  zeromq
+  pcre
+  faac
+  libtomcrypt
+  unzip
+  agg
+  libtommath
+  tinyxml
+  physfs
+  agg-demo
+  dreadthread
+builder 4 (total: 2569)
   glibc-compat
   ncurses
   zlib
-  libtar
-  nacl-spawn
-  emacs
   expat
   readline
   gdb
-  yajl
-  sqlite
-  apr
-  apr-util
-  subversion
-  vim
-  busybox
-  bash
-  libogg
-  flac
-  libxml2
-  toybox
-  nano
-  pcre
-  lua5.2
-  lua-ppapi
-  make
-  faac
-  openal-soft
-  freealut
-  libhangul
-  lua5.1
   python-host
-  markupsafe
-  ipython
-  setuptools
-  jinja2
-builder 4 (total: 2472)
-  zlib
-  libpng
-  regal
-  clapack
-  fftw
-  libmikmod
+  numpy
+  cython
   bzip2
-  expat
-  libtar
-  libogg
-  sdl
-  libvorbis
-  sdl-mixer
-  freetype
-  metakit
-  sdl-ttf
-  drod
-  dosbox
-  scummvm
-  bochs
-  glibc-compat
-  nacl-spawn
-  tar
-  leveldb
-  cfitsio
-  zeromq
-  xaos
-  sdl-tests
-  libmodplug
-  libtomcrypt
-  jpeg8d
-  sdl-image
-  sdl-net
-Difference between total time of builders: 485
+  openssl
+  pyppapi
+  python-static
+Difference between total time of builders: 520
