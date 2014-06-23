@@ -52,18 +52,6 @@ index 7ec72fe..7e7ed92 100755
  else
    cat >conftest.$ac_ext <<_ACEOF
  /* confdefs.h.  */
-@@ -29089,9 +29090,9 @@ if test "${bash_cv_getcwd_malloc+set}" = set; then
-   $as_echo_n "(cached) " >&6
- else
-   if test "$cross_compiling" = yes; then
--  { $as_echo "$as_me:$LINENO: WARNING: cannot check whether getcwd allocates memory when cross-compiling -- defaulting to no" >&5
-+  { $as_echo "$as_me:$LINENO: WARNING: cannot check whether getcwd allocates memory when cross-compiling -- defaulting to yes" >&5
- $as_echo "$as_me: WARNING: cannot check whether getcwd allocates memory when cross-compiling -- defaulting to no" >&2;}
--    bash_cv_getcwd_malloc=no
-+    bash_cv_getcwd_malloc=yes
- 
- else
-   cat >conftest.$ac_ext <<_ACEOF
 diff --git a/eval.c b/eval.c
 index 9011e0b..0f54f48 100644
 --- a/eval.c

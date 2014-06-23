@@ -11,6 +11,8 @@ export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
 -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 CONFIG_SUB=support/config.sub
 
+export bash_cv_getcwd_malloc=yes
+
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   export EXTRA_LIBS+=" -lglibc-compat"
