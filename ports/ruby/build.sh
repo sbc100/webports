@@ -11,7 +11,7 @@ EXECUTABLES="ruby${NACL_EXEEXT} pepper-ruby${NACL_EXEEXT}"
 ConfigureStep() {
   # We need to build a host version of ruby for use during the nacl
   # build.
-  HOST_BUILD=${SRC_DIR}/build-nacl-host
+  HOST_BUILD=${WORK_DIR}/build-nacl-host
   if [ ! -x ${HOST_BUILD}/inst/bin/ruby ]; then
     Banner "Building ruby for host"
     MakeDir ${HOST_BUILD}
@@ -45,8 +45,8 @@ ConfigureStep() {
 
   LogExecute ${SRC_DIR}/configure \
     --host=${conf_host} \
-    --prefix=${PREFIX} \
-    --with-baseruby=$SRC_DIR/build-nacl-host/inst/bin/ruby \
+    --prefix=/ \
+    --with-baseruby=${WORK_DIR}/build-nacl-host/inst/bin/ruby \
     --with-http=no \
     --with-html=no \
     --with-ftp=no \
@@ -64,4 +64,9 @@ BuildStep() {
     # Just write the x86-64 version out for now.
     TranslateAndWriteSelLdrScript ruby.pexe x86-64 ruby.x86-64.nexe ruby
   fi
+}
+
+InstallStep() {
+  DESTDIR=${DESTDIR}/${PREFIX}
+  DefaultInstallStep
 }

@@ -58,7 +58,7 @@ endif
 $(eval $(call NMF_RULE,$(TARGET),))
 
 DATA_ARCHIVE = $(INSTALL_DIR)/rbdata-$(NACL_ARCH).tar
-ASSETS = usr/bin/irb usr/lib/ruby/2.0.0
+ASSETS = bin/irb lib/ruby/2.0.0
 ifeq ($(TOOLCHAIN),glibc)
 EXTRA_LIBS = lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
 endif
@@ -70,7 +70,7 @@ NASSH = $(CHROMEAPPS)/nassh
 install:
 	mkdir -p $(INSTALL_DIR)
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
-	tar -h -c -C ${NACL_PREFIX}/.. -f $(DATA_ARCHIVE) ${ASSETS}
+	tar -h -c -C ${NACL_PREFIX} -f $(DATA_ARCHIVE) ${ASSETS}
 ifeq ($(TOOLCHAIN),glibc)
 	tar -h -r -C ${NACL_PREFIX} -f $(DATA_ARCHIVE) ${EXTRA_LIBS}
 endif

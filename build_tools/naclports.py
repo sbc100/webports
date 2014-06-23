@@ -595,7 +595,7 @@ class Package(object):
           RemoveEmptryDirs(os.path.dirname(filename))
 
       os.remove(file_list)
-      os.remove(GetInstallStamp(self.NAME))
+    os.remove(GetInstallStamp(self.NAME, self.config))
 
   def Build(self, verbose, build_deps, force=None):
     self.CheckEnabled()

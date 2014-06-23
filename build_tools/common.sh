@@ -723,6 +723,7 @@ SetupSDKBuildSystem() {
   export NACL_SRC
   export NACLPORTS_INCLUDE
   export NACLPORTS_REVISION=${REVISION}
+  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
 
   MAKEFLAGS+=" TOOLCHAIN=${TOOLCHAIN}"
   MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
@@ -748,7 +749,6 @@ SetupCrossEnvironment() {
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export READELF=${NACLREADELF}
-  export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
@@ -1289,20 +1289,20 @@ TranslatePexe() {
 PackageStep() {
   Banner "Packaging $(basename ${PACKAGE_FILE})"
   Remove ${PACKAGE_FILE}
-  if [ -d ${DESTDIR}${PREFIX} ]; then
-    mv ${DESTDIR}${PREFIX} ${DESTDIR}/payload
+  if [ -d ${INSTALL_DIR}${PREFIX} ]; then
+    mv ${INSTALL_DIR}${PREFIX} ${INSTALL_DIR}/payload
   fi
-  LogExecute cp ${START_DIR}/pkg_info ${DESTDIR}
+  LogExecute cp ${START_DIR}/pkg_info ${INSTALL_DIR}
   if [ ${NACL_DEBUG} = "1" ]; then
-    echo "BUILD_CONFIG=debug" >> ${DESTDIR}/pkg_info
+    echo "BUILD_CONFIG=debug" >> ${INSTALL_DIR}/pkg_info
   else
-    echo "BUILD_CONFIG=release" >> ${DESTDIR}/pkg_info
+    echo "BUILD_CONFIG=release" >> ${INSTALL_DIR}/pkg_info
   fi
-  echo "BUILD_ARCH=${NACL_ARCH}" >> ${DESTDIR}/pkg_info
-  echo "BUILD_TOOLCHAIN=${TOOLCHAIN}" >> ${DESTDIR}/pkg_info
-  echo "BUILD_SDK_VERSION=${NACL_SDK_VERSION}" >> ${DESTDIR}/pkg_info
-  echo "BUILD_NACLPORTS_REVISION=${REVISION}" >> ${DESTDIR}/pkg_info
-  LogExecute tar cf ${PACKAGE_FILE} -C ${DESTDIR} .
+  echo "BUILD_ARCH=${NACL_ARCH}" >> ${INSTALL_DIR}/pkg_info
+  echo "BUILD_TOOLCHAIN=${TOOLCHAIN}" >> ${INSTALL_DIR}/pkg_info
+  echo "BUILD_SDK_VERSION=${NACL_SDK_VERSION}" >> ${INSTALL_DIR}/pkg_info
+  echo "BUILD_NACLPORTS_REVISION=${REVISION}" >> ${INSTALL_DIR}/pkg_info
+  LogExecute tar cf ${PACKAGE_FILE} -C ${INSTALL_DIR} .
 }
 
 
@@ -1414,8 +1414,8 @@ RunPostInstallTestStep()       {
 
 
 RunInstallStep()    {
-  Remove ${DESTDIR}
-  MakeDir ${DESTDIR}
+  Remove ${INSTALL_DIR}
+  MakeDir ${INSTALL_DIR}
   RunStep InstallStep "Installing" ${BUILD_DIR};
 }
 

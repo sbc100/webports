@@ -59,7 +59,7 @@ int nacl_main(int argc, char **argv) {
   if (setup_unix_environment(DATA_ARCHIVE))
     return 1;
 
-  if (argc == 2 && !strcmp(argv[1], "/usr/bin/irb"))
+  if (argc == 2 && !strcmp(argv[1], "/bin/irb"))
     printf("Launching irb ...\n");
   ruby_sysinit(&argc, &argv);
   {
