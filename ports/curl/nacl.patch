@@ -8,7 +8,7 @@ index 3a38b32..8223556 100644
  
 +#ifdef __native_client__
 +// nacl_io does not yet support gethostbyname_r().
-+// TODO(sbc): remove this once it is added to nacl_io
++// TODO(sbc): remove this once it is added to nacl_io: http://crbug.com/387474
 +#undef HAVE_GETHOSTBYNAME_R
 +#endif
 +

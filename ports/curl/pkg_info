@@ -1,8 +1,8 @@
 NAME=curl
-VERSION=7.32.0
-URL=http://curl.haxx.se/download/curl-7.32.0.tar.bz2
+VERSION=7.37.0
+URL=http://curl.haxx.se/download/curl-7.37.0.tar.bz2
 LICENSE=CUSTOM:README
-SHA1=f6989fca0dac0c35628523436fc17869972d4251
+SHA1=3bde6fb2e599197e9579c0735ad255c1ddbd914d
 # Currently only builds on linux (due to dependency on openssl)
 BUILD_OS=linux
 DEPENDS=(openssl nacl-spawn)
