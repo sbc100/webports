@@ -1,5 +1,6 @@
 {
-  "name": "NaCl Debugger",
+  "name": "Native Client Debugger",
+  "short_name": "NaCl Debug",
   "description": "Debugger for Native Client Modules",
   "version": "7.7.0.%(version)s",
   "manifest_version": 2,

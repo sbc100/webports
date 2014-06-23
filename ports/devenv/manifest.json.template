@@ -1,5 +1,6 @@
 {
   "name": "NaCl Development Environment",
+  "short_name": "NaCl DevEnv",
   "description": "In-browser development environment for Native Client",
   "version": "0.1.0.%(version)s",
   "manifest_version": 2,

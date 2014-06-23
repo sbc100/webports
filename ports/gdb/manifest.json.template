@@ -1,5 +1,6 @@
 {
-  "name": "GDB",
+  "name": "Native Client GDB",
+  "short_name": "NaCl GDB"
   "description": "GDB running using NativeClient",
   "version": "7.7.0.%(version)s",
   "manifest_version": 2,
