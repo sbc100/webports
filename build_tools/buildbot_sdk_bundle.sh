@@ -32,37 +32,31 @@ export LUA_NO_READLINE=1
 
 PACKAGES=$(make sdklibs_list)
 
+# Build a package in both Debug and Release configurations.
 # $1 - name of package
 # $2 - arch to build for
 # $3 - toolchain ('glibc', 'newlib', 'bionic', 'pnacl')
-# $4 - 'Debug' or 'Release'
 CustomBuildPackage() {
+  PACKAGE=$1
   export NACL_ARCH=$2
   export TOOLCHAIN=$3
 
-  if [ "$4" = "Debug" ]; then
-    export NACL_DEBUG=1
-  else
-    export NACL_DEBUG=0
-  fi
-
-  BuildPackage $1 --no-deps
+  NACL_DEBUG=0 BuildPackage $PACKAGE --no-deps
+  NACL_DEBUG=1 BuildPackage $PACKAGE --no-deps
 }
 
+# Build a package for all architectures.
 # $1 - name of package
 # $2 - arch to build for
 BuildPackageArchAll() {
   local PACKAGE=$1
-  local ARCH=$2
+  local NACL_ARCH=$2
   if [ "$ARCH" = "pnacl" ]; then
-    CustomBuildPackage $PACKAGE $ARCH pnacl Release
-    CustomBuildPackage $PACKAGE $ARCH pnacl Debug
+    CustomBuildPackage $PACKAGE $NACL_ARCH pnacl
   else
-    CustomBuildPackage $PACKAGE $ARCH newlib Release
-    CustomBuildPackage $PACKAGE $ARCH newlib Debug
+    CustomBuildPackage $PACKAGE $NACL_ARCH newlib
     if [ "$ARCH" != "arm" ]; then
-      CustomBuildPackage $PACKAGE $ARCH glibc Release
-      CustomBuildPackage $PACKAGE $ARCH glibc Debug
+      CustomBuildPackage $PACKAGE $NACL_ARCH glibc
     fi
   fi
 }
