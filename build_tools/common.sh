@@ -255,7 +255,7 @@ CheckToolchain() {
       fi
     elif [ "${LIBC}" == "newlib" ]; then
       if [ "${NACL_LIBC}" != "newlib" ]; then
-        echo "This package must be built with newlib (\$TOOLCAHIN=newlib)"
+        echo "This package must be built with newlib (\$TOOLCHAIN=newlib)"
         exit 1
       fi
     fi

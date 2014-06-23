@@ -15,9 +15,9 @@ InstallStep() {
   MakeDir ${APP_DIR}
 
   # Set up files for bootstrap.
-  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash*/${NACL_LIBC}/bash
-  local CURL_DIR=${NACL_PACKAGES_PUBLISH}/curl*/${NACL_LIBC}
-  local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip*/${NACL_LIBC}
+  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash
+  local CURL_DIR=${NACL_PACKAGES_PUBLISH}/curl/${TOOLCHAIN}
+  local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip/${TOOLCHAIN}
 
   LogExecute cp -fR ${BASH_DIR}/* ${APP_DIR}
   # On newlib there won't be libs, so turn on null glob for these copies.

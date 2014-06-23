@@ -28,8 +28,8 @@ InstallStep() {
   MakeDir ${SRC_DIR}/${NACL_ARCH}/bin
   ChangeDir ${SRC_DIR}/${NACL_ARCH}/bin
 
-  local BINUTILS_DIR=${NACL_PACKAGES_PUBLISH}/binutils/${NACL_LIBC}
-  local GCC_DIR=${NACL_PACKAGES_PUBLISH}/gcc/${NACL_LIBC}
+  local BINUTILS_DIR=${NACL_PACKAGES_PUBLISH}/binutils/${TOOLCHAIN}
+  local GCC_DIR=${NACL_PACKAGES_PUBLISH}/gcc/${TOOLCHAIN}
 
   local TOOLCHAIN_OUT_DIR=mingn/toolchain/nacl_x86_glibc
   local bin_dir=${TOOLCHAIN_OUT_DIR}/bin
