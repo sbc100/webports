@@ -65,11 +65,19 @@ BuildShard() {
 Publish() {
   echo "@@@BUILD_STEP upload binaries@@@"
 
-  echo "Uploading publish directory to ${UPLOAD_PATH}"
-  ${GSUTIL} cp -R -a public-read out/publish/* gs://${UPLOAD_PATH}/publish/
+  if [ "$(ls out/publish)" != "" ]; then
+    echo "Uploading publish directory to ${UPLOAD_PATH}"
+    ${GSUTIL} cp -R -a public-read out/publish/* gs://${UPLOAD_PATH}/publish/
+  else
+    echo "Nothing to upload in publish directory."
+  fi
 
-  echo "Uploading packages directory to ${UPLOAD_PATH}"
-  ${GSUTIL} cp -R -a public-read out/packages/* gs://${UPLOAD_PATH}/packages/
+  if [ "$(ls out/packages)" != "" ]; then
+    echo "Uploading packages directory to ${UPLOAD_PATH}"
+    ${GSUTIL} cp -R -a public-read out/packages/* gs://${UPLOAD_PATH}/packages/
+  else
+    echo "Nothing to upload in packages directory."
+  fi
 
   local URL="http://gsdview.appspot.com/${UPLOAD_PATH}/"
   echo "@@@STEP_LINK@browse@${URL}@@@"
