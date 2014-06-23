@@ -6,7 +6,7 @@
 
 NaClTerm.prefix = 'bash';
 NaClTerm.nmf = 'bash.nmf';
-NaClTerm.argv = ['--init-file', '/mnt/real_http/bashrc'];
+NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
 // TODO(bradnelson): Drop this hack once tar extraction first checks relative
 // to the nexe.
 NaClTerm.useNaClAltHttp = true;

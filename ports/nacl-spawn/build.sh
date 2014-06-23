@@ -36,4 +36,6 @@ InstallStep() {
     LogExecute cp libnacl_spawn.so ${DESTDIR_LIB}
   fi
   LogExecute cp libcli_main.a ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+  LogExecute cp -f ${START_DIR}/nacl_spawn.h ${DESTDIR_INCLUDE}/
 }

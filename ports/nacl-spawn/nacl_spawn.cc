@@ -4,6 +4,8 @@
 
 // Emulates spawning/waiting process by asking JavaScript to do so.
 
+#include "nacl_spawn.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -272,13 +274,19 @@ static bool ExpandShBang(std::string* prog, pp::VarDictionary* req) {
   return true;
 }
 
-static bool UseBuiltInFallback(std::string* prog) {
+static bool UseBuiltInFallback(std::string* prog, pp::VarDictionary* req) {
   if (prog->find('/') == std::string::npos) {
     bool found = false;
     const char* path_env = getenv("PATH");
     std::vector<std::string> paths;
     GetPaths(path_env, &paths);
-    if (!GetFileInPaths(*prog, paths, prog)) {
+    if (GetFileInPaths(*prog, paths, prog)) {
+      // Update argv[0] to match prog if we ended up changing it.
+      pp::Var argsv = req->Get("args");
+      assert(argsv.is_array());
+      pp::VarArray args(argsv);
+      args.Set(0, *prog);
+    } else {
       // If the path does not contain a slash and we cannot find it
       // from PATH, we use NMF served with the JavaScript.
       return true;
@@ -289,7 +297,7 @@ static bool UseBuiltInFallback(std::string* prog) {
 
 // Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
 static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
-  if (UseBuiltInFallback(&prog)) {
+  if (UseBuiltInFallback(&prog, req)) {
     return true;
   }
   if (access(prog.c_str(), R_OK) != 0) {
@@ -300,7 +308,7 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
     return false;
   }
   // Check fallback again in case of #! expanded to something relying on it.
-  if (UseBuiltInFallback(&prog)) {
+  if (UseBuiltInFallback(&prog, req)) {
     return true;
   }
   std::vector<std::string> dependencies;
@@ -320,7 +328,7 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
 // a lot of features posix_spawn supports (e.g., handling FDs).
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
-extern "C" int nacl_spawn_simple(const char** argv) {
+int nacl_spawn_simple(const char** argv) {
   assert(argv[0]);
   pp::VarDictionary req;
   req.Set("command", "nacl_spawn");
@@ -351,7 +359,7 @@ extern "C" int nacl_spawn_simple(const char** argv) {
 // same as waitpid, though this implementation has some restrictions.
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
-extern "C" int nacl_waitpid(int pid, int* status, int options) {
+int nacl_waitpid(int pid, int* status, int options) {
 
   pp::VarDictionary req;
   req.Set("command", "nacl_wait");

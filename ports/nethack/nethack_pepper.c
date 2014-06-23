@@ -5,36 +5,30 @@
  */
 
 #include <assert.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <libtar.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
-#include "nacl_io/nacl_io.h"
-#include "ppapi_simple/ps_main.h"
+#include "nacl_spawn.h"
 
 extern int nethack_main(int argc, char *argv[]);
 
-static void setup_unix_environment(void) {
+static void setup_unix_environment(const char* arg0) {
   mkdir("/usr", 0777);
   mkdir("/usr/games", 0777);
 
-  TAR* tar;
-  int ret = tar_open(&tar, "/mnt/http/nethack.tar", NULL, O_RDONLY, 0, 0);
-  assert(ret == 0);
-
-  ret = tar_extract_all(tar, "/usr/games");
-  assert(ret == 0);
-
-  ret = tar_close(tar);
-  assert(ret == 0);
+  int ret = nacl_startup_untar(arg0, "nethack.tar", "/usr/games");
+  if (ret != 0) {
+    perror("Startup untar failed.");
+    exit(1);
+  }
 
   // Setup config file.
   ret = chdir(getenv("HOME"));
-  assert(ret == 0);
+  if (ret != 0) {
+    perror("Can change to HOME dir.");
+    exit(1);
+  }
   if (access(".nethackrc", R_OK) < 0) {
     int fh = open(".nethackrc", O_CREAT | O_WRONLY);
     const char config[] = "OPTIONS=color\n";
@@ -43,10 +37,13 @@ static void setup_unix_environment(void) {
   }
 
   ret = chdir("/usr/games");
-  assert(ret == 0);
+  if (ret != 0) {
+    perror("Can change to /usr/games.");
+    exit(1);
+  }
 }
 
 int nacl_main(int argc, char* argv[]) {
-  setup_unix_environment();
+  setup_unix_environment(argv[0]);
   return nethack_main(argc, argv);
 }

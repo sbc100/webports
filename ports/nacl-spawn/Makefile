@@ -16,11 +16,14 @@ all: test
 
 # Targets for libcli_main
 
-libcli_main.a: cli_main.o
+libcli_main.a: cli_main.o nacl_startup_untar.o
 	-rm $@
 	$(NACLAR) rcs $@ $^
 
 cli_main.o: cli_main.c
+	$(NACLCC) $(CFLAGS) -c $< -o $@
+
+nacl_startup_untar.o: nacl_startup_untar.c
 	$(NACLCC) $(CFLAGS) -c $< -o $@
 
 # Targets for libnacl_spawn
