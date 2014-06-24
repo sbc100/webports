@@ -21,13 +21,12 @@ InstallStep() {
   DefaultInstallStep
 
   MakeDir ${PUBLISH_DIR}
-  local ASSEMBLY_DIR="${PUBLISH_DIR}/nano"
 
-  DESTDIR=${ASSEMBLY_DIR}/nanotar
+  DESTDIR=${PUBLISH_DIR}/nanotar
   MAKEFLAGS="prefix="
   DefaultInstallStep
 
-  ChangeDir ${ASSEMBLY_DIR}/nanotar
+  ChangeDir ${PUBLISH_DIR}/nanotar
   local exe="../nano_${NACL_ARCH}${NACL_EXEEXT}"
   cp bin/nano${NACL_EXEEXT} ${exe}
   if [ "${NACL_ARCH}" = "pnacl" ]; then
@@ -35,20 +34,22 @@ InstallStep() {
   fi
   rm -rf bin
   rm -rf share/man
-  tar cf ${ASSEMBLY_DIR}/nano.tar .
-  rm -rf ${ASSEMBLY_DIR}/nanotar
-  cd ${ASSEMBLY_DIR}
+  tar cf ${PUBLISH_DIR}/nano.tar .
+  rm -rf ${PUBLISH_DIR}/nanotar
+  cd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       nano_*${NACL_EXEEXT} \
       -s . \
       -o nano.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py nano.nmf
 
-  InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
+  InstallNaClTerm ${PUBLISH_DIR}
+
+  GenerateManifest ${START_DIR}/manifest.json ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/icon_16.png ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/icon_48.png ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/icon_128.png ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r nano-7.3.zip nano
+  Remove nano-7.3.zip
+  LogExecute zip -r nano-7.3.zip .
 }

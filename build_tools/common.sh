@@ -693,9 +693,14 @@ InstallNaClTerm() {
   local CHROMEAPPS=${NACL_SRC}/third_party/libapps/
   local LIB_DOT=${CHROMEAPPS}/libdot
   local NASSH=${CHROMEAPPS}/nassh
-  LIBDOT_SEARCH_PATH=${CHROMEAPPS} ${LIB_DOT}/bin/concat.sh \
-      -i ${NASSH}/concat/nassh_deps.concat \
-      -o ${INSTALL_DIR}/hterm.concat.js
+  local HTERM=${CHROMEAPPS}/hterm
+  LIBDOT_SEARCH_PATH=${CHROMEAPPS} LogExecute ${LIB_DOT}/bin/concat.sh \
+      -i ${HTERM}/concat/hterm_deps.concat -o ${INSTALL_DIR}/hterm.concat.js
+  LIBDOT_SEARCH_PATH=${CHROMEAPPS} LogExecute ${LIB_DOT}/bin/concat.sh \
+      -i ${HTERM}/concat/hterm.concat -o ${INSTALL_DIR}/hterm2.js
+  chmod +w ${INSTALL_DIR}/hterm.concat.js ${INSTALL_DIR}/hterm2.js
+  cat ${INSTALL_DIR}/hterm2.js >> ${INSTALL_DIR}/hterm.concat.js
+  rm ${INSTALL_DIR}/hterm2.js
 
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     sed 's/x-nacl/x-pnacl/' \
