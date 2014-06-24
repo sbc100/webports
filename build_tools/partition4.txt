@@ -1,32 +1,4 @@
-builder 0 (total: 2730)
-  zlib
-  libpng
-  jpeg6b
-  opencv
-  libogg
-  libvorbis
-  glibc-compat
-  libtheora
-  lame
-  ffmpeg
-  yajl
-  ncurses
-  libtar
-  nacl-spawn
-  nethack
-  bzip2
-  expat
-  freetype
-  fontconfig
-  pixman
-  cairo
-  busybox
-  coreutils
-  flac
-  libxml2
-  glib
-  pango
-builder 1 (total: 2707)
+builder 0 (total: 5304)
   glibc-compat
   ncurses
   zlib
@@ -34,80 +6,81 @@ builder 1 (total: 2707)
   python-host
   numpy
   cython
-  bzip2
+  setuptools
+  six
   hdf5
-  h5py
   pyparsing
   distribute
+  python-dateutil
+  pytz
+  h5py
+  pandas
+  bzip2
   freetype
   libpng
   nose
-  setuptools
-  six
-  python-dateutil
   matplotlib
   sympy
   yt
-  leveldb
-  libtar
-  nacl-spawn
-  make
-  pcre
-  zeromq
-  pyzmq
-  openal-soft
+  netcat
   x264
-  freealut
-  agg
-  ipython
-  agg-demo
-  markupsafe
-  jinja2
-builder 2 (total: 2684)
-  zlib
-  libtar
-  gmp
-  mpfr
-  mpc
-  glibc-compat
-  nacl-spawn
-  gcc
-  binutils
-  fftw
-  glib
-  ncurses
-  readline
-  sqlite
-  expat
-  apr
-  apr-util
-  subversion
-  vim
-  bash
-  mingn
-  protobuf
-  lua5.2
-  lua-ppapi
-  zeromq
-  gc
-  mongoose
   faac
-  jpeg8d
-  libtomcrypt
-  unzip
-  libtommath
-  tinyxml
+  ipython
   lua5.1
   physfs
-  dreadthread
-builder 3 (total: 3053)
+  tinyxml
+  mongoose
+  jsoncpp
+  thttpd
+  glib
+builder 1 (total: 5378)
   clapack
+  zlib
+  libpng
+  regal
+  jpeg8d
+  bzip2
+  imagemagick
+  openscenegraph
+  gsl
+  glibc-compat
+  libtar
+  openssl
+  nacl-spawn
+  curl
+  libogg
+  sdl
+  libvorbis
+  scummvm
+  git
+  libssh
+  libgit2
+  flac
+  sdl2
+  tiff
+  libxml2
+  unzip
+  ncurses
+  readline
+  bash
+  devenv
+  lua5.2
+  lua-ppapi
+  libwebp
+  libtomcrypt
+  sdl-image
+  sdl2-image
+  freetype
+  sdl2-ttf
+  sdl2-gfx
+builder 2 (total: 5728)
+  zlib
+  libpng
+  jpeg6b
+  opencv
   glibc-compat
   ncurses
-  zlib
-  expat
   readline
-  gdb
   python-host
   numpy
   cython
@@ -115,4 +88,77 @@ builder 3 (total: 3053)
   openssl
   pyppapi
   python-static
-Difference between total time of builders: 368
+  tiff
+  jpeg8d
+  libmng
+  lcms
+  devil
+  zeromq
+  pyzmq
+  box2d
+  jsoncpp
+  setuptools
+  markupsafe
+  jinja2
+  libtar
+  nacl-spawn
+  openssh
+  pyparsing
+  distribute
+  ipython
+  six
+  freetype
+  nose
+  python-dateutil
+  matplotlib
+  ipython-ppapi
+builder 3 (total: 5304)
+  glibc-compat
+  ncurses
+  zlib
+  readline
+  python3
+  ruby
+  python
+  bzip2
+  boost
+  libogg
+  libvorbis
+  lame
+  libav
+  libtar
+  nacl-spawn
+  bash
+  freeimage
+  nethack
+  python-ppapi
+  bullet
+  mesa
+  libtheora
+  ffmpeg
+  expat
+  freetype
+  fontconfig
+  libpng
+  pixman
+  cairo
+  yajl
+  openal-soft
+  mpg123
+  nano
+  python3-ppapi
+  zeromq
+  cfitsio
+  speex
+  ruby-ppapi
+  pcre
+  protobuf
+  giflib
+  agg
+  libtommath
+  agg-demo
+  openal-ogg-demo
+  tar
+  glib
+  pango
+Difference between total time of builders: 424

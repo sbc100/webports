@@ -1,40 +1,4 @@
-builder 0 (total: 3227)
-  zlib
-  libpng
-  jpeg6b
-  opencv
-  clapack
-  libogg
-  libvorbis
-  glibc-compat
-  libtheora
-  lame
-  ffmpeg
-  yajl
-  ncurses
-  libtar
-  nacl-spawn
-  nethack
-  bzip2
-  expat
-  freetype
-  fontconfig
-  pixman
-  cairo
-  readline
-  bash
-  flac
-  protobuf
-  glib
-  pango
-  faac
-  libtomcrypt
-  agg
-  tinyxml
-  lua5.1
-  physfs
-  agg-demo
-builder 1 (total: 3227)
+builder 0 (total: 7017)
   glibc-compat
   ncurses
   zlib
@@ -42,68 +6,149 @@ builder 1 (total: 3227)
   python-host
   numpy
   cython
-  bzip2
+  setuptools
+  six
   hdf5
-  h5py
   pyparsing
   distribute
+  python-dateutil
+  pytz
+  h5py
+  pandas
+  bzip2
   freetype
   libpng
   nose
-  setuptools
-  six
-  python-dateutil
   matplotlib
   sympy
   yt
+  libtar
+  nacl-spawn
+  bash
+  freeimage
+  nethack
+  mesa
+  libogg
+  libvorbis
+  libtheora
+  lame
+  ffmpeg
+  flac
+  expat
+  fontconfig
+  pixman
+  cairo
+  nano
+  zeromq
+  cfitsio
+  pyzmq
+  pcre
+  netcat
+  libtomcrypt
+  giflib
+  faac
+  agg
+  ipython
+  agg-demo
+  lua5.1
+  physfs
+  markupsafe
+  jinja2
+  mongoose
+  tar
+  glib
+  pango
+builder 1 (total: 7433)
+  clapack
+  glibc-compat
+  ncurses
+  zlib
+  readline
+  python3
+  python-host
+  numpy
+  cython
+  bzip2
   openssl
   pyppapi
   python-static
-  pcre
-  zeromq
-  pyzmq
+  bullet
   libtar
   nacl-spawn
-  unzip
-  libtommath
+  curl
+  git
+  sdl2
+  tiff
+  yajl
+  openal-soft
+  mpg123
+  jpeg8d
+  libpng
+  libmng
+  lcms
+  devil
+  python3-ppapi
+  libwebp
+  sdl2-image
+  freetype
+  sdl2-ttf
+  sdl2-gfx
+  pyparsing
+  distribute
   ipython
-  markupsafe
-  jinja2
-builder 2 (total: 3222)
+  setuptools
+  six
+  nose
+  python-dateutil
+  matplotlib
+  ipython-ppapi
+builder 2 (total: 7019)
   zlib
-  libtar
-  gmp
-  mpfr
-  mpc
+  libpng
+  jpeg6b
+  opencv
   glibc-compat
-  nacl-spawn
-  gcc
   ncurses
-  expat
   readline
-  gdb
-  binutils
-  fftw
-  glib
-  sqlite
-  apr
-  apr-util
-  subversion
-  vim
-  busybox
-  coreutils
-  mingn
+  ruby
+  regal
+  python
+  jpeg8d
+  bzip2
+  imagemagick
+  openscenegraph
+  boost
+  gsl
+  libogg
+  libvorbis
+  lame
+  libav
+  libtar
+  openssl
+  nacl-spawn
+  curl
+  sdl
+  scummvm
+  python-ppapi
+  libssh
+  libgit2
   libxml2
-  leveldb
+  unzip
+  bash
+  devenv
+  speex
+  ruby-ppapi
   lua5.2
   lua-ppapi
-  make
-  zeromq
-  gc
-  mongoose
-  jpeg8d
-  openal-soft
+  protobuf
   x264
-  freealut
-  dreadthread
-Difference between total time of builders: 4
+  sdl-image
+  box2d
+  libtommath
+  jsoncpp
+  openal-soft
+  openal-ogg-demo
+  tinyxml
+  openssh
+  thttpd
+Difference between total time of builders: 415

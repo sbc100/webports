@@ -1,102 +1,143 @@
-builder 0 (total: 4697)
-  zlib
-  libpng
-  jpeg6b
-  opencv
-  libtar
-  gmp
-  mpfr
-  mpc
-  glibc-compat
-  nacl-spawn
-  gcc
-  libogg
-  libvorbis
-  libtheora
-  lame
-  ffmpeg
-  binutils
-  fftw
-  yajl
-  glib
-  ncurses
-  readline
-  sqlite
-  expat
-  apr
-  apr-util
-  subversion
-  nethack
-  bzip2
-  freetype
-  fontconfig
-  pixman
-  cairo
-  bash
-  mingn
-  protobuf
-  pango
-  lua5.2
-  lua-ppapi
-  zeromq
-  gc
-  mongoose
-  faac
-  jpeg8d
-  openal-soft
-  freealut
-  libtommath
-  tinyxml
-  lua5.1
-  physfs
-  dreadthread
-builder 1 (total: 4703)
+builder 0 (total: 10001)
   glibc-compat
   ncurses
   zlib
   readline
   python-host
   numpy
-  clapack
-  expat
-  gdb
-  cython
-  bzip2
-  hdf5
-  h5py
-  pyparsing
-  distribute
-  freetype
+  python3
   libpng
-  nose
+  regal
+  cython
   setuptools
   six
+  hdf5
+  pyparsing
+  distribute
   python-dateutil
+  pytz
+  h5py
+  pandas
+  bzip2
+  freetype
+  nose
   matplotlib
   sympy
   yt
+  jpeg8d
+  imagemagick
+  openscenegraph
+  gsl
+  libtar
+  libogg
+  sdl
+  libvorbis
+  scummvm
+  nacl-spawn
+  bash
+  nethack
+  bullet
+  mesa
+  flac
+  sdl2
+  expat
+  fontconfig
+  pixman
+  cairo
+  yajl
+  openal-soft
+  mpg123
+  nano
+  python3-ppapi
+  zeromq
+  cfitsio
+  speex
+  pyzmq
+  pcre
+  netcat
+  libtomcrypt
+  sdl-image
+  giflib
+  faac
+  sdl2-ttf
+  agg
+  box2d
+  sdl2-gfx
+  ipython
+  jsoncpp
+  agg-demo
+  openal-ogg-demo
+  tinyxml
+  mongoose
+  thttpd
+  tar
+  glib
+  pango
+builder 1 (total: 10429)
+  clapack
+  zlib
+  libpng
+  jpeg6b
+  opencv
+  glibc-compat
+  ncurses
+  readline
+  ruby
+  python-host
+  numpy
+  cython
+  bzip2
   openssl
   pyppapi
   python-static
+  python
+  boost
+  libogg
+  libvorbis
+  lame
+  libav
   libtar
   nacl-spawn
-  vim
-  busybox
-  coreutils
-  libogg
-  flac
+  curl
+  freeimage
+  python-ppapi
+  git
+  libssh
+  libgit2
+  libtheora
+  ffmpeg
+  tiff
   libxml2
-  leveldb
-  make
-  pcre
-  zeromq
-  pyzmq
-  libtomcrypt
   unzip
+  bash
+  devenv
+  jpeg8d
+  libmng
+  lcms
+  devil
+  ruby-ppapi
+  lua5.2
+  lua-ppapi
+  libwebp
+  protobuf
   x264
-  agg
-  ipython
-  agg-demo
+  sdl2
+  sdl2-image
+  libtommath
+  lua5.1
+  physfs
+  setuptools
   markupsafe
   jinja2
-Difference between total time of builders: 5
+  jsoncpp
+  openssh
+  pyparsing
+  distribute
+  ipython
+  six
+  freetype
+  nose
+  python-dateutil
+  matplotlib
+  ipython-ppapi
+Difference between total time of builders: 427
