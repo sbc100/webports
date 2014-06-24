@@ -1,87 +1,119 @@
-builder 0 (total: 5304)
+builder 0 (total: 5728)
   glibc-compat
   ncurses
   zlib
   readline
   python-host
   numpy
-  cython
-  setuptools
   python
+  setuptools
   six
+  python-dateutil
+  cython
   hdf5
   pyparsing
   distribute
-  python-dateutil
   pytz
   h5py
   pandas
   bzip2
   freetype
-  libpng
   nose
+  libpng
   matplotlib
   sympy
   yt
-  netcat
-  x264
-  faac
-  ipython
-  lua5.1
-  physfs
-  tinyxml
-  mongoose
-  jsoncpp
-  thttpd
-  glib
-builder 1 (total: 5378)
+builder 1 (total: 4999)
   clapack
   zlib
   libpng
   regal
+  bzip2
+  boost
+  libogg
+  libvorbis
+  lame
+  libav
+  glibc-compat
+  ncurses
+  libtar
+  nacl-spawn
+  nethack
+  sdl
+  scummvm
+  freeimage
+  readline
+  python
+  python-ppapi
+  libtheora
+  ffmpeg
+  sdl2
+  libxml2
+  openal-soft
+  mpg123
+  zeromq
+  speex
+  faac
+  pcre
+  lua5.2
+  lua-ppapi
+  libtomcrypt
+  jpeg8d
+  sdl-image
+  freetype
+  sdl2-ttf
+  sdl2-gfx
+  openal-ogg-demo
+builder 2 (total: 4997)
+  glibc-compat
+  ncurses
+  zlib
+  readline
+  python3
+  libpng
   jpeg8d
   bzip2
   imagemagick
   openscenegraph
   gsl
-  glibc-compat
   libtar
   openssl
   nacl-spawn
   curl
-  libogg
-  sdl
-  libvorbis
-  scummvm
+  bash
+  expat
+  freetype
+  fontconfig
+  pixman
+  cairo
+  bullet
   git
+  mesa
   libssh
   libgit2
+  libogg
   flac
-  sdl2
   tiff
-  libxml2
   unzip
-  ncurses
-  readline
-  bash
   devenv
-  lua5.2
-  lua-ppapi
+  nano
+  libmng
+  lcms
+  devil
+  python3-ppapi
   libwebp
-  libtomcrypt
-  sdl-image
+  agg
+  sdl2
   sdl2-image
-  freetype
-  sdl2-ttf
-  sdl2-gfx
-builder 2 (total: 5728)
-  zlib
-  libpng
-  jpeg6b
-  opencv
+  agg-demo
+  glib
+  pango
+builder 3 (total: 5978)
   glibc-compat
   ncurses
+  zlib
   readline
+  ruby
   python-host
   numpy
   cython
@@ -89,78 +121,36 @@ builder 2 (total: 5728)
   openssl
   pyppapi
   python-static
-  tiff
-  jpeg8d
-  libmng
-  lcms
-  devil
+  yajl
+  cfitsio
   zeromq
   pyzmq
+  libtar
+  nacl-spawn
+  ruby-ppapi
+  netcat
+  x264
+  giflib
   box2d
+  physfs
+  ipython
   jsoncpp
+  lua5.1
   setuptools
   markupsafe
   jinja2
-  libtar
-  nacl-spawn
   openssh
+  mongoose
+  thttpd
+  tar
   pyparsing
   distribute
-  ipython
   python
   six
+  libpng
   freetype
   nose
   python-dateutil
   matplotlib
   ipython-ppapi
-builder 3 (total: 5304)
-  glibc-compat
-  ncurses
-  zlib
-  readline
-  python3
-  ruby
-  python
-  bzip2
-  boost
-  libogg
-  libvorbis
-  lame
-  libav
-  libtar
-  nacl-spawn
-  bash
-  freeimage
-  nethack
-  python-ppapi
-  bullet
-  mesa
-  libtheora
-  ffmpeg
-  expat
-  freetype
-  fontconfig
-  libpng
-  pixman
-  cairo
-  yajl
-  openal-soft
-  mpg123
-  nano
-  python3-ppapi
-  zeromq
-  cfitsio
-  speex
-  ruby-ppapi
-  pcre
-  protobuf
-  giflib
-  agg
-  libtommath
-  agg-demo
-  openal-ogg-demo
-  tar
-  glib
-  pango
-Difference between total time of builders: 424
+Difference between total time of builders: 980

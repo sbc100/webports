@@ -1,20 +1,20 @@
-builder 0 (total: 10001)
+builder 0 (total: 9574)
   glibc-compat
   ncurses
   zlib
   readline
   python-host
   numpy
-  python3
   libpng
   regal
-  cython
+  python
   setuptools
   six
+  python-dateutil
+  cython
   hdf5
   pyparsing
   distribute
-  python-dateutil
   pytz
   h5py
   pandas
@@ -24,64 +24,59 @@ builder 0 (total: 10001)
   matplotlib
   sympy
   yt
-  jpeg8d
-  imagemagick
   openscenegraph
   gsl
   libtar
+  nacl-spawn
+  nethack
   libogg
   sdl
   libvorbis
   scummvm
-  nacl-spawn
   bash
-  nethack
-  bullet
-  mesa
-  flac
-  sdl2
   expat
   fontconfig
   pixman
   cairo
-  yajl
+  python-ppapi
+  libtheora
+  lame
+  ffmpeg
+  sdl2
+  libxml2
   openal-soft
   mpg123
   nano
-  python3-ppapi
+  yajl
   zeromq
   cfitsio
   speex
   pyzmq
   pcre
-  netcat
+  lua5.2
+  lua-ppapi
   libtomcrypt
+  agg
+  jpeg8d
   sdl-image
   giflib
-  faac
   sdl2-ttf
-  agg
   box2d
-  sdl2-gfx
+  physfs
   ipython
-  jsoncpp
   agg-demo
   openal-ogg-demo
-  tinyxml
   mongoose
-  thttpd
   tar
   glib
   pango
-builder 1 (total: 10429)
+builder 1 (total: 10569)
   clapack
-  zlib
-  libpng
-  jpeg6b
-  opencv
   glibc-compat
   ncurses
+  zlib
   readline
+  python3
   ruby
   python-host
   numpy
@@ -90,7 +85,9 @@ builder 1 (total: 10429)
   openssl
   pyppapi
   python-static
-  python
+  libpng
+  jpeg8d
+  imagemagick
   boost
   libogg
   libvorbis
@@ -100,44 +97,43 @@ builder 1 (total: 10429)
   nacl-spawn
   curl
   freeimage
-  python-ppapi
+  bullet
   git
+  mesa
   libssh
   libgit2
-  libtheora
-  ffmpeg
+  flac
   tiff
-  libxml2
   unzip
   bash
   devenv
-  jpeg8d
   libmng
   lcms
   devil
+  python3-ppapi
+  faac
   ruby-ppapi
-  lua5.2
-  lua-ppapi
   libwebp
-  protobuf
+  netcat
   x264
   sdl2
   sdl2-image
-  libtommath
+  sdl2-gfx
+  jsoncpp
   lua5.1
-  physfs
   setuptools
   markupsafe
   jinja2
-  jsoncpp
   openssh
+  thttpd
   pyparsing
   distribute
   ipython
+  python
   six
   freetype
   nose
   python-dateutil
   matplotlib
   ipython-ppapi
-Difference between total time of builders: 427
+Difference between total time of builders: 994
