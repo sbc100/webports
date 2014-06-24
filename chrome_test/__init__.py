@@ -28,13 +28,13 @@ import httpd
 
 # Pinned chrome revision. Update this to pull in a new chrome.
 # Try to select a version that exists on all platforms.
-CHROME_REVISION = 272014
+CHROME_REVISION = '4a5743e12ecad1d676be935a13d658660f96e2af'
 
 OUT_DIR = os.path.join(SRC_DIR, 'out')
 CHROME_SYNC_DIR = os.path.join(OUT_DIR, 'downloaded_chrome')
 
 GS_URL = 'http://storage.googleapis.com'
-CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%d/%s'
+CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%s/%s'
 
 TESTING_LIB = os.path.join(SCRIPT_DIR, 'chrome_test.js')
 TESTING_EXTENSION = os.path.join(SCRIPT_DIR, 'extension')

@@ -21,7 +21,7 @@ DebugExtensionTest.prototype.setUp = function() {
     // Wait for test module to be run by extensions.
     return chrometest.sleep(500);
   }).then(function() {
-    return chrometest.proxyExtension('NaCl Debugger');
+    return chrometest.proxyExtension('Native Client Debugger');
   }).then(function(debugExt) {
     self.debugExt = debugExt;
     return self.debugExt.wait();
@@ -196,7 +196,7 @@ TEST_F(DebugExtensionTest, 'testRunningAttach', function() {
 TEST('DebugExtensionTest', 'testInstallCheck', function() {
   var self = this;
   return Promise.resolve().then(function() {
-    return chrometest.proxyExtension('NaCl Debugger');
+    return chrometest.proxyExtension('Native Client Debugger');
   }).then(function(debugExt) {
     self.debugExt = debugExt;
     return self.debugExt.wait();

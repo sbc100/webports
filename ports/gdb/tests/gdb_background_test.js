@@ -39,7 +39,7 @@ GdbExtensionTestModuleTest.prototype.tearDown = function() {
 GdbExtensionTestModuleTest.prototype.newGdbExtPort = function(debugTcpPort) {
   var keepPort = null;
   return Promise.resolve().then(function() {
-    return chrometest.proxyExtension('GDB');
+    return chrometest.proxyExtension('Native Client GDB');
   }).then(function(gdbExtPort) {
     keepPort = gdbExtPort;
     keepPort.postMessage({'name': 'setDebugTcpPort',
@@ -336,7 +336,7 @@ TEST_F(GdbExtensionTestModuleTest, 'testGdbLoadSymbols', function() {
 TEST('GdbTest', 'testInstallCheck', function() {
   var self = this;
   return Promise.resolve().then(function() {
-    return chrometest.proxyExtension('GDB');
+    return chrometest.proxyExtension('Native Client GDB');
   }).then(function(gdbExt) {
     self.gdbExt = gdbExt;
     self.gdbExt.postMessage({name: 'installCheck'});
