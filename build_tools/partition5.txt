@@ -23,7 +23,7 @@ builder 0 (total: 5728)
   matplotlib
   sympy
   yt
-builder 1 (total: 4094)
+builder 1 (total: 3819)
   clapack
   zlib
   libpng
@@ -35,35 +35,30 @@ builder 1 (total: 4094)
   openssl
   nacl-spawn
   curl
+  bullet
+  git
+  mesa
+  libssh
+  libgit2
+  sdl2
   expat
   freetype
   fontconfig
   pixman
   cairo
-  bullet
-  git
-  libssh
-  libgit2
-  libxml2
   unzip
   ncurses
   readline
   bash
   devenv
+  sdl2-ttf
   agg
-  giflib
-  box2d
-  physfs
-  python-host
-  ipython
-  setuptools
-  markupsafe
-  jinja2
+  agg-demo
   jsoncpp
   openssh
   glib
   pango
-builder 2 (total: 3934)
+builder 2 (total: 3815)
   glibc-compat
   ncurses
   zlib
@@ -76,49 +71,11 @@ builder 2 (total: 3934)
   lame
   libav
   libtar
-  libpng
-  regal
-  sdl
-  scummvm
-  mesa
-  libtheora
-  ffmpeg
-  sdl2
   nacl-spawn
-  nano
-  yajl
-  python3-ppapi
-  zeromq
-  cfitsio
-  speex
-  pcre
-  lua5.2
-  lua-ppapi
-  libtomcrypt
-  x264
-  jpeg8d
-  sdl-image
-  freetype
-  sdl2-ttf
-  agg
-  agg-demo
-  lua5.1
-builder 3 (total: 3929)
-  glibc-compat
-  ncurses
-  zlib
-  readline
-  ruby
-  openscenegraph
-  gsl
-  libtar
-  nacl-spawn
-  nethack
   bash
   freeimage
   python
   python-ppapi
-  libogg
   flac
   tiff
   openal-soft
@@ -128,19 +85,61 @@ builder 3 (total: 3929)
   libmng
   lcms
   devil
-  faac
-  ruby-ppapi
+  python3-ppapi
   libwebp
-  netcat
+  libtomcrypt
   sdl2
   sdl2-image
+  box2d
   sdl2-gfx
   jsoncpp
-  libvorbis
   openal-ogg-demo
+  lua5.1
+  physfs
   mongoose
   thttpd
   tar
+builder 3 (total: 4027)
+  glibc-compat
+  ncurses
+  zlib
+  readline
+  ruby
+  openscenegraph
+  gsl
+  libtar
+  libpng
+  regal
+  libogg
+  sdl
+  libvorbis
+  scummvm
+  nacl-spawn
+  nethack
+  libtheora
+  lame
+  ffmpeg
+  libxml2
+  nano
+  yajl
+  zeromq
+  cfitsio
+  speex
+  ruby-ppapi
+  lua5.2
+  lua-ppapi
+  netcat
+  x264
+  jpeg8d
+  sdl-image
+  giflib
+  faac
+  pcre
+  python-host
+  ipython
+  setuptools
+  markupsafe
+  jinja2
 builder 4 (total: 5565)
   zlib
   libpng
@@ -170,4 +169,4 @@ builder 4 (total: 5565)
   libtar
   nacl-spawn
   ipython-ppapi
-Difference between total time of builders: 1799
+Difference between total time of builders: 1913

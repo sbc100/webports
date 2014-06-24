@@ -23,7 +23,7 @@ builder 0 (total: 5728)
   matplotlib
   sympy
   yt
-builder 1 (total: 4999)
+builder 1 (total: 5021)
   clapack
   zlib
   libpng
@@ -34,36 +34,34 @@ builder 1 (total: 4999)
   libvorbis
   lame
   libav
-  glibc-compat
-  ncurses
   libtar
-  nacl-spawn
-  nethack
   sdl
   scummvm
   freeimage
-  readline
-  python
-  python-ppapi
+  bullet
+  glibc-compat
+  nacl-spawn
+  openssl
+  curl
+  git
+  mesa
   libtheora
   ffmpeg
   sdl2
+  tiff
   libxml2
-  openal-soft
-  mpg123
-  zeromq
-  speex
-  faac
-  pcre
-  lua5.2
-  lua-ppapi
-  libtomcrypt
+  yajl
   jpeg8d
+  libmng
+  lcms
+  devil
+  libwebp
+  libtomcrypt
   sdl-image
+  sdl2-image
   freetype
   sdl2-ttf
   sdl2-gfx
-  openal-ogg-demo
 builder 2 (total: 4997)
   glibc-compat
   ncurses
@@ -81,34 +79,40 @@ builder 2 (total: 4997)
   nacl-spawn
   curl
   bash
+  python
+  python-ppapi
+  nethack
+  libssh
+  libgit2
+  libogg
+  flac
   expat
   freetype
   fontconfig
   pixman
   cairo
-  bullet
-  git
-  mesa
-  libssh
-  libgit2
-  libogg
-  flac
-  tiff
   unzip
   devenv
-  nano
-  libmng
-  lcms
-  devil
   python3-ppapi
-  libwebp
+  cfitsio
+  speex
+  lua5.2
+  lua-ppapi
+  x264
+  faac
+  box2d
   agg
-  sdl2
-  sdl2-image
   agg-demo
+  lua5.1
+  physfs
+  jsoncpp
+  openssh
+  mongoose
+  thttpd
+  tar
   glib
   pango
-builder 3 (total: 5978)
+builder 3 (total: 6060)
   glibc-compat
   ncurses
   zlib
@@ -121,28 +125,25 @@ builder 3 (total: 5978)
   openssl
   pyppapi
   python-static
-  yajl
-  cfitsio
-  zeromq
-  pyzmq
+  openal-soft
+  mpg123
   libtar
   nacl-spawn
+  nano
+  zeromq
+  pyzmq
   ruby-ppapi
   netcat
-  x264
   giflib
-  box2d
-  physfs
+  pcre
   ipython
   jsoncpp
-  lua5.1
+  libogg
+  libvorbis
+  openal-ogg-demo
   setuptools
   markupsafe
   jinja2
-  openssh
-  mongoose
-  thttpd
-  tar
   pyparsing
   distribute
   python
@@ -153,4 +154,4 @@ builder 3 (total: 5978)
   python-dateutil
   matplotlib
   ipython-ppapi
-Difference between total time of builders: 980
+Difference between total time of builders: 1062

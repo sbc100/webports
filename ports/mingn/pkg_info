@@ -1,4 +1,4 @@
 NAME=mingn
 VERSION=0.1
 LIBC=glibc
-DEPENDS=(binutils gcc)
+DEPENDS=(binutils gcc ncurses nacl-spawn zlib)

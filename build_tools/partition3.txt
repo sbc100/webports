@@ -1,4 +1,4 @@
-builder 0 (total: 6562)
+builder 0 (total: 6767)
   glibc-compat
   ncurses
   zlib
@@ -23,30 +23,37 @@ builder 0 (total: 6562)
   matplotlib
   sympy
   yt
+  mesa
+  libogg
+  flac
+  expat
+  fontconfig
+  pixman
+  cairo
+  yajl
+  cfitsio
+  zeromq
+  pyzmq
+  netcat
+  libtomcrypt
+  x264
   libtar
   nacl-spawn
-  python-ppapi
-  sdl2
-  nano
-  yajl
-  zeromq
-  libogg
-  speex
-  pyzmq
-  libtomcrypt
-  agg
   giflib
-  sdl2-ttf
-  sdl2-gfx
+  faac
+  agg
+  jsoncpp
   agg-demo
   lua5.1
+  physfs
   markupsafe
   jinja2
   mongoose
-  jsoncpp
   thttpd
   tar
-builder 1 (total: 6609)
+  glib
+  pango
+builder 1 (total: 6803)
   clapack
   zlib
   libpng
@@ -66,37 +73,36 @@ builder 1 (total: 6609)
   openssl
   nacl-spawn
   curl
-  ncurses
-  nethack
   sdl
   scummvm
+  ncurses
   readline
   bash
   freeimage
-  expat
-  freetype
-  fontconfig
-  pixman
-  cairo
-  git
+  python
+  python-ppapi
+  nethack
   libtheora
   ffmpeg
-  tiff
+  sdl2
+  libxml2
   unzip
   devenv
-  libmng
-  lcms
-  devil
-  pcre
+  zeromq
+  speex
   lua5.2
   lua-ppapi
+  tiff
   libwebp
   sdl-image
-  sdl2
   sdl2-image
-  glib
-  pango
-builder 2 (total: 7582)
+  pcre
+  freetype
+  sdl2-ttf
+  sdl2-gfx
+  jsoncpp
+  openssh
+builder 2 (total: 7782)
   glibc-compat
   ncurses
   zlib
@@ -111,38 +117,36 @@ builder 2 (total: 7582)
   pyppapi
   python-static
   bullet
-  mesa
-  libssh
-  libgit2
-  libogg
-  flac
-  libxml2
-  openal-soft
-  mpg123
   libtar
   nacl-spawn
+  curl
+  git
+  libssh
+  libgit2
+  tiff
+  openal-soft
+  mpg123
+  nano
+  jpeg8d
+  libpng
+  libmng
+  lcms
+  devil
   python3-ppapi
-  cfitsio
-  faac
   ruby-ppapi
-  netcat
-  x264
   box2d
-  physfs
   ipython
-  jsoncpp
+  libogg
   libvorbis
   openal-ogg-demo
-  openssh
   pyparsing
   distribute
   python
   setuptools
   six
-  libpng
   freetype
   nose
   python-dateutil
   matplotlib
   ipython-ppapi
-Difference between total time of builders: 1019
+Difference between total time of builders: 1015

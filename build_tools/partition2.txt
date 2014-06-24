@@ -1,4 +1,4 @@
-builder 0 (total: 9574)
+builder 0 (total: 9436)
   glibc-compat
   ncurses
   zlib
@@ -27,23 +27,23 @@ builder 0 (total: 9574)
   openscenegraph
   gsl
   libtar
-  nacl-spawn
-  nethack
   libogg
   sdl
   libvorbis
   scummvm
+  nacl-spawn
   bash
-  expat
-  fontconfig
-  pixman
-  cairo
+  freeimage
   python-ppapi
+  nethack
   libtheora
   lame
   ffmpeg
   sdl2
-  libxml2
+  expat
+  fontconfig
+  pixman
+  cairo
   openal-soft
   mpg123
   nano
@@ -52,25 +52,24 @@ builder 0 (total: 9574)
   cfitsio
   speex
   pyzmq
-  pcre
   lua5.2
   lua-ppapi
-  libtomcrypt
-  agg
+  netcat
+  x264
   jpeg8d
   sdl-image
   giflib
+  faac
   sdl2-ttf
-  box2d
-  physfs
-  ipython
-  agg-demo
+  sdl2-gfx
+  agg
   openal-ogg-demo
-  mongoose
-  tar
+  agg-demo
+  markupsafe
+  jinja2
   glib
   pango
-builder 1 (total: 10569)
+builder 1 (total: 10405)
   clapack
   glibc-compat
   ncurses
@@ -96,7 +95,6 @@ builder 1 (total: 10569)
   libtar
   nacl-spawn
   curl
-  freeimage
   bullet
   git
   mesa
@@ -104,6 +102,7 @@ builder 1 (total: 10569)
   libgit2
   flac
   tiff
+  libxml2
   unzip
   bash
   devenv
@@ -111,29 +110,29 @@ builder 1 (total: 10569)
   lcms
   devil
   python3-ppapi
-  faac
   ruby-ppapi
   libwebp
-  netcat
-  x264
+  libtomcrypt
   sdl2
   sdl2-image
-  sdl2-gfx
+  pcre
+  box2d
+  ipython
   jsoncpp
   lua5.1
-  setuptools
-  markupsafe
-  jinja2
+  physfs
   openssh
+  mongoose
   thttpd
+  tar
   pyparsing
   distribute
-  ipython
   python
+  setuptools
   six
   freetype
   nose
   python-dateutil
   matplotlib
   ipython-ppapi
-Difference between total time of builders: 994
+Difference between total time of builders: 969
