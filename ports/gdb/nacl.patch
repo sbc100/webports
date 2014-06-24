@@ -42,7 +42,7 @@ index d2bbbd5..e3447dc 100644
  MAKEHTML = $(MAKEINFO_CMD) --html
  MAKEHTMLFLAGS =
  
-+PEPPER_LIBS = -lncurses -lppapi_simple -lnacl_io -lppapi -lppapi_cpp
++PEPPER_LIBS = $(NACL_CLI_MAIN_LIB) -lncurses -lppapi_simple -lnacl_io -lppapi -lppapi_cpp
 +
  # Set this up with gcc if you have gnu ld and the loader will print out
  # line numbers for undefined references.
@@ -57,10 +57,10 @@ index d2bbbd5..e3447dc 100644
  
  # Removing the old gdb first works better if it is running, at least on SunOS.
 -gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
-+gdb$(EXEEXT): gdb.o gdb_pepper.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
++gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
  	rm -f gdb$(EXEEXT)
 -	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-+	$(CC_LD) gdb_pepper.o $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
++	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
  		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
 -		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 +		$(TDEPLIBS) $(TUI_LIBRARY) $(subst -lglibc-compat,,$(CLIBS)) $(LOADLIBES) $(PEPPER_LIBS)
@@ -72,7 +72,7 @@ index d2bbbd5..e3447dc 100644
  # A list of all the objects we might care about in this build, for
  # dependency tracking.
 -all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
-+all_object_files = gdb.o gdb_pepper.o $(LIBGDB_OBS) gdbtk-main.o \
++all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
  	test-cp-name-parser.o
  
  # Ensure that generated files are created early.  Use order-only
@@ -134,9 +134,9 @@ index e708b34..7a0617a 100644
  
 -int
 -main (int argc, char **argv)
-+extern int gdb_nacl_main(int argc, char **argv);
++extern int nacl_main(int argc, char **argv);
 +
-+int gdb_nacl_main(int argc, char **argv)
++int nacl_main(int argc, char **argv)
  {
    struct captured_main_args args;
  

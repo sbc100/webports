@@ -4,4 +4,4 @@ URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@41afdf9d5
 LICENSE=CUSTOM
 DISABLED_ARCH=(pnacl)
 BUILD_OS=linux
-DEPENDS=(ncurses expat readline zlib glibc-compat)
+DEPENDS=(ncurses expat readline zlib glibc-compat nacl-spawn)

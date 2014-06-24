@@ -11,7 +11,6 @@ fi
 ConfigureStep() {
   SetupCrossEnvironment
 
-  cp ${START_DIR}/gdb_pepper.c ${SRC_DIR}/gdb
   LogExecute ${SRC_DIR}/configure --with-curses --with-expat \
       --with-system-readline \
       --disable-libmcheck \
