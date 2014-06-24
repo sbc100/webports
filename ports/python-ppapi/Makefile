@@ -48,8 +48,9 @@ endif
 
 $(eval $(call NMF_RULE,$(TARGET),))
 
+ASSETS = lib/python2.7
 ifeq ($(TOOLCHAIN),glibc)
-EXTRA_ASSETS = lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
+ASSETS += lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
 endif
 
 CHROMEAPPS = $(NACL_SRC)/third_party/libapps/
@@ -59,7 +60,7 @@ NASSH = $(CHROMEAPPS)/nassh
 install:
 	mkdir -p $(INSTALL_DIR)
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
-	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python2.7 --exclude lib/python2.7/site-packages ${EXTRA_ASSETS}
+	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar --exclude lib/python2.7/site-packages ${ASSETS}
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
