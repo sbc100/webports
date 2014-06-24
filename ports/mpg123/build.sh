@@ -4,7 +4,12 @@
 # found in the LICENSE file.
 
 # TODO(binji): Use assembly
-EXTRA_CONFIGURE_ARGS="--enable-static -with-cpu=generic_fpu"
+EXTRA_CONFIGURE_ARGS="--with-cpu=generic_fpu"
+
+# Explicitly specify the audio backends.  Without this the
+# configure script can find the SDL backend which fails to
+# link when running with under the glibc toolchain.
+EXTRA_CONFIGURE_ARGS+=" --with-audio=openal"
 
 if [ "${NACL_SHARED}" = "1" ]; then
   EXE_DIR=src/.libs

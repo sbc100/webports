@@ -56,6 +56,10 @@ class Error(Exception):
   pass
 
 
+class PkgFormatError(Error):
+  pass
+
+
 class DisabledError(Error):
   pass
 
@@ -79,19 +83,22 @@ def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
 
   def ParsePkgInfoLine(line, line_no):
     if '=' not in line:
-      raise Error('Invalid info line %s:%d' % (line_no, filename,
-                                                   line_no))
+      raise PkgFormatError('Invalid info line %s:%d' % (line_no, filename,
+                                                        line_no))
     key, value = line.split('=', 1)
     key = key.strip()
     if key not in valid_keys:
-      raise Error("Invalid key '%s' in info file %s:%d" % (key, filename,
-                                                           line_no))
+      raise PkgFormatError("Invalid key '%s' in info file %s:%d" % (key,
+                                                                    filename,
+                                                                    line_no))
     value = value.strip()
     if value[0] == '(':
       array_value = []
       if value[-1] != ')':
-        raise Error('Error parsing %s:%d: %s (%s)' % (filename, line_no, key,
-                                                      value))
+        raise PkgFormatError('Error parsing %s:%d: %s (%s)' % (filename,
+                                                               line_no,
+                                                               key,
+                                                               value))
       value = value[1:-1].split()
     else:
       value = shlex.split(value)[0]
@@ -105,8 +112,8 @@ def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
 
   for required_key in required_keys:
     if required_key not in rtn:
-      raise Error("Required key '%s' missing from info file: '%s'" %
-                  (required_key, filename))
+      raise PkgFormatError("Required key '%s' missing from info file: '%s'" %
+                           (required_key, filename))
   return rtn
 
 
@@ -318,15 +325,18 @@ class BinaryPackage(object):
     if extension != '.bz2':
       raise Error('invalid file extension: %s' % extension)
 
-    with tarfile.open(self.filename) as tar:
-      if './pkg_info' not in tar.getnames():
-        raise Error('package does not contain pkg_info file')
-      info = tar.extractfile('./pkg_info')
-      valid_keys = Package.VALID_KEYS + BinaryPackage.EXTRA_KEYS
-      required_keys = Package.REQUIRED_KEYS + BinaryPackage.EXTRA_KEYS
-      info = ParsePkgInfo(info, filename, valid_keys, required_keys)
-      for key, value in info.iteritems():
-        setattr(self, key, value)
+    try:
+      with tarfile.open(self.filename) as tar:
+        if './pkg_info' not in tar.getnames():
+          raise PkgFormatError('package does not contain pkg_info file')
+        info = tar.extractfile('./pkg_info')
+        valid_keys = Package.VALID_KEYS + BinaryPackage.EXTRA_KEYS
+        required_keys = Package.REQUIRED_KEYS + BinaryPackage.EXTRA_KEYS
+        info = ParsePkgInfo(info, filename, valid_keys, required_keys)
+        for key, value in info.iteritems():
+          setattr(self, key, value)
+    except tarfile.TarError as e:
+      raise PkgFormatError(e)
 
     self.config = Configuration(self.BUILD_ARCH,
                                 self.BUILD_TOOLCHAIN,
@@ -399,7 +409,7 @@ class BinaryPackage(object):
     try:
       with tarfile.open(self.filename) as tar:
         if './pkg_info' not in tar.getnames():
-          raise Error('package does not contain pkg_info file')
+          raise PkgFormatError('package does not contain pkg_info file')
 
         names = []
         for info in tar:
@@ -409,7 +419,7 @@ class BinaryPackage(object):
           if name == 'pkg_info':
             continue
           if not name.startswith(PAYLOAD_DIR + '/'):
-            raise Error('invalid file in package: %s' % name)
+            raise PkgFormatError('invalid file in package: %s' % name)
 
           name = name[len(PAYLOAD_DIR) + 1:]
           names.append(name)
@@ -453,14 +463,16 @@ class Package(object):
     for key in Package.VALID_KEYS:
       setattr(self, key, None)
     self.DEPENDS = []
-    self.info = None
-    for subdir in Package.VALID_SUBDIRS:
-        info = os.path.join(PORTS_DIR, subdir, self.basename, 'pkg_info')
-        if os.path.exists(info):
-          self.info = info
-          break
-    if self.info is None:
-      raise Error('Invalid package folder: %s' % pkg_root)
+    self.info = os.path.join(self.root, 'pkg_info')
+    if not os.path.exists(self.info):
+      self.info = None
+      for subdir in Package.VALID_SUBDIRS:
+          info = os.path.join(PORTS_DIR, subdir, self.basename, 'pkg_info')
+          if os.path.exists(info):
+            self.info = info
+            break
+      if self.info is None:
+        raise Error('Invalid package folder: %s' % pkg_root)
     self.root = os.path.dirname(self.info)
 
     # Parse pkg_info file
@@ -557,7 +569,13 @@ class Package(object):
     package_file = self.PackageFile()
     if not os.path.exists(package_file):
       return False
-    return BinaryPackage(package_file).IsInstallable()
+    try:
+      package = BinaryPackage(package_file)
+    except PkgFormatError as e:
+      # If the package is malformed in some way or in some old format
+      # then treat it as not built.
+      return False
+    return package.IsInstallable()
 
   def Install(self, verbose, build_deps, force=None):
     if force is None and self.IsInstalled():
