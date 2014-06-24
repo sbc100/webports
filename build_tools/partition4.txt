@@ -7,6 +7,7 @@ builder 0 (total: 5304)
   numpy
   cython
   setuptools
+  python
   six
   hdf5
   pyparsing
@@ -106,6 +107,7 @@ builder 2 (total: 5728)
   pyparsing
   distribute
   ipython
+  python
   six
   freetype
   nose
