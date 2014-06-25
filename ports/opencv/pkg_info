@@ -1,6 +1,6 @@
 NAME=opencv
 VERSION=2.4.7
-URL=http://storage.googleapis.com/naclports/mirror/opencv-2.4.7.tar.gz
+URL=http://download.sf.net/project/opencvlibrary/opencv-unix/2.4.7/opencv-2.4.7.tar.gz
 LICENSE=BSD:doc/license.txt
 # TODO(sbc): remove this conditional once this bug gets fixed:
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
