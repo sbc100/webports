@@ -76,7 +76,7 @@ def Trace(msg):
 
 def GetBuildOrder(projects):
   rtn = []
-  packages = [naclports.Package(os.path.join('ports', p)) for p in projects]
+  packages = [naclports.CreatePackage(p) for p in projects]
   for package in packages:
     for dep in package.DEPENDS:
       for ordered_dep in GetBuildOrder([dep]):

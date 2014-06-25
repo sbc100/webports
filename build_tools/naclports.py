@@ -26,7 +26,6 @@ import sha1check
 MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
-PORTS_DIR = os.path.join(NACLPORTS_ROOT, "ports")
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'build')
@@ -53,18 +52,30 @@ pkgarch_to_arch = {v:k for k, v in arch_to_pkgarch.items()}
 # TODO(sbc): use this code to replace the bash logic in build_tools/common.sh
 
 class Error(Exception):
+  """General error used for all naclports-specific errors."""
   pass
 
 
 class PkgFormatError(Error):
+  """Error raised when package file is not valid."""
   pass
 
 
 class DisabledError(Error):
+  """Error raised when a package is cannot be built because it is disabled
+  for the current configuration.
+  """
   pass
 
 
 def FormatTimeDelta(delta):
+  """Converts a duration in seconds to a human readable string.
+
+  Args:
+    delta: the amount of time in seconds.
+
+  Returns: A string desribing the ammount of time passed in.
+  """
   rtn = ''
   if delta > 60:
     mins = delta / 60
@@ -78,6 +89,19 @@ def FormatTimeDelta(delta):
 
 def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
   """Parse the contents of the given file-object as a pkg_info file.
+
+  Args:
+    info_file: file-like object to parse.
+    filename: name of file to use in error messages.
+    valid_keys: list of keys that are valid in the file.
+    required_keys: list of keys that are required in the file.
+
+  Returns:
+    A dictionary of the key, value pairs contained in the pkg_info file.
+
+  Raises:
+    PkgFormatError: if file is malformed, contains invalid keys, or does not
+      contain all required keys.
   """
   rtn = {}
 
@@ -138,11 +162,8 @@ def WriteStamp(package_name, config, contents=''):
 def CheckStamp(filename, contents=None, timestamp=None):
   """Check that a given stamp file is up-to-date.
 
-  Returns False is the file does not exists or is older
-  that that given comparison file, or does not contain
-  the given contents.
-
-  Return True otherwise.
+  Returns: False is the file does not exists or is older that that given
+    comparison file, or does not contain the given contents. True otherwise.
   """
   if not os.path.exists(filename):
     return False
@@ -166,12 +187,14 @@ def Warn(message):
 
 
 def Trace(message):
+  """Log a message to the console if running in verbose mode (-v)."""
   if Trace.verbose:
     Log(message)
 Trace.verbose = False
 
 
 def GetSDKVersion():
+  """Returns the version of the currently configured Native Client SDK."""
   getos = os.path.join(NACL_SDK_ROOT, 'tools', 'getos.py')
   version = subprocess.check_output([getos, '--sdk-version']).strip()
   return version
@@ -242,6 +265,38 @@ def RemoveEmptryDirs(dirname):
   while not os.listdir(dirname):
     os.rmdir(dirname)
     dirname = os.path.dirname(dirname)
+
+
+def DownloadFile(filename, url):
+  """Download a file from a given URL.
+
+  Args:
+    filename: the name of the file to download the URL to.
+    url: then URL to fetch.
+
+  Returns:
+    True if the download was successful, False otherwise.
+  """
+  temp_filename = filename + '.partial'
+  curl_cmd = ['curl', '--fail', '--location', '--stderr', '-',
+              '-o', temp_filename]
+  if os.isatty(sys.stdout.fileno()):
+    # Add --progress-bar but only if stdout is a TTY device.
+    curl_cmd.append('--progress-bar')
+  else:
+    # otherwise suppress all status output, since curl always
+    # assumes a TTY and writes \r and \b characters.
+    curl_cmd.append('--silent')
+  curl_cmd.append(url)
+
+  Log('Downloading: %s [%s]' % (url, filename))
+  try:
+    subprocess.check_call(curl_cmd)
+  except subprocess.CalledProcessError:
+    return False
+
+  os.rename(temp_filename, filename)
+  return True
 
 
 class Configuration(object):
@@ -408,9 +463,6 @@ class BinaryPackage(object):
 
     try:
       with tarfile.open(self.filename) as tar:
-        if './pkg_info' not in tar.getnames():
-          raise PkgFormatError('package does not contain pkg_info file')
-
         names = []
         for info in tar:
           if info.isdir():
@@ -441,6 +493,25 @@ class BinaryPackage(object):
       shutil.rmtree(dest_tmp)
 
 
+def CreatePackage(package_name, config=None):
+  """Create a Package object given a package name or path.
+
+  Returns:
+    Package object
+  """
+  if os.path.isdir(package_name) and os.path.dirname(package_name):
+    return Package(package_name, config)
+
+  DEFAULT_LOCATIONS = ('', 'ports', 'ports/python_modules')
+  for subdir in DEFAULT_LOCATIONS:
+    pkg_root = os.path.join(NACLPORTS_ROOT, subdir, package_name)
+    info = os.path.join(pkg_root, 'pkg_info')
+    if os.path.exists(info):
+      return Package(pkg_root, config)
+
+  raise Error("Package not found: %s" % package_name)
+
+
 class Package(object):
   """Representation of a single naclports source package.
 
@@ -451,29 +522,20 @@ class Package(object):
                 'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH',
                 'DISABLED_ARCH', 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED']
   REQUIRED_KEYS = ['NAME', 'VERSION']
-  VALID_SUBDIRS = ('', 'ports', 'python_modules')
 
 
   def __init__(self, pkg_root, config=None):
     if config is None:
       config = Configuration()
-    self.config = config
-    self.root = os.path.abspath(pkg_root)
-    self.basename = os.path.basename(self.root)
     for key in Package.VALID_KEYS:
       setattr(self, key, None)
+    self.config = config
     self.DEPENDS = []
+
+    self.root = os.path.abspath(pkg_root)
     self.info = os.path.join(self.root, 'pkg_info')
-    if not os.path.exists(self.info):
-      self.info = None
-      for subdir in Package.VALID_SUBDIRS:
-          info = os.path.join(PORTS_DIR, subdir, self.basename, 'pkg_info')
-          if os.path.exists(info):
-            self.info = info
-            break
-      if self.info is None:
-        raise Error('Invalid package folder: %s' % pkg_root)
-    self.root = os.path.dirname(self.info)
+    if not os.path.isdir(self.root) or not os.path.exists(self.info):
+      raise Error('Invalid package folder: %s' % pkg_root)
 
     # Parse pkg_info file
     with open(self.info) as f:
@@ -533,8 +595,7 @@ class Package(object):
   def InstallDeps(self, verbose, force):
     for dep in self.DEPENDS:
       if not IsInstalled(dep, self.config) or force == 'all':
-        dep_dir = os.path.join(os.path.dirname(self.root), dep)
-        dep = Package(dep_dir, self.config)
+        dep = CreatePackage(dep, self.config)
         try:
           dep.Install(verbose, True, force)
         except DisabledError as e:
@@ -778,32 +839,15 @@ class Package(object):
     if not os.path.exists(os.path.dirname(filename)):
       os.makedirs(os.path.dirname(filename))
 
-    temp_filename = filename + '.partial'
-    mirror_download_successfull = False
-    curl_cmd = ['curl', '--fail', '--location', '--stderr', '-',
-                '-o', temp_filename]
-    if os.isatty(sys.stdout.fileno()):
-      # Add --progress-bar but only if stdout is a TTY device.
-      curl_cmd.append('--progress-bar')
-    else:
-      # otherwise suppress all status output, since curl always
-      # assumes a TTY and writes \r and \b characters.
-      curl_cmd.append('--silent')
-
     if mirror:
-      try:
-        mirror_url = self.GetMirrorURL()
-        Log('Downloading: %s [%s]' % (mirror_url, temp_filename))
-        subprocess.check_call(curl_cmd + [mirror_url])
-        mirror_download_successfull = True
-      except subprocess.CalledProcessError:
-        pass
+      # First try downloading form the mirror URL and silently fall
+      # back to the original if this fails.
+      mirror_url = self.GetMirrorURL()
+      if DownloadFile(filename, mirror_url):
+        return
 
-    if not mirror_download_successfull:
-      Log('Downloading: %s [%s]' % (self.URL, temp_filename))
-      subprocess.check_call(curl_cmd + [self.URL])
-
-    os.rename(temp_filename, filename)
+    if not DownloadFile(filename, self.URL):
+      raise Error("Error downloading URL: %s" % self.URL)
 
 
 def PackageIterator(folders=None):
@@ -957,7 +1001,7 @@ def run_main(args):
           DoCmd(p)
   else:
     for package_dir in package_dirs:
-      p = Package(package_dir, config)
+      p = CreatePackage(package_dir, config)
       DoCmd(p)
 
 

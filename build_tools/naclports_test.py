@@ -70,11 +70,11 @@ class TestPackage(unittest.TestCase):
   def CreateSourcePackage(self, name, extra_info=''):
     """Creates a source package directory in a temporary directory.
     Args:
-        name: The name of the temporary package.
-        extra_info: extra information to append to the pkg_info file.
+      name: The name of the temporary package.
+      extra_info: extra information to append to the pkg_info file.
 
     Returns:
-        The new package source directory
+      The new package source directory
     """
     pkg_root = os.path.join(self.tempdir, name)
     os.mkdir(pkg_root)
