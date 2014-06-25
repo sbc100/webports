@@ -33,9 +33,9 @@ InstallStep() {
   curl ${python_url}/python_store-2.7.5.3/pydata_x86_64.tar \
     -o ${APP_DIR}/pydata_x86_64.tar
 
-  # Copy bash.js and bashrc.
   cp ${START_DIR}/bash.js ${APP_DIR}
   cp ${START_DIR}/bashrc ${APP_DIR}
+  cp ${START_DIR}/graphical.html ${APP_DIR}
 
   # Generate a manifest.json.
   GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR}

@@ -70,14 +70,87 @@ NaClTerm.ANSI_RESET = '\x1b[0m';
  * of processes.
  * @const
  */
-NaClTerm.ABORT_ENV = 'ENABLE_CONTROL_C';
+NaClTerm.ENV_ABORT = 'ENABLE_CONTROL_C';
 
 /**
- * This is the value to which the ABORT_ENV environment variable should be set
+ * This is the value to which the ENV_ABORT environment variable should be set
  * in order to enable Control+C.
  * @const
  */
-NaClTerm.ABORT_ENV_VALUE = '1';
+NaClTerm.ENV_ABORT_VALUE = '1';
+
+
+/**
+ * Environment variable that can be set to the value in ENV_SPAWN_MODE or
+ * ENV_SPAWN_EMBED_VALUE to enable viewing of graphical output from programs.
+ * @const
+ */
+NaClTerm.ENV_SPAWN_MODE = 'NACL_SPAWN_MODE';
+
+/**
+ * Value for ENV_SPAWN_MODE that makes programs open in a new window.
+ * @const
+ */
+NaClTerm.ENV_SPAWN_POPUP_VALUE = 'popup';
+
+/**
+ * Value for ENV_SPAWN_MODE that makes the graphical output of programs appear
+ * within the terminal window.
+ * @const
+ */
+NaClTerm.ENV_SPAWN_EMBED_VALUE = 'embed';
+
+/**
+ * Environment variable that can be set to change the width of the popup when
+ * ENV_SPAWN_MODE is set to ENV_SPAWN_POPUP_VALUE.
+ * @const
+ */
+NaClTerm.ENV_POPUP_WIDTH = 'NACL_POPUP_WIDTH';
+
+/**
+ * Environment variable that can be set to change the height of the popup when
+ * ENV_SPAWN_MODE is set to ENV_SPAWN_POPUP_VALUE.
+ * @const
+ */
+NaClTerm.ENV_POPUP_HEIGHT = 'NACL_POPUP_HEIGHT';
+
+/*
+ * Default width for a popup, in pixels.
+ * @type {number}
+ */
+NaClTerm.POPUP_WIDTH_DEFAULT = 600;
+
+/*
+ * Default height for a popup, in pixels.
+ * @type {number}
+ */
+NaClTerm.POPUP_HEIGHT_DEFAULT  = 400;
+
+/**
+ * Environment variable that can be set to change the width of the embedded
+ * element when ENV_SPAWN_MODE is set to ENV_SPAWN_EMBED_VALUE.
+ * @const
+ */
+NaClTerm.ENV_EMBED_WIDTH = 'NACL_EMBED_WIDTH';
+
+/**
+ * Environment variable that can be set to change the height of the embedded
+ * element when ENV_SPAWN_MODE is set to ENV_SPAWN_EMBED_VALUE.
+ * @const
+ */
+NaClTerm.ENV_EMBED_HEIGHT = 'NACL_EMBED_HEIGHT';
+
+/*
+ * Default width for a spawned embed, in any units recognized by CSS.
+ * @const
+ */
+NaClTerm.EMBED_WIDTH_DEFAULT = '100%';
+
+/*
+ * Default height for a spawned embed, in any units recognized by CSS.
+ * @const
+ */
+NaClTerm.EMBED_HEIGHT_DEFAULT  = '50%';
 
 // TODO(bradnelson): Rename in line with style guide once we have tests.
 // The process which gets the input from the user.
@@ -377,9 +450,19 @@ NaClTerm.prototype.exit = function(code, element) {
     while (next_foreground_process.pid == -1)
       next_foreground_process = next_foreground_process.parent;
   }
-  document.body.removeChild(element);
+
+  // Clean up HTML elements.
+  if (element.parentNode == document.body) {
+    document.body.removeChild(element);
+  }
+
+  if (element.popup) {
+    element.popup.destroy();
+  }
+
   if (next_foreground_process)
     foreground_process = next_foreground_process;
+
   return;
 };
 
@@ -495,6 +578,40 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
   // We show this message only for the first process.
   if (pid == 1)
     this.io.print('Loading NaCl module.\n');
+
+  if (params[NaClTerm.ENV_SPAWN_MODE] === NaClTerm.ENV_SPAWN_POPUP_VALUE) {
+    var self = this;
+    var popup = new GraphicalPopup(
+      foreground_process,
+      parseInt(params[NaClTerm.ENV_POPUP_WIDTH] ||
+               NaClTerm.POPUP_WIDTH_DEFAULT),
+      parseInt(params[NaClTerm.ENV_POPUP_HEIGHT] ||
+               NaClTerm.POPUP_HEIGHT_DEFAULT),
+      argv[0]
+    );
+    popup.setClosedListener(function() {
+      self.abort(popup.process);
+      GraphicalPopup.focusCurrentWindow();
+    });
+
+    foreground_process.popup = popup;
+
+    popup.create();
+
+    return;
+  }
+
+  if (params[NaClTerm.ENV_SPAWN_MODE] ===
+             NaClTerm.ENV_SPAWN_EMBED_VALUE) {
+    var style = foreground_process.style;
+    style.position = 'absolute';
+    style.top = 0;
+    style.left = 0;
+    style.width = params[NaClTerm.ENV_EMBED_WIDTH] ||
+      NaClTerm.EMBED_WIDTH_DEFAULT;
+    style.height = params[NaClTerm.ENV_EMBED_HEIGHT] ||
+      NaClTerm.EMBED_HEIGHT_DEFAULT;
+  }
   document.body.appendChild(foreground_process);
 }
 
@@ -587,9 +704,9 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
   if (str.charCodeAt(0) === NaClTerm.CONTROL_C &&
       foreground_process.parent !== null) {
     // Only exit if the appropriate environment variable is set.
-    var query = 'param[name="' + NaClTerm.ABORT_ENV + '"]';
+    var query = 'param[name="' + NaClTerm.ENV_ABORT + '"]';
     var enabledEnv = foreground_process.querySelector(query);
-    if (enabledEnv && enabledEnv.value === NaClTerm.ABORT_ENV_VALUE) {
+    if (enabledEnv && enabledEnv.value === NaClTerm.ENV_ABORT_VALUE) {
       this.abort(foreground_process);
       this.io.print('\n');
     }
@@ -611,3 +728,114 @@ NaClTerm.prototype.run = function() {
   this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);
   this.io.onTerminalResize = this.onTerminalResize_.bind(this);
 };
+
+/**
+ * This creates a popup that runs a NaCl process inside.
+ *
+ * @param {Object} process The NaCl process to be run.
+ * @param {number} width
+ * @param {number} height
+ * @param {string} title
+ */
+function GraphicalPopup(process, width, height, title) {
+  this.process = process || null;
+  this.width = width || GraphicalPopup.DEFAULT_WIDTH;
+  this.height = height || GraphicalPopup.DEFAULT_HEIGHT;
+  this.title = title || '';
+  this.win = null;
+  this.onClosed = function () {};
+}
+
+/**
+ * The default width of the popup.
+ * @type {number}
+ */
+GraphicalPopup.DEFAULT_WIDTH = 600;
+
+/**
+ * The default height of the popup.
+ * @type {number}
+ */
+GraphicalPopup.DEFAULT_HEIGHT = 400;
+
+/**
+ * The (empty) HTML file to which the NaCl module is added.
+ * @const
+ */
+GraphicalPopup.HTML_FILE = 'graphical.html';
+
+/**
+ * Focus the window in which this code is run.
+ */
+GraphicalPopup.focusCurrentWindow = function() {
+  chrome.app.window.current().focus();
+}
+
+/**
+ * This callback is called when the popup is closed.
+ * @callback closedCallback
+ */
+
+/**
+ * Set a function to be called as a callback when the popup is closed.
+ * @param {closedCallback} listener
+ */
+GraphicalPopup.prototype.setClosedListener = function(listener) {
+  if (this.win) {
+    throw new Error("Cannot set closed listener after creating window.");
+  }
+  this.onClosed = listener;
+}
+
+/**
+ * Create the window.
+ */
+GraphicalPopup.prototype.create = function() {
+  var self =  this;
+  chrome.app.window.create('graphical.html', {
+    'bounds': {
+      'width': self.width,
+      'height': self.height
+    },
+  }, function(win) {
+    var process = self.process;
+    var popup = win.contentWindow;
+
+    self.win = process.window = win;
+
+    popup.document.title = self.title;
+
+    popup.addEventListener('load', function() {
+      process.style.position = 'absolute';
+      process.style.top = '0';
+      process.style.left = '0';
+      process.style.width = '100%';
+      process.style.height = '100%';
+      popup.document.body.appendChild(process);
+    });
+
+    popup.focused = true;
+    popup.addEventListener('focus', function() {
+      this.focused = true;
+    });
+    popup.addEventListener('blur', function() {
+      this.focused = false;
+    });
+
+    win.onClosed.addListener(self.onClosed);
+  });
+}
+
+/**
+ * Close the popup.
+ */
+GraphicalPopup.prototype.destroy = function() {
+  if (this.win.contentWindow.focused) {
+    GraphicalPopup.focusCurrentWindow();
+  }
+  this.win.onClosed.removeListener(this.onClosed);
+  this.win.close();
+
+  this.process = null;
+  this.win = null;
+}
