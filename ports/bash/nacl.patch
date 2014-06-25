@@ -31,8 +31,21 @@ index 9f9276d..896f71d 100644
  	ls -l $(Program)
  	-$(SIZE) $(Program)
  
+diff --git a/bashline.c b/bashline.c
+index 52c6de6..72dd9e8 100644
+--- a/bashline.c
++++ b/bashline.c
+@@ -2119,7 +2119,7 @@ bash_groupname_completion_function (text, state)
+      const char *text;
+      int state;
+ {
+-#if defined (__WIN32__) || defined (__OPENNT) || !defined (HAVE_GRP_H)
++#if defined (__WIN32__) || defined (__OPENNT) || !defined (HAVE_GRP_H) || (defined(__native_client__) && defined(_NEWLIB_VERSION))
+   return ((char *)NULL);
+ #else
+   static char *gname = (char *)NULL;
 diff --git a/configure b/configure
-index 7ec72fe..7e7ed92 100755
+index 7ec72fe..6d1d53d 100755
 --- a/configure
 +++ b/configure
 @@ -2201,6 +2201,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF

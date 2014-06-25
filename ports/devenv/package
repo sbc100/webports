@@ -1,0 +1,181 @@
+#!/bin/bash
+# Copyright (c) 2014 The Native Client Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Package installer script for use inside the devenv environment.
+# Assumes setup-environment has been source at least once in the parent
+# environment.
+# Written to avoid using anything other than bash, curl, and unzip when
+# installing core packages.
+
+set -e
+shopt -s nullglob
+
+STORAGE_URL=http://naclports.storage.googleapis.com/builds
+DEFAULT_SDK_VERSION=pepper_38
+DEFAULT_REVISION=1384
+DEFAULT_SOURCE="${STORAGE_URL}/${DEFAULT_SDK_VERSION}/\
+${DEFAULT_REVISION}/publish"
+
+# Pairs of <package-name>:<package-subdir>
+PACKAGE_INFO="\
+coreutils:newlib/${NACL_ARCH}.zip \
+git:newlib.zip \
+lua:newlib/lua.zip \
+make:newlib.zip \
+mingn.base:glibc/tarballs/base.${NACL_ARCH}.zip \
+mingn.lib:glibc/tarballs/lib.all.zip \
+nano:newlib.zip \
+nethack:newlib.zip \
+python:newlib/python.zip \
+ruby:newlib/ruby.zip \
+vim:newlib.zip"
+
+RemoveDir() {
+  local path="$1"
+  if [ -d ${path} ]; then
+    rm -rf ${path}/* || true
+    rm -rf ${path}
+  fi
+}
+
+InstallPackage() {
+  local package="$1"
+  local subdir="newlib.zip"
+
+  for info in ${PACKAGE_INFO}; do
+    local info_array=(${info//:/ })
+    if [ "${package}" = "${info_array[0]}" ]; then
+      subdir="${info_array[1]}"
+    fi
+  done
+
+  local url=${PACKAGE_SOURCE}/${package}/${subdir}
+  local package_dir=/mnt/html5/packages/${package}.${NACL_ARCH}
+  local clobber=1
+
+  # Special case for MinGN.
+  if [[ "${package}" = "mingn.base" || "${package}" = "mingn.lib" ]]; then
+    url="${PACKAGE_SOURCE}/mingn/${subdir}"
+    package_dir="/mnt/html5"
+    clobber=0
+  fi
+  # Special case for coreutils.
+  if [[ "${package}" = "coreutils" ]]; then
+    package_dir="/mnt/html5/coreutils.${NACL_ARCH}"
+    clobber=0
+  fi
+
+  local stamp_dir=/mnt/html5/stamps/${package}.${NACL_ARCH}
+  local url_stamp="${stamp_dir}/${url//\//_}"
+
+  if [ -d ${package_dir}/${package} ]; then
+    local package_inside=${package_dir}/${package}
+  else
+    local package_inside=${package_dir}
+  fi
+
+  if [ -d ${url_stamp} ]; then
+    # Package is up to date.
+    return
+  fi
+
+  if [ -d ${stamp_dir} ]; then
+    echo "Updating ${package} package..."
+  else
+    echo "Installing ${package} package..."
+  fi
+  local archive=/tmp/devenv.package.zip
+  echo "Downloading ${url}..."
+  curl ${url} -o ${archive}
+  if [ ! -e ${archive} ]; then
+    echo "${archive} does not exist!"
+    return
+  fi
+  echo "Extracting ${package}..."
+  if [ "${clobber}" = 1 ]; then
+    RemoveDir ${package_dir}
+  fi
+  if [ ! -d ${package_dir%/*} ]; then
+    mkdir -p ${package_dir}
+  fi
+  unzip -od ${package_dir} ${archive}
+  rm ${archive}
+
+  # Update package_inside.
+  if [ -d ${package_dir}/${package} ]; then
+    package_inside=${package_dir}/${package}
+  else
+    package_inside=${package_dir}
+  fi
+
+  # TODO(bradnelson): Do something better.
+  # Rename nexe for arch.
+  local package_nexe=${package_inside}/${package}_${NACL_ARCH}.nexe
+  if [ -e ${package_nexe} ]; then
+    cp ${package_nexe} ${package_inside}/${package}
+  fi
+  if [ "${NACL_ARCH}" = "i686" ]; then
+    local package_nexe=${package_inside}/${package}_x86_32.nexe
+    if [ -e ${package_nexe} ]; then
+      cp ${package_nexe} ${package_inside}/${package}
+    fi
+  fi
+
+  # Remove out stamps and write out new one.
+  RemoveDir ${stamp_dir}
+  mkdir -p ${url_stamp}
+  echo "Done."
+}
+
+function InstallPackages() {
+  for package in ${PACKAGE_LIST}; do
+    InstallPackage ${package}
+  done
+}
+
+function Usage() {
+  echo "Usage: $0 [options]" 2>&1
+  echo "  -i <package> = install package" 2>&1
+  echo "  -s <source> = alternate package source" 2>&1
+  echo "  -L = local package source (use with make run in naclports)" 2>&1
+  echo "  -f = force install" 2>&1
+  echo "  -h = help" 2>&1
+  exit 1
+}
+
+PACKAGE_LIST=""
+PACKAGE_SOURCE="${DEFAULT_SOURCE}"
+PACKAGE_FORCE=0
+while getopts "s:i:hLf" o; do
+  case "${o}" in
+    i)
+      PACKAGE_LIST+=" ${OPTARG}"
+      ;;
+    s)
+      PACKAGE_SOURCE="${OPTARG}"
+      ;;
+    L)
+      PACKAGE_SOURCE="http://localhost:5013/"
+      # Always force for localhost.
+      PACKAGE_FORCE=1
+      ;;
+    f)
+      PACKAGE_FORCE=1
+      ;;
+    *)
+      Usage
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+if [ "$*" != "" ]; then
+  echo "Bad Options: $*" 2>&1
+  Usage
+fi
+if [ "${PACKAGE_LIST}" = "" ]; then
+  echo "No packages selected." 2>&1
+  Usage
+fi
+InstallPackages

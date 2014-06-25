@@ -7,232 +7,36 @@
 # until the installation is completed. Also, you cannot use features
 # which nacl_io does not support yet (e.g., pipes and sub-shells).
 
-set -e
-shopt -s nullglob
+# Setup environment once to get location of fixed things like coreutils.
+source /mnt/http/setup-environment
 
-STORAGE_URL=http://naclports.storage.googleapis.com/builds
+# Core packages.
+DEFAULT_PACKAGES="\
+  -i coreutils \
+  -i git \
+  -i make \
+  -i nano \
+  -i python \
+  -i vim"
 
-SetupEnvironment() {
-  # Set up environment variables so that we can use installed binaries.
-  LIB_DIR=lib32
-  export PACKAGE_LIB_DIR=lib32
-  if [ ${NACL_ARCH} = "x86_64" ]; then
-    LIB_DIR=lib
-    export PACKAGE_LIB_DIR=lib64
-  fi
-  export NACL_SDK_ROOT=/mnt/html5/mingn
-  export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
-  LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
-  LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
-  export LD_LIBRARY_PATH
-  export LIBRARY_PATH=${LD_LIBRARY_PATH}
-  export PATH=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
+if [ "${NACL_ARCH}" != "arm" ]; then
+  DEFAULT_PACKAGES+=" \
+-i mingn.base \
+-i mingn.lib"
+fi
 
-  # Allow cross development by exporting alternate library paths.
-  LIBRARY_PATH32=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32
-  LIBRARY_PATH32+=:${NACL_TOOLCHAIN_ROOT}/i686-nacl/usr/lib
-  export LIBRARY_PATH32
-  LIBRARY_PATH64=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib
-  LIBRARY_PATH64+=:${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib
-  export LIBRARY_PATH64
+# Check for updates on some packages.
+package ${DEFAULT_PACKAGES[@]}
 
-  # TODO(bradnelson): Figure out why it can't find them normally.
-  # Compiler has trouble finding its c++ headers, workaround.
-  local tc_inc=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/include/c++/4.4.3
-  export CPLUS_INCLUDE_PATH=${tc_inc}:${tc_inc}/x86_64-nacl
+if [ "${NACL_ARCH}" == "arm" ]; then
+  echo "WARNING: gcc not yet available on arm (coming soon)." 2>&1
+  echo "WARNING: git currently broken on arm." 2>&1
+fi
 
-  mkdir -p /mnt/html5/home
-  mkdir -p /mnt/html5/alt_http
-
-  export PYTHONHOME=/lib/python2.7
-  export PYTHONPATH=/lib/python2.7
-
-  export RUBYLIB=/usr/lib/ruby/2.0.0
-  export RUBYLIB=${RUBYLIB}:${RUBYLIB}/${NACL_ARCH}-nacl
-  alias ruby='ruby /usr/bin/irb'
-
-  # Make vim emit directly until we have pipes.
-  export PAGER=cat
-}
-
-RemoveDir() {
-  local path="$1"
-  if [ -d ${path} ]; then
-    rm -rf ${path}/* || true
-    rm -rf ${path}
-  fi
-}
-
-InstallCorePackages() {
-  local package="core"
-  local sdk_version=${DEFAULT_SDK_VERSION}
-  local revision=${DEFAULT_REVISION}
-  local rev_url=${STORAGE_URL}/${sdk_version}/${revision}/publish
-
-  local base_url=${rev_url}/mingn/glibc/tarballs/base.${NACL_ARCH}.zip
-  local lib_url=${rev_url}/mingn/glibc/tarballs/lib.all.zip
-
-  local stamp_dir=/mnt/html5/mingn/stamp/${package}
-  local base_url_stamp="${stamp_dir}/${base_url//\//_}"
-  local lib_url_stamp="${stamp_dir}/${lib_url//\//_}"
-
-  if [[ -d ${base_url_stamp} && -d ${lib_url_stamp} ]]; then
-    # Package is up to date.
-    return
-  fi
-
-  local archive=/mnt/html5/.package.zip
-
-  echo "Downloading ${base_url}..."
-  curl ${base_url} -o ${archive}
-  echo "Extracting base..."
-  unzip -od /mnt/html5 ${archive}
-
-  echo "Downloading ${lib_url}..."
-  curl ${lib_url} -o ${archive}
-  echo "Extracting lib..."
-  unzip -od /mnt/html5 ${archive}
-
-  # Setup environment here so rm works.
-  SetupEnvironment
-
-  rm ${archive}
-
-  # Remove out stamps and write out new one.
-  RemoveDir ${stamp_dir}
-  mkdir -p ${base_url_stamp}
-  mkdir -p ${lib_url_stamp}
-  echo "Done."
-}
-
-InstallPython() {
-  local package="python"
-  local nacl_tools=http://nacltools.storage.googleapis.com
-  local url=${nacl_tools}/python/python_store-2.7.5.3/python_${NACL_ARCH}.zip
-  local package_dir=/mnt/html5/packages/${package}
-  local stamp_dir=/mnt/html5/mingn/stamp/${package}
-  local url_stamp="${stamp_dir}/${url//\//_}"
-
-  export PATH=${PATH}:${package_dir}
-
-  if [[ -d ${url_stamp} ]]; then
-    # Package is up to date.
-    return
-  fi
-
-  local archive=/mnt/html5/.package.zip
-
-  echo "Downloading ${url}..."
-  curl ${url} -o ${archive}
-  echo "Extracting ${package}..."
-  RemoveDir ${package_dir}
-  mkdir -p ${package_dir}
-  unzip -od ${package_dir} ${archive}
-  rm ${archive}
-
-  # Remove out stamps and write out new one.
-  RemoveDir ${stamp_dir}
-  mkdir -p ${url_stamp}
-  echo "Done."
-}
-
-InstallPackage() {
-  local package="$1"
-  local toolchain="$2"
-  local zip_path="${3:-${toolchain}.zip}"
-  local sdk_version="${4:-${DEFAULT_SDK_VERSION}}"
-  local revision="${5:-${DEFAULT_REVISION}}"
-  local rev_url=${STORAGE_URL}/${sdk_version}/${revision}/publish
-  local url=${rev_url}/${package}/${zip_path}
-  local stamp_dir=/mnt/html5/mingn/stamp/${package}
-  local url_stamp="${stamp_dir}/${url//\//_}"
-  local package_dir=/mnt/html5/packages/${package}
-
-  if [ -d ${package_dir}/${package} ]; then
-    local package_inside=${package_dir}/${package}
-  else
-    local package_inside=${package_dir}
-  fi
-
-  if [ -d ${url_stamp} ]; then
-    # TODO(bradnelson): Do something better.
-    # Add to PATH and LD_LIBRARY_PATH.
-    export PATH=${PATH}:${package_inside}
-    local package_libs=${package_inside}/${PACKAGE_LIB_DIR}
-    if [ -d ${package_libs} ]; then
-      export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
-    fi
-
-    # Package is up to date.
-    return
-  fi
-
-  if [ -d ${stamp_dir} ]; then
-    echo "Updating ${package} package..."
-  else
-    echo "Installing ${package} package..."
-  fi
-  local archive=/mnt/html5/.package.zip
-  echo "Downloading ${url}..."
-  curl ${url} -o ${archive}
-  if [ ! -e ${archive} ]; then
-    echo "${archive} does not exist!"
-    return
-  fi
-  echo "Extracting ${package}..."
-  RemoveDir ${package_dir}
-  mkdir -p ${package_dir}
-  unzip -od ${package_dir} ${archive}
-  rm ${archive}
-
-  # Update package_inside.
-  if [ -d ${package_dir}/${package} ]; then
-    local package_inside=${package_dir}/${package}
-  else
-    local package_inside=${package_dir}
-  fi
-  # TODO(bradnelson): Do something better.
-  # Add to PATH and LD_LIBRARY_PATH.
-  export PATH=${PATH}:${package_inside}
-  local package_libs=${package_inside}/${PACKAGE_LIB_DIR}
-  if [ -d ${package_libs} ]; then
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
-  fi
-
-  # Copy tar files to /mnt/http.
-  for p in ${package_inside}/*.tar; do
-    cp ${p} /mnt/http/
-  done
-
-  # TODO(bradnelson): Do something better.
-  # Rename nexe for arch.
-  local package_nexe=${package_inside}/${package}_${NACL_ARCH}.nexe
-  if [ -e ${package_nexe} ]; then
-    mv ${package_nexe} ${package_inside}/${package}
-  fi
-
-  # Remove out stamps and write out new one.
-  RemoveDir ${stamp_dir}
-  mkdir -p ${url_stamp}
-  echo "Done."
-}
-
-DEFAULT_SDK_VERSION=pepper_37
-DEFAULT_REVISION=1352
-
-InstallCorePackages
-SetupEnvironment
-InstallPackage tar glibc
-InstallPackage git glibc
-InstallPackage nano newlib
-InstallPackage vim newlib
-InstallPackage make newlib
-InstallPython
+# Setup environment again, to rescan the packages added.
+source /mnt/http/setup-environment
 
 cd ${HOME}
-
-set +e
-shopt -u nullglob
 
 if [ -e ${HOME}/.bashrc ]; then
   source ${HOME}/.bashrc

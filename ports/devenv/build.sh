@@ -26,16 +26,10 @@ InstallStep() {
   LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
   shopt -u nullglob
 
-  # Download old version of python.
-  local python_url=https://nacltools.storage.googleapis.com/python
-  curl ${python_url}/python_store-2.7.5.3/pydata_x86_32.tar \
-    -o ${APP_DIR}/pydata_x86_32.tar
-  curl ${python_url}/python_store-2.7.5.3/pydata_x86_64.tar \
-    -o ${APP_DIR}/pydata_x86_64.tar
-
-  cp ${START_DIR}/bash.js ${APP_DIR}
-  cp ${START_DIR}/bashrc ${APP_DIR}
-  cp ${START_DIR}/graphical.html ${APP_DIR}
+  RESOURCES="bash.js bashrc package setup-environment graphical.html"
+  for resource in ${RESOURCES}; do
+    cp ${START_DIR}/${resource} ${APP_DIR}/
+  done
 
   # Generate a manifest.json.
   GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR}

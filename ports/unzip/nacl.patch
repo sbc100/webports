@@ -56,3 +56,16 @@ index efa97fc..b4a0a36 100644
  
  #if (defined(NO_FCHOWN) || defined(NO_FCHMOD))
  /*---------------------------------------------------------------------------
+diff --git a/unix/unxcfg.h b/unix/unxcfg.h
+index e39b283..70da634 100644
+--- a/unix/unxcfg.h
++++ b/unix/unxcfg.h
+@@ -200,7 +200,7 @@ typedef struct stat z_stat;
+ #if (!defined(NO_LCHOWN) || !defined(NO_LCHMOD))
+ #  define SET_SYMLINK_ATTRIBS
+ #endif
+-#ifdef MTS
++#if defined(MTS) || defined(__native_client__)
+ #  ifdef SET_DIR_ATTRIB
+ #    undef SET_DIR_ATTRIB
+ #  endif
