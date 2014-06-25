@@ -50,6 +50,6 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
-  Remove nano-7.3.zip
-  LogExecute zip -r nano-7.3.zip .
+  Remove nano-${VERSION}.zip
+  LogExecute zip -r nano-${VERSION}.zip .
 }
