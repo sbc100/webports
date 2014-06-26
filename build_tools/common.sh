@@ -754,6 +754,7 @@ SetupCrossEnvironment() {
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
   export READELF=${NACLREADELF}
+  export STRIP=${NACLSTRIP}
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}/pkgconfig
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}

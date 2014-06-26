@@ -336,6 +336,8 @@ class Configuration(object):
       else:
         arch = self.default_arch
     self.arch = arch
+    if self.arch not in arch_to_pkgarch:
+      raise Error("Invalid arch: %s" % arch)
 
     self.SetLibc()
 
