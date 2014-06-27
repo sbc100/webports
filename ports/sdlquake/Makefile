@@ -26,15 +26,17 @@ SOURCES += cd_nacl.c chase.c cl_demo.c cl_input.c cl_main.c cl_parse.c\
          sv_move.c sv_phys.c sv_user.c sys_sdl.c vid_sdl.c view.c \
          wad.c world.c zone.c
 
-ifeq ($(NACL_ARCH),x86_64)
-SOURCES += $(X86_SRCS)
-else
-ifeq ($(NACL_ARCH),i686)
-SOURCES += $(X86_SRCS)
-else
+#ifeq ($(NACL_ARCH),x86_64)
+#SOURCES += $(X86_SRCS)
+#else
+#ifeq ($(NACL_ARCH),i686)
+#SOURCES += $(X86_SRCS)
+#else
+#SOURCES += $(NONX86_SRCS)
+#endif
+#endif
+
 SOURCES += $(NONX86_SRCS)
-endif
-endif
 
 # These files were excluded from FILES because they use instructions
 # disallowed by Native Client
