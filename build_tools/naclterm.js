@@ -18,15 +18,85 @@ window.onload = function() {
 };
 
 /**
- * The hterm-powered terminal command.
- *
- * This class defines a command that can be run in an hterm.Terminal instance.
+ * This class defines a wrapper around NaClTerm that can be run in an hterm.
  *
  * @param {Object} argv The argument object passed in from the Terminal.
  */
-function NaClTerm(argv) {
+function NaClTermHTerm(argv) {
+  function onProcessExit(code) {
+      argv.io.pop();
+      if (argv.onExit) {
+        argv.onExit(code);
+      }
+  }
   this.io = argv.io.push();
-  this.argv_ = argv;
+  var print = this.io.print.bind(this.io);
+
+  this.nacl = new NaClTerm(print, onProcessExit,
+                           this.io.terminal_.screenSize.width);
+};
+
+/**
+ * Add the appropriate hooks to HTerm to start the session.
+ */
+NaClTermHTerm.prototype.run = function() {
+  this.io.onVTKeystroke = this.nacl.onVTKeystroke.bind(this.nacl);
+  this.io.onTerminalResize = this.nacl.onTerminalResize.bind(this.nacl);
+}
+
+/**
+ * Static initializer called from index.html.
+ *
+ * This constructs a new Terminal instance and instructs it to run the NaClTerm
+ * command.
+ */
+NaClTermHTerm.init = function() {
+  var profileName = lib.f.parseQuery(document.location.search)['profile'];
+  var terminal = new hterm.Terminal(profileName);
+  terminal.decorate(document.querySelector('#terminal'));
+
+  // Useful for console debugging.
+  window.term_ = terminal;
+
+  // We don't properly support the hterm bell sound, so we need to disable it.
+  terminal.prefs_.definePreference('audible-bell-sound', '');
+
+  terminal.setAutoCarriageReturn(true);
+  terminal.setCursorPosition(0, 0);
+  terminal.setCursorVisible(true);
+  terminal.runCommandClass(NaClTermHTerm, document.location.hash.substr(1));
+
+  return true;
+};
+
+/**
+ * Prints a string to the terminal.
+ * @callback printCallback
+ * @param {string} message The string to be printed.
+ */
+
+/**
+ * This function is called when the main process (usually the shell) exits.
+ * @callback mainEndCallback
+ * @param {number} code The exit code of the process.
+ */
+
+/**
+ * NaClTerm provides a framework for NaCl executables to run within a
+ * web-based terminal.
+ *
+ * @param {printCallback} print A callback that prints to the terminal.
+ * @param {mainEndCallback} onEnd A callback called when the main process exits.
+ * @param {number} width The width of the terminal window.
+ */
+function NaClTerm(print, onEnd, width) {
+  this.print = print || function() {};
+  this.onEnd = onEnd || function() {};
+  this.width = width || 0;
+
+  this.bufferedOutput = '';
+  this.loaded = false;
+  this.print(NaClTerm.ANSI_CYAN);
 };
 
 /**
@@ -167,31 +237,6 @@ var waiters = {};
 var pid = 0;
 
 /**
- * Static initialier called from index.html.
- *
- * This constructs a new Terminal instance and instructs it to run the NaClTerm
- * command.
- */
-NaClTerm.init = function() {
-  var profileName = lib.f.parseQuery(document.location.search)['profile'];
-  var terminal = new hterm.Terminal(profileName);
-  terminal.decorate(document.querySelector('#terminal'));
-
-  // Useful for console debugging.
-  window.term_ = terminal;
-
-  // We don't properly support the hterm bell sound, so we need to disable it.
-  terminal.prefs_.definePreference('audible-bell-sound', '');
-
-  terminal.setAutoCarriageReturn(true);
-  terminal.setCursorPosition(0, 0);
-  terminal.setCursorVisible(true);
-  terminal.runCommandClass(NaClTerm, document.location.hash.substr(1));
-
-  return true;
-};
-
-/**
  * Makes the path in a NMF entry to fully specified path.
  *
  * @private
@@ -268,7 +313,7 @@ NaClTerm.prototype.handleMessage_ = function(e) {
     if (!this.loaded) {
       this.bufferedOutput += msg;
     } else {
-      this.io.print(msg);
+      this.print(msg);
     }
   } else if (e.data.indexOf('exited') == 0) {
     var exitCode = parseInt(e.data.split(':', 2)[1]);
@@ -285,7 +330,7 @@ NaClTerm.prototype.handleMessage_ = function(e) {
  * Handle load error event from NaCl.
  */
 NaClTerm.prototype.handleLoadAbort_ = function(e) {
-  this.io.print('Load aborted.\n');
+  this.print('Load aborted.\n');
 }
 
 /**
@@ -303,20 +348,20 @@ NaClTerm.prototype.handleLoadError_ = function(e) {
     foreground_process = e.srcElement.parent;
   }
 
-  this.io.print(e.srcElement.command_name + ': ' +
+  this.print(e.srcElement.command_name + ': ' +
                 e.srcElement.lastError + '\n');
   document.body.removeChild(e.srcElement);
 }
 
 NaClTerm.prototype.doneLoadingUrl = function() {
-  var width = this.io.terminal_.screenSize.width;
-  this.io.print('\r' + Array(width+1).join(' '));
+  var width = this.width;
+  this.print('\r' + Array(width+1).join(' '));
   var message = '\rLoaded ' + this.lastUrl;
   if (this.lastTotal) {
     var kbsize = Math.round(this.lastTotal/1024)
     message += ' ['+ kbsize + ' KiB]';
   }
-  this.io.print(message.slice(0, width) + '\n')
+  this.print(message.slice(0, width) + '\n')
 }
 
 /**
@@ -338,16 +383,16 @@ NaClTerm.prototype.handleLoad_ = function(e) {
     if (this.lastUrl)
       this.doneLoadingUrl();
     else
-      this.io.print('Loaded.\n');
+      this.print('Loaded.\n');
 
-    this.io.print(NaClTerm.ANSI_RESET);
+    this.print(NaClTerm.ANSI_RESET);
   }
 
   // Now that have completed loading and displaying
   // loading messages we output any messages from the
   // NaCl module that were buffered up unto this point
   this.loaded = true;
-  this.io.print(this.bufferedOutput);
+  this.print(this.bufferedOutput);
   this.bufferedOutput = ''
 }
 
@@ -378,8 +423,8 @@ NaClTerm.prototype.handleProgress_ = function(e) {
     message += ' [' + kbloaded + ' KiB/' + kbtotal + ' KiB ' + percent + '%]';
   }
 
-  var width = this.io.terminal_.screenSize.width;
-  this.io.print('\r' + message.slice(-width));
+  var width = this.width;
+  this.print('\r' + message.slice(-width));
 }
 
 /**
@@ -394,20 +439,18 @@ NaClTerm.prototype.handleCrash_ = function(e) {
  */
 NaClTerm.prototype.exit = function(code, element) {
   if (!element.parent) {
-    this.io.print(NaClTerm.ANSI_CYAN)
+    this.print(NaClTerm.ANSI_CYAN)
 
     // The root process finished.
     if (code == -1) {
-      this.io.print('Program (' + element.command_name +
+      this.print('Program (' + element.command_name +
                     ') crashed (exit status -1)\n');
     } else {
-      this.io.print('Program (' + element.command_name + ') exited ' +
+      this.print('Program (' + element.command_name + ') exited ' +
                     '(status=' + code + ')\n');
     }
 
-    this.io.pop();
-    if (this.argv_.onExit)
-      this.argv_.onExit(code);
+    this.onEnd(code);
     return;
   }
 
@@ -490,9 +533,9 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
   var mimetype = 'application/x-nacl';
   if (navigator.mimeTypes[mimetype] === undefined) {
     if (mimetype.indexOf('pnacl') != -1)
-      this.io.print('Browser does not support PNaCl or PNaCl is disabled\n');
+      this.print('Browser does not support PNaCl or PNaCl is disabled\n');
     else
-      this.io.print('Browser does not support NaCl or NaCl is disabled\n');
+      this.print('Browser does not support NaCl or NaCl is disabled\n');
     return;
   }
 
@@ -577,7 +620,7 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
 
   // We show this message only for the first process.
   if (pid == 1)
-    this.io.print('Loading NaCl module.\n');
+    this.print('Loading NaCl module.\n');
 
   if (params[NaClTerm.ENV_SPAWN_MODE] === NaClTerm.ENV_SPAWN_POPUP_VALUE) {
     var self = this;
@@ -683,7 +726,7 @@ NaClTerm.prototype.waitpid = function(pid, options, e) {
   }
 }
 
-NaClTerm.prototype.onTerminalResize_ = function(width, height) {
+NaClTerm.prototype.onTerminalResize = function(width, height) {
   this.tty_width = width;
   this.tty_height = height;
   if (foreground_process === undefined) {
@@ -698,7 +741,7 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
   }
 }
 
-NaClTerm.prototype.onVTKeystroke_ = function(str) {
+NaClTerm.prototype.onVTKeystroke = function(str) {
   // TODO(bradnelson): Change this once we support signals.
   // Abort on Control+C, but don't quit bash.
   if (str.charCodeAt(0) === NaClTerm.CONTROL_C &&
@@ -708,7 +751,7 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
     var enabledEnv = foreground_process.querySelector(query);
     if (enabledEnv && enabledEnv.value === NaClTerm.ENV_ABORT_VALUE) {
       this.abort(foreground_process);
-      this.io.print('\n');
+      this.print('\n');
     }
   } else {
     var message = {};
@@ -716,18 +759,6 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
     foreground_process.postMessage(message);
   }
 }
-
-/*
- * This is invoked by the terminal as a result of terminal.runCommandClass().
- */
-NaClTerm.prototype.run = function() {
-  this.bufferedOutput = '';
-  this.loaded = false;
-  this.io.print(NaClTerm.ANSI_CYAN);
-
-  this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);
-  this.io.onTerminalResize = this.onTerminalResize_.bind(this);
-};
 
 /**
  * This creates a popup that runs a NaCl process inside.

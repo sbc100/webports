@@ -15,7 +15,7 @@ window.onload = function() {
   lib.init(function() {
     navigator.webkitPersistentStorage.requestQuota(1024*1024,
     function(bytes) {
-      NaClTerm.init();
+      NaClTermHTerm.init();
     },
     function(e) { console.log('Error', e); });
   });

@@ -22,11 +22,11 @@ function onInit() {
   // Request 1GB storage.
   navigator.webkitPersistentStorage.requestQuota(
       1024 * 1024 * 1024,
-      NaClTerm.init,
+      NaClTermHTerm.init,
       function() {
         console.log("Failed to allocate space!\n");
         // Start the terminal even if FS failed to init.
-        NaClTerm.init();
+        NaClTermHTerm.init();
       });
 }
 

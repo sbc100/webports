@@ -19,7 +19,7 @@ function fsErrorHandler(error) {
 }
 
 function runVim() {
-  NaClTerm.init();
+  NaClTermHTerm.init();
 }
 
 function runVimWithFile(file) {

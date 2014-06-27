@@ -39,7 +39,7 @@ function onInitFS(fs) {
     upload.addEventListener('change', uploadFiles, false);
     window.fs = fs
   }
-  NaClTerm.init();
+  NaClTermHTerm.init();
 }
 
 function onInit() {
@@ -50,7 +50,7 @@ function onInit() {
     function() {
       log("Failed to allocate space!\n");
       // Start the terminal even if FS failed to init.
-      NaClTerm.init();
+      NaClTermHTerm.init();
     }
   );
 }
