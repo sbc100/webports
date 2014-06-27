@@ -303,7 +303,7 @@ NaClTerm.prototype.handleMessage_ = function(e) {
       }
       nmf = executable + '.nmf';
     }
-    this.spawn(nmf, args, envs, cwd, executable, e);
+    this.spawn(nmf, args, envs, cwd, executable, e.srcElement, e.data['id']);
   } else if (e.data['command'] == 'nacl_wait') {
     var msg = e.data;
     console.log('nacl_wait: ' + JSON.stringify(msg));
@@ -524,12 +524,30 @@ NaClTerm.prototype.abort = function(element) {
 }
 
 /**
- * Create the NaCl embed element.
- * We delay this until the first terminal resize event so that we start
- * with the correct size.
+ * This spawns a new NaCl process in the current window by creating an HTML
+ * embed element.
+ *
+ * When creating the initial process, we delay this until the first terminal
+ * resize event so that we start with the correct size.
+ *
+ * @param {string} nmf The path to the NaCl NMF file.
+ * @param {Array.<string>} argv The command-line arguments to be given to the
+ *     spawned process.
+ * @param {Array.<string>} envs The environment variables that the spawned
+ *     process can access. Each entry in the array should be of the format
+ *     "VARIABLE_NAME=value".
+ * @param {string} cwd The current working directory.
+ * @param {string} command_name The name of the process to be spawned.
+ * @param {HTMLObjectElement} [parent=null] The DOM object that corresponds to
+ *     the process that initiated the spawn. Set to null if there is no such
+ *     process.
+ * @param {number} [spawn_req_id=0] An identifier for this spawn request.
  */
-NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
-                                          width, height) {
+NaClTerm.prototype.spawn = function(nmf, argv, envs, cwd,
+                                    command_name, parent, spawn_req_id) {
+  if (!parent) parent = null;
+  if (!spawn_req_id) spawn_req_id = 0;
+
   var mimetype = 'application/x-nacl';
   if (navigator.mimeTypes[mimetype] === undefined) {
     if (mimetype.indexOf('pnacl') != -1)
@@ -546,6 +564,9 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
   foreground_process.height = 0;
   foreground_process.data = nmf;
   foreground_process.type = mimetype;
+  foreground_process.parent = parent;
+  foreground_process.command_name = command_name;
+  foreground_process.spawn_req_id = spawn_req_id;
   foreground_process.addEventListener(
       'message', this.handleMessage_.bind(this));
   foreground_process.addEventListener(
@@ -574,8 +595,8 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
 
   params['PS_TTY_PREFIX'] = NaClTerm.prefix;
   params['PS_TTY_RESIZE'] = 'tty_resize';
-  params['PS_TTY_COLS'] = width ? width : this.tty_width;
-  params['PS_TTY_ROWS'] = height ? height : this.tty_height;
+  params['PS_TTY_COLS'] = this.tty_width;
+  params['PS_TTY_ROWS'] = this.tty_height;
   params['PS_STDIN'] = '/dev/tty';
   params['PS_STDOUT'] = '/dev/tty';
   params['PS_STDERR'] = '/dev/tty';
@@ -658,14 +679,6 @@ NaClTerm.prototype.createEmbed = function(nmf, argv, envs, cwd,
   document.body.appendChild(foreground_process);
 }
 
-NaClTerm.prototype.spawn = function(nmf, argv, envs, cwd,
-                                    command_name, e) {
-  this.createEmbed(nmf, argv, envs, cwd);
-  foreground_process.parent = e.srcElement;
-  foreground_process.command_name = command_name;
-  foreground_process.spawn_req_id = e.data['id'];
-}
-
 NaClTerm.prototype.waitpid = function(pid, options, e) {
   var finishedProcess = null;
   Object.keys(processes).some(function(pid) {
@@ -732,10 +745,7 @@ NaClTerm.prototype.onTerminalResize = function(width, height) {
   if (foreground_process === undefined) {
     var argv = NaClTerm.argv || [];
     argv = [NaClTerm.nmf].concat(argv);
-    this.createEmbed(NaClTerm.nmf, argv, [], '/', width, height);
-    // The root process has no parent.
-    foreground_process.parent = null;
-    foreground_process.command_name = NaClTerm.prefix;
+    this.spawn(NaClTerm.nmf, argv, [], '/', NaClTerm.prefix);
   } else {
     foreground_process.postMessage({'tty_resize': [ width, height ]});
   }
