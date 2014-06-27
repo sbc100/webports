@@ -278,6 +278,7 @@ InitializePNaClToolchain() {
 }
 
 NaClEnvExport() {
+  export EXEEXT=${NACL_EXEEXT}
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
@@ -285,7 +286,7 @@ NaClEnvExport() {
   export STRIP=${NACLSTRIP}
   export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}
-  export PATH=${PATH}:${NACL_BIN_PATH}:${NACL_PREFIX}/bin
+  export PATH=${NACL_PREFIX}/bin:${PATH}:${NACL_BIN_PATH}
   export CPPFLAGS=${NACL_CPPFLAGS}
   export LDFLAGS=${NACL_LDFLAGS}
 }
@@ -325,6 +326,7 @@ fi
 if [ -z "${NACL_ENV_IMPORT:-}" ]; then
   if [ $# -gt 0 ]; then
     if [ "$1" = '--print' ]; then
+      echo "export EXEEXT=${NACL_EXEEXT}"
       echo "export CC=${NACLCC}"
       echo "export CXX=${NACLCXX}"
       echo "export AR=${NACLAR}"
@@ -332,7 +334,7 @@ if [ -z "${NACL_ENV_IMPORT:-}" ]; then
       echo "export STRIP=${NACLSTRIP}"
       echo "export PKG_CONFIG_PATH=${NACLPORTS_LIBDIR}/pkgconfig"
       echo "export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}"
-      echo "export PATH=\${PATH}:${NACL_BIN_PATH}:${NACL_PREFIX}/bin"
+      echo "export PATH=${NACL_PREFIX}/bin:\${PATH}:${NACL_BIN_PATH}"
       echo "export CPPFLAGS=\"${NACL_CPPFLAGS}\""
       echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
     else

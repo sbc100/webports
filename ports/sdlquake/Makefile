@@ -2,15 +2,32 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-CCFLAGS := -DSDL -O2
-CCFLAGS32 := $(CCFLAGS) -m32
-CCFLAGS64 := $(CCFLAGS) -m64
+EXEEXT ?= .nexe
+
+SDL_LDFLAGS := $(shell sdl-config --libs)
+SDL_CFLAGS := $(shell sdl-config --cflags)
+LDFLAGS += $(SDL_LDFLAGS)
+CFLAGS += -Wno-pointer-sign -Wno-implicit-function-declaration
+
+CFLAGS += -fcommon -DSDL $(SDL_CFLAGS)
+ifeq ($(TOOLCHAIN),pnacl)
+# TODO(sbc): remove -fcommon once PNaCl toolchain changes its default
+# https://code.google.com/p/nativeclient/issues/detail?id=3888
+CFLAGS += -fcommon -Wno-dangling-else
+endif
+
 SDL_ROOT ?= /home/dmichael/naclports/src/packages/repository/SDL-1.2.14
 NACL_TOOLCHAIN_ROOT ?= $(NACL_SDK_ROOT)/toolchain/linux_x86
 
 X86_SRCS := snd_mixa.S sys_dosa.S d_draw.S d_draw16.S d_parta.S d_polysa.S \
             d_scana.S d_spr8.S d_varsa.S math.S r_aclipa.S r_aliasa.S \
             r_drawa.S r_edgea.S surf16.S surf8.S worlda.S
+
+ifneq (V,1)
+RUN_CC    = @echo " CC    " $@;
+RUN_CCLD  = @echo " CCLD  " $@;
+RUN_STRIP = @echo " STRIP " $@;
+endif
 
 NONX86_SRCS :=  d_vars.c nonintel.c
 
@@ -45,22 +62,21 @@ OMITTED_S_FILES := d_copy.S dosasm.S
 OBJECTS := $(SOURCES:%.c=build/%.o)
 OBJECTS := $(OBJECTS:%.S=build/%.o)
 
-all: quake.nexe
+all: quake${EXEEXT}
 
-quake_debug.nexe: $(OBJECTS)
-	$(CXX) $(LDFLAGS) `sdl-config --libs` $^ -o $@
+quake_debug${EXEEXT}: $(OBJECTS)
+	$(RUN_CCLD)$(CXX) $(LDFLAGS) $^ -o $@
 
-quake.nexe: quake_debug.nexe
-	$(STRIP) -o $@ $<
+quake${EXEEXT}: quake_debug${EXEEXT}
+	$(RUN_STRIP)$(STRIP) -o $@ $<
 
 clean:
-	# remove all .os and .nexe
-	rm -f build/*.o ./*.nexe
+	rm -f build/*.o *.${EXEEXT}
 
 build/%.o: %.S
 	@mkdir -p build
-	$(CC) $(INCLUDES) `sdl-config --cflags` $(CCFLAGS) -c -o $@ $<
+	$(RUN_CC)$(CC) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
 build/%.o: %.c
 	@mkdir -p build
-	$(CC) $(INCLUDES) `sdl-config --cflags` $(CCFLAGS) -c -o $@ $<
+	$(RUN_CC)$(CC) $(INCLUDES) $(CFLAGS) -c -o $@ $<

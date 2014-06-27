@@ -749,6 +749,7 @@ SetupSDKBuildSystem() {
 SetupCrossEnvironment() {
   # export the nacl tools
   export CONFIG_SITE
+  export EXEEXT=${NACL_EXEEXT}
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   export AR=${NACLAR}
