@@ -622,7 +622,19 @@ NaClTerm.prototype.spawn = function(nmf, argv, envs, cwd,
   }
 
   // Add ARGV arguments from query parameters.
-  var args = lib.f.parseQuery(document.location.search);
+  function parseQuery(query) {
+    if (query.charAt(0) === '?') {
+      query = query.substring(1);
+    }
+    var splitArgs = query.split('&');
+    var args = {};
+    for (var i = 0; i < splitArgs.length; i++) {
+      var keyValue = splitArgs[i].split('=');
+      args[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
+    }
+    return args;
+  }
+  var args = parseQuery(document.location.search);
   for (var argname in args) {
     addParam(argname, args[argname]);
   }
@@ -630,6 +642,7 @@ NaClTerm.prototype.spawn = function(nmf, argv, envs, cwd,
   // If the application has set NaClTerm.argv and there were
   // no arguments set in the query parameters then add the default
   // NaClTerm.argv arguments.
+  // TODO(bradnelson): Consider dropping this method of passing in parameters.
   if (args['arg1'] === undefined && argv) {
     var argn = 0;
     argv.forEach(function(arg) {
