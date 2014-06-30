@@ -24,16 +24,12 @@
  *
  * @param {printCallback} print A callback that prints to the terminal.
  * @param {mainEndCallback} onEnd A callback called when the main process exits.
- * @param {number} width The width of the terminal window.
  */
-function NaClProcessManager(print, onEnd, width) {
+function NaClProcessManager(print, onEnd) {
   this.print = print || function() {};
   this.onEnd = onEnd || function() {};
-  this.width = width || 0;
 
-  this.bufferedOutput = '';
-  this.loaded = false;
-  this.print(NaClProcessManager.ANSI_CYAN);
+  this.listeners = {};
 };
 
 /**
@@ -59,18 +55,6 @@ NaClProcessManager.ECHILD= 10;
  * @type {number}
  */
 NaClProcessManager.CONTROL_C = 3;
-
-/**
- * Flag for cyan coloring in the terminal.
- * @const
- */
-NaClProcessManager.ANSI_CYAN = '\x1b[36m';
-
-/**
- * Flag for color reset in the terminal.
- * @const
- */
-NaClProcessManager.ANSI_RESET = '\x1b[0m';
 
 /**
  * This environmnent variable should be set to 1 to enable Control+C quitting
@@ -174,8 +158,35 @@ var waiters = {};
 var pid = 0;
 
 /**
+ * Handles a NaCl event.
+ * @callback eventCallback
+ * @param {object} e An object that contains information about the event.
+ */
+
+/**
+ * Listen for events emitted from the spawned processes.
+ * @param {string} evt The event to be waited for.
+ * @param {eventCallback} callback The callback to be called on the event.
+ */
+NaClProcessManager.prototype.addEventListener = function(evt, callback) {
+  if (!this.listeners[evt]) {
+    this.listeners[evt] = [];
+  }
+  this.listeners[evt].push(callback);
+}
+
+/**
+ * Is the given process the root process of this process manager? A root
+ * process is the one created by NaClProcessManager and not spawned by
+ * another process.
+ * @param {HTMLObjectElement} process The element about which one is inquiring.
+ */
+NaClProcessManager.prototype.isRootProcess = function(process) {
+  return !process.parent;
+}
+
+/**
  * Makes the path in a NMF entry to fully specified path.
- *
  * @private
  */
 NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
@@ -207,7 +218,6 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
 
 /**
  * Handle messages sent to us from NaCl.
- *
  * @private
  */
 NaClProcessManager.prototype.handleMessage_ = function(e) {
@@ -245,33 +255,17 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     var msg = e.data;
     console.log('nacl_wait: ' + JSON.stringify(msg));
     this.waitpid(msg['pid'], msg['options'], e);
-  } else if (e.data.indexOf(NaClProcessManager.prefix) == 0) {
-    var msg = e.data.substring(NaClProcessManager.prefix.length);
-    if (!this.loaded) {
-      this.bufferedOutput += msg;
-    } else {
-      this.print(msg);
-    }
   } else if (e.data.indexOf('exited') == 0) {
     var exitCode = parseInt(e.data.split(':', 2)[1]);
     if (isNaN(exitCode))
       exitCode = 0;
-    this.exit(exitCode, e.srcElement);
-  } else {
-    console.log('unexpected message: ' + e.data);
-    return;
+    this.exit_(exitCode, e.srcElement);
   }
 }
 
 /**
  * Handle load error event from NaCl.
- */
-NaClProcessManager.prototype.handleLoadAbort_ = function(e) {
-  this.print('Load aborted.\n');
-}
-
-/**
- * Handle load abort event from NaCl.
+ * @private
  */
 NaClProcessManager.prototype.handleLoadError_ = function(e) {
   console.log('load error: ' + e.srcElement.spawn_req_id);
@@ -285,24 +279,12 @@ NaClProcessManager.prototype.handleLoadError_ = function(e) {
     foreground_process = e.srcElement.parent;
   }
 
-  this.print(e.srcElement.command_name + ': ' +
-                e.srcElement.lastError + '\n');
   document.body.removeChild(e.srcElement);
-}
-
-NaClProcessManager.prototype.doneLoadingUrl = function() {
-  var width = this.width;
-  this.print('\r' + Array(width+1).join(' '));
-  var message = '\rLoaded ' + this.lastUrl;
-  if (this.lastTotal) {
-    var kbsize = Math.round(this.lastTotal/1024)
-    message += ' ['+ kbsize + ' KiB]';
-  }
-  this.print(message.slice(0, width) + '\n')
 }
 
 /**
  * Handle load end event from NaCl.
+ * @private
  */
 NaClProcessManager.prototype.handleLoad_ = function(e) {
   if (e.srcElement.spawn_req_id) {
@@ -313,59 +295,11 @@ NaClProcessManager.prototype.handleLoad_ = function(e) {
     console.log('handleLoad: ' + JSON.stringify(reply));
     e.srcElement.parent.postMessage(reply);
   }
-
-  // Don't print loading messages, except for the
-  // root process.
-  if (!e.srcElement.parent) {
-    if (this.lastUrl)
-      this.doneLoadingUrl();
-    else
-      this.print('Loaded.\n');
-
-    this.print(NaClProcessManager.ANSI_RESET);
-  }
-
-  // Now that have completed loading and displaying
-  // loading messages we output any messages from the
-  // NaCl module that were buffered up unto this point
-  this.loaded = true;
-  this.print(this.bufferedOutput);
-  this.bufferedOutput = ''
-}
-
-/**
- * Handle load progress event from NaCl.
- */
-NaClProcessManager.prototype.handleProgress_ = function(e) {
-  if (e.url !== undefined)
-    var url = e.url.substring(e.url.lastIndexOf('/') + 1);
-
-  if (!e.srcElement.parent && this.lastUrl && this.lastUrl != url)
-    this.doneLoadingUrl()
-
-  if (!url)
-    return;
-
-  this.lastUrl = url;
-  this.lastTotal = e.total;
-
-  if (e.srcElement.parent)
-    return;
-
-  var message = 'Loading ' + url;
-  if (e.lengthComputable && e.total) {
-    var percent = Math.round(e.loaded * 100 / e.total);
-    var kbloaded = Math.round(e.loaded / 1024);
-    var kbtotal = Math.round(e.total / 1024);
-    message += ' [' + kbloaded + ' KiB/' + kbtotal + ' KiB ' + percent + '%]';
-  }
-
-  var width = this.width;
-  this.print('\r' + message.slice(-width));
 }
 
 /**
  * Handle crash event from NaCl.
+ * @private
  */
 NaClProcessManager.prototype.handleCrash_ = function(e) {
   this.exit(e.srcElement.exitStatus, e.srcElement);
@@ -373,21 +307,13 @@ NaClProcessManager.prototype.handleCrash_ = function(e) {
 
 /**
  * Exit the command.
+ * @private
+ * @param {number} code The exit code of the process.
+ * @param {HTMLObjectElement} element The HTML element of the exited process.
  */
-NaClProcessManager.prototype.exit = function(code, element) {
+NaClProcessManager.prototype.exit_ = function(code, element) {
   if (!element.parent) {
-    this.print(NaClProcessManager.ANSI_CYAN)
-
-    // The root process finished.
-    if (code == -1) {
-      this.print('Program (' + element.command_name +
-                    ') crashed (exit status -1)\n');
-    } else {
-      this.print('Program (' + element.command_name + ') exited ' +
-                    '(status=' + code + ')\n');
-    }
-
-    this.onEnd(code);
+    this.onEnd(code, element);
     return;
   }
 
@@ -457,7 +383,7 @@ NaClProcessManager.prototype.abort = function(element) {
   };
   element.parent.postMessage(spawnReply);
 
-  this.exit(1, element);
+  this.exit_(1, element);
 }
 
 /**
@@ -504,16 +430,21 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd,
   foreground_process.parent = parent;
   foreground_process.command_name = command_name;
   foreground_process.spawn_req_id = spawn_req_id;
+
+  for (var evt in this.listeners) {
+    if (this.listeners.hasOwnProperty(evt)) {
+      for (var i = 0; i < this.listeners[evt].length; i++) {
+        foreground_process.addEventListener(evt, this.listeners[evt][i]);
+      }
+    }
+  }
   foreground_process.addEventListener(
       'message', this.handleMessage_.bind(this));
-  foreground_process.addEventListener(
-      'progress', this.handleProgress_.bind(this));
   foreground_process.addEventListener('load', this.handleLoad_.bind(this));
   foreground_process.addEventListener(
       'error', this.handleLoadError_.bind(this));
-  foreground_process.addEventListener(
-      'abort', this.handleLoadAbort_.bind(this));
   foreground_process.addEventListener('crash', this.handleCrash_.bind(this));
+
   processes[pid] = foreground_process;
 
   var params = {};
