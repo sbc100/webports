@@ -21,7 +21,7 @@ index c21ec67..1a5d61d 100644
  LIB_CRYPT = @LIB_CRYPT@
  LIB_NANOSLEEP = @LIB_NANOSLEEP@
 diff --git a/configure b/configure
-index a8b69e0..46e6c49 100755
+index a8b69e0..3b23916 100755
 --- a/configure
 +++ b/configure
 @@ -27324,11 +27324,15 @@ _ACEOF
@@ -284,6 +284,31 @@ index fdf2b0e..67d8341 100644
        break;
  
      default:
+diff --git a/src/remove.c b/src/remove.c
+index 0607167..7449871 100644
+--- a/src/remove.c
++++ b/src/remove.c
+@@ -908,6 +908,12 @@ remove_cwd_entries (Dirstack_state *ds, char **subdir, struct stat *subdir_sb,
+ 		status = RM_ERROR;
+ 		break;
+ 	      }
++            /* 
++             * TODO(bradnelson): Drop this once we have real looking inodes.
++             * nacl_io doesn't provide sufficiently real inodes to allow this
++             * cycle check to work.
++             */
++#if !defined(__native_client__)
+ 	    if (cycle_check (&ds->cycle_check_state, subdir_sb))
+ 	      {
+ 		error (0, 0, _("\
+@@ -918,6 +924,7 @@ The following directory is part of the cycle:\n  %s\n"),
+ 		       quote (full_filename (".")));
+ 		longjmp (ds->current_arg_jumpbuf, 1);
+ 	      }
++#endif
+ 
+ 	    *subdir = xstrdup (f);
+ 	    break;
 diff --git a/src/shred.c b/src/shred.c
 index bc89567..792b4c7 100644
 --- a/src/shred.c
@@ -403,6 +428,28 @@ index 7dbbc55..97b11a2 100644
 +#endif
    exit (EXIT_SUCCESS);
  }
+diff --git a/src/system.h b/src/system.h
+index 6154843..97f3599 100644
+--- a/src/system.h
++++ b/src/system.h
+@@ -746,9 +746,16 @@ uid_t getuid ();
+ /* Include automatically-generated macros for unlocked I/O.  */
+ #include "unlocked-io.h"
+ 
+-#define SAME_INODE(Stat_buf_1, Stat_buf_2) \
++/*
++ * TODO(bradnelson): Drop this once nacl_io inode support is better.
++ */
++#if defined(__native_client__)
++# define SAME_INODE(Stat_buf_1, Stat_buf_2) 1
++#else
++# define SAME_INODE(Stat_buf_1, Stat_buf_2) \
+   ((Stat_buf_1).st_ino == (Stat_buf_2).st_ino \
+    && (Stat_buf_1).st_dev == (Stat_buf_2).st_dev)
++#endif
+ 
+ #define DOT_OR_DOTDOT(Basename) \
+   (Basename[0] == '.' && (Basename[1] == '\0' \
 diff --git a/src/tee.c b/src/tee.c
 index 5867539..df6859b 100644
 --- a/src/tee.c
