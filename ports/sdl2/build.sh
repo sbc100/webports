@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 CONFIG_SUB=build-scripts/config.sub
+NACLPORTS_CFLAGS+=" -std=gnu99"
 
 AutogenStep() {
   ChangeDir ${SRC_DIR}
