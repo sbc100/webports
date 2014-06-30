@@ -68,12 +68,13 @@ install:
 	cp index.html $(INSTALL_DIR)
 	cp python.js $(INSTALL_DIR)
 	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
+	cp ../../build_tools/naclprocess.js $(INSTALL_DIR)
 	cp background.js $(INSTALL_DIR)
 	cp icon_16.png $(INSTALL_DIR)
 	cp icon_48.png $(INSTALL_DIR)
 	cp icon_128.png $(INSTALL_DIR)
 ifeq ($(TOOLCHAIN),pnacl)
-	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclterm.js
+	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclprocess.js
 endif
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)

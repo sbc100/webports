@@ -4,13 +4,13 @@
  * found in the LICENSE file.
  */
 
-NaClTerm.prefix = 'bash';
-NaClTerm.nmf = 'bash.nmf';
-NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
+NaClProcessManager.prefix = 'bash';
+NaClProcessManager.nmf = 'bash.nmf';
+NaClProcessManager.argv = ['--init-file', '/mnt/http/bashrc'];
 // TODO(bradnelson): Drop this hack once tar extraction first checks relative
 // to the nexe.
-NaClTerm.useNaClAltHttp = true;
-NaClTerm.nmfWhitelist = [
+NaClProcessManager.useNaClAltHttp = true;
+NaClProcessManager.nmfWhitelist = [
     'bash',
     'curl',
     'funzip',
@@ -22,11 +22,11 @@ function onInit() {
   // Request 1GB storage.
   navigator.webkitPersistentStorage.requestQuota(
       1024 * 1024 * 1024,
-      NaClTermHTerm.init,
+      NaClTerm.init,
       function() {
         console.log("Failed to allocate space!\n");
         // Start the terminal even if FS failed to init.
-        NaClTermHTerm.init();
+        NaClTerm.init();
       });
 }
 

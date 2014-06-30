@@ -71,7 +71,7 @@ int cli_main(int argc, char* argv[]) {
     perror("Mounting HTML5 filesystem in /tmp failed.");
   }
 
-  /* naclterm.js sends the current working directory using this
+  /* naclprocess.js sends the current working directory using this
    * environment variable. */
   if (getenv("PWD"))
     chdir(getenv("PWD"));

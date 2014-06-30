@@ -4,5 +4,5 @@
  * found in the LICENSE file.
  */
 
-NaClTerm.prefix = 'curl'
-NaClTerm.nmf = 'curl.nmf'
+NaClProcessManager.prefix = 'curl'
+NaClProcessManager.nmf = 'curl.nmf'

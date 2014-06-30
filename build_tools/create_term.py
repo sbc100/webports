@@ -22,6 +22,7 @@ HTML_TEMPLATE = '''\
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
     <META HTTP-EQUIV="Expires" CONTENT="-1" />
     <script type="text/javascript" src="hterm.concat.js"></script>
+    <script type="text/javascript" src="naclprocess.js"></script>
     <script type="text/javascript" src="naclterm.js"></script>
     <script type="text/javascript" src="%(module_name)s.js"></script>
 
@@ -50,8 +51,8 @@ HTML_TEMPLATE = '''\
 '''
 
 JS_TEMPLATE = '''\
-NaClTerm.prefix = '%(module_name)s'
-NaClTerm.nmf = '%(nmf)s'
+NaClProcessManager.prefix = '%(module_name)s'
+NaClProcessManager.nmf = '%(nmf)s'
 '''
 
 FORMAT = '%(filename)s: %(message)s'

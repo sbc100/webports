@@ -702,11 +702,12 @@ InstallNaClTerm() {
   cat ${INSTALL_DIR}/hterm2.js >> ${INSTALL_DIR}/hterm.concat.js
   rm ${INSTALL_DIR}/hterm2.js
 
+  LogExecute cp ${TOOLS_DIR}/naclterm.js ${INSTALL_DIR}
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     sed 's/x-nacl/x-pnacl/' \
-        ${TOOLS_DIR}/naclterm.js > ${INSTALL_DIR}/naclterm.js
+        ${TOOLS_DIR}/naclprocess.js > ${INSTALL_DIR}/naclprocess.js
   else
-    LogExecute cp ${TOOLS_DIR}/naclterm.js ${INSTALL_DIR}
+    LogExecute cp ${TOOLS_DIR}/naclprocess.js ${INSTALL_DIR}
   fi
 }
 

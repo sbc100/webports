@@ -6,8 +6,8 @@
 
 'use strict';
 
-NaClTerm.prefix = 'civetweb'
-NaClTerm.nmf = 'civetweb.nmf'
+NaClProcessManager.prefix = 'civetweb'
+NaClProcessManager.nmf = 'civetweb.nmf'
 
 lib.rtdep('lib.f')
 
@@ -16,7 +16,7 @@ window.onload = function() {
     navigator.webkitPersistentStorage.requestQuota(
         1024*1024,
         function(grantedBytes) {
-          NaClTermHTerm.init();
+          NaClTerm.init();
         },
         function(e) { console.log('Error', e); }
     );

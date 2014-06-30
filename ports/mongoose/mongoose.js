@@ -6,8 +6,8 @@
 
 'use strict';
 
-NaClTerm.prefix = 'mongoose'
-NaClTerm.nmf = 'mongoose.nmf'
+NaClProcessManager.prefix = 'mongoose'
+NaClProcessManager.nmf = 'mongoose.nmf'
 
 lib.rtdep('lib.f')
 
@@ -15,7 +15,7 @@ window.onload = function() {
   lib.init(function() {
     navigator.webkitPersistentStorage.requestQuota(1024*1024,
     function(bytes) {
-      NaClTermHTerm.init();
+      NaClTerm.init();
     },
     function(e) { console.log('Error', e); });
   });

@@ -4,8 +4,8 @@
  * found in the LICENSE file.
  */
 
-NaClTerm.prefix = 'lua'
-NaClTerm.nmf = 'lua.nmf'
+NaClProcessManager.prefix = 'lua'
+NaClProcessManager.nmf = 'lua.nmf'
 
 function log(message) {
   document.getElementById('log').textContent = message;
@@ -39,7 +39,7 @@ function onInitFS(fs) {
     upload.addEventListener('change', uploadFiles, false);
     window.fs = fs
   }
-  NaClTermHTerm.init();
+  NaClTerm.init();
 }
 
 function onInit() {
@@ -50,7 +50,7 @@ function onInit() {
     function() {
       log("Failed to allocate space!\n");
       // Start the terminal even if FS failed to init.
-      NaClTermHTerm.init();
+      NaClTerm.init();
     }
   );
 }

@@ -4,5 +4,5 @@
  * found in the LICENSE file.
  */
 
-NaClTerm.prefix = 'python'
-NaClTerm.nmf = 'python.nmf'
+NaClProcessManager.prefix = 'python'
+NaClProcessManager.nmf = 'python.nmf'
