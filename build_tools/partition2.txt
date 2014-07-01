@@ -154,7 +154,6 @@ builder 1 (total: 11374)
   agg
   cfitsio
   sdl2
-  sdl2-image
   sdl2-gfx
   libtommath
   sdl2-ttf

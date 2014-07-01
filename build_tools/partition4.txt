@@ -72,7 +72,6 @@ builder 1 (total: 5672)
   libwebp
   libhangul
   cfitsio
-  sdl2-image
   netcat
   sdl2-gfx
   apr-util

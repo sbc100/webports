@@ -167,7 +167,6 @@ builder 2 (total: 7793)
   lua5.2
   lua-ppapi
   cfitsio
-  sdl2-image
   box2d
   giflib
   sdl2-gfx
