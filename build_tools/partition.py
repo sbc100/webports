@@ -63,7 +63,7 @@ TOOLCHAINS = ('bionic', 'newlib', 'glibc', 'pnacl')
 verbose = False
 sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
-import naclports
+import naclports.package
 
 
 class Error(Exception):
@@ -77,7 +77,7 @@ def Trace(msg):
 
 def GetBuildOrder(projects):
   rtn = []
-  packages = [naclports.CreatePackage(p) for p in projects]
+  packages = [naclports.package.CreatePackage(p) for p in projects]
   for package in packages:
     for dep in package.DEPENDS:
       for ordered_dep in GetBuildOrder([dep]):
@@ -261,7 +261,7 @@ def LoadCanned(parts):
 
 
 def FixupCanned(partitions):
-  all_projects = [p for p in naclports.PackageIterator()]
+  all_projects = [p for p in naclports.package.PackageIterator()]
   all_names = [p.NAME for p in all_projects if not p.DISABLED]
 
   # Blank the last partition and fill it with anything not in the first two.

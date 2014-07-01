@@ -8,21 +8,15 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import urlparse
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-TOOLS_DIR = os.path.join(NACLPORTS_ROOT, 'build_tools')
 
-sys.path.append(TOOLS_DIR)
-
-import sha1check
-
-MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror'
+GS_BUCKET = 'naclports'
+MIRROR_URL = 'http://storage.googleapis.com/%s/mirror' % GS_BUCKET
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'build')
-ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
 PUBLISH_ROOT = os.path.join(OUT_DIR, 'publish')
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')

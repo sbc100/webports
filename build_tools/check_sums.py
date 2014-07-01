@@ -12,22 +12,23 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 
-import naclports
+import naclports.package
 
 def main(args):
-  global options
-  parser = optparse.OptionParser()
+  parser = optparse.OptionParser(description=__doc__)
   parser.add_option('-v', '--verbose', action='store_true',
                     help='Output extra information.')
   options, _ = parser.parse_args(args)
+  if options.verbose:
+    naclports.Trace.verbose = True
   count = 0
 
-  for package in naclports.PackageIterator():
+  for package in naclports.package.PackageIterator():
     package.Download()
     if not package.Verify(True):
       return 1
 
-    count = count + 1
+    count += 1
 
   print "Verfied checksums for %d packages" % count
   return 0

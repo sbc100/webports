@@ -6,14 +6,20 @@ import os
 import subprocess
 import sys
 import time
+import urlparse
 
 import naclports
 import binary_package
 from naclports import Log, Error, DisabledError
-from naclports import OUT_DIR, TOOLS_DIR, NACLPORTS_ROOT
-from naclports import VALID_KEYS, REQUIRED_KEYS
+from naclports import OUT_DIR, NACLPORTS_ROOT, VALID_KEYS, REQUIRED_KEYS
 
 PACKAGES_ROOT = os.path.join(OUT_DIR, 'packages')
+ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
+TOOLS_DIR = os.path.join(NACLPORTS_ROOT, 'build_tools')
+
+sys.path.append(TOOLS_DIR)
+
+import sha1check
 
 
 def FormatTimeDelta(delta):
@@ -368,7 +374,7 @@ class Package(object):
       raise Error("Error downloading URL: %s" % self.URL)
 
 
-DEFAULT_LOCATIONS = ('', 'ports', 'ports/python_modules')
+DEFAULT_LOCATIONS = ('ports', 'ports/python_modules')
 
 def PackageIterator(folders=None):
   """Iterator which yield a Package object for each
