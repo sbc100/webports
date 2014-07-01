@@ -13,3 +13,13 @@ deps_os = {
       "http://src.chromium.org/native_client/trunk/src/native_client/build"
   },
 }
+
+hooks = [
+  {
+    "name": "clean_pyc",
+    "pattern": ".",
+    "action": [
+        "python", "src/build_tools/clean_pyc.py", "src/build_tools", "src/lib"
+    ],
+  },
+]
