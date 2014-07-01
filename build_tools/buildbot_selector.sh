@@ -180,7 +180,7 @@ fi
 
 Unittests() {
   echo "@@@BUILD_STEP naclports unittests@@@"
-  CMD=${SCRIPT_DIR}/naclports_test.py
+  CMD=${SCRIPT_DIR}/../lib/naclports_test.py
   echo "Running ${CMD}"
   if ! ${PYTHON} ${CMD}; then
     RESULT=1
