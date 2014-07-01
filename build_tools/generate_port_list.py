@@ -9,10 +9,13 @@ import optparse
 import os
 import sys
 
-import naclports
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
+
+sys.path.append(os.path.join(SCRIPT_DIR, 'lib'))
+
+import naclports
+
 SRC_URL = 'https://code.google.com/p/naclports/source/browse/trunk/src'
 
 options = None

@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 import naclports
+import naclports.package
 
 import os
 import shutil
@@ -86,21 +87,21 @@ class TestPackage(unittest.TestCase):
     """test that invalid source directory generates an error."""
     path = '/bad/path'
     with self.assertRaises(naclports.Error) as context:
-      naclports.Package(path)
+      naclports.package.Package(path)
     self.assertEqual(context.exception.message,
                      'Invalid package folder: ' + path)
 
   def testValidSourceDir(self):
     """test that valid source directory is loaded correctly."""
     root = self.CreateSourcePackage('foo')
-    pkg = naclports.Package(root)
+    pkg = naclports.package.Package(root)
     self.assertEqual(pkg.NAME, 'foo')
     self.assertEqual(pkg.root, root)
 
   def testIsBuilt(self):
     """test that IsBuilt() can handle malformed package files."""
     root = self.CreateSourcePackage('foo')
-    pkg = naclports.Package(root)
+    pkg = naclports.package.Package(root)
     invalid_binary = os.path.join(self.tempdir, 'package.tar.bz2')
     with open(invalid_binary, 'w') as f:
       f.write('this is not valid package file\n')

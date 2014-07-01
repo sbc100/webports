@@ -21,9 +21,12 @@ import sys
 import urllib
 import urlparse
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
+sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
+
 import naclports
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MIRROR_GS = 'gs://naclports/mirror'
 
 
@@ -32,8 +35,11 @@ def main(args):
   parser.add_option('-n', '--dry-run', action='store_true',
                     help="Don't actually upload anything")
   parser.add_option('--check', action='store_true',
-                    help="Verify that the mirror is up-to-date.")
+                    help='Verify that the mirror is up-to-date.')
+  parser.add_option('-v', '--verbose', action='store_true',
+                    help='Enable verbose output.')
   options, _ = parser.parse_args(args)
+  naclports.Trace.verbose = options.verbose
 
   ports_root = os.path.dirname(SCRIPT_DIR)
   listing = subprocess.check_output(['gsutil', 'ls', MIRROR_GS])
@@ -41,6 +47,7 @@ def main(args):
   listing = [os.path.basename(l) for l in listing]
 
   def CheckMirror(package):
+    naclports.Trace('Checking %s' % package.NAME)
     basename = package.GetArchiveFilename()
     if not basename:
       return

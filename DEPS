@@ -13,13 +13,3 @@ deps_os = {
       "http://src.chromium.org/native_client/trunk/src/native_client/build"
   },
 }
-
-hooks = [
-  {
-    "name": "bin_scripts",
-    "pattern": ".",
-    "action": [
-        "python", "src/build_tools/make_bin_wrappers.py",
-    ],
-  },
-]

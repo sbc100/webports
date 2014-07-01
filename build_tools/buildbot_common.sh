@@ -44,7 +44,7 @@ BuildPackage() {
   PACKAGE=$1
   shift
   ARGS="-v --ignore-disabled $*"
-  if RunCmd build_tools/naclports.py install ports/$PACKAGE $ARGS; then
+  if RunCmd bin/naclports install ports/$PACKAGE $ARGS; then
     BuildSuccess $PACKAGE
   else
     BuildFailure $PACKAGE
@@ -87,26 +87,25 @@ InstallPackageMultiArch() {
 
 CleanAll() {
   echo "@@@BUILD_STEP clean all@@@"
-  for TC in ${TOOLCHAIN_LIST}; do
-    for ARCH in ${ARCH_LIST}; do
+  for TOOLCHAIN in ${TOOLCHAIN_LIST}; do
+    for NACL_ARCH in ${ARCH_LIST}; do
       # TODO(bradnelson): reduce the duplication here.
       # pnacl only works on pnacl and nowhere else.
-      if [ "${TC}" = "pnacl" -a "${ARCH}" != "pnacl" ]; then
+      if [ "${TOOLCHAIN}" = "pnacl" -a "${NACL_ARCH}" != "pnacl" ]; then
         continue
       fi
-      if [ "${TC}" != "pnacl" -a "${ARCH}" = "pnacl" ]; then
+      if [ "${TOOLCHAIN}" != "pnacl" -a "${NACL_ARCH}" = "pnacl" ]; then
         continue
       fi
       # glibc doesn't work on arm for now.
-      if [ "${TC}" = "glibc" -a "${ARCH}" = "arm" ]; then
+      if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
         continue
       fi
       # bionic only works on arm for now.
-      if [ "${TC}" = "bionic" -a "${ARCH}" != "arm" ]; then
+      if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
         continue
       fi
-      if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
-          build_tools/naclports.py clean --all; then
+      if ! RunCmd bin/naclports clean --all; then
         BuildFailure clean
       fi
     done

@@ -61,6 +61,7 @@ ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 TOOLCHAINS = ('bionic', 'newlib', 'glibc', 'pnacl')
 
 verbose = False
+sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
 import naclports
 

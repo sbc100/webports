@@ -44,7 +44,7 @@ export TOOLCHAIN
 export NACL_GLIBC
 
 all:
-	build_tools/naclports.py --all install $(BUILD_FLAGS)
+	bin/naclports --all install $(BUILD_FLAGS)
 
 sdklibs: $(SDK_LIBS)
 
@@ -55,12 +55,12 @@ run:
 	./httpd.py
 
 clean:
-	build_tools/naclports.py --all clean
+	bin/naclports --all clean
 
 reallyclean: clean
 	rm -rf $(NACL_OUT)
 
 %:
-	build_tools/naclports.py install $* $(BUILD_FLAGS)
+	bin/naclports install $* $(BUILD_FLAGS)
 
 .PHONY: all run clean sdklibs sdklibs_list reallyclean
