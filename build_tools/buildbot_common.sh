@@ -108,8 +108,8 @@ CleanAll() {
         continue
       fi
       if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
-          build_tools/naclports clean --all; then
-        BuildFailure clean
+          bin/naclports clean --all; then
+        TOOLCHAIN=${TC} NACL_ARCH=${ARCH} BuildFailure clean
       fi
     done
   done

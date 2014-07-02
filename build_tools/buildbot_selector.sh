@@ -94,10 +94,10 @@ else
   readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
   if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
     readonly PREFIX=${BASH_REMATCH[1]}
-    if [ ${PREFIX} = "naclports-" ]; then
+    if [ "${PREFIX}" = "naclports-" ]; then
       readonly TRYBOT=1
       readonly NIGHTLY=0
-    elif [ ${PREFIX} = "nightly-" ]; then
+    elif [ "${PREFIX}" = "nightly-" ]; then
       readonly TRYBOT=0
       readonly NIGHTLY=1
     else
