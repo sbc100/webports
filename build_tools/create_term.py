@@ -51,7 +51,7 @@ HTML_TEMPLATE = '''\
 '''
 
 JS_TEMPLATE = '''\
-NaClProcessManager.nmf = '%(nmf)s'
+NaClTerm.nmf = '%(nmf)s'
 '''
 
 FORMAT = '%(filename)s: %(message)s'

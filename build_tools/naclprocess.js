@@ -495,9 +495,9 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
     addParam(argname, args[argname]);
   }
 
-  // If the application has set NaClProcessManager.argv and there were
+  // If the application has set NaClTerm.argv and there were
   // no arguments set in the query parameters then add the default
-  // NaClProcessManager.argv arguments.
+  // NaClTerm.argv arguments.
   // TODO(bradnelson): Consider dropping this method of passing in parameters.
   if (args['arg1'] === undefined && argv) {
     var argn = 0;
@@ -600,14 +600,15 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
   }
 }
 
+/**
+ * Update the dimensions of the terminal on terminal resize.
+ * @param {number} width The width of the terminal.
+ * @param {number} height The height of the terminal.
+ */
 NaClProcessManager.prototype.onTerminalResize = function(width, height) {
   this.tty_width = width;
   this.tty_height = height;
-  if (foreground_process === undefined) {
-    var argv = NaClProcessManager.argv || [];
-    argv = [NaClProcessManager.nmf].concat(argv);
-    this.spawn(NaClProcessManager.nmf, argv, [], '/');
-  } else {
+  if (foreground_process) {
     foreground_process.postMessage({'tty_resize': [ width, height ]});
   }
 }

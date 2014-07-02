@@ -4,8 +4,8 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.nmf = 'bash.nmf';
-NaClProcessManager.argv = ['--init-file', '/mnt/http/bashrc'];
+NaClTerm.nmf = 'bash.nmf';
+NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
 // TODO(bradnelson): Drop this hack once tar extraction first checks relative
 // to the nexe.
 NaClProcessManager.useNaClAltHttp = true;

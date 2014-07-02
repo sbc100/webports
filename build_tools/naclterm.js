@@ -34,6 +34,11 @@ function NaClTerm(argv) {
   this.width = this.io.terminal_.screenSize.width;
 
   this.bufferedOutput = '';
+
+  // Have we started spawning the initial process?
+  this.started = false;
+
+  // Has the initial process finished loading?
   this.loaded = false;
 
   this.print = this.io.print.bind(this.io);
@@ -66,8 +71,7 @@ NaClTerm.ANSI_RESET = '\x1b[0m';
 NaClTerm.prototype.run = function() {
   this.io.onVTKeystroke =
     this.process_manager.onVTKeystroke.bind(this.process_manager);
-  this.io.onTerminalResize =
-    this.process_manager.onTerminalResize.bind(this.process_manager);
+  this.io.onTerminalResize = this.onTerminalResize_.bind(this);
 
   this.print(NaClTerm.ANSI_CYAN);
 }
@@ -224,4 +228,21 @@ NaClTerm.prototype.handleExit_ = function(code, element) {
   if (this.argv.onExit) {
     this.argv.onExit(code);
   }
+}
+
+/**
+ * Handle hterm terminal resize events.
+ * @private
+ * @param {number} width The width of the terminal.
+ * @param {number} height The height of the terminal.
+ */
+NaClTerm.prototype.onTerminalResize_ = function(width, height) {
+  this.process_manager.onTerminalResize(width, height);
+  if (this.started) {
+    return;
+  }
+  var argv = NaClTerm.argv || [];
+  argv = [NaClTerm.nmf].concat(argv);
+  this.process_manager.spawn(NaClTerm.nmf, argv, [], '/');
+  this.started = true;
 }

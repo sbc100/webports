@@ -4,4 +4,4 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.nmf = 'python.nmf'
+NaClTerm.nmf = 'python.nmf'

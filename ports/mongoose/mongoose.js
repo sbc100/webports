@@ -6,7 +6,7 @@
 
 'use strict';
 
-NaClProcessManager.nmf = 'mongoose.nmf'
+NaClTerm.nmf = 'mongoose.nmf'
 
 lib.rtdep('lib.f')
 

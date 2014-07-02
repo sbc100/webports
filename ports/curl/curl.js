@@ -4,4 +4,4 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.nmf = 'curl.nmf'
+NaClTerm.nmf = 'curl.nmf'

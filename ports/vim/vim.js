@@ -6,7 +6,7 @@
 
 'use strict';
 
-NaClProcessManager.nmf = 'vim.nmf'
+NaClTerm.nmf = 'vim.nmf'
 
 function log(message) {
   console.log(message)
@@ -30,7 +30,7 @@ function runVimWithFile(file) {
         // Note: write() can take a File or Blob object.
         fileWriter.write(file);
         log('File written to temporary filesystem\n');
-        NaClProcessManager.argv = ['/tmp/' + file.name];
+        NaClTerm.argv = ['/tmp/' + file.name];
         runVim();
       }, fsErrorHandler);
     }, fsErrorHandler);

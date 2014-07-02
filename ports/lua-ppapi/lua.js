@@ -4,7 +4,7 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.nmf = 'lua.nmf'
+NaClTerm.nmf = 'lua.nmf'
 
 function log(message) {
   document.getElementById('log').textContent = message;
