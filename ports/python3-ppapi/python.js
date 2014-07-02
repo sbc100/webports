@@ -4,5 +4,4 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.prefix = 'python'
 NaClProcessManager.nmf = 'python.nmf'

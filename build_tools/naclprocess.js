@@ -33,6 +33,12 @@ function NaClProcessManager(print, onEnd) {
 };
 
 /**
+ * The TTY prefix for communicating with NaCl processes.
+ * @const
+ */
+NaClProcessManager.prefix = 'nacl_process';
+
+/**
  * The "no hang" flag for waitpid().
  * @type {number}
  */
@@ -262,7 +268,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
       }
       nmf = executable + '.nmf';
     }
-    var pid = this.spawn(nmf, args, envs, cwd, executable, e.srcElement);
+    var pid = this.spawn(nmf, args, envs, cwd, e.srcElement);
     var reply = {};
     reply[e.data['id']] = {
       pid: pid
@@ -385,14 +391,12 @@ NaClProcessManager.prototype.exit = function(code, element) {
  *     process can access. Each entry in the array should be of the format
  *     "VARIABLE_NAME=value".
  * @param {string} cwd The current working directory.
- * @param {string} command_name The name of the process to be spawned.
  * @param {HTMLObjectElement} [parent=null] The DOM object that corresponds to
  *     the process that initiated the spawn. Set to null if there is no such
  *     process.
  * @returns {number} PID of the spawned process, or -1 if there was an error.
  */
-NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd,
-                                    command_name, parent) {
+NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
   if (!parent) parent = null;
 
   var mimetype = 'application/x-nacl';
@@ -412,7 +416,7 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd,
   foreground_process.data = nmf;
   foreground_process.type = mimetype;
   foreground_process.parent = parent;
-  foreground_process.command_name = command_name;
+  foreground_process.command_name = argv[0];
 
   for (var evt in this.listeners) {
     if (this.listeners.hasOwnProperty(evt)) {
@@ -602,8 +606,7 @@ NaClProcessManager.prototype.onTerminalResize = function(width, height) {
   if (foreground_process === undefined) {
     var argv = NaClProcessManager.argv || [];
     argv = [NaClProcessManager.nmf].concat(argv);
-    this.spawn(NaClProcessManager.nmf, argv, [], '/',
-               NaClProcessManager.prefix);
+    this.spawn(NaClProcessManager.nmf, argv, [], '/');
   } else {
     foreground_process.postMessage({'tty_resize': [ width, height ]});
   }

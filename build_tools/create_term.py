@@ -51,7 +51,6 @@ HTML_TEMPLATE = '''\
 '''
 
 JS_TEMPLATE = '''\
-NaClProcessManager.prefix = '%(module_name)s'
 NaClProcessManager.nmf = '%(nmf)s'
 '''
 

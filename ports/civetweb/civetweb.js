@@ -6,7 +6,6 @@
 
 'use strict';
 
-NaClProcessManager.prefix = 'civetweb'
 NaClProcessManager.nmf = 'civetweb.nmf'
 
 lib.rtdep('lib.f')

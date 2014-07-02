@@ -4,7 +4,6 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.prefix = 'lua'
 NaClProcessManager.nmf = 'lua.nmf'
 
 function log(message) {

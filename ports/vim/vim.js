@@ -6,7 +6,6 @@
 
 'use strict';
 
-NaClProcessManager.prefix = 'vim'
 NaClProcessManager.nmf = 'vim.nmf'
 
 function log(message) {

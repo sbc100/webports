@@ -4,7 +4,6 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.prefix = 'bash';
 NaClProcessManager.nmf = 'bash.nmf';
 NaClProcessManager.argv = ['--init-file', '/mnt/http/bashrc'];
 // TODO(bradnelson): Drop this hack once tar extraction first checks relative

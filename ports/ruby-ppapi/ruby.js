@@ -4,7 +4,6 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.prefix = 'ruby'
 NaClProcessManager.nmf = 'ruby.nmf'
 
 /*

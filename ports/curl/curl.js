@@ -4,5 +4,4 @@
  * found in the LICENSE file.
  */
 
-NaClProcessManager.prefix = 'curl'
 NaClProcessManager.nmf = 'curl.nmf'
