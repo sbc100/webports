@@ -65,12 +65,17 @@ NaClTerm.ANSI_CYAN = '\x1b[36m';
  */
 NaClTerm.ANSI_RESET = '\x1b[0m';
 
+/*
+ * Character code for Control+C in the terminal.
+ * @type {number}
+ */
+NaClTerm.CONTROL_C = 3;
+
 /**
  * Add the appropriate hooks to HTerm to start the session.
  */
 NaClTerm.prototype.run = function() {
-  this.io.onVTKeystroke =
-    this.process_manager.onVTKeystroke.bind(this.process_manager);
+  this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);
   this.io.onTerminalResize = this.onTerminalResize_.bind(this);
 
   this.print(NaClTerm.ANSI_CYAN);
@@ -245,4 +250,19 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
   argv = [NaClTerm.nmf].concat(argv);
   this.process_manager.spawn(NaClTerm.nmf, argv, [], '/');
   this.started = true;
+}
+
+/**
+ * Handle hterm keystroke events.
+ * @private
+ * @param {string} str The characters sent by hterm.
+ */
+NaClTerm.prototype.onVTKeystroke_ = function(str) {
+  if (str.charCodeAt(0) === NaClTerm.CONTROL_C) {
+    if (this.process_manager.sigint()) {
+      this.print('\n');
+    }
+  } else {
+    this.process_manager.sendStdinForeground(str);
+  }
 }

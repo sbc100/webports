@@ -57,10 +57,16 @@ NaClProcessManager.ENOENT = 2;
 NaClProcessManager.ECHILD= 10;
 
 /*
- * Character code for Control+C in the terminal.
+ * Exit code when a process has an error.
  * @type {number}
  */
-NaClProcessManager.CONTROL_C = 3;
+NaClProcessManager.EX_NO_EXEC = 126;
+
+/*
+ * Exit code when a process is ended with SIGKILL.
+ * @type {number}
+ */
+NaClProcessManager.EXIT_CODE_KILL = 128 + 9;
 
 /*
  * Exit code when a process has an error.
@@ -613,24 +619,34 @@ NaClProcessManager.prototype.onTerminalResize = function(width, height) {
   }
 }
 
-NaClProcessManager.prototype.onVTKeystroke = function(str) {
+/**
+ * Handle a SIGINT signal.
+ * @returns {boolean} Whether or not the interrupt succeeded.
+ */
+NaClProcessManager.prototype.sigint = function() {
   // TODO(bradnelson): Change this once we support signals.
   // Abort on Control+C, but don't quit bash.
-  if (str.charCodeAt(0) === NaClProcessManager.CONTROL_C &&
-      foreground_process.parent !== null) {
+  if (!this.isRootProcess(foreground_process)) {
     // Only exit if the appropriate environment variable is set.
     var query = 'param[name="' + NaClProcessManager.ENV_ABORT + '"]';
     var enabledEnv = foreground_process.querySelector(query);
     if (enabledEnv && enabledEnv.value === NaClProcessManager.ENV_ABORT_VALUE) {
       this.exit(NaClProcessManager.EXIT_CODE_KILL, foreground_process);
-      this.print('\n');
+      return true;
     }
-  } else {
-    var message = {};
-    message[NaClProcessManager.prefix] = str;
-    foreground_process.postMessage(message);
   }
-}
+  return false;
+};
+
+/**
+ * Send standard input to the foreground process.
+ * @param {string} str The string to be sent to as stdin.
+ */
+NaClProcessManager.prototype.sendStdinForeground = function(str) {
+  var message = {};
+  message[NaClProcessManager.prefix] = str;
+  foreground_process.postMessage(message);
+};
 
 /**
  * This creates a popup that runs a NaCl process inside.
