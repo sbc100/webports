@@ -1,5 +1,5 @@
 diff --git a/configure b/configure
-index ec1aab7..d8e9ea7 100755
+index ec1aab7..07ed9fc 100755
 --- a/configure
 +++ b/configure
 @@ -33768,7 +33768,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
@@ -25,6 +25,15 @@ index ec1aab7..d8e9ea7 100755
      -Wnonnull \
      -Wnormalized=nfc \
      -Wold-style-declaration \
+@@ -33838,8 +33834,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+     -Wstrict-prototypes \
+     -Wsuggest-attribute=const \
+     -Wsuggest-attribute=format \
+-    -Wsuggest-attribute=noreturn \
+-    -Wsuggest-attribute=pure \
+     -Wswitch \
+     -Wswitch-default \
+     -Wsync-nand \
 diff --git a/lib/creat-safer.c b/lib/creat-safer.c
 index 984857b..54bb50a 100644
 --- a/lib/creat-safer.c
@@ -150,7 +159,7 @@ index c5bb012..fd55ca5 100644
    --set->nelem;
    for (; idx < set->nelem; idx++)
 diff --git a/src/Makefile.in b/src/Makefile.in
-index 2cc8955..3b0f7f5 100644
+index 2cc8955..041828b 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
 @@ -1254,7 +1254,7 @@ clean-binPROGRAMS:
