@@ -21,7 +21,10 @@
 function NaClProcessManager(onEnd) {
   this.onEnd = onEnd || function() {};
 
-  this.listeners = {};
+  this.onError = function() {};
+  this.onStdout = function() {};
+  this.onRootProgress = function() {};
+  this.onRootLoad = function() {};
 
   // TODO(bradnelson): Rename in line with style guide once we have tests.
   // The process which gets the input from the user.
@@ -176,21 +179,62 @@ NaClProcessManager.EMBED_WIDTH_DEFAULT = '100%';
 NaClProcessManager.EMBED_HEIGHT_DEFAULT  = '50%';
 
 /**
- * Handles a NaCl event.
- * @callback eventCallback
- * @param {object} e An object that contains information about the event.
+ * Handles a stdout event.
+ * @callback stdoutCallback
+ * @param {string} msg The string sent to stdout.
  */
 
 /**
- * Listen for events emitted from the spawned processes.
- * @param {string} evt The event to be waited for.
- * @param {eventCallback} callback The callback to be called on the event.
+ * Listen for stdout from the spawned processes.
+ * @param {stdoutCallback} callback The callback to be called on a stdout write.
  */
-NaClProcessManager.prototype.addEventListener = function(evt, callback) {
-  if (!this.listeners[evt]) {
-    this.listeners[evt] = [];
-  }
-  this.listeners[evt].push(callback);
+NaClProcessManager.prototype.setStdoutListener = function(callback) {
+  this.onStdout = callback;
+}
+
+/**
+ * Handles an error event.
+ * @callback errorCallback
+ * @param {string} cmd The name of the process with the error.
+ * @param {string} err The error message.
+ */
+
+/**
+ * Listen for errors from the spawned processes.
+ * @param {errorCallback} callback The callback to be called on error.
+ */
+NaClProcessManager.prototype.setErrorListener = function(callback) {
+  this.onError = callback;
+}
+
+/**
+ * Handles a progress event from the root process.
+ * @callback rootProgressCallback
+ * @param {string} url The URL that is being loaded.
+ * @param {boolean} lengthComputable Is our progress quantitatively measurable?
+ * @param {number} loaded The number of bytes that have been loaded.
+ * @param {number} total The total number of bytes to be loaded.
+ */
+
+/**
+ * Listen for a progress event from the root process.
+ * @param {rootProgressCallback} callback The callback to be called on progress.
+ */
+NaClProcessManager.prototype.setRootProgressListener = function(callback) {
+  this.onRootProgress = callback;
+}
+
+/**
+ * Handles a load event from the root process.
+ * @callback rootLoadCallback
+ */
+
+/**
+ * Listen for a load event from the root process.
+ * @param {rootLoadCallback} callback The callback to be called on load.
+ */
+NaClProcessManager.prototype.setRootLoadListener = function(callback) {
+  this.onRootLoad = callback;
 }
 
 /**
@@ -285,11 +329,37 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
       };
       e.srcElement.postMessage(reply);
     });
+  } else if (e.data.indexOf(NaClProcessManager.prefix) === 0) {
+    var msg = e.data.substring(NaClProcessManager.prefix.length);
+    this.onStdout(msg);
   } else if (e.data.indexOf('exited') == 0) {
     var exitCode = parseInt(e.data.split(':', 2)[1]);
     if (isNaN(exitCode))
       exitCode = 0;
     this.exit(exitCode, e.srcElement);
+  } else {
+    console.log('unexpected message: ' + e.data);
+    return;
+  }
+}
+
+/**
+ * Handle progress event from NaCl.
+ * @private
+ */
+NaClProcessManager.prototype.handleProgress_ = function(e) {
+  if (this.isRootProcess(e.srcElement)) {
+    this.onRootProgress(e.url, e.lengthComputable, e.loaded, e.total);
+  }
+}
+
+/**
+ * Handle load event from NaCl.
+ * @private
+ */
+NaClProcessManager.prototype.handleLoad_ = function(e) {
+  if (this.isRootProcess(e.srcElement)) {
+    this.onRootLoad();
   }
 }
 
@@ -306,6 +376,7 @@ NaClProcessManager.prototype.handleLoadAbort_ = function(e) {
  * @private
  */
 NaClProcessManager.prototype.handleLoadError_ = function(e) {
+  this.onError(e.srcElement.command_name, e.srcElement.lastError);
   this.exit(NaClProcessManager.EX_NO_EXEC, e.srcElement);
 }
 
@@ -323,7 +394,7 @@ NaClProcessManager.prototype.handleCrash_ = function(e) {
  * @param {HTMLObjectElement} element The HTML element of the exited process.
  */
 NaClProcessManager.prototype.exit = function(code, element) {
-  if (!element.parent) {
+  if (this.isRootProcess(element)) {
     this.onEnd(code, element);
     return;
   }
@@ -420,20 +491,12 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
   fg.parent = parent;
   fg.command_name = argv[0];
 
-  for (var evt in this.listeners) {
-    if (this.listeners.hasOwnProperty(evt)) {
-      for (var i = 0; i < this.listeners[evt].length; i++) {
-        fg.addEventListener(evt, this.listeners[evt][i]);
-      }
-    }
-  }
-  fg.addEventListener(
-      'abort', this.handleLoadAbort_.bind(this));
-  fg.addEventListener(
-      'message', this.handleMessage_.bind(this));
-  fg.addEventListener(
-      'error', this.handleLoadError_.bind(this));
+  fg.addEventListener('abort', this.handleLoadAbort_.bind(this));
   fg.addEventListener('crash', this.handleCrash_.bind(this));
+  fg.addEventListener('error', this.handleLoadError_.bind(this));
+  fg.addEventListener('load', this.handleLoad_.bind(this));
+  fg.addEventListener('message', this.handleMessage_.bind(this));
+  fg.addEventListener('progress', this.handleProgress_.bind(this));
 
   this.processes[this.pid] = fg;
 
