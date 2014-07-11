@@ -44,7 +44,7 @@ function NaClTerm(argv) {
   this.print = this.io.print.bind(this.io);
 
   var mgr = this.process_manager = new NaClProcessManager(
-      this.print, this.handleExit_.bind(this));
+      this.handleExit_.bind(this));
 
   mgr.addEventListener('abort', this.handleLoadAbort_.bind(this));
   mgr.addEventListener('error', this.handleLoadError_.bind(this));
@@ -248,7 +248,14 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
   }
   var argv = NaClTerm.argv || [];
   argv = [NaClTerm.nmf].concat(argv);
-  this.process_manager.spawn(NaClTerm.nmf, argv, [], '/');
+
+  try {
+    this.print('Loading NaCl module.\n');
+    this.process_manager.spawn(NaClTerm.nmf, argv, [], '/');
+  } catch (e) {
+    this.print(e.message);
+  }
+
   this.started = true;
 }
 

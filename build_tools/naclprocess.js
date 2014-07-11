@@ -7,12 +7,6 @@
 'use strict';
 
 /**
- * Prints a string to the terminal.
- * @callback printCallback
- * @param {string} message The string to be printed.
- */
-
-/**
  * This function is called when the main process (usually the shell) exits.
  * @callback mainEndCallback
  * @param {number} code The exit code of the process.
@@ -22,11 +16,9 @@
  * NaClProcessManager provides a framework for NaCl executables to run within a
  * web-based terminal.
  *
- * @param {printCallback} print A callback that prints to the terminal.
  * @param {mainEndCallback} onEnd A callback called when the main process exits.
  */
-function NaClProcessManager(print, onEnd) {
-  this.print = print || function() {};
+function NaClProcessManager(onEnd) {
   this.onEnd = onEnd || function() {};
 
   this.listeners = {};
@@ -408,10 +400,9 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
   var mimetype = 'application/x-nacl';
   if (navigator.mimeTypes[mimetype] === undefined) {
     if (mimetype.indexOf('pnacl') != -1)
-      this.print('Browser does not support PNaCl or PNaCl is disabled\n');
+      throw new Error('Browser does not support PNaCl or PNaCl is disabled\n');
     else
-      this.print('Browser does not support NaCl or NaCl is disabled\n');
-    return -1;
+      throw new Error('Browser does not support NaCl or NaCl is disabled\n');
   }
 
   ++pid;
@@ -513,10 +504,6 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
       argn = argn + 1
     })
   }
-
-  // We show this message only for the first process.
-  if (pid == 1)
-    this.print('Loading NaCl module.\n');
 
   if (params[NaClProcessManager.ENV_SPAWN_MODE] ===
       NaClProcessManager.ENV_SPAWN_POPUP_VALUE) {
