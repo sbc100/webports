@@ -1,58 +1,3 @@
-diff --git a/ncurses/tinfo/lib_kernel.c b/ncurses/tinfo/lib_kernel.c
-index 37f7084..3a624a2 100644
---- a/ncurses/tinfo/lib_kernel.c
-+++ b/ncurses/tinfo/lib_kernel.c
-@@ -57,7 +57,7 @@ _nc_vdisable(void)
- #if defined(_POSIX_VDISABLE) && HAVE_UNISTD_H
-     value = _POSIX_VDISABLE;
- #endif
--#if defined(_PC_VDISABLE)
-+#if defined(_PC_VDISABLE) && !defined(__native_client__)
-     if (value == -1) {
- 	value = (int) fpathconf(0, _PC_VDISABLE);
- 	if (value == -1) {
-diff --git a/ncurses/tinfo/lib_baudrate.c b/ncurses/tinfo/lib_baudrate.c
-index 9302f02..ce8c1f6 100644
---- a/ncurses/tinfo/lib_baudrate.c
-+++ b/ncurses/tinfo/lib_baudrate.c
-@@ -219,11 +219,17 @@ NCURSES_SP_NAME(baudrate) (NCURSES_SP_DCL0)
- 
-     if (IsValidTIScreen(SP_PARM)) {
- #ifdef USE_OLD_TTY
--	result = cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
--	ospeed = _nc_ospeed(result);
-+#if defined(__native_client__)
-+       ospeed = 0;
-+#else
-+	result = cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
-+	ospeed = _nc_ospeed(result);
-+#endif
- #else /* !USE_OLD_TTY */
- #ifdef TERMIOS
--	ospeed = (NCURSES_OSPEED) cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
-+#if !defined(__native_client__)
-+	ospeed = (NCURSES_OSPEED) cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
-+#endif
- #else
- 	ospeed = (NCURSES_OSPEED) TerminalOf(SP_PARM)->Nttyb.sg_ospeed;
- #endif
-diff --git a/progs/tset.c b/progs/tset.c
-index 084e41d..205b88a 100644
---- a/progs/tset.c
-+++ b/progs/tset.c
-@@ -1260,7 +1260,11 @@ main(int argc, char **argv)
-     can_restore = TRUE;
-     original = oldmode = mode;
- #ifdef TERMIOS
--    ospeed = (NCURSES_OSPEED) cfgetospeed(&mode);
-+#if defined(__native_client__)
-+    ospeed = 0;
-+#else
-+    ospeed = (NCURSES_OSPEED) cfgetospeed(&mode);
-+#endif
- #else
-     ospeed = (NCURSES_OSPEED) mode.sg_ospeed;
- #endif
 diff --git a/configure b/configure
 index 639b790..0411754 100755
 --- a/configure
@@ -75,6 +20,63 @@ index 639b790..0411754 100755
  		if test "$DFT_LWR_MODEL" = "shared" ; then
  			LOCAL_LDFLAGS="${LD_RPATH_OPT}\$(LOCAL_LIBDIR)"
  			LOCAL_LDFLAGS2="$LOCAL_LDFLAGS"
+diff --git a/form/fty_num.c b/form/fty_num.c
+index 4bd7132..6d7f587 100644
+--- a/form/fty_num.c
++++ b/form/fty_num.c
+@@ -40,7 +40,7 @@ MODULE_ID("$Id: fty_num.c,v 1.28 2010/01/23 21:14:36 tom Exp $")
+ #include <locale.h>
+ #endif
+ 
+-#if HAVE_LOCALE_H
++#if HAVE_LOCALE_H && (!defined(__native_client__) || !defined(__BIONIC__))
+ #define isDecimalPoint(c) ((c) == ((L && L->decimal_point) ? *(L->decimal_point) : '.'))
+ #else
+ #define isDecimalPoint(c) ((c) == '.')
+@@ -96,7 +96,7 @@ Generic_This_Type(void *arg)
+ 	  argn->low = args->low;
+ 	  argn->high = args->high;
+ 
+-#if HAVE_LOCALE_H
++#if HAVE_LOCALE_H && (!defined(__native_client__) || !defined(__BIONIC__))
+ 	  argn->L = localeconv();
+ #else
+ 	  argn->L = NULL;
+diff --git a/ncurses/tinfo/lib_baudrate.c b/ncurses/tinfo/lib_baudrate.c
+index 9302f02..036b177 100644
+--- a/ncurses/tinfo/lib_baudrate.c
++++ b/ncurses/tinfo/lib_baudrate.c
+@@ -219,11 +219,17 @@ NCURSES_SP_NAME(baudrate) (NCURSES_SP_DCL0)
+ 
+     if (IsValidTIScreen(SP_PARM)) {
+ #ifdef USE_OLD_TTY
++#if defined(__native_client__)
++       ospeed = 0;
++#else
+ 	result = cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
+ 	ospeed = _nc_ospeed(result);
++#endif
+ #else /* !USE_OLD_TTY */
+ #ifdef TERMIOS
++#if !defined(__native_client__)
+ 	ospeed = (NCURSES_OSPEED) cfgetospeed(&(TerminalOf(SP_PARM)->Nttyb));
++#endif
+ #else
+ 	ospeed = (NCURSES_OSPEED) TerminalOf(SP_PARM)->Nttyb.sg_ospeed;
+ #endif
+diff --git a/ncurses/tinfo/lib_kernel.c b/ncurses/tinfo/lib_kernel.c
+index 37f7084..3a624a2 100644
+--- a/ncurses/tinfo/lib_kernel.c
++++ b/ncurses/tinfo/lib_kernel.c
+@@ -57,7 +57,7 @@ _nc_vdisable(void)
+ #if defined(_POSIX_VDISABLE) && HAVE_UNISTD_H
+     value = _POSIX_VDISABLE;
+ #endif
+-#if defined(_PC_VDISABLE)
++#if defined(_PC_VDISABLE) && !defined(__native_client__)
+     if (value == -1) {
+ 	value = (int) fpathconf(0, _PC_VDISABLE);
+ 	if (value == -1) {
 diff --git a/ncurses/tty/lib_twait.c b/ncurses/tty/lib_twait.c
 index 329ec29..0879823 100644
 --- a/ncurses/tty/lib_twait.c
@@ -91,3 +93,48 @@ index 329ec29..0879823 100644
  #endif
  #undef CUR
  
+diff --git a/progs/tset.c b/progs/tset.c
+index 084e41d..9f31ab3 100644
+--- a/progs/tset.c
++++ b/progs/tset.c
+@@ -583,7 +583,11 @@ get_termcap_entry(char *userarg)
+     if ((ttype = getenv("TERM")) != 0)
+ 	goto map;
+ 
++#if defined(__native_client__) && defined(__BIONIC__)
++    {
++#else
+     if ((ttypath = ttyname(STDERR_FILENO)) != 0) {
++#endif
+ 	p = _nc_basename(ttypath);
+ #if HAVE_GETTTYNAM
+ 	/*
+@@ -1260,7 +1264,11 @@ main(int argc, char **argv)
+     can_restore = TRUE;
+     original = oldmode = mode;
+ #ifdef TERMIOS
++#if defined(__native_client__)
++    ospeed = 0;
++#else
+     ospeed = (NCURSES_OSPEED) cfgetospeed(&mode);
++#endif
+ #else
+     ospeed = (NCURSES_OSPEED) mode.sg_ospeed;
+ #endif
+diff --git a/test/bs.c b/test/bs.c
+index ee7f227..135b7a5 100644
+--- a/test/bs.c
++++ b/test/bs.c
+@@ -220,10 +220,12 @@ intro(void)
+ 
+     CATCHALL(uninitgame);
+ 
++#if !defined(__native_client__) || !defined(__BIONIC__)
+     if ((tmpname = getlogin()) != 0) {
+ 	(void) strcpy(name, tmpname);
+ 	name[0] = (char) toupper(UChar(name[0]));
+     } else
++#endif
+ 	(void) strcpy(name, dftname);
+ 
+     (void) initscr();
