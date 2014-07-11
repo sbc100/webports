@@ -22,6 +22,22 @@ function NaClProcessManager(onEnd) {
   this.onEnd = onEnd || function() {};
 
   this.listeners = {};
+
+  // TODO(bradnelson): Rename in line with style guide once we have tests.
+  // The process which gets the input from the user.
+  this.foreground_process = null;
+
+  // Process information keyed by PID. The value is an embed DOM object
+  // if the process is running. Once the process has finished, the value
+  // will be the exit code.
+  this.processes = {};
+
+  // Waiter processes keyed by the PID of the waited process. The waiter
+  // is represented by a hash like
+  // { reply: a callback to call to report a process exit, options: the
+  //     options specfied for the wait (such as WNOHANG) }
+  this.waiters = {};
+  this.pid = 0;
 };
 
 /**
@@ -158,20 +174,6 @@ NaClProcessManager.EMBED_WIDTH_DEFAULT = '100%';
  * @const
  */
 NaClProcessManager.EMBED_HEIGHT_DEFAULT  = '50%';
-
-// TODO(bradnelson): Rename in line with style guide once we have tests.
-// The process which gets the input from the user.
-var foreground_process;
-// Process information keyed by PID. The value is an embed DOM object
-// if the process is running. Once the process has finished, the value
-// will be the exit code.
-var processes = {};
-
-// Waiter processes keyed by the PID of the waited process. The waiter
-// is represented by a hash like
-// { element: embed DOM object, wait_req_id: the request ID string }
-var waiters = {};
-var pid = 0;
 
 /**
  * Handles a NaCl event.
@@ -334,25 +336,25 @@ NaClProcessManager.prototype.exit = function(code, element) {
       waiter = null;
     }
   }
-  if (waiters[pid] || waiters[-1]) {
-    if (waiters[pid]) {
-      wakeWaiters(waiters[pid]);
-      delete waiters[pid];
+  if (this.waiters[pid] || this.waiters[-1]) {
+    if (this.waiters[pid]) {
+      wakeWaiters(this.waiters[pid]);
+      delete this.waiters[pid];
     }
-    if (waiters[-1]) {
-      wakeWaiters(waiters[-1]);
-      delete waiters[-1];
+    if (this.waiters[-1]) {
+      wakeWaiters(this.waiters[-1]);
+      delete this.waiters[-1];
     }
 
-    delete processes[pid];
+    delete this.processes[pid];
   } else {
-    processes[pid] = code;
+    this.processes[pid] = code;
   }
 
   // Mark as terminated.
   element.pid = -1;
   var next_foreground_process = null;
-  if (foreground_process == element) {
+  if (this.foreground_process == element) {
     next_foreground_process = element.parent;
     // When the parent has already finished, give the control to the
     // grand parent.
@@ -370,7 +372,7 @@ NaClProcessManager.prototype.exit = function(code, element) {
   }
 
   if (next_foreground_process)
-    foreground_process = next_foreground_process;
+    this.foreground_process = next_foreground_process;
 
   return;
 };
@@ -405,32 +407,35 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
       throw new Error('Browser does not support NaCl or NaCl is disabled\n');
   }
 
-  ++pid;
-  foreground_process = document.createElement('object');
-  foreground_process.pid = pid;
-  foreground_process.width = 0;
-  foreground_process.height = 0;
-  foreground_process.data = nmf;
-  foreground_process.type = mimetype;
-  foreground_process.parent = parent;
-  foreground_process.command_name = argv[0];
+  ++this.pid;
+
+  var fg = document.createElement('object');
+  this.foreground_process = fg;
+
+  fg.pid = this.pid;
+  fg.width = 0;
+  fg.height = 0;
+  fg.data = nmf;
+  fg.type = mimetype;
+  fg.parent = parent;
+  fg.command_name = argv[0];
 
   for (var evt in this.listeners) {
     if (this.listeners.hasOwnProperty(evt)) {
       for (var i = 0; i < this.listeners[evt].length; i++) {
-        foreground_process.addEventListener(evt, this.listeners[evt][i]);
+        fg.addEventListener(evt, this.listeners[evt][i]);
       }
     }
   }
-  foreground_process.addEventListener(
+  fg.addEventListener(
       'abort', this.handleLoadAbort_.bind(this));
-  foreground_process.addEventListener(
+  fg.addEventListener(
       'message', this.handleMessage_.bind(this));
-  foreground_process.addEventListener(
+  fg.addEventListener(
       'error', this.handleLoadError_.bind(this));
-  foreground_process.addEventListener('crash', this.handleCrash_.bind(this));
+  fg.addEventListener('crash', this.handleCrash_.bind(this));
 
-  processes[pid] = foreground_process;
+  this.processes[this.pid] = fg;
 
   var params = {};
   for (var i = 0; i < envs.length; i++) {
@@ -467,7 +472,7 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
     var param = document.createElement('param');
     param.name = name;
     param.value = value;
-    foreground_process.appendChild(param);
+    fg.appendChild(param);
   }
 
   for (var key in params) {
@@ -509,7 +514,7 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
       NaClProcessManager.ENV_SPAWN_POPUP_VALUE) {
     var self = this;
     var popup = new GraphicalPopup(
-      foreground_process,
+      fg,
       parseInt(params[NaClProcessManager.ENV_POPUP_WIDTH] ||
                NaClProcessManager.POPUP_WIDTH_DEFAULT),
       parseInt(params[NaClProcessManager.ENV_POPUP_HEIGHT] ||
@@ -521,13 +526,13 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
       GraphicalPopup.focusCurrentWindow();
     });
 
-    foreground_process.popup = popup;
+    fg.popup = popup;
 
     popup.create();
   } else {
     if (params[NaClProcessManager.ENV_SPAWN_MODE] ===
                NaClProcessManager.ENV_SPAWN_EMBED_VALUE) {
-      var style = foreground_process.style;
+      var style = fg.style;
       style.position = 'absolute';
       style.top = 0;
       style.left = 0;
@@ -536,9 +541,9 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
       style.height = params[NaClProcessManager.ENV_EMBED_HEIGHT] ||
         NaClProcessManager.EMBED_HEIGHT_DEFAULT;
     }
-    document.body.appendChild(foreground_process);
+    document.body.appendChild(fg);
   }
-  return pid;
+  return this.pid;
 }
 
 /**
@@ -558,9 +563,10 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
  *     exited.
  */
 NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
+  var self = this;
   var finishedProcess = null;
-  Object.keys(processes).some(function(pid) {
-    if (typeof processes[pid] == 'number') {
+  Object.keys(this.processes).some(function(pid) {
+    if (typeof self.processes[pid] == 'number') {
       finishedProcess = pid;
       return true;
     }
@@ -568,25 +574,25 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
   });
 
   if (pid == -1 && finishedProcess !== null) {
-    reply(parseInt(finishedProcess), processes[finishedProcess]);
-    delete processes[finishedProcess];
-  } else if (pid >= 0 && !processes[pid]) {
+    reply(parseInt(finishedProcess), this.processes[finishedProcess]);
+    delete this.processes[finishedProcess];
+  } else if (pid >= 0 && !this.processes[pid]) {
     // The process does not exist.
     reply(-NaClProcessManager.ECHILD, 0);
-  } else if (typeof processes[pid] == 'number') {
+  } else if (typeof this.processes[pid] == 'number') {
     // The process has already finished.
-    reply(pid, processes[pid]);
-    delete processes[pid];
+    reply(pid, this.processes[pid]);
+    delete this.processes[pid];
   } else {
     // Add the current process to the waiter list.
     if (options & this.WNOHANG != 0) {
       reply(0, 0);
       return;
     }
-    if (!waiters[pid]) {
-      waiters[pid] = [];
+    if (!this.waiters[pid]) {
+      this.waiters[pid] = [];
     }
-    waiters[pid].push({
+    this.waiters[pid].push({
       reply: reply,
       options: options
     });
@@ -601,8 +607,8 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
 NaClProcessManager.prototype.onTerminalResize = function(width, height) {
   this.tty_width = width;
   this.tty_height = height;
-  if (foreground_process) {
-    foreground_process.postMessage({'tty_resize': [ width, height ]});
+  if (this.foreground_process) {
+    this.foreground_process.postMessage({'tty_resize': [ width, height ]});
   }
 }
 
@@ -613,12 +619,12 @@ NaClProcessManager.prototype.onTerminalResize = function(width, height) {
 NaClProcessManager.prototype.sigint = function() {
   // TODO(bradnelson): Change this once we support signals.
   // Abort on Control+C, but don't quit bash.
-  if (!this.isRootProcess(foreground_process)) {
+  if (!this.isRootProcess(this.foreground_process)) {
     // Only exit if the appropriate environment variable is set.
     var query = 'param[name="' + NaClProcessManager.ENV_ABORT + '"]';
-    var enabledEnv = foreground_process.querySelector(query);
+    var enabledEnv = this.foreground_process.querySelector(query);
     if (enabledEnv && enabledEnv.value === NaClProcessManager.ENV_ABORT_VALUE) {
-      this.exit(NaClProcessManager.EXIT_CODE_KILL, foreground_process);
+      this.exit(NaClProcessManager.EXIT_CODE_KILL, this.foreground_process);
       return true;
     }
   }
@@ -632,7 +638,7 @@ NaClProcessManager.prototype.sigint = function() {
 NaClProcessManager.prototype.sendStdinForeground = function(str) {
   var message = {};
   message[NaClProcessManager.prefix] = str;
-  foreground_process.postMessage(message);
+  this.foreground_process.postMessage(message);
 };
 
 /**
