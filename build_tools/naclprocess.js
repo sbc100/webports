@@ -436,9 +436,6 @@ NaClProcessManager.prototype.exit = function(code, element) {
  * This spawns a new NaCl process in the current window by creating an HTML
  * embed element.
  *
- * When creating the initial process, we delay this until the first terminal
- * resize event so that we start with the correct size.
- *
  * @param {string} nmf The path to the NaCl NMF file.
  * @param {Array.<string>} argv The command-line arguments to be given to the
  *     spawned process.

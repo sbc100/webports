@@ -213,16 +213,13 @@ NaClTerm.prototype.handleExit_ = function(pid, status) {
 }
 
 /**
- * Handle hterm terminal resize events.
+ * Spawn the root process (usually bash).
  * @private
- * @param {number} width The width of the terminal.
- * @param {number} height The height of the terminal.
+ *
+ * We delay this call until the first terminal resize event so that we start
+ * with the correct size.
  */
-NaClTerm.prototype.onTerminalResize_ = function(width, height) {
-  this.processManager.onTerminalResize(width, height);
-  if (this.started) {
-    return;
-  }
+NaClTerm.prototype.spawnRootProcess_ = function() {
   var argv = NaClTerm.argv || [];
   argv = [NaClTerm.nmf].concat(argv);
 
@@ -235,6 +232,19 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
   }
 
   this.started = true;
+}
+
+/**
+ * Handle hterm terminal resize events.
+ * @private
+ * @param {number} width The width of the terminal.
+ * @param {number} height The height of the terminal.
+ */
+NaClTerm.prototype.onTerminalResize_ = function(width, height) {
+  this.processManager.onTerminalResize(width, height);
+  if (!this.started) {
+    this.spawnRootProcess_();
+  }
 }
 
 /**
