@@ -16,9 +16,8 @@ function NaClProcessManager() {
   this.onRootProgress = function() {};
   this.onRootLoad = function() {};
 
-  // TODO(bradnelson): Rename in line with style guide once we have tests.
   // The process which gets the input from the user.
-  this.foreground_process = null;
+  this.foregroundProcess = null;
 
   // Process information keyed by PID. The value is an embed DOM object
   // if the process is running. Once the process has finished, the value
@@ -245,18 +244,18 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
   for (var arch in entry) {
     var path = entry[arch]['url'];
     // TODO(bradnelson): Generalize this.
-    var html5_mount_point = '/mnt/html5/';
-    var home_mount_point = '/home/user/';
-    var tmp_mount_point = '/tmp/';
-    if (path.indexOf(html5_mount_point) == 0) {
-      path = path.replace(html5_mount_point,
+    var html5MountPoint = '/mnt/html5/';
+    var homeMountPoint = '/home/user/';
+    var tmpMountPoint = '/tmp/';
+    if (path.indexOf(html5MountPoint) == 0) {
+      path = path.replace(html5MountPoint,
                           'filesystem:' + location.origin + '/persistent/');
-    } else if (path.indexOf(home_mount_point) == 0) {
-      path = path.replace(home_mount_point,
+    } else if (path.indexOf(homeMountPoint) == 0) {
+      path = path.replace(homeMountPoint,
                           'filesystem:' + location.origin +
                           '/persistent/home/');
-    } else if (path.indexOf(tmp_mount_point) == 0) {
-      path = path.replace(tmp_mount_point,
+    } else if (path.indexOf(tmpMountPoint) == 0) {
+      path = path.replace(tmpMountPoint,
                           'filesystem:' + location.origin +
                           '/temporary/');
     } else {
@@ -366,7 +365,7 @@ NaClProcessManager.prototype.handleLoadAbort_ = function(e) {
  * @private
  */
 NaClProcessManager.prototype.handleLoadError_ = function(e) {
-  this.onError(e.srcElement.command_name, e.srcElement.lastError);
+  this.onError(e.srcElement.commandName, e.srcElement.lastError);
   this.exit(NaClProcessManager.EX_NO_EXEC, e.srcElement);
 }
 
@@ -409,13 +408,13 @@ NaClProcessManager.prototype.exit = function(code, element) {
 
   // Mark as terminated.
   element.pid = -1;
-  var next_foreground_process = null;
-  if (this.foreground_process == element) {
-    next_foreground_process = element.parent;
+  var nextForegroundProcess = null;
+  if (this.foregroundProcess == element) {
+    nextForegroundProcess = element.parent;
     // When the parent has already finished, give the control to the
     // grand parent.
-    while (next_foreground_process.pid == -1)
-      next_foreground_process = next_foreground_process.parent;
+    while (nextForegroundProcess.pid == -1)
+      nextForegroundProcess = nextForegroundProcess.parent;
   }
 
   // Clean up HTML elements.
@@ -427,8 +426,8 @@ NaClProcessManager.prototype.exit = function(code, element) {
     element.popup.destroy();
   }
 
-  if (next_foreground_process)
-    this.foreground_process = next_foreground_process;
+  if (nextForegroundProcess)
+    this.foregroundProcess = nextForegroundProcess;
 
   return;
 };
@@ -466,7 +465,7 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
   ++this.pid;
 
   var fg = document.createElement('object');
-  this.foreground_process = fg;
+  this.foregroundProcess = fg;
 
   fg.pid = this.pid;
   fg.width = 0;
@@ -474,7 +473,7 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
   fg.data = nmf;
   fg.type = mimetype;
   fg.parent = parent;
-  fg.command_name = argv[0];
+  fg.commandName = argv[0];
 
   fg.addEventListener('abort', this.handleLoadAbort_.bind(this));
   fg.addEventListener('crash', this.handleCrash_.bind(this));
@@ -501,8 +500,8 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
 
   params['PS_TTY_PREFIX'] = NaClProcessManager.prefix;
   params['PS_TTY_RESIZE'] = 'tty_resize';
-  params['PS_TTY_COLS'] = this.tty_width;
-  params['PS_TTY_ROWS'] = this.tty_height;
+  params['PS_TTY_COLS'] = this.ttyWidth;
+  params['PS_TTY_ROWS'] = this.ttyHeight;
   params['PS_STDIN'] = '/dev/tty';
   params['PS_STDOUT'] = '/dev/tty';
   params['PS_STDERR'] = '/dev/tty';
@@ -653,10 +652,10 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
  * @param {number} height The height of the terminal.
  */
 NaClProcessManager.prototype.onTerminalResize = function(width, height) {
-  this.tty_width = width;
-  this.tty_height = height;
-  if (this.foreground_process) {
-    this.foreground_process.postMessage({'tty_resize': [ width, height ]});
+  this.ttyWidth = width;
+  this.ttyHeight = height;
+  if (this.foregroundProcess) {
+    this.foregroundProcess.postMessage({'tty_resize': [ width, height ]});
   }
 }
 
@@ -667,12 +666,12 @@ NaClProcessManager.prototype.onTerminalResize = function(width, height) {
 NaClProcessManager.prototype.sigint = function() {
   // TODO(bradnelson): Change this once we support signals.
   // Abort on Control+C, but don't quit bash.
-  if (!this.isRootProcess(this.foreground_process)) {
+  if (!this.isRootProcess(this.foregroundProcess)) {
     // Only exit if the appropriate environment variable is set.
     var query = 'param[name="' + NaClProcessManager.ENV_ABORT + '"]';
-    var enabledEnv = this.foreground_process.querySelector(query);
+    var enabledEnv = this.foregroundProcess.querySelector(query);
     if (enabledEnv && enabledEnv.value === NaClProcessManager.ENV_ABORT_VALUE) {
-      this.exit(NaClProcessManager.EXIT_CODE_KILL, this.foreground_process);
+      this.exit(NaClProcessManager.EXIT_CODE_KILL, this.foregroundProcess);
       return true;
     }
   }
@@ -686,7 +685,7 @@ NaClProcessManager.prototype.sigint = function() {
 NaClProcessManager.prototype.sendStdinForeground = function(str) {
   var message = {};
   message[NaClProcessManager.prefix] = str;
-  this.foreground_process.postMessage(message);
+  this.foregroundProcess.postMessage(message);
 };
 
 /**

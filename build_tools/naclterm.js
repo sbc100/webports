@@ -39,7 +39,7 @@ function NaClTerm(argv) {
 
   this.print = this.io.print.bind(this.io);
 
-  var mgr = this.process_manager = new NaClProcessManager();
+  var mgr = this.processManager = new NaClProcessManager();
   mgr.setStdoutListener(this.handleStdout_.bind(this));
   mgr.setErrorListener(this.handleError_.bind(this));
   mgr.setRootProgressListener(this.handleRootProgress_.bind(this));
@@ -219,7 +219,7 @@ NaClTerm.prototype.handleExit_ = function(pid, status) {
  * @param {number} height The height of the terminal.
  */
 NaClTerm.prototype.onTerminalResize_ = function(width, height) {
-  this.process_manager.onTerminalResize(width, height);
+  this.processManager.onTerminalResize(width, height);
   if (this.started) {
     return;
   }
@@ -228,8 +228,8 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
 
   try {
     this.print('Loading NaCl module.\n');
-    var rootPid = this.process_manager.spawn(NaClTerm.nmf, argv, [], '/');
-    this.process_manager.waitpid(rootPid, 0, this.handleExit_.bind(this));
+    var rootPid = this.processManager.spawn(NaClTerm.nmf, argv, [], '/');
+    this.processManager.waitpid(rootPid, 0, this.handleExit_.bind(this));
   } catch (e) {
     this.print(e.message);
   }
@@ -244,10 +244,10 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
  */
 NaClTerm.prototype.onVTKeystroke_ = function(str) {
   if (str.charCodeAt(0) === NaClTerm.CONTROL_C) {
-    if (this.process_manager.sigint()) {
+    if (this.processManager.sigint()) {
       this.print('\n');
     }
   } else {
-    this.process_manager.sendStdinForeground(str);
+    this.processManager.sendStdinForeground(str);
   }
 }
