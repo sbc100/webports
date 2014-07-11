@@ -39,8 +39,7 @@ function NaClTerm(argv) {
 
   this.print = this.io.print.bind(this.io);
 
-  var mgr = this.process_manager = new NaClProcessManager(
-      this.handleExit_.bind(this));
+  var mgr = this.process_manager = new NaClProcessManager();
   mgr.setStdoutListener(this.handleStdout_.bind(this));
   mgr.setErrorListener(this.handleError_.bind(this));
   mgr.setRootProgressListener(this.handleRootProgress_.bind(this));
@@ -191,25 +190,25 @@ NaClTerm.prototype.handleRootLoad_ = function() {
 }
 
 /**
- * Clean up once a process exits.
+ * Clean up once the root process exits.
  * @private
- * @param {number} code The exit code of the process.
- * @param {HTMLObjectElement} element The HTML element of the exited process.
+ * @param {number} pid The PID of the process that exited.
+ * @param {number} status The exit code of the process.
  */
-NaClTerm.prototype.handleExit_ = function(code, element) {
+NaClTerm.prototype.handleExit_ = function(pid, status) {
   this.print(NaClTerm.ANSI_CYAN)
 
   // The root process finished.
-  if (code === -1) {
-    this.print('Program (' + element.command_name +
+  if (status === -1) {
+    this.print('Program (' + NaClTerm.nmf +
                          ') crashed (exit status -1)\n');
   } else {
-    this.print('Program (' + element.command_name + ') exited ' +
-               '(status=' + code + ')\n');
+    this.print('Program (' + NaClTerm.nmf + ') exited ' +
+               '(status=' + status + ')\n');
   }
   this.argv.io.pop();
   if (this.argv.onExit) {
-    this.argv.onExit(code);
+    this.argv.onExit(status);
   }
 }
 
@@ -229,7 +228,8 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
 
   try {
     this.print('Loading NaCl module.\n');
-    this.process_manager.spawn(NaClTerm.nmf, argv, [], '/');
+    var rootPid = this.process_manager.spawn(NaClTerm.nmf, argv, [], '/');
+    this.process_manager.waitpid(rootPid, 0, this.handleExit_.bind(this));
   } catch (e) {
     this.print(e.message);
   }

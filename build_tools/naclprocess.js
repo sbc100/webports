@@ -7,20 +7,10 @@
 'use strict';
 
 /**
- * This function is called when the main process (usually the shell) exits.
- * @callback mainEndCallback
- * @param {number} code The exit code of the process.
- */
-
-/**
  * NaClProcessManager provides a framework for NaCl executables to run within a
  * web-based terminal.
- *
- * @param {mainEndCallback} onEnd A callback called when the main process exits.
  */
-function NaClProcessManager(onEnd) {
-  this.onEnd = onEnd || function() {};
-
+function NaClProcessManager() {
   this.onError = function() {};
   this.onStdout = function() {};
   this.onRootProgress = function() {};
@@ -394,11 +384,6 @@ NaClProcessManager.prototype.handleCrash_ = function(e) {
  * @param {HTMLObjectElement} element The HTML element of the exited process.
  */
 NaClProcessManager.prototype.exit = function(code, element) {
-  if (this.isRootProcess(element)) {
-    this.onEnd(code, element);
-    return;
-  }
-
   var pid = element.pid;
   function wakeWaiters(waiters) {
     for (var i = 0; i < waiters.length; i++) {
