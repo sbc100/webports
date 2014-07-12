@@ -1,0 +1,240 @@
+diff --git a/configure.py b/configure.py
+index 64123a0..56beb03 100755
+--- a/configure.py
++++ b/configure.py
+@@ -75,7 +75,7 @@ n.newline()
+ 
+ n.comment('The arguments passed to configure.py, for rerunning it.')
+ n.variable('configure_args', ' '.join(sys.argv[1:]))
+-env_keys = set(['CXX', 'AR', 'CFLAGS', 'LDFLAGS'])
++env_keys = set(['CXX', 'AR', 'CFLAGS', 'LDFLAGS', 'LIBS'])
+ configure_env = dict((k, os.environ[k]) for k in os.environ if k in env_keys)
+ if configure_env:
+     config_str = ' '.join([k + '=' + configure_env[k] for k in configure_env])
+@@ -192,6 +192,10 @@ if 'LDFLAGS' in configure_env:
+     ldflags.append(configure_env['LDFLAGS'])
+ n.variable('ldflags', ' '.join(shell_escape(flag) for flag in ldflags))
+ n.newline()
++if 'LIBS' in configure_env:
++    libs.append(configure_env['LIBS'])
++n.variable('libs', ' '.join(shell_escape(flag) for flag in libs))
++n.newline()
+ 
+ if platform.is_msvc():
+     n.rule('cxx',
+@@ -302,10 +306,11 @@ else:
+     ninja_lib = n.build(built('libninja.a'), 'ar', objs)
+ n.newline()
+ 
++# TODO(bradnelson): Upstream this fix.
+ if platform.is_msvc():
+-    libs.append('ninja.lib')
++    libs.insert(0, 'ninja.lib')
+ else:
+-    libs.append('-lninja')
++    libs.insert(0, '-lninja')
+ 
+ all_targets = []
+ 
+diff --git a/platform_helper.py b/platform_helper.py
+index bc3a125..63409aa 100644
+--- a/platform_helper.py
++++ b/platform_helper.py
+@@ -19,7 +19,7 @@ import sys
+ 
+ def platforms():
+     return ['linux', 'darwin', 'freebsd', 'openbsd', 'solaris', 'sunos5',
+-            'mingw', 'msvc', 'gnukfreebsd', 'bitrig']
++            'mingw', 'msvc', 'gnukfreebsd', 'bitrig', 'nacl']
+ 
+ class Platform(object):
+     def __init__(self, platform):
+@@ -43,6 +43,8 @@ class Platform(object):
+             self._platform = 'msvc'
+         elif self._platform.startswith('bitrig'):
+             self._platform = 'bitrig'
++        elif self._platform.startswith('nacl'):
++            self._platform = 'nacl'
+ 
+     def platform(self):
+         return self._platform
+@@ -81,3 +83,6 @@ class Platform(object):
+ 
+     def is_bitrig(self):
+         return self._platform == 'bitrig'
++
++    def is_nacl(self):
++        return self._platform == 'nacl'
+diff --git a/src/line_printer.cc b/src/line_printer.cc
+index ef1609c..8f12a0c 100644
+--- a/src/line_printer.cc
++++ b/src/line_printer.cc
+@@ -92,10 +92,13 @@ void LinePrinter::Print(string to_print, LineType type) {
+ #else
+     // Limit output to width of the terminal if provided so we don't cause
+     // line-wrapping.
++    // TODO(bradnelson): Drop when bionic includes winsize.
++# if !defined(__native_client__) || !defined(__BIONIC__)
+     winsize size;
+     if ((ioctl(0, TIOCGWINSZ, &size) == 0) && size.ws_col) {
+       to_print = ElideMiddle(to_print, size.ws_col);
+     }
++#endif
+     printf("%s", to_print.c_str());
+     printf("\x1B[K");  // Clear to end of line.
+     fflush(stdout);
+diff --git a/src/ninja.cc b/src/ninja.cc
+index a381e83..a4d42c0 100644
+--- a/src/ninja.cc
++++ b/src/ninja.cc
+@@ -42,6 +42,10 @@
+ #include "util.h"
+ #include "version.h"
+ 
++#if defined(__native_client__)
++# include "nacl_spawn.h"
++#endif
++
+ #ifdef _MSC_VER
+ // Defined in msvc_helper_main-win32.cc.
+ int MSVCHelperMain(int argc, char** argv);
+@@ -1110,7 +1114,11 @@ int real_main(int argc, char** argv) {
+ 
+ }  // anonymous namespace
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char** argv) {
++#else
+ int main(int argc, char** argv) {
++#endif
+ #if !defined(NINJA_BOOTSTRAP) && defined(_MSC_VER)
+   // Set a handler to catch crashes not caught by the __try..__except
+   // block (e.g. an exception in a stack-unwind-block).
+diff --git a/src/subprocess-posix.cc b/src/subprocess-posix.cc
+index 743e406..6d51d5c 100644
+--- a/src/subprocess-posix.cc
++++ b/src/subprocess-posix.cc
+@@ -17,14 +17,22 @@
+ #include <assert.h>
+ #include <errno.h>
+ #include <fcntl.h>
+-#include <poll.h>
++// TODO(bradnelson): Drop this once poll.h in newlib is actually includable.
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++# include <poll.h>
++#endif
++#include <sys/select.h>
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include <sys/wait.h>
+ 
++#if defined(__native_client__)
++# include "nacl_spawn.h"
++#endif
+ #include "util.h"
+ 
++
+ Subprocess::Subprocess(bool use_console) : fd_(-1), pid_(-1),
+                                            use_console_(use_console) {
+ }
+@@ -49,6 +57,14 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
+ #endif  // !USE_PPOLL
+   SetCloseOnExec(fd_);
+ 
++#if defined(__native_client__)
++  const char *cmd[] = {"bash", "-c", (char *) NULL, (char *) NULL};
++  cmd[2] = command.c_str(); 
++  pid_ = nacl_spawn_simple(cmd);
++  if (pid_ < 0) {
++    Fatal("nacl_spawn_simple: %s", strerror(errno));
++  }
++#else
+   pid_ = fork();
+   if (pid_ < 0)
+     Fatal("fork: %s", strerror(errno));
+@@ -59,10 +75,12 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
+     // Track which fd we use to report errors on.
+     int error_pipe = output_pipe[1];
+     do {
++#if !defined(__native_client__)
+       if (sigaction(SIGINT, &set->old_act_, 0) < 0)
+         break;
+       if (sigprocmask(SIG_SETMASK, &set->old_mask_, 0) < 0)
+         break;
++#endif
+ 
+       if (!use_console_) {
+         // Put the child in its own process group, so ctrl-c won't reach it.
+@@ -100,6 +118,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
+     }
+     _exit(1);
+   }
++#endif
+ 
+   close(output_pipe[1]);
+   return true;
+@@ -121,7 +140,11 @@ void Subprocess::OnPipeReady() {
+ ExitStatus Subprocess::Finish() {
+   assert(pid_ != -1);
+   int status;
++#if defined(__native_client__)
++  if (nacl_waitpid(pid_, &status, 0) < 0)
++#else
+   if (waitpid(pid_, &status, 0) < 0)
++#endif
+     Fatal("waitpid(%d): %s", pid_, strerror(errno));
+   pid_ = -1;
+ 
+@@ -152,6 +175,7 @@ void SubprocessSet::SetInterruptedFlag(int signum) {
+ }
+ 
+ SubprocessSet::SubprocessSet() {
++#if !defined(__native_client__)
+   sigset_t set;
+   sigemptyset(&set);
+   sigaddset(&set, SIGINT);
+@@ -163,15 +187,18 @@ SubprocessSet::SubprocessSet() {
+   act.sa_handler = SetInterruptedFlag;
+   if (sigaction(SIGINT, &act, &old_act_) < 0)
+     Fatal("sigaction: %s", strerror(errno));
++#endif
+ }
+ 
+ SubprocessSet::~SubprocessSet() {
+   Clear();
+ 
++#if !defined(__native_client__)
+   if (sigaction(SIGINT, &old_act_, 0) < 0)
+     Fatal("sigaction: %s", strerror(errno));
+   if (sigprocmask(SIG_SETMASK, &old_mask_, 0) < 0)
+     Fatal("sigprocmask: %s", strerror(errno));
++#endif
+ }
+ 
+ Subprocess *SubprocessSet::Add(const string& command, bool use_console) {
+@@ -247,7 +274,11 @@ bool SubprocessSet::DoWork() {
+   }
+ 
+   interrupted_ = false;
++#if defined(__native_client__)
++  int ret = select(nfds, &set, 0, 0, 0);
++#else
+   int ret = pselect(nfds, &set, 0, 0, 0, &old_mask_);
++#endif
+   if (ret == -1) {
+     if (errno != EINTR) {
+       perror("ninja: pselect");
+diff --git a/src/util.cc b/src/util.cc
+index 484b0c1..4ae3d12 100644
+--- a/src/util.cc
++++ b/src/util.cc
+@@ -414,7 +414,7 @@ int GetProcessorCount() {
+ #endif
+ }
+ 
+-#if defined(_WIN32) || defined(__CYGWIN__)
++#if defined(_WIN32) || defined(__CYGWIN__) || defined(__native_client__)
+ double GetLoadAverage() {
+   // TODO(nicolas.despres@gmail.com): Find a way to implement it on Windows.
+   // Remember to also update Usage() when this is fixed.
