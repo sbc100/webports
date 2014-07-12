@@ -1,0 +1,6 @@
+NAME=libffi
+VERSION=3.1
+URL=ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
+LICENSE=custom
+DEPENDS=(glibc-compat)
+SHA1=cb373ef2115ec7c57913b84ca72eee14b10ccdc3
