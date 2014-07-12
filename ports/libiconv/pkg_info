@@ -4,3 +4,4 @@ URL=http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
 LICENSE=GPL
 DEPENDS=(glibc-compat)
 SHA1=be7d67e50d72ff067b2c0291311bc283add36965
+DISABLED_LIBC=(bionic)

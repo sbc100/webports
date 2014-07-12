@@ -4,4 +4,5 @@ ARCHIVE_ROOT=lua-5.2.2
 URL=http://www.lua.org/ftp/lua-5.2.2.tar.gz
 LICENSE=MIT
 DEPENDS=(readline)
+DISABLED_LIBC=(bionic)
 SHA1=0857e41e5579726a4cb96732e80d7aa47165eaf5

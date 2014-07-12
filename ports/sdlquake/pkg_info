@@ -3,4 +3,6 @@ VERSION=1.0.9
 URL=http://www.libsdl.org/projects/quake/src/sdlquake-1.0.9.tar.gz
 LICENSE=GPL
 DEPENDS=(sdl)
+# Disabled for bionic due to sdl.
+DISABLED_LIBC=(bionic)
 SHA1=fd34e025a55d1f95680d23603348c9f993f06545

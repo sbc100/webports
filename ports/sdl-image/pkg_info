@@ -4,4 +4,6 @@ ARCHIVE_ROOT=SDL_image-1.2.12
 URL=http://www.libsdl.org/projects/SDL_image/release/SDL_image-1.2.12.tar.gz
 LICENSE=ZLIB
 DEPENDS=(sdl libpng jpeg8d)
+# Disabled on bionic due to sdl, due to regal.
+DISABLED_LIBC=(bionic)
 SHA1=5e3e393d4e366638048bbb10d6a269ea3f4e4cf2

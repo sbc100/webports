@@ -3,4 +3,5 @@ VERSION=5.2.1
 URL=http://ftp.gnu.org/gnu/coreutils/coreutils-5.2.1.tar.bz2
 LICENSE=GPL
 DEPENDS=(nacl-spawn)
+DISABLED_LIBC=(bionic)
 SHA1=1028755ae0fa9be840576e4837004cf5a9981c45

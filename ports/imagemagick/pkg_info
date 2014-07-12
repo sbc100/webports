@@ -4,4 +4,5 @@ ARCHIVE_ROOT=ImageMagick-6.8.8-5
 URL=http://www.imagemagick.org/download/ImageMagick-6.8.8-5.tar.bz2
 LICENSE=CUSTOM:LICENSE
 DEPENDS=(libpng jpeg8d bzip2 zlib)
+DISABLED_LIBC=(bionic)
 SHA1=458fb666a480e9695e96c48a157bbfb3375edbf7

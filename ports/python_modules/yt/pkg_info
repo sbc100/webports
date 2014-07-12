@@ -4,4 +4,6 @@ URL=http://yt-project.org/upload/yt-3.0beta1.tar.gz
 LICENSE=BSD
 BUILD_OS=linux
 DEPENDS=(python-host cython h5py matplotlib numpy setuptools sympy)
+# Disabled for bionic due to cython.
+DISABLED_LIBC=(bionic)
 SHA1=4c4e2afb532b0ecedd980ae8aa46bf540651460a

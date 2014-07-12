@@ -3,4 +3,5 @@ VERSION=7dc2f2590
 URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@7dc2f2590
 LICENSE=GPL
 DEPENDS=(nacl-spawn)
+DISABLED_LIBC=(bionic)
 DISABLED_ARCH=(pnacl)

@@ -3,4 +3,5 @@ VERSION=2.10.2
 URL=http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.10.2.tar.bz2
 LICENSE=CUSTOM:COPYING
 DEPENDS=(expat freetype)
+DISABLED_LIBC=(bionic)
 SHA1=f20e4165d7706857fb9614a195c27434e2eb1fc5

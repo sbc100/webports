@@ -5,4 +5,5 @@ LICENSE=GPL
 # Disabled on mac because openssl is disabled.
 BUILD_OS=linux
 DEPENDS=(zlib nacl-spawn glibc-compat openssl curl)
+DISABLED_LIBC=(bionic)
 SHA1=9cf8f756b0dfff003b6e83eb7330420de1c90e21

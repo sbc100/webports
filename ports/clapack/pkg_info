@@ -3,4 +3,5 @@ VERSION=3.2.1
 ARCHIVE_ROOT=CLAPACK-3.2.1
 URL=http://www.netlib.org/clapack/clapack.tgz
 LICENSE=CUSTOM:COPYING
+DISABLED_LIBC=(bionic)
 SHA1=8b284658999d1eb71adb6ad521c6118e2db57a99

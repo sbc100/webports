@@ -4,4 +4,5 @@ URL=https://pypi.python.org/packages/source/p/pyppapi/pyppapi-0.4.tar.gz
 LICENSE=BSD
 BUILD_OS=linux
 DEPENDS=(python-host cython numpy)
+DISABLED_LIBC=(bionic)
 SHA1=203f78ad9ad4208fadc824c64915ae31633d878e

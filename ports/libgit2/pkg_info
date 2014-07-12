@@ -4,4 +4,5 @@ URL=https://github.com/libgit2/libgit2/archive/v0.20.0/libgit2-0.20.0.tar.gz
 DEPENDS=(glibc-compat openssl libssh)
 # GPL2 with linking exemption.
 LICENSE=CUSTOM:COPYING
+DISABLED_LIBC=(bionic)
 SHA1=811bbe4fe4fc83236ba42d23e3b449f1b95b4bab

@@ -3,4 +3,5 @@ VERSION=2.20
 URL=http://ftp.gnu.org/gnu/grep/grep-2.20.tar.xz
 LICENSE=GPL
 DEPENDS=(nacl-spawn)
+DISABLED_LIBC=(bionic)
 SHA1=55aac6158b51baa505669cf8f86440bcc106ec65

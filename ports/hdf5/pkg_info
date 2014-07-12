@@ -3,4 +3,5 @@ VERSION=1.8.12
 URL=http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.12.tar.gz
 LICENSE=CUSTOM:COPYING
 DEPENDS=(glibc-compat)
+DISABLED_LIBC=(bionic)
 SHA1=965d954d596cfa694f3260856a6406ea69e46e68

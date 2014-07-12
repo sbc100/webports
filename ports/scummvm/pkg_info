@@ -3,4 +3,6 @@ VERSION=1.6.0
 URL=http://downloads.sf.net/scummvm/scummvm/1.6.0/scummvm-1.6.0.tar.gz
 LICENSE=LGPL,GPL,BSD
 DEPENDS=(sdl libvorbis libtar)
+# Disabled on bionic due to sdl, due to regal.
+DISABLED_LIBC=(bionic)
 SHA1=68dc969c4ce12ecd899311f7610b1996eb95753f

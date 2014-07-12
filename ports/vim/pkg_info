@@ -6,4 +6,5 @@ LICENSE=CUSTOM:runtime/doc/uganda.txt
 MIN_SDK_VERSION=31
 BUILD_OS=linux
 DEPENDS=(ncurses libtar nacl-spawn)
+DISABLED_LIBC=(bionic)
 SHA1=601abf7cc2b5ab186f40d8790e542f86afca86b7
