@@ -33,6 +33,13 @@ function NaClProcessManager() {
 };
 
 /**
+ * The error thrown when the user tries to execute operations on the foreground
+ * process when there is no such process.
+ * @const
+ */
+NaClProcessManager.NO_FG_ERROR = 'No foreground process running.';
+
+/**
  * The TTY prefix for communicating with NaCl processes.
  * @const
  */
@@ -408,14 +415,6 @@ NaClProcessManager.prototype.exit = function(code, element) {
 
   // Mark as terminated.
   element.pid = -1;
-  var nextForegroundProcess = null;
-  if (this.foregroundProcess == element) {
-    nextForegroundProcess = element.parent;
-    // When the parent has already finished, give the control to the
-    // grand parent.
-    while (nextForegroundProcess.pid == -1)
-      nextForegroundProcess = nextForegroundProcess.parent;
-  }
 
   // Clean up HTML elements.
   if (element.parentNode == document.body) {
@@ -426,10 +425,16 @@ NaClProcessManager.prototype.exit = function(code, element) {
     element.popup.destroy();
   }
 
-  if (nextForegroundProcess)
-    this.foregroundProcess = nextForegroundProcess;
+  var nextForegroundProcess = null;
+  if (this.foregroundProcess === element) {
+    nextForegroundProcess = element.parent;
+    // When the parent has already finished, give the control to the
+    // grand parent.
+    while (nextForegroundProcess && nextForegroundProcess.pid === -1)
+      nextForegroundProcess = nextForegroundProcess.parent;
 
-  return;
+    this.foregroundProcess = nextForegroundProcess;
+  }
 };
 
 /**
@@ -661,6 +666,9 @@ NaClProcessManager.prototype.onTerminalResize = function(width, height) {
  * @returns {boolean} Whether or not the interrupt succeeded.
  */
 NaClProcessManager.prototype.sigint = function() {
+  if (!this.foregroundProcess)
+    throw new Error(NaClProcessManager.NO_FG_ERROR);
+
   // TODO(bradnelson): Change this once we support signals.
   // Abort on Control+C, but don't quit bash.
   if (!this.isRootProcess(this.foregroundProcess)) {
@@ -680,6 +688,9 @@ NaClProcessManager.prototype.sigint = function() {
  * @param {string} str The string to be sent to as stdin.
  */
 NaClProcessManager.prototype.sendStdinForeground = function(str) {
+  if (!this.foregroundProcess)
+    throw new Error(NaClProcessManager.NO_FG_ERROR);
+
   var message = {};
   message[NaClProcessManager.prefix] = str;
   this.foregroundProcess.postMessage(message);

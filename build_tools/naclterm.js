@@ -253,11 +253,15 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
  * @param {string} str The characters sent by hterm.
  */
 NaClTerm.prototype.onVTKeystroke_ = function(str) {
-  if (str.charCodeAt(0) === NaClTerm.CONTROL_C) {
-    if (this.processManager.sigint()) {
-      this.print('\n');
+  try {
+    if (str.charCodeAt(0) === NaClTerm.CONTROL_C) {
+      if (this.processManager.sigint()) {
+        this.print('\n');
+      }
+    } else {
+      this.processManager.sendStdinForeground(str);
     }
-  } else {
-    this.processManager.sendStdinForeground(str);
+  } catch (e) {
+    this.print(e.message);
   }
 }
