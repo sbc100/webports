@@ -1,4 +1,4 @@
-builder 0 (total: 11257)
+builder 0 (total: 10155)
   glibc-compat
   ncurses
   zlib
@@ -6,11 +6,11 @@ builder 0 (total: 11257)
   python-host
   numpy
   python3
+  expat
   libtar
   nacl-spawn
-  coreutils
-  libpng
-  regal
+  gdb
+  ruby
   cython
   bzip2
   openssl
@@ -28,146 +28,156 @@ builder 0 (total: 11257)
   pandas
   freetype
   nose
+  libpng
   matplotlib
   sympy
   yt
   openscenegraph
-  boost
+  nethack
+  gsl
   curl
   freeimage
-  bullet
+  bash
+  grep
   git
-  sdl
-  bochs
+  gmp
   libssh
   libgit2
-  apr
   sdl2
-  toybox
-  nano
-  unzip
-  bash
-  devenv
-  python3-ppapi
-  xaos
+  apr
+  libxml2
   yajl
-  libsodium
+  xaos
+  python-ppapi
+  mpfr
   mesa
-  libmodplug
+  python3-ppapi
+  cfitsio
   zeromq
-  sdl-tests
-  civetweb
-  pcre
+  netcat
+  nano
+  toybox
+  unzip
+  devenv
+  ruby-ppapi
+  libhangul
+  pyzmq
   lua5.2
   lua-ppapi
-  libhangul
-  sdl-net
-  pyzmq
-  box2d
-  faac
-  jpeg8d
-  sdl-image
-  netcat
-  giflib
-  expat
+  libtool
+  mpc
+  libffi
+  sdl2-ttf
+  gc
   apr-util
-  ipython
   x264
-  tinyxml
+  sdl2-gfx
+  physfs
+  libatomic-ops
+  ipython
+  libtommath
   markupsafe
   jinja2
-  lua5.1
-  dreadthread
   ipython-ppapi
-  busybox
-  emacs
+  dreadthread
   jsoncpp
   openssh
-  mongoose
+  gcc
+  thttpd
+  emacs
+  glib
+  fontconfig
+  pixman
+  cairo
+  pango
   tar
-builder 1 (total: 11374)
+  mongoose
+builder 1 (total: 10179)
+  clapack
   zlib
   libpng
   jpeg6b
   opencv
-  clapack
   glibc-compat
-  ncurses
-  readline
-  ruby
-  expat
-  gdb
   libtar
   nacl-spawn
+  coreutils
+  regal
   binutils
+  ncurses
+  readline
   python
   fftw
+  libunistring
+  snes9x
+  libogg
+  libvorbis
+  libtheora
+  lame
+  ffmpeg
   libmikmod
   bzip2
-  regal
-  libogg
+  libiconv
   sdl
-  libvorbis
   sdl-mixer
+  expat
   freetype
   metakit
   sdl-ttf
   drod
-  snes9x
-  libtheora
-  lame
-  ffmpeg
-  dosbox
   jpeg8d
   imagemagick
-  nethack
-  vim
-  gsl
+  dosbox
+  boost
   libav
-  gmp
-  bash
-  sqlite
-  scummvm
   fontconfig
   pixman
   cairo
+  scummvm
+  bullet
+  vim
+  sqlite
+  bochs
+  flac
   tiff
-  leveldb
-  protobuf
-  mpfr
-  libxml2
   openal-soft
   mpg123
-  flac
+  protobuf
+  ninja
+  speex
+  libsodium
+  freealut
   libmng
   lcms
   devil
-  make
-  python-ppapi
+  libmodplug
   faad2
-  freealut
-  ruby-ppapi
-  speex
-  mpc
+  leveldb
+  pcre
   libwebp
-  gc
+  make
+  faac
+  sdl-tests
+  giflib
   agg
-  cfitsio
-  sdl2
-  sdl2-gfx
-  libtommath
-  sdl2-ttf
   libtomcrypt
-  physfs
+  civetweb
+  sdl-net
+  sdl-image
+  box2d
+  sdlquake
   agg-demo
   jsoncpp
+  tinyxml
   openal-ogg-demo
-  thttpd
-  gcc
-  mingn
+  lua5.1
+  busybox
   apr
   apr-util
   subversion
-  glib
-  pango
-Difference between total time of builders: 117
+  gmp
+  mpfr
+  mpc
+  gcc
+  mingn
+Difference between total time of builders: 24
