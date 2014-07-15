@@ -60,10 +60,20 @@ index e29dc6d..bb485dd 100644
  	rm -f $(DESTDIR)$(datadir)/aclocal/sdl.m4
  	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl.pc
 diff --git a/configure.in b/configure.in
-index a7e9b18..8c91f91 100644
+index a7e9b18..2548347 100644
 --- a/configure.in
 +++ b/configure.in
-@@ -885,6 +885,50 @@ CheckVisibilityHidden()
+@@ -181,7 +181,8 @@ if test x$enable_libc = xyes; then
+         AC_DEFINE(HAVE_MPROTECT)
+         ]),
+     )
+-    AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strlcpy strlcat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp sscanf snprintf vsnprintf iconv sigaction setjmp nanosleep)
++    # TODO(bradnelson): Add back in iconv once it builds on pnacl mac.
++    AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strlcpy strlcat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep)
+ 
+     AC_CHECK_LIB(iconv, libiconv_open, [EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
+     AC_CHECK_LIB(m, pow, [EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"])
+@@ -885,6 +886,50 @@ CheckVisibilityHidden()
      fi
  }
  
@@ -114,7 +124,7 @@ index a7e9b18..8c91f91 100644
  
  dnl Do the iPod thing
  CheckIPod()
-@@ -2284,6 +2328,22 @@ case "$host" in
+@@ -2284,6 +2329,22 @@ case "$host" in
              have_timers=yes
          fi
          ;;
@@ -137,7 +147,7 @@ index a7e9b18..8c91f91 100644
      *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
          case "$host" in
              *-*-linux*)         ARCH=linux ;;
-@@ -2838,9 +2898,9 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
+@@ -2838,9 +2899,9 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
  OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.S,$(objects)/\1.lo,g'`
  OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
  
@@ -150,7 +160,7 @@ index a7e9b18..8c91f91 100644
  
  # Set runtime shared library paths as needed
  
-@@ -2866,6 +2926,9 @@ case "$ARCH" in
+@@ -2866,6 +2927,9 @@ case "$ARCH" in
      # Evil hack to allow static linking on Mac OS X
      SDL_STATIC_LIBS="\${libdir}/libSDLmain.a \${libdir}/libSDL.a $EXTRA_LDFLAGS"
      ;;
@@ -544,7 +554,7 @@ index 5c2d81f..7a757a3 100644
  	if ( CPU_haveCPUID() ) {
 diff --git a/src/main/nacl/pepper_instance.c b/src/main/nacl/pepper_instance.c
 new file mode 100644
-index 0000000..0a3ca79
+index 0000000..997e13a
 --- /dev/null
 +++ b/src/main/nacl/pepper_instance.c
 @@ -0,0 +1,310 @@
