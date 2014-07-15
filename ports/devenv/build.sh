@@ -38,3 +38,13 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r devenv_app.zip app
 }
+
+PostInstallTestStep() {
+  if [[ ${OS_NAME} == Darwin && ${NACL_ARCH} == x86_64 ]]; then
+    echo "Skipping devenv tests on unsupported mac + x86_64 configuration."
+  elif [[ ${NACL_ARCH} == arm ]]; then
+    echo "Skipping devenv tests on arm for now."
+  else
+    LogExecute python ${START_DIR}/devenv_test.py -x -vv -a ${NACL_ARCH}
+  fi
+}

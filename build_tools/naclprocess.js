@@ -592,6 +592,10 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
     }
     document.body.appendChild(fg);
   }
+
+  // Work around crbug.com/350445
+  var junk = fg.offsetTop;
+
   return this.pid;
 }
 

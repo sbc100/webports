@@ -10,6 +10,9 @@
     "48": "devenv_48.png",
     "128": "devenv_128.png"
   },
+  "externally_connectable": {
+    "ids": ["*"]
+  },
   "permissions": [
     "storage",
     "unlimitedStorage",
@@ -25,7 +28,10 @@
   ],
   "app": {
     "background": {
-      "scripts": ["background.js"]
+      "scripts": [
+        "background.js",
+        "naclprocess.js"
+      ]
     }
   },
   "platforms": [
