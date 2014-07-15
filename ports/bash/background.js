@@ -15,26 +15,3 @@ chrome.app.runtime.onLaunched.addListener(function() {
     },
   });
 });
-
-chrome.runtime.onConnectExternal.addListener(function(port) {
-  var manager = new NaClProcessManager();
-  port.onMessage.addListener(function(msg) {
-    switch (msg.name) {
-      case 'nacl_spawn':
-        var pid = manager.spawn(msg.nmf, msg.argv, msg.envs, msg.cwd);
-        port.postMessage({name: 'nacl_spawn_reply', pid: pid});
-        break;
-      case 'nacl_waitpid':
-        manager.waitpid(msg.pid, msg.options, function(pid, status) {
-          port.postMessage({
-            name: 'nacl_waitpid_reply',
-            pid: pid,
-            status: status
-          });
-        });
-        break;
-      default:
-        console.log('Unknown message: ', msg);
-    }
-  });
-});

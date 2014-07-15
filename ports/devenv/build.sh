@@ -20,13 +20,17 @@ InstallStep() {
   local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip/${TOOLCHAIN}
 
   LogExecute cp -fR ${BASH_DIR}/* ${APP_DIR}
+  # We will be providing a devenv background.js.
+  rm ${BASH_DIR}/background.js
+
   # On newlib there won't be libs, so turn on null glob for these copies.
   shopt -s nullglob
   LogExecute cp -fR ${CURL_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
   LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
   shopt -u nullglob
 
-  RESOURCES="bash.js bashrc package setup-environment graphical.html"
+  RESOURCES="background.js bash.js bashrc package setup-environment
+      graphical.html"
   for resource in ${RESOURCES}; do
     cp ${START_DIR}/${resource} ${APP_DIR}/
   done
