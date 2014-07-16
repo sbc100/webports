@@ -1310,7 +1310,7 @@ PackageStep() {
   echo "BUILD_TOOLCHAIN=${TOOLCHAIN}" >> ${INSTALL_DIR}/pkg_info
   echo "BUILD_SDK_VERSION=${NACL_SDK_VERSION}" >> ${INSTALL_DIR}/pkg_info
   echo "BUILD_NACLPORTS_REVISION=${REVISION}" >> ${INSTALL_DIR}/pkg_info
-  LogExecute tar cf ${PACKAGE_FILE} -C ${INSTALL_DIR} .
+  LogExecute tar cjf ${PACKAGE_FILE} -C ${INSTALL_DIR} .
 }
 
 

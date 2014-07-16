@@ -10,7 +10,7 @@ import urlparse
 
 import naclports
 import binary_package
-from naclports import Log, Error, DisabledError
+from naclports import Trace, Log, Warn, Error, DisabledError
 from naclports import OUT_DIR, NACLPORTS_ROOT, VALID_KEYS, REQUIRED_KEYS
 
 PACKAGES_ROOT = os.path.join(OUT_DIR, 'packages')
@@ -176,17 +176,17 @@ class Package(object):
     binary_package.BinaryPackage(self.PackageFile()).Install()
 
   def Uninstall(self, ignore_missing):
-    if not os.path.exists(GetInstallStamp(self.NAME, self.config)):
+    if not os.path.exists(naclports.GetInstallStamp(self.NAME, self.config)):
       if ignore_missing:
         return
       raise Error('Package not installed: %s [%s]' % (self.NAME, self.config))
 
     Log("Uninstalling '%s' [%s]" % (self.NAME, self.config))
-    file_list = GetFileList(self.NAME, self.config)
+    file_list = naclports.GetFileList(self.NAME, self.config)
     if not os.path.exists(file_list):
       Log('No files to uninstall')
     else:
-      root = GetInstallRoot(self.config)
+      root = naclports.GetInstallRoot(self.config)
       with open(file_list) as f:
         for line in f:
           filename = os.path.join(root, line.strip())
@@ -195,10 +195,10 @@ class Package(object):
             continue
           Trace('rm %s' % filename)
           os.remove(filename)
-          RemoveEmptryDirs(os.path.dirname(filename))
+          naclports.RemoveEmptryDirs(os.path.dirname(filename))
 
       os.remove(file_list)
-    os.remove(GetInstallStamp(self.NAME, self.config))
+    os.remove(naclports.GetInstallStamp(self.NAME, self.config))
 
   def Build(self, verbose, build_deps, force=None):
     self.CheckEnabled()
