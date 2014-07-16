@@ -21,7 +21,7 @@ InstallStep() {
 
   LogExecute cp -fR ${BASH_DIR}/* ${APP_DIR}
   # We will be providing a devenv background.js.
-  rm ${BASH_DIR}/background.js
+  LogExecute rm ${APP_DIR}/background.js
 
   # On newlib there won't be libs, so turn on null glob for these copies.
   shopt -s nullglob
