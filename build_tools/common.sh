@@ -141,7 +141,7 @@ readonly DEST_PYTHON_OBJS=${NACL_PACKAGES_BUILD}/python-modules/${NACL_BUILD_SUB
 PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
 
 # Don't support building with SDKs older than the current stable release
-MIN_SDK_VERSION=${MIN_SDK_VERSION:-31}
+MIN_SDK_VERSION=${MIN_SDK_VERSION:-35}
 
 if [ $OS_NAME = "Darwin" ]; then
   OS_JOBS=4

@@ -1,7 +1,6 @@
 NAME=readline
 VERSION=6.2
 URL=ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
-MIN_SDK_VERSION=31
 LICENSE=GPL3
 DEPENDS=(ncurses glibc-compat)
 DISABLED_LIBC=(bionic)
