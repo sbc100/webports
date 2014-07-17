@@ -9,8 +9,9 @@
 function DevEnvTest() {
   chrometest.Test.call(this);
   this.devEnv = null;
-}
+};
 DevEnvTest.prototype = new chrometest.Test();
+DevEnvTest.prototype.constructor = DevEnvTest;
 
 DevEnvTest.prototype.setUp = function() {
   var self = this;
@@ -42,7 +43,7 @@ DevEnvTest.prototype.waitWhile = function(condition, body) {
     }
   }
   return loop;
-}
+};
 
 DevEnvTest.prototype.runCommand = function(cmd) {
   var self = this;

@@ -14,7 +14,7 @@ shopt -s nullglob
 
 STORAGE_URL=http://naclports.storage.googleapis.com/builds
 DEFAULT_SDK_VERSION=pepper_38
-DEFAULT_REVISION=1384
+DEFAULT_REVISION=1451
 DEFAULT_SOURCE="${STORAGE_URL}/${DEFAULT_SDK_VERSION}/\
 ${DEFAULT_REVISION}/publish"
 

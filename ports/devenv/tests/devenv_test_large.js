@@ -16,8 +16,26 @@ TEST_F(DevEnvTest, 'testCoreUtils', function() {
   });
 });
 
+// Run a test on devenv, and clean the home directory afterwards. This allows
+// for tests that touch files. Coreutils must be installed before this kind of
+// test can be run.
+function DevEnvFileTest() {
+  DevEnvTest.call(this);
+}
+DevEnvFileTest.prototype = new DevEnvTest();
+DevEnvFileTest.prototype.constructor = DevEnvFileTest;
+
+DevEnvFileTest.prototype.tearDown = function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return self.runCommand('rm -rf /home/user');
+  }).then(function() {
+    return DevEnvTest.prototype.tearDown.call(self);
+  });
+};
+
 // Test mkdir, ls, and rmdir.
-TEST_F(DevEnvTest, 'testDirs', function() {
+TEST_F(DevEnvFileTest, 'testDirs', function() {
   var self = this;
   return Promise.resolve().then(function() {
     return self.checkCommand('mkdir foo', 0, '');
