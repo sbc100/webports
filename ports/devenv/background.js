@@ -18,6 +18,9 @@ chrome.app.runtime.onLaunched.addListener(function() {
 
 chrome.runtime.onConnectExternal.addListener(function(port) {
   var manager = new NaClProcessManager();
+  manager.setStdoutListener(function(output) {
+    port.postMessage({name: 'nacl_stdout', output: output});
+  });
   port.onMessage.addListener(function(msg) {
     switch (msg.name) {
       case 'nacl_spawn':
