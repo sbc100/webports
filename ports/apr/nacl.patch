@@ -95,6 +95,27 @@ index 0b5b83a..d7370ca 100755
  else
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
+diff --git a/file_io/unix/pipe.c b/file_io/unix/pipe.c
+index 571d9bc..9b61ed6 100644
+--- a/file_io/unix/pipe.c
++++ b/file_io/unix/pipe.c
+@@ -252,12 +252,16 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
+ APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
+                                                     apr_fileperms_t perm, apr_pool_t *pool)
+ {
++#if defined(__native_client__)
++    return ENOSYS;
++#else
+     mode_t mode = apr_unix_perms2mode(perm);
+ 
+     if (mkfifo(filename, mode) == -1) {
+         return errno;
+     }
+     return APR_SUCCESS;
++#endif
+ } 
+ 
+     
 diff --git a/include/apr.h.in b/include/apr.h.in
 index 0ad7a91..5f8d86d 100644
 --- a/include/apr.h.in
@@ -122,3 +143,16 @@ index 6ce4b91..15247ed 100644
      int oobmark;
  
      if (ioctl(sock->socketdes, SIOCATMARK, (void*) &oobmark) < 0)
+diff --git a/threadproc/unix/procsup.c b/threadproc/unix/procsup.c
+index 94177f9..073b143 100644
+--- a/threadproc/unix/procsup.c
++++ b/threadproc/unix/procsup.c
+@@ -52,7 +52,7 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
+     if (setpgrp(0, getpid()) == -1) {
+         return errno;
+     }
+-#elif defined(OS2) || defined(TPF) || defined(MPE)
++#elif defined(OS2) || defined(TPF) || defined(MPE) || defined(__native_client__)
+     /* do nothing */
+ #else
+     if (setpgid(0, 0) == -1) {

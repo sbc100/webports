@@ -19,24 +19,5 @@ BuildStep() {
 }
 
 InstallStep() {
-  MakeDir ${PUBLISH_DIR}
-  MakeDir ${PUBLISH_DIR}/${NACL_ARCH}
-  # -executable is not supported on BSD and -perm +nn is not
-  # supported on linux
-  if [ ${OS_NAME} != "Darwin" ]; then
-    local EXECUTABLES=$(find src -type f -executable)
-  else
-    local EXECUTABLES=$(find src -type f -perm +u+x)
-  fi
-  for nexe in ${EXECUTABLES}; do
-    local name=$(basename $nexe)
-    # This is a shell script.
-    if [ "${name}" = "groups" ]; then
-      continue
-    fi
-    LogExecute cp ${nexe} ${PUBLISH_DIR}/${NACL_ARCH}/${name}
-  done
-  ChangeDir ${PUBLISH_DIR}/${NACL_ARCH}
-  LogExecute rm -f ${PUBLISH_DIR}/${NACL_ARCH}.zip
-  LogExecute zip -r ${PUBLISH_DIR}/${NACL_ARCH}.zip .
+  PublishByArchForDevEnv
 }

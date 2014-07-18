@@ -582,6 +582,44 @@ DefaultPreInstallStep() {
 }
 
 
+PublishByArchForDevEnv() {
+  MakeDir ${PUBLISH_DIR}
+  local ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
+  MakeDir ${ARCH_DIR}
+  # -executable is not supported on BSD and -perm +nn is not
+  # supported on linux
+  if [ ${OS_NAME} != "Darwin" ]; then
+    local EXECUTABLES=$(find . -type f -executable)
+  else
+    local EXECUTABLES=$(find . -type f -perm +u+x)
+  fi
+  for nexe in ${EXECUTABLES}; do
+    local name=$(basename ${nexe})
+    name=${name/%.nexe/}
+    name=${name/%.pexe/}
+    LogExecute cp ${nexe} ${ARCH_DIR}/${name}
+    # Stage libraries for toolchains that support dynamic linking.
+    if [[ "${TOOLCHAIN}" = "glibc" || "${TOOLCHAIN}" = "bionic" ]]; then
+      # Run create_nmf for non-scripts.
+      # TODO(bradnelson): Do something prettier.
+      if [ "$(head -c 2 ${nexe})" != "#!" ]; then
+        pushd ${ARCH_DIR}
+        # Create a temporary name ending in .nexe so create_nmf does the right
+        # thing.
+        LogExecute cp ${name} tmp.nexe
+        LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+          tmp.nexe -s . -o /dev/null
+        LogExecute rm tmp.nexe
+        popd
+      fi
+    fi
+  done
+  ChangeDir ${ARCH_DIR}
+  LogExecute rm -f ${ARCH_DIR}.zip
+  LogExecute zip -r ${ARCH_DIR}.zip .
+}
+
+
 InitGitRepo() {
   if [ -d .git ]; then
     local PREEXISTING_REPO=1
