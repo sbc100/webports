@@ -16,11 +16,102 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-import naclports.package
-from naclports import Error, DisabledError, Trace, Configuration, NACL_SDK_ROOT
+import naclports
+import naclports.binary_package
+from naclports import Error, DisabledError, Trace, NACL_SDK_ROOT
+from naclports.package import PackageIterator
+from naclports.configuration import Configuration
+
+
+def CmdList(config, options, args):
+  if len(args):
+    raise Error('list command takes no arguments')
+  stamp_root = naclports.GetInstallStampRoot(config)
+  if os.path.exists(stamp_root):
+    for filename in os.listdir(stamp_root):
+      basename, ext = os.path.splitext(filename)
+      if ext != '.info':
+        continue
+      if options.verbose:
+        fullname = os.path.join(stamp_root, filename)
+        valid_keys = naclports.VALID_KEYS + naclports.binary_package.EXTRA_KEYS
+        info = naclports.ParsePkgInfoFile(fullname, valid_keys)
+        sys.stdout.write('%-15s %s\n' % (info['NAME'], info['VERSION']))
+      else:
+        sys.stdout.write(basename + '\n')
+  return 0
+
+
+def CmdInfo(config, options, args):
+  if len(args) != 1:
+    raise Error('info command takes a single package name')
+  package_name = args[0]
+  info_file = naclports.GetInstallStamp(package_name, config)
+  print 'Install receipt: %s' % info_file
+  if not os.path.exists(info_file):
+    raise Error('package not installed: %s [%s]' % (package_name, config))
+  with open(info_file) as f:
+    sys.stdout.write(f.read())
+
+
+def CmdContents(config, options, args):
+  if len(args) != 1:
+    raise Error('contents command takes a single package name')
+  package_name = args[0]
+  list_file = naclports.GetFileList(package_name, config)
+  if not os.path.exists(list_file):
+    raise Error('package not installed: %s [%s]' % (package_name, config))
+
+  install_root = naclports.GetInstallRoot(config)
+  with open(list_file) as f:
+    if options.verbose:
+      for line in f:
+        sys.stdout.write(os.path.join(install_root, line))
+    else:
+      sys.stdout.write(f.read())
+
+
+def CmdPkgDownload(package, options):
+  package.Download()
+
+
+def CmdPkgCheck(package, options):
+  # The fact that we got this far means the pkg_info is basically valid.
+  # This final check verifies the dependencies are valid.
+  # Cache the list of all packages names since this function could be called
+  # a lot in the case of "naclports check --all".
+  packages = PackageIterator()
+  if not CmdPkgCheck.all_package_names:
+    CmdPkgCheck.all_package_names = [os.path.basename(p.root) for p in packages]
+  naclports.Log("Checking deps for %s .." % package.NAME)
+  package.CheckDeps(CmdPkgCheck.all_package_names)
+
+CmdPkgCheck.all_package_names = None
+
+
+def CmdPkgBuild(package, options):
+  package.Build(options.build_deps, force=options.force)
+
+
+def CmdPkgInstall(package, options):
+  package.Install(options.build_deps, force=options.force,
+                  from_source=options.from_source)
+
+
+def CmdPkgUninstall(package, options):
+  package.Uninstall(options.all)
+
+
+def CmdPkgClean(package, options):
+  package.Clean()
+
+
+def CmdPkgVerify(package, options):
+  package.Verify()
+
 
 def run_main(args):
-  usage = "Usage: %prog [options] <command> [<package_dir>]"
+  usage = 'Usage: %prog [options] <command> [<package_dir>]'
   parser = optparse.OptionParser(prog='naclports', description=__doc__,
                                  usage=usage)
   parser.add_option('-v', '--verbose', action='store_true',
@@ -30,8 +121,11 @@ def run_main(args):
   parser.add_option('--all', action='store_true',
                     help='Perform action on all known ports.')
   parser.add_option('-f', '--force', action='store_const', const='build',
-                    dest='force', help='Force building specified targets, '
+                    help='Force building specified targets, '
                     'even if timestamps would otherwise skip it.')
+  parser.add_option('--from-source', action='store_true',
+                    help='Always build from source rather than downloading '
+                    'prebuilt packages.')
   parser.add_option('-F', '--force-all', action='store_const', const='all',
                     dest='force', help='Force building target and all '
                     'dependencies, even if timestamps would otherwise skip '
@@ -56,9 +150,9 @@ def run_main(args):
     parser.error('You must specify a sub-command. See --help.')
 
   command = args[0]
+  args = args[1:]
 
-  verbose = options.verbose or os.environ.get('VERBOSE') == '1'
-  Trace.verbose = verbose
+  naclports.verbose = options.verbose or os.environ.get('VERBOSE') == '1'
   if options.verbose_build:
     os.environ['VERBOSE'] = '1'
   else:
@@ -73,69 +167,41 @@ def run_main(args):
 
   config = Configuration(options.arch, options.toolchain, options.debug)
 
-  if command == 'list':
-    stamp_root = naclports.GetInstallStampRoot(config)
-    if os.path.exists(stamp_root):
-      for filename in os.listdir(stamp_root):
-        basename, ext = os.path.splitext(filename)
-        if ext != '.info':
-          continue
-        naclports.Log(basename)
-    return 0
-  elif command == 'info':
-    if len(args) != 2:
-      parser.error('info command takes a single package name')
-    package_name = args[1]
-    info_file = GetInstallStamp(package_name, config)
-    print "Install receipt: %s" % info_file
-    if not os.path.exists(info_file):
-      raise Error('package not installed: %s [%s]' % (package_name, config))
-    with open(info_file) as f:
-      sys.stdout.write(f.read())
-    return 0
-  elif command == 'contents':
-    if len(args) != 2:
-      parser.error('contents command takes a single package name')
-    package_name = args[1]
-    list_file = naclports.GetFileList(package_name, config)
-    if not os.path.exists(list_file):
-      raise Error('package not installed: %s [%s]' % (package_name, config))
-    with open(list_file) as f:
-      sys.stdout.write(f.read())
+  base_commands = {
+    'list': CmdList,
+    'info': CmdInfo,
+    'contents': CmdContents
+  }
+
+  pkg_commands = {
+    'download': CmdPkgDownload,
+    'check': CmdPkgCheck,
+    'build': CmdPkgBuild,
+    'uninstall': CmdPkgUninstall,
+    'install': CmdPkgInstall,
+    'verify': CmdPkgVerify,
+    'clean': CmdPkgClean,
+  }
+
+  if command in base_commands:
+    base_commands[command](config, options, args)
     return 0
 
-  package_dirs = ['.']
-  if len(args) > 1:
-    if options.all:
-      parser.error('Package name and --all cannot be specified together')
-    package_dirs = args[1:]
+  if command not in pkg_commands:
+    parser.error("Unknown subcommand: '%s'\n"
+                 'See --help for available commands.' % command)
+
+  if len(args) and options.all:
+    parser.error('Package name(s) and --all cannot be specified together')
+
+  if args:
+    package_dirs = args
+  else:
+    package_dirs = [os.getcwd()]
 
   def DoCmd(package):
     try:
-      if command == 'download':
-        package.Download()
-      elif command == 'check':
-        # Fact that we've got this far means the pkg_info
-        # is basically valid.  This final check verifies the
-        # dependencies are valid.
-        packages = naclports.package.PackageIterator()
-        package_names = [os.path.basename(p.root) for p in packages]
-        package.CheckDeps(package_names)
-      elif command == 'enabled':
-        package.CheckEnabled()
-      elif command == 'verify':
-        package.Verify()
-      elif command == 'clean':
-        package.Clean()
-      elif command == 'build':
-        package.Build(verbose, options.build_deps, options.force)
-      elif command == 'install':
-        package.Install(verbose, options.build_deps, options.force)
-      elif command == 'uninstall':
-        package.Uninstall(options.all)
-      else:
-        parser.error("Unknown subcommand: '%s'\n"
-                     "See --help for available commands." % command)
+      pkg_commands[command](package, options)
     except DisabledError as e:
       if options.ignore_disabled:
         naclports.Log('naclports: %s' % e)
@@ -157,7 +223,7 @@ def run_main(args):
       rmtree(naclports.GetInstallStampRoot(config))
       rmtree(naclports.GetInstallRoot(config))
     else:
-      for p in naclports.package.PackageIterator():
+      for p in PackageIterator():
         if not p.DISABLED:
           DoCmd(p)
   else:
@@ -169,6 +235,9 @@ def run_main(args):
 def main(args):
   try:
     run_main(args)
+  except KeyboardInterrupt:
+    sys.stderr.write('naclports: interrupted\n')
+    return 1
   except Error as e:
     sys.stderr.write('naclports: %s\n' % e)
     return 1

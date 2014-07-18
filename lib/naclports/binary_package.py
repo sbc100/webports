@@ -8,10 +8,13 @@ import shutil
 import tarfile
 
 import naclports
+import configuration
 
 PAYLOAD_DIR = 'payload'
 EXTRA_KEYS = ['BUILD_CONFIG', 'BUILD_ARCH', 'BUILD_TOOLCHAIN',
               'BUILD_SDK_VERSION', 'BUILD_NACLPORTS_REVISION']
+VALID_KEYS = naclports.VALID_KEYS + EXTRA_KEYS
+REQUIRED_KEYS = naclports.REQUIRED_KEYS + EXTRA_KEYS
 
 
 class BinaryPackage(object):
@@ -37,17 +40,16 @@ class BinaryPackage(object):
         if './pkg_info' not in tar.getnames():
           raise PkgFormatError('package does not contain pkg_info file')
         info = tar.extractfile('./pkg_info')
-        valid_keys = naclports.VALID_KEYS + EXTRA_KEYS
-        required_keys = naclports.REQUIRED_KEYS + EXTRA_KEYS
-        info = naclports.ParsePkgInfo(info, filename, valid_keys, required_keys)
+        info = naclports.ParsePkgInfo(info.read(), filename,
+                                      VALID_KEYS, REQUIRED_KEYS)
         for key, value in info.iteritems():
           setattr(self, key, value)
     except tarfile.TarError as e:
       raise naclports.PkgFormatError(e)
 
-    self.config = naclports.Configuration(self.BUILD_ARCH,
-                                          self.BUILD_TOOLCHAIN,
-                                          self.BUILD_CONFIG == 'debug')
+    self.config = configuration.Configuration(self.BUILD_ARCH,
+                                              self.BUILD_TOOLCHAIN,
+                                              self.BUILD_CONFIG == 'debug')
 
   def IsInstallable(self):
     """Determine if a binary package can be installed in the
@@ -103,6 +105,10 @@ class BinaryPackage(object):
       with open(filename, 'r+') as f:
         f.write(data.replace('/naclports-dummydir', dest))
 
+  def GetPkgInfo(self):
+    with tarfile.open(self.filename) as tar:
+      return tar.extractfile('./pkg_info').read()
+
   def Install(self):
     """Install binary package into toolchain directory."""
     dest = naclports.GetInstallRoot(self.config)
@@ -137,25 +143,24 @@ class BinaryPackage(object):
       for name in names:
         self.RelocateFile(name, dest)
 
-      with open(os.path.join(dest_tmp, 'pkg_info')) as f:
-        pkg_info = f.read()
-      self.WriteStamp(pkg_info)
       self.WriteFileList(names)
+      self.WriteStamp()
     finally:
       shutil.rmtree(dest_tmp)
 
-  def WriteStamp(self, contents=''):
-    """Write a file with the give filename and contents."""
+  def WriteStamp(self):
+    """Write stamp file containing pkg_info."""
     filename = naclports.GetInstallStamp(self.NAME, self.config)
-    dirname = os.path.dirname(filename)
-    if not os.path.isdir(dirname):
-      os.makedirs(dirname)
     naclports.Trace('stamp: %s' % filename)
+    pkg_info = self.GetPkgInfo()
     with open(filename, 'w') as f:
-      f.write(contents)
+      f.write(pkg_info)
 
   def WriteFileList(self, file_names):
     filename = naclports.GetFileList(self.NAME, self.config)
+    dirname = os.path.dirname(filename)
+    if not os.path.isdir(dirname):
+      os.makedirs(dirname)
     with open(filename, 'w') as f:
       for name in file_names:
         f.write(name + '\n')

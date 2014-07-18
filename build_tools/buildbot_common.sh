@@ -36,6 +36,8 @@ RunCmd() {
   $*
 }
 
+NACLPORTS_ARGS="-v --ignore-disabled --from-source"
+
 #
 # Build a single package for a single architecture
 # $1 - Name of package to build
@@ -43,8 +45,7 @@ RunCmd() {
 BuildPackage() {
   PACKAGE=$1
   shift
-  ARGS="-v --ignore-disabled $*"
-  if RunCmd bin/naclports install ports/$PACKAGE $ARGS; then
+  if RunCmd bin/naclports install $PACKAGE $NACLPORTS_ARGS $*; then
     BuildSuccess $PACKAGE
   else
     BuildFailure $PACKAGE
@@ -56,7 +57,6 @@ TOOLCHAIN_LIST="pnacl newlib glibc"
 
 InstallPackageMultiArch() {
   echo "@@@BUILD_STEP ${TOOLCHAIN} $1@@@"
-  export BUILD_FLAGS="-v --ignore-disabled"
   for NACL_ARCH in ${ARCH_LIST}; do
     export NACL_ARCH
     # pnacl only works on pnacl and nowhere else.
@@ -74,7 +74,7 @@ InstallPackageMultiArch() {
     if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
       continue
     fi
-    if ! RunCmd make $1 ; then
+    if ! RunCmd bin/naclports install $NACLPORTS_ARGS $1 ; then
       # Early exit if one of the architecures fails. This mean the
       # failure is always at the end of the build step.
       BuildFailure $1

@@ -13,7 +13,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
 GS_BUCKET = 'naclports'
-MIRROR_URL = 'http://storage.googleapis.com/%s/mirror' % GS_BUCKET
+GS_URL = 'http://storage.googleapis.com/'
 OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'build')
@@ -25,6 +25,8 @@ VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
               'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH',
               'DISABLED_ARCH', 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED']
 REQUIRED_KEYS = ['NAME', 'VERSION']
+
+verbose = False
 
 arch_to_pkgarch = {
   'x86_64': 'x86-64',
@@ -39,7 +41,6 @@ pkgarch_to_arch = {v:k for k, v in arch_to_pkgarch.items()}
 if NACL_SDK_ROOT:
   sys.path.append(os.path.join(NACL_SDK_ROOT, 'tools'))
 
-# TODO(sbc): use this code to replace the bash logic in build_tools/common.sh
 
 class Error(Exception):
   """General error used for all naclports-specific errors."""
@@ -58,11 +59,11 @@ class DisabledError(Error):
   pass
 
 
-def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
+def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
   """Parse the contents of the given file-object as a pkg_info file.
 
   Args:
-    info_file: file-like object to parse.
+    contents: pkg_info contents as a string.
     filename: name of file to use in error messages.
     valid_keys: list of keys that are valid in the file.
     required_keys: list of keys that are required in the file.
@@ -75,6 +76,10 @@ def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
       contain all required keys.
   """
   rtn = {}
+  if valid_keys is None:
+    valid_keys = VALID_KEYS
+  if required_keys is None:
+    required_keys = REQUIRED_KEYS
 
   def ParsePkgInfoLine(line, line_no):
     if '=' not in line:
@@ -99,7 +104,7 @@ def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
       value = shlex.split(value)[0]
     return (key, value)
 
-  for i, line in enumerate(info_file):
+  for i, line in enumerate(contents.splitlines()):
     if line[0] == '#':
       continue
     key, value = ParsePkgInfoLine(line, i+1)
@@ -110,6 +115,12 @@ def ParsePkgInfo(info_file, filename, valid_keys, required_keys):
       raise PkgFormatError("Required key '%s' missing from info file: '%s'" %
                            (required_key, filename))
   return rtn
+
+
+def ParsePkgInfoFile(filename, valid_keys=None, required_keys=None):
+  """Pasrse pkg_info from a file on disk."""
+  with open(filename) as f:
+    return ParsePkgInfo(f.read(), filename, valid_keys, required_keys)
 
 
 def CheckStamp(filename, contents=None, timestamp=None):
@@ -141,9 +152,8 @@ def Warn(message):
 
 def Trace(message):
   """Log a message to the console if running in verbose mode (-v)."""
-  if Trace.verbose:
+  if verbose:
     Log(message)
-Trace.verbose = False
 
 
 def GetSDKVersion():
@@ -213,22 +223,12 @@ def IsInstalled(package_name, config, stamp_content=None):
   return result
 
 
-def RemoveEmptryDirs(dirname):
-  """Recursively remove a directoy and its parents if they are empty."""
-  while not os.listdir(dirname):
-    os.rmdir(dirname)
-    dirname = os.path.dirname(dirname)
-
-
 def DownloadFile(filename, url):
   """Download a file from a given URL.
 
   Args:
     filename: the name of the file to download the URL to.
     url: then URL to fetch.
-
-  Returns:
-    True if the download was successful, False otherwise.
   """
   temp_filename = filename + '.partial'
   curl_cmd = ['curl', '--fail', '--location', '--stderr', '-',
@@ -242,75 +242,13 @@ def DownloadFile(filename, url):
     curl_cmd.append('--silent')
   curl_cmd.append(url)
 
-  Log('Downloading: %s [%s]' % (url, filename))
+  if verbose:
+    Log('Downloading: %s [%s]' % (url, filename))
+  else:
+    Log('Downloading: %s' % url.replace(GS_URL, ''))
   try:
     subprocess.check_call(curl_cmd)
-  except subprocess.CalledProcessError:
-    return False
+  except subprocess.CalledProcessError as e:
+    raise Error('Error downloading file: %s' % str(e))
 
   os.rename(temp_filename, filename)
-  return True
-
-
-class Configuration(object):
-  """Class representing the build configuration for naclports packages.
-
-  This consists of the following attributes:
-    toolchain   - newlib, glibc, bionic, pnacl
-    arch        - x86_64, x86_32, arm, pnacl
-    debug       - True/False
-    config_name - 'debug' or 'release'
-
-  If not specified in the constructor these are read from the
-  environment variables (TOOLCHAIN, NACL_ARCH, NACL_DEBUG).
-  """
-  default_toolchain = 'newlib'
-  default_arch = 'x86_64'
-
-  def __init__(self, arch=None, toolchain=None, debug=None):
-    self.SetConfig(debug)
-
-    if arch is None:
-      arch = os.environ.get('NACL_ARCH')
-
-    if toolchain is None:
-      toolchain = os.environ.get('TOOLCHAIN')
-
-    if not toolchain:
-      if arch == 'pnacl':
-        toolchain = 'pnacl'
-      else:
-        toolchain = self.default_toolchain
-    self.toolchain = toolchain
-
-    if not arch:
-      if self.toolchain == 'pnacl':
-        arch = 'pnacl'
-      else:
-        arch = self.default_arch
-    self.arch = arch
-    if self.arch not in arch_to_pkgarch:
-      raise Error("Invalid arch: %s" % arch)
-
-    self.SetLibc()
-
-  def SetConfig(self, debug):
-    if debug is None:
-      if os.environ.get('NACL_DEBUG') == '1':
-        debug = True
-      else:
-        debug = False
-    self.debug = debug
-    if self.debug:
-      self.config_name = 'debug'
-    else:
-      self.config_name = 'release'
-
-  def SetLibc(self):
-    if self.toolchain == 'pnacl':
-      self.libc = 'newlib'
-    else:
-      self.libc = self.toolchain
-
-  def __str__(self):
-    return '%s/%s/%s' % (self.arch, self.libc, self.config_name)

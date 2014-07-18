@@ -5,24 +5,44 @@ naclports is collection of open source libraries and applications that have
 been ported to Native Client, along with set to tools for building and
 maintaining them.
 
-The ports themselves live in the ``ports`` directory.  Each one contains of
-three main file:
+Packages can be built from source or prebuilt binaries packages can be
+downloaded from the continuous build system.
+
+The sources for the ports live in the ``ports`` directory.  Each one contains
+at least the following file:
 
 - pkg_info: a description of the package.
+
+Most also contain the follow optional files:
+
 - build.sh: a bash script for building it
 - nacl.patch: an optional patch file.
 
-The tools for building packages live in ``bin``.  To build and install
-a package into the toolchain run ``naclports install <package_dir>``.  This
-script will download, patch, build and install the application or library.  By
-default it will first build any dependencies that that the package has.
+The tools for building packages live in ``bin``.  The binary tool is simple
+called ``naclports``.  To build and install a package into the toolchain run
+``naclports install <package_dir>``.  This script will download, patch, build
+and install the application or library.  By default it will first install any
+dependencies that that the package has.
+
+
+Links
+-----
+
+Project home: https://code.google.com/p/naclports/
+Continuous builder: http://build.chromium.org/p/client.nacl.ports/
+Continuous build artifacts: http://gsdview.appspot.com/naclports/builds/
 
 
 Prerequistes
 ------------
 
-The build scripts require that certain tools are present in the host system.
-You will need at least these:
+The minimum requirements for using naclports are:
+
+- python 2.7
+- Native Client SDK
+
+For building packages from source the build scripts require that certain tools
+are present in the host system:
 
 - bash
 - make
@@ -100,12 +120,17 @@ Cygwin naclports is only tested on Linux and Mac so YMMV.
 Binary Packages
 ---------------
 
-Binary packages for naclports, which will allow packages to be installed
-without having to build from source, are currently being worked on.
-Currently a binary archive is built for each package as part of the standard
-package build process.  The packages live in the ``out/packages`` directory.
-In the future we hope to allow packages to be downloaded and installed from
-external archives, such as the continuous builders.
+By default naclports will attempt to install binary packages rather than
+building them from source. The binary packages are produced by the buildbots
+and stored in Google cloud storage. The index of current binary packages
+is stored in ``lib/prebuilt.txt`` and this is currently manually updated
+by running ``build_tools/scan_packages.py``.
+
+If the package version does not match the package will always be built from
+source.
+
+If you want to force a package to be built from source you can pass
+``--from-source`` to the naclports script.
 
 
 Running the examples

@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -10,16 +11,26 @@ import urlparse
 
 import naclports
 import binary_package
+import package_index
 from naclports import Trace, Log, Warn, Error, DisabledError
-from naclports import OUT_DIR, NACLPORTS_ROOT, VALID_KEYS, REQUIRED_KEYS
+from naclports import OUT_DIR, NACLPORTS_ROOT
+from naclports.configuration import Configuration
 
 PACKAGES_ROOT = os.path.join(OUT_DIR, 'packages')
 ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
 TOOLS_DIR = os.path.join(NACLPORTS_ROOT, 'build_tools')
+MIRROR_URL = '%s%s/mirror' % (naclports.GS_URL, naclports.GS_BUCKET)
 
 sys.path.append(TOOLS_DIR)
 
 import sha1check
+
+
+def RemoveEmptyDirs(dirname):
+  """Recursively remove a directoy and its parents if they are empty."""
+  while not os.listdir(dirname):
+    os.rmdir(dirname)
+    dirname = os.path.dirname(dirname)
 
 
 def FormatTimeDelta(delta):
@@ -50,8 +61,8 @@ class Package(object):
 
   def __init__(self, pkg_root, config=None):
     if config is None:
-      config = naclports.Configuration()
-    for key in VALID_KEYS:
+      config = Configuration()
+    for key in naclports.VALID_KEYS:
       setattr(self, key, None)
     self.config = config
     self.DEPENDS = []
@@ -62,8 +73,7 @@ class Package(object):
       raise Error('Invalid package folder: %s' % pkg_root)
 
     # Parse pkg_info file
-    with open(self.info) as f:
-      info = naclports.ParsePkgInfo(f, self.info, VALID_KEYS, REQUIRED_KEYS)
+    info = naclports.ParsePkgInfoFile(self.info)
 
     # Set attributres based on pkg_info setttings.
     for key, value in info.items():
@@ -115,12 +125,12 @@ class Package(object):
       return
     return os.path.join(ARCHIVE_ROOT, archive)
 
-  def InstallDeps(self, verbose, force):
+  def InstallDeps(self, force, from_source=False):
     for dep in self.DEPENDS:
       if not naclports.IsInstalled(dep, self.config) or force == 'all':
         dep = CreatePackage(dep, self.config)
         try:
-          dep.Install(verbose, True, force)
+          dep.Install(True, force, from_source)
         except DisabledError as e:
           Log(str(e))
 
@@ -162,18 +172,29 @@ class Package(object):
       return False
     return package.IsInstallable()
 
-  def Install(self, verbose, build_deps, force=None):
+  def Install(self, build_deps, force=None, from_source=False):
     if force is None and self.IsInstalled():
       Log("Already installed '%s' [%s]" % (self.NAME, self.config))
       return
 
     if build_deps:
-      self.InstallDeps(verbose, force)
+      self.InstallDeps(force, from_source)
 
-    if not self.IsBuilt() or force:
-      self.Build(verbose, build_deps, force)
+    if force:
+      from_source = True
 
-    binary_package.BinaryPackage(self.PackageFile()).Install()
+    package_file = self.PackageFile()
+    if not self.IsBuilt() and not from_source:
+      index = package_index.GetCurrentIndex()
+      if index.Installable(self.NAME, self.config):
+        package_file = index.Download(self.NAME, self.config)
+      else:
+        from_source = True
+
+    if from_source:
+      self.Build(build_deps, force)
+
+    binary_package.BinaryPackage(package_file).Install()
 
   def Uninstall(self, ignore_missing):
     if not os.path.exists(naclports.GetInstallStamp(self.NAME, self.config)):
@@ -195,16 +216,16 @@ class Package(object):
             continue
           Trace('rm %s' % filename)
           os.remove(filename)
-          naclports.RemoveEmptryDirs(os.path.dirname(filename))
+          RemoveEmptyDirs(os.path.dirname(filename))
 
       os.remove(file_list)
     os.remove(naclports.GetInstallStamp(self.NAME, self.config))
 
-  def Build(self, verbose, build_deps, force=None):
+  def Build(self, build_deps, force=None):
     self.CheckEnabled()
 
     if build_deps:
-      self.InstallDeps(verbose, force)
+      self.InstallDeps(force)
 
     if not force and self.IsBuilt():
       Log("Already built '%s' [%s]" % (self.NAME, self.config))
@@ -218,20 +239,20 @@ class Package(object):
     if os.path.exists(stdout):
       os.remove(stdout)
 
-    if verbose:
+    if naclports.verbose:
       prefix = '*** '
     else:
       prefix = ''
     Log("%sBuilding '%s' [%s]" % (prefix, self.NAME, self.config))
 
     start = time.time()
-    self.RunBuildSh(verbose, stdout)
+    self.RunBuildSh(stdout)
 
     duration = FormatTimeDelta(time.time() - start)
     Log("Build complete '%s' [%s] [took %s]"
         % (self.NAME, self.config, duration))
 
-  def RunBuildSh(self, verbose, stdout, args=None):
+  def RunBuildSh(self, stdout, args=None):
     build_port = os.path.join(TOOLS_DIR, 'build_port.sh')
     cmd = [build_port]
     if args is not None:
@@ -241,7 +262,7 @@ class Package(object):
     env['TOOLCHAIN'] = self.config.toolchain
     env['NACL_ARCH'] = self.config.arch
     env['NACL_DEBUG'] = self.config.debug and '1' or '0'
-    if verbose:
+    if naclports.verbose:
       rtn = subprocess.call(cmd, cwd=self.root, env=env)
       if rtn != 0:
         raise Error("Building %s: failed." % (self.NAME))
@@ -257,7 +278,7 @@ class Package(object):
           sys.stdout.write(log_file.read())
         raise Error("Building '%s' failed." % (self.NAME))
 
-  def Verify(self, verbose=False):
+  def Verify(self):
     """Download upstream source and verify hash."""
     archive = self.DownloadLocation()
     if not archive:
@@ -284,7 +305,7 @@ class Package(object):
     if os.path.exists(pkg):
       os.remove(pkg)
 
-    stamp_dir = os.path.join(STAMP_DIR, self.NAME)
+    stamp_dir = os.path.join(naclports.STAMP_DIR, self.NAME)
     Log('removing %s' % stamp_dir)
     if os.path.exists(stamp_dir):
       shutil.rmtree(stamp_dir)
@@ -367,11 +388,13 @@ class Package(object):
       # First try downloading form the mirror URL and silently fall
       # back to the original if this fails.
       mirror_url = self.GetMirrorURL()
-      if DownloadFile(filename, mirror_url):
+      try:
+        naclports.DownloadFile(filename, mirror_url)
         return
+      except Error:
+        pass
 
-    if not DownloadFile(filename, self.URL):
-      raise Error("Error downloading URL: %s" % self.URL)
+    naclports.DownloadFile(filename, self.URL)
 
 
 DEFAULT_LOCATIONS = ('ports', 'ports/python_modules')
@@ -394,7 +417,7 @@ def CreatePackage(package_name, config=None):
   Returns:
     Package object
   """
-  if os.path.isdir(package_name) and os.path.dirname(package_name):
+  if os.path.isdir(package_name):
     return Package(package_name, config)
 
   for subdir in DEFAULT_LOCATIONS:
