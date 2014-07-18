@@ -16,7 +16,7 @@ InstallStep() {
 
   # Set up files for bootstrap.
   local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash
-  local CURL_DIR=${NACL_PACKAGES_PUBLISH}/curl/${TOOLCHAIN}
+  local GETURL_DIR=${NACL_PACKAGES_PUBLISH}/geturl/${TOOLCHAIN}
   local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip/${TOOLCHAIN}
 
   LogExecute cp -fR ${BASH_DIR}/* ${APP_DIR}
@@ -25,7 +25,7 @@ InstallStep() {
 
   # On newlib there won't be libs, so turn on null glob for these copies.
   shopt -s nullglob
-  LogExecute cp -fR ${CURL_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
+  LogExecute cp -fR ${GETURL_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
   LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
   shopt -u nullglob
 

@@ -6,13 +6,13 @@
 # Package installer script for use inside the devenv environment.
 # Assumes setup-environment has been source at least once in the parent
 # environment.
-# Written to avoid using anything other than bash, curl, and unzip when
+# Written to avoid using anything other than bash, geturl, and unzip when
 # installing core packages.
 
 set -e
 shopt -s nullglob
 
-STORAGE_URL=http://naclports.storage.googleapis.com/builds
+STORAGE_URL=https://naclports.storage.googleapis.com/builds
 DEFAULT_SDK_VERSION=pepper_38
 DEFAULT_REVISION=1451
 DEFAULT_SOURCE="${STORAGE_URL}/${DEFAULT_SDK_VERSION}/\
@@ -21,6 +21,7 @@ ${DEFAULT_REVISION}/publish"
 # Pairs of <package-name>:<package-subdir>
 PACKAGE_INFO="\
 coreutils:newlib/${NACL_ARCH}.zip \
+curl:newlib.zip \
 git:newlib.zip \
 lua:newlib/lua.zip \
 make:newlib.zip \
@@ -88,7 +89,7 @@ InstallPackage() {
   fi
   local archive=/tmp/devenv.package.zip
   echo "Downloading ${url}..."
-  curl ${url} -o ${archive}
+  geturl ${url} ${archive}
   if [ ! -e ${archive} ]; then
     echo "${archive} does not exist!"
     return
@@ -112,16 +113,18 @@ InstallPackage() {
 
   # TODO(bradnelson): Do something better.
   # Rename nexe for arch.
-  local package_nexe=${package_inside}/${package}_${NACL_ARCH}.nexe
-  if [ -e ${package_nexe} ]; then
-    cp ${package_nexe} ${package_inside}/${package}
-  fi
-  if [ "${NACL_ARCH}" = "i686" ]; then
-    local package_nexe=${package_inside}/${package}_x86_32.nexe
+  for alt in "" _ppapi; do
+    local package_nexe=${package_inside}/${package}${alt}_${NACL_ARCH}.nexe
     if [ -e ${package_nexe} ]; then
       cp ${package_nexe} ${package_inside}/${package}
     fi
-  fi
+    if [ "${NACL_ARCH}" = "i686" ]; then
+      local package_nexe=${package_inside}/${package}${alt}_x86_32.nexe
+      if [ -e ${package_nexe} ]; then
+        cp ${package_nexe} ${package_inside}/${package}
+      fi
+    fi
+  done
 
   # Remove out stamps and write out new one.
   RemoveDir ${stamp_dir}

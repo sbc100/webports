@@ -75,6 +75,7 @@ builder 1 (total: 5067)
   openssl
   nacl-spawn
   curl
+  geturl
   git
   bochs
   tiff

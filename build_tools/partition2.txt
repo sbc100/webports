@@ -36,6 +36,7 @@ builder 0 (total: 10155)
   nethack
   gsl
   curl
+  geturl
   freeimage
   bash
   grep

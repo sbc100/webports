@@ -24,6 +24,7 @@ builder 0 (total: 6147)
   libtar
   nacl-spawn
   curl
+  geturl
   git
   sqlite
   libssh

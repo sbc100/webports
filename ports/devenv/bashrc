@@ -13,6 +13,7 @@ source /mnt/http/setup-environment
 # Core packages.
 DEFAULT_PACKAGES="\
   -i coreutils \
+  -i curl \
   -i git \
   -i make \
   -i nano \

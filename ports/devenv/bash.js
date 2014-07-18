@@ -11,7 +11,7 @@ NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
 NaClProcessManager.useNaClAltHttp = true;
 NaClProcessManager.nmfWhitelist = [
     'bash',
-    'curl',
+    'geturl',
     'funzip',
     'unzip',
     'unzipsfx',
