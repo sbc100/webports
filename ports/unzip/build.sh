@@ -25,7 +25,11 @@ BuildStep() {
 InstallStep() {
   MakeDir ${PUBLISH_DIR}
   for name in funzip unzip unzipsfx; do
-    cp ${name} ${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}
+    local exe="${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}"
+    cp ${name} ${exe}
+    if [ "${NACL_ARCH}" = "pnacl" ]; then
+      LogExecute ${PNACLFINALIZE} ${exe}
+    fi
 
     pushd ${PUBLISH_DIR}
     LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \

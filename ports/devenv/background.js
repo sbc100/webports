@@ -24,8 +24,20 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   port.onMessage.addListener(function(msg) {
     switch (msg.name) {
       case 'nacl_spawn':
-        var pid = manager.spawn(msg.nmf, msg.argv, msg.envs, msg.cwd);
-        port.postMessage({name: 'nacl_spawn_reply', pid: pid});
+        var handleSuccess = function(naclType) {
+          var pid = manager.spawn(
+            msg.nmf, msg.argv, msg.envs, msg.cwd, naclType);
+          port.postMessage({name: 'nacl_spawn_reply', pid: pid});
+        };
+        var handleFailure = function(message) {
+          port.postMessage({name: 'nacl_spawn_reply', pid: -1,
+                            message: message});
+        };
+        if ('naclType' in msg) {
+          handleSuccess(msg.naclType);
+        } else {
+          manager.checkNaClManifestType(msg.nmf, handleSuccess, handleFailure);
+        }
         break;
       case 'nacl_waitpid':
         manager.waitpid(msg.pid, msg.options, function(pid, status) {

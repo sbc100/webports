@@ -26,16 +26,28 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/bash"
 
-  MakeDir ${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}
-  LogExecute cp ${BUILD_DIR}/bash${NACL_EXEEXT} \
-      ${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}/bash${NACL_EXEEXT}
-  ChangeDir ${ASSEMBLY_DIR}
-  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      _platform_specific/*/bash*${NACL_EXEEXT} \
-      -s . \
-      -o bash.nmf
-  LogExecute python ${TOOLS_DIR}/create_term.py bash.nmf
+  local platform_dir="${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}"
+  MakeDir ${platform_dir}
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    # Add something to the per-arch directory there so the store will accept
+    # the app even if nothing else ends up there. This currently happens in
+    # the pnacl case, where there's nothing that's per architecture.
+    touch ${platform_dir}/MARKER
 
+    local exe="${ASSEMBLY_DIR}/bash${NACL_EXEEXT}"
+    LogExecute ${PNACLFINALIZE} ${BUILD_DIR}/bash${NACL_EXEEXT} -o ${exe}
+    ChangeDir ${ASSEMBLY_DIR}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        ${exe} -s . -o bash.nmf
+  else
+    local exe="${platform_dir}/bash${NACL_EXEEXT}"
+    LogExecute cp ${BUILD_DIR}/bash${NACL_EXEEXT} ${exe}
+    ChangeDir ${ASSEMBLY_DIR}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        _platform_specific/*/bash*${NACL_EXEEXT} \
+        -s . -o bash.nmf
+  fi
+  LogExecute python ${TOOLS_DIR}/create_term.py bash.nmf
   InstallNaClTerm ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}

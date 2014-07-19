@@ -134,22 +134,30 @@ static int SendRequest(pp::VarDictionary* req, int* status) {
 static void AddFileToNmf(const std::string& key,
                          const std::string& filepath,
                          pp::VarDictionary* dict) {
-#if defined(__x86_64__)
-  static const char kArch[] = "x86-64";
-#elif defined(__i686__)
-  static const char kArch[] = "x86-32";
-#elif defined(__arm__)
-  static const char kArch[] = "arm";
-#elif defined(__pnacl__)
-  static const char kArch[] = "pnacl";
+#if defined(__pnacl__)
+  pp::VarDictionary url;
+  url.Set("url", filepath);
+  pp::VarDictionary translator;
+  translator.Set("pnacl-translator", url);
+  pp::VarDictionary arch;
+  arch.Set("portable", translator);
+  dict->Set(key, arch);
 #else
-# error "Unknown architecture"
-#endif
+# if defined(__x86_64__)
+  static const char kArch[] = "x86-64";
+# elif defined(__i686__)
+  static const char kArch[] = "x86-32";
+# elif defined(__arm__)
+  static const char kArch[] = "arm";
+# else
+#  error "Unknown architecture"
+# endif
   pp::VarDictionary url;
   url.Set("url", filepath);
   pp::VarDictionary arch;
   arch.Set(kArch, url);
   dict->Set(key, arch);
+#endif
 }
 
 static void AddNmfToRequestForShared(
@@ -293,8 +301,34 @@ static bool UseBuiltInFallback(std::string* prog, pp::VarDictionary* req) {
   return false;
 }
 
+// Set the naclType of the request, ideally based on the executable header.
+static void LabelNaClType(const std::string& filename, pp::VarDictionary* req) {
+  // Open script.
+  int fh = open(filename.c_str(), O_RDONLY);
+  if (fh < 0) {
+    // Default to current nacl type if the file can't be read.
+#if defined(__pnacl__)
+    req->Set("naclType", "pnacl");
+#else
+    req->Set("naclType", "nacl");
+#endif
+    return;
+  }
+  // Read first 4 bytes.
+  char buffer[4];
+  ssize_t len = read(fh, buffer, sizeof buffer);
+  close(fh);
+  // Decide based on the header.
+  if (len == 4 && memcmp(buffer, "PEXE", sizeof buffer) == 0) {
+    req->Set("naclType", "pnacl");
+  } else {
+    req->Set("naclType", "nacl");
+  }
+}
+
 // Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
 static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
+  LabelNaClType(prog, req);
   if (UseBuiltInFallback(&prog, req)) {
     return true;
   }
@@ -302,17 +336,21 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
     errno = ENOENT;
     return false;
   }
+
   if (!ExpandShBang(&prog, req)) {
     return false;
   }
-  // Check fallback again in case of #! expanded to something relying on it.
+
+  // Relabel nacl/pnacl and check fallback again in case of #! expanded
+  // to something else.
+  LabelNaClType(prog, req);
   if (UseBuiltInFallback(&prog, req)) {
     return true;
   }
+
   std::vector<std::string> dependencies;
   if (!FindLibraryDependencies(prog, &dependencies))
     return false;
-
   if (!dependencies.empty()) {
     AddNmfToRequestForShared(prog, dependencies, req);
     return true;

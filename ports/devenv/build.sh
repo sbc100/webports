@@ -25,8 +25,8 @@ InstallStep() {
 
   # On newlib there won't be libs, so turn on null glob for these copies.
   shopt -s nullglob
-  LogExecute cp -fR ${GETURL_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
-  LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,nmf},lib*} ${APP_DIR}
+  LogExecute cp -fR ${GETURL_DIR}/{*.{nexe,pexe,nmf},lib*} ${APP_DIR}
+  LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,pexe,nmf},lib*} ${APP_DIR}
   shopt -u nullglob
 
   RESOURCES="background.js bash.js bashrc package setup-environment
@@ -44,11 +44,17 @@ InstallStep() {
 }
 
 PostInstallTestStep() {
+  local arches=
   if [[ ${OS_NAME} == Darwin && ${NACL_ARCH} == x86_64 ]]; then
     echo "Skipping devenv tests on unsupported mac + x86_64 configuration."
   elif [[ ${NACL_ARCH} == arm ]]; then
     echo "Skipping devenv tests on arm for now."
+  elif [[ ${NACL_ARCH} == pnacl ]]; then
+    arches="i686 x86_64"
   else
-    LogExecute python ${START_DIR}/devenv_test.py -x -vv -a ${NACL_ARCH}
+    arches="${NACL_ARCH}"
   fi
+  for arch in ${arches}; do
+    LogExecute python ${START_DIR}/devenv_test.py -x -vv -a ${arch}
+  done
 }

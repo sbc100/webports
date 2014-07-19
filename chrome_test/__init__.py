@@ -53,7 +53,7 @@ def ChromeUrl(arch):
   """Get the URL to download chrome from.
 
   Args:
-    arch: Chrome architecture to select i686/x86_64.
+    arch: Chrome architecture to select i686/x86_64/pnacl.
   Returns:
     URL to download a zip file from.
   """
@@ -67,7 +67,8 @@ def ChromeUrl(arch):
     filename = 'chrome-linux.zip'
     if arch == 'i686':
       target = 'Linux'
-    elif arch == 'x86_64':
+    elif arch == 'x86_64' or arch == 'pnacl':
+      # Arbitrarily decide we will use 64-bit Linux for PNaCl.
       target = 'Linux_x64'
     else:
       logging.error('Bad architecture %s' % arch)

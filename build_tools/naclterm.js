@@ -220,18 +220,27 @@ NaClTerm.prototype.handleExit_ = function(pid, status) {
  * with the correct size.
  */
 NaClTerm.prototype.spawnRootProcess_ = function() {
+  var self = this;
   var argv = NaClTerm.argv || [];
   argv = [NaClTerm.nmf].concat(argv);
 
   try {
-    this.print('Loading NaCl module.\n');
-    var rootPid = this.processManager.spawn(NaClTerm.nmf, argv, [], '/');
-    this.processManager.waitpid(rootPid, 0, this.handleExit_.bind(this));
+    self.print('Loading NaCl module.\n');
+    var handleSuccess = function(naclType) {
+      var rootPid = self.processManager.spawn(
+        NaClTerm.nmf, argv, [], '/', naclType);
+      self.processManager.waitpid(rootPid, 0, self.handleExit_.bind(self));
+    };
+    var handleFailure = function(message) {
+      self.print(message);
+    };
+    self.processManager.checkNaClManifestType(
+        NaClTerm.nmf, handleSuccess, handleFailure);
   } catch (e) {
-    this.print(e.message);
+    self.print(e.message);
   }
 
-  this.started = true;
+  self.started = true;
 }
 
 /**

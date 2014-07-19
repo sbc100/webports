@@ -279,7 +279,7 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
  * @private
  */
 NaClProcessManager.prototype.handleMessage_ = function(e) {
-  if (e.data['command'] == 'nacl_spawn') {
+  if (e.data['command'] === 'nacl_spawn') {
     var msg = e.data;
     console.log('nacl_spawn: ' + JSON.stringify(msg));
     var args = msg['args'];
@@ -287,6 +287,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     var cwd = msg['cwd'];
     var executable = args[0];
     var nmf = msg['nmf'];
+    var naclType = msg['naclType'] || 'nacl';
     if (nmf) {
       if (nmf['files']) {
         for (var key in nmf['files'])
@@ -308,13 +309,13 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
       }
       nmf = executable + '.nmf';
     }
-    var pid = this.spawn(nmf, args, envs, cwd, e.srcElement);
+    var pid = this.spawn(nmf, args, envs, cwd, naclType, e.srcElement);
     var reply = {};
     reply[e.data['id']] = {
       pid: pid
     };
     e.srcElement.postMessage(reply);
-  } else if (e.data['command'] == 'nacl_wait') {
+  } else if (e.data['command'] === 'nacl_wait') {
     var msg = e.data;
     console.log('nacl_wait: ' + JSON.stringify(msg));
     this.waitpid(msg['pid'], msg['options'], function(pid, status) {
@@ -438,6 +439,41 @@ NaClProcessManager.prototype.exit = function(code, element) {
 };
 
 /**
+ * Determines if an url points to a nacl or pnacl manifest.
+ *
+ * @param {string} url The url to download and parse.
+ * @callback typeCallback Called with 'nacl' or 'pnacl' on success.
+ * @callback errorCallback Called with error message on failure.
+ */
+NaClProcessManager.prototype.checkNaClManifestType = function(
+    url, typeCallback, errorCallback) {
+  var request = new XMLHttpRequest();
+  request.open('GET', url, true);
+  request.onload = function() {
+    try {
+      var manifest = JSON.parse(request.responseText);
+    } catch(e) {
+      errorCallback('NaCl Manifest is not valid JSON at ' + url);
+      return;
+    }
+    if ('program' in manifest) {
+      if ('portable' in manifest.program &&
+          'pnacl-translate' in manifest.program.portable) {
+            typeCallback('pnacl');
+          } else {
+            typeCallback('nacl');
+          }
+    } else {
+      errorCallback('NaCl Manifest has bad format at ' + url);
+    }
+  };
+  request.onerror = function() {
+    errorCallback('NaCl Manifest is unreachable at ' + url);
+  };
+  request.send();
+};
+
+/**
  * This spawns a new NaCl process in the current window by creating an HTML
  * embed element.
  *
@@ -448,15 +484,17 @@ NaClProcessManager.prototype.exit = function(code, element) {
  *     process can access. Each entry in the array should be of the format
  *     "VARIABLE_NAME=value".
  * @param {string} cwd The current working directory.
+ * @param {string} naclType 'nacl' or 'pnacl' to select the mime-type.
  * @param {HTMLObjectElement} [parent=null] The DOM object that corresponds to
  *     the process that initiated the spawn. Set to null if there is no such
  *     process.
  * @returns {number} PID of the spawned process, or -1 if there was an error.
  */
-NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
+NaClProcessManager.prototype.spawn = function(
+    nmf, argv, envs, cwd, naclType, parent) {
   if (!parent) parent = null;
 
-  var mimetype = 'application/x-nacl';
+  var mimetype = 'application/x-' + naclType;
   if (navigator.mimeTypes[mimetype] === undefined) {
     if (mimetype.indexOf('pnacl') != -1)
       throw new Error('Browser does not support PNaCl or PNaCl is disabled\n');
@@ -495,7 +533,7 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
       continue;
     }
     var key = env.substring(0, index);
-    if (key == 'SRC' || key == 'DATA' || key.match(/^ARG\d+$/i))
+    if (key === 'SRC' || key === 'DATA' || key.match(/^ARG\d+$/i))
       continue;
     params[key] = env.substring(index + 1);
   }
@@ -518,6 +556,11 @@ NaClProcessManager.prototype.spawn = function(nmf, argv, envs, cwd, parent) {
   }
 
   function addParam(name, value) {
+    // Don't set a 'type' field as this seems to confuse manifest parsing for
+    // pnacl.
+    if (name.toLowerCase() === 'type') {
+      return;
+    }
     var param = document.createElement('param');
     param.name = name;
     param.value = value;
@@ -619,7 +662,7 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
   var self = this;
   var finishedProcess = null;
   Object.keys(this.processes).some(function(pid) {
-    if (typeof self.processes[pid] == 'number') {
+    if (typeof self.processes[pid] === 'number') {
       finishedProcess = pid;
       return true;
     }
@@ -632,7 +675,7 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
   } else if (pid >= 0 && !this.processes[pid]) {
     // The process does not exist.
     reply(-NaClProcessManager.ECHILD, 0);
-  } else if (typeof this.processes[pid] == 'number') {
+  } else if (typeof this.processes[pid] === 'number') {
     // The process has already finished.
     reply(pid, this.processes[pid]);
     delete this.processes[pid];
