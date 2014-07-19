@@ -510,21 +510,20 @@ index 5ddf11c..cada21a 100644
  	struct strbuf buf = STRBUF_INIT, url_sb = STRBUF_INIT,
  			private_ref_sb = STRBUF_INIT, marksfilename_sb = STRBUF_INIT,
 diff --git a/run-command.c b/run-command.c
-index 1b32a12..8716404 100644
+index 1b32a12..1f9a5c3 100644
 --- a/run-command.c
 +++ b/run-command.c
-@@ -232,7 +232,11 @@ static int wait_or_whine(pid_t pid, const char *argv0)
- 	pid_t waiting;
- 	int failed_errno = 0;
+@@ -4,6 +4,10 @@
+ #include "sigchain.h"
+ #include "argv-array.h"
  
 +#if defined(__native_client__)
-+	while ((waiting = nacl_waitpid(pid, &status, 0)) < 0 && errno == EINTR)
-+#else
- 	while ((waiting = waitpid(pid, &status, 0)) < 0 && errno == EINTR)
++# include "nacl_spawn.h"
 +#endif
- 		;	/* nothing */
- 
- 	if (waiting < 0) {
++
+ #ifndef SHELL_PATH
+ # define SHELL_PATH "/bin/sh"
+ #endif
 @@ -334,7 +338,7 @@ fail_pipe:
  	trace_argv_printf(cmd->argv, "trace: run_command:");
  	fflush(NULL);
@@ -551,7 +550,7 @@ index 1b32a12..8716404 100644
  
 +#if defined(__native_client__)
 +        // TODO(bradnelson): Support pipes and cwd.
-+	cmd->pid = nacl_spawn_simple(cmd->argv);
++	cmd->pid = spawnve(P_NOWAIT, cmd->argv[0], cmd->argv, env);
 +#else
  	cmd->pid = mingw_spawnvpe(cmd->argv[0], cmd->argv, env, cmd->dir,
  				  fhin, fhout, fherr);

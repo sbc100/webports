@@ -7,6 +7,9 @@
 #ifndef _NACL_SPAWN_H_
 #define _NACL_SPAWN_H_
 
+#include <sys/types.h>
+#include <sys/wait.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,22 +35,19 @@ extern int nacl_startup_untar(
  * Spawn a child using the current environment and given args.
  *
  * Args:
+ *   mode: Execute mode, one of the defines below.
+ *   path: The program to run.
  *   argv: The startup arguments for the child.
+ *   envp: The environment to run the child in.
  * Returns:
  *   Process id of the child or -1 for error.
  */
-extern int nacl_spawn_simple(const char** argv);
-
-/*
- * Wait for a process to complete.
- * Args:
- *   pid: Process id to wait on, or -1 for all children.
- *   status: Address to store exit code to or NULL.
- *   options: 0 or WNOHANG (to poll).
- * Returns:
- *   Process id of completed child, 0 for none, or -1 for error.
- */
-extern int nacl_waitpid(int pid, int* status, int options);
+extern int spawnve(int mode, const char* path,
+                   char *const argv[], char *const envp[]);
+#define P_WAIT 1
+#define P_NOWAIT 2
+#define P_NOWAITO 3
+#define O_OVERLAY 4
 
 #ifdef __cplusplus
 }

@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <string>
@@ -324,8 +326,37 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
 // a lot of features posix_spawn supports (e.g., handling FDs).
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
-int nacl_spawn_simple(const char** argv) {
-  assert(argv[0]);
+int spawnve(int mode, const char* path,
+            char *const argv[], char *const envp[]) {
+  if (NULL == path || NULL == argv[0]) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (mode == P_WAIT) {
+    int pid = spawnve(P_NOWAIT, path, argv, envp);
+    if (pid < 0) {
+      return -1;
+    }
+    int status;
+    int result = waitpid(pid, &status, 0);
+    if (result < 0) {
+      return -1;
+    }
+    return status;
+  } else if (mode == P_NOWAIT || mode == P_NOWAITO) {
+    // The normal case.
+  } else if (mode == O_OVERLAY) {
+    // TODO(bradnelson): Add this by allowing javascript to replace the
+    // existing module with a new one.
+    errno = ENOSYS;
+    return -1;
+  } else {
+    errno = EINVAL;
+    return -1;
+  }
+  if (NULL == envp) {
+    envp = environ;
+  }
   pp::VarDictionary req;
   req.Set("command", "nacl_spawn");
   pp::VarArray args;
@@ -333,12 +364,12 @@ int nacl_spawn_simple(const char** argv) {
     args.Set(i, argv[i]);
   req.Set("args", args);
   pp::VarArray envs;
-  for (int i = 0; environ[i]; i++)
-    envs.Set(i, environ[i]);
+  for (int i = 0; envp[i]; i++)
+    envs.Set(i, envp[i]);
   req.Set("envs", envs);
   req.Set("cwd", GetCwd());
 
-  if (!AddNmfToRequest(argv[0], &req)) {
+  if (!AddNmfToRequest(path, &req)) {
     errno = ENOENT;
     return -1;
   }
@@ -351,11 +382,19 @@ int nacl_spawn_simple(const char** argv) {
   return result;
 }
 
+#if defined(__GLIBC__)
+extern "C" pid_t wait(void* status) {
+#else
+extern "C" pid_t wait(int* status) {
+#endif
+  return waitpid(-1, static_cast<int*>(status), 0);
+}
+
 // Waits for the specified pid. The semantics of this function is as
 // same as waitpid, though this implementation has some restrictions.
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
-int nacl_waitpid(int pid, int* status, int options) {
+extern "C" pid_t waitpid(int pid, int* status, int options) {
 
   pp::VarDictionary req;
   req.Set("command", "nacl_wait");

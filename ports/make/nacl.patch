@@ -16,35 +16,21 @@ index 6481e99..ea6f0ab 100644
  AM_CPPFLAGS = $(GLOBINC) $(am__append_2)
  
 diff --git a/job.c b/job.c
-index aacfb84..06568e1 100644
+index aacfb84..9be95e9 100644
 --- a/job.c
 +++ b/job.c
-@@ -119,7 +119,11 @@ static void vmsWaitForChildren (int *);
- #endif
+@@ -29,6 +29,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
  
- #ifdef HAVE_WAITPID
--# define WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
-+# if defined(__native_client__)
-+#  define WAIT_NOHANG(status)	nacl_waitpid (-1, (status), WNOHANG)
-+# else
-+#  define WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
-+# endif
- #else	/* Don't have waitpid.  */
- # ifdef HAVE_WAIT3
- #  ifndef wait3
-@@ -614,7 +618,11 @@ reap_children (int block, int err)
- 		pid = WAIT_NOHANG (&status);
- 	      else
- #endif
-+# if defined(__native_client__)
-+		EINTRLOOP(pid, nacl_waitpid (-1, &status, 0));
-+# else
- 		EINTRLOOP(pid, wait (&status));
-+# endif
- #endif /* !VMS */
- 	    }
- 	  else
-@@ -1320,8 +1328,17 @@ start_job_command (struct child *child)
+ #include <string.h>
+ 
++#if defined(__native_client__)
++#include "nacl_spawn.h"
++#endif
++
+ /* Default shell to use.  */
+ #ifdef WINDOWS32
+ #include <windows.h>
+@@ -1320,8 +1324,14 @@ start_job_command (struct child *child)
        if (job_rfd >= 0)
  	fcntl (job_rfd, F_SETFD, 0);
  
@@ -52,19 +38,16 @@ index aacfb84..06568e1 100644
 -
 +# else  /* !__EMX__ */
 +#  if defined(__native_client__)
-+      environ = child->environment;
-+      child->pid = nacl_spawn_simple(argv);
++      child->pid = spawnve(P_NOWAIT, argv[0], argv, child->environment);
 +      if (child->pid < 0) {
-+        environ = parent_environ;
-+        perror_with_name ("nacl_spawn_simple", "");
++        perror_with_name ("spawnve", "");
 +        goto error;
 +      }
-+      environ = parent_environ;
 +#  else
        child->pid = vfork ();
        environ = parent_environ;	/* Restore value child may have clobbered.  */
        if (child->pid == 0)
-@@ -1339,11 +1356,11 @@ start_job_command (struct child *child)
+@@ -1339,11 +1349,11 @@ start_job_command (struct child *child)
            if (job_rfd >= 0)
              close (job_rfd);
  
@@ -78,7 +61,7 @@ index aacfb84..06568e1 100644
  
  	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
                               argv, child->environment);
-@@ -1355,6 +1372,7 @@ start_job_command (struct child *child)
+@@ -1355,6 +1365,7 @@ start_job_command (struct child *child)
  	  perror_with_name ("vfork", "");
  	  goto error;
  	}

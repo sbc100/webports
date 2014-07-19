@@ -111,7 +111,7 @@ index a381e83..a4d42c0 100644
    // Set a handler to catch crashes not caught by the __try..__except
    // block (e.g. an exception in a stack-unwind-block).
 diff --git a/src/subprocess-posix.cc b/src/subprocess-posix.cc
-index 743e406..6d51d5c 100644
+index 743e406..20df5e1 100644
 --- a/src/subprocess-posix.cc
 +++ b/src/subprocess-posix.cc
 @@ -17,14 +17,22 @@
@@ -145,9 +145,9 @@ index 743e406..6d51d5c 100644
 +#if defined(__native_client__)
 +  const char *cmd[] = {"bash", "-c", (char *) NULL, (char *) NULL};
 +  cmd[2] = command.c_str(); 
-+  pid_ = nacl_spawn_simple(cmd);
++  pid_ = spawnve(P_NOWAIT, cmd[0], const_cast<char *const*>(cmd), NULL);
 +  if (pid_ < 0) {
-+    Fatal("nacl_spawn_simple: %s", strerror(errno));
++    Fatal("spawnve: %s", strerror(errno));
 +  }
 +#else
    pid_ = fork();
@@ -174,19 +174,7 @@ index 743e406..6d51d5c 100644
  
    close(output_pipe[1]);
    return true;
-@@ -121,7 +140,11 @@ void Subprocess::OnPipeReady() {
- ExitStatus Subprocess::Finish() {
-   assert(pid_ != -1);
-   int status;
-+#if defined(__native_client__)
-+  if (nacl_waitpid(pid_, &status, 0) < 0)
-+#else
-   if (waitpid(pid_, &status, 0) < 0)
-+#endif
-     Fatal("waitpid(%d): %s", pid_, strerror(errno));
-   pid_ = -1;
- 
-@@ -152,6 +175,7 @@ void SubprocessSet::SetInterruptedFlag(int signum) {
+@@ -152,6 +171,7 @@ void SubprocessSet::SetInterruptedFlag(int signum) {
  }
  
  SubprocessSet::SubprocessSet() {
@@ -194,7 +182,7 @@ index 743e406..6d51d5c 100644
    sigset_t set;
    sigemptyset(&set);
    sigaddset(&set, SIGINT);
-@@ -163,15 +187,18 @@ SubprocessSet::SubprocessSet() {
+@@ -163,15 +183,18 @@ SubprocessSet::SubprocessSet() {
    act.sa_handler = SetInterruptedFlag;
    if (sigaction(SIGINT, &act, &old_act_) < 0)
      Fatal("sigaction: %s", strerror(errno));
@@ -213,7 +201,7 @@ index 743e406..6d51d5c 100644
  }
  
  Subprocess *SubprocessSet::Add(const string& command, bool use_console) {
-@@ -247,7 +274,11 @@ bool SubprocessSet::DoWork() {
+@@ -247,7 +270,11 @@ bool SubprocessSet::DoWork() {
    }
  
    interrupted_ = false;

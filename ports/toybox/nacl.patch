@@ -1,3 +1,269 @@
+diff --git a/.config b/.config
+index b56b3b8..842a7a3 100644
+--- a/.config
++++ b/.config
+@@ -1,81 +1,81 @@
+ #
+ # Automatically generated make config: don't edit
+ # ToyBox version: KCONFIG_VERSION
+-# Mon Nov 18 07:48:07 2013
++# Fri Jan  3 14:13:06 2014
+ #
+ CONFIG_TOYBOX_CONTAINER=y
+ 
+ #
+ # LSB commands
+ #
+-CONFIG_DMESG=y
+-CONFIG_HOSTNAME=y
+-CONFIG_KILLALL=y
+-CONFIG_MD5SUM=y
+-CONFIG_MD5SUM_SHA1SUM=y
+-CONFIG_MKNOD=y
++# CONFIG_DMESG is not set
++# CONFIG_HOSTNAME is not set
++# CONFIG_KILLALL is not set
++# CONFIG_MD5SUM is not set
++# CONFIG_MD5SUM_SHA1SUM is not set
++# CONFIG_MKNOD is not set
+ CONFIG_MKTEMP=y
+-CONFIG_PASSWD=y
+-CONFIG_PIDOF=y
++# CONFIG_PASSWD is not set
++# CONFIG_PIDOF is not set
+ CONFIG_SEQ=y
+-CONFIG_SYNC=y
+-CONFIG_UMOUNT=y
++# CONFIG_SYNC is not set
++# CONFIG_UMOUNT is not set
+ 
+ #
+ # Other commands
+ #
+-CONFIG_ACPI=y
+-CONFIG_BLKID=y
++# CONFIG_ACPI is not set
++# CONFIG_BLKID is not set
+ CONFIG_BZCAT=y
+ CONFIG_CATV=y
+-CONFIG_CHROOT=y
+-CONFIG_CHVT=y
++# CONFIG_CHROOT is not set
++# CONFIG_CHVT is not set
+ CONFIG_CLEAR=y
+ CONFIG_COUNT=y
+ CONFIG_DOS2UNIX=y
+-CONFIG_EJECT=y
++# CONFIG_EJECT is not set
+ # CONFIG_FALLOCATE is not set
+-CONFIG_FREE=y
++# CONFIG_FREE is not set
+ # CONFIG_HELLO is not set
+ CONFIG_HELP=y
+-CONFIG_INSMOD=y
+-CONFIG_LOGIN=y
+-CONFIG_LOSETUP=y
+-CONFIG_LSMOD=y
+-CONFIG_LSUSB=y
+-CONFIG_MKSWAP=y
+-CONFIG_MODINFO=y
+-CONFIG_MOUNTPOINT=y
+-CONFIG_NETCAT=y
+-CONFIG_NETCAT_LISTEN=y
+-CONFIG_ONEIT=y
+-CONFIG_PIVOT_ROOT=y
+-CONFIG_PMAP=y
++# CONFIG_INSMOD is not set
++# CONFIG_LOGIN is not set
++# CONFIG_LOSETUP is not set
++# CONFIG_LSMOD is not set
++# CONFIG_LSUSB is not set
++# CONFIG_MKSWAP is not set
++# CONFIG_MODINFO is not set
++# CONFIG_MOUNTPOINT is not set
++# CONFIG_NETCAT is not set
++# CONFIG_NETCAT_LISTEN is not set
++# CONFIG_ONEIT is not set
++# CONFIG_PIVOT_ROOT is not set
++# CONFIG_PMAP is not set
+ CONFIG_PRINTENV=y
+ CONFIG_PWDX=y
+-CONFIG_READAHEAD=y
+-CONFIG_READLINK=y
+-CONFIG_REALPATH=y
+-CONFIG_REBOOT=y
++# CONFIG_READAHEAD is not set
++# CONFIG_READLINK is not set
++# CONFIG_REALPATH is not set
++# CONFIG_REBOOT is not set
+ CONFIG_REV=y
+-CONFIG_RMMOD=y
+-CONFIG_SETSID=y
+-CONFIG_STAT=y
+-CONFIG_SWAPOFF=y
+-CONFIG_SWAPON=y
+-CONFIG_SWITCH_ROOT=y
++# CONFIG_RMMOD is not set
++# CONFIG_SETSID is not set
++# CONFIG_STAT is not set
++# CONFIG_SWAPOFF is not set
++# CONFIG_SWAPON is not set
++# CONFIG_SWITCH_ROOT is not set
+ CONFIG_TAC=y
+-CONFIG_TASKSET=y
+-CONFIG_TIMEOUT=y
++# CONFIG_TASKSET is not set
++# CONFIG_TIMEOUT is not set
+ CONFIG_TRUNCATE=y
+-CONFIG_UNSHARE=y
+-CONFIG_UPTIME=y
++# CONFIG_UNSHARE is not set
++# CONFIG_UPTIME is not set
+ CONFIG_USLEEP=y
+-CONFIG_VCONFIG=y
+-CONFIG_VMSTAT=y
+-CONFIG_W=y
++# CONFIG_VCONFIG is not set
++# CONFIG_VMSTAT is not set
++# CONFIG_W is not set
+ CONFIG_WHICH=y
+-CONFIG_WHOAMI=y
++# CONFIG_WHOAMI is not set
+ CONFIG_YES=y
+ 
+ #
+@@ -89,10 +89,10 @@ CONFIG_YES=y
+ # CONFIG_DUMPLEASES is not set
+ # CONFIG_EXPR is not set
+ # CONFIG_FDISK is not set
+-# CONFIG_FIND is not set
++CONFIG_FIND=y
+ # CONFIG_FSCK is not set
+ # CONFIG_GROUPADD is not set
+-CONFIG_IFCONFIG=y
++# CONFIG_IFCONFIG is not set
+ # CONFIG_INIT is not set
+ # CONFIG_KLOGD is not set
+ # CONFIG_KLOGD_SOURCE_RING_BUFFER is not set
+@@ -112,20 +112,20 @@ CONFIG_IFCONFIG=y
+ # CONFIG_PGREP is not set
+ # CONFIG_PS is not set
+ # CONFIG_ROUTE is not set
+-# CONFIG_SED is not set
+-# CONFIG_SH is not set
+-# CONFIG_SH_TTY is not set
+-# CONFIG_SH_PROFILE is not set
++CONFIG_SED=y
++CONFIG_SH=y
++CONFIG_SH_TTY=y
++CONFIG_SH_PROFILE=y
+ # CONFIG_SH_JOBCTL is not set
+ # CONFIG_SH_FLOWCTL is not set
+-# CONFIG_SH_QUOTES is not set
+-# CONFIG_SH_WILDCARDS is not set
++CONFIG_SH_QUOTES=y
++CONFIG_SH_WILDCARDS=y
+ # CONFIG_SH_PROCARGS is not set
+-# CONFIG_SH_ENVVARS is not set
+-# CONFIG_SH_LOCALS is not set
+-# CONFIG_SH_ARRAYS is not set
++CONFIG_SH_ENVVARS=y
++CONFIG_SH_LOCALS=y
++CONFIG_SH_ARRAYS=y
+ # CONFIG_SH_PIPES is not set
+-# CONFIG_SH_BUILTINS is not set
++CONFIG_SH_BUILTINS=y
+ # CONFIG_EXIT is not set
+ # CONFIG_CD is not set
+ # CONFIG_CD_P is not set
+@@ -145,7 +145,7 @@ CONFIG_IFCONFIG=y
+ CONFIG_BASENAME=y
+ CONFIG_CAL=y
+ CONFIG_CAT=y
+-CONFIG_CHGRP=y
++# CONFIG_CHGRP is not set
+ CONFIG_CHMOD=y
+ CONFIG_CKSUM=y
+ CONFIG_CMP=y
+@@ -155,9 +155,9 @@ CONFIG_CP_MORE=y
+ CONFIG_CP_MV=y
+ CONFIG_CP_MV_MORE=y
+ CONFIG_CUT=y
+-CONFIG_DATE=y
+-CONFIG_DF=y
+-CONFIG_DF_PEDANTIC=y
++# CONFIG_DATE is not set
++# CONFIG_DF is not set
++# CONFIG_DF_PEDANTIC is not set
+ CONFIG_DIRNAME=y
+ CONFIG_DU=y
+ CONFIG_ECHO=y
+@@ -166,24 +166,24 @@ CONFIG_EXPAND=y
+ CONFIG_FALSE=y
+ CONFIG_GREP=y
+ CONFIG_HEAD=y
+-CONFIG_ID=y
+-CONFIG_ID_GROUPS=y
+-CONFIG_KILL=y
+-CONFIG_LINK=y
++# CONFIG_ID is not set
++# CONFIG_ID_GROUPS is not set
++# CONFIG_KILL is not set
++# CONFIG_LINK is not set
+ CONFIG_LN=y
+-CONFIG_LOGNAME=y
++# CONFIG_LOGNAME is not set
+ CONFIG_LS=y
+ CONFIG_LS_COLOR=y
+ CONFIG_MKDIR=y
+-CONFIG_MKFIFO=y
+-CONFIG_NICE=y
++# CONFIG_MKFIFO is not set
++# CONFIG_NICE is not set
+ CONFIG_NL=y
+-CONFIG_NOHUP=y
++# CONFIG_NOHUP is not set
+ CONFIG_OD=y
+ CONFIG_PASTE=y
+ CONFIG_PATCH=y
+ CONFIG_PWD=y
+-CONFIG_RENICE=y
++# CONFIG_RENICE is not set
+ CONFIG_RM=y
+ CONFIG_RMDIR=y
+ CONFIG_SLEEP=y
+@@ -194,18 +194,18 @@ CONFIG_SORT_FLOAT=y
+ CONFIG_SPLIT=y
+ CONFIG_TAIL=y
+ CONFIG_TAIL_SEEK=y
+-CONFIG_TEE=y
+-CONFIG_TIME=y
+-CONFIG_TOUCH=y
++# CONFIG_TEE is not set
++# CONFIG_TIME is not set
++# CONFIG_TOUCH is not set
+ CONFIG_TRUE=y
+-CONFIG_TTY=y
++# CONFIG_TTY is not set
+ CONFIG_UNAME=y
+-CONFIG_UNIQ=y
++# CONFIG_UNIQ is not set
+ CONFIG_UNLINK=y
+ CONFIG_UUDECODE=y
+ CONFIG_UUENCODE=y
+ CONFIG_WC=y
+-CONFIG_WHO=y
++# CONFIG_WHO is not set
+ CONFIG_XARGS=y
+ # CONFIG_XARGS_PEDANTIC is not set
+ 
+@@ -222,5 +222,5 @@ CONFIG_TOYBOX_FLOAT=y
+ CONFIG_TOYBOX_HELP=y
+ CONFIG_TOYBOX_HELP_DASHDASH=y
+ CONFIG_TOYBOX_I18N=y
+-# CONFIG_TOYBOX_FREE is not set
++CONFIG_TOYBOX_FREE=y
+ # CONFIG_TOYBOX_DEBUG is not set
 diff --git a/configure b/configure
 index 6047baf..7cc58e9 100644
 --- a/configure
@@ -550,10 +816,21 @@ index 4b8a87d..9fdd3ea 100644
  
  static void handler(int i)
 diff --git a/toys/pending/sh.c b/toys/pending/sh.c
-index 2f09f63..ef7da08 100644
+index 2f09f63..fd7109d 100644
 --- a/toys/pending/sh.c
 +++ b/toys/pending/sh.c
-@@ -291,7 +291,11 @@ static void run_pipeline(struct pipeline *line)
+@@ -177,6 +177,10 @@ config CD_P
+ #define FOR_sh
+ #include "toys.h"
+ 
++#if defined(__native_client__)
++# include "nacl_spawn.h"
++#endif
++
+ GLOBALS(
+   char *command;
+ )
+@@ -291,7 +295,11 @@ static void run_pipeline(struct pipeline *line)
  
    tl = toy_find(cmd->argv[0]);
    // Is this command a builtin that should run in this process?
@@ -565,14 +842,14 @@ index 2f09f63..ef7da08 100644
      struct toy_context temp;
      jmp_buf rebound;
  
-@@ -311,10 +315,15 @@ static void run_pipeline(struct pipeline *line)
+@@ -311,10 +319,15 @@ static void run_pipeline(struct pipeline *line)
    } else {
      int status;
  
 +#ifdef __native_client__
-+    cmd->pid = nacl_spawn_simple(cmd->argv);
++    cmd->pid = spawnve(P_NOWAIT, cmd->argv[0], cmd->argv, NULL);
 +    if (cmd->pid <= 0) xprintf("error spawning %s\n", cmd->argv[0]);
-+    else nacl_waitpid(cmd->pid, &status, 0);
++    else waitpid(cmd->pid, &status, 0);
 +#else
      cmd->pid = vfork();
      if (!cmd->pid) xexec(cmd->argv);
@@ -582,7 +859,7 @@ index 2f09f63..ef7da08 100644
      if (CFG_SH_FLOWCTL || CFG_SH_PIPES) {
        if (WIFEXITED(status)) cmd->pid = WEXITSTATUS(status);
        if (WIFSIGNALED(status)) cmd->pid = WTERMSIG(status);
-@@ -382,7 +391,12 @@ void sh_main(void)
+@@ -382,7 +395,12 @@ void sh_main(void)
      for (;;) {
        char *command = 0;
        if (!f) xputc('$');

@@ -32,7 +32,7 @@ index 9f9276d..896f71d 100644
  	-$(SIZE) $(Program)
  
 diff --git a/bashline.c b/bashline.c
-index 52c6de6..72dd9e8 100644
+index 52c6de6..4bc78dd 100644
 --- a/bashline.c
 +++ b/bashline.c
 @@ -2119,7 +2119,7 @@ bash_groupname_completion_function (text, state)
@@ -92,10 +92,21 @@ index 9011e0b..0f54f48 100644
      }
  
 diff --git a/execute_cmd.c b/execute_cmd.c
-index 485b0c7..de77f14 100644
+index 485b0c7..a2c428c 100644
 --- a/execute_cmd.c
 +++ b/execute_cmd.c
-@@ -2202,7 +2202,11 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
+@@ -98,6 +98,10 @@ extern int errno;
+ #  include "bashhist.h"
+ #endif
+ 
++#if defined(__native_client__)
++#  include "nacl_spawn.h"
++#endif
++
+ extern int dollar_dollar_pid;
+ extern int posixly_correct;
+ extern int expand_aliases;
+@@ -2202,7 +2206,11 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
    /* If the `lastpipe' option is set with shopt, and job control is not
       enabled, execute the last element of non-async pipelines in the
       current shell environment. */
@@ -107,7 +118,7 @@ index 485b0c7..de77f14 100644
      {
        lstdin = move_to_high_fd (0, 0, 255);
        if (lstdin > 0)
-@@ -4631,6 +4635,33 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
+@@ -4631,6 +4639,33 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
    SHELL_VAR *hookf;
    WORD_LIST *wl;
  
@@ -116,7 +127,7 @@ index 485b0c7..de77f14 100644
 +  maybe_make_export_env ();
 +  args = strvec_from_word_list (words, 0, 0, (int *)NULL);
 +  pathname = words->word->word;
-+  pid = nacl_spawn_simple(args);
++  pid = spawnve(P_NOWAIT, args[0], args, NULL);
 +  free(args);
 +  if (pid < 0) {
 +    /* Make sure filenames are displayed using printable characters */
@@ -129,10 +140,10 @@ index 485b0c7..de77f14 100644
 +    }
 +    return EX_NOTFOUND;  /* Posix.2 says the exit status is 127 */
 +  }
-+  if (nacl_waitpid(pid, &result, 0) < 0) {
++  if (waitpid(pid, &result, 0) < 0) {
 +    if (ansic_shouldquote (pathname))
 +      pathname = ansic_quote (pathname, 0, NULL);
-+    internal_error (_("%s: nacl_waitpid failed (errno %d)"), pathname, errno);
++    internal_error (_("%s: waitpid failed (errno %d)"), pathname, errno);
 +    return EXECUTION_FAILURE;
 +  }
 +  /* TODO(bradnelson): Make this more general once we support signals. */
@@ -141,7 +152,7 @@ index 485b0c7..de77f14 100644
    nofork = (cmdflags & CMD_NO_FORK);  /* Don't fork, just exec, if no pipes */
    pathname = words->word->word;
  
-@@ -4760,6 +4791,7 @@ parent_return:
+@@ -4760,6 +4795,7 @@ parent_return:
        FREE (command);
        return (result);
      }
