@@ -333,10 +333,10 @@ index 50cf179..7b9a0a7 100644
  #endif
 diff --git a/src/audio/nacl/SDL_naclaudio.cc b/src/audio/nacl/SDL_naclaudio.cc
 new file mode 100644
-index 0000000..908a498
+index 0000000..7a02156
 --- /dev/null
 +++ b/src/audio/nacl/SDL_naclaudio.cc
-@@ -0,0 +1,150 @@
+@@ -0,0 +1,140 @@
 +#include "SDL_config.h"
 +#include "SDL_naclaudio.h"
 +
@@ -411,12 +411,10 @@ index 0000000..908a498
 +
 +  _this->hidden->mutex = SDL_CreateMutex();
 +
-+  _this->hidden->opened = false;
-+
 +  // TODO: Move audio device creation to NACLAUD_OpenAudio.
-+  const PPB_Audio_1_1* g_nacl_audio_interface =
++  g_nacl_audio_interface =
 +      (const PPB_Audio_1_1*)g_nacl_get_interface(PPB_AUDIO_INTERFACE_1_1);
-+  const PPB_AudioConfig_1_1* g_nacl_audio_config_interface =
++  g_nacl_audio_config_interface =
 +      (const PPB_AudioConfig_1_1*)g_nacl_get_interface(
 +          PPB_AUDIO_CONFIG_INTERFACE_1_1);
 +
@@ -448,9 +446,6 @@ index 0000000..908a498
 +};
 +
 +static void NACLAUD_CloseAudio(_THIS) {
-+  SDL_LockMutex(_this->hidden->mutex);
-+  _this->hidden->opened = 0;
-+  SDL_UnlockMutex(_this->hidden->mutex);
 +}
 +
 +static void AudioCallback(void* samples, uint32_t buffer_size, PP_TimeDelta,
@@ -458,7 +453,8 @@ index 0000000..908a498
 +  SDL_AudioDevice* _this = reinterpret_cast<SDL_AudioDevice*>(data);
 +
 +  SDL_LockMutex(_this->hidden->mutex);
-+  if (_this->hidden->opened) {
++  /* Only do anything if audio is enabled and not paused */
++  if (_this->enabled && !_this->paused) {
 +    SDL_memset(samples, _this->spec.silence, buffer_size);
 +    SDL_LockMutex(_this->mixer_lock);
 +    (*_this->spec.callback)(_this->spec.userdata, (Uint8*)samples, buffer_size);
@@ -477,22 +473,16 @@ index 0000000..908a498
 +  spec->format = AUDIO_S16LSB;
 +  spec->channels = 2;
 +  spec->samples = _this->hidden->sample_frame_count;
-+
-+  SDL_LockMutex(_this->hidden->mutex);
-+  _this->hidden->opened = 1;
-+  SDL_UnlockMutex(_this->hidden->mutex);
-+
-+  // Do not create an audio thread.
 +  return 1;
 +}
 +
 +}  // extern "C"
 diff --git a/src/audio/nacl/SDL_naclaudio.h b/src/audio/nacl/SDL_naclaudio.h
 new file mode 100644
-index 0000000..b166ab0
+index 0000000..ab52848
 --- /dev/null
 +++ b/src/audio/nacl/SDL_naclaudio.h
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,23 @@
 +#include "SDL_config.h"
 +
 +#ifndef _SDL_naclaudio_h
@@ -510,14 +500,7 @@ index 0000000..b166ab0
 +#define _THIS	SDL_AudioDevice *_this
 +
 +struct SDL_PrivateAudioData {
-+
 +  SDL_mutex* mutex;
-+  // This flag is use to determine when the audio is opened and we can start
-+  // serving audio data instead of silence. This is needed because current
-+  // Pepper2 can only be used from the main thread; Therefore, we start the
-+  // audio thread very early.
-+  bool opened;
-+
 +  int sample_frame_count;
 +  PP_Resource audio;
 +};
@@ -554,10 +537,10 @@ index 5c2d81f..7a757a3 100644
  	if ( CPU_haveCPUID() ) {
 diff --git a/src/main/nacl/pepper_instance.c b/src/main/nacl/pepper_instance.c
 new file mode 100644
-index 0000000..997e13a
+index 0000000..6e1f036
 --- /dev/null
 +++ b/src/main/nacl/pepper_instance.c
-@@ -0,0 +1,310 @@
+@@ -0,0 +1,338 @@
 +/*
 + * Copyright (c) 2011 The Native Client Authors. All rights reserved.
 + * Use of this source code is governed by a BSD-style license that can be
@@ -698,7 +681,29 @@ index 0000000..997e13a
 +  int mount_default = 1;
 +  nacl_io_log("SDL: ProcessArgs %d\n", g_argc);
 +
-+  umount("/");
++  // This could fail if the sdl_mount_http attributes
++  // above created a mount on "/".
++  fprintf(stderr, "SDL: creating memfs on root\n");
++
++  rtn = umount("/");
++  if (rtn != 0)
++    fprintf(stderr, "SDL: umount failed: %s\n", strerror(errno));
++
++  rtn = mount("", "/", "memfs", 0, "");
++  if (rtn != 0)
++    fprintf(stderr, "SDL: mount failed: %s\n", strerror(errno));
++
++  rtn = mkdir("/tmp", S_IRWXU | S_IRWXG);
++  if (rtn != 0)
++    fprintf(stderr, "SDL: mkdir /tmp failed: %s\n", strerror(errno));
++
++  rtn = mkdir("/home", S_IRWXU | S_IRWXG);
++  if (rtn != 0)
++    fprintf(stderr, "SDL: mkdir /home failed: %s\n", strerror(errno));
++
++  rtn = mount("", "/tmp", "html5fs", 0, "type=TEMPORARY");
++  if (rtn != 0)
++    fprintf(stderr, "SDL: mount /tmp failed: %s\n", strerror(errno));
 +
 +  for (i = 0; i < g_argc; i++) {
 +    if (!strcmp(g_argn[i], "ps_stdout")) {
@@ -756,17 +761,23 @@ index 0000000..997e13a
 +  if (mount_default) {
 +    // Create an http mount by default
 +    fprintf(stderr, "SDL: creating default http mount\n");
-+    rtn = mount("", "/", "httpfs", 0, "");
-+    if (rtn != 0) fprintf(stderr, "SDL: mount failed: %s\n", strerror(errno));
-+  } else {
-+    // This could fail if the sdl_mount_http attributes
-+    // about created a mount on "/".
-+    fprintf(stderr, "SDL: creating memfs on root\n");
-+    mount("", "/", "memfs", 0, "");
++    rtn = chdir("/home");
++    if (rtn != 0)
++      fprintf(stderr, "SDL: chdir failed: %s\n", strerror(errno));
++    rtn = mount(".", "/home", "httpfs", 0, "");
++    if (rtn != 0)
++      fprintf(stderr, "SDL: mount failed: %s\n", strerror(errno));
 +  }
 +
 +  for (i = 0; i < g_argc; i++) {
-+    if (!strcmp(g_argn[i], "sdl_tar_extract")) {
++    nacl_io_log("SDL: arg=%s\n", g_argn[i]);
++    if (!stricmp(g_argn[i], "PWD")) {
++      int rtn = chdir(g_argv[i]);
++      if (rtn != 0)
++        nacl_io_log("SDL: chdir(%s) failed\n", g_argv[i]);
++      else
++        nacl_io_log("SDL: chdir(%s)\n", g_argv[i]);
++    } else if (!strcmp(g_argn[i], "sdl_tar_extract")) {
 +      const char* source;
 +      const char* target = "/";
 +      char* sep;
@@ -804,9 +815,9 @@ index 0000000..997e13a
 +        }
 +
 +        rtn = mkdir(target, S_IRWXU | S_IRWXG);
-+        if (rtn != 0) {
++        if (rtn != 0)
 +          fprintf(stderr, "SDL: mkdir failed: %s\n", strerror(errno));
-+        }
++
 +        rtn = tar_extract_all(tar, (char*)target);
 +        if (rtn != 0) {
 +          fprintf(stderr, "SDL: tar_extract_all failed\n");
