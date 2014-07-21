@@ -25,10 +25,21 @@ function DevEnvFileTest() {
 DevEnvFileTest.prototype = new DevEnvTest();
 DevEnvFileTest.prototype.constructor = DevEnvFileTest;
 
+DevEnvFileTest.prototype.setUp = function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return DevEnvTest.prototype.setUp.call(self);
+  }).then(function() {
+    return self.initFileSystem();
+  }).then(function() {
+    return self.mkdir('/home/user');
+  });
+};
+
 DevEnvFileTest.prototype.tearDown = function() {
   var self = this;
   return Promise.resolve().then(function() {
-    return self.runCommand('rm -rf /home/user');
+    return self.rmRf('/home/user');
   }).then(function() {
     return DevEnvTest.prototype.tearDown.call(self);
   });
@@ -43,5 +54,18 @@ TEST_F(DevEnvFileTest, 'testDirs', function() {
     return self.checkCommand('ls', 0, 'foo\n');
   }).then(function() {
     return self.checkCommand('rmdir foo', 0, '');
+  });
+});
+
+// Test cat and rm.
+TEST_F(DevEnvFileTest, 'testCatRm', function() {
+  var self = this;
+  var str = 'Hello, world!\n';
+  return Promise.resolve().then(function() {
+    return self.writeFile('/home/user/foo.txt', str);
+  }).then(function() {
+    return self.checkCommand('cat foo.txt', 0, str);
+  }).then(function() {
+    return self.checkCommand('rm foo.txt', 0, '');
   });
 });

@@ -97,3 +97,53 @@ DevEnvTest.prototype.checkCommand = function(
     }
   });
 };
+
+DevEnvTest.prototype.initFileSystem = function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.devEnv.postMessage({name: 'file_init'});
+    return self.devEnv.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('file_init_reply', msg.name);
+  });
+};
+
+DevEnvTest.prototype.writeFile = function(fileName, data) {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.devEnv.postMessage({
+      'name': 'file_write',
+      'file': fileName,
+      'data': data
+    });
+    return self.devEnv.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('file_write_reply', msg.name);
+  });
+};
+
+DevEnvTest.prototype.mkdir = function(fileName) {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.devEnv.postMessage({
+      'name': 'file_mkdir',
+      'file': fileName
+    });
+    return self.devEnv.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('file_mkdir_reply', msg.name);
+  });
+};
+
+DevEnvTest.prototype.rmRf = function(fileName) {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.devEnv.postMessage({
+      'name': 'file_rm_rf',
+      'file': fileName
+    });
+    return self.devEnv.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('file_rm_rf_reply', msg.name);
+  });
+};

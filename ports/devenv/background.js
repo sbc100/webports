@@ -6,7 +6,6 @@
 
 'use strict';
 
-
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('bash.html', {
     'bounds': {
@@ -17,10 +16,23 @@ chrome.app.runtime.onLaunched.addListener(function() {
 });
 
 chrome.runtime.onConnectExternal.addListener(function(port) {
+  var files = new FileManager();
   var manager = new NaClProcessManager();
   manager.setStdoutListener(function(output) {
     port.postMessage({name: 'nacl_stdout', output: output});
   });
+
+  function fileReply(name) {
+    return function() {
+      port.postMessage({name: name});
+    };
+  }
+  function fileError(name) {
+    return function(error) {
+      port.postMessage({name: name, error: error.message});
+    };
+  }
+
   port.onMessage.addListener(function(msg) {
     switch (msg.name) {
       case 'nacl_spawn':
@@ -48,8 +60,195 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
           });
         });
         break;
+
+      case 'file_init':
+        files.init().then(
+            fileReply('file_init_reply'), fileError('file_init_error'));
+        break;
+      case 'file_read':
+        files.readText(msg.file).then(function(data) {
+          port.postMessage({
+            name: 'file_read_reply',
+            data: data
+          });
+        }, fileError('file_read_error'));
+        break;
+      case 'file_write':
+        files.writeText(msg.file, msg.data).then(
+            fileReply('file_write_reply'), fileError('file_write_error'));
+        break;
+      case 'file_remove':
+        files.remove(msg.file).then(
+            fileReply('file_remove_reply'), fileError('file_remove_error'));
+        break;
+      case 'file_mkdir':
+        files.makeDirectory(msg.file).then(
+            fileReply('file_mkdir_reply'), fileError('file_mkdir_error'));
+        break;
+      case 'file_rm_rf':
+        files.removeDirectory(msg.file).then(
+            fileReply('file_rm_rf_reply'), fileError('file_rm_rf_error'));
+        break;
+
       default:
-        console.log('Unknown message: ', msg);
+        port.postMessage({name: 'unknown_error', error: 'unknown message'});
     }
   });
 });
+
+/**
+ * Access the HTML5 Filesystem.
+ */
+function FileManager() {
+  this.fs = null;
+}
+
+/**
+ * Translate a path from the point of view of NaCl (with / as the root) to the
+ * point of the HTML5 file system (with /mnt/html5 as the root).
+ * @param {string} path The path to be translated.
+ * @returns {string} The translated path.
+ */
+FileManager.translatePath = function(path) {
+  var html5MountPoint = '/mnt/html5';
+  var homeMountPoint = '/home/user';
+  if (path.indexOf(html5MountPoint) === 0) {
+    return path.replace(html5MountPoint, '');
+  } else if (path.indexOf(homeMountPoint) === 0) {
+    return path.replace(homeMountPoint, '/home');
+  } else {
+    throw new Error('path is outside of HTML5 filesystem');
+  }
+};
+
+/**
+ * Initialize the file system. This must be called before any file operations
+ * can be performed.
+ */
+FileManager.prototype.init = function() {
+  var self = this;
+
+  // TODO(channingh): Add support for a window.TEMPORARY file system.
+  return new Promise(function(resolve, reject) {
+    window.webkitRequestFileSystem(window.PERSISTENT, 1024*1024, function(fs) {
+      self.fs = fs;
+      resolve();
+    }, function(e) {
+      reject(e);
+    });
+  });
+};
+
+/**
+ * The error thrown when the user tries to perform file operations before the
+ * file system has been initialized.
+ * @const
+ */
+FileManager.FS_NOT_INITIALIZED = 'File system not initialized.';
+
+/**
+ * Read the contents of a text file.
+ * @param {string} fileName The name of the file to be read.
+ */
+FileManager.prototype.readText = function(fileName) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    if (!self.fs)
+      reject(new Error(FileManager.FS_NOT_INITIALIZED));
+    fileName = FileManager.translatePath(fileName);
+
+    self.fs.root.getFile(fileName, {}, function(fe) {
+      fe.file(function(file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          resolve(this.result);
+        };
+        reader.onerror = function(e) {
+          reject(new Error(e.message));
+        };
+        reader.readAsText(file);
+      }, reject);
+    }, reject);
+  });
+};
+
+/**
+ * Write a string to a text file.
+ * @param {string} fileName The name of the destination file.
+ * @param {string} fileName The text to be written.
+ */
+FileManager.prototype.writeText = function(fileName, content) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    if (!self.fs)
+      reject(new Error(FileManager.FS_NOT_INITIALIZED));
+    fileName = FileManager.translatePath(fileName);
+
+    self.fs.root.getFile(fileName, {create: true}, function(fe) {
+      fe.createWriter(onCreateWriter, reject);
+    }, reject);
+
+    function onCreateWriter(writer) {
+      var blob = new Blob([content], {type:'text/plain'})
+      // Discard arguments.
+      writer.onwriteend = function() {
+        resolve();
+      }
+      writer.onerror = reject;
+      writer.write(blob);
+    }
+  });
+};
+
+/**
+ * Remove a file from the filesystem. This does not work on directories.
+ * @param {string} fileName The name of the file.
+ */
+FileManager.prototype.remove = function(fileName) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    if (!self.fs)
+      reject(new Error(FileManager.FS_NOT_INITIALIZED));
+    fileName = FileManager.translatePath(fileName);
+
+    self.fs.root.getFile(fileName, {}, function(fe) {
+      fe.remove(resolve, reject);
+    }, reject);
+  });
+};
+
+/**
+ * Create a directory.
+ * @param {string} fileName The name of the directory.
+ */
+FileManager.prototype.makeDirectory = function(fileName) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    if (!self.fs)
+      reject(new Error(FileManager.FS_NOT_INITIALIZED));
+    fileName = FileManager.translatePath(fileName);
+
+    self.fs.root.getDirectory(fileName, {create: true}, function() {
+      resolve();
+    }, reject);
+  });
+};
+
+/**
+ * Remove a directory and its contents.
+ * @param {string} fileName The name of the directory.
+ */
+FileManager.prototype.removeDirectory = function(fileName) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    if (!self.fs)
+      reject(new Error(FileManager.FS_NOT_INITIALIZED));
+    fileName = FileManager.translatePath(fileName);
+
+    self.fs.root.getDirectory(fileName, {}, function(dir) {
+      dir.removeRecursively(function() {
+        resolve();
+      }, reject);
+    }, reject);
+  });
+};
