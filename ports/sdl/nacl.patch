@@ -771,7 +771,7 @@ index 0000000..6e1f036
 +
 +  for (i = 0; i < g_argc; i++) {
 +    nacl_io_log("SDL: arg=%s\n", g_argn[i]);
-+    if (!stricmp(g_argn[i], "PWD")) {
++    if (!strcasecmp(g_argn[i], "PWD")) {
 +      int rtn = chdir(g_argv[i]);
 +      if (rtn != 0)
 +        nacl_io_log("SDL: chdir(%s) failed\n", g_argv[i]);
