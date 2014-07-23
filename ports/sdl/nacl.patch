@@ -115,8 +115,8 @@ index a7e9b18..2548347 100644
 +        if test x$video_opengl = xyes; then
 +            AC_DEFINE(SDL_VIDEO_OPENGL)
 +            AC_DEFINE(SDL_VIDEO_OPENGL_REGAL)
-+            EXTRA_LDFLAGS="-lRegal -lppapi_gles2 ${EXTRA_LDFLAGS}"
-+            SDL_LIBS="-lRegal -lppapi_gles2 ${SDL_LIBS}"
++            EXTRA_LDFLAGS="-lRegal -lglslopt -lppapi_gles2 ${EXTRA_LDFLAGS}"
++            SDL_LIBS="-lRegal -lglslopt -lppapi_gles2 ${SDL_LIBS}"
 +        fi
 +    fi
 +}

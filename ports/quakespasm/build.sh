@@ -25,10 +25,11 @@ InstallStep() {
   LogExecute cp ${START_DIR}/index.html ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/quakespasm.js ${PUBLISH_DIR}
   LogExecute cp ${NACL_SRC}/third_party/zip.js/WebContent/*.js ${PUBLISH_DIR}
-  LogExecute cp ${BUILD_DIR}/quakespasm${NACL_EXEEXT} ${PUBLISH_DIR}
+  LogExecute cp ${BUILD_DIR}/quakespasm${NACL_EXEEXT} \
+      ${PUBLISH_DIR}/quakespasm_${NACL_ARCH}${NACL_EXEEXT}
   ChangeDir ${PUBLISH_DIR}
   LogExecute ${NACL_SDK_ROOT}/tools/create_nmf.py -s . \
-      quakespasm${NACL_EXEEXT} -o quakespasm.nmf
+      quakespasm*${NACL_EXEEXT} -o quakespasm.nmf
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     sed -i.bak 's/x-nacl/x-pnacl/' quake.html
   fi
