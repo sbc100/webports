@@ -769,6 +769,12 @@ SetupSDKBuildSystem() {
   export NACLPORTS_INCLUDE
   export NACLPORTS_REVISION=${REVISION}
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}/pkgconfig
+  # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.
+  # While PKG_CONFIG_LIBDIR overrides <libdir>, <datadir> (/usr/share/) can only
+  # be overridden individually when pkg-config is built.
+  # Setting PKG_CONFIG_PATH instead to compensate.
+  export PKG_CONFIG_PATH="${NACLPORTS_LIBDIR}/pkgconfig"
+  PKG_CONFIG_PATH+=":${NACLPORTS_LIBDIR}/../share/pkgconfig"
 
   MAKEFLAGS+=" TOOLCHAIN=${TOOLCHAIN}"
   MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
@@ -797,6 +803,12 @@ SetupCrossEnvironment() {
   export READELF=${NACLREADELF}
   export STRIP=${NACLSTRIP}
   export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}/pkgconfig
+  # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.
+  # While PKG_CONFIG_LIBDIR overrides <libdir>, <datadir> (/usr/share/) can only
+  # be overridden individually when pkg-config is built.
+  # Setting PKG_CONFIG_PATH instead to compensate.
+  export PKG_CONFIG_PATH="${NACLPORTS_LIBDIR}/pkgconfig"
+  PKG_CONFIG_PATH+=":${NACLPORTS_LIBDIR}/../share/pkgconfig"
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}

@@ -80,6 +80,8 @@ struct termio
 
 /* end olonho hack */
 
+#define FIONREAD 0x541B
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -84,12 +84,14 @@ class BinaryPackage(object):
     # pkg_config (.pc) files
     if filename.startswith('lib/pkgconfig'):
       modify = True
+    if filename.startswith('share/pkgconfig'):
+      modify = True
     # <foo>-config scripts that live in usr/bin
     if filename.startswith('bin') and filename.endswith('-config'):
       modify = True
     # libtool's .la files which can contain absolute paths to
     # dependencies.
-    if filename.startswith('lib/') and filename.endswith('.la'):
+    if filename.endswith('.la'):
       modify = True
     # headers can sometimes also contain absolute paths.
     if filename.startswith('include/') and filename.endswith('.h'):
@@ -102,8 +104,11 @@ class BinaryPackage(object):
     if modify:
       with open(filename) as f:
         data = f.read()
+      mode = os.stat(filename).st_mode
+      os.chmod(filename, 0777)
       with open(filename, 'r+') as f:
         f.write(data.replace('/naclports-dummydir', dest))
+      os.chmod(filename, mode)
 
   def GetPkgInfo(self):
     with tarfile.open(self.filename) as tar:

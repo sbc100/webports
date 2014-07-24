@@ -1,0 +1,108 @@
+diff --git a/Xtrans.c b/Xtrans.c
+index 54e3bdc..ecfdecb 100644
+--- a/Xtrans.c
++++ b/Xtrans.c
+@@ -1253,7 +1253,7 @@ TRANS(MakeAllCLTSServerListeners) (char *port, int *partial, int *count_ret,
+  */
+ 
+ 
+-#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32)
++#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32) || (defined(__native_client__) && defined(_NEWLIB_VERSION))
+ 
+ /*
+  * emulate readv
+@@ -1285,7 +1285,7 @@ static int TRANS(ReadV) (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
+ 
+ #endif /* SYSV && __i386__ || WIN32 || __sxg__ */
+ 
+-#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32)
++#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32) || (defined(__native_client__) && defined(_NEWLIB_VERSION))
+ 
+ /*
+  * emulate writev
+diff --git a/Xtransint.h b/Xtransint.h
+index 3bce8dc..f8a7bc3 100644
+--- a/Xtransint.h
++++ b/Xtransint.h
+@@ -325,7 +325,7 @@ typedef struct _Xtransport_table {
+  * systems, so they may be emulated.
+  */
+ 
+-#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32)
++#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32) || (defined(__native_client__) && defined(_NEWLIB_VERSION))
+ 
+ #define READV(ciptr, iov, iovcnt)	TRANS(ReadV)(ciptr, iov, iovcnt)
+ 
+@@ -342,7 +342,7 @@ static	int TRANS(ReadV)(
+ #endif /* CRAY || (SYSV && __i386__) || WIN32 || __sxg__ || */
+ 
+ 
+-#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32)
++#if defined(SYSV) && defined(__i386__) && !defined(__SCO__) && !defined(sun) || defined(WIN32) || (defined(__native_client__) && defined(_NEWLIB_VERSION))
+ 
+ #define WRITEV(ciptr, iov, iovcnt)	TRANS(WriteV)(ciptr, iov, iovcnt)
+ 
+diff --git a/Xtranslcl.c b/Xtranslcl.c
+index 5beef7c..653a4d9 100644
+--- a/Xtranslcl.c
++++ b/Xtranslcl.c
+@@ -416,13 +416,17 @@ TRANS(PTSOpenClient)(XtransConnInfo ciptr, char *port)
+      * wait for server to respond
+      */
+ 
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+     savef = signal(SIGALRM, _dummy);
+     alarm_time = alarm (30); /* CONNECT_TIMEOUT */
++#endif
+ 
+     ret = read(fd, buf, 1);
+ 
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+     (void) alarm(alarm_time);
+     (void) signal(SIGALRM, savef);
++#endif
+ 
+     if (ret != 1) {
+ 	prmsg(1,
+@@ -1036,13 +1040,17 @@ TRANS(SCOOpenClient)(XtransConnInfo ciptr, char *port)
+     ctlbuf.buf = (caddr_t)&temp;
+     fl = 0;
+ 
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+     savef = signal(SIGALRM, _dummy);
+     alarm_time = alarm(10);
++#endif
+ 
+     ret = getmsg(server, &ctlbuf, 0, &fl);
+ 
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+     (void) alarm(alarm_time);
+     (void) signal(SIGALRM, savef);
++#endif
+ 
+     if (ret < 0) {
+ 	prmsg(1,"SCOOpenClient: error from getmsg\n");
+diff --git a/Xtransutil.c b/Xtransutil.c
+index 52c937b..0959a4a 100644
+--- a/Xtransutil.c
++++ b/Xtransutil.c
+@@ -390,15 +390,19 @@ TRANS(GetPeerNetworkId) (XtransConnInfo ciptr)
+ 	 */
+ 
+ 	nameserver_timedout = 0;
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+ 	signal (SIGALRM, nameserver_lost);
+ 	alarm (4);
++#endif
+ 	if (setjmp(env) == 0) {
+ #endif
+ 	    hostp = _XGethostbyaddr (address, addresslen, family, hparams);
+ #ifdef SIGALRM
+ 	}
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
+ 	alarm (0);
+ #endif
++#endif
+ 	if (hostp != NULL)
+ 	  addr = hostp->h_name;
+ 	else
