@@ -1,4 +1,5 @@
-NAME=libX11
+NAME=libx11
+ARCHIVE_ROOT=libX11-1.5.0
 VERSION=1.5.0
 URL=http://www.x.org/releases/X11R7.7/src/everything/libX11-1.5.0.tar.bz2
 LICENSE=GPL
