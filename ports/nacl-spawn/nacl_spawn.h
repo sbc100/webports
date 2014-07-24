@@ -32,6 +32,18 @@ extern int nacl_startup_untar(
     const char* argv0, const char* tarfile, const char* root);
 
 /*
+ * Spawn a child using the given args.
+ *
+ * Args:
+ *   mode: Execute mode, one of the defines below.
+ *   path: The program to run.
+ *   argv: The startup arguments for the child.
+ * Returns:
+ *   Process id of the child or -1 for error.
+ */
+extern int spawnv(int mode, const char* path, char *const argv[]);
+
+/*
  * Spawn a child using the current environment and given args.
  *
  * Args:
@@ -44,10 +56,10 @@ extern int nacl_startup_untar(
  */
 extern int spawnve(int mode, const char* path,
                    char *const argv[], char *const envp[]);
-#define P_WAIT 1
-#define P_NOWAIT 2
-#define P_NOWAITO 3
-#define O_OVERLAY 4
+#define P_WAIT 0
+#define P_NOWAIT 1
+#define P_NOWAITO 1
+#define P_OVERLAY 2
 
 #ifdef __cplusplus
 }

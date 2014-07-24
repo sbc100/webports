@@ -360,6 +360,13 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
   return true;
 }
 
+// Spawn a new NaCl process. This is an alias for
+// spawnve(mode, path, argv, NULL). Returns 0 on success. On error -1 is
+// returned and errno will be set appropriately.
+int spawnv(int mode, const char* path, char *const argv[]) {
+  return spawnve(mode, path, argv, NULL);
+}
+
 // Spawn a new NaCl process by asking JavaScript. This function lacks
 // a lot of features posix_spawn supports (e.g., handling FDs).
 // Returns 0 on success. On error -1 is returned and errno will be set
@@ -383,7 +390,7 @@ int spawnve(int mode, const char* path,
     return status;
   } else if (mode == P_NOWAIT || mode == P_NOWAITO) {
     // The normal case.
-  } else if (mode == O_OVERLAY) {
+  } else if (mode == P_OVERLAY) {
     // TODO(bradnelson): Add this by allowing javascript to replace the
     // existing module with a new one.
     errno = ENOSYS;
