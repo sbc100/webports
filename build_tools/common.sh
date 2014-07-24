@@ -608,8 +608,9 @@ PublishByArchForDevEnv() {
         # thing.
         LogExecute cp ${name} tmp.nexe
         LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-          tmp.nexe -s . -o /dev/null
+          tmp.nexe -s . -o tmp.nmf
         LogExecute rm tmp.nexe
+        LogExecute rm tmp.nmf
         popd
       fi
     fi
