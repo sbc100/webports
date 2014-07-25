@@ -5,3 +5,9 @@
 
 # This is only necessary for pnacl
 export ax_cv_c_float_words_bigendian=no
+
+# For now disable use of x11 related libraries.
+EXTRA_CONFIGURE_ARGS+=" --enable-xlib=no"
+EXTRA_CONFIGURE_ARGS+=" --enable-xlib-xrender=no"
+EXTRA_CONFIGURE_ARGS+=" --enable-xcb=no"
+EXTRA_CONFIGURE_ARGS+=" --enable-xlib-xcb=no"
