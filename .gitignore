@@ -3,4 +3,5 @@
 /native_client/
 
 *.pyc
+*~
 /out

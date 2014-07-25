@@ -217,14 +217,13 @@ index ab17b52..ae86bf0 100644
  static EMACS_TIME TV1;
  static int watch_not_started = 1; /* flag */
 diff --git a/lib/symlink.c b/lib/symlink.c
-index d3c9f21..bc815d7 100644
+index d3c9f21..36948ae 100644
 --- a/lib/symlink.c
 +++ b/lib/symlink.c
-@@ -23,7 +23,7 @@
- #include <string.h>
+@@ -24,6 +24,7 @@
  #include <sys/stat.h>
  
--
+ 
 +#undef HAVE_SYMLINK
  #if HAVE_SYMLINK
  
@@ -326,7 +325,13 @@ diff --git a/src/Makefile.in b/src/Makefile.in
 index e96c788..ec789ef 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
-@@ -288,7 +288,7 @@ INTERVALS_H = dispextern.h intervals.h composite.h
+@@ -284,11 +284,13 @@ LIBGNUTLS_CFLAGS = @LIBGNUTLS_CFLAGS@
+ 
+ LIB_PTHREAD_SIGMASK = @LIB_PTHREAD_SIGMASK@
+ 
++NACL_LIBS = ${NACL_CLI_MAIN_LIB} -lppapi_simple -lppapi -lnacl_io -ltar -lppapi_cpp
++
+ INTERVALS_H = dispextern.h intervals.h composite.h
  
  GETLOADAVG_LIBS = @GETLOADAVG_LIBS@
  
@@ -335,7 +340,57 @@ index e96c788..ec789ef 100644
  
  UNEXEC_OBJ = @UNEXEC_OBJ@
  
-@@ -414,7 +414,12 @@ $(leimdir)/leim-list.el: bootstrap-emacs$(EXEEXT)
+@@ -328,6 +330,10 @@ ALL_OBJC_CFLAGS=$(ALL_CFLAGS) $(GNU_OBJC_CFLAGS)
+ 	@$(MKDEPDIR)
+ 	$(CC) -c $(CPPFLAGS) $(ALL_OBJC_CFLAGS) $<
+ 
++nacl_emacs.o: emacs.c
++	@$(MKDEPDIR)
++	$(CC) -c $(CPPFLAGS) $(ALL_CFLAGS) $< -DNACL_EMACS -o $@
++
+ 
+ ## lastfile must follow all files whose initialized data areas should
+ ## be dumped as pure by dump-emacs.
+@@ -349,6 +355,25 @@ base_obj = dispnew.o frame.o scroll.o xdisp.o menu.o $(XMENU_OBJ) window.o \
+ 	$(W32_OBJ) $(WINDOW_SYSTEM_OBJ)
+ obj = $(base_obj) $(NS_OBJC_OBJ)
+ 
++## Just like $(obj), but includes nacl_emacs.o (built with NACL_EMACS) instead
++## of emacs.o, and also includes emacs_pepper.o
++nacl_obj = dispnew.o frame.o scroll.o xdisp.o menu.o $(XMENU_OBJ) window.o \
++	charset.o coding.o category.o ccl.o character.o chartab.o bidi.o \
++	cm.o term.o terminal.o xfaces.o $(XOBJ) $(GTK_OBJ) $(DBUS_OBJ) \
++	nacl_emacs.o keyboard.o macros.o keymap.o sysdep.o \
++	buffer.o filelock.o insdel.o marker.o \
++	minibuf.o fileio.o dired.o \
++	cmds.o casetab.o casefiddle.o indent.o search.o regex.o undo.o \
++	alloc.o data.o doc.o editfns.o callint.o \
++	eval.o floatfns.o fns.o font.o print.o lread.o \
++	syntax.o $(UNEXEC_OBJ) bytecode.o \
++	process.o gnutls.o callproc.o \
++	region-cache.o sound.o atimer.o \
++	doprnt.o intervals.o textprop.o composite.o xml.o \
++	profiler.o \
++	emacs_pepper.o \
++	$(NS_OBJC_OBJ)
++
+ ## Object files used on some machine or other.
+ ## These go in the DOC file on all machines in case they are needed.
+ ## Some of them have no DOC entries, but it does no harm to have them
+@@ -400,9 +425,11 @@ LIBES = $(LIBS) $(W32_LIBS) $(LIBS_GNUSTEP) $(LIBX_BASE) $(LIBIMAGE) \
+    $(LIBGNUTLS_LIBS) $(LIB_PTHREAD) $(LIB_PTHREAD_SIGMASK) \
+    $(LIB_GCC) $(LIB_MATH) $(LIB_STANDARD) $(LIB_GCC)
+ 
+-all: emacs$(EXEEXT) $(OTHER_FILES)
++#all: emacs$(EXEEXT) $(OTHER_FILES)
++all: emacs$(EXEEXT) $(OTHER_FILES) nacl_temacs$(EXEEXT)
+ .PHONY: all
+ 
++#$(leimdir)/leim-list.el: bootstrap-emacs$(EXEEXT) temacs$(EXEEXT)
+ $(leimdir)/leim-list.el: bootstrap-emacs$(EXEEXT)
+ 	cd $(leimdir) && $(MAKE) $(MFLAGS) leim-list.el EMACS=$(bootstrap_exe)
+ 
+@@ -414,7 +441,12 @@ $(leimdir)/leim-list.el: bootstrap-emacs$(EXEEXT)
  emacs$(EXEEXT): temacs$(EXEEXT) $(etc)/DOC $(lisp) $(leimdir)/leim-list.el
  	if test "$(CANNOT_DUMP)" = "yes"; then \
  	  rm -f emacs$(EXEEXT); \
@@ -349,7 +404,7 @@ index e96c788..ec789ef 100644
  	else \
  	  LC_ALL=C $(RUN_TEMACS) -batch -l loadup dump || exit 1; \
  	  test "X$(PAXCTL)" = X || $(PAXCTL) -zex emacs$(EXEEXT); \
-@@ -438,8 +443,8 @@ emacs$(EXEEXT): temacs$(EXEEXT) $(etc)/DOC $(lisp) $(leimdir)/leim-list.el
+@@ -438,8 +470,8 @@ emacs$(EXEEXT): temacs$(EXEEXT) $(etc)/DOC $(lisp) $(leimdir)/leim-list.el
  ##
  $(etc)/DOC: $(libsrc)/make-docfile$(EXEEXT) $(obj) $(lisp)
  	-rm -f $(etc)/DOC
@@ -360,7 +415,7 @@ index e96c788..ec789ef 100644
  
  $(libsrc)/make-docfile$(EXEEXT):
  	cd $(libsrc); $(MAKE) $(MFLAGS) make-docfile$(EXEEXT)
-@@ -453,7 +458,7 @@ GLOBAL_SOURCES = $(base_obj:.o=.c) $(NS_OBJC_OBJ:.o=.m)
+@@ -453,7 +485,7 @@ GLOBAL_SOURCES = $(base_obj:.o=.c) $(NS_OBJC_OBJ:.o=.m)
  
  gl-stamp: $(libsrc)/make-docfile$(EXEEXT) $(GLOBAL_SOURCES)
  	@rm -f gl-tmp
@@ -369,16 +424,24 @@ index e96c788..ec789ef 100644
  	$(srcdir)/../build-aux/move-if-change gl-tmp globals.h
  	echo timestamp > $@
  
-@@ -464,7 +469,7 @@ $(lib)/libgnu.a: $(config_h)
+@@ -464,7 +496,15 @@ $(lib)/libgnu.a: $(config_h)
  
  temacs$(EXEEXT): $(START_FILES) stamp-oldxmenu $(obj) $(otherobj) $(lib)/libgnu.a
  	$(CC) $(LD_FIRSTFLAG) $(ALL_CFLAGS) $(TEMACS_LDFLAGS) $(LDFLAGS) \
 -	  -o temacs $(START_FILES) $(obj) $(otherobj) $(lib)/libgnu.a $(LIBES)
 +	  -o temacs$(EXEEXT) $(START_FILES) $(obj) $(otherobj) $(lib)/libgnu.a $(LIBES)
++	test "$(CANNOT_DUMP)" = "yes" || \
++	  test "X$(PAXCTL)" = X || $(PAXCTL) -r temacs$(EXEEXT)
++
++## A special build of temacs with a different entry point, and including
++## emacs_pepper
++nacl_temacs$(EXEEXT): $(START_FILES) stamp-oldxmenu $(nacl_obj) $(otherobj) $(lib)/libgnu.a
++	$(CC) $(LD_FIRSTFLAG) $(ALL_CFLAGS) $(TEMACS_LDFLAGS) $(LDFLAGS) \
++	  -o nacl_temacs$(EXEEXT) $(START_FILES) $(nacl_obj) $(otherobj) $(lib)/libgnu.a $(NACL_LIBS) $(LIBES)
  	test "$(CANNOT_DUMP)" = "yes" || \
  	  test "X$(PAXCTL)" = X || $(PAXCTL) -r temacs$(EXEEXT)
  
-@@ -613,8 +618,12 @@ $(lispsource)/loaddefs.el: $(BOOTSTRAPEMACS) $(VCSWITNESS)
+@@ -613,8 +653,12 @@ $(lispsource)/loaddefs.el: $(BOOTSTRAPEMACS) $(VCSWITNESS)
  bootstrap-emacs$(EXEEXT): temacs$(EXEEXT)
  	cd ../lisp; $(MAKE) $(MFLAGS) update-subdirs
  	if test "$(CANNOT_DUMP)" = "yes"; then \
@@ -422,10 +485,39 @@ index 7c67ecb..ca45afe 100644
        /* This used to be non-fatal (dir_warning), but it should not
           happen, and if it does sooner or later it will cause some
 diff --git a/src/emacs.c b/src/emacs.c
-index 71d84ef..8db467c 100644
+index 71d84ef..b3309a8 100644
 --- a/src/emacs.c
 +++ b/src/emacs.c
-@@ -2113,7 +2113,7 @@ decode_env_path (const char *evarname, const char *defalt)
+@@ -656,11 +656,27 @@ void (*__malloc_initialize_hook) (void) EXTERNALLY_VISIBLE = malloc_initialize_h
+ 
+ #endif /* DOUG_LEA_MALLOC */
+ 
++int real_main (int argc, char **argv);
+ 
+-/* ARGSUSED */
++#ifndef NACL_EMACS
+ int
+ main (int argc, char **argv)
+ {
++  return real_main(argc, argv);
++}
++
++#else  // NACL_EMACS
++int
++nacl_emacs_main (int argc, char **argv)
++{
++  return real_main(argc, argv);
++}
++#endif  // NACL_EMACS
++
++/* ARGSUSED */
++int
++real_main (int argc, char **argv)
++{
+ #if GC_MARK_STACK
+   Lisp_Object dummy;
+ #endif
+@@ -2113,7 +2129,7 @@ decode_env_path (const char *evarname, const char *defalt)
      path = getenv (evarname);
    else
      path = 0;
@@ -521,61 +613,6 @@ index 0df2abe..40afd8d 100644
  
    modtime = invalid_emacs_time ();
    if (visiting)
-diff --git a/src/lread.c b/src/lread.c
-index e6f29e7..fee624a 100644
---- a/src/lread.c
-+++ b/src/lread.c
-@@ -978,6 +978,42 @@ This uses the variables `load-suffixes' and `load-file-rep-suffixes'.  */)
-   return Fnreverse (lst);
- }
- 
-+  // Workaround fdopen in glibc failing due to it vetting the provided file
-+  // handles with fcntl which is not currently interceptable.
-+
-+  static ssize_t fdopen_read(void *cookie, char *buf, size_t size) {
-+    return read((int) cookie, buf, size);
-+  }
-+
-+  static ssize_t fdopen_write(void *cookie, const char *buf, size_t size) {
-+    return write((int) cookie, buf, size);
-+  }
-+
-+  static int fdopen_seek(void *cookie, off_t *offset, int whence) {
-+    off_t ret = lseek((int) cookie, *offset, whence);
-+    if (ret < 0) {
-+      return -1;
-+    }
-+    *offset = ret;
-+    return 0;
-+  }
-+
-+  static int fdopen_close(void *cookie) {
-+    return close((int) cookie);
-+  }
-+
-+  static cookie_io_functions_t fdopen_functions = {
-+    fdopen_read,
-+    fdopen_write,
-+    fdopen_seek,
-+    fdopen_close,
-+  };
-+
-+  FILE *fdopen(int fildes, const char *mode) {
-+    return fopencookie((void *) fildes, mode, fdopen_functions);
-+  }
-+
-+
- DEFUN ("load", Fload, Sload, 1, 5, 0,
-        doc: /* Execute a file of Lisp code named FILE.
- First try FILE with `.elc' appended, then try with `.el',
-@@ -4147,7 +4183,6 @@ init_lread (void)
- #else
-   Vload_path = decode_env_path ("EMACSLOADPATH", normal);
- #endif
--
-   load_path_check ();
- 
-   /* FIXME CANNOT_DUMP platforms should get source-dir/lisp etc added
 diff --git a/src/vm-limit.c b/src/vm-limit.c
 index ca7ac4f..53ed923 100644
 --- a/src/vm-limit.c
