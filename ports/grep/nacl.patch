@@ -34,22 +34,6 @@ index ec1aab7..07ed9fc 100755
      -Wswitch \
      -Wswitch-default \
      -Wsync-nand \
-diff --git a/lib/creat-safer.c b/lib/creat-safer.c
-index 984857b..54bb50a 100644
---- a/lib/creat-safer.c
-+++ b/lib/creat-safer.c
-@@ -24,6 +24,11 @@
- #include <fcntl.h>
- #include "unistd-safer.h"
- 
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+/* TODO(bradnelson): Drop once nacl newlib fcntl.h contains creat. */
-+extern int creat(const char *filename, mode_t mode);
-+#endif
-+
- int
- creat_safer (char const *file, mode_t mode)
- {
 diff --git a/lib/error.c b/lib/error.c
 index 31109df..da35ea1 100644
 --- a/lib/error.c
