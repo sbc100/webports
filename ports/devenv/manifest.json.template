@@ -10,6 +10,7 @@
     "48": "devenv_48.png",
     "128": "devenv_128.png"
   },
+  %(key)s
   "externally_connectable": {
     "ids": ["*"]
   },

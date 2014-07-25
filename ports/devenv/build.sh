@@ -36,11 +36,18 @@ InstallStep() {
   done
 
   # Generate a manifest.json.
-  GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR}
+  GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR} \
+    ${START_DIR}/key.txt
+
+  # Create uploadable version (key not included).
+  local APP_UPLOAD_DIR="${PUBLISH_DIR}/devenv_app_upload"
+  rm -rf ${APP_UPLOAD_DIR}
+  LogExecute cp -r ${APP_DIR} ${APP_UPLOAD_DIR}
+  GenerateManifest ${START_DIR}/manifest.json.template ${APP_UPLOAD_DIR}
 
   # Zip the full app for upload.
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r devenv_app.zip app
+  LogExecute zip -r devenv_app_upload.zip devenv_app_upload/
 }
 
 PostInstallTestStep() {
