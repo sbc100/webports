@@ -81,6 +81,8 @@ class Package(object):
 
     if '_' in self.NAME:
       raise Error('%s: package NAME cannot contain underscores' % self.info)
+    if self.NAME != self.NAME.lower():
+      raise Error('%s: package NAME cannot contain uppercase characters' % self.info)
     if '_' in self.VERSION:
       raise Error('%s: package VERSION cannot contain underscores' % self.info)
     if self.NAME != os.path.basename(self.root):
@@ -173,6 +175,8 @@ class Package(object):
     return package.IsInstallable()
 
   def Install(self, build_deps, force=None, from_source=False):
+    self.CheckInsallable()
+
     if force is None and self.IsInstalled():
       Log("Already installed '%s' [%s]" % (self.NAME, self.config))
       return
@@ -222,7 +226,7 @@ class Package(object):
     os.remove(naclports.GetInstallStamp(self.NAME, self.config))
 
   def Build(self, build_deps, force=None):
-    self.CheckEnabled()
+    self.CheckBuildable()
 
     if build_deps:
       self.InstallDeps(force)
@@ -351,7 +355,7 @@ class Package(object):
   def GetMirrorURL(self):
     return MIRROR_URL + '/' + self.GetArchiveFilename()
 
-  def CheckEnabled(self):
+  def CheckInsallable(self):
     if self.LIBC is not None and self.LIBC != self.config.libc:
       raise DisabledError('%s: cannot be built with %s.'
                           % (self.NAME, self.config.libc))
@@ -370,6 +374,9 @@ class Package(object):
       if self.config.arch in self.DISABLED_ARCH:
         raise DisabledError('%s: disabled for current arch: %s.'
                             % (self.NAME, self.config.arch))
+
+  def CheckBuildable(self):
+    self.CheckInsallable()
 
     if self.BUILD_OS is not None:
       import getos

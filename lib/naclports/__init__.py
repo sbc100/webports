@@ -20,6 +20,8 @@ BUILD_ROOT = os.path.join(OUT_DIR, 'build')
 PUBLISH_ROOT = os.path.join(OUT_DIR, 'publish')
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
+if sys.platform == "cygwin":
+  NACL_SDK_ROOT = NACL_SDK_ROOT.replace('\\', '/')
 
 VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
               'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH',
@@ -223,6 +225,26 @@ def IsInstalled(package_name, config, stamp_content=None):
   return result
 
 
+def FindInPath(command_name):
+  """Search user's PATH for a given executable.
+
+  Returns:
+    Full path to executable.
+  """
+  if os.name == 'nt':
+    extensions = ('.bat', '.com', '.exe')
+  else:
+    extensions = ('',)
+
+  for path in os.environ.get('PATH', '').split(os.pathsep):
+    for ext in extensions:
+      full_name = os.path.join(path, command_name + ext)
+      if os.path.exists(full_name):
+        return full_name
+
+  raise Error('command not found: %s' % command_name)
+
+
 def DownloadFile(filename, url):
   """Download a file from a given URL.
 
@@ -231,6 +253,8 @@ def DownloadFile(filename, url):
     url: then URL to fetch.
   """
   temp_filename = filename + '.partial'
+  # Ensure curl is in user's PATH
+  FindInPath('curl')
   curl_cmd = ['curl', '--fail', '--location', '--stderr', '-',
               '-o', temp_filename]
   if os.isatty(sys.stdout.fileno()):

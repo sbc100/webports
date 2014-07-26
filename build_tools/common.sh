@@ -629,7 +629,7 @@ InitGitRepo() {
   fi
 
   if [ ${PREEXISTING_REPO} = 0 ]; then
-    git init
+    LogExecute git init
   fi
 
   # Setup git username and email in case there is not a system
@@ -649,17 +649,17 @@ InitGitRepo() {
 
   # Ensure that the repo has an upstream and a master branch properly set up.
   if [ ${PREEXISTING_REPO} = 1 ]; then
-    git checkout -b "placeholder"
-    git show-ref "refs/heads/upstream" > /dev/null && git branch -D "upstream"
-    git checkout -b "upstream"
-    git show-ref "refs/heads/master" > /dev/null && git branch -D "master"
-    git checkout -b "master"
-    git branch -D "placeholder"
+    git checkout -b placeholder
+    git show-ref refs/heads/upstream > /dev/null && git branch -D upstream
+    git checkout -b upstream
+    git show-ref refs/heads/master > /dev/null && git branch -D master
+    git checkout -b master
+    git branch -D placeholder
   else
-    git checkout -b "upstream"
     git add -f .
     git commit -m "Upstream version" > /dev/null
-    git checkout -b "master"
+    git checkout -b upstream
+    git checkout master
   fi
 }
 
@@ -1221,14 +1221,22 @@ WriteSelLdrScript() {
     return
   fi
 
+  if [ $(uname -o) = "Cygwin" ]; then
+    local LOGFILE=nul
+    local NACL_IRT_PATH=`cygpath -m ${NACL_IRT}`
+  else
+    local LOGFILE=/dev/null
+    local NACL_IRT_PATH=${NACL_IRT}
+  fi
+
   if [ "${NACL_LIBC}" = "glibc" ]; then
     cat > $1 <<HERE
 #!/bin/bash
-export NACLLOG=/dev/null
+export NACLLOG=${LOGFILE}
 
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 SEL_LDR=${NACL_SEL_LDR}
-IRT=${NACL_IRT}
+IRT=${NACL_IRT_PATH}
 NACL_SDK_LIB=${NACL_SDK_LIB}
 LIB_PATH_DEFAULT=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}
 LIB_PATH_DEFAULT=\${LIB_PATH_DEFAULT}:\${NACL_SDK_LIB}:\${SCRIPT_DIR}
@@ -1241,11 +1249,14 @@ HERE
   else
     cat > $1 <<HERE
 #!/bin/bash
-export NACLLOG=/dev/null
+export NACLLOG=${LOGFILE}
 
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
+if [ \$(uname -o) = "Cygwin" ]; then
+  SCRIPT_DIR=\$(cygpath -m \${SCRIPT_DIR})
+fi
 SEL_LDR=${NACL_SEL_LDR}
-IRT=${NACL_IRT}
+IRT=${NACL_IRT_PATH}
 
 "\${SEL_LDR}" -a -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
 HERE

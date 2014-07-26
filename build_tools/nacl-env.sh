@@ -44,6 +44,13 @@ else
   readonly OS_SUBDIR="win"
 fi
 
+if [ $(uname -o) = "Cygwin" ]; then
+  NACL_SDK_ROOT=`cygpath $NACL_SDK_ROOT`
+  if [ -z "${CYGWIN:-}" ]; then
+    export CYGWIN=nodosfilewarning
+  fi
+fi
+
 # Default value for NACL_ARCH
 NACL_ARCH=${NACL_ARCH:-x86_64}
 
