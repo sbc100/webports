@@ -50,7 +50,9 @@ InstallStep() {
   LogExecute zip -r devenv_app_upload.zip devenv_app_upload/
 
   # Copy the files for DevEnvWidget.
-  LogExecute cp -r ${START_DIR}/devenvwidget ${PUBLISH_DIR}
+  local WIDGET_DIR=${PUBLISH_DIR}/devenvwidget
+  MakeDir ${WIDGET_DIR}
+  LogExecute cp -r ${START_DIR}/devenvwidget/* ${WIDGET_DIR}
 }
 
 PostInstallTestStep() {
