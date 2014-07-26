@@ -6,3 +6,4 @@
 MAKE_TARGETS="libxml2.la"
 INSTALL_TARGETS="install-libLTLIBRARIES install-data"
 EXTRA_CONFIGURE_ARGS="--with-python=no"
+EXTRA_CONFIGURE_ARGS+=" --with-iconv=no"

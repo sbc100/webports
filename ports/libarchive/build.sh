@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 EXTRA_CONFIGURE_ARGS="--disable-bsdtar --disable-bsdcpio"
+EXTRA_CONFIGURE_ARGS+=" --without-iconv"
 
 NACLPORTS_CPPFLAGS+=" -Dtimezone=_timezone"
 
