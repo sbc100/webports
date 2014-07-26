@@ -35,16 +35,19 @@ if [ -z "${NACL_SDK_ROOT:-}" ]; then
 fi
 
 # Pick platform directory for compiler.
-readonly OS_NAME=$(uname -s)
+OS_NAME=$(uname -s)
 if [ $OS_NAME = "Darwin" ]; then
   readonly OS_SUBDIR="mac"
 elif [ $OS_NAME = "Linux" ]; then
   readonly OS_SUBDIR="linux"
 else
   readonly OS_SUBDIR="win"
+  if [ $(uname -o) = "Cygwin" ]; then
+    OS_NAME="Cygwin"
+  fi
 fi
 
-if [ $(uname -o) = "Cygwin" ]; then
+if [ $OS_NAME = "Cygwin" ]; then
   NACL_SDK_ROOT=`cygpath $NACL_SDK_ROOT`
   if [ -z "${CYGWIN:-}" ]; then
     export CYGWIN=nodosfilewarning
