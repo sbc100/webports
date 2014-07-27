@@ -1,4 +1,154 @@
-builder 0 (total: 6986)
+builder 0 (total: 7675)
+  zlib
+  libpng
+  jpeg6b
+  opencv
+  glibc-compat
+  libtar
+  nacl-spawn
+  coreutils
+  ncurses
+  readline
+  python
+  sqlite
+  expat
+  apr
+  apr-util
+  subversion
+  hdf5
+  fftw
+  snes9x
+  openscenegraph
+  libogg
+  libvorbis
+  lame
+  libav
+  bzip2
+  boost
+  gsl
+  freeimage
+  bullet
+  kbproto
+  xextproto
+  xproto
+  xcb-proto
+  xtrans
+  libxau
+  libxcb
+  inputproto
+  libx11
+  gmp
+  libiconv
+  tiff
+  yajl
+  nano
+  ninja
+  mpfr
+  xaos
+  jpeg8d
+  libmng
+  lcms
+  devil
+  libice
+  libsm
+  libxt
+  libwebp
+  lua5.2
+  lua-ppapi
+  libxext
+  libxi
+  libxmu
+  mpc
+  recordproto
+  libxtst
+  renderproto
+  libxrender
+  xineramaproto
+  libxinerama
+  physfs
+  openal-soft
+  openal-ogg-demo
+  jsoncpp
+  dreadthread
+  thttpd
+  busybox
+  blis
+  gcc
+  glib
+  emacs
+  mongoose
+  tar
+builder 1 (total: 7909)
+  clapack
+  glibc-compat
+  ncurses
+  zlib
+  readline
+  python3
+  ruby
+  libpng
+  regal
+  libogg
+  libvorbis
+  libtheora
+  lame
+  ffmpeg
+  libtar
+  nacl-spawn
+  binutils
+  libunistring
+  libmikmod
+  bzip2
+  expat
+  sdl
+  sdl-mixer
+  freetype
+  metakit
+  sdl-ttf
+  drod
+  dosbox
+  nethack
+  fontconfig
+  pixman
+  cairo
+  scummvm
+  grep
+  vim
+  m4
+  bochs
+  flac
+  leveldb
+  protobuf
+  make
+  zeromq
+  mesa
+  python3-ppapi
+  libsodium
+  speex
+  faad2
+  toybox
+  libhangul
+  sdl-tests
+  faac
+  agg
+  ruby-ppapi
+  gc
+  openal-soft
+  mpg123
+  quakespasm
+  sdl-net
+  jpeg8d
+  sdl-image
+  sdlquake
+  agg-demo
+  gmp
+  mpfr
+  mpc
+  gcc
+  mingn
+  glib
+  pango
+builder 2 (total: 7686)
   glibc-compat
   ncurses
   zlib
@@ -14,6 +164,9 @@ builder 0 (total: 6986)
   openssl
   pyppapi
   python-static
+  libpng
+  jpeg8d
+  imagemagick
   python
   setuptools
   six
@@ -24,169 +177,49 @@ builder 0 (total: 6986)
   pytz
   h5py
   pandas
+  sympy
   freetype
   nose
-  libpng
   matplotlib
-  sympy
   yt
-  grep
-  vim
+  curl
+  bash
+  git
+  libxml2
+  libarchive
+  sdl2
+  python-ppapi
+  openal-soft
+  mpg123
+  geturl
+  unzip
+  devenv
+  pcre
+  libtool
+  netcat
+  libmodplug
   libssh
   libgit2
-  apr
-  libxml2
-  protobuf
-  python-ppapi
-  mesa
   cfitsio
-  netcat
-  nano
-  toybox
-  pcre
-  libhangul
-  make
+  giflib
   zeromq
   pyzmq
-  libtool
-  agg
+  libtomcrypt
+  libffi
+  freealut
+  x264
   civetweb
-  gc
-  apr-util
-  physfs
-  agg-demo
+  sdl2-gfx
+  libatomic-ops
+  box2d
+  sdl2-ttf
   ipython
+  tinyxml
+  lua5.1
   libtommath
   markupsafe
   jinja2
-  ipython-ppapi
-  sqlite
-  subversion
-builder 1 (total: 6857)
-  clapack
-  glibc-compat
-  ncurses
-  zlib
-  readline
-  python3
-  ruby
-  python
-  libunistring
-  libogg
-  libvorbis
-  libtheora
-  lame
-  ffmpeg
-  libpng
-  jpeg8d
-  bzip2
-  imagemagick
-  openscenegraph
-  libtar
-  nacl-spawn
-  nethack
-  gsl
-  openssl
-  curl
-  geturl
-  bash
-  git
-  sqlite
-  sdl2
-  tiff
-  yajl
-  ninja
-  libsodium
-  openal-soft
-  freealut
-  libmng
-  lcms
-  devil
-  python3-ppapi
-  unzip
-  devenv
-  ruby-ppapi
-  lua5.2
-  lua-ppapi
-  giflib
-  libffi
-  freetype
-  sdl2-ttf
-  x264
-  sdl2-gfx
   jsoncpp
-  tinyxml
-  lua5.1
   openssh
-  thttpd
-  emacs
-  tar
-  mongoose
-builder 2 (total: 7004)
-  zlib
-  libpng
-  jpeg6b
-  opencv
-  glibc-compat
-  libtar
-  nacl-spawn
-  coreutils
-  regal
-  binutils
-  fftw
-  snes9x
-  libmikmod
-  bzip2
-  libiconv
-  libogg
-  sdl
-  libvorbis
-  sdl-mixer
-  expat
-  freetype
-  metakit
-  sdl-ttf
-  drod
-  dosbox
-  boost
-  lame
-  libav
-  fontconfig
-  pixman
-  cairo
-  scummvm
-  freeimage
-  bullet
-  gmp
-  bochs
-  flac
-  openal-soft
-  mpg123
-  xaos
-  speex
-  mpfr
-  zeromq
-  libmodplug
-  faad2
-  leveldb
-  jpeg8d
-  tiff
-  libwebp
-  faac
-  sdl-tests
-  mpc
-  libtomcrypt
-  sdl-net
-  sdl-image
-  box2d
-  sdlquake
-  libatomic-ops
-  openal-ogg-demo
-  dreadthread
-  busybox
-  gcc
-  ncurses
-  mingn
-  glib
-  pango
-Difference between total time of builders: 146
+  ipython-ppapi
+Difference between total time of builders: 233
