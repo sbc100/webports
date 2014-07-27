@@ -1221,7 +1221,7 @@ WriteSelLdrScript() {
     return
   fi
 
-  if [ $(uname -o) = "Cygwin" ]; then
+  if [ ${OS_NAME} = "Cygwin" ]; then
     local LOGFILE=nul
     local NACL_IRT_PATH=`cygpath -m ${NACL_IRT}`
   else
@@ -1252,7 +1252,7 @@ HERE
 export NACLLOG=${LOGFILE}
 
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
-if [ \$(uname -o) = "Cygwin" ]; then
+if [ \$(uname -s) = CYGWIN* ]; then
   SCRIPT_DIR=\$(cygpath -m \${SCRIPT_DIR})
 fi
 SEL_LDR=${NACL_SEL_LDR}
