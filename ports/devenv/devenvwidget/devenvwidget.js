@@ -38,6 +38,14 @@
     this.model.setStdoutListener(function(output) {
       self.view.appendOutput(output);
     });
+
+    this.ready = false;
+    this.model.checkExtension().then(function() {
+      self.ready = true;
+    }, function(e) {
+      self.view.setStatus(WidgetView.STATUS_ERROR);
+      self.view.appendOutput(e.message);
+    });
   }
 
   Widget.WORKING_DIR = '/home/user';
@@ -59,12 +67,12 @@
       }
       resolve(msg);
     });
-  }
+  };
 
   // Compile and run the contents of the Widget textarea.
   Widget.prototype.run = function() {
     var self = this;
-    if (this.running) {
+    if (this.running || !this.ready) {
       return;
     }
     this.running = true;
@@ -112,7 +120,7 @@
       self.view.setStatus(WidgetView.STATUS_ERROR);
       self.view.appendOutput('Error: ' + e.message + '.\n');
     });
-  }
+  };
 
 
   // Communicate with the NaCl DevEnv extension to run GCC and the compiled
@@ -122,6 +130,10 @@
     this.extensionID = extensionID;
     this.stdoutListener = function() { };
   }
+
+  // This error is thrown when the extension cannot be found.
+  DevEnv.ERROR_NO_EXTENSION = 'Cannot find the NaCl Development Environment' +
+      ' extension.';
 
   // This error is thrown when commands are run before the connection is made
   // to the NaCl DevEnv extension.
@@ -136,7 +148,7 @@
       cwd: '/home/user',
       envs: {}
     };
-  }
+  };
 
   // Helper function to make a waitpid command to the extension.
   DevEnv.makeWaitpid = function(pid) {
@@ -145,13 +157,32 @@
       pid: pid,
       options: 0
     };
-  }
+  };
+
+  // Check existence of the NaCl DevEnv extension.
+  DevEnv.prototype.checkExtension = function() {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      chrome.runtime.sendMessage(
+        self.extensionID,
+        {name: 'ping'},
+        {},
+        function (response) {
+          if (!response || response.name !== 'pong') {
+            reject(new Error(DevEnv.ERROR_NO_EXTENSION));
+          } else {
+            resolve();
+          }
+        }
+      );
+    });
+  };
 
   // Connect to the NaCl DevEnv extension.
   DevEnv.prototype.connect = function() {
     this.port = chrome.runtime.connect(this.extensionID);
     this.port.onMessage.addListener(this.stdoutListener);
-  }
+  };
 
   // Disconnect from the NaCl DevEnv extension.
   DevEnv.prototype.disconnect = function() {
@@ -160,7 +191,7 @@
     }
     this.port.disconnect();
     this.port = null;
-  }
+  };
 
   // Set a callback to be called when called programs write to stdout.
   DevEnv.prototype.setStdoutListener = function(listener) {
@@ -175,7 +206,7 @@
       this.port.onMessage.addListener(newListener);
     }
     this.stdoutListener = newListener;
-  }
+  };
 
   // Send a message to the NaCl DevEnv extension.
   DevEnv.prototype.post = function(msg) {
@@ -252,13 +283,13 @@
   WidgetView.prototype.appendOutput = function(output) {
     if (this.output)
       this.output.innerText += output;
-  }
+  };
 
   // Clear the output box.
   WidgetView.prototype.clearOutput = function() {
     if (this.output)
       this.output.innerText = '';
-  }
+  };
 
   // Add a listener to be run when the Run button is clicked.
   WidgetView.prototype.setRunAction = function(action) {
@@ -267,7 +298,7 @@
     }
     this.runAction = action;
     this.run.addEventListener('click', this.runAction);
-  }
+  };
 
   // Change the status and update the view accordingly.
   WidgetView.prototype.setStatus = function(status) {
@@ -284,7 +315,7 @@
       this.output.classList.remove(WidgetView.STATUS_CSS_ERROR);
       this.output.classList.add(view.cssClass);
     }
-  }
+  };
 
   // Expose Widget to the outside.
   global['DevEnvWidget'] = Widget;

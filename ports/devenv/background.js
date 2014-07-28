@@ -15,6 +15,14 @@ chrome.app.runtime.onLaunched.addListener(function() {
   });
 });
 
+chrome.runtime.onMessageExternal.addListener(
+  function(request, sender, sendResponse) {
+    if (request.name === 'ping') {
+      sendResponse({name: 'pong'});
+    }
+  }
+);
+
 chrome.runtime.onConnectExternal.addListener(function(port) {
   var files = new FileManager();
   var manager = new NaClProcessManager();
