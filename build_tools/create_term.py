@@ -25,6 +25,7 @@ HTML_TEMPLATE = '''\
     <script type="text/javascript" src="naclprocess.js"></script>
     <script type="text/javascript" src="naclterm.js"></script>
     <script type="text/javascript" src="%(module_name)s.js"></script>
+    %(include)s
 
     <style type="text/css">
       body {
@@ -58,10 +59,12 @@ FORMAT = '%(filename)s: %(message)s'
 logging.basicConfig(format=FORMAT)
 
 
-def CreateTerm(filename, name=None):
+def CreateTerm(filename, name=None, include=None):
   if not name:
     basename = os.path.basename(filename)
     name, _ = os.path.splitext(basename)
+
+  include = include or []
 
   htmlfile = name + '.html'
   logging.info('creating html: %s', htmlfile)
@@ -69,6 +72,10 @@ def CreateTerm(filename, name=None):
     args = {}
     args['title'] = name
     args['module_name'] = name
+
+    includeHTML = ['<script src="%s"></script>' % js for js in include]
+    args['include'] = '\n    '.join(includeHTML)
+
     outfile.write(HTML_TEMPLATE % args)
 
   jsfile = name + '.js'
@@ -89,6 +96,8 @@ def main():
   parser.add_option('-v', '--verbose',
                     action='store_true', dest='verbose', default=False,
                     help='be more verbose')
+  parser.add_option('-i', '--include', action='append', default=[],
+                    help='include a JavaScript file in the generated HTML')
 
   options, args = parser.parse_args()
 
@@ -100,7 +109,7 @@ def main():
   if not options.verbose:
     logging.disable(logging.INFO)
 
-  CreateTerm(args[0], options.name)
+  CreateTerm(args[0], options.name, options.include)
 
 
 if __name__ == '__main__':

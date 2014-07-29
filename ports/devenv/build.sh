@@ -30,7 +30,7 @@ InstallStep() {
   shopt -u nullglob
 
   RESOURCES="background.js bash.js bashrc package setup-environment
-      graphical.html"
+      graphical.html whitelist.js"
   for resource in ${RESOURCES}; do
     cp ${START_DIR}/${resource} ${APP_DIR}/
   done

@@ -297,9 +297,8 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
       var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
       nmf = window.URL.createObjectURL(blob);
     } else {
-      if (NaClProcessManager.nmfWhitelist === undefined ||
-          (NaClProcessManager.nmfWhitelist !== undefined &&
-           NaClProcessManager.nmfWhitelist.indexOf(executable) === -1)) {
+      if (NaClProcessManager.nmfWhitelist !== undefined &&
+          NaClProcessManager.nmfWhitelist.indexOf(executable) === -1) {
         var reply = {};
         reply[e.data['id']] = {
           pid: -NaClProcessManager.ENOENT,

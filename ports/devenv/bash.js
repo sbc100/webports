@@ -9,13 +9,6 @@ NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
 // TODO(bradnelson): Drop this hack once tar extraction first checks relative
 // to the nexe.
 NaClProcessManager.useNaClAltHttp = true;
-NaClProcessManager.nmfWhitelist = [
-    'bash',
-    'geturl',
-    'funzip',
-    'unzip',
-    'unzipsfx',
-];
 
 function onInit() {
   // Request 1GB storage.

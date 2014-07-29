@@ -40,7 +40,8 @@
     "background": {
       "scripts": [
         "background.js",
-        "naclprocess.js"
+        "naclprocess.js",
+        "whitelist.js"
       ]
     }
   },
