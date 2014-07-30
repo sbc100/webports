@@ -70,7 +70,9 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         break;
 
       case 'file_init':
-        files.init().then(
+        var type = (msg.type === 'temporary') ?
+            window.TEMPORARY : window.PERSISTENT;
+        files.init(type).then(
             fileReply('file_init_reply'), fileError('file_init_error'));
         break;
       case 'file_read':
@@ -109,21 +111,38 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
  */
 function FileManager() {
   this.fs = null;
+  this.type = null;
 }
 
 /**
- * Translate a path from the point of view of NaCl (with / as the root) to the
- * point of the HTML5 file system (with /mnt/html5 as the root).
+ * Translate a path from the point of view of NaCl to the point of view of the
+ * HTML5 file system.
  * @param {string} path The path to be translated.
  * @returns {string} The translated path.
  */
-FileManager.translatePath = function(path) {
+FileManager.prototype.translatePath = function(path) {
   var html5MountPoint = '/mnt/html5';
   var homeMountPoint = '/home/user';
-  if (path.indexOf(html5MountPoint) === 0) {
-    return path.replace(html5MountPoint, '');
-  } else if (path.indexOf(homeMountPoint) === 0) {
-    return path.replace(homeMountPoint, '/home');
+  var tmpMountPoint = '/tmp';
+  var isHTML5 = path.indexOf(html5MountPoint) === 0;
+  var isHome = path.indexOf(homeMountPoint) === 0;
+  var isTmp = path.indexOf(tmpMountPoint) === 0;
+  if (isHTML5 || isHome) {
+    if (this.type !== window.PERSISTENT) {
+      throw new Error('attempting to access persistent data from temporary' +
+          ' filesystem');
+    }
+    if (isHTML5) {
+      return path.replace(html5MountPoint, '');
+    } else {
+      return path.replace(homeMountPoint, '/home');
+    }
+  } else if (isTmp) {
+    if (this.type !== window.TEMPORARY) {
+      throw new Error('attempting to access temporary data from persistent' +
+          ' filesystem');
+    }
+    return path.replace(tmpMountPoint, '');
   } else {
     throw new Error('path is outside of HTML5 filesystem');
   }
@@ -133,13 +152,19 @@ FileManager.translatePath = function(path) {
  * Initialize the file system. This must be called before any file operations
  * can be performed.
  */
-FileManager.prototype.init = function() {
+FileManager.prototype.init = function(type) {
   var self = this;
 
-  // TODO(channingh): Add support for a window.TEMPORARY file system.
+  // TODO(channingh): Initialize both types of filesystem, so the user doesn't
+  // have to decide.
+
+  if (type === undefined)
+    type = window.PERSISTENT;
+
   return new Promise(function(resolve, reject) {
-    window.webkitRequestFileSystem(window.PERSISTENT, 1024*1024, function(fs) {
+    window.webkitRequestFileSystem(type, 1024*1024, function(fs) {
       self.fs = fs;
+      self.type = type;
       resolve();
     }, function(e) {
       reject(e);
@@ -163,7 +188,7 @@ FileManager.prototype.readText = function(fileName) {
   return new Promise(function(resolve, reject) {
     if (!self.fs)
       reject(new Error(FileManager.FS_NOT_INITIALIZED));
-    fileName = FileManager.translatePath(fileName);
+    fileName = self.translatePath(fileName);
 
     self.fs.root.getFile(fileName, {}, function(fe) {
       fe.file(function(file) {
@@ -190,7 +215,7 @@ FileManager.prototype.writeText = function(fileName, content) {
   return new Promise(function(resolve, reject) {
     if (!self.fs)
       reject(new Error(FileManager.FS_NOT_INITIALIZED));
-    fileName = FileManager.translatePath(fileName);
+    fileName = self.translatePath(fileName);
 
     self.fs.root.getFile(fileName, {create: true}, function(fe) {
       fe.createWriter(onCreateWriter, reject);
@@ -217,7 +242,7 @@ FileManager.prototype.remove = function(fileName) {
   return new Promise(function(resolve, reject) {
     if (!self.fs)
       reject(new Error(FileManager.FS_NOT_INITIALIZED));
-    fileName = FileManager.translatePath(fileName);
+    fileName = self.translatePath(fileName);
 
     self.fs.root.getFile(fileName, {}, function(fe) {
       fe.remove(resolve, reject);
@@ -234,7 +259,7 @@ FileManager.prototype.makeDirectory = function(fileName) {
   return new Promise(function(resolve, reject) {
     if (!self.fs)
       reject(new Error(FileManager.FS_NOT_INITIALIZED));
-    fileName = FileManager.translatePath(fileName);
+    fileName = self.translatePath(fileName);
 
     self.fs.root.getDirectory(fileName, {create: true}, function() {
       resolve();
@@ -251,7 +276,7 @@ FileManager.prototype.removeDirectory = function(fileName) {
   return new Promise(function(resolve, reject) {
     if (!self.fs)
       reject(new Error(FileManager.FS_NOT_INITIALIZED));
-    fileName = FileManager.translatePath(fileName);
+    fileName = self.translatePath(fileName);
 
     self.fs.root.getDirectory(fileName, {}, function(dir) {
       dir.removeRecursively(function() {

@@ -48,10 +48,11 @@
     });
   }
 
-  Widget.WORKING_DIR = '/home/user';
-  Widget.C_FILE = Widget.WORKING_DIR + '/test.c';
-  Widget.COMPILE_COMMAND = 'gcc test.c -o test -lmingn';
-  Widget.RUN_COMMAND = Widget.WORKING_DIR + '/test';
+  Widget.WORKING_DIR = '/tmp';
+  Widget.C_FILE = Widget.WORKING_DIR + '/widget.c';
+  Widget.COMPILE_COMMAND = 'gcc ' + Widget.WORKING_DIR + '/widget.c' +
+      ' -o ' + Widget.WORKING_DIR + '/widget -lmingn';
+  Widget.RUN_COMMAND = Widget.WORKING_DIR + '/widget';
 
   // The extension ID of the NaCl Development Environment extension.
   Widget.DEFAULT_EXTENSION_ID = 'aljpgkjeipgnmdpikaajmnepbcfkglfa';
@@ -79,11 +80,9 @@
     self.view.setStatus(WidgetView.STATUS_COMPILING);
     self.view.clearOutput();
     self.model.connect();
-    self.model.post({name: 'file_init'}).then(function() {
-      return self.model.post({
-        name: 'file_mkdir',
-        file: Widget.WORKING_DIR
-      });
+    self.model.post({
+      name: 'file_init',
+      type: 'temporary'
     }).then(function() {
       return self.model.post({
         name: 'file_remove',
