@@ -20,8 +20,6 @@ InstallStep() {
   local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip/${TOOLCHAIN}
 
   LogExecute cp -fR ${BASH_DIR}/* ${APP_DIR}
-  # We will be providing a devenv background.js.
-  LogExecute rm ${APP_DIR}/background.js
 
   # On newlib there won't be libs, so turn on null glob for these copies.
   shopt -s nullglob
@@ -29,8 +27,14 @@ InstallStep() {
   LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,pexe,nmf},lib*} ${APP_DIR}
   shopt -u nullglob
 
+  # Install the HTML/JS for the terminal.
+  ChangeDir ${APP_DIR}
+  LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js bash.nmf
+  InstallNaClTerm ${APP_DIR}
+
   RESOURCES="background.js bash.js bashrc package setup-environment
-      graphical.html whitelist.js"
+      graphical.html whitelist.js devenv_16.png devenv_48.png
+      devenv_128.png"
   for resource in ${RESOURCES}; do
     cp ${START_DIR}/${resource} ${APP_DIR}/
   done

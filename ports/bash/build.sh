@@ -47,11 +47,4 @@ InstallStep() {
         _platform_specific/*/bash*${NACL_EXEEXT} \
         -s . -o bash.nmf
   fi
-  LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js bash.nmf
-  InstallNaClTerm ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/manifest.json ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/devenv_16.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/devenv_48.png ${ASSEMBLY_DIR}
-  LogExecute cp ${START_DIR}/devenv_128.png ${ASSEMBLY_DIR}
 }
