@@ -1,7 +1,6 @@
 NAME=drod
 VERSION=213fa47
-URL=https://github.com/binji/drod/archive/213fa47/drod.tar.gz
-URL_FILENAME=drod-213fa47.tar.gz
+URL=https://github.com/binji/drod/archive/213fa47/drod-213fa47.tar.gz
 ARCHIVE_ROOT=drod-213fa477000429fb9a5f4a77673394d47cadbfac
 LICENSE=MPL
 DISABLED_ARCH=(pnacl)
