@@ -3,6 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXTRA_CONFIGURE_ARGS="--enable-x11=no"
 
 if [ "${NACL_SHARED}" = "1" ]; then
   EXECUTABLES=util/.libs/rgb2gif${NACL_EXEEXT}
