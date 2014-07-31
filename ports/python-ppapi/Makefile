@@ -15,7 +15,7 @@ ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic
 else
-LIBS += glibc-compat
+LIBS += glibc-compat z
 endif
 SOURCES = python.c
 INC_PATHS = $(NACLPORTS_INCLUDE)/python2.7
