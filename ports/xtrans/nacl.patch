@@ -82,6 +82,20 @@ index 5beef7c..653a4d9 100644
  
      if (ret < 0) {
  	prmsg(1,"SCOOpenClient: error from getmsg\n");
+diff --git a/Xtranssock.c b/Xtranssock.c
+index dfa41cf..706e498 100644
+--- a/Xtranssock.c
++++ b/Xtranssock.c
+@@ -412,7 +412,8 @@ TRANS(SocketOpen) (int i, int type)
+ 
+     if ((ciptr->fd = socket(Sockettrans2devtab[i].family, type,
+ 	Sockettrans2devtab[i].protocol)) < 0
+-#ifndef WIN32
++/* TODO(bradnelson): Drop this if we decide to support this sysconf value for newlib. */
++#if !defined(WIN32) && !(defined(__native_client__) && defined(_NEWLIB_VERSION))
+ #if (defined(X11_t) && !defined(USE_POLL)) || defined(FS_t) || defined(FONT_t)
+        || ciptr->fd >= sysconf(_SC_OPEN_MAX)
+ #endif
 diff --git a/Xtransutil.c b/Xtransutil.c
 index 52c937b..0959a4a 100644
 --- a/Xtransutil.c
