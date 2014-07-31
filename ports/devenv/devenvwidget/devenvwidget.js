@@ -81,8 +81,7 @@
     self.view.clearOutput();
     self.model.connect();
     self.model.post({
-      name: 'file_init',
-      type: 'temporary'
+      name: 'file_init'
     }).then(function() {
       return self.model.post({
         name: 'file_remove',
