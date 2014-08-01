@@ -2,4 +2,6 @@ NAME=x264
 VERSION=snapshot-20091023-2245
 URL=http://downloads.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20091023-2245.tar.bz2
 LICENSE=GPL2
+# log2f undefined with bionic.
+DISABLED_LIBC=(bionic)
 SHA1=3ed3b9804822b8ff16374aee18c91a8750902341

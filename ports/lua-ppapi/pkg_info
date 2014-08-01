@@ -1,4 +1,6 @@
 NAME=lua-ppapi
 VERSION=0.1
 LICENSE=BSD
+# lua doesn't build with bionic yet
+DISABLED_LIBC=(bionic)
 DEPENDS=(lua5.2 libtar nacl-spawn)

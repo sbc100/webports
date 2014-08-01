@@ -2,7 +2,9 @@ NAME=quakespasm
 VERSION=0.85.9
 DEPENDS=(sdl libvorbis mpg123)
 LICENSE=GPL
-# regal is not usable on PNaCl yet.
+# regal is not buildable with PNaCl yet.
 DISABLED_ARCH=pnacl
+# regal is not buildable with bionic yet.
+DISABLED_LIBC=(bionic)
 URL=http://downloads.sourceforge.net/project/quakespasm/Source/quakespasm-0.85.9.tgz
 SHA1=d9f6278e2badb7be11830539e4d8bb16ef90e287
