@@ -12,7 +12,7 @@ import urlparse
 import naclports
 import binary_package
 import package_index
-from naclports import Trace, Log, Warn, Error, DisabledError
+from naclports import Trace, Log, Warn, Error, DisabledError, PkgConflictError
 from naclports import OUT_DIR, NACLPORTS_ROOT
 from naclports.configuration import Configuration
 
@@ -66,6 +66,7 @@ class Package(object):
       setattr(self, key, None)
     self.config = config
     self.DEPENDS = []
+    self.CONFLICTS = []
 
     self.root = os.path.abspath(pkg_root)
     self.info = os.path.join(self.root, 'pkg_info')
@@ -95,11 +96,17 @@ class Package(object):
   def __cmp__(self, other):
     return cmp(self.NAME, other.NAME)
 
-  def CheckDeps(self, valid_dependencies):
-    for dep in self.DEPENDS:
-      if dep not in valid_dependencies:
-        Log('%s: Invalid dependency: %s' % (self.info, dep))
+  def CheckDeps(self, valid_packages):
+    for package in self.DEPENDS:
+      if package not in valid_packages:
+        Log('%s: Invalid dependency: %s' % (self.info, package))
         return False
+
+    for package in self.CONFLICTS:
+      if package not in valid_packages:
+        Log('%s: Invalid conflict: %s' % (self.info, package))
+        return False
+
     return True
 
   def GetBasename(self):
@@ -175,7 +182,7 @@ class Package(object):
     return package.IsInstallable()
 
   def Install(self, build_deps, force=None, from_source=False):
-    self.CheckInsallable()
+    self.CheckInstallable()
 
     if force is None and self.IsInstalled():
       Log("Already installed '%s' [%s]" % (self.NAME, self.config))
@@ -355,7 +362,7 @@ class Package(object):
   def GetMirrorURL(self):
     return MIRROR_URL + '/' + self.GetArchiveFilename()
 
-  def CheckInsallable(self):
+  def CheckInstallable(self):
     if self.LIBC is not None and self.LIBC != self.config.libc:
       raise DisabledError('%s: cannot be built with %s.'
                           % (self.NAME, self.config.libc))
@@ -375,8 +382,13 @@ class Package(object):
         raise DisabledError('%s: disabled for current arch: %s.'
                             % (self.NAME, self.config.arch))
 
+    for conflicting_package in self.CONFLICTS:
+      if naclports.IsInstalled(conflicting_package, self.config):
+        raise PkgConflictError("%s: conflicts with installed package: %s" %
+            (self.NAME, conflicting_package))
+
   def CheckBuildable(self):
-    self.CheckInsallable()
+    self.CheckInstallable()
 
     if self.BUILD_OS is not None:
       import getos

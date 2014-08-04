@@ -24,7 +24,7 @@ if sys.platform == "cygwin":
   NACL_SDK_ROOT = NACL_SDK_ROOT.replace('\\', '/')
 
 VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
-              'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH',
+              'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH', 'CONFLICTS',
               'DISABLED_ARCH', 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED']
 REQUIRED_KEYS = ['NAME', 'VERSION']
 
@@ -58,6 +58,10 @@ class DisabledError(Error):
   """Error raised when a package is cannot be built because it is disabled
   for the current configuration.
   """
+  pass
+
+
+class PkgConflictError(Error):
   pass
 
 

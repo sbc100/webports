@@ -12,7 +12,7 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 
-import naclports
+import naclports.package
 
 def main(args):
   global options
@@ -23,9 +23,9 @@ def main(args):
   count = 0
 
   package_names = [os.path.basename(p.root)
-                   for p in naclports.PackageIterator()]
+                   for p in naclports.package.PackageIterator()]
 
-  for package in naclports.PackageIterator():
+  for package in naclports.package.PackageIterator():
     if not package.CheckDeps(package_names):
       return 1
     count += 1
