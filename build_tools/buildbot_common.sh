@@ -74,6 +74,10 @@ InstallPackageMultiArch() {
     if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
       continue
     fi
+    if ! RunCmd bin/naclports uninstall --all ; then
+      BuildFailure $1
+      return
+    fi
     if ! RunCmd bin/naclports install $NACLPORTS_ARGS $1 ; then
       # Early exit if one of the architecures fails. This mean the
       # failure is always at the end of the build step.
