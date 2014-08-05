@@ -8,5 +8,13 @@ EXTRA_CONFIGURE_ARGS+=" --without-iconv"
 
 NACLPORTS_CPPFLAGS+=" -Dtimezone=_timezone"
 
+# Because /usr/bin/xml2-config works different on Linux and Mac we need
+# to treat them differently. On Mac the build works correctly with no
+# changes, but Linux requires --prefix=<path_to_xml2>, which is an invalid
+# flag on Mac.
+if [ $OS_NAME = "Linux" ]; then
+  export XML2_CONFIG_PREFIX="--prefix=\"${NACL_PREFIX}\""
+fi
+
 # Necessary for libxml2.
 export LIBS="-lpthread -lm"
