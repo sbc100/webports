@@ -672,7 +672,7 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
   if (pid == -1 && finishedProcess !== null) {
     reply(parseInt(finishedProcess), this.processes[finishedProcess]);
     delete this.processes[finishedProcess];
-  } else if (pid >= 0 && !this.processes[pid]) {
+  } else if (pid >= 0 && this.processes[pid] === undefined) {
     // The process does not exist.
     reply(-NaClProcessManager.ECHILD, 0);
   } else if (typeof this.processes[pid] === 'number') {
