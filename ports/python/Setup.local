@@ -41,7 +41,7 @@ _io -I$(srcdir)/Modules/_io _io/bufferedio.c _io/bytesio.c _io/fileio.c _io/ioba
 # (If you have a really backward UNIX, select and socket may not be
 # supported...)
 
-#fcntl fcntlmodule.c	# fcntl(2) and ioctl(2)
+fcntl fcntlmodule.c	# fcntl(2) and ioctl(2)
 #spwd spwdmodule.c		# spwd(3) 
 #grp grpmodule.c		# grp(3)
 select selectmodule.c	# select(2); not on ancient System V

@@ -11,6 +11,46 @@ index c0e7ffd..b6d6036 100644
  /* Macros for type checking when building the Python core. */
  #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
  #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
+diff --git a/Lib/subprocess.py b/Lib/subprocess.py
+index ce47b5e..dddc1f8 100644
+--- a/Lib/subprocess.py
++++ b/Lib/subprocess.py
+@@ -388,6 +388,7 @@ except that:
+ 
+ import sys
+ mswindows = (sys.platform == "win32")
++nacl = (sys.platform == "nacl")
+ 
+ import os
+ import types
+@@ -1198,7 +1199,10 @@ class Popen(object):
+                 args = list(args)
+ 
+             if shell:
+-                args = ["/bin/sh", "-c"] + args
++                if nacl:
++                    args = ["bash", "-c"] + args
++                else:
++                    args = ["/bin/sh", "-c"] + args
+                 if executable:
+                     args[0] = executable
+ 
+@@ -1209,6 +1213,15 @@ class Popen(object):
+                 os.close(fd)
+                 to_close.remove(fd)
+ 
++            # TODO(bradnelson,sbc): Add support for pipes.
++            if nacl:
++                if env is None:
++                    self.pid = os.spawnv(os.P_NOWAIT, executable, args)
++                else:
++                    self.pid = os.spawnve(os.P_NOWAIT, executable, args, env)
++                self._child_created = True
++                return
++
+             # For transferring possible exec failure from child to parent
+             # The first char specifies the exception type: 0 means
+             # OSError, 1 means some other error.
 diff --git a/Makefile.pre.in b/Makefile.pre.in
 index a70119a..3cb02a5 100644
 --- a/Makefile.pre.in
