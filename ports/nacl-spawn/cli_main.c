@@ -31,6 +31,9 @@ int nacl_spawn_ppid;
 // be converted to an int.
 static int getenv_as_int(const char *env) {
   const char* env_str = getenv(env);
+  if (!env_str) {
+    return -1;
+  }
   errno = 0;
   int env_int = strtol(env_str, NULL, 0);
   if (errno) {
