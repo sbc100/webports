@@ -24,6 +24,8 @@
 
 extern int nacl_main(int argc, char *argv[]);
 
+int nacl_spawn_pid;
+
 int cli_main(int argc, char* argv[]) {
   umount("/");
   mount("", "/", "memfs", 0, NULL);
@@ -91,6 +93,14 @@ int cli_main(int argc, char* argv[]) {
   setenv("NACL_ARCH", kNaClArch, 1);
 
   setlocale(LC_CTYPE, "");
+
+  const char* pid_str = getenv("NACL_PID");
+  errno = 0;
+  nacl_spawn_pid = strtol(pid_str, NULL, 0);
+  if (errno) {
+    nacl_spawn_pid = -1;
+  }
+
   return nacl_main(argc, argv);
 }
 

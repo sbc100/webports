@@ -66,7 +66,7 @@ DevEnvTest.prototype.runCommand = function(cmd) {
       'nmf': 'bash.nmf',
       'argv': ['bash', '-c', '. /mnt/http/setup-environment && ' + cmd],
       'cwd': '/home/user',
-      'envs': {},
+      'envs': [],
     });
     return self.devEnv.wait();
   }).then(updateStdoutUntil('nacl_spawn_reply')).then(function(msg) {

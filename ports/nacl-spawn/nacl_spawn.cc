@@ -31,6 +31,7 @@
 #include "path_util.h"
 
 extern char** environ;
+extern int nacl_spawn_pid;
 
 struct NaClSpawnReply {
   pthread_mutex_t mu;
@@ -457,4 +458,12 @@ extern "C" pid_t waitpid(int pid, int* status, int options) {
   if (status)
     *status = (rawStatus & 0xff) << 8;
   return result;
+}
+
+// Get the process ID of the calling process.
+extern "C" pid_t getpid() {
+  if (nacl_spawn_pid == -1) {
+    errno = ENOSYS;
+  }
+  return nacl_spawn_pid;
 }
