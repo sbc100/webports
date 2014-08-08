@@ -527,6 +527,10 @@ NaClProcessManager.prototype.spawn = function(
   var params = {};
 
   envs.push('NACL_PID=' + this.pid);
+  if (parent) {
+    envs.push('NACL_PPID=' + parent.pid);
+  }
+
   for (var i = 0; i < envs.length; i++) {
     var env = envs[i];
     var index = env.indexOf('=');

@@ -32,6 +32,7 @@
 
 extern char** environ;
 extern int nacl_spawn_pid;
+extern int nacl_spawn_ppid;
 
 struct NaClSpawnReply {
   pthread_mutex_t mu;
@@ -466,4 +467,12 @@ extern "C" pid_t getpid() {
     errno = ENOSYS;
   }
   return nacl_spawn_pid;
+}
+
+// Get the process ID of the parent process.
+extern "C" pid_t getppid() {
+  if (nacl_spawn_ppid == -1) {
+    errno = ENOSYS;
+  }
+  return nacl_spawn_ppid;
 }

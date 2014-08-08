@@ -25,6 +25,19 @@
 extern int nacl_main(int argc, char *argv[]);
 
 int nacl_spawn_pid;
+int nacl_spawn_ppid;
+
+// Get an environment variable as an int, or return -1 if the value cannot
+// be converted to an int.
+static int getenv_as_int(const char *env) {
+  const char* env_str = getenv(env);
+  errno = 0;
+  int env_int = strtol(env_str, NULL, 0);
+  if (errno) {
+    return -1;
+  }
+  return env_int;
+}
 
 int cli_main(int argc, char* argv[]) {
   umount("/");
@@ -94,12 +107,8 @@ int cli_main(int argc, char* argv[]) {
 
   setlocale(LC_CTYPE, "");
 
-  const char* pid_str = getenv("NACL_PID");
-  errno = 0;
-  nacl_spawn_pid = strtol(pid_str, NULL, 0);
-  if (errno) {
-    nacl_spawn_pid = -1;
-  }
+  nacl_spawn_pid = getenv_as_int("NACL_PID");
+  nacl_spawn_ppid = getenv_as_int("NACL_PPID");
 
   return nacl_main(argc, argv);
 }
