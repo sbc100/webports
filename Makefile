@@ -39,6 +39,10 @@ ifeq ($(FORCE),1)
 BUILD_FLAGS+=-f
 endif
 
+ifeq ($(FROM_SOURCE),1)
+BUILD_FLAGS+=--from-source
+endif
+
 export NACL_ARCH
 export TOOLCHAIN
 export NACL_GLIBC
