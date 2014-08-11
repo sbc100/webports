@@ -168,20 +168,27 @@ index fc5a4db..d0aaeee 100644
    return toplev_main (argc, (const char **) argv);
  }
 diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
-index 366e96e..852ee70 100644
+index 366e96e..c660c98 100644
 --- a/libiberty/pex-unix.c
 +++ b/libiberty/pex-unix.c
-@@ -56,6 +56,9 @@ extern int errno;
+@@ -56,6 +56,16 @@ extern int errno;
  #include <sys/stat.h>
  #endif
  
++/*
++ * Declared inline rather than by including nacl_spawn.h because this portion
++ * of the build may build for x86-64 without nacl_spawn.h having been built for
++ * that architecture (ie when building for i686).
++ */
 +#if defined(__native_client__)
-+#include "nacl_spawn.h"
++#define P_NOWAIT 1
++extern int spawnve(int mode, const char* path,
++                   char *const argv[], char *const envp[]);
 +#endif
  
  #ifdef vfork /* Autoconf may define this to fork for us. */
  # define VFORK_STRING "fork"
-@@ -361,6 +364,12 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
+@@ -361,6 +371,12 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
                       int in, int out, int errdes,
  		     int toclose, const char **errmsg, int *err)
  {
@@ -194,7 +201,7 @@ index 366e96e..852ee70 100644
    pid_t pid;
  
    /* We declare these to be volatile to avoid warnings from gcc about
-@@ -469,6 +478,7 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
+@@ -469,6 +485,7 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,
  
        return pid;
      }
@@ -202,7 +209,7 @@ index 366e96e..852ee70 100644
  }
  
  /* Wait for a child process to complete.  */
-@@ -478,6 +488,15 @@ pex_unix_wait (struct pex_obj *obj, pid_t pid, int *status,
+@@ -478,6 +495,15 @@ pex_unix_wait (struct pex_obj *obj, pid_t pid, int *status,
  	       struct pex_time *time, int done, const char **errmsg,
  	       int *err)
  {
@@ -218,7 +225,7 @@ index 366e96e..852ee70 100644
    /* If we are cleaning up when the caller didn't retrieve process
       status for some reason, encourage the process to go away.  */
    if (done)
-@@ -491,6 +510,7 @@ pex_unix_wait (struct pex_obj *obj, pid_t pid, int *status,
+@@ -491,6 +517,7 @@ pex_unix_wait (struct pex_obj *obj, pid_t pid, int *status,
      }
  
    return 0;
