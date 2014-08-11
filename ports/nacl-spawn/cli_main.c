@@ -24,8 +24,8 @@
 
 extern int nacl_main(int argc, char *argv[]);
 
-int nacl_spawn_pid;
-int nacl_spawn_ppid;
+extern int nacl_spawn_pid;
+extern int nacl_spawn_ppid;
 
 // Get an environment variable as an int, or return -1 if the value cannot
 // be converted to an int.

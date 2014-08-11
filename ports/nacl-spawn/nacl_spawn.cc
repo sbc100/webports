@@ -31,8 +31,9 @@
 #include "path_util.h"
 
 extern char** environ;
-extern int nacl_spawn_pid;
-extern int nacl_spawn_ppid;
+
+int nacl_spawn_pid = -1;
+int nacl_spawn_ppid = -1;
 
 struct NaClSpawnReply {
   pthread_mutex_t mu;
