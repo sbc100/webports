@@ -1,6 +1,8 @@
 [scummvm]
 lastselectedgame=lure
 browser_lastpath=/usr/local/share/scummvm/lure
+extrapath=/usr/local/share/scummvm
+themepath=/usr/local/share/scummvm
 mute=false
 versioninfo=1.6.0
 
