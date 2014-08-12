@@ -19,9 +19,13 @@ function NaClProcessManager() {
   // The process which gets the input from the user.
   this.foregroundProcess = null;
 
-  // Process information keyed by PID. The value is an embed DOM object
-  // if the process is running. Once the process has finished, the value
-  // will be the exit code.
+  // Process information keyed by PID. The value is an object consisting of the
+  // fields: {
+  //   domElement: the <embed> element of the process,
+  //   exitCode: the exit code of the process, or null if the process has not
+  //       yet exited,
+  //   pgid: the process group ID of the process
+  // }
   this.processes = {};
 
   // Waiter processes keyed by the PID of the waited process. The waiter
@@ -30,6 +34,48 @@ function NaClProcessManager() {
   //     options specfied for the wait (such as WNOHANG) }
   this.waiters = {};
   this.pid = 0;
+};
+
+/**
+ * Constants that correspond to values in errno.h.
+ * @namespace
+ */
+var Errno = {
+  /**
+   * Operation not permitted.
+   * @type {number}
+   */
+  EPERM: 1,
+
+  /**
+   * File or directory not found.
+   * @type {number}
+   */
+  ENOENT: 2,
+
+  /**
+   * Process not found.
+   * @type {number}
+   */
+  ESRCH: 3,
+
+  /**
+   * No child processes.
+   * @type {number}
+   */
+  ECHILD: 10,
+
+  /**
+   * Permission denied.
+   * @type {number}
+   */
+  EACCES: 13,
+
+  /**
+   * Invalid argument.
+   * @type {number}
+   */
+  EINVAL: 22,
 };
 
 /**
@@ -50,18 +96,6 @@ NaClProcessManager.prefix = 'nacl_process';
  * @type {number}
  */
 NaClProcessManager.WNOHANG = 1;
-
-/**
- * Signal when a process cannot be found.
- * @type {number}
- */
-NaClProcessManager.ENOENT = 2;
-
-/**
- * Error when a process does not have unwaited-for children.
- * @type {number}
- */
-NaClProcessManager.ECHILD= 10;
 
 /*
  * Exit code when a process has an error.
@@ -279,65 +313,110 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
  * @private
  */
 NaClProcessManager.prototype.handleMessage_ = function(e) {
-  if (e.data['command'] === 'nacl_spawn') {
-    var msg = e.data;
-    console.log('nacl_spawn: ' + JSON.stringify(msg));
-    var args = msg['args'];
-    var envs = msg['envs'];
-    var cwd = msg['cwd'];
-    var executable = args[0];
-    var nmf = msg['nmf'];
-    var naclType = msg['naclType'] || 'nacl';
-    if (nmf) {
-      if (nmf['files']) {
-        for (var key in nmf['files'])
-          this.adjustNmfEntry_(nmf['files'][key]);
-      }
-      this.adjustNmfEntry_(nmf['program']);
-      var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
-      nmf = window.URL.createObjectURL(blob);
-    } else {
-      if (NaClProcessManager.nmfWhitelist !== undefined &&
-          NaClProcessManager.nmfWhitelist.indexOf(executable) === -1) {
-        var reply = {};
-        reply[e.data['id']] = {
-          pid: -NaClProcessManager.ENOENT,
-        };
-        console.log('nacl_spawn(error): ' + JSON.stringify(reply));
-        e.srcElement.postMessage(reply);
-        return;
-      }
-      nmf = executable + '.nmf';
-    }
-    var pid = this.spawn(nmf, args, envs, cwd, naclType, e.srcElement);
+  var msg = e.data;
+  var src = e.srcElement;
+
+  // Set handlers for commands. Each handler is passed three arguments:
+  //   msg: the data sent from the NaCl module
+  //   reply: a callback to reply to the command
+  //   src: the DOM element from which the message was received
+  var handlers = {
+    nacl_spawn: this.handleMessageSpawn_,
+    nacl_wait: this.handleMessageWait_,
+    nacl_getpgid: this.handleMessageGetPGID_,
+  };
+
+  function reply(contents) {
     var reply = {};
-    reply[e.data['id']] = {
-      pid: pid
-    };
-    e.srcElement.postMessage(reply);
-  } else if (e.data['command'] === 'nacl_wait') {
-    var msg = e.data;
-    console.log('nacl_wait: ' + JSON.stringify(msg));
-    this.waitpid(msg['pid'], msg['options'], function(pid, status) {
-      var reply = {};
-      reply[msg['id']] = {
-        pid: pid,
-        status: status
-      };
-      e.srcElement.postMessage(reply);
-    });
-  } else if (e.data.indexOf(NaClProcessManager.prefix) === 0) {
-    var msg = e.data.substring(NaClProcessManager.prefix.length);
-    this.onStdout(msg);
-  } else if (e.data.indexOf('exited') == 0) {
-    var exitCode = parseInt(e.data.split(':', 2)[1]);
+    reply[msg['id']] = contents;
+    src.postMessage(reply);
+  }
+
+  if (msg['command'] && handlers[msg['command']]) {
+    console.log(msg['command'] + ': ' + JSON.stringify(msg));
+    handlers[msg['command']].call(this, msg, reply, src);
+  } else if (msg.indexOf(NaClProcessManager.prefix) === 0) {
+    var out = msg.substring(NaClProcessManager.prefix.length);
+    this.onStdout(out);
+  } else if (msg.indexOf('exited') == 0) {
+    var exitCode = parseInt(msg.split(':', 2)[1]);
     if (isNaN(exitCode))
       exitCode = 0;
-    this.exit(exitCode, e.srcElement);
+    this.exit(exitCode, src);
   } else {
-    console.log('unexpected message: ' + e.data);
+    console.log('unexpected message: ' + msg);
     return;
   }
+}
+
+/**
+ * Handle a nacl_spawn call.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageSpawn_ = function(msg, reply, src) {
+  var args = msg['args'];
+  var envs = msg['envs'];
+  var cwd = msg['cwd'];
+  var executable = args[0];
+  var nmf = msg['nmf'];
+  var naclType = msg['naclType'] || 'nacl';
+  if (nmf) {
+    if (nmf['files']) {
+      for (var key in nmf['files'])
+        this.adjustNmfEntry_(nmf['files'][key]);
+    }
+    this.adjustNmfEntry_(nmf['program']);
+    var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
+    nmf = window.URL.createObjectURL(blob);
+  } else {
+    if (NaClProcessManager.nmfWhitelist !== undefined &&
+        NaClProcessManager.nmfWhitelist.indexOf(executable) === -1) {
+      var replyMsg = {
+        pid: -Errno.ENOENT,
+      };
+      console.log('nacl_spawn(error): ' + JSON.stringify(replyMsg));
+      reply(replyMsg);
+      return;
+    }
+    nmf = executable + '.nmf';
+  }
+  reply({
+    pid: this.spawn(nmf, args, envs, cwd, naclType, src)
+  });
+}
+
+
+/**
+ * Handle a waitpid call.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageWait_ = function(msg, reply) {
+  this.waitpid(msg['pid'], msg['options'], function(pid, status) {
+    reply({
+      pid: pid,
+      status: status
+    });
+  });
+}
+
+/**
+ * Handle a getpgid call.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageGetPGID_ = function(msg, reply, src) {
+  var pgid;
+  var pid = parseInt(msg['pid']) || src.pid;
+
+  if (pid < 0) {
+    pgid = -Errno.EINVAL;
+  } else if (!this.processes[pid]) {
+    pgid = -Errno.ESRCH;
+  } else {
+    pgid = this.processes[pid].pgid;
+  }
+  reply({
+    pid: pgid,
+  });
 }
 
 /**
@@ -386,6 +465,14 @@ NaClProcessManager.prototype.handleCrash_ = function(e) {
 }
 
 /**
+ * Remove entries for a process from the process table.
+ * @private
+ */
+NaClProcessManager.prototype.deleteProcessEntry_ = function(pid) {
+  delete this.processes[pid];
+}
+
+/**
  * Exit the command.
  * @param {number} code The exit code of the process.
  * @param {HTMLObjectElement} element The HTML element of the exited process.
@@ -409,9 +496,9 @@ NaClProcessManager.prototype.exit = function(code, element) {
       delete this.waiters[-1];
     }
 
-    delete this.processes[pid];
+    this.deleteProcessEntry_(pid);
   } else {
-    this.processes[pid] = code;
+    this.processes[pid].exitCode = code;
   }
 
   // Mark as terminated.
@@ -522,7 +609,11 @@ NaClProcessManager.prototype.spawn = function(
   fg.addEventListener('message', this.handleMessage_.bind(this));
   fg.addEventListener('progress', this.handleProgress_.bind(this));
 
-  this.processes[this.pid] = fg;
+  this.processes[this.pid] = {
+    domElement: fg,
+    exitCode: null,
+    pgid: parent ? parent.pid : this.pid
+  };
 
   var params = {};
 
@@ -666,25 +757,25 @@ NaClProcessManager.prototype.spawn = function(
  */
 NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
   var self = this;
-  var finishedProcess = null;
-  Object.keys(this.processes).some(function(pid) {
-    if (typeof self.processes[pid] === 'number') {
-      finishedProcess = pid;
-      return true;
-    }
-    return false;
-  });
 
-  if (pid == -1 && finishedProcess !== null) {
-    reply(parseInt(finishedProcess), this.processes[finishedProcess]);
-    delete this.processes[finishedProcess];
+  var finishedPid = null;
+  for (var processPid in this.processes) {
+    if (this.processes[processPid].exitCode !== null) {
+      finishedPid = parseInt(processPid);
+      break;
+    }
+  }
+
+  if (pid == -1 && finishedPid !== null) {
+    reply(finishedPid, this.processes[finishedPid].exitCode);
+    this.deleteProcessEntry_(finishedPid);
   } else if (pid >= 0 && this.processes[pid] === undefined) {
     // The process does not exist.
-    reply(-NaClProcessManager.ECHILD, 0);
-  } else if (typeof this.processes[pid] === 'number') {
+    reply(-Errno.ECHILD, 0);
+  } else if (pid >= 0 && this.processes[pid].exitCode !== null) {
     // The process has already finished.
-    reply(pid, this.processes[pid]);
-    delete this.processes[pid];
+    reply(pid, this.processes[pid].exitCode);
+    this.deleteProcessEntry_(pid);
   } else {
     // Add the current process to the waiter list.
     if (options & this.WNOHANG != 0) {

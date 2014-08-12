@@ -476,3 +476,23 @@ extern "C" pid_t getppid() {
   }
   return nacl_spawn_ppid;
 }
+
+// Get the process group ID of the given process.
+extern "C" pid_t getpgid(pid_t pid) {
+  pp::VarDictionary req;
+  req.Set("command", "nacl_getpgid");
+  req.Set("pid", pid);
+
+  int result = SendRequest(&req, NULL);
+  if (result < 0) {
+    errno = -result;
+    return -1;
+  }
+
+  return result;
+}
+
+// Get the process group ID of the current process.
+extern "C" pid_t getpgrp() {
+  return getpgid(0);
+}
