@@ -25,5 +25,6 @@
   font-family: monospace;
   height: 300px;
   padding: 10px;
+  white-space: pre;
   width: 780px;
 }

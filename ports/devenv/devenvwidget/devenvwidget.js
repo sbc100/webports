@@ -44,7 +44,7 @@
       self.ready = true;
     }, function(e) {
       self.view.setStatus(WidgetView.STATUS_ERROR);
-      self.view.appendOutput(e.message);
+      self.view.appendHTMLOutput(e.message);
     });
   }
 
@@ -129,9 +129,15 @@
     this.stdoutListener = function() { };
   }
 
+  // This is the Chrome Web Store URL of the NaCl Development Environment
+  // extension.
+  DevEnv.CHROME_STORE_URL = 'https://chrome.google.com/webstore/detail/' +
+      'aljpgkjeipgnmdpikaajmnepbcfkglfa';
+
   // This error is thrown when the extension cannot be found.
   DevEnv.ERROR_NO_EXTENSION = 'Cannot find the NaCl Development Environment' +
-      ' extension.';
+      ' extension. <a href="' + DevEnv.CHROME_STORE_URL + '" target="_blank">' +
+      'Download it from the Chrome Web Store.</a>';
 
   // This error is thrown when commands are run before the connection is made
   // to the NaCl DevEnv extension.
@@ -279,8 +285,19 @@
 
   // Append a string to the output box.
   WidgetView.prototype.appendOutput = function(output) {
-    if (this.output)
-      this.output.innerText += output;
+    if (this.output) {
+      var node = document.createTextNode(output);
+      this.output.appendChild(node);
+    }
+  };
+
+  // Append an HTML string to the output box. Do not use on unsanitized input.
+  WidgetView.prototype.appendHTMLOutput = function(output) {
+    if (this.output) {
+      var node = document.createElement('span');
+      node.innerHTML = output;
+      this.output.appendChild(node);
+    }
   };
 
   // Clear the output box.
