@@ -150,7 +150,7 @@
       nmf: 'bash.nmf',
       argv: ['bash', '-c', '. /mnt/http/setup-environment && ' + cmd],
       cwd: '/home/user',
-      envs: {}
+      envs: []
     };
   };
 
