@@ -342,8 +342,7 @@ PatchSpecFile() {
         { print $0; }'
   else
     local ARCH_SUBST='/\*cpp:/ { \
-        printf("*nacl_arch:\n%%{\
-        m64:x86_64-nacl; m32:i686-nacl; :x86_64-nacl}\n\n", $1); } \
+        printf("*nacl_arch:\n%%{m64:x86_64-nacl; m32:i686-nacl; :x86_64-nacl}\n\n", $1); } \
         { print $0; }'
   fi
   echo ${ARCH_SUBST}
