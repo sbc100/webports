@@ -100,7 +100,7 @@ index 485b0c7..a2c428c 100644
  #endif
  
 +#if defined(__native_client__)
-+#  include "nacl_spawn.h"
++#  include <spawn.h>
 +#endif
 +
  extern int dollar_dollar_pid;

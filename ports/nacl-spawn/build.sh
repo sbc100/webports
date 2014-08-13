@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+NACLPORTS_CPPFLAGS+=" -I ${START_DIR}"
+
 ConfigureStep() {
   MakeDir ${BUILD_DIR}
   cp -rf ${START_DIR}/* ${BUILD_DIR}
@@ -37,5 +39,6 @@ InstallStep() {
   fi
   LogExecute cp libcli_main.a ${DESTDIR_LIB}
   MakeDir ${DESTDIR_INCLUDE}
-  LogExecute cp -f ${START_DIR}/nacl_spawn.h ${DESTDIR_INCLUDE}/
+  LogExecute cp -f ${START_DIR}/spawn.h ${DESTDIR_INCLUDE}/
+  LogExecute cp -f ${START_DIR}/nacl_main.h ${DESTDIR_INCLUDE}/
 }

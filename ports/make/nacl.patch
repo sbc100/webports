@@ -24,7 +24,7 @@ index aacfb84..9be95e9 100644
  #include <string.h>
  
 +#if defined(__native_client__)
-+#include "nacl_spawn.h"
++#include <spawn.h>
 +#endif
 +
  /* Default shell to use.  */

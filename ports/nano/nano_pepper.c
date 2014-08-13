@@ -4,8 +4,7 @@
  * found in the LICENSE file.
  */
 
-#include "nacl_spawn.h"
-#include "ppapi_simple/ps_main.h"
+#include "nacl_main.h"
 
 extern int nacl_nano_main(int argc, char *argv[]);
 

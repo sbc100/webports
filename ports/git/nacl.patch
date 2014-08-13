@@ -518,7 +518,7 @@ index 1b32a12..1f9a5c3 100644
  #include "argv-array.h"
  
 +#if defined(__native_client__)
-+# include "nacl_spawn.h"
++# include <spawn.h>
 +#endif
 +
  #ifndef SHELL_PATH

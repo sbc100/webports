@@ -4,7 +4,7 @@
  * found in the LICENSE file.
  */
 
-#include "nacl_spawn.h"
+#include "nacl_main.h"
 
 extern int nacl_vim_main(int argc, char *argv[]);
 

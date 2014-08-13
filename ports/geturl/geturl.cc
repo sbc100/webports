@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "nacl_spawn.h"
+#include "nacl_main.h"
 
 #include "ppapi_simple/ps.h"
 

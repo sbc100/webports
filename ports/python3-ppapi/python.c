@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "nacl_spawn.h"
+#include "nacl_main.h"
 
 #ifdef __arm__
 #define DATA_FILE "pydata_arm.tar"

@@ -4,9 +4,8 @@
 
 #undef RUBY_EXPORT
 #include <ruby.h>
+#include <spawn.h>
 #include <stdio.h>
-
-#include "nacl_spawn.h"
 
 #ifdef __x86_64__
 #define NACL_ARCH "x86_64"

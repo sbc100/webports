@@ -151,7 +151,7 @@ index cd4672c..753f52f 100644
  #endif /* !_MSC_VER */
  
 +#if defined(__native_client__)
-+#include "nacl_spawn.h"
++#include <spawn.h>
 +#if !defined(HAVE_SPAWNV)
 +#define HAVE_SPAWNV 1
 +#endif /* !defined(HAVE_SPAWNV) */

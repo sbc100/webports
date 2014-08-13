@@ -4,7 +4,7 @@
  * found in the LICENSE file.
  */
 
-#include "nacl_spawn.h"
+#include "nacl_main.h"
 
 #include <assert.h>
 #include <fcntl.h>
@@ -43,7 +43,7 @@ int nacl_startup_untar(
     }
   }
 
-  ret = tar_extract_all(tar, root);
+  ret = tar_extract_all(tar, (char*)root);
   if (ret) {
     fprintf(stderr, "error extracting %s\n", filename);
     return 1;

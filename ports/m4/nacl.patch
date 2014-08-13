@@ -157,7 +157,7 @@ index 17b903f..6aef928 100644
  #endif
  
 +#if defined(__native_client__)
-+#include "nacl_spawn.h"
++#include <spawn.h>
 +#endif
  
  /* The Unix standard contains a long explanation of the way to signal

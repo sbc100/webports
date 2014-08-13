@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "nacl_spawn.h"
+#include "nacl_main.h"
 
 extern int nethack_main(int argc, char *argv[]);
 

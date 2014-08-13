@@ -309,7 +309,8 @@ PatchSpecFile() {
     fi
   fi
 
-  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "arm" -o \
+  #if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "arm" -o \
+  if [ "${NACL_ARCH}" = "pnacl" -o \
        "${NACL_ARCH}" = "emscripten" ]; then
     # The arm compiler doesn't currently need a patched specs file
     # as it ships with the correct paths.  As does the pnacl toolchain.
@@ -317,7 +318,11 @@ PatchSpecFile() {
   fi
 
   # SPECS_FILE is where nacl-gcc 'specs' file will be installed
-  local SPECS_FILE=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3/specs
+  if [ "${NACL_ARCH}" = "arm" ]; then
+    local SPECS_FILE=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.8.3/specs
+  else
+    local SPECS_FILE=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3/specs
+  fi
 
   # NACL_SDK_MULITARCH_USR is a version of NACL_TOOLCHAIN_ROOT that gets passed
   # into the gcc specs file.  It has a gcc spec-file conditional for
@@ -330,11 +335,22 @@ PatchSpecFile() {
   # fix up spaces so gcc sees entire path
   local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
   local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
+
+  if [ "${NACL_ARCH}" = "arm" ]; then
+    local ARCH_SUBST='/\*cpp:/ { \
+        printf("*nacl_arch:\narm-nacl\n\n", $1); } \
+        { print $0; }'
+  else
+    local ARCH_SUBST='/\*cpp:/ { \
+        printf("*nacl_arch:\n%%{\
+        m64:x86_64-nacl; m32:i686-nacl; :x86_64-nacl}\n\n", $1); } \
+        { print $0; }'
+  fi
+  echo ${ARCH_SUBST}
+
   # have nacl-gcc dump specs file & add include & lib search paths
   ${NACLCC} -dumpspecs |\
-    awk '/\*cpp:/ {\
-      printf("*nacl_arch:\n%%{m64:x86_64-nacl; m32:i686-nacl; :x86_64-nacl}\n\n", $1); } \
-      { print $0; }' |\
+    awk "${ARCH_SUBST}" |\
     sed "/*cpp:/{
       N
       s|$| -isystem ${SED_SAFE_SPACES_USR_INCLUDE}|

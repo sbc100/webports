@@ -4,7 +4,7 @@
 
 #include <Python.h>
 
-#include "nacl_spawn.h"
+#include "nacl_main.h"
 
 extern int nacl_startup_untar(
     const char* argv0, const char* tarfile, const char* root);

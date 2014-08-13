@@ -4,7 +4,7 @@
 
 // Emulates spawning/waiting process by asking JavaScript to do so.
 
-#include "nacl_spawn.h"
+#include "nacl_main.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -33,6 +33,11 @@
 extern char** environ;
 extern int nacl_spawn_pid;
 extern int nacl_spawn_ppid;
+
+#if defined(_NEWLIB_VERSION)
+typedef struct __posix_spawn_file_actions* posix_spawn_file_actions_t;
+typedef struct __posix_spawnattr* posix_spawnattr_t;
+#endif
 
 struct NaClSpawnReply {
   pthread_mutex_t mu;
@@ -375,7 +380,7 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
 // Spawn a new NaCl process. This is an alias for
 // spawnve(mode, path, argv, NULL). Returns 0 on success. On error -1 is
 // returned and errno will be set appropriately.
-int spawnv(int mode, const char* path, char *const argv[]) {
+int spawnv(int mode, const char* path, char* const argv[]) {
   return spawnve(mode, path, argv, NULL);
 }
 
@@ -384,7 +389,7 @@ int spawnv(int mode, const char* path, char *const argv[]) {
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
 int spawnve(int mode, const char* path,
-            char *const argv[], char *const envp[]) {
+            char* const argv[], char* const envp[]) {
   if (NULL == path || NULL == argv[0]) {
     errno = EINVAL;
     return -1;
@@ -439,10 +444,12 @@ int spawnve(int mode, const char* path,
   return result;
 }
 
+extern "C" {
+
 #if defined(__GLIBC__)
-extern "C" pid_t wait(void* status) {
+pid_t wait(void* status) {
 #else
-extern "C" pid_t wait(int* status) {
+pid_t wait(int* status) {
 #endif
   return waitpid(-1, static_cast<int*>(status), 0);
 }
@@ -451,7 +458,7 @@ extern "C" pid_t wait(int* status) {
 // same as waitpid, though this implementation has some restrictions.
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
-extern "C" pid_t waitpid(int pid, int* status, int options) {
+pid_t waitpid(int pid, int* status, int options) {
 
   pp::VarDictionary req;
   req.Set("command", "nacl_wait");
@@ -472,7 +479,7 @@ extern "C" pid_t waitpid(int pid, int* status, int options) {
 }
 
 // Get the process ID of the calling process.
-extern "C" pid_t getpid() {
+pid_t getpid() {
   if (nacl_spawn_pid == -1) {
     errno = ENOSYS;
   }
@@ -480,15 +487,39 @@ extern "C" pid_t getpid() {
 }
 
 // Get the process ID of the parent process.
-extern "C" pid_t getppid() {
+pid_t getppid() {
   if (nacl_spawn_ppid == -1) {
     errno = ENOSYS;
   }
   return nacl_spawn_ppid;
 }
 
+// Spawn a process.
+int posix_spawn(
+    pid_t* pid, const char* path,
+    const posix_spawn_file_actions_t* file_actions,
+    const posix_spawnattr_t* attrp,
+    char* const argv[], char* const envp[]) {
+  int ret = spawnve(P_NOWAIT, path, argv, envp);
+  if (ret < 0) {
+    return ret;
+  }
+  *pid = ret;
+  return 0;
+}
+
+// Spawn a process using PATH to resolve.
+int posix_spawnp(
+    pid_t* pid, const char* file,
+    const posix_spawn_file_actions_t* file_actions,
+    const posix_spawnattr_t* attrp,
+    char* const argv[], char* const envp[]) {
+  // TODO(bradnelson): Make path expansion optional.
+  return posix_spawn(pid, file, file_actions, attrp, argv, envp);
+}
+
 // Get the process group ID of the given process.
-extern "C" pid_t getpgid(pid_t pid) {
+pid_t getpgid(pid_t pid) {
   pp::VarDictionary req;
   req.Set("command", "nacl_getpgid");
   req.Set("pid", pid);
@@ -504,12 +535,12 @@ extern "C" pid_t getpgid(pid_t pid) {
 
 // Get the process group ID of the current process. This is an alias for
 // getpgid(0).
-extern "C" pid_t getpgrp() {
+pid_t getpgrp() {
   return getpgid(0);
 }
 
 // Set the process group ID of the given process.
-extern "C" pid_t setpgid(pid_t pid, pid_t pgid) {
+pid_t setpgid(pid_t pid, pid_t pgid) {
   pp::VarDictionary req;
   req.Set("command", "nacl_setpgid");
   req.Set("pid", pid);
@@ -526,6 +557,8 @@ extern "C" pid_t setpgid(pid_t pid, pid_t pgid) {
 
 // Set the process group ID of the given process. This is an alias for
 // setpgid(0, 0).
-extern "C" pid_t setpgrp() {
+pid_t setpgrp() {
   return setpgid(0, 0);
 }
+
+};  // extern "C"

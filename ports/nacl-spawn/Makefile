@@ -17,7 +17,7 @@ all: test
 # Targets for libcli_main
 
 libcli_main.a: cli_main.o nacl_startup_untar.o
-	-rm $@
+	rm -f $@
 	$(NACLAR) rcs $@ $^
 
 cli_main.o: cli_main.c
@@ -32,7 +32,7 @@ libnacl_spawn.so: $(NACL_SPAWN_OBJS)
 	$(NACLCXX) $(LDFLAGS) -shared $^ -o $@
 
 libnacl_spawn.a: $(NACL_SPAWN_OBJS)
-	-rm $@
+	rm -f $@
 	$(NACLAR) rcs $@ $^
 
 %.o: %.cc

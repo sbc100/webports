@@ -176,8 +176,8 @@ index 366e96e..c660c98 100644
  #endif
  
 +/*
-+ * Declared inline rather than by including nacl_spawn.h because this portion
-+ * of the build may build for x86-64 without nacl_spawn.h having been built for
++ * Declared inline rather than by including spawn.h because this portion
++ * of the build may build for x86-64 without nacl-spawn having been built for
 + * that architecture (ie when building for i686).
 + */
 +#if defined(__native_client__)

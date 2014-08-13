@@ -751,7 +751,7 @@ index 2f09f63..fd7109d 100644
  #include "toys.h"
  
 +#if defined(__native_client__)
-+# include "nacl_spawn.h"
++# include <spawn.h>
 +#endif
 +
  GLOBALS(
