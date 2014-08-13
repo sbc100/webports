@@ -324,8 +324,11 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     nacl_spawn: this.handleMessageSpawn_,
     nacl_wait: this.handleMessageWait_,
     nacl_getpgid: this.handleMessageGetPGID_,
+    nacl_setpgid: this.handleMessageSetPGID_,
   };
 
+  // TODO(channingh): Once pinned applications support "result" instead of
+  // "pid", change calls to reply() to set "result."
   function reply(contents) {
     var reply = {};
     reply[msg['id']] = contents;
@@ -416,6 +419,28 @@ NaClProcessManager.prototype.handleMessageGetPGID_ = function(msg, reply, src) {
   }
   reply({
     pid: pgid,
+  });
+}
+
+/**
+ * Handle a setpgid call.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageSetPGID_ = function(msg, reply, src) {
+  var pid = parseInt(msg['pid']) || src.pid;
+  var pgid = parseInt(msg['pgid']) || pid;
+  var returnCode = 0;
+
+  // TODO(channingh): Add other error cases.
+  if (pgid < 0) {
+    returnCode = -Errno.EINVAL;
+  } else if (!this.processes[pid]) {
+    returnCode = -Errno.ESRCH;
+  } else {
+    this.processes[pid].pgid = pgid;
+  }
+  reply({
+    pid: returnCode,
   });
 }
 

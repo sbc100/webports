@@ -91,11 +91,21 @@ static void HandleNaClSpawnReply(const pp::Var& key,
   assert(value.is_dictionary());
 
   pp::VarDictionary valDict(value);
-  assert(valDict.HasKey("pid"));
+  assert(valDict.HasKey("result")
+         // TODO(channingh): Drop this next line once the pinned versions of
+         // executables expect "result" instead of "pid."
+         || valDict.HasKey("pid"));
 
   NaClSpawnReply* reply = static_cast<NaClSpawnReply*>(user_data);
   pthread_mutex_lock(&reply->mu);
-  reply->result = valDict.Get("pid").AsInt();
+
+  // TODO(channingh): Drop this conditional once the pinned versions of
+  // executables expect "result" instead of "pid."
+  if (valDict.HasKey("result")) {
+    reply->result = valDict.Get("result").AsInt();
+  } else if (valDict.HasKey("pid")) {
+    reply->result = valDict.Get("pid").AsInt();
+  }
   if (valDict.HasKey("status")) {
     reply->status = valDict.Get("status").AsInt();
   }
@@ -492,7 +502,30 @@ extern "C" pid_t getpgid(pid_t pid) {
   return result;
 }
 
-// Get the process group ID of the current process.
+// Get the process group ID of the current process. This is an alias for
+// getpgid(0).
 extern "C" pid_t getpgrp() {
   return getpgid(0);
+}
+
+// Set the process group ID of the given process.
+extern "C" pid_t setpgid(pid_t pid, pid_t pgid) {
+  pp::VarDictionary req;
+  req.Set("command", "nacl_setpgid");
+  req.Set("pid", pid);
+  req.Set("pgid", pgid);
+
+  int result = SendRequest(&req, NULL);
+  if (result < 0) {
+    errno = -result;
+    return -1;
+  }
+
+  return result;
+}
+
+// Set the process group ID of the given process. This is an alias for
+// setpgid(0, 0).
+extern "C" pid_t setpgrp() {
+  return setpgid(0, 0);
 }
