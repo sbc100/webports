@@ -15,10 +15,8 @@ QuadTree
 marching_cubes
 fortran_reader
 grid_traversal
-png_writer
 Octree
 mesh_utilities
-VolumeIntegrator
 Interpolators
 write_array
 PointsInVolume
@@ -33,3 +31,4 @@ particle_smooth
 oct_visitors
 selection_routines
 particle_oct_container
+image_utilities
