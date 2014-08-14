@@ -92,7 +92,7 @@ index a381e83..a4d42c0 100644
  #include "version.h"
  
 +#if defined(__native_client__)
-+# include <spawn.h>
++# include "nacl_main.h"
 +#endif
 +
  #ifdef _MSC_VER

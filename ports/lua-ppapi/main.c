@@ -2,9 +2,9 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file. */
 
-#include <spawn.h>
 #include <unistd.h>
 
+#include "nacl_main.h"
 #include "ppapi_simple/ps_main.h"
 
 extern int lua_main(int argc, char **argv);

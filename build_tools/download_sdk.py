@@ -26,6 +26,8 @@ import tempfile
 import time
 import urllib
 
+HISTORY_SIZE = 500
+
 if sys.version_info < (2, 6, 0):
   sys.stderr.write('python 2.6 or later is required run this script\n')
   sys.exit(1)
@@ -102,16 +104,17 @@ def DetermineSDKURL(flavor, base_url, version):
     versions = [v for v in versions if v.startswith('trunk')]
 
     # Look backwards through all trunk revisions
-    # Only look back 100 revisions so this script doesn't take
+    # Only look back HISTORY_SIZE revisions so this script doesn't take
     # forever.
     versions = list(reversed(sorted(versions)))
-    for version_dir in versions[:100]:
+    for version_dir in versions[:HISTORY_SIZE]:
       contents = GSList(version_dir)
       if path in contents:
         version = version_dir.rsplit('.', 1)[1]
         break
     else:
-      ErrorOut('No SDK build (%s) found in last 100 trunk builds' % (path))
+      ErrorOut('No SDK build (%s) found in last %d trunk builds' % (
+          path, HISTORY_SIZE))
 
   version = int(version)
   return ('%strunk.%d/%s' % (GSTORE, version, path), version)

@@ -3,5 +3,7 @@ VERSION=0.1
 # Currently only builds on linux (due to dependency on openssl)
 BUILD_OS=linux
 DEPENDS=(bash unzip geturl)
+# TODO(bradnelson): Fix tests and re-enable.
+DISABLED_ARCH=(pnacl)
 # Disabled for bionic due to bash.
 DISABLED_LIBC=(bionic)
