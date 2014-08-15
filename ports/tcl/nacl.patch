@@ -1,0 +1,15 @@
+diff --git a/unix/tclAppInit.c b/unix/tclAppInit.c
+index 9bbc88b..c3df515 100644
+--- a/unix/tclAppInit.c
++++ b/unix/tclAppInit.c
+@@ -32,6 +32,10 @@ extern Tcl_PackageInitProc Tclxttest_Init;
+  * #if checks for that #define and uses Tcl_AppInit if it does not exist.
+  */
+ 
++#if defined(__native_client__) && defined(__GLIBC__)
++#define MODULE_SCOPE extern __attribute__ ((visibility ("default")))
++#endif
++
+ #ifndef TCL_LOCAL_APPINIT
+ #define TCL_LOCAL_APPINIT Tcl_AppInit
+ #endif
