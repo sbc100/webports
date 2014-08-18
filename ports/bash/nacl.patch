@@ -44,6 +44,19 @@ index 52c6de6..4bc78dd 100644
    return ((char *)NULL);
  #else
    static char *gname = (char *)NULL;
+diff --git a/builtins/Makefile.in b/builtins/Makefile.in
+index 3d8bad4..c3a3b05 100644
+--- a/builtins/Makefile.in
++++ b/builtins/Makefile.in
+@@ -68,7 +68,7 @@ LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(CFLAGS)
+ LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@ $(LOCAL_LDFLAGS) $(CFLAGS_FOR_BUILD)
+ LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
+ #LIBS_FOR_BUILD = @LIBS_FOR_BUILD@
+-LIBS_FOR_BUILD = $(LIBS)
++LIBS_FOR_BUILD =
+ 
+ BASHINCDIR = ${topdir}/include
+ 
 diff --git a/configure b/configure
 index 7ec72fe..6d1d53d 100755
 --- a/configure
@@ -92,7 +105,7 @@ index 9011e0b..0f54f48 100644
      }
  
 diff --git a/execute_cmd.c b/execute_cmd.c
-index 485b0c7..a2c428c 100644
+index 485b0c7..bec6977 100644
 --- a/execute_cmd.c
 +++ b/execute_cmd.c
 @@ -98,6 +98,10 @@ extern int errno;

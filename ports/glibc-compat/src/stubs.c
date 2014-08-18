@@ -443,8 +443,17 @@ int getnameinfo(const struct sockaddr *sa, socklen_t salen,
   UNIMPLEMENTED_NOSYS();
 }
 
-
 char *gai_strerror(int) __attribute__ ((weak));
 char *gai_strerror(int errcode) {
   UNIMPLEMENTED_NOSYS_RTN(NULL);
+}
+
+int mknod(const char *pathname, mode_t mode, dev_t dev) __attribute__ ((weak));
+int mknod(const char *pathname, mode_t mode, dev_t dev) {
+  UNIMPLEMENTED_NOSYS();
+}
+
+int mkfifo(const char *pathname, mode_t mode) __attribute__ ((weak));
+int mkfifo(const char *pathname, mode_t mode) {
+  UNIMPLEMENTED_NOSYS();
 }

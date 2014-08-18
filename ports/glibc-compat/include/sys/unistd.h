@@ -8,6 +8,9 @@
 
 #include_next <sys/unistd.h>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 /*
  * TODO(bradnelson): Consider adding sysconf (and this define) to nacl_io.
  * This would allow us to return more useful values.
@@ -20,7 +23,8 @@
 #define _SC_GETPW_R_SIZE_MAX (-1)
 
 /* TODO(bradnelson): Drop this once we've landed nacl_io pipe support. */
-#define mkfifo(x,y) (-1)
-#define mknod(x,y,z) (-1)
+extern int mknod(const char *pathname, mode_t mode, dev_t dev);
+extern int mkfifo(const char *pathname, mode_t mode);
+
 
 #endif
