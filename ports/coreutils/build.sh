@@ -9,7 +9,7 @@ CONFIG_SUB=config/config.sub
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export EXTRA_LIBS+=" -lglibc-compat"
+  export LIBS+=" -lglibc-compat"
 fi
 
 
