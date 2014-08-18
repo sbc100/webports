@@ -11,6 +11,7 @@ SOURCES := \
   src/getprotobyname_r.c \
   src/getservbyname_r.c \
   src/herrno.c \
+  src/herror.c \
   src/in6_addr.c \
   src/inet_addr.c \
   src/inet_pton.c \

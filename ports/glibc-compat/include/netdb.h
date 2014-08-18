@@ -24,6 +24,9 @@
 /* Defined h_addr as in glibc. */
 #define h_addr h_addr_list[0]
 
+void herror(const char *);
+const char *hstrerror(int);
+
 /* Declare these two correctly. */
 int getaddrinfo(const char *, const char *,
                 const struct addrinfo *, struct addrinfo **);
