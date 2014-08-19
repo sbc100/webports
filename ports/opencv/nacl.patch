@@ -1,7 +1,8 @@
-diff -Naur opencv-2.4.7/modules/contrib/src/inputoutput.cpp opencv-2.4.7.nacl/modules/contrib/src/inputoutput.cpp
---- opencv-2.4.7/modules/contrib/src/inputoutput.cpp	2013-11-06 15:26:39.000000000 +0100
-+++ opencv-2.4.7.nacl/modules/contrib/src/inputoutput.cpp	2013-11-19 21:00:51.000000000 +0100
-@@ -76,7 +76,8 @@
+diff --git a/modules/contrib/src/inputoutput.cpp b/modules/contrib/src/inputoutput.cpp
+index 37510c6..a626b66 100644
+--- a/modules/contrib/src/inputoutput.cpp
++++ b/modules/contrib/src/inputoutput.cpp
+@@ -76,7 +76,8 @@ namespace cv
              {
                  return list;
              }
@@ -11,7 +12,7 @@ diff -Naur opencv-2.4.7/modules/contrib/src/inputoutput.cpp opencv-2.4.7.nacl/mo
              while ((dirp = readdir(dp)) != NULL)
              {
                  if (dirp->d_type == DT_REG)
-@@ -89,6 +90,7 @@
+@@ -89,6 +90,7 @@ namespace cv
                  }
              }
              closedir(dp);
@@ -19,7 +20,7 @@ diff -Naur opencv-2.4.7/modules/contrib/src/inputoutput.cpp opencv-2.4.7.nacl/mo
          #endif
  
          return list;
-@@ -166,7 +168,8 @@
+@@ -166,7 +168,8 @@ namespace cv
              {
                  return list;
              }
@@ -29,7 +30,7 @@ diff -Naur opencv-2.4.7/modules/contrib/src/inputoutput.cpp opencv-2.4.7.nacl/mo
              while ((dirp = readdir(dp)) != NULL)
              {
                  if (dirp->d_type == DT_DIR &&
-@@ -181,6 +184,8 @@
+@@ -181,6 +184,8 @@ namespace cv
                  }
              }
              closedir(dp);
@@ -38,9 +39,10 @@ diff -Naur opencv-2.4.7/modules/contrib/src/inputoutput.cpp opencv-2.4.7.nacl/mo
          #endif
  
          return list;
-diff -Naur opencv-2.4.7/modules/core/include/opencv2/core/operations.hpp opencv-2.4.7.nacl/modules/core/include/opencv2/core/operations.hpp
---- opencv-2.4.7/modules/core/include/opencv2/core/operations.hpp	2013-11-06 15:26:39.000000000 +0100
-+++ opencv-2.4.7.nacl/modules/core/include/opencv2/core/operations.hpp	2013-11-19 21:03:40.000000000 +0100
+diff --git a/modules/core/include/opencv2/core/operations.hpp b/modules/core/include/opencv2/core/operations.hpp
+index 9569d1a..261e06c 100644
+--- a/modules/core/include/opencv2/core/operations.hpp
++++ b/modules/core/include/opencv2/core/operations.hpp
 @@ -58,7 +58,13 @@
  
    #if defined __clang__ && __clang_major__ >= 3 && !defined __ANDROID__
@@ -55,24 +57,42 @@ diff -Naur opencv-2.4.7/modules/core/include/opencv2/core/operations.hpp opencv-
      #else
          #define CV_XADD(addr, delta) __atomic_fetch_add((_Atomic(int)*)(addr), (delta), 5)
      #endif
-diff -Naur opencv-2.4.7/modules/flann/include/opencv2/flann/allocator.h opencv-2.4.7.nacl/modules/flann/include/opencv2/flann/allocator.h
---- opencv-2.4.7/modules/flann/include/opencv2/flann/allocator.h	2013-11-06 15:26:39.000000000 +0100
-+++ opencv-2.4.7.nacl/modules/flann/include/opencv2/flann/allocator.h	2013-11-19 21:04:57.000000000 +0100
-@@ -68,7 +68,10 @@
+diff --git a/modules/core/src/system.cpp b/modules/core/src/system.cpp
+index 8899363..d18824a 100644
+--- a/modules/core/src/system.cpp
++++ b/modules/core/src/system.cpp
+@@ -460,7 +460,11 @@ string tempfile( const char* suffix )
+     const int fd = mkstemp((char*)fname.c_str());
+     if (fd == -1) return string();
+ 
++# ifndef __native_client__
+     close(fd);
++# else
++    fclose((FILE*)fd);
++# endif  //#ifndef __native_client__
+     remove(fname.c_str());
+ # endif
+ 
+diff --git a/modules/flann/include/opencv2/flann/allocator.h b/modules/flann/include/opencv2/flann/allocator.h
+index 26091d0..5a77c50 100644
+--- a/modules/flann/include/opencv2/flann/allocator.h
++++ b/modules/flann/include/opencv2/flann/allocator.h
+@@ -68,7 +68,10 @@ T* allocate(size_t count = 1)
   *
   */
  
-+// In NaCl newlib, this variable is declared elsewhere non-const.
-+#if defined(__native_client__) && defined(__GLIBC__)
++// Some NaCl toolchains used to defined this.
++#if !defined(__native_client__) || !defined(WORDSIZE)
  const size_t     WORDSIZE=16;
-+#endif  //#ifndef __native__client__
++#endif
  const  size_t     BLOCKSIZE=8192;
  
  class PooledAllocator
-diff -Naur opencv-2.4.7/modules/legacy/include/opencv2/legacy/legacy.hpp opencv-2.4.7.nacl/modules/legacy/include/opencv2/legacy/legacy.hpp
---- opencv-2.4.7/modules/legacy/include/opencv2/legacy/legacy.hpp        2013-11-06 15:26:39.000000000 +0100
-+++ opencv-2.4.7.nacl/modules/legacy/include/opencv2/legacy/legacy.hpp   2013-11-19 23:22:11.000000000 +0100
-@@ -519,8 +519,8 @@
+diff --git a/modules/legacy/include/opencv2/legacy/legacy.hpp b/modules/legacy/include/opencv2/legacy/legacy.hpp
+index 96da25c..cc0b4d3 100644
+--- a/modules/legacy/include/opencv2/legacy/legacy.hpp
++++ b/modules/legacy/include/opencv2/legacy/legacy.hpp
+@@ -519,8 +519,8 @@ typedef struct CvStereoCamera
  
      /* New part for stereo */
      CvPoint3D32f epipole[2];
@@ -83,9 +103,10 @@ diff -Naur opencv-2.4.7/modules/legacy/include/opencv2/legacy/legacy.hpp opencv-
      double coeffs[2][3][3];/* coefficients for transformation */
      CvPoint2D32f border[2][4];
      CvSize warpSize;
-diff -Naur opencv-2.4.7/modules/legacy/src/calibfilter.cpp opencv-2.4.7.nacl/modules/legacy/src/calibfilter.cpp
---- opencv-2.4.7/modules/legacy/src/calibfilter.cpp        2013-11-06 15:26:39.000000000 +0100
-+++ opencv-2.4.7.nacl/modules/legacy/src/calibfilter.cpp   2013-11-19 23:22:42.000000000 +0100
+diff --git a/modules/legacy/src/calibfilter.cpp b/modules/legacy/src/calibfilter.cpp
+index 64b9957..41583d8 100644
+--- a/modules/legacy/src/calibfilter.cpp
++++ b/modules/legacy/src/calibfilter.cpp
 @@ -42,7 +42,10 @@
  #include "precomp.hpp"
  #include <stdio.h>
@@ -97,7 +118,7 @@ diff -Naur opencv-2.4.7/modules/legacy/src/calibfilter.cpp opencv-2.4.7.nacl/mod
  
  CvCalibFilter::CvCalibFilter()
  {
-@@ -686,8 +689,8 @@
+@@ -686,8 +689,8 @@ bool CvCalibFilter::SaveCameraParams( const char* filename )
          {
              for( j = 0; j < 4; j++ )
              {
@@ -108,7 +129,7 @@ diff -Naur opencv-2.4.7/modules/legacy/src/calibfilter.cpp opencv-2.4.7.nacl/mod
              }
              fprintf(f, "\n");
          }
-@@ -743,9 +746,9 @@
+@@ -743,9 +746,9 @@ bool CvCalibFilter::LoadCameraParams( const char* filename )
      {
          for( j = 0; j < 4; j++ )
          {
@@ -120,9 +141,10 @@ diff -Naur opencv-2.4.7/modules/legacy/src/calibfilter.cpp opencv-2.4.7.nacl/mod
              CV_Assert(values_read == 1);
          }
      }
-diff -Naur opencv-2.4.7/modules/legacy/src/epilines.cpp opencv-2.4.7.nacl/modules/legacy/src/epilines.cpp
---- opencv-2.4.7/modules/legacy/src/epilines.cpp        2013-11-06 15:26:39.000000000 +0100
-+++ opencv-2.4.7.nacl/modules/legacy/src/epilines.cpp   2013-11-19 23:22:56.000000000 +0100
+diff --git a/modules/legacy/src/epilines.cpp b/modules/legacy/src/epilines.cpp
+index 7196d51..3cd2f47 100644
+--- a/modules/legacy/src/epilines.cpp
++++ b/modules/legacy/src/epilines.cpp
 @@ -46,7 +46,10 @@
  
  /* Valery Mosyagin */
@@ -134,7 +156,7 @@ diff -Naur opencv-2.4.7/modules/legacy/src/epilines.cpp opencv-2.4.7.nacl/module
  
  #define EPS64D 1e-9
  
-@@ -312,11 +315,11 @@
+@@ -312,11 +315,11 @@ int icvComputeCoeffForStereo(  CvStereoCamera* stereoCamera)
      int i;
      for( i = 0; i < 4; i++ )
      {
@@ -150,7 +172,7 @@ diff -Naur opencv-2.4.7/modules/legacy/src/epilines.cpp opencv-2.4.7.nacl/module
      }
  
      icvComputeCoeffForStereoNew(        quad1,
-@@ -1761,8 +1764,8 @@
+@@ -1761,8 +1764,8 @@ void icvGetQuadsTransformStruct(  CvStereoCamera* stereoCamera)
      int i;
      for( i = 0; i < 4; i++ )
      {
@@ -161,7 +183,7 @@ diff -Naur opencv-2.4.7/modules/legacy/src/epilines.cpp opencv-2.4.7.nacl/module
      }
  
      return;
-@@ -3067,12 +3070,12 @@
+@@ -3067,12 +3070,12 @@ int icvComputeRestStereoParams(CvStereoCamera *stereoparams)
      icvGetQuadsTransformStruct(stereoparams);
  
      cvInitPerspectiveTransform( stereoparams->warpSize,
@@ -176,17 +198,3 @@ diff -Naur opencv-2.4.7/modules/legacy/src/epilines.cpp opencv-2.4.7.nacl/module
                                  stereoparams->coeffs[1],
                                  0);
  
-diff -Naur opencv-2.4.7/modules/core/src/system.cpp opencv-2.4.7.nacl/modules/core/src/system.cpp
---- opencv-2.4.7/modules/core/src/system.cpp        2013-11-06 15:26:39.000000000 +0100
-+++ opencv-2.4.7.nacl/modules/core/src/system.cpp   2013-11-19 22:18:14.000000000 +0100
-@@ -460,6 +460,10 @@
-     const int fd = mkstemp((char*)fname.c_str());
-     if (fd == -1) return string();
- 
-+# ifndef __native_client__
-     close(fd);
-+# else
-+    fclose((FILE*)fd);
-+# endif  //#ifndef __native_client__
-     remove(fname.c_str());
- # endif
