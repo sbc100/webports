@@ -21,6 +21,10 @@ export tcl_cv_strtod_buggy=ok
 export ac_cv_func_strtod=yes
 export tcl_cv_strtod_unbroken=ok
 
+# Prevent non-cross compile clean parts of the build from assuming the host
+# system influences things (needed for OSX).
+export tcl_cv_sys_version=Generic
+
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   NACLPORTS_CPPFLAGS+=" -DHAVE_STRLCPY=1"
