@@ -1,0 +1,14 @@
+diff --git a/randutils.c b/randutils.c
+index 80893d3..5a29e97 100644
+--- a/randutils.c
++++ b/randutils.c
+@@ -13,7 +13,9 @@
+ #include <string.h>
+ #include <sys/time.h>
+ 
++#ifndef __native_client__
+ #include <sys/syscall.h>
++#endif
+ 
+ #include "randutils.h"
+ 
