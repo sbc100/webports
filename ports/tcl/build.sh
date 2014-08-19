@@ -25,6 +25,10 @@ export tcl_cv_strtod_unbroken=ok
 # system influences things (needed for OSX).
 export tcl_cv_sys_version=Generic
 
+if [ "${NACL_LIBC}" = "glibc" ]; then
+  NACLPORTS_CFLAGS+=" -fPIC"
+fi
+
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   NACLPORTS_CPPFLAGS+=" -DHAVE_STRLCPY=1"
