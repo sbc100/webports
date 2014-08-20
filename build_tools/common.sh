@@ -1002,6 +1002,12 @@ ConfigureStep_Autotools() {
     return
   fi
 
+  # Inject a shim that speed up pnacl invocations for configure.
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    local PNACL_CONF_SHIM="${TOOLS_DIR}/pnacl-configure-shim.py"
+    CC="${PNACL_CONF_SHIM} ${CC}"
+  fi
+
   LogExecute ${CONFIGURE} \
     --host=${conf_host} \
     --prefix=${PREFIX} \
