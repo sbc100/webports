@@ -58,6 +58,10 @@ To build all ports you will also need these:
 - pkg-config
 - autoconf, automake, libtool
 - libglib2.0-dev >= 2.26.0 (if you want to build glib)
+- xsltproc
+
+To ensure you have all required packages you can run the
+install-build-deps.sh from the chromium repo.
 
 On Mac OS X you can use homebrew to install these using the following command::
 
