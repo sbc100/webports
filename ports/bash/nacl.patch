@@ -189,23 +189,6 @@ index 39da61e..3c21c6a 100644
    int running;		/* Non-zero if this process is running. */
    char *command;	/* The particular program that is running. */
  } PROCESS;
-diff --git a/lib/sh/oslib.c b/lib/sh/oslib.c
-index b3470d1..8227fb0 100644
---- a/lib/sh/oslib.c
-+++ b/lib/sh/oslib.c
-@@ -240,7 +240,12 @@ mkfifo (path, mode)
-      int mode;
- {
- #if defined (S_IFIFO)
-+#  if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+  errno = ENOSYS;
-+  return (-1);
-+#  else 
-   return (mknod (path, (mode | S_IFIFO), 0));
-+#  endif
- #else /* !S_IFIFO */
-   return (-1);
- #endif /* !S_IFIFO */
 diff --git a/lib/sh/ufuncs.c b/lib/sh/ufuncs.c
 index ed526fe..dd52657 100644
 --- a/lib/sh/ufuncs.c
@@ -265,31 +248,10 @@ index d43d1d4..eff6d86 100644
      }
  
 diff --git a/shell.c b/shell.c
-index 9e74f3b..065bf43 100644
+index 9e74f3b..20cf6e5 100644
 --- a/shell.c
 +++ b/shell.c
-@@ -339,6 +339,12 @@ _cygwin32_check_tmp ()
- }
- #endif /* __CYGWIN__ */
- 
-+#if defined(__native_client__)
-+int
-+nacl_main (argc, argv)
-+     int argc;
-+     char **argv;
-+#else /* !__native_client__ */
- #if defined (NO_MAIN_ENV_ARG)
- /* systems without third argument to main() */
- int
-@@ -351,6 +357,7 @@ main (argc, argv, env)
-      int argc;
-      char **argv, **env;
- #endif /* !NO_MAIN_ENV_ARG */
-+#endif /* !__native_client__ */
- {
-   register int i;
-   int code, old_errexit_flag;
-@@ -359,7 +366,7 @@ main (argc, argv, env)
+@@ -359,7 +359,7 @@ main (argc, argv, env)
  #endif
    volatile int locally_skip_execution;
    volatile int arg_index, top_level_arg_index;
@@ -298,3 +260,18 @@ index 9e74f3b..065bf43 100644
    char **env;
  
    env = environ;
+@@ -1687,10 +1687,14 @@ shell_initialize ()
+   if (current_host_name == 0)
+     {
+       /* Initialize current_host_name. */
++#if defined(__native_client__)
++      current_host_name = "mingn";
++#else
+       if (gethostname (hostname, 255) < 0)
+ 	current_host_name = "??host??";
+       else
+ 	current_host_name = savestring (hostname);
++#endif
+     }
+ 
+   /* Initialize the stuff in current_user that comes from the password
