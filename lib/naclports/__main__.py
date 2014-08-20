@@ -9,6 +9,7 @@ It can also be incorporated into other tools that need to
 work with packages (e.g. 'update_mirror.py' uses it to iterate
 through all packages and mirror them on Google Cloud Storage).
 """
+import fcntl
 import optparse
 import os
 import shutil
@@ -110,6 +111,19 @@ def CmdPkgVerify(package, options):
   package.Verify()
 
 
+def GetLock():
+  lock_file_name = os.path.join(naclports.OUT_DIR, 'naclports.lock')
+  if not os.path.exists(naclports.OUT_DIR):
+    os.makedirs(naclports.OUT_DIR)
+  f = open(lock_file_name, 'w')
+  try:
+    fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+  except Exception as e:
+    raise Error("Unable to lock file (%s): Is naclports already running?" %
+        lock_file_name)
+  return f
+
+
 def run_main(args):
   usage = 'Usage: %prog [options] <command> [<package_dir>]'
   parser = optparse.OptionParser(prog='naclports', description=__doc__,
@@ -151,6 +165,8 @@ def run_main(args):
 
   command = args[0]
   args = args[1:]
+
+  lock_file = GetLock()
 
   naclports.verbose = options.verbose or os.environ.get('VERBOSE') == '1'
   if options.verbose_build:
