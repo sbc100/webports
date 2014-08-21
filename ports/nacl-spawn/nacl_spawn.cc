@@ -561,4 +561,34 @@ pid_t setpgrp() {
   return setpgid(0, 0);
 }
 
+// Get the session ID of the given process.
+pid_t getsid(pid_t pid) {
+  pp::VarDictionary req;
+  req.Set("command", "nacl_getsid");
+  req.Set("pid", pid);
+
+  int result = SendRequest(&req, NULL);
+  if (result < 0) {
+    errno = -result;
+    return -1;
+  }
+
+  return result;
+}
+
+// Make the current process a session leader.
+pid_t setsid() {
+  pp::VarDictionary req;
+  req.Set("command", "nacl_setsid");
+
+  // TODO(channingh): Refactor this common pattern.
+  int result = SendRequest(&req, NULL);
+  if (result < 0) {
+    errno = -result;
+    return -1;
+  }
+
+  return result;
+}
+
 };  // extern "C"

@@ -19,6 +19,14 @@ function NaClProcessManager() {
   // The process which gets the input from the user.
   this.foregroundProcess = null;
 
+  // Process group information keyed by PGID. The value is an object consisting
+  // of the fields: {
+  //   sid: the session ID of the process group
+  //   processes: an object keyed by the PIDs of processes in this group, used
+  //       as a set
+  // }
+  this.processGroups = {};
+
   // Process information keyed by PID. The value is an object consisting of the
   // fields: {
   //   domElement: the <embed> element of the process,
@@ -325,6 +333,8 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     nacl_wait: this.handleMessageWait_,
     nacl_getpgid: this.handleMessageGetPGID_,
     nacl_setpgid: this.handleMessageSetPGID_,
+    nacl_getsid: this.handleMessageGetSID_,
+    nacl_setsid: this.handleMessageSetSID_,
   };
 
   // TODO(channingh): Once pinned applications support "result" instead of
@@ -412,7 +422,7 @@ NaClProcessManager.prototype.handleMessageGetPGID_ = function(msg, reply, src) {
 
   if (pid < 0) {
     pgid = -Errno.EINVAL;
-  } else if (!this.processes[pid]) {
+  } else if (!this.processes[pid] || this.processes[pid].exitCode !== null) {
     pgid = -Errno.ESRCH;
   } else {
     pgid = this.processes[pid].pgid;
@@ -427,20 +437,94 @@ NaClProcessManager.prototype.handleMessageGetPGID_ = function(msg, reply, src) {
  * @private
  */
 NaClProcessManager.prototype.handleMessageSetPGID_ = function(msg, reply, src) {
-  var pid = parseInt(msg['pid']) || src.pid;
-  var pgid = parseInt(msg['pgid']) || pid;
-  var returnCode = 0;
+  var self = this;
+  function setpgid() {
+    var pid = parseInt(msg['pid']) || src.pid;
+    var newPgid = parseInt(msg['pgid']) || pid;
 
-  // TODO(channingh): Add other error cases.
-  if (pgid < 0) {
-    returnCode = -Errno.EINVAL;
-  } else if (!this.processes[pid]) {
-    returnCode = -Errno.ESRCH;
-  } else {
-    this.processes[pid].pgid = pgid;
+    // TODO(channingh): Add error cases for parent/child relationships.
+    if (newPgid < 0) {
+      return -Errno.EINVAL;
+    }
+    if (!self.processes[pid] || self.processes[pid].exitCode !== null) {
+      return -Errno.ESRCH;
+    }
+
+    var oldPgid = self.processes[pid].pgid;
+    var sid = self.processGroups[oldPgid].sid;
+
+    // The new process group is in a different session.
+    if (self.processGroups[newPgid] &&
+        self.processGroups[newPgid].sid !== sid) {
+      return -Errno.EPERM;
+    }
+
+    var callerPgid = self.processes[src.pid].pgid;
+    var callerSid = self.processGroups[callerPgid].sid;
+
+    // The process we are trying to change is in a different session from the
+    // calling process.
+    if (sid !== callerSid) {
+      return -Errno.EPERM;
+    }
+
+    // The target process is a session leader.
+    if (sid === pid) {
+      return -Errno.EPERM;
+    }
+
+    self.deleteProcessFromGroup_(pid);
+    if (self.processGroups[newPgid]) {
+      self.processGroups[newPgid].processes[pid] = true;
+    } else {
+      self.createProcessGroup_(newPgid, sid);
+    }
+    self.processes[pid].pgid = newPgid;
+    return 0;
   }
   reply({
-    pid: returnCode,
+    pid: setpgid(),
+  });
+}
+
+/**
+ * Handle a getsid call.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageGetSID_ = function(msg, reply, src) {
+  var sid;
+  var pid = parseInt(msg['pid']) || src.pid;
+  var process = this.processes[pid];
+
+  if (!process || process.exitCode !== null) {
+    sid = -Errno.ESRCH;
+  } else {
+    sid = this.processGroups[process.pgid].sid;
+  }
+  reply({
+    pid: sid
+  });
+}
+
+/**
+ * Handle a setsid call.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageSetSID_ = function(msg, reply, src) {
+  var pid = src.pid;
+  var sid;
+
+  // Setsid() cannot be called on a group leader.
+  if (this.processGroups[pid]) {
+    sid = -Errno.EPERM;
+  } else {
+    this.deleteProcessFromGroup_(pid);
+    this.createProcessGroup_(pid, pid);
+    sid = this.processes[pid].pgid = pid;
+  }
+
+  reply({
+    pid: sid
   });
 }
 
@@ -490,6 +574,46 @@ NaClProcessManager.prototype.handleCrash_ = function(e) {
 }
 
 /**
+ * Create a process group with the given process as the leader and add the
+ * group to the table.
+ * @private
+ * @param {number} pid The process that will be the leader.
+ * @param {number} sid The session ID of the session to which the process
+ *     group belongs.
+ */
+NaClProcessManager.prototype.createProcessGroup_ = function(pid, sid) {
+  if (this.processGroups[pid] !== undefined) {
+    throw new Error('createProcessGroup_(): process group already exists');
+  }
+  this.processGroups[pid] = {
+    sid: sid,
+    processes: {}
+  }
+  this.processGroups[pid].processes[pid] = true;
+}
+
+/**
+ * Delete a process from the process group table. If a group has no more
+ * processes, delete the group as well.
+ * @private
+ * @param {number} pid The process to be deleted.
+ */
+NaClProcessManager.prototype.deleteProcessFromGroup_ = function(pid) {
+  if (this.processes[pid] === undefined) {
+    throw new Error('deleteProcessFromGroup_(): process does not exist');
+  }
+  var pgid = this.processes[pid].pgid;
+  if (this.processGroups[pgid] === undefined ||
+      this.processGroups[pgid].processes[pid] === undefined) {
+    throw new Error('deleteProcessFromGroup_(): process group not found');
+  }
+  delete this.processGroups[pgid].processes[pid];
+  if (Object.keys(this.processGroups[pgid].processes).length === 0) {
+    delete this.processGroups[pgid];
+  }
+}
+
+/**
  * Remove entries for a process from the process table.
  * @private
  */
@@ -504,6 +628,9 @@ NaClProcessManager.prototype.deleteProcessEntry_ = function(pid) {
  */
 NaClProcessManager.prototype.exit = function(code, element) {
   var pid = element.pid;
+
+  this.deleteProcessFromGroup_(pid);
+
   function wakeWaiters(waiters) {
     for (var i = 0; i < waiters.length; i++) {
       var waiter = waiters[i];
@@ -634,11 +761,16 @@ NaClProcessManager.prototype.spawn = function(
   fg.addEventListener('message', this.handleMessage_.bind(this));
   fg.addEventListener('progress', this.handleProgress_.bind(this));
 
+  var pgid = parent ? this.processes[parent.pid].pgid : this.pid
   this.processes[this.pid] = {
     domElement: fg,
     exitCode: null,
-    pgid: parent ? parent.pid : this.pid
+    pgid: pgid
   };
+  if (!parent) {
+    this.createProcessGroup_(this.pid, this.pid);
+  }
+  this.processGroups[pgid].processes[this.pid] = true;
 
   var params = {};
 
