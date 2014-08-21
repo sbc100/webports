@@ -14,6 +14,10 @@ else
   EXECUTABLE_DIR=.
 fi
 
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  LIBS+=" -lglibc-compat"
+fi
+
 EXECUTABLES=src/${EXECUTABLE_DIR}/curl${NACL_EXEEXT}
 CFLAGS+=" -DDEBUGBUILD"
 #EXTRA_CONFIGURE_ARGS="--enable-debug --disable-curldebug"
