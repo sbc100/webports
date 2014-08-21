@@ -42,9 +42,8 @@ typedef struct __posix_spawnattr* posix_spawnattr_t;
 struct NaClSpawnReply {
   pthread_mutex_t mu;
   pthread_cond_t cond;
-  // Zero or positive on success or -errno on failure.
-  int result;
-  int status;
+
+  pp::VarDictionary result;
 };
 
 static std::string GetCwd() {
@@ -96,30 +95,17 @@ static void HandleNaClSpawnReply(const pp::Var& key,
   assert(value.is_dictionary());
 
   pp::VarDictionary valDict(value);
-  assert(valDict.HasKey("result")
-         // TODO(channingh): Drop this next line once the pinned versions of
-         // executables expect "result" instead of "pid."
-         || valDict.HasKey("pid"));
-
   NaClSpawnReply* reply = static_cast<NaClSpawnReply*>(user_data);
   pthread_mutex_lock(&reply->mu);
 
-  // TODO(channingh): Drop this conditional once the pinned versions of
-  // executables expect "result" instead of "pid."
-  if (valDict.HasKey("result")) {
-    reply->result = valDict.Get("result").AsInt();
-  } else if (valDict.HasKey("pid")) {
-    reply->result = valDict.Get("pid").AsInt();
-  }
-  if (valDict.HasKey("status")) {
-    reply->status = valDict.Get("status").AsInt();
-  }
+  reply->result = valDict;
+
   pthread_cond_signal(&reply->cond);
   pthread_mutex_unlock(&reply->mu);
 }
 
 // Sends a spawn/wait request to JavaScript and returns the result.
-static int SendRequest(pp::VarDictionary* req, int* status) {
+static pp::VarDictionary SendRequest(pp::VarDictionary* req) {
   const std::string& req_id = GetRequestId();
   req->Set("id", req_id);
 
@@ -139,9 +125,7 @@ static int SendRequest(pp::VarDictionary* req, int* status) {
   pthread_mutex_destroy(&reply.mu);
 
   instance->RegisterMessageHandler(req_id, NULL, &reply);
-  if (reply.result >= 0 && status != NULL) {
-    *status = reply.status;
-  }
+
   return reply.result;
 }
 
@@ -377,6 +361,19 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
   return true;
 }
 
+// Send a request, decode the result, and set errno on error.
+static int GetInt(pp::VarDictionary dict, const char* key) {
+  if (!dict.HasKey(key)) {
+    return -1;
+  }
+  int value = dict.Get(key).AsInt();
+  if (value < 0) {
+    errno = -value;
+    return -1;
+  }
+  return value;
+}
+
 // Spawn a new NaCl process. This is an alias for
 // spawnve(mode, path, argv, NULL). Returns 0 on success. On error -1 is
 // returned and errno will be set appropriately.
@@ -436,12 +433,7 @@ int spawnve(int mode, const char* path,
     return -1;
   }
 
-  int result = SendRequest(&req, NULL);
-  if (result < 0) {
-    errno = -result;
-    return -1;
-  }
-  return result;
+  return GetInt(SendRequest(&req), "pid");
 }
 
 extern "C" {
@@ -459,23 +451,21 @@ pid_t wait(int* status) {
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
 pid_t waitpid(int pid, int* status, int options) {
-
   pp::VarDictionary req;
+  pp::VarDictionary result;
   req.Set("command", "nacl_wait");
   req.Set("pid", pid);
   req.Set("options", options);
 
-  int rawStatus;
-  int result = SendRequest(&req, &rawStatus);
-  if (result < 0) {
-    errno = -result;
-    return -1;
-  }
+  result = SendRequest(&req);
+  int resultPid = GetInt(result, "pid");
 
   // WEXITSTATUS(s) is defined as ((s >> 8) & 0xff).
-  if (status)
+  if (result.HasKey("status")) {
+    int rawStatus = result.Get("status").AsInt();
     *status = (rawStatus & 0xff) << 8;
-  return result;
+  }
+  return resultPid;
 }
 
 // Get the process ID of the calling process.
@@ -524,13 +514,7 @@ pid_t getpgid(pid_t pid) {
   req.Set("command", "nacl_getpgid");
   req.Set("pid", pid);
 
-  int result = SendRequest(&req, NULL);
-  if (result < 0) {
-    errno = -result;
-    return -1;
-  }
-
-  return result;
+  return GetInt(SendRequest(&req), "pgid");
 }
 
 // Get the process group ID of the current process. This is an alias for
@@ -546,13 +530,7 @@ pid_t setpgid(pid_t pid, pid_t pgid) {
   req.Set("pid", pid);
   req.Set("pgid", pgid);
 
-  int result = SendRequest(&req, NULL);
-  if (result < 0) {
-    errno = -result;
-    return -1;
-  }
-
-  return result;
+  return GetInt(SendRequest(&req), "result");
 }
 
 // Set the process group ID of the given process. This is an alias for
@@ -566,29 +544,14 @@ pid_t getsid(pid_t pid) {
   pp::VarDictionary req;
   req.Set("command", "nacl_getsid");
   req.Set("pid", pid);
-
-  int result = SendRequest(&req, NULL);
-  if (result < 0) {
-    errno = -result;
-    return -1;
-  }
-
-  return result;
+  return GetInt(SendRequest(&req), "sid");
 }
 
 // Make the current process a session leader.
 pid_t setsid() {
   pp::VarDictionary req;
   req.Set("command", "nacl_setsid");
-
-  // TODO(channingh): Refactor this common pattern.
-  int result = SendRequest(&req, NULL);
-  if (result < 0) {
-    errno = -result;
-    return -1;
-  }
-
-  return result;
+  return GetInt(SendRequest(&req), "sid");
 }
 
 };  // extern "C"

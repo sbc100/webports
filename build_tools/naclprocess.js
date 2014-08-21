@@ -428,7 +428,7 @@ NaClProcessManager.prototype.handleMessageGetPGID_ = function(msg, reply, src) {
     pgid = this.processes[pid].pgid;
   }
   reply({
-    pid: pgid,
+    pgid: pgid,
   });
 }
 
@@ -483,7 +483,7 @@ NaClProcessManager.prototype.handleMessageSetPGID_ = function(msg, reply, src) {
     return 0;
   }
   reply({
-    pid: setpgid(),
+    result: setpgid(),
   });
 }
 
@@ -502,7 +502,7 @@ NaClProcessManager.prototype.handleMessageGetSID_ = function(msg, reply, src) {
     sid = this.processGroups[process.pgid].sid;
   }
   reply({
-    pid: sid
+    sid: sid
   });
 }
 
@@ -524,7 +524,7 @@ NaClProcessManager.prototype.handleMessageSetSID_ = function(msg, reply, src) {
   }
 
   reply({
-    pid: sid
+    sid: sid
   });
 }
 
