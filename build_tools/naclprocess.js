@@ -335,6 +335,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     nacl_setpgid: this.handleMessageSetPGID_,
     nacl_getsid: this.handleMessageGetSID_,
     nacl_setsid: this.handleMessageSetSID_,
+    nacl_pipe: this.handleMessagePipe_,
   };
 
   // TODO(channingh): Once pinned applications support "result" instead of
@@ -525,6 +526,24 @@ NaClProcessManager.prototype.handleMessageSetSID_ = function(msg, reply, src) {
 
   reply({
     sid: sid
+  });
+}
+
+/**
+ * Handle a pipe call.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessagePipe_ = function(msg, reply) {
+  PipeServer.pipe().then(function(pipes) {
+    reply({
+      read: pipes[0],
+      write: pipes[1]
+    });
+  }, function() {
+    reply({
+      read: -1,
+      write: -1
+    });
   });
 }
 
