@@ -8,17 +8,33 @@
 
 NaClTerm.nmf = 'gforth.nmf'
 
+function onFailure() {
+  console.log('Failed to allocate space!\n');
+  NaClTerm.init();
+}
+
+function requestTemporary(amount, success, failure) {
+  navigator.webkitTemporaryStorage.requestQuota(amount, function(bytes) {
+    window.webkitRequestFileSystem(
+        window.TEMPORARY, bytes, success, failure);
+  }, failure);
+}
+
+function requestPersistent(amount, success, failure) {
+  navigator.webkitPersistentStorage.requestQuota(amount, function(bytes) {
+    window.webkitRequestFileSystem(
+        window.PERSISTENT, bytes, success, failure);
+  }, failure);
+}
+
+function requestStorage(success, failure) {
+  requestTemporary(1024 * 1024, function() {
+    requestPersistent(1024 * 1024, success, failure);
+  }, failure);
+}
+
 function onInit() {
-  navigator.webkitPersistentStorage.requestQuota(1024 * 1024,
-    function(bytes) {
-      window.webkitRequestFileSystem(window.TEMPORARAY, bytes, NaClTerm.init)
-    },
-    function() {
-      console.log('Failed to allocate space!\n');
-      // Start the terminal even if FS failed to init.
-      NaClTerm.init();
-    }
-  );
+  requestStorage(NaClTerm.init, onFailure);
 }
 
 window.onload = function() {
