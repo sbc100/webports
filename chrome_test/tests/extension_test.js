@@ -9,10 +9,11 @@
 
 TEST('ExtensionTest', 'testGetAllExtensions', function() {
   return chrometest.getAllExtensions().then(function(extensions) {
-    ASSERT_EQ(2, extensions.length, 'there should be two extensions');
+    ASSERT_EQ(3, extensions.length, 'there should be three extensions');
     var expected = [
       'Chrome Testing Extension',
       'Ping Test Extension',
+      'TCP Interface',
     ];
     expected.sort();
     var actual = [];
