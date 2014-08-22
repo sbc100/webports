@@ -101,9 +101,37 @@ index 500cd20..ae7fbe5 100644
  #include "../generic/machine.h"
  
 diff --git a/configure.in b/configure.in
-index 9b2c926..c2728fd 100644
+index 9b2c926..c5351fb 100644
 --- a/configure.in
 +++ b/configure.in
+@@ -241,15 +241,15 @@ case "$host_cpu" in
+ 		;;
+ 	i386)
+ 		machine=386
+-		CFLAGS="$CFLAGS -fomit-frame-pointer -fforce-addr"
++		CFLAGS="$CFLAGS -fomit-frame-pointer"
+ 		;;
+ 	i486)
+ 		machine=386
+-		CFLAGS="$CFLAGS -fomit-frame-pointer -fforce-addr"
++		CFLAGS="$CFLAGS -fomit-frame-pointer"
+ 		;;
+ 	i*86)
+ 		machine=386
+-		CFLAGS="$CFLAGS -fomit-frame-pointer -fforce-addr"
++		CFLAGS="$CFLAGS -fomit-frame-pointer"
+ 		CFLAGS_1="$CFLAGS"
+ 		CFLAGS="$CFLAGS -march=pentium"
+ 		AC_TRY_COMPILE(,,,CFLAGS="$CFLAGS_1 -m486")
+@@ -259,7 +259,7 @@ case "$host_cpu" in
+ 		in
+ 		    *-m32*)
+ 		    	machine=386
+-			CFLAGS="$CFLAGS -fomit-frame-pointer -fforce-addr"
++			CFLAGS="$CFLAGS -fomit-frame-pointer"
+ 			CFLAGS_1="$CFLAGS"
+ 			CFLAGS="$CFLAGS -march=athlon64"
+ 			;;
 @@ -637,7 +637,9 @@ AC_MSG_RESULT($M4)
  AC_MSG_CHECKING([for gforth])
  GFORTH="`cd / && which gforth 2>/dev/null`"
