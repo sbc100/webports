@@ -1,0 +1,20 @@
+diff --git a/configure b/configure
+index 0b5db82..30eb5e0 100755
+--- a/configure
++++ b/configure
+@@ -13976,6 +13976,15 @@ $as_echo_n "checking for scandir... " >&6; }
+ /* end confdefs.h.  */
+ 
+ 		#include <dirent.h>
++		/*
++		 * TODO(phosek): This declaration should be removed once the newlib
++		 * version of dirent.h is updated to declare.
++		 * See https://code.google.com/p/nativeclient/issues/detail?id=3916
++		 */
++		int scandir(const char *__dir,
++				struct dirent ***__namelist,
++				int (*select)(const struct dirent *),
++				int (*compar)(const struct dirent **, const struct dirent **));
+ 		int main(void);
+ 
+ int
