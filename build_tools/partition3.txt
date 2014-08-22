@@ -75,6 +75,10 @@ builder 0 (total: 7675)
   blis
   gcc
   glib
+  giflib
+  libxpm
+  libxaw
+  jpeg8d
   emacs
   mongoose
   tar

@@ -64,6 +64,11 @@ builder 0 (total: 5831)
   gcc
   glib
   mingn
+  jpeg8d
+  tiff
+  giflib
+  libxpm
+  libxaw
   emacs
   pango
   mongoose

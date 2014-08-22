@@ -17,7 +17,7 @@ _EXCLUDED_PATHS = (
 
 def CheckBuildbot(input_api, output_api):
   # Test various partition sizes.
-  for parts in [1, 3, 4]:
+  for parts in xrange(1, 6):
     for index in range(parts):
       cmd = ['build_tools/partition.py', '-t', str(index), '-n', str(parts)]
       try:
