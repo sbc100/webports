@@ -283,9 +283,35 @@ int sigsuspend(const sigset_t *mask) {
 }
 
 int sigaction(int signum, const struct sigaction *act,
-                     struct sigaction *oldact) __attribute__((weak));
+              struct sigaction *oldact) __attribute__((weak));
 int sigaction(int signum, const struct sigaction *act,
-                     struct sigaction *oldact) {
+              struct sigaction *oldact) {
+  UNIMPLEMENTED_NOSYS();
+}
+
+int sigvec(int signum, struct sigvec *vec,
+           struct sigvec *ovec) __attribute__((weak));
+int sigvec(int signum, struct sigvec *vec, struct sigvec *ovec) {
+  UNIMPLEMENTED_NOSYS();
+}
+
+int sigmask(int signum) __attribute__((weak));
+int sigmask(int signum) {
+  UNIMPLEMENTED_NOSYS();
+}
+
+int sigblock(int mask) __attribute__((weak));
+int sigblock(int mask) {
+  UNIMPLEMENTED_NOSYS();
+}
+
+int sigsetmask(int mask) __attribute__((weak));
+int sigsetmask(int mask) {
+  UNIMPLEMENTED_NOSYS();
+}
+
+int siggetmask(void) __attribute__((weak));
+int siggetmask(void) {
   UNIMPLEMENTED_NOSYS();
 }
 

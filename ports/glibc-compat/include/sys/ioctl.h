@@ -22,6 +22,7 @@
 #define TIOCGPGRP	0x540F
 #define TIOCGWINSZ	0x5413
 #define TIOCSWINSZ	0x5414
+#define TCXONC          0x540A
 
 struct winsize
   {
