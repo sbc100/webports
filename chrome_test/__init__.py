@@ -38,6 +38,7 @@ CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%s/%s'
 
 TESTING_LIB = os.path.join(SCRIPT_DIR, 'chrome_test.js')
 TESTING_EXTENSION = os.path.join(SCRIPT_DIR, 'extension')
+TESTING_TCP_APP = os.path.join(SCRIPT_DIR, 'tcpapp');
 
 RETURNCODE_KILL = -9
 
@@ -400,7 +401,7 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
                for i in load_apps]
 
   # Add in the chrome_test extension and compute its id.
-  load_extensions += [TESTING_EXTENSION]
+  load_extensions += [TESTING_EXTENSION, TESTING_TCP_APP]
   testing_id = ChromeAppIdFromPath(TESTING_EXTENSION)
 
   s = ChromeTestServer(('', 0), ChromeTestHandler)

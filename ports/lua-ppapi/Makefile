@@ -91,6 +91,7 @@ install: install-tests
 	cp index.html $(INSTALL_DIR)
 	cp lua.html $(INSTALL_DIR)
 	cp lua.js $(INSTALL_DIR)
+	cp ../../build_tools/pipeserver.js $(INSTALL_DIR)
 	cp ../../build_tools/naclprocess.js $(INSTALL_DIR)
 	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
 	cp background.js ${INSTALL_DIR}

@@ -758,6 +758,7 @@ InstallNaClTerm() {
   rm ${INSTALL_DIR}/hterm2.js
 
   LogExecute cp ${TOOLS_DIR}/naclterm.js ${INSTALL_DIR}
+  LogExecute cp ${TOOLS_DIR}/pipeserver.js ${INSTALL_DIR}
   if [ ${NACL_ARCH} = "pnacl" ] ; then
     sed 's/x-nacl/x-pnacl/' \
         ${TOOLS_DIR}/naclprocess.js > ${INSTALL_DIR}/naclprocess.js
