@@ -1,69 +1,21 @@
 diff --git a/Makefile.in b/Makefile.in
-index e29dc6d..bb485dd 100644
+index ab51035..9e5d6f6 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -36,13 +36,13 @@ TARGET  = libSDL.la
- SOURCES = @SOURCES@
- OBJECTS = @OBJECTS@
+@@ -43,7 +43,7 @@ SDLMAIN_LDFLAGS = @SDLMAIN_LDFLAGS@
  
--SDLMAIN_TARGET = libSDLmain.a
-+SDLMAIN_TARGET = libSDLmain.la
- SDLMAIN_SOURCES = @SDLMAIN_SOURCES@
- SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
- 
- DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
+ DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE VisualC.html VisualC Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode
  
 -HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
 +HDRS = SDL.h SDL_active.h SDL_audio.h SDL_byteorder.h SDL_cdrom.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_getenv.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_nacl.h SDL_opengl.h SDL_platform.h SDL_quit.h SDL_rwops.h SDL_stdinc.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
  
  LT_AGE      = @LT_AGE@
  LT_CURRENT  = @LT_CURRENT@
-@@ -68,9 +68,9 @@ depend:
- 	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" output="$(depend)" \
- 	$(SHELL) $(auxdir)/makedep.sh
- 	@for src in $(SDLMAIN_SOURCES); do \
--	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.o|'`; \
-+	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.lo|'`; \
- 	    echo "\$$(objects)/$$obj: $$src" >>$(depend); \
--	    echo "	\$$(CC) \$$(CFLAGS) \$$(EXTRA_CFLAGS) -c $$src -o \$$@" >>$(depend); \
-+	    echo "	\$$(LIBTOOL) --mode=compile \$$(CC) \$$(CFLAGS) \$$(EXTRA_CFLAGS) -c $$src -o \$$@" >>$(depend); \
- 	done
- 
- include $(depend)
-@@ -79,8 +79,7 @@ $(objects)/$(TARGET): $(OBJECTS)
- 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
- 
- $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
--	$(AR) cru $@ $(SDLMAIN_OBJECTS)
--	$(RANLIB) $@
-+	$(LIBTOOL) --mode=link $(CC) -o $@ $(SDLMAIN_OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
- 
- install: all install-bin install-hdrs install-lib install-data install-man
- install-bin:
-@@ -95,8 +94,7 @@ install-hdrs:
- install-lib: $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
- 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(libdir)
- 	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(TARGET) $(DESTDIR)$(libdir)/$(TARGET)
--	$(INSTALL) -m 644 $(objects)/$(SDLMAIN_TARGET) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
--	$(RANLIB) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
-+	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(SDLMAIN_TARGET) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
- install-data:
- 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(datadir)/aclocal
- 	$(INSTALL) -m 644 $(srcdir)/sdl.m4 $(DESTDIR)$(datadir)/aclocal/sdl.m4
-@@ -120,7 +118,7 @@ uninstall-hdrs:
- 	-rmdir $(DESTDIR)$(includedir)/SDL
- uninstall-lib:
- 	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$(TARGET)
--	rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
-+	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
- uninstall-data:
- 	rm -f $(DESTDIR)$(datadir)/aclocal/sdl.m4
- 	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl.pc
 diff --git a/configure.in b/configure.in
-index a7e9b18..2548347 100644
+index 08c8e1e..bfbc120 100644
 --- a/configure.in
 +++ b/configure.in
-@@ -181,7 +181,8 @@ if test x$enable_libc = xyes; then
+@@ -176,7 +176,8 @@ if test x$enable_libc = xyes; then
          AC_DEFINE(HAVE_MPROTECT)
          ]),
      )
@@ -73,7 +25,7 @@ index a7e9b18..2548347 100644
  
      AC_CHECK_LIB(iconv, libiconv_open, [EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
      AC_CHECK_LIB(m, pow, [EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"])
-@@ -885,6 +886,50 @@ CheckVisibilityHidden()
+@@ -910,6 +911,50 @@ CheckWarnAll()
      fi
  }
  
@@ -124,7 +76,7 @@ index a7e9b18..2548347 100644
  
  dnl Do the iPod thing
  CheckIPod()
-@@ -2284,6 +2329,22 @@ case "$host" in
+@@ -2325,6 +2370,22 @@ case "$host" in
              have_timers=yes
          fi
          ;;
@@ -147,20 +99,7 @@ index a7e9b18..2548347 100644
      *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
          case "$host" in
              *-*-linux*)         ARCH=linux ;;
-@@ -2838,9 +2899,9 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
- OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.S,$(objects)/\1.lo,g'`
- OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
- 
--SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.o,g'`
--SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.o,g'`
--SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
-+SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
-+SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
-+SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
- 
- # Set runtime shared library paths as needed
- 
-@@ -2866,6 +2927,9 @@ case "$ARCH" in
+@@ -2914,6 +2975,9 @@ case "$ARCH" in
      # Evil hack to allow static linking on Mac OS X
      SDL_STATIC_LIBS="\${libdir}/libSDLmain.a \${libdir}/libSDL.a $EXTRA_LDFLAGS"
      ;;
@@ -171,10 +110,10 @@ index a7e9b18..2548347 100644
      SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
      ;;
 diff --git a/include/SDL_config.h.in b/include/SDL_config.h.in
-index 58593ca..150097d 100644
+index 8bb1773..d535d92 100644
 --- a/include/SDL_config.h.in
 +++ b/include/SDL_config.h.in
-@@ -174,6 +174,7 @@
+@@ -176,6 +176,7 @@
  #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC
  #undef SDL_AUDIO_DRIVER_MINT
  #undef SDL_AUDIO_DRIVER_MMEAUDIO
@@ -182,7 +121,7 @@ index 58593ca..150097d 100644
  #undef SDL_AUDIO_DRIVER_NAS
  #undef SDL_AUDIO_DRIVER_NAS_DYNAMIC
  #undef SDL_AUDIO_DRIVER_OSS
-@@ -265,6 +266,7 @@
+@@ -267,6 +268,7 @@
  #undef SDL_VIDEO_DRIVER_GEM
  #undef SDL_VIDEO_DRIVER_GGI
  #undef SDL_VIDEO_DRIVER_IPOD
@@ -190,7 +129,7 @@ index 58593ca..150097d 100644
  #undef SDL_VIDEO_DRIVER_NANOX
  #undef SDL_VIDEO_DRIVER_OS2FS
  #undef SDL_VIDEO_DRIVER_PHOTON
-@@ -295,6 +297,7 @@
+@@ -297,6 +299,7 @@
  /* Enable OpenGL support */
  #undef SDL_VIDEO_OPENGL
  #undef SDL_VIDEO_OPENGL_GLX
@@ -199,7 +138,7 @@ index 58593ca..150097d 100644
  #undef SDL_VIDEO_OPENGL_OSMESA
  #undef SDL_VIDEO_OPENGL_OSMESA_DYNAMIC
 diff --git a/include/SDL_main.h b/include/SDL_main.h
-index b7f6b2c..cdde128 100644
+index ab50ef1..067d15e 100644
 --- a/include/SDL_main.h
 +++ b/include/SDL_main.h
 @@ -32,7 +32,7 @@
@@ -244,7 +183,7 @@ index 0000000..7bb5683
 +
 +#endif /* _SDL_nacl_h */
 diff --git a/include/SDL_opengl.h b/include/SDL_opengl.h
-index c479a3a..a0f4962 100644
+index 3d791d6..35d123a 100644
 --- a/include/SDL_opengl.h
 +++ b/include/SDL_opengl.h
 @@ -33,7 +33,7 @@
@@ -268,7 +207,7 @@ index c479a3a..a0f4962 100644
  #include <GL/gl.h>	/* Header File For The OpenGL Library */
  #include <GL/glu.h>	/* Header File For The GLU Library */
 diff --git a/include/SDL_platform.h b/include/SDL_platform.h
-index 11d8673..dd99403 100644
+index 48540a8..2bec932 100644
 --- a/include/SDL_platform.h
 +++ b/include/SDL_platform.h
 @@ -63,10 +63,14 @@
@@ -288,7 +227,7 @@ index 11d8673..dd99403 100644
  #undef __MACOSX__
  #define __MACOSX__	1
 diff --git a/src/SDL_fatal.c b/src/SDL_fatal.c
-index 15c0be7..82ceeef 100644
+index d422a01..51bb9cb 100644
 --- a/src/SDL_fatal.c
 +++ b/src/SDL_fatal.c
 @@ -39,7 +39,11 @@ static void SDL_Parachute(int sig)
@@ -304,7 +243,7 @@ index 15c0be7..82ceeef 100644
  
  static int SDL_fatal_signals[] = {
 diff --git a/src/audio/SDL_audio.c b/src/audio/SDL_audio.c
-index bdeacdc..ac43356 100644
+index beb26e0..82f183d 100644
 --- a/src/audio/SDL_audio.c
 +++ b/src/audio/SDL_audio.c
 @@ -36,6 +36,9 @@
@@ -314,14 +253,14 @@ index bdeacdc..ac43356 100644
 +#if SDL_AUDIO_DRIVER_NACL
 +	&NACLAUD_bootstrap,
 +#endif
- #if SDL_AUDIO_DRIVER_BSD
- 	&BSD_AUDIO_bootstrap,
+ #if SDL_AUDIO_DRIVER_PULSE
+ 	&PULSE_bootstrap,
  #endif
 diff --git a/src/audio/SDL_sysaudio.h b/src/audio/SDL_sysaudio.h
-index 50cf179..7b9a0a7 100644
+index 74ac21d..c6d8542 100644
 --- a/src/audio/SDL_sysaudio.h
 +++ b/src/audio/SDL_sysaudio.h
-@@ -156,6 +156,9 @@ extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
+@@ -158,6 +158,9 @@ extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
  extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
  extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
  #endif
@@ -507,7 +446,7 @@ index 0000000..ab52848
 +
 +#endif /* _SDL_naclaudio_h */
 diff --git a/src/cpuinfo/SDL_cpuinfo.c b/src/cpuinfo/SDL_cpuinfo.c
-index 5c2d81f..7a757a3 100644
+index 0cd0838..5d5ee7f 100644
 --- a/src/cpuinfo/SDL_cpuinfo.c
 +++ b/src/cpuinfo/SDL_cpuinfo.c
 @@ -53,6 +53,8 @@ static void illegal_instruction(int sig)
@@ -519,7 +458,7 @@ index 5c2d81f..7a757a3 100644
  static __inline__ int CPU_haveCPUID(void)
  {
  	int has_CPUID = 0;
-@@ -280,6 +282,15 @@ done:
+@@ -300,6 +302,15 @@ done:
  	return features;
  }
  
@@ -537,7 +476,7 @@ index 5c2d81f..7a757a3 100644
  	if ( CPU_haveCPUID() ) {
 diff --git a/src/main/nacl/pepper_instance.c b/src/main/nacl/pepper_instance.c
 new file mode 100644
-index 0000000..6e1f036
+index 0000000..017a53a
 --- /dev/null
 +++ b/src/main/nacl/pepper_instance.c
 @@ -0,0 +1,338 @@
@@ -880,7 +819,7 @@ index 0000000..6e1f036
 +
 +PP_EXPORT void PPP_ShutdownModule() {}
 diff --git a/src/thread/pthread/SDL_systhread.c b/src/thread/pthread/SDL_systhread.c
-index 479bf34..a3b9119 100644
+index 40cc3b7..6bc1c25 100644
 --- a/src/thread/pthread/SDL_systhread.c
 +++ b/src/thread/pthread/SDL_systhread.c
 @@ -81,12 +81,15 @@ void SDL_SYS_SetupThread(void)
@@ -900,7 +839,7 @@ index 479bf34..a3b9119 100644
  #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
  	/* Allow ourselves to be asynchronously cancelled */
 diff --git a/src/video/SDL_sysvideo.h b/src/video/SDL_sysvideo.h
-index 1c72e09..9fc1a85 100644
+index 436450e..7f9ea97 100644
 --- a/src/video/SDL_sysvideo.h
 +++ b/src/video/SDL_sysvideo.h
 @@ -317,6 +317,9 @@ typedef struct VideoBootStrap {
@@ -914,7 +853,7 @@ index 1c72e09..9fc1a85 100644
  extern VideoBootStrap QZ_bootstrap;
  #endif
 diff --git a/src/video/SDL_video.c b/src/video/SDL_video.c
-index e84ef35..f8a5090 100644
+index 46285c9..5d1fc17 100644
 --- a/src/video/SDL_video.c
 +++ b/src/video/SDL_video.c
 @@ -33,6 +33,9 @@
@@ -927,7 +866,7 @@ index e84ef35..f8a5090 100644
  #if SDL_VIDEO_DRIVER_QUARTZ
  	&QZ_bootstrap,
  #endif
-@@ -764,6 +767,8 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
+@@ -772,6 +775,8 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
  #define __SDL_NOGETPROCADDR__
  #elif defined(__MINT__)
  #define __SDL_NOGETPROCADDR__

@@ -1,5 +1,5 @@
 diff --git a/backends/platform/sdl/posix/posix-main.cpp b/backends/platform/sdl/posix/posix-main.cpp
-index 5f0914e..4f11f2f 100644
+index 5f0914e..809ddee 100644
 --- a/backends/platform/sdl/posix/posix-main.cpp
 +++ b/backends/platform/sdl/posix/posix-main.cpp
 @@ -20,6 +20,13 @@
@@ -16,7 +16,7 @@ index 5f0914e..4f11f2f 100644
  #include "common/scummsys.h"
  
  #if defined(POSIX) && !defined(MACOSX) && !defined(SAMSUNGTV) && !defined(MAEMO) && !defined(WEBOS) && !defined(LINUXMOTO) && !defined(GPH_DEVICE) && !defined(GP2X) && !defined(DINGUX) && !defined(OPENPANDORA) && !defined(PLAYSTATION3)
-@@ -28,7 +35,88 @@
+@@ -28,7 +35,89 @@
  #include "backends/plugins/sdl/sdl-provider.h"
  #include "base/main.h"
  
@@ -34,14 +34,18 @@ index 5f0914e..4f11f2f 100644
 +
 +#if defined(NACL)
 +
-+#define CHECK(x) ret = x; assert(ret == 0)
++#define CHECK(x) \
++	ret = x; \
++	if (ret != 0) \
++		perror(#x " failed"); \
++	assert(ret == 0) \
 +
 +void ExtractAll(const char* data_file) {
 +	printf("Extracting: %s ...\n", data_file);
 +	TAR* tar;
-+        int ret;
-+	CHECK(tar_open(&tar, (char*)data_file, NULL, O_RDONLY, 0, 0));
-+	CHECK(tar_extract_all(tar, "/"));
++	int ret;
++	CHECK(tar_open(&tar, const_cast<char*>(data_file), NULL, O_RDONLY, 0, 0));
++	CHECK(tar_extract_all(tar, const_cast<char*>("/")));
 +	CHECK(tar_close(tar));
 +}
 +
@@ -81,24 +85,21 @@ index 5f0914e..4f11f2f 100644
 +
 +int SDL_main(int argc, char *argv[]) {
 +	int ret;
-+	CHECK(umount("/"));
-+	CHECK(mount("", "/", "memfs", 0, NULL));
++	CHECK(umount("/home"));
++  CHECK(mount("", "/home", "html5fs", 0, "type=PERSISTENT"));
 +	CHECK(mount("./", "/mnt/http", "httpfs", 0, NULL));
++	CHECK(setenv("HOME", "/home", 1));
 +
 +	ExtractAll("/mnt/http/runimage.tar");
 +	ExtractAll("/mnt/http/bass.tar");
 +	ExtractAll("/mnt/http/lure.tar");
-+
-+	CHECK(mkdir("/home", 0777));
-+        CHECK(mount("", "/home", "html5fs", 0, "type=PERSISTENT"));
-+	CHECK(setenv("HOME", "/home", 1));
 +
 +	const char kConfigFile[] = "/home/.scummvmrc";
 +	if (!FileExists(kConfigFile)) {
 +		// Initialize with a default .scummvmrm that already has the
 +		// games loaded.
 +		CopyFile("/mnt/http/scummvmrc", kConfigFile);
-+        }
++	}
 +#else
  int main(int argc, char *argv[]) {
 +#endif
