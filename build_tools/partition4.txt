@@ -168,6 +168,7 @@ builder 2 (total: 5848)
   libhangul
   giflib
   pyzmq
+  gmp
   libtomcrypt
   libffi
   freealut

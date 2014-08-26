@@ -5,6 +5,18 @@
 
 BUILD_DIR=${SRC_DIR}
 
+MAKE_TARGETS="-f makefile.unix test"
+EXECUTABLES=test
+
+BuildStep() {
+  SetupCrossEnvironment
+  DefaultBuildStep
+}
+
+TestStep() {
+  RunSelLdrCommand test
+}
+
 InstallStep() {
   # copy libs and headers manually
   MakeDir ${DESTDIR_INCLUDE}

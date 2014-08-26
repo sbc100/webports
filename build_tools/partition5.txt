@@ -89,6 +89,7 @@ builder 1 (total: 4928)
   sdl-tests
   faac
   ruby-ppapi
+  gmp
   libtomcrypt
   openal-soft
   freealut

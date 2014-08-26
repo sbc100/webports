@@ -5,7 +5,12 @@
 
 BUILD_DIR=${SRC_DIR}
 MAKE_TARGETS=mtest
-export EXEEXT=${NACL_EXEEXT}
+EXECUTABLES=mtest/mtest${NACL_EXEEXT}
+
+BuildStep() {
+  SetupCrossEnvironment
+  DefaultBuildStep
+}
 
 #TestStep() {
   # To run tests, pipe mtest.nexe output into test.nexe input
