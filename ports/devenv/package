@@ -160,7 +160,7 @@ while getopts "s:i:hLf" o; do
       PACKAGE_SOURCE="${OPTARG}"
       ;;
     L)
-      PACKAGE_SOURCE="http://localhost:5013/"
+      PACKAGE_SOURCE="http://localhost:5103/"
       # Always force for localhost.
       PACKAGE_FORCE=1
       ;;

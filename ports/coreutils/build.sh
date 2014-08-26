@@ -12,12 +12,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export LIBS+=" -lglibc-compat"
 fi
 
-
-BuildStep() {
-  # Disable all assembly code by specifying none-none-none.
-  DefaultBuildStep --target=none-none-none
-}
-
 InstallStep() {
   PublishByArchForDevEnv
 }

@@ -616,11 +616,14 @@ PublishByArchForDevEnv() {
     name=${name/%.nexe/}
     name=${name/%.pexe/}
     LogExecute cp ${nexe} ${ARCH_DIR}/${name}
-    # Stage libraries for toolchains that support dynamic linking.
-    if [[ "${TOOLCHAIN}" = "glibc" || "${TOOLCHAIN}" = "bionic" ]]; then
+    # TODO(bradnelson): Do something prettier.
+    if [ "$(head -c 2 ${nexe})" != "#!" ]; then
+      # Strip non-scripts
+      LogExecute ${NACLSTRIP} ${ARCH_DIR}/${name}
+
       # Run create_nmf for non-scripts.
-      # TODO(bradnelson): Do something prettier.
-      if [ "$(head -c 2 ${nexe})" != "#!" ]; then
+      # Stage libraries for toolchains that support dynamic linking.
+      if [[ "${TOOLCHAIN}" = "glibc" || "${TOOLCHAIN}" = "bionic" ]]; then
         pushd ${ARCH_DIR}
         # Create a temporary name ending in .nexe so create_nmf does the right
         # thing.
