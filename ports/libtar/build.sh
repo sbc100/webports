@@ -4,14 +4,16 @@
 # found in the LICENSE file.
 
 NACLPORTS_CPPFLAGS+=" -DMAXPATHLEN=512 -DHAVE_STDARG_H"
+
 if [ "${NACL_LIBC}" == "bionic" ]; then
   NACLPORTS_CPPFLAGS+=" -I${START_DIR}"
-else
-  NACLPORTS_CPPFLAGS+=" -Dcompat_makedev\(a,b\)"
 fi
+
 if [ "${NACL_SHARED}" = "1" ]; then
   NACLPORTS_CFLAGS+=" -fPIC"
 fi
+
+export compat_cv_func_snprintf_works=yes
 
 InstallStep() {
   DefaultInstallStep
