@@ -2,7 +2,7 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Tool for generating list of ports in wiki format.
+"""Tool for generating list of ports in code.google.com wiki format.
 """
 
 import optparse
@@ -12,13 +12,17 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 
-sys.path.append(os.path.join(SCRIPT_DIR, 'lib'))
+sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 
 import naclports
+import naclports.package
 
 SRC_URL = 'https://code.google.com/p/naclports/source/browse/trunk/src'
 
 options = None
+
+def log(msg):
+  sys.stderr.write(str(msg) + '\n')
 
 def main(args):
   global options
@@ -38,9 +42,9 @@ def main(args):
   print 'script.'
   print ''
   print ('|| *Name* || *Version* || *Upstream Archive* || *!NaCl Patch* || ' +
-         '*Libc* || *Disabled On* ||')
+         '*Libc* || *Arch* || *Builds on* ||')
   total = 0
-  for package in sorted(naclports.PackageIterator()):
+  for package in sorted(naclports.package.PackageIterator()):
     if not package.URL:
       continue
     patch = os.path.join(package.root, 'nacl.patch')
@@ -52,27 +56,41 @@ def main(args):
       else:
         patch = '[%s/%s %d KiB]' % (SRC_URL, relative_path, size/1024)
     else:
-      patch = '_none_'
+      patch = ''
     url = '[%s %s]' % (package.URL, package.GetArchiveFilename())
     package_url = '[%s/%s %s]' % (SRC_URL,
         os.path.relpath(package.root, NACLPORTS_ROOT),
         package.NAME)
-    libc = getattr(package, 'LIBC', '')
+
+    libc = package.LIBC
     if libc:
-      libc += '-only'
-    disabled_arch = getattr(package, 'DISABLED_ARCH', '')
-    print '|| %-70s || %-10s || %-50s || %s || %s || %s ||' % (package_url,
-                                                               package.VERSION,
-                                                               url,
-                                                               patch,
-                                                               libc,
-                                                               disabled_arch)
+      libc = libc + '-only'
+    else:
+      disabled_libc = getattr(package, 'DISABLED_LIBC')
+      if disabled_libc:
+        libc = 'not ' + ' or '.join(disabled_libc)
+      else:
+        libc = ''
+
+    disabled_arch = getattr(package, 'DISABLED_ARCH')
+    if disabled_arch:
+      arch = 'not ' + ' or '.join(disabled_arch)
+    else:
+      arch = ''
+
+    host = package.BUILD_OS
+    if host:
+      host = host + '-only'
+    else:
+      host = ''
+    cols = (package_url, package.VERSION, url, patch, libc, arch, host)
+    print '|| %-70s || %-10s || %-50s || %s || %s || %s || %s ||' % cols
     total += 1
   print '\n_Total = %d_\n' % total
 
   print '= Local Ports (not based on upstream sources) =\n'
   total = 0
-  for package in naclports.PackageIterator():
+  for package in naclports.package.PackageIterator():
     if package.URL:
       continue
     package_url = '[%s/%s %s]' % (SRC_URL,
