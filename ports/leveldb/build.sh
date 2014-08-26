@@ -7,13 +7,13 @@
 # neither newlib or glibc has mkdir plumbed through to the
 # IRT.
 #autocompact_test
-#c_test
 #corruption_test
 #db_test
 #issue178_test
-#issue200_test
-#table_test
 EXECUTABLES="\
+    issue200_test \
+    c_test \
+    table_test \
     arena_test \
     bloom_test \
     cache_test \
@@ -38,8 +38,8 @@ BuildStep() {
   export CC=${NACLCC}
   export CXX=${NACLCXX}
   LogExecute make clean
-  LogExecute make -j${OS_JOBS}
-  LogExecute make -j${OS_JOBS} tests programs
+  LogExecute make -j${OS_JOBS} OPT=""
+  LogExecute make -j${OS_JOBS} OPT="" tests programs
 }
 
 InstallStep() {
@@ -55,7 +55,7 @@ TestStep() {
   fi
 
   for test_binary in $EXECUTABLES; do
-    echo "***** Running $test_binary.sh"i
+    echo "***** Running $test_binary.sh"
     ./$test_binary.sh
   done
 }

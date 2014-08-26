@@ -528,6 +528,9 @@ GitCloneStep() {
   LogExecute git reset --hard ${COMMIT}
 
   TouchKeyStamp clone "$URL"
+
+  # make sure the patch step is applied
+  rm -f ${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch
 }
 
 
