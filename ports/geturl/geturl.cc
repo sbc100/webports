@@ -22,6 +22,7 @@
 #include "ppapi/cpp/module.h"
 #include "ppapi/cpp/url_loader.h"
 #include "ppapi/cpp/url_request_info.h"
+#include "ppapi/cpp/url_response_info.h"
 
 
 static int Download(const char* url, const char* dst) {
@@ -44,6 +45,13 @@ static int Download(const char* url, const char* dst) {
   int fh = open(dst, O_WRONLY | O_CREAT);
   if (fh < 0) {
     fprintf(stderr, "ERROR: Can't open file (%d): %s\n", errno, dst);
+    return 1;
+  }
+
+  pp::URLResponseInfo info = url_loader.GetResponseInfo();
+  if (info.GetStatusCode() != 200) {
+    fprintf(stderr, "ERROR: got http error code %d for: %s\n",
+        info.GetStatusCode(), url);
     return 1;
   }
 
