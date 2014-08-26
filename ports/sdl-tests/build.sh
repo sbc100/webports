@@ -30,18 +30,16 @@ ConfigureStep() {
 }
 
 InstallStep() {
-  local PUBLISH_DIR=${NACL_PACKAGES_PUBLISH}/sdl-tests/${NACL_ARCH}-${NACL_LIBC}
   Remove ${PUBLISH_DIR}
   MakeDir ${PUBLISH_DIR}
-  LogExecute cp *.?exe ${PUBLISH_DIR}
+  LogExecute cp *${NACL_EXEEXT} ${PUBLISH_DIR}
   ChangeDir ${SRC_DIR}/test
   LogExecute cp *.bmp *.wav *.xbm *.dat *.txt ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
-  # Older versions of the SDK don't include create_html.py so we
-  # need to check for its existence.
-  if [ -e "${NACL_SDK_ROOT}/tools/create_html.py" ]; then
-    for NEXE in *.?exe; do
-      LogExecute "${NACL_SDK_ROOT}/tools/create_html.py" ${NEXE}
-    done
+  for NEXE in *${NACL_EXEEXT}; do
+    LogExecute "${NACL_SDK_ROOT}/tools/create_html.py" ${NEXE}
+  done
+  if [ ${NACL_ARCH} = "pnacl" ]; then
+    sed -i.bak 's/x-nacl/x-pnacl/' *.html
   fi
 }
