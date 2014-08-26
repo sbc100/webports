@@ -33,6 +33,7 @@ function NaClProcessManager() {
   //   exitCode: the exit code of the process, or null if the process has not
   //       yet exited,
   //   pgid: the process group ID of the process
+  //   ppid: the parent PID of the process
   // }
   this.processes = {};
 
@@ -41,7 +42,9 @@ function NaClProcessManager() {
   // { reply: a callback to call to report a process exit, options: the
   //     options specfied for the wait (such as WNOHANG) }
   this.waiters = {};
-  this.pid = 0;
+
+  // Start process IDs at 2, as PIDs 0 and 1 are reserved on real systems.
+  this.pid = 2;
 };
 
 /**
@@ -85,6 +88,13 @@ var Errno = {
    */
   EINVAL: 22,
 };
+
+/*
+ * The PID of the "init" process. Processes directly spawned from JavaScript
+ * have their parent PID set to this value.
+ * @type {number}
+ */
+NaClProcessManager.INIT_PID = 1;
 
 /**
  * The error thrown when the user tries to execute operations on the foreground
@@ -404,13 +414,13 @@ NaClProcessManager.prototype.handleMessageSpawn_ = function(msg, reply, src) {
  * Handle a waitpid call.
  * @private
  */
-NaClProcessManager.prototype.handleMessageWait_ = function(msg, reply) {
+NaClProcessManager.prototype.handleMessageWait_ = function(msg, reply, src) {
   this.waitpid(msg['pid'], msg['options'], function(pid, status) {
     reply({
       pid: pid,
       status: status
     });
-  });
+  }, src.pid);
 }
 
 /**
@@ -443,11 +453,11 @@ NaClProcessManager.prototype.handleMessageSetPGID_ = function(msg, reply, src) {
     var pid = parseInt(msg['pid']) || src.pid;
     var newPgid = parseInt(msg['pgid']) || pid;
 
-    // TODO(channingh): Add error cases for parent/child relationships.
     if (newPgid < 0) {
       return -Errno.EINVAL;
     }
-    if (!self.processes[pid] || self.processes[pid].exitCode !== null) {
+    if (!self.processes[pid] || self.processes[pid].exitCode !== null ||
+        (src.pid !== pid && src.pid !== self.processes[pid].ppid)) {
       return -Errno.ESRCH;
     }
 
@@ -647,26 +657,35 @@ NaClProcessManager.prototype.deleteProcessEntry_ = function(pid) {
  */
 NaClProcessManager.prototype.exit = function(code, element) {
   var pid = element.pid;
+  var ppid = this.processes[pid].ppid;
+  var pgid = this.processes[pid].pgid;
 
   this.deleteProcessFromGroup_(pid);
 
-  function wakeWaiters(waiters) {
-    for (var i = 0; i < waiters.length; i++) {
-      var waiter = waiters[i];
-      waiter.reply(pid, code);
-      waiter = null;
+  // Reply to processes waiting on the exited process.
+  var waitersToCheck = [pid, -1, -pgid];
+  var reaped = false;
+  for (var i = 0; i < waitersToCheck.length; i++) {
+    var currPid = waitersToCheck[i];
+    if (this.waiters[currPid] === undefined) {
+      continue;
+    }
+    var currPidWaiters = this.waiters[currPid];
+    for (var j = 0; j < currPidWaiters.length; j++) {
+      var waiter = currPidWaiters[j];
+      if (waiter.srcPid === ppid) {
+        waiter.reply(pid, code);
+        reaped = true;
+      }
+    }
+    this.waiters[currPid] = currPidWaiters.filter(function(waiter) {
+      return waiter.srcPid !== ppid;
+    });
+    if (this.waiters[currPid].length === 0) {
+      delete this.waiters[currPid];
     }
   }
-  if (this.waiters[pid] || this.waiters[-1]) {
-    if (this.waiters[pid]) {
-      wakeWaiters(this.waiters[pid]);
-      delete this.waiters[pid];
-    }
-    if (this.waiters[-1]) {
-      wakeWaiters(this.waiters[-1]);
-      delete this.waiters[-1];
-    }
-
+  if (reaped) {
     this.deleteProcessEntry_(pid);
   } else {
     this.processes[pid].exitCode = code;
@@ -760,12 +779,12 @@ NaClProcessManager.prototype.spawn = function(
       throw new Error('Browser does not support NaCl or NaCl is disabled\n');
   }
 
-  ++this.pid;
-
   var fg = document.createElement('object');
   this.foregroundProcess = fg;
 
   fg.pid = this.pid;
+  ++this.pid;
+
   fg.width = 0;
   fg.height = 0;
   fg.data = nmf;
@@ -780,23 +799,23 @@ NaClProcessManager.prototype.spawn = function(
   fg.addEventListener('message', this.handleMessage_.bind(this));
   fg.addEventListener('progress', this.handleProgress_.bind(this));
 
-  var pgid = parent ? this.processes[parent.pid].pgid : this.pid
-  this.processes[this.pid] = {
+  var pgid = parent ? this.processes[parent.pid].pgid : fg.pid;
+  var ppid = parent ? parent.pid : NaClProcessManager.INIT_PID;
+  this.processes[fg.pid] = {
     domElement: fg,
     exitCode: null,
-    pgid: pgid
+    pgid: pgid,
+    ppid: ppid
   };
   if (!parent) {
-    this.createProcessGroup_(this.pid, this.pid);
+    this.createProcessGroup_(fg.pid, fg.pid);
   }
-  this.processGroups[pgid].processes[this.pid] = true;
+  this.processGroups[pgid].processes[fg.pid] = true;
 
   var params = {};
 
-  envs.push('NACL_PID=' + this.pid);
-  if (parent) {
-    envs.push('NACL_PPID=' + parent.pid);
-  }
+  envs.push('NACL_PID=' + fg.pid);
+  envs.push('NACL_PPID=' + ppid);
 
   for (var i = 0; i < envs.length; i++) {
     var env = envs[i];
@@ -912,7 +931,7 @@ NaClProcessManager.prototype.spawn = function(
   // Work around crbug.com/350445
   var junk = fg.offsetTop;
 
-  return this.pid;
+  return fg.pid;
 }
 
 /**
@@ -926,46 +945,81 @@ NaClProcessManager.prototype.spawn = function(
 /**
  * Waits for the process identified by pid to exit, and call a callback when
  * finished.
- * @param {number} pid The process ID of the process.
+ * @param {number} pid The process ID of the process. If pid==-1, wait for any
+ *     child. If pid==0, wait for any child in the caller's process group. If
+ *     pid<-1, wait for any child in the process group with process group
+ *     id==|pid|.
  * @param {number} options The desired options, ORed together.
  * @param {waitCallback} reply The callback to be called when the process has
  *     exited.
+ * @param {number} [srcPid=1] The process PID of the calling process. Assume
+ *     the init process if omitted.
  */
-NaClProcessManager.prototype.waitpid = function(pid, options, reply) {
+NaClProcessManager.prototype.waitpid = function(pid, options, reply, srcPid) {
   var self = this;
-
-  var finishedPid = null;
-  for (var processPid in this.processes) {
-    if (this.processes[processPid].exitCode !== null) {
-      finishedPid = parseInt(processPid);
-      break;
-    }
+  if (srcPid === undefined) {
+    srcPid = NaClProcessManager.INIT_PID;
   }
 
-  if (pid == -1 && finishedPid !== null) {
-    reply(finishedPid, this.processes[finishedPid].exitCode);
-    this.deleteProcessEntry_(finishedPid);
-  } else if (pid >= 0 && this.processes[pid] === undefined) {
-    // The process does not exist.
+  // The specified process does not exist or is not a child.
+  if (pid > 0 && (this.processes[pid] === undefined ||
+                  this.processes[pid].ppid !== srcPid)) {
     reply(-Errno.ECHILD, 0);
-  } else if (pid >= 0 && this.processes[pid].exitCode !== null) {
-    // The process has already finished.
-    reply(pid, this.processes[pid].exitCode);
+    return;
+  }
+
+  // The specified process has already finished.
+  if (pid > 0 && this.processes[pid].exitCode !== null) {
+    var exitCode = this.processes[pid].exitCode;
     this.deleteProcessEntry_(pid);
-  } else {
-    // Add the current process to the waiter list.
-    if (options & this.WNOHANG != 0) {
-      reply(0, 0);
+    reply(pid, exitCode);
+    return;
+  }
+
+  // There should be no processes in the init process group.
+  if (pid === 0 && srcPid === NaClProcessManager.INIT_PID) {
+    reply(-Errno.ECHILD, 0);
+    return;
+  }
+
+  // pid = 0 waits for processes in the calling process's group.
+  if (pid === 0) {
+    pid = -this.processes[srcPid].pgid;
+  }
+
+  if (pid < 0) {
+    var finishedPid = null;
+    for (var processPid in this.processes) {
+      var process = this.processes[processPid];
+      if (process.exitCode !== null &&
+          process.ppid === srcPid &&
+          (pid === -1 || process.pgid === -pid)) {
+        finishedPid = parseInt(processPid);
+        break;
+      }
+    }
+
+    if (finishedPid !== null) {
+      reply(finishedPid, this.processes[finishedPid].exitCode);
+      this.deleteProcessEntry_(finishedPid);
       return;
     }
-    if (!this.waiters[pid]) {
-      this.waiters[pid] = [];
-    }
-    this.waiters[pid].push({
-      reply: reply,
-      options: options
-    });
   }
+
+  if ((options & NaClProcessManager.WNOHANG) != 0) {
+    reply(0, 0);
+    return;
+  }
+
+  // Add the waitpid call to the waiter list.
+  if (!this.waiters[pid]) {
+    this.waiters[pid] = [];
+  }
+  this.waiters[pid].push({
+    reply: reply,
+    options: options,
+    srcPid: srcPid
+  });
 }
 
 /**
