@@ -31,6 +31,7 @@
     "storage",
     "unlimitedStorage",
     "*://naclports.storage.googleapis.com/*",
+    "*://0.0.0.0/*",
     "*://localhost/*",
     {
       "socket": [

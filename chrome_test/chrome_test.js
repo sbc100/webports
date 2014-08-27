@@ -147,6 +147,16 @@ chrometest.proxyExtension = function(extensionName) {
 };
 
 /**
+ * Get an URL that references the test harness.
+ * @param {string} path The relative path to a resource hosted by the harness.
+ * @return {string} The absolute URL.
+ */
+chrometest.harnessURL = function(path) {
+  var baseURL = location.href.split('/').slice(0, -1).join('/');
+  return baseURL + '/' + path;
+};
+
+/**
  * Log a message to the test harness.
  * @param {string} level The python logging level of the message.
  * @param {string} message The message to log.

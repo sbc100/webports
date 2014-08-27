@@ -3,9 +3,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
+  -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
+
 BuildStep() {
-  # Nothing to build.
-  return
+  SetupCrossEnvironment
+
+  # Build test module.
+  MakeDir ${BUILD_DIR}/tests
+  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
+      ${START_DIR}/tests/devenv_test.cc \
+      -o ${BUILD_DIR}/tests/devenv_test${NACL_EXEEXT} \
+      ${EXTRA_LIBS} -lgtest
 }
 
 InstallStep() {
@@ -57,6 +66,21 @@ InstallStep() {
   local WIDGET_DIR=${PUBLISH_DIR}/devenvwidget
   MakeDir ${WIDGET_DIR}
   LogExecute cp -r ${START_DIR}/devenvwidget/* ${WIDGET_DIR}
+
+  # Install tests.
+  MakeDir ${PUBLISH_DIR}/tests
+  LogExecute cp -r ${BUILD_DIR}/tests/* ${PUBLISH_DIR}/tests
+  cd ${PUBLISH_DIR}/tests
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    LogExecute ${PNACLFINALIZE} devenv_test${NACL_EXEEXT}
+  fi
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      devenv_test${NACL_EXEEXT} \
+      -s . \
+      -o devenv_test.nmf
+  LogExecute mv devenv_test${NACL_EXEEXT} devenv_test
+
+  LogExecute zip -r devenv_test.zip *
 }
 
 PostInstallTestStep() {

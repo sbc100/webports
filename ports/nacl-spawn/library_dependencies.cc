@@ -58,7 +58,15 @@ static bool FindLibraryDependenciesImpl(
   for (size_t i = 0; i < elf_reader.neededs().size(); i++) {
     const std::string& needed_name = elf_reader.neededs()[i];
     std::string needed_path;
-    if (GetFileInPaths(needed_name, paths, &needed_path)) {
+    if (needed_name == "ld-nacl-x86-32.so.1" ||
+        needed_name == "ld-nacl-x86-64.so.1") {
+      // Our sdk includes ld-nacl-x86-*.so.1, for link time. However,
+      // create_nmf.py (because of objdump) only publishes runnable-ld.so
+      // (which is a version of ld-nacl-x86-*.so.1, modified to be runnable
+      // as the initial nexe by nacl). Since all glibc NMFs include
+      // ld-runnable.so (which has ld-nacl-*.so.1 as its SONAME), they will
+      // already have this dependency, so we can ignore it.
+    } else if (GetFileInPaths(needed_name, paths, &needed_path)) {
       if (!FindLibraryDependenciesImpl(needed_path, paths, dependencies))
         return false;
     } else {

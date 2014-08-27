@@ -101,7 +101,7 @@ DevEnvTest.prototype.checkCommand = function(
   return Promise.resolve().then(function() {
     return self.runCommand(cmd);
   }).then(function(result) {
-    ASSERT_EQ(expectedStatus, result.status);
+    ASSERT_EQ(expectedStatus, result.status, result.output);
     if (expectedOutput !== undefined) {
       ASSERT_EQ(expectedOutput, result.output);
     }

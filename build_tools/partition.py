@@ -282,7 +282,7 @@ def FixupCanned(partitions):
   for i, partition in enumerate(partitions):
     for item in partition:
       if item not in all_names:
-        raise Error('non-existent package in partion %d: %s' % (i, item))
+        raise Error('non-existent package in partition %d: %s' % (i, item))
 
   # Check that partitions include all of their dependencies.
   for i, partition in enumerate(partitions):

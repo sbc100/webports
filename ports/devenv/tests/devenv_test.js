@@ -16,6 +16,21 @@ TEST_F(DevEnvTest, 'testEcho', function() {
   return this.checkCommand('echo hello', 0, 'hello\n');
 });
 
+// Run a NaCl executable to make sure syscalls are working.
+TEST_F(DevEnvTest, 'testCTests', function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return self.checkCommand('geturl ' +
+        chrometest.harnessURL('devenv_test.zip') + ' devenv_test.zip', 0);
+  }).then(function() {
+    return self.checkCommand('unzip devenv_test.zip', 0);
+  }).then(function() {
+    return self.checkCommand(
+        'LD_LIBRARY_PATH=${PWD}/lib32:${PWD}/lib64:$LD_LIBRARY_PATH ' +
+        './devenv_test', 0);
+  });
+});
+
 // Test the Pipe Server.
 TEST_F(DevEnvTest, 'testPipeServer', function() {
   var HOST = '127.0.0.1';

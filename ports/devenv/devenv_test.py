@@ -19,9 +19,11 @@ import chrome_test
 
 app = os.path.join(DEVENV_OUT_DIR, 'app')
 test_dir = os.path.join(SCRIPT_DIR, 'tests')
+test_out_dir = os.path.join(DEVENV_OUT_DIR, 'tests')
 
 chrome_test.Main([
     '-C', test_dir,
+    '-C', test_out_dir,
     '-t', '60',
     '--enable-nacl',
     '--load-extension', app,
