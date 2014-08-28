@@ -516,12 +516,15 @@ GitCloneStep() {
       Banner "Skipping git clone step"
       return
     fi
+
+    echo "Upstream archive or patch has changed."
+    echo "Please remove existing checkout to continue: '${SRC_DIR}'"
+    exit 1
   fi
 
   local GIT_URL=${URL%@*}
   local COMMIT=${URL#*@}
 
-  Remove ${SRC_DIR}
   LogExecute git clone ${GIT_URL} ${SRC_DIR}
   ChangeDir ${SRC_DIR}
   LogExecute git reset --hard ${COMMIT}
