@@ -1,7 +1,6 @@
 NAME=sdl
 VERSION=1.2.15
-ARCHIVE_ROOT=SDL-1.2.15
-URL=http://www.libsdl.org/release/SDL-1.2.15.tar.gz
+URL=https://github.com/sbc100/SDL-mirror.git@8ccf0e8
 LICENSE=LGPL2
 DEPENDS=(libtar regal)
 # Disabled on bionic due to regal.
