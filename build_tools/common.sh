@@ -1017,7 +1017,21 @@ ConfigureStep_Autotools() {
     CC="${PNACL_CONF_SHIM} ${CC}"
   fi
 
+  local CONFIG_SUB=${CONFIG_SUB:-${SRC_DIR}/config.sub}
+  local CONFIG_GUESS=${CONFIG_SUB%%.sub}.guess
+  if [ -f ${CONFIG_GUESS} ]; then
+    conf_build=$(${CONFIG_GUESS})
+  else
+    conf_build=${OS_NAME}
+  fi
+
+  # Specify both --build and --host options.  This forces autoconf into cross
+  # compile mode.  This is useful since the autodection doesn't always works.
+  # For example a trivial PNaCl binary can sometimes run on the linux host if
+  # it has the correct LLVM bimfmt support. What is more, autoconf will
+  # generate a warning if only --host is specified.
   LogExecute ${CONFIGURE} \
+    --build=${conf_build} \
     --host=${conf_host} \
     --prefix=${PREFIX} \
     --with-http=no \

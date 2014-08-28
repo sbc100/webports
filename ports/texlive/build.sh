@@ -26,14 +26,12 @@ EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
 
 NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--as-needed"
 BUILD_DIR=${SRC_DIR}
+CONFIG_SUB=build-aux/config.sub
 
 ConfigureStep() {
   # TODO(phosek): we should be able to run reautoconf at this point, but
   # this requires automake > 1.12 which is not currently shipped in Ubuntu
   #${SRC_DIR}/reautoconf
-
-  local build_host=$(${SRC_DIR}/build-aux/config.guess)
-  EXTRA_CONFIGURE_ARGS+=" --build=${build_host}"
 
   export LIBS="-ltar -lppapi_simple -lnacl_io \
     -lppapi_cpp -lppapi -l${NACL_CPP_LIB}"
