@@ -1,6 +1,6 @@
 NAME=blis
-VERSION=0.1.3
-URL=http://github.com/flame/blis/archive/0.1.3/blis-0.1.3.tar.gz
+VERSION=0.1.4
+URL=http://github.com/flame/blis/archive/0.1.4/blis-0.1.4.tar.gz
 LICENSE=BSD:LICENSE
 ARCH=pnacl
-SHA1=7062f1521cc64bfd18806311c27da56a4f457eb2
+SHA1=e465e9a5fe9353010e2992838aaafd01023acb47
