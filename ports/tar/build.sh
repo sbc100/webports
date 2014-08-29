@@ -3,8 +3,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io"
-CONFIG_SUB=config/config.sub
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
+-lppapi_cpp -l${NACL_CPP_LIB}"
+EXECUTABLES=src/tar
+
+# The default when cross compiling is to assume chown does not
+# follow symlinks, and the code that works around this in chown.c
+# does not compile under newlib (missing O_NOCTTY).
+export gl_cv_func_chown_follows_symlink=yes
+
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  export LIBS="-lglibc-compat"
+fi
 
 InstallStep() {
   MakeDir ${PUBLISH_DIR}

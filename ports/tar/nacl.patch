@@ -28,11 +28,19 @@ index 86de4cc..64eeb01 100644
  LIB_SETSOCKOPT = @LIB_SETSOCKOPT@
  LTLIBICONV = @LTLIBICONV@
 diff --git a/src/tar.c b/src/tar.c
-index 31d7d30..7259390 100644
+index 31d7d30..eec331e 100644
 --- a/src/tar.c
 +++ b/src/tar.c
-@@ -1617,7 +1617,7 @@ decode_options (int argc, char **argv)
-
+@@ -37,6 +37,7 @@
+ #include "common.h"
+ 
+ #include <getdate.h>
++#include <locale.h>
+ #include <localedir.h>
+ #include <rmt.h>
+ #include <prepargs.h>
+@@ -1617,7 +1618,7 @@ decode_options (int argc, char **argv)
+ 
  /* Main routine for tar.  */
  int
 -main (int argc, char **argv)

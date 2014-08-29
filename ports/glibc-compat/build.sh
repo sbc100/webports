@@ -22,9 +22,14 @@ BuildStep() {
 
 InstallStep() {
   local LIB=libglibc-compat.a
+  INCDIR=${DESTDIR_INCLUDE}/glibc-compat
   MakeDir ${DESTDIR_LIB}
-  Remove ${DESTDIR_INCLUDE}/glibc-compat
-  MakeDir ${DESTDIR_INCLUDE}/glibc-compat
+  Remove ${INCDIR}
+  MakeDir ${INCDIR}
   LogExecute install -m 644 out/${LIB} ${DESTDIR_LIB}/${LIB}
-  LogExecute cp -r include/* ${DESTDIR_INCLUDE}/glibc-compat
+  LogExecute cp include/*.h ${DESTDIR_INCLUDE}/glibc-compat
+  for dir in sys arpa machine netinet netinet6; do
+    MakeDir ${INCDIR}/${dir}
+    LogExecute install -m 644 include/${dir}/*.h ${INCDIR}/${dir}/
+  done
 }
