@@ -995,13 +995,7 @@ DefaultConfigureStep() {
 
 
 ConfigureStep_Autotools() {
-  local CONFIG_SUB=${CONFIG_SUB:-config.sub}
-  local CONFIG_GUESS=${SRC_DIR}/${CONFIG_SUB%%.sub}.guess
-  if [ -f ${CONFIG_GUESS} ]; then
-    conf_build=$(/bin/sh ${CONFIG_GUESS})
-  else
-    conf_build=${OS_NAME}
-  fi
+  conf_build=$(/bin/sh ${SCRIPT_DIR}/config.guess)
 
   SetupCrossEnvironment
 
