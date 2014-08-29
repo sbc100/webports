@@ -33,6 +33,8 @@ _elementtree -I$(srcdir)/Modules/expat -DHAVE_EXPAT_CONFIG_H -DUSE_PYEXPAT_CAPI 
 datetime datetimemodule.c	# date/time type
 _bisect _bisectmodule.c	# Bisection algorithms
 
+unicodedata unicodedata.c
+
 # Standard I/O baseline
 _io -I$(srcdir)/Modules/_io _io/bufferedio.c _io/bytesio.c _io/fileio.c _io/iobase.c _io/_iomodule.c _io/stringio.c _io/textio.c
 
@@ -47,7 +49,7 @@ fcntl fcntlmodule.c	# fcntl(2) and ioctl(2)
 select selectmodule.c	# select(2); not on ancient System V
 
 # Memory-mapped files (also works on Win32).
-#mmap mmapmodule.c
+# mmap mmapmodule.c
 
 # CSV file helper
 _csv _csv.c
@@ -62,6 +64,7 @@ _socket socketmodule.c timemodule.c
 #termios termios.c	# Steen Lumholt's termios module
 #resource resource.c	# Jeremy Hylton's rlimit interface
 
+_ssl _ssl.c -DUSE_SSL -lssl -lcrypto
 
 # Note that the _md5 and _sha modules are normally only built if the
 # system does not have the OpenSSL libs containing an optimized version.
@@ -81,6 +84,8 @@ _sha512 sha512module.c
 
 # Helper module for various ascii-encoders
 binascii binascii.c
+
+future_builtins future_builtins.c
 
 # Fred Drake's interface to the Python parser
 parser parsermodule.c

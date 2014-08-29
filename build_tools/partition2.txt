@@ -6,6 +6,7 @@ builder 0 (total: 11545)
   glibc-compat
   ncurses
   readline
+  openssl
   python3
   libtar
   nacl-spawn

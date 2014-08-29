@@ -8,6 +8,7 @@ builder 0 (total: 5831)
   nacl-spawn
   ncurses
   readline
+  openssl
   python
   sqlite
   expat

@@ -9,6 +9,7 @@ builder 0 (total: 7675)
   coreutils
   ncurses
   readline
+  openssl
   python
   sqlite
   expat

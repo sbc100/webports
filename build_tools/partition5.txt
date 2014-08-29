@@ -142,6 +142,7 @@ builder 3 (total: 4945)
   python3
   libtar
   nacl-spawn
+  openssl
   python
   libogg
   libvorbis
