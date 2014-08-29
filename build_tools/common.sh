@@ -995,6 +995,14 @@ DefaultConfigureStep() {
 
 
 ConfigureStep_Autotools() {
+  local CONFIG_SUB=${CONFIG_SUB:-config.sub}
+  local CONFIG_GUESS=${SRC_DIR}/${CONFIG_SUB%%.sub}.guess
+  if [ -f ${CONFIG_GUESS} ]; then
+    conf_build=$(/bin/sh ${CONFIG_GUESS})
+  else
+    conf_build=${OS_NAME}
+  fi
+
   SetupCrossEnvironment
 
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
@@ -1015,14 +1023,6 @@ ConfigureStep_Autotools() {
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     local PNACL_CONF_SHIM="${TOOLS_DIR}/pnacl-configure-shim.py"
     CC="${PNACL_CONF_SHIM} ${CC}"
-  fi
-
-  local CONFIG_SUB=${CONFIG_SUB:-${SRC_DIR}/config.sub}
-  local CONFIG_GUESS=${CONFIG_SUB%%.sub}.guess
-  if [ -f ${CONFIG_GUESS} ]; then
-    conf_build=$(${CONFIG_GUESS})
-  else
-    conf_build=${OS_NAME}
   fi
 
   # Specify both --build and --host options.  This forces autoconf into cross

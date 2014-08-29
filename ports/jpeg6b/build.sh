@@ -12,6 +12,9 @@ EXECUTABLES="\
   wrjpgcom${NACL_EXEEXT}"
 
 BuildStep() {
+  for exe in ${EXECUTABLES}; do
+    rm -f ${exe} ${exe%%${NACL_EXEEXT}}
+  done
   DefaultBuildStep
   for exe in ${EXECUTABLES}; do
     mv ${exe%%${NACL_EXEEXT}} ${exe}
