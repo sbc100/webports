@@ -3,18 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
-DOSBOX_EXAMPLE_DIR=${NACL_SRC}/ports/dosbox-0.74
 EXECUTABLES=src/dosbox${NACL_EXEEXT}
 MAKE_TARGETS="AR=${NACLAR}"
 
 ConfigureStep() {
   SetupCrossEnvironment
-
-  export LIBS="-L${NACLPORTS_LIBDIR} \
-      -lm \
-      -lpng \
-      -lz"
 
   # --as-needed is needed during confgiure otherwise a lot of tests
   # will fail to link undefined 'SDLmain'
