@@ -13,7 +13,7 @@ BuildStep() {
   MakeDir ${BUILD_DIR}/tests
   LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
       ${START_DIR}/tests/devenv_test.cc \
-      -o ${BUILD_DIR}/tests/devenv_test${NACL_EXEEXT} \
+      -o ${BUILD_DIR}/tests/devenv_test_${NACL_ARCH}${NACL_EXEEXT} \
       ${EXTRA_LIBS} -lgtest
 }
 
@@ -72,13 +72,13 @@ InstallStep() {
   LogExecute cp -r ${BUILD_DIR}/tests/* ${PUBLISH_DIR}/tests
   cd ${PUBLISH_DIR}/tests
   if [ "${NACL_ARCH}" = "pnacl" ]; then
-    LogExecute ${PNACLFINALIZE} devenv_test${NACL_EXEEXT}
+    LogExecute ${PNACLFINALIZE} devenv_test_${NACL_ARCH}${NACL_EXEEXT}
   fi
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      devenv_test${NACL_EXEEXT} \
+      devenv_test_${NACL_ARCH}${NACL_EXEEXT} \
       -s . \
       -o devenv_test.nmf
-  LogExecute mv devenv_test${NACL_EXEEXT} devenv_test
+  LogExecute mv devenv_test_${NACL_ARCH}${NACL_EXEEXT} devenv_test_${NACL_ARCH}
 
   LogExecute zip -r devenv_test.zip *
 }

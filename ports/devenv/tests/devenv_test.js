@@ -26,8 +26,8 @@ TEST_F(DevEnvTest, 'testCTests', function() {
     return self.checkCommand('unzip devenv_test.zip', 0);
   }).then(function() {
     return self.checkCommand(
-        'LD_LIBRARY_PATH=${PWD}/lib32:${PWD}/lib64:$LD_LIBRARY_PATH ' +
-        './devenv_test', 0);
+        'LD_LIBRARY_PATH=${PWD}/${PACKAGE_LIB_DIR}:$LD_LIBRARY_PATH ' +
+        './devenv_test_${NACL_ARCH}', 0);
   });
 });
 
