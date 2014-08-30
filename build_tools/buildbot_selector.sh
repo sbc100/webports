@@ -207,7 +207,9 @@ PlumbingTests() {
 }
 
 Unittests
-PlumbingTests
+# Temporarily disabled since out pinned chrome URL disappeared
+# TODO(bradnelson): re-enable ASAP.
+#PlumbingTests
 
 # PEPPER_DIR is the root direcotry name within the bundle. e.g. pepper_28
 export PEPPER_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
