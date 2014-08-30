@@ -10,7 +10,7 @@ ConfigureStep() {
 
   local conf_host
   if [ "${NACL_ARCH}" = pnacl ]; then
-    conf_host=pnacl
+    conf_host=nacl
   else
     conf_host=${NACL_CROSS_PREFIX}
   fi
