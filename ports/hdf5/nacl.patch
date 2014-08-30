@@ -1,27 +1,3 @@
-diff --git a/bin/config.sub b/bin/config.sub
-index 6759825..1b4e4db 100755
---- a/bin/config.sub
-+++ b/bin/config.sub
-@@ -739,6 +739,10 @@ case $basic_machine in
- 		basic_machine=i370-ibm
- 		os=-mvs
- 		;;
-+	nacl)
-+		basic_machine=i686-pc
-+		os=-nacl
-+		;;
- 	ncr3000)
- 		basic_machine=i486-ncr
- 		os=-sysv4
-@@ -1258,7 +1262,7 @@ case $os in
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
- 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
- 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
--	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
-+	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -nacl* )
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)
 diff --git a/src/H5FDsec2.c b/src/H5FDsec2.c
 index 952389e..4e8f019 100644
 --- a/src/H5FDsec2.c

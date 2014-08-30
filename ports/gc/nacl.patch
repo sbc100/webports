@@ -1,26 +1,3 @@
-diff -Naur gc6.8/config.sub gc6.8.nacl/config.sub
---- gc6.8/config.sub	2002-05-24 16:18:38.000000000 -0700
-+++ gc6.8.nacl/config.sub	2011-01-07 14:52:37.000000000 -0800
-@@ -631,6 +631,10 @@
- 		basic_machine=i370-ibm
- 		os=-mvs
- 		;;
-+	nacl)
-+		basic_machine=i686-pc
-+		os=-nacl
-+		;;
- 	ncr3000)
- 		basic_machine=i486-ncr
- 		os=-sysv4
-@@ -1090,7 +1094,7 @@
- 	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
- 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
--	      | -morphos* | -superux* | -rtmk* | -rtmk-nova*)
-+	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -nacl*)
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)
 diff -Naur gc6.8/configure gc6.8.nacl/configure
 --- gc6.8/configure	2006-03-23 16:42:55.000000000 -0800
 +++ gc6.8.nacl/configure	2011-01-07 14:55:39.000000000 -0800

@@ -15,19 +15,6 @@ index 47730ca..399603a 100644
  EXTRA_DIST = \
         autogen.sh      \
         version.sh      \
-diff --git a/config/config.sub b/config/config.sub
-index 9633db7..49b62bc 100755
---- a/config/config.sub
-+++ b/config/config.sub
-@@ -1374,7 +1374,7 @@ case $os in
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
- 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
- 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
--	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es*)
-+	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* | -nacl* )
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)
 diff --git a/configure b/configure
 index e40479a..aeca0d4 100755
 --- a/configure

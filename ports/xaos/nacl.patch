@@ -1,26 +1,3 @@
-diff -r e1b373f3aaa2 config.sub
---- a/config.sub	Mon Jul 23 11:34:01 2012 -0400
-+++ b/config.sub	Mon Jul 23 15:52:29 2012 -0400
-@@ -715,6 +715,10 @@
- 		basic_machine=i370-ibm
- 		os=-mvs
- 		;;
-+	nacl*)
-+		basic_machine=i686-pc
-+		os=-nacl
-+		;;
- 	ncr3000)
- 		basic_machine=i486-ncr
- 		os=-sysv4
-@@ -1222,7 +1226,7 @@
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
- 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
- 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
--	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops*)
-+	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -nacl*)
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)
 diff -r e1b373f3aaa2 configure.in
 --- a/configure.in	Mon Jul 23 11:34:01 2012 -0400
 +++ b/configure.in	Mon Jul 23 15:52:29 2012 -0400

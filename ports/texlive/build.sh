@@ -26,7 +26,6 @@ EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
 
 NACLPORTS_LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--as-needed"
 BUILD_DIR=${SRC_DIR}
-CONFIG_SUB=build-aux/config.sub
 
 ConfigureStep() {
   # TODO(phosek): we should be able to run reautoconf at this point, but

@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-CONFIG_SUB=build-aux/config.sub
-
 ExtractStep() {
   DefaultExtractStep
   # Add chmod here since gtest archive contains readonly files we don't

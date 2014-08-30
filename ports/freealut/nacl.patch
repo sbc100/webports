@@ -27,26 +27,3 @@ diff -Naur freealut-1.1.0/src/alutWaveform.c freealut-1.1.0.nacl/src/alutWavefor
      case ALUT_WAVEFORM_IMPULSE:
        return &waveformImpulse;
      }
-diff -Naur freealut-1.1.0/admin/autotools/config.sub freealut-1.1.0.nacl/admin/autotools/config.sub
---- freealut-1.1.0/admin/autotools/config.sub	2006-05-22 05:10:39.000000000 -0700
-+++ freealut-1.1.0.nacl/admin/autotools/config.sub	2013-01-29 18:30:35.000040364 -0800
-@@ -687,6 +687,10 @@
- 		basic_machine=i370-ibm
- 		os=-mvs
- 		;;
-+	nacl*)
-+		basic_machine=le32-unknown
-+		os=-nacl
-+		;;
- 	ncr3000)
- 		basic_machine=i486-ncr
- 		os=-sysv4
-@@ -1178,7 +1182,7 @@
- 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
- 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
--	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly*)
-+	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* | -nacl*)
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)

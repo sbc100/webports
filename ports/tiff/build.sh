@@ -4,5 +4,3 @@
 # found in the LICENSE file.
 
 export LIBS="-lm"
-
-CONFIG_SUB=config/config.sub

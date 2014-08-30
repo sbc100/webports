@@ -10,7 +10,6 @@ NACLPORTS_CPPFLAGS+=" -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 export LIBS+="${NACL_CLI_MAIN_LIB} \
 -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
-CONFIG_SUB=support/config.sub
 
 export bash_cv_getcwd_malloc=yes
 

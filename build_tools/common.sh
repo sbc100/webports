@@ -936,15 +936,19 @@ PatchConfigSub() {
   # Replace the package's config.sub one with an up-do-date copy
   # that includes nacl support.  We only do this if the string
   # 'nacl)' is not already contained in the file.
-  local CONFIG_SUB=${CONFIG_SUB:-config.sub}
-  if [ -f $CONFIG_SUB ]; then
-    if grep -q 'nacl)' $CONFIG_SUB /dev/null; then
+  CONFIG_SUB=${CONFIG_SUB:-config.sub}
+  if [ ! -f $CONFIG_SUB ]; then
+    CONFIG_SUB=$(find "${SRC_DIR}" -name config.sub -print)
+  fi
+
+  for sub in $CONFIG_SUB; do
+    if grep -q 'nacl)' $sub /dev/null; then
       echo "$CONFIG_SUB supports NaCl"
     else
-      echo "Patching config.sub"
-      /bin/cp -f ${TOOLS_DIR}/config.sub $CONFIG_SUB
+      echo "Patching $sub"
+      /bin/cp -f ${TOOLS_DIR}/config.sub $sub
     fi
-  fi
+  done
 }
 
 
@@ -1519,7 +1523,7 @@ RunTestStep()       {
 
 
 RunPostInstallTestStep()       {
-  RunStep PostInstallTestStep "Testing"
+  RunStep PostInstallTestStep "Testing (post-install)"
 }
 
 

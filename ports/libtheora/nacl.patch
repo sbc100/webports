@@ -1,27 +1,3 @@
-diff --git a/config.sub b/config.sub
-index 9ff085e..c6ab0d5 100755
---- a/config.sub
-+++ b/config.sub
-@@ -648,6 +648,10 @@ case $basic_machine in
- 		basic_machine=i370-ibm
- 		os=-mvs
- 		;;
-+	nacl)
-+		basic_machine=i686-pc
-+		os=-nacl
-+		;;
- 	ncr3000)
- 		basic_machine=i486-ncr
- 		os=-sysv4
-@@ -1107,7 +1111,7 @@ case $os in
- 	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
- 	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
- 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
--	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* | -powermax*)
-+	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* | -powermax* | -nacl*)
- 	# Remember, each alternative MUST END IN *, to match a version number.
- 		;;
- 	-qnx*)
 diff --git a/configure b/configure
 index 9703bcb..5c88440 100755
 --- a/configure

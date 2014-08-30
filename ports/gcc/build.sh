@@ -5,7 +5,7 @@
 
 export EXTRA_LIBS=\
 "-lppapi -lppapi_cpp -lppapi_simple -lcli_main -lnacl_io -lnacl_spawn"
-CONFIG_SUB=support/config.sub
+
 # --with-build-sysroot is necessary to run "fixincl"
 # properly. Without this option, GCC's build system tries to create
 # "include-fixed" based on the host's include directory, which is

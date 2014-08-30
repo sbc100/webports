@@ -5,7 +5,6 @@
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
   -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
-CONFIG_SUB=support/config.sub
 EXTRA_CONFIGURE_ARGS="\
   --enable-targets=x86_64-nacl,arm-nacl,avr \
   --disable-werror \

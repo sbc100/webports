@@ -5,7 +5,6 @@
 
 
 # readline has config.sub in a 'support' subfolder
-CONFIG_SUB=support/config.sub
 MAKEFLAGS+=" EXEEXT=.${NACL_EXEEXT}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then

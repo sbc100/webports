@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-CONFIG_SUB=build-scripts/config.sub
-
 AutogenStep() {
   ChangeDir ${SRC_DIR}
   # For some reason if we don't remove configure before running
@@ -17,7 +15,6 @@ AutogenStep() {
   PatchConfigSub
   cd -
 }
-
 
 ConfigureStep() {
   AutogenStep

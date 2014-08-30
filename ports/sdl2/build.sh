@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-CONFIG_SUB=build-scripts/config.sub
 NACLPORTS_CFLAGS+=" -std=gnu99"
 
 AutogenStep() {
@@ -18,7 +17,6 @@ AutogenStep() {
   PatchConfigSub
   cd -
 }
-
 
 ConfigureStep() {
   AutogenStep
