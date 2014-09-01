@@ -853,7 +853,13 @@ SetupCrossEnvironment() {
 
 
 GetRevision() {
-  local REV_RAW=$(cd ${START_DIR} && git number 2>/dev/null || svnversion)
+  cd ${NACL_SRC}
+  if [ -d .git ]; then
+    REV_RAW=$(git number)
+  else
+    REV_RAW=$(svnversion)
+  fi
+  cd - > /dev/null
   # The svn revision can have a trailing M when there are modifications, such
   # as during a try run. Remove it so we get a valid extension version.
   REVISION=${REV_RAW/M/}
