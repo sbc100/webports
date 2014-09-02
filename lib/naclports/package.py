@@ -17,7 +17,7 @@ from naclports import OUT_DIR, NACLPORTS_ROOT
 from naclports.configuration import Configuration
 
 PACKAGES_ROOT = os.path.join(OUT_DIR, 'packages')
-ARCHIVE_ROOT = os.path.join(OUT_DIR, 'tarballs')
+CACHE_ROOT = os.path.join(OUT_DIR, 'cache')
 TOOLS_DIR = os.path.join(NACLPORTS_ROOT, 'build_tools')
 MIRROR_URL = '%s%s/mirror' % (naclports.GS_URL, naclports.GS_BUCKET)
 
@@ -116,7 +116,7 @@ class Package(object):
     return basename
 
   def GetBuildLocation(self):
-    package_dir = self.ARCHIVE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
+    package_dir = self.CACHE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
     return os.path.join(BUILD_ROOT, self.NAME, package_dir)
 
   def GetArchiveFilename(self):
@@ -132,7 +132,7 @@ class Package(object):
     archive = self.GetArchiveFilename()
     if not archive:
       return
-    return os.path.join(ARCHIVE_ROOT, archive)
+    return os.path.join(CACHE_ROOT, archive)
 
   def InstallDeps(self, force, from_source=False):
     for dep in self.DEPENDS:

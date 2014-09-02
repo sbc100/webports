@@ -29,9 +29,9 @@ ImageExtractStep() {
   ChangeDir ${WORK_DIR}
   Remove $2
   if [ $OS_SUBDIR = "windows" ]; then
-    tar --no-same-owner -zxf ${NACL_PACKAGES_TARBALLS}/$1
+    tar --no-same-owner -zxf ${NACL_PACKAGES_CACHE}/$1
   else
-    tar zxf ${NACL_PACKAGES_TARBALLS}/$1
+    tar zxf ${NACL_PACKAGES_CACHE}/$1
   fi
 }
 
@@ -83,7 +83,7 @@ CustomCheck() {
 }
 
 ImageDownloadStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
+  cd ${NACL_PACKAGES_CACHE}
   # if matching tarball already exists, don't download again
   if ! CustomCheck $3; then
     Fetch $1 $2.tar.gz

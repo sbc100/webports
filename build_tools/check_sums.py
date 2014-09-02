@@ -25,7 +25,7 @@ def main(args):
 
   for package in naclports.package.PackageIterator():
     package.Download()
-    if not package.Verify(True):
+    if not package.Verify():
       return 1
 
     count += 1

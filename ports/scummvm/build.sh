@@ -122,7 +122,7 @@ CustomCheck() {
 }
 
 DownloadZipStep() {
-  cd ${NACL_PACKAGES_TARBALLS}
+  cd ${NACL_PACKAGES_CACHE}
   # if matching zip already exists, don't download again
   if ! CustomCheck $3; then
     Fetch $1 $2.zip
@@ -137,7 +137,7 @@ ExtractGameZipStep() {
   Banner "Unzipping ${PACKAGE_NAME}.zip"
   ChangeDir ${WORK_DIR}
   Remove ${1}
-  unzip -d ${1} ${NACL_PACKAGES_TARBALLS}/${PACKAGE_NAME}.zip
+  unzip -d ${1} ${NACL_PACKAGES_CACHE}/${PACKAGE_NAME}.zip
 }
 
 GameGetStep() {

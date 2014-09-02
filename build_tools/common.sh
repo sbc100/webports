@@ -113,7 +113,7 @@ readonly NACL_PACKAGES_OUT=${NACL_SRC}/out
 readonly NACL_PACKAGES_ROOT=${NACL_PACKAGES_OUT}/packages
 readonly NACL_PACKAGES_BUILD=${NACL_PACKAGES_OUT}/build
 readonly NACL_PACKAGES_PUBLISH=${NACL_PACKAGES_OUT}/publish
-readonly NACL_PACKAGES_TARBALLS=${NACL_PACKAGES_OUT}/tarballs
+readonly NACL_PACKAGES_CACHE=${NACL_PACKAGES_OUT}/cache
 readonly NACL_PACKAGES_STAMPDIR=${NACL_PACKAGES_OUT}/stamp
 readonly NACL_HOST_PYROOT=${NACL_PACKAGES_BUILD}/host_python_root
 readonly NACL_HOST_PYTHON=${NACL_HOST_PYROOT}/bin/python2.7
@@ -498,7 +498,7 @@ DefaultDownloadStep() {
     return
   fi
 
-  cd ${NACL_PACKAGES_TARBALLS}
+  cd ${NACL_PACKAGES_CACHE}
   # if matching tarball already exists, don't download again
   if ! Check ; then
     Fetch ${URL} ${ARCHIVE_NAME}
@@ -525,9 +525,32 @@ GitCloneStep() {
   local GIT_URL=${URL%@*}
   local COMMIT=${URL#*@}
 
-  LogExecute git clone ${GIT_URL} ${SRC_DIR}
+  # Clone upstream git repo into local mirror, or update the existing
+  # mirror.
+  local GIT_MIRROR=${GIT_URL##*://}
+  GIT_MIRROR=${GIT_MIRROR//\//_}
+  cd "${NACL_PACKAGES_CACHE}"
+  if [ -e "${GIT_MIRROR}" ]; then
+    cd ${GIT_MIRROR}
+    if git rev-parse ${COMMIT} > /dev/null 2>&1; then
+      echo "git mirror up-to-date: ${GIT_MIRROR}"
+    else
+      echo "Updating git mirror: ${GIT_MIRROR}"
+      LogExecute git remote update --prune
+    fi
+    cd "${NACL_PACKAGES_CACHE}"
+  else
+    LogExecute git clone --mirror ${GIT_URL} ${GIT_MIRROR}
+  fi
+
+  # Clone from the local mirror.
+  LogExecute git clone ${GIT_MIRROR} ${SRC_DIR}
   ChangeDir ${SRC_DIR}
   LogExecute git reset --hard ${COMMIT}
+
+  # Set the origing to the original URL so it is possible to push directly
+  # from the build tree.
+  git remote set-url origin ${GIT_URL}
 
   TouchKeyStamp clone "$URL"
 
@@ -597,7 +620,13 @@ MakeDir() {
 DefaultPreInstallStep() {
   MakeDir ${NACL_PACKAGES_ROOT}
   MakeDir ${NACL_PACKAGES_BUILD}
-  MakeDir ${NACL_PACKAGES_TARBALLS}
+  # If 'tarballs' directory exists then rename it to the new name: 'cache'.
+  # TODO(sbc): remove this once the new name as been in existence for
+  # a few months.
+  if [ ! -d ${NACL_PACKAGES_CACHE} -a -d ${NACL_PACKAGES_OUT}/tarballs ]; then
+    mv ${NACL_PACKAGES_OUT}/tarballs ${NACL_PACKAGES_CACHE}
+  fi
+  MakeDir ${NACL_PACKAGES_CACHE}
   MakeDir ${NACL_PACKAGES_PUBLISH}
   MakeDir ${WORK_DIR}
 }
@@ -899,7 +928,7 @@ DefaultExtractStep() {
     return
   fi
 
-  local ARCHIVE="${NACL_PACKAGES_TARBALLS}/${ARCHIVE_NAME}"
+  local ARCHIVE="${NACL_PACKAGES_CACHE}/${ARCHIVE_NAME}"
   if [ -d ${SRC_DIR} ]; then
     local PATCH="${START_DIR}/${PATCH_FILE:-nacl.patch}"
 
