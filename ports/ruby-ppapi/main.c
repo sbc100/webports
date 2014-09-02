@@ -7,6 +7,8 @@
 #include <spawn.h>
 #include <stdio.h>
 
+#include "nacl_main.h"
+
 #ifdef __x86_64__
 #define NACL_ARCH "x86_64"
 #elif defined __i686__
