@@ -431,14 +431,15 @@ index c2907f6..faa3ad6 100644
  "getpwuid(uid) -> (pw_name,pw_passwd,pw_uid,\n\
                    pw_gid,pw_gecos,pw_dir,pw_shell)\n\
 diff --git a/Modules/python.c b/Modules/python.c
-index 2739b8b..80dd21e 100644
+index 2739b8b..e7a907e 100644
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -6,6 +6,29 @@
+@@ -6,6 +6,30 @@
  #include <floatingpoint.h>
  #endif
  
 +#ifdef __native_client__
++#define main nacl_main
 +#include <stdio.h>
 +#include <sys/utsname.h>
 +
@@ -464,7 +465,7 @@ index 2739b8b..80dd21e 100644
  int
  main(int argc, char **argv)
  {
-@@ -20,5 +43,9 @@ main(int argc, char **argv)
+@@ -20,5 +44,9 @@ main(int argc, char **argv)
  	m = fpgetmask();
  	fpsetmask(m & ~FP_X_OFL);
  #endif
