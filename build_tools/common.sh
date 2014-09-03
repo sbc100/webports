@@ -884,7 +884,10 @@ SetupCrossEnvironment() {
 GetRevision() {
   cd ${NACL_SRC}
   if [ -d .git ]; then
-    REV_RAW=$(git number)
+    # TODO(sbc): find a replacement for git number.  It seems that its not
+    # designed for normal use like this.  'git describe' would work but
+    # requires a tag in the git repo which we currently don't have.
+    REV_RAW=$(CHROME_HEADLESS=1 git number)
   else
     REV_RAW=$(svnversion)
   fi
