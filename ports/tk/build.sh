@@ -24,5 +24,9 @@ export tcl_cv_strtod_buggy=ok
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   LIBS+=" -lglibc-compat"
-  EXTRA_CONFIGURE_ARGS+=" --disable-shared"
 fi
+
+# Ideally we would only add this flag for newlib builds but
+# linking of the shared library currently fails because it
+# tries to link libppapi_stub.a which is not built with -fPIC.
+EXTRA_CONFIGURE_ARGS+=" --disable-shared"
