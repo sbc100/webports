@@ -1,4 +1,6 @@
 NAME=python-ppapi
 VERSION=0.1
 LICENSE=BSD
+# openssl is not buildable on mac
+BUILD_OS=linux
 DEPENDS=(python libtar nacl-spawn)
