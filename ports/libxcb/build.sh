@@ -5,3 +5,5 @@
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi
+
+NACLPORTS_LDFLAGS+=" -lnacl_io"

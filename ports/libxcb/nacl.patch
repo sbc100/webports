@@ -14,10 +14,42 @@ index 93e1a00..bbc78dd 100755
  pkg_failed=no
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for NEEDED" >&5
 diff --git a/src/xcb_conn.c b/src/xcb_conn.c
-index 725502a..5e4b08b 100644
+index 725502a..61b470f 100644
 --- a/src/xcb_conn.c
 +++ b/src/xcb_conn.c
-@@ -179,7 +179,8 @@ static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
+@@ -63,11 +63,31 @@ static const int xcb_con_error = XCB_CONN_ERROR;
+ static const int xcb_con_closed_mem_er = XCB_CONN_CLOSED_MEM_INSUFFICIENT;
+ static const int xcb_con_closed_parse_er = XCB_CONN_CLOSED_PARSE_ERR;
+ 
++#if defined(__native_client__)
++#include "nacl_io/kernel_intercept.h"
++#include "nacl_io/kernel_wrap.h"
++#include <stdarg.h>
++
++/*
++ * Explicitly use nacl_fnctl.
++ * When built as a shared library, without this xcb seems to hit stubs.
++ */
++static int nacl_fcntl(int fd, int cmd, ...) {
++  va_list ap;
++  va_start(ap, cmd);
++  int rtn = ki_fcntl(fd, cmd, ap);
++  va_end(ap);
++  return rtn;
++}
++#define fcntl nacl_fcntl
++#endif
++
++
+ static int set_fd_flags(const int fd)
+ {
+ /* Win32 doesn't have file descriptors and the fcntl function. This block sets the socket in non-blocking mode */
+ 
+ #ifdef _WIN32
+    u_long iMode = 1; /* non-zero puts it in non-blocking mode, 0 in blocking mode */   
+    int ret = 0;
+ 
+@@ -179,7 +195,8 @@ static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
      int n;
      assert(!c->out.queue_len);
  
@@ -27,7 +59,7 @@ index 725502a..5e4b08b 100644
      int i = 0;
      int ret = 0,err = 0;
      struct iovec *vec;
-@@ -191,10 +192,17 @@ static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
+@@ -191,10 +208,17 @@ static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
      while(i < *count)
      {         	 
           ret = send(c->fd,vec->iov_base,vec->iov_len,0);	 
