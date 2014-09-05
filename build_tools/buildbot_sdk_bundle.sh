@@ -23,7 +23,7 @@ cd ${NACLPORTS_ROOT}
 # Don't do a full clean of naclports when we're testing the buildbot scripts
 # locally.
 if [ -z "${TEST_BUILDBOT:-}" ]; then
-  CleanAll
+  CleanAllToolchains
 fi
 
 # Don't build lua with readline support. We don't want to include
