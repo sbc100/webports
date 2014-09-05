@@ -28,7 +28,7 @@ import httpd
 
 # Pinned chrome revision. Update this to pull in a new chrome.
 # Try to select a version that exists on all platforms.
-CHROME_REVISION = 'c68b2049916f610361b06419974c60391e5e7b07'
+CHROME_REVISION = '293496'
 
 OUT_DIR = os.path.join(SRC_DIR, 'out')
 CHROME_SYNC_DIR = os.path.join(OUT_DIR, 'downloaded_chrome')
@@ -555,11 +555,6 @@ def Main(argv):
       datefmt='%Y-%m-%d %H:%M:%S')
   if not options.chdir:
     options.chdir.append('.')
-
-  # Temporarily disabled since out pinned chrome URL disappeared
-  # TODO(bradnelson): re-enable ASAP.
-  logging.error('Chrome tests temporarily disabled')
-  sys.exit(0)
 
   DownloadChrome(ChromeUrl(options.arch), ChromeDir(options.arch))
   RunChrome(
