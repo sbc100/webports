@@ -1121,6 +1121,7 @@ DefaultPythonModuleBuildStep() {
   Banner "Build ${PACKAGE_NAME} python module"
   ChangeDir ${SRC_DIR}
   LogExecute rm -rf build dist
+  MakeDir "${NACL_DEST_PYROOT}/${SITE_PACKAGES}"
   export PYTHONPATH="${NACL_HOST_PYROOT}/${SITE_PACKAGES}"
   export PYTHONPATH="${PYTHONPATH}:${NACL_DEST_PYROOT}/${SITE_PACKAGES}"
   export NACL_PORT_BUILD=${1:-dest}
