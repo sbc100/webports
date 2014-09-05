@@ -9,6 +9,14 @@ export NACL_SEL_LDR
 export RUNPROGRAM_ARGS="-a -B ${NACL_IRT} -- ${NACL_SDK_LIB}/runnable-ld.so \
   --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
 
+EXTRA_CONFIGURE_ARGS+=" --with-x"
+EXTRA_CONFIGURE_ARGS+=" --with-x-toolkit=athena"
+EXTRA_CONFIGURE_ARGS+=" --with-xpm=no"
+EXTRA_CONFIGURE_ARGS+=" --with-jpeg=yes"
+EXTRA_CONFIGURE_ARGS+=" --with-png=yes"
+EXTRA_CONFIGURE_ARGS+=" --with-gif=yes"
+EXTRA_CONFIGURE_ARGS+=" --with-tiff=yes"
+
 ConfigureStep() {
   export CFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include"
   DefaultConfigureStep

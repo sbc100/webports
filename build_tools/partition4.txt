@@ -144,6 +144,24 @@ builder 1 (total: 10557)
   httplib2
   google-api-python-client
   openal-ogg-demo
+  kbproto
+  xtrans
+  xextproto
+  xproto
+  xcb-proto
+  libxau
+  libxcb
+  inputproto
+  libx11
+  libice
+  libsm
+  libxt
+  libxext
+  libxmu
+  tiff
+  giflib
+  libxpm
+  libxaw
   emacs
   pyparsing
   distribute

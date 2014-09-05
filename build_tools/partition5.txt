@@ -278,6 +278,10 @@ builder 3 (total: 7918)
   xcmiscproto
   glproto
   tinyxml
+  giflib
+  tiff
+  libxpm
+  libxaw
   emacs
   dreadthread
   jsoncpp

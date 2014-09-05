@@ -208,6 +208,9 @@ builder 1 (total: 12319)
   glproto
   compositeproto
   physfs
+  jpeg8d
+  giflib
+  tiff
   emacs
   glib
   pango

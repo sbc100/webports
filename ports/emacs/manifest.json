@@ -3,6 +3,7 @@
   "description": "Emacs console application running using NativeClient",
   "version": "24.3.0.0",
   "manifest_version": 2,
+  "minimum_chrome_version": "28",
   "icons": {
     "16": "icon_16.png",
     "48": "icon_48.png",
@@ -35,6 +36,15 @@
   "permissions": [
     "fileSystem",
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    {
+      "socket": [
+        "tcp-listen:*:*",
+        "tcp-connect",
+        "resolve-host",
+        "udp-bind:*:*",
+        "udp-send-to:*:*"
+      ]
+    }
   ]
 }
