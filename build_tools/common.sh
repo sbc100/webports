@@ -276,19 +276,8 @@ InstallConfigSite() {
 # with -I are not found.  Here we push the additional newlib headers
 # into the toolchain itself from $NACL_SDK_ROOT/include/<toolchain>.
 InjectSystemHeaders() {
-  if [ "${TOOLCHAIN}" = "glibc" ]; then
-    local TC_INCLUDES=${NACL_SDK_ROOT}/include/glibc
-  elif [ "${TOOLCHAIN}" = "pnacl" ]; then
-    local TC_INCLUDES=${NACL_SDK_ROOT}/include/pnacl
-  elif [ "${TOOLCHAIN}" = "bionic" ]; then
-    local TC_INCLUDES=${NACL_SDK_ROOT}/include/pnacl
-  elif [ "${NACL_ARCH}" = "emscripten" ]; then
-    return
-  else
-    local TC_INCLUDES=${NACL_SDK_ROOT}/include/newlib
-  fi
-
-  if [ ! -d ${TC_INCLUDES} ]; then
+  local TC_INCLUDES=${NACL_SDK_ROOT}/include/${TOOLCHAIN}
+  if [ ! -d "${TC_INCLUDES}" ]; then
     return
   fi
 
@@ -887,6 +876,14 @@ GetRevision() {
     # TODO(sbc): find a replacement for git number.  It seems that its not
     # designed for normal use like this.  'git describe' would work but
     # requires a tag in the git repo which we currently don't have.
+    if ! git config user.name > /dev/null; then
+      echo "setting user.name"
+      git config user.name local_bot
+    fi
+    if ! git config user.email > /dev/null; then
+      echo "setting user.email"
+      git config user.email local_bot@example.com
+    fi
     REV_RAW=$(CHROME_HEADLESS=1 git number)
   else
     REV_RAW=$(svnversion)

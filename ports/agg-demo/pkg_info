@@ -2,3 +2,6 @@ NAME=agg-demo
 VERSION=0.1
 LICENSE=BSD
 DEPENDS=(agg)
+# bionic build fails with undefined symbol:
+# https://code.google.com/p/nativeclient/issues/detail?id=3938
+DISABLED_LIBC=(bionic)

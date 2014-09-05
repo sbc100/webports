@@ -1121,7 +1121,7 @@ index c5f6da2..48fdf80 100644
  #endif
  #endif
  
-+#if defined(__native_client__) && !defined(__GLIBC__)
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +// Definition of timercmp taken from GLibC.
 +#define timercmp(a, b, CMP) 		      \
 +  (((a)->tv_sec == (b)->tv_sec) ?	      \

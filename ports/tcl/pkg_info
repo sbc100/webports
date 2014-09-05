@@ -4,4 +4,7 @@ VERSION=8.6.1
 URL=http://prdownloads.sourceforge.net/tcl/tcl8.6.1-src.tar.gz
 LICENSE=BSD
 DEPENDS=(glibc-compat nacl-spawn)
+# bionic build fails with undefined symbol:
+# https://code.google.com/p/nativeclient/issues/detail?id=3938
+DISABLED_LIBC=(bionic)
 SHA1=5c83d44152cc0496cc0847a2495f659502a30e40

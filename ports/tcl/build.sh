@@ -4,7 +4,7 @@
 
 NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+NACLPORTS_CPPFLAGS="-Dmain=nacl_main"
 
 export LIBS+="\
   -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
@@ -35,4 +35,8 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   EXTRA_CONFIGURE_ARGS+=" --enable-load=no"
   export tcl_cv_strtoul_unbroken=ok
   LIBS+=" -lglibc-compat"
+fi
+
+if [ "${NACL_LIBC}" = "bionic" ]; then
+  NACLPORTS_CPPFLAGS+=" -DHAVE_STRLCPY=1"
 fi

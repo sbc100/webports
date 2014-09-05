@@ -47,7 +47,7 @@ index dfda1c6..e805d9e 100644
  	(void) strncpy(dest, ptr, len-1);
  	dest[len-1] = '\0';
      } else {
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++#if defined(__native_client__) && !defined(__GLIBC__)
 +        pw = NULL;
 +#else
  	if ((ptr = getenv("USER")))

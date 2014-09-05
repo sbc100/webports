@@ -4,3 +4,4 @@ LICENSE=BSD
 # openssl is not buildable on mac
 BUILD_OS=linux
 DEPENDS=(python libtar nacl-spawn)
+DISABLED_LIBC=(bionic)

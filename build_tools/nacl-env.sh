@@ -54,8 +54,16 @@ if [ $OS_NAME = "Cygwin" ]; then
   fi
 fi
 
+if [ $TOOLCHAIN = "bionic" ]; then
+  DEFAULT_ARCH=arm
+elif [ $TOOLCHAIN = "pnacl" ]; then
+  DEFAULT_ARCH=pnacl
+else
+  DEFAULT_ARCH=x86_64
+fi
+
 # Default value for NACL_ARCH
-NACL_ARCH=${NACL_ARCH:-x86_64}
+NACL_ARCH=${NACL_ARCH:-${DEFAULT_ARCH}}
 
 # Default Value for TOOLCHAIN, taking into account legacy
 # NACL_GLIBC varible.
@@ -91,6 +99,12 @@ if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
   exit -1
 fi
 
+if [ "${TOOLCHAIN}" = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    echo "PNaCl does not support the selected architecture: $NACL_ARCH" 1>&2
+  fi
+fi
+
 if [ "${TOOLCHAIN}" = "glibc" ]; then
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     echo "PNaCl is not supported by the glibc toolchain" 1>&2
@@ -107,9 +121,6 @@ elif [ "${TOOLCHAIN}" = "bionic" ]; then
     exit -1
   fi
   NACL_LIBC=bionic
-elif [ "${TOOLCHAIN}" = "pnacl" ]; then
-  NACL_ARCH=pnacl
-  NACL_LIBC=newlib
 else
   NACL_LIBC=newlib
 fi

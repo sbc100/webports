@@ -10,7 +10,13 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#ifdef __BIONIC__
+// TODO(sbc): remove this once bionic toolchain gets a copy of
+// spawn.h.
+#include <bsd_spawn.h>
+#else
 #include_next <spawn.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

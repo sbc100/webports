@@ -5,4 +5,5 @@ LICENSE=GPL
 DEPENDS=(glibc-compat xbitmaps libx11 libxcb libxmu libxext libxau libxt libice libsm nacl-spawn libiconv)
 # No mac support, due to libx11.
 BUILD_OS=linux
+DISABLED_LIBC=(bionic)
 SHA1=66455b8400d6659b5681c290a5ced3697d199955

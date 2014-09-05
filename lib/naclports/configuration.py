@@ -40,6 +40,8 @@ class Configuration(object):
     if not arch:
       if self.toolchain == 'pnacl':
         arch = 'pnacl'
+      elif self.toolchain == 'bionic':
+        arch = 'arm'
       else:
         arch = self.default_arch
     self.arch = arch

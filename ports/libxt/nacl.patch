@@ -6,7 +6,7 @@ index 9783deb..622af81 100644
  	(void) strncpy (dest, ptr, len-1);
  	dest[len-1] = '\0';
      } else {
-+# if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++# if !defined(__native_client__) || defined(__GLIBC__)
  	if ((pw = _XGetpwuid(getuid(),pwparams)) != NULL) {
  	    (void) strncpy (dest, pw->pw_name, len-1);
  	    dest[len-1] = '\0';
@@ -19,7 +19,7 @@ index 9783deb..622af81 100644
  	(void) strncpy (dest, ptr, len-1);
  	dest[len-1] = '\0';
      } else {
-+# if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++# if !defined(__native_client__) || defined(__GLIBC__)
  	if ((ptr = getenv("USER")))
  	    pw = _XGetpwnam(ptr,pwparams);
  	else

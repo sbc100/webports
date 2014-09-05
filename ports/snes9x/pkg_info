@@ -3,4 +3,7 @@ VERSION=1.53
 URL=https://sites.google.com/site/bearoso/snes9x/snes9x-1.53-src.tar.bz2
 ARCHIVE_ROOT=snes9x-1.53-src
 LICENSE=CUSTOM
+# bionic build fails with undefined symbol:
+# https://code.google.com/p/nativeclient/issues/detail?id=3938
+DISABLED_LIBC=(bionic)
 SHA1=57be6480369f66b9aaaeb722789ce114f58ed1e2

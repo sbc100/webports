@@ -4,5 +4,7 @@ URL=https://pypi.python.org/packages/source/t/thingking/thingking-1.0.2.tar.gz
 LICENSE=BSD
 # yt not buildable on mac yet
 BUILD_OS=linux
+# no yt for bionic
+DISABLED_LIBC=(bionic)
 DEPENDS=(python-host requests yt)
 SHA1=137a38bcf50354788b04d1497166622206aee125
