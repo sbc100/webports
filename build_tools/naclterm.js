@@ -222,13 +222,14 @@ NaClTerm.prototype.handleExit_ = function(pid, status) {
 NaClTerm.prototype.spawnRootProcess_ = function() {
   var self = this;
   var argv = NaClTerm.argv || [];
+  var env = NaClTerm.env || [];
   argv = [NaClTerm.nmf].concat(argv);
 
   try {
     self.print('Loading NaCl module.\n');
     var handleSuccess = function(naclType) {
       var rootPid = self.processManager.spawn(
-        NaClTerm.nmf, argv, [], '/', naclType);
+        NaClTerm.nmf, argv, env, '/', naclType);
       self.processManager.waitpid(rootPid, 0, self.handleExit_.bind(self));
     };
     var handleFailure = function(message) {
