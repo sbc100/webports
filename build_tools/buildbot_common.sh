@@ -53,7 +53,7 @@ BuildPackage() {
 }
 
 ARCH_LIST="i686 x86_64 arm pnacl"
-TOOLCHAIN_LIST="pnacl newlib glibc"
+TOOLCHAIN_LIST="pnacl newlib glibc bionic"
 
 InstallPackageMultiArch() {
   echo "@@@BUILD_STEP ${TOOLCHAIN} $1@@@"
@@ -89,32 +89,42 @@ InstallPackageMultiArch() {
   BuildSuccess $1
 }
 
-CleanAll() {
-  echo "@@@BUILD_STEP clean all@@@"
+CleanToolchain() {
   # Don't use TOOLCHAIN and NACL_ARCH here as we don't want to
   # clobber the globals.
+  TC=$1
+  for ARCH in ${ARCH_LIST}; do
+    # TODO(bradnelson): reduce the duplication here.
+    # pnacl only works on pnacl and nowhere else.
+    if [ "${TC}" = "pnacl" -a "${ARCH}" != "pnacl" ]; then
+      continue
+    fi
+    if [ "${TC}" != "pnacl" -a "${ARCH}" = "pnacl" ]; then
+      continue
+    fi
+    # glibc doesn't work on arm for now.
+    if [ "${TC}" = "glibc" -a "${ARCH}" = "arm" ]; then
+      continue
+    fi
+    # bionic only works on arm for now.
+    if [ "${TC}" = "bionic" -a "${ARCH}" != "arm" ]; then
+      continue
+    fi
+    if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
+        bin/naclports clean --all; then
+      TOOLCHAIN=${TC} NACL_ARCH=${ARCH} BuildFailure clean
+    fi
+  done
+}
+
+CleanCurrentToolchain() {
+  echo "@@@BUILD_STEP clean@@@"
+  CleanToolchain ${TOOLCHAIN}
+}
+
+CleanAllToolchains() {
+  echo "@@@BUILD_STEP clean all@@@"
   for TC in ${TOOLCHAIN_LIST}; do
-    for ARCH in ${ARCH_LIST}; do
-      # TODO(bradnelson): reduce the duplication here.
-      # pnacl only works on pnacl and nowhere else.
-      if [ "${TC}" = "pnacl" -a "${ARCH}" != "pnacl" ]; then
-        continue
-      fi
-      if [ "${TC}" != "pnacl" -a "${ARCH}" = "pnacl" ]; then
-        continue
-      fi
-      # glibc doesn't work on arm for now.
-      if [ "${TC}" = "glibc" -a "${ARCH}" = "arm" ]; then
-        continue
-      fi
-      # bionic only works on arm for now.
-      if [ "${TC}" = "bionic" -a "${ARCH}" != "arm" ]; then
-        continue
-      fi
-      if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
-          bin/naclports clean --all; then
-        TOOLCHAIN=${TC} NACL_ARCH=${ARCH} BuildFailure clean
-      fi
-    done
+    CleanToolchain ${TC}
   done
 }

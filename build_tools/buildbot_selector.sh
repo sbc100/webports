@@ -223,7 +223,7 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   exit 0
 fi
 
-CleanAll
+CleanCurrentToolchain
 BuildShard
 
 # Publish resulting builds to Google Storage, but only on the
