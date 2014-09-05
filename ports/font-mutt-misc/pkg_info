@@ -4,3 +4,5 @@ URL=http://www.x.org/releases/X11R7.7/src/everything/font-mutt-misc-1.0.3.tar.bz
 LICENSE=GPL
 DEPENDS=(font-util)
 SHA1=245d3041d9138b7e4a00858228adad2de304043b
+# Disabled on OSX due to lack of mkfontdir.
+BUILD_OS=linux

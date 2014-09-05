@@ -4,3 +4,5 @@ URL=http://www.x.org/releases/X11R7.7/src/everything/font-sony-misc-1.0.3.tar.bz
 LICENSE=GPL
 DEPENDS=(font-util)
 SHA1=8d0dd87148283c8ac8c5ac37906b12fab5ddb1d8
+# Disabled on OSX due to lack of mkfontdir.
+BUILD_OS=linux

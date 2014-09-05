@@ -4,3 +4,5 @@ URL=http://www.x.org/releases/X11R7.7/src/everything/font-bh-100dpi-1.0.3.tar.bz
 LICENSE=GPL
 DEPENDS=(font-util)
 SHA1=47d5e50be9e78695017650a088da52bfcf1eeb40
+# Disabled on OSX due to lack of mkfontdir.
+BUILD_OS=linux
