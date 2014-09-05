@@ -811,7 +811,7 @@ SetupSDKBuildSystem() {
   export NACL_SRC
   export NACLPORTS_INCLUDE
   export NACLPORTS_REVISION=${REVISION}
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR="${NACLPORTS_LIBDIR}/pkgconfig"
   export ENABLE_BIONIC=1
   # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.
   # While PKG_CONFIG_LIBDIR overrides <libdir>, <datadir> (/usr/share/) can only
@@ -846,7 +846,7 @@ SetupCrossEnvironment() {
   export RANLIB=${NACLRANLIB}
   export READELF=${NACLREADELF}
   export STRIP=${NACLSTRIP}
-  export PKG_CONFIG_LIBDIR=${NACLPORTS_LIBDIR}/pkgconfig
+  export PKG_CONFIG_LIBDIR="${NACLPORTS_LIBDIR}/pkgconfig"
   # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.
   # While PKG_CONFIG_LIBDIR overrides <libdir>, <datadir> (/usr/share/) can only
   # be overridden individually when pkg-config is built.
