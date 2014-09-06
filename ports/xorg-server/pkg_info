@@ -1,0 +1,10 @@
+NAME=xorg-server
+VERSION=1.12.2
+URL=http://www.x.org/releases/X11R7.7/src/everything/xorg-server-1.12.2.tar.bz2
+LICENSE=GPL
+DEPENDS=(glibc-compat pixman libxext libx11 glproto regal openssh fixesproto damageproto xcmiscproto bigreqsproto randrproto renderproto fontsproto videoproto compositeproto recordproto scrnsaverproto resourceproto xineramaproto libxkbfile libxfont libpciaccess sdl2 pixman openssl nacl-spawn libtar)
+# No mac support, due to libx11.
+BUILD_OS=linux
+# Newlib work still in progress.
+LIBC=glibc
+SHA1=2edb151d39571dc0fcdedc299ea0a77fe6bfc076
