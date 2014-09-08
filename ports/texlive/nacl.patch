@@ -1,8 +1,21 @@
+diff --git a/Makefile.in b/Makefile.in
+index d17634e..4b7f878 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -353,7 +353,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+ LD = @LD@
+ LDFLAGS = @LDFLAGS@
+ LIBOBJS = @LIBOBJS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ $(EXTRA_LIBS)
+ LIBTOOL = @LIBTOOL@
+ LIPO = @LIPO@
+ LN_S = @LN_S@
 diff --git a/configure b/configure
-index 9d3f3b5..18e50ef 100755
+index c00d55b..80708f3 100755
 --- a/configure
 +++ b/configure
-@@ -955,7 +955,9 @@ XMKMF
+@@ -956,7 +956,9 @@ XMKMF
  CXX
  CXXFLAGS
  CCC
@@ -13,8 +26,21 @@ index 9d3f3b5..18e50ef 100755
  ac_subdirs_all='texk/ptexenc
  texk/kpathsea
  auxdir/auxsub libs utils texk'
+@@ -20458,7 +20460,11 @@ else
+ fi
+ if $FT2_CONFIG --ftversion >/dev/null 2>&1; then
+   FREETYPE2_INCLUDES=`$FT2_CONFIG --cflags`
+-  FREETYPE2_LIBS=`$FT2_CONFIG --libs`
++  if test "$enable_shared" = no; then
++    FREETYPE2_LIBS=`$FT2_CONFIG --libs --static`
++  else
++    FREETYPE2_LIBS=`$FT2_CONFIG --libs`
++  fi
+ elif test "x$need_freetype2:$with_system_freetype2" = xyes:yes; then
+   as_fn_error $? "did not find freetype-config required for system freetype2 library" "$LINENO" 5
+ fi
 diff --git a/configure.ac b/configure.ac
-index c9e3833..0d83b26 100644
+index 7791d9a..e52072c 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -64,6 +64,13 @@ AC_PROG_MKDIR_P
@@ -31,74 +57,89 @@ index c9e3833..0d83b26 100644
  
  AC_PROG_LN_S
  AC_ARG_WITH([ln-s],
-diff --git a/libs/cairo/cairo-1.12.8/build/configure.ac.warnings b/libs/cairo/cairo-1.12.8/build/configure.ac.warnings
-index f984eb2..553d72b 100644
---- a/libs/cairo/cairo-1.12.8/build/configure.ac.warnings
-+++ b/libs/cairo/cairo-1.12.8/build/configure.ac.warnings
-@@ -49,7 +49,6 @@ AC_TRY_LINK([],[
- MAYBE_WARN="$MAYBE_WARN -fno-strict-aliasing -fno-common"
- 
- dnl Also to turn various gcc/glibc-specific preprocessor checks
--MAYBE_WARN="$MAYBE_WARN -Wp,-D_FORTIFY_SOURCE=2"
- 
- # invalidate cached value if MAYBE_WARN has changed
- if test "x$cairo_cv_warn_maybe" != "x$MAYBE_WARN"; then
-diff --git a/libs/cairo/cairo-1.12.8/configure b/libs/cairo/cairo-1.12.8/configure
-index ae5c386..015086b 100755
---- a/libs/cairo/cairo-1.12.8/configure
-+++ b/libs/cairo/cairo-1.12.8/configure
-@@ -18490,8 +18490,6 @@ rm -f core conftest.err conftest.$ac_objext \
+diff --git a/libs/cairo/cairo-1.12.16/build/configure.ac.warnings b/libs/cairo/cairo-1.12.16/build/configure.ac.warnings
+index f984eb2..09662a7 100644
+--- a/libs/cairo/cairo-1.12.16/build/configure.ac.warnings
++++ b/libs/cairo/cairo-1.12.16/build/configure.ac.warnings
+@@ -48,9 +48,6 @@ AC_TRY_LINK([],[
  
  MAYBE_WARN="$MAYBE_WARN -fno-strict-aliasing -fno-common"
  
+-dnl Also to turn various gcc/glibc-specific preprocessor checks
 -MAYBE_WARN="$MAYBE_WARN -Wp,-D_FORTIFY_SOURCE=2"
 -
  # invalidate cached value if MAYBE_WARN has changed
  if test "x$cairo_cv_warn_maybe" != "x$MAYBE_WARN"; then
  	unset cairo_cv_warn_cflags
+diff --git a/libs/freetype2/Makefile.am b/libs/freetype2/Makefile.am
+index 624752f..f153112 100644
+--- a/libs/freetype2/Makefile.am
++++ b/libs/freetype2/Makefile.am
+@@ -29,7 +29,7 @@ ft-config:
+ 	rm -rf ft-build
+ 	$(MKDIR_P) ft-build
+ 	cd ft-build && \
+-	  CC='$(CC)' CONFIG_SITE=/dev/null CONFIG_SHELL='$(SHELL)' \
++	  CC='$(CC)' CFLAGS='$(CFLAGS)' CPPFLAGS='$(CPPFLAGS)' LDFLAGS='$(LDFLAGS)' CONFIG_SITE=/dev/null CONFIG_SHELL='$(SHELL)' \
+ 	  $(SHELL) $(abs_srcdir)/$(FREETYPE_TREE)/configure \
+ 	    $(config_args) --disable-shared \
+ 	    --without-bzip2 \
+diff --git a/libs/freetype2/Makefile.in b/libs/freetype2/Makefile.in
+index 9f69405..50605fc 100644
+--- a/libs/freetype2/Makefile.in
++++ b/libs/freetype2/Makefile.in
+@@ -576,7 +576,7 @@ ft-config:
+ 	rm -rf ft-build
+ 	$(MKDIR_P) ft-build
+ 	cd ft-build && \
+-	  CC='$(CC)' CONFIG_SITE=/dev/null CONFIG_SHELL='$(SHELL)' \
++	  CC='$(CC)' CFLAGS='$(CFLAGS)' CPPFLAGS='$(CPPFLAGS)' LDFLAGS='$(LDFLAGS)' CONFIG_SITE=/dev/null CONFIG_SHELL='$(SHELL)' \
+ 	  $(SHELL) $(abs_srcdir)/$(FREETYPE_TREE)/configure \
+ 	    $(config_args) --disable-shared \
+ 	    --without-bzip2 \
 diff --git a/libs/icu/configure b/libs/icu/configure
-index 8ee28c9..e6d9389 100755
+index 46d63bb..bb78ad0 100755
 --- a/libs/icu/configure
 +++ b/libs/icu/configure
-@@ -3672,7 +3672,7 @@ do
+@@ -4269,7 +4269,7 @@ do
    *) icu_list=build ;;
    esac
    case $icu_arg in
 -  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=*) ;;
-+  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=* | AR=* | RANLIB=*) ;;
++  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=* | AR=* | ARFLAGS=* | RANLIB=* | LIBS=*) ;;
    *) continue ;;
    esac
    case $icu_arg in
 diff --git a/libs/icu/configure.ac b/libs/icu/configure.ac
-index 9fa26bd..a5cdb87 100644
+index ad5e45f..2cfc4b8 100644
 --- a/libs/icu/configure.ac
 +++ b/libs/icu/configure.ac
-@@ -54,7 +54,7 @@ do
+@@ -61,7 +61,7 @@ do
    *) icu_list=build ;;
    esac
    case $icu_arg in
 -  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=*) ;;
-+  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=* | AR=* | RANLIB=*) ;;
++  CC=* | CFLAGS=* | CPPFLAGS=* | CXX=* | CXXFLAGS=* | LDFLAGS=* | AR=* | ARFLAGS=* | RANLIB=* | LIBS=*) ;;
    *) continue ;;
    esac
    case $icu_arg in
-diff --git a/libs/icu/icu-51.1/source/aclocal.m4 b/libs/icu/icu-51.1/source/aclocal.m4
-index 7991322..130daaa 100644
---- a/libs/icu/icu-51.1/source/aclocal.m4
-+++ b/libs/icu/icu-51.1/source/aclocal.m4
-@@ -30,7 +30,7 @@ powerpc*-*-linux*)
+diff --git a/libs/icu/icu-53.1/source/acinclude.m4 b/libs/icu/icu-53.1/source/acinclude.m4
+index 6bd65cd..91e162f 100644
+--- a/libs/icu/icu-53.1/source/acinclude.m4
++++ b/libs/icu/icu-53.1/source/acinclude.m4
+@@ -31,7 +31,7 @@ powerpc*-*-linux*)
  	else
  		icu_cv_host_frag=mh-linux-va
  	fi ;;
 -*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu) icu_cv_host_frag=mh-linux ;;
 +*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu|*-*-nacl) icu_cv_host_frag=mh-linux ;;
- *-*-cygwin|*-*-mingw32|*-*-mingw64)
- 	if test "$GCC" = yes; then
- 		AC_TRY_COMPILE([
-diff --git a/libs/icu/icu-51.1/source/common/putilimp.h b/libs/icu/icu-51.1/source/common/putilimp.h
-index 9c10f83..c5caa27 100644
---- a/libs/icu/icu-51.1/source/common/putilimp.h
-+++ b/libs/icu/icu-51.1/source/common/putilimp.h
+ i[[34567]]86-*-cygwin) icu_cv_host_frag=mh-cygwin ;;
+ x86_64-*-cygwin) icu_cv_host_frag=mh-cygwin64 ;;
+ *-*-mingw32|*-*-mingw64)
+diff --git a/libs/icu/icu-53.1/source/common/putilimp.h b/libs/icu/icu-53.1/source/common/putilimp.h
+index a9a24e3..845afca 100644
+--- a/libs/icu/icu-53.1/source/common/putilimp.h
++++ b/libs/icu/icu-53.1/source/common/putilimp.h
 @@ -120,6 +120,13 @@ typedef size_t uintptr_t;
      /* __timezone is only available in glibc */
  #       define U_TIMEZONE __timezone
@@ -113,10 +154,10 @@ index 9c10f83..c5caa27 100644
  #elif U_PLATFORM_USES_ONLY_WIN32_API
  #   define U_TIMEZONE _timezone
  #elif U_PLATFORM == U_PF_BSD && !defined(__NetBSD__)
-diff --git a/libs/icu/icu-51.1/source/common/unicode/platform.h b/libs/icu/icu-51.1/source/common/unicode/platform.h
-index 26f12f4..843ae2d 100644
---- a/libs/icu/icu-51.1/source/common/unicode/platform.h
-+++ b/libs/icu/icu-51.1/source/common/unicode/platform.h
+diff --git a/libs/icu/icu-53.1/source/common/unicode/platform.h b/libs/icu/icu-53.1/source/common/unicode/platform.h
+index 1b2ab30..0a0f5c0 100644
+--- a/libs/icu/icu-53.1/source/common/unicode/platform.h
++++ b/libs/icu/icu-53.1/source/common/unicode/platform.h
 @@ -123,6 +123,8 @@
  #define U_PF_LINUX 4000
  /** Android is based on Linux. @internal */
@@ -132,115 +173,98 @@ index 26f12f4..843ae2d 100644
  #   define U_PLATFORM U_PF_LINUX
 +#elif defined(__native_client__)
 +#   define U_PLATFORM U_PF_NACL
- #elif defined(BSD) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__MirBSD__)
- #   define U_PLATFORM U_PF_BSD
- #elif defined(sun) || defined(__sun)
-diff --git a/libs/icu/icu-51.1/source/configure b/libs/icu/icu-51.1/source/configure
-index 1a20f41..af3c980 100755
---- a/libs/icu/icu-51.1/source/configure
-+++ b/libs/icu/icu-51.1/source/configure
-@@ -4845,7 +4845,7 @@ powerpc*-*-linux*)
+ #elif defined(__APPLE__) && defined(__MACH__)
+ #   include <TargetConditionals.h>
+ #   if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE  /* variant of TARGET_OS_MAC */
+diff --git a/libs/icu/icu-53.1/source/configure b/libs/icu/icu-53.1/source/configure
+index 8680619..51b8fb7 100755
+--- a/libs/icu/icu-53.1/source/configure
++++ b/libs/icu/icu-53.1/source/configure
+@@ -4050,6 +4050,12 @@ esac
+ $as_echo_n "checking checking for executable suffix... " >&6; }
+ case "${host}" in
+     *-*-cygwin*|*-*-mingw*)  EXEEXT=.exe ;;
++    *-*-nacl*)
++        case "$CC" in
++            *pnacl*) EXEEXT=.pexe ;;
++            *) EXEEXT=.nexe ;;
++        esac
++        ;;
+     *)      EXEEXT="" ;;
+ esac
+ ac_exeext=$EXEEXT
+@@ -4869,7 +4875,7 @@ powerpc*-*-linux*)
  	else
  		icu_cv_host_frag=mh-linux-va
  	fi ;;
 -*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu) icu_cv_host_frag=mh-linux ;;
 +*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu|*-*-nacl) icu_cv_host_frag=mh-linux ;;
- *-*-cygwin|*-*-mingw32|*-*-mingw64)
- 	if test "$GCC" = yes; then
- 		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-diff --git a/libs/icu/icu-51.1/source/data/Makefile.in b/libs/icu/icu-51.1/source/data/Makefile.in
-index 5bcadc3..c8ef742 100644
---- a/libs/icu/icu-51.1/source/data/Makefile.in
-+++ b/libs/icu/icu-51.1/source/data/Makefile.in
-@@ -44,7 +44,7 @@ CURDIR:=$(CURR_FULL_DIR)
- ifeq ($(CURDIR),)
- CURDIR=.
- endif
+ i[34567]86-*-cygwin) icu_cv_host_frag=mh-cygwin ;;
+ x86_64-*-cygwin) icu_cv_host_frag=mh-cygwin64 ;;
+ *-*-mingw32|*-*-mingw64)
+diff --git a/libs/icu/icu-53.1/source/configure.ac b/libs/icu/icu-53.1/source/configure.ac
+index d52b1e6..2569b46 100644
+--- a/libs/icu/icu-53.1/source/configure.ac
++++ b/libs/icu/icu-53.1/source/configure.ac
+@@ -220,6 +220,12 @@ ICU_PROG_LINK
+ AC_MSG_CHECKING(checking for executable suffix)
+ case "${host}" in
+     *-*-cygwin*|*-*-mingw*)  EXEEXT=.exe ;;
++		*-nacl*)
++        case "$CC" in
++            *pnacl*) EXEEXT=.pexe ;;
++            *) EXEEXT=.nexe ;;
++        esac
++        ;;
+     *)      EXEEXT="" ;;
+ esac
+ ac_exeext=$EXEEXT
+diff --git a/libs/icu/icu-53.1/source/data/Makefile.in b/libs/icu/icu-53.1/source/data/Makefile.in
+index df97376..fd2b4da 100644
+--- a/libs/icu/icu-53.1/source/data/Makefile.in
++++ b/libs/icu/icu-53.1/source/data/Makefile.in
+@@ -47,7 +47,7 @@ endif
+ ifeq ($(OS390BATCH),1)
+ PKGDATA = $(TOOLBINDIR)/pkgdata $(PKGDATA_OPTS) -z -q -c -s $(CURDIR)/out/build/$(ICUDATA_PLATFORM_NAME) -d $(ICUPKGDATA_OUTDIR)
+ else
 -PKGDATA = $(TOOLBINDIR)/pkgdata $(PKGDATA_OPTS) -q -c -s $(CURDIR)/out/build/$(ICUDATA_PLATFORM_NAME) -d $(ICUPKGDATA_OUTDIR)
 +PKGDATA = $(TOOLBINDIR)/pkgdata $(PKGDATA_OPTS) -w -q -c -s $(CURDIR)/out/build/$(ICUDATA_PLATFORM_NAME) -d $(ICUPKGDATA_OUTDIR)
+ endif
  OS390_PDS_NAME = -z -L $(BATCH_STUB_TARGET)
  
- ifeq ($(OS390_STUBDATA),1)
-diff --git a/texk/bibtex-x/bibtex.c b/texk/bibtex-x/bibtex.c
-index 0964f4d..cf12a06 100644
---- a/texk/bibtex-x/bibtex.c
-+++ b/texk/bibtex-x/bibtex.c
-@@ -107,6 +107,17 @@
- #include <kpathsea/progname.h>
- #endif
+diff --git a/libs/icu/icu-53.1/source/tools/gendict/gendict.cpp b/libs/icu/icu-53.1/source/tools/gendict/gendict.cpp
+index 5c01f35..bc194a5 100644
+--- a/libs/icu/icu-53.1/source/tools/gendict/gendict.cpp
++++ b/libs/icu/icu-53.1/source/tools/gendict/gendict.cpp
+@@ -57,17 +57,23 @@ const int nextSeconds = 15; /* seconds between notices*/
+ static void alarm_fn(int /*n*/) {
+   printf("%s: still writing\t%s (%ds)\t...\n",    wToolname, wOutname, elapsedTime());
+   
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++  /* TODO(phosek): Drop once we emulate signals. */
+   signal(SIGALRM, &alarm_fn);
+   alarm(nextSeconds); // reset the alarm
++#endif
+ }
  
-+#if defined(__native_client__)
-+#include <assert.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <libtar.h>
-+#include <sys/mount.h>
-+
-+#include "nacl_io/nacl_io.h"
-+#include "ppapi_simple/ps_main.h"
-+#endif
-+
- #include "sysdep.h"
- #include "bibtex.h"
- #include "datatype.h"
-@@ -226,11 +237,43 @@ END
-  * In addition, the program sends error messages and other remarks to the
-  * |log_file| and terminal.
-  ***************************************************************************/
-+#if defined(__native_client__)
-+int                     bibtex_pepper_main (int argc, char **argv)
-+#else
- int                     main (int argc, char **argv)
-+#endif
- BEGIN
-     extern Integer8_T       history;
-     int			    exit_status;
+ static void install_watchdog(const char *toolName, const char *outFileName) {
+   wToolname=toolName;
+   wOutname=outFileName;
  
-+#if defined(__native_client__)
-+    TAR *tar;
-+    int err;
-+
-+    umount("/");
-+    mount("foo", "/", "html5fs", 0, NULL);
-+    mount("./", "/mnt/tars", "httpfs", 0, NULL);
-+
-+    mkdir("/myhome", 0777);
-+
-+    /* Setup home directory to a known location. */
-+    setenv("HOME", "/myhome", 1);
-+    /* Setup terminal type. */
-+    setenv("TERM", "xterm-256color", 1);
-+    /* Blank out USER and LOGNAME. */
-+    setenv("USER", "", 1);
-+    setenv("LOGNAME", "", 1);
-+
-+    err = tar_open(&tar, "/mnt/tars/texlive.tar", NULL, O_RDONLY, 0, 0);
-+    assert(err == 0);
-+
-+    err = tar_extract_all(tar, "/");
-+    assert(err == 0);
-+
-+    err = tar_close(tar);
-+    assert(err == 0);
-+#endif
-+
-     /*-
-     **------------------------------------------------------------------------
-     ** Set |log_file| initially to point to NULL.  All writes to the log
-@@ -481,4 +524,8 @@ Exit_Program_Label:
-     return (exit_status);
- END
++#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++  /* TODO(phosek): Drop once we emulate signals. */
+   signal(SIGALRM, &alarm_fn);
  
-+#if defined(__native_client__)
-+PPAPI_SIMPLE_REGISTER_MAIN(bibtex_pepper_main)
+   alarm(firstSeconds); // set the alarm
 +#endif
-+
- /*^^^^^^^^^^^^^^^^^^^^^^^^^^ END OF SECTION  10 ^^^^^^^^^^^^^^^^^^^^^^^^^^^*/
-diff --git a/texk/dvipsk/configure b/texk/dvipsk/configure
-index ed4123f..5e78aae 100755
---- a/texk/dvipsk/configure
-+++ b/texk/dvipsk/configure
-@@ -16911,7 +16911,8 @@ if test "x$cross_compiling" = xyes; then :
+ }
+ 
+ #else
+diff --git a/libs/luajit/configure b/libs/luajit/configure
+index 1f36913..2c64966 100755
+--- a/libs/luajit/configure
++++ b/libs/luajit/configure
+@@ -6924,7 +6924,8 @@ if test "x$cross_compiling" = xyes; then :
    cache_file=/dev/null
   ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
   CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
@@ -250,12 +274,12 @@ index ed4123f..5e78aae 100755
  fi
  
  # configure is writing to config.log, and then calls config.status.
-diff --git a/texk/dvipsk/configure.ac b/texk/dvipsk/configure.ac
-index 09ccc69..d2d6294 100644
---- a/texk/dvipsk/configure.ac
-+++ b/texk/dvipsk/configure.ac
-@@ -34,6 +34,7 @@ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
- [cache_file=/dev/null
+diff --git a/libs/luajit/configure.ac b/libs/luajit/configure.ac
+index 38ba43f..d32f610 100644
+--- a/libs/luajit/configure.ac
++++ b/libs/luajit/configure.ac
+@@ -72,6 +72,7 @@ AS_IF([test "x$cross_compiling" = xyes],
+       [cache_file=/dev/null
   ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
   CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
 - CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"])])
@@ -263,8 +287,245 @@ index 09ccc69..d2d6294 100644
 + LIBS='$BUILDLIBS'"])])
  
  AC_OUTPUT
+diff --git a/m4/kpse-fontconfig-flags.m4 b/m4/kpse-fontconfig-flags.m4
+index dac61e8..d97856e 100644
+--- a/m4/kpse-fontconfig-flags.m4
++++ b/m4/kpse-fontconfig-flags.m4
+@@ -39,7 +39,11 @@ if test "x$with_fontconfig_includes:$with_fontconfig_libdir" != x:; then
+   fi
+ elif $PKG_CONFIG fontconfig; then
+   kpse_cv_fontconfig_includes=`$PKG_CONFIG fontconfig --cflags`
+-  kpse_cv_fontconfig_libs=`$PKG_CONFIG fontconfig --libs`
++  if test "x$enable_shared" = xno; then
++    kpse_cv_fontconfig_libs=`$PKG_CONFIG fontconfig --libs --static`
++  else
++    kpse_cv_fontconfig_libs=`$PKG_CONFIG fontconfig --libs`
++  fi
+ fi
+ CPPFLAGS="$kpse_cv_fontconfig_includes $CPPFLAGS"
+ LIBS="$kpse_cv_fontconfig_libs $LIBS"
+diff --git a/m4/kpse-freetype2-flags.m4 b/m4/kpse-freetype2-flags.m4
+index 9c83475..2e96707 100644
+--- a/m4/kpse-freetype2-flags.m4
++++ b/m4/kpse-freetype2-flags.m4
+@@ -35,7 +35,11 @@ AC_REQUIRE([AC_CANONICAL_HOST])[]dnl
+ AC_CHECK_TOOL([FT2_CONFIG], [freetype-config], [false])[]dnl
+ if $FT2_CONFIG --ftversion >/dev/null 2>&1; then
+   FREETYPE2_INCLUDES=`$FT2_CONFIG --cflags`
+-  FREETYPE2_LIBS=`$FT2_CONFIG --libs`
++  if test "x$enable_shared" = xno; then
++    FREETYPE2_LIBS=`$FT2_CONFIG --libs --static`
++  else
++    FREETYPE2_LIBS=`$FT2_CONFIG --libs`
++  fi
+ elif test "x$need_freetype2:$with_system_freetype2" = xyes:yes; then
+   AC_MSG_ERROR([did not find freetype-config required for system freetype2 library])
+ fi
+diff --git a/texk/Makefile.in b/texk/Makefile.in
+index 74bffab..6e25c6f 100644
+--- a/texk/Makefile.in
++++ b/texk/Makefile.in
+@@ -320,7 +320,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
+ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+ LDFLAGS = @LDFLAGS@
+ LIBOBJS = @LIBOBJS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ $(EXTRA_LIBS)
+ LTLIBOBJS = @LTLIBOBJS@
+ MAINT = @MAINT@
+ MAKEINFO = @MAKEINFO@
+diff --git a/texk/bibtex-x/Makefile.in b/texk/bibtex-x/Makefile.in
+index cce4fc0..2c49d42 100644
+--- a/texk/bibtex-x/Makefile.in
++++ b/texk/bibtex-x/Makefile.in
+@@ -491,7 +491,7 @@ KPATHSEA_LIBS = @KPATHSEA_LIBS@
+ LD = @LD@
+ LDFLAGS = @LDFLAGS@
+ LIBOBJS = @LIBOBJS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ $(EXTRA_LIBS)
+ LIBTOOL = @LIBTOOL@
+ LIPO = @LIPO@
+ LN_S = @LN_S@
+diff --git a/texk/bibtex-x/bibtex.c b/texk/bibtex-x/bibtex.c
+index 0964f4d..f4f5ddf 100644
+--- a/texk/bibtex-x/bibtex.c
++++ b/texk/bibtex-x/bibtex.c
+@@ -115,6 +115,21 @@
+ #include "utils.h"
+ #include "version.h"
+ 
++#if defined(__native_client__)
++#include "nacl_main.h"
++#ifdef __arm__
++#define DATA_FILE "texdata_arm.tar"
++#elif defined __i386__
++#define DATA_FILE "texdata_x86_32.tar"
++#elif defined __x86_64__
++#define DATA_FILE "texdata_x86_64.tar"
++#elif defined __pnacl__
++#define DATA_FILE "texdata_pnacl.tar"
++#else
++#error Unsuported architecture
++#endif
++#endif
++
+ 
+ /***************************************************************************
+  * WEB section number:	 39
+@@ -226,11 +241,20 @@ END
+  * In addition, the program sends error messages and other remarks to the
+  * |log_file| and terminal.
+  ***************************************************************************/
++#if defined(__native_client__)
++int                     nacl_main (int argc, char **argv)
++#else
+ int                     main (int argc, char **argv)
++#endif
+ BEGIN
+     extern Integer8_T       history;
+     int			    exit_status;
+ 
++#if defined(__native_client__)
++    if (nacl_startup_untar(argv[0], DATA_FILE, "/"))
++      return -1;
++#endif
++
+     /*-
+     **------------------------------------------------------------------------
+     ** Set |log_file| initially to point to NULL.  All writes to the log
+diff --git a/texk/dvipdfm-x/Makefile.in b/texk/dvipdfm-x/Makefile.in
+index 9a70d82..174b917 100644
+--- a/texk/dvipdfm-x/Makefile.in
++++ b/texk/dvipdfm-x/Makefile.in
+@@ -548,7 +548,7 @@ LIBPAPER_LIBS = @LIBPAPER_LIBS@
+ LIBPNG_DEPEND = @LIBPNG_DEPEND@
+ LIBPNG_INCLUDES = @LIBPNG_INCLUDES@
+ LIBPNG_LIBS = @LIBPNG_LIBS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ $(EXTRA_LIBS)
+ LIBTOOL = @LIBTOOL@
+ LIPO = @LIPO@
+ LN_S = @LN_S@
+diff --git a/texk/dvipdfm-x/dvipdfmx.c b/texk/dvipdfm-x/dvipdfmx.c
+index 64b7125..e178291 100644
+--- a/texk/dvipdfm-x/dvipdfmx.c
++++ b/texk/dvipdfm-x/dvipdfmx.c
+@@ -889,6 +889,8 @@ do_mps_pages (void)
+ /* TODO: MetaPost mode */
+ #if defined(MIKTEX)
+ #  define main Main
++#elif defined(__native_client__)
++#  define main nacl_main
+ #endif
+ int CDECL
+ main (int argc, char *argv[]) 
+diff --git a/texk/dvipdfm-x/pdfencrypt.c b/texk/dvipdfm-x/pdfencrypt.c
+index 480823c..eadfdf5 100644
+--- a/texk/dvipdfm-x/pdfencrypt.c
++++ b/texk/dvipdfm-x/pdfencrypt.c
+@@ -22,6 +22,9 @@
+ #include <config.h>
+ #endif
+ 
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++#define _GNU_SOURCE
++#endif
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -32,6 +35,9 @@
+ #define getch _getch
+ #else  /* !WIN32 */
+ #include <unistd.h>
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++#include <termios.h>
++#endif
+ #endif /* WIN32 */
+ 
+ #include "system.h"
+@@ -347,7 +353,7 @@ static void compute_user_password (void)
+   memcpy(upwd_string, out_buf, MAX_STR_LEN);
+ }
+ 
+-#ifdef WIN32
++#if defined(WIN32) 
+ static char *getpass (const char *prompt)
+ {
+   static char pwd_buf[128];
+@@ -366,6 +372,37 @@ static char *getpass (const char *prompt)
+   fputs("\n", stderr);
+   return pwd_buf;
+ }
++#elif defined(__native_client__) && defined(_NEWLIB_VERSION)
++char *getpass (const char *prompt)
++{
++  struct termios s, t;
++  static char *buf;
++  static size_t bufsize;
++  ssize_t nread;
++
++  if (tcgetattr (fileno (stdin), &t) != 0)
++    return -1;
++  s = t;
++  t.c_lflag &= ~ECHO;
++  if (tcsetattr (fileno (stdin), TCSAFLUSH, &t) != 0)
++    return -1;
++
++  fprintf(stderr, "%s", prompt);
++  fflush(stderr);
++
++  nread = __getline (&buf, &bufsize, stdin);
++  if (buf != NULL) {
++    if (nread < 0) {
++      buf[0] = '\0';
++    } else if (buf[nread -1] == '\n') {
++      buf[nread - 1] = '\n';
++      fprintf(stderr, "\n");
++    }
++  }
++
++  (void) tcsetattr (fileno (stdin), TCSAFLUSH, &s);
++  return buf;
++}
+ #endif
+ 
+ void pdf_enc_set_passwd (unsigned bits, unsigned perm, const char *owner_pw, const char *user_pw)
+diff --git a/texk/dvipsk/configure b/texk/dvipsk/configure
+index 01fd8ce..2fa319d 100755
+--- a/texk/dvipsk/configure
++++ b/texk/dvipsk/configure
+@@ -17015,9 +17015,11 @@ test $ac_write_fail = 0 ||
+ 
+ if test "x$cross_compiling" = xyes; then :
+   cache_file=/dev/null
++ unset CONFIG_SITE
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ AR='$BUILDAR' RANLIB='$BUILDRANLIB' LIBS='$BUILDLIBS'"
+ fi
+ 
+ # configure is writing to config.log, and then calls config.status.
+diff --git a/texk/dvipsk/configure.ac b/texk/dvipsk/configure.ac
+index 502fc9d..dabb8c9 100644
+--- a/texk/dvipsk/configure.ac
++++ b/texk/dvipsk/configure.ac
+@@ -32,8 +32,10 @@ dnl The subdirectory squeeze must be configured for the build system.
+ dnl When cross compiling, can not share the cache file with the subdirectory!
+ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
+ [cache_file=/dev/null
++ unset CONFIG_SITE
+  ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
+  CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
+- CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"])])
++ CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
++ AR='$BUILDAR' RANLIB='$BUILDRANLIB' LIBS='$BUILDLIBS'"])])
+ 
+ AC_OUTPUT
 diff --git a/texk/kpathsea/progname.c b/texk/kpathsea/progname.c
-index f73cf07..2ade903 100644
+index c4fe781..368efdf 100644
 --- a/texk/kpathsea/progname.c
 +++ b/texk/kpathsea/progname.c
 @@ -66,6 +66,11 @@
@@ -279,6 +540,84 @@ index f73cf07..2ade903 100644
  
  #ifndef WIN32
  /* From a standalone program `ll' to expand symlinks written by Kimbo Mundy.
+diff --git a/texk/kpathsea/texmf.cnf b/texk/kpathsea/texmf.cnf
+index 77bcfb9..9eccf80 100644
+--- a/texk/kpathsea/texmf.cnf
++++ b/texk/kpathsea/texmf.cnf
+@@ -51,23 +51,23 @@
+ % Redistributors will probably want $SELFAUTODIR/share, i.e., /usr/share.
+ % Kpathsea sets SELFAUTOLOC (the directory with the binary),
+ % SELFAUTODIR (its parent), and SELFAUTOPARENT (its grandparent).
+-TEXMFROOT = $SELFAUTOPARENT
++TEXMFROOT = /usr/share
+ 
+ % The main tree of distributed packages and programs:
+-TEXMFDIST = $TEXMFROOT/texmf-dist
++TEXMFDIST = /usr/share/texmf-dist
+ 
+ % We used to have a separate /texmf tree with some core programs and files.
+ % Keep the variable name.
+-TEXMFMAIN = $TEXMFDIST
++TEXMFMAIN = /usr/share/texmf-dist
+ 
+ % Local additions to the distribution trees.
+-TEXMFLOCAL = $SELFAUTOGRANDPARENT/texmf-local
++TEXMFLOCAL = /usr/texmf-local
+ 
+ % TEXMFSYSVAR, where *-sys store cached runtime data.
+-TEXMFSYSVAR = $TEXMFROOT/texmf-var
++TEXMFSYSVAR = /usr/share/texmf-var
+ 
+ % TEXMFSYSCONFIG, where *-sys store configuration data.
+-TEXMFSYSCONFIG = $TEXMFROOT/texmf-config
++TEXMFSYSCONFIG = /usr/share/texmf-config
+ 
+ % Per-user texmf tree(s) -- organized per the TDS, as usual.  To define
+ % more than one per-user tree, set this to a list of directories in
+@@ -325,7 +325,7 @@ TEXPSHEADERS.gsftopk = .;$TEXMF/{dvips,fonts/{enc,type1,type42,type3,truetype}}/
+ % OSFONTDIR is to provide a convenient hook for allowing TeX to find
+ % fonts installed on the system (outside of TeX).  An empty default
+ % value would add "//" to the search paths, so we give it a dummy value.
+-OSFONTDIR = /please/set/osfontdir/in/the/environment
++OSFONTDIR = /usr/share/fonts
+ 
+ % PostScript Type 1 outline fonts.
+ T1FONTS = .;$TEXMF/fonts/type1//;$OSFONTDIR//
+@@ -481,33 +481,7 @@ RUBYINPUTS   = .;$TEXMF/scripts/{$progname,$engine,}/ruby//
+ % since we don't want to scatter ../'s throughout the value.  Hence we
+ % explicitly list every directory.  Arguably more understandable anyway.
+ %
+-TEXMFCNF = {\
+-$SELFAUTOLOC,\
+-$SELFAUTOLOC/share/texmf-local/web2c,\
+-$SELFAUTOLOC/share/texmf-dist/web2c,\
+-$SELFAUTOLOC/share/texmf/web2c,\
+-$SELFAUTOLOC/texmf-local/web2c,\
+-$SELFAUTOLOC/texmf-dist/web2c,\
+-$SELFAUTOLOC/texmf/web2c,\
+-\
+-$SELFAUTODIR,\
+-$SELFAUTODIR/share/texmf-local/web2c,\
+-$SELFAUTODIR/share/texmf-dist/web2c,\
+-$SELFAUTODIR/share/texmf/web2c,\
+-$SELFAUTODIR/texmf-local/web2c,\
+-$SELFAUTODIR/texmf-dist/web2c,\
+-$SELFAUTODIR/texmf/web2c,\
+-\
+-$SELFAUTOGRANDPARENT/texmf-local/web2c,\
+-$SELFAUTOPARENT,\
+-\
+-$SELFAUTOPARENT/share/texmf-local/web2c,\
+-$SELFAUTOPARENT/share/texmf-dist/web2c,\
+-$SELFAUTOPARENT/share/texmf/web2c,\
+-$SELFAUTOPARENT/texmf-local/web2c,\
+-$SELFAUTOPARENT/texmf-dist/web2c,\
+-$SELFAUTOPARENT/texmf/web2c\
+-}
++TEXMFCNF = /usr/share;/usr/share/texmf-dist/web2c;/usr/texmf-local/web2c
+ %
+ % For reference, here is the old brace-using definition:
+ %TEXMFCNF = {$SELFAUTOLOC,$SELFAUTODIR,$SELFAUTOPARENT}{,{/share,}/texmf{-local,}/web2c}
 diff --git a/texk/kpathsea/xgetcwd.c b/texk/kpathsea/xgetcwd.c
 index dae50dd..77e18be 100644
 --- a/texk/kpathsea/xgetcwd.c
@@ -317,211 +656,569 @@ index 59347ba..b46dfb4 100644
  /* Two files are indistinguishable if they are on the same device
     and have the same inode.  This checks two stat buffers for that.  Cf.
     the `same_file_p' routine in file-p.c, declared in kpathlib.h.  */
+diff --git a/texk/texlive/tl_scripts/Makefile.am b/texk/texlive/tl_scripts/Makefile.am
+index 8c3bfab..cf90492 100644
+--- a/texk/texlive/tl_scripts/Makefile.am
++++ b/texk/texlive/tl_scripts/Makefile.am
+@@ -125,7 +125,7 @@ run_texlinks = $(DESTDIR)$(bindir)/texlinks -v \
+ 	-e "$(EXEEXT)" $(DESTDIR)$(bindir)
+ run-texlinks:
+ if !WIN32
+-	PATH="$(DESTDIR)$(bindir):$(PATH)"; export PATH; $(run_texlinks)
++	PATH="$(DESTDIR)$(bindir):$$PATH"; export PATH; $(run_texlinks)
+ endif !WIN32
+ 
+ 
+diff --git a/texk/texlive/tl_scripts/Makefile.in b/texk/texlive/tl_scripts/Makefile.in
+index e4e042f..03523f2 100644
+--- a/texk/texlive/tl_scripts/Makefile.in
++++ b/texk/texlive/tl_scripts/Makefile.in
+@@ -853,7 +853,7 @@ xupdmap.1: updmap.help2man $(updmap_dir)/updmap.pl
+ 
+ .PHONY: run-texlinks
+ run-texlinks:
+-@WIN32_FALSE@	PATH="$(DESTDIR)$(bindir):$(PATH)"; export PATH; $(run_texlinks)
++@WIN32_FALSE@	PATH="$(DESTDIR)$(bindir):$$PATH"; export PATH; $(run_texlinks)
+ 
+ .PHONY: echo-shell-scripts
+ echo-shell-scripts:
+diff --git a/texk/texlive/tl_scripts/texlinks.sh b/texk/texlive/tl_scripts/texlinks.sh
+index 028b50b..6a1f7b8 100755
+--- a/texk/texlive/tl_scripts/texlinks.sh
++++ b/texk/texlive/tl_scripts/texlinks.sh
+@@ -195,7 +195,7 @@ search_symlinkdir()
+   kpsewhich=`check_for_binary kpsewhich`
+   test -z "$kpsewhich" && return 1
+   symlinkdir=`echo $kpsewhich | sed 's@/*kpsewhich$@@'`
+-  kpseaccess -w "$symlinkdir" || return 1
++  [ -w "$symlinkdir" ] || return 1
+   touch "$symlinkdir/tl$$"
+   if test -f "$selfautoloc/tl$$"; then
+     rm -f "$symlinkdir/tl$$"
+@@ -255,7 +255,7 @@ main()
+   silent=false
+   thisdir=`pwd`
+   : ${KPSE_DOT=$thisdir}; export KPSE_DOT
+-  selfautoloc=`kpsewhich --expand-var='$SELFAUTOLOC'`
++  selfautoloc=`cd \`dirname $0\` && pwd`
+   while 
+     case $1 in
+       --h*|-h)
+@@ -275,8 +275,6 @@ main()
+   do test $# -gt 0 && shift; done
+   dirs="$*"
+ 
+-  # if no cnf_file from command-line, look it up with kpsewhich:
+-  test -z "$cnf_file" && cnf_file=`kpsewhich --format='web2c files' $cnf`
+   test -f "$cnf_file" || abort "config file \`$cnf' not found"
+ 
+ 
+@@ -291,7 +289,7 @@ main()
+     if test $multiplatform = true; then
+       case $selfautoloc in
+         */bin) dirs=$selfautoloc;;
+-        *)     parent=`kpsewhich --expand-var='$SELFAUTODIR'`
++        *)     parent=`dirname $selfautoloc`
+                dirs=`find $parent -type f -name kpsewhich -print \
+                        | sed 's@/kpsewhich$@@'`;;
+       esac
+@@ -301,7 +299,7 @@ main()
+   fi
+   
+   for d in $dirs; do
+-    kpseaccess -w $d \
++    [ -w $d ] \
+       || { errmsg "$d: no write permissions. Skipping..."; continue; }
+     # cnf_file_ln.$$ has lines with "format engine" pairs
+     set x `cat cnf_file_ln.$$`; shift
+diff --git a/texk/web2c/Makefile.in b/texk/web2c/Makefile.in
+index da335b2..ff14643 100644
+--- a/texk/web2c/Makefile.in
++++ b/texk/web2c/Makefile.in
+@@ -1830,7 +1830,7 @@ LIBOBJS = @LIBOBJS@
+ LIBPNG_DEPEND = @LIBPNG_DEPEND@
+ LIBPNG_INCLUDES = @LIBPNG_INCLUDES@
+ LIBPNG_LIBS = @LIBPNG_LIBS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ $(EXTRA_LIBS)
+ LIBTOOL = @LIBTOOL@
+ LIPO = @LIPO@
+ LN_S = @LN_S@
 diff --git a/texk/web2c/configure b/texk/web2c/configure
-index fd06395..c2df40f 100755
+index 2350513..9cd9bc3 100755
 --- a/texk/web2c/configure
 +++ b/texk/web2c/configure
-@@ -26630,7 +26630,8 @@ if test "x$cross_compiling" = xyes; then :
+@@ -19176,7 +19176,11 @@ else
+   kpse_save_CPPFLAGS=$CPPFLAGS
+ kpse_save_LIBS=$LIBS
+ kpse_cv_fontconfig_includes=
+-kpse_cv_fontconfig_libs='-lfontconfig'
++if test "x$enable_shared" = xno; then
++  kpse_cv_fontconfig_libs='-lfontconfig -lexpat -lfreetype -lbz2 -lpng16 -lz -lpthread -lm'
++else
++  kpse_cv_fontconfig_libs='-lfontconfig'
++fi
+ if test "x$with_fontconfig_includes:$with_fontconfig_libdir" != x:; then
+   if test "x$with_fontconfig_includes" != x; then
+     kpse_cv_fontconfig_includes="-I$with_fontconfig_includes"
+@@ -19186,7 +19190,11 @@ if test "x$with_fontconfig_includes:$with_fontconfig_libdir" != x:; then
+   fi
+ elif $PKG_CONFIG fontconfig; then
+   kpse_cv_fontconfig_includes=`$PKG_CONFIG fontconfig --cflags`
+-  kpse_cv_fontconfig_libs=`$PKG_CONFIG fontconfig --libs`
++  if test "x$enable_shared" = xno; then
++    kpse_cv_fontconfig_libs=`$PKG_CONFIG fontconfig --libs --static`
++  else
++    kpse_cv_fontconfig_libs=`$PKG_CONFIG fontconfig --libs`
++  fi
+ fi
+ CPPFLAGS="$kpse_cv_fontconfig_includes $CPPFLAGS"
+ LIBS="$kpse_cv_fontconfig_libs $LIBS"
+@@ -26864,9 +26872,11 @@ test $ac_write_fail = 0 ||
+ 
+ if test "x$cross_compiling" = xyes; then :
    cache_file=/dev/null
++ unset CONFIG_SITE
   ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
   CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
 - CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"
 + CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
-+ LIBS='$BUILDLIBS'"
++ AR='$BUILDAR' RANLIB='$BUILDRANLIB' LIBS='$BUILDLIBS'"
  fi
  
  # configure is writing to config.log, and then calls config.status.
 diff --git a/texk/web2c/configure.ac b/texk/web2c/configure.ac
-index f6d2763..959174a 100644
+index 87e2ad5..7c9913a 100644
 --- a/texk/web2c/configure.ac
 +++ b/texk/web2c/configure.ac
-@@ -390,6 +390,7 @@ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
+@@ -394,8 +394,10 @@ dnl The subdirectory web2c must be configured for the build system.
+ dnl When cross compiling, can not share the cache file with the subdirectory!
+ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
  [cache_file=/dev/null
++ unset CONFIG_SITE
   ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
   CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
 - CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"])])
 + CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
-+ LIBS='$BUILDLIBS'"])])
++ AR='$BUILDAR' RANLIB=$BUILDRANLIB' LIBS='$BUILDLIBS'"])])
  
  AC_OUTPUT
+diff --git a/texk/web2c/ctangleboot.cin b/texk/web2c/ctangleboot.cin
+index 969424a..2fd1beb 100644
+--- a/texk/web2c/ctangleboot.cin
++++ b/texk/web2c/ctangleboot.cin
+@@ -410,7 +410,11 @@ static void skip_limbo(void);
+ #line 91 "cwebdir/ctangle.w"
+ 
+ #line 70 "cwebdir/ctang-w2c.ch"
++#if defined(__native_client__)
++int nacl_main(int ac,char**av)
++#else
+ int main(int ac,char**av)
++#endif
+ #line 95 "cwebdir/ctangle.w"
+ {
+ argc= ac;argv= av;
+diff --git a/texk/web2c/ctiedir/ctie-k.ch b/texk/web2c/ctiedir/ctie-k.ch
+index ebb0fa0..318b073 100644
+--- a/texk/web2c/ctiedir/ctie-k.ch
++++ b/texk/web2c/ctiedir/ctie-k.ch
+@@ -29,7 +29,11 @@
+ main(argc, argv)
+         int argc; string *argv;
+ @y
++#if defined(__native_client__)
++int nacl_main (int argc, string *argv)
++#else
+ int main (int argc, string *argv)
++#endif
+ @z
+ 
+ @x l.105 Set up kpathsea stuff
+diff --git a/texk/web2c/cwebdir/ctang-w2c.ch b/texk/web2c/cwebdir/ctang-w2c.ch
+index e1f507a..642480b 100644
+--- a/texk/web2c/cwebdir/ctang-w2c.ch
++++ b/texk/web2c/cwebdir/ctang-w2c.ch
+@@ -67,7 +67,11 @@ int main (ac, av)
+ int ac;
+ char **av;
+ @y
++#if defined(__native_client__)
++int nacl_main (int ac, char **av)
++#else
+ int main (int ac, char **av)
++#endif
+ @z
+ 
+ @x l.100 - Add Web2C version to banner.
+diff --git a/texk/web2c/cwebdir/cweav-w2c.ch b/texk/web2c/cwebdir/cweav-w2c.ch
+index 4c3249e..df4e81a 100644
+--- a/texk/web2c/cwebdir/cweav-w2c.ch
++++ b/texk/web2c/cwebdir/cweav-w2c.ch
+@@ -72,7 +72,11 @@ int main (ac, av)
+ int ac; /* argument count */
+ char **av; /* argument values */
+ @y
++#if defined(__native_client__)
++int nacl_main (int ac, char **av)
++#else
+ int main (int ac, char **av)
++#endif
+ @z
+ 
+ @x l.107 - Add Web2C version to banner.
 diff --git a/texk/web2c/lib/main.c b/texk/web2c/lib/main.c
-index d3f5a45..ad88bed 100644
+index d3f5a45..eb30910 100644
 --- a/texk/web2c/lib/main.c
 +++ b/texk/web2c/lib/main.c
-@@ -4,6 +4,20 @@
+@@ -4,6 +4,21 @@
  #include <w2c/config.h>
  #include "lib.h"
  
 +#if defined(__native_client__)
-+#include <assert.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <libtar.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/mount.h>
-+
-+#include "nacl_io/nacl_io.h"
-+#include "ppapi_simple/ps_main.h"
++#include "nacl_main.h"
++#ifdef __arm__
++#define DATA_FILE "texdata_arm.tar"
++#elif defined __i386__
++#define DATA_FILE "texdata_x86_32.tar"
++#elif defined __x86_64__
++#define DATA_FILE "texdata_x86_64.tar"
++#elif defined __pnacl__
++#define DATA_FILE "texdata_pnacl.tar"
++#else
++#error Unsuported architecture
++#endif
 +#endif
 +
  /* These variables are referenced from the change files.  */
  char **argv;
  int argc;
-@@ -12,8 +26,40 @@ int argc;
+@@ -12,8 +27,17 @@ int argc;
     have more to do.  We just have to set up the command line.  web2c
     transforms Pascal's main block into a procedure `main_body'.  */
  int
 +#if defined(__native_client__)
-+main_pepper_main (int ac, string *av)
++nacl_main (int  ac,  string* av)
 +#else
  main (int  ac,  string* av)
 +#endif
  {
 +#if defined(__native_client__)
-+  TAR *tar;
-+  int err;
-+
-+  umount("/");
-+  mount("foo", "/", "html5fs", 0, NULL);
-+  mount("./", "/tars", "httpfs", 0, NULL);
-+
-+  mkdir("/myhome", 0777);
-+
-+  /* Setup home directory to a known location. */
-+  setenv("HOME", "/myhome", 1);
-+  /* Setup terminal type. */
-+  setenv("TERM", "xterm-256color", 1);
-+  /* Blank out USER and LOGNAME. */
-+  setenv("USER", "", 1);
-+  setenv("LOGNAME", "", 1);
-+
-+  err = tar_open(&tar, "/tars/texlive.tar", NULL, O_RDONLY, 0, 0);
-+  assert(err == 0);
-+
-+  err = tar_extract_all(tar, "/");
-+  assert(err == 0);
-+
-+  err = tar_close(tar);
-+  assert(err == 0);
++  if (nacl_startup_untar(av[0], DATA_FILE, "/"))
++    return -1;
 +#endif
 +
  #ifdef __EMX__
    _wildcard (&ac, &av);
    _response (&ac, &av);
-@@ -29,6 +75,10 @@ main (int  ac,  string* av)
-   return EXIT_SUCCESS;
- }
- 
-+#if defined(__native_client__)
-+PPAPI_SIMPLE_REGISTER_MAIN(main_pepper_main)
-+#endif
-+
- 
- /* Return the Nth (counted as in C) argument from the command line.  */
- 
 diff --git a/texk/web2c/lib/texmfmp.c b/texk/web2c/lib/texmfmp.c
-index 47d5232..a6e149b 100644
+index d6cdb40..ce84411 100644
 --- a/texk/web2c/lib/texmfmp.c
 +++ b/texk/web2c/lib/texmfmp.c
-@@ -33,6 +33,20 @@
- #include <locale.h>
- #endif
- 
-+#if defined(__native_client__)
-+#include <assert.h>
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <libtar.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/mount.h>
-+
-+#include "nacl_io/nacl_io.h"
-+#include "ppapi_simple/ps_main.h"
-+#endif
-+
- #include <signal.h> /* Catch interrupts.  */
+@@ -37,6 +37,21 @@
  
  #include <texmfmp-help.h>
-@@ -871,10 +885,40 @@ maininit (int ac, string *av)
+ 
++#if defined(__native_client__)
++#include "nacl_main.h"
++#ifdef __arm__
++#define DATA_FILE "texdata_arm.tar"
++#elif defined __i386__
++#define DATA_FILE "texdata_x86_32.tar"
++#elif defined __x86_64__
++#define DATA_FILE "texdata_x86_64.tar"
++#elif defined __pnacl__
++#define DATA_FILE "texdata_pnacl.tar"
++#else
++#error Unsuported architecture
++#endif
++#endif
++
+ /* {tex,mf}d.h defines TeX, MF, INI, and other such symbols.
+    Unfortunately there's no way to get the banner into this code, so
+    just repeat the text.  */
+@@ -886,10 +901,17 @@ maininit (int ac, string *av)
  int
  #if defined(WIN32) && !defined(__MINGW32__) && defined(DLLPROC)
  DLLPROC (int ac, string *av)
 +#elif defined(__native_client__)
-+texmfmp_pepper_main (int ac, string *av)
++nacl_main (int ac, string *av)
  #else
  main (int ac, string *av)
  #endif
  {
 +#if defined(__native_client__)
-+  TAR *tar;
-+  int err;
-+
-+  umount("/");
-+  mount("foo", "/", "html5fs", 0, NULL);
-+  mount("./", "/tars", "httpfs", 0, NULL);
-+
-+  mkdir("/myhome", 0777);
-+
-+  /* Setup home directory to a known location. */
-+  setenv("HOME", "/myhome", 1);
-+  /* Setup terminal type. */
-+  setenv("TERM", "xterm-256color", 1);
-+  /* Blank out USER and LOGNAME. */
-+  setenv("USER", "", 1);
-+  setenv("LOGNAME", "", 1);
-+
-+  err = tar_open(&tar, "/tars/texlive.tar", NULL, O_RDONLY, 0, 0);
-+  assert(err == 0);
-+
-+  err = tar_extract_all(tar, "/");
-+  assert(err == 0);
-+
-+  err = tar_close(tar);
-+  assert(err == 0);
++  if (nacl_startup_untar(av[0], DATA_FILE, "/"))
++    return -1;
 +#endif
 +
  #ifdef __EMX__
    _wildcard (&ac, &av);
    _response (&ac, &av);
-@@ -892,6 +936,10 @@ main (int ac, string *av)
+diff --git a/texk/web2c/luatexdir/lua/loslibext.c b/texk/web2c/luatexdir/lua/loslibext.c
+index 78f1e48..007f5f9 100644
+--- a/texk/web2c/luatexdir/lua/loslibext.c
++++ b/texk/web2c/luatexdir/lua/loslibext.c
+@@ -127,7 +127,7 @@ static const char _svn_version[] =
+    for the patch and the persistence in tracking this down.
+ */
  
-   return EXIT_SUCCESS;
- }
-+
-+#if defined(__native_client__)
-+PPAPI_SIMPLE_REGISTER_MAIN(texmfmp_pepper_main)
+-#ifdef _WIN32
++#if defined(_WIN32)
+ #  include <process.h>
+ #  define spawn_command(a,b,c) c ? \
+   _spawnvpe(_P_WAIT,(const char *)a,(const char* const*)b,(const char* const*)c) : \
+@@ -198,7 +198,11 @@ static int exec_command(const char *file, char *const *av, char *const *envp)
+         free(path);
+         path = NULL;
+         if (errno == E2BIG || errno == ENOEXEC ||
++#if !defined(__native_client__)
+             errno == ENOMEM || errno == ETXTBSY)
++#else
++            errno == ENOMEM)
 +#endif
- 
- /* This is supposed to ``open the terminal for input'', but what we
-    really do is copy command line arguments into TeX's or Metafont's
+             break;              /* Report this as an error, no more search */
+ 
+         searchpath = esp + 1;
+@@ -264,8 +268,10 @@ static int spawn_command(const char *file, char *const *av, char *const *envp)
+             switch (errno) {
+             case E2BIG:
+                 exit(INVALID_RET_E2BIG);
++#if !defined(__native_client__)
+             case ETXTBSY:
+                 exit(INVALID_RET_ETXTBSY);
++#endif
+             case ENOENT:
+                 exit(INVALID_RET_ENOENT);
+             case ENOEXEC:
+@@ -571,8 +577,10 @@ static int os_spawn(lua_State * L)
+             do_error_return(strerror(ENOEXEC), i);
+         } else if (i == INVALID_RET_ENOMEM) {
+             do_error_return(strerror(ENOMEM), i);
++#if !defined(__native_client__)
+         } else if (i == INVALID_RET_ETXTBSY) {
+             do_error_return(strerror(ETXTBSY), i);
++#endif
+         } else if (i == INVALID_RET_UNKNOWN) {
+             do_error_return("execution failed", i);
+         } else if (i == INVALID_RET_INTR) {
+@@ -837,7 +845,7 @@ static int ex_uname(lua_State * L)
+ }
+ 
+ 
+-#if (! defined (_WIN32))  && (! defined (__SUNOS__))
++#if (! defined (_WIN32))  && (! defined (__SUNOS__)) && (! defined(__native_client__))
+ static int os_times(lua_State * L)
+ {
+     struct tms r;
+@@ -1030,7 +1038,7 @@ void open_oslibext(lua_State * L, int safer)
+     lua_setfield(L, -2, "name");
+     lua_pushcfunction(L, ex_uname);
+     lua_setfield(L, -2, "uname");
+-#if (! defined (_WIN32))  && (! defined (__SUNOS__))
++#if (! defined (_WIN32))  && (! defined (__SUNOS__)) && (! defined(__native_client__))
+     lua_pushcfunction(L, os_times);
+     lua_setfield(L, -2, "times");
+ #endif
+diff --git a/texk/web2c/luatexdir/luasocket/src/serial.c b/texk/web2c/luatexdir/luasocket/src/serial.c
+index acee671..22bb1a3 100644
+--- a/texk/web2c/luatexdir/luasocket/src/serial.c
++++ b/texk/web2c/luatexdir/luasocket/src/serial.c
+@@ -164,7 +164,7 @@ static int global_create(lua_State *L) {
+     p_unix un = (p_unix) lua_newuserdata(L, sizeof(t_unix));
+ 
+     /* open serial device */
+-#ifdef __MINGW32__
++#if defined(__MINGW32__) || (defined(__native_client__) && defined(_NEWLIB_VERSION))
+     t_socket sock = open(path, O_RDWR);
+ #else
+     t_socket sock = open(path, O_NOCTTY|O_RDWR);
+diff --git a/texk/web2c/luatexdir/luatex.c b/texk/web2c/luatexdir/luatex.c
+index fb65516..0ddf76c 100644
+--- a/texk/web2c/luatexdir/luatex.c
++++ b/texk/web2c/luatexdir/luatex.c
+@@ -58,6 +58,21 @@ const char *engine_name = "luatex";     /* the name of this engine */
+ 
+ #include <signal.h>             /* Catch interrupts.  */
+ 
++#if defined(__native_client__)
++#include "nacl_main.h"
++#ifdef __arm__
++#define DATA_FILE "texdata_arm.tar"
++#elif defined __i386__
++#define DATA_FILE "texdata_x86_32.tar"
++#elif defined __x86_64__
++#define DATA_FILE "texdata_x86_64.tar"
++#elif defined __pnacl__
++#define DATA_FILE "texdata_pnacl.tar"
++#else
++#error Unsuported architecture
++#endif
++#endif
++
+ 
+ /* {tex,mf}d.h defines TeX, MF, INI, and other such symbols.
+    Unfortunately there's no way to get the banner into this code, so
+@@ -460,10 +475,17 @@ const char *ptexbanner;
+ int
+ #if defined(WIN32) && !defined(__MINGW32__) && defined(DLLPROC)
+ DLLPROC (int ac, string *av)
++#elif defined(__native_client__)
++nacl_main (int ac, string *av)
+ #else
+ main (int ac, string *av)
+ #endif
+ {
++#if defined(__native_client__)
++  if (nacl_startup_untar(av[0], DATA_FILE, "/"))
++    return -1;
++#endif
++
+ #  ifdef __EMX__
+     _wildcard(&ac, &av);
+     _response(&ac, &av);
+diff --git a/texk/web2c/mplibdir/mpost.w b/texk/web2c/mplibdir/mpost.w
+index f2165b5..bb9cb12 100644
+--- a/texk/web2c/mplibdir/mpost.w
++++ b/texk/web2c/mplibdir/mpost.w
+@@ -1308,6 +1308,8 @@ static char *cleaned_invocation_name(char *arg)
+ int
+ #if defined(WIN32) && !defined(__MINGW32__) && defined(DLLPROC)
+ DLLPROC (int argc, char **argv)
++#elif defined(__native_client__)
++nacl_main (int argc, char **argv)
+ #else
+ main (int argc, char **argv)
+ #endif
+diff --git a/texk/web2c/pdftexdir/pdftosrc.cc b/texk/web2c/pdftexdir/pdftosrc.cc
+index 642e12f..29676e3 100644
+--- a/texk/web2c/pdftexdir/pdftosrc.cc
++++ b/texk/web2c/pdftexdir/pdftosrc.cc
+@@ -55,7 +55,11 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ static XRef *xref = 0;
+ 
++#if defined(__native_client__)
++extern "C" int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char *argv[])
++#endif
+ {
+     char *p, buf[1024];
+     PDFDoc *doc;
+diff --git a/texk/web2c/pdftexdir/ttf2afm.c b/texk/web2c/pdftexdir/ttf2afm.c
+index 6ca0da9..ba5005f 100644
+--- a/texk/web2c/pdftexdir/ttf2afm.c
++++ b/texk/web2c/pdftexdir/ttf2afm.c
+@@ -1015,7 +1015,11 @@ static void usage(void)
+     _exit(-1);
+ }
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     char date[128], *s;
+     time_t t = time(&t);
+diff --git a/texk/web2c/synctexdir/synctex_main.c b/texk/web2c/synctexdir/synctex_main.c
+index f0fa3b9..fe7f37c 100644
+--- a/texk/web2c/synctexdir/synctex_main.c
++++ b/texk/web2c/synctexdir/synctex_main.c
+@@ -101,7 +101,11 @@ inline static double my_fmax(double x, double y) { return (x < y) ? y : x; }
+ #   endif
+ #endif
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[]);
++#else
+ int main(int argc, char *argv[]);
++#endif
+ 
+ void synctex_help(const char * error,...);
+ void synctex_help_view(const char * error,...);
+@@ -113,7 +117,11 @@ int synctex_edit(int argc, char *argv[]);
+ int synctex_update(int argc, char *argv[]);
+ int synctex_test(int argc, char *argv[]);
+ 
++#if defined(__native_client__)
++int nacl_main(int argc, char *argv[])
++#else
+ int main(int argc, char *argv[])
++#endif
+ {
+ 	int arg_index = 1;
+ 	printf("This is SyncTeX command line utility, version 1.2\n");
+diff --git a/texk/web2c/tiedir/tie-w2c.ch b/texk/web2c/tiedir/tie-w2c.ch
+index 37d5bd7..93b30e6 100644
+--- a/texk/web2c/tiedir/tie-w2c.ch
++++ b/texk/web2c/tiedir/tie-w2c.ch
+@@ -139,7 +139,11 @@ void usage (void)
+ main(argc,argv)
+         int argc; string *argv;
+ @y
++#if defined(__native_client__)
++int nacl_main (int argc, string *argv)
++#else
+ int main (int argc, string *argv)
++#endif
+ @z
+ 
+ @x
+@@ -163,4 +167,4 @@ int main (int argc, string *argv)
+ @y
+       default: /* Anything except spotless, troublesome, or fatal is a bug. */
+       case fatal: msg="That was a fatal error, my friend";  break;
+-@z
+\ No newline at end of file
++@z
+diff --git a/texk/web2c/web2c/main.c b/texk/web2c/web2c/main.c
+index 78f7041..3e0a5ef 100644
+--- a/texk/web2c/web2c/main.c
++++ b/texk/web2c/web2c/main.c
+@@ -224,7 +224,11 @@ initialize (void)
+ #endif
+ 
+ int
++#if defined(__native_client__)
++nacl_main (int argc, string *argv)
++#else
+ main (int argc, string *argv)
++#endif
+ {
+   int i;
+ 
 diff --git a/texk/xdvik/configure b/texk/xdvik/configure
-index 95cb39f..a31910f 100755
+index 265ef9f..962b3fa 100755
 --- a/texk/xdvik/configure
 +++ b/texk/xdvik/configure
-@@ -20709,7 +20709,8 @@ if test "x$cross_compiling" = xyes; then :
+@@ -20903,9 +20903,11 @@ test $ac_write_fail = 0 ||
+ 
+ if test "x$cross_compiling" = xyes; then :
    cache_file=/dev/null
++ unset CONFIG_SITE
   ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
   CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
 - CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"
 + CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
-+ LIBS='$BUILDLIBS'"
++ AR='$BUILDAR' RANLIB='$BUILDRANLIB' LIBS='$BUILDLIBS'"
  fi
  
  # configure is writing to config.log, and then calls config.status.
 diff --git a/texk/xdvik/configure.ac b/texk/xdvik/configure.ac
-index c795578..da11a7b 100644
+index 775e153..0f4333d 100644
 --- a/texk/xdvik/configure.ac
 +++ b/texk/xdvik/configure.ac
-@@ -306,6 +306,7 @@ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
+@@ -305,8 +305,10 @@ dnl The subdirectory squeeze must be configured for the build system.
+ dnl When cross compiling, can not share the cache file with the subdirectory!
+ AC_CONFIG_COMMANDS_POST([AS_IF([test "x$cross_compiling" = xyes],
  [cache_file=/dev/null
++ unset CONFIG_SITE
   ac_configure_args="$ac_configure_args --host='$kpse_build_alias' \
   CC='$BUILDCC' CPPFLAGS='$BUILDCPPFLAGS'\
 - CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'"])])
 + CFLAGS='$BUILDCFLAGS' LDFLAGS='$BUILDLDFLAGS'\
-+ LIBS='$BUILDLIBS'"])])
++ AR='$BUILDAR' RANLIB='$BUILDRANLIB' LIBS='$BUILDLIBS'"])])
  
  AC_OUTPUT
