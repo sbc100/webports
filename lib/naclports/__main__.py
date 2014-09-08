@@ -181,6 +181,11 @@ def run_main(args):
   if not os.path.isdir(NACL_SDK_ROOT):
     raise Error('$NACL_SDK_ROOT does not exist: %s' % NACL_SDK_ROOT)
 
+  sentinel = os.path.join(NACL_SDK_ROOT, 'tools', 'getos.py')
+  if not os.path.exists(sentinel):
+    raise Error("$NACL_SDK_ROOT (%s) doesn't look right. "
+                "Couldn't find sentinel file (%s)" % (NACL_SDK_ROOT, sentinel))
+
   config = Configuration(options.arch, options.toolchain, options.debug)
 
   base_commands = {
