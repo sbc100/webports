@@ -4,9 +4,6 @@
  * found in the LICENSE file.
  */
 
-#ifndef _NACL_SPAWN_SPAWN_H_
-#define _NACL_SPAWN_SPAWN_H_
-
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -17,6 +14,13 @@
 #else
 #include_next <spawn.h>
 #endif
+
+/*
+ * Include guards are here so that this header can forward to the next one in
+ * presence of an already installed copy of nacl-spawn.
+ */
+#ifndef _NACL_SPAWN_SPAWN_H_
+#define _NACL_SPAWN_SPAWN_H_
 
 #ifdef __cplusplus
 extern "C" {

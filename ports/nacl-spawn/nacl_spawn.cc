@@ -4,6 +4,10 @@
 
 // Emulates spawning/waiting process by asking JavaScript to do so.
 
+// Include quoted spawn.h first so we can build in the presence of an installed
+// copy of nacl-spawn.
+#include "spawn.h"
+
 #include "nacl_main.h"
 
 #include <arpa/inet.h>
