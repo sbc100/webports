@@ -19,6 +19,7 @@ SOURCES := \
   src/ns_netint.c \
   src/ns_samedomain.c \
   src/qsort_r.c \
+  src/realpath.c \
   src/res_comp.c \
   src/res_data.c \
   src/res_debug.c \

@@ -440,11 +440,6 @@ int connect(int sockfd, const struct sockaddr *addr,
   UNIMPLEMENTED_FATAL();
 }
 
-char* realpath(const char* path, char* resolved) __attribute__ ((weak));
-char* realpath(const char* path, char* resolved) {
-  UNIMPLEMENTED_NOSYS_RTN(NULL);
-}
-
 int getaddrinfo(const char *, const char *, const struct addrinfo *,
                 struct addrinfo **) __attribute__ ((weak));
 int getaddrinfo(const char *node, const char *service,
