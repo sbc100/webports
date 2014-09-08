@@ -54,9 +54,9 @@ if [ $OS_NAME = "Cygwin" ]; then
   fi
 fi
 
-if [ $TOOLCHAIN = "bionic" ]; then
+if [ "$TOOLCHAIN" = "bionic" ]; then
   DEFAULT_ARCH=arm
-elif [ $TOOLCHAIN = "pnacl" ]; then
+elif [ "$TOOLCHAIN" = "pnacl" ]; then
   DEFAULT_ARCH=pnacl
 else
   DEFAULT_ARCH=x86_64
