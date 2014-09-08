@@ -8,4 +8,10 @@
 
 #include_next <sys/dirent.h>
 
+__BEGIN_DECLS
+
+int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
+
+__END_DECLS
+
 #endif
