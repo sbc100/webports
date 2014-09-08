@@ -172,8 +172,10 @@ def run_main(args):
   if options.verbose_build:
     os.environ['VERBOSE'] = '1'
   else:
-    os.environ['VERBOSE'] = '0'
-    os.environ['V'] = '0'
+    if 'VERBOSE' in os.environ:
+      del os.environ['VERBOSE']
+    if 'V' in os.environ:
+      del os.environ['V']
 
   if not NACL_SDK_ROOT:
     raise Error('$NACL_SDK_ROOT not set')
