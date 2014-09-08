@@ -6,6 +6,7 @@
 #ifndef _GLIBCEMU_SYS_DIRENT_H
 #define _GLIBCEMU_SYS_DIRENT_H
 
+#include <sys/cdefs.h>
 #include_next <sys/dirent.h>
 
 __BEGIN_DECLS
