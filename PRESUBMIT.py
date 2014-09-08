@@ -59,7 +59,7 @@ def CheckChangeOnUpload(input_api, output_api):
   report = []
   affected_files = input_api.AffectedFiles(include_deletes=False)
   report.extend(RunUnittests(input_api, output_api))
-  report.extend(CheckBuildbot(input_api, output_api))
+  report.extend(CheckDeps(input_api, output_api))
   report.extend(input_api.canned_checks.PanProjectChecks(
       input_api, output_api, project_name='Native Client',
       excluded_paths=_EXCLUDED_PATHS))
@@ -70,7 +70,7 @@ def CheckChangeOnCommit(input_api, output_api):
   report = []
   report.extend(CheckChangeOnUpload(input_api, output_api))
   report.extend(CheckMirror(input_api, output_api))
-  report.extend(CheckDeps(input_api, output_api))
+  report.extend(CheckBuildbot(input_api, output_api))
   report.extend(input_api.canned_checks.CheckTreeIsOpen(
       input_api, output_api,
       json_url='http://naclports-status.appspot.com/current?format=json'))

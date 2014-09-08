@@ -282,7 +282,13 @@ InjectSystemHeaders() {
   fi
 
   MakeDir ${NACLPORTS_INCLUDE}
-  LogExecute cp -r ${TC_INCLUDES}/* ${NACLPORTS_INCLUDE}
+  for INC in $(find ${TC_INCLUDES} -type f); do
+    INC=${INC#${TC_INCLUDES}}
+    if ! cmp ${TC_INCLUDES}${INC} ${NACLPORTS_INCLUDE}${INC} > /dev/null; then
+      MakeDir $(dirname ${NACLPORTS_INCLUDE}${INC})
+      LogExecute cp ${TC_INCLUDES}${INC} ${NACLPORTS_INCLUDE}${INC}
+    fi
+  done
 }
 
 
@@ -1023,6 +1029,11 @@ DefaultPatchStep() {
 
 DefaultConfigureStep() {
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
+
+  if [ -n "${CONFIGURE_SENTINEL:-}" -a -f "${CONFIGURE_SENTINEL:-}" ]; then
+    return
+  fi
+
   if [ -f "${CONFIGURE}" ]; then
     ConfigureStep_Autotools
   elif [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
@@ -1046,10 +1057,6 @@ ConfigureStep_Autotools() {
     # Unfortunately, most of the config.subs here are so old that
     # it doesn't know about that "le32" either.  So we just say "nacl".
     conf_host="nacl"
-  fi
-
-  if [ -n "${CONFIGURE_SENTINEL:-}" -a -f "${CONFIGURE_SENTINEL:-}" ]; then
-    return
   fi
 
   # Inject a shim that speed up pnacl invocations for configure.
