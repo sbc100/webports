@@ -5,6 +5,8 @@
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
   -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
+EXECUTABLES=tests/devenv_test_${NACL_ARCH}${NACL_EXEEXT}
+
 BuildStep() {
   SetupCrossEnvironment
 

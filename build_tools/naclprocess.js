@@ -11,13 +11,14 @@
  * web-based terminal.
  */
 function NaClProcessManager() {
-  this.onError = function() {};
-  this.onStdout = function() {};
-  this.onRootProgress = function() {};
-  this.onRootLoad = function() {};
+  var self = this;
+  self.onError = function() {};
+  self.onStdout = function() {};
+  self.onRootProgress = function() {};
+  self.onRootLoad = function() {};
 
   // The process which gets the input from the user.
-  this.foregroundProcess = null;
+  self.foregroundProcess = null;
 
   // Process group information keyed by PGID. The value is an object consisting
   // of the fields: {
@@ -25,7 +26,7 @@ function NaClProcessManager() {
   //   processes: an object keyed by the PIDs of processes in this group, used
   //       as a set
   // }
-  this.processGroups = {};
+  self.processGroups = {};
 
   // Process information keyed by PID. The value is an object consisting of the
   // fields: {
@@ -35,16 +36,27 @@ function NaClProcessManager() {
   //   pgid: the process group ID of the process
   //   ppid: the parent PID of the process
   // }
-  this.processes = {};
+  self.processes = {};
 
   // Waiter processes keyed by the PID of the waited process. The waiter
   // is represented by a hash like
   // { reply: a callback to call to report a process exit, options: the
   //     options specfied for the wait (such as WNOHANG) }
-  this.waiters = {};
+  self.waiters = {};
 
   // Start process IDs at 2, as PIDs 0 and 1 are reserved on real systems.
-  this.pid = 2;
+  self.pid = 2;
+
+  // TODO(bradnelson): Restructure to make sure this isn't racey.
+  // NaCl Architecture.
+  self.naclArch = null;
+  chrome.runtime.getPlatformInfo(function(platformInfo) {
+    self.naclArch = {
+      'x86-32': 'i686',
+      'x86-64': 'x86_64',
+      'arm': 'arm',
+    }[platformInfo.nacl_arch] || platformInfo.nacl_arch;
+  });
 };
 
 /**
@@ -114,18 +126,6 @@ NaClProcessManager.prefix = 'nacl_process';
  * @type {number}
  */
 NaClProcessManager.WNOHANG = 1;
-
-/*
- * Exit code when a process has an error.
- * @type {number}
- */
-NaClProcessManager.EX_NO_EXEC = 126;
-
-/*
- * Exit code when a process is ended with SIGKILL.
- * @type {number}
- */
-NaClProcessManager.EXIT_CODE_KILL = 128 + 9;
 
 /*
  * Exit code when a process has an error.
@@ -301,19 +301,30 @@ NaClProcessManager.prototype.isRootProcess = function(process) {
  */
 NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
   for (var arch in entry) {
-    var path = entry[arch]['url'];
+    if (arch === 'portable') {
+      if (entry[arch]['pnacl-translate'] === undefined ||
+          entry[arch]['pnacl-translate']['url'] === undefined) {
+        return;
+      }
+      var path = entry[arch]['pnacl-translate']['url'];
+    } else {
+      if (entry[arch]['url'] === undefined) {
+       return;
+      }
+      var path = entry[arch]['url'];
+    }
     // TODO(bradnelson): Generalize this.
     var html5MountPoint = '/mnt/html5/';
     var homeMountPoint = '/home/user/';
     var tmpMountPoint = '/tmp/';
-    if (path.indexOf(html5MountPoint) == 0) {
+    if (path.indexOf(html5MountPoint) === 0) {
       path = path.replace(html5MountPoint,
                           'filesystem:' + location.origin + '/persistent/');
-    } else if (path.indexOf(homeMountPoint) == 0) {
+    } else if (path.indexOf(homeMountPoint) === 0) {
       path = path.replace(homeMountPoint,
                           'filesystem:' + location.origin +
                           '/persistent/home/');
-    } else if (path.indexOf(tmpMountPoint) == 0) {
+    } else if (path.indexOf(tmpMountPoint) === 0) {
       path = path.replace(tmpMountPoint,
                           'filesystem:' + location.origin +
                           '/temporary/');
@@ -322,7 +333,11 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
       var base = location.href.match('.*/')[0];
       path = base + path;
     }
-    entry[arch]['url'] = path;
+    if (arch === 'portable') {
+      entry[arch]['pnacl-translate']['url'] = path;
+    } else {
+      entry[arch]['url'] = path;
+    }
   }
 }
 
@@ -362,7 +377,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
   } else if (msg.indexOf(NaClProcessManager.prefix) === 0) {
     var out = msg.substring(NaClProcessManager.prefix.length);
     this.onStdout(out);
-  } else if (msg.indexOf('exited') == 0) {
+  } else if (msg.indexOf('exited') === 0) {
     var exitCode = parseInt(msg.split(':', 2)[1]);
     if (isNaN(exitCode))
       exitCode = 0;
@@ -378,35 +393,47 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
  * @private
  */
 NaClProcessManager.prototype.handleMessageSpawn_ = function(msg, reply, src) {
+  var self = this;
   var args = msg['args'];
   var envs = msg['envs'];
   var cwd = msg['cwd'];
   var executable = args[0];
   var nmf = msg['nmf'];
-  var naclType = msg['naclType'] || 'nacl';
   if (nmf) {
     if (nmf['files']) {
       for (var key in nmf['files'])
-        this.adjustNmfEntry_(nmf['files'][key]);
+        self.adjustNmfEntry_(nmf['files'][key]);
     }
-    this.adjustNmfEntry_(nmf['program']);
+    self.adjustNmfEntry_(nmf['program']);
     var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
-    nmf = window.URL.createObjectURL(blob);
+    var nmfUrl = window.URL.createObjectURL(blob);
+    var naclType = self.checkNaClManifestType_(nmf) || 'nacl';
+    reply({
+      pid: self.spawn(nmfUrl, args, envs, cwd, naclType, src)
+    });
   } else {
     if (NaClProcessManager.nmfWhitelist !== undefined &&
         NaClProcessManager.nmfWhitelist.indexOf(executable) === -1) {
       var replyMsg = {
         pid: -Errno.ENOENT,
       };
-      console.log('nacl_spawn(error): ' + JSON.stringify(replyMsg));
+      console.log('nacl_spawn(error): ' + executable + ' not in whitelist');
       reply(replyMsg);
       return;
     }
     nmf = executable + '.nmf';
+    self.checkUrlNaClManifestType(nmf, function(naclType) {
+      reply({
+        pid: self.spawn(nmf, args, envs, cwd, naclType, src)
+      });
+    }, function(msg) {
+      var replyMsg = {
+        pid: -Errno.ENOENT,
+      };
+      console.log('nacl_spawn(error): ' + msg);
+      reply(replyMsg);
+    });
   }
-  reply({
-    pid: this.spawn(nmf, args, envs, cwd, naclType, src)
-  });
 }
 
 
@@ -695,7 +722,7 @@ NaClProcessManager.prototype.exit = function(code, element) {
   element.pid = -1;
 
   // Clean up HTML elements.
-  if (element.parentNode == document.body) {
+  if (element.parentNode === document.body) {
     document.body.removeChild(element);
   }
 
@@ -716,14 +743,34 @@ NaClProcessManager.prototype.exit = function(code, element) {
 };
 
 /**
+ * Determines if an object is a nacl or pnacl manifest.
+ *
+ * @param {object} manifest A manifest to examine.
+ * @return {string} 'nacl' or 'pnacl' on success, or null on failure..
+ */
+NaClProcessManager.prototype.checkNaClManifestType_ = function(manifest) {
+  if ('program' in manifest) {
+    if ('portable' in manifest.program &&
+        'pnacl-translate' in manifest.program.portable) {
+      return 'pnacl';
+    } else {
+      return 'nacl';
+    }
+  } else {
+    return null;
+  }
+};
+
+/**
  * Determines if an url points to a nacl or pnacl manifest.
  *
  * @param {string} url The url to download and parse.
  * @callback typeCallback Called with 'nacl' or 'pnacl' on success.
  * @callback errorCallback Called with error message on failure.
  */
-NaClProcessManager.prototype.checkNaClManifestType = function(
+NaClProcessManager.prototype.checkUrlNaClManifestType = function(
     url, typeCallback, errorCallback) {
+  var self = this;
   var request = new XMLHttpRequest();
   request.open('GET', url, true);
   request.onload = function() {
@@ -733,15 +780,11 @@ NaClProcessManager.prototype.checkNaClManifestType = function(
       errorCallback('NaCl Manifest is not valid JSON at ' + url);
       return;
     }
-    if ('program' in manifest) {
-      if ('portable' in manifest.program &&
-          'pnacl-translate' in manifest.program.portable) {
-            typeCallback('pnacl');
-          } else {
-            typeCallback('nacl');
-          }
-    } else {
+    var kind = self.checkNaClManifestType_(manifest);
+    if (kind === null) {
       errorCallback('NaCl Manifest has bad format at ' + url);
+    } else {
+      typeCallback(kind);
     }
   };
   request.onerror = function() {
@@ -816,6 +859,10 @@ NaClProcessManager.prototype.spawn = function(
 
   envs.push('NACL_PID=' + fg.pid);
   envs.push('NACL_PPID=' + ppid);
+  if (this.naclArch === null) {
+    throw new Error('naclArch not yet set, race in startup\n');
+  }
+  envs.push('NACL_ARCH=' + this.naclArch);
 
   for (var i = 0; i < envs.length; i++) {
     var env = envs[i];

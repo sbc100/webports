@@ -27,7 +27,7 @@ TEST_F(DevEnvTest, 'testCTests', function() {
   }).then(function() {
     return self.checkCommand(
         'LD_LIBRARY_PATH=${PWD}/${PACKAGE_LIB_DIR}:$LD_LIBRARY_PATH ' +
-        './devenv_test_${NACL_ARCH}', 0);
+        './devenv_test_${NACL_BOOT_ARCH}', 0);
   });
 });
 

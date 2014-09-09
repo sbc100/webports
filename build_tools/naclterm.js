@@ -235,7 +235,7 @@ NaClTerm.prototype.spawnRootProcess_ = function() {
     var handleFailure = function(message) {
       self.print(message);
     };
-    self.processManager.checkNaClManifestType(
+    self.processManager.checkUrlNaClManifestType(
         NaClTerm.nmf, handleSuccess, handleFailure);
   } catch (e) {
     self.print(e.message);

@@ -56,7 +56,8 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         if ('naclType' in msg) {
           handleSuccess(msg.naclType);
         } else {
-          manager.checkNaClManifestType(msg.nmf, handleSuccess, handleFailure);
+          manager.checkUrlNaClManifestType(
+              msg.nmf, handleSuccess, handleFailure);
         }
         break;
       case 'nacl_waitpid':

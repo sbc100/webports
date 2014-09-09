@@ -106,7 +106,12 @@ int cli_main(int argc, char* argv[]) {
 #else
 # error "Unknown architecture"
 #endif
-  setenv("NACL_ARCH", kNaClArch, 1);
+  // Set NACL_ARCH with a guess if not set (0 == set if not already).
+  setenv("NACL_ARCH", kNaClArch, 0);
+  // Set NACL_BOOT_ARCH if not inherited from a parent (0 == set if not already
+  // set). This will let us prefer PNaCl if we started with PNaCl (for tests
+  // mainly).
+  setenv("NACL_BOOT_ARCH", kNaClArch, 0);
 
   setlocale(LC_CTYPE, "");
 

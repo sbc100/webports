@@ -331,7 +331,7 @@ chrometest.fail = function() {
  * @param {?} error A thrown value.
  */
 chrometest.formatError = function(error) {
-  if (error.stack === undefined) {
+  if (error === undefined || error.stack === undefined) {
     return '' + error;
   } else {
     return error.stack;
