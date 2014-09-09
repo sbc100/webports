@@ -3,6 +3,4 @@ VERSION=0.6.0
 URL=https://red.libssh.org/attachments/download/71/libssh-0.6.0.tar.xz
 LICENSE=LGPL
 DEPENDS=(openssl zlib glibc-compat)
-# Currently openssl only builds on linux
-BUILD_OS=linux
 SHA1=da432966c2123bc7aa399d93dc8c185149d661a2

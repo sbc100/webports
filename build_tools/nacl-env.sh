@@ -100,8 +100,9 @@ if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
 fi
 
 if [ "${TOOLCHAIN}" = "pnacl" ]; then
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [ "${NACL_ARCH}" != "pnacl" ]; then
     echo "PNaCl does not support the selected architecture: $NACL_ARCH" 1>&2
+    exit -1
   fi
 fi
 
