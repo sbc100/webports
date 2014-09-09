@@ -1087,8 +1087,8 @@ ConfigureStep_Autotools() {
 
 
 ConfigureStep_CMake() {
-  if [ "${VERBOSE:-}" = "1" ]; then
-    MAKE_TARGETS+=" VERBOSE=1"
+  if [ "${CMAKE_USE_NINJA:-}" = "1" ]; then
+    EXTRA_CMAKE_ARGS+=" -GNinja"
   fi
 
   EXTRA_CMAKE_ARGS=${EXTRA_CMAKE_ARGS:-}
@@ -1105,11 +1105,19 @@ ConfigureStep_CMake() {
            -DNACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT} \
            -DCMAKE_PREFIX_PATH=${NACL_PREFIX} \
            -DCMAKE_INSTALL_PREFIX=${PREFIX} \
-           -DCMAKE_BUILD_TYPE=RELEASE ${EXTRA_CMAKE_ARGS:-}
+           -DCMAKE_BUILD_TYPE=RELEASE ${EXTRA_CMAKE_ARGS}
 }
 
 
 DefaultBuildStep() {
+  if [ "${CMAKE_USE_NINJA:-}" = "1" ]; then
+    if [ "${VERBOSE:-}" = "1" ]; then
+      NINJA_ARGS="-v"
+    fi
+    LogExecute ninja ${NINJA_ARGS:-} ${MAKE_TARGETS:-}
+    return
+  fi
+
   # Build ${MAKE_TARGETS} or default target if it is not defined
   if [ -n "${MAKEFLAGS:-}" ]; then
     echo "MAKEFLAGS=${MAKEFLAGS}"
@@ -1156,13 +1164,20 @@ DefaultPostInstallTestStep() {
 
 
 DefaultInstallStep() {
+  INSTALL_TARGETS=${INSTALL_TARGETS:-install}
+
+  if [ "${CMAKE_USE_NINJA:-}" = "1" ]; then
+    DESTDIR=${DESTDIR} LogExecute ninja ${INSTALL_TARGETS}
+    return
+  fi
+
   # assumes pwd has makefile
   if [ -n "${MAKEFLAGS:-}" ]; then
     echo "MAKEFLAGS=${MAKEFLAGS}"
     export MAKEFLAGS
   fi
   export PATH=${NACL_BIN_PATH}:${PATH}
-  LogExecute make ${INSTALL_TARGETS:-install} DESTDIR=${DESTDIR}
+  LogExecute make ${INSTALL_TARGETS} DESTDIR=${DESTDIR}
 }
 
 
