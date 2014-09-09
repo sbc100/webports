@@ -9,10 +9,16 @@
 #include <sys/cdefs.h>
 #include_next <sys/dirent.h>
 
+/* Work around a dirent.h wrapping includes in extern "C". */
+#if defined(_DIRENT_H_)
 __BEGIN_DECLS
+#endif
 
 int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
 
+/* Work around a dirent.h wrapping includes in extern "C". */
+#if defined(_DIRENT_H_)
 __END_DECLS
+#endif
 
 #endif

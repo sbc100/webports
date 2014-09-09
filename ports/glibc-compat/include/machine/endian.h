@@ -2,6 +2,8 @@
 #define GLIBCEMU_MACHINE_ENDIAN_H 1
 #include_next <machine/endian.h>
 
+#include <_ansi.h>
+
 #define __byte_swap_constant_16(x) \
   ( (((x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
 
@@ -12,7 +14,7 @@
          ((x) >> 24) )
 
 
-static inline unsigned short int
+_ELIDABLE_INLINE unsigned short int
 __inline_bswap_16 (unsigned short int x)
 {
     return __byte_swap_constant_16(x);
