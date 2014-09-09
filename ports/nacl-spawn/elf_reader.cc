@@ -37,12 +37,12 @@ ElfReader::ElfReader(const char* filename)
     return;
   }
 
-  std::vector<ElfW(Phdr)> phdrs;
-  if (!ReadPhdrs(fp.get(), &phdrs))
+  std::vector<Elf64_Phdr> phdrs;
+  if (!ReadHeaders(fp.get(), &phdrs))
     return;
 
   bool dynamic_found = false;
-  ElfW(Addr) straddr = 0;
+  Elf64_Addr straddr = 0;
   size_t strsize = 0;
   std::vector<int> neededs;
   if (!ReadDynamic(fp.get(), phdrs, &straddr, &strsize, &neededs))
@@ -58,47 +58,92 @@ ElfReader::ElfReader(const char* filename)
   is_valid_= true;
 }
 
-bool ElfReader::ReadPhdrs(FILE* fp, std::vector<ElfW(Phdr)>* phdrs) {
-  ElfW(Ehdr) ehdr;
-  if (fread(&ehdr, sizeof(ehdr), 1, fp) != 1) {
+bool ElfReader::ReadHeaders(FILE* fp, std::vector<Elf64_Phdr>* phdrs) {
+  Elf32_Ehdr ehdr32;
+  if (fread(&ehdr32, sizeof(ehdr32), 1, fp) != 1) {
     PrintError("failed to read ELF header");
     return false;
   }
 
-  if (memcmp(ELFMAG, ehdr.e_ident, SELFMAG)) {
-    PrintError("invalid ELF header");
+  if (memcmp(ELFMAG, ehdr32.e_ident, SELFMAG)) {
+    PrintError("not an ELF file");
     return false;
   }
 
-#if !defined(__pnacl__)
-  if (ehdr.e_machine != ELF_MACHINE) {
-    PrintError("unsupported architecture: e_machine=%d", ehdr.e_machine);
+  elf_class_ = ehdr32.e_ident[EI_CLASS];
+  if (elf_class_ != ELFCLASS32 && elf_class_ != ELFCLASS64) {
+    PrintError("bad ELFCLASS");
     return false;
   }
-#endif
 
-  if (fseek(fp, ehdr.e_phoff, SEEK_SET) < 0) {
+  Elf64_Ehdr ehdr64;
+  if (elf_class_ == ELFCLASS64) {
+    if (fseek(fp, 0, SEEK_SET) < 0) {
+      PrintError("failed to seek back to ELF header");
+      return false;
+    }
+    if (fread(&ehdr64, sizeof(ehdr64), 1, fp) != 1) {
+      PrintError("failed to read ELF64 header");
+      return false;
+    }
+  }
+
+  if (elf_class_ == ELFCLASS32) {
+    machine_ = ehdr32.e_machine;
+  } else {
+    machine_ = ehdr64.e_machine;
+  }
+
+  uint64_t off;
+  if (elf_class_ == ELFCLASS32) {
+    off = ehdr32.e_phoff;
+  } else {
+    off = ehdr64.e_phoff;
+  }
+  if (fseek(fp, off, SEEK_SET) < 0) {
     PrintError("failed to seek to program header");
     return false;
   }
 
-  for (int i = 0; i < ehdr.e_phnum; i++) {
-    ElfW(Phdr) phdr;
-    if (fread(&phdr, sizeof(phdr), 1, fp) != 1) {
-      PrintError("failed to read a program header %d", i);
-      return false;
+  int phnum;
+  if (elf_class_ == ELFCLASS32) {
+    phnum = ehdr32.e_phnum;
+  } else {
+    phnum = ehdr64.e_phnum;
+  }
+  for (int i = 0; i < phnum; i++) {
+    Elf64_Phdr phdr;
+    if (elf_class_ == ELFCLASS32) {
+      Elf32_Phdr phdr32;
+      if (fread(&phdr32, sizeof(phdr32), 1, fp) != 1) {
+        PrintError("failed to read a program header %d", i);
+        return false;
+      }
+      phdr.p_type = phdr32.p_type;
+      phdr.p_offset = phdr32.p_offset;
+      phdr.p_vaddr = phdr32.p_vaddr;
+      phdr.p_paddr = phdr32.p_paddr;
+      phdr.p_filesz = phdr32.p_filesz;
+      phdr.p_memsz = phdr32.p_memsz;
+      phdr.p_flags = phdr32.p_flags;
+      phdr.p_align = phdr32.p_align;
+    } else {
+      if (fread(&phdr, sizeof(phdr), 1, fp) != 1) {
+        PrintError("failed to read a program header %d", i);
+        return false;
+      }
     }
     phdrs->push_back(phdr);
   }
   return true;
 }
 
-bool ElfReader::ReadDynamic(FILE* fp, const std::vector<ElfW(Phdr)>& phdrs,
-                            ElfW(Addr)* straddr, size_t* strsize,
+bool ElfReader::ReadDynamic(FILE* fp, const std::vector<Elf64_Phdr>& phdrs,
+                            Elf64_Addr* straddr, size_t* strsize,
                             std::vector<int>* neededs) {
   bool dynamic_found = false;
   for (size_t i = 0; i < phdrs.size(); i++) {
-    const ElfW(Phdr)& phdr = phdrs[i];
+    const Elf64_Phdr& phdr = phdrs[i];
     if (phdr.p_type != PT_DYNAMIC)
       continue;
 
@@ -117,10 +162,21 @@ bool ElfReader::ReadDynamic(FILE* fp, const std::vector<ElfW(Phdr)>& phdrs,
     }
 
     for (;;) {
-      ElfW(Dyn) dyn;
-      if (fread(&dyn, sizeof(dyn), 1, fp) != 1) {
-        PrintError("failed to read a dynamic entry");
-        return false;
+      Elf64_Dyn dyn;
+      if (elf_class_ == ELFCLASS32) {
+        Elf32_Dyn dyn32;
+        if (fread(&dyn32, sizeof(dyn32), 1, fp) != 1) {
+          PrintError("failed to read a dynamic entry");
+          return false;
+        }
+        dyn.d_tag = dyn32.d_tag;
+        // TODO(bradnelson): This relies on little endian arches, fix.
+        dyn.d_un.d_ptr = dyn32.d_un.d_ptr;
+      } else {
+        if (fread(&dyn, sizeof(dyn), 1, fp) != 1) {
+          PrintError("failed to read a dynamic entry");
+          return false;
+        }
       }
 
       if (dyn.d_tag == DT_NULL)
@@ -150,15 +206,15 @@ bool ElfReader::ReadDynamic(FILE* fp, const std::vector<ElfW(Phdr)>& phdrs,
   return true;
 }
 
-bool ElfReader::ReadStrtab(FILE* fp, const std::vector<ElfW(Phdr)>& phdrs,
-                           ElfW(Addr) straddr, size_t strsize,
+bool ElfReader::ReadStrtab(FILE* fp, const std::vector<Elf64_Phdr>& phdrs,
+                           Elf64_Addr straddr, size_t strsize,
                            std::string* strtab) {
   // DT_STRTAB is specified by a pointer to a virtual address
   // space. We need to convert this value to a file offset. To do
   // this, we find a PT_LOAD segment which contains the address.
-  ElfW(Addr) stroff = 0;
+  Elf64_Addr stroff = 0;
   for (size_t i = 0; i < phdrs.size(); i++) {
-    const ElfW(Phdr)& phdr = phdrs[i];
+    const Elf64_Phdr& phdr = phdrs[i];
     if (phdr.p_type == PT_LOAD &&
         phdr.p_vaddr <= straddr && straddr < phdr.p_vaddr + phdr.p_filesz) {
       stroff = straddr - phdr.p_vaddr + phdr.p_offset;
