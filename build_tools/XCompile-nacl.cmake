@@ -5,6 +5,8 @@
 # If you already have a toolchain file setup, you may use that instead of this
 # file.
 
+SET(NACL 1)
+
 # the name of the target operating system
 SET(CMAKE_SYSTEM_NAME Linux)
 
