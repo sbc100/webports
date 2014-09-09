@@ -138,40 +138,23 @@ static pp::VarDictionary SendRequest(pp::VarDictionary* req) {
 
 // Adds a file into nmf. |key| is the key for open_resource IRT or
 // "program". |filepath| is not a URL yet. JavaScript code is
-// responsible to fix them.
+// responsible to fix them. |arch| is the architecture string.
 static void AddFileToNmf(const std::string& key,
+                         const std::string& arch,
                          const std::string& filepath,
                          pp::VarDictionary* dict) {
-#if defined(__pnacl__)
   pp::VarDictionary url;
   url.Set("url", filepath);
-  pp::VarDictionary translator;
-  translator.Set("pnacl-translator", url);
-  pp::VarDictionary arch;
-  arch.Set("portable", translator);
-  dict->Set(key, arch);
-#else
-# if defined(__x86_64__)
-  static const char kArch[] = "x86-64";
-# elif defined(__i686__)
-  static const char kArch[] = "x86-32";
-# elif defined(__arm__)
-  static const char kArch[] = "arm";
-# else
-#  error "Unknown architecture"
-# endif
-  pp::VarDictionary url;
-  url.Set("url", filepath);
-  pp::VarDictionary arch;
-  arch.Set(kArch, url);
-  dict->Set(key, arch);
-#endif
+  pp::VarDictionary archd;
+  archd.Set(arch, url);
+  dict->Set(key, archd);
 }
 
 static void AddNmfToRequestForShared(
-  std::string prog,
-  const std::vector<std::string>& dependencies,
-  pp::VarDictionary* req) {
+    std::string prog,
+    const std::string& arch,
+    const std::vector<std::string>& dependencies,
+    pp::VarDictionary* req) {
   pp::VarDictionary nmf;
   pp::VarDictionary files;
   const char* prog_base = basename(&prog[0]);
@@ -184,9 +167,9 @@ static void AddNmfToRequestForShared(
     if (strcmp(prog_base, base) == 0)
       base = "main.nexe";
     if (strcmp(base, "runnable-ld.so") == 0) {
-      AddFileToNmf("program", abspath, &nmf);
+      AddFileToNmf("program", arch, abspath, &nmf);
     } else {
-      AddFileToNmf(base, abspath, &files);
+      AddFileToNmf(base, arch, abspath, &files);
     }
   }
   nmf.Set("files", files);
@@ -194,9 +177,24 @@ static void AddNmfToRequestForShared(
 }
 
 static void AddNmfToRequestForStatic(const std::string& prog,
+                                     const std::string& arch,
                                      pp::VarDictionary* req) {
   pp::VarDictionary nmf;
-  AddFileToNmf("program", GetAbsPath(prog), &nmf);
+  AddFileToNmf("program", arch, GetAbsPath(prog), &nmf);
+  req->Set("nmf", nmf);
+}
+
+static void AddNmfToRequestForPNaCl(const std::string& prog,
+                                    pp::VarDictionary* req) {
+  pp::VarDictionary nmf;
+
+  pp::VarDictionary url;
+  url.Set("url", GetAbsPath(prog));
+  pp::VarDictionary translate;
+  translate.Set("pnacl-translate", url);
+  pp::VarDictionary archd;
+  archd.Set("portable", translate);
+  nmf.Set("program", archd);
   req->Set("nmf", nmf);
 }
 
@@ -309,34 +307,25 @@ static bool UseBuiltInFallback(std::string* prog, pp::VarDictionary* req) {
   return false;
 }
 
-// Set the naclType of the request, ideally based on the executable header.
-static void LabelNaClType(const std::string& filename, pp::VarDictionary* req) {
+// Check if a file is a pnacl type file.
+// If the file can't be read, return false.
+static bool IsPNaClType(const std::string& filename) {
   // Open script.
   int fh = open(filename.c_str(), O_RDONLY);
   if (fh < 0) {
-    // Default to current nacl type if the file can't be read.
-#if defined(__pnacl__)
-    req->Set("naclType", "pnacl");
-#else
-    req->Set("naclType", "nacl");
-#endif
-    return;
+    // Default to nacl type if the file can't be read.
+    return false;
   }
   // Read first 4 bytes.
   char buffer[4];
   ssize_t len = read(fh, buffer, sizeof buffer);
   close(fh);
   // Decide based on the header.
-  if (len == 4 && memcmp(buffer, "PEXE", sizeof buffer) == 0) {
-    req->Set("naclType", "pnacl");
-  } else {
-    req->Set("naclType", "nacl");
-  }
+  return len == 4 && memcmp(buffer, "PEXE", sizeof buffer) == 0;
 }
 
 // Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
 static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
-  LabelNaClType(prog, req);
   if (UseBuiltInFallback(&prog, req)) {
     return true;
   }
@@ -349,22 +338,27 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
     return false;
   }
 
-  // Relabel nacl/pnacl and check fallback again in case of #! expanded
-  // to something else.
-  LabelNaClType(prog, req);
+  // Check fallback again in case of #! expanded to something else.
   if (UseBuiltInFallback(&prog, req)) {
     return true;
   }
 
+  // Check for pnacl.
+  if (IsPNaClType(prog)) {
+    AddNmfToRequestForPNaCl(prog, req);
+    return true;
+  }
+
+  std::string arch;
   std::vector<std::string> dependencies;
-  if (!FindLibraryDependencies(prog, &dependencies))
+  if (!FindArchAndLibraryDependencies(prog, &arch, &dependencies))
     return false;
   if (!dependencies.empty()) {
-    AddNmfToRequestForShared(prog, dependencies, req);
+    AddNmfToRequestForShared(prog, arch, dependencies, req);
     return true;
   }
   // No dependencies means the main binary is statically linked.
-  AddNmfToRequestForStatic(prog, req);
+  AddNmfToRequestForStatic(prog, arch, req);
   return true;
 }
 

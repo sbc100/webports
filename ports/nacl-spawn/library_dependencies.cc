@@ -27,19 +27,36 @@ static bool GetLibraryPaths(std::vector<std::string>* paths) {
   return true;
 }
 
-static bool FindLibraryDependenciesImpl(
-  const std::string& filename,
-  const std::vector<std::string>& paths,
-  std::set<std::string>* dependencies) {
+static bool FindArchAndLibraryDependenciesImpl(
+    const std::string& filename,
+    const std::vector<std::string>& paths,
+    std::string* arch,
+    std::set<std::string>* dependencies) {
   if (!dependencies->insert(filename).second) {
     // We have already added this file.
     return true;
   }
 
   ElfReader elf_reader(filename.c_str());
+
   if (!elf_reader.is_valid()) {
     errno = ENOEXEC;
     return false;
+  }
+
+  Elf64_Half machine = elf_reader.machine();
+  if (machine != EM_X86_64 && machine != EM_386 && machine != EM_ARM) {
+    errno = ENOEXEC;
+    return false;
+  }
+  if (arch) {
+    if (machine == EM_X86_64) {
+      *arch = "x86-64";
+    } else if (machine == EM_386) {
+      *arch = "x86-32";
+    } else if (machine == EM_ARM) {
+      *arch = "arm";
+    }
   }
 
   if (elf_reader.is_static()) {
@@ -67,7 +84,8 @@ static bool FindLibraryDependenciesImpl(
       // ld-runnable.so (which has ld-nacl-*.so.1 as its SONAME), they will
       // already have this dependency, so we can ignore it.
     } else if (GetFileInPaths(needed_name, paths, &needed_path)) {
-      if (!FindLibraryDependenciesImpl(needed_path, paths, dependencies))
+      if (!FindArchAndLibraryDependenciesImpl(
+            needed_path, paths, NULL, dependencies))
         return false;
     } else {
       fprintf(stderr, "%s: library not found\n", needed_name.c_str());
@@ -78,13 +96,15 @@ static bool FindLibraryDependenciesImpl(
   return true;
 }
 
-bool FindLibraryDependencies(const std::string& filename,
-                             std::vector<std::string>* dependencies) {
+bool FindArchAndLibraryDependencies(const std::string& filename,
+                                    std::string* arch,
+                                    std::vector<std::string>* dependencies) {
   std::vector<std::string> paths;
   GetLibraryPaths(&paths);
 
   std::set<std::string> dep_set;
-  if (!FindLibraryDependenciesImpl(filename.c_str(), paths, &dep_set))
+  if (!FindArchAndLibraryDependenciesImpl(
+        filename.c_str(), paths, arch, &dep_set))
     return false;
   dependencies->assign(dep_set.begin(), dep_set.end());
 
@@ -122,8 +142,9 @@ int main(int argc, char* argv[]) {
   // For test.
   setenv("LD_LIBRARY_PATH", ".", 0);
 
+  std::string arch;
   std::vector<std::string> dependencies;
-  if (!FindLibraryDependencies(argv[1], &dependencies)) {
+  if (!FindArchAndLibraryDependencies(argv[1], &arch, &dependencies)) {
     perror("failed");
     return 1;
   }

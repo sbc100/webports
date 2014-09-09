@@ -9,11 +9,13 @@
 #include <vector>
 
 // Finds shared objects which are necessary to run |filename|.
+// Also finds the architecture string |arch|.
 // Output paths will be stored in |dependencies|. |filename| will be
 // in |dependencies| if |filename| is dynamically linked. Otherwise,
 // |dependencies| will be empty. Returns false and update errno
 // appropriately on error.
-bool FindLibraryDependencies(const std::string& filename,
-                             std::vector<std::string>* dependencies);
+bool FindArchAndLibraryDependencies(const std::string& filename,
+                                    std::string* arch,
+                                    std::vector<std::string>* dependencies);
 
 #endif  // NACL_SPAWN_LIBRARY_DEPENDENCIES_
