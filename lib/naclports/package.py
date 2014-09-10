@@ -422,16 +422,11 @@ class Package(object):
 
 DEFAULT_LOCATIONS = ('ports', 'ports/python_modules')
 
-def PackageIterator(folders=None):
-  """Iterator which yield a Package object for each
-  naclport package."""
-  if not folders:
-    folders = [os.path.join(NACLPORTS_ROOT, d) for d in DEFAULT_LOCATIONS]
-
-  for folder in folders:
-    for root, dirs, files in os.walk(folder):
-      if 'pkg_info' in files:
-        yield Package(root)
+def PackageIterator():
+  """Iterator which yields a Package object for each naclport package."""
+  for root, _, files in os.walk(os.path.join(NACLPORTS_ROOT, 'ports')):
+    if 'pkg_info' in files:
+      yield Package(root)
 
 
 def CreatePackage(package_name, config=None):
