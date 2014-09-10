@@ -5,11 +5,17 @@
 BUILD_DIR=${SRC_DIR}
 
 ConfigureStep() {
+  if [ "${NACL_LIBC}" != "newlib" ]; then
+    return
+  fi
   LogExecute cp -rf ${START_DIR}/* .
   LogExecute rm -rf out
 }
 
 BuildStep() {
+  if [ "${NACL_LIBC}" != "newlib" ]; then
+    return
+  fi
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -20,6 +26,9 @@ BuildStep() {
 }
 
 InstallStep() {
+  if [ "${NACL_LIBC}" != "newlib" ]; then
+    return
+  fi
   local LIB=libglibc-compat.a
   INCDIR=${DESTDIR_INCLUDE}/glibc-compat
   MakeDir ${DESTDIR_LIB}

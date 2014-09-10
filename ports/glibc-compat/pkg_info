@@ -1,3 +1,2 @@
 NAME=glibc-compat
 VERSION=0.1
-LIBC=newlib
