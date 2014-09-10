@@ -138,10 +138,7 @@ class Package(object):
     for dep in self.DEPENDS:
       if not naclports.IsInstalled(dep, self.config) or force == 'all':
         dep = CreatePackage(dep, self.config)
-        try:
-          dep.Install(True, force, from_source)
-        except DisabledError as e:
-          Log(str(e))
+        dep.Install(True, force, from_source)
 
   def PackageFile(self):
     fullname = [os.path.join(PACKAGES_ROOT, self.NAME)]
@@ -386,6 +383,13 @@ class Package(object):
       if naclports.IsInstalled(conflicting_package, self.config):
         raise PkgConflictError("%s: conflicts with installed package: %s" %
             (self.NAME, conflicting_package))
+
+    for dep_name in self.DEPENDS:
+      try:
+        dep = CreatePackage(dep_name, self.config)
+        dep.CheckInstallable()
+      except DisabledError as e:
+        raise DisabledError("%s depends on %s; %s" % (self.NAME, dep_name, e))
 
   def CheckBuildable(self):
     self.CheckInstallable()

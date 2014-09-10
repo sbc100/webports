@@ -1,6 +1,4 @@
 NAME=python3-ppapi
 VERSION=0.1
 LICENSE=BSD
-# Disabled for bionic due to python3.
-DISABLED_LIBC=(bionic)
 DEPENDS=(python3 libtar nacl-spawn)
