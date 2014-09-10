@@ -1,7 +1,7 @@
 NAME=x264
-VERSION=snapshot-20091023-2245
-URL=http://downloads.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20091023-2245.tar.bz2
+VERSION=snapshot-20140829-2245-stable
+URL=http://downloads.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20140829-2245-stable.tar.bz2
 LICENSE=GPL2
 # log2f undefined with bionic.
 DISABLED_LIBC=(bionic)
-SHA1=3ed3b9804822b8ff16374aee18c91a8750902341
+SHA1=3c749f5264b1eb5913fbe5a2182167d388628d83
