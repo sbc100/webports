@@ -45,7 +45,7 @@ NACLPORTS_ARGS="-v --ignore-disabled --from-source"
 BuildPackage() {
   PACKAGE=$1
   shift
-  if RunCmd bin/naclports install $PACKAGE $NACLPORTS_ARGS $*; then
+  if RunCmd bin/naclports $NACLPORTS_ARGS $* install $PACKAGE; then
     BuildSuccess $PACKAGE
   else
     BuildFailure $PACKAGE
@@ -78,7 +78,7 @@ InstallPackageMultiArch() {
       BuildFailure $1
       return
     fi
-    if ! RunCmd bin/naclports install $NACLPORTS_ARGS $1 ; then
+    if ! RunCmd bin/naclports $NACLPORTS_ARGS install $1 ; then
       # Early exit if one of the architecures fails. This mean the
       # failure is always at the end of the build step.
       BuildFailure $1
