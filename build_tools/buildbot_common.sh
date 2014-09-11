@@ -11,7 +11,7 @@ cd ${BASE_DIR}
 
 UPLOAD_PATH=naclports/builds/${PEPPER_DIR}/
 if [ -d .git ]; then
-  UPLOAD_PATH+=`git number`-`git rev-parse --short HEAD`
+  UPLOAD_PATH+=$(git describe)
 else
   UPLOAD_PATH+=${BUILDBOT_GOT_REVISION}
 fi

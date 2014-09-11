@@ -879,18 +879,7 @@ SetupCrossEnvironment() {
 GetRevision() {
   cd ${NACL_SRC}
   if [ -d .git ]; then
-    # TODO(sbc): find a replacement for git number.  It seems that its not
-    # designed for normal use like this.  'git describe' would work but
-    # requires a tag in the git repo which we currently don't have.
-    if ! git config user.name > /dev/null; then
-      echo "setting user.name"
-      git config user.name local_bot
-    fi
-    if ! git config user.email > /dev/null; then
-      echo "setting user.email"
-      git config user.email local_bot@example.com
-    fi
-    REV_RAW=$(CHROME_HEADLESS=1 git number)
+    REV_RAW=$(git describe)
   else
     REV_RAW=$(svnversion)
   fi
