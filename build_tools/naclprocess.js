@@ -50,13 +50,15 @@ function NaClProcessManager() {
   // TODO(bradnelson): Restructure to make sure this isn't racey.
   // NaCl Architecture.
   self.naclArch = null;
-  chrome.runtime.getPlatformInfo(function(platformInfo) {
-    self.naclArch = {
-      'x86-32': 'i686',
-      'x86-64': 'x86_64',
-      'arm': 'arm',
-    }[platformInfo.nacl_arch] || platformInfo.nacl_arch;
-  });
+  if (chrome.runtime.getPlatformInfo) {
+    chrome.runtime.getPlatformInfo(function(platformInfo) {
+      self.naclArch = {
+        'x86-32': 'i686',
+        'x86-64': 'x86_64',
+        'arm': 'arm',
+      }[platformInfo.nacl_arch] || platformInfo.nacl_arch;
+    });
+  }
 };
 
 /**
@@ -859,10 +861,12 @@ NaClProcessManager.prototype.spawn = function(
 
   envs.push('NACL_PID=' + fg.pid);
   envs.push('NACL_PPID=' + ppid);
-  if (this.naclArch === null) {
-    throw new Error('naclArch not yet set, race in startup\n');
+  if (chrome.runtime.getPlatformInfo) {
+    if (this.naclArch === null) {
+      throw new Error('naclArch not yet set, race in startup\n');
+    }
+    envs.push('NACL_ARCH=' + this.naclArch);
   }
-  envs.push('NACL_ARCH=' + this.naclArch);
 
   for (var i = 0; i < envs.length; i++) {
     var env = envs[i];
