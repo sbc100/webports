@@ -816,7 +816,7 @@ SetupSDKBuildSystem() {
   export NACL_PACKAGES_PUBLISH
   export NACL_SRC
   export NACLPORTS_INCLUDE
-  export NACLPORTS_REVISION=${REVISION}
+  export NACLPORTS_REVISION=${FULL_REVISION}
   export PKG_CONFIG_LIBDIR="${NACLPORTS_LIBDIR}/pkgconfig"
   export ENABLE_BIONIC=1
   # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.
@@ -878,15 +878,9 @@ SetupCrossEnvironment() {
 
 GetRevision() {
   cd ${NACL_SRC}
-  if [ -d .git ]; then
-    REV_RAW=$(git describe)
-  else
-    REV_RAW=$(svnversion)
-  fi
+  FULL_REVISION=$(git describe)
+  REVISION=$(echo $FULL_REVISION | cut  -f2 -d-)
   cd - > /dev/null
-  # The svn revision can have a trailing M when there are modifications, such
-  # as during a try run. Remove it so we get a valid extension version.
-  REVISION=${REV_RAW/M/}
 }
 
 
@@ -1462,7 +1456,7 @@ PackageStep() {
   echo "BUILD_ARCH=${NACL_ARCH}" >> ${INSTALL_DIR}/pkg_info
   echo "BUILD_TOOLCHAIN=${TOOLCHAIN}" >> ${INSTALL_DIR}/pkg_info
   echo "BUILD_SDK_VERSION=${NACL_SDK_VERSION}" >> ${INSTALL_DIR}/pkg_info
-  echo "BUILD_NACLPORTS_REVISION=${REVISION}" >> ${INSTALL_DIR}/pkg_info
+  echo "BUILD_NACLPORTS_REVISION=${FULL_REVISION}" >> ${INSTALL_DIR}/pkg_info
   LogExecute tar cjf ${PACKAGE_FILE} -C ${INSTALL_DIR} .
 }
 
