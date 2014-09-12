@@ -375,25 +375,16 @@ static int GetInt(pp::VarDictionary dict, const char* key) {
   return value;
 }
 
-// Spawn a new NaCl process. This is an alias for
-// spawnve(mode, path, argv, NULL). Returns 0 on success. On error -1 is
-// returned and errno will be set appropriately.
-int spawnv(int mode, const char* path, char* const argv[]) {
-  return spawnve(mode, path, argv, NULL);
-}
-
-// Spawn a new NaCl process by asking JavaScript. This function lacks
-// a lot of features posix_spawn supports (e.g., handling FDs).
-// Returns 0 on success. On error -1 is returned and errno will be set
-// appropriately.
-int spawnve(int mode, const char* path,
-            char* const argv[], char* const envp[]) {
+// Shared spawnve implementation. Declared static so that shared library
+// overrides doesn't break calls meant to be internal to this implementation.
+static int spawnve_impl(int mode, const char* path,
+                        char* const argv[], char* const envp[]) {
   if (NULL == path || NULL == argv[0]) {
     errno = EINVAL;
     return -1;
   }
   if (mode == P_WAIT) {
-    int pid = spawnve(P_NOWAIT, path, argv, envp);
+    int pid = spawnve_impl(P_NOWAIT, path, argv, envp);
     if (pid < 0) {
       return -1;
     }
@@ -437,21 +428,22 @@ int spawnve(int mode, const char* path,
   return GetInt(SendRequest(&req), "pid");
 }
 
-extern "C" {
-
-#if defined(__GLIBC__)
-pid_t wait(void* status) {
-#else
-pid_t wait(int* status) {
-#endif
-  return waitpid(-1, static_cast<int*>(status), 0);
+// Spawn a new NaCl process. This is an alias for
+// spawnve(mode, path, argv, NULL). Returns 0 on success. On error -1 is
+// returned and errno will be set appropriately.
+int spawnv(int mode, const char* path, char* const argv[]) {
+  return spawnve_impl(mode, path, argv, NULL);
 }
 
-// Waits for the specified pid. The semantics of this function is as
-// same as waitpid, though this implementation has some restrictions.
-// Returns 0 on success. On error -1 is returned and errno will be set
-// appropriately.
-pid_t waitpid(int pid, int* status, int options) {
+int spawnve(int mode, const char* path,
+            char* const argv[], char* const envp[]) {
+  return spawnve_impl(mode, path, argv, envp);
+}
+
+// Shared below by waitpid and wait.
+// Done as a static so that users that replace waitpid and call wait (gcc)
+// don't cause infinite recursion.
+static pid_t waitpid_impl(int pid, int* status, int options) {
   pp::VarDictionary req;
   pp::VarDictionary result;
   req.Set("command", "nacl_wait");
@@ -467,6 +459,24 @@ pid_t waitpid(int pid, int* status, int options) {
     *status = (rawStatus & 0xff) << 8;
   }
   return resultPid;
+}
+
+extern "C" {
+
+#if defined(__GLIBC__)
+pid_t wait(void* status) {
+#else
+pid_t wait(int* status) {
+#endif
+  return waitpid_impl(-1, static_cast<int*>(status), 0);
+}
+
+// Waits for the specified pid. The semantics of this function is as
+// same as waitpid, though this implementation has some restrictions.
+// Returns 0 on success. On error -1 is returned and errno will be set
+// appropriately.
+pid_t waitpid(int pid, int* status, int options) {
+  return waitpid_impl(pid, status, options);
 }
 
 // Get the process ID of the calling process.
@@ -491,7 +501,7 @@ int posix_spawn(
     const posix_spawn_file_actions_t* file_actions,
     const posix_spawnattr_t* attrp,
     char* const argv[], char* const envp[]) {
-  int ret = spawnve(P_NOWAIT, path, argv, envp);
+  int ret = spawnve_impl(P_NOWAIT, path, argv, envp);
   if (ret < 0) {
     return ret;
   }
