@@ -79,9 +79,10 @@ struct termio
 #define TCGETA		0x5405
 #define TCSETA		0x5406
 
-/* end olonho hack */
-
 #define FIONREAD 0x541B
+#define FIONBIO 0x5421
+
+/* end olonho hack */
 
 #ifdef __cplusplus
 extern "C" {

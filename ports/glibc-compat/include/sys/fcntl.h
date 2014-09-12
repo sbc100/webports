@@ -8,7 +8,16 @@
 
 #include_next <sys/fcntl.h>
 
-#define FIONBIO O_NONBLOCK
-#define creat(pathname, mode) open(pathname, O_CREAT|O_WRONLY|O_TRUNC, mode)
+#include <sys/cdefs.h>
+
+__BEGIN_DECLS
+
+/* NaCl's fcntl doesn't include creat() declaration
+ * TOOD(sbc): remove this once this gets fixed:
+ * https://code.google.com/p/nativeclient/issues/detail?id=3945
+ */
+int creat(const char *pathname, mode_t mode);
+
+__END_DECLS
 
 #endif  /* GLIBCEMU_SYS_FCNTL_H */
