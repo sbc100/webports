@@ -7,6 +7,8 @@
 /* Define a typical entry point for command line tools spawned by bash
  * (e.g., ls, objdump, and objdump). */
 
+#include "nacl_main.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -22,7 +24,7 @@
 #include "nacl_io/nacl_io.h"
 #include "ppapi_simple/ps_main.h"
 
-extern int nacl_main(int argc, char *argv[]);
+extern char** environ;
 
 int nacl_spawn_pid;
 int nacl_spawn_ppid;
@@ -118,7 +120,7 @@ int cli_main(int argc, char* argv[]) {
   nacl_spawn_pid = getenv_as_int("NACL_PID");
   nacl_spawn_ppid = getenv_as_int("NACL_PPID");
 
-  return nacl_main(argc, argv);
+  return nacl_main(argc, argv, environ);
 }
 
 PPAPI_SIMPLE_REGISTER_MAIN(cli_main)

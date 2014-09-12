@@ -15,8 +15,11 @@ extern "C" {
 
 /*
  * Entry point expected by libcli_main.a
+ * Using C declaration so that variantions in arguments work.
+ * Ensure default visibility in case a module is build with default hidden
+ * visibility.
  */
-extern int nacl_main(int argc, char* argv[]);
+extern __attribute__ (( visibility("default") )) int nacl_main();
 
 /*
  * Untar a startup bundle to a particular root.

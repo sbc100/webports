@@ -2,6 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -include nacl_main.h"
+export LIBS+=" -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} -lnacl_spawn \
+  -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
+
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -D_POSIX_VERSION"
 fi
