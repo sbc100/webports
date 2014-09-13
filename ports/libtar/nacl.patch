@@ -101,7 +101,7 @@ index 13b3ed0..f37c307 100644
  
  
 diff --git a/lib/extract.c b/lib/extract.c
-index 6bbb801..4ae276d 100644
+index 6bbb801..2d8b571 100644
 --- a/lib/extract.c
 +++ b/lib/extract.c
 @@ -28,6 +28,22 @@
@@ -127,7 +127,25 @@ index 6bbb801..4ae276d 100644
  struct linkname
  {
  	char ln_save[MAXPATHLEN];
-@@ -117,6 +133,7 @@ tar_extract_file(TAR *t, char *realname)
+@@ -74,10 +90,17 @@ tar_set_file_perms(TAR *t, char *realname)
+ 	/* change access/modification time */
+ 	if (!TH_ISSYM(t) && utime(filename, &ut) == -1)
+ 	{
++          /* TODO(bradnelson): Remove this when all mounts support utime. */
++#if !defined(__native_client__)
++          if (errno != ENOSYS && errno != EINVAL) {
++#endif
+ #ifdef DEBUG
+ 		perror("utime()");
+ #endif
+ 		return -1;
++#if !defined(__native_client__)
++          }
++#endif
+ 	}
+ 
+ 	/* change permissions */
+@@ -117,6 +140,7 @@ tar_extract_file(TAR *t, char *realname)
  		if (i == 1)
  			i = 0;
  	}
@@ -135,7 +153,7 @@ index 6bbb801..4ae276d 100644
  	else if (TH_ISLNK(t))
  		i = tar_extract_hardlink(t, realname);
  	else if (TH_ISSYM(t))
-@@ -127,6 +144,7 @@ tar_extract_file(TAR *t, char *realname)
+@@ -127,6 +151,7 @@ tar_extract_file(TAR *t, char *realname)
  		i = tar_extract_blockdev(t, realname);
  	else if (TH_ISFIFO(t))
  		i = tar_extract_fifo(t, realname);
@@ -143,7 +161,7 @@ index 6bbb801..4ae276d 100644
  	else /* if (TH_ISREG(t)) */
  		i = tar_extract_regfile(t, realname);
  
-@@ -282,6 +300,7 @@ tar_skip_regfile(TAR *t)
+@@ -282,6 +307,7 @@ tar_skip_regfile(TAR *t)
  }
  
  
@@ -151,7 +169,7 @@ index 6bbb801..4ae276d 100644
  /* hardlink */
  int
  tar_extract_hardlink(TAR * t, char *realname)
-@@ -436,6 +455,7 @@ tar_extract_blockdev(TAR *t, char *realname)
+@@ -436,6 +462,7 @@ tar_extract_blockdev(TAR *t, char *realname)
  
  	return 0;
  }
@@ -159,7 +177,7 @@ index 6bbb801..4ae276d 100644
  
  
  /* directory */
-@@ -493,6 +513,7 @@ tar_extract_dir(TAR *t, char *realname)
+@@ -493,6 +520,7 @@ tar_extract_dir(TAR *t, char *realname)
  }
  
  
@@ -167,7 +185,7 @@ index 6bbb801..4ae276d 100644
  /* FIFO */
  int
  tar_extract_fifo(TAR *t, char *realname)
-@@ -525,5 +546,6 @@ tar_extract_fifo(TAR *t, char *realname)
+@@ -525,5 +553,6 @@ tar_extract_fifo(TAR *t, char *realname)
  
  	return 0;
  }
