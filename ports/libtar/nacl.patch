@@ -132,14 +132,14 @@ index 6bbb801..2d8b571 100644
  	if (!TH_ISSYM(t) && utime(filename, &ut) == -1)
  	{
 +          /* TODO(bradnelson): Remove this when all mounts support utime. */
-+#if !defined(__native_client__)
++#if defined(__native_client__)
 +          if (errno != ENOSYS && errno != EINVAL) {
 +#endif
  #ifdef DEBUG
  		perror("utime()");
  #endif
  		return -1;
-+#if !defined(__native_client__)
++#if defined(__native_client__)
 +          }
 +#endif
  	}
