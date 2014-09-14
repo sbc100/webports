@@ -13,25 +13,25 @@ set -e
 shopt -s nullglob
 
 STORAGE_URL=https://naclports.storage.googleapis.com/builds
-DEFAULT_SDK_VERSION=pepper_38
-DEFAULT_REVISION=1451
+DEFAULT_SDK_VERSION=${DEFAULT_SDK_VERSION:-pepper_39}
+DEFAULT_REVISION=${DEFAULT_REVISION:-trunk-17-g6eb7892}
 DEFAULT_SOURCE="${STORAGE_URL}/${DEFAULT_SDK_VERSION}/\
 ${DEFAULT_REVISION}/publish"
+DS="${DEFAULT_SOURCE}"
 
-# Pairs of <package-name>:<package-subdir>
+OLD_SDK_VERSION=pepper_38
+OLD_REVISION=1451
+OLD_SOURCE="${STORAGE_URL}/${OLD_SDK_VERSION}/${OLD_REVISION}/publish"
+
+# TODO(bradnelson): Roll forward python and git when they are fixed.
+# Special cases for certain packages.
+# Pairs of <package-name>:<source>:<package-subdir>
 PACKAGE_INFO="\
-coreutils:newlib/${NACL_ARCH}.zip \
-curl:newlib.zip \
-git:newlib.zip \
-lua:newlib/lua.zip \
-make:newlib.zip \
-mingn.base:glibc/tarballs/base.${NACL_ARCH}.zip \
-mingn.lib:glibc/tarballs/lib.all.zip \
-nano:newlib.zip \
-nethack:newlib.zip \
-python:newlib/python.zip \
-ruby:newlib/ruby.zip \
-vim:newlib.zip"
+coreutils|${DS}|newlib/${NACL_ARCH}.zip \
+git|${OLD_SOURCE}|newlib.zip \
+mingn.base|${DS}|glibc/tarballs/base.${NACL_ARCH}.zip \
+mingn.lib|${DS}|glibc/tarballs/lib.all.zip \
+python|${OLD_SOURCE}|newlib/python.zip"
 
 RemoveDir() {
   local path="$1"
@@ -44,15 +44,17 @@ RemoveDir() {
 InstallPackage() {
   local package="$1"
   local subdir="newlib.zip"
+  local source_base="${PACKAGE_SOURCE}"
 
   for info in ${PACKAGE_INFO}; do
-    local info_array=(${info//:/ })
+    local info_array=(${info//|/ })
     if [ "${package}" = "${info_array[0]}" ]; then
-      subdir="${info_array[1]}"
+      source_base="${info_array[1]}"
+      subdir="${info_array[2]}"
     fi
   done
 
-  local url=${PACKAGE_SOURCE}/${package}/${subdir}
+  local url=${source_base}/${package}/${subdir}
   local package_dir=/mnt/html5/packages/${package}.${NACL_ARCH}
   local clobber=1
 
@@ -77,7 +79,7 @@ InstallPackage() {
     local package_inside=${package_dir}
   fi
 
-  if [ -d ${url_stamp} ]; then
+  if [[ ${PACKAGE_FORCE} != 1 && -d ${url_stamp} ]]; then
     # Package is up to date.
     return
   fi
@@ -139,12 +141,12 @@ function InstallPackages() {
 }
 
 function Usage() {
-  echo "Usage: $0 [options]" 2>&1
-  echo "  -i <package> = install package" 2>&1
-  echo "  -s <source> = alternate package source" 2>&1
-  echo "  -L = local package source (use with make run in naclports)" 2>&1
-  echo "  -f = force install" 2>&1
-  echo "  -h = help" 2>&1
+  echo "Usage: $0 [options]"
+  echo "  -i <package> = install package"
+  echo "  -s <source> = alternate package source"
+  echo "  -L = local package source (use with make run in naclports)"
+  echo "  -f = force install"
+  echo "  -h = help"
   exit 1
 }
 
@@ -174,11 +176,11 @@ while getopts "s:i:hLf" o; do
 done
 shift $((OPTIND-1))
 if [ "$*" != "" ]; then
-  echo "Bad Options: $*" 2>&1
+  echo "Bad Options: $*"
   Usage
 fi
 if [ "${PACKAGE_LIST}" = "" ]; then
-  echo "No packages selected." 2>&1
+  echo "No packages selected."
   Usage
 fi
 InstallPackages

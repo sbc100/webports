@@ -19,6 +19,8 @@ LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
 export LD_LIBRARY_PATH
 export LIBRARY_PATH=${LD_LIBRARY_PATH}
 export PATH=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
+# TODO(bradnelson): Figure out why this is now needed to find cc1.
+PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/libexec/gcc/x86_64-nacl/4.4.3
 PATH+=:/mnt/html5/coreutils.${NACL_ARCH}
 PATH+=:/mnt/http
 

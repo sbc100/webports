@@ -6,8 +6,8 @@
 MAKE_TARGETS="V=1"
 BUILD_DIR=${SRC_DIR}
 export CROSS_COMPILE=1
-EXTLIBS="-lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -lcli_main"
-export EXTLIBS="-Wl,--start-group $EXTLIBS -Wl,--end-group"
+export EXTLIBS+="${NACL_CLI_MAIN_LIB} \
+-lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
 if [ "${NACL_SHARED}" != "1" ]; then
   # These are needed so that the configure can detect libcurl when statically
