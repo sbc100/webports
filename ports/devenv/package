@@ -14,7 +14,7 @@ shopt -s nullglob
 
 STORAGE_URL=https://naclports.storage.googleapis.com/builds
 DEFAULT_SDK_VERSION=${DEFAULT_SDK_VERSION:-pepper_39}
-DEFAULT_REVISION=${DEFAULT_REVISION:-trunk-17-g6eb7892}
+DEFAULT_REVISION=${DEFAULT_REVISION:-trunk-18-gfe25716}
 DEFAULT_SOURCE="${STORAGE_URL}/${DEFAULT_SDK_VERSION}/\
 ${DEFAULT_REVISION}/publish"
 DS="${DEFAULT_SOURCE}"
@@ -23,12 +23,11 @@ OLD_SDK_VERSION=pepper_38
 OLD_REVISION=1451
 OLD_SOURCE="${STORAGE_URL}/${OLD_SDK_VERSION}/${OLD_REVISION}/publish"
 
-# TODO(bradnelson): Roll forward python and git when they are fixed.
+# TODO(bradnelson): Roll forward python when regression fixed.
 # Special cases for certain packages.
 # Pairs of <package-name>:<source>:<package-subdir>
 PACKAGE_INFO="\
 coreutils|${DS}|newlib/${NACL_ARCH}.zip \
-git|${OLD_SOURCE}|newlib.zip \
 mingn.base|${DS}|glibc/tarballs/base.${NACL_ARCH}.zip \
 mingn.lib|${DS}|glibc/tarballs/lib.all.zip \
 python|${OLD_SOURCE}|newlib/python.zip"
