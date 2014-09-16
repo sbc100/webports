@@ -284,10 +284,13 @@ InjectSystemHeaders() {
   MakeDir ${NACLPORTS_INCLUDE}
   for INC in $(find ${TC_INCLUDES} -type f); do
     INC=${INC#${TC_INCLUDES}}
-    if ! cmp ${TC_INCLUDES}${INC} ${NACLPORTS_INCLUDE}${INC} > /dev/null; then
-      MakeDir $(dirname ${NACLPORTS_INCLUDE}${INC})
-      LogExecute cp ${TC_INCLUDES}${INC} ${NACLPORTS_INCLUDE}${INC}
+    if [ -f ${NACLPORTS_INCLUDE}${INC} ]; then
+      if cmp ${TC_INCLUDES}${INC} ${NACLPORTS_INCLUDE}${INC} > /dev/null; then
+        continue
+      fi
     fi
+    MakeDir $(dirname ${NACLPORTS_INCLUDE}${INC})
+    LogExecute install  -m 644 ${TC_INCLUDES}${INC} ${NACLPORTS_INCLUDE}${INC}
   done
 }
 
