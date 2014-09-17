@@ -295,15 +295,22 @@ def FixupCanned(partitions):
 
 
 def PrintCanned(index, parts):
+  canned = GetCanned(index, parts)
+  print ' '.join(canned)
+
+
+def GetCanned(index, parts):
   assert index >= 0 and index < parts, [index, parts]
   partitions = LoadCanned(parts)
   partitions = FixupCanned(partitions)
   Trace("Found %d packages for shard %d" % (len(partitions[index]), index))
-  print ' '.join(partitions[index])
+  return partitions[index]
 
 
 def main(args):
   parser = optparse.OptionParser()
+  parser.add_option('--check', action='store_true',
+                    help='check canned partition information is up-to-date.')
   parser.add_option('-v', '--verbose', action='store_true',
                     help='Output extra information.')
   parser.add_option('-t', '--print-canned', type='int',
@@ -327,6 +334,14 @@ def main(args):
 
   global verbose
   verbose = options.verbose
+
+  if options.check:
+    for num_bots in xrange(1, 6):
+      print 'Checking partioning with %d bot(s)' % (num_bots)
+      # GetCanned with raise an Error if the canned partition information is
+      # bad, which in turn will trigger a non-zero return from this script.
+      GetCanned(0, num_bots)
+    return
 
   if options.print_canned is not None:
     PrintCanned(options.print_canned, options.num_bots)

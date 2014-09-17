@@ -16,14 +16,10 @@ _EXCLUDED_PATHS = (
 )
 
 def CheckBuildbot(input_api, output_api):
-  # Test various partition sizes.
-  for parts in xrange(1, 6):
-    for index in range(parts):
-      cmd = ['build_tools/partition.py', '-t', str(index), '-n', str(parts)]
-      try:
-        subprocess.check_call(cmd, stdout=open(os.devnull, 'w'))
-      except subprocess.CalledProcessError as e:
-        return [output_api.PresubmitError('%s failed' % str(cmd))]
+  try:
+    subprocess.check_call(['build_tools/partition.py', '--check'])
+  except subprocess.CalledProcessError as e:
+    return [output_api.PresubmitError('%s failed' % str(cmd))]
   return []
 
 
