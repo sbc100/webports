@@ -33,7 +33,4 @@ publish: $(NEXE)
 clean:
 	rm -f *.o $(NEXE)
 
-run:
-	cd $(PUBLISH_DIR) && $(NACL_SDK_ROOT)/tools/httpd.py --no_dir_check
-
 .PHONY: clean publish all run

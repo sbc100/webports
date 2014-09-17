@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-#
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-#
 
 """A tiny web server.
 
@@ -23,47 +21,32 @@ import shutil
 # via the loop back interface.
 SERVER_PORT = 5103
 SERVER_HOST = ''
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.dirname(SCRIPT_DIR)
 
-# We only run from the examples directory (the one that contains scons-out), so
-# that not too much is exposed via this HTTP server.  Everything in the
-# directory is served, so there should never be anything potentially sensitive
-# in the serving directory, especially if the machine might be a
-# multi-user machine and not all users are trusted.  We only serve via
-# the loopback interface.
-
-SAFE_DIR_COMPONENTS = ['out', 'publish']
-SAFE_DIR_SUFFIX = os.path.join(*SAFE_DIR_COMPONENTS)
-
-def SanityCheckDirectory():
-  if os.getcwd().endswith(SAFE_DIR_SUFFIX):
-    return
-  logging.error('httpd.py should only be run from the %s', SAFE_DIR_SUFFIX)
-  logging.error('directory for testing purposes.')
-  logging.error('We are currently in %s', os.getcwd())
-  sys.exit(1)
-
-
-# An HTTP server that will quit when |is_running| is set to False.  We also use
-# SocketServer.ThreadingMixIn in order to handle requests asynchronously for
-# faster responses.
 class QuittableHTTPServer(SocketServer.ThreadingMixIn,
                           BaseHTTPServer.HTTPServer):
+  """An HTTP server that will quit when |is_running| is set to False.
+
+  We also use SocketServer.ThreadingMixIn in order to handle requests
+  asynchronously for faster responses."""
   pass
 
 
-# "Safely" split a string at |sep| into a [key, value] pair.  If |sep| does not
-# exist in |str|, then the entire |str| is the key and the value is set to an
-# empty string.
 def KeyValuePair(str, sep='='):
+  """"Safely" split a string at |sep| into a [key, value] pair.
+
+  If |sep| does not exist in |str|, then the entire |str| is the key and the
+  value is set to an empty string."""
   if sep in str:
     return str.split(sep)
   else:
     return [str, '']
 
 
-# A small handler that looks for '?quit=1' query in the path and shuts itself
-# down if it finds that parameter.
 class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+  """A small handler that looks for '?quit=1' query in the path and shuts itself
+  down if it finds that parameter."""
   def do_OPTIONS(self):
     self.send_response(200, 'OK');
     self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
@@ -108,11 +91,9 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     SimpleHTTPServer.SimpleHTTPRequestHandler.end_headers(self)
 
   def send_partial(self, offset, length):
-    """
-    The following code is lifed from SimpleHTTPServer.send_head()
+    """The following code is lifed from SimpleHTTPServer.send_head()
     The only change is that a 206 response is sent instead of 200.
     """
-
     path = self.translate_path(self.path)
     f = None
     if os.path.isdir(path):
@@ -164,12 +145,16 @@ def Run(server_address,
   logging.info("Shutting down local server on port %d", server_address[1])
 
 
-if __name__ == '__main__':
+def main(args):
   logging.getLogger().setLevel(logging.INFO)
-  os.chdir('out/publish')
-  SanityCheckDirectory()
-  if len(sys.argv) > 1:
-    Run((SERVER_HOST, int(sys.argv[1])))
+  os.chdir(os.path.join(SCRIPT_DIR, 'out', 'publish'))
+  if args:
+    port = int(args[0])
   else:
-    Run((SERVER_HOST, SERVER_PORT))
-  sys.exit(0)
+    port = SERVER_PORT
+  Run((SERVER_HOST, port))
+  return 0
+
+
+if __name__ == '__main__':
+  sys.exit(main(sys.argv[1:]))

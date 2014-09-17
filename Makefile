@@ -56,7 +56,7 @@ sdklibs_list:
 	@echo $(SDK_LIBS)
 
 run:
-	./httpd.py
+	./build_tools/httpd.py
 
 clean:
 	bin/naclports --all clean
