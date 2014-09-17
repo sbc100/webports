@@ -1,0 +1,3 @@
+NAME=alut-demo
+VERSION=0.1
+DEPENDS=(freealut)
