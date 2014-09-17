@@ -35,8 +35,12 @@ InstallStep() {
   Remove ${INCDIR}
   MakeDir ${INCDIR}
   LogExecute install -m 644 out/${LIB} ${DESTDIR_LIB}/${LIB}
-  LogExecute cp include/*.h ${DESTDIR_INCLUDE}/glibc-compat
-  for dir in sys arpa machine netinet netinet6; do
+  for file in include/*.h ${INCDIR}; do
+    if [ -f $file ]; then
+      LogExecute install -m 644 $file ${INCDIR}/
+    fi
+  done
+  for dir in sys arpa machine net netinet netinet6; do
     MakeDir ${INCDIR}/${dir}
     LogExecute install -m 644 include/${dir}/*.h ${INCDIR}/${dir}/
   done

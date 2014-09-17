@@ -42,6 +42,18 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+/*
+ * Round p (pointer or byte index) up to a correctly-aligned value
+ * for all data types (int, long, ...).   The result is unsigned int
+ * and must be cast to any desired pointer type.
+ */
+#ifndef _ALIGNBYTES
+#define _ALIGNBYTES (sizeof(int) - 1)
+#endif
+#ifndef _ALIGN
+#define _ALIGN(p) (((unsigned)(p) + _ALIGNBYTES) & ~_ALIGNBYTES)
+#endif
+
 /* Needed by linuxthreads. */
 
 # define __SOCKADDR_ARG		struct sockaddr *__restrict

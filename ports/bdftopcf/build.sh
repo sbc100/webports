@@ -12,7 +12,6 @@ export LIBS="-Wl,--undefined=nacl_main -lz \
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  NACLPORTS_CPPFLAGS+=" -DSSIZE_MAX=LONG_MAX"
   export LIBS+=" -lglibc-compat"
 fi
 

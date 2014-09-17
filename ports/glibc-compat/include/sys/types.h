@@ -15,6 +15,9 @@ typedef uint32_t __gid_t;
 typedef int32_t _ssize_t;
 #endif
 
+#include <limits.h>
+#define SSIZE_MAX LONG_MAX
+
 #include_next <sys/types.h>
 
 #endif  /* GLIBCEMU_SYS_TYPES_H */

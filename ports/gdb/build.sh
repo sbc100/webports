@@ -5,6 +5,11 @@
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   export LIBS="-lglibc-compat"
+  # Since the final link is done with -lnacl_io and not -lglibc-compat
+  # we disable getrlimit and setrlimit.  TODO(sbc): add these back if/when
+  # nacl_io evolves to include these functions.
+  export ac_cv_func_getrlimit=no
+  export ac_cv_func_setrlimit=no
 fi
 
 ConfigureStep() {

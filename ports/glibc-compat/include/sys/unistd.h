@@ -21,6 +21,9 @@
  * One port (tcl) has a fallback in this case to guess a reasonable value.
  */
 #define _SC_GETPW_R_SIZE_MAX (-1)
+#define _SC_GETGR_R_SIZE_MAX (-1)
+#define _SC_MONOTONIC_CLOCK (-1)
+#define _SC_OPEN_MAX (-1)
 
 /* TODO(bradnelson): Drop this once we've landed nacl_io pipe support. */
 extern int mknod(const char *pathname, mode_t mode, dev_t dev);

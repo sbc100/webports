@@ -139,24 +139,6 @@ index 47bc9e8..2b1276c 100644
  #ifndef MS_WINDOWS
     /* register() is useless on Windows, because only SIGSEGV, SIGABRT and
        SIGILL can be handled by the process, and these signals can only be used
-diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index 46e31cd..c1bb7e7 100644
---- a/Modules/posixmodule.c
-+++ b/Modules/posixmodule.c
-@@ -49,6 +49,13 @@ corresponding Unix manual entries for more information on calls.");
- #include <sys/uio.h>
- #endif
- 
-+#if defined(__native_client__) && !defined(__GLIBC__)
-+struct iovec {
-+  void *iov_base;
-+  size_t iov_len;
-+};
-+#endif
-+
- #ifdef HAVE_SYS_TYPES_H
- #include <sys/types.h>
- #endif /* HAVE_SYS_TYPES_H */
 diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 index 9909400..2e45df3 100644
 --- a/Modules/pwdmodule.c

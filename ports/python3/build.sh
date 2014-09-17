@@ -38,6 +38,7 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
   export LIBS="-ltermcap"
   if [ "${NACL_LIBC}" = "newlib" ]; then
+    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     LIBS+=" -lglibc-compat"
   fi
   DefaultConfigureStep

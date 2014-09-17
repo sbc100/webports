@@ -21,13 +21,12 @@ ConfigureStep() {
     cd -
   fi
 
-  SetupCrossEnvironment
-
   # TODO(sbc): remove once getaddrinfo() is working
-  local EXTRA_CONFIGURE_ARGS=--disable-ipv6
+  EXTRA_CONFIGURE_ARGS=--disable-ipv6
 
   if [ "${NACL_LIBC}" = "newlib" ]; then
     EXTRA_CONFIGURE_ARGS+=" --with-static-linked-ext --with-newlib"
+    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     export LIBS="-lglibc-compat"
   else
     EXTRA_CONFIGURE_ARGS+=" --with-out-ext=openssl,digest/*"
@@ -42,6 +41,7 @@ ConfigureStep() {
     conf_host="nacl"
   fi
 
+  SetupCrossEnvironment
   LogExecute ${SRC_DIR}/configure \
     --host=${conf_host} \
     --prefix=/ \
