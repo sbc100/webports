@@ -147,7 +147,7 @@ def Run(server_address,
 
 def main(args):
   logging.getLogger().setLevel(logging.INFO)
-  os.chdir(os.path.join(SCRIPT_DIR, 'out', 'publish'))
+  os.chdir(os.path.join(SRC_DIR, 'out', 'publish'))
   if args:
     port = int(args[0])
   else:
