@@ -1,0 +1,6 @@
+NAME=protobuf-c
+VERSION=1.0.0
+URL=http://github.com/protobuf-c/protobuf-c/releases/download/v1.0.0/protobuf-c-1.0.0.tar.gz
+LICENSE=BSD
+DISABLED_LIBC=(bionic)
+SHA1=6d48eb6a193556262c35526e1ccf209a6fc69684
