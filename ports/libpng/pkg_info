@@ -1,6 +1,6 @@
 NAME=libpng
-VERSION=1.6.8
-URL=http://download.sf.net/libpng/libpng-1.6.8.tar.gz
+VERSION=1.6.12
+URL=http://download.sf.net/libpng/libpng-1.6.12.tar.gz
 LICENSE=CUSTOM:LICENSE
 DEPENDS=(zlib)
-SHA1=a6d0be6facada6b4f26c24ffb23eaa2da8df9bd9
+SHA1=6bcd6efa7f20ccee51e70453426d7f4aea7cf4bb
