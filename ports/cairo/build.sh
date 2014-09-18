@@ -2,6 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+if [ "${NACL_SHARED}" = "1" ]; then
+  EXECUTABLES="test/.libs/cairo-test-suite${NACL_EXEEXT}"
+else
+  EXECUTABLES="test/cairo-test-suite${NACL_EXEEXT}"
+fi
+
 # This is only necessary for pnacl
 export ax_cv_c_float_words_bigendian=no
 

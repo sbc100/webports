@@ -113,6 +113,7 @@ builder 0 (total: 18534)
   thttpd
   dreadthread
   openssh
+  gettext
   glib
   pango
   gcc

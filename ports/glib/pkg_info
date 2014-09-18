@@ -2,8 +2,10 @@ NAME=glib
 VERSION=2.28.8
 URL=http://ftp.gnome.org/pub/gnome/sources/glib/2.28/glib-2.28.8.tar.bz2
 LICENSE=LGPL
-LIBC=glibc
-DEPENDS=(zlib)
+DEPENDS=(zlib gettext)
+# ABI verfification fails during build
+DISABLED_ARCH=(pnacl)
+DISABLED_LIBC=(bionic)
 # glib depends on the system gettext and for some reason it can't
 # detect this on mac.
 BUILD_OS=linux

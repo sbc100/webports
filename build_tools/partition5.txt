@@ -68,6 +68,7 @@ builder 0 (total: 7910)
   resourceproto
   openal-ogg-demo
   physfs
+  gettext
   glib
   pango
 builder 1 (total: 8288)

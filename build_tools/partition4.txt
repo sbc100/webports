@@ -246,6 +246,7 @@ builder 2 (total: 10175)
   videoproto
   markupsafe
   jinja2
+  gettext
   glib
   pango
   gcc
