@@ -97,6 +97,9 @@ DevEnvTest.prototype.runCommand = function(cmd) {
 
 DevEnvTest.prototype.checkCommand = function(
     cmd, expectedStatus, expectedOutput) {
+  if (expectedStatus === undefined) {
+    expectedStatus = 0;
+  }
   var self = this;
   return Promise.resolve().then(function() {
     return self.runCommand(cmd);
@@ -105,6 +108,31 @@ DevEnvTest.prototype.checkCommand = function(
     if (expectedOutput !== undefined) {
       ASSERT_EQ(expectedOutput, result.output);
     }
+  });
+};
+
+DevEnvTest.prototype.checkCommandReLines = function(
+    cmd, expectedStatus, expectedOutput) {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return self.runCommand(cmd);
+  }).then(function(result) {
+    ASSERT_EQ(expectedStatus, result.status, result.output);
+    var resultLines = result.output.split('\n');
+    // Trim the last line if empty to reduce boilerplate.
+    if (resultLines[resultLines.length - 1] === '') {
+      resultLines = resultLines.slice(0, resultLines.length -1);
+    }
+    for (var i = 0; i < resultLines.length && i < expectedOutput.length; i++) {
+      if (typeof expectedOutput[i] === 'string') {
+        EXPECT_EQ(expectedOutput[i], resultLines[i],
+            'match on line ' + i);
+      } else {
+        EXPECT_TRUE(resultLines[i].match(expectedOutput[i]) !== null,
+            'match on line ' + i + ' with: ' + resultLines[i]);
+      }
+    }
+    ASSERT_EQ(expectedOutput.length, resultLines.length, 'line count match');
   });
 };
 

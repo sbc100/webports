@@ -30,6 +30,7 @@ PACKAGE_INFO="\
 coreutils|${DS}|newlib/${NACL_ARCH}.zip \
 mingn.base|${DS}|glibc/tarballs/base.${NACL_ARCH}.zip \
 mingn.lib|${DS}|glibc/tarballs/lib.all.zip \
+git|${OLD_SOURCE}|newlib.zip \
 python|${OLD_SOURCE}|newlib/python.zip"
 
 RemoveDir() {
