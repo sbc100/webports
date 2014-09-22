@@ -4,23 +4,13 @@
 
 BUILD_DIR=${SRC_DIR}
 EXECUTABLES=x264${NACL_EXEEXT}
+EXTRA_CONFIGURE_ARGS="--enable-static --disable-asm --disable-thread"
+
+if [ "${NACL_SHARED}" = "1" ]; then
+  EXTRA_CONFIGURE_ARGS+=" --enable-shared"
+fi
 
 ConfigureStep() {
-  SetupCrossEnvironment
-
-  local conf_host
-  if [ "${NACL_ARCH}" = pnacl ]; then
-    conf_host=nacl-pnacl
-  else
-    conf_host=${NACL_CROSS_PREFIX}
-  fi
-
-  LogExecute ./configure \
-    --host=${conf_host} \
-    --prefix=${PREFIX} \
-    --cross-prefix=${NACL_CROSS_PREFIX}- \
-    --disable-asm \
-    --disable-thread
-
+  DefaultConfigureStep
   LogExecute make clean
 }
