@@ -55,29 +55,37 @@ endif
 
 CHROMEAPPS = $(NACL_SRC)/third_party/libapps/
 LIB_DOT = $(CHROMEAPPS)/libdot
-NASSH = $(CHROMEAPPS)/nassh
+HTERM = $(CHROMEAPPS)/hterm
 
-install:
+install-hterm:
 	mkdir -p $(INSTALL_DIR)
+	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(HTERM)/concat/hterm_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
+	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(HTERM)/concat/hterm.concat -o $(INSTALL_DIR)/hterm2.concat.js
+	chmod +w $(INSTALL_DIR)/hterm2.concat.js $(INSTALL_DIR)/hterm.concat.js
+	cat $(INSTALL_DIR)/hterm2.concat.js >> $(INSTALL_DIR)/hterm.concat.js
+	rm $(INSTALL_DIR)/hterm2.concat.js
+	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
+	cp ../../build_tools/pipeserver.js $(INSTALL_DIR)
+	cp ../../build_tools/naclprocess.js $(INSTALL_DIR)
+ifeq ($(TOOLCHAIN),pnacl)
+	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclprocess.js
+endif
+
+install: install-hterm
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
 	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar --exclude lib/python2.7/site-packages ${ASSETS}
-	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
 	cp $(OUTDIR)/python.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
 	cp python.js $(INSTALL_DIR)
-	cp ../../build_tools/naclterm.js $(INSTALL_DIR)
-	cp ../../build_tools/pipeserver.js $(INSTALL_DIR)
-	cp ../../build_tools/naclprocess.js $(INSTALL_DIR)
 	cp background.js $(INSTALL_DIR)
 	cp icon_16.png $(INSTALL_DIR)
 	cp icon_48.png $(INSTALL_DIR)
 	cp icon_128.png $(INSTALL_DIR)
-ifeq ($(TOOLCHAIN),pnacl)
-	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclprocess.js
-endif
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
 endif
 	cd $(INSTALL_DIR) && rm -f python.zip && zip -r python.zip .
+
+.PHONY: install-hterm

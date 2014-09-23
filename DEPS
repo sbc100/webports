@@ -1,6 +1,6 @@
 deps = {
   "src/third_party/libapps":
-    "https://chromium.googlesource.com/apps/libapps.git@0bec09b",
+    "https://chromium.googlesource.com/apps/libapps.git@cd34b28",
   "src/third_party/mock":
     "https://github.com/sbc100/mock.git@6206f33",
   "src/third_party/zip.js":
