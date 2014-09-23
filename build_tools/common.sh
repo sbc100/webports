@@ -1021,6 +1021,10 @@ DefaultPatchStep() {
 DefaultConfigureStep() {
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
 
+  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+    CONFIGURE_SENTINEL=${CONFIGURE_SENTINEL:-Makefile}
+  fi
+
   if [ -n "${CONFIGURE_SENTINEL:-}" -a -f "${CONFIGURE_SENTINEL:-}" ]; then
     return
   fi
@@ -1455,6 +1459,13 @@ PackageStep() {
   if [ -d ${INSTALL_DIR}${PREFIX} ]; then
     mv ${INSTALL_DIR}${PREFIX} ${INSTALL_DIR}/payload
   fi
+  local excludes="usr/doc share/man"
+  for exclude in ${excludes}; do
+    if [ -e "${INSTALL_DIR}/payload/$exclude" ]; then
+      echo "Pruning $exclude"
+      rm -rf "${INSTALL_DIR}/payload/${exclude}"
+    fi
+  done
   LogExecute cp ${START_DIR}/pkg_info ${INSTALL_DIR}
   if [ ${NACL_DEBUG} = "1" ]; then
     echo "BUILD_CONFIG=debug" >> ${INSTALL_DIR}/pkg_info
@@ -1471,6 +1482,9 @@ PackageStep() {
 
 ZipPublishDir() {
   # If something exists in the publish directory, zip it for download by mingn.
+  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+    return
+  fi
   if [ -d "${PUBLISH_DIR}" ]; then
     # Remove existing zip as it may contain only some architectures.
     LogExecute rm -f ${PUBLISH_DIR}.zip
@@ -1566,6 +1580,9 @@ RunPostBuildStep()  { RunStep PostBuildStep "PostBuild" ${BUILD_DIR}; }
 RunTestStep()       {
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return;
+  fi
+  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+    return
   fi
   RunStep TestStep "Testing" ${BUILD_DIR}
 }
