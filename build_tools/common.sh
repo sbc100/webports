@@ -142,7 +142,7 @@ readonly DEST_PYTHON_OBJS=${NACL_PACKAGES_BUILD}/python-modules/${NACL_BUILD_SUB
 PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
 
 # Don't support building with SDKs older than the current stable release
-MIN_SDK_VERSION=${MIN_SDK_VERSION:-35}
+MIN_SDK_VERSION=${MIN_SDK_VERSION:-36}
 
 if [ $OS_NAME = "Darwin" ]; then
   OS_JOBS=4
@@ -316,11 +316,16 @@ PatchSpecFile() {
   fi
 
   # SPECS_FILE is where nacl-gcc 'specs' file will be installed
+  local SPECS_DIR=
   if [ "${NACL_ARCH}" = "arm" ]; then
-    local SPECS_FILE=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.8.3/specs
+    SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.8.2
+    if [ ! -d "${SPECS_DIR}" ]; then
+      SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.8.3
+    fi
   else
-    local SPECS_FILE=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3/specs
+    SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
   fi
+  local SPECS_FILE=${SPECS_DIR}/specs
 
   # NACL_SDK_MULITARCH_USR is a version of NACL_TOOLCHAIN_ROOT that gets passed
   # into the gcc specs file.  It has a gcc spec-file conditional for
