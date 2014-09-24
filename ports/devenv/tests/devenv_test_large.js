@@ -10,10 +10,11 @@
 // This test must be run before any tests that use these packages.
 TEST_F(DevEnvTest, 'testPackageInstall', function() {
   var self = this;
+  var params = chrometest.getUrlParameters();
   return Promise.resolve().then(function() {
-    return self.checkCommand('package -i coreutils', 0);
+    return self.installPackage('coreutils');
   }).then(function() {
-    return self.checkCommand('package -i git', 0);
+    return self.installPackage('git');
   });
 });
 

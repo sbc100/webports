@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import urllib
 import urllib2
 import urlparse
 import zipfile
@@ -538,9 +539,18 @@ def Main(argv):
   parser.add_option(
       '-f', '--filter', default='*',
       help='Filter on tests.')
+  parser.add_option(
+      '-p', '--param', default=[], action='append',
+      help='Add a parameter to the end of the url, = separated.')
   options, args = parser.parse_args(argv)
   if len(args) == 1:
     start_path = args[0]
+    if options.param:
+      params = {}
+      for param in options.param:
+        key, value = param.split('=', 1)
+        params[key] = value
+      start_path += '?' + urllib.urlencode(params)
   else:
     parser.print_help()
     sys.exit(1)

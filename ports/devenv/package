@@ -13,25 +13,28 @@ set -e
 shopt -s nullglob
 
 STORAGE_URL=https://naclports.storage.googleapis.com/builds
-DEFAULT_SDK_VERSION=${DEFAULT_SDK_VERSION:-pepper_39}
-DEFAULT_REVISION=${DEFAULT_REVISION:-trunk-18-gfe25716}
-DEFAULT_SOURCE="${STORAGE_URL}/${DEFAULT_SDK_VERSION}/\
-${DEFAULT_REVISION}/publish"
-DS="${DEFAULT_SOURCE}"
+SDK_VERSION=${SDK_VERSION:-pepper_39}
+REVISION=${REVISION:-trunk-18-gfe25716}
+PACKAGE_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 
 OLD_SDK_VERSION=pepper_38
 OLD_REVISION=1451
 OLD_SOURCE="${STORAGE_URL}/${OLD_SDK_VERSION}/${OLD_REVISION}/publish"
 
+NACL_ARCH_ALT="${NACL_ARCH}"
+if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
+  NACL_ARCH_ALT="pnacl"
+fi
+
 # TODO(bradnelson): Roll forward python when regression fixed.
 # Special cases for certain packages.
 # Pairs of <package-name>:<source>:<package-subdir>
 PACKAGE_INFO="\
-coreutils|${DS}|newlib/${NACL_ARCH}.zip \
-mingn.base|${DS}|glibc/tarballs/base.${NACL_ARCH}.zip \
-mingn.lib|${DS}|glibc/tarballs/lib.all.zip \
-git|${OLD_SOURCE}|newlib.zip \
-python|${OLD_SOURCE}|newlib/python.zip"
+coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
+mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
+git|${OLD_SOURCE}|${TOOLCHAIN}.zip \
+python|${OLD_SOURCE}|${TOOLCHAIN}/python.zip"
 
 RemoveDir() {
   local path="$1"
@@ -43,13 +46,15 @@ RemoveDir() {
 
 InstallPackage() {
   local package="$1"
-  local subdir="newlib.zip"
+  local subdir="${TOOLCHAIN}.zip"
   local source_base="${PACKAGE_SOURCE}"
 
   for info in ${PACKAGE_INFO}; do
     local info_array=(${info//|/ })
     if [ "${package}" = "${info_array[0]}" ]; then
-      source_base="${info_array[1]}"
+      if [ "${ALTERNATE_SOURCE}" == "0" ]; then
+        source_base="${info_array[1]}"
+      fi
       subdir="${info_array[2]}"
     fi
   done
@@ -153,6 +158,7 @@ function Usage() {
 PACKAGE_LIST=""
 PACKAGE_SOURCE="${DEFAULT_SOURCE}"
 PACKAGE_FORCE=0
+ALTERNATE_SOURCE=0
 while getopts "s:i:hLf" o; do
   case "${o}" in
     i)
@@ -160,9 +166,11 @@ while getopts "s:i:hLf" o; do
       ;;
     s)
       PACKAGE_SOURCE="${OPTARG}"
+      ALTERNATE_SOURCE=1
       ;;
     L)
       PACKAGE_SOURCE="http://localhost:5103/"
+      ALTERNATE_SOURCE=1
       # Always force for localhost.
       PACKAGE_FORCE=1
       ;;

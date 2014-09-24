@@ -16,6 +16,7 @@ export NACL_SDK_ROOT=/mnt/html5/mingn
 export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
 LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
 LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
+LD_LIBRARY_PATH+=:/mnt/html5/coreutils.${NACL_ARCH}/${PACKAGE_LIB_DIR}
 export LD_LIBRARY_PATH
 export LIBRARY_PATH=${LD_LIBRARY_PATH}
 export PATH=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin

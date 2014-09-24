@@ -111,6 +111,18 @@ DevEnvTest.prototype.checkCommand = function(
   });
 };
 
+
+DevEnvTest.prototype.installPackage = function(name) {
+  var cmd = 'bash /mnt/http/package -f -i ' + name;
+  var params = chrometest.getUrlParameters();
+  if (params['latest'] === '1') {
+    cmd += ' -s ' + window.location.origin + '/publish';
+  }
+  chrometest.info(cmd);
+  return this.checkCommand(cmd, 0);
+};
+
+
 DevEnvTest.prototype.checkCommandReLines = function(
     cmd, expectedStatus, expectedOutput) {
   var self = this;
