@@ -98,3 +98,49 @@ index 2af61d2..c1b3eff 100644
  #else
  
  #  if defined(unix) \
+diff --git a/boost/log/detail/light_rw_mutex.hpp b/boost/log/detail/light_rw_mutex.hpp
+index 544ae14..91b4d7a 100644
+--- a/boost/log/detail/light_rw_mutex.hpp
++++ b/boost/log/detail/light_rw_mutex.hpp
+@@ -26,6 +26,7 @@
+ 
+ #include <boost/log/detail/header.hpp>
+ 
++#ifndef _NEWLIB_VERSION
+ #if defined(BOOST_THREAD_POSIX) // This one can be defined by users, so it should go first
+ #define BOOST_LOG_LWRWMUTEX_USE_PTHREAD
+ #elif defined(BOOST_WINDOWS) && defined(BOOST_LOG_USE_WINNT6_API)
+@@ -33,6 +34,7 @@
+ #elif defined(BOOST_HAS_PTHREADS)
+ #define BOOST_LOG_LWRWMUTEX_USE_PTHREAD
+ #endif
++#endif
+ 
+ #if defined(BOOST_LOG_LWRWMUTEX_USE_SRWLOCK)
+ 
+diff --git a/libs/system/src/error_code.cpp b/libs/system/src/error_code.cpp
+index 5e00588..73cf8a2 100644
+--- a/libs/system/src/error_code.cpp
++++ b/libs/system/src/error_code.cpp
+@@ -101,7 +101,7 @@ namespace
+       char buf[64];
+       char * bp = buf;
+       std::size_t sz = sizeof(buf);
+-  #  if defined(__CYGWIN__) || defined(__USE_GNU)
++  #  if defined(__CYGWIN__) || defined(__USE_GNU) || defined _NEWLIB_VERSION
+       // Oddball version of strerror_r
+       const char * c_str = strerror_r( ev, bp, sz );
+       return  c_str
+diff --git a/tools/build/v2/tools/gcc.jam b/tools/build/v2/tools/gcc.jam
+index ef90f05..da042de 100644
+--- a/tools/build/v2/tools/gcc.jam
++++ b/tools/build/v2/tools/gcc.jam
+@@ -1032,7 +1032,7 @@ rule setup-threading ( targets * : sources * : properties * )
+             case *bsd    : option = -pthread ;  # There is no -lrt on BSD.
+             case sgi     : # gcc on IRIX does not support multi-threading.
+             case darwin  : # No threading options.
+-            case *       : option = -pthread ; libs = rt ;
++            case *       : option = -pthread ;
+         }
+ 
+         if $(option)
