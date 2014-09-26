@@ -338,7 +338,16 @@ if [ "${TOOLCHAIN}" = "glibc" ]; then
 fi
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then
-  readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
+  if [ -d ${NACL_TOOLCHAIN_ROOT}/le32-nacl ]; then
+    # new pepper_39 pnacl install location
+    # TODO: change this to le32-nacl/usr once that is in the default
+    # include path.
+    readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/local
+  else
+    # pre-pepper_39 location
+    # TODO: remove this once pepper_39 is stable.
+    readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
+  fi
 elif [ "${NACL_ARCH}" = "emscripten" ]; then
   readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
 else

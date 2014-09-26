@@ -184,14 +184,27 @@ def GetToolchainRoot(config):
     tc_dir = '%s_%s_%s' % (platform, tc_arch, config.toolchain)
     tc_dir = os.path.join(tc_dir, '%s-nacl' % config.arch)
 
-  return os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir)
+  rtn = os.path.join(NACL_SDK_ROOT, 'toolchain', tc_dir)
+
+  # New PNaCl toolchains use 'le32-nacl'.
+  # TODO: make this the default once pepper_39 hits stable.
+  if config.toolchain == 'pnacl':
+    pnacl_dir = os.path.join(rtn, 'le32-nacl')
+    if os.path.exists(pnacl_dir):
+      rtn = pnacl_dir
+  return rtn
 
 
 def GetInstallRoot(config):
   """Returns the installation used by naclports within a given toolchain."""
   tc_root = GetToolchainRoot(config)
+  # TODO(sbc): drop the pnacl special case once 'le32-nacl/usr' is available
+  # in the PNaCl default search path (should be once pepper_39 is stable).
   if config.toolchain == 'pnacl':
-    return os.path.join(tc_root, 'usr', 'local')
+    if tc_root.endswith('le32-nacl'):
+      return os.path.join(tc_root, 'local')
+    else:
+      return os.path.join(tc_root, 'usr', 'local')
   else:
     return os.path.join(tc_root, 'usr')
 
