@@ -2,29 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXTRA_CONFIGURE_ARGS+=" --disable-oggtest"
+EXTRA_CONFIGURE_ARGS+=" --disable-xmms-plugin"
+EXTRA_CONFIGURE_ARGS+=" --without-metaflac-test-files"
 
-ConfigureStep() {
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    export LIBS="-lglibc-compat"
-  fi
-  EXTRA_CONFIGURE_ARGS+=" --disable-oggtest"
-  EXTRA_CONFIGURE_ARGS+=" --disable-xmms-plugin"
-  EXTRA_CONFIGURE_ARGS+=" --without-metaflac-test-files"
-  DefaultConfigureStep
-  PostConfigureStep
-}
-
-
-PostConfigureStep() {
-  # satisfy random, srandom
-  echo "/* pull features.h that has __GLIBC__ */" >> config.h
-  echo "#include <stdlib.h>" >> config.h
-  echo "#ifndef __GLIBC__" >> config.h
-  echo "# define random() rand()" >> config.h
-  echo "# define srandom(x) srand(x)" >> config.h
-  echo "#endif" >> config.h
-}
-
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  export LIBS="-lglibc-compat"
+fi
 
 InstallStep() {
   # assumes pwd has makefile
