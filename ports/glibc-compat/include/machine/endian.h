@@ -1,5 +1,11 @@
+/*
+ * Copyright 2014 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef GLIBCEMU_MACHINE_ENDIAN_H
 #define GLIBCEMU_MACHINE_ENDIAN_H 1
+
 #include_next <machine/endian.h>
 
 #include <_ansi.h>
@@ -8,7 +14,7 @@
   ( (((x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
 
 #define __byte_swap_constant_32(x) \
-        (((x && 0xff) << 24) | \
+         (((x & 0xff) << 24) | \
          (((x) << 8) & 0x00ff0000) | \
          (((x) >> 8) & 0x0000ff00) | \
          ((x) >> 24) )
