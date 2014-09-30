@@ -1,5 +1,5 @@
 diff --git a/configure b/configure
-index ec1aab7..07ed9fc 100755
+index ec1aab7..b8f914a 100755
 --- a/configure
 +++ b/configure
 @@ -33768,7 +33768,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
@@ -10,7 +10,15 @@ index ec1aab7..07ed9fc 100755
      -Wchar-subscripts \
      -Wclobbered \
      -Wcomment \
-@@ -33805,14 +33804,11 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+@@ -33782,7 +33781,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+     -Wdouble-promotion \
+     -Wempty-body \
+     -Wendif-labels \
+-    -Wenum-compare \
+     -Wextra \
+     -Wformat-contains-nul \
+     -Wformat-extra-args \
+@@ -33805,14 +33803,11 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
      -Wmain \
      -Wmaybe-uninitialized \
      -Wmissing-braces \
@@ -25,7 +33,7 @@ index ec1aab7..07ed9fc 100755
      -Wnonnull \
      -Wnormalized=nfc \
      -Wold-style-declaration \
-@@ -33838,8 +33834,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+@@ -33838,8 +33833,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
      -Wstrict-prototypes \
      -Wsuggest-attribute=const \
      -Wsuggest-attribute=format \
