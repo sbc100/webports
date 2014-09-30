@@ -310,6 +310,7 @@ NaClEnvExport() {
   export PKG_CONFIG_LIBDIR=${NACL_PREFIX}/lib/pkgconfig
   export PATH=${NACL_PREFIX}/bin:${PATH}:${NACL_BIN_PATH}
   export CPPFLAGS=${NACL_CPPFLAGS}
+  export ARFLAGS=${NACL_ARFLAGS}
   export LDFLAGS=${NACL_LDFLAGS}
 }
 
@@ -330,6 +331,7 @@ else
   export NACL_CPP_LIB="stdc++"
 fi
 
+NACL_ARFLAGS="cr"
 NACL_LDFLAGS="-L${NACL_SDK_LIBDIR}"
 NACL_CPPFLAGS="-I${NACL_SDK_ROOT}/include"
 
@@ -367,6 +369,7 @@ if [ -z "${NACL_ENV_IMPORT:-}" ]; then
       echo "export PKG_CONFIG_LIBDIR=${NACL_PREFIX}/lib/pkgconfig"
       echo "export PATH=${NACL_PREFIX}/bin:\${PATH}:${NACL_BIN_PATH}"
       echo "export CPPFLAGS=\"${NACL_CPPFLAGS}\""
+      echo "export ARFLAGS=\"${NACL_ARFLAGS}\""
       echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
     else
       NaClEnvExport

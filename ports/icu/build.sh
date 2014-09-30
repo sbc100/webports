@@ -51,6 +51,7 @@ BuildHostICU() {
 ConfigureStep() {
   BuildHostICU
   Banner "Configuring cross build of $NAME"
+  NACL_ARFLAGS=
   EXTRA_CONFIGURE_ARGS+=" --with-cross-build=${HOST_BUILD_DIR}"
   ChangeDir ${BUILD_DIR}
   DefaultConfigureStep

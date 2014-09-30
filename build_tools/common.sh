@@ -871,8 +871,8 @@ SetupCrossEnvironment() {
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
-  export ARFLAGS=cr
-  export AR_FLAGS=${ARFLAGS}
+  export ARFLAGS=${NACL_ARFLAGS}
+  export AR_FLAGS=${NACL_ARFLAGS}
 
   export SDL_CONFIG=${NACLPORTS_BIN}/sdl-config
   export FREETYPE_CONFIG=${NACLPORTS_BIN}/freetype-config

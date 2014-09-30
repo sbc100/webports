@@ -18,6 +18,8 @@ if [ "${NACL_ARCH}" = "pnacl" ] ; then
 fi
 
 ConfigureStep() {
+  export cf_cv_ar_flags=${NACL_ARFLAGS}
+  NACL_ARFLAGS=""
   if [ "${NACL_LIBC}" = "newlib" ]; then
     # Changing NACLCC rather than CFLAGS as otherwise the configure script
     # fails to detect termios and tries to use gtty.
