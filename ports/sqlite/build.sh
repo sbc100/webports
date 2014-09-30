@@ -12,7 +12,7 @@ else
   EXECUTABLE_DIR=.
 fi
 
-EXECUTABLES="${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}"
+EXECUTABLES="sqlite3${NACL_EXEEXT}"
 
 BuildStep() {
   if [ -f "${SRC_DIR}/shell.c" ]; then

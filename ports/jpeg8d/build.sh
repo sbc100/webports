@@ -2,15 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
-if [ "${NACL_SHARED}" = "1" ]; then
-  EXECUTABLES="rdjpgcom${NACL_EXEEXT} wrjpgcom${NACL_EXEEXT} \
-      .libs/cjpeg${NACL_EXEEXT} .libs/djpeg${NACL_EXEEXT} \
-      .libs/jpegtran${NACL_EXEEXT}"
-else
-  EXECUTABLES="rdjpgcom${NACL_EXEEXT} wrjpgcom${NACL_EXEEXT} \
+EXECUTABLES="rdjpgcom${NACL_EXEEXT} wrjpgcom${NACL_EXEEXT} \
       cjpeg${NACL_EXEEXT} djpeg${NACL_EXEEXT} jpegtran${NACL_EXEEXT}"
-fi
 
 TestStep() {
   export SEL_LDR_LIB_PATH=$PWD/.libs

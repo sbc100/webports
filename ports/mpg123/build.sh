@@ -10,16 +10,11 @@ EXTRA_CONFIGURE_ARGS="--with-cpu=generic_fpu"
 # link when running with under the glibc toolchain.
 EXTRA_CONFIGURE_ARGS+=" --with-audio=openal"
 
-if [ "${NACL_SHARED}" = "1" ]; then
-  EXE_DIR=src/.libs
-else
-  EXE_DIR=src
-fi
-
-EXECUTABLES="${EXE_DIR}/mpg123${NACL_EXEEXT} \
-  ${EXE_DIR}/out123${NACL_EXEEXT} \
-  ${EXE_DIR}/mpg123-id3dump${NACL_EXEEXT} \
-  ${EXE_DIR}/mpg123-strip${NACL_EXEEXT}"
+EXECUTABLES="
+  src/mpg123${NACL_EXEEXT}
+  src/out123${NACL_EXEEXT}
+  src/mpg123-id3dump${NACL_EXEEXT}
+  src/mpg123-strip${NACL_EXEEXT}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   # Disable network support for newlib builds.

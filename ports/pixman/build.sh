@@ -2,11 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-if [ "${NACL_SHARED}" = "1" ]; then
-  EXECUTABLES=test/.libs/pixel-test${NACL_EXEEXT}
-else
-  EXECUTABLES=test/pixel-test${NACL_EXEEXT}
-fi
+EXECUTABLES=test/pixel-test${NACL_EXEEXT}
 
 EXTRA_CONFIGURE_ARGS="
   --disable-arm-simd

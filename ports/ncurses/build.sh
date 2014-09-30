@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-EXTRA_CONFIGURE_ARGS="--disable-database"
+EXECUTABLES="progs/clear${NACL_EXEEXT}"
+
+EXTRA_CONFIGURE_ARGS+=" --disable-database"
 EXTRA_CONFIGURE_ARGS+=" --with-fallbacks=xterm-256color,vt100"
 EXTRA_CONFIGURE_ARGS+=" --disable-termcap"
 # Without this ncurses headers will be installed include/ncurses

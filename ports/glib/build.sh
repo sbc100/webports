@@ -2,11 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-if [ "$NACL_SHARED" = "1" ]; then
-  EXECUTABLES=glib/.libs/gtester${NACL_EXEEXT}
-else
-  EXECUTABLES=glib/gtester${NACL_EXEEXT}
-fi
+EXECUTABLES="glib/gtester${NACL_EXEEXT}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

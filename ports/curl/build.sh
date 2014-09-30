@@ -7,19 +7,15 @@ export ac_cv_func_getaddrinfo=no
 export ac_cv_func_connect=yes
 export LIBS="-lnacl_io -pthread -l${NACL_CPP_LIB}"
 
-if [ "${NACL_SHARED}" = "1" ]; then
-  EXECUTABLE_DIR=.libs
-else
-  EXECUTABLE_DIR=.
-fi
-
 if [ "${NACL_LIBC}" = "newlib" ]; then
   LIBS+=" -lglibc-compat"
 fi
 
-EXECUTABLES=src/${EXECUTABLE_DIR}/curl${NACL_EXEEXT}
-CFLAGS+=" -DDEBUGBUILD"
-#EXTRA_CONFIGURE_ARGS="--enable-debug --disable-curldebug"
+EXECUTABLES="src/curl${NACL_EXEEXT}"
+if [ "${NACL_DEBUG}" = "1" ]; then
+  CFLAGS+=" -DDEBUGBUILD"
+  EXTRA_CONFIGURE_ARGS="--enable-debug --disable-curldebug"
+fi
 
 BuildStep() {
   # Run the build twice, initially to build the sel_ldr version
@@ -45,6 +41,13 @@ BuildStep() {
 InstallStep() {
   DefaultInstallStep
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/curl"
+
+  if [ "${NACL_SHARED}" = "1" ]; then
+    EXECUTABLE_DIR=.libs
+  else
+    EXECUTABLE_DIR=.
+  fi
+
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     # Just set up the x86-64 version for now.
     local pexe="${EXECUTABLE_DIR}/curl${NACL_EXEEXT}"

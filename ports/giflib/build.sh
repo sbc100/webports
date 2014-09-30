@@ -3,12 +3,7 @@
 # found in the LICENSE file.
 
 EXTRA_CONFIGURE_ARGS="--enable-x11=no"
-
-if [ "${NACL_SHARED}" = "1" ]; then
-  EXECUTABLES=util/.libs/rgb2gif${NACL_EXEEXT}
-else
-  EXECUTABLES=util/rgb2gif${NACL_EXEEXT}
-fi
+EXECUTABLES="util/rgb2gif${NACL_EXEEXT}"
 
 RunTest() {
   util/rgb2gif -s 320 200  < ${SRC_DIR}/tests/porsche.rgb > porsche.gif

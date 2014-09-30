@@ -642,11 +642,11 @@ PublishByArchForDevEnv() {
   # -executable is not supported on BSD and -perm +nn is not
   # supported on linux
   if [ ${OS_NAME} != "Darwin" ]; then
-    local EXECUTABLES=$(find . -type f -executable)
+    local executables=$(find . -type f -executable)
   else
-    local EXECUTABLES=$(find . -type f -perm +u+x)
+    local executables=$(find . -type f -perm +u+x)
   fi
-  for nexe in ${EXECUTABLES}; do
+  for nexe in ${executables}; do
     local name=$(basename ${nexe})
     name=${name/%.nexe/}
     name=${name/%.pexe/}
@@ -915,6 +915,23 @@ GenerateManifest() {
   # Generate a manifest.json
   ${TEMPLATE_EXPAND} ${SOURCE_FILE} \
     version=${REVISION} key="${KEY}" > ${TARGET_DIR}/manifest.json
+}
+
+
+FixupExecutablesList() {
+  # Modify EXECUTABLES list for libtool case where actual executables
+  # live within the ".libs" folder.
+  local executables_modified=
+  for nexe in ${EXECUTABLES:-}; do
+    local basename=$(basename ${nexe})
+    local dirname=$(dirname ${nexe})
+    if [ -f ${dirname}/.libs/${basename} ]; then
+      executables_modified+=" ${dirname}/.libs/${basename}"
+    else
+      executables_modified+=" ${nexe}"
+    fi
+  done
+  EXECUTABLES=${executables_modified}
 }
 
 
@@ -1235,24 +1252,24 @@ Validate() {
 #
 DefaultPostBuildStep() {
   if [ "${NACL_ARCH}" = "emscripten" ]; then
-    return;
+    return
   fi
 
-  if [ -z "${EXECUTABLES:-}" ]; then
+  if [ -z "${EXECUTABLES}" ]; then
     return
   fi
 
   if [ "${NACL_ARCH}" = "pnacl" ]; then
-    for pexe in ${EXECUTABLES} ; do
+    for pexe in ${EXECUTABLES}; do
       FinalizePexe ${pexe}
     done
-    for pexe in ${EXECUTABLES} ; do
+    for pexe in ${EXECUTABLES}; do
       TranslatePexe ${pexe}
     done
     return
   fi
 
-  for nexe in $EXECUTABLES ; do
+  for nexe in $EXECUTABLES; do
     Validate ${nexe}
     # Create a script which will run the executable in sel_ldr.  The name
     # of the script is the same as the name of the executable, either without
@@ -1573,11 +1590,24 @@ RunDownloadStep()   { RunStep DownloadStep; }
 RunGitCloneStep()   { RunStep GitCloneStep; }
 RunExtractStep()    { RunStep ExtractStep; }
 RunPatchStep()      { RunStep PatchStep; }
+
+
 RunConfigureStep()  {
   RunStep ConfigureStep "Configuring" ${BUILD_DIR};
 }
-RunBuildStep()      { RunStep BuildStep "Building" ${BUILD_DIR}; }
-RunPostBuildStep()  { RunStep PostBuildStep "PostBuild" ${BUILD_DIR}; }
+
+
+RunBuildStep()      {
+  RunStep BuildStep "Building" ${BUILD_DIR};
+  FixupExecutablesList
+}
+
+
+RunPostBuildStep()  {
+  RunStep PostBuildStep "PostBuild" ${BUILD_DIR};
+}
+
+
 RunTestStep()       {
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return;

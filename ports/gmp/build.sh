@@ -15,3 +15,19 @@ NACLPORTS_CFLAGS+=" -DLONGLONG_STANDALONE"
 
 # Disable all assembly code by specifying none-none-none.
 EXTRA_CONFIGURE_ARGS=--host=none-none-none
+
+TestStep() {
+  MAKE_TARGETS="allprogs"
+  EXECUTABLES="demos/calc/calc${NACL_EXEEXT}"
+  ChangeDir ${BUILD_DIR}/demos
+  DefaultBuildStep
+  RunPostBuildStep
+  if [ "${NACL_ARCH}" != "pnacl" ]; then
+    # Perform a simple calculation using the calc demo program
+    RESULT=$(echo "1000 * 1000" | demos/calc/calc)
+    if [ "$RESULT" != "1000000" ]; then
+      echo "Unexpted result from calc test: ${RESULT}"
+      exit 1
+    fi
+  fi
+}
