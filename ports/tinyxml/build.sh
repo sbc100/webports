@@ -4,10 +4,23 @@
 
 BUILD_DIR=${SRC_DIR}
 
+EXECUTABLES=xmltest
+
+ConfigureStep() {
+  LogExecute make clean
+}
+
 BuildStep() {
   SetupCrossEnvironment
-  make clean
-  make OUTPUT=libtinyxml.a
+  LogExecute make libtinyxml.a xmltest
+}
+
+TestStep() {
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    return
+  fi
+
+  LogExecute ./xmltest.sh
 }
 
 InstallStep() {
