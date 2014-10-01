@@ -5,14 +5,30 @@
 BUILD_DIR=${SRC_DIR}
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  NACLPORTS_CPPFLAGS+=" -isystem ${NACLPORTS_INCLUDE}/glibc-compat"
+fi
+
+if [ "${NACL_ARCH}" = "pnacl" ]; then
+  # TODO(sbc): Should probably use clang here
+  COMPILER=gcc
+else
+  COMPILER=gcc
+fi
+
+if [ "${NACL_ARCH}" = "pnacl" ]; then
+  COMPILER_VERSION=3.4
+elif [ "${NACL_ARCH}" = "arm" ]; then
+  COMPILER_VERSION=4.8
+else
+  COMPILER_VERSION=4.4.3
 fi
 
 # TODO(eugenis): build dynamic libraries, too
 BUILD_ARGS="
+  toolset=${COMPILER}
   target-os=unix
-  --build-dir=../${NACL_BUILD_SUBDIR} \
-  --stagedir=../${NACL_BUILD_SUBDIR} \
+  --build-dir=../${NACL_BUILD_SUBDIR}
+  --stagedir=../${NACL_BUILD_SUBDIR}
   link=static"
 
 BUILD_ARGS+=" --without-python"
@@ -21,13 +37,36 @@ BUILD_ARGS+=" --without-mpi"
 BUILD_ARGS+=" --without-context"
 BUILD_ARGS+=" --without-coroutine"
 
-if [ "${NACL_LIBC}" = "newlib" ] ; then
+if [ "${NACL_LIBC}" != "glibc" ] ; then
   BUILD_ARGS+=" --without-locale"
+  BUILD_ARGS+=" --without-log"
+  BUILD_ARGS+=" --without-test"
+  BUILD_ARGS+=" --without-timer"
+
+fi
+
+if [ "${NACL_LIBC}" = "bionic" ] ; then
+  # No statvfs on bionic
+  BUILD_ARGS+=" --without-filesystem"
+fi
+
+if [ "${NACL_ARCH}" = "arm" -o "${NACL_ARCH}" = "pnacl" ]; then
+  # The ARM toolchains are not currently built with full C++ threading support
+  # (_GLIBCXX_HAS_GTHREADS is not defined)
+  # PNaCl currently doesn't support -x c++-header which threading library
+  # tries to use during the build.
+  BUILD_ARGS+=" --without-math"
+  BUILD_ARGS+=" --without-thread"
+  BUILD_ARGS+=" --without-wave"
 fi
 
 ConfigureStep() {
-  echo "using gcc : 4.4.3 : ${NACLCXX} <compileflags>${NACLPORTS_CPPFLAGS};" \
-      >> tools/build/v2/user-config.jam
+  flags=
+  for flag in ${NACLPORTS_CPPFLAGS}; do
+    flags+=" <compileflags>${flag}"
+  done
+  conf="using ${COMPILER} : ${COMPILER_VERSION} : ${NACLCXX} :${flags} ;"
+  echo $conf > tools/build/v2/user-config.jam
   LogExecute ./bootstrap.sh --prefix=${NACL_PREFIX}
 }
 
