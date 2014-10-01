@@ -63,10 +63,11 @@ TOOLCHAINS = ('bionic', 'newlib', 'glibc', 'pnacl')
 verbose = False
 sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
+import naclports
 import naclports.package
 
 
-class Error(Exception):
+class Error(naclports.Error):
   pass
 
 
@@ -370,6 +371,6 @@ def main(args):
 if __name__ == '__main__':
   try:
     sys.exit(main(sys.argv[1:]))
-  except Error, e:
+  except Error as e:
     sys.stderr.write("%s\n" % e)
     sys.exit(1)

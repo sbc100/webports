@@ -2,13 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXECUTABLES="\
   cjpeg${NACL_EXEEXT} \
   djpeg${NACL_EXEEXT} \
   jpegtran${NACL_EXEEXT} \
   rdjpgcom${NACL_EXEEXT} \
   wrjpgcom${NACL_EXEEXT}"
+
 
 BuildStep() {
   for exe in ${EXECUTABLES}; do
@@ -20,11 +20,13 @@ BuildStep() {
   done
 }
 
+
 InstallStep() {
-  # Don't install jpeg6b by default since it would
-  # conflict with jpeg8.
-  return
+  MakeDir ${DESTDIR}/${PREFIX}/include
+  MakeDir ${DESTDIR}/${PREFIX}/lib
+  LogExecute make install-lib prefix=${DESTDIR}/${PREFIX}
 }
+
 
 TestStep() {
   if [ ${NACL_ARCH} = "pnacl" ]; then
