@@ -22,6 +22,29 @@ index 6f1a97e..664d3f4 100644
  ELSEIF (AMIGA)
  	ADD_DEFINITIONS(-DNO_ADDRINFO -DNO_READDIR_R -DNO_MMAP)
  ELSE()
++++ b/src/global.c
+diff --git a/src/indexer.c b/src/indexer.c
+index 0b1cf3c..1286816 100644
+--- a/src/indexer.c
++++ b/src/indexer.c
+@@ -437,12 +437,17 @@ static int write_at(git_indexer *idx, const void *data, git_off_t offset, size_t
+ 	page_start = (offset / page_size) * page_size;
+ 	page_offset = offset - page_start;
+ 
++#ifdef NO_MMAP
++	if ((error = pwrite(fd, data, size, offset)) < 0)
++		return error;
++#else
+ 	if ((error = p_mmap(&map, page_offset + size, GIT_PROT_WRITE, GIT_MAP_SHARED, fd, page_start)) < 0)
+ 		return error;
+ 
+ 	map_data = (unsigned char *)map.data;
+ 	memcpy(map_data + page_offset, data, size);
+ 	p_munmap(&map);
++#endif
+ 
+ 	return 0;
+ }
 diff --git a/src/pool.c b/src/pool.c
 index a516ff9..b1c2bfe 100644
 --- a/src/pool.c
