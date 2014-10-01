@@ -11,7 +11,7 @@
 # Each port has a dependency on its own sentinel file, which can be found
 # at out/sentinels/*
 
-SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libmodplug libogg
+SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libogg
 SDK_LIBS += libtheora libvorbis libwebp libxml2 tinyxml openal-soft freealut
 
 ifeq ($(V),1)
