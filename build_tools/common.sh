@@ -140,6 +140,7 @@ NACL_BUILD_SUBDIR+=${PACKAGE_SUFFIX}
 NACL_INSTALL_SUBDIR+=${PACKAGE_SUFFIX}
 readonly DEST_PYTHON_OBJS=${NACL_PACKAGES_BUILD}/python-modules/${NACL_BUILD_SUBDIR}
 PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
+PATCH_FILE=${START_DIR}/nacl.patch
 
 # Don't support building with SDKs older than the current stable release
 MIN_SDK_VERSION=${MIN_SDK_VERSION:-36}
@@ -514,8 +515,14 @@ DefaultDownloadStep() {
 
 
 GitCloneStep() {
+  local stamp_content="GITURL=$URL"
+  if [ -f "${PATCH_FILE}" ]; then
+    local patch_checksum=$(${TOOLS_DIR}/sha1sum.py ${PATCH_FILE})
+    stamp_content+=" PATCH_${patch_checksum}"
+  fi
+
   if [ -d ${SRC_DIR} ]; then
-    if CheckKeyStamp clone "$URL" ; then
+    if CheckStampContent clone "${stamp_content}" ; then
       Banner "Skipping git clone step"
       return
     fi
@@ -555,19 +562,21 @@ GitCloneStep() {
   # from the build tree.
   git remote set-url origin ${GIT_URL}
 
-  TouchKeyStamp clone "$URL"
+  WriteStamp clone "$stamp_content"
 
   # make sure the patch step is applied
   rm -f ${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch
 }
 
 
+#
+# Apply the package's patch file in the current working directory
+#
 Patch() {
-  local LOCAL_PATCH_FILE=$1
-  if [ -e "${START_DIR}/${LOCAL_PATCH_FILE}" ]; then
+  if [ -f "${PATCH_FILE}" ]; then
     Banner "Patching $(basename ${PWD})"
-    #git apply ${START_DIR}/${LOCAL_PATCH_FILE}
-    patch -p1 -g0 --no-backup-if-mismatch < ${START_DIR}/${LOCAL_PATCH_FILE}
+    #git apply ${PATCH_FILE}
+    patch -p1 -g0 --no-backup-if-mismatch < ${PATCH_FILE}
     git add .
     git commit -m "Apply naclports patch"
   fi
@@ -752,37 +761,30 @@ TouchStamp() {
 
 
 #
-# KeyStamp: just like a stamp, but it puts a value in the file
-# and checks to make sure it's the same when you check it.
-# The value must be the second argument, subsequent arguments
-# can be dependencies, just like stamp.
+# CheckStampContent: checks that a stampfile exists an has a specified contents.
 #
-CheckKeyStamp() {
+# $1 - Name of stamp file.
+# $2 - Expected contents of stamp file.
+#
+CheckStampContent() {
   local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
   local STAMP_FILE="${STAMP_DIR}/$1"
-  # check the stamp file exists, contains the key, and is newer
-  # than dependencies.
+
+  # check the stamp file exists
   if [ ! -f "${STAMP_FILE}" ]; then
     return 1
   fi
 
-  if [ ! `cat ${STAMP_FILE}` = $2 ]; then
+  # check the stamp contents
+  if [ ! "$(cat ${STAMP_FILE})" = "$2" ]; then
     return 1
   fi
 
-  shift
-  shift
-  while (( "$#" )) ; do
-    if [ "$1" -nt "${STAMP_FILE}" ]; then
-      return 1
-    fi
-    shift
-  done
   return 0
 }
 
 
-TouchKeyStamp() {
+WriteStamp() {
   local STAMP_DIR=${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}
   mkdir -p ${STAMP_DIR}
   echo $2 > ${STAMP_DIR}/$1
@@ -949,11 +951,14 @@ DefaultExtractStep() {
     return
   fi
 
-  local ARCHIVE="${NACL_PACKAGES_CACHE}/${ARCHIVE_NAME}"
-  if [ -d ${SRC_DIR} ]; then
-    local PATCH="${START_DIR}/${PATCH_FILE:-nacl.patch}"
+  local stamp_content="ARCHIVE_SHA1=$SHA1"
+  if [ -f "${PATCH_FILE}" ]; then
+    local patch_checksum=$(${TOOLS_DIR}/sha1sum.py ${PATCH_FILE})
+    stamp_content+=" PATCH_${patch_checksum}"
+  fi
 
-    if CheckStamp extract "${ARCHIVE}" "${PATCH}" ; then
+  if [ -d "${SRC_DIR}" ]; then
+    if CheckStampContent extract "${stamp_content}" ; then
       Banner "Skipping extract step"
       return
     fi
@@ -965,7 +970,7 @@ DefaultExtractStep() {
     echo "Please remove existing workspace to continue: '${SRC_DIR}'"
     exit 1
   fi
-  Remove ${SRC_DIR}
+  Remove "${SRC_DIR}"
 
   # make sure the patch step is applied
   rm -f ${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch
@@ -973,6 +978,7 @@ DefaultExtractStep() {
   PARENT_DIR=$(dirname ${SRC_DIR})
   MakeDir ${PARENT_DIR}
   ChangeDir ${PARENT_DIR}
+  local ARCHIVE="${NACL_PACKAGES_CACHE}/${ARCHIVE_NAME}"
   if [ ${EXTENSION} = "zip" ]; then
     unzip -q ${ARCHIVE}
   else
@@ -984,7 +990,7 @@ DefaultExtractStep() {
   fi
 
   MakeDir ${BUILD_DIR}
-  TouchStamp extract
+  WriteStamp extract "$stamp_content"
 }
 
 
@@ -1030,7 +1036,7 @@ DefaultPatchStep() {
   fi
 
   InitGitRepo
-  Patch ${PATCH_FILE:-nacl.patch}
+  Patch ${PATCH_FILE}
   PatchConfigure
   PatchConfigSub
   if [ -n "$(git diff --no-ext-diff)" ]; then
