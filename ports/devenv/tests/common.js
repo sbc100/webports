@@ -172,6 +172,20 @@ DevEnvTest.prototype.writeFile = function(fileName, data) {
   });
 };
 
+DevEnvTest.prototype.readFile = function(fileName) {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.devEnv.postMessage({
+      'name': 'file_read',
+      'file': fileName,
+    });
+    return self.devEnv.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('file_read_reply', msg.name);
+    return msg.data;
+  });
+};
+
 DevEnvTest.prototype.mkdir = function(fileName) {
   var self = this;
   return Promise.resolve().then(function() {

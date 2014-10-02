@@ -15,6 +15,8 @@ TEST_F(DevEnvTest, 'testPackageInstall', function() {
     return self.installPackage('coreutils');
   }).then(function() {
     return self.installPackage('git');
+  }).then(function() {
+    return self.installPackage('make');
   });
 });
 
@@ -47,8 +49,8 @@ DevEnvFileTest.prototype.tearDown = function() {
   });
 };
 
-// Test mkdir, ls, and rmdir.
 TEST_F(DevEnvFileTest, 'testDirs', function() {
+  // Test mkdir, ls, and rmdir.
   var self = this;
   return Promise.resolve().then(function() {
     return self.checkCommand('mkdir foo', 0, '');
@@ -59,8 +61,8 @@ TEST_F(DevEnvFileTest, 'testDirs', function() {
   });
 });
 
-// Test cat and rm.
 TEST_F(DevEnvFileTest, 'testCatRm', function() {
+  // Test cat and rm.
   var self = this;
   var str = 'Hello, world!\n';
   return Promise.resolve().then(function() {
@@ -72,7 +74,6 @@ TEST_F(DevEnvFileTest, 'testCatRm', function() {
   });
 });
 
-// Test git.
 TEST_F(DevEnvFileTest, 'testGit', function() {
   var self = this;
   return Promise.resolve().then(function() {
@@ -174,5 +175,41 @@ TEST_F(DevEnvFileTest, 'testGit', function() {
          '+++ b/bar/README',
          '@@ -0,0 +1 @@',
          '+hello there']);
+  });
+});
+
+TEST_F(DevEnvFileTest, 'testMake', function() {
+  var self = this;
+  var i = 0;
+  var makefile = [
+    '.SUFFIXES:',
+    'all: part0.z part1.z part2.z part3.z part4.z part5.z part6.z part7.z',
+    '%.z: %.y',
+    '\tcp $< $@',
+    '%.y: %.x',
+    '\tcp $< $@',
+    '%.x: foo.txt',
+    '\tcp $< $@',
+  ].join('\n') + '\n';
+  var foo = 'This is a test!\nTesting!\n';
+  return Promise.resolve().then(function() {
+    return self.writeFile('/home/user/Makefile', makefile);
+  }).then(function() {
+    return self.writeFile('/home/user/foo.txt', foo);
+  }).then(function() {
+    return self.checkCommand('make -j10');
+  }).then(function() {
+    function checkOne() {
+      return Promise.resolve().then(function() {
+        return self.readFile('/home/user/part' + i + '.z', foo);
+      }).then(function(data) {
+        ASSERT_EQ(foo, data);
+        i++;
+        if (i < 8) {
+          return checkOne();
+        }
+      });
+    }
+    return checkOne();
   });
 });

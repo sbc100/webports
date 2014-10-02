@@ -33,6 +33,7 @@ PACKAGE_INFO="\
 coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
 mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
+make|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip|${TOOLCHAIN}.zip \
 git|${OLD_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip|${TOOLCHAIN}.zip \
 python|${OLD_SOURCE}|${TOOLCHAIN}/python.zip"
 
