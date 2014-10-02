@@ -639,12 +639,16 @@ PublishByArchForDevEnv() {
   MakeDir ${PUBLISH_DIR}
   local ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
   MakeDir ${ARCH_DIR}
-  # -executable is not supported on BSD and -perm +nn is not
-  # supported on linux
-  if [ ${OS_NAME} != "Darwin" ]; then
-    local executables=$(find . -type f -executable)
+  # TODO(bradnelson): Drop this once all pors that have executables list them
+  # explicitly (required for pnacl to work right anyhow).
+  if [ "${EXECUTABLES:-}" != "" ]; then
+    local executables="${EXECUTABLES}"
+  elif [ ${OS_NAME} != "Darwin" ]; then
+    # -executable is not supported on BSD and -perm +nn is not
+    # supported on linux
+    local executables=$(find . -type f -executable -not -path "*/.git/*")
   else
-    local executables=$(find . -type f -perm +u+x)
+    local executables=$(find . -type f -perm +u+x -not -path "*/.git/*")
   fi
   for nexe in ${executables}; do
     local name=$(basename ${nexe})
@@ -652,7 +656,9 @@ PublishByArchForDevEnv() {
     name=${name/%.pexe/}
     LogExecute cp ${nexe} ${ARCH_DIR}/${name}
     # TODO(bradnelson): Do something prettier.
-    if [ "$(head -c 2 ${nexe})" != "#!" ]; then
+    if [[ "$(head -c 2 ${nexe})" != "#!" && \
+          "$(head -c 2 ${nexe})" != "# " && \
+          "${nexe}" != *.txt ]]; then
       # Strip non-scripts
       LogExecute ${NACLSTRIP} ${ARCH_DIR}/${name}
 
@@ -1263,9 +1269,11 @@ DefaultPostBuildStep() {
     for pexe in ${EXECUTABLES}; do
       FinalizePexe ${pexe}
     done
-    for pexe in ${EXECUTABLES}; do
-      TranslatePexe ${pexe}
-    done
+    if [ "${TRANSLATE_PEXES:-}" != "no" ]; then
+      for pexe in ${EXECUTABLES}; do
+        TranslatePexe ${pexe}
+      done
+    fi
     return
   fi
 

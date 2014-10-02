@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXECUTABLES="git git-remote-http"
+
 # Do a verbose build so we're confident it's hitting nacl's tools.
 MAKE_TARGETS="V=1"
 BUILD_DIR=${SRC_DIR}
@@ -51,15 +53,5 @@ BuildStep() {
 }
 
 InstallStep() {
-  MakeDir ${PUBLISH_DIR}
-  for name in $(cat ${START_DIR}/git_binaries.txt); do
-    cp ${name} ${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}
-
-    pushd ${PUBLISH_DIR}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-        ${PUBLISH_DIR}/${name}_*${NACL_EXEEXT} \
-        -s . \
-        -o ${name}.nmf
-    popd
-  done
+  PublishByArchForDevEnv
 }

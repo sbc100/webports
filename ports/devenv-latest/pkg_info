@@ -5,6 +5,3 @@ BUILD_OS=linux
 DEPENDS=(devenv coreutils git)
 # Disabled for bionic due to bash.
 DISABLED_LIBC=(bionic)
-# TODO(bradnelson): Fix and drop this.
-# Disabled for pnacl due to issue with git.
-DISABLED_ARCH=(pnacl)

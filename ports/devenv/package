@@ -28,12 +28,12 @@ fi
 
 # TODO(bradnelson): Roll forward python when regression fixed.
 # Special cases for certain packages.
-# Pairs of <package-name>:<source>:<package-subdir>
+# Pairs of <package-name>:<source>:<package-subdir>[:<old-package-subdir>]
 PACKAGE_INFO="\
 coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
 mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
-git|${OLD_SOURCE}|${TOOLCHAIN}.zip \
+git|${OLD_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip|${TOOLCHAIN}.zip \
 python|${OLD_SOURCE}|${TOOLCHAIN}/python.zip"
 
 RemoveDir() {
@@ -55,7 +55,11 @@ InstallPackage() {
       if [ "${ALTERNATE_SOURCE}" == "0" ]; then
         source_base="${info_array[1]}"
       fi
-      subdir="${info_array[2]}"
+      if [[ "${ALTERNATE_SOURCE}" == "0" && "${info_array[3]}" != "" ]]; then
+        subdir="${info_array[3]}"
+      else
+        subdir="${info_array[2]}"
+      fi
     fi
   done
 
