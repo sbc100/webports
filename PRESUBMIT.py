@@ -17,7 +17,8 @@ _EXCLUDED_PATHS = (
 
 def CheckBuildbot(input_api, output_api):
   try:
-    subprocess.check_call(['build_tools/partition.py', '--check'])
+    cmd = ['build_tools/partition.py', '--check']
+    subprocess.check_call(cmd)
   except subprocess.CalledProcessError as e:
     return [output_api.PresubmitError('%s failed' % str(cmd))]
   return []
