@@ -1,24 +1,25 @@
-# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Copyright 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 VALID_TOOLCHAINS := glibc newlib pnacl
 include $(NACL_SDK_ROOT)/tools/common.mk
 
-TARGET = kernel
-LIBS = python2.7 freetype bz2 ssl crypto z png readline ncurses nacl_spawn \
-       ppapi_simple tar nacl_io ppapi_cpp ppapi
-NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
-PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
-ifeq ($(TOOLCHAIN),glibc)
-LIBS += util dl
-NACL_LDFLAGS += -Wl,-export-dynamic
-else
+NACL_LDFLAGS += -Wl,--undefined=PSUserCreateInstance
+PNACL_LDFLAGS += -Wl,--undefined=PSUserCreateInstance
+TARGET = libgit2-demo
+CORE_LIBS = cli_main ppapi_simple nacl_io ppapi_cpp ppapi
+
+LIBS = git2 ssl crypto z $(CORE_LIBS)
+ifeq ($(TOOLCHAIN),newlib)
 LIBS += glibc-compat
 endif
-SOURCES = kernel.cc
-INC_PATHS = $(NACLPORTS_INCLUDE)/python2.7
-INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/ipython/$(TOOLCHAIN)
+ifeq ($(TOOLCHAIN),pnacl)
+LIBS += glibc-compat
+endif
+SOURCES = libgit2-demo.c operations.c
+INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/$(TARGET)/$(TOOLCHAIN)
+CFLAGS += -Wall -Werror
 
 ifeq ($(TOOLCHAIN),pnacl)
 EXEEXT=.pexe
@@ -48,17 +49,18 @@ endif
 
 $(eval $(call NMF_RULE,$(TARGET),))
 
-ifeq ($(TOOLCHAIN),glibc)
-EXTRA_ASSETS = lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
-endif
-
 install:
 	mkdir -p $(INSTALL_DIR)
-	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python2.7 ${EXTRA_ASSETS}
 	cp $(OUTDIR)/$(TARGET)*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
 	cp $(OUTDIR)/$(TARGET).nmf $(INSTALL_DIR)
-	cp kernel.py $(INSTALL_DIR)
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
+endif
+	cp index.html $(INSTALL_DIR)
+	cp background.js $(INSTALL_DIR)
+	cp libgit2.js $(INSTALL_DIR)
+	cp manifest.json $(INSTALL_DIR)
+ifeq ($(TOOLCHAIN),pnacl)
+	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/index.html
 endif

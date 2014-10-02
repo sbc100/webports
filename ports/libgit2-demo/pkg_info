@@ -1,0 +1,3 @@
+NAME=libgit2-demo
+VERSION=0.1
+DEPENDS=(libgit2 nacl-spawn)

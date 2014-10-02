@@ -2,15 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Build OpenAL/ogg demo with Pepper in C
 VALID_TOOLCHAINS := glibc newlib pnacl
-NACL_SDK_ROOT ?= $(abspath $(CURDIR)/../..)
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = alut-demo
 LIBS = alut openal ppapi_simple nacl_io ppapi_cpp ppapi
 SOURCES = alut_hello_world.c
-INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/alut-demo/$(TOOLCHAIN)
+INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/$(TARGET)/$(TOOLCHAIN)
 CFLAGS = -Wall -Werror
 
 ifeq ($(TOOLCHAIN),pnacl)

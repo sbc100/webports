@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<!-- Copyright 2014 Google Inc.  All rights reserved. -->
+<head>
+  <META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
+  <META HTTP-EQUIV="Expires" CONTENT="-1" />
+  <title>Native Client libgit2 demo</title>
+  <script type="text/javascript" src="libgit2.js"></script>
+</head>
+
+<body>
+  <h1>Native Client libgit2 demo</h1>
+  <embed name="nacl_module"
+         width=0,
+         height=0,
+         PWD="/tmp",
+         id="nacl_module"
+         src="libgit2-demo.nmf"
+         type="application/x-nacl">
+  <p>
+    This demo embeds an invisible NaCl element in the page which can recieve
+    requests vis postMessage to perform various git operation using the libgit2
+    library.
+  </p>
+  <p>
+    A <a href="https://github.com/libgit2/libgit2/issues/2518">bug</a> in
+    libgit2 means that we currently can't fetch from gerrit repositories
+  </p>
+  <p>
+    Working directory: <input type="text" id="directory" value="/tmp/test"></br>
+    Clone URL: <input size="50" type="text" id="clone_url"
+                      value="https://github.com/google/adb-sync.git"></br>
+  </p>
+  <p>
+    <button id="clone">clone</button>
+    <button id="init">init</button>
+    <button id="status">status</button>
+    <button id="mount">mount filesystem</button>
+  </p>
+  <p>
+  Output:
+  </p>
+  <textarea cols="80" rows="20" id="output" readonly></textarea>
+</body>
+</html>
