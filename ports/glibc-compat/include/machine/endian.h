@@ -27,17 +27,11 @@ __inline_bswap_16 (unsigned short int x)
     return __byte_swap_constant_16(x);
 }
 
-_ELIDABLE_INLINE unsigned long int
-__inline_bswap_32 (unsigned long int x)
-{
-    return __byte_swap_constant_32(x);
-}
-
 #define __byte_swap_16(x) \
   (__builtin_constant_p(x) ? __byte_swap_constant_16(x) : __inline_bswap_16(x))
 
 #define __byte_swap_32(x) \
-  (__builtin_constant_p(x) ? __byte_swap_constant_32(x) : __inline_bswap_32(x))
+  (__builtin_constant_p(x) ? __byte_swap_constant_32(x) : __builtin_bswap32(x))
 
 #define ntohs(x)   (unsigned int)__byte_swap_16(x)
 #define ntohl(x)   (unsigned int)__byte_swap_32(x)
