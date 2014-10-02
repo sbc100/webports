@@ -1,9 +1,9 @@
 diff --git a/boost/config/platform/nacl.hpp b/boost/config/platform/nacl.hpp
 new file mode 100644
-index 0000000..14d472f
+index 0000000..11ce94e
 --- /dev/null
 +++ b/boost/config/platform/nacl.hpp
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,82 @@
 +// Copyright (c) 2013 The Native Client Authors.
 +// Use, modification and distribution are subject to the
 +// Boost Software License, Version 1.0. (See accompanying file
@@ -56,7 +56,10 @@ index 0000000..14d472f
 +// boilerplate code:
 +#define BOOST_HAS_UNISTD_H
 +#include <boost/config/posix_features.hpp>
-+#define BOOST_HAS_PTHREAD_YIELD
++#ifdef _NEWLIB_VERSION
++  #define BOOST_HAS_SCHED_YIELD
++  #define BOOST_HAS_PTHREADS
++#endif
 +
 +#ifndef __GNUC__
 +//
@@ -119,7 +122,7 @@ index 544ae14..91b4d7a 100644
  #if defined(BOOST_LOG_LWRWMUTEX_USE_SRWLOCK)
  
 diff --git a/libs/system/src/error_code.cpp b/libs/system/src/error_code.cpp
-index 5e00588..73cf8a2 100644
+index 5e00588..6545e8d 100644
 --- a/libs/system/src/error_code.cpp
 +++ b/libs/system/src/error_code.cpp
 @@ -101,7 +101,7 @@ namespace
@@ -131,6 +134,26 @@ index 5e00588..73cf8a2 100644
        // Oddball version of strerror_r
        const char * c_str = strerror_r( ev, bp, sz );
        return  c_str
+@@ -251,7 +251,9 @@ namespace
+     case ENOTEMPTY: return make_error_condition( directory_not_empty );
+   # endif // ENOTEMPTY != EEXIST
+   # if ENOTRECOVERABLE != ECONNRESET // the same on some Broadcom chips 
++  # ifndef __pnacl__
+     case ENOTRECOVERABLE: return make_error_condition( state_not_recoverable ); 
++  # endif
+   # endif // ENOTRECOVERABLE != ECONNRESET 
+     case ENOTSOCK: return make_error_condition( not_a_socket );
+     case ENOTSUP: return make_error_condition( not_supported );
+@@ -262,7 +264,9 @@ namespace
+   # endif // EOPNOTSUPP != ENOTSUP
+     case EOVERFLOW: return make_error_condition( value_too_large );
+   # if EOWNERDEAD != ECONNABORTED // the same on some Broadcom chips 
++  # ifndef __pnacl__
+     case EOWNERDEAD: return make_error_condition( owner_dead ); 
++  # endif
+   # endif // EOWNERDEAD != ECONNABORTED 
+     case EPERM: return make_error_condition( operation_not_permitted );
+     case EPIPE: return make_error_condition( broken_pipe );
 diff --git a/tools/build/v2/tools/gcc.jam b/tools/build/v2/tools/gcc.jam
 index ef90f05..da042de 100644
 --- a/tools/build/v2/tools/gcc.jam
