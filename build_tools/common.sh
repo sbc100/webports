@@ -143,7 +143,7 @@ PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
 PATCH_FILE=${START_DIR}/nacl.patch
 
 # Don't support building with SDKs older than the current stable release
-MIN_SDK_VERSION=${MIN_SDK_VERSION:-36}
+MIN_SDK_VERSION=${MIN_SDK_VERSION:-37}
 
 if [ $OS_NAME = "Darwin" ]; then
   OS_JOBS=4
@@ -297,18 +297,6 @@ InjectSystemHeaders() {
 
 
 PatchSpecFile() {
-  # Temporary PNaCl toolchain hack to add usr/local/lib to the library
-  # path. TODO(sbc): remove this once this change makes it into pepper_canary:
-  # https://codereview.chromium.org/299273002/
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    local LD=${NACL_TOOLCHAIN_ROOT}/bin/pydir/pnacl-ld.py
-    if ! grep -q "local\/lib" "$LD"; then
-      sed -i.bak \
-          "s:\${BASE_USR}/lib/:\${BASE_USR}/local/lib/ \${BASE_USR}/lib/:" "$LD"
-    fi
-  fi
-
-  #if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "arm" -o \
   if [ "${NACL_ARCH}" = "pnacl" -o \
        "${NACL_ARCH}" = "emscripten" ]; then
     # The arm compiler doesn't currently need a patched specs file
