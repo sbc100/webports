@@ -296,11 +296,11 @@ InjectSystemHeaders() {
 }
 
 
-PatchSpecFile() {
+PatchSpecsFile() {
   if [ "${NACL_ARCH}" = "pnacl" -o \
        "${NACL_ARCH}" = "emscripten" ]; then
-    # The arm compiler doesn't currently need a patched specs file
-    # as it ships with the correct paths.  As does the pnacl toolchain.
+    # The emscripten and PNaCl toolchains already include the required
+    # include and library paths by defaut. No need to patch them.
     return
   fi
 
@@ -328,6 +328,19 @@ PatchSpecFile() {
   local SED_SAFE_SPACES_USR_INCLUDE=${NACL_SDK_MULTIARCH_USR_INCLUDE/ /\ /}
   local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
 
+  if [ -f ${SPECS_FILE} ]; then
+    if grep -q "${NACL_SDK_MULTIARCH_USR_LIB}" ${SPECS_FILE}; then
+      echo "Specs file already patched"
+      return
+    fi
+    echo "Patching existing specs file"
+    cp ${SPECS_FILE} ${SPECS_FILE}.current
+  else
+    echo "Creating new specs file"
+    ${NACLCC} -dumpspecs > ${SPECS_FILE}.current
+  fi
+
+  # add include & lib search paths to specs file
   if [ "${NACL_ARCH}" = "arm" ]; then
     local ARCH_SUBST='/\*cpp:/ { \
         printf("*nacl_arch:\narm-nacl\n\n", $1); } \
@@ -338,8 +351,7 @@ PatchSpecFile() {
         { print $0; }'
   fi
 
-  # have nacl-gcc dump specs file & add include & lib search paths
-  ${NACLCC} -dumpspecs |\
+  cat ${SPECS_FILE}.current |\
     awk "${ARCH_SUBST}" |\
     sed "/*cpp:/{
       N
@@ -350,9 +362,9 @@ PatchSpecFile() {
       s|$| -rpath-link=${SED_SAFE_SPACES_USR_LIB} -L${SED_SAFE_SPACES_USR_LIB}|
     }" > ${SPECS_FILE}
 
-  # For newlib toolchain, modify the specs file to give an error when attempting
-  # to create a shared object.
-  if [ "${NACL_LIBC}" = "newlib" ]; then
+  # For static-only toolchains (i.e. newlib), modify the specs file to give an
+  # error when attempting to create a shared object.
+  if [ "${NACL_SHARED}" != "1" ]; then
     sed -i.bak "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
   fi
 }
@@ -1641,7 +1653,7 @@ RunInstallStep()    {
 CheckToolchain
 CheckPatchVersion
 CheckSDKVersion
-PatchSpecFile
+PatchSpecsFile
 InjectSystemHeaders
 InstallConfigSite
 GetRevision

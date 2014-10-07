@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 344ff29..5e5249e 100644
+index f8903b6..ab4f2aa 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -90,7 +90,11 @@ endif  # PLATFORM_SHARED_EXT
@@ -68,7 +68,7 @@ index a9866b2..5e80b34 100644
   private:
    std::atomic<void*> rep_;
 diff --git a/port/port_posix.h b/port/port_posix.h
-index f2b89bf..8976acb 100644
+index f2b89bf..c1c3b5c 100644
 --- a/port/port_posix.h
 +++ b/port/port_posix.h
 @@ -37,6 +37,14 @@
@@ -77,11 +77,11 @@ index f2b89bf..8976acb 100644
    #define PLATFORM_IS_LITTLE_ENDIAN  (_BYTE_ORDER == _LITTLE_ENDIAN)
 +#elif defined(OS_NACL)
 +  #include <sys/types.h>
-+  #if defined(__GLIBC__)
-+     #include <endian.h>
-+  #else
++  #if defined(_NEWLIB_VERSION)
 +    #include <machine/endian.h>
 +    #define PLATFORM_IS_LITTLE_ENDIAN  (BYTE_ORDER == LITTLE_ENDIAN)
++  #else
++    #include <endian.h>
 +  #endif
  #else
    #include <endian.h>
@@ -91,7 +91,7 @@ index f2b89bf..8976acb 100644
  #if defined(OS_MACOSX) || defined(OS_SOLARIS) || defined(OS_FREEBSD) ||\
      defined(OS_NETBSD) || defined(OS_OPENBSD) || defined(OS_DRAGONFLYBSD) ||\
 -    defined(OS_ANDROID) || defined(OS_HPUX)
-+    defined(OS_ANDROID) || defined(OS_HPUX) || (defined(OS_NACL) && defined(_NEWLIB_VERSION))
++    defined(OS_ANDROID) || defined(OS_HPUX) || (defined(OS_NACL) && (defined(_NEWLIB_VERSION) || defined(__BIONIC__)))
  // Use fread/fwrite/fflush on platforms without _unlocked variants
  #define fread_unlocked fread
  #define fwrite_unlocked fwrite

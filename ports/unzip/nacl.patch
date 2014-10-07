@@ -9,7 +9,7 @@ index ba0a1d0..1377c2a 100644
 +    /* TODO(hamaji): remove once this gets fixed:
 +     * https://code.google.com/p/nativeclient/issues/detail?id=3737
 +     */
-+#if defined(__native_client__) && !defined(__GLIBC__)
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +    m_time += _timezone;         /* seconds WEST of GMT:  add */
 +#else
      m_time += timezone;         /* seconds WEST of GMT:  add */

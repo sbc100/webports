@@ -6,6 +6,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi
 
-if [ "${NACL_SHARED}" = "0" ]; then
+if [ "${NACL_SHARED}" != "1" ]; then
   EXTRA_CONFIGURE_ARGS="--disable-dso"
 fi
