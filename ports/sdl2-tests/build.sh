@@ -74,8 +74,8 @@ ConfigureStep() {
     conf_host="nacl"
   fi
 
-  CFLAGS="$CPPFLAGS $CFLAGS"
-  LIBS="$LDFLAGS" LogExecute ${SRC_DIR}/test/configure \
+  CFLAGS="${CPPFLAGS} ${CFLAGS}"
+  LIBS="${LDFLAGS}" LogExecute ${SRC_DIR}/test/configure \
     --host=${conf_host} \
     --prefix=${PREFIX} \
     --disable-assembly \

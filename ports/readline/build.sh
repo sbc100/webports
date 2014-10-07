@@ -39,6 +39,5 @@ InstallStep() {
   if [ "${NACL_SHARED}" = "1" ]; then
     cd ${DESTDIR_LIB}
     ln -sf libreadline.so.6 libreadline.so
-    cd -
   fi
 }

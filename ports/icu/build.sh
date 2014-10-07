@@ -31,7 +31,7 @@ else
 fi
 
 BuildHostICU() {
-  Banner "Configuring host version of $NAME"
+  Banner "Configuring host version of ${NAME}"
   if [ "${NACL_ARCH}" = "x86_64" ]; then
     HOST_BUILD_DIR=${WORK_DIR}/build_host_64
     export CPPFLAGS=-m64
@@ -44,13 +44,13 @@ BuildHostICU() {
   MakeDir ${HOST_BUILD_DIR}
   ChangeDir ${HOST_BUILD_DIR}
   LogExecute ${NACL_CONFIGURE_PATH}
-  Banner "Building host version of $NAME"
+  Banner "Building host version of ${NAME}"
   LogExecute make
 }
 
 ConfigureStep() {
   BuildHostICU
-  Banner "Configuring cross build of $NAME"
+  Banner "Configuring cross build of ${NAME}"
   NACL_ARFLAGS=
   EXTRA_CONFIGURE_ARGS+=" --with-cross-build=${HOST_BUILD_DIR}"
   ChangeDir ${BUILD_DIR}

@@ -36,7 +36,8 @@ make ${TARGETS}
 NACL_ARCH=arm
 TOOLCHAIN=newlib
 make ${TARGETS}
-if [ -e ${NACL_SDK_ROOT}/toolchain/*_arm_bionic ]; then
+BIONIC_TOOLCHAIN="${NACL_SDK_ROOT}/toolchain/*_arm_bionic"
+if [ -n "$(shopt -s nullglob; echo ${BIONIC_TOOLCHAIN})" ]; then
   TOOLCHAIN=bionic
   make ${TARGETS}
 fi

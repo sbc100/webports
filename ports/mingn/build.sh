@@ -9,15 +9,15 @@ BuildStep() {
 
 CreateMingnPackage() {
   local package_name="$1.${2:-${NACL_ARCH}}"
-  echo "CreateMingnPackage $package_name"
-  local stamp=\"$(date)\"
+  echo "CreateMingnPackage ${package_name}"
+  local stamp="$(date)"
   MakeDir mingn/stamp
-  echo INSTALLED=${stamp} > mingn/stamp/${package_name}
+  echo "INSTALLED=\"${stamp}\"" > "mingn/stamp/${package_name}"
   MakeDir ${PUBLISH_DIR}/tarballs
   LogExecute rm -f ${PUBLISH_DIR}/tarballs/${package_name}.zip
   LogExecute zip -qr ${PUBLISH_DIR}/tarballs/${package_name}.zip mingn
-  MakeDir ${PUBLISH_DIR}/stamp
-  echo LATEST=${stamp} > ${PUBLISH_DIR}/stamp/${package_name}
+  MakeDir "${PUBLISH_DIR}/stamp"
+  echo "LATEST=\"${stamp}\"" > "${PUBLISH_DIR}/stamp/${package_name}"
 }
 
 InstallStep() {
@@ -62,14 +62,14 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/lib32
 toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/lib
 toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
 "
-  for d in $dirs; do
-    local o=$(echo mingn/$d | sed "s/${OS_SUBDIR}_/nacl_/")
-    echo "Copying libs from: $d -> $o"
-    MakeDir $o
-    if [ -d ${NACL_SDK_ROOT}/$d ]; then
-      cp -R ${NACL_SDK_ROOT}/$d $(dirname $o)
+  for d in ${dirs}; do
+    local o=$(echo mingn/${d} | sed "s/${OS_SUBDIR}_/nacl_/")
+    echo "Copying libs from: ${d} -> ${o}"
+    MakeDir ${o}
+    if [ -d ${NACL_SDK_ROOT}/${d} ]; then
+      cp -R ${NACL_SDK_ROOT}/${d} $(dirname ${o})
     else
-      MakeDir $o
+      MakeDir ${o}
     fi
   done
 
@@ -79,10 +79,10 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
 
   # Resolve all symlinks as nacl_io does not support symlinks.
   for i in $(find mingn -type l); do
-    if [ ! -d $i ]; then
-      cp $i $i.tmp
-      rm $i
-      mv $i.tmp $i
+    if [ ! -d ${i} ]; then
+      cp ${i} ${i}.tmp
+      rm ${i}
+      mv ${i}.tmp ${i}
     fi
   done
 

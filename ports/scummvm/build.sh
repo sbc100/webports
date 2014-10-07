@@ -59,7 +59,7 @@ InstallStep() {
      dists/pred.dic \
      ${SCUMMVM_DIR}
 
-  cp `find gui/themes/fonts/ -type f` ${SCUMMVM_DIR}
+  cp $(find gui/themes/fonts/ -type f) ${SCUMMVM_DIR}
 
   Banner "Creating tarballs"
   cd runimage

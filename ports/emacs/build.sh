@@ -63,7 +63,7 @@ InstallStep() {
      ../emacs_${NACL_ARCH}${NACL_EXEEXT}
   rm -rf bin
   rm -rf share/man
-  find . -iname *.nexe -delete
+  find . -iname "*.nexe" -delete
   tar cf ${ASSEMBLY_DIR}/emacs.tar .
   rm -rf ${ASSEMBLY_DIR}/emacstar
   cd ${ASSEMBLY_DIR}

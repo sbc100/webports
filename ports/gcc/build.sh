@@ -16,7 +16,7 @@ EXTRA_CONFIGURE_ARGS="\
 
 ConfigureStep() {
   DefaultConfigureStep
-  LogExecute rm -f `find -name config.cache`
+  Remove $(find -name config.cache)
 }
 
 InstallStep() {

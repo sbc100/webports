@@ -33,8 +33,8 @@ InstallStep() {
 
   # On newlib there won't be libs, so turn on null glob for these copies.
   shopt -s nullglob
-  LogExecute cp -fR ${GETURL_DIR}/{*.{nexe,pexe,nmf},lib*} ${APP_DIR}
-  LogExecute cp -fR ${UNZIP_DIR}/{*.{nexe,pexe,nmf},lib*} ${APP_DIR}
+  LogExecute cp -fR ${GETURL_DIR}/{*.nexe,*.pexe,*.nmf,lib*} ${APP_DIR}
+  LogExecute cp -fR ${UNZIP_DIR}/{*.nexe,*.pexe,*.nmf,lib*} ${APP_DIR}
   shopt -u nullglob
 
   # Install the HTML/JS for the terminal.

@@ -74,8 +74,7 @@ BuildStep() {
   LogExecute touch python${NACL_EXEEXT}
   # The modules get built with SO=so, but they need to be SO=a inside the
   # destination filesystem.
-  for fn in `find ${NACL_DEST_PYROOT}/${SITE_PACKAGES} -name "*.so"`
-  do
+  for fn in $(find ${NACL_DEST_PYROOT}/${SITE_PACKAGES} -name "*.so"); do
     LogExecute touch ${fn%%so}a
     LogExecute rm -v ${fn}
   done

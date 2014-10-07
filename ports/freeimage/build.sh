@@ -28,8 +28,8 @@ ExtractStep() {
   # tr interprets the '\r' string as ASCII and not UTF-8.
   ChangeDir ${SRC_DIR}
   export
-  for crlf in ${CRLF_TRANSLATE_FILES[@]}; do
-    echo "tr -d '\r' < ${crlf}"
+  for crlf in "${CRLF_TRANSLATE_FILES[@]}"; do
+    echo "Converting line endings: ${crlf}"
     LC_CTYPE=C tr -d '\r' < ${crlf} > .tmp
     mv .tmp ${crlf}
   done

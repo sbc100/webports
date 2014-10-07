@@ -30,9 +30,9 @@ for PKG in ${PACKAGE_LIST}; do
 done
 
 echo "@@@BUILD_STEP Summary@@@"
-if [[ $RESULT != 0 ]] ; then
+if [[ ${RESULT} != 0 ]] ; then
   echo "@@@STEP_FAILURE@@@"
-  echo -e "$MESSAGES"
+  echo -e "${MESSAGES}"
 fi
 
-exit $RESULT
+exit ${RESULT}

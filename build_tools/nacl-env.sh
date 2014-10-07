@@ -36,9 +36,9 @@ fi
 
 # Pick platform directory for compiler.
 OS_NAME=$(uname -s)
-if [ $OS_NAME = "Darwin" ]; then
+if [ ${OS_NAME} = "Darwin" ]; then
   readonly OS_SUBDIR="mac"
-elif [ $OS_NAME = "Linux" ]; then
+elif [ ${OS_NAME} = "Linux" ]; then
   readonly OS_SUBDIR="linux"
 else
   readonly OS_SUBDIR="win"
@@ -47,16 +47,16 @@ else
   fi
 fi
 
-if [ $OS_NAME = "Cygwin" ]; then
-  NACL_SDK_ROOT=`cygpath $NACL_SDK_ROOT`
+if [ ${OS_NAME} = "Cygwin" ]; then
+  NACL_SDK_ROOT=$(cygpath ${NACL_SDK_ROOT})
   if [ -z "${CYGWIN:-}" ]; then
     export CYGWIN=nodosfilewarning
   fi
 fi
 
-if [ "$TOOLCHAIN" = "bionic" ]; then
+if [ "${TOOLCHAIN}" = "bionic" ]; then
   DEFAULT_ARCH=arm
-elif [ "$TOOLCHAIN" = "pnacl" ]; then
+elif [ "${TOOLCHAIN}" = "pnacl" ]; then
   DEFAULT_ARCH=pnacl
 else
   DEFAULT_ARCH=x86_64
@@ -101,7 +101,7 @@ fi
 
 if [ "${TOOLCHAIN}" = "pnacl" ]; then
   if [ "${NACL_ARCH}" != "pnacl" ]; then
-    echo "PNaCl does not support the selected architecture: $NACL_ARCH" 1>&2
+    echo "PNaCl does not support the selected architecture: ${NACL_ARCH}" 1>&2
     exit -1
   fi
 fi
@@ -163,7 +163,7 @@ export NACL_ARCH
 export NACL_CROSS_PREFIX
 
 InitializeNaClGccToolchain() {
-  if [ $NACL_ARCH = "arm" ]; then
+  if [ ${NACL_ARCH} = "arm" ]; then
     local TOOLCHAIN_ARCH="arm"
   else
     local TOOLCHAIN_ARCH="x86"
@@ -373,7 +373,7 @@ if [ -z "${NACL_ENV_IMPORT:-}" ]; then
       echo "export LDFLAGS=\"${NACL_LDFLAGS}\""
     else
       NaClEnvExport
-      exec $@
+      exec "$@"
     fi
   fi
 fi

@@ -200,6 +200,12 @@ step will not effect other steps.
 A variety of shared variables and functions are available from with the build
 scripts.  These are defined in build_tools/common.sh.
 
+When modifying any shell scripts in naclports it is recommended that you
+run ``shellcheck`` to catch common errors.  The recommended command line
+for this is::
+
+  shellcheck -e SC2044,SC2129,SC2046,SC2035,SC2034,SC2086,SC2148 \
+    `git ls-files "*.sh"`
 
 Modifying package sources / Working with patches
 ------------------------------------------------

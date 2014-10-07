@@ -9,4 +9,4 @@ NACL_ENV_IMPORT=1
 . "$SCRIPT_DIR/nacl-env.sh"
 NaClEnvExport
 
-exec make DESTDIR=$NACL_PREFIX $*
+exec make DESTDIR=$NACL_PREFIX "$@"

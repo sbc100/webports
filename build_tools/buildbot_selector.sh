@@ -92,7 +92,7 @@ if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
 else
   # Decode buildername.
   readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
-  if [[ ${BUILDBOT_BUILDERNAME} =~ $BNAME_REGEX ]]; then
+  if [[ ${BUILDBOT_BUILDERNAME} =~ ${BNAME_REGEX} ]]; then
     readonly PREFIX=${BASH_REMATCH[1]}
     if [ "${PREFIX}" = "naclports-" ]; then
       readonly TRYBOT=1
@@ -118,18 +118,18 @@ else
   fi
 
   # Select platform specific things.
-  if [ "$OS" = "win" ]; then
+  if [ "${OS}" = "win" ]; then
     PYTHON=python.bat
   fi
 
   # Select libc
-  if [ "$LIBC" = "glibc" ]; then
+  if [ "${LIBC}" = "glibc" ]; then
     TOOLCHAIN=glibc
-  elif [ "$LIBC" = "newlib" ]; then
+  elif [ "${LIBC}" = "newlib" ]; then
     TOOLCHAIN=newlib
-  elif [ "$LIBC" = "pnacl_newlib" ]; then
+  elif [ "${LIBC}" = "pnacl_newlib" ]; then
     TOOLCHAIN=pnacl
-  elif [ "$LIBC" = "bionic" ]; then
+  elif [ "${LIBC}" = "bionic" ]; then
     TOOLCHAIN=bionic
   else
     echo "Bad LIBC: ${LIBC}" 1>&2
@@ -137,16 +137,16 @@ else
   fi
 
   # Select shard count
-  if [ "$OS" = "mac" ]; then
+  if [ "${OS}" = "mac" ]; then
     readonly SHARDS=2
-  elif [ "$OS" = "linux" ]; then
-    if [ "$TOOLCHAIN" = "glibc" ]; then
+  elif [ "${OS}" = "linux" ]; then
+    if [ "${TOOLCHAIN}" = "glibc" ]; then
       SHARDS=4
-    elif [ "$TOOLCHAIN" = "newlib" ]; then
+    elif [ "${TOOLCHAIN}" = "newlib" ]; then
       SHARDS=3
-    elif [ "$TOOLCHAIN" = "bionic" ]; then
+    elif [ "${TOOLCHAIN}" = "bionic" ]; then
       SHARDS=1
-    elif [ "$TOOLCHAIN" = "pnacl" ]; then
+    elif [ "${TOOLCHAIN}" = "pnacl" ]; then
       SHARDS=4
     else
       echo "Unspecified sharding for TOOLCHAIN: ${TOOLCHAIN}" 1>&2
@@ -156,7 +156,7 @@ else
   fi
 
   # For the trybots we have 5 shards for each toolchain
-  if [ "$TRYBOT" = "1" ]; then
+  if [ "${TRYBOT}" = "1" ]; then
     SHARDS=5
   fi
 fi
@@ -196,7 +196,7 @@ PlumbingTests() {
     RESULT=1
     echo "@@@STEP_FAILURE@@@"
   fi
-  if [ "$OS" = "linux" ]; then
+  if [ "${OS}" = "linux" ]; then
     echo "@@@BUILD_STEP plumbing_tests x86_64@@@"
     if ! ${PYTHON} ${SCRIPT_DIR}/../chrome_test/plumbing_test.py \
         -a x86_64 -x -vv; then
@@ -228,7 +228,7 @@ BuildShard
 
 # Publish resulting builds to Google Storage, but only on the
 # linux bots.
-if [ -z "${NACLPORTS_NO_UPLOAD:-}" -a "$OS" = "linux" ]; then
+if [ -z "${NACLPORTS_NO_UPLOAD:-}" -a "${OS}" = "linux" ]; then
   Publish
 fi
 

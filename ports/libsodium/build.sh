@@ -14,8 +14,8 @@ TestStep() {
   # the libtool warns "libtool: install: warning: remember to run
   # `libtool --finish pepper_31/toolchain/linux_pnacl/usr/lib'"
   (cd src/libsodium;
-  /bin/bash ../../libtool   --mode=install /usr/bin/install \
-      -c   libsodium.la `cd ../../naclport_test/lib && pwd`)
+  /bin/bash ../../libtool --mode=install /usr/bin/install \
+    -c libsodium.la $(cd ../../naclport_test/lib && pwd))
 
   if [[ ${NACL_ARCH} == "pnacl" ]]; then
     EXT=.bc
@@ -48,8 +48,7 @@ TestStep() {
      TranslateAndWriteSelLdrScript ${pexe} x86-64 crypto_box_test.x86-64${EXT} crypto_box_test)
     RunTest
     echo "Tests OK"
-  # skip running tests on arm
-  elif [ `uname -m` == "${NACL_ARCH_ALT}" ]; then
+  elif [ "$(uname -m)" = "${NACL_ARCH_ALT}" ]; then
     WriteSelLdrScript naclport_test/crypto_box_test crypto_box_test${EXT}
     RunTest
     echo "Tests OK"

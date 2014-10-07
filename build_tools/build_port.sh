@@ -8,7 +8,7 @@
 # pkg_info and build.sh).  Most of the code and heavy lifting is in
 # common.sh.
 
-readonly SCRIPT_DIR=$(cd "$(dirname "$BASH_SOURCE")" ; pwd)
+readonly SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE}")" ; pwd)
 
 if [ ! -f pkg_info ]; then
   echo "No pkg_info found in current directory"

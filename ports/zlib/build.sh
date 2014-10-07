@@ -13,7 +13,7 @@ fi
 ConfigureStep() {
   LogExecute rm -f libz.*
   SetupCrossEnvironment
-  CHOST=${NACL_CROSS_PREFIX} LogExecute ./configure --prefix=${PREFIX}
+  CHOST=${NACL_CROSS_PREFIX} LogExecute ./configure --prefix="${PREFIX}"
 }
 
 
@@ -55,17 +55,17 @@ TestStep() {
     local example_pexe="example${NACL_EXEEXT}"
     local minigzip_script="minigzip"
     local example_script="example"
-    TranslateAndWriteSelLdrScript ${minigzip_pexe} x86-32 \
-      minigzip.x86-32.nexe ${minigzip_script}
+    TranslateAndWriteSelLdrScript "${minigzip_pexe}" x86-32 \
+      minigzip.x86-32.nexe "${minigzip_script}"
     RunMinigzip
-    TranslateAndWriteSelLdrScript ${minigzip_pexe} x86-64 \
-      minigzip.x86-64.nexe ${minigzip_script}
+    TranslateAndWriteSelLdrScript "${minigzip_pexe}" x86-64 \
+      minigzip.x86-64.nexe "${minigzip_script}"
     RunMinigzip
-    TranslateAndWriteSelLdrScript ${example_pexe} x86-32 \
-      example.x86-32.nexe ${example_script}
+    TranslateAndWriteSelLdrScript "${example_pexe}" x86-32 \
+      example.x86-32.nexe "${example_script}"
     RunExample
-    TranslateAndWriteSelLdrScript ${example_pexe} x86-64 \
-      example.x86-64.nexe ${example_script}
+    TranslateAndWriteSelLdrScript "${example_pexe}" x86-64 \
+      example.x86-64.nexe "${example_script}"
     RunExample
   else
     RunMinigzip

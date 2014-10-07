@@ -22,9 +22,9 @@ BuildSuccess() {
 
 BuildFailure() {
   MESSAGE="naclports: Build FAILED for $1 (${NACL_ARCH}/${TOOLCHAIN})"
-  echo $MESSAGE
+  echo ${MESSAGE}
   echo "@@@STEP_FAILURE@@@"
-  MESSAGES="$MESSAGES\n$MESSAGE"
+  MESSAGES="${MESSAGES}\n${MESSAGE}"
   RESULT=1
   if [ "${TEST_BUILDBOT:-}" = "1" ]; then
     exit 1
@@ -32,8 +32,8 @@ BuildFailure() {
 }
 
 RunCmd() {
-  echo $*
-  $*
+  echo "$@"
+  "$@"
 }
 
 NACLPORTS_ARGS="-v --ignore-disabled --from-source"
@@ -45,10 +45,10 @@ NACLPORTS_ARGS="-v --ignore-disabled --from-source"
 BuildPackage() {
   PACKAGE=$1
   shift
-  if RunCmd bin/naclports $NACLPORTS_ARGS $* install $PACKAGE; then
-    BuildSuccess $PACKAGE
+  if RunCmd bin/naclports ${NACLPORTS_ARGS} "$@" install ${PACKAGE}; then
+    BuildSuccess ${PACKAGE}
   else
-    BuildFailure $PACKAGE
+    BuildFailure ${PACKAGE}
   fi
 }
 
@@ -78,7 +78,7 @@ InstallPackageMultiArch() {
       BuildFailure $1
       return
     fi
-    if ! RunCmd bin/naclports $NACLPORTS_ARGS install $1 ; then
+    if ! RunCmd bin/naclports ${NACLPORTS_ARGS} install $1 ; then
       # Early exit if one of the architecures fails. This mean the
       # failure is always at the end of the build step.
       BuildFailure $1
