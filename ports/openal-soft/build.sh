@@ -13,6 +13,6 @@ if [ "${NACL_ARCH}" = "i686" ]; then
 fi
 
 # Defaults to dynamic lib, but newlib can only link statically.
-if [ "${NACL_LIBC}" = "newlib" ]; then
+if [ "${NACL_SHARED}" != "1" ]; then
   EXTRA_CMAKE_ARGS+=" -DLIBTYPE=STATIC"
 fi
