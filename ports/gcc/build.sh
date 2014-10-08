@@ -16,7 +16,9 @@ EXTRA_CONFIGURE_ARGS="\
 
 ConfigureStep() {
   DefaultConfigureStep
-  Remove $(find -name config.cache)
+  for cache_file in $(find . -name config.cache); do
+    Remove $cache_file
+  done
 }
 
 InstallStep() {
