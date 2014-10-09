@@ -12,7 +12,11 @@ InstallStep() {
 
   LogExecute rm -rf fonts
   LogExecute cp -fR ${NACL_PREFIX}/share/fonts ${PUBLISH_DIR}
+  for dir in $(find ${PUBLISH_DIR}/fonts/X11 -type d); do
+    LogExecute mkfontdir "$dir"
+    LogExecute mkfontscale "$dir"
+  done
 
-  LogExecute zip -r fonts.zip fonts
+  LogExecute zip -qr fonts.zip fonts
   LogExecute rm -rf fonts
 }
