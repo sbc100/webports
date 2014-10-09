@@ -341,12 +341,15 @@ fi
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then
   if [ -d ${NACL_TOOLCHAIN_ROOT}/le32-nacl ]; then
-    # new pepper_39 pnacl install location
-    # TODO: change this to le32-nacl/usr once that is in the default
-    # include path.
-    readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/local
+    NACL_SDK_REVISION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-revision)
+    if [ "${NACL_SDK_REVISION}" -lt "298910" ]; then
+      # pepper_39 shiped with le32-nacl/local in is default search path
+      readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/local
+    else
+      readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/usr
+    fi
   else
-    # pre-pepper_39 location
+    # pre-pepper_39 used /usr/local
     # TODO: remove this once pepper_39 is stable.
     readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
   fi

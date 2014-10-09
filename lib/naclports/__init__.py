@@ -169,6 +169,13 @@ def GetSDKVersion():
   return version
 
 
+def GetSDKRevision():
+  """Returns the revision of the currently configured Native Client SDK."""
+  getos = os.path.join(NACL_SDK_ROOT, 'tools', 'getos.py')
+  version = subprocess.check_output([getos, '--sdk-revision']).strip()
+  return int(version)
+
+
 def GetToolchainRoot(config):
   """Returns the toolchain folder for a given NaCl toolchain."""
   import getos
@@ -202,7 +209,10 @@ def GetInstallRoot(config):
   # in the PNaCl default search path (should be once pepper_39 is stable).
   if config.toolchain == 'pnacl':
     if tc_root.endswith('le32-nacl'):
-      return os.path.join(tc_root, 'local')
+      if GetSDKRevision() < 298910:
+        return os.path.join(tc_root, 'local')
+      else:
+        return os.path.join(tc_root, 'usr')
     else:
       return os.path.join(tc_root, 'usr', 'local')
   else:
