@@ -566,6 +566,15 @@ def Main(argv):
   if not options.chdir:
     options.chdir.append('.')
 
+  if sys.platform.startswith('linux'):
+    if 'CHROME_DEVEL_SANDBOX' not in os.environ:
+      logging.error('chrome_test on linux requires CHROME_DEVEL_SANDBOX')
+      sys.exit(1)
+    if not os.path.exists(os.environ['CHROME_DEVEL_SANDBOX']):
+      logging.error('chrome sandbox specified by CHROME_DEVEL_SANDBOX is '
+                    'missing: %s' % os.environ['CHROME_DEVEL_SANDBOX'])
+      sys.exit(1)
+
   DownloadChrome(ChromeUrl(options.arch), ChromeDir(options.arch))
   RunChrome(
       chrome_path=ChromeRunPath(options.arch),
