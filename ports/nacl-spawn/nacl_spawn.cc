@@ -375,6 +375,8 @@ static int GetInt(pp::VarDictionary dict, const char* key) {
   return value;
 }
 
+static pid_t waitpid_impl(int pid, int* status, int options);
+
 // Shared spawnve implementation. Declared static so that shared library
 // overrides doesn't break calls meant to be internal to this implementation.
 static int spawnve_impl(int mode, const char* path,
@@ -389,7 +391,7 @@ static int spawnve_impl(int mode, const char* path,
       return -1;
     }
     int status;
-    int result = waitpid(pid, &status, 0);
+    int result = waitpid_impl(pid, &status, 0);
     if (result < 0) {
       return -1;
     }
@@ -475,8 +477,18 @@ pid_t wait(int* status) {
 // same as waitpid, though this implementation has some restrictions.
 // Returns 0 on success. On error -1 is returned and errno will be set
 // appropriately.
-pid_t waitpid(int pid, int* status, int options) {
+pid_t waitpid(pid_t pid, int* status, int options) {
   return waitpid_impl(pid, status, options);
+}
+
+// BSD wait variant with rusage.
+pid_t wait3(void* status, int options, struct rusage* rusage) {
+  return waitpid_impl(-1, static_cast<int*>(status), options);
+}
+
+// BSD wait variant with pid and rusage.
+pid_t wait4(pid_t pid, void* status, int options, struct rusage* rusage) {
+  return waitpid_impl(pid, static_cast<int*>(status), options);
 }
 
 // Get the process ID of the calling process.

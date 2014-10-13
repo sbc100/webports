@@ -1,20 +1,3 @@
-diff --git a/Makefile.in b/Makefile.in
-index 6481e99..ea6f0ab 100644
---- a/Makefile.in
-+++ b/Makefile.in
-@@ -332,8 +332,11 @@ EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
- noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
- 		debug.h getopt.h gettext.h hash.h
- 
-+NACL_LIBS = ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp \
-+    -l${NACL_CPP_LIB}
-+
- make_LDADD = @LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
--	$(am__append_1)
-+	$(am__append_1) $(NACL_LIBS)
- man_MANS = make.1
- AM_CPPFLAGS = $(GLOBINC) $(am__append_2)
- 
 diff --git a/job.c b/job.c
 index aacfb84..9be95e9 100644
 --- a/job.c
