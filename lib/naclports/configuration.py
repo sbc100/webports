@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import os
+import platform
 
 import naclports
 
@@ -19,7 +20,6 @@ class Configuration(object):
   environment variables (TOOLCHAIN, NACL_ARCH, NACL_DEBUG).
   """
   default_toolchain = 'newlib'
-  default_arch = 'x86_64'
 
   def __init__(self, arch=None, toolchain=None, debug=None):
     self.SetConfig(debug)
@@ -42,8 +42,11 @@ class Configuration(object):
         arch = 'pnacl'
       elif self.toolchain == 'bionic':
         arch = 'arm'
+      elif platform.machine() == 'i686':
+        arch = 'i686'
       else:
-        arch = self.default_arch
+        arch = 'x86_64'
+
     self.arch = arch
     if self.arch not in naclports.arch_to_pkgarch:
       raise naclports.Error("Invalid arch: %s" % arch)

@@ -222,10 +222,17 @@ else
   PUBLISH_DIR+=/${NACL_LIBC}
 fi
 
-if [ "${NACL_ARCH}" != "pnacl" -a -z "${NACL_SEL_LDR:-}" ]; then
+SKIP_SEL_LDR_TESTS=0
+
+# Skip sel_ldr tests when building for arm
+if [ "${NACL_ARCH}" = "arm" ]; then
   SKIP_SEL_LDR_TESTS=1
-else
-  SKIP_SEL_LDR_TESTS=0
+fi
+
+# Skip sel_ldr tests when building x86_64 targets on a 32-bit host
+if [ "${NACL_ARCH}" = "x86_64" -a "${HOST_IS_32BIT}" = "1" ]; then
+  echo "WARNING: Building x86_64 targets on i686 host. Cannot run tests."
+  SKIP_SEL_LDR_TESTS=1
 fi
 
 
@@ -1627,7 +1634,7 @@ RunPostBuildStep()  {
 
 RunTestStep()       {
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
-    return;
+    return
   fi
   if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
     return

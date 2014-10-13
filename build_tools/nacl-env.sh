@@ -54,12 +54,21 @@ if [ ${OS_NAME} = "Cygwin" ]; then
   fi
 fi
 
+HOST_IS_32BIT=0
+if [ "$(uname -m)" = "i686" ]; then
+  HOST_IS_32BIT=1
+fi
+
 if [ "${TOOLCHAIN}" = "bionic" ]; then
   DEFAULT_ARCH=arm
 elif [ "${TOOLCHAIN}" = "pnacl" ]; then
   DEFAULT_ARCH=pnacl
 else
-  DEFAULT_ARCH=x86_64
+  if [ "${HOST_IS_32BIT}" = "1" ]; then
+    DEFAULT_ARCH=i686
+  else
+    DEFAULT_ARCH=x86_64
+  fi
 fi
 
 # Default value for NACL_ARCH
