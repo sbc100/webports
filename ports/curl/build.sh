@@ -20,16 +20,15 @@ fi
 BuildStep() {
   # Run the build twice, initially to build the sel_ldr version
   # and secondly to build the PPAPI version based on nacl_io.
-  # Touch tool_main.c to ensure that it gets rebuilt each time.
-  # This is the only file that depends on the PPAPI define and
-  # therefore will differ between PPAPI and sel_ldr versions.
-  if [ -f ${SRC_DIR}/src/tool_main.c ]; then
-    touch ${SRC_DIR}/src/tool_main.c
-  fi
+  # Remove curl-tool_main.o between builds to ensure it gets
+  # rebuilt.  This is the only object that depends on the PPAPI
+  # define and therefore will differ between PPAPI and sel_ldr
+  # versions.
+  Remove src/curl-tool_main.o
   DefaultBuildStep
 
   Banner "Build curl_ppapi"
-  touch ${SRC_DIR}/src/tool_main.c
+  Remove  src/curl-tool_main.o
   sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" src/Makefile
   sed -i.bak "s/curl\$(EXEEXT)/curl_ppapi\$(EXEEXT)/" src/Makefile
   local sedlibs="-lppapi_simple,-lnacl_io,-lppapi_cpp,-lppapi,-lcli_main"

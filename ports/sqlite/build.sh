@@ -15,9 +15,10 @@ fi
 EXECUTABLES="sqlite3${NACL_EXEEXT}"
 
 BuildStep() {
-  if [ -f "${SRC_DIR}/shell.c" ]; then
-    touch ${SRC_DIR}/shell.c
-  fi
+  # Remove shell.o between building ppapi and sel_ldr versions of sqlite.
+  # This is the only object that depends on the PPAPI define and therefore
+  # needs to be rebuilt.
+  Remove shell.o
   DefaultBuildStep
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     local pexe=${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}
@@ -29,7 +30,7 @@ BuildStep() {
   sed -i.bak "s/sqlite3\$(EXEEXT)/sqlite3_ppapi\$(EXEEXT)/" Makefile
   sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" Makefile
   sed -i.bak "s/-lnacl_io/-lppapi_simple -lnacl_io -pthread -lppapi_cpp -lppapi/" Makefile
-  touch ${SRC_DIR}/shell.c
+  Remove shell.o
   DefaultBuildStep
 }
 
