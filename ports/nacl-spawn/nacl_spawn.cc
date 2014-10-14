@@ -481,15 +481,20 @@ pid_t waitpid(pid_t pid, int* status, int options) {
   return waitpid_impl(pid, status, options);
 }
 
+#if !defined(__BIONIC__)
 // BSD wait variant with rusage.
-pid_t wait3(void* status, int options, struct rusage* rusage) {
+pid_t wait3(void* status, int options, struct rusage* unused_rusage) {
   return waitpid_impl(-1, static_cast<int*>(status), options);
 }
+#endif
 
 // BSD wait variant with pid and rusage.
-pid_t wait4(pid_t pid, void* status, int options, struct rusage* rusage) {
+#if !defined(__BIONIC__)
+pid_t wait4(pid_t pid, void* status, int options,
+            struct rusage* unused_rusage) {
   return waitpid_impl(pid, static_cast<int*>(status), options);
 }
+#endif
 
 // Get the process ID of the calling process.
 pid_t getpid() {
