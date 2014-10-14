@@ -12,6 +12,7 @@ SET(CMAKE_SYSTEM_NAME Linux)
 
 # which compilers to use for C and C++
 SET(CMAKE_C_COMPILER "${NACLCC}")
+SET(NACL_LIBC "${NACL_LIBC}")
 SET(CMAKE_CXX_COMPILER "${NACLCXX}")
 SET(CMAKE_LINKER "${NACLLD}")
 SET(CMAKE_AR "${NACLAR}" CACHE FILEPATH "Archiver")
@@ -20,6 +21,11 @@ SET(_CMAKE_TOOLCHAIN_PREFIX ${NACL_CROSS_PREFIX})
 # here is the target environment located
 SET(CMAKE_FIND_ROOT_PATH ${NACL_TOOLCHAIN_ROOT})
 
+# Reference CMAKE_TOOLCHAIN_FILE and CMAKE_PREFIX_PATH here to avoid
+# cmake warnings:
+# http://public.kitware.com/pipermail/cmake/2013-February/053476.html
+SET(DUMMY_VALUE ${CMAKE_TOOLCHAIN_FILE} ${CMAKE_PREFIX_PATH})
+
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search 
 # programs in the host environment
@@ -27,6 +33,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 SET(CMAKE_REQUIRED_INCLUDES "${NACL_SDK_ROOT}/include")
+LINK_DIRECTORIES(${NACL_SDK_LIBDIR})
 INCLUDE_DIRECTORIES(${NACL_SDK_ROOT}/include)
 INCLUDE_DIRECTORIES(${EXTRA_INCLUDE})
 

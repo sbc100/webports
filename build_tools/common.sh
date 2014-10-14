@@ -1135,7 +1135,9 @@ ConfigureStep_CMake() {
            -DNACLLD=${NACLLD} \
            -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
            -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
+           -DNACL_SDK_LIBDIR=${NACL_SDK_LIBDIR} \
            -DNACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT} \
+           -DNACL_LIBC=${NACL_LIBC} \
            -DCMAKE_PREFIX_PATH=${NACL_PREFIX} \
            -DCMAKE_INSTALL_PREFIX=${PREFIX} \
            -DCMAKE_BUILD_TYPE=RELEASE ${EXTRA_CMAKE_ARGS}
@@ -1325,25 +1327,17 @@ RunSelLdrCommand() {
     TranslateAndWriteSelLdrScript "${PEXE}" x86-32 "${NEXE_32}" "${SCRIPT_32}"
     echo "[sel_ldr x86-32] $*"
     time "./${SCRIPT_32}" "$@"
-    if [ -f "${NACL_SEL_LDR_X8664}" ]; then
-      TranslateAndWriteSelLdrScript "${PEXE}" x86-64 "${NEXE_64}" "${SCRIPT_64}"
-      echo "[sel_ldr x86-64] $*"
-      time "./${SCRIPT_64}" "$@"
-    else
-      echo "WARNING: ${NACL_SEL_LDR_X8664} not found, skipping tests."
-    fi
+    TranslateAndWriteSelLdrScript "${PEXE}" x86-64 "${NEXE_64}" "${SCRIPT_64}"
+    echo "[sel_ldr x86-64] $*"
+    time "./${SCRIPT_64}" "$@"
   else
     # Normal NaCl.
     local NEXE=$(basename "$1")
     local SCRIPT=$1.sh
-    if [ -f "${NACL_SEL_LDR}" ]; then
-      WriteSelLdrScript "${SCRIPT}" "${NEXE}"
-      echo "[sel_ldr] $*"
-      shift
-      time "./${SCRIPT}" "$@"
-    else
-      echo "WARNING: ${NACL_SEL_LDR} not found, skipping tests."
-    fi
+    WriteSelLdrScript "${SCRIPT}" "${NEXE}"
+    echo "[sel_ldr] $*"
+    shift
+    time "./${SCRIPT}" "$@"
   fi
 }
 
@@ -1410,9 +1404,13 @@ TranslateAndWriteSelLdrScript() {
   local NEXE=$3
   local SCRIPT=$4
   # Finalize the pexe to make sure it is finalizeable.
-  TimeCommand "${PNACLFINALIZE}" "${PEXE}" -o "${PEXE_FINAL}"
+  if [ "${PEXE}" -nt "${PEXE_FINAL}" ]; then
+    "${PNACLFINALIZE}" "${PEXE}" -o "${PEXE_FINAL}"
+  fi
   # Translate to the appropriate version.
-  TimeCommand "${TRANSLATOR}" "${PEXE_FINAL}" -arch "${ARCH}" -o "${NEXE}"
+  if [ "${PEXE_FINAL}" -nt "${NEXE}" ]; then
+    "${TRANSLATOR}" "${PEXE_FINAL}" -arch "${ARCH}" -o "${NEXE}"
+  fi
   WriteSelLdrScriptForPNaCl "${SCRIPT}" "${NEXE}" "${ARCH}"
 }
 
@@ -1460,7 +1458,7 @@ HERE
 FinalizePexe() {
   local pexe=$1
   Banner "Finalizing ${pexe}"
-  TimeCommand "${PNACLFINALIZE}" "${pexe}"
+  "${PNACLFINALIZE}" "${pexe}"
 }
 
 
@@ -1478,7 +1476,9 @@ TranslatePexe() {
   for a in ${arches} ; do
     echo "translating pexe [${a}]"
     nexe=${basename}.${a}.nexe
-    TimeCommand "${TRANSLATOR}" -O0 -arch "${a}" "${pexe}" -o "${nexe}"
+    if [ "${pexe}" -nt "${nexe}" ]; then
+      "${TRANSLATOR}" -O0 -arch "${a}" "${pexe}" -o "${nexe}"
+    fi
   done
 
   # Now the same spiel with -O2
@@ -1486,7 +1486,9 @@ TranslatePexe() {
   for a in ${arches} ; do
     echo "translating pexe [${a}]"
     nexe=${basename}.opt.${a}.nexe
-    TimeCommand "${TRANSLATOR}" -O2 -arch "${a}" "${pexe}" -o "${nexe}"
+    if [ "${pexe}" -nt "${nexe}" ]; then
+      "${TRANSLATOR}" -O2 -arch "${a}" "${pexe}" -o "${nexe}"
+    fi
   done
 
   local dirname=$(dirname "${pexe}")
