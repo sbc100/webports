@@ -162,6 +162,9 @@ class Package(object):
     info_content += 'BUILD_SDK_VERSION=%s\n' % naclports.GetSDKVersion()
     return info_content
 
+  def IsAnyVersionInstalled(self):
+    return naclports.IsInstalled(self.NAME, self.config)
+
   def IsInstalled(self):
     return naclports.IsInstalled(self.NAME, self.config,
                                  self.InstalledInfoContents())
@@ -182,7 +185,7 @@ class Package(object):
     self.CheckInstallable()
 
     if force is None and self.IsInstalled():
-      Log("Already installed '%s' [%s]" % (self.NAME, self.config))
+      Log("Already installed %s" % self.InfoString())
       return
 
     if build_deps:
@@ -202,32 +205,46 @@ class Package(object):
     if from_source:
       self.Build(build_deps, force)
 
+    if self.IsAnyVersionInstalled():
+      Log("Uninstalling existing %s" % self.InfoString())
+      self.DoUninstall()
+
     binary_package.BinaryPackage(package_file).Install()
 
-  def Uninstall(self, ignore_missing):
-    if not os.path.exists(naclports.GetInstallStamp(self.NAME, self.config)):
+  def InfoString(self):
+    return "'%s' [%s]" % (self.NAME, self.config)
+
+  def GetInstallStamp(self):
+    return naclports.GetInstallStamp(self.NAME, self.config)
+
+  def Uninstall(self, ignore_missing=False):
+    if not os.path.exists(self.GetInstallStamp()):
       if ignore_missing:
         return
-      raise Error('Package not installed: %s [%s]' % (self.NAME, self.config))
+      raise Error('Package not installed: %s' % self.InfoString())
 
-    Log("Uninstalling '%s' [%s]" % (self.NAME, self.config))
+    Log("Uninstalling %s" % self.InfoString())
+    self.DoUninstall()
+
+  def DoUninstall(self):
+    os.remove(self.GetInstallStamp())
     file_list = naclports.GetFileList(self.NAME, self.config)
     if not os.path.exists(file_list):
-      Log('No files to uninstall')
-    else:
-      root = naclports.GetInstallRoot(self.config)
-      with open(file_list) as f:
-        for line in f:
-          filename = os.path.join(root, line.strip())
-          if not os.path.lexists(filename):
-            Warn('File not found while uninstalling: %s' % filename)
-            continue
-          Trace('rm %s' % filename)
-          os.remove(filename)
-          RemoveEmptyDirs(os.path.dirname(filename))
+      Trace('No files to uninstall')
+      return
 
-      os.remove(file_list)
-    os.remove(naclports.GetInstallStamp(self.NAME, self.config))
+    root = naclports.GetInstallRoot(self.config)
+    with open(file_list) as f:
+      for line in f:
+        filename = os.path.join(root, line.strip())
+        if not os.path.lexists(filename):
+          Warn('File not found while uninstalling: %s' % filename)
+          continue
+        Trace('rm %s' % filename)
+        os.remove(filename)
+        RemoveEmptyDirs(os.path.dirname(filename))
+
+    os.remove(file_list)
 
   def Build(self, build_deps, force=None):
     self.CheckBuildable()
@@ -236,7 +253,7 @@ class Package(object):
       self.InstallDeps(force)
 
     if not force and self.IsBuilt():
-      Log("Already built '%s' [%s]" % (self.NAME, self.config))
+      Log("Already built %s" % self.InfoString())
       return
 
     log_root = os.path.join(OUT_DIR, 'logs')
@@ -251,14 +268,13 @@ class Package(object):
       prefix = '*** '
     else:
       prefix = ''
-    Log("%sBuilding '%s' [%s]" % (prefix, self.NAME, self.config))
+    Log("%sBuilding %s" % (prefix, self.InfoString()))
 
     start = time.time()
     self.RunBuildSh(stdout)
 
     duration = FormatTimeDelta(time.time() - start)
-    Log("Build complete '%s' [%s] [took %s]"
-        % (self.NAME, self.config, duration))
+    Log("Build complete %s [took %s]" % (self.InfoString(), duration))
 
   def RunBuildSh(self, stdout, args=None):
     build_port = os.path.join(TOOLS_DIR, 'build_port.sh')

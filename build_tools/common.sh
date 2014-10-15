@@ -1499,7 +1499,7 @@ PackageStep() {
   if [ -d "${INSTALL_DIR}${PREFIX}" ]; then
     mv "${INSTALL_DIR}${PREFIX}" "${INSTALL_DIR}/payload"
   fi
-  local excludes="usr/doc share/man"
+  local excludes="usr/doc share/man share/info lib/charset.alias"
   for exclude in ${excludes}; do
     if [ -e "${INSTALL_DIR}/payload/${exclude}" ]; then
       echo "Pruning ${exclude}"

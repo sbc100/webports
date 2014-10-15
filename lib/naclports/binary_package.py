@@ -114,6 +114,9 @@ class BinaryPackage(object):
     with tarfile.open(self.filename) as tar:
       return tar.extractfile('./pkg_info').read()
 
+  def InfoString(self):
+    return "'%s' [%s]" % (self.NAME, self.config)
+
   def Install(self):
     """Install binary package into toolchain directory."""
     dest = naclports.GetInstallRoot(self.config)
@@ -121,12 +124,15 @@ class BinaryPackage(object):
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
-    naclports.Log("Installing '%s' [%s]" % (self.NAME, self.config))
+    if self.IsInstalled():
+      raise naclports.Error('package already installed: %s' % self.InfoString())
+
+    naclports.Log("Installing %s" % self.InfoString())
     os.makedirs(dest_tmp)
 
+    names = []
     try:
       with tarfile.open(self.filename) as tar:
-        names = []
         for info in tar:
           if info.isdir():
             continue
@@ -139,19 +145,26 @@ class BinaryPackage(object):
           name = name[len(PAYLOAD_DIR) + 1:]
           names.append(name)
 
+        for name in names:
+          full_name = os.path.join(dest, name)
+          if os.path.exists(full_name):
+            raise naclports.Error('file already exists: %s' % full_name)
+
         tar.extractall(dest_tmp)
-
-      payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
-      for name in names:
-        self.InstallFile(name, payload_tree, dest)
-
-      for name in names:
-        self.RelocateFile(name, dest)
-
-      self.WriteFileList(names)
-      self.WriteStamp()
+        payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
+        for name in names:
+          self.InstallFile(name, payload_tree, dest)
     finally:
       shutil.rmtree(dest_tmp)
+
+    for name in names:
+      self.RelocateFile(name, dest)
+    self.WriteFileList(names)
+    self.WriteStamp()
+
+  def IsInstalled(self):
+    stamp = naclports.GetInstallStamp(self.NAME, self.config)
+    return os.path.exists(stamp)
 
   def WriteStamp(self):
     """Write stamp file containing pkg_info."""

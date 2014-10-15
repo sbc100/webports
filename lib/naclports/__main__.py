@@ -31,7 +31,7 @@ from naclports.configuration import Configuration
 
 
 def CmdList(config, options, args):
-  '''List installed packages'''
+  """List installed packages"""
   if len(args):
     raise Error('list command takes no arguments')
   stamp_root = naclports.GetInstallStampRoot(config)
@@ -51,7 +51,7 @@ def CmdList(config, options, args):
 
 
 def CmdInfo(config, options, args):
-  '''Print infomation on installed package(s)'''
+  """Print infomation on installed package(s)"""
   if len(args) != 1:
     raise Error('info command takes a single package name')
   package_name = args[0]
@@ -64,30 +64,40 @@ def CmdInfo(config, options, args):
 
 
 def CmdContents(config, options, args):
-  '''List contents of an installed package'''
+  """List contents of an installed package"""
+  if options.all:
+    for package in PackageIterator():
+      ListPackageContents(config, options, package.NAME, True)
+    return
+
   if len(args) != 1:
     raise Error('contents command takes a single package name')
   package_name = args[0]
+  ListPackageContents(config, options, package_name)
+
+
+def ListPackageContents(config, options, package_name, prefix=False):
   list_file = naclports.GetFileList(package_name, config)
   if not os.path.exists(list_file):
     raise Error('package not installed: %s [%s]' % (package_name, config))
 
   install_root = naclports.GetInstallRoot(config)
   with open(list_file) as f:
-    if options.verbose:
-      for line in f:
-        sys.stdout.write(os.path.join(install_root, line))
-    else:
-      sys.stdout.write(f.read())
+    for line in f:
+      if options.verbose:
+        line = os.path.join(install_root, line)
+      if prefix:
+        line = package_name + ': ' + line
+      sys.stdout.write(line)
 
 
 def CmdPkgDownload(package, options):
-  '''Download sources for given package(s)'''
+  """Download sources for given package(s)"""
   package.Download()
 
 
 def CmdPkgCheck(package, options):
-  '''Verify dependency information for given package(s)'''
+  """Verify dependency information for given package(s)"""
   # The fact that we got this far means the pkg_info is basically valid.
   # This final check verifies the dependencies are valid.
   # Cache the list of all packages names since this function could be called
@@ -102,28 +112,28 @@ CmdPkgCheck.all_package_names = None
 
 
 def CmdPkgBuild(package, options):
-  '''Build package(s)'''
+  """Build package(s)"""
   package.Build(options.build_deps, force=options.force)
 
 
 def CmdPkgInstall(package, options):
-  '''Install package(s)'''
+  """Install package(s)"""
   package.Install(options.build_deps, force=options.force,
                   from_source=options.from_source)
 
 
 def CmdPkgUninstall(package, options):
-  '''Uninstall package(s)'''
+  """Uninstall package(s)"""
   package.Uninstall(options.all)
 
 
 def CmdPkgClean(package, options):
-  '''Clean package build artifacts.'''
+  """Clean package build artifacts."""
   package.Clean()
 
 
 def CmdPkgVerify(package, options):
-  '''Verify package(s)'''
+  """Verify package(s)"""
   package.Verify()
 
 
