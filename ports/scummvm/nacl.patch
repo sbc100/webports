@@ -1,5 +1,5 @@
 diff --git a/backends/platform/sdl/posix/posix-main.cpp b/backends/platform/sdl/posix/posix-main.cpp
-index 5f0914e..809ddee 100644
+index 5f0914e..77ff95a 100644
 --- a/backends/platform/sdl/posix/posix-main.cpp
 +++ b/backends/platform/sdl/posix/posix-main.cpp
 @@ -20,6 +20,13 @@
@@ -16,7 +16,7 @@ index 5f0914e..809ddee 100644
  #include "common/scummsys.h"
  
  #if defined(POSIX) && !defined(MACOSX) && !defined(SAMSUNGTV) && !defined(MAEMO) && !defined(WEBOS) && !defined(LINUXMOTO) && !defined(GPH_DEVICE) && !defined(GP2X) && !defined(DINGUX) && !defined(OPENPANDORA) && !defined(PLAYSTATION3)
-@@ -28,7 +35,89 @@
+@@ -28,7 +35,85 @@
  #include "backends/plugins/sdl/sdl-provider.h"
  #include "base/main.h"
  
@@ -85,16 +85,12 @@ index 5f0914e..809ddee 100644
 +
 +int SDL_main(int argc, char *argv[]) {
 +	int ret;
-+	CHECK(umount("/home"));
-+  CHECK(mount("", "/home", "html5fs", 0, "type=PERSISTENT"));
-+	CHECK(mount("./", "/mnt/http", "httpfs", 0, NULL));
-+	CHECK(setenv("HOME", "/home", 1));
 +
 +	ExtractAll("/mnt/http/runimage.tar");
 +	ExtractAll("/mnt/http/bass.tar");
 +	ExtractAll("/mnt/http/lure.tar");
 +
-+	const char kConfigFile[] = "/home/.scummvmrc";
++	const char kConfigFile[] = "/home/user/.scummvmrc";
 +	if (!FileExists(kConfigFile)) {
 +		// Initialize with a default .scummvmrm that already has the
 +		// games loaded.

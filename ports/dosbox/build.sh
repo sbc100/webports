@@ -8,10 +8,6 @@ MAKE_TARGETS="AR=${NACLAR}"
 ConfigureStep() {
   SetupCrossEnvironment
 
-  # --as-needed is needed during confgiure otherwise a lot of tests
-  # will fail to link undefined 'SDLmain'
-  export LDFLAGS="${NACLPORTS_LDFLAGS} -Wl,--as-needed"
-
   local conf_host=${NACL_CROSS_PREFIX}
   if [ ${NACL_ARCH} = "pnacl" ]; then
     # The PNaCl tools use "pnacl-" as the prefix, but config.sub

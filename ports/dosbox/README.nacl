@@ -14,18 +14,8 @@ virtual filesystem to dosbox. e.g::
 This command will mount the contents of /path/to/app as
 the DOS C: drive.
 
-The contents of the NaCl VFS can be controlled via the
-arguments to the embed tag.  The embed tag in the included
-html file by default contains the following attribute:
-
-  sdl_mount_http=".:/mnt/http"
-
-This attribute tells SDL to create HTTP filesystem at
-/mnt/http.
-
-The simplest way to populate the filesystem with useful
-data is to extract a tar file at a certain location.  For
-example:
+Tar files can be extract into the NaCl VFS by setting the
+sdl_mount_http attribute on the NaCl embed tag. e.g::
 
   sdl_tar_extract="/mnt/http/myapp.tar:/myapp"
 

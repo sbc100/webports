@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXTRA_CONFIGURE_ARGS="--disable-assembly --disable-pthread-sem"
+
 AutogenStep() {
   ChangeDir ${SRC_DIR}
   # For some reason if we don't remove configure before running
@@ -18,19 +20,5 @@ AutogenStep() {
 ConfigureStep() {
   AutogenStep
   SetupCrossEnvironment
-
-  local conf_host=${NACL_CROSS_PREFIX}
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
-    # does not know about "pnacl".  It only knows about "le32-nacl".
-    # Unfortunately, most of the config.subs here are so old that
-    # it doesn't know about that "le32" either.  So we just say "nacl".
-    conf_host="nacl-pnacl"
-  fi
-
-  LogExecute ${SRC_DIR}/configure \
-    --host=${conf_host} \
-    --prefix=${PREFIX} \
-    --disable-assembly \
-    --disable-pthread-sem
+  DefaultConfigureStep
 }

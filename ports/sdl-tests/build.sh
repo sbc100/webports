@@ -20,10 +20,7 @@ ConfigureStep() {
   fi
 
   LIBS="$LDFLAGS" LogExecute ${SRC_DIR}/test/configure \
-    --host=${conf_host} \
-    --prefix=${PREFIX} \
-    --disable-assembly \
-    --disable-pthread-sem
+    --host=${conf_host} --prefix=${PREFIX}
 }
 
 InstallStep() {

@@ -722,10 +722,6 @@ InitGitRepo() {
     fi
   fi
 
-  # Ignore the nacl build directories so that are preserved
-  # across calls to git clean.
-  echo "/build-nacl-*" >> .gitignore
-
   # Ensure that the repo has an upstream and a master branch properly set up.
   if [ ${PREEXISTING_REPO} = 1 ]; then
     git checkout -b placeholder

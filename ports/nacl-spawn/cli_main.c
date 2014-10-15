@@ -42,6 +42,12 @@ static int getenv_as_int(const char *env) {
   return env_int;
 }
 
+static mkdir_checked(const char* dir) {
+  if (mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+    fprintf(stderr, "mkdir '%s' failed: %s\n", dir, strerror(errno));
+  }
+}
+
 int cli_main(int argc, char* argv[]) {
   umount("/");
   mount("", "/", "memfs", 0, NULL);
@@ -54,14 +60,14 @@ int cli_main(int argc, char* argv[]) {
   setenv("LOGNAME", "user", 0);
 
   const char* home = getenv("HOME");
-  mkdir("/home", 0777);
-  mkdir(home, 0777);
-  mkdir("/tmp", 0777);
-  mkdir("/bin", 0777);
-  mkdir("/etc", 0777);
-  mkdir("/mnt", 0777);
-  mkdir("/mnt/http", 0777);
-  mkdir("/mnt/html5", 0777);
+  mkdir_checked("/home");
+  mkdir_checked(home);
+  mkdir_checked("/tmp");
+  mkdir_checked("/bin");
+  mkdir_checked("/etc");
+  mkdir_checked("/mnt");
+  mkdir_checked("/mnt/http");
+  mkdir_checked("/mnt/html5");
 
   const char* data_url = getenv("NACL_DATA_URL");
   if (!data_url)
@@ -72,12 +78,12 @@ int cli_main(int argc, char* argv[]) {
   }
 
   if (mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
-    perror("Mounting HTML5 filesystem in /mnt/html5 failed.");
+    perror("Mounting HTML5 filesystem in /mnt/html5 failed");
   } else {
     mkdir("/mnt/html5/home", 0777);
     struct stat st;
     if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
-      perror("Unable to create home directory in persistent storage.");
+      perror("Unable to create home directory in persistent storage");
     } else {
       if (mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
         fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
@@ -86,13 +92,17 @@ int cli_main(int argc, char* argv[]) {
   }
 
   if (mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
-    perror("Mounting HTML5 filesystem in /tmp failed.");
+    perror("Mounting HTML5 filesystem in /tmp failed");
   }
 
   /* naclprocess.js sends the current working directory using this
    * environment variable. */
-  if (getenv("PWD"))
-    chdir(getenv("PWD"));
+  const char* pwd = getenv("PWD");
+  if (pwd != NULL) {
+    if (chdir(pwd)) {
+      fprintf(stderr, "chdir() to %s failed: %s\n", pwd, strerror(errno));
+    }
+  }
 
   // Tell the NaCl architecture to /etc/bashrc of mingn.
 #if defined(__x86_64__)
