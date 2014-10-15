@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef NACL_SPAWN_PATH_UTIL_
-#define NACL_SPAWN_PATH_UTIL_
+#ifndef NACL_SPAWN_PATH_UTIL_H_
+#define NACL_SPAWN_PATH_UTIL_H_
 
 #include <string>
 #include <vector>
@@ -18,4 +18,4 @@ bool GetFileInPaths(const std::string& basename,
                     const std::vector<std::string>& paths,
                     std::string* out_path);
 
-#endif  // NACL_SPAWN_PATH_UTIL_
+#endif  // NACL_SPAWN_PATH_UTIL_H_

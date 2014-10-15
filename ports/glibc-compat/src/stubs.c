@@ -84,37 +84,6 @@ int eaccess(const char *pathname, int mode) {
   return access(pathname, mode);
 }
 
-#if NACL_SDK_VERSION < 34
-speed_t cfgetispeed(const struct termios *termios_p) __attribute__((weak));
-speed_t cfgetispeed(const struct termios *termios_p) {
-  return termios_p->c_ispeed;
-}
-
-speed_t cfgetospeed(const struct termios *termios_p) __attribute__((weak));
-speed_t cfgetospeed(const struct termios *termios_p) {
-  return termios_p->c_ospeed;
-}
-
-int cfsetispeed(struct termios *termios_p, speed_t speed) __attribute__((weak));
-int cfsetispeed(struct termios *termios_p, speed_t speed) {
-  termios_p->c_ispeed = speed;
-  return 0;
-}
-
-int cfsetospeed(struct termios *termios_p, speed_t speed) __attribute__((weak));
-int cfsetospeed(struct termios *termios_p, speed_t speed) {
-  termios_p->c_ospeed = speed;
-  return 0;
-}
-
-int cfsetspeed(struct termios *termios_p, speed_t speed) __attribute__((weak));
-int cfsetspeed(struct termios *termios_p, speed_t speed) {
-  termios_p->c_ispeed = speed;
-  termios_p->c_ospeed = speed;
-  return 0;
-}
-#endif
-
 void endgrent(void) __attribute__((weak));
 void endgrent(void) {
   UNIMPLEMENTED();
@@ -345,40 +314,6 @@ int socketpair(int domain, int type, int protocol,
                int sv[2]) {
   UNIMPLEMENTED_FATAL();
 }
-
-#if NACL_SDK_VERSION < 34
-int tcdrain(int fd) __attribute__((weak));
-int tcdrain(int fd) {
-  UNIMPLEMENTED_NOSYS();
-}
-
-int tcflow(int fd, int action) __attribute__((weak));
-int tcflow(int fd, int action) {
-  UNIMPLEMENTED_NOSYS();
-}
-
-int tcflush(int fd, int queue_selector) __attribute__((weak));
-int tcflush(int fd, int queue_selector) {
-  UNIMPLEMENTED_NOSYS();
-}
-
-int tcgetattr(int fd, struct termios *termios_p) __attribute__((weak));
-int tcgetattr(int fd, struct termios *termios_p) {
-  UNIMPLEMENTED_NOSYS();
-}
-
-int tcsendbreak(int fd, int duration) __attribute__((weak));
-int tcsendbreak(int fd, int duration) {
-  UNIMPLEMENTED_NOSYS();
-}
-
-int tcsetattr(int fd, int optional_actions,
-              const struct termios *termios_p) __attribute__((weak));
-int tcsetattr(int fd, int optional_actions,
-              const struct termios *termios_p) {
-  UNIMPLEMENTED_NOSYS();
-}
-#endif
 
 FILE *popen(const char *command, const char *type) __attribute__ ((weak));
 FILE *popen(const char *command, const char *type) {

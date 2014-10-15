@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef NACL_SPAWN_LIBRARY_DEPENDENCIES_
-#define NACL_SPAWN_LIBRARY_DEPENDENCIES_
+#ifndef NACL_SPAWN_LIBRARY_DEPENDENCIES_H_
+#define NACL_SPAWN_LIBRARY_DEPENDENCIES_H_
 
 #include <string>
 #include <vector>
@@ -18,4 +18,4 @@ bool FindArchAndLibraryDependencies(const std::string& filename,
                                     std::string* arch,
                                     std::vector<std::string>* dependencies);
 
-#endif  // NACL_SPAWN_LIBRARY_DEPENDENCIES_
+#endif  // NACL_SPAWN_LIBRARY_DEPENDENCIES_H_

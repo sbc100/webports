@@ -19,8 +19,8 @@
  * Include guards are here so that this header can forward to the next one in
  * presence of an already installed copy of nacl-spawn.
  */
-#ifndef _NACL_SPAWN_SPAWN_H_
-#define _NACL_SPAWN_SPAWN_H_
+#ifndef NACL_SPAWN_SPAWN_H_
+#define NACL_SPAWN_SPAWN_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,4 +60,4 @@ extern int spawnve(int mode, const char* path,
 }
 #endif
 
-#endif
+#endif /* NACL_SPAWN_SPAWN_H_ */

@@ -4,8 +4,8 @@
  * found in the LICENSE file.
  */
 
-#ifndef _NACL_SPAWN_NACL_MAIN_H_
-#define _NACL_SPAWN_NACL_MAIN_H_
+#ifndef NACL_SPAWN_NACL_MAIN_H_
+#define NACL_SPAWN_NACL_MAIN_H_
 
 #include <spawn.h>
 
@@ -34,4 +34,4 @@ extern int nacl_startup_untar(
 }
 #endif
 
-#endif
+#endif /* NACL_SPAWN_NACL_MAIN_H_ */

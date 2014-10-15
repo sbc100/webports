@@ -24,8 +24,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _SPAWN_H_
-#define _SPAWN_H_
+#ifndef NACL_SPAWN_BSD_SPAWN_H_
+#define NACL_SPAWN_BSD_SPAWN_H_
 
 // This is slighly modified from the newlib version of spawn.h.
 // TODO(sbc): remove this once bionic toolchain gets a copy of
@@ -126,4 +126,4 @@ int _EXFUN(posix_spawnattr_setsigmask,
 );
 _END_STD_C
 
-#endif /* !_SPAWN_H_ */
+#endif /* !NACL_SPAWN_BSD_SPAWN_H_ */
