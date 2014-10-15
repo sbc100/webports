@@ -9,10 +9,8 @@ import configuration
 import naclports
 import package
 
-EXTRA_KEYS = [ 'BIN_URL', 'BIN_SIZE', 'BIN_SHA1' ]
-VALID_KEYS = naclports.binary_package.VALID_KEYS + EXTRA_KEYS
-REQUIRED_KEYS = naclports.binary_package.REQUIRED_KEYS + EXTRA_KEYS
 DEFAULT_INDEX = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
+EXTRA_KEYS = naclports.package.EXTRA_KEYS + ['BIN_URL', 'BIN_SIZE', 'BIN_SHA1']
 
 
 def VerifyHash(filename, sha1):
@@ -64,7 +62,11 @@ class PackageIndex(object):
   This class is used to read a package index of disk and stores
   it in memory as dictionary keys on package name + configuration.
   """
+  valid_keys = naclports.VALID_KEYS + EXTRA_KEYS
+  required_keys = naclports.REQUIRED_KEYS + EXTRA_KEYS
+
   def __init__(self, filename, index_data):
+
     self.filename = filename
     self.packages = {}
     self.ParseIndex(index_data)
@@ -108,7 +110,7 @@ class PackageIndex(object):
 
     for pkg_info in index_data.split('\n\n'):
       info = naclports.ParsePkgInfo(pkg_info, self.filename,
-                                    VALID_KEYS, EXTRA_KEYS)
+                                    self.valid_keys, self.required_keys)
       debug = info['BUILD_CONFIG'] == 'debug'
       config = configuration.Configuration(info['BUILD_ARCH'],
                                            info['BUILD_TOOLCHAIN'],

@@ -9,15 +9,33 @@ import tarfile
 
 import naclports
 import configuration
+import package
 
 PAYLOAD_DIR = 'payload'
-EXTRA_KEYS = ['BUILD_CONFIG', 'BUILD_ARCH', 'BUILD_TOOLCHAIN',
-              'BUILD_SDK_VERSION', 'BUILD_NACLPORTS_REVISION']
-VALID_KEYS = naclports.VALID_KEYS + EXTRA_KEYS
-REQUIRED_KEYS = naclports.REQUIRED_KEYS + EXTRA_KEYS
 
 
-class BinaryPackage(object):
+def InstallFile(filename, old_root, new_root):
+  """Install a single file by moving it into a new location.
+
+  Args:
+    filename: Relative name of file to install.
+    old_root: The current location of the file.
+    new_root: The new desired root for the file.
+  """
+  oldname = os.path.join(old_root, filename)
+  if os.path.isdir(oldname):
+    return
+
+  naclports.Trace('install: %s' % filename)
+
+  newname = os.path.join(new_root, filename)
+  dirname = os.path.dirname(newname)
+  if not os.path.isdir(dirname):
+    os.makedirs(dirname)
+  os.rename(oldname, newname)
+
+
+class BinaryPackage(package.Package):
   """Representation of binary package packge file.
 
   This class is initialised with the filename of a binary package
@@ -25,9 +43,11 @@ class BinaryPackage(object):
 
   Operations such as installation can be performed on the package.
   """
+  extra_keys = package.EXTRA_KEYS
 
   def __init__(self, filename):
     self.filename = filename
+    self.info = filename
     if not os.path.exists(self.filename):
       raise naclports.Error('package not found: %s'% self.filename)
     basename, extension = os.path.splitext(os.path.basename(filename))
@@ -40,10 +60,7 @@ class BinaryPackage(object):
         if './pkg_info' not in tar.getnames():
           raise PkgFormatError('package does not contain pkg_info file')
         info = tar.extractfile('./pkg_info')
-        info = naclports.ParsePkgInfo(info.read(), filename,
-                                      VALID_KEYS, REQUIRED_KEYS)
-        for key, value in info.iteritems():
-          setattr(self, key, value)
+        self.ParseInfo(info)
     except tarfile.TarError as e:
       raise naclports.PkgFormatError(e)
 
@@ -60,20 +77,13 @@ class BinaryPackage(object):
     """
     return self.BUILD_SDK_VERSION == naclports.GetSDKVersion()
 
-  def InstallFile(self, filename, old_root, new_root):
-    oldname = os.path.join(old_root, filename)
-    if os.path.isdir(oldname):
-      return
-
-    naclports.Trace('install: %s' % filename)
-
-    newname = os.path.join(new_root, filename)
-    dirname = os.path.dirname(newname)
-    if not os.path.isdir(dirname):
-      os.makedirs(dirname)
-    os.rename(oldname, newname)
-
   def RelocateFile(self, filename, dest):
+    """Perform in-place mutations on file contents to handle new location.
+
+    There are a few file types that have absolute pathnames embedded
+    and need to be modified in some way when being installed to
+    a particular location. For most file types this method does nothing.
+    """
     # Only relocate certain file types.
     modify = False
 
@@ -111,11 +121,9 @@ class BinaryPackage(object):
       os.chmod(filename, mode)
 
   def GetPkgInfo(self):
+    """Extract the contents of the pkg_info file from the binary package."""
     with tarfile.open(self.filename) as tar:
       return tar.extractfile('./pkg_info').read()
-
-  def InfoString(self):
-    return "'%s' [%s]" % (self.NAME, self.config)
 
   def Install(self):
     """Install binary package into toolchain directory."""
@@ -124,7 +132,7 @@ class BinaryPackage(object):
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
-    if self.IsInstalled():
+    if self.IsAnyVersionInstalled():
       raise naclports.Error('package already installed: %s' % self.InfoString())
 
     naclports.Log("Installing %s" % self.InfoString())
@@ -153,7 +161,7 @@ class BinaryPackage(object):
         tar.extractall(dest_tmp)
         payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
         for name in names:
-          self.InstallFile(name, payload_tree, dest)
+          InstallFile(name, payload_tree, dest)
     finally:
       shutil.rmtree(dest_tmp)
 
@@ -161,10 +169,6 @@ class BinaryPackage(object):
       self.RelocateFile(name, dest)
     self.WriteFileList(names)
     self.WriteStamp()
-
-  def IsInstalled(self):
-    stamp = naclports.GetInstallStamp(self.NAME, self.config)
-    return os.path.exists(stamp)
 
   def WriteStamp(self):
     """Write stamp file containing pkg_info."""
@@ -175,7 +179,8 @@ class BinaryPackage(object):
       f.write(pkg_info)
 
   def WriteFileList(self, file_names):
-    filename = naclports.GetFileList(self.NAME, self.config)
+    """Write the file list for this package."""
+    filename = self.GetListFile()
     dirname = os.path.dirname(filename)
     if not os.path.isdir(dirname):
       os.makedirs(dirname)

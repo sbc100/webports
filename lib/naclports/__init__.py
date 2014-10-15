@@ -18,6 +18,7 @@ OUT_DIR = os.path.join(NACLPORTS_ROOT, 'out')
 STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'build')
 PUBLISH_ROOT = os.path.join(OUT_DIR, 'publish')
+TOOLS_DIR = os.path.join(NACLPORTS_ROOT, 'build_tools')
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 if sys.platform == "cygwin":
@@ -235,7 +236,7 @@ def GetInstallStamp(package_name, config):
   return os.path.join(root, package_name + '.info')
 
 
-def GetFileList(package_name, config):
+def GetListFile(package_name, config):
   """Returns the filename of the list of installed files for a given package.
 
   This file is written at install time.

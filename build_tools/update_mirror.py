@@ -26,7 +26,7 @@ NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 
 import naclports
-import naclports.package
+import naclports.source_package
 
 MIRROR_GS = 'gs://naclports/mirror'
 
@@ -77,7 +77,7 @@ def main(args):
       subprocess.check_call(cmd)
 
   count = 0
-  for package in naclports.package.PackageIterator():
+  for package in naclports.source_package.SourcePackageIterator():
     CheckMirror(package)
     count += 1
 

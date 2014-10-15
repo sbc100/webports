@@ -5,6 +5,7 @@
 
 import naclports
 import naclports.package
+import naclports.source_package
 from naclports.configuration import Configuration
 from naclports.package_index import PackageIndex
 
@@ -143,7 +144,7 @@ class TestParsePkgInfo(unittest.TestCase):
     self.assertEqual(str(ex), expected)
 
 
-class TestPackage(unittest.TestCase):
+class TestSourcePackage(unittest.TestCase):
   def setUp(self):
     self.tempdir = tempfile.mkdtemp(prefix='naclports_test_')
 
@@ -169,21 +170,21 @@ class TestPackage(unittest.TestCase):
     """test that invalid source directory generates an error."""
     path = '/bad/path'
     with self.assertRaises(naclports.Error) as context:
-      naclports.package.Package(path)
+      naclports.source_package.SourcePackage(path)
     self.assertEqual(context.exception.message,
                      'Invalid package folder: ' + path)
 
   def testValidSourceDir(self):
     """test that valid source directory is loaded correctly."""
     root = self.CreateSourcePackage('foo')
-    pkg = naclports.package.Package(root)
+    pkg = naclports.source_package.SourcePackage(root)
     self.assertEqual(pkg.NAME, 'foo')
     self.assertEqual(pkg.root, root)
 
   def testIsBuilt(self):
     """test that IsBuilt() can handle malformed package files."""
     root = self.CreateSourcePackage('foo')
-    pkg = naclports.package.Package(root)
+    pkg = naclports.source_package.SourcePackage(root)
     invalid_binary = os.path.join(self.tempdir, 'package.tar.bz2')
     with open(invalid_binary, 'w') as f:
       f.write('this is not valid package file\n')

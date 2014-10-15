@@ -64,7 +64,7 @@ verbose = False
 sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
 import naclports
-import naclports.package
+import naclports.source_package
 
 
 class Error(naclports.Error):
@@ -78,7 +78,7 @@ def Trace(msg):
 
 def GetBuildOrder(projects):
   rtn = []
-  packages = [naclports.package.CreatePackage(p) for p in projects]
+  packages = [naclports.source_package.CreatePackage(p) for p in projects]
   for package in packages:
     for dep in package.DEPENDS:
       for ordered_dep in GetBuildOrder([dep]):
@@ -262,7 +262,7 @@ def LoadCanned(parts):
 
 
 def FixupCanned(partitions):
-  all_projects = [p for p in naclports.package.PackageIterator()]
+  all_projects = [p for p in naclports.source_package.SourcePackageIterator()]
   all_names = [p.NAME for p in all_projects if not p.DISABLED]
 
   # Blank the last partition and fill it with anything not in the first two.
