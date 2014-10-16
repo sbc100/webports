@@ -17,6 +17,7 @@ import package_index
 from naclports import Log, Error, DisabledError, PkgFormatError
 
 PACKAGES_ROOT = os.path.join(naclports.OUT_DIR, 'packages')
+CACHE_ROOT = os.path.join(naclports.OUT_DIR, 'cache')
 
 
 def FormatTimeDelta(delta):

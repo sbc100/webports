@@ -1,6 +1,6 @@
 NAME=readline
-VERSION=6.2
-URL=ftp://ftp.cwru.edu/pub/bash/readline-6.2.tar.gz
+VERSION=6.3
+URL=ftp://ftp.cwru.edu/pub/bash/readline-6.3.tar.gz
 LICENSE=GPL3
 DEPENDS=(ncurses glibc-compat)
-SHA1=a9761cd9c3da485eb354175fcc2fe35856bc43ac
+SHA1=017b92dc7fd4e636a2b5c9265a77ccc05798c9e1

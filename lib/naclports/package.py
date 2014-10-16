@@ -9,7 +9,6 @@ import naclports
 from naclports import Trace, Log, Warn, Error
 from naclports import configuration
 
-CACHE_ROOT = os.path.join(naclports.OUT_DIR, 'cache')
 MIRROR_URL = '%s%s/mirror' % (naclports.GS_URL, naclports.GS_BUCKET)
 EXTRA_KEYS = ['BUILD_CONFIG', 'BUILD_ARCH', 'BUILD_TOOLCHAIN',
               'BUILD_SDK_VERSION', 'BUILD_NACLPORTS_REVISION']

@@ -1,8 +1,8 @@
 diff --git a/Makefile.in b/Makefile.in
-index 9f9276d..896f71d 100644
+index cf77228..4d5e880 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -414,7 +414,8 @@ LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(GLOB_LDFLAGS) \
+@@ -423,7 +423,8 @@ LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(GLOB_LDFLAGS) \
  #
  
  # The main source code for the Bourne Again SHell.
@@ -12,7 +12,7 @@ index 9f9276d..896f71d 100644
  	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
  	   expr.c copy_cmd.c flags.c subst.c hashcmd.c hashlib.c mailcheck.c \
  	   test.c trap.c alias.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
-@@ -443,7 +444,8 @@ SIGLIST_O = @SIGLIST_O@
+@@ -452,7 +453,8 @@ SIGLIST_O = @SIGLIST_O@
  SIGNAMES_O = @SIGNAMES_O@
  
  # Matching object files.
@@ -22,7 +22,7 @@ index 9f9276d..896f71d 100644
  	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
  	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
  	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
-@@ -538,7 +540,7 @@ CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
+@@ -551,7 +553,7 @@ OTHER_INSTALLED_DOCS = CHANGES COMPAT NEWS POSIX RBASH README
  
  $(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
  	$(RM) $@
@@ -32,10 +32,10 @@ index 9f9276d..896f71d 100644
  	-$(SIZE) $(Program)
  
 diff --git a/bashline.c b/bashline.c
-index 52c6de6..4bc78dd 100644
+index 1f12764..a9d7c1a 100644
 --- a/bashline.c
 +++ b/bashline.c
-@@ -2119,7 +2119,7 @@ bash_groupname_completion_function (text, state)
+@@ -2379,7 +2379,7 @@ bash_groupname_completion_function (text, state)
       const char *text;
       int state;
  {
@@ -44,45 +44,32 @@ index 52c6de6..4bc78dd 100644
    return ((char *)NULL);
  #else
    static char *gname = (char *)NULL;
-diff --git a/builtins/Makefile.in b/builtins/Makefile.in
-index 3d8bad4..c3a3b05 100644
---- a/builtins/Makefile.in
-+++ b/builtins/Makefile.in
-@@ -68,7 +68,7 @@ LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(CFLAGS)
- LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@ $(LOCAL_LDFLAGS) $(CFLAGS_FOR_BUILD)
- LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
- #LIBS_FOR_BUILD = @LIBS_FOR_BUILD@
--LIBS_FOR_BUILD = $(LIBS)
-+LIBS_FOR_BUILD =
- 
- BASHINCDIR = ${topdir}/include
- 
 diff --git a/configure b/configure
-index 7ec72fe..6d1d53d 100755
+index 98bf890..1e2f7a6 100755
 --- a/configure
 +++ b/configure
-@@ -2201,6 +2201,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
+@@ -2867,6 +2867,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
  *-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
  *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
  *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
 +*nacl*) 	opt_bash_malloc=no ;;	# Native Client
  *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
- esac
- 
-@@ -5563,7 +5564,7 @@ if test "${ac_cv_rl_version+set}" = set; then
+ *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
+ *-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
+@@ -5278,7 +5279,7 @@ if ${ac_cv_rl_version+:} false; then :
    $as_echo_n "(cached) " >&6
  else
-   if test "$cross_compiling" = yes; then
+   if test "$cross_compiling" = yes; then :
 -  ac_cv_rl_version='4.2'
 +  ac_cv_rl_version='6.2'
  else
-   cat >conftest.$ac_ext <<_ACEOF
- /* confdefs.h.  */
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
 diff --git a/eval.c b/eval.c
-index 9011e0b..0f54f48 100644
+index 1f65aac..48e7552 100644
 --- a/eval.c
 +++ b/eval.c
-@@ -261,7 +261,10 @@ read_command ()
+@@ -271,7 +271,10 @@ read_command ()
  	  if (tmout_len > 0)
  	    {
  	      old_alrm = set_signal_handler (SIGALRM, alrm_catcher);
@@ -93,7 +80,7 @@ index 9011e0b..0f54f48 100644
  	    }
  	}
      }
-@@ -273,7 +276,10 @@ read_command ()
+@@ -283,7 +286,10 @@ read_command ()
  
    if (interactive && tmout_var && (tmout_len > 0))
      {
@@ -105,7 +92,7 @@ index 9011e0b..0f54f48 100644
      }
  
 diff --git a/execute_cmd.c b/execute_cmd.c
-index 485b0c7..bec6977 100644
+index f9a755d..f94faf4 100644
 --- a/execute_cmd.c
 +++ b/execute_cmd.c
 @@ -98,6 +98,10 @@ extern int errno;
@@ -119,7 +106,7 @@ index 485b0c7..bec6977 100644
  extern int dollar_dollar_pid;
  extern int posixly_correct;
  extern int expand_aliases;
-@@ -2202,7 +2206,11 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
+@@ -2369,7 +2373,11 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
    /* If the `lastpipe' option is set with shopt, and job control is not
       enabled, execute the last element of non-async pipelines in the
       current shell environment. */
@@ -129,9 +116,9 @@ index 485b0c7..bec6977 100644
 +  if (lastpipe_opt && asynchronous == 0 && pipe_out == NO_PIPE && prev > 0)
 +#endif
      {
-       lstdin = move_to_high_fd (0, 0, 255);
+       lstdin = move_to_high_fd (0, 1, -1);
        if (lstdin > 0)
-@@ -4631,6 +4639,33 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
+@@ -4873,6 +4881,33 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
    SHELL_VAR *hookf;
    WORD_LIST *wl;
  
@@ -165,7 +152,7 @@ index 485b0c7..bec6977 100644
    nofork = (cmdflags & CMD_NO_FORK);  /* Don't fork, just exec, if no pipes */
    pathname = words->word->word;
  
-@@ -4760,6 +4795,7 @@ parent_return:
+@@ -5005,6 +5040,7 @@ parent_return:
        FREE (command);
        return (result);
      }
@@ -174,7 +161,7 @@ index 485b0c7..bec6977 100644
  
  /* CPP defines to decide whether a particular index into the #! line
 diff --git a/jobs.h b/jobs.h
-index 39da61e..3c21c6a 100644
+index bec9527..31af426 100644
 --- a/jobs.h
 +++ b/jobs.h
 @@ -56,7 +56,11 @@
@@ -213,7 +200,7 @@ index ed526fe..dd52657 100644
  #endif /* !HAVE_SETITIMER */
  
 diff --git a/nojobs.c b/nojobs.c
-index d43d1d4..eff6d86 100644
+index 0c9bd75..dbe9179 100644
 --- a/nojobs.c
 +++ b/nojobs.c
 @@ -65,6 +65,10 @@
@@ -227,8 +214,8 @@ index d43d1d4..eff6d86 100644
  /* Return the fd from which we are actually getting input. */
  #define input_tty() (shell_tty != -1) ? shell_tty : fileno (stderr)
  
-@@ -753,7 +757,7 @@ wait_for (pid)
-       CHECK_TERMSIG;
+@@ -775,7 +779,7 @@ wait_for (pid)
+       CHECK_WAIT_INTR;
        if (got_pid < 0 && errno == ECHILD)
  	{
 -#if !defined (_POSIX_VERSION)
@@ -236,8 +223,8 @@ index d43d1d4..eff6d86 100644
  	  status.w_termsig = status.w_retcode = 0;
  #else
  	  status = 0;
-@@ -810,8 +814,10 @@ wait_for (pid)
- #endif
+@@ -839,8 +843,10 @@ wait_for (pid)
+   if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) && REPORTSIG(WTERMSIG (status)))
      {
        fprintf (stderr, "%s", j_strsignal (WTERMSIG (status)));
 +#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
@@ -248,10 +235,10 @@ index d43d1d4..eff6d86 100644
      }
  
 diff --git a/shell.c b/shell.c
-index 9e74f3b..20cf6e5 100644
+index bbc8a66..0387db8 100644
 --- a/shell.c
 +++ b/shell.c
-@@ -359,7 +359,7 @@ main (argc, argv, env)
+@@ -365,7 +365,7 @@ main (argc, argv, env)
  #endif
    volatile int locally_skip_execution;
    volatile int arg_index, top_level_arg_index;
@@ -260,7 +247,7 @@ index 9e74f3b..20cf6e5 100644
    char **env;
  
    env = environ;
-@@ -1687,10 +1687,14 @@ shell_initialize ()
+@@ -1717,10 +1717,14 @@ shell_initialize ()
    if (current_host_name == 0)
      {
        /* Initialize current_host_name. */

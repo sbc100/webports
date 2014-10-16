@@ -10,6 +10,7 @@ NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 export LIBS+="${NACL_CLI_MAIN_LIB} \
 -lppapi_simple -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
+# Configure requires this variable to be pre-set when cross compiling.
 export bash_cv_getcwd_malloc=yes
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
