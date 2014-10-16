@@ -6,6 +6,7 @@
 import naclports
 import naclports.package
 import naclports.source_package
+import naclports.__main__
 from naclports.configuration import Configuration
 from naclports.package_index import PackageIndex
 
@@ -21,7 +22,7 @@ SRC_DIR = os.path.dirname(SCRIPT_DIR)
 MOCK_DIR = os.path.join(SRC_DIR, 'third_party', 'mock')
 sys.path.append(MOCK_DIR)
 
-import mock
+from mock import Mock, patch
 
 
 class TestConfiguration(unittest.TestCase):
@@ -100,7 +101,7 @@ class TestPackageIndex(unittest.TestCase):
       'NAME': 'dummy',
       'BUILD_SDK_VERSION': 123
     }
-    with mock.patch('naclports.GetSDKVersion') as mock_version:
+    with patch('naclports.GetSDKVersion') as mock_version:
       # Setting the mock SDK version to 123 should mean that the
       # index contains the 'foo' package and it is installable'
       mock_version.return_value = 123
@@ -188,8 +189,48 @@ class TestSourcePackage(unittest.TestCase):
     invalid_binary = os.path.join(self.tempdir, 'package.tar.bz2')
     with open(invalid_binary, 'w') as f:
       f.write('this is not valid package file\n')
-    pkg.PackageFile = mock.Mock(return_value=invalid_binary)
+    pkg.PackageFile = Mock(return_value=invalid_binary)
     self.assertFalse(pkg.IsBuilt())
+
+
+class TestCommands(unittest.TestCase):
+  def tearDown(sefl):
+    if os.path.exists('test.list'):
+      os.remove('test.list')
+
+  def testContentsCommands(self):
+    file_list = ['foo', 'bar']
+    install_root = '/testpath'
+
+    # ideally we would use mock.mock_open here to avoid hitting
+    # the filesystem at all but the version we are using doesn't
+    # seem to support f.readlines().
+    test_data = '\n'.join(file_list) + '\n'
+    with open('test.list', 'w') as f:
+      f.write(test_data)
+
+    options = Mock()
+    package = Mock()
+    package.GetListFile = Mock(return_value='test.list')
+    package.config = Configuration('arm', 'newlib', True)
+    package.NAME = 'test'
+
+    options.verbose = False
+    options.all = False
+
+    with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
+      with patch('naclports.GetInstallRoot', Mock(return_value=install_root)):
+        naclports.__main__.CmdContents(package, options)
+        self.assertEqual(stdout.getvalue(), test_data)
+
+    # when the verbose option is set expect CmdContents to output full paths.
+    options.verbose = True
+    expected_output = [os.path.join(install_root, f) for f in file_list]
+    expected_output = '\n'.join(expected_output) + '\n'
+    with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
+      with patch('naclports.GetInstallRoot', Mock(return_value=install_root)):
+        naclports.__main__.CmdContents(package, options)
+        self.assertEqual(stdout.getvalue(), expected_output)
 
 
 if __name__ == '__main__':

@@ -58,6 +58,7 @@ def CmdInfo(config, options, args):
 
 def CmdContents(package, options):
   """List contents of an installed package"""
+  install_root = naclports.GetInstallRoot(package.config)
   with open(package.GetListFile()) as f:
     for line in f:
       if options.verbose:
