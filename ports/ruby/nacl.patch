@@ -1,5 +1,5 @@
 diff --git a/.gitignore b/.gitignore
-index 5bcaeeb..abeccf1 100644
+index 5808bf1..2b798af 100644
 --- a/.gitignore
 +++ b/.gitignore
 @@ -50,7 +50,6 @@ y.tab.c
@@ -139,6 +139,19 @@ index 9eb659c..4d9458e 100644
  #if defined __SYMBIAN32__
  	if (init_fct == NULL) {
  	    init_fct = (void(*)())dlsym(handle, "1"); /* Some Symbian versions do not support symbol table in DLL, ordinal numbers only */
+diff --git a/ext/readline/readline.c b/ext/readline/readline.c
+index 3e7feea..90353b7 100644
+--- a/ext/readline/readline.c
++++ b/ext/readline/readline.c
+@@ -1883,7 +1883,7 @@ Init_readline()
+ 
+     rl_attempted_completion_function = readline_attempted_completion_function;
+ #if defined(HAVE_RL_PRE_INPUT_HOOK)
+-    rl_pre_input_hook = (Function *)readline_pre_input_hook;
++    rl_pre_input_hook = readline_pre_input_hook;
+ #endif
+ #ifdef HAVE_RL_CATCH_SIGNALS
+     rl_catch_signals = 0;
 diff --git a/ext/socket/addrinfo.h b/ext/socket/addrinfo.h
 index f0b977d..59bf0e4 100644
 --- a/ext/socket/addrinfo.h
