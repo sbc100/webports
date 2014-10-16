@@ -59,13 +59,12 @@ def CmdInfo(config, options, args):
 def CmdContents(package, options):
   """List contents of an installed package"""
   install_root = naclports.GetInstallRoot(package.config)
-  with open(package.GetListFile()) as f:
-    for line in f:
-      if options.verbose:
-        line = os.path.join(install_root, line)
-      if options.all:
-        line = package.NAME + ': ' + line
-      sys.stdout.write(line)
+  for filename in package.Files():
+    if options.verbose:
+      filename = os.path.join(install_root, filename)
+    if options.all:
+      filename = package.NAME + ': ' + filename
+    sys.stdout.write(filename + '\n')
 
 
 def CmdPkgDownload(package, options):

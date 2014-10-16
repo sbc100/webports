@@ -194,34 +194,24 @@ class TestSourcePackage(unittest.TestCase):
 
 
 class TestCommands(unittest.TestCase):
-  def tearDown(sefl):
-    if os.path.exists('test.list'):
-      os.remove('test.list')
-
   def testContentsCommands(self):
     file_list = ['foo', 'bar']
     install_root = '/testpath'
 
-    # ideally we would use mock.mock_open here to avoid hitting
-    # the filesystem at all but the version we are using doesn't
-    # seem to support f.readlines().
-    test_data = '\n'.join(file_list) + '\n'
-    with open('test.list', 'w') as f:
-      f.write(test_data)
-
     options = Mock()
     package = Mock()
-    package.GetListFile = Mock(return_value='test.list')
     package.config = Configuration('arm', 'newlib', True)
+    package.Files = Mock(return_value=file_list)
     package.NAME = 'test'
 
     options.verbose = False
     options.all = False
 
+    expected_output = '\n'.join(file_list) + '\n'
     with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
       with patch('naclports.GetInstallRoot', Mock(return_value=install_root)):
         naclports.__main__.CmdContents(package, options)
-        self.assertEqual(stdout.getvalue(), test_data)
+        self.assertEqual(stdout.getvalue(), expected_output)
 
     # when the verbose option is set expect CmdContents to output full paths.
     options.verbose = True

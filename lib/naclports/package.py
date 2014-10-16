@@ -112,6 +112,12 @@ class InstalledPackage(Package):
     Log("Uninstalling %s" % self.InfoString())
     self.DoUninstall()
 
+  def Files(self):
+    """Yields the list of files currently installed by this package."""
+    with open(self.GetListFile()) as f:
+      for line in f:
+        yield line.strip()
+
   def DoUninstall(self):
     os.remove(self.GetInstallStamp())
     file_list = self.GetListFile()
