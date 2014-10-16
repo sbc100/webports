@@ -1,5 +1,4 @@
 diff --git a/job.c b/job.c
-index aacfb84..9be95e9 100644
 --- a/job.c
 +++ b/job.c
 @@ -29,6 +29,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
@@ -53,7 +52,6 @@ index aacfb84..9be95e9 100644
  #endif /* !VMS */
      }
 diff --git a/main.c b/main.c
-index c6989e3..d070b47 100644
 --- a/main.c
 +++ b/main.c
 @@ -911,6 +911,9 @@ open_tmpfile(char **name, const char *template)
