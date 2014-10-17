@@ -47,18 +47,8 @@ function NaClProcessManager() {
   // Start process IDs at 2, as PIDs 0 and 1 are reserved on real systems.
   self.pid = 2;
 
-  // TODO(bradnelson): Restructure to make sure this isn't racey.
-  // NaCl Architecture.
-  self.naclArch = null;
-  if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
-    chrome.runtime.getPlatformInfo(function(platformInfo) {
-      self.naclArch = {
-        'x86-32': 'i686',
-        'x86-64': 'x86_64',
-        'arm': 'arm',
-      }[platformInfo.nacl_arch] || platformInfo.nacl_arch;
-    });
-  }
+  // NaCl Architecture (initialized lazily by naclArch).
+  self.naclArch_ = undefined;
 };
 
 /**
@@ -83,6 +73,12 @@ var Errno = {
    * @type {number}
    */
   ESRCH: 3,
+
+  /**
+   * Executable format error.
+   * @type {number}
+   */
+  ENOEXEC: 8,
 
   /**
    * No child processes.
@@ -227,6 +223,37 @@ NaClProcessManager.EMBED_WIDTH_DEFAULT = '100%';
  * @const
  */
 NaClProcessManager.EMBED_HEIGHT_DEFAULT  = '50%';
+
+/**
+ * Handles an architecture gotten event.
+ * @callback naclArchCallback
+ */
+
+/**
+ * Called to get the nacl architectgure.
+ * @param {naclArchCallback} callback.
+ */
+NaClProcessManager.prototype.naclArch = function(callback) {
+  var self = this;
+  if (self.naclArch_ === undefined) {
+    if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
+      chrome.runtime.getPlatformInfo(function(platformInfo) {
+        self.naclArch_ = {
+          'x86-32': 'i686',
+          'x86-64': 'x86_64',
+          'arm': 'arm',
+        }[platformInfo.nacl_arch] || platformInfo.nacl_arch;
+        callback(self.naclArch_);
+      });
+      return;
+    } else {
+      self.naclArch_ = null;
+    }
+  }
+  setTimeout(function() {
+    callback(self.naclArch_);
+  }, 0);
+};
 
 /**
  * Handles a stdout event.
@@ -410,8 +437,8 @@ NaClProcessManager.prototype.handleMessageSpawn_ = function(msg, reply, src) {
     var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
     var nmfUrl = window.URL.createObjectURL(blob);
     var naclType = self.checkNaClManifestType_(nmf) || 'nacl';
-    reply({
-      pid: self.spawn(nmfUrl, args, envs, cwd, naclType, src)
+    self.spawn(nmfUrl, args, envs, cwd, naclType, src, function(pid) {
+      reply({pid: pid});
     });
   } else {
     if (NaClProcessManager.nmfWhitelist !== undefined &&
@@ -425,8 +452,8 @@ NaClProcessManager.prototype.handleMessageSpawn_ = function(msg, reply, src) {
     }
     nmf = executable + '.nmf';
     self.checkUrlNaClManifestType(nmf, function(naclType) {
-      reply({
-        pid: self.spawn(nmf, args, envs, cwd, naclType, src)
+      self.spawn(nmf, args, envs, cwd, naclType, src, function(pid) {
+        reply({pid: pid});
       });
     }, function(msg) {
       var replyMsg = {
@@ -796,6 +823,12 @@ NaClProcessManager.prototype.checkUrlNaClManifestType = function(
 };
 
 /**
+ * Called once a pid / error code is known for a spawned process.
+ * @callback spawnCallback
+ * @param {pid} pid The pid of the spawned process or error code if negative.
+ */
+
+/**
  * This spawns a new NaCl process in the current window by creating an HTML
  * embed element.
  *
@@ -807,182 +840,193 @@ NaClProcessManager.prototype.checkUrlNaClManifestType = function(
  *     "VARIABLE_NAME=value".
  * @param {string} cwd The current working directory.
  * @param {string} naclType 'nacl' or 'pnacl' to select the mime-type.
- * @param {HTMLObjectElement} [parent=null] The DOM object that corresponds to
+ * @param {HTMLObjectElement} parent The DOM object that corresponds to
  *     the process that initiated the spawn. Set to null if there is no such
  *     process.
- * @returns {number} PID of the spawned process, or -1 if there was an error.
+ * @param {spawnCallback} callback.
  */
 NaClProcessManager.prototype.spawn = function(
-    nmf, argv, envs, cwd, naclType, parent) {
-  if (!parent) parent = null;
+    nmf, argv, envs, cwd, naclType, parent, callback) {
+  var self = this;
 
-  var mimetype = 'application/x-' + naclType;
-  if (navigator.mimeTypes[mimetype] === undefined) {
-    if (mimetype.indexOf('pnacl') != -1)
-      throw new Error('Browser does not support PNaCl or PNaCl is disabled\n');
-    else
-      throw new Error('Browser does not support NaCl or NaCl is disabled\n');
-  }
-
-  var fg = document.createElement('object');
-  this.foregroundProcess = fg;
-
-  fg.pid = this.pid;
-  ++this.pid;
-
-  fg.width = 0;
-  fg.height = 0;
-  fg.data = nmf;
-  fg.type = mimetype;
-  fg.parent = parent;
-  fg.commandName = argv[0];
-
-  fg.addEventListener('abort', this.handleLoadAbort_.bind(this));
-  fg.addEventListener('crash', this.handleCrash_.bind(this));
-  fg.addEventListener('error', this.handleLoadError_.bind(this));
-  fg.addEventListener('load', this.handleLoad_.bind(this));
-  fg.addEventListener('message', this.handleMessage_.bind(this));
-  fg.addEventListener('progress', this.handleProgress_.bind(this));
-
-  var pgid = parent ? this.processes[parent.pid].pgid : fg.pid;
-  var ppid = parent ? parent.pid : NaClProcessManager.INIT_PID;
-  this.processes[fg.pid] = {
-    domElement: fg,
-    exitCode: null,
-    pgid: pgid,
-    ppid: ppid
-  };
-  if (!parent) {
-    this.createProcessGroup_(fg.pid, fg.pid);
-  }
-  this.processGroups[pgid].processes[fg.pid] = true;
-
-  var params = {};
-
-  envs.push('NACL_PID=' + fg.pid);
-  envs.push('NACL_PPID=' + ppid);
-  if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
-    if (this.naclArch === null) {
-      throw new Error('naclArch not yet set, race in startup\n');
-    }
-    envs.push('NACL_ARCH=' + this.naclArch);
-  }
-
-  for (var i = 0; i < envs.length; i++) {
-    var env = envs[i];
-    var index = env.indexOf('=');
-    if (index < 0) {
-      console.error('Broken env: ' + env);
-      continue;
-    }
-    var key = env.substring(0, index);
-    if (key === 'SRC' || key === 'DATA' || key.match(/^ARG\d+$/i))
-      continue;
-    params[key] = env.substring(index + 1);
-  }
-
-  params['PS_TTY_PREFIX'] = NaClProcessManager.prefix;
-  params['PS_TTY_RESIZE'] = 'tty_resize';
-  params['PS_TTY_COLS'] = this.ttyWidth;
-  params['PS_TTY_ROWS'] = this.ttyHeight;
-  params['PS_STDIN'] = '/dev/tty';
-  params['PS_STDOUT'] = '/dev/tty';
-  params['PS_STDERR'] = '/dev/tty';
-  params['PS_VERBOSITY'] = '2';
-  params['PS_EXIT_MESSAGE'] = 'exited';
-  params['TERM'] = 'xterm-256color';
-  params['PWD'] = cwd;
-  // TODO(bradnelson): Drop this hack once tar extraction first checks relative
-  // to the nexe.
-  if (NaClProcessManager.useNaClAltHttp === true) {
-    params['NACL_ALT_HTTP'] = '1';
-  }
-
-  function addParam(name, value) {
-    // Don't set a 'type' field as this seems to confuse manifest parsing for
-    // pnacl.
-    if (name.toLowerCase() === 'type') {
+  self.naclArch(function(naclArch) {
+    var mimetype = 'application/x-' + naclType;
+    if (navigator.mimeTypes[mimetype] === undefined) {
+      if (mimetype.indexOf('pnacl') != -1) {
+        console.log(
+            'Browser does not support PNaCl or PNaCl is disabled.');
+      } else {
+        console.log(
+            'Browser does not support NaCl or NaCl is disabled.');
+      }
+      callback(-Errno.ENOEXEC);
       return;
     }
-    var param = document.createElement('param');
-    param.name = name;
-    param.value = value;
-    fg.appendChild(param);
-  }
 
-  for (var key in params) {
-    addParam(key, params[key]);
-  }
+    var fg = document.createElement('object');
+    self.foregroundProcess = fg;
 
-  // Add ARGV arguments from query parameters.
-  function parseQuery(query) {
-    if (query.charAt(0) === '?') {
-      query = query.substring(1);
+    fg.pid = self.pid;
+    ++self.pid;
+
+    fg.width = 0;
+    fg.height = 0;
+    fg.data = nmf;
+    fg.type = mimetype;
+    fg.parent = parent;
+    fg.commandName = argv[0];
+
+    fg.addEventListener('abort', self.handleLoadAbort_.bind(self));
+    fg.addEventListener('crash', self.handleCrash_.bind(self));
+    fg.addEventListener('error', self.handleLoadError_.bind(self));
+    fg.addEventListener('load', self.handleLoad_.bind(self));
+    fg.addEventListener('message', self.handleMessage_.bind(self));
+    fg.addEventListener('progress', self.handleProgress_.bind(self));
+
+    var pgid = parent ? self.processes[parent.pid].pgid : fg.pid;
+    var ppid = parent ? parent.pid : NaClProcessManager.INIT_PID;
+    self.processes[fg.pid] = {
+      domElement: fg,
+      exitCode: null,
+      pgid: pgid,
+      ppid: ppid
+    };
+    if (!parent) {
+      self.createProcessGroup_(fg.pid, fg.pid);
     }
-    var splitArgs = query.split('&');
-    var args = {};
-    for (var i = 0; i < splitArgs.length; i++) {
-      var keyValue = splitArgs[i].split('=');
-      args[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
+    self.processGroups[pgid].processes[fg.pid] = true;
+
+    var params = {};
+
+    envs.push('NACL_PID=' + fg.pid);
+    envs.push('NACL_PPID=' + ppid);
+    if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
+      if (naclArch === null) {
+        console.log(
+            'Browser does not support NaCl/PNaCl or is disabled.');
+        callback(-Errno.ENOEXEC);
+        return;
+      }
+      envs.push('NACL_ARCH=' + naclArch);
     }
-    return args;
-  }
-  var args = parseQuery(document.location.search);
-  for (var argname in args) {
-    addParam(argname, args[argname]);
-  }
 
-  // If the application has set NaClTerm.argv and there were
-  // no arguments set in the query parameters then add the default
-  // NaClTerm.argv arguments.
-  // TODO(bradnelson): Consider dropping this method of passing in parameters.
-  if (args['arg1'] === undefined && argv) {
-    var argn = 0;
-    argv.forEach(function(arg) {
-      var argname = 'arg' + argn;
-      addParam(argname, arg);
-      argn = argn + 1
-    })
-  }
+    for (var i = 0; i < envs.length; i++) {
+      var env = envs[i];
+      var index = env.indexOf('=');
+      if (index < 0) {
+        console.error('Broken env: ' + env);
+        continue;
+      }
+      var key = env.substring(0, index);
+      if (key === 'SRC' || key === 'DATA' || key.match(/^ARG\d+$/i))
+        continue;
+      params[key] = env.substring(index + 1);
+    }
 
-  if (params[NaClProcessManager.ENV_SPAWN_MODE] ===
-      NaClProcessManager.ENV_SPAWN_POPUP_VALUE) {
-    var self = this;
-    var popup = new GraphicalPopup(
-      fg,
-      parseInt(params[NaClProcessManager.ENV_POPUP_WIDTH] ||
-               NaClProcessManager.POPUP_WIDTH_DEFAULT),
-      parseInt(params[NaClProcessManager.ENV_POPUP_HEIGHT] ||
-               NaClProcessManager.POPUP_HEIGHT_DEFAULT),
-      argv[0]
-    );
-    popup.setClosedListener(function() {
-      self.exit(NaClProcessManager.EXIT_CODE_KILL, popup.process);
-      GraphicalPopup.focusCurrentWindow();
-    });
+    params['PS_TTY_PREFIX'] = NaClProcessManager.prefix;
+    params['PS_TTY_RESIZE'] = 'tty_resize';
+    params['PS_TTY_COLS'] = self.ttyWidth;
+    params['PS_TTY_ROWS'] = self.ttyHeight;
+    params['PS_STDIN'] = '/dev/tty';
+    params['PS_STDOUT'] = '/dev/tty';
+    params['PS_STDERR'] = '/dev/tty';
+    params['PS_VERBOSITY'] = '2';
+    params['PS_EXIT_MESSAGE'] = 'exited';
+    params['TERM'] = 'xterm-256color';
+    params['PWD'] = cwd;
+    // TODO(bradnelson): Drop self hack once tar extraction first checks
+    // relative to the nexe.
+    if (NaClProcessManager.useNaClAltHttp === true) {
+      params['NACL_ALT_HTTP'] = '1';
+    }
 
-    fg.popup = popup;
+    function addParam(name, value) {
+      // Don't set a 'type' field as self seems to confuse manifest parsing for
+      // pnacl.
+      if (name.toLowerCase() === 'type') {
+        return;
+      }
+      var param = document.createElement('param');
+      param.name = name;
+      param.value = value;
+      fg.appendChild(param);
+    }
 
-    popup.create();
-  } else {
+    for (var key in params) {
+      addParam(key, params[key]);
+    }
+
+    // Add ARGV arguments from query parameters.
+    function parseQuery(query) {
+      if (query.charAt(0) === '?') {
+        query = query.substring(1);
+      }
+      var splitArgs = query.split('&');
+      var args = {};
+      for (var i = 0; i < splitArgs.length; i++) {
+        var keyValue = splitArgs[i].split('=');
+        args[decodeURIComponent(keyValue[0])] =
+            decodeURIComponent(keyValue[1]);
+      }
+      return args;
+    }
+    var args = parseQuery(document.location.search);
+    for (var argname in args) {
+      addParam(argname, args[argname]);
+    }
+
+    // If the application has set NaClTerm.argv and there were
+    // no arguments set in the query parameters then add the default
+    // NaClTerm.argv arguments.
+    // TODO(bradnelson): Consider dropping this method of passing in parameters.
+    if (args['arg1'] === undefined && argv) {
+      var argn = 0;
+      argv.forEach(function(arg) {
+        var argname = 'arg' + argn;
+        addParam(argname, arg);
+        argn = argn + 1
+      })
+    }
+
     if (params[NaClProcessManager.ENV_SPAWN_MODE] ===
-               NaClProcessManager.ENV_SPAWN_EMBED_VALUE) {
-      var style = fg.style;
-      style.position = 'absolute';
-      style.top = 0;
-      style.left = 0;
-      style.width = params[NaClProcessManager.ENV_EMBED_WIDTH] ||
-        NaClProcessManager.EMBED_WIDTH_DEFAULT;
-      style.height = params[NaClProcessManager.ENV_EMBED_HEIGHT] ||
-        NaClProcessManager.EMBED_HEIGHT_DEFAULT;
+        NaClProcessManager.ENV_SPAWN_POPUP_VALUE) {
+      var popup = new GraphicalPopup(
+        fg,
+        parseInt(params[NaClProcessManager.ENV_POPUP_WIDTH] ||
+                 NaClProcessManager.POPUP_WIDTH_DEFAULT),
+        parseInt(params[NaClProcessManager.ENV_POPUP_HEIGHT] ||
+                 NaClProcessManager.POPUP_HEIGHT_DEFAULT),
+        argv[0]
+      );
+      popup.setClosedListener(function() {
+        self.exit(NaClProcessManager.EXIT_CODE_KILL, popup.process);
+        GraphicalPopup.focusCurrentWindow();
+      });
+
+      fg.popup = popup;
+
+      popup.create();
+    } else {
+      if (params[NaClProcessManager.ENV_SPAWN_MODE] ===
+                 NaClProcessManager.ENV_SPAWN_EMBED_VALUE) {
+        var style = fg.style;
+        style.position = 'absolute';
+        style.top = 0;
+        style.left = 0;
+        style.width = params[NaClProcessManager.ENV_EMBED_WIDTH] ||
+          NaClProcessManager.EMBED_WIDTH_DEFAULT;
+        style.height = params[NaClProcessManager.ENV_EMBED_HEIGHT] ||
+          NaClProcessManager.EMBED_HEIGHT_DEFAULT;
+      }
+      document.body.appendChild(fg);
     }
-    document.body.appendChild(fg);
-  }
 
-  // Work around crbug.com/350445
-  var junk = fg.offsetTop;
+    // Work around crbug.com/350445
+    var junk = fg.offsetTop;
 
-  return fg.pid;
+    // yield result.
+    callback(fg.pid);
+  });
 }
 
 /**

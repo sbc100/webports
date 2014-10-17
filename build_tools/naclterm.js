@@ -226,11 +226,12 @@ NaClTerm.prototype.spawnRootProcess_ = function() {
   argv = [NaClTerm.nmf].concat(argv);
 
   try {
-    self.print('Loading NaCl module.\n');
     var handleSuccess = function(naclType) {
-      var rootPid = self.processManager.spawn(
-        NaClTerm.nmf, argv, env, '/', naclType);
-      self.processManager.waitpid(rootPid, 0, self.handleExit_.bind(self));
+      self.print('Loading NaCl module.\n');
+      self.processManager.spawn(
+          NaClTerm.nmf, argv, env, '/', naclType, null, function(rootPid) {
+        self.processManager.waitpid(rootPid, 0, self.handleExit_.bind(self));
+      });
     };
     var handleFailure = function(message) {
       self.print(message);
