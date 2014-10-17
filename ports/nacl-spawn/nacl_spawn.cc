@@ -41,11 +41,6 @@ extern char** environ;
 extern int nacl_spawn_pid;
 extern int nacl_spawn_ppid;
 
-#if defined(_NEWLIB_VERSION)
-typedef struct __posix_spawn_file_actions* posix_spawn_file_actions_t;
-typedef struct __posix_spawnattr* posix_spawnattr_t;
-#endif
-
 struct NaClSpawnReply {
   pthread_mutex_t mu;
   pthread_cond_t cond;
