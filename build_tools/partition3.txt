@@ -164,7 +164,7 @@ builder 1 (total: 12319)
   libtomcrypt
   coreutils
   boost
-  libssh
+  libssh2
   libgit2
   requests
   thingking

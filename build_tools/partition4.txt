@@ -109,7 +109,7 @@ builder 1 (total: 10557)
   subversion
   python3
   python3-ppapi
-  libssh
+  libssh2
   libgit2
   libxml2
   libarchive

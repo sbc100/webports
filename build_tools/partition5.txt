@@ -96,7 +96,7 @@ builder 1 (total: 8288)
   python
   python-ppapi
   git
-  libssh
+  libssh2
   libgit2
   grep
   vim

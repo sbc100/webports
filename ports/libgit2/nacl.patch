@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6f1a97e..664d3f4 100644
+index 6f1a97e..756085b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -91,6 +91,10 @@ FUNCTION(TARGET_OS_LIBRARIES target)
@@ -22,7 +22,26 @@ index 6f1a97e..664d3f4 100644
  ELSEIF (AMIGA)
  	ADD_DEFINITIONS(-DNO_ADDRINFO -DNO_READDIR_R -DNO_MMAP)
  ELSE()
-+++ b/src/global.c
+@@ -385,8 +391,8 @@ ENDIF()
+ 
+ # Compile and link libgit2
+ ADD_LIBRARY(git2 ${SRC_H} ${SRC_GIT2} ${SRC_OS} ${SRC_ZLIB} ${SRC_HTTP} ${SRC_REGEX} ${SRC_SHA1} ${WIN_RC})
+-TARGET_LINK_LIBRARIES(git2 ${SSL_LIBRARIES})
+ TARGET_LINK_LIBRARIES(git2 ${SSH_LIBRARIES})
++TARGET_LINK_LIBRARIES(git2 ${SSL_LIBRARIES})
+ TARGET_LINK_LIBRARIES(git2 ${ICONV_LIBRARIES})
+ TARGET_OS_LIBRARIES(git2)
+ 
+@@ -451,8 +457,8 @@ IF (BUILD_CLAR)
+ 
+ 	ADD_EXECUTABLE(libgit2_clar ${SRC_H} ${SRC_GIT2} ${SRC_OS} ${SRC_CLAR} ${SRC_TEST} ${SRC_ZLIB} ${SRC_HTTP} ${SRC_REGEX} ${SRC_SHA1})
+ 
+-	TARGET_LINK_LIBRARIES(libgit2_clar ${SSL_LIBRARIES})
+ 	TARGET_LINK_LIBRARIES(libgit2_clar ${SSH_LIBRARIES})
++	TARGET_LINK_LIBRARIES(libgit2_clar ${SSL_LIBRARIES})
+ 	TARGET_LINK_LIBRARIES(libgit2_clar ${ICONV_LIBRARIES})
+ 	TARGET_OS_LIBRARIES(libgit2_clar)
+ 	MSVC_SPLIT_SOURCES(libgit2_clar)
 diff --git a/src/indexer.c b/src/indexer.c
 index 0b1cf3c..1286816 100644
 --- a/src/indexer.c
