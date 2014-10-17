@@ -22,15 +22,17 @@ EXTRA_CONFIGURE_ARGS+=" --enable-static=yes"
 EXTRA_CONFIGURE_ARGS+=" --enable-shared=no"
 EXTRA_CONFIGURE_ARGS+=" --enable-unit-tests=no"
 EXTRA_CONFIGURE_ARGS+=" --enable-ipv6=no"
-EXTRA_CONFIGURE_ARGS+=" --datarootdir=/mnt/html5/share"
-EXTRA_CONFIGURE_ARGS+=" --with-xkb-bin-directory=/mnt/html5/packages/xkbcomp"
+EXTRA_CONFIGURE_ARGS+=" --datarootdir=/share"
+EXTRA_CONFIGURE_ARGS+=" --with-xkb-bin-directory="
 
 NACLPORTS_CFLAGS+=" -Dmain=SDL_main"
-NACLPORTS_LDFLAGS+=" -lSDL2main"
-export LIBS+=" -Wl,--undefined=SDL_main \
-  -lnacl_spawn -lSDL2 -lppapi_simple \
-  -lnacl_io -lppapi -lppapi_cpp -lppapi_gles2 \
-  -l${NACL_CPP_LIB} -lcli_main"
+export LIBS+="\
+-Wl,--undefined=SDL_main \
+-lnacl_spawn \
+-lSDL -lSDLmain \
+${NACL_CLI_MAIN_LIB} \
+-lppapi_simple -ltar -lnacl_io -lppapi -lppapi_cpp \
+-l${NACL_CPP_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
@@ -61,20 +63,41 @@ InstallStep() {
   MakeDir ${ASSEMBLY_DIR}
 
   ChangeDir ${ASSEMBLY_DIR}
-  for f in manifest.json \
-           background.js \
-           xorg_16.png \
-           xorg_48.png \
-           xorg_128.png \
-           index.html; do
-    LogExecute cp ${START_DIR}/${f} .
-  done
   LogExecute cp ${BUILD_DIR}/hw/kdrive/sdl/Xsdl${NACL_EXEEXT} \
                 ${ASSEMBLY_DIR}/Xsdl_${NACL_ARCH}${NACL_EXEEXT}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${ASSEMBLY_DIR}/Xsdl_*${NACL_EXEEXT} \
       -s . \
       -o Xsdl.nmf
+
+  # Bash is already platform specific split, copy the whole thing.
+  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash
+  LogExecute cp -fR ${BASH_DIR}/* ${ASSEMBLY_DIR}
+
+  local XKBCOMP_DIR=${NACL_PACKAGES_PUBLISH}/xkbcomp/${TOOLCHAIN}/${NACL_ARCH}
+  LogExecute cp ${XKBCOMP_DIR}/xkbcomp \
+      ${ASSEMBLY_DIR}/xkbcomp_${NACL_ARCH}${NACL_EXEEXT}
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      ${ASSEMBLY_DIR}/xkbcomp_*${NACL_EXEEXT} \
+      -s . \
+      -o xkbcomp.nmf
+
+  # Install the HTML/JS for the terminal.
+  LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js Xsdl.nmf
+  InstallNaClTerm ${ASSEMBLY_DIR}
+
+  for f in manifest.json \
+           background.js \
+           xorg_16.png \
+           xorg_48.png \
+           xorg_128.png \
+           whitelist.js \
+           Xsdl.js; do
+    LogExecute cp ${START_DIR}/${f} .
+  done
+
+  ChangeDir ${NACL_PREFIX}
+  LogExecute tar cvf ${ASSEMBLY_DIR}/xorg.tar share/X11
 
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r xorg-server.zip xorg-server

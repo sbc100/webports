@@ -1,5 +1,4 @@
 diff --git a/configure.ac b/configure.ac
-index d7c59ed..0d4cee7 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -2228,6 +2228,7 @@ hw/kdrive/fake/Makefile
@@ -11,10 +10,9 @@ index d7c59ed..0d4cee7 100644
  test/xi2/Makefile
  xserver.ent
 diff --git a/dix/main.c b/dix/main.c
-index 70dcc94..cae74b6 100644
 --- a/dix/main.c
 +++ b/dix/main.c
-@@ -126,15 +126,29 @@ pthread_cond_t serverRunningCond = PTHREAD_COND_INITIALIZER;
+@@ -126,15 +126,30 @@ pthread_cond_t serverRunningCond = PTHREAD_COND_INITIALIZER;
  
  int dix_main(int argc, char *argv[], char *envp[]);
  
@@ -39,13 +37,13 @@ index 70dcc94..cae74b6 100644
 +#if defined(__native_client__)
 +    char **envp = environ;
 +    unsetenv("NACL_SPAWN_MODE");
-+//    nacl_spawn_setup();
++    if (nacl_startup_untar(argv[0], "xorg.tar", "/"))
++      return 1;
 +#endif
  
      display = "0";
  
 diff --git a/hw/kdrive/Makefile.am b/hw/kdrive/Makefile.am
-index 471ca89..870574d 100644
 --- a/hw/kdrive/Makefile.am
 +++ b/hw/kdrive/Makefile.am
 @@ -15,6 +15,7 @@ LINUX_SUBDIRS = linux
@@ -66,7 +64,6 @@ index 471ca89..870574d 100644
  relink:
  	$(AM_V_at)for i in $(SERVER_SUBDIRS) ; do $(MAKE) -C $$i relink || exit 1 ; done
 diff --git a/hw/xfree86/os-support/bus/Pci.h b/hw/xfree86/os-support/bus/Pci.h
-index 776bb63..ea669ca 100644
 --- a/hw/xfree86/os-support/bus/Pci.h
 +++ b/hw/xfree86/os-support/bus/Pci.h
 @@ -135,7 +135,7 @@
@@ -79,7 +76,6 @@ index 776bb63..ea669ca 100644
  #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || \
  	defined(__OpenBSD__) || defined(__NetBSD__) || \
 diff --git a/os/utils.c b/os/utils.c
-index 30592d2..669e3ee 100644
 --- a/os/utils.c
 +++ b/os/utils.c
 @@ -247,6 +247,7 @@ static Bool nolock = FALSE;
@@ -133,7 +129,6 @@ index 30592d2..669e3ee 100644
  
  static struct pid {
 diff --git a/xkb/ddxLoad.c b/xkb/ddxLoad.c
-index cb2dfc3..c2e94f5 100644
 --- a/xkb/ddxLoad.c
 +++ b/xkb/ddxLoad.c
 @@ -179,7 +179,7 @@ XkbDDXCompileKeymapByNames(XkbDescPtr xkb,

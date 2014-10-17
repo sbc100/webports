@@ -5,10 +5,10 @@
  */
 
 function onLaunched(launchData) {
-  chrome.app.window.create('index.html', {
+  chrome.app.window.create('Xsdl.html', {
     width: 1024,
     height: 768,
-    frame: 'none'
+    id: 'Xsdl',
   });
 }
 

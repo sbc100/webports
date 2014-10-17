@@ -28,7 +28,7 @@
 #include "kdrive-config.h"
 #endif
 #include "kdrive.h"
-#include <SDL2/SDL.h>
+#include <SDL/SDL.h>
 #include <X11/keysym.h>
 #include <sys/wait.h>
 #include <pthread.h>
@@ -98,9 +98,6 @@ enum { NUMRECTS = 32, FULLSCREEN_REFRESH_TIME = 1000 };
 typedef struct
 {
 	SDL_Surface *screen;
-	SDL_Renderer *renderer;
-	SDL_Window *window;
-	SDL_Texture *texture;
 	Rotation randr;
 	Bool shadow;
 } SdlDriver;
@@ -183,36 +180,11 @@ static Bool sdlScreenInit(KdScreenInfo *screen)
 		screen->height = 480;
 	}
 	if (!screen->fb.depth)
-		screen->fb.depth = 32;
+		screen->fb.depth = 4;
 	printf("Attempting for %dx%d/%dbpp mode\n", screen->width, screen->height, screen->fb.depth);
-	//driver->screen = SDL_SetVideoMode(screen->width, screen->height, screen->fb.depth, 0);
-	driver->screen = SDL_CreateRGBSurface(0, screen->width, screen->height,
-                                              screen->fb.depth, 0, 0, 0, 0);
+	driver->screen = SDL_SetVideoMode(screen->width, screen->height, screen->fb.depth, 0);
 	if(driver->screen == NULL)
 		return FALSE;
-        driver->window = SDL_CreateWindow(
-            "xorg-server",
-	    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-	    screen->width, screen->height,
-            SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-        if (driver->window == NULL)
-                return FALSE;
-        driver->renderer = SDL_CreateRenderer(driver->window, -1, SDL_RENDERER_ACCELERATED);
-        if (driver->renderer == NULL) {
-          driver->renderer = SDL_CreateRenderer(driver->window, -1, SDL_RENDERER_SOFTWARE);
-        }
-        if (driver->renderer == NULL) {
-          return FALSE;
-        }
-	SDL_SetRenderDrawColor(driver->renderer, 0, 0, 0, 255);
-	SDL_RenderClear(driver->renderer);
-	SDL_RenderPresent(driver->renderer);
-        driver->texture = SDL_CreateTexture(driver->renderer, SDL_PIXELFORMAT_ARGB8888,
-                                            SDL_TEXTUREACCESS_STREAMING,
-                                            screen->width, screen->height);
-        if (driver->texture == NULL) {
-                return FALSE;
-        }
 	driver->randr = screen->randr;
 	screen->driver = driver;
 	printf("Set %dx%d/%dbpp mode\n", driver->screen->w, driver->screen->h, driver->screen->format->BitsPerPixel);
@@ -227,10 +199,9 @@ static Bool sdlScreenInit(KdScreenInfo *screen)
 	//screen->fb.shadow = FALSE;
 	screen->rate=30; // 60 is too intense for CPU
 
-	//SDL_WM_SetCaption("Freedesktop.org X server (SDL)", NULL);
-	SDL_SetWindowTitle(driver->window, "xorg-server");
+	SDL_WM_SetCaption("Freedesktop.org X server (SDL)", NULL);
 
-	//SDL_EnableUNICODE(1);
+	SDL_EnableUNICODE(1);
 
 	return sdlMapFramebuffer (screen);
 }
@@ -291,8 +262,7 @@ static void sdlShadowUpdate (ScreenPtr pScreen, shadowBufPtr pBuf)
 	if ( amount > NUMRECTS || updateRectsPixelCount * 3 > driver->screen->w * driver->screen->h )
 	{
 		//printf("SDL_Flip\n");
-		//SDL_Flip(driver->screen);
-		SDL_RenderPresent(driver->renderer);
+		SDL_Flip(driver->screen);
 		//nextFullScreenRefresh = 0;
 	}
 	else
@@ -309,14 +279,7 @@ static void sdlShadowUpdate (ScreenPtr pScreen, shadowBufPtr pBuf)
 			//printf("sdlShadowUpdate: rect %d: %04d:%04d:%04d:%04d", i, rects[i].x1, rects[i].y1, rects[i].x2, rects[i].y2);
 		}
 		//printf("SDL_UpdateRects %d\n", amount);
-		//SDL_UpdateRects(driver->screen, amount, updateRects);
-
-		//SDL_UpdateRects(driver->screen, amount, updateRects);
-		SDL_UpdateTexture(driver->texture, NULL,
-                                  driver->screen->pixels, driver->screen->pitch);
-		SDL_RenderClear(driver->renderer);
-		SDL_RenderCopy(driver->renderer, driver->texture, NULL, NULL);
-		SDL_RenderPresent(driver->renderer);
+		SDL_UpdateRects(driver->screen, amount, updateRects);
 	}
 }
 
@@ -626,14 +589,12 @@ static void sdlPollInput(void)
 					case SDL_BUTTON_RIGHT:
 						buttonState = KD_BUTTON_3;
 						break;
-/*
 					case SDL_BUTTON_WHEELUP:
 						buttonState = KD_BUTTON_4;
 						break;
 					case SDL_BUTTON_WHEELDOWN:
 						buttonState = KD_BUTTON_5;
 						break;
-*/
 					/*
 					case SDL_BUTTON_X1:
 						buttonState = KD_BUTTON_6;
@@ -662,14 +623,12 @@ static void sdlPollInput(void)
 					case SDL_BUTTON_RIGHT:
 						buttonState = KD_BUTTON_3;
 						break;
-/*
 					case SDL_BUTTON_WHEELUP:
 						buttonState = KD_BUTTON_4;
 						break;
 					case SDL_BUTTON_WHEELDOWN:
 						buttonState = KD_BUTTON_5;
 						break;
-*/
 					/*
 					case SDL_BUTTON_X1:
 						buttonState = KD_BUTTON_6;
@@ -707,18 +666,16 @@ static void sdlPollInput(void)
 						KdEnqueueKeyboardEvent (sdlKeyboard, 37, 1); // LCTRL
 					}
 				}
-/*
 				else if((event.key.keysym.unicode & 0xFF80) != 0)
 				{
 					send_unicode (event.key.keysym.unicode);
 				}
-*/
 				else
 					KdEnqueueKeyboardEvent (sdlKeyboard, event.key.keysym.scancode, event.type==SDL_KEYUP);
 				// Force SDL screen update, so SDL virtual on-screen buttons will change their images
 				{
-//					SDL_Rect r = {0, 0, 1, 1};
-//					SDL_UpdateRects(SDL_GetVideoSurface(), 1, &r);
+					SDL_Rect r = {0, 0, 1, 1};
+					SDL_UpdateRects(SDL_GetVideoSurface(), 1, &r);
 				}
 				break;
 			case SDL_JOYAXISMOTION:
@@ -729,15 +686,12 @@ static void sdlPollInput(void)
 						KdEnqueuePointerEvent(sdlPointer, mouseState|KD_MOUSE_DELTA, 0, 0, pressure);
 				}
 				break;
-/*
 			case SDL_ACTIVEEVENT:
 				// We need this to re-init OpenGL and redraw screen
 				// And we need to also call this when OpenGL context was destroyed
 				// Oherwise SDL will stuck and we will get a permanent black screen
-				//SDL_Flip(SDL_GetVideoSurface());
-		                SDL_RenderPresent(driver->renderer);
+				SDL_Flip(SDL_GetVideoSurface());
 				break;
-*/
 			//case SDL_QUIT:
 				/* this should never happen */
 				//SDL_Quit(); // SDL_Quit() on Android is buggy
@@ -747,8 +701,7 @@ static void sdlPollInput(void)
 	if ( nextFullScreenRefresh && nextFullScreenRefresh < SDL_GetTicks() )
 	{
 		//printf("SDL_Flip from sdlPollInput");
-		//SDL_Flip(SDL_GetVideoSurface());
-		SDL_RenderPresent(driver->renderer);
+		SDL_Flip(SDL_GetVideoSurface());
 		nextFullScreenRefresh = 0;
 	}
 	*/

@@ -7,7 +7,6 @@ From which we've borrowed:
   Makefile.am
 
 The port has been modified to:
-  - Use SDL2 in favor of SDL.
   - Remove android-ism.
   - Work with the autoconf build instead of an ant build (by only
     cherry-picking the SDL work without other changes).
