@@ -16,7 +16,6 @@ import package
 import package_index
 from naclports import Log, Error, DisabledError, PkgFormatError
 
-PACKAGES_ROOT = os.path.join(naclports.OUT_DIR, 'packages')
 CACHE_ROOT = os.path.join(naclports.OUT_DIR, 'cache')
 
 
@@ -96,7 +95,7 @@ class SourcePackage(package.Package):
         dep.Install(True, force, from_source)
 
   def PackageFile(self):
-    fullname = [os.path.join(PACKAGES_ROOT, self.NAME)]
+    fullname = [os.path.join(naclports.PACKAGES_ROOT, self.NAME)]
     fullname.append(self.VERSION)
     fullname.append(naclports.arch_to_pkgarch[self.config.arch])
     # for pnacl toolchain and arch are the same

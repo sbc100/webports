@@ -5,10 +5,9 @@
 
 import naclports
 import naclports.package
-import naclports.source_package
 import naclports.__main__
+from naclports import source_package, package_index
 from naclports.configuration import Configuration
-from naclports.package_index import PackageIndex
 
 import os
 import shutil
@@ -77,14 +76,14 @@ class TestPackageIndex(unittest.TestCase):
     contents = 'FOO=bar\nBAR=baz\n'
     ex = None
     try:
-      index = PackageIndex('dummy_file', contents)
+      index = package_index.PackageIndex('dummy_file', contents)
     except naclports.Error as e:
       ex = e
     self.assertIsNotNone(ex)
     self.assertEqual(str(ex), "Invalid key 'FOO' in info file dummy_file:1")
 
   def testParsingValid(self):
-    index = PackageIndex('dummy_file', test_index)
+    index = package_index.PackageIndex('dummy_file', test_index)
     arm_config = Configuration('arm', 'newlib', False)
     i686_config = Configuration('i686', 'newlib', False)
     self.assertEqual(len(index.packages), 2)
@@ -93,7 +92,7 @@ class TestPackageIndex(unittest.TestCase):
 
   def testContains(self):
     # Create an empty package index and add a single entry to it
-    index = PackageIndex('dummy_file', '')
+    index = package_index.PackageIndex('dummy_file', '')
     config_debug = Configuration('arm', 'newlib', True)
     config_release = Configuration('arm', 'newlib', False)
     self.assertFalse(index.Contains('foo', config_release))
@@ -117,6 +116,15 @@ class TestPackageIndex(unittest.TestCase):
       self.assertFalse(index.Contains('foo', config_debug))
       self.assertFalse(index.Contains('bar', config_release))
 
+  @patch('naclports.Log', Mock())
+  @patch('naclports.package_index.PREBUILT_ROOT', os.getcwd())
+  @patch('naclports.package_index.VerifyHash', Mock(return_value=True))
+  @patch('naclports.DownloadFile')
+  def testDownload(self, download_file_mock):
+    index = package_index.PackageIndex('dummy_file', test_index)
+    arm_config = Configuration('arm', 'newlib', False)
+    index.Download('agg-demo', arm_config)
+    self.assertEqual(download_file_mock.call_count, 1)
 
 class TestParsePkgInfo(unittest.TestCase):
   def testValidKeys(self):
@@ -171,21 +179,21 @@ class TestSourcePackage(unittest.TestCase):
     """test that invalid source directory generates an error."""
     path = '/bad/path'
     with self.assertRaises(naclports.Error) as context:
-      naclports.source_package.SourcePackage(path)
+      source_package.SourcePackage(path)
     self.assertEqual(context.exception.message,
                      'Invalid package folder: ' + path)
 
   def testValidSourceDir(self):
     """test that valid source directory is loaded correctly."""
     root = self.CreateSourcePackage('foo')
-    pkg = naclports.source_package.SourcePackage(root)
+    pkg = source_package.SourcePackage(root)
     self.assertEqual(pkg.NAME, 'foo')
     self.assertEqual(pkg.root, root)
 
   def testIsBuilt(self):
     """test that IsBuilt() can handle malformed package files."""
     root = self.CreateSourcePackage('foo')
-    pkg = naclports.source_package.SourcePackage(root)
+    pkg = source_package.SourcePackage(root)
     invalid_binary = os.path.join(self.tempdir, 'package.tar.bz2')
     with open(invalid_binary, 'w') as f:
       f.write('this is not valid package file\n')

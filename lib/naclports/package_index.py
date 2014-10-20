@@ -11,6 +11,7 @@ import package
 
 DEFAULT_INDEX = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
 EXTRA_KEYS = naclports.package.EXTRA_KEYS + ['BIN_URL', 'BIN_SIZE', 'BIN_SHA1']
+PREBUILT_ROOT = os.path.join(naclports.PACKAGES_ROOT, 'prebuilt')
 
 
 def VerifyHash(filename, sha1):
@@ -90,7 +91,6 @@ class PackageIndex(object):
     return True
 
   def Download(self, package_name, config):
-    PREBUILT_ROOT = os.path.join(package.PACKAGES_ROOT, 'prebuilt')
     if not os.path.exists(PREBUILT_ROOT):
       os.makedirs(PREBUILT_ROOT)
     info = self.packages[(package_name, config)]

@@ -19,6 +19,7 @@ STAMP_DIR = os.path.join(OUT_DIR, 'stamp')
 BUILD_ROOT = os.path.join(OUT_DIR, 'build')
 PUBLISH_ROOT = os.path.join(OUT_DIR, 'publish')
 TOOLS_DIR = os.path.join(NACLPORTS_ROOT, 'build_tools')
+PACKAGES_ROOT = os.path.join(OUT_DIR, 'packages')
 
 NACL_SDK_ROOT = os.environ.get('NACL_SDK_ROOT')
 if sys.platform == "cygwin":
