@@ -1228,15 +1228,6 @@ DefaultPythonModuleInstallStep() {
 
 
 #
-# echo a command before exexuting it under 'time'
-#
-TimeCommand() {
-  echo "$@"
-  time "$@"
-}
-
-
-#
 # Validate a given NaCl executable (.nexe file)
 # $1 - Execuatable file (.nexe)
 #
@@ -1321,19 +1312,25 @@ RunSelLdrCommand() {
     local SCRIPT_64=$1_64.sh
     shift
     TranslateAndWriteSelLdrScript "${PEXE}" x86-32 "${NEXE_32}" "${SCRIPT_32}"
-    echo "[sel_ldr x86-32] $*"
-    time "./${SCRIPT_32}" "$@"
+    echo "[sel_ldr x86-32] ${SCRIPT_32} $*"
+    "./${SCRIPT_32}" "$@"
     TranslateAndWriteSelLdrScript "${PEXE}" x86-64 "${NEXE_64}" "${SCRIPT_64}"
-    echo "[sel_ldr x86-64] $*"
-    time "./${SCRIPT_64}" "$@"
+    echo "[sel_ldr x86-64] ${SCRIPT_64} $*"
+    "./${SCRIPT_64}" "$@"
   else
     # Normal NaCl.
-    local NEXE=$(basename "$1")
-    local SCRIPT=$1.sh
-    WriteSelLdrScript "${SCRIPT}" "${NEXE}"
-    echo "[sel_ldr] $*"
+    local nexe=$1
+    local basename=$(basename ${nexe})
+    local dirname=$(dirname ${nexe})
+    if [ -f "${dirname}/.libs/${basename}" ]; then
+      nexe=${dirname}/.libs/${basename}
+    fi
+
+    local SCRIPT=${nexe}.sh
+    WriteSelLdrScript "${SCRIPT}" ${basename}
     shift
-    time "./${SCRIPT}" "$@"
+    echo "[sel_ldr] ${SCRIPT} $*"
+    "./${SCRIPT}" "$@"
   fi
 }
 
@@ -1407,7 +1404,7 @@ TranslateAndWriteSelLdrScript() {
   if [ "${PEXE_FINAL}" -nt "${NEXE}" ]; then
     "${TRANSLATOR}" "${PEXE_FINAL}" -arch "${ARCH}" -o "${NEXE}"
   fi
-  WriteSelLdrScriptForPNaCl "${SCRIPT}" "${NEXE}" "${ARCH}"
+  WriteSelLdrScriptForPNaCl "${SCRIPT}" $(basename "${NEXE}") "${ARCH}"
 }
 
 
@@ -1499,7 +1496,7 @@ PackageStep() {
   if [ -d "${INSTALL_DIR}${PREFIX}" ]; then
     mv "${INSTALL_DIR}${PREFIX}" "${INSTALL_DIR}/payload"
   fi
-  local excludes="usr/doc share/man share/info lib/charset.alias"
+  local excludes="usr/doc share/man share/info share/doc lib/charset.alias"
   for exclude in ${excludes}; do
     if [ -e "${INSTALL_DIR}/payload/${exclude}" ]; then
       echo "Pruning ${exclude}"
