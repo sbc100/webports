@@ -231,5 +231,13 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), expected_output)
 
 
+class TestMain(unittest.TestCase):
+  @patch('naclports.Log', Mock())
+  @patch('shutil.rmtree', Mock())
+  def testCleanAll(self):
+    config = Configuration('arm', 'newlib', True)
+    naclports.__main__.CleanAll(config)
+
+
 if __name__ == '__main__':
   unittest.main()

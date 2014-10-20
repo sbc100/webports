@@ -126,6 +126,22 @@ def GetLock():
   return f
 
 
+def CleanAll(config):
+  """Remove all build directories and all pre-built packages as well
+  as all installed packages for the given configuration."""
+  def rmtree(path):
+    naclports.Log('removing %s' % path)
+    if os.path.exists(path):
+      shutil.rmtree(path)
+
+  rmtree(naclports.STAMP_DIR)
+  rmtree(naclports.BUILD_ROOT)
+  rmtree(naclports.PUBLISH_ROOT)
+  rmtree(naclports.PACKAGES_ROOT)
+  rmtree(naclports.GetInstallStampRoot(config))
+  rmtree(naclports.GetInstallRoot(config))
+
+
 def run_main(args):
   base_commands = {
     'list': CmdList,
@@ -237,20 +253,10 @@ def run_main(args):
       else:
         raise e
 
-  def rmtree(path):
-    naclports.Log('removing %s' % path)
-    if os.path.exists(path):
-      shutil.rmtree(path)
-
   if args.all:
     args.ignore_disabled = True
     if args.command == 'clean':
-      rmtree(naclports.STAMP_DIR)
-      rmtree(naclports.BUILD_ROOT)
-      rmtree(naclports.PUBLISH_ROOT)
-      rmtree(naclports.source_package.PACKAGES_ROOT)
-      rmtree(naclports.GetInstallStampRoot(config))
-      rmtree(naclports.GetInstallRoot(config))
+      CleanAll()
     else:
       if args.command in installed_pkg_commands:
         package_iterator = naclports.package.InstalledPackageIterator(config)
