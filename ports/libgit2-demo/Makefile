@@ -10,7 +10,7 @@ PNACL_LDFLAGS += -Wl,--undefined=PSUserCreateInstance
 TARGET = libgit2-demo
 CORE_LIBS = cli_main ppapi_simple nacl_io ppapi_cpp ppapi
 
-LIBS = git2 ssl crypto z $(CORE_LIBS)
+LIBS = git2 ssh2 ssl crypto z $(CORE_LIBS)
 ifeq ($(TOOLCHAIN),newlib)
 LIBS += glibc-compat
 endif
