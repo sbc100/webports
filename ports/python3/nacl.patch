@@ -12,10 +12,10 @@ index 06cbc4a..cc47ca7 100644
  #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
  #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
 diff --git a/Makefile.pre.in b/Makefile.pre.in
-index 6fdea8d..6c84e4f 100644
+index 629835d..8c8c616 100644
 --- a/Makefile.pre.in
 +++ b/Makefile.pre.in
-@@ -715,14 +715,18 @@ $(IO_OBJS): $(IO_H)
+@@ -747,14 +747,18 @@ $(IO_OBJS): $(IO_H)
  
  $(GRAMMAR_H): $(GRAMMAR_INPUT) $(PGENSRCS)
  		@$(MKDIR_P) Include
@@ -34,7 +34,7 @@ index 6fdea8d..6c84e4f 100644
  
  Parser/grammar.o:	$(srcdir)/Parser/grammar.c \
  				$(srcdir)/Include/token.h \
-@@ -1460,9 +1464,12 @@ profile-removal:
+@@ -1539,9 +1543,12 @@ profile-removal:
  	rm -rf $(COVERAGE_REPORT)
  
  clobber: clean profile-removal
@@ -49,10 +49,10 @@ index 6fdea8d..6c84e4f 100644
  	-rm -rf $(PYTHONFRAMEWORKDIR)
  	-rm -f python-config.py python-config
 diff --git a/Modules/_ctypes/libffi/configure b/Modules/_ctypes/libffi/configure
-index 8230830..1ab4dcb 100755
+index 75f62a7..6d8cfb8 100755
 --- a/Modules/_ctypes/libffi/configure
 +++ b/Modules/_ctypes/libffi/configure
-@@ -13393,7 +13393,7 @@ case "$host" in
+@@ -17261,7 +17261,7 @@ case "$host" in
  	TARGETDIR=x86
  	if test $ac_cv_sizeof_size_t = 4; then
  	  case "$host" in
@@ -61,25 +61,8 @@ index 8230830..1ab4dcb 100755
  	      TARGET=X86_64
  	      ;;
  	    *)
-diff --git a/Modules/_ctypes/libffi/src/x86/ffi64.c b/Modules/_ctypes/libffi/src/x86/ffi64.c
-index 2014af2..cacf894 100644
---- a/Modules/_ctypes/libffi/src/x86/ffi64.c
-+++ b/Modules/_ctypes/libffi/src/x86/ffi64.c
-@@ -202,10 +202,12 @@ classify_argument (ffi_type *type, enum x86_64_reg_class classes[],
-     case FFI_TYPE_DOUBLE:
-       classes[0] = X86_64_SSEDF_CLASS;
-       return 1;
-+#if FFI_TYPE_DOUBLE != FFI_TYPE_LONGDOUBLE
-     case FFI_TYPE_LONGDOUBLE:
-       classes[0] = X86_64_X87_CLASS;
-       classes[1] = X86_64_X87UP_CLASS;
-       return 2;
-+#endif
-     case FFI_TYPE_STRUCT:
-       {
- 	const int UNITS_PER_WORD = 8;
 diff --git a/Modules/_datetimemodule.c b/Modules/_datetimemodule.c
-index 8848432..b74cb26 100644
+index d8225ba..d8820b5 100644
 --- a/Modules/_datetimemodule.c
 +++ b/Modules/_datetimemodule.c
 @@ -7,6 +7,14 @@
@@ -98,10 +81,10 @@ index 8848432..b74cb26 100644
   * modules.
   */
 diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
-index 34b95c0..ba34b88 100644
+index 538322d..684cc8c 100644
 --- a/Modules/_testcapimodule.c
 +++ b/Modules/_testcapimodule.c
-@@ -1747,6 +1747,9 @@ static int test_run_counter = 0;
+@@ -1810,6 +1810,9 @@ static int test_run_counter = 0;
  
  static PyObject *
  test_datetime_capi(PyObject *self, PyObject *args) {
@@ -111,7 +94,7 @@ index 34b95c0..ba34b88 100644
      if (PyDateTimeAPI) {
          if (test_run_counter) {
              /* Probably regrtest.py -R */
-@@ -1764,6 +1767,7 @@ test_datetime_capi(PyObject *self, PyObject *args) {
+@@ -1827,6 +1830,7 @@ test_datetime_capi(PyObject *self, PyObject *args) {
          Py_RETURN_NONE;
      else
          return NULL;
@@ -119,8 +102,29 @@ index 34b95c0..ba34b88 100644
  }
  
  
+diff --git a/Modules/_tracemalloc.c b/Modules/_tracemalloc.c
+index 780e8ed..253e2d2 100644
+--- a/Modules/_tracemalloc.c
++++ b/Modules/_tracemalloc.c
+@@ -4,6 +4,16 @@
+ #include "pythread.h"
+ #include "osdefs.h"
+ 
++#ifdef __native_client__ && !defined _POSIX_THREADS
++  /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
++     However this file expects it to be defined if pthreads are present so we
++     define it here after including pthread.h
++     TODO(sbc): remove this hack once newlib is fixed:
++     https://code.google.com/p/nativeclient/issues/detail?id=3551
++     */
++# define _POSIX_THREADS
++#endif
++
+ /* Trace memory blocks allocated by PyMem_RawMalloc() */
+ #define TRACE_RAW_MALLOC
+ 
 diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
-index 47bc9e8..2b1276c 100644
+index 6a145dc..0a8eb1b 100644
 --- a/Modules/faulthandler.c
 +++ b/Modules/faulthandler.c
 @@ -15,6 +15,15 @@
@@ -140,10 +144,10 @@ index 47bc9e8..2b1276c 100644
     /* register() is useless on Windows, because only SIGSEGV, SIGABRT and
        SIGILL can be handled by the process, and these signals can only be used
 diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
-index 9909400..2e45df3 100644
+index ebb8712..348a357 100644
 --- a/Modules/pwdmodule.c
 +++ b/Modules/pwdmodule.c
-@@ -95,6 +95,29 @@ mkpwent(struct passwd *p)
+@@ -87,6 +87,29 @@ mkpwent(struct passwd *p)
      return v;
  }
  
@@ -198,7 +202,7 @@ index 9811c01..29cbb0e 100644
  main(int argc, char **argv)
  {
 diff --git a/Modules/signalmodule.c b/Modules/signalmodule.c
-index 9a0e8e3..ba0fe10 100644
+index fedaddf..27e6c5b 100644
 --- a/Modules/signalmodule.c
 +++ b/Modules/signalmodule.c
 @@ -29,7 +29,7 @@
@@ -211,10 +215,10 @@ index 9a0e8e3..ba0fe10 100644
  #endif
  
 diff --git a/Modules/socketmodule.c b/Modules/socketmodule.c
-index 0396bf4..ab00381 100644
+index b37e793..29e134b 100644
 --- a/Modules/socketmodule.c
 +++ b/Modules/socketmodule.c
-@@ -314,6 +314,14 @@ if_indextoname(index) -- return the corresponding interface name\n\
+@@ -310,6 +310,14 @@ if_indextoname(index) -- return the corresponding interface name\n\
  #  include "addrinfo.h"
  #endif
  
@@ -230,7 +234,7 @@ index 0396bf4..ab00381 100644
  #if !defined(NTDDI_VERSION) || (NTDDI_VERSION < NTDDI_LONGHORN)
  int inet_pton(int af, const char *src, void *dst);
 diff --git a/Modules/timemodule.c b/Modules/timemodule.c
-index 8d161d4..011f19c 100644
+index d0917a4..e58d455 100644
 --- a/Modules/timemodule.c
 +++ b/Modules/timemodule.c
 @@ -2,6 +2,7 @@
@@ -268,7 +272,7 @@ index 8d161d4..011f19c 100644
  static int floatsleep(double);
  static PyObject* floattime(_Py_clock_info_t *info);
 diff --git a/Python/condvar.h b/Python/condvar.h
-index e022dc7..a4c0ac4 100644
+index ef818c4..969c7a7 100644
 --- a/Python/condvar.h
 +++ b/Python/condvar.h
 @@ -49,6 +49,15 @@
@@ -288,10 +292,10 @@ index e022dc7..a4c0ac4 100644
  
  #ifdef _POSIX_THREADS
 diff --git a/Python/dynload_shlib.c b/Python/dynload_shlib.c
-index 888fbfc..c7bafd2 100644
+index 5cd1efd..75d1be2 100644
 --- a/Python/dynload_shlib.c
 +++ b/Python/dynload_shlib.c
-@@ -78,6 +78,11 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
+@@ -69,6 +69,11 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
      PyOS_snprintf(funcname, sizeof(funcname),
                    LEAD_UNDERSCORE "PyInit_%.200s", shortname);
  
@@ -303,8 +307,8 @@ index 888fbfc..c7bafd2 100644
      if (fp != NULL) {
          int i;
          struct stat statb;
-@@ -104,6 +109,7 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
- #endif
+@@ -89,6 +94,7 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
+             handles[nhandles].ino = statb.st_ino;
          }
      }
 +#endif
@@ -312,29 +316,11 @@ index 888fbfc..c7bafd2 100644
      dlopenflags = PyThreadState_GET()->interp->dlopenflags;
  
 diff --git a/Python/fileutils.c b/Python/fileutils.c
-index eecbb3b..55211e6 100644
+index f5000e5..9dfddda 100644
 --- a/Python/fileutils.c
 +++ b/Python/fileutils.c
-@@ -621,7 +621,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
- #ifdef MS_WINDOWS
-     HANDLE handle;
-     DWORD flags;
--#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX)
-+#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX) && !defined(__native_client__)
-     int request;
-     int err;
- #elif defined(HAVE_FCNTL_H)
-@@ -670,7 +670,7 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
-     }
-     return 0;
- 
--#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX)
-+#elif defined(HAVE_SYS_IOCTL_H) && defined(FIOCLEX) && defined(FIONCLEX) && !defined(__native_client__)
-     if (inheritable)
-         request = FIONCLEX;
-     else
-@@ -686,6 +686,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
- #else
+@@ -707,6 +707,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+     /* slow-path: fcntl() requires two syscalls */
      flags = fcntl(fd, F_GETFD);
      if (flags < 0) {
 +#if defined(__native_client__) && !defined(__GLIBC__)
@@ -362,7 +348,7 @@ index 7bd6efd..b4f6702 100644
  	return version;
  }
 diff --git a/Python/thread.c b/Python/thread.c
-index 8540942..114b3f7 100644
+index d1cb0e6..810bbed 100644
 --- a/Python/thread.c
 +++ b/Python/thread.c
 @@ -13,9 +13,19 @@
@@ -386,10 +372,10 @@ index 8540942..114b3f7 100644
  #include <stdio.h>
  #endif
 diff --git a/configure b/configure
-index 83d0ee2..b975f71 100755
+index 139d391..d99439e 100755
 --- a/configure
 +++ b/configure
-@@ -3268,6 +3268,9 @@ then
+@@ -3284,6 +3284,9 @@ then
         # a lot of different things including 'define_xopen_source'
         # in the case statement below.
  	case "$host" in
@@ -399,7 +385,7 @@ index 83d0ee2..b975f71 100755
  	*-*-linux*)
  		ac_sys_system=Linux
  		;;
-@@ -3316,6 +3319,15 @@ if test "$cross_compiling" = yes; then
+@@ -3332,6 +3335,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -415,7 +401,7 @@ index 83d0ee2..b975f71 100755
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -5345,7 +5357,11 @@ if test -d casesensitivetestdir
+@@ -5376,7 +5388,11 @@ if test -d casesensitivetestdir
  then
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
  $as_echo "yes" >&6; }
@@ -428,8 +414,8 @@ index 83d0ee2..b975f71 100755
  else
  	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
  $as_echo "no" >&6; }
-@@ -8519,7 +8535,7 @@ then
- 			fi
+@@ -8579,7 +8595,7 @@ then
+ 			BLDSHARED="$LDSHARED"
  		fi
  		;;
 -	Linux*|GNU*|QNX*)
@@ -437,7 +423,7 @@ index 83d0ee2..b975f71 100755
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -8590,7 +8606,7 @@ then
+@@ -8650,7 +8666,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -446,7 +432,7 @@ index 83d0ee2..b975f71 100755
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -8623,7 +8639,7 @@ then
+@@ -8683,7 +8699,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
@@ -456,10 +442,10 @@ index 83d0ee2..b975f71 100755
  	Darwin/*)
  		LINKFORSHARED="$extra_undefs -framework CoreFoundation"
 diff --git a/configure.ac b/configure.ac
-index e1d3e77..4db8c4e 100644
+index 9698ea0..f00a9c0 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -366,6 +366,9 @@ then
+@@ -373,6 +373,9 @@ then
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
@@ -469,7 +455,7 @@ index e1d3e77..4db8c4e 100644
  	*)
  		# for now, limit cross builds to known configurations
  		MACHDEP="unknown"
-@@ -408,6 +411,15 @@ if test "$cross_compiling" = yes; then
+@@ -415,6 +418,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -485,8 +471,8 @@ index e1d3e77..4db8c4e 100644
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -2015,7 +2027,7 @@ then
- 			fi
+@@ -2055,7 +2067,7 @@ then
+ 			BLDSHARED="$LDSHARED"
  		fi
  		;;
 -	Linux*|GNU*|QNX*)
@@ -494,7 +480,7 @@ index e1d3e77..4db8c4e 100644
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -2084,7 +2096,7 @@ then
+@@ -2124,7 +2136,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -503,7 +489,7 @@ index e1d3e77..4db8c4e 100644
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -2115,7 +2127,7 @@ then
+@@ -2155,7 +2167,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;

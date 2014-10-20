@@ -69,7 +69,7 @@ ifeq ($(TOOLCHAIN),pnacl)
 	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclprocess.js
 endif
 
-install:
+install: install-hterm
 	mkdir -p $(INSTALL_DIR)
 	tar -h -c --exclude=*.pyc --exclude=__pycache__ -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python3.4 ${EXTRA_ASSETS}
 	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
