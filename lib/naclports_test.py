@@ -235,8 +235,13 @@ class TestMain(unittest.TestCase):
   @patch('naclports.Log', Mock())
   @patch('shutil.rmtree', Mock())
   def testCleanAll(self):
-    config = Configuration('arm', 'newlib', True)
+    config = Configuration()
     naclports.__main__.CleanAll(config)
+
+  @patch('naclports.__main__.CleanAll')
+  def testMainCleanAll(self, clean_all_mock):
+    naclports.__main__.main(['clean', '--all'])
+    clean_all_mock.assert_called_once_with(Configuration())
 
 
 if __name__ == '__main__':

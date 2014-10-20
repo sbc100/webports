@@ -256,7 +256,7 @@ def run_main(args):
   if args.all:
     args.ignore_disabled = True
     if args.command == 'clean':
-      CleanAll()
+      CleanAll(config)
     else:
       if args.command in installed_pkg_commands:
         package_iterator = naclports.package.InstalledPackageIterator(config)
