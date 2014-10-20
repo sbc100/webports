@@ -1,0 +1,6 @@
+[run]
+include = lib/naclports/*
+data_file = out/coverage
+
+[html]
+directory = out/coverage_html

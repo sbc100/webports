@@ -64,7 +64,12 @@ clean:
 reallyclean: clean
 	rm -rf $(NACL_OUT)
 
+test:
+	coverage run lib/naclports_test.py
+	coverage report
+	coverage html
+
 %:
 	bin/naclports install $* $(BUILD_FLAGS)
 
-.PHONY: all run clean sdklibs sdklibs_list reallyclean
+.PHONY: all run clean sdklibs sdklibs_list reallyclean test
