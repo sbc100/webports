@@ -6,15 +6,15 @@ EXECUTABLES=test/yajl_test
 EXTRA_CMAKE_ARGS="-DBUILD_SHARED=${NACL_SHARED}"
 
 TestStep() {
-  if [ ${NACL_ARCH} == "pnacl" ]; then
+  local script=${BUILD_DIR}/test/yajl_test.sh
+  if [ ${NACL_ARCH} = "pnacl" ]; then
     local pexe=test/yajl_test
-    local script=${BUILD_DIR}/yajl_test.sh
     TranslateAndWriteSelLdrScript ${pexe} x86-32 ${pexe}.x86-32.nexe "${script}"
     (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
     TranslateAndWriteSelLdrScript ${pexe} x86-64 ${pexe}.x86-64.nexe "${script}"
     (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
   else
-    (cd "${SRC_DIR}/test" && ./run_tests.sh "${BUILD_DIR}/test/yajl_test.sh")
+    (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
   fi
 }
 
