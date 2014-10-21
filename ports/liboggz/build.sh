@@ -38,6 +38,7 @@ write-unmarked-guard
 #seek-stress
 
 TestStep() {
+  export SEL_LDR_LIB_PATH=$PWD/src/liboggz/.libs
   for test in ${TESTS}; do
     RunSelLdrCommand "src/tests/${test}${NACL_EXEEXT}"
   done

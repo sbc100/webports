@@ -1,0 +1,15 @@
+diff --git a/src/tools/oggz-chop/httpdate.c b/src/tools/oggz-chop/httpdate.c
+index 4ef6ac2..330560e 100644
+--- a/src/tools/oggz-chop/httpdate.c
++++ b/src/tools/oggz-chop/httpdate.c
+@@ -5,6 +5,10 @@
+ #include <string.h>
+ #include <time.h>
+ 
++#ifdef _NEWLIB_VERSIOn
++#define timezone _timezone
++#endif
++
+ #define HTTPDATE_FMT "%3s, %02d %s %4d %02d:%02d:%02d GMT"
+ 
+ static char * wdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
