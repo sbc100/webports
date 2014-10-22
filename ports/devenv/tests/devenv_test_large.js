@@ -17,6 +17,8 @@ TEST_F(DevEnvTest, 'testPackageInstall', function() {
     return self.installPackage('git');
   }).then(function() {
     return self.installPackage('make');
+  }).then(function() {
+    return self.installPackage('python');
   });
 });
 
@@ -211,5 +213,38 @@ TEST_F(DevEnvFileTest, 'testMake', function() {
       });
     }
     return checkOne();
+  });
+});
+
+TEST_F(DevEnvFileTest, 'testPython', function() {
+  var self = this;
+  var i = 0;
+  var script = [
+    '#!/usr/bin/python',
+    '',
+    'import subprocess',
+    'import sys',
+    '',
+    'n = int(sys.argv[1])',
+    'if n > 3:',
+    '  sys.exit(n)',
+    'else:',
+    '  a = subprocess.Popen([sys.executable, "test.py", str(n * 2)])',
+    '  b = subprocess.Popen([sys.executable, "test.py", str(n * 2 + 1)])',
+    '  a.wait()',
+    '  b.wait()',
+    '  sys.exit(a.returncode + b.returncode + n)',
+  ].join('\n') + '\n';
+  return Promise.resolve().then(function() {
+    return self.writeFile('/home/user/test.py', script);
+  }).then(function() {
+    function test(n) {
+      if (n > 3) {
+        return n;
+      } else {
+        return test(n * 2) + test(n * 2 + 1) + n;
+      }
+    }
+    return self.checkCommand('./test.py 1', test(1));
   });
 });
