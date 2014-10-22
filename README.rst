@@ -72,6 +72,8 @@ host build of Python itself, which in turn relies on the development version
 of zlib being available.  On 64-bit Ubuntu/Precise this means installing the
 following package: ``lib32z1-dev``.
 
+To run the presubmit checks (or ``make test``) you will also need to have
+python coverage module installed.
 
 Building
 --------
