@@ -10,6 +10,7 @@ function DevEnvTest() {
   chrometest.Test.call(this);
   this.devEnv = null;
   this.tcp = null;
+  this.params = chrometest.getUrlParameters();
 
   // Buffer incoming TCP messages.
   this.tcpBuffer = {};
@@ -114,8 +115,7 @@ DevEnvTest.prototype.checkCommand = function(
 
 DevEnvTest.prototype.installPackage = function(name) {
   var cmd = 'bash /mnt/http/package -f -i ' + name;
-  var params = chrometest.getUrlParameters();
-  if (params['latest'] === '1') {
+  if (this.params['latest'] === '1') {
     cmd += ' -s ' + window.location.origin + '/publish';
   }
   chrometest.info(cmd);

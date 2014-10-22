@@ -218,9 +218,29 @@ TEST_F(DevEnvFileTest, 'testMake', function() {
   });
 });
 
-TEST_F(DevEnvFileTest, 'testPython', function() {
+TEST_F(DevEnvFileTest, 'testPythonBasic', function() {
   var self = this;
-  var i = 0;
+  var script = [
+    '#!/usr/bin/python',
+    '',
+    'import sys',
+    '',
+    'sys.exit(42)',
+  ].join('\n') + '\n';
+  return Promise.resolve().then(function() {
+    return self.writeFile('/home/user/test.py', script);
+  }).then(function() {
+    return self.checkCommand('./test.py', 42);
+  });
+});
+
+TEST_F(DevEnvFileTest, 'testPythonSubprocess', function() {
+  var self = this;
+  // TODO(bradnelson): Drop this once subprocess works on glibc.
+  if (self.params['TOOLCHAIN'] === 'glibc') {
+    // Skip on glibc.
+    return;
+  }
   var script = [
     '#!/usr/bin/python',
     '',
