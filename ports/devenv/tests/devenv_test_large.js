@@ -19,6 +19,8 @@ TEST_F(DevEnvTest, 'testPackageInstall', function() {
     return self.installPackage('make');
   }).then(function() {
     return self.installPackage('python');
+  }).then(function() {
+    return self.installPackage('curl');
   });
 });
 
@@ -246,5 +248,36 @@ TEST_F(DevEnvFileTest, 'testPython', function() {
       }
     }
     return self.checkCommand('./test.py 1', test(1));
+  });
+});
+
+TEST_F(DevEnvFileTest, 'testGetUrlAndUnzip', function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return self.checkCommand(
+       'geturl http://nacltools.storage.googleapis.com/io2014/voronoi.zip ' +
+       'voronoi.zip');
+  }).then(function() {
+    return self.checkCommand('unzip voronoi.zip');
+  }).then(function() {
+    return self.readFile('/home/user/voronoi/Makefile');
+  }).then(function(data) {
+    // Check there's something in the makefile.
+    ASSERT_GT(data.length, 100);
+  });
+});
+
+TEST_F(DevEnvFileTest, 'testCurlAndUnzip', function() {
+  var self = this;
+  return Promise.resolve().then(function() {
+    return self.checkCommand(
+       'curl http://nacltools.storage.googleapis.com/io2014/voronoi.zip -O');
+  }).then(function() {
+    return self.checkCommand('unzip voronoi.zip');
+  }).then(function() {
+    return self.readFile('/home/user/voronoi/Makefile');
+  }).then(function(data) {
+    // Check there's something in the makefile.
+    ASSERT_GT(data.length, 100);
   });
 });
