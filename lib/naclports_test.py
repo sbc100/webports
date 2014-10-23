@@ -74,13 +74,9 @@ BIN_SHA1=0cb0d2d1380831b38c2b8461528836aa7992435f
 class TestPackageIndex(unittest.TestCase):
   def testParsingInvalid(self):
     contents = 'FOO=bar\nBAR=baz\n'
-    ex = None
-    try:
+    expected_error = "Invalid key 'FOO' in info file dummy_file:1"
+    with self.assertRaisesRegexp(naclports.Error, expected_error):
       index = package_index.PackageIndex('dummy_file', contents)
-    except naclports.Error as e:
-      ex = e
-    self.assertIsNotNone(ex)
-    self.assertEqual(str(ex), "Invalid key 'FOO' in info file dummy_file:1")
 
   def testParsingValid(self):
     index = package_index.PackageIndex('dummy_file', test_index)
@@ -128,39 +124,31 @@ class TestPackageIndex(unittest.TestCase):
 
 class TestParsePkgInfo(unittest.TestCase):
   def testValidKeys(self):
-    contents = 'FOO=bar\nBAR=baz\n'
-    valid = ['FOO']
-    required = []
-    ex = None
-    try:
+    expected_error = "Invalid key 'BAR' in info file dummy_file:2"
+    with self.assertRaisesRegexp(naclports.Error, expected_error):
+      contents = 'FOO=bar\nBAR=baz\n'
+      valid = ['FOO']
+      required = []
       naclports.ParsePkgInfo(contents, 'dummy_file', valid, required)
-    except naclports.Error as e:
-      ex = e
-    self.assertIsNotNone(ex)
-    self.assertEqual(str(ex), "Invalid key 'BAR' in info file dummy_file:2")
 
   def testRequiredKeys(self):
-    contents = 'FOO=bar\n'
-    valid = ['FOO']
-    required = ['BAR']
-    ex = None
-    try:
+    expected_error = "Required key 'BAR' missing from info file: 'dummy_file'"
+    with self.assertRaisesRegexp(naclports.Error, expected_error):
+      contents = 'FOO=bar\n'
+      valid = ['FOO']
+      required = ['BAR']
       naclports.ParsePkgInfo(contents, 'dummy_file', valid, required)
-    except naclports.Error as e:
-      ex = e
-    expected = "Required key 'BAR' missing from info file: 'dummy_file'"
-    self.assertIsNotNone(ex)
-    self.assertEqual(str(ex), expected)
 
 
 class TestSourcePackage(unittest.TestCase):
   def setUp(self):
     self.tempdir = tempfile.mkdtemp(prefix='naclports_test_')
+    self.temp_ports = os.path.join(self.tempdir, 'ports')
 
   def tearDown(self):
     shutil.rmtree(self.tempdir)
 
-  def CreateSourcePackage(self, name, extra_info=''):
+  def CreateTestPackage(self, name, extra_info=''):
     """Creates a source package directory in a temporary directory.
     Args:
       name: The name of the temporary package.
@@ -169,8 +157,8 @@ class TestSourcePackage(unittest.TestCase):
     Returns:
       The new package source directory
     """
-    pkg_root = os.path.join(self.tempdir, name)
-    os.mkdir(pkg_root)
+    pkg_root = os.path.join(self.temp_ports, name)
+    os.makedirs(pkg_root)
     with open(os.path.join(pkg_root, 'pkg_info'), 'w') as info:
       info.write("NAME=%s\nVERSION=1.0\n%s" % (name, extra_info))
     return pkg_root
@@ -178,27 +166,66 @@ class TestSourcePackage(unittest.TestCase):
   def testInvalidSourceDir(self):
     """test that invalid source directory generates an error."""
     path = '/bad/path'
-    with self.assertRaises(naclports.Error) as context:
+    expected_error = 'Invalid package folder: ' + path
+    with self.assertRaisesRegexp(naclports.Error, expected_error):
       source_package.SourcePackage(path)
-    self.assertEqual(context.exception.message,
-                     'Invalid package folder: ' + path)
 
   def testValidSourceDir(self):
     """test that valid source directory is loaded correctly."""
-    root = self.CreateSourcePackage('foo')
+    root = self.CreateTestPackage('foo')
     pkg = source_package.SourcePackage(root)
     self.assertEqual(pkg.NAME, 'foo')
     self.assertEqual(pkg.root, root)
 
-  def testIsBuilt(self):
+  def testIsBuiltMalformedBinary(self):
     """test that IsBuilt() can handle malformed package files."""
-    root = self.CreateSourcePackage('foo')
+    root = self.CreateTestPackage('foo')
     pkg = source_package.SourcePackage(root)
     invalid_binary = os.path.join(self.tempdir, 'package.tar.bz2')
     with open(invalid_binary, 'w') as f:
       f.write('this is not valid package file\n')
     pkg.PackageFile = Mock(return_value=invalid_binary)
     self.assertFalse(pkg.IsBuilt())
+
+  @patch('naclports.source_package.SourcePackage.RunBuildSh',
+      Mock(return_value=True))
+  @patch('naclports.source_package.Log', Mock())
+  def testBuildPackage(self):
+    root = self.CreateTestPackage('foo')
+    pkg = source_package.SourcePackage(root)
+    pkg.Build(True)
+
+  @patch('sha1check.VerifyHash')
+  @patch('naclports.source_package.SourcePackage.Download', Mock())
+  @patch('naclports.source_package.Log', Mock())
+  def testVerify(self, verify_hash_mock):
+    root = self.CreateTestPackage('foo', 'URL=someurl\nSHA1=123')
+    pkg = source_package.SourcePackage(root)
+    pkg.Verify()
+    filename = os.path.join(source_package.CACHE_ROOT, 'someurl')
+    verify_hash_mock.assert_called_once_with(filename, '123')
+
+  def testSourcePackageIterator(self):
+    self.CreateTestPackage('foo')
+    with patch('naclports.NACLPORTS_ROOT', self.tempdir):
+      pkgs = [p for p in source_package.SourcePackageIterator()]
+    self.assertEqual(len(pkgs), 1)
+    self.assertEqual(pkgs[0].NAME, 'foo')
+
+  def testCreatePackageInvalid(self):
+    with self.assertRaisesRegexp(naclports.Error, 'Package not found: foo'):
+      source_package.CreatePackage('foo')
+
+  def testFormatTimeDelta(self):
+    expectations = (
+       ( 1, '1s' ),
+       ( 60, '1m' ),
+       ( 70, '1m10s' ),
+    )
+
+    for secs, expected_result in expectations:
+      self.assertEqual(expected_result,
+                       naclports.source_package.FormatTimeDelta(secs))
 
 
 class TestCommands(unittest.TestCase):

@@ -14,8 +14,10 @@ import configuration
 import naclports
 import package
 import package_index
+import sha1check
 from naclports import Log, Error, DisabledError, PkgFormatError
 
+MIRROR_URL = '%s%s/mirror' % (naclports.GS_URL, naclports.GS_BUCKET)
 CACHE_ROOT = os.path.join(naclports.OUT_DIR, 'cache')
 
 
@@ -28,7 +30,7 @@ def FormatTimeDelta(delta):
   Returns: A string desribing the ammount of time passed in.
   """
   rtn = ''
-  if delta > 60:
+  if delta >= 60:
     mins = delta / 60
     rtn += '%dm' % mins
     delta -= mins * 60
