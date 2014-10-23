@@ -25,13 +25,20 @@ EXTRA_CONFIGURE_ARGS+=" --enable-ipv6=no"
 EXTRA_CONFIGURE_ARGS+=" --datarootdir=/share"
 EXTRA_CONFIGURE_ARGS+=" --with-xkb-bin-directory="
 
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  EXTRA_CONFIGURE_ARGS+=" --enable-xvfb=no"
+  EXTRA_CONFIGURE_ARGS+=" --enable-xorg=no"
+fi
+
 NACLPORTS_CFLAGS+=" -Dmain=SDL_main"
 export LIBS+="\
+-Wl,--undefined=nacl_main \
 -Wl,--undefined=SDL_main \
 -lnacl_spawn \
--lSDL -lSDLmain \
+-lSDLmain -lSDL \
 ${NACL_CLI_MAIN_LIB} \
--lppapi_simple -ltar -lnacl_io -lppapi -lppapi_cpp \
+-lppapi_simple -ltar -lnacl_io -lRegal -lglslopt \
+-lppapi -lppapi_cpp -lppapi_gles2 -lm \
 -l${NACL_CPP_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
@@ -97,7 +104,7 @@ InstallStep() {
   done
 
   ChangeDir ${NACL_PREFIX}
-  LogExecute tar cvf ${ASSEMBLY_DIR}/xorg.tar share/X11
+  LogExecute tar cvf ${ASSEMBLY_DIR}/xorg-xkb.tar share/X11/xkb
 
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r xorg-server.zip xorg-server
