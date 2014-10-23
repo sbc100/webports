@@ -29,8 +29,7 @@
         "cc",
         "cpp",
         "java"
-      ],
-      "title": "Edit with Emacs"
+      ]
     }
   },
   "permissions": [

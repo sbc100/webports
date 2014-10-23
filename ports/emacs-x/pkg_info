@@ -1,0 +1,7 @@
+NAME=emacs-x
+VERSION=0.1
+# Currently only builds on linux (due to x11)
+BUILD_OS=linux
+DEPENDS=(xorg-server emacs)
+# Disabled for bionic due to bash.
+DISABLED_LIBC=(bionic)
