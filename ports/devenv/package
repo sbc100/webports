@@ -130,6 +130,10 @@ InstallPackage() {
     if [ -e ${package_pexe} ]; then
       cp ${package_pexe} ${package_inside}/${package}
     fi
+    local package_pexe=${package_inside}/${package}${alt}_pnacl.pexe
+    if [ -e ${package_pexe} ]; then
+      cp ${package_pexe} ${package_inside}/${package}
+    fi
     local package_nexe=${package_inside}/${package}${alt}_${NACL_ARCH}.nexe
     if [ -e ${package_nexe} ]; then
       cp ${package_nexe} ${package_inside}/${package}
