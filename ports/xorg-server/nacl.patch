@@ -75,15 +75,18 @@ diff --git a/configure.ac b/configure.ac
 diff --git a/dix/main.c b/dix/main.c
 --- a/dix/main.c
 +++ b/dix/main.c
-@@ -126,15 +126,30 @@ pthread_cond_t serverRunningCond = PTHREAD_COND_INITIALIZER;
+@@ -117,6 +117,10 @@ Equipment Corporation.
  
- int dix_main(int argc, char *argv[], char *envp[]);
+ extern void Dispatch(void);
  
 +#if defined(__native_client__)
 +# include "nacl_main.h"
 +#endif
 +
- int
+ #ifdef XQUARTZ
+ #include <pthread.h>
+ 
+@@ -130,11 +134,22 @@ int
  dix_main(int argc, char *argv[], char *envp[])
  #else
  int
@@ -174,6 +177,23 @@ diff --git a/include/do-not-use-config.h.in b/include/do-not-use-config.h.in
  /* Define to 1 if unsigned long is 64 bits. */
  #undef _XSERVER64
  
+diff --git a/include/servermd.h b/include/servermd.h
+--- a/include/servermd.h
++++ b/include/servermd.h
+@@ -279,6 +279,13 @@ SOFTWARE.
+ #define GLYPHPADBYTES		4
+ #endif
+ 
++/* nacl on ARM */
++#if defined(__native_client__) && defined(__arm__)
++#define IMAGE_BYTE_ORDER	LSBFirst
++#define BITMAP_BIT_ORDER	LSBFirst
++#define GLYPHPADBYTES		4
++#endif
++
+ /* linux on IBM S/390 */
+ #if defined (linux) && defined (__s390__)
+ #define IMAGE_BYTE_ORDER	MSBFirst
 diff --git a/os/access.c b/os/access.c
 --- a/os/access.c
 +++ b/os/access.c
