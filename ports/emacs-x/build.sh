@@ -17,10 +17,15 @@ InstallStep() {
   LogExecute cp ${EMACS_DIR}/*.nmf ${ASSEMBLY_DIR}/
   LogExecute cp ${EMACS_DIR}/*.nexe ${ASSEMBLY_DIR}/
   LogExecute cp -r ${EMACS_DIR}/lib* ${ASSEMBLY_DIR}/
+  LogExecute cp ${EMACS_DIR}/*.tar ${ASSEMBLY_DIR}/
+  LogExecute cp ${EMACS_DIR}/*.png ${ASSEMBLY_DIR}/
   LogExecute cp ${EMACS_DIR}/manifest.json ${ASSEMBLY_DIR}/
 
-  LogExecute cp -r ${XORG_DIR}/lib* ${ASSEMBLY_DIR}/
+  LogExecute cp -r ${XORG_DIR}/_platform_specific ${ASSEMBLY_DIR}/
+  LogExecute cp ${XORG_DIR}/*.nmf ${ASSEMBLY_DIR}/
   LogExecute cp ${XORG_DIR}/*.nexe ${ASSEMBLY_DIR}/
+  LogExecute cp -r ${XORG_DIR}/lib* ${ASSEMBLY_DIR}/
+  LogExecute cp ${XORG_DIR}/*.tar ${ASSEMBLY_DIR}/
   LogExecute cp ${XORG_DIR}/*.js ${ASSEMBLY_DIR}/
   LogExecute cp ${XORG_DIR}/*.html ${ASSEMBLY_DIR}/
 
