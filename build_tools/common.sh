@@ -1513,7 +1513,14 @@ PackageStep() {
   echo "BUILD_TOOLCHAIN=${TOOLCHAIN}" >> "${INSTALL_DIR}/pkg_info"
   echo "BUILD_SDK_VERSION=${NACL_SDK_VERSION}" >> "${INSTALL_DIR}/pkg_info"
   echo "BUILD_NACLPORTS_REVISION=${FULL_REVISION}" >> "${INSTALL_DIR}/pkg_info"
-  LogExecute tar cjf "${PACKAGE_FILE}" -C "${INSTALL_DIR}" .
+  if [ "${OS_NAME}" = "Darwin" ]; then
+    # OSX likes to create files starting with ._. We don't want to package
+    # these.
+    local args="--exclude ._*"
+  else
+    local args=""
+  fi
+  LogExecute tar cjf "${PACKAGE_FILE}" -C "${INSTALL_DIR}" ${args} .
 }
 
 
