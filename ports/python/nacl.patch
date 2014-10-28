@@ -465,30 +465,6 @@ index 7bd6efd..b4f6702 100644
  		      PY_VERSION, Py_GetBuildInfo(), Py_GetCompiler());
  	return version;
  }
-diff --git a/Python/thread.c b/Python/thread.c
-index dd333e8..33fec81 100644
---- a/Python/thread.c
-+++ b/Python/thread.c
-@@ -14,9 +14,19 @@
-    library (e.g. gnu pth in pthread emulation) */
- # ifdef HAVE_PTHREAD_H
- #  include <pthread.h> /* _POSIX_THREADS */
-+#  if defined __native_client__ && !defined __GLIBC__
-+     /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
-+        However this file expects it to be defined if pthreads are present so we
-+        define it here after including pthread.h
-+        TODO(sbc): remove this hack once newlib is fixed:
-+        https://code.google.com/p/nativeclient/issues/detail?id=3551
-+        */
-+#    define _POSIX_THREADS
-+#  endif
- # endif
- #endif
- 
-+
- #ifndef DONT_HAVE_STDIO_H
- #include <stdio.h>
- #endif
 diff --git a/configure b/configure
 index 2e32be2..29b7eef 100755
 --- a/configure

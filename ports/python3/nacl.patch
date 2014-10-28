@@ -102,27 +102,6 @@ index 538322d..684cc8c 100644
  }
  
  
-diff --git a/Modules/_tracemalloc.c b/Modules/_tracemalloc.c
-index 780e8ed..253e2d2 100644
---- a/Modules/_tracemalloc.c
-+++ b/Modules/_tracemalloc.c
-@@ -4,6 +4,16 @@
- #include "pythread.h"
- #include "osdefs.h"
- 
-+#ifdef __native_client__ && !defined _POSIX_THREADS
-+  /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
-+     However this file expects it to be defined if pthreads are present so we
-+     define it here after including pthread.h
-+     TODO(sbc): remove this hack once newlib is fixed:
-+     https://code.google.com/p/nativeclient/issues/detail?id=3551
-+     */
-+# define _POSIX_THREADS
-+#endif
-+
- /* Trace memory blocks allocated by PyMem_RawMalloc() */
- #define TRACE_RAW_MALLOC
- 
 diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
 index 6a145dc..0a8eb1b 100644
 --- a/Modules/faulthandler.c
@@ -271,26 +250,6 @@ index d0917a4..e58d455 100644
  /* Forward declarations */
  static int floatsleep(double);
  static PyObject* floattime(_Py_clock_info_t *info);
-diff --git a/Python/condvar.h b/Python/condvar.h
-index ef818c4..969c7a7 100644
---- a/Python/condvar.h
-+++ b/Python/condvar.h
-@@ -49,6 +49,15 @@
- # ifdef HAVE_PTHREAD_H
- #  include <pthread.h> /* _POSIX_THREADS */
- # endif
-+# ifdef __native_client__ && !defined _POSIX_THREADS
-+#  define _POSIX_THREADS
-+   /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
-+      However this file expects it to be defined if pthreads are present so we
-+      define it here after including pthread.h
-+      TODO(sbc): remove this hack once newlib is fixed:
-+      https://code.google.com/p/nativeclient/issues/detail?id=3551
-+      */
-+# endif
- #endif
- 
- #ifdef _POSIX_THREADS
 diff --git a/Python/dynload_shlib.c b/Python/dynload_shlib.c
 index 5cd1efd..75d1be2 100644
 --- a/Python/dynload_shlib.c

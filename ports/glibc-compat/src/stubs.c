@@ -663,3 +663,8 @@ int setrlimit(int resource, const struct rlimit *rlim) __attribute__ ((weak));
 int setrlimit(int resource, const struct rlimit *rlim) {
   UNIMPLEMENTED_NOSYS();
 }
+
+int pthread_sigmask(int how, const sigset_t *set, sigset_t *oldset) {
+  UNIMPLEMENTED();
+  return ENOSYS;
+}

@@ -1639,6 +1639,9 @@ RunTestStep()       {
 
 
 RunPostInstallTestStep()       {
+  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+    return
+  fi
   RunStep PostInstallTestStep "Testing (post-install)"
 }
 
