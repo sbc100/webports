@@ -48,7 +48,7 @@ def RunUnittests(input_api, output_api):
   try:
     subprocess.check_call(['make', 'test'])
   except subprocess.CalledProcessError as e:
-    return [output_api.PresubmitError(message)]
+    return [output_api.PresubmitError(str(e))]
   return []
 
 

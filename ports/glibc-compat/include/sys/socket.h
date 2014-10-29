@@ -211,8 +211,8 @@ struct sockaddr {
  * information in raw sockets.
  */
 struct sockproto {
-	u_short	sp_family;		/* address family */
-	u_short	sp_protocol;		/* protocol */
+	uint16_t	sp_family;		/* address family */
+	uint16_t	sp_protocol;		/* protocol */
 };
 
 /*
@@ -400,7 +400,7 @@ struct cmsgcred {
  * 4.3 compat sockaddr, move to compat file later
  */
 struct osockaddr {
-	u_short	sa_family;		/* address family */
+	uint16_t	sa_family;		/* address family */
 	char	sa_data[14];		/* up to 14 bytes of direct address */
 };
 

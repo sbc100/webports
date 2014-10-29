@@ -1125,18 +1125,27 @@ ConfigureStep_CMake() {
     EXTRA_CMAKE_ARGS+=" -DEXTRA_INCLUDE=${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
-  CC="${NACLCC}" CXX="${NACLCXX}" LogExecute cmake "${SRC_DIR}" \
+  if [ $NACL_DEBUG = "1" ]; then
+    BUILD_TYPE=DEBUG
+  else
+    BUILD_TYPE=RELEASE
+  fi
+
+  LogExecute cmake "${SRC_DIR}" \
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
            -DNACLAR=${NACLAR} \
            -DNACLLD=${NACLLD} \
+           -DNACLCC=${NACLCC} \
+           -DNACLCXX=${NACLCXX} \
            -DNACL_CROSS_PREFIX=${NACL_CROSS_PREFIX} \
+           -DNACL_ARCH=${NACL_ARCH} \
            -DNACL_SDK_ROOT=${NACL_SDK_ROOT} \
            -DNACL_SDK_LIBDIR=${NACL_SDK_LIBDIR} \
            -DNACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT} \
            -DNACL_LIBC=${NACL_LIBC} \
            -DCMAKE_PREFIX_PATH=${NACL_PREFIX} \
            -DCMAKE_INSTALL_PREFIX=${PREFIX} \
-           -DCMAKE_BUILD_TYPE=RELEASE ${EXTRA_CMAKE_ARGS}
+           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ${EXTRA_CMAKE_ARGS}
 }
 
 

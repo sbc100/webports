@@ -24,6 +24,8 @@
 /* Defined h_addr as in glibc. */
 #define h_addr h_addr_list[0]
 
+__BEGIN_DECLS
+
 void herror(const char *);
 const char *hstrerror(int);
 
@@ -32,5 +34,7 @@ int getaddrinfo(const char *, const char *,
                 const struct addrinfo *, struct addrinfo **);
 int getnameinfo(const struct sockaddr *, socklen_t, char *,
                 socklen_t, char *, socklen_t, unsigned int);
+
+__END_DECLS
 
 #endif  /* GLIBCEMU_NETDB_H */
