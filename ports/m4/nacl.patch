@@ -88,26 +88,6 @@ index 9947405..2b655cd 100644
  #if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
  
  #include <stdio.h>
-diff --git a/lib/sig-handler.h b/lib/sig-handler.h
-index 67d061d..5475e88 100644
---- a/lib/sig-handler.h
-+++ b/lib/sig-handler.h
-@@ -37,6 +37,7 @@ typedef void (*sa_handler_t) (int);
- SIG_HANDLER_INLINE sa_handler_t
- get_handler (struct sigaction const *a)
- {
-+#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
- #ifdef SA_SIGINFO
-   /* POSIX says that special values like SIG_IGN can only occur when
-      action.sa_flags does not contain SA_SIGINFO.  But in Linux 2.4,
-@@ -46,6 +47,7 @@ get_handler (struct sigaction const *a)
-   if (a->sa_flags & SA_SIGINFO)
-     return (sa_handler_t) a->sa_sigaction;
- #endif
-+#endif
-   return a->sa_handler;
- }
- 
 diff --git a/lib/sigaction.c b/lib/sigaction.c
 index 97eb76d..901cd40 100644
 --- a/lib/sigaction.c

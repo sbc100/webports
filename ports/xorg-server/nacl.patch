@@ -215,25 +215,6 @@ diff --git a/os/access.c b/os/access.c
      uname(&name);
  #else
      gethostname(name.nodename, sizeof(name.nodename));
-diff --git a/os/osinit.c b/os/osinit.c
---- a/os/osinit.c
-+++ b/os/osinit.c
-@@ -127,6 +127,7 @@ OsSigHandler(int signo)
-     /* log, cleanup, and abort */
-     xorg_backtrace();
- 
-+#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
- #ifdef SA_SIGINFO
-     if (sip->si_code == SI_USER) {
-         ErrorF("Recieved signal %d sent by process %ld, uid %ld\n",
-@@ -142,6 +143,7 @@ OsSigHandler(int signo)
-         }
-     }
- #endif
-+#endif
- 
-     FatalError("Caught signal %d (%s). Server aborting\n",
-                signo, strsignal(signo));
 diff --git a/os/utils.c b/os/utils.c
 --- a/os/utils.c
 +++ b/os/utils.c

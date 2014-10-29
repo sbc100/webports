@@ -254,18 +254,3 @@ index 73b7466..31a7950 100644
  	  
    code_here = ((void *)0)+CODE_BLOCK_SIZE; /* llvm-gcc does not like this as
                                                initializer, so we do it here */
-diff --git a/engine/signals.c b/engine/signals.c
-index b522f19..0a81a21 100644
---- a/engine/signals.c
-+++ b/engine/signals.c
-@@ -58,6 +58,10 @@ UCell rows=DEFAULTROWS;
- #define SA_ONSTACK 0
- #endif
- 
-+#if defined(_NEWLIB_VERSION) && defined(__native_client__)
-+#undef SA_SIGINFO
-+#endif
-+
- #ifdef SA_SIGINFO
- void install_signal_handler(int sig, void (*handler)(int, siginfo_t *, void *))
-      /* installs three-argument signal handler for sig */

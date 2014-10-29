@@ -8,6 +8,18 @@
 
 #include_next <sys/signal.h>
 
+/*
+ * newlib defines SA_SIGINFO even if _POSIX_REALTIME_SIGNALS is not defined (and
+ * therefore sa_sighandler is not a member of sigaction).  As it turns out a lot
+ * of software assumgins that if SA_SIGINFO is defined then is can/should use
+ * sa_sighandler.
+ * TODO(sbc): remove this once this bug is fixed:
+ * https://code.google.com/p/nativeclient/issues/detail?id=3989
+ */
+#ifndef _POSIX_REALTIME_SIGNALS
+#undef SA_SIGINFO
+#endif
+
 #define SA_RESTART 0x10000000
 
 struct sigvec {
