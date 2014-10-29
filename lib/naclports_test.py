@@ -212,6 +212,25 @@ class TestSourcePackage(unittest.TestCase):
     self.assertEqual(len(pkgs), 1)
     self.assertEqual(pkgs[0].NAME, 'foo')
 
+  def testGetBuildLocation(self):
+    root = self.CreateTestPackage('foo')
+    pkg = source_package.SourcePackage(root)
+    location = pkg.GetBuildLocation()
+    self.assertTrue(location.startswith(naclports.BUILD_ROOT))
+    self.assertEqual(os.path.basename(location),
+                     '%s-%s' % (pkg.NAME, pkg.VERSION))
+
+  @patch('naclports.Log', Mock())
+  def testExtract(self):
+    root = self.CreateTestPackage('foo', 'URL=someurl.tar.gz\nSHA1=123')
+    pkg = source_package.SourcePackage(root)
+
+    def fake_extract(archive, dest):
+      os.mkdir(os.path.join(dest, '%s-%s' % (pkg.NAME, pkg.VERSION)))
+
+    with patch('naclports.source_package.ExtractArchive', fake_extract):
+      pkg.Extract()
+
   def testCreatePackageInvalid(self):
     with self.assertRaisesRegexp(naclports.Error, 'Package not found: foo'):
       source_package.CreatePackage('foo')

@@ -15,7 +15,7 @@ SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libogg
 SDK_LIBS += libtheora libvorbis libwebp libxml2 tinyxml openal-soft freealut
 
 COVERAGE = coverage
-COVERAGE_ARGS = --fail-under=50
+COVERAGE_ARGS = --fail-under=52
 COVERAGE_VER := $(shell $(COVERAGE) --version 2>/dev/null)
 
 ifndef COVERAGE_VER
@@ -80,6 +80,8 @@ clean:
 reallyclean: clean
 	rm -rf $(NACL_OUT)
 
+check: test
+
 test:
 	$(COVERAGE) run lib/naclports_test.py
 	$(COVERAGE) report $(COVERAGE_ARGS)
@@ -89,4 +91,4 @@ test:
 %:
 	bin/naclports install $* $(BUILD_FLAGS)
 
-.PHONY: all run clean sdklibs sdklibs_list reallyclean test
+.PHONY: all run clean sdklibs sdklibs_list reallyclean check test

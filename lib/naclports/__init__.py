@@ -7,7 +7,6 @@ import shlex
 import shutil
 import subprocess
 import sys
-import tempfile
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))

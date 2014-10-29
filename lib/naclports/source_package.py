@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import urlparse
 
@@ -15,7 +16,7 @@ import naclports
 import package
 import package_index
 import sha1check
-from naclports import Log, Error, DisabledError, PkgFormatError
+from naclports import Log, Error, Trace, DisabledError, PkgFormatError
 
 MIRROR_URL = '%s%s/mirror' % (naclports.GS_URL, naclports.GS_BUCKET)
 CACHE_ROOT = os.path.join(naclports.OUT_DIR, 'cache')
@@ -38,6 +39,18 @@ def FormatTimeDelta(delta):
   if delta:
     rtn += '%.0fs' % delta
   return rtn
+
+
+def ExtractArchive(archive, destination):
+  ext = os.path.splitext(archive)[1]
+  if ext in ('.gz', '.tgz', '.bz2'):
+    cmd = ['tar', 'xf', archive, '-C', destination]
+  elif ext in ('.zip',):
+    cmd = ['unzip', '-q', '-d', destination, archive]
+  else:
+    raise Error('unhandled extension: %s' % ext)
+  Trace(cmd)
+  subprocess.check_call(cmd)
 
 
 class SourcePackage(package.Package):
@@ -68,8 +81,8 @@ class SourcePackage(package.Package):
     return basename
 
   def GetBuildLocation(self):
-    package_dir = self.CACHE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
-    return os.path.join(BUILD_ROOT, self.NAME, package_dir)
+    package_dir = self.ARCHIVE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
+    return os.path.join(naclports.BUILD_ROOT, self.NAME, package_dir)
 
   def GetArchiveFilename(self):
     if self.URL_FILENAME:
@@ -250,7 +263,7 @@ class SourcePackage(package.Package):
       shutil.rmtree(stamp_dir)
 
   def Extract(self):
-    self.ExtractInto(os.path.join(BUILD_ROOT, self.NAME))
+    self.ExtractInto(os.path.join(naclports.BUILD_ROOT, self.NAME))
 
   def ExtractInto(self, output_path):
     """Extract the package archive into the given location.
@@ -271,18 +284,13 @@ class SourcePackage(package.Package):
       return
 
     tmp_output_path = tempfile.mkdtemp(dir=naclports.OUT_DIR)
+    Log("Extracting '%s'" % self.NAME)
     try:
-      ext = os.path.splitext(archive)[1]
-      if ext in ('.gz', '.tgz', '.bz2'):
-        cmd = ['tar', 'xf', archive, '-C', tmp_output_path]
-      elif ext in ('.zip',):
-        cmd = ['unzip', '-q', '-d', tmp_output_path, archive]
-      else:
-        raise Error('unhandled extension: %s' % ext)
-      Log("Extracting '%s'" % self.NAME)
-      Trace(cmd)
-      subprocess.check_call(cmd)
+      ExtractArchive(archive, tmp_output_path)
       src = os.path.join(tmp_output_path, new_foldername)
+      if not os.path.isdir(src):
+        raise Error('Archive contents not found: %s' % src)
+      Trace("renaming '%s' -> '%s'" % (src, dest))
       os.rename(src, dest)
     finally:
       shutil.rmtree(tmp_output_path)
