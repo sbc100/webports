@@ -76,7 +76,7 @@ def main(args):
 
   if not os.path.exists(options.configure):
     sys.stderr.write('configure script not found: %s\n' % options.configure)
-    sys.exit(1)
+    return 1
 
   # Read configure
   with open(options.configure) as input_file:
@@ -90,14 +90,14 @@ def main(args):
   for i, (pattern, replacement) in enumerate(CONFIGURE_PATCHS):
     if not re.search(pattern, filedata):
       sys.stderr.write('Failed to find patch %s location in configure '
-                       'script: %s\n' % (i, configure))
+                       'script: %s\n' % (i, options.configure))
       continue
 
     # Apply patch
     filedata = re.sub(pattern, replacement, filedata)
 
   # Overwrite input file with patched file data
-  with open(configure, 'w') as output_file:
+  with open(options.configure, 'w') as output_file:
     output_file.write(filedata)
 
   return 0
