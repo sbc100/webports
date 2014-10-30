@@ -1,20 +1,23 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Autoconf builds lots of small executables.
-# This wreaks havock with pnacl's slow -O2 build time.
-# Additionally linking nacl_io + ppapi_simple slows things down even more.
-#
-# This script is injected for CC to speed up configure by:
-# - When configuring:
-#   - Drop -O2 and -O3
-#   - Add -O0
-#   - Drop nacl_spawn + nacl_io and their dependencies.
-# - When configuring and using -Dmain=nacl_main + -lcli_main, drop them.
+"""Autoconf builds lots of small executables.
+This wreaks havock with pnacl's slow -O2 build time.
+Additionally linking nacl_io + ppapi_simple slows things down even more.
 
-# Determine if we're configuring and if -Dmain=nacl_main is passed.
+This script is injected for CC to speed up configure by:
+- When configuring:
+  - Drop -O2 and -O3
+  - Add -O0
+  - Drop nacl_spawn + nacl_io and their dependencies.
+- When configuring and using -Dmain=nacl_main + -lcli_main, drop them.
+
+Determine if we're configuring and if -Dmain=nacl_main is passed.
+"""
+
+from __future__ import print_function
 
 import subprocess
 import sys

@@ -2,13 +2,17 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Script to patch a configure script in-place such that the libtool
 dynamic library detection works for NaCl.
 
 Once this patch makes it into upstream libtool it should eventually
 be possible to remove this completely.
 """
-import optparse
+
+from __future__ import print_function
+
+import argparse
 import os
 import re
 import sys
@@ -65,19 +69,17 @@ nacl)
 ]
 
 def main(args):
-  usage = 'usage: %prog [options] <configure_script>'
-  parser = optparse.OptionParser(usage=usage, description=__doc__)
-  args = parser.parse_args(args)[1]
-  if not args:
-    parser.error('no configure script specified')
-  configure = args[0]
+  parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument('configure', metavar='CONFIGURE_SCRIPT',
+                      help='configure script to patch')
+  options = parser.parse_args(args)
 
-  if not os.path.exists(configure):
-    sys.stderr.write('configure script not found: %s\n' % configure)
+  if not os.path.exists(options.configure):
+    sys.stderr.write('configure script not found: %s\n' % options.configure)
     sys.exit(1)
 
   # Read configure
-  with open(configure) as input_file:
+  with open(options.configure) as input_file:
     filedata = input_file.read()
 
   if 'Patched by naclports' in filedata:

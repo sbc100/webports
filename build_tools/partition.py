@@ -49,8 +49,10 @@ Example use:
     $ ./partition.py -t <index> -n <number_of_shards>
 """
 
+from __future__ import print_function
+
+import argparse
 import json
-import optparse
 import os
 import subprocess
 import sys
@@ -60,20 +62,15 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 TOOLCHAINS = ('bionic', 'newlib', 'glibc', 'pnacl')
 
-verbose = False
 sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
 import naclports
 import naclports.source_package
+from naclports import Trace
 
 
 class Error(naclports.Error):
   pass
-
-
-def Trace(msg):
-  if verbose:
-    sys.stderr.write(msg + '\n')
 
 
 def GetBuildOrder(projects):
@@ -297,7 +294,7 @@ def FixupCanned(partitions):
 
 def PrintCanned(index, parts):
   canned = GetCanned(index, parts)
-  print ' '.join(canned)
+  print(' '.join(canned))
 
 
 def GetCanned(index, parts):
@@ -309,36 +306,32 @@ def GetCanned(index, parts):
 
 
 def main(args):
-  parser = optparse.OptionParser()
-  parser.add_option('--check', action='store_true',
-                    help='check canned partition information is up-to-date.')
-  parser.add_option('-v', '--verbose', action='store_true',
-                    help='Output extra information.')
-  parser.add_option('-t', '--print-canned', type='int',
-                    help='Print a the canned partition list and exit.')
-  parser.add_option('-b', '--bot-prefix', help='builder name prefix.',
-                    default='linux-newlib-')
-  parser.add_option('-n', '--num-bots',
-                    help='Number of builders on the waterfall to collect '
-                    'data from or to print a canned partition for.',
-                    type='int', default=3)
-  parser.add_option('-p', '--num-parts',
-                    help='Number of parts to partition things into '
-                    '(this will differ from --num-bots when changing the '
-                    'number of shards).',
-                    type='int', default=3)
-  parser.add_option('--build-number', help='Builder number to look at for '
-                    'historical data on build times.', type='int', default=-1)
-  options, args = parser.parse_args(args)
-  if len(args):
-    parser.error("Script does not take any arguments (see --help)");
-
-  global verbose
-  verbose = options.verbose
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--check', action='store_true',
+                      help='check canned partition information is up-to-date.')
+  parser.add_argument('-v', '--verbose', action='store_true',
+                      help='Output extra information.')
+  parser.add_argument('-t', '--print-canned', type=int,
+                      help='Print a the canned partition list and exit.')
+  parser.add_argument('-b', '--bot-prefix', help='builder name prefix.',
+                      default='linux-newlib-')
+  parser.add_argument('-n', '--num-bots',
+                      help='Number of builders on the waterfall to collect '
+                      'data from or to print a canned partition for.',
+                      type=int, default=3)
+  parser.add_argument('-p', '--num-parts',
+                      help='Number of parts to partition things into '
+                      '(this will differ from --num-bots when changing the '
+                      'number of shards).',
+                      type=int, default=3)
+  parser.add_argument('--build-number', help='Builder number to look at for '
+                      'historical data on build times.', type=int, default=-1)
+  options = parser.parse_args(args)
+  naclports.verbose = options.verbose
 
   if options.check:
     for num_bots in xrange(1, 6):
-      print 'Checking partioning with %d bot(s)' % (num_bots)
+      print('Checking partioning with %d bot(s)' % (num_bots))
       # GetCanned with raise an Error if the canned partition information is
       # bad, which in turn will trigger a non-zero return from this script.
       GetCanned(0, num_bots)
@@ -357,15 +350,15 @@ def main(args):
 
   parts = Partition(projects, options.num_parts)
   for i, project_times in enumerate(parts):
-    print 'builder %d (total: %d)' % (i, project_times.total_time)
+    print('builder %d (total: %d)' % (i, project_times.total_time))
     project_names = project_times.TopologicallySortedProjectNames(projects)
-    print '  %s' % '\n  '.join(project_names)
+    print('  %s' % '\n  '.join(project_names))
 
   times = list(sorted(part.total_time for part in parts))
   difference = 0
   for i in range(1, len(times)):
     difference += times[i] - times[i - 1]
-  print 'Difference between total time of builders: %d' % difference
+  print('Difference between total time of builders: %d' % difference)
 
 
 if __name__ == '__main__':

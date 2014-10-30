@@ -2,6 +2,7 @@
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Scan online binary packages to produce new package index.
 
 This script is indended to be run periodically and the
@@ -9,9 +10,11 @@ results checked into source control.  This script depends on
 gsutil being installed.
 """
 
+from __future__ import print_function
+
+import argparse
 import collections
 import hashlib
-import optparse
 import os
 import subprocess
 import sys
@@ -23,9 +26,7 @@ import naclports
 import naclports.package
 import naclports.package_index
 
-
-def Log(msg):
-  sys.stderr.write(msg + '\n')
+from naclports import Log, Trace
 
 
 def FormatSize(num_bytes):
@@ -112,50 +113,50 @@ def DownloadFiles(files, check_hashes=True):
 
 
 def main(args):
-  usage = 'Usage: %proc [options] <revision>'
-  parser = optparse.OptionParser(description=__doc__, usage=usage)
-  parser.add_option('-v', '--verbose', action='store_true',
-                    help='Output extra information.')
-  parser.add_option('-l', '--cache-listing', action='store_true',
-                    help='Cached output of gsutil -le (for testing).')
-  parser.add_option('--skip-md5', action='store_true',
-                    help='Assume on-disk files are up-to-date (for testing).')
-  options, args = parser.parse_args(args)
-  if options.verbose:
+  parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument('revision', metavar='REVISION',
+                      help='naclports revision to to scan for.')
+  parser.add_argument('-v', '--verbose', action='store_true',
+                      help='Output extra information.')
+  parser.add_argument('-l', '--cache-listing', action='store_true',
+                      help='Cached output of gsutil -le (for testing).')
+  parser.add_argument('--skip-md5', action='store_true',
+                      help='Assume on-disk files are up-to-date (for testing).')
+  args = parser.parse_args(args)
+  if args.verbose:
     naclports.verbose = True
 
-  if len(args) != 1:
-    parser.error('Expected exactly one argument. See --help.')
-
-  ports_revision = args[0]
   sdk_version = naclports.GetSDKVersion()
   Log('Scanning packages built for pepper_%s at revsion %s' %
-      (sdk_version, ports_revision))
+      (sdk_version, args.revision))
   base_path = '%s/builds/pepper_%s/%s/packages' % (naclports.GS_BUCKET,
                                                    sdk_version,
-                                                   ports_revision)
+                                                   args.revision)
   gs_url = 'gs://' + base_path
   listing_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'listing.txt')
-  if options.cache_listing and os.path.exists(listing_file):
+  if args.cache_listing and os.path.exists(listing_file):
     Log('Using pre-cached gs listing: %s' % listing_file)
     with open(listing_file) as f:
       listing = f.read()
   else:
+    Log("Searching for packages at: %s" % gs_url)
+    cmd = ['gsutil', 'ls', '-le', gs_url]
+    Trace("Running: %s" % str(cmd))
     try:
-      listing = subprocess.check_output(['gsutil', 'ls', '-le', gs_url])
+      listing = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
       naclports.Error(e)
       return 1
 
   all_files = ParseGsUtilLs(listing)
-  if options.cache_listing and not os.path.exists(listing_file):
+  if args.cache_listing and not os.path.exists(listing_file):
     with open(listing_file, 'w') as f:
       f.write(listing)
 
   Log('Found %d packages [%s]' % (len(all_files),
                                   FormatSize(sum(f.size for f in all_files))))
 
-  binaries = DownloadFiles(all_files, not options.skip_md5)
+  binaries = DownloadFiles(all_files, not args.skip_md5)
   index_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
   Log('Generating %s' % index_file)
   naclports.package_index.WriteIndex(index_file, binaries)

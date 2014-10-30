@@ -4,11 +4,11 @@
 
 """Test harness for testing chrome apps / extensions."""
 
+import argparse
 import cStringIO
 import contextlib
 import hashlib
 import logging
-import optparse
 import os
 import shutil
 import subprocess
@@ -507,53 +507,52 @@ def Main(argv):
           See --help.
   NOTE: Ends the process with sys.exit(1) on failure.
   """
-  parser = optparse.OptionParser(usage='%prog [options] <test_path>',
-                                 description=__doc__)
-  parser.add_option(
-      '-x', '--xvfb', default=False, action='store_true',
+  parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument(
+      'start_path', metavar='START_PATH',
+      help='location in which to run tests')
+  parser.add_argument(
+      '-x', '--xvfb', action='store_true',
       help='Run Chrome thru xvfb on Linux.')
-  parser.add_option(
+  parser.add_argument(
       '-a', '--arch', default='i686',
       help='Chrome architecture: i686 / x86_64.')
-  parser.add_option(
+  parser.add_argument(
       '-v', '--verbose', default=0, action='count',
       help='Emit verbose output, use twice for more.')
-  parser.add_option(
-      '-t', '--timeout', default=30, type='float',
+  parser.add_argument(
+      '-t', '--timeout', default=30, type=float,
       help='Timeout for all tests (in seconds).')
-  parser.add_option(
+  parser.add_argument(
       '-C', '--chdir', default=[], action='append',
       help='Add a root directory.')
-  parser.add_option(
+  parser.add_argument(
       '--load-extension', default=[], action='append',
       help='Add an extension to load on start.')
-  parser.add_option(
+  parser.add_argument(
       '--load-and-launch-app', default=[], action='append',
       help='Add an app to load on start.')
-  parser.add_option(
+  parser.add_argument(
       '--enable-nacl', default=False, action='store_true',
       help='Enable NaCl generally.')
-  parser.add_option(
+  parser.add_argument(
       '--enable-nacl-debug', default=False, action='store_true',
       help='Enable NaCl debugging.')
-  parser.add_option(
+  parser.add_argument(
       '-f', '--filter', default='*',
       help='Filter on tests.')
-  parser.add_option(
+  parser.add_argument(
       '-p', '--param', default=[], action='append',
       help='Add a parameter to the end of the url, = separated.')
-  options, args = parser.parse_args(argv)
-  if len(args) == 1:
-    start_path = args[0]
-    if options.param:
-      params = {}
-      for param in options.param:
-        key, value = param.split('=', 1)
-        params[key] = value
-      start_path += '?' + urllib.urlencode(params)
-  else:
-    parser.print_help()
-    sys.exit(1)
+  options = parser.parse_args(argv)
+
+  if options.param:
+    params = {}
+    for param in options.param:
+      key, value = param.split('=', 1)
+      params[key] = value
+    options.start_path += '?' + urllib.urlencode(params)
+
   if options.verbose > 1:
     logging.getLogger().setLevel(logging.DEBUG)
   elif options.verbose > 0:
@@ -586,5 +585,5 @@ def Main(argv):
       enable_nacl_debug=options.enable_nacl_debug,
       load_extensions=options.load_extension,
       load_apps=options.load_and_launch_app,
-      start_path=start_path)
+      start_path=options.start_path)
   sys.exit(0)

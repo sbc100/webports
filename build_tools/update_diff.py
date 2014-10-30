@@ -10,6 +10,8 @@ Changesin out/build/<port> can be worked on incrementally.
 Then when ready for pickling as a patch, this script is run.
 """
 
+from __future__ import print_function
+
 import os
 import re
 import subprocess

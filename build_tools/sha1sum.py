@@ -14,6 +14,8 @@ Usage:
   SHA1=da39a3ee5e6b4b0d3255bfef95601890afd80709
 """
 
+from __future__ import print_function
+
 import hashlib
 import os
 import string
@@ -36,7 +38,7 @@ def main(args):
     filehash = h.hexdigest()
     f.close()
 
-  print "SHA1=%s" % filehash.lower()
+  print("SHA1=%s" % filehash.lower())
 
 if __name__ == '__main__':
   # all files hashed with success

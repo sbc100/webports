@@ -13,8 +13,10 @@ On Windows this script also required access to the cygtar python
 module which gets included by the gclient DEPS.
 """
 
+from __future__ import print_function
+
+import argparse
 import glob
-import optparse
 import os
 import re
 import shutil
@@ -22,7 +24,6 @@ import stat
 import subprocess
 import sys
 import tarfile
-import tempfile
 import time
 import urllib
 
@@ -97,7 +98,7 @@ def DetermineSDKURL(flavor, base_url, version):
     return [os.path.basename(os.path.normpath(e)) for e in elements]
 
   if version == 'latest':
-    print 'Looking for latest SDK upload...'
+    print('Looking for latest SDK upload...')
     # List the top level of the nacl_sdk folder
     versions = GSList('')
     # Find all trunk revision
@@ -124,7 +125,7 @@ def Untar(bz2_filename):
   if sys.platform == 'win32':
     tar_file = None
     try:
-      print 'Unpacking tarball...'
+      print('Unpacking tarball...')
       tar_file = cygtar.CygTar(bz2_filename, 'r:bz2')
       tar_file.Extract()
     except Exception, err:
@@ -155,7 +156,7 @@ def DownloadAndInstallSDK(url):
   if sys.platform in ['win32', 'cygwin']:
     cygbin = os.path.join(FindCygwin(), 'bin')
 
-  print 'Downloading "%s" to "%s"...' % (url, bz2_filename)
+  print('Downloading "%s" to "%s"...' % (url, bz2_filename))
   sys.stdout.flush()
 
   # Download it.
@@ -179,7 +180,7 @@ def DownloadAndInstallSDK(url):
 
   # Drop old versions.
   if os.path.exists(TARGET_DIR):
-    print 'Cleaning up old SDK...'
+    print('Cleaning up old SDK...')
     if sys.platform in ['win32', 'cygwin']:
       cmd = [os.path.join(cygbin, 'bin', 'rm.exe'), '-rf']
     else:
@@ -188,7 +189,7 @@ def DownloadAndInstallSDK(url):
     returncode = subprocess.call(cmd)
     assert returncode == 0
 
-  print 'Renaming toolchain "%s" -> "%s"' % (actual_dir, TARGET_DIR)
+  print('Renaming toolchain "%s" -> "%s"' % (actual_dir, TARGET_DIR))
   os.rename(actual_dir, TARGET_DIR)
 
   if sys.platform in ['win32', 'cygwin']:
@@ -197,7 +198,7 @@ def DownloadAndInstallSDK(url):
   # Clean up: remove the sdk bz2.
   os.remove(bz2_filename)
 
-  print 'Install complete.'
+  print('Install complete.')
 
 
 PLATFORM_COLLAPSE = {
@@ -209,14 +210,12 @@ PLATFORM_COLLAPSE = {
 }
 
 def main(argv):
-  parser = optparse.OptionParser(description=__doc__)
-  parser.add_option('-v', '--version', default='latest',
+  parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument('-v', '--version', default='latest',
       help='which version of the SDK to download')
-  parser.add_option('--bionic', action='store_true',
+  parser.add_argument('--bionic', action='store_true',
       help='download bionic version of the SDK (linux only).')
-  options, args = parser.parse_args(argv)
-  if args:
-    parser.error('invalid argument')
+  options = parser.parse_args(argv)
 
   if options.bionic:
     flavor = 'naclsdk_bionic'
@@ -233,9 +232,9 @@ def main(argv):
   url, version = DetermineSDKURL(flavor,
                                  base_url=GS_URL_BASE,
                                  version=options.version)
-  print 'SDK URL is "%s"' % url
+  print('SDK URL is "%s"' % url)
   if version == existing_version:
-    print 'SDK revision %s is already downlaoded' % version
+    print('SDK revision %s is already downlaoded' % version)
     return 0
 
 

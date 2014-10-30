@@ -2,6 +2,7 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Creates simple terminal for a NaCl module.
 
 This script is designed to make the process of porting terminal based
@@ -9,8 +10,10 @@ Native Client executables simple by generating boilerplate .html and .js
 files for a given Native Client module (.nmf).
 """
 
+from __future__ import print_function
+
+import argparse
 import logging
-import optparse
 import os
 import sys
 
@@ -88,30 +91,22 @@ def CreateTerm(filename, name=None, include=None):
     outfile.write(JS_TEMPLATE % args)
 
 
-def main():
-  parser = optparse.OptionParser(
-      usage='usage: %prog [-n] [-v] .nmf',
-      description=__doc__)
-  parser.add_option('-n', '--name',
-                    help='name of the application')
-  parser.add_option('-v', '--verbose',
-                    action='store_true', dest='verbose', default=False,
-                    help='be more verbose')
-  parser.add_option('-i', '--include', action='append', default=[],
-                    help='include a JavaScript file in the generated HTML')
+def main(args):
+  parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument('nmf', help='nmf file to load')
+  parser.add_argument('-n', '--name', help='name of the application')
+  parser.add_argument('-v', '--verbose', action='store_true',
+                      help='be more verbose')
+  parser.add_argument('-i', '--include', action='append', default=[],
+                      help='include a JavaScript file in the generated HTML')
 
-  options, args = parser.parse_args()
-
-  if not args:
-    parser.error('no input file specified')
-  if len(args) > 1:
-    parser.error('more than one input file specified')
-
+  options = parser.parse_args(args)
   if not options.verbose:
     logging.disable(logging.INFO)
 
-  CreateTerm(args[0], options.name, options.include)
+  CreateTerm(options.nmf, options.name, options.include)
+  return 0
 
 
 if __name__ == '__main__':
-  main()
+  sys.exit(main(sys.argv[1:]))
