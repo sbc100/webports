@@ -48,10 +48,9 @@ def CmdInfo(config, options, args):
   if len(args) != 1:
     raise Error('info command takes a single package name')
   package_name = args[0]
-  info_file = naclports.GetInstallStamp(package_name, config)
+  pkg = naclports.package.CreateInstalledPackage(package_name, config)
+  info_file = pkg.GetInstallStamp()
   print('Install receipt: %s' % info_file)
-  if not os.path.exists(info_file):
-    raise Error('package not installed: %s [%s]' % (package_name, config))
   with open(info_file) as f:
     sys.stdout.write(f.read())
 
@@ -100,7 +99,7 @@ def CmdPkgInstall(package, options):
 
 def CmdPkgUninstall(package, options):
   """Uninstall package(s)"""
-  package.Uninstall(options.all)
+  package.Uninstall()
 
 
 def CmdPkgClean(package, options):

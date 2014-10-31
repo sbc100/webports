@@ -21,7 +21,15 @@ SRC_DIR = os.path.dirname(SCRIPT_DIR)
 MOCK_DIR = os.path.join(SRC_DIR, 'third_party', 'mock')
 sys.path.append(MOCK_DIR)
 
-from mock import Mock, patch
+from mock import MagicMock, Mock, patch, call
+
+
+def MockFileObject(contents):
+  file_mock = Mock(name="file_mock", spec=file)
+  file_mock.read.return_value = contents
+  file_mock.__enter__ = lambda s: s
+  file_mock.__exit__ = Mock(return_value=False)
+  return file_mock
 
 
 class TestConfiguration(unittest.TestCase):
@@ -31,10 +39,37 @@ class TestConfiguration(unittest.TestCase):
     self.assertEqual(config.arch, 'x86_64')
     self.assertEqual(config.debug, False)
     self.assertEqual(config.config_name, 'release')
+    self.assertEqual(config.libc, 'newlib')
 
-  def testConfigString(self):
+  def testDefaultArch(self):
+    # We default to x86_64 except in the special case where the build
+    # machine is i686 hardware, in which case we default to i686.
+    with patch('platform.machine', Mock(return_value='i686')):
+      self.assertEqual(Configuration().arch, 'i686')
+    with patch('platform.machine', Mock(return_value='dummy')):
+      self.assertEqual(Configuration().arch, 'x86_64')
+
+  def testEnvironmentVariables(self):
+    with patch.dict('os.environ', {'NACL_ARCH': 'arm'}):
+      self.assertEqual(Configuration().arch, 'arm')
+
+    with patch.dict('os.environ', {'NACL_DEBUG': '1'}):
+      self.assertEqual(Configuration().debug, True)
+
+  def testDefaultToolchain(self):
+    self.assertEqual(Configuration(arch='pnacl').toolchain, 'pnacl')
+    self.assertEqual(Configuration(arch='arm').libc, 'newlib')
+
+  def testDefaultLibc(self):
+    self.assertEqual(Configuration(toolchain='pnacl').libc, 'newlib')
+    self.assertEqual(Configuration(toolchain='newlib').libc, 'newlib')
+    self.assertEqual(Configuration(toolchain='glibc').libc, 'glibc')
+    self.assertEqual(Configuration(toolchain='bionic').libc, 'bionic')
+
+  def testConfigStringForm(self):
     config = Configuration('arm', 'newlib', True)
     self.assertEqual(str(config), 'arm/newlib/debug')
+    self.assertRegexpMatches(repr(config), '<Configuration .*>')
 
   def testConfigEquality(self):
     config1 = Configuration('arm', 'newlib', True)
@@ -42,6 +77,11 @@ class TestConfiguration(unittest.TestCase):
     config3 = Configuration('arm', 'newlib', False)
     self.assertEqual(config1, config2)
     self.assertNotEqual(config1, config3)
+
+  def testInvalidArch(self):
+    expected_error = 'Invalid arch: not_arch'
+    with self.assertRaisesRegexp(naclports.Error, expected_error):
+      config = Configuration('not_arch')
 
 test_index = '''\
 NAME=agg-demo
@@ -121,6 +161,39 @@ class TestPackageIndex(unittest.TestCase):
     arm_config = Configuration('arm', 'newlib', False)
     index.Download('agg-demo', arm_config)
     self.assertEqual(download_file_mock.call_count, 1)
+
+test_info = '''\
+NAME=foo
+VERSION=bar
+BUILD_ARCH=arm
+BUILD_CONFIG=debbug
+BUILD_TOOLCHAIN=newlib
+BUILD_SDK_VERSION=123
+BUILD_NACLPORTS_REVISION=456
+'''
+
+class TestInstalledPackage(unittest.TestCase):
+  def CreateMockInstalledPackage(self):
+    file_mock = MockFileObject(test_info)
+    with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
+      return naclports.package.InstalledPackage('dummy_file')
+
+  @patch('naclports.package.Log', Mock())
+  @patch('naclports.GetInstallRoot', Mock(return_value='mock_root'))
+  @patch('naclports.package.InstalledPackage.RemoveFile')
+  @patch('os.path.lexists', Mock(return_value=True))
+  def testUninstall(self, remove_patch):
+    pkg = self.CreateMockInstalledPackage()
+    pkg.Files = Mock(return_value=['f1', 'f2'])
+    pkg.Uninstall()
+
+    # Assert that exactly 4 files we removed using InstalledPackage.RemoveFile
+    calls = [call('mock_root/var/lib/npkg/foo.info'),
+             call('mock_root/f1'),
+             call('mock_root/f2'),
+             call('mock_root/var/lib/npkg/foo.list')]
+    remove_patch.assert_has_calls(calls)
+
 
 class TestParsePkgInfo(unittest.TestCase):
   def testValidKeys(self):
@@ -248,7 +321,31 @@ class TestSourcePackage(unittest.TestCase):
 
 
 class TestCommands(unittest.TestCase):
-  def testContentsCommands(self):
+  def testListCommand(self):
+    config = Configuration()
+    options = Mock()
+    pkg = Mock(NAME='foo', VERSION='bar')
+    with patch('naclports.package.InstalledPackageIterator',
+               Mock(return_value=[pkg])):
+      with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
+        naclports.__main__.CmdList(config, options, [])
+        lines = stdout.getvalue().splitlines()
+        self.assertEqual(len(lines), 1)
+        self.assertRegexpMatches(lines[0], "^foo\\s+bar$")
+
+  @patch('naclports.package.CreateInstalledPackage', Mock())
+  def testInfoCommand(self):
+    config = Configuration()
+    options = Mock()
+    file_mock = MockFileObject('FOO=bar\n')
+    pkg = Mock(NAME='foo', VERSION='bar')
+
+    with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
+      with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
+        naclports.__main__.CmdInfo(config, options, ['foo'])
+        self.assertRegexpMatches(stdout.getvalue(), "FOO=bar")
+
+  def testContentsCommand(self):
     file_list = ['foo', 'bar']
     install_root = '/testpath'
 
@@ -283,6 +380,15 @@ class TestMain(unittest.TestCase):
   def testCleanAll(self):
     config = Configuration()
     naclports.__main__.CleanAll(config)
+
+  @patch('naclports.__main__.run_main',
+         Mock(side_effect=naclports.Error('oops')))
+  def testErrorReport(self):
+    # Verify that exceptions of the type naclports.Error are printed
+    # to stderr and result in a return code of 1
+    with patch('sys.stderr', new_callable=StringIO.StringIO) as stderr:
+      self.assertEqual(naclports.__main__.main(None), 1)
+    self.assertRegexpMatches(stderr.getvalue(), '^naclports: oops')
 
   @patch('naclports.__main__.CleanAll')
   def testMainCleanAll(self, clean_all_mock):

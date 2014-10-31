@@ -82,7 +82,7 @@ def DownloadFiles(files, check_hashes=True):
   """
   files_to_download = []
   filenames = []
-  download_dir = os.path.join(naclports.package.PACKAGES_ROOT, 'prebuilt')
+  download_dir = naclports.package_index.PREBUILT_ROOT
   if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 

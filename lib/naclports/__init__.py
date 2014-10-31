@@ -121,6 +121,7 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
     if required_key not in rtn:
       raise PkgFormatError("Required key '%s' missing from info file: '%s'" %
                            (required_key, filename))
+
   return rtn
 
 

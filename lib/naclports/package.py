@@ -100,12 +100,7 @@ class InstalledPackage(Package):
                                               self.BUILD_TOOLCHAIN,
                                               self.BUILD_CONFIG == 'debug')
 
-  def Uninstall(self, ignore_missing=False):
-    if not os.path.exists(self.GetInstallStamp()):
-      if ignore_missing:
-        return
-      raise Error('Package not installed: %s' % self.InfoString())
-
+  def Uninstall(self):
     Log("Uninstalling %s" % self.InfoString())
     self.DoUninstall()
 
@@ -115,25 +110,23 @@ class InstalledPackage(Package):
       for line in f:
         yield line.strip()
 
+  def RemoveFile(self, filename):
+    os.remove(filename)
+    RemoveEmptyDirs(os.path.dirname(filename))
+
   def DoUninstall(self):
-    os.remove(self.GetInstallStamp())
-    file_list = self.GetListFile()
-    if not os.path.exists(file_list):
-      Trace('No files to uninstall')
-      return
+    self.RemoveFile(self.GetInstallStamp())
 
     root = naclports.GetInstallRoot(self.config)
-    with open(file_list) as f:
-      for line in f:
-        filename = os.path.join(root, line.strip())
-        if not os.path.lexists(filename):
-          Warn('File not found while uninstalling: %s' % filename)
-          continue
-        Trace('rm %s' % filename)
-        os.remove(filename)
-        RemoveEmptyDirs(os.path.dirname(filename))
+    for filename in self.Files():
+      filename = os.path.join(root, filename)
+      if not os.path.lexists(filename):
+        Warn('File not found while uninstalling: %s' % filename)
+        continue
+      Trace('rm %s' % filename)
+      self.RemoveFile(filename)
 
-    os.remove(file_list)
+    self.RemoveFile(self.GetListFile())
 
 
 def InstalledPackageIterator(config):

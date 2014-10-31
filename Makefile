@@ -15,7 +15,7 @@ SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libogg
 SDK_LIBS += libtheora libvorbis libwebp libxml2 tinyxml openal-soft freealut
 
 COVERAGE = coverage
-COVERAGE_ARGS = --fail-under=52
+COVERAGE_ARGS = --fail-under=57
 COVERAGE_VER := $(shell $(COVERAGE) --version 2>/dev/null)
 
 ifndef COVERAGE_VER
