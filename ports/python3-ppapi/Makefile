@@ -6,7 +6,8 @@ VALID_TOOLCHAINS := glibc newlib pnacl
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = python
-LIBS = python3.4m readline ncurses tar ppapi_simple nacl_io ppapi_cpp ppapi
+LIBS = python3.4m readline ncurses bz2 z tar
+LIBS += ppapi_simple nacl_io ppapi_cpp ppapi
 NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 ifeq ($(TOOLCHAIN),glibc)

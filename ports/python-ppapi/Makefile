@@ -50,7 +50,7 @@ $(eval $(call NMF_RULE,$(TARGET),))
 
 ASSETS = lib/python2.7
 ifeq ($(TOOLCHAIN),glibc)
-ASSETS += lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5
+ASSETS += lib/libz.so.1 lib/libreadline.so lib/libncurses.so.5 lib/libbz2.so.1.0
 endif
 
 CHROMEAPPS = $(NACL_SRC)/third_party/libapps/

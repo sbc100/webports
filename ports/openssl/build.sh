@@ -52,6 +52,7 @@ HackStepForNewlib() {
 
 BuildStep() {
   LogExecute make clean
+  Banner "Building openssl"
   DefaultBuildStep
 }
 
