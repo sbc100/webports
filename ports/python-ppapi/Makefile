@@ -19,6 +19,11 @@ endif
 SOURCES = python.c
 INC_PATHS = $(NACLPORTS_INCLUDE)/python2.7
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/python/$(TOOLCHAIN)
+ifeq ($(TOOLCHAIN),pnacl)
+INSTALL_ARCH_DIR = $(INSTALL_DIR)/_platform_specific/all
+else
+INSTALL_ARCH_DIR = $(INSTALL_DIR)/_platform_specific/$(NACL_ARCH)
+endif
 
 ifeq ($(TOOLCHAIN),pnacl)
 EXEEXT=.pexe
@@ -59,6 +64,7 @@ HTERM = $(CHROMEAPPS)/hterm
 
 install-hterm:
 	mkdir -p $(INSTALL_DIR)
+	mkdir -p $(INSTALL_ARCH_DIR)
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(HTERM)/concat/hterm_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
 	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(HTERM)/concat/hterm.concat -o $(INSTALL_DIR)/hterm2.concat.js
 	chmod +w $(INSTALL_DIR)/hterm2.concat.js $(INSTALL_DIR)/hterm.concat.js
@@ -73,19 +79,20 @@ endif
 
 install: install-hterm
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
-	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar --exclude lib/python2.7/site-packages ${ASSETS}
-	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
-	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
-	cp $(OUTDIR)/python.nmf $(INSTALL_DIR)
+	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_ARCH_DIR)/pydata_$(NACL_ARCH).tar --exclude lib/python2.7/site-packages ${ASSETS}
+	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_ARCH_DIR)
+	rm -f $(INSTALL_ARCH_DIR)/*_unstripped_*$(EXEEXT)
+	cd $(INSTALL_DIR) && \
+	  python $(NACL_SDK_ROOT)/tools/create_nmf.py \
+	  _platform_specific/*/*$(EXEEXT) \
+	  -L $(OUTDIR)/lib32 -L $(OUTDIR)/lib64 \
+	  -s . -o python.nmf
 	cp index.html $(INSTALL_DIR)
 	cp python.js $(INSTALL_DIR)
 	cp background.js $(INSTALL_DIR)
 	cp icon_16.png $(INSTALL_DIR)
 	cp icon_48.png $(INSTALL_DIR)
 	cp icon_128.png $(INSTALL_DIR)
-ifeq ($(TOOLCHAIN),glibc)
-	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
-endif
 	cd $(INSTALL_DIR) && rm -f python.zip && zip -r python.zip .
 
 .PHONY: install-hterm

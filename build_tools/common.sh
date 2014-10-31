@@ -836,7 +836,7 @@ SetupSDKBuildSystem() {
   export NACL_PACKAGES_PUBLISH
   export NACL_SRC
   export NACLPORTS_INCLUDE
-  export NACLPORTS_REVISION=${FULL_REVISION}
+  export NACLPORTS_REVISION=${REVISION}
   export PKG_CONFIG_LIBDIR="${NACLPORTS_LIBDIR}/pkgconfig"
   export ENABLE_BIONIC=1
   # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.

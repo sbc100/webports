@@ -8,9 +8,11 @@
 
 LIB_DIR=lib32
 export PACKAGE_LIB_DIR=lib32
+export PACKAGE_ALT_LIB_DIR=_platform_specific/i686/lib32
 if [ ${NACL_ARCH} = "x86_64" ]; then
   LIB_DIR=lib
   export PACKAGE_LIB_DIR=lib64
+  export PACKAGE_ALT_LIB_DIR=_platform_specific/x86_64/lib64
 fi
 export NACL_SDK_ROOT=/mnt/html5/mingn
 export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
@@ -66,6 +68,11 @@ for package_dir in /mnt/html5/packages/*; do
   # Add package to the path and library path.
   export PATH=${PATH}:${package_inside}
   package_libs=${package_inside}/${PACKAGE_LIB_DIR}
+  if [ -d ${package_libs} ]; then
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+  fi
+  # Add optional platform specific library path.
+  package_libs=${package_inside}/${PACKAGE_ALT_LIB_DIR}
   if [ -d ${package_libs} ]; then
     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
   fi
