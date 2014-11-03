@@ -3,3 +3,4 @@ VERSION=2.6.0
 URL=https://protobuf.googlecode.com/svn/rc/protobuf-2.6.0.tar.gz
 LICENSE=BSD:COPYING.txt
 SHA1=ab00a2c85d73ab718dd37595b2ae1a8f530dc26e
+CONFLICTS=(protobuf25)
