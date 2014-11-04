@@ -10,7 +10,9 @@
   },
   "app": {
     "background": {
-      "scripts": ["background.js"]
+      "scripts": [
+        "background.js"
+      ]
     }
   },
   "platforms": [
@@ -25,10 +27,6 @@
     {
       "nacl_arch": "x86-64",
       "sub_package_path": "_platform_specific/x86_64/"
-    },
-    {
-      "nacl_arch": "all",
-      "sub_package_path": "_platform_specific/all/"
     }
   ],
   "permissions": [

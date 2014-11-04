@@ -74,7 +74,7 @@ install: install-hterm
 	mkdir -p $(INSTALL_DIR)
 	tar -h -c --exclude=*.pyc --exclude=__pycache__ -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python3.4 ${EXTRA_ASSETS}
 	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_DIR)
-	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
+	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/python.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
 	cp python.js $(INSTALL_DIR)

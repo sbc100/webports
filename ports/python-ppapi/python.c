@@ -16,7 +16,7 @@ extern int nacl_startup_untar(
 #elif defined __x86_64__
 #define DATA_FILE "_platform_specific/x86_64/pydata_x86_64.tar"
 #elif defined __pnacl__
-#define DATA_FILE "_platform_specific/all/pydata_pnacl.tar"
+#define DATA_FILE "pydata_pnacl.tar"
 #else
 #error "Unknown arch"
 #endif

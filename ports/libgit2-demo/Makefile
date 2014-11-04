@@ -52,7 +52,7 @@ $(eval $(call NMF_RULE,$(TARGET),))
 install:
 	mkdir -p $(INSTALL_DIR)
 	cp $(OUTDIR)/$(TARGET)*$(EXEEXT) $(INSTALL_DIR)
-	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
+	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/$(TARGET).nmf $(INSTALL_DIR)
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)

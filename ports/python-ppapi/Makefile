@@ -20,7 +20,7 @@ SOURCES = python.c
 INC_PATHS = $(NACLPORTS_INCLUDE)/python2.7
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/python/$(TOOLCHAIN)
 ifeq ($(TOOLCHAIN),pnacl)
-INSTALL_ARCH_DIR = $(INSTALL_DIR)/_platform_specific/all
+INSTALL_ARCH_DIR = $(INSTALL_DIR)
 else
 INSTALL_ARCH_DIR = $(INSTALL_DIR)/_platform_specific/$(NACL_ARCH)
 endif
@@ -81,10 +81,10 @@ install: install-hterm
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
 	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_ARCH_DIR)/pydata_$(NACL_ARCH).tar --exclude lib/python2.7/site-packages ${ASSETS}
 	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_ARCH_DIR)
-	rm -f $(INSTALL_ARCH_DIR)/*_unstripped_*$(EXEEXT)
+	rm -f $(INSTALL_ARCH_DIR)/*_unstripped*$(EXEEXT)
 	cd $(INSTALL_DIR) && \
 	  python $(NACL_SDK_ROOT)/tools/create_nmf.py \
-	  _platform_specific/*/*$(EXEEXT) \
+	  $(INSTALL_ARCH_DIR)/*$(EXEEXT) \
 	  -L $(OUTDIR)/lib32 -L $(OUTDIR)/lib64 \
 	  -s . -o python.nmf
 	cp index.html $(INSTALL_DIR)

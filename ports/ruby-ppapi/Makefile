@@ -87,7 +87,7 @@ ifeq ($(TOOLCHAIN),glibc)
 	tar -h -r -C ${NACL_PREFIX} -f $(DATA_ARCHIVE) ${EXTRA_LIBS}
 endif
 	cp $(OUTDIR)/ruby*$(EXEEXT) $(INSTALL_DIR)
-	rm -f $(INSTALL_DIR)/*_unstripped_*$(EXEEXT)
+	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/ruby.nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
 	cp ruby.js $(INSTALL_DIR)
