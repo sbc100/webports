@@ -319,6 +319,21 @@ class TestSourcePackage(unittest.TestCase):
       self.assertEqual(expected_result,
                        naclports.source_package.FormatTimeDelta(secs))
 
+  def testConflicts(self):
+    root = self.CreateTestPackage('foo', 'CONFLICTS=(bar)')
+    pkg = source_package.SourcePackage(root)
+
+    # with no other packages installed
+    with patch('naclports.IsInstalled', Mock(return_value=False)):
+      pkg.CheckInstallable()
+
+    # with all possible packages installed
+    with patch('naclports.IsInstalled') as is_installed:
+      is_installed.return_value = True
+      with self.assertRaises(naclports.source_package.PkgConflictError):
+        pkg.CheckInstallable()
+      is_installed.assert_called_once_with('bar', pkg.config)
+
 
 class TestCommands(unittest.TestCase):
   def testListCommand(self):

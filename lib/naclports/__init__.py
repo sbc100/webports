@@ -62,10 +62,6 @@ class DisabledError(Error):
   pass
 
 
-class PkgConflictError(Error):
-  pass
-
-
 def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
   """Parse the contents of the given file-object as a pkg_info file.
 

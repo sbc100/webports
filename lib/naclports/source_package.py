@@ -22,6 +22,10 @@ MIRROR_URL = '%s%s/mirror' % (naclports.GS_URL, naclports.GS_BUCKET)
 CACHE_ROOT = os.path.join(naclports.OUT_DIR, 'cache')
 
 
+class PkgConflictError(Error):
+  pass
+
+
 def FormatTimeDelta(delta):
   """Converts a duration in seconds to a human readable string.
 
