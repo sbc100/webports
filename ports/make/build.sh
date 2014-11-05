@@ -9,6 +9,7 @@ export LIBS+="${NACL_CLI_MAIN_LIB} \
 -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
+  export ac_cv_func_getrlimit=no
   NACLPORTS_CPPFLAGS+=" -D_POSIX_VERSION"
 fi
 

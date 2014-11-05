@@ -68,3 +68,17 @@ index 9bbc88b..c3df515 100644
  #ifndef TCL_LOCAL_APPINIT
  #define TCL_LOCAL_APPINIT Tcl_AppInit
  #endif
+diff --git a/unix/tclUnixCompat.c b/unix/tclUnixCompat.c
+index 2a68f7f..2afd53f 100644
+--- a/unix/tclUnixCompat.c
++++ b/unix/tclUnixCompat.c
+@@ -99,7 +99,8 @@ static Tcl_Mutex compatLock;
+ #undef NEED_COPYPWD
+ #undef NEED_COPYSTRING
+ 
+-#if !defined(HAVE_GETGRNAM_R_5) && !defined(HAVE_GETGRNAM_R_4)
++#if (!defined(HAVE_GETGRNAM_R_5) && !defined(HAVE_GETGRNAM_R_4)) \
++  || (!defined(HAVE_GETGRGID_R_5) && !defined(HAVE_GETGRGID_R_4))
+ #define NEED_COPYGRP 1
+ static int		CopyGrp(struct group *tgtPtr, char *buf, int buflen);
+ #endif

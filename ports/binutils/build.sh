@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+export ac_cv_func_getrlimit=no
+
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
   -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 EXTRA_CONFIGURE_ARGS="\

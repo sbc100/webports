@@ -139,9 +139,6 @@ struct in6_addr {
 /*
  * Socket address for IPv6
  */
-#ifndef _XOPEN_SOURCE
-#define SIN6_LEN
-#endif
 struct sockaddr_in6 {
 	uint8_t	sin6_family;	/* AF_INET6 (sa_family_t) */
 	uint16_t	sin6_port;	/* Transport layer port # (in_port_t)*/

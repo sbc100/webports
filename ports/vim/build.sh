@@ -23,6 +23,7 @@ ConfigureStep() {
   export vim_cv_getcwd_broken=no
   export vim_cv_stat_ignores_slash=no
   export vim_cv_memmove_handles_overlap=yes
+  export ac_cv_func_getrlimit=no
   if [ "${NACL_DEBUG}" == "1" ]; then
     export STRIP=echo
   else

@@ -219,6 +219,9 @@ builder 3 (total: 7918)
   libxext
   libxmu
   xbitmaps
+  expat
+  freetype
+  fontconfig
   fvwm
   font-util
   font-cronyx-cyrillic
