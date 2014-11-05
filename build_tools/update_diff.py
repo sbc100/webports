@@ -12,6 +12,7 @@ Then when ready for pickling as a patch, this script is run.
 
 from __future__ import print_function
 
+import argparse
 import os
 import re
 import subprocess
@@ -21,35 +22,18 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 
+sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
-class Error(Exception):
-  pass
+from naclports import Error
+import naclports.source_package
 
 
-def main(args):
-  if len(args) != 1:
-    raise Error('Usage: update-diff <port-name>')
+def UpdatePatch(package_name):
+  package = naclports.source_package.CreatePackage(package_name)
 
-  port = args[0]
-  port_dir = os.path.join(ROOT_DIR, 'ports', port)
-
-  if not os.path.exists(port_dir):
-    raise Error('Port %s does not exist' % port)
-
-  port_build_dir = os.path.join(ROOT_DIR, 'out', 'build', port)
-
-  if not os.path.exists(port_build_dir):
-    raise Error('Port %s build dir does not exist' % port)
-
-  items = [i for i in os.listdir(port_build_dir)
-           if i.lower().startswith(port.lower() + '-')]
-  if len(items) == 0:
-    raise Error('Port %s build git dir does not exist' % port)
-
-  if len(items) > 1:
-    raise Error('Port %s build git dir is ambiguous')
-
-  git_dir = os.path.join(port_build_dir, items[0])
+  git_dir = package.GetBuildLocation()
+  if not os.path.exists(git_dir):
+    raise Error('Build directory does not exist: %s' % git_dir)
 
   diff = subprocess.check_output(['git', 'diff', 'upstream', '--no-ext-diff'],
                                  cwd=git_dir)
@@ -65,7 +49,7 @@ def main(args):
       'Binary files [^\n]+ differ\n', '', diff)
 
   # Filter out things from an optional per port skip list.
-  diff_skip = os.path.join(port_dir, 'diff_skip.txt')
+  diff_skip = os.path.join(package.root, 'diff_skip.txt')
   if os.path.exists(diff_skip):
     names = open(diff_skip).read().splitlines()
     new_diff = ''
@@ -81,10 +65,18 @@ def main(args):
     diff = new_diff
 
   # Write back out the diff.
-  patch_path = os.path.join(port_dir, 'nacl.patch')
+  patch_path = os.path.join(package.root, 'nacl.patch')
   with open(patch_path, 'w') as fh:
     fh.write(diff)
   return 0
+
+
+def main(args):
+  parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument('port', metavar='PORT_NAME',
+                      help='name of port to update patch for')
+  options = parser.parse_args(args)
+  return UpdatePatch(options.port)
 
 
 if __name__ == '__main__':
