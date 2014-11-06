@@ -12,7 +12,7 @@ extern int nacl_startup_untar(
 #ifdef __arm__
 #define DATA_FILE "_platform_specific/arm/pydata_arm.tar"
 #elif defined __i386__
-#define DATA_FILE "_platform_specific/i686/pydata_x86_32.tar"
+#define DATA_FILE "_platform_specific/x86_32/pydata_x86_32.tar"
 #elif defined __x86_64__
 #define DATA_FILE "_platform_specific/x86_64/pydata_x86_64.tar"
 #elif defined __pnacl__

@@ -80,13 +80,19 @@ endif
 install: install-hterm
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
 	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_ARCH_DIR)/pydata_$(NACL_ARCH).tar --exclude lib/python2.7/site-packages ${ASSETS}
-	cp $(OUTDIR)/python*$(EXEEXT) $(INSTALL_ARCH_DIR)
-	rm -f $(INSTALL_ARCH_DIR)/*_unstripped*$(EXEEXT)
+ifeq ($(TOOLCHAIN),pnacl)
+	cp $(OUTDIR)/python$(EXEEXT) $(INSTALL_ARCH_DIR)
 	cd $(INSTALL_DIR) && \
 	  python $(NACL_SDK_ROOT)/tools/create_nmf.py \
-	  $(INSTALL_ARCH_DIR)/*$(EXEEXT) \
+	  python$(EXEEXT) -s . -o python.nmf
+else
+	cp $(OUTDIR)/python_$(NACL_ARCH)$(EXEEXT) $(INSTALL_ARCH_DIR)
+	cd $(INSTALL_DIR) && \
+	  python $(NACL_SDK_ROOT)/tools/create_nmf.py \
+	  _platform_specific/*/python_*$(EXEEXT) \
 	  -L $(OUTDIR)/lib32 -L $(OUTDIR)/lib64 \
 	  -s . -o python.nmf
+endif
 	cp index.html $(INSTALL_DIR)
 	cp python.js $(INSTALL_DIR)
 	cp background.js $(INSTALL_DIR)

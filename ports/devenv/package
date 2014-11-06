@@ -126,13 +126,14 @@ InstallPackage() {
   # TODO(bradnelson): Do something better.
   # Rename appropriate nexe/pexe to unsuffixed version.
   local suffixes=".pexe _pnacl.pexe _${NACL_ARCH}.nexe"
+  local platform_dirs="_platform_specific/${NACL_ARCH}/ \
+                       _platform_specific/all/"
   if [ "${NACL_ARCH}" = "i686" ]; then
     suffixes+=" _x86_32.nexe"
+    platform_dirs+=" _platform_specific/x86_32/"
   fi
   for alt in "" _ppapi; do
-    for plat in "" \
-      _platform_specific/${NACL_ARCH}/ \
-      _platform_specific/all/; do
+    for plat in "" ${platform_dirs}; do
       for suffix in ${suffixes}; do
         local exe=${package_inside}/${plat}${package}${alt}${suffix}
         if [ -e ${exe} ]; then

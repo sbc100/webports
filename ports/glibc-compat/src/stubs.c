@@ -45,9 +45,7 @@
           __FUNCTION__);                                                 \
   abort();
 
-#define UNIMPLEMENTED() \
-  fprintf(stderr, "Function %s is not implemented in glibc-compat!\n", \
-          __FUNCTION__);
+#define UNIMPLEMENTED()
 
 #define UNIMPLEMENTED_NOSYS_RTN(RTN) \
   UNIMPLEMENTED(); \
