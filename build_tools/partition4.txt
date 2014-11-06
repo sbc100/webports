@@ -13,6 +13,7 @@ builder 0 (total: 10165)
   gdb
   libpng
   jpeg6b
+  tiff
   opencv
   jpeg8d
   imagemagick

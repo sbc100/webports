@@ -3,6 +3,7 @@ builder 0 (total: 7910)
   zlib
   libpng
   jpeg6b
+  tiff
   opencv
   libogg
   libvorbis

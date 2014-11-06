@@ -3,3 +3,4 @@
 # found in the LICENSE file.
 
 export LIBS="-lm"
+EXTRA_CONFIGURE_ARGS="--disable-jpeg"

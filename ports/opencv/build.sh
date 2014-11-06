@@ -2,6 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXECUTABLES="
+bin/opencv_createsamples
+bin/opencv_haartraining
+bin/opencv_performance
+bin/opencv_traincascade
+"
 EXTRA_CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF \
            -DWITH_FFMPEG=OFF \
            -DWITH_OPENEXR=OFF \
@@ -10,13 +16,11 @@ EXTRA_CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF \
            -DWITH_OPENCL=OFF \
            -DWITH_1394=OFF \
            -DWITH_V4L=OFF \
-           -DWITH_TIFF=OFF \
-           -DBUILD_opencv_apps=OFF \
            -DBUILD_opencv_java=OFF \
-           -DBUILD_SHARED_LIBS=OFF \
            -DBUILD_TESTS=OFF \
            -DBUILD_PERF_TESTS=OFF \
            -DBUILD_FAT_JAVA_LIB=OFF"
 
-# opencv build can fail when build with -jN.
-OS_JOBS=1
+if [ "${NACL_SHARED}" != "1" ]; then
+   EXTRA_CMAKE_ARGS+=" -DBUILD_SHARED_LIBS=OFF"
+fi

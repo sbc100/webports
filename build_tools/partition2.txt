@@ -23,6 +23,7 @@ builder 0 (total: 18534)
   gdb
   libpng
   jpeg6b
+  tiff
   opencv
   jpeg8d
   bzip2

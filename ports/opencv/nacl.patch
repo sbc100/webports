@@ -1,3 +1,40 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b610ecf..ebebaed 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -326,8 +326,10 @@ else()
+   endif()
+ endif()
+ 
+-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}")
+-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
++if(BUILD_SHARED_LIBS)
++  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}")
++  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
++endif()
+ 
+ if(INSTALL_TO_MANGLED_PATHS)
+   set(OPENCV_INCLUDE_INSTALL_PATH ${OPENCV_INCLUDE_INSTALL_PATH}/opencv-${OPENCV_VERSION})
+@@ -434,6 +436,8 @@ if(UNIX)
+       set(OPENCV_LINKER_LIBS ${OPENCV_LINKER_LIBS} dl m log)
+     elseif(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD|NetBSD|DragonFly")
+       set(OPENCV_LINKER_LIBS ${OPENCV_LINKER_LIBS} m pthread)
++    elseif(NACL AND NACL_LIBC STREQUAL "newlib")
++      set(OPENCV_LINKER_LIBS ${OPENCV_LINKER_LIBS} m pthread)
+     else()
+       set(OPENCV_LINKER_LIBS ${OPENCV_LINKER_LIBS} dl m pthread rt)
+     endif()
+@@ -449,8 +453,8 @@ include(cmake/OpenCVModule.cmake)
+ #  Detect endianness of build platform
+ # ----------------------------------------------------------------------------
+ 
+-if(CMAKE_SYSTEM_NAME STREQUAL iOS)
+-  # test_big_endian needs try_compile, which doesn't work for iOS
++if(CMAKE_SYSTEM_NAME STREQUAL iOS OR NACL)
++  # test_big_endian needs try_compile, which doesn't work for iOS or PNaCl
+   # http://public.kitware.com/Bug/view.php?id=12288
+   set(WORDS_BIGENDIAN 0)
+ else()
 diff --git a/modules/contrib/src/inputoutput.cpp b/modules/contrib/src/inputoutput.cpp
 index 37510c6..a626b66 100644
 --- a/modules/contrib/src/inputoutput.cpp
@@ -40,12 +77,12 @@ index 37510c6..a626b66 100644
  
          return list;
 diff --git a/modules/core/include/opencv2/core/operations.hpp b/modules/core/include/opencv2/core/operations.hpp
-index 9569d1a..261e06c 100644
+index 4ab7e35..e0d2df4 100644
 --- a/modules/core/include/opencv2/core/operations.hpp
 +++ b/modules/core/include/opencv2/core/operations.hpp
 @@ -58,7 +58,13 @@
  
-   #if defined __clang__ && __clang_major__ >= 3 && !defined __ANDROID__
+   #if defined __clang__ && __clang_major__ >= 3 && !defined __ANDROID__ && !defined __EMSCRIPTEN__
      #ifdef __ATOMIC_SEQ_CST
 +     // Clang in NaCl "cannot compile this atomic library call yet": use 
 +     // instead a programmatic atomic fetch.
@@ -58,10 +95,10 @@ index 9569d1a..261e06c 100644
          #define CV_XADD(addr, delta) __atomic_fetch_add((_Atomic(int)*)(addr), (delta), 5)
      #endif
 diff --git a/modules/core/src/system.cpp b/modules/core/src/system.cpp
-index 8899363..d18824a 100644
+index ef45b9b..97f385d 100644
 --- a/modules/core/src/system.cpp
 +++ b/modules/core/src/system.cpp
-@@ -460,7 +460,11 @@ string tempfile( const char* suffix )
+@@ -491,7 +491,11 @@ string tempfile( const char* suffix )
      const int fd = mkstemp((char*)fname.c_str());
      if (fd == -1) return string();
  
@@ -142,7 +179,7 @@ index 64b9957..41583d8 100644
          }
      }
 diff --git a/modules/legacy/src/epilines.cpp b/modules/legacy/src/epilines.cpp
-index 7196d51..3cd2f47 100644
+index b63f8e1..ea00059 100644
 --- a/modules/legacy/src/epilines.cpp
 +++ b/modules/legacy/src/epilines.cpp
 @@ -46,7 +46,10 @@

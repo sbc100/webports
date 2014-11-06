@@ -861,8 +861,22 @@ SetupSDKBuildSystem() {
   BUILD_DIR=${START_DIR}
 }
 
+SetupCrossPaths() {
+  export PKG_CONFIG_LIBDIR="${NACLPORTS_LIBDIR}/pkgconfig"
+  # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.
+  # While PKG_CONFIG_LIBDIR overrides <libdir>, <datadir> (/usr/share/) can only
+  # be overridden individually when pkg-config is built.
+  # Setting PKG_CONFIG_PATH instead to compensate.
+  export PKG_CONFIG_PATH="${NACLPORTS_LIBDIR}/pkgconfig"
+  PKG_CONFIG_PATH+=":${NACLPORTS_LIBDIR}/../share/pkgconfig"
+  export SDL_CONFIG=${NACLPORTS_BIN}/sdl-config
+  export FREETYPE_CONFIG=${NACLPORTS_BIN}/freetype-config
+  export PATH=${NACL_BIN_PATH}:${NACLPORTS_BIN}:${PATH}
+}
 
 SetupCrossEnvironment() {
+  SetupCrossPaths
+
   # export the nacl tools
   export CONFIG_SITE
   export EXEEXT=${NACL_EXEEXT}
@@ -872,23 +886,13 @@ SetupCrossEnvironment() {
   export RANLIB=${NACLRANLIB}
   export READELF=${NACLREADELF}
   export STRIP=${NACLSTRIP}
-  export PKG_CONFIG_LIBDIR="${NACLPORTS_LIBDIR}/pkgconfig"
-  # By default PKG_CONFIG_PATH is set to <libdir>/pkgconfig:<datadir>/pkgconfig.
-  # While PKG_CONFIG_LIBDIR overrides <libdir>, <datadir> (/usr/share/) can only
-  # be overridden individually when pkg-config is built.
-  # Setting PKG_CONFIG_PATH instead to compensate.
-  export PKG_CONFIG_PATH="${NACLPORTS_LIBDIR}/pkgconfig"
-  PKG_CONFIG_PATH+=":${NACLPORTS_LIBDIR}/../share/pkgconfig"
+
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export ARFLAGS=${NACL_ARFLAGS}
   export AR_FLAGS=${NACL_ARFLAGS}
-
-  export SDL_CONFIG=${NACLPORTS_BIN}/sdl-config
-  export FREETYPE_CONFIG=${NACLPORTS_BIN}/freetype-config
-  export PATH=${NACL_BIN_PATH}:${NACLPORTS_BIN}:${PATH}
 
   echo "CPPFLAGS=${CPPFLAGS}"
   echo "CFLAGS=${CFLAGS}"
@@ -1131,6 +1135,7 @@ ConfigureStep_CMake() {
     BUILD_TYPE=RELEASE
   fi
 
+  SetupCrossPaths
   LogExecute cmake "${SRC_DIR}" \
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
            -DNACLAR=${NACLAR} \
@@ -1501,7 +1506,6 @@ TranslatePexe() {
 PackageStep() {
   local basename=$(basename "${PACKAGE_FILE}")
   Banner "Packaging ${basename}"
-  Remove "${PACKAGE_FILE}"
   if [ -d "${INSTALL_DIR}${PREFIX}" ]; then
     mv "${INSTALL_DIR}${PREFIX}" "${INSTALL_DIR}/payload"
   fi
@@ -1529,7 +1533,11 @@ PackageStep() {
   else
     local args=""
   fi
-  LogExecute tar cjf "${PACKAGE_FILE}" -C "${INSTALL_DIR}" ${args} .
+  # Create packge in temporary location and move into place once
+  # done.  This prevents partially created packages from being
+  # left lying around if this process is interrupted.
+  LogExecute tar cjf "${PACKAGE_FILE}.tmp" -C "${INSTALL_DIR}" ${args} .
+  LogExecute mv -f "${PACKAGE_FILE}.tmp" "${PACKAGE_FILE}"
 }
 
 

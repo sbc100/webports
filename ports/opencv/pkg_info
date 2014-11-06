@@ -1,9 +1,9 @@
 NAME=opencv
-VERSION=2.4.7
-URL=http://download.sf.net/project/opencvlibrary/opencv-unix/2.4.7/opencv-2.4.7.tar.gz
+VERSION=2.4.9
+URL=https://github.com/Itseez/opencv/archive/2.4.9/opencv-2.4.9.tar.gz
 LICENSE=BSD:doc/license.txt
 # TODO(sbc): remove this conditional once this bug gets fixed:
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 DISABLED_ARCH=(arm)
-DEPENDS=(zlib libpng jpeg6b)
-SHA1=67ec788943894d4be3dff6efd7720591108feb29
+DEPENDS=(zlib libpng jpeg6b tiff)
+SHA1=d16ced627db17f9864c681545f18f030c7a4cc0b
