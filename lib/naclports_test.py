@@ -5,6 +5,7 @@
 
 import naclports
 import naclports.package
+import naclports.binary_package
 import naclports.__main__
 from naclports import source_package, package_index
 from naclports.configuration import Configuration
@@ -24,7 +25,7 @@ sys.path.append(MOCK_DIR)
 from mock import MagicMock, Mock, patch, call
 
 
-def MockFileObject(contents):
+def MockFileObject(contents=''):
   file_mock = Mock(name="file_mock", spec=file)
   file_mock.read.return_value = contents
   file_mock.__enter__ = lambda s: s
@@ -32,7 +33,15 @@ def MockFileObject(contents):
   return file_mock
 
 
-class TestConfiguration(unittest.TestCase):
+class NaclportsTest(unittest.TestCase):
+  def setUp(self):
+    self.patcher = patch('naclports.GetInstallRoot',
+                         Mock(return_value='/package/install/path'))
+    self.patcher.start()
+    self.addCleanup(self.patcher.stop)
+
+
+class TestConfiguration(NaclportsTest):
   def testDefaults(self):
     config = Configuration()
     self.assertEqual(config.toolchain, 'newlib')
@@ -92,7 +101,7 @@ BUILD_CONFIG=release
 BUILD_ARCH=arm
 BUILD_TOOLCHAIN=newlib
 BUILD_SDK_VERSION=38
-BUILD_NACLPORTS_REVISION=1414
+BUILD_NACLPORTS_REVISION=98765
 BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_arm_newlib.tar.bz2
 BIN_SIZE=10240
 BIN_SHA1=f300618f52188a291804dd60d6a5e04361c0ffe6
@@ -105,13 +114,13 @@ BUILD_CONFIG=release
 BUILD_ARCH=i686
 BUILD_TOOLCHAIN=newlib
 BUILD_SDK_VERSION=38
-BUILD_NACLPORTS_REVISION=1414
+BUILD_NACLPORTS_REVISION=98765
 BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_i686_newlib.tar.bz2
 BIN_SIZE=10240
 BIN_SHA1=0cb0d2d1380831b38c2b8461528836aa7992435f
 '''
 
-class TestPackageIndex(unittest.TestCase):
+class TestPackageIndex(NaclportsTest):
   def testParsingInvalid(self):
     contents = 'FOO=bar\nBAR=baz\n'
     expected_error = "Invalid key 'FOO' in info file dummy_file:1"
@@ -169,17 +178,16 @@ BUILD_ARCH=arm
 BUILD_CONFIG=debbug
 BUILD_TOOLCHAIN=newlib
 BUILD_SDK_VERSION=123
-BUILD_NACLPORTS_REVISION=456
+BUILD_NACLPORTS_REVISION=98765
 '''
 
-class TestInstalledPackage(unittest.TestCase):
+class TestInstalledPackage(NaclportsTest):
   def CreateMockInstalledPackage(self):
     file_mock = MockFileObject(test_info)
     with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
       return naclports.package.InstalledPackage('dummy_file')
 
   @patch('naclports.package.Log', Mock())
-  @patch('naclports.GetInstallRoot', Mock(return_value='mock_root'))
   @patch('naclports.package.InstalledPackage.RemoveFile')
   @patch('os.path.lexists', Mock(return_value=True))
   def testUninstall(self, remove_patch):
@@ -188,14 +196,52 @@ class TestInstalledPackage(unittest.TestCase):
     pkg.Uninstall()
 
     # Assert that exactly 4 files we removed using InstalledPackage.RemoveFile
-    calls = [call('mock_root/var/lib/npkg/foo.info'),
-             call('mock_root/f1'),
-             call('mock_root/f2'),
-             call('mock_root/var/lib/npkg/foo.list')]
+    calls = [call('/package/install/path/var/lib/npkg/foo.info'),
+             call('/package/install/path/f1'),
+             call('/package/install/path/f2'),
+             call('/package/install/path/var/lib/npkg/foo.list')]
     remove_patch.assert_has_calls(calls)
 
 
-class TestParsePkgInfo(unittest.TestCase):
+class TestBinaryPackage(NaclportsTest):
+  @patch('os.rename')
+  @patch('os.makedirs')
+  @patch('os.path.isdir', Mock(return_value=False))
+  def testInstallFile(self, makedirs_mock, rename_mock):
+    naclports.binary_package.InstallFile('fname', 'location1', 'location2')
+    makedirs_mock.assert_called_once_with('location2')
+    rename_mock.assert_has_calls([call('location1/fname', 'location2/fname')])
+
+  def testRelocateFile(self):
+    # Only certain files should be relocated. A file called 'testfile'
+    # for example, should not be touched.
+    with patch('__builtin__.open', Mock(), create=True) as open_mock:
+      naclports.binary_package.RelocateFile('testfile', 'newroot')
+      open_mock.assert_not_called()
+
+  @patch('naclports.binary_package.BinaryPackage.VerifyArchiveFormat', Mock())
+  @patch('naclports.binary_package.BinaryPackage.GetPkgInfo')
+  @patch('naclports.GetInstallStamp', Mock(return_value='stamp_dir/stamp_file'))
+  def testWriteStamp(self, mock_get_info):
+    fake_binary_pkg_info = '''\
+NAME=foo
+VERSION=1.0
+BUILD_CONFIG=release
+BUILD_ARCH=arm
+BUILD_TOOLCHAIN=newlib
+BUILD_SDK_VERSION=38
+BUILD_NACLPORTS_REVISION=1414
+'''
+    mock_get_info.return_value = fake_binary_pkg_info
+    pkg = naclports.binary_package.BinaryPackage('foo')
+    mock_stamp_file = MockFileObject()
+    with patch('__builtin__.open', Mock(return_value=mock_stamp_file),
+               create=True):
+      pkg.WriteStamp()
+    mock_stamp_file.write.assert_called_once_with(fake_binary_pkg_info)
+
+
+class TestParsePkgInfo(NaclportsTest):
   def testValidKeys(self):
     expected_error = "Invalid key 'BAR' in info file dummy_file:2"
     with self.assertRaisesRegexp(naclports.Error, expected_error):
@@ -213,13 +259,11 @@ class TestParsePkgInfo(unittest.TestCase):
       naclports.ParsePkgInfo(contents, 'dummy_file', valid, required)
 
 
-class TestSourcePackage(unittest.TestCase):
+class TestSourcePackage(NaclportsTest):
   def setUp(self):
     self.tempdir = tempfile.mkdtemp(prefix='naclports_test_')
+    self.addCleanup(shutil.rmtree, self.tempdir)
     self.temp_ports = os.path.join(self.tempdir, 'ports')
-
-  def tearDown(self):
-    shutil.rmtree(self.tempdir)
 
   def CreateTestPackage(self, name, extra_info=''):
     """Creates a source package directory in a temporary directory.
@@ -335,7 +379,7 @@ class TestSourcePackage(unittest.TestCase):
       is_installed.assert_called_once_with('bar', pkg.config)
 
 
-class TestCommands(unittest.TestCase):
+class TestCommands(NaclportsTest):
   def testListCommand(self):
     config = Configuration()
     options = Mock()
@@ -362,34 +406,26 @@ class TestCommands(unittest.TestCase):
 
   def testContentsCommand(self):
     file_list = ['foo', 'bar']
-    install_root = '/testpath'
 
-    options = Mock()
-    package = Mock()
-    package.config = Configuration('arm', 'newlib', True)
-    package.Files = Mock(return_value=file_list)
-    package.NAME = 'test'
-
-    options.verbose = False
-    options.all = False
+    options = Mock(verbose=False, all=False)
+    package = Mock(NAME='test', Files=Mock(return_value=file_list))
 
     expected_output = '\n'.join(file_list) + '\n'
     with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
-      with patch('naclports.GetInstallRoot', Mock(return_value=install_root)):
-        naclports.__main__.CmdContents(package, options)
-        self.assertEqual(stdout.getvalue(), expected_output)
+      naclports.__main__.CmdContents(package, options)
+      self.assertEqual(stdout.getvalue(), expected_output)
 
     # when the verbose option is set expect CmdContents to output full paths.
     options.verbose = True
-    expected_output = [os.path.join(install_root, f) for f in file_list]
+    expected_output = [os.path.join('/package/install/path', f)
+                       for f in file_list]
     expected_output = '\n'.join(expected_output) + '\n'
     with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
-      with patch('naclports.GetInstallRoot', Mock(return_value=install_root)):
-        naclports.__main__.CmdContents(package, options)
-        self.assertEqual(stdout.getvalue(), expected_output)
+      naclports.__main__.CmdContents(package, options)
+      self.assertEqual(stdout.getvalue(), expected_output)
 
 
-class TestMain(unittest.TestCase):
+class TestMain(NaclportsTest):
   @patch('naclports.Log', Mock())
   @patch('shutil.rmtree', Mock())
   def testCleanAll(self):

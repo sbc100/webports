@@ -1,5 +1,5 @@
 [run]
-include = lib/naclports/*
+omit = third_party/mock/mock.py,*_test.py
 data_file = out/coverage
 
 [html]

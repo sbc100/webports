@@ -28,9 +28,9 @@ class Package(object):
   def __init__(self, info_file):
     self.info = info_file
     with open(self.info) as f:
-      self.ParseInfo(f)
+      self.ParseInfo(f.read())
 
-  def ParseInfo(self, info_stream):
+  def ParseInfo(self, info_string):
     valid_keys = naclports.VALID_KEYS + self.extra_keys
     required_keys = naclports.REQUIRED_KEYS + self.extra_keys
 
@@ -40,7 +40,7 @@ class Package(object):
     self.CONFLICTS = []
 
     # Parse pkg_info file
-    info = naclports.ParsePkgInfo(info_stream.read(),
+    info = naclports.ParsePkgInfo(info_string,
                                   self.info,
                                   valid_keys,
                                   required_keys)

@@ -84,7 +84,7 @@ check: test
 
 test:
 	build_tools/build_tools_test.py
-	$(COVERAGE) run lib/naclports_test.py
+	$(COVERAGE) run --include=lib/naclports/* lib/naclports_test.py
 	$(COVERAGE) report $(COVERAGE_ARGS)
 	@rm -rf out/coverage_html
 	$(COVERAGE) html

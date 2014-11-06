@@ -23,8 +23,6 @@ def InstallFile(filename, old_root, new_root):
     new_root: The new desired root for the file.
   """
   oldname = os.path.join(old_root, filename)
-  if os.path.isdir(oldname):
-    return
 
   naclports.Trace('install: %s' % filename)
 
@@ -33,6 +31,48 @@ def InstallFile(filename, old_root, new_root):
   if not os.path.isdir(dirname):
     os.makedirs(dirname)
   os.rename(oldname, newname)
+
+
+def RelocateFile(filename, dest):
+  """Perform in-place mutations on file contents to handle new location.
+
+  There are a few file types that have absolute pathnames embedded
+  and need to be modified in some way when being installed to
+  a particular location. For most file types this method does nothing.
+  """
+  # Only relocate certain file types.
+  modify = False
+
+  # boost build scripts
+  # TODO(sbc): move this to the boost package metadata
+  if filename.startswith('build-1'):
+    modify = True
+  # pkg_config (.pc) files
+  if filename.startswith('lib/pkgconfig'):
+    modify = True
+  if filename.startswith('share/pkgconfig'):
+    modify = True
+  # <foo>-config scripts that live in usr/bin
+  if filename.startswith('bin') and filename.endswith('-config'):
+    modify = True
+  # libtool's .la files which can contain absolute paths to
+  # dependencies.
+  if filename.endswith('.la'):
+    modify = True
+  # headers can sometimes also contain absolute paths.
+  if filename.startswith('include/') and filename.endswith('.h'):
+    modify = True
+
+  filename = os.path.join(dest, filename)
+
+  if modify:
+    with open(filename) as f:
+      data = f.read()
+    mode = os.stat(filename).st_mode
+    os.chmod(filename, 0777)
+    with open(filename, 'r+') as f:
+      f.write(data.replace('/naclports-dummydir', dest))
+    os.chmod(filename, mode)
 
 
 class BinaryPackage(package.Package):
@@ -46,11 +86,23 @@ class BinaryPackage(package.Package):
   extra_keys = package.EXTRA_KEYS
 
   def __init__(self, filename):
+    self.InitFromArchiveFile(filename)
+
+  def InitFromArchiveFile(self, filename):
     self.filename = filename
     self.info = filename
+    self.VerifyArchiveFormat()
+
+    info = self.GetPkgInfo()
+    self.ParseInfo(info)
+    self.config = configuration.Configuration(self.BUILD_ARCH,
+                                              self.BUILD_TOOLCHAIN,
+                                              self.BUILD_CONFIG == 'debug')
+
+  def VerifyArchiveFormat(self):
     if not os.path.exists(self.filename):
-      raise naclports.Error('package not found: %s'% self.filename)
-    basename, extension = os.path.splitext(os.path.basename(filename))
+      raise naclports.Error('package archive not found: %s' % self.filename)
+    basename, extension = os.path.splitext(os.path.basename(self.filename))
     basename = os.path.splitext(basename)[0]
     if extension != '.bz2':
       raise naclports.Error('invalid file extension: %s' % extension)
@@ -59,14 +111,8 @@ class BinaryPackage(package.Package):
       with tarfile.open(self.filename) as tar:
         if './pkg_info' not in tar.getnames():
           raise PkgFormatError('package does not contain pkg_info file')
-        info = tar.extractfile('./pkg_info')
-        self.ParseInfo(info)
     except tarfile.TarError as e:
       raise naclports.PkgFormatError(e)
-
-    self.config = configuration.Configuration(self.BUILD_ARCH,
-                                              self.BUILD_TOOLCHAIN,
-                                              self.BUILD_CONFIG == 'debug')
 
   def IsInstallable(self):
     """Determine if a binary package can be installed in the
@@ -76,49 +122,6 @@ class BinaryPackage(package.Package):
     are installable.
     """
     return self.BUILD_SDK_VERSION == naclports.GetSDKVersion()
-
-  def RelocateFile(self, filename, dest):
-    """Perform in-place mutations on file contents to handle new location.
-
-    There are a few file types that have absolute pathnames embedded
-    and need to be modified in some way when being installed to
-    a particular location. For most file types this method does nothing.
-    """
-    # Only relocate certain file types.
-    modify = False
-
-    # boost build scripts
-    # TODO(sbc): move this to the boost package metadata
-    if filename.startswith('build-1'):
-      modify = True
-    # pkg_config (.pc) files
-    if filename.startswith('lib/pkgconfig'):
-      modify = True
-    if filename.startswith('share/pkgconfig'):
-      modify = True
-    # <foo>-config scripts that live in usr/bin
-    if filename.startswith('bin') and filename.endswith('-config'):
-      modify = True
-    # libtool's .la files which can contain absolute paths to
-    # dependencies.
-    if filename.endswith('.la'):
-      modify = True
-    # headers can sometimes also contain absolute paths.
-    if filename.startswith('include/') and filename.endswith('.h'):
-      modify = True
-
-    filename = os.path.join(dest, filename)
-    if os.path.isdir(filename):
-      return
-
-    if modify:
-      with open(filename) as f:
-        data = f.read()
-      mode = os.stat(filename).st_mode
-      os.chmod(filename, 0777)
-      with open(filename, 'r+') as f:
-        f.write(data.replace('/naclports-dummydir', dest))
-      os.chmod(filename, mode)
 
   def GetPkgInfo(self):
     """Extract the contents of the pkg_info file from the binary package."""
@@ -166,7 +169,7 @@ class BinaryPackage(package.Package):
       shutil.rmtree(dest_tmp)
 
     for name in names:
-      self.RelocateFile(name, dest)
+      RelocateFile(name, dest)
     self.WriteFileList(names)
     self.WriteStamp()
 
