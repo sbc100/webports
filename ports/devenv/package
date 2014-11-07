@@ -12,30 +12,63 @@
 set -e
 shopt -s nullglob
 
-STORAGE_URL=https://naclports.storage.googleapis.com/builds
-SDK_VERSION=${SDK_VERSION:-pepper_39}
-REVISION=${REVISION:-trunk-18-gfe25716}
-PACKAGE_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
-
-OLD_SDK_VERSION=pepper_38
-OLD_REVISION=1451
-OLD_SOURCE="${STORAGE_URL}/${OLD_SDK_VERSION}/${OLD_REVISION}/publish"
+STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
+SDK_VERSION=${SDK_VERSION:-pepper_40}
+REVISION=${REVISION:-trunk-147-g49eb4c9}
+DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 
 NACL_ARCH_ALT="${NACL_ARCH}"
 if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
   NACL_ARCH_ALT="pnacl"
 fi
 
-# TODO(bradnelson): Roll forward python when regression fixed.
+PACKAGE_LIST="${PACKAGE_LIST:-}"
+PACKAGE_FORCE=${PACKAGE_FORCE:-0}
+ALTERNATE_SOURCE=0
+while getopts "s:i:hLf" o; do
+  case "${o}" in
+    i)
+      PACKAGE_LIST+=" ${OPTARG}"
+      ;;
+    s)
+      PACKAGE_SOURCE="${OPTARG}"
+      ;;
+    L)
+      PACKAGE_SOURCE="http://localhost:5103/"
+      # Always force for localhost.
+      PACKAGE_FORCE=1
+      ;;
+    f)
+      PACKAGE_FORCE=1
+      ;;
+    *)
+      Usage
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+if [ "$*" != "" ]; then
+  echo "Bad Options: $*"
+  Usage
+fi
+if [ "${PACKAGE_LIST}" = "" ]; then
+  echo "No packages selected."
+  Usage
+fi
+if [ "${PACKAGE_SOURCE:-}" = "" ]; then
+  PACKAGE_SOURCE="${PACKAGE_SOURCE:-${DEFAULT_SOURCE}}"
+  ALTERNATE_SOURCE=1
+fi
+
 # Special cases for certain packages.
 # Pairs of <package-name>:<source>:<package-subdir>[:<old-package-subdir>]
 PACKAGE_INFO="\
 coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
 mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
-make|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip|${TOOLCHAIN}.zip \
-git|${OLD_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip|${TOOLCHAIN}.zip \
-python|${OLD_SOURCE}|${TOOLCHAIN}/python.zip"
+git|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+make|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+python|${PACKAGE_SOURCE}|${TOOLCHAIN}/python.zip"
 
 RemoveDir() {
   local path="$1"
@@ -165,40 +198,4 @@ function Usage() {
   exit 1
 }
 
-PACKAGE_LIST=""
-PACKAGE_SOURCE="${DEFAULT_SOURCE}"
-PACKAGE_FORCE=0
-ALTERNATE_SOURCE=0
-while getopts "s:i:hLf" o; do
-  case "${o}" in
-    i)
-      PACKAGE_LIST+=" ${OPTARG}"
-      ;;
-    s)
-      PACKAGE_SOURCE="${OPTARG}"
-      ALTERNATE_SOURCE=1
-      ;;
-    L)
-      PACKAGE_SOURCE="http://localhost:5103/"
-      ALTERNATE_SOURCE=1
-      # Always force for localhost.
-      PACKAGE_FORCE=1
-      ;;
-    f)
-      PACKAGE_FORCE=1
-      ;;
-    *)
-      Usage
-      ;;
-  esac
-done
-shift $((OPTIND-1))
-if [ "$*" != "" ]; then
-  echo "Bad Options: $*"
-  Usage
-fi
-if [ "${PACKAGE_LIST}" = "" ]; then
-  echo "No packages selected."
-  Usage
-fi
 InstallPackages
