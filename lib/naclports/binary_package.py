@@ -130,6 +130,10 @@ class BinaryPackage(package.Package):
 
   def Install(self):
     """Install binary package into toolchain directory."""
+    with naclports.InstallLock(self.config):
+      self._Install()
+
+  def _Install(self):
     dest = naclports.GetInstallRoot(self.config)
     dest_tmp = os.path.join(dest, 'install_tmp')
     if os.path.exists(dest_tmp):

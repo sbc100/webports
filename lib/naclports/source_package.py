@@ -204,7 +204,8 @@ class SourcePackage(package.Package):
     Log("%sBuilding %s" % (prefix, self.InfoString()))
 
     start = time.time()
-    self.RunBuildSh(stdout)
+    with naclports.BuildLock():
+      self.RunBuildSh(stdout)
 
     duration = FormatTimeDelta(time.time() - start)
     Log("Build complete %s [took %s]" % (self.InfoString(), duration))

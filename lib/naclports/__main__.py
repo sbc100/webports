@@ -9,7 +9,6 @@ work with packages (e.g. 'update_mirror.py' uses it to iterate
 through all packages and mirror them on Google Cloud Storage).
 """
 from __future__ import print_function
-import fcntl
 import os
 import shutil
 import sys
@@ -116,19 +115,6 @@ def CmdPkgVerify(package, options):
   package.Verify()
 
 
-def GetLock():
-  lock_file_name = os.path.join(naclports.OUT_DIR, 'naclports.lock')
-  if not os.path.exists(naclports.OUT_DIR):
-    os.makedirs(naclports.OUT_DIR)
-  f = open(lock_file_name, 'w')
-  try:
-    fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-  except Exception as e:
-    raise Error("Unable to lock file (%s): Is naclports already running?" %
-        lock_file_name)
-  return f
-
-
 def CleanAll(config):
   """Remove all build directories and all pre-built packages as well
   as all installed packages for the given configuration."""
@@ -206,8 +192,6 @@ def run_main(args):
   parser.add_argument('command', help="sub-command to run")
   parser.add_argument('pkg', nargs='*', help="package name or directory")
   args = parser.parse_args(args)
-
-  lock_file = GetLock()
 
   naclports.verbose = args.verbose or os.environ.get('VERBOSE') == '1'
   if args.verbose_build:

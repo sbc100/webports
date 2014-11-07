@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import fcntl
 import os
 import shlex
 import shutil
@@ -301,3 +302,40 @@ def DownloadFile(filename, url):
     raise Error('Error downloading file: %s' % str(e))
 
   os.rename(temp_filename, filename)
+
+
+class Lock(object):
+  """Per-directory flock()-based context manager
+
+  This class will raise an exception if another process already holds the
+  lock for the given directory.
+  """
+  def __init__(self, lock_dir):
+    if not os.path.exists(lock_dir):
+      os.makedirs(lock_dir)
+    self.file_name = os.path.join(lock_dir, 'naclports.lock')
+    self.fd = open(self.file_name, 'w')
+
+  def __enter__(self):
+    try:
+      fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except Exception as e:
+      raise Error("Unable to acquire lock (%s): Is naclports already running?" %
+          self.file_name)
+
+  def __exit__(self, exc_type, exc_val, exc_tb):
+    os.remove(self.file_name)
+    self.fd.close()
+
+
+class BuildLock(Lock):
+  """Lock used when building a package (essentially a lock on OUT_DIR)"""
+  def __init__(self):
+    super(BuildLock, self).__init__(OUT_DIR)
+
+
+class InstallLock(Lock):
+  """Lock used when installing/uninstalling package"""
+  def __init__(self, config):
+    root = GetInstallRoot(config)
+    super(InstallLock, self).__init__(root)

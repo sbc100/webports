@@ -34,11 +34,27 @@ def MockFileObject(contents=''):
 
 
 class NaclportsTest(unittest.TestCase):
+  """Class that sets up core mocks common to all test cases."""
+
   def setUp(self):
-    self.patcher = patch('naclports.GetInstallRoot',
-                         Mock(return_value='/package/install/path'))
-    self.patcher.start()
-    self.addCleanup(self.patcher.stop)
+    patcher = patch('naclports.GetInstallRoot',
+                    Mock(return_value='/package/install/path'))
+    patcher.start()
+    self.addCleanup(patcher.stop)
+
+    mock_lock = Mock()
+    mock_lock.__enter__ = lambda s: s
+    mock_lock.__exit__ = Mock(return_value=False)
+    patcher = patch('naclports.InstallLock', Mock(return_value=mock_lock))
+    patcher.start()
+    self.addCleanup(patcher.stop)
+
+    mock_lock = Mock()
+    mock_lock.__enter__ = lambda s: s
+    mock_lock.__exit__ = Mock(return_value=False)
+    patcher = patch('naclports.BuildLock', Mock(return_value=mock_lock))
+    patcher.start()
+    self.addCleanup(patcher.stop)
 
 
 class TestConfiguration(NaclportsTest):

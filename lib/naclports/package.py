@@ -118,18 +118,19 @@ class InstalledPackage(Package):
     RemoveEmptyDirs(os.path.dirname(filename))
 
   def DoUninstall(self):
-    self.RemoveFile(self.GetInstallStamp())
+    with naclports.InstallLock(self.config):
+      self.RemoveFile(self.GetInstallStamp())
 
-    root = naclports.GetInstallRoot(self.config)
-    for filename in self.Files():
-      filename = os.path.join(root, filename)
-      if not os.path.lexists(filename):
-        Warn('File not found while uninstalling: %s' % filename)
-        continue
-      Trace('rm %s' % filename)
-      self.RemoveFile(filename)
+      root = naclports.GetInstallRoot(self.config)
+      for filename in self.Files():
+        filename = os.path.join(root, filename)
+        if not os.path.lexists(filename):
+          Warn('File not found while uninstalling: %s' % filename)
+          continue
+        Trace('rm %s' % filename)
+        self.RemoveFile(filename)
 
-    self.RemoveFile(self.GetListFile())
+      self.RemoveFile(self.GetListFile())
 
 
 def InstalledPackageIterator(config):
