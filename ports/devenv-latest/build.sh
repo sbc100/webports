@@ -24,7 +24,7 @@ PostInstallTestStep() {
     arches="${NACL_ARCH}"
   fi
   for arch in ${arches}; do
-    LogExecute python ${START_DIR}/../devenv/devenv_test_large.py \
+    LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
       -p latest=1 \
       -C ${NACL_SRC}/out \
       -x -vv -a ${arch}

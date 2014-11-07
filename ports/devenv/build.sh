@@ -5,7 +5,7 @@
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
   -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
-EXECUTABLES=tests/devenv_test_${NACL_ARCH}${NACL_EXEEXT}
+EXECUTABLES=tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT}
 
 BuildStep() {
   SetupCrossEnvironment
@@ -13,8 +13,8 @@ BuildStep() {
   # Build test module.
   MakeDir ${BUILD_DIR}/tests
   LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
-      ${START_DIR}/tests/devenv_test.cc \
-      -o ${BUILD_DIR}/tests/devenv_test_${NACL_ARCH}${NACL_EXEEXT} \
+      ${START_DIR}/tests/devenv_small_test.cc \
+      -o ${BUILD_DIR}/tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
       ${EXTRA_LIBS} -lgtest
 }
 
@@ -75,15 +75,16 @@ InstallStep() {
   LogExecute cp -r ${BUILD_DIR}/tests/* ${PUBLISH_DIR}/tests
   cd ${PUBLISH_DIR}/tests
   if [ "${NACL_ARCH}" = "pnacl" ]; then
-    LogExecute ${PNACLFINALIZE} devenv_test_${NACL_ARCH}${NACL_EXEEXT}
+    LogExecute ${PNACLFINALIZE} devenv_small_test_${NACL_ARCH}${NACL_EXEEXT}
   fi
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      devenv_test_${NACL_ARCH}${NACL_EXEEXT} \
+      devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
       -s . \
-      -o devenv_test.nmf
-  LogExecute mv devenv_test_${NACL_ARCH}${NACL_EXEEXT} devenv_test_${NACL_ARCH}
+      -o devenv_small_test.nmf
+  LogExecute mv devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
+      devenv_small_test_${NACL_ARCH}
 
-  LogExecute zip -r devenv_test.zip *
+  LogExecute zip -r devenv_small_test.zip *
 }
 
 PostInstallTestStep() {
@@ -98,6 +99,6 @@ PostInstallTestStep() {
     arches="${NACL_ARCH}"
   fi
   for arch in ${arches}; do
-    LogExecute python ${START_DIR}/devenv_test.py -x -vv -a ${arch}
+    LogExecute python ${START_DIR}/devenv_small_test.py -x -vv -a ${arch}
   done
 }

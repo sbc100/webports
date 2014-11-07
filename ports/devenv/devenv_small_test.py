@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Large tests of the devenv app."""
+"""Tests of the devenv app."""
 
 import os
 import sys
@@ -19,11 +19,12 @@ import chrome_test
 
 app = os.path.join(DEVENV_OUT_DIR, 'app')
 test_dir = os.path.join(SCRIPT_DIR, 'tests')
+test_out_dir = os.path.join(DEVENV_OUT_DIR, 'tests')
 
 chrome_test.Main([
     '-C', test_dir,
-    '-p', 'TOOLCHAIN=' + TOOLCHAIN,
-    '-t', '120',
+    '-C', test_out_dir,
+    '-t', '60',
     '--enable-nacl',
     '--load-extension', app,
-    'devenv_test_large.html'] + sys.argv[1:])
+    'devenv_small_test.html'] + sys.argv[1:])

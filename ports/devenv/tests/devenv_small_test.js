@@ -21,13 +21,14 @@ TEST_F(DevEnvTest, 'testCTests', function() {
   var self = this;
   return Promise.resolve().then(function() {
     return self.checkCommand('geturl ' +
-        chrometest.harnessURL('devenv_test.zip') + ' devenv_test.zip', 0);
+        chrometest.harnessURL('devenv_small_test.zip') +
+                              ' devenv_small_test.zip', 0);
   }).then(function() {
-    return self.checkCommand('unzip devenv_test.zip', 0);
+    return self.checkCommand('unzip devenv_small_test.zip', 0);
   }).then(function() {
     return self.checkCommand(
         'LD_LIBRARY_PATH=${PWD}/${PACKAGE_LIB_DIR}:$LD_LIBRARY_PATH ' +
-        './devenv_test_${NACL_BOOT_ARCH}', 0);
+        './devenv_small_test_${NACL_BOOT_ARCH}', 0);
   });
 });
 
