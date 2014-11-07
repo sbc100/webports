@@ -108,9 +108,8 @@ class SourcePackage(package.Package):
                                  self.InstalledInfoContents())
 
   def InstallDeps(self, force, from_source=False):
-    for dep in self.DEPENDS:
-      if not naclports.IsInstalled(dep, self.config) or force == 'all':
-        dep = CreatePackage(dep, self.config)
+    for dep in self.Dependencies():
+      if not dep.IsAnyVersionInstalled() or force == 'all':
         dep.Install(True, force, from_source)
 
   def PackageFile(self):
@@ -173,10 +172,12 @@ class SourcePackage(package.Package):
 
     if self.IsAnyVersionInstalled():
       Log("Uninstalling existing %s" % self.InfoString())
-      installed_package = package.CreateInstalledPackage(self.NAME, self.config)
-      installed_package.DoUninstall()
+      self.GetInstalledPackage().DoUninstall()
 
     binary_package.BinaryPackage(package_file).Install()
+
+  def GetInstalledPackage(self):
+    return package.CreateInstalledPackage(self.NAME, self.config)
 
   def Build(self, build_deps, force=None):
     self.CheckBuildable()
@@ -304,22 +305,22 @@ class SourcePackage(package.Package):
 
   def CheckInstallable(self):
     if self.LIBC is not None and self.LIBC != self.config.libc:
-      raise DisabledError('%s: cannot be built with %s.'
+      raise DisabledError('%s: cannot be built with %s'
                           % (self.NAME, self.config.libc))
 
     if self.DISABLED_LIBC is not None:
       if self.config.libc in self.DISABLED_LIBC:
-        raise DisabledError('%s: cannot be built with %s.'
+        raise DisabledError('%s: cannot be built with %s'
                             % (self.NAME, self.config.libc))
 
     if self.ARCH is not None:
       if self.config.arch not in self.ARCH:
-        raise DisabledError('%s: disabled for current arch: %s.'
+        raise DisabledError('%s: disabled for current arch: %s'
                             % (self.NAME, self.config.arch))
 
     if self.DISABLED_ARCH is not None:
       if self.config.arch in self.DISABLED_ARCH:
-        raise DisabledError('%s: disabled for current arch: %s.'
+        raise DisabledError('%s: disabled for current arch: %s'
                             % (self.NAME, self.config.arch))
 
     for conflicting_package in self.CONFLICTS:
@@ -327,12 +328,34 @@ class SourcePackage(package.Package):
         raise PkgConflictError("%s: conflicts with installed package: %s" %
             (self.NAME, conflicting_package))
 
-    for dep_name in self.DEPENDS:
+    for dep in self.Dependencies():
       try:
-        dep = CreatePackage(dep_name, self.config)
         dep.CheckInstallable()
       except DisabledError as e:
-        raise DisabledError("%s depends on %s; %s" % (self.NAME, dep_name, e))
+        raise DisabledError('%s depends on %s; %s' % (self.NAME, dep.NAME, e))
+
+  def Conflicts(self):
+    """Yields the set of SourcePackages that directly conflict with this one"""
+    for dep_name in self.CONFLICTS:
+      yield CreatePackage(dep_name, self.config)
+
+  def TransitiveConflicts(self):
+    rtn = set(self.Conflicts())
+    for dep in self.TransitiveDependencies():
+      rtn |= set(dep.Conflicts())
+    return rtn
+
+  def Dependencies(self):
+    """Yields the set of SourcePackages that this package directly depends on"""
+    for dep_name in self.DEPENDS:
+      yield CreatePackage(dep_name, self.config)
+
+  def TransitiveDependencies(self):
+    """Yields the set of packages that this package transitively depends on"""
+    rtn = set(self.Dependencies())
+    for dep in set(rtn):
+      rtn |= dep.TransitiveDependencies()
+    return rtn
 
   def CheckBuildable(self):
     self.CheckInstallable()
@@ -340,7 +363,7 @@ class SourcePackage(package.Package):
     if self.BUILD_OS is not None:
       import getos
       if getos.GetPlatform() != self.BUILD_OS:
-        raise DisabledError('%s: can only be built on %s.'
+        raise DisabledError('%s: can only be built on %s'
                             % (self.NAME, self.BUILD_OS))
 
   def Download(self, mirror=True):

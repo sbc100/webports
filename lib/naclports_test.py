@@ -378,6 +378,20 @@ class TestSourcePackage(NaclportsTest):
         pkg.CheckInstallable()
       is_installed.assert_called_once_with('bar', pkg.config)
 
+  def testCheckInstallable(self):
+    root = self.CreateTestPackage('foo', 'DEPENDS=(bar)')
+    pkg = source_package.SourcePackage(root)
+
+    # Verify that CheckInstallable raises an error when the package
+    # depened on something that is disabled.
+    def CreatePackageMock(name, config):
+      root = self.CreateTestPackage(name, 'DISABLED_ARCH=(x86_64)')
+      return source_package.SourcePackage(root)
+
+    with patch('naclports.source_package.CreatePackage', CreatePackageMock):
+      with self.assertRaises(naclports.DisabledError):
+        pkg.CheckInstallable()
+
 
 class TestCommands(NaclportsTest):
   def testListCommand(self):
@@ -412,7 +426,7 @@ class TestCommands(NaclportsTest):
 
     expected_output = '\n'.join(file_list) + '\n'
     with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
-      naclports.__main__.CmdContents(package, options)
+      naclports.__main__.CmdPkgContents(package, options)
       self.assertEqual(stdout.getvalue(), expected_output)
 
     # when the verbose option is set expect CmdContents to output full paths.
@@ -421,7 +435,7 @@ class TestCommands(NaclportsTest):
                        for f in file_list]
     expected_output = '\n'.join(expected_output) + '\n'
     with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
-      naclports.__main__.CmdContents(package, options)
+      naclports.__main__.CmdPkgContents(package, options)
       self.assertEqual(stdout.getvalue(), expected_output)
 
 

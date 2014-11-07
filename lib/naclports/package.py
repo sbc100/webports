@@ -63,6 +63,9 @@ class Package(object):
   def __cmp__(self, other):
     return cmp(self.NAME, other.NAME)
 
+  def __str__(self):
+    return '<Package %s %s %s>' % (self.NAME, self.VERSION, self.config)
+
   def InfoString(self):
     return "'%s' [%s]" % (self.NAME, self.config)
 

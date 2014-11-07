@@ -54,7 +54,7 @@ def CmdInfo(config, options, args):
     sys.stdout.write(f.read())
 
 
-def CmdContents(package, options):
+def CmdPkgContents(package, options):
   """List contents of an installed package"""
   install_root = naclports.GetInstallRoot(package.config)
   for filename in package.Files():
@@ -92,6 +92,11 @@ def CmdPkgBuild(package, options):
 
 def CmdPkgInstall(package, options):
   """Install package(s)"""
+  if options.all:
+    for conflict in package.TransitiveConflicts():
+      if conflict.IsInstalled():
+        conflict.GetInstalledPackage().Uninstall()
+
   package.Install(options.build_deps, force=options.force,
                   from_source=options.from_source)
 
@@ -154,7 +159,7 @@ def run_main(args):
     'verify': CmdPkgVerify,
     'clean': CmdPkgClean,
     'uninstall': CmdPkgUninstall,
-    'contents': CmdContents
+    'contents': CmdPkgContents
   }
 
   installed_pkg_commands = ['contents', 'uninstall']
