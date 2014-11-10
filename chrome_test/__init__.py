@@ -548,6 +548,7 @@ def Main(argv):
 
   if options.param:
     params = {}
+    params['SYS_ARCH'] = options.arch
     for param in options.param:
       key, value = param.split('=', 1)
       params[key] = value

@@ -53,46 +53,77 @@ DevEnvTest.prototype.waitWhile = function(ext, condition, body) {
       return ext.wait().then(loop);
     }
   }
-  return loop;
+  return ext.wait().then(loop);
 };
 
-DevEnvTest.prototype.runCommand = function(cmd) {
+DevEnvTest.prototype.gatherStdoutUntil = function(name) {
   var self = this;
   var output = '';
-  var pid = null;
 
-  function updateStdoutUntil(name) {
+  return Promise.resolve().then(function() {
     return self.waitWhile(self.devEnv,
       function condition(msg) { return msg.name !== name; },
       function body(msg) {
         ASSERT_EQ('nacl_stdout', msg.name);
         output += msg.output;
-      }
-    );
+        chrometest.info(msg.output);
+      });
+  }).then(function(msg) {
+    ASSERT_EQ(name, msg.name, 'expected message');
+    msg.output = output;
+    return msg;
+  });
+};
+
+DevEnvTest.prototype.spawnCommand = function(cmd, cmdPrefix) {
+  var self = this;
+
+  if (cmdPrefix === undefined) {
+    cmdPrefix = '. /mnt/http/setup-environment && ';
   }
 
   return Promise.resolve().then(function() {
     self.devEnv.postMessage({
       'name': 'nacl_spawn',
       'nmf': 'bash.nmf',
-      'argv': ['bash', '-c', '. /mnt/http/setup-environment && ' + cmd],
+      'argv': ['bash', '-c', cmdPrefix + cmd],
       'cwd': '/home/user',
-      'envs': [],
+      'envs': ['HOME=/home/user'],
     });
-    return self.devEnv.wait();
-  }).then(updateStdoutUntil('nacl_spawn_reply')).then(function(msg) {
+    return self.gatherStdoutUntil('nacl_spawn_reply');
+  }).then(function(msg) {
     ASSERT_EQ('nacl_spawn_reply', msg.name);
-    pid = msg.pid;
+    return {pid: msg.pid, output: msg.output};
+  });
+};
+
+DevEnvTest.prototype.waitCommand = function(pid) {
+  var self = this;
+  return Promise.resolve().then(function() {
     self.devEnv.postMessage({
       'name': 'nacl_waitpid',
       'pid': pid,
       'options': 0,
     });
-    return self.devEnv.wait();
-  }).then(updateStdoutUntil('nacl_waitpid_reply')).then(function(msg) {
+    return self.gatherStdoutUntil('nacl_waitpid_reply');
+  }).then(function(msg) {
     ASSERT_EQ('nacl_waitpid_reply', msg.name);
     ASSERT_EQ(pid, msg.pid);
-    return {status: msg.status, output: output};
+    return {status: msg.status, output: msg.output};
+  });
+};
+
+DevEnvTest.prototype.runCommand = function(cmd, cmdPrefix) {
+  var self = this;
+  var earlyOutput;
+  return Promise.resolve().then(function() {
+    return self.spawnCommand(cmd, cmdPrefix);
+  }).then(function(msg) {
+    earlyOutput = msg.output;
+    return self.waitCommand(msg.pid);
+  }).then(function(msg) {
+    msg.output = earlyOutput + msg.output;
+    return msg;
   });
 };
 
@@ -112,6 +143,11 @@ DevEnvTest.prototype.checkCommand = function(
   });
 };
 
+DevEnvTest.prototype.sigint = function(pid) {
+  this.devEnv.postMessage({
+    'name': 'nacl_sigint',
+  });
+};
 
 DevEnvTest.prototype.installPackage = function(name) {
   var cmd = 'bash /mnt/http/package -f -i ' + name;
@@ -260,26 +296,25 @@ DevEnvTest.prototype.tcpExec_ = function(msg) {
   var error = msg.name + '_error';
   return Promise.resolve().then(function() {
     self.tcp.postMessage(msg);
-    return self.tcp.wait();
-  }).then(self.waitWhile(self.tcp,
-    function condition(msg) {
-      return msg.name !== reply && msg.name !== error;
-    },
-    function body(msg) {
-      if (msg.name === 'tcp_message') {
-        if (self.tcpBuffer[msg.socket] === undefined) {
-          self.tcpBuffer[msg.socket] = '';
+    return self.waitWhile(self.tcp,
+      function condition(msg) {
+        return msg.name !== reply && msg.name !== error;
+      },
+      function body(msg) {
+        if (msg.name === 'tcp_message') {
+          if (self.tcpBuffer[msg.socket] === undefined) {
+            self.tcpBuffer[msg.socket] = '';
+          }
+          self.tcpBuffer[msg.socket] += DevEnvTest.array2Str(msg.data);
+        } else if (msg.name === 'tcp_disconnect') {
+          self.tcpDisconnected[msg.socket] = true;
+        } else {
+          // Is there a better way to do this?
+          chrometest.assert(false, 'unexpected message ' + msg.name +
+              ' from tcpapp');
         }
-        self.tcpBuffer[msg.socket] += DevEnvTest.array2Str(msg.data);
-      } else if (msg.name === 'tcp_disconnect') {
-        self.tcpDisconnected[msg.socket] = true;
-      } else {
-        // Is there a better way to do this?
-        chrometest.assert(false, 'unexpected message ' + msg.name +
-            ' from tcpapp');
-      }
-    }
-  )).then(function(msg) {
+      });
+  }).then(function(msg) {
     ASSERT_EQ(reply, msg.name);
     return msg;
   });

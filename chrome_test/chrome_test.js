@@ -163,11 +163,18 @@ chrometest.harnessURL = function(path) {
  * @return {Promise} A promise to log it (or rejects with error code).
  */
 chrometest.log = function(level, message) {
+  // Cap the log line limit.
+  var logLimit = 1024;
+  var rest = message.substr(logLimit);
+  message = message.substr(0, logLimit);
   console.log(level + ': ' + message);
   return chrometest.httpGet(
-    '/_command?log=' + encodeURIComponent(message) +
-    '&level=' + encodeURIComponent(level)).then(function(result) {
-    // Consume the result so theres's no confusion with any chained promises.
+      '/_command?log=' + encodeURIComponent(message) +
+      '&level=' + encodeURIComponent(level)).then(function(result) {
+    if (rest.length > 0) {
+      // Log the rest if any.
+      chrometest.log(level, rest);
+    }
   });
 };
 

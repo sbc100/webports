@@ -28,5 +28,9 @@ PostInstallTestStep() {
       -p latest=1 \
       -C ${NACL_SRC}/out \
       -x -vv -a ${arch}
+    LogExecute python ${START_DIR}/../devenv/io2014_test.py \
+      -p latest=1 \
+      -C ${NACL_SRC}/out \
+      -x -vv -a ${arch}
   done
 }
