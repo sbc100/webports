@@ -27,12 +27,6 @@ else
   export GSUTIL=gsutil
 fi
 
-# Allows Linux Chromium builds to use the existing SUID Sandbox on the bots.
-# Ignored on other platforms.
-if [ "${TEST_BUILDBOT:-}" != "1" ]; then
-  export CHROME_DEVEL_SANDBOX=/opt/chromium/chrome_sandbox
-fi
-
 # The bots set the BOTO_CONFIG environment variable to a different .boto file
 # (currently /b/build/site-config/.boto). override this to the gsutil default
 # which has access to gs://naclports.

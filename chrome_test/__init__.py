@@ -567,9 +567,18 @@ def Main(argv):
     options.chdir.append('.')
 
   if sys.platform.startswith('linux'):
+    default_sandbox_locations = [
+      '/usr/local/sbin/chrome-devel-sandbox',
+      '/opt/chromium/chrome_sandbox'
+    ]
     if 'CHROME_DEVEL_SANDBOX' not in os.environ:
-      logging.error('chrome_test on linux requires CHROME_DEVEL_SANDBOX')
-      sys.exit(1)
+      for filename in default_sandbox_locations:
+        if os.path.exists(filename):
+          os.environ['CHROME_DEVEL_SANDBOX'] = filename
+          break
+      else:
+        logging.error('chrome_test on linux requires CHROME_DEVEL_SANDBOX')
+        sys.exit(1)
     if not os.path.exists(os.environ['CHROME_DEVEL_SANDBOX']):
       logging.error('chrome sandbox specified by CHROME_DEVEL_SANDBOX is '
                     'missing: %s' % os.environ['CHROME_DEVEL_SANDBOX'])
