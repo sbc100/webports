@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 # The host build of this tool is needed by its dependents.
-HOST_BUILD_DIR=${WORK_DIR}/build-nacl-host
-HOST_INSTALL_DIR=${WORK_DIR}/install-nacl-host
+HOST_BUILD_DIR=${WORK_DIR}/build_host
+HOST_INSTALL_DIR=${WORK_DIR}/install_host
 
 EXECUTABLES="bdftruncate${NACL_EXEEXT} ucs2any${NACL_EXEEXT}"
 

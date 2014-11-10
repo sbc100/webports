@@ -24,7 +24,7 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=i686-linux-gnu --disable-shared --enable-static"
   export SO=.a
-  export MAKEFLAGS="PGEN=${NACL_HOST_PYROOT}/../python-host/build-nacl-host/Parser/pgen"
+  export MAKEFLAGS="PGEN=${NACL_HOST_PYBUILD}/Parser/pgen"
   export LIBS="-ltermcap"
   export DYNLOADFILE=dynload_ppapi.o
   export MACHDEP=ppapi
@@ -63,7 +63,7 @@ ConfigureStep() {
 BuildStep() {
   SetupCrossEnvironment
   export CROSS_COMPILE=true
-  export MAKEFLAGS="PGEN=${NACL_HOST_PYROOT}/../python-host/build-nacl-host/Parser/pgen"
+  export MAKEFLAGS="PGEN=${NACL_HOST_PYBUILD}/Parser/pgen"
   DefaultBuildStep
   ChangeDir ${BUILD_DIR}
   Banner "Rebuilding libpython2.7.a"

@@ -6,8 +6,8 @@
 OS_JOBS=1
 
 # This build relies on certain host binaries.
-HOST_BUILD_DIR=${WORK_DIR}/build-nacl-host
-HOST_INSTALL_DIR=${WORK_DIR}/install-nacl-host
+HOST_BUILD_DIR=${WORK_DIR}/build_host
+HOST_INSTALL_DIR=${WORK_DIR}/install_host
 
 EXECUTABLES="gforth-ditc${NACL_EXEEXT}"
 MAKE_TARGETS="${EXECUTABLES}"

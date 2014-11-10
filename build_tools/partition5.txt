@@ -201,6 +201,7 @@ builder 3 (total: 7918)
   libtar
   nacl-spawn
   openssl
+  python-host
   python
   libpng
   jpeg8d

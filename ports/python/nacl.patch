@@ -482,8 +482,8 @@ index 2e32be2..29b7eef 100755
 -	done
 +	case "$host" in
 +	*-*-nacl*)
-+	    interp=$(cd ../build-nacl-host && pwd)/python.exe
-+	    if [ ! -f $interp ]; then interp=$(cd ../build-nacl-host && pwd)/python; fi
++	    interp=$(cd ../../python-host/build_host && pwd)/python.exe
++	    if [ ! -f $interp ]; then interp=$(cd ../../python-host/build_host && pwd)/python; fi
 +	    ;;
 +	*)
 +	    for interp in python$PACKAGE_VERSION python2 python; do
@@ -588,7 +588,7 @@ index ee7e5fc..eacd03d 100644
 -	done
 +	case "$host" in
 +	*-*-nacl*)
-+	    interp=$(cd ../build-nacl-host && pwd)/python
++	    interp=$(cd ../../python-host/build_host && pwd)/python
 +	    ;;
 +	*)
 +	    for interp in python$PACKAGE_VERSION python2 python; do

@@ -571,7 +571,7 @@ index 2e32be2..e01c7ca 100755
 -	done
 +	case "$host" in
 +	*-*-nacl*)
-+	    interp=$(cd ../../python-host/build-nacl-host && pwd)/python
++	    interp=$(cd ../../python-host/build_host && pwd)/python
 +	    ;;
 +	*)
 +	    for interp in python$PACKAGE_VERSION python2 python; do
@@ -676,7 +676,7 @@ index ee7e5fc..4f52cd6 100644
 -	done
 +	case "$host" in
 +	*-*-nacl*)
-+	    interp=$(cd ../../python-host/build-nacl-host && pwd)/python
++	    interp=$(cd ../../python-host/build_host && pwd)/python
 +	    ;;
 +	*)
 +	    for interp in python$PACKAGE_VERSION python2 python; do

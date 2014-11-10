@@ -9,10 +9,8 @@ libasound2:i386 libxdamage1:i386 libxtst6:i386 libxrandr2:i386 libcap2:i386
 libudev0:i386 libgtk2.0-0:i386 libxss1:i386 libexif12:i386
 libgl1-mesa-glx:i386
 
-Building some packages (python) requires:
-libssl0.9.8:i386 lib32z1-dev
-
-Additionally, we currently need some symlinks:
+Additionally, on older Ubuntu system such as Precise, we currently need
+some symlinks to be manually created:
 $ cd /usr/lib/i386-linux-gnu/
 $ sudo ln -s libcrypto.so.0.9.8 libcrypto.so
 $ sudo ln -s libssl.so.0.9.8 libssl.so

@@ -69,11 +69,20 @@ On Mac OS X you can use homebrew to install these using the following command::
 
 The build system for some of the native Python modules relies on a 32-bit
 host build of Python itself, which in turn relies on the development version
-of zlib being available.  On 64-bit Ubuntu/Precise this means installing the
-following package: ``lib32z1-dev``.
+of zlib and libssl being available.  On 64-bit Ubuntu/Trust this means
+installing:
+
+- zlib1g-dev:i386
+- libssl-dev:i386
+
+On older Debian/Ubuntu systems the packages were called:
+
+- lib32z1-dev
+- libssl0.9.8:i
 
 To run the presubmit checks (or ``make test``) you will also need to have
-python coverage module installed.
+the ``coverage`` Python module installed.
+
 
 Building
 --------

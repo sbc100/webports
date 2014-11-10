@@ -10,7 +10,7 @@ EXECUTABLES="ruby${NACL_EXEEXT} pepper-ruby${NACL_EXEEXT}"
 ConfigureStep() {
   # We need to build a host version of ruby for use during the nacl
   # build.
-  HOST_BUILD=${WORK_DIR}/build-nacl-host
+  HOST_BUILD=${WORK_DIR}/build_host
   if [ ! -x ${HOST_BUILD}/inst/bin/ruby ]; then
     Banner "Building ruby for host"
     MakeDir ${HOST_BUILD}
@@ -45,7 +45,7 @@ ConfigureStep() {
   LogExecute ${SRC_DIR}/configure \
     --host=${conf_host} \
     --prefix=/ \
-    --with-baseruby=${WORK_DIR}/build-nacl-host/inst/bin/ruby \
+    --with-baseruby=${HOST_BUILD}/inst/bin/ruby \
     --with-http=no \
     --with-html=no \
     --with-ftp=no \
