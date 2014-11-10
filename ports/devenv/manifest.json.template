@@ -29,6 +29,8 @@
   },
   "permissions": [
     "storage",
+    "clipboardRead",
+    "clipboardWrite",
     "unlimitedStorage",
     "*://naclports.storage.googleapis.com/*",
     "*://nacltools.storage.googleapis.com/*",

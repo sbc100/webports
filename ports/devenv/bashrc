@@ -20,18 +20,19 @@ DEFAULT_PACKAGES="\
   -i python \
   -i vim"
 
-if [ "${NACL_ARCH}" != "arm" ]; then
+HAVE_GCC=0
+if [[ "${NACL_ARCH}" == "i686" || "${NACL_ARCH}" == "x86_64" ]]; then
   DEFAULT_PACKAGES+=" \
 -i mingn.base \
 -i mingn.lib"
+  HAVE_GCC=1
 fi
 
 # Check for updates on some packages.
 package ${DEFAULT_PACKAGES[@]}
 
-if [ "${NACL_ARCH}" == "arm" ]; then
-  echo "WARNING: gcc not yet available on arm (coming soon)." 2>&1
-  echo "WARNING: git currently broken on arm." 2>&1
+if [ "${HAVE_GCC}" == 0 ]; then
+  echo "WARNING: gcc not yet available for your platform (coming soon)." 
 fi
 
 # Setup environment again, to rescan the packages added.

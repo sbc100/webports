@@ -69,6 +69,7 @@ NaClTerm.CONTROL_C = 3;
  */
 NaClTerm.prototype.run = function() {
   this.io.onVTKeystroke = this.onVTKeystroke_.bind(this);
+  this.io.sendString = this.onVTKeystroke_.bind(this);
   this.io.onTerminalResize = this.onTerminalResize_.bind(this);
 
   this.print(NaClTerm.ANSI_CYAN);

@@ -33,6 +33,7 @@ static int Download(const char* url, const char* dst) {
   pp::URLRequestInfo url_request(instance);
   url_request.SetURL(url);
   url_request.SetMethod("GET");
+  url_request.SetAllowCrossOriginRequests(true);
   url_request.SetRecordDownloadProgress(true);
 
   pp::URLLoader url_loader(instance);
