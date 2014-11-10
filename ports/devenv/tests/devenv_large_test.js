@@ -10,7 +10,6 @@
 // This test must be run before any tests that use these packages.
 TEST_F(DevEnvTest, 'testPackageInstall', function() {
   var self = this;
-  var params = chrometest.getUrlParameters();
   return Promise.resolve().then(function() {
     return self.installPackage('coreutils');
   }).then(function() {
