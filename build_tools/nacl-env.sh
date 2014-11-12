@@ -188,16 +188,15 @@ InitializeNaClGccToolchain() {
     exit -1
   fi
 
-  # export nacl tools for direct use in patches.
-  export NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-gcc
-  export NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-g++
-  export NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ar
-  export NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
-  export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
-  export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
-  export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
-  export NACLREADELF=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-readelf
-  export NACL_EXEEXT=".nexe"
+  NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-gcc
+  NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-g++
+  NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ar
+  NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
+  NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
+  NACLREADELF=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-readelf
+  NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
+  NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+  NACL_EXEEXT=".nexe"
 
   if [ ${NACL_ARCH} = "arm" ]; then
     local NACL_LIBDIR=arm-nacl/lib
@@ -246,16 +245,17 @@ InitializeEmscriptenToolchain() {
   readonly NACL_TOOLCHAIN_ROOT=${EM_ROOT}
   readonly NACL_BIN_PATH=${EM_ROOT}
 
-  # export emscripten tools for direct use in patches.
-  export NACLCC=${EM_ROOT}/emcc
-  export NACLCXX=${EM_ROOT}/em++
-  export NACLAR=${EM_ROOT}/emar
-  export NACLRANLIB=${EM_ROOT}/emranlib
-  export NACLLD=${EM_ROOT}/em++
-  export NACLSTRINGS=/bin/true
-  export NACLSTRIP=/bin/true
-  export NACL_EXEEXT=".js"
-  export LLVM=${TC_ROOT}/bin
+  NACLCC=${EM_ROOT}/emcc
+  NACLCXX=${EM_ROOT}/em++
+  NACLAR=${EM_ROOT}/emar
+  NACLRANLIB=${EM_ROOT}/emranlib
+  NACLLD=${EM_ROOT}/em++
+  NACLREADELF=/bin/true
+  NACLSTRINGS=/bin/true
+  NACLSTRIP=/bin/true
+  NACL_EXEEXT=".js"
+
+  LLVM=${TC_ROOT}/bin
 
   if [ "${NACL_DEBUG:-}" = "1" ]; then
     NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/emscripten/Debug"
@@ -280,26 +280,25 @@ InitializePNaClToolchain() {
   readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${TC_ROOT}}
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
-  # export nacl tools for direct use in patches.
-  export NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-clang
-  export NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-clang++
-  export NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ar
-  export NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
-  export NACLREADELF=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-readelf
-  export NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
-  export NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
-  export NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
-  # pnacl's translator
-  export TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
-  export PNACLFINALIZE=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-finalize
-  # pnacl's pexe optimizer
-  export PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
+  NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-clang
+  NACLCXX=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-clang++
+  NACLAR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ar
+  NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
+  NACLREADELF=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-readelf
+  NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
   # TODO(robertm): figure our why we do not have a pnacl-string
-  #export NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
+  #NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
   # until then use the host's strings tool
   # (used only by the cairo package)
-  export NACLSTRINGS="$(which strings)"
-  export NACL_EXEEXT=".pexe"
+  NACLSTRINGS="$(which strings)"
+  NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+  NACL_EXEEXT=".pexe"
+
+  # pnacl's translator
+  TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
+  PNACLFINALIZE=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-finalize
+  # pnacl's pexe optimizer
+  PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
 
   if [ "${NACL_DEBUG:-}" = "1" ]; then
     NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Debug"

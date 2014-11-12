@@ -29,6 +29,17 @@ NACL_DEBUG=${NACL_DEBUG:-0}
 NACL_ENV_IMPORT=1
 . "${TOOLS_DIR}/nacl-env.sh"
 
+# export tool names for direct use in patches.
+export NACLCC
+export NACLCXX
+export NACLAR
+export NACLRANLIB
+export NACLLD
+export NACLREADELF
+export NACLSTRINGS
+export NACLSTRIP
+export NACL_EXEEXT
+
 # When run by a buildbot force all archives to come from the NaCl mirror
 # rather than using upstream URL.
 if [ -n "${BUILDBOT_BUILDERNAME:-}" ]; then
@@ -901,7 +912,6 @@ SetupCrossEnvironment() {
   echo "CXXFLAGS=${CXXFLAGS}"
   echo "LDFLAGS=${LDFLAGS}"
 }
-
 
 GetRevision() {
   cd ${NACL_SRC}
