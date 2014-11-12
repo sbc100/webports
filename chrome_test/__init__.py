@@ -376,7 +376,7 @@ def ChromeAppIdFromPath(path):
 
 
 def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
-              enable_nacl, enable_nacl_debug,
+              unlimited_storage, enable_nacl, enable_nacl_debug,
               load_extensions, load_apps, start_path):
   """Run Chrome with a timeout and several options.
 
@@ -386,6 +386,8 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
     filter_string: Filter string to select which tests to run.
     roots: Directories to serve test from.
     use_xvfb: Boolean indicating if xvfb should be used.
+    unlimited_storage: Boolean indicating if chrome should be run with
+                       unlimited storage.
     enable_nacl: Boolean indicating that NaCl should be enabled on regular
                  pages.
     enable_nacl_debug: Boolean indicating that NaCl debugging should be
@@ -440,6 +442,8 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
       # faults without it. Using "Chrome/34" so that it goes down one of the
       # more sensible of its version based code paths.
       cmd += ['--user-agent=ChromeTestAgent/' + testing_id + ' Chrome/34']
+      if unlimited_storage:
+        cmd += ['--unlimited-storage']
       if enable_nacl:
         cmd += ['--enable-nacl']
       if enable_nacl_debug:
@@ -533,6 +537,9 @@ def Main(argv):
       '--load-and-launch-app', default=[], action='append',
       help='Add an app to load on start.')
   parser.add_argument(
+      '--unlimited-storage', default=False, action='store_true',
+      help='Allow unlimited storage.')
+  parser.add_argument(
       '--enable-nacl', default=False, action='store_true',
       help='Enable NaCl generally.')
   parser.add_argument(
@@ -591,6 +598,7 @@ def Main(argv):
       filter_string=options.filter,
       roots=options.chdir,
       use_xvfb=options.xvfb,
+      unlimited_storage=options.unlimited_storage,
       enable_nacl=options.enable_nacl,
       enable_nacl_debug=options.enable_nacl_debug,
       load_extensions=options.load_extension,

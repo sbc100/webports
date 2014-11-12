@@ -582,6 +582,23 @@ pid_t setsid() {
   return GetInt(SendRequest(&req), "sid");
 }
 
+void jseval(const char* cmd, char** data, size_t* len) {
+  pp::VarDictionary req;
+  req.Set("command", "nacl_jseval");
+  req.Set("cmd", cmd);
+  pp::VarDictionary result = SendRequest(&req);
+  std::string result_str = result.Get("result").AsString();
+  if (len) {
+    *len = result_str.size();
+  }
+  if (data) {
+    *data = static_cast<char*>(malloc(result_str.size() + 1));
+    assert(*data);
+    memcpy(*data, result_str.data(), result_str.size());
+    (*data)[result_str.size()] = '\0';
+  }
+}
+
 // This is the address for localhost (127.0.0.1).
 #define LOCAL_HOST 0x7F000001
 

@@ -56,6 +56,16 @@ extern int spawnve(int mode, const char* path,
 #define P_NOWAITO 1
 #define P_OVERLAY 2
 
+/*
+ * Synchronously eval JavaScript.
+ *
+ * Args:
+ *   cmd: Null terminated string containing code to eval.
+ *   data: Pointer to a char* to receive eval string result.
+ *   len: Pointer to a size_t to receive the length of the result.
+ */
+extern void jseval(const char* cmd, char** data, size_t* len);
+
 #ifdef __cplusplus
 }
 #endif

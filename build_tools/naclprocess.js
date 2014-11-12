@@ -390,6 +390,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     nacl_getsid: this.handleMessageGetSID_,
     nacl_setsid: this.handleMessageSetSID_,
     nacl_pipe: this.handleMessagePipe_,
+    nacl_jseval: this.handleMessageJSEval_,
   };
 
   // TODO(channingh): Once pinned applications support "result" instead of
@@ -611,6 +612,15 @@ NaClProcessManager.prototype.handleMessagePipe_ = function(msg, reply) {
       write: -1
     });
   });
+}
+
+/**
+ * Handle a javascript invocation.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageJSEval_ = function(msg, reply) {
+  // Using '' + so that undefined can be emitted as a string.
+  reply({result: '' + eval(msg['cmd'])});
 }
 
 /**
@@ -933,6 +943,7 @@ NaClProcessManager.prototype.spawn = function(
     params['PS_VERBOSITY'] = '2';
     params['PS_EXIT_MESSAGE'] = 'exited';
     params['TERM'] = 'xterm-256color';
+    params['LOCATION_ORIGIN'] = location.origin;
     params['PWD'] = cwd;
     // TODO(bradnelson): Drop self hack once tar extraction first checks
     // relative to the nexe.

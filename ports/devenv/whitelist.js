@@ -8,6 +8,7 @@ NaClProcessManager.nmfWhitelist = [
     'bash',
     'geturl',
     'funzip',
+    'jseval',
     'unzip',
     'unzipsfx',
 ];

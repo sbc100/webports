@@ -5,10 +5,18 @@
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
   -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
-EXECUTABLES=tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT}
+EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
+             jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"
 
 BuildStep() {
   SetupCrossEnvironment
+
+  # Build jseval module.
+  MakeDir ${BUILD_DIR}/jseval
+  LogExecute ${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} -O2 \
+      ${START_DIR}/jseval.c \
+      -o ${BUILD_DIR}/jseval/jseval_${NACL_ARCH}${NACL_EXEEXT} \
+      ${EXTRA_LIBS}
 
   # Build test module.
   MakeDir ${BUILD_DIR}/tests
@@ -36,6 +44,18 @@ InstallStep() {
   LogExecute cp -fR ${GETURL_DIR}/{*.nexe,*.pexe,*.nmf,lib*} ${APP_DIR}
   LogExecute cp -fR ${UNZIP_DIR}/{*.nexe,*.pexe,*.nmf,lib*} ${APP_DIR}
   shopt -u nullglob
+
+  # Install jseval only for pnacl (as it can't really work otherwise).
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    LogExecute ${PNACLFINALIZE} \
+        ${BUILD_DIR}/jseval/jseval_${NACL_ARCH}${NACL_EXEEXT} \
+        -o ${APP_DIR}/jseval_${NACL_ARCH}${NACL_EXEEXT}
+    cd ${APP_DIR}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        jseval_${NACL_ARCH}${NACL_EXEEXT} \
+        -s . \
+        -o jseval.nmf
+  fi
 
   # Install the HTML/JS for the terminal.
   ChangeDir ${APP_DIR}
@@ -100,5 +120,8 @@ PostInstallTestStep() {
   fi
   for arch in ${arches}; do
     LogExecute python ${START_DIR}/devenv_small_test.py -x -vv -a ${arch}
+    if [[ ${NACL_ARCH} == pnacl ]]; then
+      LogExecute python ${START_DIR}/jseval_test.py -x -vv -a ${arch}
+    fi
   done
 }
