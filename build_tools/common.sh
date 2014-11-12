@@ -145,6 +145,7 @@ PATCH_FILE=${START_DIR}/nacl.patch
 
 # Don't support building with SDKs older than the current stable release
 MIN_SDK_VERSION=${MIN_SDK_VERSION:-37}
+NACLPORTS_QUICKBUILD=${NACLPORTS_QUICKBUILD:-0}
 
 if [ "${OS_NAME}" = "Darwin" ]; then
   OS_JOBS=4
@@ -1060,7 +1061,7 @@ DefaultPatchStep() {
 DefaultConfigureStep() {
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
 
-  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
     CONFIGURE_SENTINEL=${CONFIGURE_SENTINEL:-Makefile}
   fi
 
@@ -1479,10 +1480,14 @@ TranslatePexe() {
   local pexe=$1
   local basename="${pexe%.*}"
   local arches="arm x86-32 x86-64"
+  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
+    arches="x86-64"
+  fi
+
   Banner "Translating ${pexe}"
 
   for a in ${arches} ; do
-    echo "translating pexe [${a}]"
+    echo "translating pexe -O0 [${a}]"
     nexe=${basename}.${a}.nexe
     if [ "${pexe}" -nt "${nexe}" ]; then
       "${TRANSLATOR}" -O0 -arch "${a}" "${pexe}" -o "${nexe}"
@@ -1491,13 +1496,15 @@ TranslatePexe() {
 
   # Now the same spiel with -O2
 
-  for a in ${arches} ; do
-    echo "translating pexe [${a}]"
-    nexe=${basename}.opt.${a}.nexe
-    if [ "${pexe}" -nt "${nexe}" ]; then
-      "${TRANSLATOR}" -O2 -arch "${a}" "${pexe}" -o "${nexe}"
-    fi
-  done
+  if [ "${NACLPORTS_QUICKBUILD}" != "1" ]; then
+    for a in ${arches} ; do
+      echo "translating pexe -O2 [${a}]"
+      nexe=${basename}.opt.${a}.nexe
+      if [ "${pexe}" -nt "${nexe}" ]; then
+        "${TRANSLATOR}" -O2 -arch "${a}" "${pexe}" -o "${nexe}"
+      fi
+    done
+  fi
 
   local dirname=$(dirname "${pexe}")
   ls -l "${dirname}"/*.nexe "${pexe}"
@@ -1545,7 +1552,7 @@ PackageStep() {
 
 ZipPublishDir() {
   # If something exists in the publish directory, zip it for download by mingn.
-  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
     return
   fi
   if [ -d "${PUBLISH_DIR}" ]; then
@@ -1657,7 +1664,7 @@ RunTestStep()       {
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
   fi
-  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
     return
   fi
   RunStep TestStep "Testing" "${BUILD_DIR}"
@@ -1665,7 +1672,7 @@ RunTestStep()       {
 
 
 RunPostInstallTestStep()       {
-  if [ "${NACLPORTS_QUICKBUILD:-}" = "1" ]; then
+  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
     return
   fi
   RunStep PostInstallTestStep "Testing (post-install)"
