@@ -53,6 +53,12 @@ def CmdInfo(config, options, args):
     sys.stdout.write(f.read())
 
 
+def CmdPkgListDeps(package, options):
+  """Print complete list of package dependencies."""
+  for pkg in package.TransitiveDependencies():
+    print(pkg.NAME)
+
+
 def CmdPkgContents(package, options):
   """List contents of an installed package"""
   install_root = naclports.GetInstallRoot(package.config)
@@ -145,7 +151,8 @@ def run_main(args):
     'verify': CmdPkgVerify,
     'clean': CmdPkgClean,
     'uninstall': CmdPkgUninstall,
-    'contents': CmdPkgContents
+    'contents': CmdPkgContents,
+    'depends': CmdPkgListDeps
   }
 
   installed_pkg_commands = ['contents', 'uninstall']

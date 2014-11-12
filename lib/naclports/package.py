@@ -61,7 +61,11 @@ class Package(object):
       raise Error('%s: contains both LIBC and DISABLED_LIBC' % self.info)
 
   def __cmp__(self, other):
-    return cmp(self.NAME, other.NAME)
+    return cmp((self.NAME, self.VERSION, self.config),
+               (other.NAME, other.VERSION, other.config))
+
+  def __hash__(self):
+    return hash((self.NAME, self.VERSION, self.config))
 
   def __str__(self):
     return '<Package %s %s %s>' % (self.NAME, self.VERSION, self.config)
