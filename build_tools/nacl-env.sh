@@ -351,8 +351,7 @@ fi
 if [ "${NACL_ARCH}" = "pnacl" ]; then
   if [ -d ${NACL_TOOLCHAIN_ROOT}/le32-nacl ]; then
     NACL_SDK_REVISION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-revision)
-    if [ "${NACL_SDK_VERSION}" -lt 40 -a
-         "${NACL_SDK_REVISION}" -lt 298910 ]; then
+    if [ "${NACL_SDK_VERSION}" -lt 40 ]; then
       # pepper_39 shiped with le32-nacl/local in is default search path
       readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/local
     else

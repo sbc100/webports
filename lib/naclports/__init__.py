@@ -208,7 +208,7 @@ def GetInstallRoot(config):
   # in the PNaCl default search path (should be once pepper_39 is stable).
   if config.toolchain == 'pnacl':
     if tc_root.endswith('le32-nacl'):
-      if GetSDKRevision() < 298910:
+      if int(GetSDKVersion()) < 40:
         return os.path.join(tc_root, 'local')
       else:
         return os.path.join(tc_root, 'usr')
