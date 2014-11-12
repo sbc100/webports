@@ -16,8 +16,8 @@ ConfigureStep() {
   CHOST=${NACL_CROSS_PREFIX} LogExecute ./configure --prefix="${PREFIX}"
 }
 
-
 RunMinigzip() {
+  echo "Running minigzip test"
   export LD_LIBRARY_PATH=.
   if echo "hello world" | ./minigzip | ./minigzip -d; then
     echo '  *** minigzip test OK ***'
@@ -28,19 +28,18 @@ RunMinigzip() {
   unset LD_LIBRARY_PATH
 }
 
-
 RunExample() {
+  echo "Running exmple test"
   export LD_LIBRARY_PATH=.
   # This second test does not yet work on nacl (gzopen fails)
-  #if ./example; then \
-    #echo '  *** zlib test OK ***'; \
-  #else \
-    #echo '  *** zlib test FAILED ***'; \
-    #exit 1
-  #fi
+  if ./example; then \
+    echo '  *** zlib test OK ***'; \
+  else \
+    echo '  *** zlib test FAILED ***'; \
+    exit 1
+  fi
   unset LD_LIBRARY_PATH
 }
-
 
 TestStep() {
   if [ "${NACL_LIBC}" = "glibc" ]; then
