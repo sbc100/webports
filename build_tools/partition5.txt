@@ -153,6 +153,7 @@ builder 2 (total: 8175)
   libunistring
   binutils
   nethack
+  gettext
   python3
   python3-ppapi
   sdl2
@@ -196,6 +197,7 @@ builder 3 (total: 7918)
   ncurses
   zlib
   readline
+  gettext
   python3
   bzip2
   libtar

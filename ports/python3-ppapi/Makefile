@@ -14,7 +14,7 @@ ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic
 else
-LIBS += glibc-compat
+LIBS += intl glibc-compat
 endif
 SOURCES = python.c
 INC_PATHS = $(NACLPORTS_INCLUDE)/python3.4m

@@ -6,5 +6,5 @@ LICENSE=CUSTOM:LICENSE
 # missing decimal_point member in lconv struct lconv.
 DISABLED_LIBC=(bionic)
 BUILD_OS=linux
-DEPENDS=(readline zlib bzip2)
+DEPENDS=(readline zlib bzip2 gettext)
 SHA1=0727d8a8498733baabe6f51632b9bab0cbaa9ada

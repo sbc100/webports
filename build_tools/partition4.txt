@@ -110,6 +110,7 @@ builder 1 (total: 10557)
   apr
   apr-util
   subversion
+  gettext
   python3
   python3-ppapi
   libssh2
