@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-PATH="${BUILD_DIR}/../../font-util/install-nacl-host/bin:${PATH}"
+PATH="${BUILD_DIR}/../../font-util/install_host/bin:${PATH}"
 
 # Disable running on mkfontdir/mkfontscale on install.
 export ac_cv_path_MKFONTDIR=echo
