@@ -256,7 +256,7 @@ fi
 CheckPatchVersion() {
   # refuse patch 2.6
   if ! which patch > /dev/null; then
-    echo 'patch command not found, please install and try again.'
+    echo 'error: patch command not found, please install and try again.'
     exit 1
   fi
   if [ "$(patch --version 2> /dev/null | sed q)" = "patch 2.6" ]; then
@@ -329,12 +329,16 @@ PatchSpecsFile() {
   # SPECS_FILE is where nacl-gcc 'specs' file will be installed
   local SPECS_DIR=
   if [ "${NACL_ARCH}" = "arm" ]; then
-    SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.8.2
+    SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.8.3
     if [ ! -d "${SPECS_DIR}" ]; then
-      SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.8.3
+      SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/arm-nacl/4.9.2
     fi
   else
     SPECS_DIR=${NACL_TOOLCHAIN_ROOT}/lib/gcc/x86_64-nacl/4.4.3
+  fi
+  if [ ! -d "${SPECS_DIR}" ]; then
+    echo "error: gcc directory not found: ${SPECS_DIR}"
+    exit 1
   fi
   local SPECS_FILE=${SPECS_DIR}/specs
 
@@ -471,7 +475,7 @@ TryFetch() {
   if which curl > /dev/null ; then
     curl ${CURL_ARGS} -o "${FILENAME}" "${URL}"
   else
-    Banner "ERROR: could not find 'curl' in your PATH"
+    echo "error: could not find 'curl' in your PATH"
     exit 1
   fi
 }
@@ -548,7 +552,7 @@ GitCloneStep() {
       return
     fi
 
-    echo "Upstream archive or patch has changed."
+    echo "error: Upstream archive or patch has changed."
     echo "Please remove existing checkout to continue: '${SRC_DIR}'"
     exit 1
   fi
@@ -930,7 +934,7 @@ GenerateManifest() {
 
   # TODO(sbc): deal with versions greater than 16bit.
   if (( REVISION >= 65536 )); then
-    echo "Version too great to store in revision field on manifest.json"
+    echo "error: Version too great to store in revision field on manifest.json"
     exit 1
   fi
 
@@ -986,7 +990,7 @@ DefaultExtractStep() {
 
   Banner "Extracting ${ARCHIVE_NAME}"
   if [ -d "${SRC_DIR}" ]; then
-    echo "Upstream archive or patch has changed."
+    echo "error: Upstream archive or patch has changed."
     echo "Please remove existing workspace to continue: '${SRC_DIR}'"
     exit 1
   fi
@@ -1456,7 +1460,7 @@ WriteSelLdrScriptForPNaCl() {
       irt_core="${NACL_IRT_X8664}"
       ;;
     *)
-      echo "No sel_ldr for ${arch}"
+      echo "error: No sel_ldr for ${arch}"
       exit 1
   esac
   cat > "${script_name}" <<HERE
