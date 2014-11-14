@@ -17,8 +17,6 @@ readonly -a CRLF_TRANSLATE_FILES=(
     "Source/OpenEXR/Imath/ImathMatrix.h"
     "Source/Utilities.h")
 
-
-
 ExtractStep() {
   DefaultExtractStep
   # FreeImage uses CRLF for line-endings.  The patch file has LF (Unix-style)
@@ -47,6 +45,8 @@ BuildStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
+  export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
+  export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   export PATH=${NACL_BIN_PATH}:${PATH}
 
   # assumes pwd has makefile

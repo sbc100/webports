@@ -4,6 +4,13 @@
 
 EXECUTABLES="bin/opj_decompress bin/opj_compress"
 
+# Workaround for arm-gcc bug:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+# TODO(sbc): remove this once the issue is fixed
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 if [ "${NACL_SHARED}" != "1" ]; then
   EXTRA_CMAKE_ARGS+=" -DBUILD_SHARED_LIBS=OFF"
 fi

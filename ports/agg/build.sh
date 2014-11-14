@@ -7,10 +7,16 @@ BuildStep() {
   ChangeDir ${SRC_DIR}
   local cflags="${NACLPORTS_CFLAGS} -I${NACLPORTS_INCLUDE}/freetype2"
   if [ ${NACL_ARCH} != "pnacl" ]; then
-    cflags="${cflags} -O3 -fomit-frame-pointer"
+    cflags+=" -O3 -fomit-frame-pointer"
   fi
   if [ ${NACL_ARCH} = "i686" -o ${NACL_ARCH} = "x86_64" ]; then
-    cflags="${cflags} -mfpmath=sse -msse"
+    cflags+=" -mfpmath=sse -msse"
+  fi
+  # Workaround for arm-gcc bug:
+  # https://code.google.com/p/nativeclient/issues/detail?id=3205
+  # TODO(sbc): remove this once the issue is fixed
+  if [ "${NACL_ARCH}" = "arm" ]; then
+    cflags+=" -mfpu=vfp"
   fi
   MAKEFLAGS="-j${OS_JOBS}" AGGCXXFLAGS="${cflags}" LogExecute make -j${OS_JOBS}
 }

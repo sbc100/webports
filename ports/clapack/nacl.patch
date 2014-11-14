@@ -1,5 +1,5 @@
 diff --git a/F2CLIBS/libf2c/Makefile b/F2CLIBS/libf2c/Makefile
-index 57eff0d..10c026b 100644
+index 57eff0d..8060da8 100644
 --- a/F2CLIBS/libf2c/Makefile
 +++ b/F2CLIBS/libf2c/Makefile
 @@ -20,7 +20,7 @@ include $(TOPDIR)/make.inc
@@ -31,15 +31,17 @@ index 57eff0d..10c026b 100644
  
  clapack_install: libf2c.a
  	mv libf2c.a ..
-@@ -182,8 +182,9 @@ xwsne.o:	lio.h
+@@ -181,9 +181,11 @@ xwsne.o:	fio.h
+ xwsne.o:	lio.h
  xwsne.o:	fmt.h
  
++BUILD_CC ?= $(CC)
++
  arith.h: arithchk.c
 -	$(CC) $(CFLAGS) -DNO_FPINIT arithchk.c -lm ||\
 -	 $(CC) -DNO_LONG_LONG $(CFLAGS) -DNO_FPINIT arithchk.c -lm
-+	BUILD_CC=${BUILD_CC:-${CC}}
-+	${BUILD_CC} $(CFLAGS) -DNO_FPINIT arithchk.c -lm ||\
-+	${BUILD_CC} -DNO_LONG_LONG $(CFLAGS) -DNO_FPINIT arithchk.c -lm
++	$(BUILD_CC) $(BUILD_CFLAGS) -DNO_FPINIT arithchk.c -lm ||\
++	$(BUILD_CC) -DNO_LONG_LONG $(BUILD_CFLAGS) -DNO_FPINIT arithchk.c -lm
  	./a.out >arith.h
  	rm -f a.out arithchk.o
  
@@ -60,7 +62,7 @@ index 2875fbc..7c47045 100644
  	( cd BLAS/SRC; $(MAKE) )
 diff --git a/make.inc b/make.inc
 new file mode 100644
-index 0000000..dd94588
+index 0000000..9707df1
 --- /dev/null
 +++ b/make.inc
 @@ -0,0 +1,78 @@
@@ -90,7 +92,7 @@ index 0000000..dd94588
 +#CC        = gcc
 +# if no wrapping of the blas library is needed, uncomment next line
 +CC        = ${NACLCC} -DNO_BLAS_WRAP
-+CFLAGS    = -O3 -I$(TOPDIR)/INCLUDE
++CFLAGS    += -O3 -I$(TOPDIR)/INCLUDE
 +LOADER    = ${NACLLD}
 +LOADOPTS  =
 +NOOPT     = -O0 -I$(TOPDIR)/INCLUDE

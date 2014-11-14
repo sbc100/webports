@@ -476,6 +476,19 @@ index 0000000..a1313f1
 +    else if(type == ALL_DEVICE_PROBE)
 +        AppendAllDevicesList(ppapiDevice);
 +}
+diff --git a/Alc/mixer_neon.c b/Alc/mixer_neon.c
+index 7b6da2b..f61ef55 100644
+--- a/Alc/mixer_neon.c
++++ b/Alc/mixer_neon.c
+@@ -75,7 +75,7 @@ static inline void ApplyCoeffs(ALuint Offset, ALfloat (*restrict Values)[2],
+ #undef SUFFIX
+ 
+ 
+-void MixDirect_Neon(const ALfloat *data, ALuint OutChans, ALfloat (*restrict OutBuffer)[BUFFERSIZE],
++void Mix_Neon(const ALfloat *data, ALuint OutChans, ALfloat (*restrict OutBuffer)[BUFFERSIZE],
+                     MixGains *Gains, ALuint Counter, ALuint OutPos, ALuint BufferSize)
+ {
+     ALfloat gain, step;
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 0087edb..582901c 100644
 --- a/CMakeLists.txt

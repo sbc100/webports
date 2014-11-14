@@ -20,6 +20,13 @@ ConfigureStep() {
     EXTRA_ARGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
+  # Workaround for arm-gcc bug:
+  # https://code.google.com/p/nativeclient/issues/detail?id=3205
+  # TODO(sbc): remove this once the issue is fixed
+  if [ "${NACL_ARCH}" = "arm" ]; then
+    EXTRA_ARGS+=" -mfpu=vfp"
+  fi
+
   # Override $SYSTEM $RELEASE and $MACHINE, otherwise openssl's
   # config will use uname to try and guess them which has
   # different results depending on the host OS.

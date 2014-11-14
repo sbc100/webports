@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 5ffb952..5c77e30 100644
+index 5ffb952..b432a38 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -19,11 +19,11 @@ TINYXML_USE_STL := NO
@@ -19,14 +19,29 @@ index 5ffb952..5c77e30 100644
  
  DEBUG_CFLAGS     := -Wall -Wno-format -g -DDEBUG
  RELEASE_CFLAGS   := -Wall -Wno-unknown-pragmas -Wno-format -O3
-@@ -35,6 +35,7 @@ RELEASE_CXXFLAGS := ${RELEASE_CFLAGS}
+@@ -35,15 +35,16 @@ RELEASE_CXXFLAGS := ${RELEASE_CFLAGS}
  
  DEBUG_LDFLAGS    := -g
  RELEASE_LDFLAGS  :=
 +ARFLAGS          ?= rc
  
  ifeq (YES, ${DEBUG})
-    CFLAGS       := ${DEBUG_CFLAGS}
+-   CFLAGS       := ${DEBUG_CFLAGS}
+-   CXXFLAGS     := ${DEBUG_CXXFLAGS}
+-   LDFLAGS      := ${DEBUG_LDFLAGS}
++   CFLAGS       := ${CFLAGS} ${DEBUG_CFLAGS}
++   CXXFLAGS     := ${CXXFLAGS} ${DEBUG_CXXFLAGS}
++   LDFLAGS      := ${LDFLAGS} ${DEBUG_LDFLAGS}
+ else
+-   CFLAGS       := ${RELEASE_CFLAGS}
+-   CXXFLAGS     := ${RELEASE_CXXFLAGS}
+-   LDFLAGS      := ${RELEASE_LDFLAGS}
++   CFLAGS       := ${CFLAGS} ${RELEASE_CFLAGS}
++   CXXFLAGS     := ${CXXFLAGS} ${RELEASE_CXXFLAGS}
++   LDFLAGS      := ${LDFLAGS} ${RELEASE_LDFLAGS}
+ endif
+ 
+ ifeq (YES, ${PROFILE})
 @@ -82,6 +83,7 @@ CXXFLAGS := ${CXXFLAGS} ${DEFS}
  #****************************************************************************
  

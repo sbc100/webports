@@ -3,8 +3,15 @@
 # found in the LICENSE file.
 
 # Without these CFLAGS fftw fails to build for ARM
-NACLPORTS_CFLAGS+=" -fomit-frame-pointer -fstrict-aliasing \
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -fomit-frame-pointer -fstrict-aliasing \
   -fno-schedule-insns -ffast-math"
+
+  # Workaround for arm-gcc bug:
+  # https://code.google.com/p/nativeclient/issues/detail?id=3205
+  # TODO(sbc): remove this once the issue is fixed
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
 
 ConfigureStep() {
   SetupCrossEnvironment

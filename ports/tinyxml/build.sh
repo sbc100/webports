@@ -6,12 +6,22 @@ BUILD_DIR=${SRC_DIR}
 
 EXECUTABLES=xmltest
 
+# Workaround for arm-gcc bug:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+# TODO(sbc): remove this once the issue is fixed
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 ConfigureStep() {
   LogExecute make clean
 }
 
 BuildStep() {
   SetupCrossEnvironment
+  CFLAGS="${CPPFLAGS} ${CFLAGS}"
+  CXXFLAGS="${CPPFLAGS} ${CXXFLAGS}"
+  echo $CFLAGS
   LogExecute make libtinyxml.a xmltest
 }
 

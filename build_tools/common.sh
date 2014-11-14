@@ -1140,11 +1140,6 @@ ConfigureStep_CMake() {
     EXTRA_CMAKE_ARGS+=" -GNinja"
   fi
 
-  EXTRA_CMAKE_ARGS=${EXTRA_CMAKE_ARGS:-}
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    EXTRA_CMAKE_ARGS+=" -DEXTRA_INCLUDE=${NACLPORTS_INCLUDE}/glibc-compat"
-  fi
-
   if [ $NACL_DEBUG = "1" ]; then
     BUILD_TYPE=DEBUG
   else
@@ -1152,6 +1147,8 @@ ConfigureStep_CMake() {
   fi
 
   SetupCrossPaths
+  export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
+  export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   LogExecute cmake "${SRC_DIR}" \
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
            -DNACLAR=${NACLAR} \
@@ -1166,7 +1163,7 @@ ConfigureStep_CMake() {
            -DNACL_LIBC=${NACL_LIBC} \
            -DCMAKE_PREFIX_PATH=${NACL_PREFIX} \
            -DCMAKE_INSTALL_PREFIX=${PREFIX} \
-           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ${EXTRA_CMAKE_ARGS}
+           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ${EXTRA_CMAKE_ARGS:-}
 }
 
 
