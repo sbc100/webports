@@ -7,4 +7,9 @@ if [ "${NACL_SHARED}" != "1" ]; then
   export LIBS="-lz -lm"
 fi
 
+# TODO(sbc): fix the NEON build of libwebp remove this.
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 EXECUTABLES="examples/dwebp${NACL_EXEEXT} examples/cwebp${NACL_EXEEXT}"
