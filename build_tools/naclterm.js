@@ -91,6 +91,13 @@ NaClTerm.init = function() {
   // We don't properly support the hterm bell sound, so we need to disable it.
   terminal.prefs_.definePreference('audible-bell-sound', '');
 
+  // TODO(bradnelson/rginda): Drop when hterm auto-detects this.
+  // Turn on open web friendly clipboard handling if we're not running
+  // in a chrome app.
+  if (!window.chrome || !chrome.runtime || !chrome.runtime.id) {
+    terminal.prefs_.definePreference('use-default-window-copy', true);
+  }
+
   terminal.setAutoCarriageReturn(true);
   terminal.setCursorPosition(0, 0);
   terminal.setCursorVisible(true);
