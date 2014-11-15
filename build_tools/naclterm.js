@@ -215,6 +215,8 @@ NaClTerm.prototype.handleExit_ = function(pid, status) {
                '(status=' + status + ')\n');
   }
   this.argv.io.pop();
+  // Remove window close handler.
+  window.onbeforeunload = function() { return null; };
   if (this.argv.onExit) {
     this.argv.onExit(status);
   }
@@ -238,6 +240,10 @@ NaClTerm.prototype.spawnRootProcess_ = function() {
       self.print('Loading NaCl module.\n');
       self.processManager.spawn(
           NaClTerm.nmf, argv, env, '/', naclType, null, function(rootPid) {
+        // Warn if we close while still running.
+        window.onbeforeunload = function() {
+          return 'Processes still running!';
+        };
         self.processManager.waitpid(rootPid, 0, self.handleExit_.bind(self));
       });
     };
