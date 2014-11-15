@@ -96,6 +96,8 @@ NaClTerm.init = function() {
   // in a chrome app.
   if (!window.chrome || !chrome.runtime || !chrome.runtime.id) {
     terminal.prefs_.definePreference('use-default-window-copy', true);
+    terminal.prefs_.definePreference('ctrl-c-copy', true);
+    terminal.prefs_.definePreference('ctrl-v-paste', true);
   }
 
   terminal.setAutoCarriageReturn(true);
