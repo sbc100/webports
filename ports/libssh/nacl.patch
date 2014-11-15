@@ -12,7 +12,7 @@ index 472fe79..c87a2e7 100644
 -endif (NOT WIN32)
 +endif (NOT WIN32 AND NOT PNACL)
 diff --git a/cmake/Modules/DefineCompilerFlags.cmake b/cmake/Modules/DefineCompilerFlags.cmake
-index 0ab8802..b545ff2 100644
+index 0ab8802..49ff9a1 100644
 --- a/cmake/Modules/DefineCompilerFlags.cmake
 +++ b/cmake/Modules/DefineCompilerFlags.cmake
 @@ -10,7 +10,11 @@ if (UNIX AND NOT WIN32)
@@ -28,6 +28,23 @@ index 0ab8802..b545ff2 100644
          set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wshadow -Wmissing-prototypes -Wdeclaration-after-statement")
          set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunused -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wformat-security")
          set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-format-attribute")
+@@ -21,10 +25,12 @@ if (UNIX AND NOT WIN32)
+             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+         endif (WITH_FPIC)
+ 
+-        check_c_compiler_flag_ssp("-fstack-protector" WITH_STACK_PROTECTOR)
+-        if (WITH_STACK_PROTECTOR)
+-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector")
+-        endif (WITH_STACK_PROTECTOR)
++        if (NOT NACL)
++            check_c_compiler_flag_ssp("-fstack-protector" WITH_STACK_PROTECTOR)
++            if (WITH_STACK_PROTECTOR)
++                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector")
++            endif (WITH_STACK_PROTECTOR)
++        endif ()
+ 
+         if (CMAKE_BUILD_TYPE)
+             string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index 83435d0..774582b 100644
 --- a/src/CMakeLists.txt
