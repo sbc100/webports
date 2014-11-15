@@ -4,7 +4,9 @@ deps = {
   "src/third_party/mock":
     "https://github.com/sbc100/mock.git@6206f33",
   "src/third_party/zip.js":
-    "git://github.com/gildas-lormeau/zip.js@4c93974"
+    "git://github.com/gildas-lormeau/zip.js@4c93974",
+  "src/third_party/coverage":
+    "https://github.com/nedbat/coveragepy.git@8da39d5"
 }
 
 deps_os = {

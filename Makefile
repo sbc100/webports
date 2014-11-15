@@ -14,21 +14,9 @@
 SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libogg
 SDK_LIBS += libtheora libvorbis libwebp libxml2 tinyxml openal-soft freealut
 
-COVERAGE = coverage
+COVERAGE = python third_party/coverage
 COVERAGE_ARGS = --fail-under=56
 COVERAGE_VER := $(shell $(COVERAGE) --version 2>/dev/null)
-
-ifndef COVERAGE_VER
-# Debian/Ubuntu ship the coverage binary as 'python-coverage' so check
-# for that if coverage is not found.
-# The version in ubunaru/precise 3.4 does not support the --fail-under
-# argument.
-COVERAGE_VER := $(shell python-coverage --version 2>/dev/null)
-ifdef COVERAGE_VER
-COVERAGE = python-coverage
-COVERAGE_ARGS =
-endif
-endif
 
 ifeq ($(V),1)
 VERBOSE ?= 1

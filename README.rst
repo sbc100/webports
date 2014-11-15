@@ -80,9 +80,6 @@ On older Debian/Ubuntu systems the packages were called:
 - lib32z1-dev
 - libssl0.9.8:i
 
-To run the presubmit checks (or ``make test``) you will also need to have
-the ``coverage`` Python module installed.
-
 
 Building
 --------
