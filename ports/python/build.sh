@@ -8,6 +8,13 @@ EXECUTABLES=python${NACL_EXEEXT}
 # requires us to set --build= as well as --host=.
 HOST_BUILD_DIR=${WORK_DIR}/build_host
 
+# Workaround for arm-gcc bug:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+# TODO(sbc): remove this once the issue is fixed
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 ConfigureStep() {
   # We pre-seed configure with certain results that it cannot determine
   # since we are doing a cross compile.  The $CONFIG_SITE file is sourced

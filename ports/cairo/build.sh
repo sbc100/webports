@@ -2,6 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Workaround for arm-gcc bug:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+# TODO(sbc): remove this once the issue is fixed
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 EXECUTABLES="test/cairo-test-suite${NACL_EXEEXT}"
 
 # This is only necessary for pnacl

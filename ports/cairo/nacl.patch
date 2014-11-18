@@ -1,5 +1,5 @@
 diff --git a/configure b/configure
-index 0ceb5bf..55e6f97 100755
+index 0ceb5bf..4a94244 100755
 --- a/configure
 +++ b/configure
 @@ -2974,18 +2974,22 @@ $as_echo "/* confdefs.h */" > confdefs.h
@@ -25,7 +25,42 @@ index 0ceb5bf..55e6f97 100755
  #define PACKAGE_STRING "$PACKAGE_STRING"
  _ACEOF
  
-@@ -18805,10 +18809,10 @@ _ACEOF
+@@ -18160,31 +18164,10 @@ MAYBE_WARN="$MAYBE_WARN -erroff=E_ENUM_TYPE_MISMATCH_ARG \
+ 			-erroff=E_ENUM_TYPE_MISMATCH_OP"
+ 
+ 
++# Removed -flto flag as it seems to cause problems with the latest
++# version of our arm compiler:
++# https://code.google.com/p/nativeclient/issues/detail?id=3995
+ 
+-safe_MAYBE_WARN="$MAYBE_WARN"
+-MAYBE_WARN="$MAYBE_WARN -flto"
+-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-int
+-main ()
+-{
+-
+-	int main(int argc, char **argv) { return 0; }
+-
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_link "$LINENO"; then :
+-
+-else
+-
+-	MAYBE_WARN="$safe_MAYBE_WARN"
+-
+-fi
+-rm -f core conftest.err conftest.$ac_objext \
+-    conftest$ac_exeext conftest.$ac_ext
+ 
+ MAYBE_WARN="$MAYBE_WARN -fno-strict-aliasing -fno-common"
+ 
+@@ -18805,10 +18788,10 @@ _ACEOF
  if ac_fn_c_try_compile "$LINENO"; then :
  
  

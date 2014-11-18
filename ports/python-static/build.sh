@@ -4,6 +4,13 @@
 
 EXECUTABLES=python${NACL_EXEEXT}
 
+# Workaround for arm-gcc bug:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+# TODO(sbc): remove this once the issue is fixed
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 # Currently this package only builds on linux.
 # The build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.

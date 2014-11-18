@@ -8,6 +8,13 @@ BUILD_SHARED=FALSE
 # library.
 BUILD_TEST=FALSE
 
+# Workaround for arm-gcc bug:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+# TODO(sbc): remove this once the issue is fixed
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 EXTRA_CMAKE_ARGS=" \
   -DPHYSFS_BUILD_SHARED=${BUILD_SHARED} \
   -DPHYSFS_BUILD_TEST=${BUILD_TEST} \

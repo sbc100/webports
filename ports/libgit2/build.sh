@@ -4,15 +4,22 @@
 
 EXECUTABLES="libgit2_clar"
 
+# Workaround for arm-gcc bug:
+# https://code.google.com/p/nativeclient/issues/detail?id=3205
+# TODO(sbc): remove this once the issue is fixed
+if [ "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
+fi
+
 if [ "${NACL_SHARED}" != "1" ]; then
   EXTRA_CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF"
 fi
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS="-I${NACLPORTS_INCLUDE}/glibc-compat"
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   # newlib headers generate a lot of char-subscript warnings
   # for macros such as tolower()
-  NACLPORTS_CPPFLAGS+=" -Wno-char-subscripts"
+  NACLPORTS_CPPFLAGS+=" -Wno-char-subscripts"S
   if [ "$NACL_ARCH" != "arm" ]; then
     # Our x86 version of gcc generates a lot of strict aliasing
     # warnings.
