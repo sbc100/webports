@@ -355,7 +355,7 @@ PatchSpecsFile() {
   local SED_SAFE_SPACES_USR_LIB=${NACL_SDK_MULTIARCH_USR_LIB/ /\ /}
 
   if [ -f ${SPECS_FILE} ]; then
-    if grep -q "${NACL_SDK_MULTIARCH_USR_LIB}" ${SPECS_FILE}; then
+    if grep -q nacl_arch ${SPECS_FILE}; then
       echo "Specs file already patched"
       return
     fi
