@@ -1,6 +1,6 @@
 NAME=scummvm
-VERSION=1.6.0
-URL=http://downloads.sf.net/scummvm/scummvm/1.6.0/scummvm-1.6.0.tar.gz
+VERSION=1.7.0
+URL=http://downloads.sf.net/scummvm/scummvm/1.7.0/scummvm-1.7.0.tar.gz
 LICENSE=LGPL,GPL,BSD
 DEPENDS=(sdl libvorbis libtar)
-SHA1=68dc969c4ce12ecd899311f7610b1996eb95753f
+SHA1=fcf083a3539a9daa69713794cdc8c2953a096f24

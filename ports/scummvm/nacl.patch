@@ -1,5 +1,4 @@
 diff --git a/backends/platform/sdl/posix/posix-main.cpp b/backends/platform/sdl/posix/posix-main.cpp
-index 5f0914e..77ff95a 100644
 --- a/backends/platform/sdl/posix/posix-main.cpp
 +++ b/backends/platform/sdl/posix/posix-main.cpp
 @@ -20,6 +20,13 @@
@@ -103,10 +102,9 @@ index 5f0914e..77ff95a 100644
  	// Create our OSystem instance
  	g_system = new OSystem_POSIX();
 diff --git a/backends/platform/sdl/posix/posix.cpp b/backends/platform/sdl/posix/posix.cpp
-index 7a8b1e7..6a9b94f 100644
 --- a/backends/platform/sdl/posix/posix.cpp
 +++ b/backends/platform/sdl/posix/posix.cpp
-@@ -160,6 +160,9 @@ Common::WriteStream *OSystem_POSIX::createLogFile() {
+@@ -161,6 +161,9 @@ Common::WriteStream *OSystem_POSIX::createLogFile() {
  }
  
  bool OSystem_POSIX::displayLogFile() {
@@ -116,7 +114,7 @@ index 7a8b1e7..6a9b94f 100644
  	if (_logFilePath.empty())
  		return false;
  
-@@ -208,6 +211,7 @@ bool OSystem_POSIX::displayLogFile() {
+@@ -209,6 +212,7 @@ bool OSystem_POSIX::displayLogFile() {
  	}
  
  	return WIFEXITED(status) && WEXITSTATUS(status) == 0;
@@ -125,10 +123,9 @@ index 7a8b1e7..6a9b94f 100644
  
  
 diff --git a/configure b/configure
-index 5016a86..019faad 100755
 --- a/configure
 +++ b/configure
-@@ -1338,6 +1338,16 @@ n64)
+@@ -1374,6 +1374,16 @@ n64)
  	_host_cpu=mips
  	_host_alias=mips64
  	;;
@@ -145,7 +142,7 @@ index 5016a86..019faad 100755
  neuros)
  	_host_os=linux
  	_host_cpu=arm
-@@ -1347,6 +1357,11 @@ openpandora)
+@@ -1383,6 +1393,11 @@ openpandora)
  	_host_cpu=arm
  	_host_alias=arm-angstrom-linux-gnueabi
  	;;
@@ -157,25 +154,25 @@ index 5016a86..019faad 100755
  ppc-amigaos)
  	_host_os=amigaos
  	_host_cpu=ppc
-@@ -1731,7 +1746,7 @@ if test "$have_gcc" = yes ; then
+@@ -1783,7 +1798,7 @@ if test "$have_gcc" = yes ; then
  			case $_host_os in
  			# newlib-based system include files suppress non-C89 function
  			# declarations under __STRICT_ANSI__
--			amigaos* | android | bada | dreamcast | ds | gamecube | mingw* | n64 | psp | ps2 | ps3 | wii | wince )
-+			amigaos* | android | bada | dreamcast | ds | gamecube | mingw* | n64 | psp | ps2 | ps3 | wii | wince | *nacl* )
+-			amigaos* | android | dreamcast | ds | gamecube | mingw* | n64 | psp | ps2 | ps3 | tizen | wii | wince )
++			amigaos* | android | dreamcast | ds | gamecube | mingw* | n64 | psp | ps2 | ps3 | tizen | wii | wince | *nacl* )
  				;;
  			*)
  				CXXFLAGS="$CXXFLAGS -ansi"
-@@ -1808,6 +1823,8 @@ if strings $TMPO.o | grep BIGenDianSyS >/dev/null; then
+@@ -1870,6 +1885,8 @@ if $_strings $TMPO.o | grep BIGenDianSyS >/dev/null; then
  	_endian=big
- elif strings $TMPO.o | grep LiTTleEnDian >/dev/null; then
+ elif $_strings $TMPO.o | grep LiTTleEnDian >/dev/null; then
  	_endian=little
 +elif [ "$_host_cpu" = "le32" ]; then
 +	_endian=little
  fi
  echo $_endian;
  cc_check_clean tmp_endianness_check.cpp
-@@ -1965,10 +1982,12 @@ echo_n "Checking host CPU architecture... "
+@@ -2027,10 +2044,12 @@ echo_n "Checking host CPU architecture... "
  case $_host_cpu in
  	arm*)
  		echo "ARM"
@@ -192,7 +189,7 @@ index 5016a86..019faad 100755
  		# FIXME: The following feature exhibits a bug during the intro scene of Indy 4
  		# (on Pandora and iPhone at least)
  		#define_in_config_if_yes yes 'USE_ARM_COSTUME_ASM'
-@@ -1991,6 +2010,9 @@ case $_host_cpu in
+@@ -2053,6 +2072,9 @@ case $_host_cpu in
  	amd64 | x86_64)
  		echo "x86_64"
  		;;
@@ -202,17 +199,16 @@ index 5016a86..019faad 100755
  	*)
  		echo "unknown ($_host_cpu)"
  		;;
-@@ -2915,7 +2937,7 @@ case $_host_os in
+@@ -3103,7 +3125,7 @@ case $_host_os in
  	amigaos* | cygwin* | dreamcast | ds | gamecube | mingw* | n64 | ps2 | ps3 | psp | wii | wince)
  		_posix=no
  		;;
--	android | beos* | bsd* | darwin* | freebsd* | gph-linux | haiku* | hpux* | iphone | irix* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | uclinux* | webos)
-+	android | beos* | bsd* | darwin* | freebsd* | gph-linux | haiku* | hpux* | iphone | irix* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | uclinux* | webos | *nacl)
+-	android | beos* | bsd* | darwin* | freebsd* | gnu* | gph-linux | haiku* | hpux* | iphone | irix*| k*bsd*-gnu* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | uclinux* | webos)
++	android | beos* | bsd* | darwin* | freebsd* | gnu* | gph-linux | haiku* | hpux* | iphone | irix*| k*bsd*-gnu* | linux* | maemo | mint* | netbsd* | openbsd* | solaris* | sunos* | uclinux* | webos | *nacl* )
  		_posix=yes
  		;;
  	os2-emx*)
 diff --git a/graphics/scaler/scale2x.cpp b/graphics/scaler/scale2x.cpp
-index ac2dbad..0fc0603 100644
 --- a/graphics/scaler/scale2x.cpp
 +++ b/graphics/scaler/scale2x.cpp
 @@ -201,9 +201,15 @@ static inline void scale2x_8_mmx_single(scale2x_uint8* dst, const scale2x_uint8*
