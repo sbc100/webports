@@ -16,7 +16,12 @@ fi
 EXECUTABLES="convert libyuv_unittest"
 
 TestStep() {
+  # TODO(sbc): re-enable i686 testing once we fix this gtest-releated issue:
+  # http://crbug.com/434821
+  if [ "${NACL_ARCH}" = "i686" ]; then
+    return
+  fi
   if [ "${NACL_ARCH}" != pnacl ]; then
-    ./libyuv_unittest.sh
+    LogExecute ./libyuv_unittest.sh
   fi
 }
