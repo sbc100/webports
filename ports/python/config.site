@@ -9,3 +9,9 @@ ac_cv_file__dev_ptc=no
 # implemenation.
 # TODO(sbc): Remove this once we add getnameinfo: http://crbug.com/386832
 ac_cv_func_getnameinfo=no
+
+# The check for uname currently fails with newlib since libnacl
+# does not contain a uname() stub function.
+# TODO(sbc): Remove this once uname() gets added to libnacl.
+# https://code.google.com/p/nativeclient/issues/detail?id=3997
+ac_cv_func_uname=yes
