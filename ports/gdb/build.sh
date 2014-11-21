@@ -15,13 +15,22 @@ fi
 ConfigureStep() {
   SetupCrossEnvironment
 
+  # TODO(sbc): workaround for compiler warning in gdb-7.7 when building
+  # with latest recent gcc versions (4.9.3)
+  # Remove once this bug is fixes:
+  # https://code.google.com/p/nativeclient/issues/detail?id=4000
+  if [ "${NACL_ARCH}" = "arm" ]; then
+    EXTRA_CONFIGURE_ARGS="--disable-werror"
+  fi
+
   LogExecute ${SRC_DIR}/configure --with-curses --with-expat \
       --with-system-readline \
       --disable-libmcheck \
       --prefix=${PREFIX} \
       --enable-targets=arm-none-eabi-nacl \
       --host=${NACL_CROSS_PREFIX} \
-      --target=x86_64-nacl
+      --target=x86_64-nacl \
+      ${EXTRA_CONFIGURE_ARGS:-}
 
   # If the .info files don't exist, "make all" will try to recreate it with the
   # "makeinfo" tool, which isn't normally installed.
