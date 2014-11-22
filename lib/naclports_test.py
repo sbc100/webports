@@ -412,15 +412,27 @@ class TestSourcePackage(NaclportsTest):
 class TestCommands(NaclportsTest):
   def testListCommand(self):
     config = Configuration()
-    options = Mock()
-    pkg = Mock(NAME='foo', VERSION='bar')
+    pkg = Mock(NAME='foo', VERSION='0.1')
     with patch('naclports.package.InstalledPackageIterator',
                Mock(return_value=[pkg])):
       with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
+        options = Mock(all=False)
         naclports.__main__.CmdList(config, options, [])
         lines = stdout.getvalue().splitlines()
+        self.assertRegexpMatches(lines[0], "^foo\\s+0.1$")
         self.assertEqual(len(lines), 1)
-        self.assertRegexpMatches(lines[0], "^foo\\s+bar$")
+
+  def testListCommandVerbose(self):
+    config = Configuration()
+    pkg = Mock(NAME='foo', VERSION='0.1')
+    with patch('naclports.package.InstalledPackageIterator',
+               Mock(return_value=[pkg])):
+      with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
+        options = Mock(verbose=False, all=False)
+        naclports.__main__.CmdList(config, options, [])
+        lines = stdout.getvalue().splitlines()
+        self.assertRegexpMatches(lines[0], "^foo$")
+        self.assertEqual(len(lines), 1)
 
   @patch('naclports.package.CreateInstalledPackage', Mock())
   def testInfoCommand(self):

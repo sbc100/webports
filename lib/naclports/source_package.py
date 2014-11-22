@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -150,7 +151,7 @@ class SourcePackage(package.Package):
     self.CheckInstallable()
 
     if force is None and self.IsInstalled():
-      Log("Already installed %s" % self.InfoString())
+      Log('Already installed %s' % self.InfoString())
       return
 
     if build_deps:
@@ -171,7 +172,7 @@ class SourcePackage(package.Package):
       self.Build(build_deps, force)
 
     if self.IsAnyVersionInstalled():
-      Log("Uninstalling existing %s" % self.InfoString())
+      Log('Uninstalling existing %s' % self.InfoString())
       self.GetInstalledPackage().DoUninstall()
 
     binary_package.BinaryPackage(package_file).Install()
@@ -186,7 +187,7 @@ class SourcePackage(package.Package):
       self.InstallDeps(force)
 
     if not force and self.IsBuilt():
-      Log("Already built %s" % self.InfoString())
+      Log('Already built %s' % self.InfoString())
       return
 
     log_root = os.path.join(naclports.OUT_DIR, 'logs')
@@ -201,14 +202,14 @@ class SourcePackage(package.Package):
       prefix = '*** '
     else:
       prefix = ''
-    Log("%sBuilding %s" % (prefix, self.InfoString()))
+    Log('%sBuilding %s' % (prefix, self.InfoString()))
 
     start = time.time()
     with naclports.BuildLock():
       self.RunBuildSh(stdout)
 
     duration = FormatTimeDelta(time.time() - start)
-    Log("Build complete %s [took %s]" % (self.InfoString(), duration))
+    Log('Build complete %s [took %s]' % (self.InfoString(), duration))
 
   def RunBuildSh(self, stdout, args=None):
     build_port = os.path.join(naclports.TOOLS_DIR, 'build_port.sh')
@@ -240,19 +241,19 @@ class SourcePackage(package.Package):
     """Download upstream source and verify hash."""
     archive = self.DownloadLocation()
     if not archive:
-      Log("no archive: %s" % self.NAME)
+      Log('no archive: %s' % self.NAME)
       return True
 
     if self.SHA1 is None:
-      Log("missing SHA1 attribute: %s" % self.info)
+      Log('missing SHA1 attribute: %s' % self.info)
       return False
 
     self.Download()
     try:
       sha1check.VerifyHash(archive, self.SHA1)
-      Log("verified: %s" % archive)
+      Log('verified: %s' % archive)
     except sha1check.Error as e:
-      Log("verification failed: %s: %s" % (archive, str(e)))
+      Log('verification failed: %s: %s' % (archive, str(e)))
       return False
 
     return True
@@ -385,6 +386,58 @@ class SourcePackage(package.Package):
         pass
 
     naclports.DownloadFile(filename, self.URL)
+
+  def UpdatePatch(self):
+    git_dir = self.GetBuildLocation()
+    if not os.path.exists(git_dir):
+      Log('source directory not found: %s' % git_dir)
+      return
+
+    diff = subprocess.check_output(['git', 'diff', 'upstream', '--no-ext-diff'],
+                                   cwd=git_dir)
+
+    # Drop index lines for a more stable diff.
+    diff = re.sub('\nindex [^\n]+\n', '\n', diff)
+
+    # Drop binary files, as they don't work anyhow.
+    diff = re.sub(
+        'diff [^\n]+\n'
+        '(new file [^\n]+\n)?'
+        '(deleted file mode [^\n]+\n)?'
+        'Binary files [^\n]+ differ\n', '', diff)
+
+    # Filter out things from an optional per port skip list.
+    diff_skip = os.path.join(self.root, 'diff_skip.txt')
+    if os.path.exists(diff_skip):
+      names = open(diff_skip).read().splitlines()
+      new_diff = ''
+      skipping = False
+      for line in diff.splitlines():
+        if line.startswith('diff --git '):
+          skipping = False
+          for name in names:
+            if line == 'diff --git a/%s b/%s' % (name, name):
+              skipping = True
+        if not skipping:
+          new_diff += line + '\n'
+      diff = new_diff
+
+    # Write back out the diff.
+    patch_path = os.path.join(self.root, 'nacl.patch')
+    preexisting = os.path.exists(patch_path)
+    if preexisting:
+      with open(patch_path) as f:
+        if diff == f.read():
+          Log('patch unchanged: %s' % patch_path)
+          return
+
+    with open(patch_path, 'w') as f:
+      f.write(diff)
+
+    if preexisting:
+      Log('created patch: %s' % patch_path)
+    else:
+      Log('updated patch: %s' % patch_path)
 
 
 def SourcePackageIterator():

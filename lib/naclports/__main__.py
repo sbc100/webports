@@ -33,7 +33,11 @@ def CmdList(config, options, args):
   """List installed packages"""
   if len(args):
     raise Error('list command takes no arguments')
-  for package in naclports.package.InstalledPackageIterator(config):
+  if options.all:
+    iterator = naclports.source_package.SourcePackageIterator()
+  else:
+    iterator = naclports.package.InstalledPackageIterator(config)
+  for package in iterator:
     if options.verbose:
       sys.stdout.write('%-15s %s\n' % (package.NAME, package.VERSION))
     else:
@@ -121,6 +125,11 @@ def CmdPkgVerify(package, options):
   package.Verify()
 
 
+def CmdPkgUpdatePatch(package, options):
+  """Update patch file for package(s)"""
+  package.UpdatePatch()
+
+
 def CleanAll(config):
   """Remove all build directories and all pre-built packages as well
   as all installed packages for the given configuration."""
@@ -152,7 +161,8 @@ def run_main(args):
     'clean': CmdPkgClean,
     'uninstall': CmdPkgUninstall,
     'contents': CmdPkgContents,
-    'depends': CmdPkgListDeps
+    'depends': CmdPkgListDeps,
+    'updatepatch': CmdPkgUpdatePatch
   }
 
   installed_pkg_commands = ['contents', 'uninstall']
