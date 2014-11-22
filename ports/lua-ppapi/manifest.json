@@ -3,6 +3,7 @@
   "description": "Lua interactive shell built using Native Client",
   "version": "5.2.3.%(version)s",
   "manifest_version": 2,
+  "minimum_chrome_version": "30",
   "icons": {
     "16": "icon_16.png",
     "48": "icon_48.png",
@@ -16,6 +17,7 @@
   "permissions": [
     "clipboardRead",
     "clipboardWrite",
-    "storage"
+    "storage",
+    "unlimitedStorage"
   ]
 }

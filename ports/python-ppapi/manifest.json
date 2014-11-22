@@ -1,8 +1,9 @@
 {
   "name": "Python",
   "description": "Python interactive shell built with Native Client",
-  "version": "2.7.0.%(version)s",
+  "version": "2.7.7.%(version)s",
   "manifest_version": 2,
+  "minimum_chrome_version": "30",
   "icons": {
     "16": "icon_16.png",
     "48": "icon_48.png",
@@ -33,6 +34,7 @@
     "clipboardRead",
     "clipboardWrite",
     "storage",
+    "unlimitedStorage",
     { "socket": [
         "tcp-listen:*:*",
         "tcp-connect",
