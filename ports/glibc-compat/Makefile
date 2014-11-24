@@ -28,8 +28,7 @@ SOURCES := \
   src/res_libc.c \
   src/res_mkquery.c \
   src/res_query.c \
-  src/res_send.c \
-  src/stubs.c
+  src/res_send.c
 
 OBJS := $(patsubst src/%.c,$(OUT)/%.o,$(SOURCES))
 

@@ -156,6 +156,7 @@ PATCH_FILE=${START_DIR}/nacl.patch
 
 # Don't support building with SDKs older than the current stable release
 MIN_SDK_VERSION=${MIN_SDK_VERSION:-37}
+MIN_SDK_VERSION=${MIN_SDK_VERSION:-40}
 NACLPORTS_QUICKBUILD=${NACLPORTS_QUICKBUILD:-0}
 
 if [ "${OS_NAME}" = "Darwin" ]; then
@@ -396,13 +397,11 @@ PatchSpecsFile() {
 
 
 CheckSDKVersion() {
-  if [ -z "${MIN_SDK_VERSION:-}" ]; then
-    return
-  fi
   local GETOS=${NACL_SDK_ROOT}/tools/getos.py
   local RESULT=$("${GETOS}" --check-version="${MIN_SDK_VERSION}" 2>&1)
   if [ -n "${RESULT:-}" ]; then
     echo "The SDK in \$NACL_SDK_ROOT is too old to build ${PACKAGE_NAME}."
+    echo "Please update your SDK, or use the pepper_XX naclports branches."
     echo "${RESULT}"
     exit -1
   fi
