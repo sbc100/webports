@@ -78,6 +78,15 @@ diff --git a/configure b/configure
        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for style of pending output formalism" >&5
  $as_echo_n "checking for style of pending output formalism... " >&6; }
                    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+@@ -15929,7 +15935,7 @@ if ${emacs_cv_usable_FIONREAD+:} false; then :
+   $as_echo_n "(cached) " >&6
+ else
+   case $opsys in
+-     aix4-2)
++     aix4-2 | nacl)
+               emacs_cv_usable_FIONREAD=no
+        ;;
+ 
 @@ -24659,7 +24665,7 @@ LD_FIRSTFLAG=
  ORDINARY_LINK=
  case "$opsys" in
@@ -319,6 +328,18 @@ diff --git a/lisp/files.el b/lisp/files.el
  	    (if (equal ".." (file-name-nondirectory filename))
  		(setq filename
  		      (directory-file-name (file-name-directory (directory-file-name dir)))
+diff --git a/lisp/loadup.el b/lisp/loadup.el
+--- a/lisp/loadup.el
++++ b/lisp/loadup.el
+@@ -68,7 +68,7 @@
+     ;; Hash consing saved around 11% of pure space in my tests.
+     (setq purify-flag (make-hash-table :test 'equal :size 70000)))
+ 
+-(message "Using load-path %s" load-path)
++;; (message "Using load-path %s" load-path)
+ 
+ (if (or (member (nth 3 command-line-args) '("dump" "bootstrap"))
+ 	(member (nth 4 command-line-args) '("dump" "bootstrap")))
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
@@ -607,6 +628,76 @@ diff --git a/src/fileio.c b/src/fileio.c
  
    modtime = invalid_emacs_time ();
    if (visiting)
+diff --git a/src/keyboard.c b/src/keyboard.c
+--- a/src/keyboard.c
++++ b/src/keyboard.c
+@@ -6946,10 +6946,10 @@ tty_read_avail_input (struct terminal *terminal,
+     return 0;
+   if (n_to_read > sizeof cbuf)
+     n_to_read = sizeof cbuf;
+-#elif defined USG || defined CYGWIN
++#elif defined USG || defined CYGWIN || defined __native_client__
+   /* Read some input if available, but don't wait.  */
+   n_to_read = sizeof cbuf;
+-  fcntl (fileno (tty->input), F_SETFL, O_NDELAY);
++  fcntl (fileno (tty->input), F_SETFL, O_NONBLOCK);
+ #else
+ # error "Cannot read without possibly delaying"
+ #endif
+diff --git a/src/lisp.h b/src/lisp.h
+--- a/src/lisp.h
++++ b/src/lisp.h
+@@ -3748,6 +3748,50 @@ functionp (Lisp_Object object)
+     return 0;
+ }
+ 
++// Add some functions for use in the debugger to print out the value
++// of a lisp object.
++
++// Print a human readable type for a Lisp object to the debug console.
++char debug_print_buf[81];
++LISP_INLINE char*
++whatis(Lisp_Object object)
++{
++  debug_print_buf[0] = '\0';
++  debug_print_buf[80] = '\0';
++
++  if (STRINGP(object)) {
++    // TODO: remove line below if line below that works as I expect.
++    struct Lisp_String* string = XSTRING(object);
++    snprintf(debug_print_buf, 80, "String %s", SSDATA(object));
++    return debug_print_buf;
++  }
++  else if (INTEGERP(object)) {
++    int x = XINT(object);
++    snprintf(debug_print_buf, 80, "Number %d", x);
++    return debug_print_buf;
++  }
++  else if (FLOATP(object)) {
++    struct Lisp_Float* floater = XFLOAT(object);
++    return "It's a float number!";
++  }
++  else if (Qnil == object)
++    return "It's a lisp null";
++  else if (Qt == object)
++    return "It's a lisp 't'";
++  else if (SYMBOLP(object)) {
++    snprintf(debug_print_buf, 80, "Symbol named %s", SYMBOL_NAME(object));
++    return debug_print_buf;
++  }
++  else if (CONSP(object))
++    return "It's a list!";
++  else if (MISCP(object))
++    return "It's a lisp misc!";
++  else if (VECTORLIKEP(object))
++    return "It's some kind of vector like thingie!";
++  else
++    return "I don't know what it is.";
++}
++
+ INLINE_HEADER_END
+ 
+ #endif /* EMACS_LISP_H */
 diff --git a/src/vm-limit.c b/src/vm-limit.c
 --- a/src/vm-limit.c
 +++ b/src/vm-limit.c
