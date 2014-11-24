@@ -1,6 +1,6 @@
 NAME=freeimage
-VERSION=3.14.1
-URL=http://downloads.sf.net/freeimage/FreeImage3141.zip
+VERSION=3.16.0
+URL=http://downloads.sf.net/freeimage/FreeImage3160.zip
 ARCHIVE_ROOT=FreeImage
 LICENSE=CUSTOM
-SHA1=cc09671e16460c27242280c2b6100f39974c89e1
+SHA1=a70600d288fe5bd11131e85e6f857a93bb100ad8
