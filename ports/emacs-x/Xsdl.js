@@ -25,7 +25,8 @@ function startEmacs() {
     'DISPLAY=:42',
   ];
   mgr.spawn(
-      'emacs.nmf', ['-g', '162x53'], env, '/', 'nacl', null, function(pid) {
+      'emacs.nmf', ['-g', '162x53'], env,
+      '/home/user', 'nacl', null, function(pid) {
     mgr.waitpid(pid, 0, function() {
       window.close();
     });

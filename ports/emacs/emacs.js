@@ -5,6 +5,7 @@
  */
 
 NaClTerm.nmf = 'emacs.nmf';
+NaClTerm.cwd = '/home/user';
 NaClTerm.argv = ['-nw'];
 NaClTerm.env = [
   'EMACSLOADPATH=' +

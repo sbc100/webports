@@ -369,8 +369,12 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  
  ## lastfile must follow all files whose initialized data areas should
  ## be dumped as pure by dump-emacs.
-@@ -349,6 +355,26 @@ base_obj = dispnew.o frame.o scroll.o xdisp.o menu.o $(XMENU_OBJ) window.o \
- 	$(W32_OBJ) $(WINDOW_SYSTEM_OBJ)
+@@ -346,9 +352,29 @@ base_obj = dispnew.o frame.o scroll.o xdisp.o menu.o $(XMENU_OBJ) window.o \
+ 	doprnt.o intervals.o textprop.o composite.o xml.o \
+ 	profiler.o \
+ 	$(MSDOS_OBJ) $(MSDOS_X_OBJ) $(NS_OBJ) $(CYGWIN_OBJ) $(FONT_OBJ) \
+-	$(W32_OBJ) $(WINDOW_SYSTEM_OBJ)
++	$(W32_OBJ) $(WINDOW_SYSTEM_OBJ) -lnacl_io
  obj = $(base_obj) $(NS_OBJC_OBJ)
  
 +## Just like $(obj), but includes nacl_emacs.o (built with NACL_EMACS) instead
@@ -631,7 +635,34 @@ diff --git a/src/fileio.c b/src/fileio.c
 diff --git a/src/keyboard.c b/src/keyboard.c
 --- a/src/keyboard.c
 +++ b/src/keyboard.c
-@@ -6946,10 +6946,10 @@ tty_read_avail_input (struct terminal *terminal,
+@@ -6858,6 +6858,26 @@ decode_keyboard_code (struct tty_display_info *tty,
+    and so this function is called once for each individual termcap
+    terminal.  The first parameter indicates which terminal to read from.  */
+ 
++#if defined(__native_client__)
++#include "nacl_io/kernel_intercept.h"
++#include "nacl_io/kernel_wrap.h"
++#include <stdarg.h>
++
++/*
++ * TODO(bradnelson): Drop this when fcntl is sorted out in nacl_io.
++ * Explicitly use nacl_fnctl.
++ * When built as a shared library, without this emacs seems to hit stubs.
++ */
++int nacl_fcntl(int fd, int cmd, ...) {
++  va_list ap;
++  va_start(ap, cmd);
++  int rtn = ki_fcntl(fd, cmd, ap);
++  va_end(ap);
++  return rtn;
++}
++#define fcntl nacl_fcntl
++#endif
++
+ int
+ tty_read_avail_input (struct terminal *terminal,
+                       struct input_event *hold_quit)
+@@ -6946,10 +6966,10 @@ tty_read_avail_input (struct terminal *terminal,
      return 0;
    if (n_to_read > sizeof cbuf)
      n_to_read = sizeof cbuf;
