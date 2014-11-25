@@ -1,5 +1,4 @@
 diff --git a/.config b/.config
-index b56b3b8..842a7a3 100644
 --- a/.config
 +++ b/.config
 @@ -1,81 +1,81 @@
@@ -265,7 +264,6 @@ index b56b3b8..842a7a3 100644
 +CONFIG_TOYBOX_FREE=y
  # CONFIG_TOYBOX_DEBUG is not set
 diff --git a/configure b/configure
-index 6047baf..7cc58e9 100644
 --- a/configure
 +++ b/configure
 @@ -8,7 +8,7 @@
@@ -278,7 +276,6 @@ index 6047baf..7cc58e9 100644
  [ -z "$STRIP" ] && STRIP=strip
  
 diff --git a/lib/getmountlist.c b/lib/getmountlist.c
-index c863de5..e7b9f10 100644
 --- a/lib/getmountlist.c
 +++ b/lib/getmountlist.c
 @@ -5,13 +5,18 @@
@@ -307,7 +304,6 @@ index c863de5..e7b9f10 100644
 +#endif
  }
 diff --git a/lib/lib.h b/lib/lib.h
-index a0a1c31..f5366a4 100644
 --- a/lib/lib.h
 +++ b/lib/lib.h
 @@ -151,6 +151,7 @@ int yesno(char *prompt, int def);
@@ -327,7 +323,6 @@ index a0a1c31..f5366a4 100644
  struct mtab_list *xgetmountlist(char *path);
  
 diff --git a/lib/password.c b/lib/password.c
-index 34abf6e..90c22f2 100644
 --- a/lib/password.c
 +++ b/lib/password.c
 @@ -7,6 +7,10 @@
@@ -342,7 +337,6 @@ index 34abf6e..90c22f2 100644
  {      
    int i, len = 0, offset = 0;
 diff --git a/lib/pending.c b/lib/pending.c
-index a804d5b..7ccae28 100644
 --- a/lib/pending.c
 +++ b/lib/pending.c
 @@ -57,7 +57,7 @@ void daemonize(void)
@@ -355,7 +349,6 @@ index a804d5b..7ccae28 100644
    dup2(fd, 1);
    dup2(fd, 2);
 diff --git a/lib/portability.c b/lib/portability.c
-index d901a4b..3063d56 100644
 --- a/lib/portability.c
 +++ b/lib/portability.c
 @@ -6,7 +6,7 @@
@@ -376,14 +369,17 @@ index d901a4b..3063d56 100644
  extern char **environ;
  
  int clearenv(void)
-@@ -70,3 +70,149 @@ int clearenv(void)
+@@ -70,3 +70,152 @@ int clearenv(void)
    return 0;
  }
  #endif
 +
 +#if defined(__native_client__)
-+int openat(int dirfd, const char *pathname, int flags)
++#ifndef AT_FDCWD
++/* Laster headers include openat() declaration but not the others */
++int openat(int dirfd, const char *pathname, int flags, ...)
 +  __attribute__((weak));
++#endif
 +int fstatat(int dirfd, const char *pathname, struct stat *buf, int flags)
 +  __attribute__((weak));
 +int fchmodat(int dirfd, const char *pathname, mode_t mode, int flags)
@@ -420,7 +416,7 @@ index d901a4b..3063d56 100644
 +    if (dirfd != AT_FDCWD) chdir(save); \
 +    free(save);
 +
-+int openat(int dirfd, const char *pathname, int flags) {
++int openat(int dirfd, const char *pathname, int flags, ...) {
 +  _AT_WRAP_START("openat")
 +  int fd = open(pathname, flags);
 +  _AT_WRAP_END("openat")
@@ -527,7 +523,6 @@ index d901a4b..3063d56 100644
 +
 +#endif
 diff --git a/lib/portability.h b/lib/portability.h
-index 745f8cd..bfef70d 100644
 --- a/lib/portability.h
 +++ b/lib/portability.h
 @@ -15,7 +15,7 @@
@@ -575,7 +570,6 @@ index 745f8cd..bfef70d 100644
  #include <endian.h>
  
 diff --git a/lib/xwrap.c b/lib/xwrap.c
-index 98b4300..2cfb09e 100644
 --- a/lib/xwrap.c
 +++ b/lib/xwrap.c
 @@ -224,7 +224,8 @@ off_t xlseek(int fd, off_t offset, int whence)
@@ -601,7 +595,6 @@ index 98b4300..2cfb09e 100644
    return new;
  }
 diff --git a/scripts/install.c b/scripts/install.c
-index cda8fc2..1abbe16 100644
 --- a/scripts/install.c
 +++ b/scripts/install.c
 @@ -3,6 +3,9 @@
@@ -615,7 +608,6 @@ index cda8fc2..1abbe16 100644
  
  #undef NEWTOY
 diff --git a/scripts/make.sh b/scripts/make.sh
-index a685010..345e45d 100755
 --- a/scripts/make.sh
 +++ b/scripts/make.sh
 @@ -162,9 +162,11 @@ echo "Library probe..."
@@ -632,7 +624,6 @@ index a685010..345e45d 100755
  do_loudly()
  {
 diff --git a/toys.h b/toys.h
-index 8450b80..08e4b75 100644
 --- a/toys.h
 +++ b/toys.h
 @@ -5,6 +5,8 @@
@@ -715,7 +706,6 @@ index 8450b80..08e4b75 100644
  // These live in main.c
  
 diff --git a/toys/other/stat.c b/toys/other/stat.c
-index d603316..c950b65 100644
 --- a/toys/other/stat.c
 +++ b/toys/other/stat.c
 @@ -40,7 +40,9 @@ GLOBALS(
@@ -729,7 +719,6 @@ index d603316..c950b65 100644
    struct passwd *user_name;
    struct group *group_name;
 diff --git a/toys/other/timeout.c b/toys/other/timeout.c
-index 4b8a87d..9fdd3ea 100644
 --- a/toys/other/timeout.c
 +++ b/toys/other/timeout.c
 @@ -33,7 +33,9 @@ GLOBALS(
@@ -743,7 +732,6 @@ index 4b8a87d..9fdd3ea 100644
  
  static void handler(int i)
 diff --git a/toys/pending/sh.c b/toys/pending/sh.c
-index 2f09f63..fd7109d 100644
 --- a/toys/pending/sh.c
 +++ b/toys/pending/sh.c
 @@ -177,6 +177,10 @@ config CD_P
@@ -801,7 +789,6 @@ index 2f09f63..fd7109d 100644
        free(command);
      }
 diff --git a/toys/posix/cp.c b/toys/posix/cp.c
-index 088f224..2581f08 100644
 --- a/toys/posix/cp.c
 +++ b/toys/posix/cp.c
 @@ -232,18 +232,24 @@ int cp_node(struct dirtree *try)
@@ -830,7 +817,6 @@ index 088f224..2581f08 100644
        }
      }
 diff --git a/toys/posix/ls.c b/toys/posix/ls.c
-index b504f9e..b946080 100644
 --- a/toys/posix/ls.c
 +++ b/toys/posix/ls.c
 @@ -97,10 +97,15 @@ static char *getusername(uid_t uid)
