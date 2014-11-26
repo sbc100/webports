@@ -666,10 +666,28 @@ static void sdlPollInput(void)
 						KdEnqueueKeyboardEvent (sdlKeyboard, 37, 1); // LCTRL
 					}
 				}
+/*
+ * On some platforms (OSX) keystrokes like (Alt-X) have a unicode
+ * character associated with them: ≈.
+ * OSX makes the choice to propagate this character with key events.
+ * Multi-byte IMEs likely do the same, but without a keycode.
+ *
+ * The Android port this was based on uses the approach of shelling
+ * out to xset using the clipboard as a mechanism to emit unicode reliably.
+ * Unfortunately our NaCl port doesn't yet have this utility.
+ * Additionally, even if it did, it is unclear if passing along all unicode
+ * this way is desirable, as for instance this blocks Emacs from receiving
+ * Alt-X. For Android it was clear cut that using the Android IME would be
+ * preferred over the remote one, but this is less clear on the desktop.
+ *
+ * Sending only raw key codes for now.
+ */
+#if !defined(__native_client__)
 				else if((event.key.keysym.unicode & 0xFF80) != 0)
 				{
 					send_unicode (event.key.keysym.unicode);
 				}
+#endif
 				else
 					KdEnqueueKeyboardEvent (sdlKeyboard, event.key.keysym.scancode, event.type==SDL_KEYUP);
 				// Force SDL screen update, so SDL virtual on-screen buttons will change their images

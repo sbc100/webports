@@ -10,3 +10,4 @@ The port has been modified to:
   - Remove android-ism.
   - Work with the autoconf build instead of an ant build (by only
     cherry-picking the SDL work without other changes).
+  - Ignore unicode and pass along raw key events.
