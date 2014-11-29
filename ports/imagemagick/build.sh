@@ -11,12 +11,6 @@ else
   EXE_DIR=".libs/"
 fi
 
-# TODO: Remove when this is fixed.
-# https://code.google.com/p/nativeclient/issues/detail?id=3205
-if [ "$NACL_ARCH" = "arm" ]; then
-  export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
-fi
-
 EXTRA_CONFIGURE_ARGS="--disable-largefile --without-fftw --without-xml"
 
 EXECUTABLES="
@@ -57,6 +51,15 @@ TEST_EXECUTABLES="
   Magick++/${EXE_DIR}tests/coderInfo${NACL_EXEEXT}
   Magick++/${EXE_DIR}tests/appendImages${NACL_EXEEXT}
   Magick++/${EXE_DIR}tests/colorHistogram${NACL_EXEEXT}"
+
+ConfigureStep() {
+  # TODO: Remove when this is fixed.
+  # https://code.google.com/p/nativeclient/issues/detail?id=3205
+  if [ "$NACL_ARCH" = "arm" ]; then
+    NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS/-O2/-O1}"
+  fi
+  DefaultConfigureStep
+}
 
 TestStep() {
   # The tests as (a) very slow and (b) not all passing at this point.

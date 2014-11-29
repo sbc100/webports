@@ -2,9 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
-# TODO: Remove when this is fixed.
-# https://code.google.com/p/nativeclient/issues/detail?id=3205
-if [ "$NACL_ARCH" = "arm" ]; then
-  export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS//-O2/}"
-fi
+ConfigureStep() {
+  # TODO: Remove when this is fixed.
+  # https://code.google.com/p/nativeclient/issues/detail?id=3205
+  if [ "$NACL_ARCH" = "arm" ]; then
+    export NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS/-O2/-O1}"
+  fi
+  DefaultConfigureStep
+}

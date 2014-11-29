@@ -11,7 +11,7 @@
 #
 # This file is source'd by the main naclports build script.  Functions
 # and variables defined here are available in the build script for
-# individual ports.  Only variables beginging with "NACL_" are intended
+# individual ports.  Only variables beginning with "NACL_" are intended
 # to be used by those scripts.
 
 set -o nounset
@@ -63,7 +63,7 @@ NACLPORTS_CFLAGS=""
 NACLPORTS_CXXFLAGS=""
 NACLPORTS_CPPFLAGS="${NACL_CPPFLAGS}"
 
-# For the library path we always explicly add to the link flags
+# For the library path we always explicitly add to the link flags
 # otherwise 'libtool' won't find the libraries correctly.  This
 # is because libtool uses 'gcc -print-search-dirs' which does
 # not honor the external specs file.
@@ -96,17 +96,6 @@ if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "bionic" ]; then
   NACL_SHARED=1
 else
   NACL_SHARED=0
-fi
-
-if [ "${NACL_DEBUG}" = "1" ]; then
-  NACLPORTS_CFLAGS+=" -g -O0"
-  NACLPORTS_CXXFLAGS+=" -g -O0"
-else
-  NACLPORTS_CFLAGS+=" -O2"
-  NACLPORTS_CXXFLAGS+=" -O2"
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    NACLPORTS_LDFLAGS+=" -O2"
-  fi
 fi
 
 # libcli_main.a has a circular dependency which makes static link fail
@@ -190,8 +179,8 @@ if [ -n "${NACL_GOMA:-}" ]; then
       NACLCC="gomacc ${NACLCC}"
       NACLCXX="gomacc ${NACLCXX}"
       # There is a bug in goma right now where the i686 compiler wrapper script
-      # is not correcly handled and gets confiused with the x86_64 version.
-      # We need to pass a redunant -m32, to force it to compiler for i686.
+      # is not correctly handled and gets confused with the x86_64 version.
+      # We need to pass a redundant -m32, to force it to compiler for i686.
       if [ "${NACL_ARCH}" = "i686" ]; then
         NACLPORTS_CFLAGS+=" -m32"
         NACLPORTS_CXXFLAGS+=" -m32"
@@ -218,6 +207,8 @@ SRC_DIR=${WORK_DIR}/${ARCHIVE_ROOT}
 DEFAULT_BUILD_DIR=${WORK_DIR}/${NACL_BUILD_SUBDIR}
 BUILD_DIR=${NACL_BUILD_DIR:-${DEFAULT_BUILD_DIR}}
 INSTALL_DIR=${WORK_DIR}/${NACL_INSTALL_SUBDIR}
+NACL_CONFIGURE_PATH=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
+
 
 # DESTDIR is where the headers, libraries, etc. will be installed
 # Default to the usr folder within the SDK.
@@ -293,10 +284,12 @@ InstallConfigSite() {
 }
 
 
+#
 # When configure checks for system headers is doesn't pass CFLAGS
 # to the compiler.  This means that any includes that live in paths added
 # with -I are not found.  Here we push the additional newlib headers
 # into the toolchain itself from ${NACL_SDK_ROOT}/include/<toolchain>.
+#
 InjectSystemHeaders() {
   local TC_INCLUDES=${NACL_SDK_ROOT}/include/${TOOLCHAIN}
   if [ ! -d "${TC_INCLUDES}" ]; then
@@ -323,7 +316,7 @@ PatchSpecsFile() {
   if [ "${NACL_ARCH}" = "pnacl" -o \
        "${NACL_ARCH}" = "emscripten" ]; then
     # The emscripten and PNaCl toolchains already include the required
-    # include and library paths by defaut. No need to patch them.
+    # include and library paths by default. No need to patch them.
     return
   fi
 
@@ -419,14 +412,16 @@ Banner() {
 }
 
 
+#
 # echo a command to stdout and then execute it.
+#
 LogExecute() {
   echo "$@"
   "$@"
 }
 
 
-# Set the ARCHIVE_NAME variable to the nacl of the upstream
+# Set the ARCHIVE_NAME variable to the name of the upstream
 # tarball.  If ${URL} is not define (when there is no upstream)
 # then leave ARCHIVE_NAME unset.
 ArchiveName() {
@@ -436,21 +431,76 @@ ArchiveName() {
 }
 
 
-# Is this a git repo?
+#
+# Return 0 if the current port's URL points to a git repo, 1 otherwise.
+#
 IsGitRepo() {
   if [ -z "${URL:-}" ]; then
-    return 1;
+    return 1
   fi
 
   local GIT_URL=${URL%@*}
 
   if [[ "${#GIT_URL}" -ge "4" ]] && [[ "${GIT_URL:(-4)}" == ".git" ]]; then
-    return 0;
+    return 0
   else
-    return 1;
+    return 1
   fi
 }
 
+
+#
+# Return 0 if the current port is autoconf-based, 1 otherwise.
+# This must be called after the source archive is expanded
+# as it inspects the contents of ${SRC_DIR}
+#
+IsAutoconfProject() {
+  if [ -f "${NACL_CONFIGURE_PATH}" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
+#
+# Return 0 if the current port is cmake-based, 1 otherwise.
+# This must be called after the source archive is expanded
+# as it inspects the contents of ${current}
+#
+IsCMakeProject() {
+  if IsAutoconfProject; then
+    return 1
+  fi
+  if [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
+#
+# Add optimization flags for either debug or release configuration.
+# This is not done for cmake-based projects as cmake adds these
+# internally.
+#
+SetOptFlags() {
+  if IsCMakeProject; then
+    return
+  fi
+
+  if [ "${NACL_DEBUG}" = "1" ]; then
+    NACLPORTS_CFLAGS+=" -g -O0"
+    NACLPORTS_CXXFLAGS+=" -g -O0"
+  else
+    NACLPORTS_CFLAGS+=" -O2"
+    NACLPORTS_CXXFLAGS+=" -O2"
+    if [ "${NACL_ARCH}" = "pnacl" ]; then
+      NACLPORTS_LDFLAGS+=" -O2"
+    fi
+  fi
+}
 
 #
 # Attempt to download a file from a given URL
@@ -1072,8 +1122,6 @@ DefaultPatchStep() {
 
 
 DefaultConfigureStep() {
-  local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
-
   if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
     CONFIGURE_SENTINEL=${CONFIGURE_SENTINEL:-Makefile}
   fi
@@ -1082,9 +1130,9 @@ DefaultConfigureStep() {
     return
   fi
 
-  if [ -f "${CONFIGURE}" ]; then
-    ConfigureStep_Autotools
-  elif [ -f "${SRC_DIR}/CMakeLists.txt" ]; then
+  if IsAutoconfProject; then
+    ConfigureStep_Autoconf
+  elif IsCMakeProject; then
     ConfigureStep_CMake
   else
     echo "No configure or CMakeLists.txt script found in ${SRC_DIR}"
@@ -1092,12 +1140,11 @@ DefaultConfigureStep() {
 }
 
 
-ConfigureStep_Autotools() {
+ConfigureStep_Autoconf() {
   conf_build=$(/bin/sh "${SCRIPT_DIR}/config.guess")
 
   SetupCrossEnvironment
 
-  local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
   local conf_host=${NACL_CROSS_PREFIX}
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
     # The PNaCl tools use "pnacl-" as the prefix, but config.sub
@@ -1118,7 +1165,7 @@ ConfigureStep_Autotools() {
   # For example a trivial PNaCl binary can sometimes run on the linux host if
   # it has the correct LLVM bimfmt support. What is more, autoconf will
   # generate a warning if only --host is specified.
-  LogExecute "${CONFIGURE}" \
+  LogExecute "${NACL_CONFIGURE_PATH}" \
     --build=${conf_build} \
     --host=${conf_host} \
     --prefix=${PREFIX} \
@@ -1655,6 +1702,7 @@ RunPatchStep()      { RunStep PatchStep; }
 
 
 RunConfigureStep()  {
+  SetOptFlags
   RunStep ConfigureStep "Configuring" "${BUILD_DIR}"
 }
 
