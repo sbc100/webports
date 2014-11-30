@@ -1,5 +1,4 @@
 diff --git a/bfd/opncls.c b/bfd/opncls.c
-index 54744ce..631eaa9 100644
 --- a/bfd/opncls.c
 +++ b/bfd/opncls.c
 @@ -673,6 +673,10 @@ bfd_openw (const char *filename, const char *target)
@@ -22,7 +21,6 @@ index 54744ce..631eaa9 100644
  
  /*
 diff --git a/config/dfp.m4 b/config/dfp.m4
-index 48683f0..93ac2e9 100644
 --- a/config/dfp.m4
 +++ b/config/dfp.m4
 @@ -23,7 +23,7 @@ Valid choices are 'yes', 'bid', 'dpd', and 'no'.]) ;;
@@ -35,7 +33,6 @@ index 48683f0..93ac2e9 100644
        ;;
      *)
 diff --git a/gdb/Makefile.in b/gdb/Makefile.in
-index d2bbbd5..e3447dc 100644
 --- a/gdb/Makefile.in
 +++ b/gdb/Makefile.in
 @@ -120,10 +120,12 @@ MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
@@ -52,32 +49,16 @@ index d2bbbd5..e3447dc 100644
  
  # Where is our "include" directory?  Typically $(srcdir)/../include.
  # This is essentially the header file directory for the library
-@@ -1233,11 +1235,11 @@ libgdb.a: $(LIBGDB_OBS)
- 	$(RANLIB) libgdb.a
- 
- # Removing the old gdb first works better if it is running, at least on SunOS.
--gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
-+gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+@@ -1237,7 +1239,7 @@ gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
  	rm -f gdb$(EXEEXT)
--	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-+	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+ 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
  		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
 -		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 +		$(TDEPLIBS) $(TUI_LIBRARY) $(subst -lglibc-compat,,$(CLIBS)) $(LOADLIBES) $(PEPPER_LIBS)
  
  # Convenience rule to handle recursion.
  $(LIBGNU) $(GNULIB_H): all-lib
-@@ -2321,7 +2323,7 @@ py-value.o: $(srcdir)/python/py-value.c
- 
- # A list of all the objects we might care about in this build, for
- # dependency tracking.
--all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
-+all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
- 	test-cp-name-parser.o
- 
- # Ensure that generated files are created early.  Use order-only
 diff --git a/gdb/charset.c b/gdb/charset.c
-index 3e4ed47..0e28d01 100644
 --- a/gdb/charset.c
 +++ b/gdb/charset.c
 @@ -767,6 +767,7 @@ find_charset_names (void)
@@ -112,7 +93,6 @@ index 3e4ed47..0e28d01 100644
  
  #endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
 diff --git a/gdb/configure b/gdb/configure
-index 9349917..ddbca17 100755
 --- a/gdb/configure
 +++ b/gdb/configure
 @@ -5188,7 +5188,7 @@ fi
@@ -125,7 +105,6 @@ index 9349917..ddbca17 100755
    gdb_native=no
  fi
 diff --git a/gdb/gdb.c b/gdb/gdb.c
-index e708b34..7a0617a 100644
 --- a/gdb/gdb.c
 +++ b/gdb/gdb.c
 @@ -21,8 +21,9 @@
@@ -141,7 +120,6 @@ index e708b34..7a0617a 100644
    struct captured_main_args args;
  
 diff --git a/gdb/inflow.c b/gdb/inflow.c
-index 9e2444c..0ae0a4a 100644
 --- a/gdb/inflow.c
 +++ b/gdb/inflow.c
 @@ -121,6 +121,7 @@ gdb_getpgrp (void)
@@ -201,7 +179,6 @@ index 9e2444c..0ae0a4a 100644
  
    if (!job_control || inferior_thisrun_terminal == 0)
 diff --git a/gdb/ser-pipe.c b/gdb/ser-pipe.c
-index 9c5b99b..313006f 100644
 --- a/gdb/ser-pipe.c
 +++ b/gdb/ser-pipe.c
 @@ -100,7 +100,8 @@ pipe_open (struct serial *scb, const char *name)
@@ -215,7 +192,6 @@ index 9c5b99b..313006f 100644
        if (sid == -1)
  	signal (SIGINT, SIG_IGN);
 diff --git a/gdb/utils.c b/gdb/utils.c
-index 80a99a8..f0846b0 100644
 --- a/gdb/utils.c
 +++ b/gdb/utils.c
 @@ -3168,7 +3168,8 @@ gdb_realpath (const char *filename)
@@ -265,7 +241,6 @@ index 80a99a8..f0846b0 100644
  #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
        struct sigaction sa, old_sa;
 diff --git a/libdecnumber/configure b/libdecnumber/configure
-index 2720f46..39ab4c4 100755
 --- a/libdecnumber/configure
 +++ b/libdecnumber/configure
 @@ -4616,7 +4616,7 @@ else
@@ -278,7 +253,6 @@ index 2720f46..39ab4c4 100755
        ;;
      *)
 diff --git a/libiberty/lrealpath.c b/libiberty/lrealpath.c
-index b27c8de..8829bbb 100644
 --- a/libiberty/lrealpath.c
 +++ b/libiberty/lrealpath.c
 @@ -79,7 +79,8 @@ lrealpath (const char *filename)
@@ -302,7 +276,6 @@ index b27c8de..8829bbb 100644
      /* Find out the max path size.  */
      long path_max = pathconf ("/", _PC_PATH_MAX);
 diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
-index addf8ee..64fc443 100644
 --- a/libiberty/pex-unix.c
 +++ b/libiberty/pex-unix.c
 @@ -593,6 +593,9 @@ pex_unix_exec_child (struct pex_obj *obj, int flags, const char *executable,

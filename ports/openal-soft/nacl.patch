@@ -1,5 +1,4 @@
 diff --git a/Alc/ALc.c b/Alc/ALc.c
-index f7f7b63..7882591 100644
 --- a/Alc/ALc.c
 +++ b/Alc/ALc.c
 @@ -61,6 +61,9 @@ struct BackendInfo {
@@ -14,7 +13,6 @@ index f7f7b63..7882591 100644
  #endif
 diff --git a/Alc/backends/ppapi.c b/Alc/backends/ppapi.c
 new file mode 100644
-index 0000000..a1313f1
 --- /dev/null
 +++ b/Alc/backends/ppapi.c
 @@ -0,0 +1,458 @@
@@ -477,7 +475,6 @@ index 0000000..a1313f1
 +        AppendAllDevicesList(ppapiDevice);
 +}
 diff --git a/Alc/mixer_neon.c b/Alc/mixer_neon.c
-index 7b6da2b..f61ef55 100644
 --- a/Alc/mixer_neon.c
 +++ b/Alc/mixer_neon.c
 @@ -75,7 +75,7 @@ static inline void ApplyCoeffs(ALuint Offset, ALfloat (*restrict Values)[2],
@@ -490,7 +487,6 @@ index 7b6da2b..f61ef55 100644
  {
      ALfloat gain, step;
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 0087edb..582901c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -611,6 +611,7 @@ SET(HAVE_MMDEVAPI   0)
@@ -534,7 +530,6 @@ index 0087edb..582901c 100644
  IF(WIN32 AND ALSOFT_NO_UID_DEFS)
      SET_PROPERTY(TARGET ${LIBNAME} APPEND PROPERTY COMPILE_DEFINITIONS AL_NO_UID_DEFS)
 diff --git a/OpenAL32/Include/alMain.h b/OpenAL32/Include/alMain.h
-index 111dde9..57c1d12 100644
 --- a/OpenAL32/Include/alMain.h
 +++ b/OpenAL32/Include/alMain.h
 @@ -273,6 +273,14 @@ typedef ptrdiff_t ALsizeiptrEXT;
@@ -572,7 +567,6 @@ index 111dde9..57c1d12 100644
  enum DevFmtChannels {
      DevFmtMono   = ALC_MONO_SOFT,
 diff --git a/config.h.in b/config.h.in
-index af0d8bf..d1f36d1 100644
 --- a/config.h.in
 +++ b/config.h.in
 @@ -70,6 +70,9 @@
@@ -586,7 +580,6 @@ index af0d8bf..d1f36d1 100644
  #cmakedefine HAVE_WAVE
  
 diff --git a/include/AL/alc.h b/include/AL/alc.h
-index 294e8b3..8b0a235 100644
 --- a/include/AL/alc.h
 +++ b/include/AL/alc.h
 @@ -230,6 +230,15 @@ typedef void           (ALC_APIENTRY *LPALCCAPTURESTART)(ALCdevice *device);
@@ -606,7 +599,6 @@ index 294e8b3..8b0a235 100644
  }
  #endif
 diff --git a/include/atomic.h b/include/atomic.h
-index d761890..932da9d 100644
 --- a/include/atomic.h
 +++ b/include/atomic.h
 @@ -11,7 +11,7 @@ extern "C" {

@@ -1,5 +1,4 @@
 diff --git a/src/iceauth.c b/src/iceauth.c
-index 14370e2..6ecadf4 100644
 --- a/src/iceauth.c
 +++ b/src/iceauth.c
 @@ -67,7 +67,7 @@ IceGenerateMagicCookie (

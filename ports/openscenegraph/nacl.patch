@@ -1,6 +1,7 @@
-diff -Naur OpenSceneGraph-2.9.7/Makefile OpenSceneGraph-2.9.7.nacl/Makefile
---- OpenSceneGraph-2.9.7/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/Makefile	2010-07-01 17:33:14.000000000 -0600
+diff --git a/Makefile b/Makefile
+new file mode 100644
+--- /dev/null
++++ b/Makefile
 @@ -0,0 +1,17 @@
 +export CXXFLAGS += -O3
 +
@@ -19,9 +20,10 @@ diff -Naur OpenSceneGraph-2.9.7/Makefile OpenSceneGraph-2.9.7.nacl/Makefile
 +	cd src/osg && $(MAKE) clean
 +	cd src/osgUtil && $(MAKE) clean
 +	cd src/OpenThreads && $(MAKE) clean
-diff -Naur OpenSceneGraph-2.9.7/include/OpenThreads/Config OpenSceneGraph-2.9.7.nacl/include/OpenThreads/Config
---- OpenSceneGraph-2.9.7/include/OpenThreads/Config	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/include/OpenThreads/Config	2010-07-01 17:32:53.000000000 -0600
+diff --git a/include/OpenThreads/Config b/include/OpenThreads/Config
+new file mode 100644
+--- /dev/null
++++ b/include/OpenThreads/Config
 @@ -0,0 +1,42 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 2008 Robert Osfield 
 + *
@@ -65,10 +67,10 @@ diff -Naur OpenSceneGraph-2.9.7/include/OpenThreads/Config OpenSceneGraph-2.9.7.
 +#define OT_LIBRARY_STATIC
 +
 +#endif
-diff -Naur OpenSceneGraph-2.9.7/include/osg/Array OpenSceneGraph-2.9.7.nacl/include/osg/Array
---- OpenSceneGraph-2.9.7/include/osg/Array	2009-10-20 12:34:24.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/include/osg/Array	2012-01-28 01:22:08.272995795 -0800
-@@ -154,7 +154,7 @@
+diff --git a/include/osg/Array b/include/osg/Array
+--- a/include/osg/Array
++++ b/include/osg/Array
+@@ -154,7 +154,7 @@ class TemplateArray : public Array, public MixinVector<T>
          TemplateArray& operator = (const TemplateArray& array)
          {
              if (this==&array) return *this;
@@ -77,7 +79,7 @@ diff -Naur OpenSceneGraph-2.9.7/include/osg/Array OpenSceneGraph-2.9.7.nacl/incl
              return *this;
          } 
  
-@@ -240,7 +240,7 @@
+@@ -240,7 +240,7 @@ class TemplateIndexArray : public IndexArray, public MixinVector<T>
          TemplateIndexArray& operator = (const TemplateIndexArray& array)
          {
              if (this==&array) return *this;
@@ -86,9 +88,10 @@ diff -Naur OpenSceneGraph-2.9.7/include/osg/Array OpenSceneGraph-2.9.7.nacl/incl
              return *this;
          } 
  
-diff -Naur OpenSceneGraph-2.9.7/include/osg/Config OpenSceneGraph-2.9.7.nacl/include/osg/Config
---- OpenSceneGraph-2.9.7/include/osg/Config	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/include/osg/Config	2010-07-01 17:32:53.000000000 -0600
+diff --git a/include/osg/Config b/include/osg/Config
+new file mode 100644
+--- /dev/null
++++ b/include/osg/Config
 @@ -0,0 +1,48 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 2008-2009 Robert Osfield
 + *
@@ -138,10 +141,10 @@ diff -Naur OpenSceneGraph-2.9.7/include/osg/Config OpenSceneGraph-2.9.7.nacl/inc
 +/* #undef OSG_GL_FIXED_FUNCTION_AVAILABLE */
 +
 +#endif
-diff -Naur OpenSceneGraph-2.9.7/include/osg/Math OpenSceneGraph-2.9.7.nacl/include/osg/Math
---- OpenSceneGraph-2.9.7/include/osg/Math	2009-11-18 05:15:29.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/include/osg/Math	2010-07-01 17:32:53.000000000 -0600
-@@ -211,9 +211,19 @@
+diff --git a/include/osg/Math b/include/osg/Math
+--- a/include/osg/Math
++++ b/include/osg/Math
+@@ -211,9 +211,19 @@ inline double round(double v) { return v>=0.0?floor(v+0.5):ceil(v-0.5); }
          inline bool isNaN(float v) { return std::isnan(v); }
          inline bool isNaN(double v) { return std::isnan(v); }
      #else
@@ -164,9 +167,10 @@ diff -Naur OpenSceneGraph-2.9.7/include/osg/Math OpenSceneGraph-2.9.7.nacl/inclu
      #endif
  #endif
  
-diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/Makefile OpenSceneGraph-2.9.7.nacl/src/OpenThreads/Makefile
---- OpenSceneGraph-2.9.7/src/OpenThreads/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/Makefile	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/OpenThreads/Makefile b/src/OpenThreads/Makefile
+new file mode 100644
+--- /dev/null
++++ b/src/OpenThreads/Makefile
 @@ -0,0 +1,43 @@
 +OSG_ROOT = ../..
 +
@@ -211,9 +215,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/Makefile OpenSceneGraph-2.9.7.na
 +
 +$(LIB_OPENTHREADS): $(OBJ_DIR) $(COMMON_OBJ_FILES) $(PTHREADS_OBJ_FILES)
 +	cd $(OBJ_DIR) && $(AR) rcs ../$(OSG_ROOT)/$(LIB_OPENTHREADS) $(COMMON_OBJ_FILES) $(PTHREADS_OBJ_FILES)
-diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/common/Version.in OpenSceneGraph-2.9.7.nacl/src/OpenThreads/common/Version.in
---- OpenSceneGraph-2.9.7/src/OpenThreads/common/Version.in	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/common/Version.in	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/OpenThreads/common/Version.in b/src/OpenThreads/common/Version.in
+new file mode 100644
+--- /dev/null
++++ b/src/OpenThreads/common/Version.in
 @@ -0,0 +1,38 @@
 +/* -*-c++-*- OpenThreads library, Copyright (C) 2002 - 2007  The Open Thread Group
 + *
@@ -253,9 +258,9 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/common/Version.in OpenSceneGraph
 +}
 +
 +#endif
-diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThread.c++
---- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++	2009-11-20 03:27:43.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThread.c++	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/OpenThreads/pthreads/PThread.c++ b/src/OpenThreads/pthreads/PThread.c++
+--- a/src/OpenThreads/pthreads/PThread.c++
++++ b/src/OpenThreads/pthreads/PThread.c++
 @@ -45,6 +45,7 @@
  #endif
  
@@ -264,7 +269,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  #include "PThreadPrivateData.h"
  
  #include <iostream>
-@@ -149,7 +150,7 @@
+@@ -149,7 +150,7 @@ private:
              printf("Error: pthread_setspecific(,) returned error status, status = %d\n",status);
          }
  
@@ -273,7 +278,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  
  #ifdef ALLOW_PRIORITY_SCHEDULING
  
-@@ -169,7 +170,7 @@
+@@ -169,7 +170,7 @@ private:
  
          pd->isRunning = false;
  
@@ -282,7 +287,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  
          return 0;
  
-@@ -387,6 +388,7 @@
+@@ -387,6 +388,7 @@ Thread::Thread() {
      pd->threadPriority = Thread::THREAD_PRIORITY_DEFAULT;
      pd->threadPolicy = Thread::THREAD_SCHEDULE_DEFAULT;
      pd->cpunum = -1;
@@ -290,7 +295,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  
      _prvData = static_cast<void *>(pd);
  
-@@ -412,6 +414,7 @@
+@@ -412,6 +414,7 @@ Thread::~Thread()
      cancel();
      }
  
@@ -298,7 +303,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
      delete pd;
      
      _prvData = 0;
-@@ -693,14 +696,16 @@
+@@ -693,14 +696,16 @@ int Thread::join() {
  //
  int Thread::testCancel() {
  
@@ -322,7 +327,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  
  }
  
-@@ -716,56 +721,15 @@
+@@ -716,56 +721,15 @@ int Thread::cancel() {
      PThreadPrivateData *pd = static_cast<PThreadPrivateData *> (_prvData);
      if (pd->isRunning)
      {
@@ -381,7 +386,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  // Description: Set the thread's schedule priority (if able)
  //
  // Use: public
-@@ -910,7 +874,7 @@
+@@ -910,7 +874,7 @@ int Thread::YieldCurrentThread()
  //
  int Thread::microSleep(unsigned int microsec)
  {
@@ -390,9 +395,9 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThread.c++ OpenSceneGr
  }
  
  
-diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadBarrier.c++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadBarrier.c++
---- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadBarrier.c++	2009-07-13 10:14:43.000000000 -0600
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadBarrier.c++	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/OpenThreads/pthreads/PThreadBarrier.c++ b/src/OpenThreads/pthreads/PThreadBarrier.c++
+--- a/src/OpenThreads/pthreads/PThreadBarrier.c++
++++ b/src/OpenThreads/pthreads/PThreadBarrier.c++
 @@ -21,6 +21,7 @@
  #include <unistd.h>
  #include <OpenThreads/Barrier>
@@ -401,7 +406,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadBarrier.c++ Open
  
  using namespace OpenThreads;
  
-@@ -178,11 +179,11 @@
+@@ -178,11 +179,11 @@ void Barrier::block(unsigned int numThreads) {
          {
              while (pd->phase == my_phase)
              {
@@ -415,9 +420,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadBarrier.c++ Open
              }
          }
      }
-diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCleanup.h OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCleanup.h
---- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCleanup.h	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCleanup.h	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/OpenThreads/pthreads/PThreadCleanup.h b/src/OpenThreads/pthreads/PThreadCleanup.h
+new file mode 100644
+--- /dev/null
++++ b/src/OpenThreads/pthreads/PThreadCleanup.h
 @@ -0,0 +1,28 @@
 +#ifndef _PTHREADCLEANUP_H_
 +#define _PTHREADCLEANUP_H_
@@ -447,9 +453,9 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCleanup.h OpenSc
 +};
 +}
 +#endif
-diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCondition.c++
---- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++	2007-09-07 09:26:18.000000000 -0600
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadCondition.c++	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/OpenThreads/pthreads/PThreadCondition.c++ b/src/OpenThreads/pthreads/PThreadCondition.c++
+--- a/src/OpenThreads/pthreads/PThreadCondition.c++
++++ b/src/OpenThreads/pthreads/PThreadCondition.c++
 @@ -26,6 +26,7 @@
  #include <stdio.h>
  
@@ -458,7 +464,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++ Op
  #include "PThreadConditionPrivateData.h"
  #include "PThreadMutexPrivateData.h"
  
-@@ -132,11 +133,11 @@
+@@ -132,11 +133,11 @@ int Condition::wait(Mutex *mutex) {
  
      int status;
      
@@ -472,7 +478,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++ Op
  
      return status;
  
-@@ -179,11 +180,11 @@
+@@ -179,11 +180,11 @@ int Condition::wait(Mutex *mutex, unsigned long int ms) {
  
      int status;
  
@@ -486,9 +492,9 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadCondition.c++ Op
  
      return status;
  
-diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadPrivateData.h OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadPrivateData.h
---- OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadPrivateData.h	2007-09-25 03:45:44.000000000 -0600
-+++ OpenSceneGraph-2.9.7.nacl/src/OpenThreads/pthreads/PThreadPrivateData.h	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/OpenThreads/pthreads/PThreadPrivateData.h b/src/OpenThreads/pthreads/PThreadPrivateData.h
+--- a/src/OpenThreads/pthreads/PThreadPrivateData.h
++++ b/src/OpenThreads/pthreads/PThreadPrivateData.h
 @@ -25,6 +25,8 @@
  
  namespace OpenThreads {
@@ -498,7 +504,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadPrivateData.h Op
  class PThreadPrivateData {
  
      //-------------------------------------------------------------------------
-@@ -65,6 +67,8 @@
+@@ -65,6 +67,8 @@ private:
      volatile int uniqueId;
  
      volatile int cpunum;
@@ -507,9 +513,9 @@ diff -Naur OpenSceneGraph-2.9.7/src/OpenThreads/pthreads/PThreadPrivateData.h Op
      
  
      static int nextId;
-diff -Naur OpenSceneGraph-2.9.7/src/osg/GLExtensions.cpp OpenSceneGraph-2.9.7.nacl/src/osg/GLExtensions.cpp
---- OpenSceneGraph-2.9.7/src/osg/GLExtensions.cpp	2010-02-10 05:44:59.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/GLExtensions.cpp	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/osg/GLExtensions.cpp b/src/osg/GLExtensions.cpp
+--- a/src/osg/GLExtensions.cpp
++++ b/src/osg/GLExtensions.cpp
 @@ -27,9 +27,32 @@
  #include <set>
  
@@ -545,7 +551,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/GLExtensions.cpp OpenSceneGraph-2.9.7.na
  
  typedef std::set<std::string>  ExtensionSet;
  static osg::buffered_object<ExtensionSet> s_glExtensionSetList;
-@@ -91,18 +114,55 @@
+@@ -91,18 +114,55 @@ bool osg::isGLExtensionOrVersionSupported(unsigned int contextID, const char *ex
              rendererString = renderer ? (const char*)renderer : "";
  
              // get the extension list from OpenGL.
@@ -792,9 +798,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/GLExtensions.cpp OpenSceneGraph-2.9.7.na
 +    }
  #endif
 -}
-diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.cpp OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.cpp
---- OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.cpp	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.cpp	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/osg/GLStaticLibrary.cpp b/src/osg/GLStaticLibrary.cpp
+new file mode 100644
+--- /dev/null
++++ b/src/osg/GLStaticLibrary.cpp
 @@ -0,0 +1,211 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield 
 + * Copyright (C) 2003-2005 3Dlabs Inc. Ltd.
@@ -1007,9 +1014,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.cpp OpenSceneGraph-2.9.7
 +}
 +
 +#endif  // OSG_GLES2_LIBRARY_STATIC
-diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.h OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.h
---- OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.h	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/GLStaticLibrary.h	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/osg/GLStaticLibrary.h b/src/osg/GLStaticLibrary.h
+new file mode 100644
+--- /dev/null
++++ b/src/osg/GLStaticLibrary.h
 @@ -0,0 +1,33 @@
 +/* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield 
 + * Copyright (C) 2003-2005 3Dlabs Inc. Ltd.
@@ -1044,9 +1052,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/GLStaticLibrary.h OpenSceneGraph-2.9.7.n
 +}
 +
 +#endif
-diff -Naur OpenSceneGraph-2.9.7/src/osg/Makefile OpenSceneGraph-2.9.7.nacl/src/osg/Makefile
---- OpenSceneGraph-2.9.7/src/osg/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/Makefile	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/osg/Makefile b/src/osg/Makefile
+new file mode 100644
+--- /dev/null
++++ b/src/osg/Makefile
 @@ -0,0 +1,161 @@
 +OSG_ROOT = ../..
 +
@@ -1209,10 +1218,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/Makefile OpenSceneGraph-2.9.7.nacl/src/o
 +
 +$(LIB_OSG): $(OBJ_DIR) $(OBJ_FILES)
 +	cd $(OBJ_DIR) && $(AR) rcs ../$(OSG_ROOT)/$(LIB_OSG) $(OBJ_FILES)
-diff -Naur OpenSceneGraph-2.9.7/src/osg/Notify.cpp OpenSceneGraph-2.9.7.nacl/src/osg/Notify.cpp
---- OpenSceneGraph-2.9.7/src/osg/Notify.cpp	2010-02-12 04:45:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osg/Notify.cpp	2010-07-01 17:32:53.000000000 -0600
-@@ -219,7 +219,7 @@
+diff --git a/src/osg/Notify.cpp b/src/osg/Notify.cpp
+--- a/src/osg/Notify.cpp
++++ b/src/osg/Notify.cpp
+@@ -219,7 +219,7 @@ std::ostream& osg::notify(const osg::NotifySeverity severity)
  
  void osg::StandardNotifyHandler::notify(osg::NotifySeverity severity, const char *message)
  {
@@ -1221,7 +1230,7 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/Notify.cpp OpenSceneGraph-2.9.7.nacl/src
      if (severity <= osg::WARN) 
          fputs(message, stderr);
      else
-@@ -231,7 +231,9 @@
+@@ -231,7 +231,9 @@ void osg::StandardNotifyHandler::notify(osg::NotifySeverity severity, const char
  
  #if defined(WIN32) && !defined(__CYGWIN__)
  
@@ -1232,9 +1241,10 @@ diff -Naur OpenSceneGraph-2.9.7/src/osg/Notify.cpp OpenSceneGraph-2.9.7.nacl/src
  #include <windows.h>
  
  void osg::WinDebugNotifyHandler::notify(osg::NotifySeverity severity, const char *message)
-diff -Naur OpenSceneGraph-2.9.7/src/osgUtil/Makefile OpenSceneGraph-2.9.7.nacl/src/osgUtil/Makefile
---- OpenSceneGraph-2.9.7/src/osgUtil/Makefile	1969-12-31 17:00:00.000000000 -0700
-+++ OpenSceneGraph-2.9.7.nacl/src/osgUtil/Makefile	2010-07-01 17:32:53.000000000 -0600
+diff --git a/src/osgUtil/Makefile b/src/osgUtil/Makefile
+new file mode 100644
+--- /dev/null
++++ b/src/osgUtil/Makefile
 @@ -0,0 +1,66 @@
 +OSG_ROOT = ../..
 +

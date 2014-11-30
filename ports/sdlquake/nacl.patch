@@ -1,6 +1,5 @@
 diff --git a/cd_nacl.c b/cd_nacl.c
 new file mode 100644
-index 0000000..4f3576d
 --- /dev/null
 +++ b/cd_nacl.c
 @@ -0,0 +1,29 @@
@@ -34,7 +33,6 @@ index 0000000..4f3576d
 +}
 +
 diff --git a/d_ifacea.h b/d_ifacea.h
-index 241952a..22c9c99 100644
 --- a/d_ifacea.h
 +++ b/d_ifacea.h
 @@ -38,7 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -47,7 +45,6 @@ index 241952a..22c9c99 100644
  // !!! if this is changed, it must be changed in quakedef.h too !!!
  #define CACHE_SIZE	32		// used to align key data structures
 diff --git a/net_dgrm.c b/net_dgrm.c
-index a293b77..6b24283 100644
 --- a/net_dgrm.c
 +++ b/net_dgrm.c
 @@ -19,6 +19,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -125,7 +122,6 @@ index a293b77..6b24283 100644
 +#endif
 +
 diff --git a/net_udp.c b/net_udp.c
-index c7e8256..e2d138f 100644
 --- a/net_udp.c
 +++ b/net_udp.c
 @@ -19,9 +19,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -226,7 +222,6 @@ index c7e8256..e2d138f 100644
 +
 +#endif
 diff --git a/r_shared.h b/r_shared.h
-index f2a6db3..6e09c3d 100644
 --- a/r_shared.h
 +++ b/r_shared.h
 @@ -30,8 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -241,7 +236,6 @@ index f2a6db3..6e09c3d 100644
  
  #define SIN_BUFFER_SIZE	(MAXDIMENSION+CYCLE)
 diff --git a/sys_sdl.c b/sys_sdl.c
-index 145a7f7..e7a62e2 100644
 --- a/sys_sdl.c
 +++ b/sys_sdl.c
 @@ -11,7 +11,7 @@
@@ -263,7 +257,6 @@ index 145a7f7..e7a62e2 100644
  
  qboolean			isDedicated;
 diff --git a/vid_sdl.c b/vid_sdl.c
-index 76d8244..ad1b6d8 100644
 --- a/vid_sdl.c
 +++ b/vid_sdl.c
 @@ -11,8 +11,8 @@ unsigned short  d_8to16table[256];

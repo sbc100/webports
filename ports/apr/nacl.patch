@@ -1,5 +1,4 @@
 diff --git a/Makefile.in b/Makefile.in
-index 2ccaaf3..0cdd738 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -18,7 +18,7 @@ APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
@@ -47,7 +46,6 @@ index 2ccaaf3..0cdd738 100644
  LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
  	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
 diff --git a/configure b/configure
-index 0b5b83a..d7370ca 100755
 --- a/configure
 +++ b/configure
 @@ -20959,7 +20959,8 @@ if ${ac_cv_file__dev_zero+:} false; then :
@@ -96,7 +94,6 @@ index 0b5b83a..d7370ca 100755
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
 diff --git a/file_io/unix/pipe.c b/file_io/unix/pipe.c
-index 571d9bc..9b61ed6 100644
 --- a/file_io/unix/pipe.c
 +++ b/file_io/unix/pipe.c
 @@ -252,12 +252,16 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create_ex(apr_file_t **in,
@@ -117,7 +114,6 @@ index 571d9bc..9b61ed6 100644
  
      
 diff --git a/include/apr.h.in b/include/apr.h.in
-index 0ad7a91..5f8d86d 100644
 --- a/include/apr.h.in
 +++ b/include/apr.h.in
 @@ -189,6 +189,9 @@
@@ -131,7 +127,6 @@ index 0ad7a91..5f8d86d 100644
  #include <limits.h>
  #else
 diff --git a/network_io/unix/sockopt.c b/network_io/unix/sockopt.c
-index 6ce4b91..15247ed 100644
 --- a/network_io/unix/sockopt.c
 +++ b/network_io/unix/sockopt.c
 @@ -358,7 +358,7 @@ apr_status_t apr_socket_opt_get(apr_socket_t *sock,
@@ -144,7 +139,6 @@ index 6ce4b91..15247ed 100644
  
      if (ioctl(sock->socketdes, SIOCATMARK, (void*) &oobmark) < 0)
 diff --git a/threadproc/unix/procsup.c b/threadproc/unix/procsup.c
-index 94177f9..073b143 100644
 --- a/threadproc/unix/procsup.c
 +++ b/threadproc/unix/procsup.c
 @@ -52,7 +52,7 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)

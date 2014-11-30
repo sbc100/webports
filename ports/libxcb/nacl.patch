@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index 93e1a00..bbc78dd 100755
 --- a/configure
 +++ b/configure
 @@ -13123,7 +13123,9 @@ else
@@ -14,7 +13,6 @@ index 93e1a00..bbc78dd 100755
  pkg_failed=no
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for NEEDED" >&5
 diff --git a/src/xcb_conn.c b/src/xcb_conn.c
-index 725502a..84c6a5f 100644
 --- a/src/xcb_conn.c
 +++ b/src/xcb_conn.c
 @@ -63,6 +63,26 @@ static const int xcb_con_error = XCB_CONN_ERROR;

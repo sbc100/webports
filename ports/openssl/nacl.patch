@@ -1,5 +1,4 @@
 diff --git a/Configure b/Configure
-index de78469..d76df92 100755
 --- a/Configure
 +++ b/Configure
 @@ -362,6 +362,13 @@ my %table=(
@@ -17,7 +16,6 @@ index de78469..d76df92 100755
  # "Highgprs" is kernel feature first implemented in Linux 2.6.32, see
  # /proc/cpuinfo. The idea is to preserve most significant bits of
 diff --git a/config b/config
-index 41fa2a6..e8d82b3 100755
 --- a/config
 +++ b/config
 @@ -660,6 +660,9 @@ case "$GUESSOS" in
@@ -31,7 +29,6 @@ index 41fa2a6..e8d82b3 100755
    *86-*-linux2) OUT="linux-elf"
  	if [ "$GCCVER" -gt 28 ]; then
 diff --git a/crypto/rand/rand_unix.c b/crypto/rand/rand_unix.c
-index e3a6557..acb6cf8 100644
 --- a/crypto/rand/rand_unix.c
 +++ b/crypto/rand/rand_unix.c
 @@ -133,7 +133,30 @@

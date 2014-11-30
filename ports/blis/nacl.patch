@@ -1,5 +1,4 @@
 diff --git a/testsuite/input.general b/testsuite/input.general
-index 0f52b46..d975907 100644
 --- a/testsuite/input.general
 +++ b/testsuite/input.general
 @@ -25,7 +25,7 @@ sdcz    # Datatype(s) to test:
@@ -12,7 +11,6 @@ index 0f52b46..d975907 100644
  0       # Output results in matlab/octave format? ('1' = yes; '0' = no)
  0       # Output results to stdout AND files? ('1' = yes; '0' = no)
 diff --git a/testsuite/input.operations b/testsuite/input.operations
-index c651d33..5603083 100644
 --- a/testsuite/input.operations
 +++ b/testsuite/input.operations
 @@ -198,7 +198,7 @@

@@ -1,8 +1,7 @@
 diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
-index cfb417a..9ab9f7b 100644
 --- a/bfd/elf32-i386.c
 +++ b/bfd/elf32-i386.c
-@@ -3804,7 +3804,7 @@ elf_i386_relocate_section (bfd *output_bfd,
+@@ -3807,7 +3807,7 @@ elf_i386_relocate_section (bfd *output_bfd,
  	      if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
  		{
  		  unsigned int type;
@@ -11,7 +10,7 @@ index cfb417a..9ab9f7b 100644
  
  		  /* GD->LE transition.  */
  		  type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
-@@ -4133,7 +4133,7 @@ elf_i386_relocate_section (bfd *output_bfd,
+@@ -4163,7 +4163,7 @@ elf_i386_relocate_section (bfd *output_bfd,
  	  else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
  	    {
  	      unsigned int val, type;
@@ -21,7 +20,6 @@ index cfb417a..9ab9f7b 100644
  	      /* GD->IE transition.  */
  	      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 diff --git a/binutils/Makefile.in b/binutils/Makefile.in
-index 3408769..fbe6353 100644
 --- a/binutils/Makefile.in
 +++ b/binutils/Makefile.in
 @@ -332,7 +332,7 @@ LIBICONV = @LIBICONV@
@@ -44,7 +42,6 @@ index 3408769..fbe6353 100644
  HFILES = \
  	arsup.h binemul.h bucomm.h budbg.h \
 diff --git a/gas/Makefile.in b/gas/Makefile.in
-index dd0318f..20fddc2 100644
 --- a/gas/Makefile.in
 +++ b/gas/Makefile.in
 @@ -197,7 +197,7 @@ LIBINTL = @LIBINTL@
@@ -67,7 +64,6 @@ index dd0318f..20fddc2 100644
  
  # How to link with both our special library facilities
 diff --git a/ld/Makefile.in b/ld/Makefile.in
-index 987a068..a89fe92 100644
 --- a/ld/Makefile.in
 +++ b/ld/Makefile.in
 @@ -448,7 +448,8 @@ TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \

@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index 466a189..3b1fe44 100755
 --- a/configure
 +++ b/configure
 @@ -2602,8 +2602,8 @@ cat >>confdefs.h <<\_ACEOF
@@ -24,7 +23,6 @@ index 466a189..3b1fe44 100755
    cat >conftest.$ac_ext <<_ACEOF
  
 diff --git a/lib/decode.c b/lib/decode.c
-index 794c868..014f32f 100644
 --- a/lib/decode.c
 +++ b/lib/decode.c
 @@ -46,6 +46,10 @@ th_get_pathname(TAR *t)
@@ -65,7 +63,6 @@ index 794c868..014f32f 100644
  
  
 diff --git a/lib/encode.c b/lib/encode.c
-index 13b3ed0..f37c307 100644
 --- a/lib/encode.c
 +++ b/lib/encode.c
 @@ -155,6 +155,7 @@ th_set_device(TAR *t, dev_t device)
@@ -101,7 +98,6 @@ index 13b3ed0..f37c307 100644
  
  
 diff --git a/lib/extract.c b/lib/extract.c
-index 6bbb801..2d8b571 100644
 --- a/lib/extract.c
 +++ b/lib/extract.c
 @@ -28,6 +28,22 @@
@@ -193,7 +189,6 @@ index 6bbb801..2d8b571 100644
  
  
 diff --git a/lib/output.c b/lib/output.c
-index a2db929..e645db5 100644
 --- a/lib/output.c
 +++ b/lib/output.c
 @@ -82,14 +82,22 @@ th_print_long_ls(TAR *t)
@@ -220,7 +215,6 @@ index a2db929..e645db5 100644
  		snprintf(groupname, sizeof(groupname), "%d", gid);
  	else
 diff --git a/libtar/Makefile.in b/libtar/Makefile.in
-index 3128127..c6e42e8 100644
 --- a/libtar/Makefile.in
 +++ b/libtar/Makefile.in
 @@ -16,7 +16,7 @@ PACKAGE_VERSION	= @PACKAGE_VERSION@

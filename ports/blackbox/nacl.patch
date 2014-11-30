@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index 765411c..80ea6aa 100755
 --- a/configure
 +++ b/configure
 @@ -20734,7 +20734,7 @@ if test "${ac_cv_lib_X11_XOpenDisplay+set}" = set; then
@@ -12,7 +11,6 @@ index 765411c..80ea6aa 100755
  /* confdefs.h.  */
  _ACEOF
 diff --git a/lib/Application.cc b/lib/Application.cc
-index f905f06..5a107e2 100644
 --- a/lib/Application.cc
 +++ b/lib/Application.cc
 @@ -36,7 +36,7 @@
@@ -25,7 +23,6 @@ index f905f06..5a107e2 100644
  #endif
  #include <sys/time.h>
 diff --git a/lib/Display.cc b/lib/Display.cc
-index dc9ae67..7c3146b 100644
 --- a/lib/Display.cc
 +++ b/lib/Display.cc
 @@ -32,6 +32,9 @@
@@ -39,7 +36,6 @@ index dc9ae67..7c3146b 100644
  namespace bt {
  
 diff --git a/lib/Image.cc b/lib/Image.cc
-index ebce0b1..eefd29c 100644
 --- a/lib/Image.cc
 +++ b/lib/Image.cc
 @@ -44,6 +44,7 @@
@@ -51,7 +47,6 @@ index ebce0b1..eefd29c 100644
  // #define COLORTABLE_DEBUG
  // #define MITSHM_DEBUG
 diff --git a/lib/Menu.cc b/lib/Menu.cc
-index 279000e..33dd962 100644
 --- a/lib/Menu.cc
 +++ b/lib/Menu.cc
 @@ -35,6 +35,7 @@
@@ -100,7 +95,6 @@ index 279000e..33dd962 100644
        // go one item past the current active index
        if (anchor != end && !anchor->separator)
 diff --git a/lib/Pen.cc b/lib/Pen.cc
-index 42c97df..cb3bded 100644
 --- a/lib/Pen.cc
 +++ b/lib/Pen.cc
 @@ -36,6 +36,7 @@
@@ -112,7 +106,6 @@ index 42c97df..cb3bded 100644
  // #define PENCACHE_DEBUG
  
 diff --git a/lib/Resource.cc b/lib/Resource.cc
-index 8240719..b7e93a2 100644
 --- a/lib/Resource.cc
 +++ b/lib/Resource.cc
 @@ -29,6 +29,7 @@
@@ -124,7 +117,6 @@ index 8240719..b7e93a2 100644
  
  bt::Resource::Resource(void)
 diff --git a/lib/Texture.cc b/lib/Texture.cc
-index fb5a06b..5b08332 100644
 --- a/lib/Texture.cc
 +++ b/lib/Texture.cc
 @@ -31,6 +31,7 @@
@@ -136,7 +128,6 @@ index fb5a06b..5b08332 100644
  
  void bt::Texture::setColor1(const bt::Color &new_color) {
 diff --git a/lib/Util.cc b/lib/Util.cc
-index 10dfdeb..849f63c 100644
 --- a/lib/Util.cc
 +++ b/lib/Util.cc
 @@ -86,10 +86,12 @@ bool bt::mkdirhier(const std::string &path, int mode)
@@ -176,7 +167,6 @@ index 10dfdeb..849f63c 100644
    return success;
  }
 diff --git a/lib/Util.hh b/lib/Util.hh
-index fe8625b..fbf456e 100644
 --- a/lib/Util.hh
 +++ b/lib/Util.hh
 @@ -25,6 +25,8 @@
@@ -202,7 +192,6 @@ index fe8625b..fbf456e 100644
  } // namespace bt
  
 diff --git a/lib/XDG.cc b/lib/XDG.cc
-index feabb92..8b0ede2 100644
 --- a/lib/XDG.cc
 +++ b/lib/XDG.cc
 @@ -26,6 +26,7 @@
@@ -214,7 +203,6 @@ index feabb92..8b0ede2 100644
  
  // make sure directory names end with a slash
 diff --git a/src/BlackboxResource.cc b/src/BlackboxResource.cc
-index 27d1323..ff320d0 100644
 --- a/src/BlackboxResource.cc
 +++ b/src/BlackboxResource.cc
 @@ -33,6 +33,7 @@
@@ -226,7 +214,6 @@ index 27d1323..ff320d0 100644
  BlackboxResource::BlackboxResource(const std::string& rc): rc_file(rc) {
    screen_resources = 0;
 diff --git a/src/Makefile.in b/src/Makefile.in
-index 6f9dec8..4724b38 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
 @@ -302,7 +302,7 @@ clean-binPROGRAMS:
@@ -239,7 +226,6 @@ index 6f9dec8..4724b38 100644
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
 diff --git a/src/Screen.cc b/src/Screen.cc
-index 838d168..15739b6 100644
 --- a/src/Screen.cc
 +++ b/src/Screen.cc
 @@ -47,6 +47,7 @@
@@ -251,7 +237,6 @@ index 838d168..15739b6 100644
  
  static bool running = true;
 diff --git a/src/ScreenResource.cc b/src/ScreenResource.cc
-index 239ddc6..372ac16 100644
 --- a/src/ScreenResource.cc
 +++ b/src/ScreenResource.cc
 @@ -32,6 +32,7 @@
@@ -263,7 +248,6 @@ index 239ddc6..372ac16 100644
  
  static const int iconify_width  = 9;
 diff --git a/src/Toolbar.cc b/src/Toolbar.cc
-index e88b8f6..2c72996 100644
 --- a/src/Toolbar.cc
 +++ b/src/Toolbar.cc
 @@ -39,12 +39,15 @@
@@ -284,7 +268,6 @@ index e88b8f6..2c72996 100644
  }
  
 diff --git a/src/Window.cc b/src/Window.cc
-index b1361ae..0067728 100644
 --- a/src/Window.cc
 +++ b/src/Window.cc
 @@ -43,6 +43,7 @@
@@ -311,7 +294,6 @@ index b1361ae..0067728 100644
      if (!client.state.resizing)
        startResize(event->window);
 diff --git a/src/blackbox.cc b/src/blackbox.cc
-index d750fe6..2e1b2b1 100644
 --- a/src/blackbox.cc
 +++ b/src/blackbox.cc
 @@ -37,6 +37,7 @@
@@ -323,7 +305,6 @@ index d750fe6..2e1b2b1 100644
  // #define FOCUS_DEBUG
  #ifdef FOCUS_DEBUG
 diff --git a/src/main.cc b/src/main.cc
-index 2c48e0d..70bac53 100644
 --- a/src/main.cc
 +++ b/src/main.cc
 @@ -35,6 +35,8 @@
@@ -348,7 +329,6 @@ index 2c48e0d..70bac53 100644
    const char *dpy_name = 0;
    std::string rc_file;
 diff --git a/util/Makefile.in b/util/Makefile.in
-index b2ce1d1..fdc5220 100644
 --- a/util/Makefile.in
 +++ b/util/Makefile.in
 @@ -282,10 +282,10 @@ clean-binPROGRAMS:
@@ -365,7 +345,6 @@ index b2ce1d1..fdc5220 100644
  	@$(NORMAL_INSTALL)
  	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
 diff --git a/util/bsetroot.cc b/util/bsetroot.cc
-index 9fe3c5d..bd6d0a3 100644
 --- a/util/bsetroot.cc
 +++ b/util/bsetroot.cc
 @@ -31,6 +31,8 @@
@@ -390,7 +369,6 @@ index 9fe3c5d..bd6d0a3 100644
    char *display_name = 0;
    bool multi_head = False;
 diff --git a/util/bstyleconvert.cc b/util/bstyleconvert.cc
-index 2bd1772..561be84 100644
 --- a/util/bstyleconvert.cc
 +++ b/util/bstyleconvert.cc
 @@ -710,6 +710,10 @@ void writeStyle(const std::string &filename, const NewStyle &style)

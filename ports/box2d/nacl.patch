@@ -1,7 +1,6 @@
-diff --git Box2D_v2.2.1/CMakeLists.txt Box2D_v2.2.1/CMakeLists.txt
-index a9dc06c..0efc35f 100644
---- Box2D_v2.2.1/CMakeLists.txt
-+++ Box2D_v2.2.1/CMakeLists.txt
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
 @@ -19,10 +19,10 @@ set(BOX2D_VERSION 2.1.0)
  # The Box2D library.
  add_subdirectory(Box2D)

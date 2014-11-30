@@ -1,5 +1,4 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6f1a97e..756085b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -91,6 +91,10 @@ FUNCTION(TARGET_OS_LIBRARIES target)
@@ -43,7 +42,6 @@ index 6f1a97e..756085b 100644
  	TARGET_OS_LIBRARIES(libgit2_clar)
  	MSVC_SPLIT_SOURCES(libgit2_clar)
 diff --git a/src/indexer.c b/src/indexer.c
-index 0b1cf3c..1286816 100644
 --- a/src/indexer.c
 +++ b/src/indexer.c
 @@ -437,12 +437,17 @@ static int write_at(git_indexer *idx, const void *data, git_off_t offset, size_t
@@ -65,7 +63,6 @@ index 0b1cf3c..1286816 100644
  	return 0;
  }
 diff --git a/src/pool.c b/src/pool.c
-index a516ff9..b1c2bfe 100644
 --- a/src/pool.c
 +++ b/src/pool.c
 @@ -312,7 +312,7 @@ uint32_t git_pool__system_page_size(void)
@@ -78,7 +75,6 @@ index a516ff9..b1c2bfe 100644
  
  		size -= 2 * sizeof(void *); /* allow space for malloc overhead */
 diff --git a/src/posix.h b/src/posix.h
-index 965cd98..eb93cde 100644
 --- a/src/posix.h
 +++ b/src/posix.h
 @@ -12,6 +12,10 @@
@@ -93,7 +89,6 @@ index 965cd98..eb93cde 100644
  #define S_IFGITLINK 0160000
  #define S_ISGITLINK(m) (((m) & S_IFMT) == S_IFGITLINK)
 diff --git a/tests/clar.c b/tests/clar.c
-index 1546447..839f7f3 100644
 --- a/tests/clar.c
 +++ b/tests/clar.c
 @@ -222,7 +222,7 @@ static void
@@ -106,7 +101,6 @@ index 1546447..839f7f3 100644
  	if (!suite->enabled)
  		return;
 diff --git a/tests/clar/fs.h b/tests/clar/fs.h
-index 7c7dde6..e37aec1 100644
 --- a/tests/clar/fs.h
 +++ b/tests/clar/fs.h
 @@ -250,6 +250,249 @@ cl_fs_cleanup(void)
@@ -360,7 +354,6 @@ index 7c7dde6..e37aec1 100644
  
  #include <errno.h>
 diff --git a/tests/clar/sandbox.h b/tests/clar/sandbox.h
-index a44e291..a6aea62 100644
 --- a/tests/clar/sandbox.h
 +++ b/tests/clar/sandbox.h
 @@ -110,8 +110,21 @@ static int build_sandbox_path(void)
@@ -386,7 +379,6 @@ index a44e291..a6aea62 100644
  	return 0;
  }
 diff --git a/tests/commit/parse.c b/tests/commit/parse.c
-index 41e1624..f27bada 100644
 --- a/tests/commit/parse.c
 +++ b/tests/commit/parse.c
 @@ -119,8 +119,8 @@ passing_signature_test_case passing_signature_cases[] = {
@@ -401,7 +393,6 @@ index 41e1624..f27bada 100644
  	{NULL,NULL,NULL,NULL,0,0}
  };
 diff --git a/tests/config/read.c b/tests/config/read.c
-index 2567272..2db4b3d 100644
 --- a/tests/config/read.c
 +++ b/tests/config/read.c
 @@ -477,7 +477,7 @@ void test_config_read__simple_read_from_specific_level(void)
@@ -414,7 +405,6 @@ index 2567272..2db4b3d 100644
  
  	cl_git_pass(git_config_new(&cfg));
 diff --git a/tests/config/write.c b/tests/config/write.c
-index 0f11ae8..675f7f4 100644
 --- a/tests/config/write.c
 +++ b/tests/config/write.c
 @@ -18,7 +18,7 @@ void test_config_write__replace_value(void)

@@ -1,5 +1,4 @@
 diff --git a/Include/datetime.h b/Include/datetime.h
-index c0e7ffd..b6d6036 100644
 --- a/Include/datetime.h
 +++ b/Include/datetime.h
 @@ -166,6 +166,8 @@ typedef struct {
@@ -12,7 +11,6 @@ index c0e7ffd..b6d6036 100644
  #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
  #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
 diff --git a/Lib/distutils/unixccompiler.py b/Lib/distutils/unixccompiler.py
-index 2aa1cb1..40b0aff 100644
 --- a/Lib/distutils/unixccompiler.py
 +++ b/Lib/distutils/unixccompiler.py
 @@ -286,3 +286,42 @@ class UnixCCompiler(CCompiler):
@@ -59,7 +57,6 @@ index 2aa1cb1..40b0aff 100644
 +if os.environ.get("NACL_PORT_BUILD", None) in ["dest", "bootstrap"]:
 +    UnixCCompiler.link_shared_object = _link_shared_object
 diff --git a/Makefile.pre.in b/Makefile.pre.in
-index a70119a..3cb02a5 100644
 --- a/Makefile.pre.in
 +++ b/Makefile.pre.in
 @@ -597,14 +597,18 @@ Modules/pwdmodule.o: $(srcdir)/Modules/pwdmodule.c $(srcdir)/Modules/posixmodule
@@ -98,7 +95,6 @@ index a70119a..3cb02a5 100644
  		$(PYTHON_FOR_BUILD) -m lib2to3.pgen2.driver $(DESTDIR)$(LIBDEST)/lib2to3/Grammar.txt
  	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
 diff --git a/Modules/_ctypes/libffi/configure b/Modules/_ctypes/libffi/configure
-index 8230830..1ab4dcb 100755
 --- a/Modules/_ctypes/libffi/configure
 +++ b/Modules/_ctypes/libffi/configure
 @@ -13393,7 +13393,7 @@ case "$host" in
@@ -111,7 +107,6 @@ index 8230830..1ab4dcb 100755
  	      ;;
  	    *)
 diff --git a/Modules/_ctypes/libffi/src/x86/ffi64.c b/Modules/_ctypes/libffi/src/x86/ffi64.c
-index 2014af2..cacf894 100644
 --- a/Modules/_ctypes/libffi/src/x86/ffi64.c
 +++ b/Modules/_ctypes/libffi/src/x86/ffi64.c
 @@ -202,10 +202,12 @@ classify_argument (ffi_type *type, enum x86_64_reg_class classes[],
@@ -128,7 +123,6 @@ index 2014af2..cacf894 100644
        {
  	const int UNITS_PER_WORD = 8;
 diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
-index e4885d1..8f27a5b 100644
 --- a/Modules/_testcapimodule.c
 +++ b/Modules/_testcapimodule.c
 @@ -1278,6 +1278,9 @@ static int test_run_counter = 0;
@@ -150,7 +144,6 @@ index e4885d1..8f27a5b 100644
  
  
 diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
-index cd4672c..9bacfad 100644
 --- a/Modules/posixmodule.c
 +++ b/Modules/posixmodule.c
 @@ -663,9 +663,13 @@ posix_error_with_unicode_filename(Py_UNICODE* name)
@@ -296,7 +289,6 @@ index cd4672c..9bacfad 100644
      return PyInt_FromLong((long)fd);
  }
 diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
-index c2907f6..faa3ad6 100644
 --- a/Modules/pwdmodule.c
 +++ b/Modules/pwdmodule.c
 @@ -94,6 +94,29 @@ mkpwent(struct passwd *p)
@@ -330,7 +322,6 @@ index c2907f6..faa3ad6 100644
  "getpwuid(uid) -> (pw_name,pw_passwd,pw_uid,\n\
                    pw_gid,pw_gecos,pw_dir,pw_shell)\n\
 diff --git a/Modules/python.c b/Modules/python.c
-index 2739b8b..5a5b753 100644
 --- a/Modules/python.c
 +++ b/Modules/python.c
 @@ -6,6 +6,19 @@
@@ -364,7 +355,6 @@ index 2739b8b..5a5b753 100644
  	return Py_Main(argc, argv);
  }
 diff --git a/Modules/timemodule.c b/Modules/timemodule.c
-index 12c43b0..b727afa 100644
 --- a/Modules/timemodule.c
 +++ b/Modules/timemodule.c
 @@ -34,6 +34,11 @@ extern int ftime(struct timeb *);
@@ -380,7 +370,6 @@ index 12c43b0..b727afa 100644
  #include <i86.h>
  #else
 diff --git a/Python/dynload_shlib.c b/Python/dynload_shlib.c
-index 17ebab1..93ea45d 100644
 --- a/Python/dynload_shlib.c
 +++ b/Python/dynload_shlib.c
 @@ -84,6 +84,11 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *fqname, const char *shortname,
@@ -404,7 +393,6 @@ index 17ebab1..93ea45d 100644
  #if !(defined(PYOS_OS2) && defined(PYCC_GCC))
      dlopenflags = PyThreadState_GET()->interp->dlopenflags;
 diff --git a/Python/getversion.c b/Python/getversion.c
-index 7bd6efd..b4f6702 100644
 --- a/Python/getversion.c
 +++ b/Python/getversion.c
 @@ -8,8 +8,8 @@
@@ -419,7 +407,6 @@ index 7bd6efd..b4f6702 100644
  	return version;
  }
 diff --git a/Python/thread.c b/Python/thread.c
-index dd333e8..33fec81 100644
 --- a/Python/thread.c
 +++ b/Python/thread.c
 @@ -14,9 +14,19 @@
@@ -443,7 +430,6 @@ index dd333e8..33fec81 100644
  #include <stdio.h>
  #endif
 diff --git a/configure b/configure
-index 2e32be2..2140ece 100755
 --- a/configure
 +++ b/configure
 @@ -2861,19 +2861,27 @@ if test "$cross_compiling" = yes; then
@@ -536,7 +522,6 @@ index 2e32be2..2140ece 100755
  	Darwin/*)
  		# -u _PyMac_Error is needed to pull in the mac toolbox glue,
 diff --git a/configure.ac b/configure.ac
-index ee7e5fc..eacd03d 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -19,18 +19,25 @@ AC_SUBST(host)
@@ -627,7 +612,6 @@ index ee7e5fc..eacd03d 100644
  	Darwin/*) 
  		# -u _PyMac_Error is needed to pull in the mac toolbox glue,
 diff --git a/setup.py b/setup.py
-index 2b4119a..a3a70cc 100644
 --- a/setup.py
 +++ b/setup.py
 @@ -1404,7 +1404,9 @@ class PyBuildExt(build_ext):

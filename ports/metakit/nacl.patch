@@ -1,5 +1,4 @@
 diff --git a/include/mk4.h b/include/mk4.h
-index 7e05653..6bbacfb 100755
 --- a/include/mk4.h
 +++ b/include/mk4.h
 @@ -99,7 +99,7 @@ class c4_Persist; // not defined here
@@ -12,7 +11,6 @@ index 7e05653..6bbacfb 100755
  defined(__x86_64__) || defined(__s390x__) || defined(__alpha) ||  \
    (defined(__ia64) && (!defined(__HP_aCC) || defined(__LP64__)))
 diff --git a/unix/Makefile.in b/unix/Makefile.in
-index bf187ba..676de6c 100755
 --- a/unix/Makefile.in
 +++ b/unix/Makefile.in
 @@ -47,6 +47,8 @@ CXXFLAGS = $(CXX_FLAGS)
@@ -69,7 +67,6 @@ index bf187ba..676de6c 100755
  Mk4py$(SHLIB_SUFFIX): $(PYOBJS) $(LOBJS) $(LINK_SPECIAL_FILES)
  	$(SHLIB_LD) -o $@ $(PYOBJS) $(LOBJS) $(LINK_SPECIAL_FLAGS)
 diff --git a/unix/configure.in b/unix/configure.in
-index 1a97866..d7a70ac 100755
 --- a/unix/configure.in
 +++ b/unix/configure.in
 @@ -117,7 +117,7 @@ fi
@@ -93,7 +90,6 @@ index 1a97866..d7a70ac 100755
  
 diff --git a/unix/m4/ac_prog_ar.m4 b/unix/m4/ac_prog_ar.m4
 new file mode 100644
-index 0000000..18cc8d1
 --- /dev/null
 +++ b/unix/m4/ac_prog_ar.m4
 @@ -0,0 +1,8 @@

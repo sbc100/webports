@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index 0b5db82..30eb5e0 100755
 --- a/configure
 +++ b/configure
 @@ -13976,6 +13976,15 @@ $as_echo_n "checking for scandir... " >&6; }

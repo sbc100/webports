@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index cb83a3b..f0c1598 100755
 --- a/configure
 +++ b/configure
 @@ -7563,7 +7563,6 @@ $as_echo "$gl_cv_cc_uninitialized_supported" >&6; }
@@ -55,7 +54,6 @@ index cb83a3b..f0c1598 100755
  
  $as_echo "#define gmtime rpl_gmtime" >>confdefs.h
 diff --git a/lib/canonicalize-lgpl.c b/lib/canonicalize-lgpl.c
-index 6cbd2e0..4beb7b0 100644
 --- a/lib/canonicalize-lgpl.c
 +++ b/lib/canonicalize-lgpl.c
 @@ -69,7 +69,9 @@
@@ -70,7 +68,6 @@ index 6cbd2e0..4beb7b0 100644
  #  ifdef SYMLOOP_MAX
  #   define MAXSYMLINKS SYMLOOP_MAX
 diff --git a/lib/getdtablesize.c b/lib/getdtablesize.c
-index 9947405..2b655cd 100644
 --- a/lib/getdtablesize.c
 +++ b/lib/getdtablesize.c
 @@ -20,6 +20,14 @@
@@ -89,7 +86,6 @@ index 9947405..2b655cd 100644
  
  #include <stdio.h>
 diff --git a/lib/sigaction.c b/lib/sigaction.c
-index 97eb76d..901cd40 100644
 --- a/lib/sigaction.c
 +++ b/lib/sigaction.c
 @@ -51,9 +51,11 @@
@@ -129,7 +125,6 @@ index 97eb76d..901cd40 100644
          }
      }
 diff --git a/lib/spawni.c b/lib/spawni.c
-index 17b903f..6aef928 100644
 --- a/lib/spawni.c
 +++ b/lib/spawni.c
 @@ -80,6 +80,9 @@
@@ -156,7 +151,7 @@ index 17b903f..6aef928 100644
    pid_t new_pid;
    char *path, *p, *name;
    size_t len;
-@@ -369,6 +382,7 @@ __spawni (pid_t *pid, const char *file,
+@@ -369,6 +379,7 @@ __spawni (pid_t *pid, const char *file,
  
    /* Return with an error.  */
    _exit (SPAWN_ERROR);
@@ -165,7 +160,6 @@ index 17b903f..6aef928 100644
  
  #endif
 diff --git a/src/Makefile.in b/src/Makefile.in
-index 1859012..6fda5bb 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
 @@ -1488,7 +1488,7 @@ clean-binPROGRAMS:
@@ -178,7 +172,6 @@ index 1859012..6fda5bb 100644
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
 diff --git a/src/builtin.c b/src/builtin.c
-index b3700c3..b813326 100644
 --- a/src/builtin.c
 +++ b/src/builtin.c
 @@ -153,6 +153,9 @@ static builtin const builtin_tab[] =
@@ -201,7 +194,6 @@ index b3700c3..b813326 100644
  #endif
    { NULL,       "__gnu__",      "" },
 diff --git a/src/m4.c b/src/m4.c
-index 3e56e9d..e0af020 100644
 --- a/src/m4.c
 +++ b/src/m4.c
 @@ -362,7 +362,11 @@ process_file (const char *name)

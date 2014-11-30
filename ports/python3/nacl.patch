@@ -1,5 +1,4 @@
 diff --git a/Include/datetime.h b/Include/datetime.h
-index 06cbc4a..cc47ca7 100644
 --- a/Include/datetime.h
 +++ b/Include/datetime.h
 @@ -169,6 +169,8 @@ typedef struct {
@@ -12,7 +11,6 @@ index 06cbc4a..cc47ca7 100644
  #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
  #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
 diff --git a/Makefile.pre.in b/Makefile.pre.in
-index 629835d..8c8c616 100644
 --- a/Makefile.pre.in
 +++ b/Makefile.pre.in
 @@ -747,14 +747,18 @@ $(IO_OBJS): $(IO_H)
@@ -49,7 +47,6 @@ index 629835d..8c8c616 100644
  	-rm -rf $(PYTHONFRAMEWORKDIR)
  	-rm -f python-config.py python-config
 diff --git a/Modules/_ctypes/libffi/configure b/Modules/_ctypes/libffi/configure
-index 75f62a7..6d8cfb8 100755
 --- a/Modules/_ctypes/libffi/configure
 +++ b/Modules/_ctypes/libffi/configure
 @@ -17261,7 +17261,7 @@ case "$host" in
@@ -62,7 +59,6 @@ index 75f62a7..6d8cfb8 100755
  	      ;;
  	    *)
 diff --git a/Modules/_datetimemodule.c b/Modules/_datetimemodule.c
-index d8225ba..d8820b5 100644
 --- a/Modules/_datetimemodule.c
 +++ b/Modules/_datetimemodule.c
 @@ -7,6 +7,14 @@
@@ -81,7 +77,6 @@ index d8225ba..d8820b5 100644
   * modules.
   */
 diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
-index 538322d..684cc8c 100644
 --- a/Modules/_testcapimodule.c
 +++ b/Modules/_testcapimodule.c
 @@ -1810,6 +1810,9 @@ static int test_run_counter = 0;
@@ -103,7 +98,6 @@ index 538322d..684cc8c 100644
  
  
 diff --git a/Modules/faulthandler.c b/Modules/faulthandler.c
-index 6a145dc..0a8eb1b 100644
 --- a/Modules/faulthandler.c
 +++ b/Modules/faulthandler.c
 @@ -15,6 +15,15 @@
@@ -123,7 +117,6 @@ index 6a145dc..0a8eb1b 100644
     /* register() is useless on Windows, because only SIGSEGV, SIGABRT and
        SIGILL can be handled by the process, and these signals can only be used
 diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
-index ebb8712..348a357 100644
 --- a/Modules/pwdmodule.c
 +++ b/Modules/pwdmodule.c
 @@ -87,6 +87,29 @@ mkpwent(struct passwd *p)
@@ -157,7 +150,6 @@ index ebb8712..348a357 100644
  "getpwuid(uid) -> (pw_name,pw_passwd,pw_uid,\n\
                    pw_gid,pw_gecos,pw_dir,pw_shell)\n\
 diff --git a/Modules/python.c b/Modules/python.c
-index 9811c01..29cbb0e 100644
 --- a/Modules/python.c
 +++ b/Modules/python.c
 @@ -15,6 +15,19 @@ wmain(int argc, wchar_t **argv)
@@ -181,7 +173,6 @@ index 9811c01..29cbb0e 100644
  main(int argc, char **argv)
  {
 diff --git a/Modules/signalmodule.c b/Modules/signalmodule.c
-index fedaddf..27e6c5b 100644
 --- a/Modules/signalmodule.c
 +++ b/Modules/signalmodule.c
 @@ -29,7 +29,7 @@
@@ -194,7 +185,6 @@ index fedaddf..27e6c5b 100644
  #endif
  
 diff --git a/Modules/socketmodule.c b/Modules/socketmodule.c
-index b37e793..29e134b 100644
 --- a/Modules/socketmodule.c
 +++ b/Modules/socketmodule.c
 @@ -310,6 +310,14 @@ if_indextoname(index) -- return the corresponding interface name\n\
@@ -213,7 +203,6 @@ index b37e793..29e134b 100644
  #if !defined(NTDDI_VERSION) || (NTDDI_VERSION < NTDDI_LONGHORN)
  int inet_pton(int af, const char *src, void *dst);
 diff --git a/Modules/timemodule.c b/Modules/timemodule.c
-index d0917a4..e58d455 100644
 --- a/Modules/timemodule.c
 +++ b/Modules/timemodule.c
 @@ -2,6 +2,7 @@
@@ -251,7 +240,6 @@ index d0917a4..e58d455 100644
  static int floatsleep(double);
  static PyObject* floattime(_Py_clock_info_t *info);
 diff --git a/Python/dynload_shlib.c b/Python/dynload_shlib.c
-index 5cd1efd..75d1be2 100644
 --- a/Python/dynload_shlib.c
 +++ b/Python/dynload_shlib.c
 @@ -69,6 +69,11 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *shortname,
@@ -275,7 +263,6 @@ index 5cd1efd..75d1be2 100644
      dlopenflags = PyThreadState_GET()->interp->dlopenflags;
  
 diff --git a/Python/fileutils.c b/Python/fileutils.c
-index f5000e5..9dfddda 100644
 --- a/Python/fileutils.c
 +++ b/Python/fileutils.c
 @@ -707,6 +707,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
@@ -292,7 +279,6 @@ index f5000e5..9dfddda 100644
              PyErr_SetFromErrno(PyExc_OSError);
          return -1;
 diff --git a/Python/getversion.c b/Python/getversion.c
-index 7bd6efd..b4f6702 100644
 --- a/Python/getversion.c
 +++ b/Python/getversion.c
 @@ -8,8 +8,8 @@
@@ -307,7 +293,6 @@ index 7bd6efd..b4f6702 100644
  	return version;
  }
 diff --git a/Python/thread.c b/Python/thread.c
-index d1cb0e6..810bbed 100644
 --- a/Python/thread.c
 +++ b/Python/thread.c
 @@ -13,9 +13,19 @@
@@ -331,7 +316,6 @@ index d1cb0e6..810bbed 100644
  #include <stdio.h>
  #endif
 diff --git a/configure b/configure
-index 139d391..c75793b 100755
 --- a/configure
 +++ b/configure
 @@ -2969,7 +2969,7 @@ $as_echo_n "checking for python interpreter for cross build... " >&6; }
@@ -410,7 +394,6 @@ index 139d391..c75793b 100755
  	Darwin/*)
  		LINKFORSHARED="$extra_undefs -framework CoreFoundation"
 diff --git a/configure.ac b/configure.ac
-index 9698ea0..f00a9c0 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -373,6 +373,9 @@ then

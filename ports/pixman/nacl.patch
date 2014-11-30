@@ -1,5 +1,4 @@
 diff --git a/pixman/pixman-x86.c b/pixman/pixman-x86.c
-index 05297c4..1dfb252 100644
 --- a/pixman/pixman-x86.c
 +++ b/pixman/pixman-x86.c
 @@ -80,7 +80,7 @@ detect_cpu_features (void)

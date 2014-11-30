@@ -1,5 +1,4 @@
 diff --git a/simd-support/sse2.c b/simd-support/sse2.c
-index 7bbc3f0..5c6e6e1 100644
 --- a/simd-support/sse2.c
 +++ b/simd-support/sse2.c
 @@ -52,6 +52,11 @@
@@ -23,7 +22,6 @@ index 7bbc3f0..5c6e6e1 100644
  
    extern void X(check_alignment_of_sse2_pm)(void);
 diff --git a/simd-support/x86-cpuid.h b/simd-support/x86-cpuid.h
-index 774124c..ae7a4b0 100644
 --- a/simd-support/x86-cpuid.h
 +++ b/simd-support/x86-cpuid.h
 @@ -29,6 +29,13 @@
@@ -64,7 +62,6 @@ index 774124c..ae7a4b0 100644
  
  static inline int cpuid_edx(int op)
 diff --git a/threads/threads.c b/threads/threads.c
-index d3a658f..a5b1576 100644
 --- a/threads/threads.c
 +++ b/threads/threads.c
 @@ -137,7 +137,11 @@ static void os_create_thread(FFTW_WORKER (*worker)(void *arg),

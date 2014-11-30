@@ -1,5 +1,4 @@
 diff --git a/makefiles/configure.in b/makefiles/configure.in
-index e7cb75c..2407191 100644
 --- a/makefiles/configure.in
 +++ b/makefiles/configure.in
 @@ -15,7 +15,6 @@ AC_SUBST(VERSION)

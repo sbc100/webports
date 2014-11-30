@@ -1,5 +1,4 @@
 diff --git a/F2CLIBS/libf2c/Makefile b/F2CLIBS/libf2c/Makefile
-index 57eff0d..8060da8 100644
 --- a/F2CLIBS/libf2c/Makefile
 +++ b/F2CLIBS/libf2c/Makefile
 @@ -20,7 +20,7 @@ include $(TOPDIR)/make.inc
@@ -46,7 +45,6 @@ index 57eff0d..8060da8 100644
  	rm -f a.out arithchk.o
  
 diff --git a/Makefile b/Makefile
-index 2875fbc..7c47045 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -16,8 +16,8 @@ lib: f2clib blaslib variants lapacklib tmglib
@@ -62,7 +60,6 @@ index 2875fbc..7c47045 100644
  	( cd BLAS/SRC; $(MAKE) )
 diff --git a/make.inc b/make.inc
 new file mode 100644
-index 0000000..9707df1
 --- /dev/null
 +++ b/make.inc
 @@ -0,0 +1,78 @@

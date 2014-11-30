@@ -1,5 +1,4 @@
 diff --git a/buildutils/config.py b/buildutils/config.py
-index 66f61e3..de2cd6e 100644
 --- a/buildutils/config.py
 +++ b/buildutils/config.py
 @@ -87,6 +87,11 @@ def get_cfg_args():
@@ -16,7 +15,6 @@ index 66f61e3..de2cd6e 100644
                  'bundle_libzmq_dylib',
 diff --git a/setup.cfg b/setup.cfg
 new file mode 100644
-index 0000000..15686fc
 --- /dev/null
 +++ b/setup.cfg
 @@ -0,0 +1,3 @@
@@ -24,7 +22,6 @@ index 0000000..15686fc
 +plat-name = pnacl
 +
 diff --git a/setup.py b/setup.py
-index 5348c61..a204e23 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -270,6 +270,10 @@ class Configure(build_ext):
@@ -84,11 +81,7 @@ index 5348c61..a204e23 100755
      },
  )
  
- #-----------------------------------------------------------------------------
- # Main setup
- #-----------------------------------------------------------------------------
 diff --git a/zmq/__init__.py b/zmq/__init__.py
-index 19cb4a9..c55ac5c 100644
 --- a/zmq/__init__.py
 +++ b/zmq/__init__.py
 @@ -39,7 +39,7 @@ if bundled:
@@ -101,7 +94,6 @@ index 19cb4a9..c55ac5c 100644
          raise ImportError("%s\nAre you trying to `import zmq` from the pyzmq source dir?" % e)
      else:
 diff --git a/zmq/core/__init__.py b/zmq/core/__init__.py
-index 862f1d5..275e47a 100644
 --- a/zmq/core/__init__.py
 +++ b/zmq/core/__init__.py
 @@ -23,21 +23,21 @@
@@ -141,7 +133,6 @@ index 862f1d5..275e47a 100644
  
 diff --git a/zmq/core/__zdevice.pyx b/zmq/core/__zdevice.pyx
 new file mode 100644
-index 0000000..99bcc27
 --- /dev/null
 +++ b/zmq/core/__zdevice.pyx
 @@ -0,0 +1,86 @@
@@ -233,7 +224,6 @@ index 0000000..99bcc27
 +
 diff --git a/zmq/core/__zpoll.pyx b/zmq/core/__zpoll.pyx
 new file mode 100644
-index 0000000..799b20b
 --- /dev/null
 +++ b/zmq/core/__zpoll.pyx
 @@ -0,0 +1,136 @@
@@ -375,7 +365,6 @@ index 0000000..799b20b
 +__all__ = [ 'zmq_poll' ]
 diff --git a/zmq/core/__zversion.pyx b/zmq/core/__zversion.pyx
 new file mode 100644
-index 0000000..02cf6fc
 --- /dev/null
 +++ b/zmq/core/__zversion.pyx
 @@ -0,0 +1,43 @@
@@ -424,7 +413,6 @@ index 0000000..02cf6fc
 +
 diff --git a/zmq/core/_device.pyx b/zmq/core/_device.pyx
 deleted file mode 100644
-index 5471e73..0000000
 --- a/zmq/core/_device.pyx
 +++ /dev/null
 @@ -1,86 +0,0 @@
@@ -516,7 +504,6 @@ index 5471e73..0000000
 -
 diff --git a/zmq/core/_poll.pyx b/zmq/core/_poll.pyx
 deleted file mode 100644
-index 9db19e1..0000000
 --- a/zmq/core/_poll.pyx
 +++ /dev/null
 @@ -1,136 +0,0 @@
@@ -658,7 +645,6 @@ index 9db19e1..0000000
 -__all__ = [ 'zmq_poll' ]
 diff --git a/zmq/core/_version.pyx b/zmq/core/_version.pyx
 deleted file mode 100644
-index 02cf6fc..0000000
 --- a/zmq/core/_version.pyx
 +++ /dev/null
 @@ -1,43 +0,0 @@
@@ -707,7 +693,6 @@ index 02cf6fc..0000000
 -
 diff --git a/zmq/core/_zconstants.pyx b/zmq/core/_zconstants.pyx
 new file mode 100644
-index 0000000..fa2695d
 --- /dev/null
 +++ b/zmq/core/_zconstants.pyx
 @@ -0,0 +1,190 @@
@@ -903,7 +888,6 @@ index 0000000..fa2695d
 +__all__ = [ key for key in _names if not key.startswith('_') ]
 diff --git a/zmq/core/_zcontext.pxd b/zmq/core/_zcontext.pxd
 new file mode 100644
-index 0000000..e399de5
 --- /dev/null
 +++ b/zmq/core/_zcontext.pxd
 @@ -0,0 +1,40 @@
@@ -949,7 +933,6 @@ index 0000000..e399de5
 +
 diff --git a/zmq/core/_zcontext.pyx b/zmq/core/_zcontext.pyx
 new file mode 100644
-index 0000000..0917c66
 --- /dev/null
 +++ b/zmq/core/_zcontext.pyx
 @@ -0,0 +1,254 @@
@@ -1209,7 +1192,6 @@ index 0000000..0917c66
 +__all__ = ['Context']
 diff --git a/zmq/core/_zerror.pyx b/zmq/core/_zerror.pyx
 new file mode 100644
-index 0000000..85e785f
 --- /dev/null
 +++ b/zmq/core/_zerror.pyx
 @@ -0,0 +1,56 @@
@@ -1271,7 +1253,6 @@ index 0000000..85e785f
 +__all__ = ['strerror', 'zmq_errno']
 diff --git a/zmq/core/_zmessage.pxd b/zmq/core/_zmessage.pxd
 new file mode 100644
-index 0000000..a86a8e0
 --- /dev/null
 +++ b/zmq/core/_zmessage.pxd
 @@ -0,0 +1,66 @@
@@ -1343,7 +1324,6 @@ index 0000000..a86a8e0
 +
 diff --git a/zmq/core/_zmessage.pyx b/zmq/core/_zmessage.pyx
 new file mode 100644
-index 0000000..1d358ab
 --- /dev/null
 +++ b/zmq/core/_zmessage.pyx
 @@ -0,0 +1,297 @@
@@ -1646,7 +1626,6 @@ index 0000000..1d358ab
 +__all__ = ['Frame', 'Message']
 diff --git a/zmq/core/_zsocket.pxd b/zmq/core/_zsocket.pxd
 new file mode 100644
-index 0000000..68f96c8
 --- /dev/null
 +++ b/zmq/core/_zsocket.pxd
 @@ -0,0 +1,48 @@
@@ -1700,7 +1679,6 @@ index 0000000..68f96c8
 +
 diff --git a/zmq/core/_zsocket.pyx b/zmq/core/_zsocket.pyx
 new file mode 100644
-index 0000000..a5e507d
 --- /dev/null
 +++ b/zmq/core/_zsocket.pyx
 @@ -0,0 +1,628 @@
@@ -2334,7 +2312,6 @@ index 0000000..a5e507d
 +__all__ = ['Socket', 'IPC_PATH_MAX_LEN']
 diff --git a/zmq/core/_zstopwatch.pxd b/zmq/core/_zstopwatch.pxd
 new file mode 100644
-index 0000000..5d56166
 --- /dev/null
 +++ b/zmq/core/_zstopwatch.pxd
 @@ -0,0 +1,31 @@
@@ -2371,7 +2348,6 @@ index 0000000..5d56166
 +
 diff --git a/zmq/core/_zstopwatch.pyx b/zmq/core/_zstopwatch.pyx
 new file mode 100644
-index 0000000..6d2fd61
 --- /dev/null
 +++ b/zmq/core/_zstopwatch.pyx
 @@ -0,0 +1,90 @@
@@ -2467,7 +2443,6 @@ index 0000000..6d2fd61
 +__all__ = ['Stopwatch']
 diff --git a/zmq/core/constants.pyx b/zmq/core/constants.pyx
 deleted file mode 100644
-index fa2695d..0000000
 --- a/zmq/core/constants.pyx
 +++ /dev/null
 @@ -1,190 +0,0 @@
@@ -2663,7 +2638,6 @@ index fa2695d..0000000
 -__all__ = [ key for key in _names if not key.startswith('_') ]
 diff --git a/zmq/core/context.pxd b/zmq/core/context.pxd
 deleted file mode 100644
-index e399de5..0000000
 --- a/zmq/core/context.pxd
 +++ /dev/null
 @@ -1,40 +0,0 @@
@@ -2709,7 +2683,6 @@ index e399de5..0000000
 -
 diff --git a/zmq/core/context.pyx b/zmq/core/context.pyx
 deleted file mode 100644
-index 0917c66..0000000
 --- a/zmq/core/context.pyx
 +++ /dev/null
 @@ -1,254 +0,0 @@
@@ -2969,7 +2942,6 @@ index 0917c66..0000000
 -__all__ = ['Context']
 diff --git a/zmq/core/error.pyx b/zmq/core/error.pyx
 deleted file mode 100644
-index 85e785f..0000000
 --- a/zmq/core/error.pyx
 +++ /dev/null
 @@ -1,56 +0,0 @@
@@ -3031,7 +3003,6 @@ index 85e785f..0000000
 -__all__ = ['strerror', 'zmq_errno']
 diff --git a/zmq/core/message.pxd b/zmq/core/message.pxd
 deleted file mode 100644
-index a86a8e0..0000000
 --- a/zmq/core/message.pxd
 +++ /dev/null
 @@ -1,66 +0,0 @@
@@ -3103,7 +3074,6 @@ index a86a8e0..0000000
 -
 diff --git a/zmq/core/message.pyx b/zmq/core/message.pyx
 deleted file mode 100644
-index 1d358ab..0000000
 --- a/zmq/core/message.pyx
 +++ /dev/null
 @@ -1,297 +0,0 @@
@@ -3406,7 +3376,6 @@ index 1d358ab..0000000
 -__all__ = ['Frame', 'Message']
 diff --git a/zmq/core/socket.pxd b/zmq/core/socket.pxd
 deleted file mode 100644
-index 92253eb..0000000
 --- a/zmq/core/socket.pxd
 +++ /dev/null
 @@ -1,48 +0,0 @@
@@ -3460,7 +3429,6 @@ index 92253eb..0000000
 -
 diff --git a/zmq/core/socket.pyx b/zmq/core/socket.pyx
 deleted file mode 100644
-index 16fbf7f..0000000
 --- a/zmq/core/socket.pyx
 +++ /dev/null
 @@ -1,628 +0,0 @@
@@ -4094,7 +4062,6 @@ index 16fbf7f..0000000
 -__all__ = ['Socket', 'IPC_PATH_MAX_LEN']
 diff --git a/zmq/core/stopwatch.pxd b/zmq/core/stopwatch.pxd
 deleted file mode 100644
-index 5d56166..0000000
 --- a/zmq/core/stopwatch.pxd
 +++ /dev/null
 @@ -1,31 +0,0 @@
@@ -4131,7 +4098,6 @@ index 5d56166..0000000
 -
 diff --git a/zmq/core/stopwatch.pyx b/zmq/core/stopwatch.pyx
 deleted file mode 100644
-index 6d2fd61..0000000
 --- a/zmq/core/stopwatch.pyx
 +++ /dev/null
 @@ -1,90 +0,0 @@
@@ -4226,7 +4192,6 @@ index 6d2fd61..0000000
 -
 -__all__ = ['Stopwatch']
 diff --git a/zmq/devices/__init__.py b/zmq/devices/__init__.py
-index b5c8eb3..dcae13d 100644
 --- a/zmq/devices/__init__.py
 +++ b/zmq/devices/__init__.py
 @@ -14,11 +14,12 @@
@@ -4246,7 +4211,6 @@ index b5c8eb3..dcae13d 100644
  __all__ = ['device']
 diff --git a/zmq/devices/_zmonitoredqueue.pxd b/zmq/devices/_zmonitoredqueue.pxd
 new file mode 100644
-index 0000000..e04354a
 --- /dev/null
 +++ b/zmq/devices/_zmonitoredqueue.pxd
 @@ -0,0 +1,166 @@
@@ -4418,7 +4382,6 @@ index 0000000..e04354a
 +    return 0
 diff --git a/zmq/devices/_zmonitoredqueue.pyx b/zmq/devices/_zmonitoredqueue.pyx
 new file mode 100644
-index 0000000..a74ae8e
 --- /dev/null
 +++ b/zmq/devices/_zmonitoredqueue.pyx
 @@ -0,0 +1,108 @@
@@ -4531,7 +4494,6 @@ index 0000000..a74ae8e
 +
 +__all__ = ['monitored_queue']
 diff --git a/zmq/devices/basedevice.py b/zmq/devices/basedevice.py
-index f65ba1f..4b2c42b 100644
 --- a/zmq/devices/basedevice.py
 +++ b/zmq/devices/basedevice.py
 @@ -20,8 +20,15 @@ Authors
@@ -4554,7 +4516,6 @@ index f65ba1f..4b2c42b 100644
  
 diff --git a/zmq/devices/monitoredqueue.pxd b/zmq/devices/monitoredqueue.pxd
 deleted file mode 100644
-index e04354a..0000000
 --- a/zmq/devices/monitoredqueue.pxd
 +++ /dev/null
 @@ -1,166 +0,0 @@
@@ -4726,7 +4687,6 @@ index e04354a..0000000
 -    return 0
 diff --git a/zmq/devices/monitoredqueue.pyx b/zmq/devices/monitoredqueue.pyx
 deleted file mode 100644
-index 65db882..0000000
 --- a/zmq/devices/monitoredqueue.pyx
 +++ /dev/null
 @@ -1,108 +0,0 @@
@@ -4839,7 +4799,6 @@ index 65db882..0000000
 -
 -__all__ = ['monitored_queue']
 diff --git a/zmq/devices/monitoredqueuedevice.py b/zmq/devices/monitoredqueuedevice.py
-index a9f5c3f..422715c 100644
 --- a/zmq/devices/monitoredqueuedevice.py
 +++ b/zmq/devices/monitoredqueuedevice.py
 @@ -24,7 +24,7 @@ import time
@@ -4852,7 +4811,6 @@ index a9f5c3f..422715c 100644
  #-----------------------------------------------------------------------------
  # Classes
 diff --git a/zmq/sugar/backend.py b/zmq/sugar/backend.py
-index ad07379..6f87c1b 100644
 --- a/zmq/sugar/backend.py
 +++ b/zmq/sugar/backend.py
 @@ -23,8 +23,9 @@ try:
@@ -4867,7 +4825,6 @@ index ad07379..6f87c1b 100644
      from zmq.cffi_core import (
          Context,
 diff --git a/zmq/sugar/context.py b/zmq/sugar/context.py
-index bcc4686..f0f3325 100644
 --- a/zmq/sugar/context.py
 +++ b/zmq/sugar/context.py
 @@ -128,4 +128,4 @@ class Context(ContextBase, AttributeSetter):
@@ -4879,7 +4836,6 @@ index bcc4686..f0f3325 100644
 +__all__ = ['Context']
 diff --git a/zmq/utils/_zinitthreads.pyx b/zmq/utils/_zinitthreads.pyx
 new file mode 100644
-index 0000000..6c57c9f
 --- /dev/null
 +++ b/zmq/utils/_zinitthreads.pyx
 @@ -0,0 +1,23 @@
@@ -4908,7 +4864,6 @@ index 0000000..6c57c9f
 +__all__ = ['init_threads']
 diff --git a/zmq/utils/_zrebuffer.pyx b/zmq/utils/_zrebuffer.pyx
 new file mode 100644
-index 0000000..ca240d3
 --- /dev/null
 +++ b/zmq/utils/_zrebuffer.pyx
 @@ -0,0 +1,104 @@
@@ -5019,7 +4974,6 @@ index 0000000..ca240d3
 \ No newline at end of file
 diff --git a/zmq/utils/initthreads.pyx b/zmq/utils/initthreads.pyx
 deleted file mode 100644
-index 6c57c9f..0000000
 --- a/zmq/utils/initthreads.pyx
 +++ /dev/null
 @@ -1,23 +0,0 @@
@@ -5048,7 +5002,6 @@ index 6c57c9f..0000000
 -__all__ = ['init_threads']
 diff --git a/zmq/utils/rebuffer.pyx b/zmq/utils/rebuffer.pyx
 deleted file mode 100644
-index ca240d3..0000000
 --- a/zmq/utils/rebuffer.pyx
 +++ /dev/null
 @@ -1,104 +0,0 @@

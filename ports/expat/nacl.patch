@@ -1,6 +1,7 @@
---- expat-2.0.1/Makefile.in	2007-05-09 11:38:50.000000000 -0700
-+++ expat-2.0.1.nacl/Makefile.in	2011-06-22 12:20:25.538925743 -0700
-@@ -103,6 +103,7 @@
+diff --git a/Makefile.in b/Makefile.in
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -103,6 +103,7 @@ mkdir-init:
  CC = @CC@
  CXX = @CXX@
  LIBTOOL = @LIBTOOL@
@@ -8,7 +9,7 @@
  
  INCLUDES = -I$(srcdir)/lib -I.
  LDFLAGS = @LDFLAGS@
-@@ -143,7 +144,7 @@
+@@ -143,7 +144,7 @@ xmlwf/xmlfile.o: xmlwf/xmlfile.c
  xmlwf/codepage.o: xmlwf/codepage.c
  xmlwf/@FILEMAP@.o: xmlwf/@FILEMAP@.c
  xmlwf/xmlwf: $(XMLWF_OBJS) $(LIBRARY)

@@ -1,5 +1,4 @@
 diff --git a/Makefile.in b/Makefile.in
-index c21ec67..1a5d61d 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -184,7 +184,7 @@ CPP = @CPP@
@@ -21,7 +20,6 @@ index c21ec67..1a5d61d 100644
  LIB_CRYPT = @LIB_CRYPT@
  LIB_NANOSLEEP = @LIB_NANOSLEEP@
 diff --git a/configure b/configure
-index a8b69e0..3b23916 100755
 --- a/configure
 +++ b/configure
 @@ -27324,11 +27324,15 @@ _ACEOF
@@ -44,7 +42,6 @@ index a8b69e0..3b23916 100755
  
  if test $ac_list_mounted_fs = found; then
 diff --git a/lib/__fpending.c b/lib/__fpending.c
-index a872102..f7e47d8 100644
 --- a/lib/__fpending.c
 +++ b/lib/__fpending.c
 @@ -23,8 +23,10 @@
@@ -59,7 +56,6 @@ index a872102..f7e47d8 100644
  }
 +#endif
 diff --git a/lib/getopt.c b/lib/getopt.c
-index 6dcdbeb..032168d 100644
 --- a/lib/getopt.c
 +++ b/lib/getopt.c
 @@ -51,6 +51,11 @@
@@ -75,7 +71,6 @@ index 6dcdbeb..032168d 100644
  
  
 diff --git a/lib/getopt1.c b/lib/getopt1.c
-index 3288c72..4a7bc24 100644
 --- a/lib/getopt1.c
 +++ b/lib/getopt1.c
 @@ -47,6 +47,11 @@
@@ -91,7 +86,6 @@ index 3288c72..4a7bc24 100644
  
  
 diff --git a/lib/getpass.c b/lib/getpass.c
-index 8a993d3..dcd5f5d 100644
 --- a/lib/getpass.c
 +++ b/lib/getpass.c
 @@ -106,7 +106,9 @@ getpass (const char *prompt)
@@ -105,7 +99,6 @@ index 8a993d3..dcd5f5d 100644
        out = in = tty;
      }
 diff --git a/lib/mktime.c b/lib/mktime.c
-index ce3de58..fea6229 100644
 --- a/lib/mktime.c
 +++ b/lib/mktime.c
 @@ -127,8 +127,8 @@ ydhms_diff (long int year1, long int yday1, int hour1, int min1, int sec1,
@@ -120,7 +113,6 @@ index ce3de58..fea6229 100644
    /* Compute intervening leap days correctly even if year is negative.
       Take care to avoid integer overflow here.  */
 diff --git a/lib/regex.c b/lib/regex.c
-index ac70b90..67f6d33 100644
 --- a/lib/regex.c
 +++ b/lib/regex.c
 @@ -8181,7 +8181,7 @@ regerror (int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
@@ -133,7 +125,6 @@ index ac70b90..67f6d33 100644
  #else
            memcpy (errbuf, msg, errbuf_size - 1);
 diff --git a/man/Makefile.in b/man/Makefile.in
-index 2bfa6f4..30022a9 100644
 --- a/man/Makefile.in
 +++ b/man/Makefile.in
 @@ -143,7 +143,9 @@ DIST_SOURCES =
@@ -148,7 +139,6 @@ index 2bfa6f4..30022a9 100644
  ACLOCAL = @ACLOCAL@
  ALLOCA = @ALLOCA@
 diff --git a/src/Makefile.in b/src/Makefile.in
-index 2d4a63f..d4f43bf 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
 @@ -716,7 +716,7 @@ CPP = @CPP@
@@ -170,7 +160,6 @@ index 2d4a63f..d4f43bf 100644
  LIB_CRYPT = @LIB_CRYPT@
  LIB_NANOSLEEP = @LIB_NANOSLEEP@
 diff --git a/src/copy.c b/src/copy.c
-index 51c5f6d..bca274e 100644
 --- a/src/copy.c
 +++ b/src/copy.c
 @@ -1436,23 +1436,34 @@ copy_internal (const char *src_path, const char *dst_path,
@@ -209,7 +198,6 @@ index 51c5f6d..bca274e 100644
    else
  #ifdef S_ISLNK
 diff --git a/src/fs.h b/src/fs.h
-index 675dd61..c2eb64b 100644
 --- a/src/fs.h
 +++ b/src/fs.h
 @@ -2,7 +2,10 @@
@@ -225,7 +213,6 @@ index 675dd61..c2eb64b 100644
  # define S_MAGIC_DEVPTS 0x1CD1
  # define S_MAGIC_EXT 0x137D
 diff --git a/src/md5sum.c b/src/md5sum.c
-index 561f2a5..d0b1247 100644
 --- a/src/md5sum.c
 +++ b/src/md5sum.c
 @@ -49,7 +49,7 @@
@@ -238,7 +225,6 @@ index 561f2a5..d0b1247 100644
  #  else
      /* The following line is intended to evoke an error.
 diff --git a/src/mkfifo.c b/src/mkfifo.c
-index ff94108..c213b41 100644
 --- a/src/mkfifo.c
 +++ b/src/mkfifo.c
 @@ -129,7 +129,11 @@ main (int argc, char **argv)
@@ -254,7 +240,6 @@ index ff94108..c213b41 100644
  	error (0, errno, _("cannot create fifo %s"), quote (argv[optind]));
  
 diff --git a/src/mknod.c b/src/mknod.c
-index fdf2b0e..67d8341 100644
 --- a/src/mknod.c
 +++ b/src/mknod.c
 @@ -197,8 +197,12 @@ numbers must be specified"));
@@ -285,7 +270,6 @@ index fdf2b0e..67d8341 100644
  
      default:
 diff --git a/src/remove.c b/src/remove.c
-index 0607167..7449871 100644
 --- a/src/remove.c
 +++ b/src/remove.c
 @@ -908,6 +908,12 @@ remove_cwd_entries (Dirstack_state *ds, char **subdir, struct stat *subdir_sb,
@@ -310,7 +294,6 @@ index 0607167..7449871 100644
  	    *subdir = xstrdup (f);
  	    break;
 diff --git a/src/shred.c b/src/shred.c
-index bc89567..792b4c7 100644
 --- a/src/shred.c
 +++ b/src/shred.c
 @@ -1398,7 +1398,11 @@ wipename (char *oldname, char const *qoldname, struct Options const *flags)
@@ -338,7 +321,6 @@ index bc89567..792b4c7 100644
    if (!err && flags->verbose)
      error (0, 0, _("%s: removed"), qoldname);
 diff --git a/src/stat.c b/src/stat.c
-index 527ccf2..2be9759 100644
 --- a/src/stat.c
 +++ b/src/stat.c
 @@ -106,6 +106,7 @@ static int G_fail;
@@ -400,7 +382,6 @@ index 527ccf2..2be9759 100644
  
  /* stat the file and print what we find */
 diff --git a/src/su.c b/src/su.c
-index d15d96a..961da0c 100644
 --- a/src/su.c
 +++ b/src/su.c
 @@ -291,7 +291,11 @@ correct_password (const struct passwd *pw)
@@ -416,7 +397,6 @@ index d15d96a..961da0c 100644
    return strcmp (encrypted, correct) == 0;
  }
 diff --git a/src/sync.c b/src/sync.c
-index 7dbbc55..97b11a2 100644
 --- a/src/sync.c
 +++ b/src/sync.c
 @@ -70,6 +70,8 @@ main (int argc, char **argv)
@@ -429,7 +409,6 @@ index 7dbbc55..97b11a2 100644
    exit (EXIT_SUCCESS);
  }
 diff --git a/src/system.h b/src/system.h
-index 6154843..97f3599 100644
 --- a/src/system.h
 +++ b/src/system.h
 @@ -746,9 +746,16 @@ uid_t getuid ();
@@ -451,7 +430,6 @@ index 6154843..97f3599 100644
  #define DOT_OR_DOTDOT(Basename) \
    (Basename[0] == '.' && (Basename[1] == '\0' \
 diff --git a/src/tee.c b/src/tee.c
-index 5867539..df6859b 100644
 --- a/src/tee.c
 +++ b/src/tee.c
 @@ -31,6 +31,8 @@
@@ -473,7 +451,6 @@ index 5867539..df6859b 100644
    FILE **descriptors;
    char buffer[BUFSIZ];
 diff --git a/src/test.c b/src/test.c
-index ef2b35f..35feef0 100644
 --- a/src/test.c
 +++ b/src/test.c
 @@ -124,7 +124,13 @@ test_syntax_error (char const *format, char const *arg)

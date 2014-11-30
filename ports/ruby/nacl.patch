@@ -1,5 +1,4 @@
 diff --git a/.gitignore b/.gitignore
-index 5808bf1..2b798af 100644
 --- a/.gitignore
 +++ b/.gitignore
 @@ -50,7 +50,6 @@ y.tab.c
@@ -11,7 +10,6 @@ index 5808bf1..2b798af 100644
  /enc.mk
  /encdb.h
 diff --git a/configure b/configure
-index a3a1c51..f276c37 100755
 --- a/configure
 +++ b/configure
 @@ -3160,11 +3160,13 @@ esac
@@ -66,7 +64,6 @@ index a3a1c51..f276c37 100755
    *) :
      	LIBS="-lm $LIBS" ;;
 diff --git a/configure.in b/configure.in
-index 7977aaf..3dc1043 100644
 --- a/configure.in
 +++ b/configure.in
 @@ -90,8 +90,11 @@ AC_DEFUN([RUBY_NACL],
@@ -107,7 +104,6 @@ index 7977aaf..3dc1043 100644
  [	LIBS="-lm $LIBS"])
  
 diff --git a/dln.c b/dln.c
-index 9eb659c..4d9458e 100644
 --- a/dln.c
 +++ b/dln.c
 @@ -1318,28 +1318,13 @@ dln_load(const char *file)
@@ -140,7 +136,6 @@ index 9eb659c..4d9458e 100644
  	if (init_fct == NULL) {
  	    init_fct = (void(*)())dlsym(handle, "1"); /* Some Symbian versions do not support symbol table in DLL, ordinal numbers only */
 diff --git a/ext/readline/readline.c b/ext/readline/readline.c
-index 3e7feea..90353b7 100644
 --- a/ext/readline/readline.c
 +++ b/ext/readline/readline.c
 @@ -1883,7 +1883,7 @@ Init_readline()
@@ -153,7 +148,6 @@ index 3e7feea..90353b7 100644
  #ifdef HAVE_RL_CATCH_SIGNALS
      rl_catch_signals = 0;
 diff --git a/ext/socket/addrinfo.h b/ext/socket/addrinfo.h
-index f0b977d..59bf0e4 100644
 --- a/ext/socket/addrinfo.h
 +++ b/ext/socket/addrinfo.h
 @@ -140,6 +140,25 @@ struct addrinfo {
@@ -183,7 +177,6 @@ index f0b977d..59bf0e4 100644
  #undef getaddrinfo
  #define getaddrinfo getaddrinfo__compat
 diff --git a/ext/socket/extconf.rb b/ext/socket/extconf.rb
-index 13937ac..19caf34 100644
 --- a/ext/socket/extconf.rb
 +++ b/ext/socket/extconf.rb
 @@ -423,7 +423,7 @@ $objs = [
@@ -196,7 +189,6 @@ index 13937ac..19caf34 100644
      $defs[-1] = "s6_addr=s6_addr8"
    end
 diff --git a/ext/socket/rubysocket.h b/ext/socket/rubysocket.h
-index ff91f51..6eed45c 100644
 --- a/ext/socket/rubysocket.h
 +++ b/ext/socket/rubysocket.h
 @@ -90,6 +90,18 @@
@@ -219,7 +211,6 @@ index ff91f51..6eed45c 100644
   * workaround for NetBSD, OpenBSD and etc.
   * The problem is since 4.4BSD-Lite.
 diff --git a/file.c b/file.c
-index f0f8348..95faa09 100644
 --- a/file.c
 +++ b/file.c
 @@ -1074,6 +1074,14 @@ rb_group_member(GETGROUPS_T gid)
@@ -247,7 +238,6 @@ index f0f8348..95faa09 100644
  int
  rb_file_load_ok(const char *path)
 diff --git a/io.c b/io.c
-index aa514e3..d9f52db 100644
 --- a/io.c
 +++ b/io.c
 @@ -31,9 +31,7 @@
@@ -287,7 +277,6 @@ index aa514e3..d9f52db 100644
  fcntl_narg_len(int cmd)
  {
 diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
-index c1aaa36..e430100 100644
 --- a/nacl/GNUmakefile.in
 +++ b/nacl/GNUmakefile.in
 @@ -4,48 +4,62 @@
@@ -370,7 +359,6 @@ index c1aaa36..e430100 100644
  .rbconfig.time:
  	@$(MAKE) .rbconfig.raw.time RBCONFIG=.rbconfig.raw.time
 diff --git a/nacl/nacl-config.rb b/nacl/nacl-config.rb
-index b90c9ed..abbe96c 100644
 --- a/nacl/nacl-config.rb
 +++ b/nacl/nacl-config.rb
 @@ -27,14 +27,13 @@ module NaClConfig
@@ -396,7 +384,6 @@ index b90c9ed..abbe96c 100644
  
    module_function
 diff --git a/nacl/pepper_main.c b/nacl/pepper_main.c
-index c0e497b..6c41929 100644
 --- a/nacl/pepper_main.c
 +++ b/nacl/pepper_main.c
 @@ -210,7 +210,7 @@ pruby_async_return_value(void* data, VALUE value)
@@ -427,7 +414,6 @@ index c0e497b..6c41929 100644
  Instance_DidChangeView(PP_Instance instance,
                         const struct PP_Rect* position,
 diff --git a/ruby.c b/ruby.c
-index 6634229..f99d7fa 100644
 --- a/ruby.c
 +++ b/ruby.c
 @@ -1747,6 +1747,9 @@ load_file(VALUE parser, VALUE fname, int script, struct cmdline_options *opt)

@@ -1,5 +1,4 @@
 diff --git a/Makefile b/Makefile
-index 5ffb952..b432a38 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -19,11 +19,11 @@ TINYXML_USE_STL := NO

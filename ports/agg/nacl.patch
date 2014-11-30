@@ -1,7 +1,7 @@
-diff -Naur agg-2.5/Makefile agg-2.5.nacl/Makefile
---- agg-2.5/Makefile	2006-10-08 21:06:36.000000000 -0700
-+++ agg-2.5.nacl/Makefile	2009-10-13 16:32:57.179819000 -0700
-@@ -3,7 +3,12 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -3,7 +3,12 @@ all:	lib
  src/libagg.a:
  	cd src; make
  
@@ -15,9 +15,10 @@ diff -Naur agg-2.5/Makefile agg-2.5.nacl/Makefile
  	cd src; make clean
 +	cd font_freetype; make clean
 +
-diff -Naur agg-2.5/Makefile.in.NativeClient agg-2.5.nacl/Makefile.in.NativeClient
---- agg-2.5/Makefile.in.NativeClient	1969-12-31 16:00:00.000000000 -0800
-+++ agg-2.5.nacl/Makefile.in.NativeClient	2009-10-13 16:23:34.598139000 -0700
+diff --git a/Makefile.in.NativeClient b/Makefile.in.NativeClient
+new file mode 100644
+--- /dev/null
++++ b/Makefile.in.NativeClient
 @@ -0,0 +1,7 @@
 +AGGLIBS= -lagg
 +CXX = $(NACLCXX)
@@ -26,9 +27,10 @@ diff -Naur agg-2.5/Makefile.in.NativeClient agg-2.5.nacl/Makefile.in.NativeClien
 +
 +.PHONY : clean
 +
-diff -Naur agg-2.5/font_freetype/Makefile agg-2.5.nacl/font_freetype/Makefile
---- agg-2.5/font_freetype/Makefile	1969-12-31 16:00:00.000000000 -0800
-+++ agg-2.5.nacl/font_freetype/Makefile	2009-10-13 16:59:49.143370000 -0700
+diff --git a/font_freetype/Makefile b/font_freetype/Makefile
+new file mode 100644
+--- /dev/null
++++ b/font_freetype/Makefile
 @@ -0,0 +1,21 @@
 +include ../Makefile.in.NativeClient
 +
@@ -51,19 +53,10 @@ diff -Naur agg-2.5/font_freetype/Makefile agg-2.5.nacl/font_freetype/Makefile
 +
 +%.o: %.c
 +	$(C) -c $(CXXFLAGS) $*.c -o $@
-diff -Naur agg-2.5/src/Makefile agg-2.5.nacl/src/Makefile
---- agg-2.5/src/Makefile	2006-10-08 21:07:22.000000000 -0700
-+++ agg-2.5.nacl/src/Makefile	2009-10-13 16:24:09.202208000 -0700
-@@ -1,4 +1,4 @@
--include ../Makefile.in.$(shell uname)
-+include ../Makefile.in.NativeClient
- 
- CXXFLAGS= $(AGGCXXFLAGS) -I../include -L./
- 
-diff -Naur agg-2.5/include/agg_renderer_outline_aa.h agg-2.5.nacl/include/agg_renderer_outline_aa.h
---- agg-2.5/include/agg_renderer_outline_aa.h      2012-01-10 15:43:13.332345442 -0500
-+++ agg-2.5.nacl/include/agg_renderer_outline_aa.h   2012-01-10 15:43:35.192491666 -0500
-@@ -1375,7 +1375,6 @@
+diff --git a/include/agg_renderer_outline_aa.h b/include/agg_renderer_outline_aa.h
+--- a/include/agg_renderer_outline_aa.h
++++ b/include/agg_renderer_outline_aa.h
+@@ -1375,7 +1375,6 @@ namespace agg
          //---------------------------------------------------------------------
          void profile(const line_profile_aa& prof) { m_profile = &prof; }
          const line_profile_aa& profile() const { return *m_profile; }
@@ -71,3 +64,12 @@ diff -Naur agg-2.5/include/agg_renderer_outline_aa.h agg-2.5.nacl/include/agg_re
  
          //---------------------------------------------------------------------
          int subpixel_width() const { return m_profile->subpixel_width(); }
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -1,4 +1,4 @@
+-include ../Makefile.in.$(shell uname)
++include ../Makefile.in.NativeClient
+ 
+ CXXFLAGS= $(AGGCXXFLAGS) -I../include -L./
+ 

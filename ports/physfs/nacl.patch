@@ -1,5 +1,4 @@
 diff --git a/physfs_platforms.h b/physfs_platforms.h
-index 112193c..c1120d6 100644
 --- a/physfs_platforms.h
 +++ b/physfs_platforms.h
 @@ -38,7 +38,7 @@
@@ -12,7 +11,6 @@ index 112193c..c1120d6 100644
  #  define PHYSFS_PLATFORM_POSIX
  #else
 diff --git a/platform/posix.c b/platform/posix.c
-index 652d9f7..2649f3a 100644
 --- a/platform/posix.c
 +++ b/platform/posix.c
 @@ -27,6 +27,11 @@
@@ -28,7 +26,6 @@ index 652d9f7..2649f3a 100644
  
  
 diff --git a/platform/unix.c b/platform/unix.c
-index 093e7eb..1ce171e 100644
 --- a/platform/unix.c
 +++ b/platform/unix.c
 @@ -283,8 +283,13 @@ char *__PHYSFS_platformRealPath(const char *path)

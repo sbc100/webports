@@ -1,5 +1,4 @@
 diff --git a/src/Makefile.in b/src/Makefile.in
-index acb3389..4865e3e 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
 @@ -55,7 +55,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
@@ -29,7 +28,6 @@ index acb3389..4865e3e 100644
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
 diff --git a/src/nano.c b/src/nano.c
-index e4e2222..c936fd3 100644
 --- a/src/nano.c
 +++ b/src/nano.c
 @@ -1279,6 +1279,14 @@ RETSIGTYPE handle_sigwinch(int signal)

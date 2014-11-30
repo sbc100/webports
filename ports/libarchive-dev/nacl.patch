@@ -1,5 +1,4 @@
 diff --git a/libarchive/archive_random.c b/libarchive/archive_random.c
-index 7786323..7b807d1 100644
 --- a/libarchive/archive_random.c
 +++ b/libarchive/archive_random.c
 @@ -34,6 +34,10 @@ __FBSDID("$FreeBSD$");

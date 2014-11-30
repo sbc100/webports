@@ -1,5 +1,4 @@
 diff --git a/shell.c b/shell.c
-index c6d7fa3..b0a0716 100644
 --- a/shell.c
 +++ b/shell.c
 @@ -45,6 +45,10 @@
@@ -70,7 +69,6 @@ index c6d7fa3..b0a0716 100644
 +PPAPI_SIMPLE_REGISTER_MAIN(sqlite_main)
 +#endif
 diff --git a/sqlite3.c b/sqlite3.c
-index 37ee4ad..fdf30df 100644
 --- a/sqlite3.c
 +++ b/sqlite3.c
 @@ -22852,6 +22852,27 @@ SQLITE_PRIVATE const char *sqlite3OpcodeName(int i){

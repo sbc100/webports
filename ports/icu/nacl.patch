@@ -1,5 +1,4 @@
 diff --git a/source/configure b/source/configure
-index dd98833..d473be9 100755
 --- a/source/configure
 +++ b/source/configure
 @@ -4938,6 +4938,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
@@ -19,7 +18,6 @@ index dd98833..d473be9 100755
  	*-*-aix*) 	platform=U_AIX ;;
  	*-*-hpux*) 	platform=U_HPUX ;;
 diff --git a/source/tools/gendict/gendict.cpp b/source/tools/gendict/gendict.cpp
-index 3d297f5..f9854b9 100644
 --- a/source/tools/gendict/gendict.cpp
 +++ b/source/tools/gendict/gendict.cpp
 @@ -43,7 +43,7 @@ static int elapsedTime() {
@@ -32,7 +30,6 @@ index 3d297f5..f9854b9 100644
  #include <signal.h>
  #include <unistd.h>
 diff --git a/source/tools/toolutil/pkg_genc.c b/source/tools/toolutil/pkg_genc.c
-index f6d1d8b..18382a1 100644
 --- a/source/tools/toolutil/pkg_genc.c
 +++ b/source/tools/toolutil/pkg_genc.c
 @@ -672,9 +672,14 @@ getArchitecture(uint16_t *pCPU, uint16_t *pBits, UBool *pIsBigEndian, const char

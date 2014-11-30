@@ -1,5 +1,4 @@
 diff --git a/Makefile.in b/Makefile.in
-index cb95493..0a8a8d2 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -83,6 +83,7 @@ SHELL = @SHELL@
@@ -11,7 +10,6 @@ index cb95493..0a8a8d2 100644
  CXX = @CXX@
  CFLAGS = @CFLAGS@ @GUI_CFLAGS@ $(MCH_CFLAGS) $(FLA_FLAGS) @DEFINE_PLUGIN_PATH@ -DBX_SHARE_PATH='"$(sharedir)"'
 diff --git a/configure b/configure
-index be5e0a5..8ae9525 100755
 --- a/configure
 +++ b/configure
 @@ -24619,6 +24619,9 @@ fi
@@ -25,7 +23,6 @@ index be5e0a5..8ae9525 100755
      if test "$bx_plugins" = 1; then
        # set variables for building DLL plugins
 diff --git a/cpu/init.cc b/cpu/init.cc
-index 8ada90b..07432e2 100644
 --- a/cpu/init.cc
 +++ b/cpu/init.cc
 @@ -111,6 +111,7 @@ void BX_CPU_C::initialize(void)
@@ -37,7 +34,6 @@ index 8ada90b..07432e2 100644
  #endif
  
 diff --git a/iodev/hdimage/vvfat.cc b/iodev/hdimage/vvfat.cc
-index f75ef2d..a5e78fc 100644
 --- a/iodev/hdimage/vvfat.cc
 +++ b/iodev/hdimage/vvfat.cc
 @@ -1554,7 +1554,9 @@ bx_bool vvfat_image_t::write_file(const char *path, direntry_t *entry, bx_bool c
@@ -51,7 +47,6 @@ index f75ef2d..a5e78fc 100644
    hFile = CreateFile(path, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
    if (hFile != INVALID_HANDLE_VALUE) {
 diff --git a/main.cc b/main.cc
-index 0f11e31..f1a3315 100644
 --- a/main.cc
 +++ b/main.cc
 @@ -473,6 +473,12 @@ int WINAPI WinMain(

@@ -1,5 +1,4 @@
 diff --git a/pcretest.c b/pcretest.c
-index 57ee041..bbe84a3 100644
 --- a/pcretest.c
 +++ b/pcretest.c
 @@ -3101,7 +3101,8 @@ while (argc > 1 && argv[op][0] == '-')

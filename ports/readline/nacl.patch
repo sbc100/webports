@@ -1,5 +1,4 @@
 diff --git a/rldefs.h b/rldefs.h
-index 0257754..991f308 100644
 --- a/rldefs.h
 +++ b/rldefs.h
 @@ -34,6 +34,22 @@

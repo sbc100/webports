@@ -1,5 +1,4 @@
 diff --git a/include/setup.h b/include/setup.h
-index db75ada..f52b840 100644
 --- a/include/setup.h
 +++ b/include/setup.h
 @@ -21,6 +21,8 @@
@@ -12,7 +11,6 @@ index db75ada..f52b840 100644
  #pragma warning ( disable : 4786 )
  #pragma warning ( disable : 4290 )
 diff --git a/src/cpu/core_dyn_x86/risc_x86.h b/src/cpu/core_dyn_x86/risc_x86.h
-index 849b433..2247e8a 100644
 --- a/src/cpu/core_dyn_x86/risc_x86.h
 +++ b/src/cpu/core_dyn_x86/risc_x86.h
 @@ -134,7 +134,11 @@ return_address:
@@ -34,7 +32,6 @@ index 849b433..2247e8a 100644
 -
 -
 diff --git a/src/gui/sdl_mapper.cpp b/src/gui/sdl_mapper.cpp
-index c905c05..82c1b14 100644
 --- a/src/gui/sdl_mapper.cpp
 +++ b/src/gui/sdl_mapper.cpp
 @@ -360,7 +360,91 @@ static SDLKey sdlkey_map[]={
@@ -149,7 +146,6 @@ index c905c05..82c1b14 100644
  #elif defined(OS2)
  		sdlkey_map[0x61]=SDLK_UP;
 diff --git a/src/gui/sdlmain.cpp b/src/gui/sdlmain.cpp
-index 6bbc24c..cbe0662 100644
 --- a/src/gui/sdlmain.cpp
 +++ b/src/gui/sdlmain.cpp
 @@ -1743,7 +1743,10 @@ int main(int argc, char* argv[]) {

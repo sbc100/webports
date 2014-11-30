@@ -1,7 +1,7 @@
-diff -Naur Mesa-7.6/bin/mklib Mesa-7.6.nacl/bin/mklib
---- Mesa-7.6/bin/mklib	2009-11-12 10:34:16.352646000 -0800
-+++ Mesa-7.6.nacl/bin/mklib	2009-11-12 10:37:51.518132000 -0800
-@@ -39,7 +39,7 @@
+diff --git a/bin/mklib b/bin/mklib
+--- a/bin/mklib
++++ b/bin/mklib
+@@ -39,7 +39,7 @@ CPLUSPLUS=0
  STATIC=0
  DLOPEN=0
  INSTALLDIR="."
@@ -10,7 +10,7 @@ diff -Naur Mesa-7.6/bin/mklib Mesa-7.6.nacl/bin/mklib
  ARCHOPT=""
  NOPREFIX=0
  EXPORTS=""
-@@ -213,6 +213,11 @@
+@@ -213,6 +213,11 @@ if [  ]  ; then
      echo "-----------------"
      echo ARCH is $ARCH
      echo LIBNAME is $LIBNAME
@@ -22,7 +22,7 @@ diff -Naur Mesa-7.6/bin/mklib Mesa-7.6.nacl/bin/mklib
      echo MAJOR is $MAJOR
      echo MINOR is $MINOR
      echo PATCH is $PATCH
-@@ -228,15 +233,15 @@
+@@ -228,15 +233,15 @@ fi
  #
  case $ARCH in
  
@@ -41,7 +41,7 @@ diff -Naur Mesa-7.6/bin/mklib Mesa-7.6.nacl/bin/mklib
              fi
  	fi
  
-@@ -271,7 +276,7 @@
+@@ -271,7 +276,7 @@ case $ARCH in
          elif [ $STATIC = 1 ] ; then
              LIBNAME="lib${LIBNAME}.a"     # prefix with "lib", suffix with ".a"
              echo "mklib: Making" $ARCH "static library: " ${LIBNAME}
@@ -50,7 +50,7 @@ diff -Naur Mesa-7.6/bin/mklib Mesa-7.6.nacl/bin/mklib
              OPTS="-ru"
              if [ "${ALTOPTS}" ] ; then
                  OPTS=${ALTOPTS}
-@@ -285,8 +290,8 @@
+@@ -285,8 +290,8 @@ case $ARCH in
  		case $OBJ in
  		    *.a)
  			# extract the .o files from this .a archive
@@ -61,7 +61,7 @@ diff -Naur Mesa-7.6/bin/mklib Mesa-7.6.nacl/bin/mklib
  			NEWOBJECTS="$NEWOBJECTS $FILES"
  			# keep track of temporary .o files and delete them below
  			DELETIA="$DELETIA $FILES"
-@@ -300,7 +305,7 @@
+@@ -300,7 +305,7 @@ case $ARCH in
  
              # make lib
              ${LINK} ${OPTS} ${LIBNAME} ${NEWOBJECTS}
@@ -70,10 +70,10 @@ diff -Naur Mesa-7.6/bin/mklib Mesa-7.6.nacl/bin/mklib
  
  	    # remove temporary extracted .o files
  	    rm -f ${DELETIA}
-diff -Naur Mesa-7.6/src/gallium/auxiliary/cso_cache/cso_context.c Mesa-7.6.nacl/src/gallium/auxiliary/cso_cache/cso_context.c
---- Mesa-7.6/src/gallium/auxiliary/cso_cache/cso_context.c	2009-11-12 10:34:29.346507000 -0800
-+++ Mesa-7.6.nacl/src/gallium/auxiliary/cso_cache/cso_context.c	2009-11-12 10:24:42.817893000 -0800
-@@ -268,7 +268,7 @@
+diff --git a/src/gallium/auxiliary/cso_cache/cso_context.c b/src/gallium/auxiliary/cso_cache/cso_context.c
+--- a/src/gallium/auxiliary/cso_cache/cso_context.c
++++ b/src/gallium/auxiliary/cso_cache/cso_context.c
+@@ -268,7 +268,7 @@ void cso_release_all( struct cso_context *ctx )
  void cso_destroy_context( struct cso_context *ctx )
  {
     if (ctx) {
@@ -82,10 +82,10 @@ diff -Naur Mesa-7.6/src/gallium/auxiliary/cso_cache/cso_context.c Mesa-7.6.nacl/
        FREE( ctx );
     }
  }
-diff -Naur Mesa-7.6/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c Mesa-7.6.nacl/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c
---- Mesa-7.6/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c	2009-11-12 10:34:29.506422000 -0800
-+++ Mesa-7.6.nacl/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c	2009-11-12 10:24:43.101821000 -0800
-@@ -213,8 +213,7 @@
+diff --git a/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c b/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c
+--- a/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c
++++ b/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c
+@@ -213,8 +213,7 @@ static void fse_prepare( struct draw_pt_middle_end *middle,
        vs->prepare(vs, draw);
     }
     
@@ -95,10 +95,10 @@ diff -Naur Mesa-7.6/src/gallium/auxiliary/draw/draw_pt_fetch_shade_emit.c Mesa-7
  }
  
  
-diff -Naur Mesa-7.6/src/gallium/auxiliary/draw/draw_pt_post_vs.c Mesa-7.6.nacl/src/gallium/auxiliary/draw/draw_pt_post_vs.c
---- Mesa-7.6/src/gallium/auxiliary/draw/draw_pt_post_vs.c	2009-11-12 10:34:29.518405000 -0800
-+++ Mesa-7.6.nacl/src/gallium/auxiliary/draw/draw_pt_post_vs.c	2009-11-12 10:24:43.117808000 -0800
-@@ -210,7 +210,7 @@
+diff --git a/src/gallium/auxiliary/draw/draw_pt_post_vs.c b/src/gallium/auxiliary/draw/draw_pt_post_vs.c
+--- a/src/gallium/auxiliary/draw/draw_pt_post_vs.c
++++ b/src/gallium/auxiliary/draw/draw_pt_post_vs.c
+@@ -210,7 +210,7 @@ void draw_pt_post_vs_prepare( struct pt_post_vs *pvs,
  	 pvs->run = post_vs_viewport;
     }
     else {
@@ -107,10 +107,10 @@ diff -Naur Mesa-7.6/src/gallium/auxiliary/draw/draw_pt_post_vs.c Mesa-7.6.nacl/s
        pvs->run = post_vs_cliptest_viewport_gl;
     }
  }
-diff -Naur Mesa-7.6/src/gallium/auxiliary/translate/translate_generic.c Mesa-7.6.nacl/src/gallium/auxiliary/translate/translate_generic.c
---- Mesa-7.6/src/gallium/auxiliary/translate/translate_generic.c	2009-11-12 10:34:30.317432000 -0800
-+++ Mesa-7.6.nacl/src/gallium/auxiliary/translate/translate_generic.c	2009-11-12 10:24:44.304754000 -0800
-@@ -217,7 +217,7 @@
+diff --git a/src/gallium/auxiliary/translate/translate_generic.c b/src/gallium/auxiliary/translate/translate_generic.c
+--- a/src/gallium/auxiliary/translate/translate_generic.c
++++ b/src/gallium/auxiliary/translate/translate_generic.c
+@@ -217,7 +217,7 @@ ATTRIB( R8G8_SNORM,      2, char, FROM_8_SNORM, TO_8_SNORM )
  ATTRIB( R8_SNORM,        1, char, FROM_8_SNORM, TO_8_SNORM )
  
  ATTRIB( A8R8G8B8_UNORM,       4, ubyte, FROM_8_UNORM, TO_8_UNORM )
@@ -119,10 +119,10 @@ diff -Naur Mesa-7.6/src/gallium/auxiliary/translate/translate_generic.c Mesa-7.6
  
  ATTRIB( R32G32B32A32_FIXED,   4, int, FROM_32_FIXED, TO_32_FIXED )
  ATTRIB( R32G32B32_FIXED,      3, int, FROM_32_FIXED, TO_32_FIXED )
-diff -Naur Mesa-7.6/src/gallium/drivers/i915simple/i915_state.c Mesa-7.6.nacl/src/gallium/drivers/i915simple/i915_state.c
---- Mesa-7.6/src/gallium/drivers/i915simple/i915_state.c	2009-11-12 10:34:31.510250000 -0800
-+++ Mesa-7.6.nacl/src/gallium/drivers/i915simple/i915_state.c	2009-11-12 10:24:46.052550000 -0800
-@@ -58,8 +58,8 @@
+diff --git a/src/gallium/drivers/i915simple/i915_state.c b/src/gallium/drivers/i915simple/i915_state.c
+--- a/src/gallium/drivers/i915simple/i915_state.c
++++ b/src/gallium/drivers/i915simple/i915_state.c
+@@ -58,8 +58,8 @@ translate_wrap_mode(unsigned wrap)
        return TEXCOORDMODE_CLAMP_EDGE;
     case PIPE_TEX_WRAP_CLAMP_TO_BORDER:
        return TEXCOORDMODE_CLAMP_BORDER;
@@ -133,9 +133,9 @@ diff -Naur Mesa-7.6/src/gallium/drivers/i915simple/i915_state.c Mesa-7.6.nacl/sr
     default:
        return TEXCOORDMODE_WRAP;
     }
-diff -Naur Mesa-7.6/src/mesa/main/compiler.h Mesa-7.6.nacl/src/mesa/main/compiler.h
---- Mesa-7.6/src/mesa/main/compiler.h	2009-11-12 10:34:18.405444000 -0800
-+++ Mesa-7.6.nacl/src/mesa/main/compiler.h	2009-11-12 10:24:28.127126000 -0800
+diff --git a/src/mesa/main/compiler.h b/src/mesa/main/compiler.h
+--- a/src/mesa/main/compiler.h
++++ b/src/mesa/main/compiler.h
 @@ -45,7 +45,7 @@
  #include <stdlib.h>
  #include <stdio.h>
@@ -145,10 +145,10 @@ diff -Naur Mesa-7.6/src/mesa/main/compiler.h Mesa-7.6.nacl/src/mesa/main/compile
  #include <fpu_control.h>
  #endif
  #include <float.h>
-diff -Naur Mesa-7.6/src/mesa/shader/slang/slang_codegen.c Mesa-7.6.nacl/src/mesa/shader/slang/slang_codegen.c
---- Mesa-7.6/src/mesa/shader/slang/slang_codegen.c	2009-11-12 10:34:20.040271000 -0800
-+++ Mesa-7.6.nacl/src/mesa/shader/slang/slang_codegen.c	2009-11-12 10:24:31.427853000 -0800
-@@ -924,7 +924,7 @@
+diff --git a/src/mesa/shader/slang/slang_codegen.c b/src/mesa/shader/slang/slang_codegen.c
+--- a/src/mesa/shader/slang/slang_codegen.c
++++ b/src/mesa/shader/slang/slang_codegen.c
+@@ -924,7 +924,7 @@ gen_return_with_expression(slang_assemble_ctx *A, slang_operation *oper)
        slang_operation_copy(rhs, &oper->children[0]);
     }
  
@@ -157,10 +157,10 @@ diff -Naur Mesa-7.6/src/mesa/shader/slang/slang_codegen.c Mesa-7.6.nacl/src/mesa
  
     /*slang_print_tree(blockOper, 0);*/
  
-diff -Naur Mesa-7.6/src/mesa/state_tracker/st_atom.c Mesa-7.6.nacl/src/mesa/state_tracker/st_atom.c
---- Mesa-7.6/src/mesa/state_tracker/st_atom.c	2009-11-12 10:34:28.616498000 -0800
-+++ Mesa-7.6.nacl/src/mesa/state_tracker/st_atom.c	2009-11-12 10:24:41.550990000 -0800
-@@ -137,7 +137,7 @@
+diff --git a/src/mesa/state_tracker/st_atom.c b/src/mesa/state_tracker/st_atom.c
+--- a/src/mesa/state_tracker/st_atom.c
++++ b/src/mesa/state_tracker/st_atom.c
+@@ -137,7 +137,7 @@ void st_validate_state( struct st_context *st )
     if (state->st == 0)
        return;
  
@@ -169,7 +169,7 @@ diff -Naur Mesa-7.6/src/mesa/state_tracker/st_atom.c Mesa-7.6.nacl/src/mesa/stat
  
     if (1) {
        /* Debug version which enforces various sanity checks on the
-@@ -152,7 +152,7 @@
+@@ -152,7 +152,7 @@ void st_validate_state( struct st_context *st )
  	 const struct st_tracked_state *atom = atoms[i];
  	 struct st_state_flags generated;
  	 
@@ -178,7 +178,7 @@ diff -Naur Mesa-7.6/src/mesa/state_tracker/st_atom.c Mesa-7.6.nacl/src/mesa/stat
  
  	 if (!(atom->dirty.mesa || atom->dirty.st) ||
  	     !atom->update) {
-@@ -162,7 +162,7 @@
+@@ -162,7 +162,7 @@ void st_validate_state( struct st_context *st )
  
  	 if (check_state(state, &atom->dirty)) {
  	    atoms[i]->update( st );
@@ -187,7 +187,7 @@ diff -Naur Mesa-7.6/src/mesa/state_tracker/st_atom.c Mesa-7.6.nacl/src/mesa/stat
  	 }
  
  	 accumulate_state(&examined, &atom->dirty);
-@@ -175,7 +175,7 @@
+@@ -175,7 +175,7 @@ void st_validate_state( struct st_context *st )
  	 assert(!check_state(&examined, &generated));
  	 prev = *state;
        }
@@ -196,10 +196,10 @@ diff -Naur Mesa-7.6/src/mesa/state_tracker/st_atom.c Mesa-7.6.nacl/src/mesa/stat
  
     }
     else {
-diff -Naur Mesa-7.6/src/mesa/state_tracker/st_cb_bitmap.c Mesa-7.6.nacl/src/mesa/state_tracker/st_cb_bitmap.c
---- Mesa-7.6/src/mesa/state_tracker/st_cb_bitmap.c	2009-11-12 10:34:28.715521000 -0800
-+++ Mesa-7.6.nacl/src/mesa/state_tracker/st_cb_bitmap.c	2009-11-12 10:24:41.712986000 -0800
-@@ -515,7 +515,7 @@
+diff --git a/src/mesa/state_tracker/st_cb_bitmap.c b/src/mesa/state_tracker/st_cb_bitmap.c
+--- a/src/mesa/state_tracker/st_cb_bitmap.c
++++ b/src/mesa/state_tracker/st_cb_bitmap.c
+@@ -515,7 +515,7 @@ reset_cache(struct st_context *st)
     struct pipe_screen *screen = pipe->screen;
     struct bitmap_cache *cache = st->bitmap.cache;
  
@@ -208,10 +208,10 @@ diff -Naur Mesa-7.6/src/mesa/state_tracker/st_cb_bitmap.c Mesa-7.6.nacl/src/mesa
     cache->empty = GL_TRUE;
  
     cache->xmin = 1000000;
-diff -Naur Mesa-7.6/src/mesa/vbo/vbo_exec_array.c Mesa-7.6.nacl/src/mesa/vbo/vbo_exec_array.c
---- Mesa-7.6/src/mesa/vbo/vbo_exec_array.c	2009-11-12 10:34:21.030196000 -0800
-+++ Mesa-7.6.nacl/src/mesa/vbo/vbo_exec_array.c	2009-11-12 10:24:32.666763000 -0800
-@@ -149,7 +149,7 @@
+diff --git a/src/mesa/vbo/vbo_exec_array.c b/src/mesa/vbo/vbo_exec_array.c
+--- a/src/mesa/vbo/vbo_exec_array.c
++++ b/src/mesa/vbo/vbo_exec_array.c
+@@ -149,7 +149,7 @@ check_array_data(GLcontext *ctx, struct gl_client_array *array,
                                 array->Ptr, array->BufferObj->Name);
                    f[k] = 1.0; /* XXX replace the bad value! */
                 }

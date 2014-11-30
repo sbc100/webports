@@ -1,5 +1,4 @@
 diff --git a/Makefile.in b/Makefile.in
-index c0949e7..16b263f 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -262,7 +262,10 @@ LIBCC_SRC = cstr.fs unix/socket.fs
@@ -65,7 +64,6 @@ index c0949e7..16b263f 100644
 +	echo '%.o:      %.c' >>$@
 +	echo '          $$(GCC) $$(CFLAGS) $$(CPPFLAGS) -c $$<' >>$@
 diff --git a/arch/386/machine.h b/arch/386/machine.h
-index 1b626a3..3117f03 100644
 --- a/arch/386/machine.h
 +++ b/arch/386/machine.h
 @@ -39,11 +39,13 @@
@@ -83,7 +81,6 @@ index 1b626a3..3117f03 100644
  #include "../generic/machine.h"
  
 diff --git a/arch/amd64/machine.h b/arch/amd64/machine.h
-index 500cd20..ae7fbe5 100644
 --- a/arch/amd64/machine.h
 +++ b/arch/amd64/machine.h
 @@ -42,11 +42,13 @@
@@ -101,7 +98,6 @@ index 500cd20..ae7fbe5 100644
  #include "../generic/machine.h"
  
 diff --git a/configure.in b/configure.in
-index 9b2c926..c5351fb 100644
 --- a/configure.in
 +++ b/configure.in
 @@ -241,15 +241,15 @@ case "$host_cpu" in
@@ -171,7 +167,6 @@ index 9b2c926..c5351fb 100644
  
  AC_PATH_PROG(INSTALL_INFO,install-info,[echo '>>>>Please make info dir entry:'],$PATH:/sbin:/usr/sbin:/usr/local/sbin)
 diff --git a/engine/Makefile.in b/engine/Makefile.in
-index 6a724d1..1da1840 100644
 --- a/engine/Makefile.in
 +++ b/engine/Makefile.in
 @@ -89,7 +89,8 @@ XCFLAGS	= @CFLAGS@
@@ -185,7 +180,6 @@ index 6a724d1..1da1840 100644
  CFLAGS	= $(DEBUGFLAG) -I$(srcdir)/../arch/$(machine) -I. -Wall $(SWITCHES) -DDEFAULTPATH='"$(FORTHPATH)"' $(LTDLINCL)
  CFLAGS2	= $(DEBUGFLAG) -I$(srcdir)/../arch/$(machine) -I. -Wall $(SWITCHES) -DDEFAULTPATH='"$(FORTHPATH)"' $(LTDLINCL)
 diff --git a/engine/engine.c b/engine/engine.c
-index e4ed239..8cb74fa 100644
 --- a/engine/engine.c
 +++ b/engine/engine.c
 @@ -221,6 +221,14 @@ extern int gforth_memcmp(const char * s1, const char * s2, size_t n);
@@ -204,7 +198,6 @@ index e4ed239..8cb74fa 100644
  /* an individualized asm statement so that (hopefully) gcc's optimizer
     does not do cross-jumping */
 diff --git a/engine/io.c b/engine/io.c
-index 57cf0c0..6a39e17 100644
 --- a/engine/io.c
 +++ b/engine/io.c
 @@ -79,7 +79,7 @@ typedef unsigned int uint32_t;
@@ -217,7 +210,6 @@ index 57cf0c0..6a39e17 100644
  #    define TERMIO_TTY_DRIVER
  #    include <termio.h>
 diff --git a/engine/main.c b/engine/main.c
-index 73b7466..31a7950 100644
 --- a/engine/main.c
 +++ b/engine/main.c
 @@ -49,6 +49,10 @@

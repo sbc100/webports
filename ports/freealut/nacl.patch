@@ -1,7 +1,7 @@
-diff -Naur freealut-1.1.0/src/alutWaveform.c freealut-1.1.0.nacl/src/alutWaveform.c
---- freealut-1.1.0/src/alutWaveform.c	2006-05-11 05:53:31.000000000 -0700
-+++ freealut-1.1.0.nacl/src/alutWaveform.c	2013-01-29 19:40:28.846592559 -0800
-@@ -35,12 +35,14 @@
+diff --git a/src/alutWaveform.c b/src/alutWaveform.c
+--- a/src/alutWaveform.c
++++ b/src/alutWaveform.c
+@@ -35,12 +35,14 @@ waveformSawtooth (double UNUSED (lastPhase), double phase)
    return 2 * phase - 1;
  }
  
@@ -16,7 +16,7 @@ diff -Naur freealut-1.1.0/src/alutWaveform.c freealut-1.1.0.nacl/src/alutWavefor
  
  static double
  waveformImpulse (double lastPhase, double phase)
-@@ -59,8 +61,10 @@
+@@ -59,8 +61,10 @@ getWaveformFunction (ALenum waveshape)
        return &waveformSquare;
      case ALUT_WAVEFORM_SAWTOOTH:
        return &waveformSawtooth;

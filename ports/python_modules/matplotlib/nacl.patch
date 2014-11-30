@@ -1,5 +1,4 @@
 diff --git a/lib/matplotlib/mpl-data/matplotlibrc b/lib/matplotlib/mpl-data/matplotlibrc
-index ef09a5e..41351db 100644
 --- a/lib/matplotlib/mpl-data/matplotlibrc
 +++ b/lib/matplotlib/mpl-data/matplotlibrc
 @@ -29,7 +29,7 @@
@@ -12,7 +11,6 @@ index ef09a5e..41351db 100644
  # If you are using the Qt4Agg backend, you can choose here
  # to use the PyQt4 bindings or the newer PySide bindings to
 diff --git a/lib/matplotlib/tri/_tri.cpp b/lib/matplotlib/tri/_tri.cpp
-index 9dd538a..8dbe107 100644
 --- a/lib/matplotlib/tri/_tri.cpp
 +++ b/lib/matplotlib/tri/_tri.cpp
 @@ -2177,14 +2177,14 @@ TrapezoidMapTriFinder::Trapezoid::set_upper_right(Trapezoid* upper_right_)
@@ -34,7 +32,6 @@ index 9dd538a..8dbe107 100644
  
  
 diff --git a/lib/matplotlib/tri/_tri.h b/lib/matplotlib/tri/_tri.h
-index 3662678..c923411 100644
 --- a/lib/matplotlib/tri/_tri.h
 +++ b/lib/matplotlib/tri/_tri.h
 @@ -818,7 +818,7 @@ public:
@@ -48,7 +45,6 @@ index 3662678..c923411 100644
  
 diff --git a/setup.cfg b/setup.cfg
 new file mode 100644
-index 0000000..2531255
 --- /dev/null
 +++ b/setup.cfg
 @@ -0,0 +1,84 @@
@@ -137,7 +133,6 @@ index 0000000..2531255
 +backend = Agg
 +#
 diff --git a/setupext.py b/setupext.py
-index 4e304d9..53e72ba 100644
 --- a/setupext.py
 +++ b/setupext.py
 @@ -60,10 +60,12 @@ options = {

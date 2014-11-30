@@ -1,5 +1,4 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b610ecf..ebebaed 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -326,8 +326,10 @@ else()
@@ -36,7 +35,6 @@ index b610ecf..ebebaed 100644
    set(WORDS_BIGENDIAN 0)
  else()
 diff --git a/modules/contrib/src/inputoutput.cpp b/modules/contrib/src/inputoutput.cpp
-index 37510c6..a626b66 100644
 --- a/modules/contrib/src/inputoutput.cpp
 +++ b/modules/contrib/src/inputoutput.cpp
 @@ -76,7 +76,8 @@ namespace cv
@@ -77,7 +75,6 @@ index 37510c6..a626b66 100644
  
          return list;
 diff --git a/modules/core/include/opencv2/core/operations.hpp b/modules/core/include/opencv2/core/operations.hpp
-index 4ab7e35..e0d2df4 100644
 --- a/modules/core/include/opencv2/core/operations.hpp
 +++ b/modules/core/include/opencv2/core/operations.hpp
 @@ -58,7 +58,13 @@
@@ -95,7 +92,6 @@ index 4ab7e35..e0d2df4 100644
          #define CV_XADD(addr, delta) __atomic_fetch_add((_Atomic(int)*)(addr), (delta), 5)
      #endif
 diff --git a/modules/core/src/system.cpp b/modules/core/src/system.cpp
-index ef45b9b..97f385d 100644
 --- a/modules/core/src/system.cpp
 +++ b/modules/core/src/system.cpp
 @@ -491,7 +491,11 @@ string tempfile( const char* suffix )
@@ -111,7 +107,6 @@ index ef45b9b..97f385d 100644
  # endif
  
 diff --git a/modules/flann/include/opencv2/flann/allocator.h b/modules/flann/include/opencv2/flann/allocator.h
-index 26091d0..5a77c50 100644
 --- a/modules/flann/include/opencv2/flann/allocator.h
 +++ b/modules/flann/include/opencv2/flann/allocator.h
 @@ -68,7 +68,10 @@ T* allocate(size_t count = 1)
@@ -126,7 +121,6 @@ index 26091d0..5a77c50 100644
  
  class PooledAllocator
 diff --git a/modules/legacy/include/opencv2/legacy/legacy.hpp b/modules/legacy/include/opencv2/legacy/legacy.hpp
-index 96da25c..cc0b4d3 100644
 --- a/modules/legacy/include/opencv2/legacy/legacy.hpp
 +++ b/modules/legacy/include/opencv2/legacy/legacy.hpp
 @@ -519,8 +519,8 @@ typedef struct CvStereoCamera
@@ -141,7 +135,6 @@ index 96da25c..cc0b4d3 100644
      CvPoint2D32f border[2][4];
      CvSize warpSize;
 diff --git a/modules/legacy/src/calibfilter.cpp b/modules/legacy/src/calibfilter.cpp
-index 64b9957..41583d8 100644
 --- a/modules/legacy/src/calibfilter.cpp
 +++ b/modules/legacy/src/calibfilter.cpp
 @@ -42,7 +42,10 @@
@@ -179,7 +172,6 @@ index 64b9957..41583d8 100644
          }
      }
 diff --git a/modules/legacy/src/epilines.cpp b/modules/legacy/src/epilines.cpp
-index b63f8e1..ea00059 100644
 --- a/modules/legacy/src/epilines.cpp
 +++ b/modules/legacy/src/epilines.cpp
 @@ -46,7 +46,10 @@

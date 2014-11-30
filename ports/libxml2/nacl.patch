@@ -1,7 +1,7 @@
-diff -aur libxml2-2.7.8/xmlIO.c libxml2-2.7.8-nacl/xmlIO.c
---- libxml2-2.7.8/xmlIO.c	2010-10-11 23:25:32.000000000 -0700
-+++ libxml2-2.7.8-nacl/xmlIO.c	2013-01-23 17:18:59.255645774 -0800
-@@ -3649,10 +3649,12 @@
+diff --git a/xmlIO.c b/xmlIO.c
+--- a/xmlIO.c
++++ b/xmlIO.c
+@@ -3649,10 +3649,12 @@ xmlParserGetDirectory(const char *filename) {
  	else *cur = 0;
  	ret = xmlMemStrdup(dir);
      } else {

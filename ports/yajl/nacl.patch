@@ -1,7 +1,6 @@
-diff --git yajl-2.0.4/src/CMakeLists.txt yajl-2.0.4-nacl/src/CMakeLists.txt
-index e36b736..4193048 100644
---- yajl-2.0.4/src/CMakeLists.txt
-+++ yajl-2.0.4-nacl/src/CMakeLists.txt
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
 @@ -37,20 +37,22 @@ SET(LIBRARY_OUTPUT_PATH ${libDir})
  
  ADD_LIBRARY(yajl_s STATIC ${SRCS} ${HDRS} ${PUB_HDRS})
@@ -48,10 +47,9 @@ index e36b736..4193048 100644
    INSTALL(TARGETS yajl_s ARCHIVE DESTINATION lib${LIB_SUFFIX})
    INSTALL(FILES ${PUB_HDRS} DESTINATION include/yajl)
    INSTALL(FILES ${incDir}/yajl_version.h DESTINATION include/yajl)
-diff --git yajl-2.0.4/test/run_tests.sh yajl-2.0.4-nacl/test/run_tests.sh
-index 55a665b..225df99 100755
---- yajl-2.0.4/test/run_tests.sh
-+++ yajl-2.0.4-nacl/test/run_tests.sh
+diff --git a/test/run_tests.sh b/test/run_tests.sh
+--- a/test/run_tests.sh
++++ b/test/run_tests.sh
 @@ -68,6 +68,8 @@ for file in cases/*.json ; do
    # parse with a read buffer size ranging from 1-31 to stress stream parsing
    while [ $iter -lt 32  ] && [ $success = "SUCCESS" ] ; do

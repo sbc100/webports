@@ -1,5 +1,4 @@
 diff --git a/makefile.unix b/makefile.unix
-index bb8f29c..5c2b243 100644
 --- a/makefile.unix
 +++ b/makefile.unix
 @@ -3,16 +3,20 @@
@@ -28,7 +27,6 @@ index bb8f29c..5c2b243 100644
  LIBTEST=libtomcrypt_prof.a
  LIBTEST_S=$(LIBTEST)
 diff --git a/src/headers/tomcrypt_cfg.h b/src/headers/tomcrypt_cfg.h
-index 7feae6e..b1e52cc 100644
 --- a/src/headers/tomcrypt_cfg.h
 +++ b/src/headers/tomcrypt_cfg.h
 @@ -70,7 +70,7 @@ LTC_EXPORT int   LTC_CALL XSTRCMP(const char *s1, const char *s2);
@@ -41,7 +39,6 @@ index 7feae6e..b1e52cc 100644
     #define ENDIAN_64BITWORD
     #define LTC_FAST
 diff --git a/src/headers/tomcrypt_macros.h b/src/headers/tomcrypt_macros.h
-index 53bda9b..4f56978 100644
 --- a/src/headers/tomcrypt_macros.h
 +++ b/src/headers/tomcrypt_macros.h
 @@ -7,10 +7,10 @@

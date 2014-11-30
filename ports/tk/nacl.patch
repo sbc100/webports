@@ -1,5 +1,4 @@
 diff --git a/unix/tkAppInit.c b/unix/tkAppInit.c
-index 9a0b053..1ab701c 100644
 --- a/unix/tkAppInit.c
 +++ b/unix/tkAppInit.c
 @@ -26,6 +26,10 @@ extern Tcl_PackageInitProc Tktest_Init;

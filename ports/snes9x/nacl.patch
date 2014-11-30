@@ -1,8 +1,7 @@
 diff --git a/port.h b/port.h
-index 0e8192e..a00b402 100644
 --- a/port.h
 +++ b/port.h
-@@ -331,7 +333,7 @@ void SetInfoDlgColor(unsigned char, unsigned char, unsigned char);
+@@ -331,7 +331,7 @@ void SetInfoDlgColor(unsigned char, unsigned char, unsigned char);
  #define TITLE "Snes9x"
  #endif
  
@@ -12,7 +11,6 @@ index 0e8192e..a00b402 100644
  #define FAST_LSB_WORD_ACCESS
  #else
 diff --git a/unix/Makefile.in b/unix/Makefile.in
-index 36cf605..5fa8dae 100644
 --- a/unix/Makefile.in
 +++ b/unix/Makefile.in
 @@ -2,14 +2,19 @@
@@ -37,7 +35,6 @@ index 36cf605..5fa8dae 100644
  OBJECTS   += ../debug.o ../fxdbg.o
  endif
 diff --git a/unix/configure.ac b/unix/configure.ac
-index 75b5bca..5f6b68a 100644
 --- a/unix/configure.ac
 +++ b/unix/configure.ac
 @@ -38,7 +38,7 @@ AC_DEFUN([AC_S9X_COMPILER_FLAG],
@@ -138,7 +135,6 @@ index 75b5bca..5f6b68a 100644
  
 diff --git a/unix/keycodes.h b/unix/keycodes.h
 new file mode 100644
-index 0000000..ea50e9a
 --- /dev/null
 +++ b/unix/keycodes.h
 @@ -0,0 +1,271 @@
@@ -415,7 +411,6 @@ index 0000000..ea50e9a
 +}
 diff --git a/unix/nacl.cpp b/unix/nacl.cpp
 new file mode 100644
-index 0000000..9976e00
 --- /dev/null
 +++ b/unix/nacl.cpp
 @@ -0,0 +1,694 @@
@@ -1114,7 +1109,6 @@ index 0000000..9976e00
 +
 +#endif
 diff --git a/unix/unix.cpp b/unix/unix.cpp
-index c5f6da2..48fdf80 100644
 --- a/unix/unix.cpp
 +++ b/unix/unix.cpp
 @@ -229,6 +229,14 @@

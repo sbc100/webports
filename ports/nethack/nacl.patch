@@ -22,9 +22,9 @@
  #define COMPRESS_EXTENSION ".Z"		/* compress's extension */
  /* An example of one alternative you might want to use: */
  /* #define COMPRESS "/usr/local/bin/gzip" */	/* FSF gzip compression */
-diff -Naur nethack-3.4.3-orig/include/config1.h nethack-3.4.3/include/config1.h
---- nethack-3.4.3-orig/include/config1.h	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/include/config1.h	2011-09-27 13:38:17.000000000 -0700
+diff --git a/include/config1.h b/include/config1.h
+--- a/include/config1.h
++++ b/include/config1.h
 @@ -144,7 +144,7 @@
  #  else
  #   define NHSTDC
@@ -46,9 +46,9 @@ diff -Naur nethack-3.4.3-orig/include/system.h nethack-3.4.3/include/system.h
  #   endif
  #  endif /* HPUX */
  # endif /* MICRO */
-diff -Naur nethack-3.4.3-orig/include/unixconf.h nethack-3.4.3/include/unixconf.h
---- nethack-3.4.3-orig/include/unixconf.h	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/include/unixconf.h	2011-09-27 13:38:17.000000000 -0700
+diff --git a/include/unixconf.h b/include/unixconf.h
+--- a/include/unixconf.h
++++ b/include/unixconf.h
 @@ -95,8 +95,8 @@
   *		Ralf Brown, 7/26/89 (from v2.3 hack of 10/10/88)
   */
@@ -79,7 +79,7 @@ diff -Naur nethack-3.4.3-orig/include/unixconf.h nethack-3.4.3/include/unixconf.
  
  /* The Andrew Message System does mail a little differently from normal
   * UNIX.  Mail is deposited in the user's own directory in ~/Mailbox
-@@ -270,6 +271,6 @@
+@@ -270,7 +271,7 @@
  #endif
  #define tgetch getchar
  
@@ -174,7 +174,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  #
  # files for an X11 port
  # (tile.c is a generated source file)
-@@ -231,7 +268,8 @@
+@@ -231,7 +233,8 @@ WINOBJ = $(WINTTYOBJ)
  # WINTTYLIB = -lcurses
  # WINTTYLIB = -lcurses16
  # WINTTYLIB = -lncurses
@@ -184,9 +184,9 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.src nethack-3.4.3/sys/unix/Makef
  #
  # libraries for X11
  # If USE_XPM is defined in config.h, you will also need -lXpm here.
-diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.top nethack-3.4.3/sys/unix/Makefile.top
---- nethack-3.4.3-orig/sys/unix/Makefile.top	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/unix/Makefile.top	2011-09-27 13:38:17.000000000 -0700
+diff --git a/sys/unix/Makefile.top b/sys/unix/Makefile.top
+--- a/sys/unix/Makefile.top
++++ b/sys/unix/Makefile.top
 @@ -14,7 +14,7 @@
  # MAKE = make
  
@@ -196,7 +196,7 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.top nethack-3.4.3/sys/unix/Makef
  GAME     = nethack
  # GAME     = nethack.prg
  GAMEUID  = games
-@@ -64,8 +64,8 @@
+@@ -64,8 +64,8 @@ VARDAT = $(VARDATD) $(VARDATND)
  # other permission-related reasons.  If that happens, you may want to set the
  # command to "true", which is a no-op. Note that disabling chown or chgrp
  # will only work if setuid (or setgid) behavior is not desired or required.
@@ -207,9 +207,9 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.top nethack-3.4.3/sys/unix/Makef
  
  #
  # end of configuration
-diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.utl nethack-3.4.3/sys/unix/Makefile.utl
---- nethack-3.4.3-orig/sys/unix/Makefile.utl	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/unix/Makefile.utl	2011-09-27 13:38:17.000000000 -0700
+diff --git a/sys/unix/Makefile.utl b/sys/unix/Makefile.utl
+--- a/sys/unix/Makefile.utl
++++ b/sys/unix/Makefile.utl
 @@ -15,7 +15,7 @@
  
  # if you are using gcc as your compiler,
@@ -251,10 +251,10 @@ diff -Naur nethack-3.4.3-orig/sys/unix/Makefile.utl nethack-3.4.3/sys/unix/Makef
   
  # these are the names of the output files from YACC/LEX. Under MS-DOS
  # and similar systems, they may differ
-diff -Naur nethack-3.4.3-orig/sys/unix/unixmain.c nethack-3.4.3/sys/unix/unixmain.c
---- nethack-3.4.3-orig/sys/unix/unixmain.c	2003-12-07 15:39:13.000000000 -0800
-+++ nethack-3.4.3/sys/unix/unixmain.c	2011-09-27 13:38:17.000000000 -0700
-@@ -45,7 +45,7 @@
+diff --git a/sys/unix/unixmain.c b/sys/unix/unixmain.c
+--- a/sys/unix/unixmain.c
++++ b/sys/unix/unixmain.c
+@@ -45,7 +45,7 @@ static boolean wiz_error_flag = FALSE;
  #endif
  
  int
@@ -263,10 +263,10 @@ diff -Naur nethack-3.4.3-orig/sys/unix/unixmain.c nethack-3.4.3/sys/unix/unixmai
  int argc;
  char *argv[];
  {
-diff -Naur nethack-3.4.3-orig/win/tty/termcap.c nethack-3.4.3/win/tty/termcap.c
---- nethack-3.4.3-orig/win/tty/termcap.c	2003-12-07 15:39:14.000000000 -0800
-+++ nethack-3.4.3/win/tty/termcap.c	2011-09-27 13:38:17.000000000 -0700
-@@ -108,6 +108,7 @@
+diff --git a/win/tty/termcap.c b/win/tty/termcap.c
+--- a/win/tty/termcap.c
++++ b/win/tty/termcap.c
+@@ -108,6 +108,7 @@ int *wid, *hgt;
  # if defined(TOS) && defined(__GNUC__)
  	if (!term)
  		term = "builtin";		/* library has a default */

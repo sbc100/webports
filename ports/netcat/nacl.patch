@@ -1,5 +1,4 @@
 diff --git a/src/Makefile.in b/src/Makefile.in
-index cf822d4..01d6e4f 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
 @@ -161,6 +161,7 @@ netcat_SOURCES = \
@@ -29,7 +28,6 @@ index cf822d4..01d6e4f 100644
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT) core *.core
 diff --git a/src/flagset.c b/src/flagset.c
-index 442b634..1f85f0c 100644
 --- a/src/flagset.c
 +++ b/src/flagset.c
 @@ -169,7 +169,7 @@ int netcat_flag_count(void)
@@ -62,7 +60,6 @@ index 442b634..1f85f0c 100644
  
    /* don't return this same flag again */
 diff --git a/src/netcat.c b/src/netcat.c
-index 21887cc..62da088 100644
 --- a/src/netcat.c
 +++ b/src/netcat.c
 @@ -135,7 +135,11 @@ static void ncexec(nc_sock_t *ncsock)
@@ -87,7 +84,6 @@ index 21887cc..62da088 100644
 +PPAPI_SIMPLE_REGISTER_MAIN(nacl_ppapi_main)
 +#endif
 diff --git a/src/udphelper.c b/src/udphelper.c
-index 9a3e885..a460b4b 100644
 --- a/src/udphelper.c
 +++ b/src/udphelper.c
 @@ -30,7 +30,9 @@

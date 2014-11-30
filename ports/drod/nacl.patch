@@ -4,7 +4,6 @@ add it to the include path, otherwise the system headers will
 see it when searching for <wchar.h>
 
 diff --git a/Caravel/Master/Linux/Makefile b/Caravel/Master/Linux/Makefile
-index b0f5c51..e3d32eb 100644
 --- a/Caravel/Master/Linux/Makefile
 +++ b/Caravel/Master/Linux/Makefile
 @@ -77,7 +77,7 @@ SOURCES = $(shell $(GREP) "SOURCE=.*\.cpp" $(MODSDIR)/$(MODULE).dsp |\

@@ -1,5 +1,4 @@
 diff --git a/Makefile b/Makefile
-index 6e78f66..7d68313 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -38,7 +38,7 @@ RANLIB= ranlib
@@ -12,7 +11,6 @@ index 6e78f66..7d68313 100644
  # What to install.
  TO_BIN= lua luac
 diff --git a/src/Makefile b/src/Makefile
-index e4a3cd6..69b159f 100644
 --- a/src/Makefile
 +++ b/src/Makefile
 @@ -95,6 +95,18 @@ freebsd:

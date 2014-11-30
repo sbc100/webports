@@ -1,7 +1,7 @@
-diff -aur ipython-1.1.0/IPython/core/prompts.py ipython-1.1.0-mod/IPython/core/prompts.py
---- a/IPython/core/prompts.py	2013-09-09 17:36:34.000000000 -0400
-+++ b/IPython/core/prompts.py	2014-05-01 14:04:55.414706282 -0400
-@@ -145,7 +145,9 @@
+diff --git a/IPython/core/prompts.py b/IPython/core/prompts.py
+--- a/IPython/core/prompts.py
++++ b/IPython/core/prompts.py
+@@ -145,7 +145,9 @@ HOME = os.path.realpath(HOME)
  # fixed once ipython starts.  This reduces the runtime overhead of computing
  # prompt strings.
  USER           = py3compat.str_to_unicode(os.environ.get("USER",''))
@@ -10,12 +10,12 @@ diff -aur ipython-1.1.0/IPython/core/prompts.py ipython-1.1.0-mod/IPython/core/p
 +# so we sent HOSTNAME to empty
 +HOSTNAME       = '' #py3compat.str_to_unicode(socket.gethostname())
  HOSTNAME_SHORT = HOSTNAME.split(".")[0]
- ROOT_SYMBOL    = "#" if (os.name=='nt' or os.getuid()==0) else "$"
  
-diff -aur ipython-1.1.0/IPython/external/pexpect/_pexpect.py ipython-1.1.0-mod/IPython/external/pexpect/_pexpect.py
---- a/IPython/external/pexpect/_pexpect.py	2013-09-09 17:36:34.000000000 -0400
-+++ b/IPython/external/pexpect/_pexpect.py	2014-05-01 14:02:38.743366957 -0400
-@@ -70,7 +70,7 @@
+ # IronPython doesn't currently have os.getuid() even if 
+diff --git a/IPython/external/pexpect/_pexpect.py b/IPython/external/pexpect/_pexpect.py
+--- a/IPython/external/pexpect/_pexpect.py
++++ b/IPython/external/pexpect/_pexpect.py
+@@ -70,7 +70,7 @@ try:
      import select
      import re
      import struct
@@ -24,7 +24,7 @@ diff -aur ipython-1.1.0/IPython/external/pexpect/_pexpect.py ipython-1.1.0-mod/I
      import types
      import pty
      import tty
-@@ -568,7 +568,8 @@
+@@ -571,7 +571,8 @@ class spawnb(object):
                  # This is a serious limitation, but not a show stopper.
                  pass
              # Do not allow child to inherit open file descriptors from parent.
@@ -34,9 +34,9 @@ diff -aur ipython-1.1.0/IPython/external/pexpect/_pexpect.py ipython-1.1.0-mod/I
              for i in range (3, max_fd):
                  try:
                      os.close (i)
-diff -aur ipython-1.1.0/IPython/kernel/__init__.py ipython-1.1.0-mod/IPython/kernel/__init__.py
---- a/IPython/kernel/__init__.py	2013-09-09 17:36:34.000000000 -0400
-+++ b/IPython/kernel/__init__.py	2014-05-01 15:22:57.690063237 -0400
+diff --git a/IPython/kernel/__init__.py b/IPython/kernel/__init__.py
+--- a/IPython/kernel/__init__.py
++++ b/IPython/kernel/__init__.py
 @@ -1,11 +1,6 @@
  """IPython kernels and associated utilities"""
  
@@ -53,9 +53,9 @@ diff -aur ipython-1.1.0/IPython/kernel/__init__.py ipython-1.1.0-mod/IPython/ker
 +# This file is left empty because this package
 +# is only needed for IPython/kernel/zmq/pylab/backend_inline.py
 +# which in turn does not require the rest of the package to load.
-diff -aur ipython-1.1.0/IPython/kernel/zmq/__init__.py ipython-1.1.0-mod/IPython/kernel/zmq/__init__.py
---- a/IPython/kernel/zmq/__init__.py	2013-09-09 17:36:34.000000000 -0400
-+++ b/IPython/kernel/zmq/__init__.py	2014-05-01 15:22:44.529935812 -0400
+diff --git a/IPython/kernel/zmq/__init__.py b/IPython/kernel/zmq/__init__.py
+--- a/IPython/kernel/zmq/__init__.py
++++ b/IPython/kernel/zmq/__init__.py
 @@ -5,13 +5,7 @@
  #  the file COPYING.txt, distributed as part of this software.
  #-----------------------------------------------------------------------------

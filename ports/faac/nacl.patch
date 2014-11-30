@@ -1,6 +1,6 @@
-diff -Naur faac-1.28/frontend/main.c faac-1.28.nacl/frontend/main.c
---- faac-1.28/frontend/main.c	2009-01-23 17:10:20.000000000 -0800
-+++ faac-1.28.nacl/frontend/main.c	2013-01-26 23:04:33.383592895 -0800
+diff --git a/frontend/main.c b/frontend/main.c
+--- a/frontend/main.c
++++ b/frontend/main.c
 @@ -43,7 +43,7 @@
  #endif
  
@@ -10,7 +10,7 @@ diff -Naur faac-1.28/frontend/main.c faac-1.28.nacl/frontend/main.c
  #define __unix__
  #endif
  
-@@ -1048,14 +1048,14 @@
+@@ -1048,14 +1048,14 @@ int main(int argc, char *argv[])
              if ((showcnt <= 0) || !bytesWritten)
              {
                  double timeused;

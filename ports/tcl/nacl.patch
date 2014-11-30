@@ -1,5 +1,4 @@
 diff --git a/unix/configure b/unix/configure
-index 06ff7a4..f4bee64 100755
 --- a/unix/configure
 +++ b/unix/configure
 @@ -10916,7 +10916,10 @@ _ACEOF
@@ -54,7 +53,6 @@ index 06ff7a4..f4bee64 100755
  echo $ECHO_N "checking how to package libraries... $ECHO_C" >&6
  	# Check whether --enable-framework or --disable-framework was given.
 diff --git a/unix/tclAppInit.c b/unix/tclAppInit.c
-index 9bbc88b..c3df515 100644
 --- a/unix/tclAppInit.c
 +++ b/unix/tclAppInit.c
 @@ -32,6 +32,10 @@ extern Tcl_PackageInitProc Tclxttest_Init;
@@ -69,7 +67,6 @@ index 9bbc88b..c3df515 100644
  #define TCL_LOCAL_APPINIT Tcl_AppInit
  #endif
 diff --git a/unix/tclUnixCompat.c b/unix/tclUnixCompat.c
-index 2a68f7f..2afd53f 100644
 --- a/unix/tclUnixCompat.c
 +++ b/unix/tclUnixCompat.c
 @@ -99,7 +99,8 @@ static Tcl_Mutex compatLock;

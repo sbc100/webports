@@ -1,5 +1,4 @@
 diff --git a/libbb/appletlib.c b/libbb/appletlib.c
-index 8f3a8a1..c907344 100644
 --- a/libbb/appletlib.c
 +++ b/libbb/appletlib.c
 @@ -772,7 +772,10 @@ void FAST_FUNC run_applet_and_exit(const char *name, char **argv)

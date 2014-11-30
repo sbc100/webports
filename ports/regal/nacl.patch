@@ -1,5 +1,4 @@
 diff --git a/Makefile b/Makefile
-index 911a3c6..e45d3c4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -39,6 +39,7 @@ include Makefile.dreamtorus
@@ -11,7 +10,6 @@ index 911a3c6..e45d3c4 100644
  # Testing
  
 diff --git a/Makefile.glu b/Makefile.glu
-index 9df0418..3043f07 100644
 --- a/Makefile.glu
 +++ b/Makefile.glu
 @@ -36,7 +36,6 @@ GLU.OBJS       := $(GLU.OBJS:.c=.o) $(GLU.OBJS:.cc=.o)
@@ -23,7 +21,6 @@ index 9df0418..3043f07 100644
  
  -include $(GLU.DEPS)
 diff --git a/Makefile.nacl b/Makefile.nacl
-index e5fa8f8..6a6cb90 100644
 --- a/Makefile.nacl
 +++ b/Makefile.nacl
 @@ -36,8 +36,8 @@ NACL.SRCS.NAMES := $(notdir $(NACL.SRCS))
@@ -38,7 +35,6 @@ index e5fa8f8..6a6cb90 100644
  -include $(NACL.DEPS)
  
 diff --git a/Makefile.regal b/Makefile.regal
-index 04a1c88..147a391 100644
 --- a/Makefile.regal
 +++ b/Makefile.regal
 @@ -18,9 +18,9 @@ include build/regal.inc
@@ -103,7 +99,6 @@ index 04a1c88..147a391 100644
  	@mkdir -p $(dir $@)
  	$(LOG_AR)$(CCACHE) $(AR) cr $@ $(REGAL.OBJS)
 diff --git a/Makefile.regaltest b/Makefile.regaltest
-index fdebf3a..98a419f 100644
 --- a/Makefile.regaltest
 +++ b/Makefile.regaltest
 @@ -7,7 +7,7 @@ include build/common.inc
@@ -125,7 +120,6 @@ index fdebf3a..98a419f 100644
  endif
  
 diff --git a/Makefile.regalw b/Makefile.regalw
-index 3577769..012938e 100644
 --- a/Makefile.regalw
 +++ b/Makefile.regalw
 @@ -18,9 +18,9 @@ REGALW.SHARED    ?= libRegal.so
@@ -150,7 +144,6 @@ index 3577769..012938e 100644
  
  REGALW.SRCS           := $(REGAL.CXX)
 diff --git a/README.rst b/README.rst
-index a8d5d84..600c336 100644
 --- a/README.rst
 +++ b/README.rst
 @@ -380,9 +380,7 @@ PPAPI and NaCl
@@ -165,7 +158,6 @@ index a8d5d84..600c336 100644
  Questions and Answers
  =====================
 diff --git a/build/common.inc b/build/common.inc
-index 6049b68..5ae16e0 100644
 --- a/build/common.inc
 +++ b/build/common.inc
 @@ -51,12 +51,12 @@ OPT   ?= $(CFLAGS.RELEASE)
@@ -187,7 +179,6 @@ index 6049b68..5ae16e0 100644
  
  INCLUDE ?= -Iinclude
 diff --git a/build/glu.inc b/build/glu.inc
-index 3788977..f4dd54f 100644
 --- a/build/glu.inc
 +++ b/build/glu.inc
 @@ -102,9 +102,10 @@ GLU.CXX += src/glu/libnurbs/nurbtess/searchTree.cc
@@ -204,7 +195,6 @@ index 3788977..f4dd54f 100644
 +GLU.SHARED     := libRegalGLU.so
  endif
 diff --git a/build/pcre.inc b/build/pcre.inc
-index d253c38..7a941c6 100644
 --- a/build/pcre.inc
 +++ b/build/pcre.inc
 @@ -65,7 +65,7 @@ PCRE.C += src/pcre/pcre_get.c
@@ -217,7 +207,6 @@ index d253c38..7a941c6 100644
  PCRE.C += src/pcre/pcre_newline.c
  PCRE.C += src/pcre/pcre_ord2utf8.c
 diff --git a/build/regal.inc b/build/regal.inc
-index 32e7933..71ec2a6 100644
 --- a/build/regal.inc
 +++ b/build/regal.inc
 @@ -153,5 +153,5 @@ ifeq ($(PROFILE_OS),Windows)
@@ -228,7 +217,6 @@ index 32e7933..71ec2a6 100644
 +REGAL.STATIC    ?= libRegal.a
  REGAL.SHARED    ?= libRegal.so
 diff --git a/config/Makefile.nacl-pnacl b/config/Makefile.nacl-pnacl
-index a0ee95c..9bfbe1d 100644
 --- a/config/Makefile.nacl-pnacl
 +++ b/config/Makefile.nacl-pnacl
 @@ -2,7 +2,7 @@ NACL_ARCH := pnacl
@@ -249,7 +237,6 @@ index a0ee95c..9bfbe1d 100644
  CFLAGS.EXTRA +=
  LDFLAGS.EXTRA +=
 diff --git a/config/nacl.inc b/config/nacl.inc
-index d86d4e7..66a9b05 100644
 --- a/config/nacl.inc
 +++ b/config/nacl.inc
 @@ -48,8 +48,12 @@ export CCACHE_COMPILERCHECK=echo $(SYSTEM)$(NACL_LIBC)$(NACL_SDK_ROOT)
@@ -266,7 +253,6 @@ index d86d4e7..66a9b05 100644
  ifeq ($(MODE),debug)
  LDFLAGS.EXTRA += -L$(NACL_SDK_ROOT)/ports/lib/$(NACL_LIBTYPE)/Debug
 diff --git a/src/apitrace/common/os_posix.cpp b/src/apitrace/common/os_posix.cpp
-index 28abb97..b49fd40 100644
 --- a/src/apitrace/common/os_posix.cpp
 +++ b/src/apitrace/common/os_posix.cpp
 @@ -123,7 +123,7 @@ getCurrentDir(void)
@@ -279,7 +265,6 @@ index 28abb97..b49fd40 100644
      
      path.truncate();
 diff --git a/src/boost/boost/print/detail.hpp b/src/boost/boost/print/detail.hpp
-index 9cb3643..49aa043 100644
 --- a/src/boost/boost/print/detail.hpp
 +++ b/src/boost/boost/print/detail.hpp
 @@ -325,7 +325,7 @@ inline size_t unsigned_length(const unsigned long val) { return unsigned_length(
@@ -292,7 +277,6 @@ index 9cb3643..49aa043 100644
  #endif
  
 diff --git a/src/regal/RegalShader.cpp b/src/regal/RegalShader.cpp
-index d59249f..65cceeb 100644
 --- a/src/regal/RegalShader.cpp
 +++ b/src/regal/RegalShader.cpp
 @@ -233,7 +233,7 @@ namespace Shader {
@@ -305,7 +289,6 @@ index d59249f..65cceeb 100644
      //_mesa_print_ir (ir, state);
      Error( "GLSLOptimize debug **** ", name, ":",
 diff --git a/src/regal/RegalUtil.h b/src/regal/RegalUtil.h
-index 4bf9e75..0df4078 100644
 --- a/src/regal/RegalUtil.h
 +++ b/src/regal/RegalUtil.h
 @@ -56,7 +56,7 @@

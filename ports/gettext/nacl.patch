@@ -1,5 +1,4 @@
 diff --git a/gettext-runtime/gnulib-lib/stdint.in.h b/gettext-runtime/gnulib-lib/stdint.in.h
-index 247f0d8..b124d1a 100644
 --- a/gettext-runtime/gnulib-lib/stdint.in.h
 +++ b/gettext-runtime/gnulib-lib/stdint.in.h
 @@ -85,7 +85,7 @@
@@ -12,7 +11,6 @@ index 247f0d8..b124d1a 100644
  #endif
  
 diff --git a/gettext-tools/configure b/gettext-tools/configure
-index 9b1383c..17a45e0 100755
 --- a/gettext-tools/configure
 +++ b/gettext-tools/configure
 @@ -3041,16 +3041,16 @@ $4
@@ -46,7 +44,6 @@ index 9b1383c..17a45e0 100755
  
  
 diff --git a/gettext-tools/gnulib-lib/stdint.in.h b/gettext-tools/gnulib-lib/stdint.in.h
-index 247f0d8..f5965aa 100644
 --- a/gettext-tools/gnulib-lib/stdint.in.h
 +++ b/gettext-tools/gnulib-lib/stdint.in.h
 @@ -82,10 +82,11 @@
@@ -63,7 +60,6 @@ index 247f0d8..f5965aa 100644
  #endif
  
 diff --git a/gettext-tools/libgettextpo/stdint.in.h b/gettext-tools/libgettextpo/stdint.in.h
-index 247f0d8..144b622 100644
 --- a/gettext-tools/libgettextpo/stdint.in.h
 +++ b/gettext-tools/libgettextpo/stdint.in.h
 @@ -82,10 +82,11 @@
@@ -80,7 +76,6 @@ index 247f0d8..144b622 100644
  #endif
  
 diff --git a/gettext-tools/src/Makefile.am b/gettext-tools/src/Makefile.am
-index 42899da..bf2a21f 100644
 --- a/gettext-tools/src/Makefile.am
 +++ b/gettext-tools/src/Makefile.am
 @@ -247,7 +247,7 @@ urlget_SOURCES = urlget.c
@@ -93,7 +88,6 @@ index 42899da..bf2a21f 100644
  libgettextsrc_la_CPPFLAGS = $(AM_CPPFLAGS)
  
 diff --git a/gettext-tools/src/Makefile.in b/gettext-tools/src/Makefile.in
-index 319a16c..1abc8ad 100644
 --- a/gettext-tools/src/Makefile.in
 +++ b/gettext-tools/src/Makefile.in
 @@ -2006,7 +2006,7 @@ urlget_SOURCES = urlget.c
@@ -106,7 +100,6 @@ index 319a16c..1abc8ad 100644
  
  # Compile-time flags for particular source files.
 diff --git a/gettext-tools/tests/setlocale.c b/gettext-tools/tests/setlocale.c
-index 7e4fdd8..c1dbb87 100644
 --- a/gettext-tools/tests/setlocale.c
 +++ b/gettext-tools/tests/setlocale.c
 @@ -22,6 +22,15 @@

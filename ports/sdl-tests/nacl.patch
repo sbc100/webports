@@ -1,5 +1,4 @@
 diff --git a/test/configure.in b/test/configure.in
-index 7c25c17..001a4e9 100644
 --- a/test/configure.in
 +++ b/test/configure.in
 @@ -50,6 +50,18 @@ case "$host" in

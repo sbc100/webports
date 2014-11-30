@@ -1,5 +1,4 @@
 diff --git a/Quake/Makefile b/Quake/Makefile
-index 6ad9a72..840064a 100644
 --- a/Quake/Makefile
 +++ b/Quake/Makefile
 @@ -14,7 +14,7 @@ USE_CODEC_MP3=1
@@ -130,7 +129,6 @@ index 6ad9a72..840064a 100644
  	$(error Use "make DEBUG=1")
  
 diff --git a/Quake/arch_def.h b/Quake/arch_def.h
-index 34a7d7a..893068d 100644
 --- a/Quake/arch_def.h
 +++ b/Quake/arch_def.h
 @@ -77,6 +77,7 @@
@@ -151,7 +149,6 @@ index 34a7d7a..893068d 100644
  #	define	PLATFORM_STRING	"Linux"
  #elif defined(__DragonFly__)
 diff --git a/Quake/net_udp.c b/Quake/net_udp.c
-index 92ab2a5..04b6f9c 100644
 --- a/Quake/net_udp.c
 +++ b/Quake/net_udp.c
 @@ -132,7 +132,9 @@ sys_socket_t UDP_OpenSocket (int port)
@@ -229,7 +226,6 @@ index 92ab2a5..04b6f9c 100644
  	strcpy (name, UDP_AddrToString (addr));
  	return 0;
 diff --git a/Quake/sys_sdl_unix.c b/Quake/sys_sdl_unix.c
-index fcdff11..0b211c4 100644
 --- a/Quake/sys_sdl_unix.c
 +++ b/Quake/sys_sdl_unix.c
 @@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.

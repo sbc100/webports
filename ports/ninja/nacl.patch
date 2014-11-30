@@ -1,5 +1,4 @@
 diff --git a/configure.py b/configure.py
-index 64123a0..56beb03 100755
 --- a/configure.py
 +++ b/configure.py
 @@ -75,7 +75,7 @@ n.newline()
@@ -37,7 +36,6 @@ index 64123a0..56beb03 100755
  all_targets = []
  
 diff --git a/platform_helper.py b/platform_helper.py
-index bc3a125..63409aa 100644
 --- a/platform_helper.py
 +++ b/platform_helper.py
 @@ -19,7 +19,7 @@ import sys
@@ -66,7 +64,6 @@ index bc3a125..63409aa 100644
 +    def is_nacl(self):
 +        return self._platform == 'nacl'
 diff --git a/src/line_printer.cc b/src/line_printer.cc
-index ef1609c..8f12a0c 100644
 --- a/src/line_printer.cc
 +++ b/src/line_printer.cc
 @@ -92,10 +92,13 @@ void LinePrinter::Print(string to_print, LineType type) {
@@ -84,7 +81,6 @@ index ef1609c..8f12a0c 100644
      printf("\x1B[K");  // Clear to end of line.
      fflush(stdout);
 diff --git a/src/ninja.cc b/src/ninja.cc
-index a381e83..a4d42c0 100644
 --- a/src/ninja.cc
 +++ b/src/ninja.cc
 @@ -42,6 +42,10 @@
@@ -111,7 +107,6 @@ index a381e83..a4d42c0 100644
    // Set a handler to catch crashes not caught by the __try..__except
    // block (e.g. an exception in a stack-unwind-block).
 diff --git a/src/subprocess-posix.cc b/src/subprocess-posix.cc
-index 743e406..20df5e1 100644
 --- a/src/subprocess-posix.cc
 +++ b/src/subprocess-posix.cc
 @@ -17,14 +17,22 @@
@@ -214,7 +209,6 @@ index 743e406..20df5e1 100644
      if (errno != EINTR) {
        perror("ninja: pselect");
 diff --git a/src/util.cc b/src/util.cc
-index 484b0c1..4ae3d12 100644
 --- a/src/util.cc
 +++ b/src/util.cc
 @@ -414,7 +414,7 @@ int GetProcessorCount() {

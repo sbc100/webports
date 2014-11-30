@@ -1,7 +1,7 @@
-diff -Naur gc6.8/configure gc6.8.nacl/configure
---- gc6.8/configure	2006-03-23 16:42:55.000000000 -0800
-+++ gc6.8.nacl/configure	2011-01-07 14:55:39.000000000 -0800
-@@ -3988,7 +3988,7 @@
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -3988,7 +3988,7 @@ _ACEOF
  _ACEOF
  
  	;;
@@ -10,7 +10,7 @@ diff -Naur gc6.8/configure gc6.8.nacl/configure
  	cat >>confdefs.h <<\_ACEOF
  #define GC_LINUX_THREADS 1
  _ACEOF
-@@ -4512,6 +4512,12 @@
+@@ -4512,6 +4512,12 @@ _ACEOF
   ia64-*-*)
      machdep="mach_dep.lo ia64_save_regs_in_stack.lo"
      ;;
@@ -23,10 +23,10 @@ diff -Naur gc6.8/configure gc6.8.nacl/configure
  esac
  if test x"$machdep" = x; then
  echo "$as_me:$LINENO: result: $machdep" >&5
-diff -Naur gc6.8/configure.in gc6.8.nacl/configure.in
---- gc6.8/configure.in	2006-06-06 22:01:52.000000000 -0700
-+++ gc6.8.nacl/configure.in	2011-01-07 14:53:57.000000000 -0800
-@@ -86,7 +86,7 @@
+diff --git a/configure.in b/configure.in
+--- a/configure.in
++++ b/configure.in
+@@ -86,7 +86,7 @@ case "$THREADS" in
  	fi
  	AC_DEFINE(THREAD_LOCAL_ALLOC)
  	;;
@@ -35,7 +35,7 @@ diff -Naur gc6.8/configure.in gc6.8.nacl/configure.in
  	AC_DEFINE(GC_LINUX_THREADS)
  	AC_DEFINE(_REENTRANT)
  	;;
-@@ -332,6 +332,9 @@
+@@ -332,6 +332,9 @@ case "$host" in
   ia64-*-*)
      machdep="mach_dep.lo ia64_save_regs_in_stack.lo"
      ;;
@@ -45,9 +45,9 @@ diff -Naur gc6.8/configure.in gc6.8.nacl/configure.in
  esac
  if test x"$machdep" = x; then
  AC_MSG_RESULT($machdep)
-diff -Naur gc6.8/gc_dlopen.c gc6.8.nacl/gc_dlopen.c
---- gc6.8/gc_dlopen.c	2003-05-29 08:50:09.000000000 -0700
-+++ gc6.8.nacl/gc_dlopen.c	2011-01-07 15:31:00.000000000 -0800
+diff --git a/gc_dlopen.c b/gc_dlopen.c
+--- a/gc_dlopen.c
++++ b/gc_dlopen.c
 @@ -25,7 +25,7 @@
  
  #include "private/gc_priv.h"
@@ -57,9 +57,9 @@ diff -Naur gc6.8/gc_dlopen.c gc6.8.nacl/gc_dlopen.c
        || defined(GC_SOLARIS_THREADS)
  
  # if defined(dlopen) && !defined(GC_USE_LD_WRAP)
-diff -Naur gc6.8/include/gc_pthread_redirects.h gc6.8.nacl/include/gc_pthread_redirects.h
---- gc6.8/include/gc_pthread_redirects.h	2006-02-16 20:07:29.000000000 -0800
-+++ gc6.8.nacl/include/gc_pthread_redirects.h	2011-01-07 14:57:36.000000000 -0800
+diff --git a/include/gc_pthread_redirects.h b/include/gc_pthread_redirects.h
+--- a/include/gc_pthread_redirects.h
++++ b/include/gc_pthread_redirects.h
 @@ -57,6 +57,12 @@
  #endif
    int GC_pthread_join(pthread_t thread, void **retval);
@@ -73,10 +73,10 @@ diff -Naur gc6.8/include/gc_pthread_redirects.h gc6.8.nacl/include/gc_pthread_re
  
  #if defined(GC_OSF1_THREADS) \
      && defined(_PTHREAD_USE_MANGLED_NAMES_) && !defined(_PTHREAD_USE_PTDNAM_)
-diff -Naur gc6.8/include/private/gc_priv.h gc6.8.nacl/include/private/gc_priv.h
---- gc6.8/include/private/gc_priv.h	2006-02-10 11:38:40.000000000 -0800
-+++ gc6.8.nacl/include/private/gc_priv.h	2011-01-07 14:58:18.000000000 -0800
-@@ -1942,6 +1942,8 @@
+diff --git a/include/private/gc_priv.h b/include/private/gc_priv.h
+--- a/include/private/gc_priv.h
++++ b/include/private/gc_priv.h
+@@ -1942,6 +1942,8 @@ void GC_err_puts GC_PROTO((GC_CONST char *s));
         /* SPARC/Linux doesn't properly define SIGPWR in <signal.h>.
          * It is aliased to SIGLOST in asm/signal.h, though.		*/
  #      define SIG_SUSPEND SIGLOST
@@ -85,9 +85,9 @@ diff -Naur gc6.8/include/private/gc_priv.h gc6.8.nacl/include/private/gc_priv.h
  #    else
         /* Linuxthreads itself uses SIGUSR1 and SIGUSR2.			*/
  #      define SIG_SUSPEND SIGPWR
-diff -Naur gc6.8/include/private/gcconfig.h gc6.8.nacl/include/private/gcconfig.h
---- gc6.8/include/private/gcconfig.h	2006-07-07 14:08:05.000000000 -0700
-+++ gc6.8.nacl/include/private/gcconfig.h	2011-01-07 15:30:07.000000000 -0800
+diff --git a/include/private/gcconfig.h b/include/private/gcconfig.h
+--- a/include/private/gcconfig.h
++++ b/include/private/gcconfig.h
 @@ -61,9 +61,16 @@
  # endif
  
@@ -203,7 +203,7 @@ diff -Naur gc6.8/include/private/gcconfig.h gc6.8.nacl/include/private/gcconfig.
  #   ifdef LINUX
  #       define OS_TYPE "LINUX"
  #       define LINUX_STACKBOTTOM
-@@ -2238,7 +2304,7 @@
+@@ -2238,7 +2305,7 @@
  # if defined(GC_IRIX_THREADS) && !defined(IRIX5)
  	--> inconsistent configuration
  # endif
@@ -212,10 +212,10 @@ diff -Naur gc6.8/include/private/gcconfig.h gc6.8.nacl/include/private/gcconfig.
  	--> inconsistent configuration
  # endif
  # if defined(GC_NETBSD_THREADS) && !defined(NETBSD)
-diff -Naur gc6.8/include/private/pthread_stop_world.h gc6.8.nacl/include/private/pthread_stop_world.h
---- gc6.8/include/private/pthread_stop_world.h	2005-07-11 13:40:15.000000000 -0700
-+++ gc6.8.nacl/include/private/pthread_stop_world.h	2011-01-07 15:04:20.000000000 -0800
-@@ -6,6 +6,15 @@
+diff --git a/include/private/pthread_stop_world.h b/include/private/pthread_stop_world.h
+--- a/include/private/pthread_stop_world.h
++++ b/include/private/pthread_stop_world.h
+@@ -6,6 +6,15 @@ struct thread_stop_info {
      				/* last successfully handled a suspend	*/
      				/* signal.				*/
      ptr_t stack_ptr;  		/* Valid only when stopped.      	*/
@@ -231,10 +231,10 @@ diff -Naur gc6.8/include/private/pthread_stop_world.h gc6.8.nacl/include/private
  };
      
  #endif
-diff -Naur gc6.8/include/private/pthread_support.h gc6.8.nacl/include/private/pthread_support.h
---- gc6.8/include/private/pthread_support.h	2005-09-01 21:27:13.000000000 -0700
-+++ gc6.8.nacl/include/private/pthread_support.h	2011-01-07 15:04:41.000000000 -0800
-@@ -86,6 +86,9 @@
+diff --git a/include/private/pthread_support.h b/include/private/pthread_support.h
+--- a/include/private/pthread_support.h
++++ b/include/private/pthread_support.h
+@@ -86,6 +86,9 @@ typedef struct GC_Thread_Rep {
  
  # define THREAD_TABLE_SZ 128	/* Must be power of 2	*/
  extern volatile GC_thread GC_threads[THREAD_TABLE_SZ];
@@ -244,9 +244,9 @@ diff -Naur gc6.8/include/private/pthread_support.h gc6.8.nacl/include/private/pt
  
  extern GC_bool GC_thr_initialized;
  
-diff -Naur gc6.8/os_dep.c gc6.8.nacl/os_dep.c
---- gc6.8/os_dep.c	2006-04-21 16:26:47.000000000 -0700
-+++ gc6.8.nacl/os_dep.c	2011-01-07 15:21:59.000000000 -0800
+diff --git a/os_dep.c b/os_dep.c
+--- a/os_dep.c
++++ b/os_dep.c
 @@ -131,7 +131,7 @@
  # include <errno.h>
  #endif
@@ -256,7 +256,7 @@ diff -Naur gc6.8/os_dep.c gc6.8.nacl/os_dep.c
  # include <fcntl.h>
  # if defined(SUNOS5SIGS) && !defined(FREEBSD)
  #  include <sys/siginfo.h>
-@@ -510,6 +510,12 @@
+@@ -510,6 +510,12 @@ void GC_enable_signals(void)
      	  /* longjmp implementations.  Most systems appear not to have	*/
      	  /* a signal 32.						*/
  #	define SIGSETMASK(old, new) (old) = sigsetmask(new)
@@ -269,7 +269,7 @@ diff -Naur gc6.8/os_dep.c gc6.8.nacl/os_dep.c
  #   else
  	/* Use POSIX/SYSV interface	*/
  #	define SIGSET_T sigset_t
-@@ -1014,8 +1020,8 @@
+@@ -1014,8 +1020,8 @@ ptr_t GC_get_stack_base()
  #   if defined(HEURISTIC1) || defined(HEURISTIC2) || \
         defined(LINUX_STACKBOTTOM) || defined(FREEBSD_STACKBOTTOM)
      word dummy;
@@ -279,7 +279,7 @@ diff -Naur gc6.8/os_dep.c gc6.8.nacl/os_dep.c
  
  #   define STACKBOTTOM_ALIGNMENT_M1 ((word)STACK_GRAN - 1)
  
-@@ -1904,8 +1910,21 @@
+@@ -1904,8 +1910,21 @@ void GC_remap(ptr_t start, word bytes)
        int result; 
  
        if (0 == start_addr) return;
@@ -301,9 +301,9 @@ diff -Naur gc6.8/os_dep.c gc6.8.nacl/os_dep.c
        if (result != 0) {
  	  GC_err_printf3(
  		"Mprotect failed at 0x%lx (length %ld) with errno %ld\n",
-diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
---- gc6.8/pthread_stop_world.c	2006-03-03 12:01:48.000000000 -0800
-+++ gc6.8.nacl/pthread_stop_world.c	2011-01-07 15:44:20.000000000 -0800
+diff --git a/pthread_stop_world.c b/pthread_stop_world.c
+--- a/pthread_stop_world.c
++++ b/pthread_stop_world.c
 @@ -8,11 +8,24 @@
  #include <errno.h>
  #include <unistd.h>
@@ -338,7 +338,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
  void GC_print_sig_mask()
  {
      sigset_t blocked;
-@@ -40,6 +54,7 @@
+@@ -40,6 +54,7 @@ void GC_print_sig_mask()
      }
      GC_printf0("\n");
  }
@@ -346,7 +346,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
  
  #endif
  
-@@ -85,7 +100,11 @@
+@@ -85,7 +100,11 @@ void GC_brief_async_signal_safe_sleep()
      struct timeval tv;
      tv.tv_sec = 0;
      tv.tv_usec = 1000 * TIME_LIMIT / 2;
@@ -358,7 +358,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
  }
  
  #ifdef GC_OSF1_THREADS
-@@ -152,6 +171,7 @@
+@@ -152,6 +171,7 @@ void GC_suspend_handler(int sig)
  
  void GC_suspend_handler_inner(ptr_t sig_arg)
  {
@@ -366,7 +366,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
      int sig = (int)(word)sig_arg;
      int dummy;
      pthread_t my_thread = pthread_self();
-@@ -226,6 +246,8 @@
+@@ -226,6 +246,8 @@ void GC_suspend_handler_inner(ptr_t sig_arg)
  #if DEBUG_THREADS
      GC_printf1("Continuing 0x%lx\n", my_thread);
  #endif
@@ -375,7 +375,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
  }
  
  void GC_restart_handler(int sig)
-@@ -307,6 +329,10 @@
+@@ -307,6 +329,10 @@ void GC_push_all_stacks()
  #       else
            GC_push_all_stack(lo, hi);
  #	endif
@@ -386,7 +386,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
  #	ifdef IA64
  #         if DEBUG_THREADS
              GC_printf3("Reg stack for thread 0x%lx = [%lx,%lx)\n",
-@@ -337,6 +363,7 @@
+@@ -337,6 +363,7 @@ int GC_stopping_pid;
  /* were sent. */
  int GC_suspend_all()
  {
@@ -394,7 +394,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
      int n_live_threads = 0;
      int i;
      GC_thread p;
-@@ -371,6 +398,9 @@
+@@ -371,6 +398,9 @@ int GC_suspend_all()
        }
      }
      return n_live_threads;
@@ -404,7 +404,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
  }
  
  /* Caller holds allocation lock.	*/
-@@ -395,6 +425,8 @@
+@@ -395,6 +425,8 @@ void GC_stop_world()
  #   endif /* PARALLEL_MARK */
      ++GC_stop_count;
      GC_world_is_stopped = TRUE;
@@ -413,7 +413,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
      n_live_threads = GC_suspend_all();
  
        if (GC_retry_signals) {
-@@ -434,19 +466,143 @@
+@@ -434,19 +466,143 @@ void GC_stop_world()
  	      }
  	  }
      }
@@ -560,7 +560,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
      pthread_t my_thread = pthread_self();
      register int i;
      register GC_thread p;
-@@ -495,9 +649,16 @@
+@@ -495,9 +651,16 @@ void GC_start_world()
      #if DEBUG_THREADS
        GC_printf0("World started\n");
      #endif
@@ -577,7 +577,7 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
      struct sigaction act;
      
      if (sem_init(&GC_suspend_ack_sem, 0, 0) != 0)
-@@ -542,6 +703,7 @@
+@@ -542,6 +705,7 @@ void GC_stop_init() {
                GC_printf0("Will retry suspend signal if necessary.\n");
  	  }
  #     endif
@@ -585,9 +585,9 @@ diff -Naur gc6.8/pthread_stop_world.c gc6.8.nacl/pthread_stop_world.c
  }
  
  #endif
-diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
---- gc6.8/pthread_support.c	2006-06-28 15:38:42.000000000 -0700
-+++ gc6.8.nacl/pthread_support.c	2011-01-07 16:17:52.000000000 -0800
+diff --git a/pthread_support.c b/pthread_support.c
+--- a/pthread_support.c
++++ b/pthread_support.c
 @@ -153,6 +153,9 @@
  #   endif
  #   undef pthread_join
@@ -598,7 +598,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
  #   if defined(GC_OSF1_THREADS) && defined(_PTHREAD_USE_MANGLED_NAMES_) \
         && !defined(_PTHREAD_USE_PTDNAM_)
  /* Restore the original mangled names on Tru64 UNIX.  */
-@@ -557,6 +560,53 @@
+@@ -557,6 +560,53 @@ void GC_mark_thread_local_free_lists(void)
  
  static struct GC_Thread_Rep first_thread;
  
@@ -652,7 +652,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
  /* Add a thread to GC_threads.  We assume it wasn't already there.	*/
  /* Caller holds allocation lock.					*/
  GC_thread GC_new_thread(pthread_t id)
-@@ -576,6 +626,10 @@
+@@ -576,6 +626,10 @@ GC_thread GC_new_thread(pthread_t id)
      result -> id = id;
      result -> next = GC_threads[hv];
      GC_threads[hv] = result;
@@ -663,7 +663,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
      GC_ASSERT(result -> flags == 0 && result -> thread_blocked == 0);
      return(result);
  }
-@@ -616,6 +670,11 @@
+@@ -616,6 +670,11 @@ void GC_delete_gc_thread(pthread_t id, GC_thread gc_id)
      register GC_thread p = GC_threads[hv];
      register GC_thread prev = 0;
  
@@ -675,7 +675,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
      while (p != gc_id) {
          prev = p;
          p = p -> next;
-@@ -710,6 +769,7 @@
+@@ -710,6 +769,7 @@ int GC_segment_is_thread_stack(ptr_t lo, ptr_t hi)
  /* Return the number of processors, or i<= 0 if it can't be determined.	*/
  int GC_get_nprocs()
  {
@@ -683,7 +683,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
      /* Should be "return sysconf(_SC_NPROCESSORS_ONLN);" but that	*/
      /* appears to be buggy in many cases.				*/
      /* We look for lines "cpu<n>" in /proc/stat.			*/
-@@ -739,6 +799,9 @@
+@@ -739,6 +799,9 @@ int GC_get_nprocs()
      }
      close(f);
      return result;
@@ -693,7 +693,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
  }
  #endif /* GC_LINUX_THREADS */
  
-@@ -984,7 +1047,7 @@
+@@ -984,7 +1047,7 @@ void GC_init_parallel()
  }
  
  
@@ -702,7 +702,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
  int WRAP_FUNC(pthread_sigmask)(int how, const sigset_t *set, sigset_t *oset)
  {
      sigset_t fudged_set;
-@@ -996,7 +1059,7 @@
+@@ -996,7 +1059,7 @@ int WRAP_FUNC(pthread_sigmask)(int how, const sigset_t *set, sigset_t *oset)
      }
      return(REAL_FUNC(pthread_sigmask)(how, set, oset));
  }
@@ -711,7 +711,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
  
  /* Wrappers for functions that are likely to block for an appreciable	*/
  /* length of time.  Must be called in pairs, if at all.			*/
-@@ -1121,6 +1184,17 @@
+@@ -1121,6 +1184,17 @@ int WRAP_FUNC(pthread_join)(pthread_t thread, void **retval)
      return result;
  }
  
@@ -729,7 +729,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
  int
  WRAP_FUNC(pthread_detach)(pthread_t thread)
  {
-@@ -1203,7 +1277,9 @@
+@@ -1203,7 +1277,9 @@ void * GC_start_routine(void * arg)
      start_arg = si -> arg;
      sem_post(&(si -> registered));	/* Last action on si.	*/
      					/* OK to deallocate.	*/
@@ -739,7 +739,7 @@ diff -Naur gc6.8/pthread_support.c gc6.8.nacl/pthread_support.c
  #   if defined(THREAD_LOCAL_ALLOC) && !defined(DBG_HDRS_ALL)
   	LOCK();
          GC_init_thread_local(me);
-@@ -1214,7 +1290,9 @@
+@@ -1214,7 +1290,9 @@ void * GC_start_routine(void * arg)
          GC_printf1("Finishing thread 0x%x\n", pthread_self());
  #endif
      me -> status = result;

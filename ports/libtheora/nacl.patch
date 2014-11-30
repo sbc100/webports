@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index 9703bcb..5c88440 100755
 --- a/configure
 +++ b/configure
 @@ -11863,7 +11863,7 @@ else
@@ -12,7 +11,6 @@ index 9703bcb..5c88440 100755
          esac
  fi
 diff --git a/configure.ac b/configure.ac
-index 8260bdf..5057d8b 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -168,7 +168,7 @@ else
@@ -25,7 +23,6 @@ index 8260bdf..5057d8b 100644
          esac
  fi
 diff --git a/lib/cpu.c b/lib/cpu.c
-index a863aad..621ff15 100644
 --- a/lib/cpu.c
 +++ b/lib/cpu.c
 @@ -20,6 +20,7 @@

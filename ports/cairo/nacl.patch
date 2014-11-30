@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index 0ceb5bf..4a94244 100755
 --- a/configure
 +++ b/configure
 @@ -2974,18 +2974,22 @@ $as_echo "/* confdefs.h */" > confdefs.h

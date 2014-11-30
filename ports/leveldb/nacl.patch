@@ -1,5 +1,4 @@
 diff --git a/Makefile b/Makefile
-index f8903b6..ab4f2aa 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -90,7 +90,11 @@ endif  # PLATFORM_SHARED_EXT
@@ -16,7 +15,6 @@ index f8903b6..ab4f2aa 100644
  
  clean:
 diff --git a/build_detect_platform b/build_detect_platform
-index 6e59c6f..bf10dc4 100755
 --- a/build_detect_platform
 +++ b/build_detect_platform
 @@ -98,6 +98,22 @@ case "$TARGET_OS" in
@@ -43,7 +41,6 @@ index 6e59c6f..bf10dc4 100755
          PLATFORM=OS_NETBSD
          COMMON_FLAGS="$MEMCMP_FLAG -D_REENTRANT -DOS_NETBSD"
 diff --git a/port/atomic_pointer.h b/port/atomic_pointer.h
-index a9866b2..5e80b34 100644
 --- a/port/atomic_pointer.h
 +++ b/port/atomic_pointer.h
 @@ -20,6 +20,9 @@
@@ -68,7 +65,6 @@ index a9866b2..5e80b34 100644
   private:
    std::atomic<void*> rep_;
 diff --git a/port/port_posix.h b/port/port_posix.h
-index f2b89bf..c1c3b5c 100644
 --- a/port/port_posix.h
 +++ b/port/port_posix.h
 @@ -37,6 +37,14 @@
@@ -96,7 +92,6 @@ index f2b89bf..c1c3b5c 100644
  #define fread_unlocked fread
  #define fwrite_unlocked fwrite
 diff --git a/util/env_posix.cc b/util/env_posix.cc
-index e1cbebd..a385f03 100644
 --- a/util/env_posix.cc
 +++ b/util/env_posix.cc
 @@ -27,6 +27,32 @@

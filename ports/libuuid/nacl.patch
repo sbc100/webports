@@ -1,5 +1,4 @@
 diff --git a/randutils.c b/randutils.c
-index 80893d3..5a29e97 100644
 --- a/randutils.c
 +++ b/randutils.c
 @@ -13,7 +13,9 @@

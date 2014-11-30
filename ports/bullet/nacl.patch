@@ -1,6 +1,5 @@
 diff --git a/Demos/HelloWorld/Makefile.am b/Demos/HelloWorld/Makefile.am
 new file mode 100644
-index 0000000..64f6cf0
 --- /dev/null
 +++ b/Demos/HelloWorld/Makefile.am
 @@ -0,0 +1,5 @@
@@ -10,7 +9,6 @@ index 0000000..64f6cf0
 +AppHelloWorld_CXXFLAGS=-I@top_srcdir@/src $(CXXFLAGS)
 +AppHelloWorld_LDADD=-L../../src -lBulletDynamics -lBulletCollision -lLinearMath
 diff --git a/Demos/Makefile.am b/Demos/Makefile.am
-index 7f2bb95..4568758 100644
 --- a/Demos/Makefile.am
 +++ b/Demos/Makefile.am
 @@ -1,5 +1,7 @@
@@ -25,7 +23,6 @@ index 7f2bb95..4568758 100644
 +SUBDIRS+=MultiThreadedDemo
  endif
 diff --git a/Makefile.am b/Makefile.am
-index fe2625f..9c90c3d 100644
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -1,7 +1,6 @@
@@ -39,7 +36,6 @@ index fe2625f..9c90c3d 100644
  pkgconfigdir = $(libdir)/pkgconfig
  pkgconfig_DATA = bullet.pc
 diff --git a/UnitTests/BulletUnitTests/CMakeLists.txt b/UnitTests/BulletUnitTests/CMakeLists.txt
-index 8f38f05..25fb220 100644
 --- a/UnitTests/BulletUnitTests/CMakeLists.txt
 +++ b/UnitTests/BulletUnitTests/CMakeLists.txt
 @@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES(
@@ -52,7 +48,6 @@ index 8f38f05..25fb220 100644
  	BulletDynamics  
  	BulletCollision 
 diff --git a/UnitTests/BulletUnitTests/Main.cpp b/UnitTests/BulletUnitTests/Main.cpp
-index 1bc8999..11e9cb6 100644
 --- a/UnitTests/BulletUnitTests/Main.cpp
 +++ b/UnitTests/BulletUnitTests/Main.cpp
 @@ -40,7 +40,7 @@ int main(int argc, char* argv[])
@@ -66,7 +61,6 @@ index 1bc8999..11e9cb6 100644
  }
 diff --git a/UnitTests/BulletUnitTests/Makefile.am b/UnitTests/BulletUnitTests/Makefile.am
 new file mode 100644
-index 0000000..d398160
 --- /dev/null
 +++ b/UnitTests/BulletUnitTests/Makefile.am
 @@ -0,0 +1,11 @@
@@ -83,13 +77,11 @@ index 0000000..d398160
 +	-lBulletDynamics -lBulletCollision -lLinearMath
 diff --git a/UnitTests/Makefile.am b/UnitTests/Makefile.am
 new file mode 100644
-index 0000000..d7decd6
 --- /dev/null
 +++ b/UnitTests/Makefile.am
 @@ -0,0 +1 @@
 +SUBDIRS=cppunit BulletUnitTests
 diff --git a/UnitTests/cppunit/CMakeLists.txt b/UnitTests/cppunit/CMakeLists.txt
-index 1468214..4b39b29 100644
 --- a/UnitTests/cppunit/CMakeLists.txt
 +++ b/UnitTests/cppunit/CMakeLists.txt
 @@ -48,15 +48,15 @@ ADD_LIBRARY(cppunit
@@ -126,7 +118,6 @@ index 1468214..4b39b29 100644
 +)
 diff --git a/UnitTests/cppunit/Makefile.am b/UnitTests/cppunit/Makefile.am
 new file mode 100644
-index 0000000..70cadce
 --- /dev/null
 +++ b/UnitTests/cppunit/Makefile.am
 @@ -0,0 +1,45 @@
@@ -176,7 +167,6 @@ index 0000000..70cadce
 +	src/cppunit/XmlDocument.cpp \
 +	src/cppunit/XmlElement.cpp
 diff --git a/configure.ac b/configure.ac
-index 5598d22..205e333 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -58,6 +58,16 @@ case "$host" in

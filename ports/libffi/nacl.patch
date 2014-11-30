@@ -1,8 +1,7 @@
 diff --git a/configure b/configure
-index d85b952..2dc24c3 100755
 --- a/configure
 +++ b/configure
-@@ -17261,6 +17261,10 @@ case "$host" in
+@@ -17236,6 +17236,10 @@ case "$host" in
  	fi
  	;;
  

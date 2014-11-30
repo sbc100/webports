@@ -1,5 +1,4 @@
 diff --git a/src/Initialize.c b/src/Initialize.c
-index 9783deb..622af81 100644
 --- a/src/Initialize.c
 +++ b/src/Initialize.c
 @@ -314,10 +314,12 @@ String _XtGetUserName(
@@ -32,7 +31,6 @@ index 9783deb..622af81 100644
      }
  #endif
 diff --git a/src/Makefile.in b/src/Makefile.in
-index 709632b..26f7af7 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
 @@ -736,7 +736,7 @@ all-local: $(BUILT_FILES)
@@ -45,7 +43,6 @@ index 709632b..26f7af7 100644
  	$(AM_V_at)mkdir -p $(top_builddir)/include/X11
  	$(AM_V_at)cp StringDefs.h $(top_builddir)/include/X11
 diff --git a/util/Makefile.in b/util/Makefile.in
-index e2501d3..bef207a 100644
 --- a/util/Makefile.in
 +++ b/util/Makefile.in
 @@ -311,7 +311,7 @@ distclean-compile:

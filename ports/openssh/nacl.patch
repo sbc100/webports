@@ -1,5 +1,4 @@
 diff --git a/channels.h b/channels.h
-index e2941c8..f60e31d 100644
 --- a/channels.h
 +++ b/channels.h
 @@ -161,9 +161,9 @@ struct Channel {
@@ -15,7 +14,6 @@ index e2941c8..f60e31d 100644
  #define CHAN_X11_WINDOW_DEFAULT	(4*CHAN_X11_PACKET_DEFAULT)
  
 diff --git a/misc.h b/misc.h
-index f3142a9..e3997a2 100644
 --- a/misc.h
 +++ b/misc.h
 @@ -15,6 +15,11 @@
@@ -31,7 +29,6 @@ index f3142a9..e3997a2 100644
  
  char	*chop(char *);
 diff --git a/openbsd-compat/bsd-closefrom.c b/openbsd-compat/bsd-closefrom.c
-index 9380b33..be53224 100644
 --- a/openbsd-compat/bsd-closefrom.c
 +++ b/openbsd-compat/bsd-closefrom.c
 @@ -93,12 +93,14 @@ closefrom(int lowfd)
@@ -50,7 +47,6 @@ index 9380b33..be53224 100644
  
  	for (fd = lowfd; fd < maxfd; fd++)
 diff --git a/openbsd-compat/bsd-misc.c b/openbsd-compat/bsd-misc.c
-index 3ef373f..40d7021 100644
 --- a/openbsd-compat/bsd-misc.c
 +++ b/openbsd-compat/bsd-misc.c
 @@ -169,12 +169,16 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
@@ -71,7 +67,6 @@ index 3ef373f..40d7021 100644
  #endif /* HAVE_TCGETPGRP */
  
 diff --git a/openbsd-compat/xcrypt.c b/openbsd-compat/xcrypt.c
-index 6291e28..db46c0a 100644
 --- a/openbsd-compat/xcrypt.c
 +++ b/openbsd-compat/xcrypt.c
 @@ -24,6 +24,7 @@
@@ -95,7 +90,6 @@ index 6291e28..db46c0a 100644
  
  	return crypted;
 diff --git a/ssh.c b/ssh.c
-index c717dcf..94ffb2f 100644
 --- a/ssh.c
 +++ b/ssh.c
 @@ -231,12 +231,77 @@ tilde_expand_paths(char **paths, u_int num_paths)
@@ -178,7 +172,6 @@ index c717dcf..94ffb2f 100644
  	char *p, *cp, *line, *argv0, buf[MAXPATHLEN], *host_arg;
  	char thishost[NI_MAXHOST], shorthost[NI_MAXHOST], portstr[NI_MAXSERV];
 diff --git a/sshconnect.h b/sshconnect.h
-index fd7f7f7..0f03d8a 100644
 --- a/sshconnect.h
 +++ b/sshconnect.h
 @@ -55,6 +55,10 @@ void	 ssh_userauth2(const char *, const char *, char *, Sensitive *);

@@ -1,5 +1,4 @@
 diff --git a/common/cpu.c b/common/cpu.c
-index 837de89..f2fa468 100644
 --- a/common/cpu.c
 +++ b/common/cpu.c
 @@ -93,7 +93,7 @@ const x264_cpu_name_t x264_cpu_names[] =
@@ -12,7 +11,6 @@ index 837de89..f2fa468 100644
  #include <setjmp.h>
  static sigjmp_buf jmpbuf;
 diff --git a/configure b/configure
-index 0a4cb94..2f84cc2 100755
 --- a/configure
 +++ b/configure
 @@ -547,6 +547,16 @@ case $host_os in

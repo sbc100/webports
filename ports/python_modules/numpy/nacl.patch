@@ -1,5 +1,4 @@
 diff --git a/numpy/core/code_generators/generate_numpy_api.py b/numpy/core/code_generators/generate_numpy_api.py
-index ce270a6..4094a56 100644
 --- a/numpy/core/code_generators/generate_numpy_api.py
 +++ b/numpy/core/code_generators/generate_numpy_api.py
 @@ -111,14 +111,18 @@ _import_array(void)
@@ -26,7 +25,6 @@ index ce270a6..4094a56 100644
    }
  #endif
 diff --git a/numpy/core/include/numpy/npy_cpu.h b/numpy/core/include/numpy/npy_cpu.h
-index ab14731..86c48ac 100644
 --- a/numpy/core/include/numpy/npy_cpu.h
 +++ b/numpy/core/include/numpy/npy_cpu.h
 @@ -27,7 +27,10 @@
@@ -42,7 +40,6 @@ index ab14731..86c48ac 100644
       * both __x86_64__ and __amd64__ are defined by gcc
       * __x86_64 defined by sun compiler on opensolaris at least
 diff --git a/numpy/core/setup.py b/numpy/core/setup.py
-index 28b15aa..a6c8513 100644
 --- a/numpy/core/setup.py
 +++ b/numpy/core/setup.py
 @@ -288,7 +288,7 @@ def check_types(config_cmd, ext, build_dir):
@@ -84,7 +81,6 @@ index 28b15aa..a6c8513 100644
      #######################################################################
      #                          npymath library                            #
 diff --git a/numpy/core/setup_common.py b/numpy/core/setup_common.py
-index bad3607..1574d0d 100644
 --- a/numpy/core/setup_common.py
 +++ b/numpy/core/setup_common.py
 @@ -3,6 +3,7 @@ from __future__ import division, absolute_import, print_function
@@ -104,7 +100,6 @@ index bad3607..1574d0d 100644
          # We never detected the after_sequence
          raise ValueError("Could not lock sequences (%s)" % saw)
 diff --git a/numpy/core/src/npymath/npy_math_private.h b/numpy/core/src/npymath/npy_math_private.h
-index 2bca6bf..9d35356 100644
 --- a/numpy/core/src/npymath/npy_math_private.h
 +++ b/numpy/core/src/npymath/npy_math_private.h
 @@ -51,29 +51,27 @@
@@ -142,7 +137,6 @@ index 2bca6bf..9d35356 100644
  } ieee_double_shape_type;
  
 diff --git a/numpy/core/src/private/npy_fpmath.h b/numpy/core/src/private/npy_fpmath.h
-index 8a120ca..984bd65 100644
 --- a/numpy/core/src/private/npy_fpmath.h
 +++ b/numpy/core/src/private/npy_fpmath.h
 @@ -7,6 +7,10 @@
@@ -157,7 +151,6 @@ index 8a120ca..984bd65 100644
      /* This hardcoded logic is fragile, but universal builds makes it
       * difficult to detect arch-specific features */
 diff --git a/numpy/distutils/misc_util.py b/numpy/distutils/misc_util.py
-index f77e525..7bdaee6 100644
 --- a/numpy/distutils/misc_util.py
 +++ b/numpy/distutils/misc_util.py
 @@ -2036,6 +2036,11 @@ def get_cmd(cmdname, _cache={}):

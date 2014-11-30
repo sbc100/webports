@@ -1,5 +1,4 @@
 diff --git a/Makefile b/Makefile
-index 83f525b..355d904 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -17,7 +17,7 @@
@@ -31,7 +30,6 @@ index 83f525b..355d904 100644
  bsd:
  	$(CC) mongoose.c main.c -o $(PROG) $(CFLAGS)
 diff --git a/main.c b/main.c
-index e8a842f..dbadfd4 100644
 --- a/main.c
 +++ b/main.c
 @@ -893,7 +893,36 @@ int main(int argc, char *argv[]) {
@@ -81,7 +79,6 @@ index e8a842f..dbadfd4 100644
 +#endif
  #endif /* _WIN32 */
 diff --git a/mongoose.c b/mongoose.c
-index 4814612..350c4bb 100644
 --- a/mongoose.c
 +++ b/mongoose.c
 @@ -23,7 +23,7 @@

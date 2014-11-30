@@ -1,8 +1,7 @@
 diff --git a/configure b/configure
-index e12f27f..206ff9b 100755
 --- a/configure
 +++ b/configure
-@@ -18399,10 +18399,11 @@ fi
+@@ -18377,10 +18377,11 @@ fi
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mach-O dynamic module iteration functions" >&5
  $as_echo_n "checking for Mach-O dynamic module iteration functions... " >&6; }
    if test "$cross_compiling" = yes; then :

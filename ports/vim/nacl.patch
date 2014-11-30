@@ -1,5 +1,4 @@
 diff --git a/src/Makefile b/src/Makefile
-index c830378..e8d15b6 100644
 --- a/src/Makefile
 +++ b/src/Makefile
 @@ -1576,6 +1576,7 @@ OBJ_COMMON = \
@@ -30,7 +29,6 @@ index c830378..e8d15b6 100644
  	$(CCC) -o $@ mark.c
  
 diff --git a/src/auto/configure b/src/auto/configure
-index a9755a0..abac37b 100755
 --- a/src/auto/configure
 +++ b/src/auto/configure
 @@ -13006,16 +13006,16 @@ $as_echo "yes" >&6; }
@@ -61,7 +59,6 @@ index a9755a0..abac37b 100755
  
  
 diff --git a/src/main.c b/src/main.c
-index 884a308..87b4f76 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -159,7 +159,11 @@ _cdecl
@@ -77,7 +74,6 @@ index 884a308..87b4f76 100644
  (argc, argv)
      int		argc;
 diff --git a/src/memfile.c b/src/memfile.c
-index 2826aea..7bd3423 100644
 --- a/src/memfile.c
 +++ b/src/memfile.c
 @@ -639,7 +639,8 @@ mf_sync(mfp, flags)
@@ -91,7 +87,6 @@ index 2826aea..7bd3423 100644
  # else
  	    sync();
 diff --git a/src/xxd/Makefile b/src/xxd/Makefile
-index 97bbcc7..69fdaa2 100644
 --- a/src/xxd/Makefile
 +++ b/src/xxd/Makefile
 @@ -1,7 +1,7 @@

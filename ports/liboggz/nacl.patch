@@ -1,5 +1,4 @@
 diff --git a/src/tools/oggz-chop/httpdate.c b/src/tools/oggz-chop/httpdate.c
-index 4ef6ac2..9a15430 100644
 --- a/src/tools/oggz-chop/httpdate.c
 +++ b/src/tools/oggz-chop/httpdate.c
 @@ -5,6 +5,10 @@
@@ -14,7 +13,6 @@ index 4ef6ac2..9a15430 100644
  
  static char * wdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 diff --git a/src/tools/oggz-chop/httpdate_test.c b/src/tools/oggz-chop/httpdate_test.c
-index a6c9c26..5017a1f 100644
 --- a/src/tools/oggz-chop/httpdate_test.c
 +++ b/src/tools/oggz-chop/httpdate_test.c
 @@ -7,6 +7,10 @@

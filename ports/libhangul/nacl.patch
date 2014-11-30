@@ -1,6 +1,6 @@
-diff -urN libhangul-0.1.0/config.h.in libhangul-0.1.0-nacl/config.h.in
---- libhangul-0.1.0/config.h.in	2011-10-16 21:44:31.000000000 +0800
-+++ libhangul-0.1.0-nacl/config.h.in	2013-02-21 12:59:43.346588775 +0800
+diff --git a/config.h.in b/config.h.in
+--- a/config.h.in
++++ b/config.h.in
 @@ -149,6 +149,3 @@
  #ifndef __cplusplus
  #undef inline

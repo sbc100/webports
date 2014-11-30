@@ -1,5 +1,4 @@
 diff --git a/pandas/__init__.py b/pandas/__init__.py
-index ff5588e..d83cf0d 100644
 --- a/pandas/__init__.py
 +++ b/pandas/__init__.py
 @@ -3,7 +3,7 @@
@@ -21,7 +20,6 @@ index ff5588e..d83cf0d 100644
  import numpy as np
  
 diff --git a/pandas/io/packers.py b/pandas/io/packers.py
-index 105bea9..0c50469 100644
 --- a/pandas/io/packers.py
 +++ b/pandas/io/packers.py
 @@ -60,7 +60,11 @@ from pandas.io.common import get_filepath_or_buffer
@@ -38,7 +36,6 @@ index 105bea9..0c50469 100644
  
  try:
 diff --git a/pandas/io/parsers.py b/pandas/io/parsers.py
-index 6b0d56b..f7c198c 100644
 --- a/pandas/io/parsers.py
 +++ b/pandas/io/parsers.py
 @@ -22,7 +22,7 @@ from pandas.util.decorators import Appender
@@ -51,7 +48,6 @@ index 6b0d56b..f7c198c 100644
  
  _parser_params = """Also supports optionally iterating or breaking of the file
 diff --git a/pandas/io/tests/test_cparser.py b/pandas/io/tests/test_cparser.py
-index 0b104ff..437cb57 100644
 --- a/pandas/io/tests/test_cparser.py
 +++ b/pandas/io/tests/test_cparser.py
 @@ -27,8 +27,8 @@ from pandas.lib import Timestamp
@@ -66,7 +62,6 @@ index 0b104ff..437cb57 100644
  
  class TestCParser(tm.TestCase):
 diff --git a/pandas/io/tests/test_parsers.py b/pandas/io/tests/test_parsers.py
-index 7600650..8896092 100644
 --- a/pandas/io/tests/test_parsers.py
 +++ b/pandas/io/tests/test_parsers.py
 @@ -35,7 +35,7 @@ import pandas.tseries.tools as tools
@@ -79,7 +74,6 @@ index 7600650..8896092 100644
  
  class ParserTests(object):
 diff --git a/pandas/src/datetime.pxd b/pandas/src/datetime.pxd
-index abd3bc3..044e6ac 100644
 --- a/pandas/src/datetime.pxd
 +++ b/pandas/src/datetime.pxd
 @@ -65,6 +65,7 @@ cdef extern from "numpy/npy_common.h":
@@ -144,7 +138,6 @@ index abd3bc3..044e6ac 100644
                                       dts, &islocal, &out_bestunit, &special)
      return result
 diff --git a/pandas/src/datetime/np_datetime.c b/pandas/src/datetime/np_datetime.c
-index c30b404..6c1840f 100644
 --- a/pandas/src/datetime/np_datetime.c
 +++ b/pandas/src/datetime/np_datetime.c
 @@ -44,7 +44,7 @@ const int days_per_month_table[2][12] = {
@@ -311,7 +304,6 @@ index c30b404..6c1840f 100644
                  out->ps = (dt / 1000000LL) % 1000000LL;
                  out->as = dt % 1000000LL;
 diff --git a/pandas/src/datetime/np_datetime.h b/pandas/src/datetime/np_datetime.h
-index f200d3a..1ad7743 100644
 --- a/pandas/src/datetime/np_datetime.h
 +++ b/pandas/src/datetime/np_datetime.h
 @@ -45,7 +45,7 @@ typedef struct {
@@ -395,7 +387,6 @@ index f200d3a..1ad7743 100644
  
  #endif
 diff --git a/pandas/src/datetime/np_datetime_strings.c b/pandas/src/datetime/np_datetime_strings.c
-index 9c78e99..068653e 100644
 --- a/pandas/src/datetime/np_datetime_strings.c
 +++ b/pandas/src/datetime/np_datetime_strings.c
 @@ -21,7 +21,7 @@
@@ -530,7 +521,6 @@ index 9c78e99..068653e 100644
  
      /*
 diff --git a/pandas/src/datetime/np_datetime_strings.h b/pandas/src/datetime/np_datetime_strings.h
-index 9a2488f..c27e0c4 100644
 --- a/pandas/src/datetime/np_datetime_strings.h
 +++ b/pandas/src/datetime/np_datetime_strings.h
 @@ -41,7 +41,7 @@
@@ -561,7 +551,6 @@ index 9a2488f..c27e0c4 100644
                      NPY_CASTING casting);
  
 diff --git a/pandas/src/datetime_helper.h b/pandas/src/datetime_helper.h
-index 8be5f59..fe22093 100644
 --- a/pandas/src/datetime_helper.h
 +++ b/pandas/src/datetime_helper.h
 @@ -1,5 +1,7 @@
@@ -573,7 +562,6 @@ index 8be5f59..fe22093 100644
    PyDateTime_GET_MONTH(val) = -1;
    PyDateTime_GET_DAY(val) = -1;
 diff --git a/pandas/src/numpy_helper.h b/pandas/src/numpy_helper.h
-index 69b849d..ced66d8 100644
 --- a/pandas/src/numpy_helper.h
 +++ b/pandas/src/numpy_helper.h
 @@ -126,6 +126,7 @@ char_to_string(char* data) {
@@ -606,7 +594,6 @@ index 69b849d..ced66d8 100644
      ao->flags &= ~(NPY_C_CONTIGUOUS | NPY_F_CONTIGUOUS);
  }
 diff --git a/pandas/src/parse_helper.h b/pandas/src/parse_helper.h
-index 763cbc0..9a46d55 100644
 --- a/pandas/src/parse_helper.h
 +++ b/pandas/src/parse_helper.h
 @@ -1,9 +1,11 @@
@@ -622,7 +609,6 @@ index 763cbc0..9a46d55 100644
  {
      char *p_end;
 diff --git a/pandas/tests/test_frame.py b/pandas/tests/test_frame.py
-index 210e56e..aadd1e9 100644
 --- a/pandas/tests/test_frame.py
 +++ b/pandas/tests/test_frame.py
 @@ -37,7 +37,7 @@ from pandas.core.api import (DataFrame, Index, Series, notnull, isnull,
@@ -635,7 +621,6 @@ index 210e56e..aadd1e9 100644
  
  from pandas.util.testing import (assert_almost_equal,
 diff --git a/setup.py b/setup.py
-index c91242c..95b1b7d 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -75,6 +75,7 @@ from distutils.extension import Extension

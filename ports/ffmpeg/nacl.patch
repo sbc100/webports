@@ -1,5 +1,4 @@
 diff --git a/ffmpeg.c b/ffmpeg.c
-index dba6089..b67a8c4 100644
 --- a/ffmpeg.c
 +++ b/ffmpeg.c
 @@ -3360,7 +3360,7 @@ static int transcode(void)

@@ -1,5 +1,4 @@
 diff --git a/Makefile.in b/Makefile.in
-index 47730ca..399603a 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -338,9 +338,9 @@ top_build_prefix = @top_build_prefix@
@@ -13,10 +12,9 @@ index 47730ca..399603a 100644
 +@BUILD_PGM_TRUE@SUBDIRS = src
 +DIST_SUBDIRS = src
  EXTRA_DIST = \
-        autogen.sh      \
-        version.sh      \
+ 	autogen.sh	\
+ 	version.sh	\
 diff --git a/configure b/configure
-index e40479a..aeca0d4 100755
 --- a/configure
 +++ b/configure
 @@ -7032,7 +7032,7 @@ irix5* | irix6* | nonstopux*)
@@ -76,7 +74,6 @@ index e40479a..aeca0d4 100755
          if test "x$GXX" = "xyes"; then
              CPPFLAGS="-D_GNU_SOURCE $CPPFLAGS"
 diff --git a/src/signaler.cpp b/src/signaler.cpp
-index 3fb3632..db129e5 100644
 --- a/src/signaler.cpp
 +++ b/src/signaler.cpp
 @@ -71,6 +71,7 @@
@@ -88,7 +85,6 @@ index 3fb3632..db129e5 100644
  #include <unistd.h>
  #include <sys/types.h>
 diff --git a/src/tcp_address.cpp b/src/tcp_address.cpp
-index 1c75812..70ef622 100644
 --- a/src/tcp_address.cpp
 +++ b/src/tcp_address.cpp
 @@ -205,6 +205,58 @@ int zmq::tcp_address_t::resolve_nic_name (const char *nic_, bool ipv6_)
@@ -151,7 +147,6 @@ index 1c75812..70ef622 100644
  {
      //  Initialize temporary output pointers with storage address.
 diff --git a/src/thread.cpp b/src/thread.cpp
-index e9eeceb..67eec95 100644
 --- a/src/thread.cpp
 +++ b/src/thread.cpp
 @@ -67,7 +67,7 @@ extern "C"

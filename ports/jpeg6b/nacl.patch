@@ -1,5 +1,4 @@
 diff --git a/makefile.cfg b/makefile.cfg
-index f25e42e..78a2135 100644
 --- a/makefile.cfg
 +++ b/makefile.cfg
 @@ -60,7 +60,7 @@ RM= rm -f

@@ -1,5 +1,4 @@
 diff --git a/Makefile.in b/Makefile.in
-index cf77228..4d5e880 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -423,7 +423,8 @@ LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(GLOB_LDFLAGS) \
@@ -32,7 +31,6 @@ index cf77228..4d5e880 100644
  	-$(SIZE) $(Program)
  
 diff --git a/bashline.c b/bashline.c
-index 1f12764..a9d7c1a 100644
 --- a/bashline.c
 +++ b/bashline.c
 @@ -2379,7 +2379,7 @@ bash_groupname_completion_function (text, state)
@@ -45,7 +43,6 @@ index 1f12764..a9d7c1a 100644
  #else
    static char *gname = (char *)NULL;
 diff --git a/configure b/configure
-index 98bf890..1e2f7a6 100755
 --- a/configure
 +++ b/configure
 @@ -2867,6 +2867,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
@@ -66,7 +63,6 @@ index 98bf890..1e2f7a6 100755
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
 diff --git a/eval.c b/eval.c
-index 1f65aac..48e7552 100644
 --- a/eval.c
 +++ b/eval.c
 @@ -271,7 +271,10 @@ read_command ()
@@ -92,7 +88,6 @@ index 1f65aac..48e7552 100644
      }
  
 diff --git a/execute_cmd.c b/execute_cmd.c
-index f9a755d..f94faf4 100644
 --- a/execute_cmd.c
 +++ b/execute_cmd.c
 @@ -98,6 +98,10 @@ extern int errno;
@@ -161,7 +156,6 @@ index f9a755d..f94faf4 100644
  
  /* CPP defines to decide whether a particular index into the #! line
 diff --git a/jobs.h b/jobs.h
-index bec9527..31af426 100644
 --- a/jobs.h
 +++ b/jobs.h
 @@ -56,7 +56,11 @@
@@ -177,7 +171,6 @@ index bec9527..31af426 100644
    char *command;	/* The particular program that is running. */
  } PROCESS;
 diff --git a/lib/sh/ufuncs.c b/lib/sh/ufuncs.c
-index ed526fe..dd52657 100644
 --- a/lib/sh/ufuncs.c
 +++ b/lib/sh/ufuncs.c
 @@ -65,6 +65,10 @@ int
@@ -200,7 +193,6 @@ index ed526fe..dd52657 100644
  #endif /* !HAVE_SETITIMER */
  
 diff --git a/nojobs.c b/nojobs.c
-index 0c9bd75..dbe9179 100644
 --- a/nojobs.c
 +++ b/nojobs.c
 @@ -65,6 +65,10 @@
@@ -235,7 +227,6 @@ index 0c9bd75..dbe9179 100644
      }
  
 diff --git a/shell.c b/shell.c
-index bbc8a66..0387db8 100644
 --- a/shell.c
 +++ b/shell.c
 @@ -365,7 +365,7 @@ main (argc, argv, env)

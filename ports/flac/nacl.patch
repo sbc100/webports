@@ -1,6 +1,6 @@
-diff -Naur flac-1.2.1/examples/cpp/encode/file/main.cpp flac-1.2.1.nacl/examples/cpp/encode/file/main.cpp
---- flac-1.2.1/examples/cpp/encode/file/main.cpp	2007-09-13 19:58:03.000000000 -0700
-+++ flac-1.2.1.nacl/examples/cpp/encode/file/main.cpp	2009-10-23 14:43:06.012399000 -0700
+diff --git a/examples/cpp/encode/file/main.cpp b/examples/cpp/encode/file/main.cpp
+--- a/examples/cpp/encode/file/main.cpp
++++ b/examples/cpp/encode/file/main.cpp
 @@ -29,6 +29,7 @@
  #endif
  
@@ -9,10 +9,10 @@ diff -Naur flac-1.2.1/examples/cpp/encode/file/main.cpp flac-1.2.1.nacl/examples
  #include <stdlib.h>
  #include "FLAC++/metadata.h"
  #include "FLAC++/encoder.h"
-diff -Naur flac-1.2.1/src/test_libFLAC++/metadata_manip.cpp flac-1.2.1.nacl/src/test_libFLAC++/metadata_manip.cpp
---- flac-1.2.1/src/test_libFLAC++/metadata_manip.cpp	2007-07-31 15:41:53.000000000 -0700
-+++ flac-1.2.1.nacl/src/test_libFLAC++/metadata_manip.cpp	2009-10-23 14:43:06.012399000 -0700
-@@ -44,6 +44,9 @@
+diff --git a/src/test_libFLAC++/metadata_manip.cpp b/src/test_libFLAC++/metadata_manip.cpp
+--- a/src/test_libFLAC++/metadata_manip.cpp
++++ b/src/test_libFLAC++/metadata_manip.cpp
+@@ -44,6 +44,9 @@ extern "C" {
  #include "test_libs_common/file_utils_flac.h"
  }
  

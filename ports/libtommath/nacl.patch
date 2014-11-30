@@ -1,5 +1,4 @@
 diff --git a/makefile b/makefile
-index 3e254d4..6316133 100644
 --- a/makefile
 +++ b/makefile
 @@ -11,6 +11,8 @@ ifndef MAKE
@@ -69,10 +68,10 @@ index 3e254d4..6316133 100644
          *.idx *.toc *.log *.aux *.dvi *.lof *.ind *.ilg *.ps *.log *.s mpi.c *.da *.dyn *.dpi tommath.tex `find . -type f | grep [~] | xargs` *.lo *.la
  	rm -rf .libs
  	cd etc ; MAKE=${MAKE} ${MAKE} clean
-diff -Naur libtommath-0.41/tommath.h libtommath-0.41.nacl/tommath.h
---- libtommath-0.41/tommath.h	2007-03-10 15:45:11.000000000 -0800
-+++ libtommath-0.41.nacl/tommath.h	2010-07-23 11:04:12.000000000 -0700
-@@ -46,7 +46,7 @@
+diff --git a/tommath.h b/tommath.h
+--- a/tommath.h
++++ b/tommath.h
+@@ -46,7 +46,7 @@ extern "C" {
  
  
  /* detect 64-bit mode if possible */

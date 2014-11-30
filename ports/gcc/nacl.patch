@@ -1,5 +1,4 @@
 diff --git a/gcc/Makefile.in b/gcc/Makefile.in
-index 2e57082..25ca0f4 100644
 --- a/gcc/Makefile.in
 +++ b/gcc/Makefile.in
 @@ -913,7 +913,7 @@ BUILD_LIBDEPS= $(BUILD_LIBIBERTY)
@@ -24,7 +23,6 @@ index 2e57082..25ca0f4 100644
  	$(STAMP) s-fixinc_list
  
 diff --git a/gcc/collect2.c b/gcc/collect2.c
-index 3f62dfe..c646765 100644
 --- a/gcc/collect2.c
 +++ b/gcc/collect2.c
 @@ -47,6 +47,14 @@ along with GCC; see the file COPYING3.  If not see
@@ -52,7 +50,6 @@ index 3f62dfe..c646765 100644
    static const char *const ld_suffix	= "ld";
    static const char *const real_ld_suffix = "real-ld";
 diff --git a/gcc/config/i386/cpuid.h b/gcc/config/i386/cpuid.h
-index b525865..37efc4c 100644
 --- a/gcc/config/i386/cpuid.h
 +++ b/gcc/config/i386/cpuid.h
 @@ -110,6 +110,10 @@
@@ -75,7 +72,6 @@ index b525865..37efc4c 100644
  
  /* Return cpuid data for requested cpuid level, as found in returned
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index 6c7f47c..1989071 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
 @@ -6262,10 +6262,10 @@ fatal_error (int signum)
@@ -108,7 +104,6 @@ index 6c7f47c..1989071 100644
       on ?: in file-scope variable initializations.  */
    asm_debug = ASM_DEBUG_SPEC;
 diff --git a/gcc/gcov-dump.c b/gcc/gcov-dump.c
-index 8425041..fa736f9 100644
 --- a/gcc/gcov-dump.c
 +++ b/gcc/gcov-dump.c
 @@ -37,7 +37,7 @@ static void tag_arcs (const char *, unsigned, unsigned);
@@ -130,7 +125,6 @@ index 8425041..fa736f9 100644
    int opt;
  
 diff --git a/gcc/gcov.c b/gcc/gcov.c
-index a697608..b0d88fe 100644
 --- a/gcc/gcov.c
 +++ b/gcc/gcov.c
 @@ -349,10 +349,10 @@ static int output_branch_count (FILE *, int, const arc_t *);
@@ -147,7 +141,6 @@ index a697608..b0d88fe 100644
    int argno;
  
 diff --git a/gcc/main.c b/gcc/main.c
-index fc5a4db..d0aaeee 100644
 --- a/gcc/main.c
 +++ b/gcc/main.c
 @@ -23,14 +23,14 @@ along with GCC; see the file COPYING3.  If not see
@@ -168,7 +161,6 @@ index fc5a4db..d0aaeee 100644
    return toplev_main (argc, (const char **) argv);
  }
 diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
-index 366e96e..c660c98 100644
 --- a/libiberty/pex-unix.c
 +++ b/libiberty/pex-unix.c
 @@ -56,6 +56,16 @@ extern int errno;

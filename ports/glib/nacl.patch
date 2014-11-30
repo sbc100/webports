@@ -1,7 +1,7 @@
-diff -urN glib-2.28.8/gthread/gthread-posix.c glib-2.28.8-nacl/gthread/gthread-posix.c
---- glib-2.28.8/gthread/gthread-posix.c	2010-09-27 11:48:34.000000000 -0700
-+++ glib-2.28.8-nacl/gthread/gthread-posix.c	2011-09-29 14:40:17.286005000 -0700
-@@ -97,6 +97,7 @@
+diff --git a/gthread/gthread-posix.c b/gthread/gthread-posix.c
+--- a/gthread/gthread-posix.c
++++ b/gthread/gthread-posix.c
+@@ -97,6 +97,7 @@ static gboolean posix_check_cmd_prio_warned = FALSE;
  # error This should not happen. Contact the GLib team.
  #endif
  
@@ -9,7 +9,7 @@ diff -urN glib-2.28.8/gthread/gthread-posix.c glib-2.28.8-nacl/gthread/gthread-p
  #if defined (POSIX_MIN_PRIORITY) && defined (POSIX_MAX_PRIORITY)
  # define HAVE_PRIORITIES 1
  static gint priority_normal_value;
-@@ -114,6 +115,7 @@
+@@ -114,6 +115,7 @@ static gint priority_normal_value;
  # endif /* !__FreeBSD__ */
  # define PRIORITY_NORMAL_VALUE    priority_normal_value
  #endif /* POSIX_MIN_PRIORITY && POSIX_MAX_PRIORITY */
@@ -17,9 +17,10 @@ diff -urN glib-2.28.8/gthread/gthread-posix.c glib-2.28.8-nacl/gthread/gthread-p
  
  static gulong g_thread_min_stack_size = 0;
  
-diff -urN glib-2.28.8/nacl.cache glib-2.28.8-nacl/nacl.cache
---- glib-2.28.8/nacl.cache	1969-12-31 16:00:00.000000000 -0800
-+++ glib-2.28.8-nacl/nacl.cache	2011-09-29 14:40:07.680834000 -0700
+diff --git a/nacl.cache b/nacl.cache
+new file mode 100644
+--- /dev/null
++++ b/nacl.cache
 @@ -0,0 +1,5 @@
 +glib_cv_stack_grows=no
 +glib_cv_uscore=no

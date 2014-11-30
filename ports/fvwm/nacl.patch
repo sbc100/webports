@@ -1,5 +1,4 @@
 diff --git a/configure b/configure
-index b8e3ec7..a4ba685 100755
 --- a/configure
 +++ b/configure
 @@ -12610,10 +12610,10 @@ done
@@ -33,7 +32,6 @@ index b8e3ec7..a4ba685 100755
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
 diff --git a/fvwm/fvwm.h b/fvwm/fvwm.h
-index 109df1d..a332b7d 100644
 --- a/fvwm/fvwm.h
 +++ b/fvwm/fvwm.h
 @@ -201,7 +201,21 @@ typedef struct
@@ -129,7 +127,6 @@ index 109df1d..a332b7d 100644
  	unsigned use_parent_relative : 1;
  	unsigned use_colorset : 1;
 diff --git a/libs/System.c b/libs/System.c
-index f06f2ba..9d34659 100644
 --- a/libs/System.c
 +++ b/libs/System.c
 @@ -46,11 +46,15 @@ fd_set_size_t fvwmlib_max_fd = (fd_set_size_t)-9999999;
@@ -149,7 +146,6 @@ index f06f2ba..9d34659 100644
  
  void fvwmlib_init_max_fd(void)
 diff --git a/libs/fvwmlib.h b/libs/fvwmlib.h
-index b3d9c80..50cb791 100644
 --- a/libs/fvwmlib.h
 +++ b/libs/fvwmlib.h
 @@ -24,7 +24,7 @@ int atexit(void(*func)());
@@ -162,7 +158,6 @@ index b3d9c80..50cb791 100644
  
  #ifndef HAVE_STRCASECMP
 diff --git a/libs/gethostname.c b/libs/gethostname.c
-index c7fcc7c..1a7257b 100644
 --- a/libs/gethostname.c
 +++ b/libs/gethostname.c
 @@ -27,7 +27,7 @@
@@ -175,7 +170,6 @@ index c7fcc7c..1a7257b 100644
  #ifdef HAVE_UNAME
  	struct utsname uts;
 diff --git a/modules/FvwmConsole/FvwmConsole.c b/modules/FvwmConsole/FvwmConsole.c
-index edf3e58..35f54d1 100644
 --- a/modules/FvwmConsole/FvwmConsole.c
 +++ b/modules/FvwmConsole/FvwmConsole.c
 @@ -223,11 +223,15 @@ void server(void)
@@ -195,7 +189,6 @@ index edf3e58..35f54d1 100644
  		{
  			ErrMsg("listen");
 diff --git a/modules/FvwmForm/FvwmForm.c b/modules/FvwmForm/FvwmForm.c
-index 48b7ed6..ca7c274 100644
 --- a/modules/FvwmForm/FvwmForm.c
 +++ b/modules/FvwmForm/FvwmForm.c
 @@ -134,7 +134,9 @@ static void SetupTimer(void)
@@ -219,7 +212,6 @@ index 48b7ed6..ca7c274 100644
  
    SIGNAL_RETURN;
 diff --git a/modules/FvwmScroll/GrabWindow.c b/modules/FvwmScroll/GrabWindow.c
-index 6dab86a..79baf74 100644
 --- a/modules/FvwmScroll/GrabWindow.c
 +++ b/modules/FvwmScroll/GrabWindow.c
 @@ -80,7 +80,7 @@ extern char *BackColor;
@@ -232,7 +224,6 @@ index 6dab86a..79baf74 100644
  
  /*
 diff --git a/modules/FvwmTaskBar/FvwmTaskBar.c b/modules/FvwmTaskBar/FvwmTaskBar.c
-index 4034d6c..68d920c 100644
 --- a/modules/FvwmTaskBar/FvwmTaskBar.c
 +++ b/modules/FvwmTaskBar/FvwmTaskBar.c
 @@ -2528,9 +2528,13 @@ void HideTaskBar(void)

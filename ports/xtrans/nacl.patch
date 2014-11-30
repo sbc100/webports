@@ -1,5 +1,4 @@
 diff --git a/Xtrans.c b/Xtrans.c
-index 54e3bdc..ecfdecb 100644
 --- a/Xtrans.c
 +++ b/Xtrans.c
 @@ -1253,7 +1253,7 @@ TRANS(MakeAllCLTSServerListeners) (char *port, int *partial, int *count_ret,
@@ -21,7 +20,6 @@ index 54e3bdc..ecfdecb 100644
  /*
   * emulate writev
 diff --git a/Xtransint.h b/Xtransint.h
-index 3bce8dc..f8a7bc3 100644
 --- a/Xtransint.h
 +++ b/Xtransint.h
 @@ -325,7 +325,7 @@ typedef struct _Xtransport_table {
@@ -43,7 +41,6 @@ index 3bce8dc..f8a7bc3 100644
  #define WRITEV(ciptr, iov, iovcnt)	TRANS(WriteV)(ciptr, iov, iovcnt)
  
 diff --git a/Xtranslcl.c b/Xtranslcl.c
-index 5beef7c..653a4d9 100644
 --- a/Xtranslcl.c
 +++ b/Xtranslcl.c
 @@ -416,13 +416,17 @@ TRANS(PTSOpenClient)(XtransConnInfo ciptr, char *port)
@@ -83,7 +80,6 @@ index 5beef7c..653a4d9 100644
      if (ret < 0) {
  	prmsg(1,"SCOOpenClient: error from getmsg\n");
 diff --git a/Xtranssock.c b/Xtranssock.c
-index dfa41cf..706e498 100644
 --- a/Xtranssock.c
 +++ b/Xtranssock.c
 @@ -412,7 +412,8 @@ TRANS(SocketOpen) (int i, int type)
@@ -97,7 +93,6 @@ index dfa41cf..706e498 100644
         || ciptr->fd >= sysconf(_SC_OPEN_MAX)
  #endif
 diff --git a/Xtransutil.c b/Xtransutil.c
-index 52c937b..0959a4a 100644
 --- a/Xtransutil.c
 +++ b/Xtransutil.c
 @@ -390,15 +390,19 @@ TRANS(GetPeerNetworkId) (XtransConnInfo ciptr)
