@@ -1622,7 +1622,7 @@ ZipPublishDir() {
 }
 
 
-DefaultPackageInstall() {
+PackageInstall() {
   RunPreInstallStep
   if IsGitRepo; then
     RunGitCloneStep
@@ -1692,7 +1692,6 @@ PostBuildStep()       { DefaultPostBuildStep;       }
 TestStep()            { DefaultTestStep;            }
 InstallStep()         { DefaultInstallStep;         }
 PostInstallTestStep() { DefaultPostInstallTestStep; }
-PackageInstall()      { DefaultPackageInstall;      }
 
 RunPreInstallStep() { RunStep PreInstallStep; }
 RunDownloadStep()   { RunStep DownloadStep; }

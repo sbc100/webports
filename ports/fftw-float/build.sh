@@ -1,10 +1,11 @@
-# Copyright (c) 2011 The Native Client Authors. All rights reserved.
+# Copyright (c) The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-EXECUTABLES="tools/fftw-wisdom${NACL_EXEEXT} tests/bench${NACL_EXEEXT}"
+EXECUTABLES="tools/fftwf-wisdom${NACL_EXEEXT} tests/bench${NACL_EXEEXT}"
 
-# Without these CFLAGS fftw fails to build for ARM
+EXTRA_CONFIGURE_ARGS="--enable-float"
+
 if [ "${NACL_ARCH}" = "arm" ]; then
   NACLPORTS_CPPFLAGS+=" -fomit-frame-pointer -fstrict-aliasing \
   -fno-schedule-insns -ffast-math"
