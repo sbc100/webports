@@ -277,12 +277,14 @@ class TestParsePkgInfo(NaclportsTest):
 
 class TestSourcePackage(NaclportsTest):
   def setUp(self):
+    super(TestSourcePackage, self).setUp()
     self.tempdir = tempfile.mkdtemp(prefix='naclports_test_')
     self.addCleanup(shutil.rmtree, self.tempdir)
     self.temp_ports = os.path.join(self.tempdir, 'ports')
 
   def CreateTestPackage(self, name, extra_info=''):
     """Creates a source package directory in a temporary directory.
+
     Args:
       name: The name of the temporary package.
       extra_info: extra information to append to the pkg_info file.
