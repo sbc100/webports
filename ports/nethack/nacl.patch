@@ -87,6 +87,7 @@ diff --git a/include/unixconf.h b/include/unixconf.h
 +/* #define SHELL */		/* do not delete the '!' command */
  
  #include "system.h"
+
 diff -Naur nethack-3.4.3-orig/sys/share/unixtty.c nethack-3.4.3/sys/share/unixtty.c
 --- nethack-3.4.3-orig/sys/share/unixtty.c	2003-12-07 15:39:13.000000000 -0800
 +++ nethack-3.4.3/sys/share/unixtty.c	2011-09-27 13:38:17.000000000 -0700
