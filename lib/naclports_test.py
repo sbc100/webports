@@ -463,6 +463,12 @@ class TestCommands(NaclportsTest):
 
 
 class TestMain(NaclportsTest):
+  def setUp(self):
+    super(TestMain, self).setUp()
+    patcher = patch('naclports.__main__.CheckSDKRoot')
+    patcher.start()
+    self.addCleanup(patcher.stop)
+
   @patch('naclports.Log', Mock())
   @patch('shutil.rmtree', Mock())
   def testCleanAll(self):

@@ -146,6 +146,21 @@ def CleanAll(config):
   rmtree(naclports.GetInstallRoot(config))
 
 
+def CheckSDKRoot():
+  """Check validity of NACL_SDK_ROOT."""
+
+  if not NACL_SDK_ROOT:
+    raise Error('$NACL_SDK_ROOT not set')
+
+  if not os.path.isdir(NACL_SDK_ROOT):
+    raise Error('$NACL_SDK_ROOT does not exist: %s' % NACL_SDK_ROOT)
+
+  sentinel = os.path.join(NACL_SDK_ROOT, 'tools', 'getos.py')
+  if not os.path.exists(sentinel):
+    raise Error("$NACL_SDK_ROOT (%s) doesn't look right. "
+                "Couldn't find sentinel file (%s)" % (NACL_SDK_ROOT, sentinel))
+
+
 def run_main(args):
   base_commands = {
     'list': CmdList,
@@ -219,17 +234,7 @@ def run_main(args):
     if 'V' in os.environ:
       del os.environ['V']
 
-  if not NACL_SDK_ROOT:
-    raise Error('$NACL_SDK_ROOT not set')
-
-  if not os.path.isdir(NACL_SDK_ROOT):
-    raise Error('$NACL_SDK_ROOT does not exist: %s' % NACL_SDK_ROOT)
-
-  sentinel = os.path.join(NACL_SDK_ROOT, 'tools', 'getos.py')
-  if not os.path.exists(sentinel):
-    raise Error("$NACL_SDK_ROOT (%s) doesn't look right. "
-                "Couldn't find sentinel file (%s)" % (NACL_SDK_ROOT, sentinel))
-
+  CheckSDKRoot()
   config = Configuration(args.arch, args.toolchain, args.debug)
 
   if args.command in base_commands:
