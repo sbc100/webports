@@ -27,6 +27,13 @@ import tarfile
 import time
 import urllib
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
+sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
+
+import naclports
+import naclports.source_package
+
 HISTORY_SIZE = 500
 
 if sys.version_info < (2, 6, 0):
@@ -55,9 +62,6 @@ LOCAL_GSUTIL = 'gsutil'
 GS_URL_BASE = 'gs://nativeclient-mirror/nacl/nacl_sdk/'
 GSTORE = 'http://storage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/'
 
-def ErrorOut(msg):
-    sys.stderr.write("error: %s\n" % str(msg))
-    sys.exit(1)
 
 
 def DetermineSDKURL(flavor, base_url, version):
@@ -75,7 +79,7 @@ def DetermineSDKURL(flavor, base_url, version):
       not os.environ.get('TEST_BUILDBOT')):
     gsutil = BOT_GSUTIL
     if not os.path.exists(gsutil):
-      ErrorOut('gsutil not found at: %s' % gsutil)
+      raise naclports.Error('gsutil not found at: %s' % gsutil)
   else:
     gsutil = LOCAL_GSUTIL
 
@@ -92,7 +96,7 @@ def DetermineSDKURL(flavor, base_url, version):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     p_stdout = p.communicate()[0]
     if p.returncode:
-      ErrorOut('gsutil command failed: %s' % str(cmd))
+      raise naclports.Error('gsutil command failed: %s' % str(cmd))
 
     elements = p_stdout.splitlines()
     return [os.path.basename(os.path.normpath(e)) for e in elements]
@@ -114,8 +118,8 @@ def DetermineSDKURL(flavor, base_url, version):
         version = version_dir.rsplit('.', 1)[1]
         break
     else:
-      ErrorOut('No SDK build (%s) found in last %d trunk builds' % (
-          path, HISTORY_SIZE))
+      raise naclports.Error('No SDK build (%s) found in last %d trunk builds' %
+                            (path, HISTORY_SIZE))
 
   version = int(version)
   return ('%strunk.%d/%s' % (GSTORE, version, path), version)
@@ -129,13 +133,13 @@ def Untar(bz2_filename):
       tar_file = cygtar.CygTar(bz2_filename, 'r:bz2')
       tar_file.Extract()
     except Exception, err:
-      ErrorOut('Error unpacking %s' % str(err))
+      raise naclports.Error('Error unpacking %s' % str(err))
     finally:
       if tar_file:
         tar_file.Close()
   else:
     if subprocess.call(['tar', 'jxf', bz2_filename]):
-      ErrorOut('Error unpacking')
+      raise naclports.Error('Error unpacking')
 
 
 def FindCygwin():
@@ -144,7 +148,7 @@ def FindCygwin():
   elif os.path.exists(r'C:\cygwin'):
     return r'C:\cygwin'
   else:
-    ErrorOut('failed to find cygwin in \cygwin or c:\cygwin')
+    raise naclports.Error('failed to find cygwin in \cygwin or c:\cygwin')
 
 
 def DownloadAndInstallSDK(url):
@@ -160,8 +164,7 @@ def DownloadAndInstallSDK(url):
   sys.stdout.flush()
 
   # Download it.
-  urlret = urllib.urlretrieve(url, bz2_filename)
-  assert urlret[0] == bz2_filename
+  naclports.DownloadFile(bz2_filename, url)
 
   # Extract toolchain.
   old_cwd = os.getcwd()
@@ -209,6 +212,7 @@ PLATFORM_COLLAPSE = {
     'darwin': 'mac',
 }
 
+
 def main(argv):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('-v', '--version', default='latest',
@@ -232,14 +236,18 @@ def main(argv):
   url, version = DetermineSDKURL(flavor,
                                  base_url=GS_URL_BASE,
                                  version=options.version)
-  print('SDK URL is "%s"' % url)
   if version == existing_version:
-    print('SDK revision %s is already downlaoded' % version)
+    print('SDK revision %s already downloaded' % version)
     return 0
-
 
   DownloadAndInstallSDK(url)
   return 0
 
+
 if __name__ == '__main__':
-  sys.exit(main(sys.argv[1:]))
+  try:
+    rtn = main(sys.argv[1:])
+  except naclports.Error as e:
+    sys.stderr.write("error: %s\n" % str(e))
+    rtn = 1
+  sys.exit(rtn)
