@@ -46,6 +46,7 @@ export PYTHONPATH=/lib/python2.7
 export RUBYLIB=/usr/lib/ruby/2.0.0
 export RUBYLIB=${RUBYLIB}:${RUBYLIB}/${NACL_ARCH}-nacl
 alias ruby='ruby /bin/irb'
+alias emacs='ENABLE_CONTROL_C=0 emacs'
 
 # Make vim emit directly until we have pipes.
 export PAGER=cat

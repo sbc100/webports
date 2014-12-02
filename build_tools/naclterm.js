@@ -285,10 +285,10 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
     if (str.charCodeAt(0) === NaClTerm.CONTROL_C) {
       if (this.processManager.sigint()) {
         this.print('\n');
+        return;
       }
-    } else {
-      this.processManager.sendStdinForeground(str);
     }
+    this.processManager.sendStdinForeground(str);
   } catch (e) {
     this.print(e.message);
   }
