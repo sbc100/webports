@@ -14,7 +14,7 @@
 SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libogg
 SDK_LIBS += libtheora libvorbis libwebp libxml2 tinyxml openal-soft freealut
 
-COVERAGE = python third_party/coverage
+COVERAGE = bin/coverage
 COVERAGE_ARGS = --fail-under=56
 COVERAGE_VER := $(shell $(COVERAGE) --version 2>/dev/null)
 
@@ -72,7 +72,7 @@ check: test
 
 test:
 	build_tools/build_tools_test.py
-	$(COVERAGE) run --include=lib/naclports/* lib/naclports_test.py
+	$(COVERAGE) run --include=lib/naclports/* -m nose --exe --rednose
 	$(COVERAGE) report $(COVERAGE_ARGS)
 	@rm -rf out/coverage_html
 	$(COVERAGE) html

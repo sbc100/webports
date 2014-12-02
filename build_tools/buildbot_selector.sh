@@ -174,9 +174,9 @@ fi
 
 Unittests() {
   echo "@@@BUILD_STEP naclports unittests@@@"
-  CMD=${SCRIPT_DIR}/../lib/naclports_test.py
+  CMD="make -C $(dirname ${SCRIPT_DIR}) check"
   echo "Running ${CMD}"
-  if ! ${PYTHON} ${CMD}; then
+  if ! ${CMD}; then
     RESULT=1
     echo "@@@STEP_FAILURE@@@"
   fi

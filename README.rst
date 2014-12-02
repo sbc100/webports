@@ -39,6 +39,7 @@ Prerequistes
 The minimum requirements for using naclports are:
 
 - python 2.7
+- gclient (from depot_tools)
 - Native Client SDK
 
 For building packages from source the build scripts require that certain tools

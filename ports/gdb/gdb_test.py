@@ -21,11 +21,12 @@ gdb_app = os.path.join(GDB_OUT_DIR, 'gdb_app')
 test_dir = os.path.join(SCRIPT_DIR, 'tests')
 test_out_dir = os.path.join(GDB_OUT_DIR, 'tests')
 
-chrome_test.Main([
-    '-C', test_dir,
-    '-C', test_out_dir,
-    '-t', '60',
-    '--enable-nacl',
-    '--enable-nacl-debug',
-    '--load-and-launch-app', gdb_app,
-    'gdb_test.html'] + sys.argv[1:])
+if __name__ == '__main__':
+  chrome_test.Main([
+      '-C', test_dir,
+      '-C', test_out_dir,
+      '-t', '60',
+      '--enable-nacl',
+      '--enable-nacl-debug',
+      '--load-and-launch-app', gdb_app,
+      'gdb_test.html'] + sys.argv[1:])

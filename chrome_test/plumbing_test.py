@@ -14,8 +14,8 @@ sys.path.insert(0, SRC_DIR)
 
 import chrome_test
 
-
-chrome_test.Main(
-    ['-C', os.path.join(SCRIPT_DIR, 'tests'),
-     '--load-extension', os.path.join(SCRIPT_DIR, 'pinger'),
-     'plumbing_test.html'] + sys.argv[1:])
+if __name__ == '__main__':
+  chrome_test.Main(
+      ['-C', os.path.join(SCRIPT_DIR, 'tests'),
+       '--load-extension', os.path.join(SCRIPT_DIR, 'pinger'),
+       'plumbing_test.html'] + sys.argv[1:])
