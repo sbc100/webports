@@ -24,5 +24,8 @@ BuildStep() {
 }
 
 TestStep() {
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    return
+  fi
   LogExecute ./sys/test
 }
