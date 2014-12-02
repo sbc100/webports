@@ -72,7 +72,7 @@ check: test
 
 test:
 	bin/nosetests build_tools/build_tools_test.py
-	$(COVERAGE) run --include=lib/naclports/* -m nose --exe --rednose
+	$(COVERAGE) run --include=lib/naclports/* -m nose --rednose
 	$(COVERAGE) report $(COVERAGE_ARGS)
 	@rm -rf out/coverage_html
 	$(COVERAGE) html

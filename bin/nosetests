@@ -5,4 +5,4 @@
 SCRIPT_DIR=$(cd $(dirname "$BASH_SOURCE") && pwd)
 
 export PYTHONUSERBASE=$(dirname $SCRIPT_DIR)/out/pip
-exec python -m nose --exe --rednose $*
+exec python -m nose --rednose $*

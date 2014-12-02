@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -46,7 +45,3 @@ class TestScanPackages(unittest.TestCase):
     file_info = scan_packages.FileInfo('foo', 10, 'http://host/base', 'hashval')
     scan_packages.DownloadFiles([file_info])
     check_hash_mock.assert_called_once_with('dummydir/base', 'hashval')
-
-
-if __name__ == '__main__':
-  unittest.main()

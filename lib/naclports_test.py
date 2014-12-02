@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -483,7 +482,3 @@ class TestMain(NaclportsTest):
   def testMainCleanAll(self, clean_all_mock):
     naclports.__main__.main(['clean', '--all'])
     clean_all_mock.assert_called_once_with(Configuration())
-
-
-if __name__ == '__main__':
-  unittest.main()
