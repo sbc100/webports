@@ -10,19 +10,13 @@ import naclports.__main__
 from naclports import source_package, package_index
 from naclports.configuration import Configuration
 
+from mock import MagicMock, Mock, patch, call
 import os
 import shutil
 import StringIO
 import sys
 import tempfile
 import unittest
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SRC_DIR = os.path.dirname(SCRIPT_DIR)
-MOCK_DIR = os.path.join(SRC_DIR, 'third_party', 'mock')
-sys.path.append(MOCK_DIR)
-
-from mock import MagicMock, Mock, patch, call
 
 
 def MockFileObject(contents=''):

@@ -3,19 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+from mock import Mock, patch, call
 import os
 import patch_configure
 import scan_packages
 import sys
 import StringIO
 import unittest
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SRC_DIR = os.path.dirname(SCRIPT_DIR)
-MOCK_DIR = os.path.join(SRC_DIR, 'third_party', 'mock')
-sys.path.append(MOCK_DIR)
-
-from mock import Mock, patch, call
 
 
 def MockFileObject(contents):

@@ -1,5 +1,5 @@
 [run]
-omit = third_party/mock/mock.py,*_test.py
+omit = *_test.py
 data_file = out/coverage
 
 [html]

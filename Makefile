@@ -71,7 +71,7 @@ reallyclean: clean
 check: test
 
 test:
-	build_tools/build_tools_test.py
+	bin/nosetests build_tools/build_tools_test.py
 	$(COVERAGE) run --include=lib/naclports/* -m nose --exe --rednose
 	$(COVERAGE) report $(COVERAGE_ARGS)
 	@rm -rf out/coverage_html
