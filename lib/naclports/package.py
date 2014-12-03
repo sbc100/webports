@@ -5,14 +5,12 @@
 import os
 import sys
 
-import naclports
-from naclports import Trace, Log, Warn, Error
-from naclports import configuration
+from naclports.util import Trace, Log, Warn
+from naclports.error import Error
+from naclports import configuration, pkg_info, util
 
 EXTRA_KEYS = ['BUILD_CONFIG', 'BUILD_ARCH', 'BUILD_TOOLCHAIN',
               'BUILD_SDK_VERSION', 'BUILD_NACLPORTS_REVISION']
-
-sys.path.append(naclports.TOOLS_DIR)
 
 
 def RemoveEmptyDirs(dirname):
@@ -25,25 +23,27 @@ def RemoveEmptyDirs(dirname):
 class Package(object):
   extra_keys = []
 
-  def __init__(self, info_file):
+  def __init__(self, info_file=None):
     self.info = info_file
-    with open(self.info) as f:
-      self.ParseInfo(f.read())
+    if self.info:
+      with open(self.info) as f:
+        self.ParseInfo(f.read())
 
   def ParseInfo(self, info_string):
-    valid_keys = naclports.VALID_KEYS + self.extra_keys
-    required_keys = naclports.REQUIRED_KEYS + self.extra_keys
+    valid_keys = pkg_info.VALID_KEYS + self.extra_keys
+    required_keys = pkg_info.REQUIRED_KEYS + self.extra_keys
 
     for key in valid_keys:
-      setattr(self, key, None)
-    self.DEPENDS = []
-    self.CONFLICTS = []
+      if key in ('DEPENDS', 'CONFLICTS'):
+        setattr(self, key, [])
+      else:
+        setattr(self, key, None)
 
     # Parse pkg_info file
-    info = naclports.ParsePkgInfo(info_string,
-                                  self.info,
-                                  valid_keys,
-                                  required_keys)
+    info = pkg_info.ParsePkgInfo(info_string,
+                                 self.info,
+                                 valid_keys,
+                                 required_keys)
 
     # Set attributres based on pkg_info setttings.
     for key, value in info.items():
@@ -52,7 +52,8 @@ class Package(object):
     if '_' in self.NAME:
       raise Error('%s: package NAME cannot contain underscores' % self.info)
     if self.NAME != self.NAME.lower():
-      raise Error('%s: package NAME cannot contain uppercase characters' % self.info)
+      raise Error('%s: package NAME cannot contain uppercase characters' %
+                  self.info)
     if '_' in self.VERSION:
       raise Error('%s: package VERSION cannot contain underscores' % self.info)
     if self.DISABLED_ARCH is not None and self.ARCH is not None:
@@ -87,15 +88,15 @@ class Package(object):
     return True
 
   def IsAnyVersionInstalled(self):
-    return naclports.IsInstalled(self.NAME, self.config)
+    return util.IsInstalled(self.NAME, self.config)
 
   def GetInstallStamp(self):
     """Returns the name of install stamp for this package."""
-    return naclports.GetInstallStamp(self.NAME, self.config)
+    return util.GetInstallStamp(self.NAME, self.config)
 
   def GetListFile(self):
     """Returns the name of the installed file list for this package."""
-    return naclports.GetListFile(self.NAME, self.config)
+    return util.GetListFile(self.NAME, self.config)
 
 
 class InstalledPackage(Package):
@@ -122,10 +123,10 @@ class InstalledPackage(Package):
     RemoveEmptyDirs(os.path.dirname(filename))
 
   def DoUninstall(self):
-    with naclports.InstallLock(self.config):
+    with util.InstallLock(self.config):
       self.RemoveFile(self.GetInstallStamp())
 
-      root = naclports.GetInstallRoot(self.config)
+      root = util.GetInstallRoot(self.config)
       for filename in self.Files():
         filename = os.path.join(root, filename)
         if not os.path.lexists(filename):
@@ -138,7 +139,7 @@ class InstalledPackage(Package):
 
 
 def InstalledPackageIterator(config):
-  stamp_root = naclports.GetInstallStampRoot(config)
+  stamp_root = util.GetInstallStampRoot(config)
   if not os.path.exists(stamp_root):
     return
 
@@ -149,7 +150,7 @@ def InstalledPackageIterator(config):
 
 
 def CreateInstalledPackage(package_name, config=None):
-  stamp_root = naclports.GetInstallStampRoot(config)
+  stamp_root = util.GetInstallStampRoot(config)
   info_file = os.path.join(stamp_root, package_name + '.info')
   if not os.path.exists(info_file):
     raise Error('package not installed: %s [%s]' % (package_name, config))

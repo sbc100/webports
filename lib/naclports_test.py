@@ -2,13 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import naclports
-import naclports.package
-import naclports.binary_package
-import naclports.__main__
-from naclports import source_package, package_index
-from naclports.configuration import Configuration
-
+import mock
 from mock import MagicMock, Mock, patch, call
 import os
 import shutil
@@ -17,6 +11,14 @@ import sys
 import tempfile
 import unittest
 
+from naclports import paths
+from naclports import binary_package
+from naclports import error
+from naclports import package_index
+from naclports import source_package
+from naclports.configuration import Configuration
+import naclports
+import naclports.__main__
 
 def MockFileObject(contents=''):
   file_mock = Mock(name="file_mock", spec=file)
@@ -30,7 +32,7 @@ class NaclportsTest(unittest.TestCase):
   """Class that sets up core mocks common to all test cases."""
 
   def setUp(self):
-    patcher = patch('naclports.GetInstallRoot',
+    patcher = patch('naclports.util.GetInstallRoot',
                     Mock(return_value='/package/install/path'))
     patcher.start()
     self.addCleanup(patcher.stop)
@@ -38,14 +40,14 @@ class NaclportsTest(unittest.TestCase):
     mock_lock = Mock()
     mock_lock.__enter__ = lambda s: s
     mock_lock.__exit__ = Mock(return_value=False)
-    patcher = patch('naclports.InstallLock', Mock(return_value=mock_lock))
+    patcher = patch('naclports.util.InstallLock', Mock(return_value=mock_lock))
     patcher.start()
     self.addCleanup(patcher.stop)
 
     mock_lock = Mock()
     mock_lock.__enter__ = lambda s: s
     mock_lock.__exit__ = Mock(return_value=False)
-    patcher = patch('naclports.BuildLock', Mock(return_value=mock_lock))
+    patcher = patch('naclports.util.BuildLock', Mock(return_value=mock_lock))
     patcher.start()
     self.addCleanup(patcher.stop)
 
@@ -98,8 +100,8 @@ class TestConfiguration(NaclportsTest):
 
   def testInvalidArch(self):
     expected_error = 'Invalid arch: not_arch'
-    with self.assertRaisesRegexp(naclports.Error, expected_error):
-      config = Configuration('not_arch')
+    with self.assertRaisesRegexp(error.Error, expected_error):
+      Configuration('not_arch')
 
 test_index = '''\
 NAME=agg-demo
@@ -133,8 +135,8 @@ class TestPackageIndex(NaclportsTest):
   def testParsingInvalid(self):
     contents = 'FOO=bar\nBAR=baz\n'
     expected_error = "Invalid key 'FOO' in info file dummy_file:1"
-    with self.assertRaisesRegexp(naclports.Error, expected_error):
-      index = package_index.PackageIndex('dummy_file', contents)
+    with self.assertRaisesRegexp(error.Error, expected_error):
+      package_index.PackageIndex('dummy_file', contents)
 
   def testParsingValid(self):
     index = package_index.PackageIndex('dummy_file', test_index)
@@ -154,7 +156,7 @@ class TestPackageIndex(NaclportsTest):
       'NAME': 'dummy',
       'BUILD_SDK_VERSION': 123
     }
-    with patch('naclports.GetSDKVersion') as mock_version:
+    with patch('naclports.util.GetSDKVersion') as mock_version:
       # Setting the mock SDK version to 123 should mean that the
       # index contains the 'foo' package and it is installable'
       mock_version.return_value = 123
@@ -170,10 +172,10 @@ class TestPackageIndex(NaclportsTest):
       self.assertFalse(index.Contains('foo', config_debug))
       self.assertFalse(index.Contains('bar', config_release))
 
-  @patch('naclports.Log', Mock())
+  @patch('naclports.util.Log', Mock())
   @patch('naclports.package_index.PREBUILT_ROOT', os.getcwd())
   @patch('naclports.package_index.VerifyHash', Mock(return_value=True))
-  @patch('naclports.DownloadFile')
+  @patch('naclports.util.DownloadFile')
   def testDownload(self, download_file_mock):
     index = package_index.PackageIndex('dummy_file', test_index)
     arm_config = Configuration('arm', 'newlib', False)
@@ -217,7 +219,7 @@ class TestBinaryPackage(NaclportsTest):
   @patch('os.makedirs')
   @patch('os.path.isdir', Mock(return_value=False))
   def testInstallFile(self, makedirs_mock, rename_mock):
-    naclports.binary_package.InstallFile('fname', 'location1', 'location2')
+    binary_package.InstallFile('fname', 'location1', 'location2')
     makedirs_mock.assert_called_once_with('location2')
     rename_mock.assert_has_calls([call('location1/fname', 'location2/fname')])
 
@@ -225,12 +227,13 @@ class TestBinaryPackage(NaclportsTest):
     # Only certain files should be relocated. A file called 'testfile'
     # for example, should not be touched.
     with patch('__builtin__.open', Mock(), create=True) as open_mock:
-      naclports.binary_package.RelocateFile('testfile', 'newroot')
+      binary_package.RelocateFile('testfile', 'newroot')
       open_mock.assert_not_called()
 
   @patch('naclports.binary_package.BinaryPackage.VerifyArchiveFormat', Mock())
   @patch('naclports.binary_package.BinaryPackage.GetPkgInfo')
-  @patch('naclports.GetInstallStamp', Mock(return_value='stamp_dir/stamp_file'))
+  @patch('naclports.util.GetInstallStamp',
+         Mock(return_value='stamp_dir/stamp_file'))
   def testWriteStamp(self, mock_get_info):
     fake_binary_pkg_info = '''\
 NAME=foo
@@ -242,7 +245,7 @@ BUILD_SDK_VERSION=38
 BUILD_NACLPORTS_REVISION=1414
 '''
     mock_get_info.return_value = fake_binary_pkg_info
-    pkg = naclports.binary_package.BinaryPackage('foo')
+    pkg = binary_package.BinaryPackage('foo')
     mock_stamp_file = MockFileObject()
     with patch('__builtin__.open', Mock(return_value=mock_stamp_file),
                create=True):
@@ -253,7 +256,7 @@ BUILD_NACLPORTS_REVISION=1414
 class TestParsePkgInfo(NaclportsTest):
   def testValidKeys(self):
     expected_error = "Invalid key 'BAR' in info file dummy_file:2"
-    with self.assertRaisesRegexp(naclports.Error, expected_error):
+    with self.assertRaisesRegexp(error.Error, expected_error):
       contents = 'FOO=bar\nBAR=baz\n'
       valid = ['FOO']
       required = []
@@ -261,7 +264,7 @@ class TestParsePkgInfo(NaclportsTest):
 
   def testRequiredKeys(self):
     expected_error = "Required key 'BAR' missing from info file: 'dummy_file'"
-    with self.assertRaisesRegexp(naclports.Error, expected_error):
+    with self.assertRaisesRegexp(error.Error, expected_error):
       contents = 'FOO=bar\n'
       valid = ['FOO']
       required = ['BAR']
@@ -295,7 +298,7 @@ class TestSourcePackage(NaclportsTest):
     """test that invalid source directory generates an error."""
     path = '/bad/path'
     expected_error = 'Invalid package folder: ' + path
-    with self.assertRaisesRegexp(naclports.Error, expected_error):
+    with self.assertRaisesRegexp(error.Error, expected_error):
       source_package.SourcePackage(path)
 
   def testValidSourceDir(self):
@@ -330,12 +333,12 @@ class TestSourcePackage(NaclportsTest):
     root = self.CreateTestPackage('foo', 'URL=someurl\nSHA1=123')
     pkg = source_package.SourcePackage(root)
     pkg.Verify()
-    filename = os.path.join(source_package.CACHE_ROOT, 'someurl')
+    filename = os.path.join(paths.CACHE_ROOT, 'someurl')
     verify_hash_mock.assert_called_once_with(filename, '123')
 
   def testSourcePackageIterator(self):
     self.CreateTestPackage('foo')
-    with patch('naclports.NACLPORTS_ROOT', self.tempdir):
+    with patch('naclports.paths.NACLPORTS_ROOT', self.tempdir):
       pkgs = [p for p in source_package.SourcePackageIterator()]
     self.assertEqual(len(pkgs), 1)
     self.assertEqual(pkgs[0].NAME, 'foo')
@@ -348,7 +351,7 @@ class TestSourcePackage(NaclportsTest):
     self.assertEqual(os.path.basename(location),
                      '%s-%s' % (pkg.NAME, pkg.VERSION))
 
-  @patch('naclports.Log', Mock())
+  @patch('naclports.util.Log', Mock())
   def testExtract(self):
     root = self.CreateTestPackage('foo', 'URL=someurl.tar.gz\nSHA1=123')
     pkg = source_package.SourcePackage(root)
@@ -360,7 +363,7 @@ class TestSourcePackage(NaclportsTest):
       pkg.Extract()
 
   def testCreatePackageInvalid(self):
-    with self.assertRaisesRegexp(naclports.Error, 'Package not found: foo'):
+    with self.assertRaisesRegexp(error.Error, 'Package not found: foo'):
       source_package.CreatePackage('foo')
 
   def testFormatTimeDelta(self):
@@ -379,11 +382,11 @@ class TestSourcePackage(NaclportsTest):
     pkg = source_package.SourcePackage(root)
 
     # with no other packages installed
-    with patch('naclports.IsInstalled', Mock(return_value=False)):
+    with patch('naclports.util.IsInstalled', Mock(return_value=False)):
       pkg.CheckInstallable()
 
     # with all possible packages installed
-    with patch('naclports.IsInstalled') as is_installed:
+    with patch('naclports.util.IsInstalled') as is_installed:
       is_installed.return_value = True
       with self.assertRaises(naclports.source_package.PkgConflictError):
         pkg.CheckInstallable()
@@ -400,8 +403,15 @@ class TestSourcePackage(NaclportsTest):
       return source_package.SourcePackage(root)
 
     with patch('naclports.source_package.CreatePackage', CreatePackageMock):
-      with self.assertRaises(naclports.DisabledError):
+      with self.assertRaises(error.DisabledError):
         pkg.CheckInstallable()
+
+  def testCheckBuildable(self):
+    root = self.CreateTestPackage('foo', 'BUILD_OS=solaris')
+    pkg = source_package.SourcePackage(root)
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'can only be built on solaris'):
+      pkg.CheckBuildable()
 
 
 class TestCommands(NaclportsTest):
@@ -414,7 +424,7 @@ class TestCommands(NaclportsTest):
         options = Mock(all=False)
         naclports.__main__.CmdList(config, options, [])
         lines = stdout.getvalue().splitlines()
-        self.assertRegexpMatches(lines[0], "^foo\\s+0.1$")
+        self.assertRegexpMatches(lines[0], '^foo\\s+0.1$')
         self.assertEqual(len(lines), 1)
 
   def testListCommandVerbose(self):
@@ -434,7 +444,6 @@ class TestCommands(NaclportsTest):
     config = Configuration()
     options = Mock()
     file_mock = MockFileObject('FOO=bar\n')
-    pkg = Mock(NAME='foo', VERSION='bar')
 
     with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
       with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
@@ -465,7 +474,7 @@ class TestCommands(NaclportsTest):
 class TestMain(NaclportsTest):
   def setUp(self):
     super(TestMain, self).setUp()
-    patcher = patch('naclports.__main__.CheckSDKRoot')
+    patcher = patch('naclports.util.CheckSDKRoot')
     patcher.start()
     self.addCleanup(patcher.stop)
 
@@ -476,15 +485,32 @@ class TestMain(NaclportsTest):
     naclports.__main__.CleanAll(config)
 
   @patch('naclports.__main__.run_main',
-         Mock(side_effect=naclports.Error('oops')))
+         Mock(side_effect=error.Error('oops')))
   def testErrorReport(self):
-    # Verify that exceptions of the type naclports.Error are printed
+    # Verify that exceptions of the type error.Error are printed
     # to stderr and result in a return code of 1
     with patch('sys.stderr', new_callable=StringIO.StringIO) as stderr:
       self.assertEqual(naclports.__main__.main(None), 1)
     self.assertRegexpMatches(stderr.getvalue(), '^naclports: oops')
 
+  @patch('naclports.__main__.CmdPkgClean')
+  def testMainCommandDispatch(self, cmd_pkg_clean):
+    mock_pkg = Mock()
+    with patch('naclports.source_package.CreatePackage',
+               Mock(return_value=mock_pkg)):
+      naclports.__main__.run_main(['clean', 'foo'])
+    cmd_pkg_clean.assert_called_once_with(mock_pkg, mock.ANY)
+
+  @patch('naclports.__main__.CmdPkgClean',
+         Mock(side_effect=error.DisabledError()))
+  def testMainHandlePackageDisabled(self):
+    mock_pkg = Mock()
+    with patch('naclports.source_package.CreatePackage',
+               Mock(return_value=mock_pkg)):
+      with self.assertRaises(error.DisabledError):
+        naclports.__main__.run_main(['clean', 'foo'])
+
   @patch('naclports.__main__.CleanAll')
   def testMainCleanAll(self, clean_all_mock):
-    naclports.__main__.main(['clean', '--all'])
+    naclports.__main__.run_main(['clean', '--all'])
     clean_all_mock.assert_called_once_with(Configuration())

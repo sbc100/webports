@@ -24,7 +24,7 @@ def main(args):
                       help='Output extra information.')
   options = parser.parse_args(args)
   if options.verbose:
-    naclports.verbose = True
+    naclports.SetVerbose(True)
   count = 0
 
   package_names = [os.path.basename(p.root)

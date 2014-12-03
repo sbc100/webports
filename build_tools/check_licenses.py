@@ -64,7 +64,7 @@ def main(args):
                       help='Output extra information.')
   options = parser.parse_args(args)
   if options.verbose:
-    naclports.verbose = True
+    naclports.SetVerbose(True)
   rtn = False
 
   count = 0

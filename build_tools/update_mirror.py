@@ -42,7 +42,7 @@ def main(args):
   parser.add_argument('-v', '--verbose', action='store_true',
                       help='Enable verbose output.')
   options = parser.parse_args(args)
-  naclports.verbose = options.verbose
+  naclports.SetVerbose(options.verbose)
 
   ports_root = os.path.dirname(SCRIPT_DIR)
   listing = subprocess.check_output(['gsutil', 'ls', MIRROR_GS])

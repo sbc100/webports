@@ -5,13 +5,12 @@
 import os
 import hashlib
 
-import configuration
-import naclports
-import package
+from naclports import configuration, binary_package, package, util, paths
+from naclports import pkg_info, error
 
-DEFAULT_INDEX = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
-EXTRA_KEYS = naclports.package.EXTRA_KEYS + ['BIN_URL', 'BIN_SIZE', 'BIN_SHA1']
-PREBUILT_ROOT = os.path.join(naclports.PACKAGES_ROOT, 'prebuilt')
+DEFAULT_INDEX = os.path.join(paths.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
+EXTRA_KEYS = package.EXTRA_KEYS + ['BIN_URL', 'BIN_SIZE', 'BIN_SHA1']
+PREBUILT_ROOT = os.path.join(paths.PACKAGES_ROOT, 'prebuilt')
 
 
 def VerifyHash(filename, sha1):
@@ -32,12 +31,12 @@ def WriteIndex(index_filename, binaries):
   tmp_name = index_filename + '.tmp'
   with open(tmp_name, 'w') as output_file:
     for i, (filename, url) in enumerate(binaries):
-      package = naclports.binary_package.BinaryPackage(filename)
+      pkg = binary_package.BinaryPackage(filename)
       with open(filename) as f:
         sha1 = hashlib.sha1(f.read()).hexdigest()
       if i != 0:
         output_file.write('\n')
-      output_file.write(package.GetPkgInfo())
+      output_file.write(pkg.GetPkgInfo())
       output_file.write('BIN_URL=%s\n' % url)
       output_file.write('BIN_SIZE=%s\n' % os.path.getsize(filename))
       output_file.write('BIN_SHA1=%s\n' % sha1)
@@ -63,8 +62,8 @@ class PackageIndex(object):
   This class is used to read a package index of disk and stores
   it in memory as dictionary keys on package name + configuration.
   """
-  valid_keys = naclports.VALID_KEYS + EXTRA_KEYS
-  required_keys = naclports.REQUIRED_KEYS + EXTRA_KEYS
+  valid_keys = pkg_info.VALID_KEYS + EXTRA_KEYS
+  required_keys = pkg_info.REQUIRED_KEYS + EXTRA_KEYS
 
   def __init__(self, filename, index_data):
 
@@ -83,10 +82,10 @@ class PackageIndex(object):
     info = self.packages.get((package_name, config))
     if not info:
       return False
-    version = naclports.GetSDKVersion()
+    version = util.GetSDKVersion()
     if info['BUILD_SDK_VERSION'] != version:
-      naclports.Trace('Prebuilt package was built with different SDK version: '
-                      '%s vs %s' % (info['BUILD_SDK_VERSION'], version))
+      util.Trace('Prebuilt package was built with different SDK version: '
+                 '%s vs %s' % (info['BUILD_SDK_VERSION'], version))
       return False
     return True
 
@@ -98,24 +97,24 @@ class PackageIndex(object):
     if os.path.exists(filename):
       if VerifyHash(filename, info['BIN_SHA1']):
         return filename
-    naclports.Log('Downloading prebuilt binary ...')
-    naclports.DownloadFile(filename, info['BIN_URL'])
+    util.Log('Downloading prebuilt binary ...')
+    util.DownloadFile(filename, info['BIN_URL'])
     if not VerifyHash(filename, info['BIN_SHA1']):
-      raise naclports.Error('Unexepected SHA1: %s' % filename)
+      raise error.Error('Unexepected SHA1: %s' % filename)
     return filename
 
   def ParseIndex(self, index_data):
     if not index_data:
       return
 
-    for pkg_info in index_data.split('\n\n'):
-      info = naclports.ParsePkgInfo(pkg_info, self.filename,
-                                    self.valid_keys, self.required_keys)
+    for info_files in index_data.split('\n\n'):
+      info = pkg_info.ParsePkgInfo(info_files, self.filename,
+                                   self.valid_keys, self.required_keys)
       debug = info['BUILD_CONFIG'] == 'debug'
       config = configuration.Configuration(info['BUILD_ARCH'],
                                            info['BUILD_TOOLCHAIN'],
                                            debug)
       key = (info['NAME'], config)
       if key in self.packages:
-        naclports.Error('package index contains duplicate: %s' % str(key))
+        error.Error('package index contains duplicate: %s' % str(key))
       self.packages[key] = info

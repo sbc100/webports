@@ -327,7 +327,7 @@ def main(args):
   parser.add_argument('--build-number', help='Builder number to look at for '
                       'historical data on build times.', type=int, default=-1)
   options = parser.parse_args(args)
-  naclports.verbose = options.verbose
+  naclports.SetVerbose(options.verbose)
 
   if options.check:
     for num_bots in xrange(1, 6):

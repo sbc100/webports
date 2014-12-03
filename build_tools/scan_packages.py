@@ -124,7 +124,7 @@ def main(args):
                       help='Assume on-disk files are up-to-date (for testing).')
   args = parser.parse_args(args)
   if args.verbose:
-    naclports.verbose = True
+    naclports.SetVerbose(True)
 
   sdk_version = naclports.GetSDKVersion()
   Log('Scanning packages built for pepper_%s at revsion %s' %

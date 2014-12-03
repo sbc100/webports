@@ -7,9 +7,7 @@ import posixpath
 import shutil
 import tarfile
 
-import naclports
-import configuration
-import package
+from naclports import configuration, package, util, error
 
 PAYLOAD_DIR = 'payload'
 
@@ -24,7 +22,7 @@ def InstallFile(filename, old_root, new_root):
   """
   oldname = os.path.join(old_root, filename)
 
-  naclports.Trace('install: %s' % filename)
+  util.Trace('install: %s' % filename)
 
   newname = os.path.join(new_root, filename)
   dirname = os.path.dirname(newname)
@@ -86,9 +84,7 @@ class BinaryPackage(package.Package):
   extra_keys = package.EXTRA_KEYS
 
   def __init__(self, filename):
-    self.InitFromArchiveFile(filename)
-
-  def InitFromArchiveFile(self, filename):
+    super(BinaryPackage, self).__init__()
     self.filename = filename
     self.info = filename
     self.VerifyArchiveFormat()
@@ -101,18 +97,18 @@ class BinaryPackage(package.Package):
 
   def VerifyArchiveFormat(self):
     if not os.path.exists(self.filename):
-      raise naclports.Error('package archive not found: %s' % self.filename)
+      raise error.Error('package archive not found: %s' % self.filename)
     basename, extension = os.path.splitext(os.path.basename(self.filename))
     basename = os.path.splitext(basename)[0]
     if extension != '.bz2':
-      raise naclports.Error('invalid file extension: %s' % extension)
+      raise error.Error('invalid file extension: %s' % extension)
 
     try:
       with tarfile.open(self.filename) as tar:
         if './pkg_info' not in tar.getnames():
-          raise PkgFormatError('package does not contain pkg_info file')
+          raise error.PkgFormatError('package does not contain pkg_info file')
     except tarfile.TarError as e:
-      raise naclports.PkgFormatError(e)
+      raise error.PkgFormatError(e)
 
   def IsInstallable(self):
     """Determine if a binary package can be installed in the
@@ -121,7 +117,7 @@ class BinaryPackage(package.Package):
     Currently only packages built with the same SDK major version
     are installable.
     """
-    return self.BUILD_SDK_VERSION == naclports.GetSDKVersion()
+    return self.BUILD_SDK_VERSION == util.GetSDKVersion()
 
   def GetPkgInfo(self):
     """Extract the contents of the pkg_info file from the binary package."""
@@ -130,19 +126,19 @@ class BinaryPackage(package.Package):
 
   def Install(self):
     """Install binary package into toolchain directory."""
-    with naclports.InstallLock(self.config):
+    with util.InstallLock(self.config):
       self._Install()
 
   def _Install(self):
-    dest = naclports.GetInstallRoot(self.config)
+    dest = util.GetInstallRoot(self.config)
     dest_tmp = os.path.join(dest, 'install_tmp')
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
     if self.IsAnyVersionInstalled():
-      raise naclports.Error('package already installed: %s' % self.InfoString())
+      raise error.Error('package already installed: %s' % self.InfoString())
 
-    naclports.Log("Installing %s" % self.InfoString())
+    util.Log("Installing %s" % self.InfoString())
     os.makedirs(dest_tmp)
 
     names = []
@@ -155,7 +151,7 @@ class BinaryPackage(package.Package):
           if name == 'pkg_info':
             continue
           if not name.startswith(PAYLOAD_DIR + '/'):
-            raise naclports.PkgFormatError('invalid file in package: %s' % name)
+            raise error.PkgFormatError('invalid file in package: %s' % name)
 
           name = name[len(PAYLOAD_DIR) + 1:]
           names.append(name)
@@ -163,7 +159,7 @@ class BinaryPackage(package.Package):
         for name in names:
           full_name = os.path.join(dest, name)
           if os.path.exists(full_name):
-            raise naclports.Error('file already exists: %s' % full_name)
+            raise error.Error('file already exists: %s' % full_name)
 
         tar.extractall(dest_tmp)
         payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
@@ -179,8 +175,8 @@ class BinaryPackage(package.Package):
 
   def WriteStamp(self):
     """Write stamp file containing pkg_info."""
-    filename = naclports.GetInstallStamp(self.NAME, self.config)
-    naclports.Trace('stamp: %s' % filename)
+    filename = util.GetInstallStamp(self.NAME, self.config)
+    util.Trace('stamp: %s' % filename)
     pkg_info = self.GetPkgInfo()
     with open(filename, 'w') as f:
       f.write(pkg_info)

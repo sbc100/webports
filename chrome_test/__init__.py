@@ -576,7 +576,8 @@ def Main(argv):
   if sys.platform.startswith('linux'):
     default_sandbox_locations = [
       '/usr/local/sbin/chrome-devel-sandbox',
-      '/opt/chromium/chrome_sandbox'
+      '/opt/chromium/chrome_sandbox',
+      '/opt/google/chrome-beta/chrome-sandbox'
     ]
     if 'CHROME_DEVEL_SANDBOX' not in os.environ:
       for filename in default_sandbox_locations:

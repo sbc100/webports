@@ -24,7 +24,7 @@ def main(args):
                       help='Output extra information.')
   options = parser.parse_args(args)
   if options.verbose:
-    naclports.verbose = True
+    naclports.SetVerbose(True)
   count = 0
 
   for package in naclports.source_package.SourcePackageIterator():

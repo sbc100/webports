@@ -70,6 +70,9 @@ reallyclean: clean
 
 check: test
 
+lint:
+	pylint -d unused-argument lib/naclports
+
 test:
 	bin/nosetests build_tools/build_tools_test.py
 	$(COVERAGE) run --include=lib/naclports/* -m nose --rednose
@@ -80,4 +83,4 @@ test:
 %:
 	bin/naclports install $* $(BUILD_FLAGS)
 
-.PHONY: all run clean sdklibs sdklibs_list reallyclean check test
+.PHONY: all run clean sdklibs sdklibs_list reallyclean check test lint

@@ -5,7 +5,7 @@
 import os
 import platform
 
-import naclports
+from naclports import error, util
 
 class Configuration(object):
   """Class representing the build configuration for naclports packages.
@@ -22,6 +22,10 @@ class Configuration(object):
   default_toolchain = 'newlib'
 
   def __init__(self, arch=None, toolchain=None, debug=None):
+    self.debug = None
+    self.libc = None
+    self.config_name = None
+
     self.SetConfig(debug)
 
     if arch is None:
@@ -48,8 +52,8 @@ class Configuration(object):
         arch = 'x86_64'
 
     self.arch = arch
-    if self.arch not in naclports.arch_to_pkgarch:
-      raise naclports.Error("Invalid arch: %s" % arch)
+    if self.arch not in util.arch_to_pkgarch:
+      raise error.Error("Invalid arch: %s" % arch)
 
     self.SetLibc()
 

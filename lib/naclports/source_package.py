@@ -11,16 +11,13 @@ import tempfile
 import time
 import urlparse
 
-import binary_package
-import configuration
-import naclports
-import package
-import package_index
-import sha1check
-from naclports import Log, Error, Trace, DisabledError, PkgFormatError
+from naclports import binary_package, configuration, package, package_index
+from naclports import util, paths
+from naclports.util import Log, Trace
+from naclports.error import Error, DisabledError, PkgFormatError
 
-MIRROR_URL = '%s%s/mirror' % (naclports.GS_URL, naclports.GS_BUCKET)
-CACHE_ROOT = os.path.join(naclports.OUT_DIR, 'cache')
+sys.path.append(paths.TOOLS_DIR)
+import sha1check
 
 
 class PkgConflictError(Error):
@@ -66,6 +63,7 @@ class SourcePackage(package.Package):
   """
 
   def __init__(self, pkg_root, config=None):
+    super(SourcePackage, self).__init__()
     if config is None:
       config = configuration.Configuration()
     self.config = config
@@ -87,7 +85,7 @@ class SourcePackage(package.Package):
 
   def GetBuildLocation(self):
     package_dir = self.ARCHIVE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
-    return os.path.join(naclports.BUILD_ROOT, self.NAME, package_dir)
+    return os.path.join(paths.BUILD_ROOT, self.NAME, package_dir)
 
   def GetArchiveFilename(self):
     if self.URL_FILENAME:
@@ -102,11 +100,11 @@ class SourcePackage(package.Package):
     archive = self.GetArchiveFilename()
     if not archive:
       return
-    return os.path.join(CACHE_ROOT, archive)
+    return os.path.join(paths.CACHE_ROOT, archive)
 
   def IsInstalled(self):
-    return naclports.IsInstalled(self.NAME, self.config,
-                                 self.InstalledInfoContents())
+    return util.IsInstalled(self.NAME, self.config,
+                            self.InstalledInfoContents())
 
   def InstallDeps(self, force, from_source=False):
     for dep in self.Dependencies():
@@ -114,9 +112,9 @@ class SourcePackage(package.Package):
         dep.Install(True, force, from_source)
 
   def PackageFile(self):
-    fullname = [os.path.join(naclports.PACKAGES_ROOT, self.NAME)]
+    fullname = [os.path.join(paths.PACKAGES_ROOT, self.NAME)]
     fullname.append(self.VERSION)
-    fullname.append(naclports.arch_to_pkgarch[self.config.arch])
+    fullname.append(util.arch_to_pkgarch[self.config.arch])
     # for pnacl toolchain and arch are the same
     if self.config.toolchain != self.config.arch:
       fullname.append(self.config.toolchain)
@@ -132,7 +130,7 @@ class SourcePackage(package.Package):
     info_content += 'BUILD_CONFIG=%s\n' % self.config.config_name
     info_content += 'BUILD_ARCH=%s\n' % self.config.arch
     info_content += 'BUILD_TOOLCHAIN=%s\n' % self.config.toolchain
-    info_content += 'BUILD_SDK_VERSION=%s\n' % naclports.GetSDKVersion()
+    info_content += 'BUILD_SDK_VERSION=%s\n' % util.GetSDKVersion()
     return info_content
 
   def IsBuilt(self):
@@ -140,12 +138,12 @@ class SourcePackage(package.Package):
     if not os.path.exists(package_file):
       return False
     try:
-      package = binary_package.BinaryPackage(package_file)
-    except naclports.PkgFormatError as e:
+      pkg = binary_package.BinaryPackage(package_file)
+    except PkgFormatError:
       # If the package is malformed in some way or in some old format
       # then treat it as not built.
       return False
-    return package.IsInstallable()
+    return pkg.IsInstallable()
 
   def Install(self, build_deps, force=None, from_source=False):
     self.CheckInstallable()
@@ -190,7 +188,7 @@ class SourcePackage(package.Package):
       Log('Already built %s' % self.InfoString())
       return
 
-    log_root = os.path.join(naclports.OUT_DIR, 'logs')
+    log_root = os.path.join(paths.OUT_DIR, 'logs')
     if not os.path.isdir(log_root):
       os.makedirs(log_root)
 
@@ -198,21 +196,21 @@ class SourcePackage(package.Package):
     if os.path.exists(stdout):
       os.remove(stdout)
 
-    if naclports.verbose:
+    if util.verbose:
       prefix = '*** '
     else:
       prefix = ''
     Log('%sBuilding %s' % (prefix, self.InfoString()))
 
     start = time.time()
-    with naclports.BuildLock():
+    with util.BuildLock():
       self.RunBuildSh(stdout)
 
     duration = FormatTimeDelta(time.time() - start)
     Log('Build complete %s [took %s]' % (self.InfoString(), duration))
 
   def RunBuildSh(self, stdout, args=None):
-    build_port = os.path.join(naclports.TOOLS_DIR, 'build_port.sh')
+    build_port = os.path.join(paths.TOOLS_DIR, 'build_port.sh')
     cmd = [build_port]
     if args is not None:
       cmd += args
@@ -221,7 +219,7 @@ class SourcePackage(package.Package):
     env['TOOLCHAIN'] = self.config.toolchain
     env['NACL_ARCH'] = self.config.arch
     env['NACL_DEBUG'] = self.config.debug and '1' or '0'
-    if naclports.verbose:
+    if util.verbose:
       rtn = subprocess.call(cmd, cwd=self.root, env=env)
       if rtn != 0:
         raise Error("Building %s: failed." % (self.NAME))
@@ -264,13 +262,13 @@ class SourcePackage(package.Package):
     if os.path.exists(pkg):
       os.remove(pkg)
 
-    stamp_dir = os.path.join(naclports.STAMP_DIR, self.NAME)
+    stamp_dir = os.path.join(paths.STAMP_DIR, self.NAME)
     Log('removing %s' % stamp_dir)
     if os.path.exists(stamp_dir):
       shutil.rmtree(stamp_dir)
 
   def Extract(self):
-    self.ExtractInto(os.path.join(naclports.BUILD_ROOT, self.NAME))
+    self.ExtractInto(os.path.join(paths.BUILD_ROOT, self.NAME))
 
   def ExtractInto(self, output_path):
     """Extract the package archive into the given location.
@@ -290,7 +288,7 @@ class SourcePackage(package.Package):
       Trace('Already exists: %s' % dest)
       return
 
-    tmp_output_path = tempfile.mkdtemp(dir=naclports.OUT_DIR)
+    tmp_output_path = tempfile.mkdtemp(dir=paths.OUT_DIR)
     Log("Extracting '%s'" % self.NAME)
     try:
       ExtractArchive(archive, tmp_output_path)
@@ -303,7 +301,7 @@ class SourcePackage(package.Package):
       shutil.rmtree(tmp_output_path)
 
   def GetMirrorURL(self):
-    return MIRROR_URL + '/' + self.GetArchiveFilename()
+    return util.GS_MIRROR_URL + '/' + self.GetArchiveFilename()
 
   def CheckInstallable(self):
     if self.LIBC is not None and self.LIBC != self.config.libc:
@@ -326,7 +324,7 @@ class SourcePackage(package.Package):
                             % (self.NAME, self.config.arch))
 
     for conflicting_package in self.CONFLICTS:
-      if naclports.IsInstalled(conflicting_package, self.config):
+      if util.IsInstalled(conflicting_package, self.config):
         raise PkgConflictError("%s: conflicts with installed package: %s" %
             (self.NAME, conflicting_package))
 
@@ -363,8 +361,7 @@ class SourcePackage(package.Package):
     self.CheckInstallable()
 
     if self.BUILD_OS is not None:
-      import getos
-      if getos.GetPlatform() != self.BUILD_OS:
+      if util.GetPlatform() != self.BUILD_OS:
         raise DisabledError('%s: can only be built on %s'
                             % (self.NAME, self.BUILD_OS))
 
@@ -380,12 +377,12 @@ class SourcePackage(package.Package):
       # back to the original if this fails.
       mirror_url = self.GetMirrorURL()
       try:
-        naclports.DownloadFile(filename, mirror_url)
+        util.DownloadFile(filename, mirror_url)
         return
       except Error:
         pass
 
-    naclports.DownloadFile(filename, self.URL)
+    util.DownloadFile(filename, self.URL)
 
   def UpdatePatch(self):
     git_dir = self.GetBuildLocation()
@@ -442,7 +439,7 @@ class SourcePackage(package.Package):
 
 def SourcePackageIterator():
   """Iterator which yields a Package object for each naclport package."""
-  ports_root = os.path.join(naclports.NACLPORTS_ROOT, 'ports')
+  ports_root = os.path.join(paths.NACLPORTS_ROOT, 'ports')
   for root, _, files in os.walk(ports_root):
     if 'pkg_info' in files:
       yield SourcePackage(root)
@@ -459,7 +456,7 @@ def CreatePackage(package_name, config=None):
     return SourcePackage(package_name, config)
 
   for subdir in DEFAULT_LOCATIONS:
-    pkg_root = os.path.join(naclports.NACLPORTS_ROOT, subdir, package_name)
+    pkg_root = os.path.join(paths.NACLPORTS_ROOT, subdir, package_name)
     info = os.path.join(pkg_root, 'pkg_info')
     if os.path.exists(info):
       return SourcePackage(pkg_root, config)
