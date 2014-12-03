@@ -44,7 +44,6 @@ def main(args):
   options = parser.parse_args(args)
   naclports.SetVerbose(options.verbose)
 
-  ports_root = os.path.dirname(SCRIPT_DIR)
   listing = subprocess.check_output(['gsutil', 'ls', MIRROR_GS])
   listing = listing.splitlines()
   listing = [os.path.basename(l) for l in listing]

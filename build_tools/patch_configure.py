@@ -26,6 +26,7 @@ detect_so_support = \
 # GLIBC toolchain.
 CONFIGURE_PATCHS = [
 # Correct result for "dynamic linker characteristics"
+# pylint: disable=line-too-long
 ['(\n\*\)\n  dynamic_linker=no)',
 '''
 nacl)

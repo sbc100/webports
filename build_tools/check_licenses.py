@@ -41,15 +41,15 @@ def CheckLicense(package):
   licenses = package.LICENSE.split(',')
   if options.verbose:
     print('%-27s: %s' % (package.NAME, licenses))
-  licenses = [license.split(':') for license in licenses]
-  for license in licenses:
-    if license[0] not in VALID_LICENSES:
-      print('%s: Invalid license: %s' % (package.root, license))
+  licenses = [l.split(':') for l in licenses]
+  for license_info in licenses:
+    if license_info[0] not in VALID_LICENSES:
+      print('%s: Invalid license: %s' % (package.root, license_info[0]))
       rtn = 1
-    if len(license) > 1:
+    if len(license_info) > 1:
       package.Download()
       package.Extract()
-      filename = os.path.join(package.GetBuildLocation(), license[1])
+      filename = os.path.join(package.GetBuildLocation(), license_info[1])
       if not os.path.exists(filename):
         print('Missing license file: %s' % filename)
         rtn = 1

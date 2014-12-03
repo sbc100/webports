@@ -99,7 +99,7 @@ def DetermineSDKURL(flavor, base_url, version):
       raise naclports.Error('gsutil command failed: %s' % str(cmd))
 
     elements = p_stdout.splitlines()
-    return [os.path.basename(os.path.normpath(e)) for e in elements]
+    return [os.path.basename(os.path.normpath(elem)) for elem in elements]
 
   if version == 'latest':
     print('Looking for latest SDK upload...')

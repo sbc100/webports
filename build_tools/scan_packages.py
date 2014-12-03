@@ -52,7 +52,7 @@ def ParseGsUtilLs(output):
   for line in output.splitlines():
     if line.startswith("TOTAL"):
       continue
-    size, data, filename, etag = line.split()
+    size, _, filename, etag = line.split()
     etag = etag.split('=', 1)[1]
     filename = filename[len('gs://'):]
     url = naclports.GS_URL + filename

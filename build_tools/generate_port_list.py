@@ -39,7 +39,7 @@ def main(args):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('-v', '--verbose', action='store_true',
                       help='Output extra information.')
-  options = parser.parse_args(args)
+  parser.parse_args(args)
   rtn = 0
 
   print(header)

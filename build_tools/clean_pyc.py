@@ -21,7 +21,7 @@ def main(args):
   args = parser.parse_args()
   for directory in args.directories:
     assert(os.path.isdir(directory))
-    for root, dirs, files in os.walk(directory):
+    for root, _, files in os.walk(directory):
       for filename in files:
         basename, ext = os.path.splitext(filename)
         if ext == '.pyc':
