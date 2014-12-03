@@ -15,11 +15,25 @@ _EXCLUDED_PATHS = (
     r"^build_tools[\\\/]patch_configure.py",
 )
 
+def RunPylint(input_api, output_api):
+  output = []
+  canned = input_api.canned_checks
+  disabled_warnings = [
+    'W0613',  # Unused argument
+  ]
+  black_list = list(input_api.DEFAULT_BLACK_LIST) + [
+    r'ports[\/\\]ipython-ppapi[\/\\]kernel\.py',
+  ]
+  output.extend(canned.RunPylint(input_api, output_api, black_list=black_list,
+                disabled_warnings=disabled_warnings, extra_paths_list=['lib']))
+  return output
+
+
 def CheckBuildbot(input_api, output_api):
   try:
     cmd = ['build_tools/partition.py', '--check']
     subprocess.check_call(cmd)
-  except subprocess.CalledProcessError as e:
+  except subprocess.CalledProcessError:
     return [output_api.PresubmitError('%s failed' % str(cmd))]
   return []
 
@@ -27,7 +41,7 @@ def CheckBuildbot(input_api, output_api):
 def CheckDeps(input_api, output_api):
   try:
     subprocess.check_call(['build_tools/check_deps.py'])
-  except subprocess.CalledProcessError as e:
+  except subprocess.CalledProcessError:
     message = 'update_mirror.py --check failed.'
     message += '\nRun build_tools/update_mirror.py to update.'
     return [output_api.PresubmitError(message)]
@@ -37,7 +51,7 @@ def CheckDeps(input_api, output_api):
 def CheckMirror(input_api, output_api):
   try:
     subprocess.check_call(['build_tools/update_mirror.py', '--check'])
-  except subprocess.CalledProcessError as e:
+  except subprocess.CalledProcessError:
     message = 'update_mirror.py --check failed.'
     message += '\nRun build_tools/update_mirror.py to update.'
     return [output_api.PresubmitError(message)]
@@ -54,7 +68,7 @@ def RunUnittests(input_api, output_api):
 
 def CheckChangeOnUpload(input_api, output_api):
   report = []
-  affected_files = input_api.AffectedFiles(include_deletes=False)
+  report.extend(RunPylint(input_api, output_api))
   report.extend(RunUnittests(input_api, output_api))
   report.extend(CheckDeps(input_api, output_api))
   report.extend(input_api.canned_checks.PanProjectChecks(

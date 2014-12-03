@@ -338,9 +338,9 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
     # Fall back to a providing normal HTTP access.
     httpd.QuittableHTTPHandler.do_GET(self)
 
-  def log_message(self, format, *args):
+  def log_message(self, fmt, *args):
     if logging.getLogger().isEnabledFor(logging.DEBUG):
-      httpd.QuittableHTTPHandler.log_message(self, format, *args)
+      httpd.QuittableHTTPHandler.log_message(self, fmt, *args)
 
 
 def Hex2Alpha(ch):
@@ -464,7 +464,7 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
           cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
           preexec_fn=ProcessGroup)
       logging.info('Started chrome with command line: %s' % (' '.join(cmd)))
-      stdout, stderr, returncode = CommunicateWithTimeout(p, timeout=timeout)
+      stdout, _, returncode = CommunicateWithTimeout(p, timeout=timeout)
       if logging.getLogger().isEnabledFor(logging.DEBUG):
         sys.stdout.write('\n[[[ STDOUT ]]]\n')
         sys.stdout.write('-' * 70 + '\n')
@@ -475,7 +475,7 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
       try:
         with contextlib.closing(urllib2.urlopen(quit_url)) as stream:
           stream.read()
-      except:
+      except Exception:
         pass
     thread.join()
     logging.info('Shutdown web server.')
