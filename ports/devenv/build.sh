@@ -2,8 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
-  -lnacl_spawn -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
+  -lnacl_spawn -lppapi_simple \
+  -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
              jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"
@@ -23,7 +24,7 @@ BuildStep() {
   LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
       ${START_DIR}/tests/devenv_small_test.cc \
       -o ${BUILD_DIR}/tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
-      ${EXTRA_LIBS} -lgtest
+      -lgtest ${EXTRA_LIBS}
 }
 
 InstallStep() {

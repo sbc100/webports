@@ -6,51 +6,12 @@ diff --git a/job.c b/job.c
  #include <string.h>
  
 +#if defined(__native_client__)
-+#include <spawn.h>
++# include <spawn.h>
 +#endif
 +
  /* Default shell to use.  */
  #ifdef WINDOWS32
  #include <windows.h>
-@@ -1320,8 +1324,14 @@ start_job_command (struct child *child)
-       if (job_rfd >= 0)
- 	fcntl (job_rfd, F_SETFD, 0);
- 
--#else  /* !__EMX__ */
--
-+# else  /* !__EMX__ */
-+#  if defined(__native_client__)
-+      child->pid = spawnve(P_NOWAIT, argv[0], argv, child->environment);
-+      if (child->pid < 0) {
-+        perror_with_name ("spawnve", "");
-+        goto error;
-+      }
-+#  else
-       child->pid = vfork ();
-       environ = parent_environ;	/* Restore value child may have clobbered.  */
-       if (child->pid == 0)
-@@ -1339,11 +1349,11 @@ start_job_command (struct child *child)
-           if (job_rfd >= 0)
-             close (job_rfd);
- 
--#ifdef SET_STACK_SIZE
-+#   ifdef SET_STACK_SIZE
-           /* Reset limits, if necessary.  */
-           if (stack_limit.rlim_cur)
-             setrlimit (RLIMIT_STACK, &stack_limit);
--#endif
-+#   endif
- 
- 	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
-                              argv, child->environment);
-@@ -1355,6 +1365,7 @@ start_job_command (struct child *child)
- 	  perror_with_name ("vfork", "");
- 	  goto error;
- 	}
-+#  endif
- # endif  /* !__EMX__ */
- #endif /* !VMS */
-     }
 diff --git a/main.c b/main.c
 --- a/main.c
 +++ b/main.c

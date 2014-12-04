@@ -423,7 +423,7 @@ diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 diff --git a/Modules/python.c b/Modules/python.c
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -6,6 +6,30 @@
+@@ -6,6 +6,36 @@
  #include <floatingpoint.h>
  #endif
  
@@ -450,6 +450,12 @@ diff --git a/Modules/python.c b/Modules/python.c
 +	return 0;
 +}
 +#endif
++
++// Dummy implementation of nacl_spawn_vfork_exit, otherwise provided
++// by nacl_spawn.
++void nacl_spawn_vfork_exit(int status) {
++  _exit(status);
++}
 +
  int
  main(int argc, char **argv)

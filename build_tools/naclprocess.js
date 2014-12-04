@@ -391,6 +391,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     nacl_setsid: this.handleMessageSetSID_,
     nacl_pipe: this.handleMessagePipe_,
     nacl_jseval: this.handleMessageJSEval_,
+    nacl_deadpid: this.handleMessageDeadPid_,
   };
 
   // TODO(channingh): Once pinned applications support "result" instead of
@@ -624,6 +625,22 @@ NaClProcessManager.prototype.handleMessageJSEval_ = function(msg, reply) {
 }
 
 /**
+ * Create a process that immediately exits with a given status.
+ * Used to implement vfork calling _exit.
+ * @private
+ */
+NaClProcessManager.prototype.handleMessageDeadPid_ = function(msg, reply, src) {
+  var self = this;
+  // TODO(bradnelson): Avoid needing to frivolously manipulate the DOM to
+  // generate a dead pid by separating the process data structure manipulation
+  // parts of spawn + exit from the DOM / module ones.
+  self.spawn(null, [], [], '/', 'pnacl', src, function(pid, element) {
+    self.exit(msg['status'], element);
+    reply({pid: pid});
+  });
+}
+
+/**
  * Handle progress event from NaCl.
  * @private
  */
@@ -836,6 +853,8 @@ NaClProcessManager.prototype.checkUrlNaClManifestType = function(
  * Called once a pid / error code is known for a spawned process.
  * @callback spawnCallback
  * @param {pid} pid The pid of the spawned process or error code if negative.
+ * @param {HTMLObjectElement} element DOM object corresponding to the spawned
+ *                            process.
  */
 
 /**
@@ -886,12 +905,14 @@ NaClProcessManager.prototype.spawn = function(
     fg.parent = parent;
     fg.commandName = argv[0];
 
-    fg.addEventListener('abort', self.handleLoadAbort_.bind(self));
-    fg.addEventListener('crash', self.handleCrash_.bind(self));
-    fg.addEventListener('error', self.handleLoadError_.bind(self));
-    fg.addEventListener('load', self.handleLoad_.bind(self));
-    fg.addEventListener('message', self.handleMessage_.bind(self));
-    fg.addEventListener('progress', self.handleProgress_.bind(self));
+    if (nmf !== null) {
+      fg.addEventListener('abort', self.handleLoadAbort_.bind(self));
+      fg.addEventListener('crash', self.handleCrash_.bind(self));
+      fg.addEventListener('error', self.handleLoadError_.bind(self));
+      fg.addEventListener('load', self.handleLoad_.bind(self));
+      fg.addEventListener('message', self.handleMessage_.bind(self));
+      fg.addEventListener('progress', self.handleProgress_.bind(self));
+    }
 
     var pgid = parent ? self.processes[parent.pid].pgid : fg.pid;
     var ppid = parent ? parent.pid : NaClProcessManager.INIT_PID;
@@ -914,7 +935,7 @@ NaClProcessManager.prototype.spawn = function(
       if (naclArch === null) {
         console.log(
             'Browser does not support NaCl/PNaCl or is disabled.');
-        callback(-Errno.ENOEXEC);
+        callback(-Errno.ENOEXEC, fg);
         return;
       }
       envs.push('NACL_ARCH=' + naclArch);
@@ -1036,7 +1057,7 @@ NaClProcessManager.prototype.spawn = function(
     var junk = fg.offsetTop;
 
     // yield result.
-    callback(fg.pid);
+    callback(fg.pid, fg);
   });
 }
 
