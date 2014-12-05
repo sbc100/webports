@@ -64,6 +64,8 @@ InstallStep() {
   rm -rf bin
   rm -rf share/man
   find . -iname "*.nexe" -delete
+  mkdir -p ${ASSEMBLY_DIR}/emacstar/home/user/.emacs.d
+  cp ${START_DIR}/init.el ${ASSEMBLY_DIR}/emacstar/home/user/.emacs.d
   tar cf ${ASSEMBLY_DIR}/emacs.tar .
   rm -rf ${ASSEMBLY_DIR}/emacstar
   cd ${ASSEMBLY_DIR}

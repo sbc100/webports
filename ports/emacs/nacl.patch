@@ -276,7 +276,7 @@ diff --git a/lisp/files.el b/lisp/files.el
 diff --git a/lisp/loadup.el b/lisp/loadup.el
 --- a/lisp/loadup.el
 +++ b/lisp/loadup.el
-@@ -68,7 +68,7 @@
+@@ -68,7 +70,7 @@
      ;; Hash consing saved around 11% of pure space in my tests.
      (setq purify-flag (make-hash-table :test 'equal :size 70000)))
  
@@ -285,6 +285,27 @@ diff --git a/lisp/loadup.el b/lisp/loadup.el
  
  (if (or (member (nth 3 command-line-args) '("dump" "bootstrap"))
  	(member (nth 4 command-line-args) '("dump" "bootstrap")))
+
+diff --git a/lisp/startup.el b/lisp/startup.el
+--- a/lisp/startup.el
++++ b/lisp/startup.el
+@@ -1004,7 +1018,7 @@ Amongst another things, it parses the command-line arguments."
+ 			       ;; even if invoked with "-u USER", or
+ 			       ;; if $USER or $LOGNAME are set to
+ 			       ;; something different.
+-			       (if (memq system-type '(windows-nt ms-dos))
++			       (if (memq system-type '(windows-nt ms-dos nacl))
+ 				   "~"
+ 				 (concat "~" init-file-user))))
+ 	    nil
+@@ -1031,6 +1045,7 @@ Amongst another things, it parses the command-line arguments."
+ 			   (cond
+ 			     ((eq system-type 'ms-dos)
+ 			      (concat "~" init-file-user "/_emacs"))
++                             ((eq system-type 'nacl) "~/.emacs")
+ 			     ((not (eq system-type 'windows-nt))
+ 			      (concat "~" init-file-user "/.emacs"))
+ 			     ;; Else deal with the Windows situation
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
@@ -455,7 +476,7 @@ diff --git a/src/emacs.c b/src/emacs.c
  #if GC_MARK_STACK
    Lisp_Object dummy;
  #endif
-@@ -2113,7 +2129,7 @@ decode_env_path (const char *evarname, const char *defalt)
+@@ -2113,7 +2144,7 @@ decode_env_path (const char *evarname, const char *defalt)
      path = getenv (evarname);
    else
      path = 0;
