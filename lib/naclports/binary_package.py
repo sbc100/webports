@@ -27,7 +27,7 @@ def InstallFile(filename, old_root, new_root):
   newname = os.path.join(new_root, filename)
   dirname = os.path.dirname(newname)
   if not os.path.isdir(dirname):
-    os.makedirs(dirname)
+    util.Makedirs(dirname)
   os.rename(oldname, newname)
 
 
@@ -139,7 +139,7 @@ class BinaryPackage(package.Package):
       raise error.Error('package already installed: %s' % self.InfoString())
 
     util.Log("Installing %s" % self.InfoString())
-    os.makedirs(dest_tmp)
+    util.Makedirs(dest_tmp)
 
     names = []
     try:
@@ -186,7 +186,7 @@ class BinaryPackage(package.Package):
     filename = self.GetListFile()
     dirname = os.path.dirname(filename)
     if not os.path.isdir(dirname):
-      os.makedirs(dirname)
+      util.Makedirs(dirname)
     with open(filename, 'w') as f:
       for name in file_names:
         f.write(name + '\n')

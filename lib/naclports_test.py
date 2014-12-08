@@ -9,6 +9,7 @@ import shutil
 import StringIO
 import sys
 import tempfile
+import textwrap
 import unittest
 
 from naclports import paths
@@ -16,6 +17,7 @@ from naclports import binary_package
 from naclports import error
 from naclports import package_index
 from naclports import source_package
+from naclports import util
 from naclports.configuration import Configuration
 import naclports
 import naclports.__main__
@@ -28,28 +30,34 @@ def MockFileObject(contents=''):
   return file_mock
 
 
+def AddPatch(testcase, patcher):
+  patcher.start()
+  testcase.addCleanup(patcher.stop)
+
+
 class NaclportsTest(unittest.TestCase):
   """Class that sets up core mocks common to all test cases."""
 
   def setUp(self):
-    patcher = patch('naclports.util.GetInstallRoot',
-                    Mock(return_value='/package/install/path'))
-    patcher.start()
-    self.addCleanup(patcher.stop)
+    AddPatch(self, patch.dict('os.environ', {'NACL_SDK_ROOT': '/sdk/root'}))
+    AddPatch(self, patch('naclports.util.GetPlatform',
+             Mock(return_value='linux')))
+    AddPatch(self, patch('naclports.util.GetInstallRoot',
+             Mock(return_value='/package/install/path')))
+    AddPatch(self, patch('naclports.util.GetSDKRoot',
+             Mock(return_value='/sdk/root')))
 
     mock_lock = Mock()
     mock_lock.__enter__ = lambda s: s
     mock_lock.__exit__ = Mock(return_value=False)
-    patcher = patch('naclports.util.InstallLock', Mock(return_value=mock_lock))
-    patcher.start()
-    self.addCleanup(patcher.stop)
+    AddPatch(self, patch('naclports.util.InstallLock',
+             Mock(return_value=mock_lock)))
 
     mock_lock = Mock()
     mock_lock.__enter__ = lambda s: s
     mock_lock.__exit__ = Mock(return_value=False)
-    patcher = patch('naclports.util.BuildLock', Mock(return_value=mock_lock))
-    patcher.start()
-    self.addCleanup(patcher.stop)
+    AddPatch(self, patch('naclports.util.BuildLock',
+             Mock(return_value=mock_lock)))
 
 
 class TestConfiguration(NaclportsTest):
@@ -131,6 +139,16 @@ BIN_SIZE=10240
 BIN_SHA1=0cb0d2d1380831b38c2b8461528836aa7992435f
 '''
 
+test_info = '''\
+NAME=foo
+VERSION=bar
+BUILD_ARCH=arm
+BUILD_CONFIG=debug
+BUILD_TOOLCHAIN=newlib
+BUILD_SDK_VERSION=123
+BUILD_NACLPORTS_REVISION=98765
+'''
+
 class TestPackageIndex(NaclportsTest):
   def testParsingInvalid(self):
     contents = 'FOO=bar\nBAR=baz\n'
@@ -174,7 +192,7 @@ class TestPackageIndex(NaclportsTest):
 
   @patch('naclports.util.Log', Mock())
   @patch('naclports.package_index.PREBUILT_ROOT', os.getcwd())
-  @patch('naclports.package_index.VerifyHash', Mock(return_value=True))
+  @patch('naclports.util.VerifyHash', Mock(return_value=True))
   @patch('naclports.util.DownloadFile')
   def testDownload(self, download_file_mock):
     index = package_index.PackageIndex('dummy_file', test_index)
@@ -182,15 +200,16 @@ class TestPackageIndex(NaclportsTest):
     index.Download('agg-demo', arm_config)
     self.assertEqual(download_file_mock.call_count, 1)
 
-test_info = '''\
-NAME=foo
-VERSION=bar
-BUILD_ARCH=arm
-BUILD_CONFIG=debbug
-BUILD_TOOLCHAIN=newlib
-BUILD_SDK_VERSION=123
-BUILD_NACLPORTS_REVISION=98765
-'''
+  @patch('naclports.util.HashFile', Mock(return_value='sha1'))
+  @patch('os.path.getsize', Mock(return_value=100))
+  def testWriteIndex(self):
+    temp_file = tempfile.mkstemp('naclports_test')[1]
+    self.addCleanup(os.remove, temp_file)
+
+    with patch('naclports.package_index.ExtractPkgInfo',
+               Mock(return_value=test_info)):
+      package_index.WriteIndex(temp_file, (('pkg1', 'url1'), ('pkg2', 'url2')))
+
 
 class TestInstalledPackage(NaclportsTest):
   def CreateMockInstalledPackage(self):
@@ -213,7 +232,6 @@ class TestInstalledPackage(NaclportsTest):
              call('/package/install/path/var/lib/npkg/foo.list')]
     remove_patch.assert_has_calls(calls)
 
-
 class TestBinaryPackage(NaclportsTest):
   @patch('os.rename')
   @patch('os.makedirs')
@@ -235,15 +253,15 @@ class TestBinaryPackage(NaclportsTest):
   @patch('naclports.util.GetInstallStamp',
          Mock(return_value='stamp_dir/stamp_file'))
   def testWriteStamp(self, mock_get_info):
-    fake_binary_pkg_info = '''\
-NAME=foo
-VERSION=1.0
-BUILD_CONFIG=release
-BUILD_ARCH=arm
-BUILD_TOOLCHAIN=newlib
-BUILD_SDK_VERSION=38
-BUILD_NACLPORTS_REVISION=1414
-'''
+    fake_binary_pkg_info = textwrap.dedent('''\
+      NAME=foo
+      VERSION=1.0
+      BUILD_CONFIG=release
+      BUILD_ARCH=arm
+      BUILD_TOOLCHAIN=newlib
+      BUILD_SDK_VERSION=38
+      BUILD_NACLPORTS_REVISION=1414
+      ''')
     mock_get_info.return_value = fake_binary_pkg_info
     pkg = binary_package.BinaryPackage('foo')
     mock_stamp_file = MockFileObject()
@@ -278,6 +296,15 @@ class TestSourcePackage(NaclportsTest):
     self.addCleanup(shutil.rmtree, self.tempdir)
     self.temp_ports = os.path.join(self.tempdir, 'ports')
 
+    patcher = patch('naclports.paths.BUILD_ROOT',
+                    os.path.join(self.tempdir, 'build_root'))
+    patcher.start()
+    self.addCleanup(patcher.stop)
+    patcher = patch('naclports.paths.OUT_DIR',
+                    os.path.join(self.tempdir, 'out_dir'))
+    patcher.start()
+    self.addCleanup(patcher.stop)
+
   def CreateTestPackage(self, name, extra_info=''):
     """Creates a source package directory in a temporary directory.
 
@@ -293,6 +320,33 @@ class TestSourcePackage(NaclportsTest):
     with open(os.path.join(pkg_root, 'pkg_info'), 'w') as info:
       info.write("NAME=%s\nVERSION=1.0\n%s" % (name, extra_info))
     return pkg_root
+
+  def testStampIsNewerThan(self):
+    stamp_file = os.path.join(self.tempdir, 'test_stamp')
+    stamp_file2 = os.path.join(self.tempdir, 'test_stamp2')
+
+    # Stamp doesn't exist.
+    self.assertFalse(source_package.StampIsNewerThan(stamp_file, stamp_file2))
+
+    # Stamp exist and is older than stamp2
+    open(stamp_file, 'w').close()
+    open(stamp_file2, 'w').close()
+    os.utime(stamp_file, (0, 0))
+    self.assertFalse(source_package.StampIsNewerThan(stamp_file, stamp_file2))
+
+    # Stamp exist and is newer than stamp2
+    stamp2_mtime = os.path.getmtime(stamp_file2)
+    os.utime(stamp_file, (stamp2_mtime + 1, stamp2_mtime + 1))
+    self.assertTrue(source_package.StampIsNewerThan(stamp_file, stamp_file2))
+
+  def testStampContentsMatch(self):
+    stamp_file = os.path.join(self.tempdir, 'test_stamp')
+    # stamp does not exist
+    self.assertFalse(source_package.StampContentsMatch(stamp_file, ''))
+
+    open(stamp_file, 'w').close()
+    self.assertTrue(source_package.StampContentsMatch(stamp_file, ''))
+    self.assertFalse(source_package.StampContentsMatch(stamp_file, 'foo'))
 
   def testInvalidSourceDir(self):
     """test that invalid source directory generates an error."""
@@ -319,22 +373,12 @@ class TestSourcePackage(NaclportsTest):
     self.assertFalse(pkg.IsBuilt())
 
   @patch('naclports.source_package.SourcePackage.RunBuildSh',
-      Mock(return_value=True))
+         Mock(return_value=True))
   @patch('naclports.source_package.Log', Mock())
   def testBuildPackage(self):
     root = self.CreateTestPackage('foo')
     pkg = source_package.SourcePackage(root)
     pkg.Build(True)
-
-  @patch('sha1check.VerifyHash')
-  @patch('naclports.source_package.SourcePackage.Download', Mock())
-  @patch('naclports.source_package.Log', Mock())
-  def testVerify(self, verify_hash_mock):
-    root = self.CreateTestPackage('foo', 'URL=someurl\nSHA1=123')
-    pkg = source_package.SourcePackage(root)
-    pkg.Verify()
-    filename = os.path.join(paths.CACHE_ROOT, 'someurl')
-    verify_hash_mock.assert_called_once_with(filename, '123')
 
   def testSourcePackageIterator(self):
     self.CreateTestPackage('foo')
@@ -347,7 +391,7 @@ class TestSourcePackage(NaclportsTest):
     root = self.CreateTestPackage('foo')
     pkg = source_package.SourcePackage(root)
     location = pkg.GetBuildLocation()
-    self.assertTrue(location.startswith(naclports.BUILD_ROOT))
+    self.assertTrue(location.startswith(paths.BUILD_ROOT))
     self.assertEqual(os.path.basename(location),
                      '%s-%s' % (pkg.NAME, pkg.VERSION))
 
@@ -413,6 +457,35 @@ class TestSourcePackage(NaclportsTest):
                                  'can only be built on solaris'):
       pkg.CheckBuildable()
 
+  @patch('naclports.util.GetSDKVersion', Mock(return_value=1234))
+  def testInstalledInfoContents(self):
+    root = self.CreateTestPackage('foo')
+    pkg = source_package.SourcePackage(root)
+    expected_contents = textwrap.dedent('''\
+      NAME=foo
+      VERSION=1.0
+      BUILD_CONFIG=release
+      BUILD_ARCH=x86_64
+      BUILD_TOOLCHAIN=newlib
+      BUILD_SDK_VERSION=1234
+      ''')
+    self.assertRegexpMatches(pkg.InstalledInfoContents(), expected_contents)
+
+  def testRunGitCmd_BadRepo(self):
+    os.mkdir(os.path.join(self.tempdir, '.git'))
+    with self.assertRaisesRegexp(error.Error, 'git command failed'):
+      source_package.InitGitRepo(self.tempdir)
+
+  def testInitGitRepo(self):
+    # init a git repo containing a single dummy file
+    with open(os.path.join(self.tempdir, 'file'), 'w') as f:
+      f.write('bar')
+    source_package.InitGitRepo(self.tempdir)
+    self.assertTrue(os.path.isdir(os.path.join(self.tempdir, '.git')))
+
+    # InitGitRepo should work on existing git repositories too.
+    source_package.InitGitRepo(self.tempdir)
+
 
 class TestCommands(NaclportsTest):
   def testListCommand(self):
@@ -469,6 +542,70 @@ class TestCommands(NaclportsTest):
     with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
       naclports.__main__.CmdPkgContents(package, options)
       self.assertEqual(stdout.getvalue(), expected_output)
+
+
+class TestUtil(unittest.TestCase):
+  def setUp(self):
+    AddPatch(self, patch('naclports.util.GetSDKRoot',
+             Mock(return_value='/sdk/root')))
+    AddPatch(self, patch('naclports.util.GetPlatform',
+             Mock(return_value='linux')))
+
+  @patch('naclports.util.HashFile', Mock(return_value='sha1'))
+  def testVerifyHash(self):
+    self.assertTrue(util.VerifyHash('foo', 'sha1'))
+    self.assertFalse(util.VerifyHash('foo', 'sha1x'))
+
+  @patch.dict('os.environ', {'PATH': '/x/y/z'})
+  def testFindInPath(self):
+    with self.assertRaisesRegexp(error.Error, "command not found: foo"):
+      util.FindInPath('foo')
+
+    with patch('os.path.exists') as mock_exists:
+      executable = os.path.join('/x/y/z', 'somefile')
+      self.assertEqual(util.FindInPath('somefile'), executable)
+      mock_exists.assert_called_once_with(executable)
+
+  def testCheckStamp_Missing(self):
+    with patch('os.path.exists', Mock(return_value=False)):
+      self.assertFalse(util.CheckStamp('foo.stamp', ''))
+
+  def testCheckStamp_Contents(self):
+    temp_fd, temp_name = tempfile.mkstemp('naclports_test')
+    self.addCleanup(os.remove, temp_name)
+
+    stamp_contents = 'stamp file contents'
+    with os.fdopen(temp_fd, 'w') as f:
+      f.write(stamp_contents)
+
+    self.assertTrue(util.CheckStamp(temp_name, stamp_contents))
+    self.assertFalse(util.CheckStamp(temp_name, stamp_contents + 'x'))
+
+  def testGetToolchainRoot(self):
+    expected = '/sdk/root/toolchain/linux_x86_newlib/x86_64-nacl'
+    self.assertEqual(util.GetToolchainRoot(Configuration()), expected)
+
+  def testGetInstallRoot(self):
+    expected = '/sdk/root/toolchain/linux_x86_newlib/x86_64-nacl/usr'
+    self.assertEqual(util.GetInstallRoot(Configuration()), expected)
+
+    expected = '/sdk/root/toolchain/linux_pnacl/usr/local'
+    self.assertEqual(util.GetInstallRoot(Configuration('pnacl')), expected)
+
+  def testHashFile(self):
+    temp_name = tempfile.mkstemp('naclports_test')[1]
+    self.addCleanup(os.remove, temp_name)
+
+    with self.assertRaises(IOError):
+      util.HashFile('/does/not/exist')
+
+    sha1_empty_string = 'da39a3ee5e6b4b0d3255bfef95601890afd80709'
+    self.assertEqual(util.HashFile(temp_name), sha1_empty_string)
+
+  @patch('naclports.paths.NACLPORTS_ROOT', '/foo')
+  def testRelPath(self):
+    self.assertEqual('bar', util.RelPath('/foo/bar'))
+    self.assertEqual('../baz/bar', util.RelPath('/baz/bar'))
 
 
 class TestMain(NaclportsTest):

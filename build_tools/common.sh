@@ -141,7 +141,6 @@ NACL_BUILD_SUBDIR+=${PACKAGE_SUFFIX}
 NACL_INSTALL_SUBDIR+=${PACKAGE_SUFFIX}
 readonly DEST_PYTHON_OBJS=${NACL_PACKAGES_BUILD}/python-modules/${NACL_BUILD_SUBDIR}
 PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
-PATCH_FILE=${START_DIR}/nacl.patch
 
 # Don't support building with SDKs older than the current stable release
 MIN_SDK_VERSION=${MIN_SDK_VERSION:-37}
@@ -571,92 +570,6 @@ Check() {
 }
 
 
-DefaultDownloadStep() {
-  if [ -z "${ARCHIVE_NAME:-}" ]; then
-    return
-  fi
-
-  cd "${NACL_PACKAGES_CACHE}"
-  # if matching tarball already exists, don't download again
-  if ! Check ; then
-    Fetch "${URL}" "${ARCHIVE_NAME}"
-    if ! Check ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
-       exit -1
-    fi
-  fi
-}
-
-
-GitCloneStep() {
-  local stamp_content="GITURL=${URL}"
-  if [ -f "${PATCH_FILE}" ]; then
-    local patch_checksum=$(${TOOLS_DIR}/sha1sum.py "${PATCH_FILE}")
-    stamp_content+=" PATCH_${patch_checksum}"
-  fi
-
-  if [ -d "${SRC_DIR}" ]; then
-    if CheckStampContent clone "${stamp_content}" ; then
-      Banner "Skipping git clone step"
-      return
-    fi
-
-    echo "error: Upstream archive or patch has changed."
-    echo "Please remove existing checkout to continue: '${SRC_DIR}'"
-    exit 1
-  fi
-
-  local GIT_URL=${URL%@*}
-  local COMMIT=${URL#*@}
-
-  # Clone upstream git repo into local mirror, or update the existing
-  # mirror.
-  local GIT_MIRROR=${GIT_URL##*://}
-  GIT_MIRROR=${GIT_MIRROR//\//_}
-  cd "${NACL_PACKAGES_CACHE}"
-  if [ -e "${GIT_MIRROR}" ]; then
-    cd "${GIT_MIRROR}"
-    if git rev-parse "${COMMIT}" > /dev/null 2>&1; then
-      echo "git mirror up-to-date: ${GIT_MIRROR}"
-    else
-      echo "Updating git mirror: ${GIT_MIRROR}"
-      LogExecute git remote update --prune
-    fi
-    cd "${NACL_PACKAGES_CACHE}"
-  else
-    LogExecute git clone --mirror "${GIT_URL}" "${GIT_MIRROR}"
-  fi
-
-  # Clone from the local mirror.
-  LogExecute git clone "${GIT_MIRROR}" "${SRC_DIR}"
-  ChangeDir "${SRC_DIR}"
-  LogExecute git reset --hard "${COMMIT}"
-
-  # Set the origing to the original URL so it is possible to push directly
-  # from the build tree.
-  git remote set-url origin "${GIT_URL}"
-
-  WriteStamp clone "${stamp_content}"
-
-  # make sure the patch step is applied
-  Remove "${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch"
-}
-
-
-#
-# Apply the package's patch file in the current working directory
-#
-Patch() {
-  if [ -f "${PATCH_FILE}" ]; then
-    Banner "Patching $(basename ${PWD})"
-    #git apply ${PATCH_FILE}
-    patch -p1 -g0 --no-backup-if-mismatch < "${PATCH_FILE}"
-    git add .
-    git commit -m "Apply naclports patch"
-  fi
-}
-
-
 VerifyPath() {
   # make sure path isn't all slashes (possibly from an unset variable)
   local PATH=$1
@@ -703,7 +616,7 @@ MakeDir() {
 }
 
 
-DefaultPreInstallStep() {
+MakeDirs() {
   MakeDir "${NACL_PACKAGES_ROOT}"
   MakeDir "${NACL_PACKAGES_BUILD}"
   # If 'tarballs' directory exists then rename it to the new name: 'cache'.
@@ -766,45 +679,10 @@ PublishByArchForDevEnv() {
 }
 
 
-InitGitRepo() {
-  if [ -d .git ]; then
-    local PREEXISTING_REPO=1
-  else
-    local PREEXISTING_REPO=0
-  fi
-
-  if [ ${PREEXISTING_REPO} = 0 ]; then
-    LogExecute git init
-  fi
-
-  # Setup git username and email in case there is not a system
-  # wide one already (git will error out on commit if it is missing).
-  if [ -n "${BUILDBOT_BUILDERNAME:-}" ]; then
-    if [ -z "$(git config user.email)" ]; then
-      git config user.email "naclports_buildbot"
-    fi
-    if [ -z "$(git config user.name)" ]; then
-      git config user.name "naclports buildbot"
-    fi
-  fi
-
-  # Ensure that the repo has an upstream and a master branch properly set up.
-  if [ ${PREEXISTING_REPO} = 1 ]; then
-    git checkout -b placeholder
-    git show-ref refs/heads/upstream > /dev/null && git branch -D upstream
-    git checkout -b upstream
-    git show-ref refs/heads/master > /dev/null && git branch -D master
-    git checkout -b master
-    git branch -D placeholder
-  else
-    git add -f .
-    git commit -m "Upstream version" > /dev/null
-    git checkout -b upstream
-    git checkout master
-  fi
-}
-
-
+#
+# CheckStamp: checks for the existence of a stamp file
+# $1 - Name of stamp file.
+#
 CheckStamp() {
   local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
   local STAMP_FILE="${STAMP_DIR}/$1"
@@ -812,13 +690,6 @@ CheckStamp() {
   if [ ! -f "${STAMP_FILE}" ]; then
     return 1
   fi
-  shift
-  while (( "$#" )) ; do
-    if [ "$1" -nt "${STAMP_FILE}" ]; then
-      return 1
-    fi
-    shift
-  done
   return 0
 }
 
@@ -827,38 +698,6 @@ TouchStamp() {
   local STAMP_DIR=${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}
   MakeDir "${STAMP_DIR}"
   touch "${STAMP_DIR}/$1"
-}
-
-
-#
-# CheckStampContent: checks that a stampfile exists an has a specified contents.
-#
-# $1 - Name of stamp file.
-# $2 - Expected contents of stamp file.
-#
-CheckStampContent() {
-  local STAMP_DIR="${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}"
-  local STAMP_FILE="${STAMP_DIR}/$1"
-
-  # check the stamp file exists
-  if [ ! -f "${STAMP_FILE}" ]; then
-    return 1
-  fi
-
-  # check the stamp contents
-  local stamp_contents=$(cat "${STAMP_FILE}")
-  if [ ! "${stamp_contents}" = "$2" ]; then
-    return 1
-  fi
-
-  return 0
-}
-
-
-WriteStamp() {
-  local STAMP_DIR=${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}
-  MakeDir "${STAMP_DIR}"
-  echo "$2" > "${STAMP_DIR}/$1"
 }
 
 
@@ -1019,53 +858,6 @@ FixupExecutablesList() {
 ######################################################################
 # Build Steps
 ######################################################################
-DefaultExtractStep() {
-  if [ -z "${ARCHIVE_NAME:-}" ]; then
-    return
-  fi
-
-  local stamp_content="ARCHIVE_SHA1=${SHA1}"
-  if [ -f "${PATCH_FILE}" ]; then
-    local patch_checksum=$(${TOOLS_DIR}/sha1sum.py ${PATCH_FILE})
-    stamp_content+=" PATCH_${patch_checksum}"
-  fi
-
-  if [ -d "${SRC_DIR}" ]; then
-    if CheckStampContent extract "${stamp_content}" ; then
-      Banner "Skipping extract step"
-      return
-    fi
-  fi
-
-  Banner "Extracting ${ARCHIVE_NAME}"
-  if [ -d "${SRC_DIR}" ]; then
-    echo "error: Upstream archive or patch has changed."
-    echo "Please remove existing workspace to continue: '${SRC_DIR}'"
-    exit 1
-  fi
-  Remove "${SRC_DIR}"
-
-  # make sure the patch step is applied
-  Remove "${NACL_PACKAGES_STAMPDIR}/${PACKAGE_NAME}/patch"
-  local EXTENSION="${ARCHIVE_NAME##*.}"
-  PARENT_DIR=$(dirname ${SRC_DIR})
-  MakeDir "${PARENT_DIR}"
-  ChangeDir "${PARENT_DIR}"
-  local ARCHIVE="${NACL_PACKAGES_CACHE}/${ARCHIVE_NAME}"
-  if [ "${EXTENSION}" = "zip" ]; then
-    LogExecute unzip -q "${ARCHIVE}"
-  else
-    if [ "${OS_SUBDIR}" = "win" ]; then
-      LogExecute tar --no-same-owner -xf "${ARCHIVE}"
-    else
-      LogExecute tar xf "${ARCHIVE}"
-    fi
-  fi
-
-  MakeDir "${BUILD_DIR}"
-  WriteStamp extract "${stamp_content}"
-}
-
 
 PatchConfigSub() {
   # Replace the package's config.sub one with an up-do-date copy
@@ -1096,6 +888,11 @@ PatchConfigure() {
 
 
 DefaultPatchStep() {
+  # The applicaiton of the nacl.patch file is now done by
+  # naclports python code.
+  # TODO(sbc): migrate auto patching of config sub and configure
+  # and remove this function.
+
   if [ -z "${ARCHIVE_NAME:-}" ] && ! IsGitRepo; then
     return
   fi
@@ -1103,13 +900,9 @@ DefaultPatchStep() {
   ChangeDir "${SRC_DIR}"
 
   if CheckStamp patch ; then
-    Banner "Skipping patch step (cleaning source tree)"
-    git clean -f -d
     return
   fi
 
-  InitGitRepo
-  Patch "${PATCH_FILE}"
   PatchConfigure
   PatchConfigSub
   if [ -n "$(git diff --no-ext-diff)" ]; then
@@ -1623,13 +1416,7 @@ ZipPublishDir() {
 
 
 PackageInstall() {
-  RunPreInstallStep
-  if IsGitRepo; then
-    RunGitCloneStep
-  else
-    RunDownloadStep
-    RunExtractStep
-  fi
+  RunDownloadStep
   RunPatchStep
   RunConfigureStep
   RunBuildStep
@@ -1682,9 +1469,7 @@ RunStep() {
 
 # Function entry points that packages should override in order
 # to customize the build process.
-PreInstallStep()      { DefaultPreInstallStep;      }
-DownloadStep()        { DefaultDownloadStep;        }
-ExtractStep()         { DefaultExtractStep;         }
+DownloadStep()        { return;                     }
 PatchStep()           { DefaultPatchStep;           }
 ConfigureStep()       { DefaultConfigureStep;       }
 BuildStep()           { DefaultBuildStep;           }
@@ -1693,10 +1478,7 @@ TestStep()            { DefaultTestStep;            }
 InstallStep()         { DefaultInstallStep;         }
 PostInstallTestStep() { DefaultPostInstallTestStep; }
 
-RunPreInstallStep() { RunStep PreInstallStep; }
 RunDownloadStep()   { RunStep DownloadStep; }
-RunGitCloneStep()   { RunStep GitCloneStep; }
-RunExtractStep()    { RunStep ExtractStep; }
 RunPatchStep()      { RunStep PatchStep; }
 
 
@@ -1755,3 +1537,4 @@ PatchSpecsFile
 InjectSystemHeaders
 InstallConfigSite
 GetRevision
+MakeDirs

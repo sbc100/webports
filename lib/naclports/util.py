@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import fcntl
+import hashlib
 import os
 import subprocess
 import sys
@@ -261,6 +262,42 @@ def CheckSDKRoot():
                       "Couldn't find sentinel file (%s)" % (root, sentinel))
 
 
+def HashFile(filename):
+  """Return the SHA1 (in hex format) of the contents of the given file."""
+  block_size = 100 * 1024;
+  sha1 = hashlib.sha1()
+  with open(filename) as f:
+    while True:
+      data = f.read(block_size)
+      if not data:
+        break
+      sha1.update(data)
+  return sha1.hexdigest()
+
+
+def VerifyHash(filename, sha1):
+  """Return True if the sha1 of the given file match the sha1 passed in."""
+  file_sha1 = HashFile(filename)
+  return sha1 == file_sha1
+
+
+def RelPath(filename):
+  """Return a pathname relative to the root the naclports src tree.
+
+  This is used mostly to make output more readable when printing filenames."""
+  return os.path.relpath(filename, paths.NACLPORTS_ROOT)
+
+
+def Makedirs(directory):
+  if os.path.isdir(directory):
+    return
+  if os.path.exists(directory):
+    raise error.Error('mkdir: File exists and is not a directory: %s'
+                      % directory)
+  Log("mkdir: %s" % directory)
+  os.makedirs(directory)
+
+
 class Lock(object):
   """Per-directory flock()-based context manager
 
@@ -269,7 +306,7 @@ class Lock(object):
   """
   def __init__(self, lock_dir):
     if not os.path.exists(lock_dir):
-      os.makedirs(lock_dir)
+      Makedirs(lock_dir)
     self.file_name = os.path.join(lock_dir, 'naclports.lock')
     self.fd = open(self.file_name, 'w')
 

@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import os
-import hashlib
 
 from naclports import configuration, binary_package, package, util, paths
 from naclports import pkg_info, error
@@ -13,15 +12,18 @@ EXTRA_KEYS = package.EXTRA_KEYS + ['BIN_URL', 'BIN_SIZE', 'BIN_SHA1']
 PREBUILT_ROOT = os.path.join(paths.PACKAGES_ROOT, 'prebuilt')
 
 
-def VerifyHash(filename, sha1):
-  """Return True if the sha1 of the given file match the sha1 passed in."""
-  with open(filename) as f:
-    file_sha1 = hashlib.sha1(f.read()).hexdigest()
-  return sha1 == file_sha1
+def ExtractPkgInfo(filename):
+  """Return the pkg_info contents from a binary package."""
+  pkg = binary_package.BinaryPackage(filename)
+  return pkg.GetPkgInfo()
 
 
 def WriteIndex(index_filename, binaries):
   """Create a package index file from set of binaries on disk.
+
+  Args:
+    index_filename: The name of the file to write create.
+    binaries: List of (filename, url) pairs containing packages to include.
 
   Returns:
     A PackageIndex object based on the contents of the newly written file.
@@ -31,12 +33,10 @@ def WriteIndex(index_filename, binaries):
   tmp_name = index_filename + '.tmp'
   with open(tmp_name, 'w') as output_file:
     for i, (filename, url) in enumerate(binaries):
-      pkg = binary_package.BinaryPackage(filename)
-      with open(filename) as f:
-        sha1 = hashlib.sha1(f.read()).hexdigest()
+      sha1 = util.HashFile(filename)
       if i != 0:
         output_file.write('\n')
-      output_file.write(pkg.GetPkgInfo())
+      output_file.write(ExtractPkgInfo(filename))
       output_file.write('BIN_URL=%s\n' % url)
       output_file.write('BIN_SIZE=%s\n' % os.path.getsize(filename))
       output_file.write('BIN_SHA1=%s\n' % sha1)
@@ -91,15 +91,15 @@ class PackageIndex(object):
 
   def Download(self, package_name, config):
     if not os.path.exists(PREBUILT_ROOT):
-      os.makedirs(PREBUILT_ROOT)
+      util.Makedirs(PREBUILT_ROOT)
     info = self.packages[(package_name, config)]
     filename = os.path.join(PREBUILT_ROOT, os.path.basename(info['BIN_URL']))
     if os.path.exists(filename):
-      if VerifyHash(filename, info['BIN_SHA1']):
+      if util.VerifyHash(filename, info['BIN_SHA1']):
         return filename
     util.Log('Downloading prebuilt binary ...')
     util.DownloadFile(filename, info['BIN_URL'])
-    if not VerifyHash(filename, info['BIN_SHA1']):
+    if not util.VerifyHash(filename, info['BIN_SHA1']):
       raise error.Error('Unexepected SHA1: %s' % filename)
     return filename
 

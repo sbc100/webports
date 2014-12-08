@@ -105,6 +105,5 @@ FetchLinuxStep() {
 }
 
 DownloadStep() {
-  DefaultDownloadStep
   FetchLinuxStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
 }

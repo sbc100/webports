@@ -149,7 +149,6 @@ GameGetStep() {
 }
 
 DownloadStep() {
-  DefaultDownloadStep
   GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
   GameGetStep ${LURE_URL} ${LURE_NAME}
 }

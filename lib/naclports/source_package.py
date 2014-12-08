@@ -11,8 +11,12 @@ import tempfile
 import time
 import urlparse
 
-from naclports import binary_package, configuration, package, package_index
-from naclports import util, paths
+from naclports import binary_package
+from naclports import configuration
+from naclports import package
+from naclports import package_index
+from naclports import util
+from naclports import paths
 from naclports.util import Log, Trace
 from naclports.error import Error, DisabledError, PkgFormatError
 
@@ -45,7 +49,7 @@ def FormatTimeDelta(delta):
 
 def ExtractArchive(archive, destination):
   ext = os.path.splitext(archive)[1]
-  if ext in ('.gz', '.tgz', '.bz2'):
+  if ext in ('.gz', '.tgz', '.bz2', '.xz'):
     cmd = ['tar', 'xf', archive, '-C', destination]
   elif ext in ('.zip',):
     cmd = ['unzip', '-q', '-d', destination, archive]
@@ -53,6 +57,76 @@ def ExtractArchive(archive, destination):
     raise Error('unhandled extension: %s' % ext)
   Trace(cmd)
   subprocess.check_call(cmd)
+
+
+def RunGitCmd(directory, cmd, error_ok=False):
+  cmd = ['git'] + cmd
+  Trace('%s' % ' '.join(cmd))
+  p = subprocess.Popen(cmd,
+                       cwd=directory,
+                       stderr=subprocess.PIPE,
+                       stdout=subprocess.PIPE)
+  stdout, stderr = p.communicate()
+  if not error_ok and p.returncode != 0:
+    if stdout:
+      Log(stdout)
+    if stderr:
+      Log(stderr)
+    raise Error('git command failed: %s' % cmd)
+  return p.returncode
+
+
+def InitGitRepo(directory):
+  """Initialise the source git repository for a given package direcotry.
+
+  This function works for unpacked tar files as well as cloned git
+  repositories.  It sets up an 'upstream' branch pointing and the
+  pestine upstream sources and a 'master' bracnh will contain changes
+  specific to naclports (normally the result of applying nacl.patch).
+
+  Args:
+    directory: Direcotory containing unpacked package sources.
+  """
+  if os.path.exists(os.path.join(directory, '.git')):
+    RunGitCmd(directory, ['checkout', '-b', 'placeholder'])
+    RunGitCmd(directory, ['branch', '-D', 'upstream'], error_ok=True)
+    RunGitCmd(directory, ['branch', '-D', 'master'], error_ok=True)
+    RunGitCmd(directory, ['checkout', '-b', 'upstream'])
+    RunGitCmd(directory, ['checkout', '-b', 'master'])
+    RunGitCmd(directory, ['branch', '-D', 'placeholder'])
+  else:
+    RunGitCmd(directory, ['init'])
+    RunGitCmd(directory, ['add', '-f', '.'])
+    RunGitCmd(directory, ['commit', '-m', 'Upstream version'])
+    RunGitCmd(directory, ['checkout', '-b', 'upstream'])
+    RunGitCmd(directory, ['checkout', 'master'])
+
+
+def WriteStamp(stamp_file, stamp_contents):
+  """Write a stamp file to disk with the given file contents."""
+  stamp_dir = os.path.dirname(stamp_file)
+  util.Makedirs(stamp_dir)
+
+  with open(stamp_file, 'w') as f:
+    f.write(stamp_contents)
+  Log('Wrote stamp: %s' % stamp_file)
+
+
+def StampIsNewerThan(stamp_file, dependency):
+  """Return True is stamp file exists and is newer than dependency."""
+  if not os.path.exists(stamp_file):
+    return False
+  if not os.path.exists(dependency):
+    return True
+  return os.path.getmtime(stamp_file) > os.path.getmtime(dependency)
+
+
+def StampContentsMatch(stamp_file, stamp_contents):
+  """Return True is stamp_file exists and contains the given contents."""
+  if not os.path.exists(stamp_file):
+    return False
+  with open(stamp_file) as f:
+    return f.read() == stamp_contents
 
 
 class SourcePackage(package.Package):
@@ -77,24 +151,21 @@ class SourcePackage(package.Package):
     if self.NAME != os.path.basename(self.root):
       raise Error('%s: package NAME must match directory name' % self.info)
 
-  def GetBasename(self):
-    basename = os.path.splitext(self.GetArchiveFilename())[0]
-    if basename.endswith('.tar'):
-      basename = os.path.splitext(basename)[0]
-    return basename
-
   def GetBuildLocation(self):
     package_dir = self.ARCHIVE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
     return os.path.join(paths.BUILD_ROOT, self.NAME, package_dir)
+
+  def GetPatchFile(self):
+    return os.path.join(self.root, 'nacl.patch')
 
   def GetArchiveFilename(self):
     if self.URL_FILENAME:
       return self.URL_FILENAME
 
-    if self.URL and '.git' not in self.URL:
-      return os.path.basename(urlparse.urlparse(self.URL)[2])
+    if self.IsGitUpstream() or self.URL is None:
+      return None
 
-    return None
+    return os.path.basename(urlparse.urlparse(self.URL)[2])
 
   def DownloadLocation(self):
     archive = self.GetArchiveFilename()
@@ -105,6 +176,9 @@ class SourcePackage(package.Package):
   def IsInstalled(self):
     return util.IsInstalled(self.NAME, self.config,
                             self.InstalledInfoContents())
+
+  def IsGitUpstream(self):
+    return self.URL and self.URL.split('@')[0].endswith('.git')
 
   def InstallDeps(self, force, from_source=False):
     for dep in self.Dependencies():
@@ -189,8 +263,7 @@ class SourcePackage(package.Package):
       return
 
     log_root = os.path.join(paths.OUT_DIR, 'logs')
-    if not os.path.isdir(log_root):
-      os.makedirs(log_root)
+    util.Makedirs(log_root)
 
     stdout = os.path.join(log_root, '%s.log' % self.NAME)
     if os.path.exists(stdout):
@@ -204,6 +277,9 @@ class SourcePackage(package.Package):
 
     start = time.time()
     with util.BuildLock():
+      self.Download()
+      self.Extract()
+      self.Patch()
       self.RunBuildSh(stdout)
 
     duration = FormatTimeDelta(time.time() - start)
@@ -235,25 +311,29 @@ class SourcePackage(package.Package):
           sys.stdout.write(log_file.read())
         raise Error("Building '%s' failed." % (self.NAME))
 
-  def Verify(self):
-    """Download upstream source and verify hash."""
+  def Download(self):
+    """Download upstream sources and verify integrity."""
+    if self.IsGitUpstream():
+      self.GitCloneToMirror()
+      return True
+
     archive = self.DownloadLocation()
     if not archive:
-      Log('no archive: %s' % self.NAME)
       return True
 
     if self.SHA1 is None:
       Log('missing SHA1 attribute: %s' % self.info)
       return False
 
-    self.Download()
-    try:
-      sha1check.VerifyHash(archive, self.SHA1)
-      Log('verified: %s' % archive)
-    except sha1check.Error as e:
-      Log('verification failed: %s: %s' % (archive, str(e)))
+    force_mirror = os.environ.get('FORCE_MIRROR', False)
+    self.DownloadArchive(force_mirror=force_mirror)
+    archive_sha1 = util.HashFile(archive)
+    if archive_sha1 != self.SHA1:
+      Log('verification failed: %s\nExpected: %s\nActual: %s' % (archive,
+          self.SHA1, archive_sha1))
       return False
 
+    Log('verified: %s' % util.RelPath(archive))
     return True
 
   def Clean(self):
@@ -268,28 +348,37 @@ class SourcePackage(package.Package):
       shutil.rmtree(stamp_dir)
 
   def Extract(self):
-    self.ExtractInto(os.path.join(paths.BUILD_ROOT, self.NAME))
-
-  def ExtractInto(self, output_path):
-    """Extract the package archive into the given location.
+    """Extract the package archive into its build location.
 
     This method assumes the package has already been downloaded.
     """
+    if self.IsGitUpstream():
+      self.GitClone()
+      return
+
     archive = self.DownloadLocation()
     if not archive:
+      self.Log('Skipping extract; No upstream archive')
       return
 
-    if not os.path.exists(output_path):
-      os.makedirs(output_path)
+    dest = self.GetBuildLocation()
+    output_path, new_foldername = os.path.split(dest)
+    util.Makedirs(output_path)
 
-    new_foldername = os.path.basename(self.GetBuildLocation())
-    dest = os.path.join(output_path, new_foldername)
+    # Check existing stamp file contents
+    stamp_file = self.GetExtractStamp()
+    stamp_contents = self.GetExtractStampContent()
     if os.path.exists(dest):
-      Trace('Already exists: %s' % dest)
-      return
+      if StampContentsMatch(stamp_file, stamp_contents):
+        Log('Already up-to-date: %s' % util.RelPath(dest))
+        return
 
+      raise Error("Upstream archive or patch has changed.\n" +
+                  "Please remove existing checkout and try again: '%s'" % dest)
+
+    self.Banner('Extracting')
+    util.Makedirs(paths.OUT_DIR)
     tmp_output_path = tempfile.mkdtemp(dir=paths.OUT_DIR)
-    Log("Extracting '%s'" % self.NAME)
     try:
       ExtractArchive(archive, tmp_output_path)
       src = os.path.join(tmp_output_path, new_foldername)
@@ -297,8 +386,61 @@ class SourcePackage(package.Package):
         raise Error('Archive contents not found: %s' % src)
       Trace("renaming '%s' -> '%s'" % (src, dest))
       os.rename(src, dest)
+      WriteStamp(stamp_file, stamp_contents)
     finally:
       shutil.rmtree(tmp_output_path)
+
+  def RunCmd(self, cmd, **args):
+    try:
+      subprocess.check_call(cmd, cwd=self.GetBuildLocation(), **args)
+    except subprocess.CalledProcessError as e:
+      raise Error(e)
+
+  def Log(self, message):
+    Log('%s: %s' % (message, self.InfoString()))
+
+  def Banner(self, message):
+    Log("#####################################################################")
+    self.Log(message)
+    Log("#####################################################################")
+
+  def Patch(self):
+    stamp_file = os.path.join(paths.STAMP_DIR, self.NAME, 'nacl_patch')
+    src_dir = self.GetBuildLocation()
+    if self.URL is None:
+      return
+
+    if StampIsNewerThan(stamp_file, self.GetExtractStamp()):
+      self.Log('Skipping patch step (cleaning source tree)')
+      self.RunCmd(['git', 'clean', '-f', '-d'])
+      return
+
+    self.Banner('Patching')
+    Log('Init git repo: %s' % src_dir)
+    try:
+      InitGitRepo(src_dir)
+    except subprocess.CalledProcessError as e:
+      raise Error(e)
+    if os.path.exists(self.GetPatchFile()):
+      Trace('applying patch to: %s' % src_dir)
+      cmd = ['patch', '-p1', '-g0', '--no-backup-if-mismatch']
+      with open(self.GetPatchFile()) as f:
+        self.RunCmd(cmd, stdin=f)
+      self.RunCmd(['git', 'add', '.'])
+      self.RunCmd(['git', 'commit', '-m', 'Apply naclports patch'])
+
+    WriteStamp(stamp_file, '')
+
+  def GetExtractStamp(self):
+    return os.path.join(paths.STAMP_DIR, self.NAME, 'extract')
+
+  def GetExtractStampContent(self):
+    patch_file = self.GetPatchFile()
+    if os.path.exists(patch_file):
+      patch_sha = util.HashFile(self.GetPatchFile())
+      return 'ARCHIVE_SHA1=%s PATCH_SHA1=%s\n' % (self.SHA1, patch_sha)
+    else:
+      return 'ARCHIVE_SHA1=%s\n' % self.SHA1
 
   def GetMirrorURL(self):
     return util.GS_MIRROR_URL + '/' + self.GetArchiveFilename()
@@ -365,33 +507,95 @@ class SourcePackage(package.Package):
         raise DisabledError('%s: can only be built on %s'
                             % (self.NAME, self.BUILD_OS))
 
-  def Download(self, mirror=True):
+  def GitCloneToMirror(self):
+    """Clone the upstream git repo into a local mirror. """
+    git_url, git_commit = self.URL.split('@', 2)
+
+    # Clone upstream git repo into local mirror, or update the existing
+    # mirror.
+    git_mirror = git_url.split('://', 2)[1]
+    git_mirror = git_mirror.replace('/', '_')
+    mirror_dir = os.path.join(paths.CACHE_ROOT, git_mirror)
+    if os.path.exists(mirror_dir):
+      if RunGitCmd(mirror_dir, ['rev-parse', git_commit], error_ok=True) != 0:
+        Log('Updating git mirror: %s' % util.RelPath(mirror_dir))
+        RunGitCmd(mirror_dir, ['remote', 'update', '--prune'])
+    else:
+      Log('Mirroring upstream git repo: %s' % self.URL)
+      RunGitCmd(paths.CACHE_ROOT, ['clone', '--mirror', git_url, git_mirror])
+    Log('git mirror up-to-date: %s' % util.RelPath(mirror_dir))
+    return mirror_dir, git_commit
+
+  def GitClone(self):
+    """Create a clone of the upstream repo in the build directory.
+
+    This operation will only require a network connection if the
+    local git mirror is out-of-date."""
+    stamp_file = self.GetExtractStamp()
+    stamp_content = 'GITURL=%s' % self.URL
+    patch_file = self.GetPatchFile()
+    if os.path.exists(patch_file):
+      patch_checksum = util.HashFile(patch_file)
+      stamp_content += ' PATCH=%s' % patch_checksum
+
+    stamp_content += '\n'
+
+    dest = self.GetBuildLocation()
+    if os.path.exists(self.GetBuildLocation()):
+      if StampContentsMatch(stamp_file, stamp_content):
+        return
+
+      raise Error('Upstream archive or patch has changed.\n' +
+                  "Please remove existing checkout and try again: '%s'" % dest)
+
+    self.Banner('Cloning')
+    # Ensure local mirror is up-to-date
+    git_mirror, git_commit = self.GitCloneToMirror()
+    # Clone from the local mirror.
+    RunGitCmd(None, ['clone', git_mirror, dest])
+    RunGitCmd(dest, ['reset', '--hard', git_commit])
+
+    # Set the origing to the original URL so it is possible to push directly
+    # from the build tree.
+    RunGitCmd(dest, ['remote', 'set-url', 'origin', '${GIT_URL}'])
+
+    WriteStamp(stamp_file, stamp_content)
+
+  def DownloadArchive(self, force_mirror):
+    """Download the archive to the local cache directory.
+
+    Args:
+      force_mirror: force downloading from mirror only.
+    """
     filename = self.DownloadLocation()
     if not filename or os.path.exists(filename):
       return
-    if not os.path.exists(os.path.dirname(filename)):
-      os.makedirs(os.path.dirname(filename))
+    util.Makedirs(os.path.dirname(filename))
 
-    if mirror:
-      # First try downloading form the mirror URL and silently fall
-      # back to the original if this fails.
-      mirror_url = self.GetMirrorURL()
-      try:
-        util.DownloadFile(filename, mirror_url)
-        return
-      except Error:
-        pass
-
-    util.DownloadFile(filename, self.URL)
+    # Always try the mirror URL first
+    mirror_url = self.GetMirrorURL()
+    try:
+      util.DownloadFile(filename, mirror_url)
+    except Error as e:
+      if not force_mirror:
+        # Fall back to the original upstream URL
+        util.DownloadFile(filename, self.URL)
+      else:
+        raise e
 
   def UpdatePatch(self):
-    git_dir = self.GetBuildLocation()
-    if not os.path.exists(git_dir):
-      Log('source directory not found: %s' % git_dir)
+    if self.URL is None:
       return
 
-    diff = subprocess.check_output(['git', 'diff', 'upstream', '--no-ext-diff'],
-                                   cwd=git_dir)
+    git_dir = self.GetBuildLocation()
+    if not os.path.exists(git_dir):
+      raise Error('Source directory not found: %s' % git_dir)
+
+    try:
+      diff = subprocess.check_output(['git', 'diff', 'upstream',
+                                      '--no-ext-diff'], cwd=git_dir)
+    except subprocess.CalledProcessError as e:
+      raise Error('error running git in %s: %s' % (git_dir, str(e)))
 
     # Drop index lines for a more stable diff.
     diff = re.sub('\nindex [^\n]+\n', '\n', diff)
@@ -420,21 +624,30 @@ class SourcePackage(package.Package):
       diff = new_diff
 
     # Write back out the diff.
-    patch_path = os.path.join(self.root, 'nacl.patch')
+    patch_path = self.GetPatchFile()
     preexisting = os.path.exists(patch_path)
+
+    if not diff:
+      if preexisting:
+        Log('removing patch file: %s' % util.RelPath(patch_path))
+        os.remove(patch_path)
+      else:
+        Log('no patch required: %s' % util.RelPath(git_dir))
+      return
+
     if preexisting:
       with open(patch_path) as f:
         if diff == f.read():
-          Log('patch unchanged: %s' % patch_path)
+          Log('patch unchanged: %s' % util.RelPath(patch_path))
           return
 
     with open(patch_path, 'w') as f:
       f.write(diff)
 
     if preexisting:
-      Log('created patch: %s' % patch_path)
+      Log('created patch: %s' % util.RelPath(patch_path))
     else:
-      Log('updated patch: %s' % patch_path)
+      Log('updated patch: %s' % util.RelPath(patch_path))
 
 
 def SourcePackageIterator():

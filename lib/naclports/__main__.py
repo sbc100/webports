@@ -118,14 +118,20 @@ def CmdPkgClean(package, options):
   package.Clean()
 
 
-def CmdPkgVerify(package, options):
-  """Verify package(s)"""
-  package.Verify()
-
-
 def CmdPkgUpdatePatch(package, options):
   """Update patch file for package(s)"""
   package.UpdatePatch()
+
+
+def CmdPkgExtract(package, options):
+  """Extact source archive for package(s)"""
+  package.Download()
+  package.Extract()
+
+
+def CmdPkgPatch(package, options):
+  """Apply naclports patch for package(s)"""
+  package.Patch()
 
 
 def CleanAll(config):
@@ -156,12 +162,13 @@ def run_main(args):
     'check': CmdPkgCheck,
     'build': CmdPkgBuild,
     'install': CmdPkgInstall,
-    'verify': CmdPkgVerify,
     'clean': CmdPkgClean,
     'uninstall': CmdPkgUninstall,
     'contents': CmdPkgContents,
     'depends': CmdPkgListDeps,
-    'updatepatch': CmdPkgUpdatePatch
+    'updatepatch': CmdPkgUpdatePatch,
+    'extract': CmdPkgExtract,
+    'patch': CmdPkgPatch
   }
 
   installed_pkg_commands = ['contents', 'uninstall']
@@ -170,7 +177,7 @@ def run_main(args):
 
   epilog = "The following commands are available:\n"
   for name, function in all_commands.iteritems():
-    epilog += '  %-10s - %s\n' % (name, function.__doc__)
+    epilog += '  %-12s - %s\n' % (name, function.__doc__)
 
   parser = argparse.ArgumentParser(prog='naclports', description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter, epilog=epilog)
