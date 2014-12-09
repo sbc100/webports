@@ -4,4 +4,4 @@
 # found in the LICENSE file.
 SCRIPT_DIR=$(cd $(dirname "$BASH_SOURCE") && pwd)
 
-exec python $(dirname $SCRIPT_DIR)/lib/naclports $*
+exec ${SCRIPT_DIR}/../build_tools/python_wrapper -m naclports $*

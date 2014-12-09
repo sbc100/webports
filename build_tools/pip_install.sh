@@ -26,5 +26,6 @@ if [ -z "$pip" ]; then
   rm -f get-pip.py
 fi
 
+ARGS="--no-compile --download-cache=out/cache/pip"
 set -x
-pip install --download-cache=out/cache/pip --user -r requirements.txt
+pip install $ARGS --user -r requirements.txt

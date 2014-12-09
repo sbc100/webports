@@ -31,7 +31,7 @@ from naclports import Log, Trace
 
 def FormatSize(num_bytes):
   """Create a human readable string from a byte count."""
-  for x in ['bytes','KB','MB','GB','TB']:
+  for x in ('bytes', 'KB', 'MB', 'GB', 'TB'):
     if num_bytes < 1024.0:
       return "%3.1f %s" % (num_bytes, x)
     num_bytes /= 1024.0

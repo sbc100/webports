@@ -264,7 +264,7 @@ def CheckSDKRoot():
 
 def HashFile(filename):
   """Return the SHA1 (in hex format) of the contents of the given file."""
-  block_size = 100 * 1024;
+  block_size = 100 * 1024
   sha1 = hashlib.sha1()
   with open(filename) as f:
     while True:

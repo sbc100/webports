@@ -47,9 +47,9 @@ def WriteIndex(index_filename, binaries):
 
 
 def IndexFromFile(filename):
-    with open(filename) as f:
-      contents = f.read()
-    return PackageIndex(filename, contents)
+  with open(filename) as f:
+    contents = f.read()
+  return PackageIndex(filename, contents)
 
 
 def GetCurrentIndex():

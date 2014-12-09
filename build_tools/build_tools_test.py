@@ -2,11 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from mock import Mock, patch, call
-import os
+from mock import Mock, patch
 import patch_configure
 import scan_packages
-import sys
 import StringIO
 import unittest
 
@@ -29,7 +27,7 @@ class TestPatchConfigure(unittest.TestCase):
 
 
 class TestScanPackages(unittest.TestCase):
-  def testCheckHash(self):
+  def testCheckHash(self): # pylint: disable=no-self-use
     file_mock = MockFileObject('1234\n')
     md5 = Mock()
     md5.hexdigest.return_value('4321')
@@ -40,7 +38,7 @@ class TestScanPackages(unittest.TestCase):
   @patch('scan_packages.Log', Mock())
   @patch('scan_packages.CheckHash')
   @patch('os.path.exists', Mock(return_value=True))
-  def testDownloadFiles(self, check_hash_mock):
+  def testDownloadFiles(self, check_hash_mock): # pylint: disable=no-self-use
     check_hash_mock.return_value = True
     file_info = scan_packages.FileInfo('foo', 10, 'http://host/base', 'hashval')
     scan_packages.DownloadFiles([file_info])

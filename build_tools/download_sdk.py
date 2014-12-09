@@ -7,7 +7,7 @@
 
 This script downloads toolchain bz2's and expands them. It requires
 gsutil to be in the bin PATH and assumes if building on windows that
-cygwin is installed to \cygwin.
+cygwin is installed to /cygwin.
 
 On Windows this script also required access to the cygtar python
 module which gets included by the gclient DEPS.
@@ -16,16 +16,11 @@ module which gets included by the gclient DEPS.
 from __future__ import print_function
 
 import argparse
-import glob
 import os
-import re
-import shutil
-import stat
 import subprocess
 import sys
 import tarfile
 import time
-import urllib
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -52,7 +47,7 @@ TARGET_DIR = os.path.join(OUT_DIR, 'nacl_sdk')
 if sys.platform == 'win32':
   NACL_BUILD_DIR = os.path.join(SRC_DIR, 'native_client', 'build')
   sys.path.append(NACL_BUILD_DIR)
-  import cygtar
+  import cygtar  # pylint: disable=import-error
 
 BOT_GSUTIL = '/b/build/scripts/slave/gsutil'
 LOCAL_GSUTIL = 'gsutil'
@@ -148,7 +143,7 @@ def FindCygwin():
   elif os.path.exists(r'C:\cygwin'):
     return r'C:\cygwin'
   else:
-    raise naclports.Error('failed to find cygwin in \cygwin or c:\cygwin')
+    raise naclports.Error(r'failed to find cygwin in \cygwin or c:\cygwin')
 
 
 def DownloadAndInstallSDK(url):
@@ -230,8 +225,8 @@ def main(argv):
   getos = os.path.join(TARGET_DIR, 'tools', 'getos.py')
   existing_version = 0
   if os.path.exists(getos):
-     cmd = [sys.executable, getos, '--sdk-revision']
-     existing_version = int(subprocess.check_output(cmd).strip())
+    cmd = [sys.executable, getos, '--sdk-revision']
+    existing_version = int(subprocess.check_output(cmd).strip())
 
   url, version = DetermineSDKURL(flavor,
                                  base_url=GS_URL_BASE,

@@ -18,7 +18,6 @@ from __future__ import print_function
 
 import hashlib
 import os
-import string
 import sys
 
 def main(args):

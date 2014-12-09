@@ -27,7 +27,7 @@ detect_so_support = \
 CONFIGURE_PATCHS = [
 # Correct result for "dynamic linker characteristics"
 # pylint: disable=line-too-long
-['(\n\*\)\n  dynamic_linker=no)',
+['(\n\\*\\)\n  dynamic_linker=no)',
 '''
 nacl)
   # Patched by naclports using patch_configure.py
@@ -42,7 +42,7 @@ nacl)
   ;;
 \\1''' % detect_so_support],
 # Correct result for "supports shared libraries"
-['''(
+[r'''(
   netbsd\*\)
     if echo __ELF__ \| \$CC -E - \| grep __ELF__ >/dev/null; then
       archive_cmds_CXX='\$LD -Bshareable  -o \$lib \$predep_objects \$libobjs \$deplibs \$postdep_objects \$linker_flags')
@@ -60,7 +60,7 @@ nacl)
 \\1
 ''' % detect_so_support],
 # Correct result for "how to recognize dependent libraries"
-['''
+[r'''
 (.*linux.*)\)
   lt_cv_deplibs_check_method=pass_all''',
 '''

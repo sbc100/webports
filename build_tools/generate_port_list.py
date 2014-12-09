@@ -35,6 +35,50 @@ script.
 || *Name* || *Version* || *Upstream Archive* || *!NaCl Patch* || *Libc* \
 || *Arch* || *Builds on* ||''' % SRC_URL
 
+
+def OutputTableRow(package):
+  if not package.URL:
+    return
+  patch = os.path.join(package.root, 'nacl.patch')
+  if os.path.exists(patch):
+    relative_path = os.path.relpath(patch, NACLPORTS_ROOT)
+    size = os.path.getsize(patch)
+    if size < 1024:
+      patch = '[%s/%s %d B]' % (SRC_URL, relative_path, size)
+    else:
+      patch = '[%s/%s %d KiB]' % (SRC_URL, relative_path, size/1024)
+  else:
+    patch = ''
+  url = '[%s %s]' % (package.URL, package.GetArchiveFilename())
+  package_url = '[%s/%s %s]' % (SRC_URL,
+      os.path.relpath(package.root, NACLPORTS_ROOT),
+      package.NAME)
+
+  libc = package.LIBC
+  if libc:
+    libc = libc + '-only'
+  else:
+    disabled_libc = getattr(package, 'DISABLED_LIBC')
+    if disabled_libc:
+      libc = 'not ' + ' or '.join(disabled_libc)
+    else:
+      libc = ''
+
+  disabled_arch = getattr(package, 'DISABLED_ARCH')
+  if disabled_arch:
+    arch = 'not ' + ' or '.join(disabled_arch)
+  else:
+    arch = ''
+
+  host = package.BUILD_OS
+  if host:
+    host = host + '-only'
+  else:
+    host = ''
+  cols = (package_url, package.VERSION, url, patch, libc, arch, host)
+  print('|| %-70s || %-10s || %-50s || %s || %s || %s || %s ||' % cols)
+
+
 def main(args):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('-v', '--verbose', action='store_true',
@@ -46,47 +90,9 @@ def main(args):
 
   total = 0
   for package in sorted(naclports.source_package.SourcePackageIterator()):
-    if not package.URL:
-      continue
-    patch = os.path.join(package.root, 'nacl.patch')
-    if os.path.exists(patch):
-      relative_path = os.path.relpath(patch, NACLPORTS_ROOT)
-      size = os.path.getsize(patch)
-      if size < 1024:
-        patch = '[%s/%s %d B]' % (SRC_URL, relative_path, size)
-      else:
-        patch = '[%s/%s %d KiB]' % (SRC_URL, relative_path, size/1024)
-    else:
-      patch = ''
-    url = '[%s %s]' % (package.URL, package.GetArchiveFilename())
-    package_url = '[%s/%s %s]' % (SRC_URL,
-        os.path.relpath(package.root, NACLPORTS_ROOT),
-        package.NAME)
-
-    libc = package.LIBC
-    if libc:
-      libc = libc + '-only'
-    else:
-      disabled_libc = getattr(package, 'DISABLED_LIBC')
-      if disabled_libc:
-        libc = 'not ' + ' or '.join(disabled_libc)
-      else:
-        libc = ''
-
-    disabled_arch = getattr(package, 'DISABLED_ARCH')
-    if disabled_arch:
-      arch = 'not ' + ' or '.join(disabled_arch)
-    else:
-      arch = ''
-
-    host = package.BUILD_OS
-    if host:
-      host = host + '-only'
-    else:
-      host = ''
-    cols = (package_url, package.VERSION, url, patch, libc, arch, host)
-    print('|| %-70s || %-10s || %-50s || %s || %s || %s || %s ||' % cols)
+    OutputTableRow(package)
     total += 1
+
   print('\n_Total = %d_\n' % total)
 
   print('= Local Ports (not based on upstream sources) =\n')

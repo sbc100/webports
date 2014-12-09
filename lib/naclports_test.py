@@ -218,14 +218,14 @@ class TestInstalledPackage(NaclportsTest):
       return naclports.package.InstalledPackage('dummy_file')
 
   @patch('naclports.package.Log', Mock())
-  @patch('naclports.package.InstalledPackage.RemoveFile')
+  @patch('naclports.package.RemoveFile')
   @patch('os.path.lexists', Mock(return_value=True))
   def testUninstall(self, remove_patch):
     pkg = self.CreateMockInstalledPackage()
     pkg.Files = Mock(return_value=['f1', 'f2'])
     pkg.Uninstall()
 
-    # Assert that exactly 4 files we removed using InstalledPackage.RemoveFile
+    # Assert that exactly 4 files we removed using RemoveFile
     calls = [call('/package/install/path/var/lib/npkg/foo.info'),
              call('/package/install/path/f1'),
              call('/package/install/path/f2'),

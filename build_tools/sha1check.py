@@ -22,7 +22,6 @@ Usage:
 from __future__ import print_function
 
 import hashlib
-import string
 import sys
 
 class Error(Exception):

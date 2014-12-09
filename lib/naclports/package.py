@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import os
-import sys
 
 from naclports.util import Trace, Log, Warn
 from naclports.error import Error
@@ -18,6 +17,11 @@ def RemoveEmptyDirs(dirname):
   while not os.listdir(dirname):
     os.rmdir(dirname)
     dirname = os.path.dirname(dirname)
+
+
+def RemoveFile(filename):
+  os.remove(filename)
+  RemoveEmptyDirs(os.path.dirname(filename))
 
 
 class Package(object):
@@ -118,13 +122,9 @@ class InstalledPackage(Package):
       for line in f:
         yield line.strip()
 
-  def RemoveFile(self, filename):
-    os.remove(filename)
-    RemoveEmptyDirs(os.path.dirname(filename))
-
   def DoUninstall(self):
     with util.InstallLock(self.config):
-      self.RemoveFile(self.GetInstallStamp())
+      RemoveFile(self.GetInstallStamp())
 
       root = util.GetInstallRoot(self.config)
       for filename in self.Files():
@@ -133,9 +133,9 @@ class InstalledPackage(Package):
           Warn('File not found while uninstalling: %s' % filename)
           continue
         Trace('rm %s' % filename)
-        self.RemoveFile(filename)
+        RemoveFile(filename)
 
-      self.RemoveFile(self.GetListFile())
+      RemoveFile(self.GetListFile())
 
 
 def InstalledPackageIterator(config):

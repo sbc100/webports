@@ -20,9 +20,6 @@ from naclports import paths
 from naclports.util import Log, Trace
 from naclports.error import Error, DisabledError, PkgFormatError
 
-sys.path.append(paths.TOOLS_DIR)
-import sha1check
-
 
 class PkgConflictError(Error):
   pass

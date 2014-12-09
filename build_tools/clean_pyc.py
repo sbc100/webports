@@ -20,7 +20,7 @@ def main(args):
                       help='directory to search for pyc files')
   args = parser.parse_args()
   for directory in args.directories:
-    assert(os.path.isdir(directory))
+    assert os.path.isdir(directory)
     for root, _, files in os.walk(directory):
       for filename in files:
         basename, ext = os.path.splitext(filename)

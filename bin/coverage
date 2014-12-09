@@ -4,5 +4,4 @@
 # found in the LICENSE file.
 SCRIPT_DIR=$(cd $(dirname "$BASH_SOURCE") && pwd)
 
-export PYTHONUSERBASE=$(dirname $SCRIPT_DIR)/out/pip
-exec python -m coverage $*
+exec ${SCRIPT_DIR}/../build_tools/python_wrapper -m coverage $*

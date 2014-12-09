@@ -71,7 +71,7 @@ reallyclean: clean
 check: test
 
 lint:
-	pylint -d unused-argument lib/naclports
+	build_tools/python_wrapper -m pylint --rcfile=.pylintrc lib/naclports
 
 test:
 	bin/nosetests build_tools/build_tools_test.py
