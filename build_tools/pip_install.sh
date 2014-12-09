@@ -26,6 +26,15 @@ if [ -z "$pip" ]; then
   rm -f get-pip.py
 fi
 
-ARGS="--no-compile --download-cache=out/cache/pip"
+ARGS="--download-cache=out/cache/pip --user -r requirements.txt"
+
+# pip version 1.5 and above support the --no-compile option which we prefer
+# here as it makes the output less verbose, and our modules will be compiled
+# on first use anyway
+pip_version=$(pip --version | cut -d ' ' -f 2)
+if [[ $pip_version =~ ^1.5 ]]; then
+  ARGS+=" --no-compile"
+fi
+
 set -x
-pip install $ARGS --user -r requirements.txt
+pip install $ARGS
