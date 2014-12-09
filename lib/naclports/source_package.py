@@ -109,15 +109,6 @@ def WriteStamp(stamp_file, stamp_contents):
   Log('Wrote stamp: %s' % stamp_file)
 
 
-def StampIsNewerThan(stamp_file, dependency):
-  """Return True is stamp file exists and is newer than dependency."""
-  if not os.path.exists(stamp_file):
-    return False
-  if not os.path.exists(dependency):
-    return True
-  return os.path.getmtime(stamp_file) > os.path.getmtime(dependency)
-
-
 def StampContentsMatch(stamp_file, stamp_contents):
   """Return True is stamp_file exists and contains the given contents."""
   if not os.path.exists(stamp_file):
@@ -383,9 +374,11 @@ class SourcePackage(package.Package):
         raise Error('Archive contents not found: %s' % src)
       Trace("renaming '%s' -> '%s'" % (src, dest))
       os.rename(src, dest)
-      WriteStamp(stamp_file, stamp_contents)
     finally:
       shutil.rmtree(tmp_output_path)
+
+    WriteStamp(stamp_file, stamp_contents)
+    self.RemovePatchStamp()
 
   def RunCmd(self, cmd, **args):
     try:
@@ -401,13 +394,20 @@ class SourcePackage(package.Package):
     self.Log(message)
     Log("#####################################################################")
 
+  def GetPatchStamp(self):
+    return os.path.join(paths.STAMP_DIR, self.NAME, 'nacl_patch')
+
+  def RemovePatchStamp(self):
+    if os.path.exists(self.GetPatchStamp()):
+      os.remove(self.GetPatchStamp())
+
   def Patch(self):
-    stamp_file = os.path.join(paths.STAMP_DIR, self.NAME, 'nacl_patch')
+    stamp_file = self.GetPatchStamp()
     src_dir = self.GetBuildLocation()
     if self.URL is None:
       return
 
-    if StampIsNewerThan(stamp_file, self.GetExtractStamp()):
+    if os.path.exists(stamp_file):
       self.Log('Skipping patch step (cleaning source tree)')
       self.RunCmd(['git', 'clean', '-f', '-d'])
       return
@@ -557,6 +557,7 @@ class SourcePackage(package.Package):
     RunGitCmd(dest, ['remote', 'set-url', 'origin', '${GIT_URL}'])
 
     WriteStamp(stamp_file, stamp_content)
+    self.RemovePatchStamp()
 
   def DownloadArchive(self, force_mirror):
     """Download the archive to the local cache directory.

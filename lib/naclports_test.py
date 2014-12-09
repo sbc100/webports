@@ -321,24 +321,6 @@ class TestSourcePackage(NaclportsTest):
       info.write("NAME=%s\nVERSION=1.0\n%s" % (name, extra_info))
     return pkg_root
 
-  def testStampIsNewerThan(self):
-    stamp_file = os.path.join(self.tempdir, 'test_stamp')
-    stamp_file2 = os.path.join(self.tempdir, 'test_stamp2')
-
-    # Stamp doesn't exist.
-    self.assertFalse(source_package.StampIsNewerThan(stamp_file, stamp_file2))
-
-    # Stamp exist and is older than stamp2
-    open(stamp_file, 'w').close()
-    open(stamp_file2, 'w').close()
-    os.utime(stamp_file, (0, 0))
-    self.assertFalse(source_package.StampIsNewerThan(stamp_file, stamp_file2))
-
-    # Stamp exist and is newer than stamp2
-    stamp2_mtime = os.path.getmtime(stamp_file2)
-    os.utime(stamp_file, (stamp2_mtime + 1, stamp2_mtime + 1))
-    self.assertTrue(source_package.StampIsNewerThan(stamp_file, stamp_file2))
-
   def testStampContentsMatch(self):
     stamp_file = os.path.join(self.tempdir, 'test_stamp')
     # stamp does not exist
