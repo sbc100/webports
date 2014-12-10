@@ -5,3 +5,6 @@ LICENSE=GPL
 DEPENDS=(ncurses libtar nacl-spawn libx11 libxaw jpeg8d libpng giflib tiff)
 LIBC=glibc
 SHA1=3c672a176df06e20d2661058ad49893f184b4956
+# Temporarily disabaled due to build failure
+# https://code.google.com/p/naclports/issues/detail?id=165
+DISABLED=1
