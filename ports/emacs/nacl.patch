@@ -231,7 +231,7 @@ diff --git a/lib/symlink.c b/lib/symlink.c
 diff --git a/lisp/Makefile.in b/lisp/Makefile.in
 --- a/lisp/Makefile.in
 +++ b/lisp/Makefile.in
-@@ -30,6 +30,7 @@ VPATH = $(srcdir)
+@@ -30,7 +30,8 @@ VPATH = $(srcdir)
  # We sometimes change directory before running Emacs (typically when
  # building out-of-tree, we chdir to the source directory), so we need
  # to use an absolute file name.
@@ -240,7 +240,7 @@ diff --git a/lisp/Makefile.in b/lisp/Makefile.in
 +EMACS = ${abs_top_builddir}/src/emacs.nexe
  
  # Command line flags for Emacs.
-
+ 
 diff --git a/lisp/files.el b/lisp/files.el
 --- a/lisp/files.el
 +++ b/lisp/files.el
@@ -276,7 +276,7 @@ diff --git a/lisp/files.el b/lisp/files.el
 diff --git a/lisp/loadup.el b/lisp/loadup.el
 --- a/lisp/loadup.el
 +++ b/lisp/loadup.el
-@@ -68,7 +70,7 @@
+@@ -68,7 +68,7 @@
      ;; Hash consing saved around 11% of pure space in my tests.
      (setq purify-flag (make-hash-table :test 'equal :size 70000)))
  
@@ -285,11 +285,10 @@ diff --git a/lisp/loadup.el b/lisp/loadup.el
  
  (if (or (member (nth 3 command-line-args) '("dump" "bootstrap"))
  	(member (nth 4 command-line-args) '("dump" "bootstrap")))
-
 diff --git a/lisp/startup.el b/lisp/startup.el
 --- a/lisp/startup.el
 +++ b/lisp/startup.el
-@@ -1004,7 +1018,7 @@ Amongst another things, it parses the command-line arguments."
+@@ -1004,7 +1004,7 @@ Amongst another things, it parses the command-line arguments."
  			       ;; even if invoked with "-u USER", or
  			       ;; if $USER or $LOGNAME are set to
  			       ;; something different.
@@ -298,7 +297,7 @@ diff --git a/lisp/startup.el b/lisp/startup.el
  				   "~"
  				 (concat "~" init-file-user))))
  	    nil
-@@ -1031,6 +1045,7 @@ Amongst another things, it parses the command-line arguments."
+@@ -1031,6 +1031,7 @@ Amongst another things, it parses the command-line arguments."
  			   (cond
  			     ((eq system-type 'ms-dos)
  			      (concat "~" init-file-user "/_emacs"))
@@ -306,6 +305,30 @@ diff --git a/lisp/startup.el b/lisp/startup.el
  			     ((not (eq system-type 'windows-nt))
  			      (concat "~" init-file-user "/.emacs"))
  			     ;; Else deal with the Windows situation
+@@ -1052,13 +1053,20 @@ Amongst another things, it parses the command-line arguments."
+ 
+ 		      (when (eq user-init-file t)
+ 			;; If we did not find ~/.emacs, try
+-			;; ~/.emacs.d/init.el.
++			;; ~<user>/.emacs.d/init.el.
+ 			(let ((otherfile
+ 			       (expand-file-name
+ 				"init"
+ 				(file-name-as-directory
+-				 (concat "~" init-file-user "/.emacs.d")))))
+-			  (load otherfile t t)
++				 (concat "~" init-file-user "/.emacs.d"))))
++                              ;; NaCl cannot expand ~<user>, just use '~'
++                              (otherfile-nacl
++                               (expand-file-name
++                                "init"
++                                (file-name-as-directory "~/.emacs.d"))))
++                          (if (eq system-type 'nacl)
++                              (load otherfile-nacl t t)
++                            (load otherfile t t))
+ 
+ 			  ;; If we did not find the user's init file,
+ 			  ;; set user-init-file conclusively.
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
@@ -476,7 +499,7 @@ diff --git a/src/emacs.c b/src/emacs.c
  #if GC_MARK_STACK
    Lisp_Object dummy;
  #endif
-@@ -2113,7 +2144,7 @@ decode_env_path (const char *evarname, const char *defalt)
+@@ -2113,7 +2129,7 @@ decode_env_path (const char *evarname, const char *defalt)
      path = getenv (evarname);
    else
      path = 0;
