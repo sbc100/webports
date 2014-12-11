@@ -1,5 +1,5 @@
 [run]
-omit = *_test.py
+omit = *_test.py,*/tests/*.py,out/*
 data_file = out/coverage
 
 [html]

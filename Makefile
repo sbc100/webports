@@ -14,6 +14,7 @@
 SDK_LIBS = zlib tiff jpeg8d libpng freetype lua5.2 libogg
 SDK_LIBS += libtheora libvorbis libwebp libxml2 tinyxml openal-soft freealut
 
+PYLINT = build_tools/python_wrapper -m pylint
 COVERAGE = bin/coverage
 COVERAGE_ARGS = --fail-under=60
 COVERAGE_VER := $(shell $(COVERAGE) --version 2>/dev/null)
@@ -71,10 +72,10 @@ reallyclean: clean
 check: test
 
 lint:
-	build_tools/python_wrapper -m pylint --rcfile=.pylintrc lib/naclports
+	$(PYLINT) --rcfile=.pylintrc lib/naclports lib/naclports/tests/*.py
 
 test:
-	bin/nosetests build_tools/build_tools_test.py
+	bin/nosetests build_tools
 	$(COVERAGE) run --include=lib/naclports/* -m nose --rednose
 	@rm -rf out/coverage_html
 	$(COVERAGE) html

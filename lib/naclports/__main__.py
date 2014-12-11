@@ -12,7 +12,6 @@ through all packages and mirror them on Google Cloud Storage).
 
 from __future__ import print_function
 import os
-import shutil
 import sys
 
 if sys.version_info < (2, 7, 0):
@@ -139,8 +138,7 @@ def CleanAll(config):
   as all installed packages for the given configuration."""
   def rmtree(path):
     util.Log('removing %s' % path)
-    if os.path.exists(path):
-      shutil.rmtree(path)
+    util.RemoveTree(path)
 
   rmtree(paths.STAMP_DIR)
   rmtree(paths.BUILD_ROOT)
