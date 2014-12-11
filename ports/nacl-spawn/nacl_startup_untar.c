@@ -14,13 +14,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 int nacl_startup_untar(
     const char *argv0, const char* tarfile, const char* root) {
   int ret;
   TAR* tar;
   char filename[PATH_MAX];
   char* pos;
+  NACL_LOG("nacl_startup_untar[%s]: %s -> %s\n", argv0, tarfile, root);
 
   // First try relative to argv[0].
   strcpy(filename, argv0);
@@ -43,6 +43,7 @@ int nacl_startup_untar(
     }
   }
 
+  NACL_LOG("extracting tar file: %s\n", filename);
   ret = tar_extract_all(tar, (char*)root);
   if (ret) {
     fprintf(stderr, "error extracting %s\n", filename);

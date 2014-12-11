@@ -9,9 +9,15 @@
 
 #include <spawn.h>
 
-#ifdef __cplusplus
-extern "C" {
+#include "nacl_io/log.h"
+
+#if defined(NDEBUG)
+#define NACL_LOG(format, ...)
+#else
+#define NACL_LOG(format, ...) nacl_io_log(format, ##__VA_ARGS__)
 #endif
+
+__BEGIN_DECLS
 
 /*
  * Entry point expected by libcli_main.a
@@ -30,8 +36,6 @@ extern int nacl_main(int argc, char* argv[]);
 extern int nacl_startup_untar(
     const char* argv0, const char* tarfile, const char* root);
 
-#ifdef __cplusplus
-}
-#endif
+__END_DECLS
 
 #endif /* NACL_SPAWN_NACL_MAIN_H_ */

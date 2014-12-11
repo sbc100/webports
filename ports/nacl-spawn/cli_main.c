@@ -19,7 +19,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "nacl_io/nacl_io.h"
+#include "nacl_main.h"
 #include "ppapi_simple/ps_main.h"
 
 extern int nacl_main(int argc, char *argv[]);
@@ -42,15 +42,24 @@ static int getenv_as_int(const char *env) {
   return env_int;
 }
 
-static mkdir_checked(const char* dir) {
-  if (mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+static int mkdir_checked(const char* dir) {
+  int rtn =  mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
+  if (rtn != 0) {
     fprintf(stderr, "mkdir '%s' failed: %s\n", dir, strerror(errno));
   }
+  return rtn;
+}
+
+static int do_mount(const char *source, const char *target,
+                    const char *filesystemtype, unsigned long mountflags,
+                    const void *data) {
+  NACL_LOG("mount[%s] '%s' at '%s'\n", filesystemtype, source, target);
+  return mount(source, target, filesystemtype, mountflags, data);
 }
 
 int cli_main(int argc, char* argv[]) {
   umount("/");
-  mount("", "/", "memfs", 0, NULL);
+  do_mount("", "/", "memfs", 0, NULL);
 
   // Setup common environment variables, but don't override those
   // set already by ppapi_simple.
@@ -72,12 +81,18 @@ int cli_main(int argc, char* argv[]) {
   const char* data_url = getenv("NACL_DATA_URL");
   if (!data_url)
     data_url = "./";
+  NACL_LOG("NACL_DATA_URL=%s\n", data_url);
 
-  if (mount(data_url, "/mnt/http", "httpfs", 0, "") != 0) {
+  const char* mount_flags = getenv("NACL_DATA_MOUNT_FLAGS");
+  if (!mount_flags)
+    mount_flags = "";
+  NACL_LOG("NACL_DATA_MOUNT_FLAGS=%s\n", mount_flags);
+
+  if (do_mount(data_url, "/mnt/http", "httpfs", 0, mount_flags) != 0) {
     perror("mounting http filesystem at /mnt/http failed");
   }
 
-  if (mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
+  if (do_mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
     perror("Mounting HTML5 filesystem in /mnt/html5 failed");
   } else {
     mkdir("/mnt/html5/home", 0777);
@@ -85,13 +100,13 @@ int cli_main(int argc, char* argv[]) {
     if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
       perror("Unable to create home directory in persistent storage");
     } else {
-      if (mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
+      if (do_mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
         fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
       }
     }
   }
 
-  if (mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
+  if (do_mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
     perror("Mounting HTML5 filesystem in /tmp failed");
   }
 

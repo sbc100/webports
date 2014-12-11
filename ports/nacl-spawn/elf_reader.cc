@@ -41,7 +41,6 @@ ElfReader::ElfReader(const char* filename)
   if (!ReadHeaders(fp.get(), &phdrs))
     return;
 
-  bool dynamic_found = false;
   Elf64_Addr straddr = 0;
   size_t strsize = 0;
   std::vector<int> neededs;

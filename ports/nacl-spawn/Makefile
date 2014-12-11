@@ -11,7 +11,7 @@ NACL_SPAWN_OBJS += elf_reader.o library_dependencies.o
 
 TEST_EXES = test/elf_reader test/library_dependencies
 TEST_BINARIES = test/test_exe test/libtest1.so test/libtest2.so test/libtest3.so
-CPPFLAGS += -Iinclude
+CPPFLAGS += -Wall -Werror -Iinclude
 
 all: test
 

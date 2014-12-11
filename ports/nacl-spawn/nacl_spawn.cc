@@ -287,7 +287,6 @@ static bool ExpandShBang(std::string* prog, pp::VarDictionary* req) {
 
 static bool UseBuiltInFallback(std::string* prog, pp::VarDictionary* req) {
   if (prog->find('/') == std::string::npos) {
-    bool found = false;
     const char* path_env = getenv("PATH");
     std::vector<std::string> paths;
     GetPaths(path_env, &paths);

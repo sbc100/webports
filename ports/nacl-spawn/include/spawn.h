@@ -32,9 +32,7 @@
 #ifndef NACL_SPAWN_SPAWN_H_
 #define NACL_SPAWN_SPAWN_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS
 
 /*
  * Spawn a child using the given args.
@@ -116,8 +114,6 @@ extern int execvpe(const char *file, char *const argv[], char *const envp[]);
 extern int execlpe(const char *path,
                    const char *arg, ...); /* char* const envp[] */
 
-#ifdef __cplusplus
-}
-#endif
+__END_DECLS
 
 #endif /* NACL_SPAWN_SPAWN_H_ */
