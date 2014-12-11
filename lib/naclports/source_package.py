@@ -377,8 +377,8 @@ class SourcePackage(package.Package):
     finally:
       shutil.rmtree(tmp_output_path)
 
+    self.RemoveStamps()
     WriteStamp(stamp_file, stamp_contents)
-    self.RemovePatchStamp()
 
   def RunCmd(self, cmd, **args):
     try:
@@ -394,15 +394,14 @@ class SourcePackage(package.Package):
     self.Log(message)
     Log("#####################################################################")
 
-  def GetPatchStamp(self):
-    return os.path.join(paths.STAMP_DIR, self.NAME, 'nacl_patch')
+  def GetStampDir(self):
+    return os.path.join(paths.STAMP_DIR, self.NAME)
 
-  def RemovePatchStamp(self):
-    if os.path.exists(self.GetPatchStamp()):
-      os.remove(self.GetPatchStamp())
+  def RemoveStamps(self):
+    util.RemoveTree(self.GetStampDir())
 
   def Patch(self):
-    stamp_file = self.GetPatchStamp()
+    stamp_file = os.path.join(self.GetStampDir(), 'nacl_patch')
     src_dir = self.GetBuildLocation()
     if self.URL is None:
       return
@@ -429,7 +428,7 @@ class SourcePackage(package.Package):
     WriteStamp(stamp_file, '')
 
   def GetExtractStamp(self):
-    return os.path.join(paths.STAMP_DIR, self.NAME, 'extract')
+    return os.path.join(self.GetStampDir(), 'extract')
 
   def GetExtractStampContent(self):
     patch_file = self.GetPatchFile()
@@ -556,8 +555,8 @@ class SourcePackage(package.Package):
     # from the build tree.
     RunGitCmd(dest, ['remote', 'set-url', 'origin', '${GIT_URL}'])
 
+    self.RemoveStamps()
     WriteStamp(stamp_file, stamp_content)
-    self.RemovePatchStamp()
 
   def DownloadArchive(self, force_mirror):
     """Download the archive to the local cache directory.

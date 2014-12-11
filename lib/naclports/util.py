@@ -5,6 +5,7 @@
 import fcntl
 import hashlib
 import os
+import shutil
 import subprocess
 import sys
 
@@ -279,6 +280,15 @@ def VerifyHash(filename, sha1):
   """Return True if the sha1 of the given file match the sha1 passed in."""
   file_sha1 = HashFile(filename)
   return sha1 == file_sha1
+
+
+def RemoveTree(directory):
+  """Recursively remove a directory and its contents."""
+  if not os.path.exists(directory):
+    return
+  if not os.path.isdir(directory):
+    raise error.Error('RemoveTree: not a directory: %s', directory)
+  shutil.rmtree(directory)
 
 
 def RelPath(filename):

@@ -296,14 +296,12 @@ class TestSourcePackage(NaclportsTest):
     self.addCleanup(shutil.rmtree, self.tempdir)
     self.temp_ports = os.path.join(self.tempdir, 'ports')
 
-    patcher = patch('naclports.paths.BUILD_ROOT',
-                    os.path.join(self.tempdir, 'build_root'))
-    patcher.start()
-    self.addCleanup(patcher.stop)
-    patcher = patch('naclports.paths.OUT_DIR',
-                    os.path.join(self.tempdir, 'out_dir'))
-    patcher.start()
-    self.addCleanup(patcher.stop)
+    AddPatch(self, patch('naclports.paths.BUILD_ROOT',
+                        os.path.join(self.tempdir, 'build_root')))
+    AddPatch(self, patch('naclports.paths.OUT_DIR',
+                         os.path.join(self.tempdir, 'out_dir')))
+    AddPatch(self, patch('naclports.paths.STAMP_DIR',
+                         os.path.join(self.tempdir, 'stamp_dir')))
 
   def CreateTestPackage(self, name, extra_info=''):
     """Creates a source package directory in a temporary directory.
