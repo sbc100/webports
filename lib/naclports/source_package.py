@@ -442,6 +442,9 @@ class SourcePackage(package.Package):
     return util.GS_MIRROR_URL + '/' + self.GetArchiveFilename()
 
   def CheckInstallable(self):
+    if self.DISABLED:
+      raise DisabledError('%s: package is disabled' % self.NAME)
+
     if self.LIBC is not None and self.LIBC != self.config.libc:
       raise DisabledError('%s: cannot be built with %s'
                           % (self.NAME, self.config.libc))

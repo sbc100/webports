@@ -263,8 +263,7 @@ def run_main(args):
       else:
         package_iterator = source_package.SourcePackageIterator()
       for p in package_iterator:
-        if not p.DISABLED:
-          DoCmd(p)
+        DoCmd(p)
   else:
     for package_name in package_names:
       if args.command in installed_pkg_commands:

@@ -296,6 +296,7 @@ class TestSourcePackage(NaclportsTest):
     self.addCleanup(shutil.rmtree, self.tempdir)
     self.temp_ports = os.path.join(self.tempdir, 'ports')
 
+    AddPatch(self, patch('naclports.paths.NACLPORTS_ROOT', self.tempdir))
     AddPatch(self, patch('naclports.paths.BUILD_ROOT',
                         os.path.join(self.tempdir, 'build_root')))
     AddPatch(self, patch('naclports.paths.OUT_DIR',
@@ -362,8 +363,7 @@ class TestSourcePackage(NaclportsTest):
 
   def testSourcePackageIterator(self):
     self.CreateTestPackage('foo')
-    with patch('naclports.paths.NACLPORTS_ROOT', self.tempdir):
-      pkgs = [p for p in source_package.SourcePackageIterator()]
+    pkgs = [p for p in source_package.SourcePackageIterator()]
     self.assertEqual(len(pkgs), 1)
     self.assertEqual(pkgs[0].NAME, 'foo')
 
@@ -416,23 +416,42 @@ class TestSourcePackage(NaclportsTest):
         pkg.CheckInstallable()
       is_installed.assert_called_once_with('bar', pkg.config)
 
-  def testCheckInstallable(self):
-    root = self.CreateTestPackage('foo', 'DEPENDS=(bar)')
+  def testDisabled(self):
+    root = self.CreateTestPackage('foo', 'DISABLED=1')
     pkg = source_package.SourcePackage(root)
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'package is disabled'):
+      pkg.CheckInstallable()
 
-    # Verify that CheckInstallable raises an error when the package
-    # depened on something that is disabled.
-    def CreatePackageMock(name, config):
-      root = self.CreateTestPackage(name, 'DISABLED_ARCH=(x86_64)')
-      return source_package.SourcePackage(root)
+  def testDisabledArch(self):
+    self.CreateTestPackage('bar', 'DISABLED_ARCH=(x86_64)')
 
-    with patch('naclports.source_package.CreatePackage', CreatePackageMock):
-      with self.assertRaises(error.DisabledError):
-        pkg.CheckInstallable()
+    pkg = source_package.CreatePackage('bar')
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'disabled for current arch: x86_64'):
+      pkg.CheckInstallable()
+
+  def testDisabledLibc(self):
+    self.CreateTestPackage('bar', 'DISABLED_LIBC=(newlib)')
+
+    pkg = source_package.CreatePackage('bar')
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'cannot be built with newlib'):
+      pkg.CheckInstallable()
+
+  def testCheckInstallableDepends(self):
+    self.CreateTestPackage('foo', 'DEPENDS=(bar)')
+    self.CreateTestPackage('bar', 'DISABLED=1')
+
+    pkg = source_package.CreatePackage('foo')
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'bar: package is disabled'):
+      pkg.CheckInstallable()
 
   def testCheckBuildable(self):
-    root = self.CreateTestPackage('foo', 'BUILD_OS=solaris')
-    pkg = source_package.SourcePackage(root)
+    self.CreateTestPackage('foo', 'BUILD_OS=solaris')
+
+    pkg = source_package.CreatePackage('foo')
     with self.assertRaisesRegexp(error.DisabledError,
                                  'can only be built on solaris'):
       pkg.CheckBuildable()
