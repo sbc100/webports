@@ -19,6 +19,8 @@ ConfigureStep() {
   SetupCrossEnvironment
   export LIBS+="${NACL_CLI_MAIN_LIB} -lnacl_spawn -lppapi_simple -lnacl_io \
     -lppapi -lppapi_cpp"
+  # ninja doesn't honor CPPFLAGS to add them to CFLAGS
+  CFLAGS+=" ${CPPFLAGS}"
   LogExecute python configure.py --host=linux --platform=nacl
 }
 
