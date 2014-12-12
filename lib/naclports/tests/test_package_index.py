@@ -92,7 +92,7 @@ class TestPackageIndex(common.NaclportsTest):
 
   @patch('naclports.util.Log', Mock())
   @patch('naclports.package_index.PREBUILT_ROOT', os.getcwd())
-  @patch('naclports.util.VerifyHash', Mock(return_value=True))
+  @patch('naclports.util.VerifyHash', Mock())
   @patch('naclports.util.DownloadFile')
   def testDownload(self, download_file_mock):
     index = package_index.PackageIndex('dummy_file', test_index)

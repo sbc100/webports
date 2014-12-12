@@ -276,10 +276,18 @@ def HashFile(filename):
   return sha1.hexdigest()
 
 
+class HashVerificationError(error.Error):
+  pass
+
+
 def VerifyHash(filename, sha1):
   """Return True if the sha1 of the given file match the sha1 passed in."""
   file_sha1 = HashFile(filename)
-  return sha1 == file_sha1
+  if sha1 != file_sha1:
+    raise HashVerificationError(
+        'verification failed: %s\nExpected: %s\nActual: %s' %
+            (filename, sha1, file_sha1))
+
 
 
 def RemoveTree(directory):

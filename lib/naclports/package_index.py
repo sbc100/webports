@@ -95,12 +95,14 @@ class PackageIndex(object):
     info = self.packages[(package_name, config)]
     filename = os.path.join(PREBUILT_ROOT, os.path.basename(info['BIN_URL']))
     if os.path.exists(filename):
-      if util.VerifyHash(filename, info['BIN_SHA1']):
+      try:
+        util.VerifyHash(filename, info['BIN_SHA1'])
         return filename
+      except util.HashVerificationError:
+        pass
     util.Log('Downloading prebuilt binary ...')
     util.DownloadFile(filename, info['BIN_URL'])
-    if not util.VerifyHash(filename, info['BIN_SHA1']):
-      raise error.Error('Unexepected SHA1: %s' % filename)
+    util.VerifyHash(filename, info['BIN_SHA1'])
     return filename
 
   def ParseIndex(self, index_data):

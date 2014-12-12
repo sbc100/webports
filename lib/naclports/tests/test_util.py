@@ -22,8 +22,9 @@ class TestUtil(unittest.TestCase):
 
   @patch('naclports.util.HashFile', Mock(return_value='sha1'))
   def testVerifyHash(self):
-    self.assertTrue(util.VerifyHash('foo', 'sha1'))
-    self.assertFalse(util.VerifyHash('foo', 'sha1x'))
+    util.VerifyHash('foo', 'sha1')
+    with self.assertRaises(util.HashVerificationError):
+      util.VerifyHash('foo', 'sha1x')
 
   @patch.dict('os.environ', {'PATH': '/x/y/z'})
   def testFindInPath(self):

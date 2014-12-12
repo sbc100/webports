@@ -315,14 +315,8 @@ class SourcePackage(package.Package):
 
     force_mirror = os.environ.get('FORCE_MIRROR', False)
     self.DownloadArchive(force_mirror=force_mirror)
-    archive_sha1 = util.HashFile(archive)
-    if archive_sha1 != self.SHA1:
-      Log('verification failed: %s\nExpected: %s\nActual: %s' % (archive,
-          self.SHA1, archive_sha1))
-      return False
-
+    util.VerifyHash(archive, self.SHA1)
     Log('verified: %s' % util.RelPath(archive))
-    return True
 
   def Clean(self):
     pkg = self.PackageFile()
