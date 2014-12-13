@@ -56,7 +56,8 @@ $(OUT)/libglibc-compat.a: $(OBJS)
 LIBS=-lglibc-compat -lgtest -lpthread
 
 $(OUT)/glibc_compat_test: src/test.cc $(OUT)/libglibc-compat.a
-	$(CXX_PREFIX)$(CXX) -o $@ $< $(LDFLAGS) $(CXXFLAGS) $(CPPFLAGS) -L$(OUT) $(LIBS)
+	$(CXX_PREFIX)$(CXX) -o $@ $< -L$(OUT) $(LDFLAGS) $(CXXFLAGS) \
+		$(CPPFLAGS) $(LIBS)
 
 test: $(OUT)/glibc_compat_test
 

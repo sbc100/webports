@@ -47,7 +47,6 @@ static char* _mktemp(char *template, int suffixlen, int* fd, int open_flags) {
     if (stat(template, &buf) == -1 && errno == ENOENT) {
       if (fd) {
         *fd = open(template, open_flags, 0600);
-        printf("opened file %s %#o -> %d\n", template, open_flags, *fd);
         if (*fd != -1) {
           return template;
         }
