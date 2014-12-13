@@ -2,10 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-CFLAGS := -Werror -Wno-implicit-function-declaration -Wno-unused-value
-CFLAGS += -pthread -Iinclude -Isrc -D_LIBC
-CFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
-CFLAGS += -I$(NACL_SDK_ROOT)/include
+CFLAGS += -Wno-implicit-function-declaration
+CPPFLAGS := -Werror -Wno-unused-value
+CPPFLAGS += -pthread -Iinclude -Isrc -D_LIBC
+CPPFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
+CPPFLAGS += -I$(NACL_SDK_ROOT)/include
 OUT := out
 SOURCES := \
   src/getprotobyname_r.c \
@@ -15,6 +16,7 @@ SOURCES := \
   src/in6_addr.c \
   src/inet_addr.c \
   src/inet_pton.c \
+  src/mktemp.c \
   src/ns_name.c \
   src/ns_netint.c \
   src/ns_samedomain.c \
@@ -33,23 +35,32 @@ SOURCES := \
 OBJS := $(patsubst src/%.c,$(OUT)/%.o,$(SOURCES))
 
 ifeq ($(V),1)
-CC_PREFIX=
-AR_PREFIX=
+CXX_PREFIX =
+CC_PREFIX =
+AR_PREFIX =
 else
-CC_PREFIX=@echo " CC $@";
-AR_PREFIX=@echo " AR $@";
+CXX_PREFIX = @echo " CXX $@";
+CC_PREFIX =  @echo " CC  $@";
+AR_PREFIX =  @echo " AR  $@";
 endif
 
 $(OUT)/%.o : src/%.c
 	@mkdir -p $(OUT)
-	$(CC_PREFIX) $(CC) -o $@ -c $< $(CFLAGS)
+	$(CC_PREFIX)$(CC) -o $@ -c $< $(CFLAGS) $(CPPFLAGS)
 
-all: $(OUT)/libglibc-compat.a
+all: $(OUT)/libglibc-compat.a $(OUT)/glibc_compat_test
 
 $(OUT)/libglibc-compat.a: $(OBJS)
-	@echo " AR $@"; $(AR) rcs $@ $^
+	$(AR_PREFIX)$(AR) rcs $@ $^
 
-.PHONY: clean all
+LIBS=-lglibc-compat -lgtest -lpthread
+
+$(OUT)/glibc_compat_test: src/test.cc $(OUT)/libglibc-compat.a
+	$(CXX_PREFIX)$(CXX) -o $@ $< $(LDFLAGS) $(CXXFLAGS) $(CPPFLAGS) -L$(OUT) $(LIBS)
+
+test: $(OUT)/glibc_compat_test
 
 clean:
 	rm -rf $(OUT)
+
+.PHONY: test clean all

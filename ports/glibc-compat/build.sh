@@ -3,6 +3,9 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  EXECUTABLES=out/glibc_compat_test
+fi
 
 ConfigureStep() {
   if [ "${NACL_LIBC}" != "newlib" ]; then
@@ -22,7 +25,18 @@ BuildStep() {
   export AR=${NACLAR}
   export NACL_SDK_VERSION
   export NACL_SDK_ROOT
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
   DefaultBuildStep
+}
+
+TestStep() {
+  if [ "${NACL_LIBC}" != "newlib" ]; then
+    return
+  fi
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    return
+  fi
+  LogExecute ./out/glibc_compat_test.sh
 }
 
 InstallStep() {
