@@ -493,10 +493,10 @@ SetOptFlags() {
     NACLPORTS_CFLAGS+=" -g -O0"
     NACLPORTS_CXXFLAGS+=" -g -O0"
   else
-    NACLPORTS_CFLAGS+=" -O2"
-    NACLPORTS_CXXFLAGS+=" -O2"
+    NACLPORTS_CFLAGS+=" -DNDEBUG -O2"
+    NACLPORTS_CXXFLAGS+=" -DNDEBUG -O2"
     if [ "${NACL_ARCH}" = "pnacl" ]; then
-      NACLPORTS_LDFLAGS+=" -O2"
+      NACLPORTS_LDFLAGS+=" -DNDEBUG -O2"
     fi
   fi
 }
