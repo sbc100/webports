@@ -299,7 +299,7 @@ class SourcePackage(package.Package):
           sys.stdout.write(log_file.read())
         raise Error("Building '%s' failed." % (self.NAME))
 
-  def Download(self):
+  def Download(self, force_mirror=None):
     """Download upstream sources and verify integrity."""
     if self.IsGitUpstream():
       self.GitCloneToMirror()
@@ -313,7 +313,8 @@ class SourcePackage(package.Package):
       Log('missing SHA1 attribute: %s' % self.info)
       return False
 
-    force_mirror = os.environ.get('FORCE_MIRROR', False)
+    if force_mirror is None:
+      force_mirror = os.environ.get('FORCE_MIRROR', False)
     self.DownloadArchive(force_mirror=force_mirror)
     util.VerifyHash(archive, self.SHA1)
     Log('verified: %s' % util.RelPath(archive))

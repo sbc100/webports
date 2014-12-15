@@ -2,11 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import mock
 from mock import Mock, patch
-import patch_configure
-import scan_packages
 import StringIO
 import unittest
+
+import naclports
+import patch_configure
+import scan_packages
+import update_mirror
 
 
 def MockFileObject(contents):
@@ -43,3 +47,49 @@ class TestScanPackages(unittest.TestCase):
     file_info = scan_packages.FileInfo('foo', 10, 'http://host/base', 'hashval')
     scan_packages.DownloadFiles([file_info])
     check_hash_mock.assert_called_once_with('dummydir/base', 'hashval')
+
+
+class TestUpdateMirror(unittest.TestCase):
+  def testCheckMirror_CheckOnly(self):
+    pkg = naclports.source_package.CreatePackage('zlib')
+    pkg.GetArchiveFilename = Mock(return_value='file.tar.gz')
+    options = Mock()
+    options.check = True
+    update_mirror.CheckMirror(options, pkg, ['file.tar.gz'])
+
+    with self.assertRaises(SystemExit):
+      update_mirror.CheckMirror(options, pkg, [])
+
+  @patch('update_mirror.GsUpload')
+  def testCheckMirror_WithDownload(self, upload_mock):
+    mock_download = Mock()
+    pkg = naclports.source_package.CreatePackage('zlib')
+    pkg.Download = mock_download
+
+    pkg.GetArchiveFilename = Mock(return_value='file.tar.gz')
+    options = Mock()
+    options.check = False
+    update_mirror.CheckMirror(options, pkg, ['file.tar.gz'])
+    update_mirror.CheckMirror(options, pkg, [])
+
+    upload_mock.assert_called_once_with(options, pkg.DownloadLocation(),
+        update_mirror.MIRROR_GS + '/file.tar.gz')
+
+  @patch('update_mirror.CheckMirror')
+  def testCheckPackages(self, check_mirror):
+    mirror_listing = ['foo']
+    mock_options = Mock()
+    update_mirror.CheckPackages(mock_options, ['a', 'b', 'c'], mirror_listing)
+    check_mirror.assert_calls([mock.call(mock_options, 'a', mirror_listing),
+                               mock.call(mock_options, 'b', mirror_listing),
+                               mock.call(mock_options, 'c', mirror_listing)])
+
+  @patch('naclports.source_package.SourcePackageIterator')
+  @patch('update_mirror.GetMirrorListing', Mock(return_value=['foo']))
+  @patch('update_mirror.CheckPackages')
+  def testMain(self, check_packages, source_package_iter):
+    mock_iter = Mock()
+    source_package_iter.return_value = mock_iter
+
+    update_mirror.main([])
+    check_packages.assert_called_once_with(mock.ANY, mock_iter, ['foo'])

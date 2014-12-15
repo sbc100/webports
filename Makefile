@@ -75,8 +75,8 @@ lint:
 	$(PYLINT) --rcfile=.pylintrc lib/naclports lib/naclports/tests/*.py
 
 test:
-	bin/nosetests build_tools
-	$(COVERAGE) run --include=lib/naclports/* -m nose --rednose
+	$(COVERAGE) run --include=lib/naclports/*,build_tools/* -m nose \
+		--rednose build_tools lib
 	@rm -rf out/coverage_html
 	$(COVERAGE) html
 	$(COVERAGE) report $(COVERAGE_ARGS)
