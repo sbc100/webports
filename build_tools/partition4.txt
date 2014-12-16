@@ -217,6 +217,7 @@ builder 2 (total: 10175)
   scummvm
   snes9x
   nacl-spawn
+  pcre
   grep
   bochs
   mesa

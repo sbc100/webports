@@ -57,6 +57,7 @@ builder 0 (total: 18534)
   snes9x
   libxml2
   libarchive
+  pcre
   grep
   vim
   bochs

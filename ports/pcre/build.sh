@@ -18,7 +18,7 @@ TestStep() {
     echo "Tests OK"
   elif [ "$(uname -m)" = "${NACL_ARCH_ALT}" ]; then
     for test in ${EXECUTABLES}; do
-      ./${test%%${NACL_EXEEXT}}
+      LogExecute ./${test%%${NACL_EXEEXT}}
     done
     echo "Tests OK"
   fi
