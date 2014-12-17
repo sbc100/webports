@@ -6,7 +6,7 @@ InstallStep() {
   MakeDir ${DESTDIR_LIB}
   MakeDir ${DESTDIR_INCLUDE}
 
-  LogExecute install -m 644 lib/.libs/libgtest.a ${DESTDIR_LIB}/
+  LogExecute install -m 644 lib/.libs/libgtest*.a ${DESTDIR_LIB}/
   if [ "${NACL_SHARED}" = "1" ]; then
     LogExecute install -m 644 lib/.libs/libgtest.so* ${DESTDIR_LIB}/
   fi

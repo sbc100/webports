@@ -16,7 +16,7 @@
 #define RLIMIT_NOFILE 5
 #define RLIM_INFINITY -1
 
-typedef long rlim_t;
+typedef unsigned long rlim_t;
 
 struct rlimit {
   rlim_t rlim_cur;  /* Soft limit */

@@ -631,7 +631,6 @@ MakeDirs() {
 
 
 PublishByArchForDevEnv() {
-  DID_PUBLISH_FOR_DEVENV=1
   MakeDir "${PUBLISH_DIR}"
   local ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
   MakeDir "${ARCH_DIR}"
@@ -1423,19 +1422,20 @@ ZipPublishDir() {
     return
   fi
 
-  if [ "${DID_PUBLISH_FOR_DEVENV:-}" ]; then
-    return
-  fi
-
   if [ ! -d "${PUBLISH_DIR}" ]; then
     return
   fi
 
+  # If an arch specfic zip already exists (e.g. from PublishByArchForDevEnv)
+  # then skip supping the whole publish dir
+  if [ -f "${PUBLISH_DIR}/${NACL_ARCH}.zip" ]; then
+    return
+  fi
+
   # Remove existing zip as it may contain only some architectures.
-  LogExecute rm -f "${PUBLISH_DIR}.zip"
-  pushd "${PUBLISH_DIR}"
+  Remove "${PUBLISH_DIR}.zip"
+  ChangeDir "${PUBLISH_DIR}"
   LogExecute zip -rq "${PUBLISH_DIR}.zip" ./
-  popd
 }
 
 

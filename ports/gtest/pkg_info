@@ -2,6 +2,7 @@ NAME=gtest
 VERSION=1.7.0
 URL=http://googletest.googlecode.com/files/gtest-1.7.0.zip
 LICENSE=BSD:COPYING
+DEPENDS=(nacl-spawn)
 # This port is disabled since it already comes prebuilt with the NaCl
 # SDK. Its included here as an example, or in case anybody wants to
 # rebuilt using the naclports build system.

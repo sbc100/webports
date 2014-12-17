@@ -17,6 +17,8 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
+#include <irt.h>
+#include <irt_dev.h>
 #include <netinet/in.h>
 #include <setjmp.h>
 #include <stdint.h>
@@ -40,6 +42,7 @@
 
 #include "library_dependencies.h"
 #include "path_util.h"
+
 
 extern char** environ;
 extern int nacl_spawn_pid;
@@ -457,6 +460,13 @@ static int spawnve_impl(int mode, const char* path,
   if (NULL == envp) {
     envp = environ;
   }
+
+  PSInstance* instance = PSInstance::GetInstance();
+  if (!instance) {
+    errno = ENOSYS;
+    return -1;
+  }
+
   pp::VarDictionary req;
   req.Set("command", "nacl_spawn");
   pp::VarArray args;
@@ -551,10 +561,44 @@ pid_t wait4(pid_t pid, void* status, int options,
   return waitpid_impl(pid, static_cast<int*>(status), options);
 }
 
+/*
+ * Fake version of getpid().  This is used if there is no
+ * nacl_spawn_ppid set and no IRT getpid interface available.
+ */
+static int getpid_fake(int* pid) {
+  *pid = 1;
+  return 0;
+}
+
+static struct nacl_irt_dev_getpid irt_dev_getpid;
+
+/*
+ * IRT version of getpid().  This is used if there is no
+ * nacl_spawn_ppid set.
+ */
+static pid_t getpid_irt() {
+  if (irt_dev_getpid.getpid == NULL) {
+    int res = nacl_interface_query(NACL_IRT_DEV_GETPID_v0_1,
+                                   &irt_dev_getpid,
+                                   sizeof(irt_dev_getpid));
+    if (res != sizeof(irt_dev_getpid)) {
+      irt_dev_getpid.getpid = getpid_fake;
+    }
+  }
+
+  int pid;
+  int error = irt_dev_getpid.getpid(&pid);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return pid;
+}
+
 // Get the process ID of the calling process.
 pid_t getpid() {
   if (nacl_spawn_pid == -1) {
-    errno = ENOSYS;
+    return getpid_irt();
   }
   return nacl_spawn_pid;
 }
@@ -683,6 +727,10 @@ static int TCPConnectToLocalhost(int port) {
 // Create a pipe. pipefd[0] will be the read end of the pipe and pipefd[1] the
 // write end of the pipe.
 int pipe(int pipefd[2]) {
+  PSInstance* instance = PSInstance::GetInstance();
+  if (!instance)
+    return ENOSYS;
+
   pp::VarDictionary req, result;
   int readPort, writePort, readSocket, writeSocket;
 

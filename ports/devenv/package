@@ -234,6 +234,7 @@ emacs|${PACKAGE_SOURCE}|glibc/emacs-24.3.zip \
 git|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 make|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 grep|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+ninja|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 lua|${PACKAGE_SOURCE}|${TOOLCHAIN}/lua.zip \
 ruby|${PACKAGE_SOURCE}|${TOOLCHAIN}/ruby.zip \
 python|${PACKAGE_SOURCE}|${TOOLCHAIN}/python.zip"
