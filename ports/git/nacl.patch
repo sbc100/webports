@@ -1,7 +1,7 @@
 diff --git a/Makefile b/Makefile
 --- a/Makefile
 +++ b/Makefile
-@@ -986,11 +986,17 @@ BUILTIN_OBJS += builtin/verify-tag.o
+@@ -889,14 +889,22 @@ BUILTIN_OBJS += builtin/verify-tag.o
  BUILTIN_OBJS += builtin/write-tree.o
  
  GITLIBS = $(LIB_FILE) $(XDIFF_LIB)
@@ -20,62 +20,64 @@ diff --git a/Makefile b/Makefile
  -include config.mak.autogen
  -include config.mak
  
-@@ -1710,7 +1716,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
++CCLD = $(CC)
++
+ ifndef sysconfdir
+ ifeq ($(prefix),/usr)
+ sysconfdir = /etc
+@@ -1610,7 +1618,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
  	'-DGIT_INFO_PATH="$(infodir_relative_SQ)"'
  
  git$X: git.o GIT-LDFLAGS $(BUILTIN_OBJS) $(GITLIBS)
--	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ git.o \
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ git.o \
- 		$(BUILTIN_OBJS) $(ALL_LDFLAGS) $(LIBS)
+-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) git.o \
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) git.o \
+ 		$(BUILTIN_OBJS) $(LIBS)
  
  help.sp help.s help.o: common-cmds.h
-@@ -2030,21 +2036,21 @@ compat/nedmalloc/nedmalloc.sp compat/nedmalloc/nedmalloc.o: EXTRA_CPPFLAGS = \
+@@ -1893,21 +1901,21 @@ compat/nedmalloc/nedmalloc.sp: SPARSE_FLAGS += -Wno-non-pointer-null
  endif
  
  git-%$X: %.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS)
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS)
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS)
  
  git-imap-send$X: imap-send.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
--		$(LIBS) $(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIB_4_CRYPTO)
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
-+		$(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIBS) $(LIB_4_CRYPTO) $(EXTLIBS)
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+ 		$(LIBS) $(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIB_4_CRYPTO)
  
- git-http-fetch$X: revision.o http.o http-walker.o http-fetch.o GIT-LDFLAGS $(GITLIBS)
+ git-http-fetch$X: http.o http-walker.o http-fetch.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
--		$(LIBS) $(CURL_LIBCURL)
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
-+		$(LIBS) $(CURL_LIBCURL) $(EXTLIBS)
- git-http-push$X: revision.o http.o http-push.o GIT-LDFLAGS $(GITLIBS)
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+ 		$(LIBS) $(CURL_LIBCURL)
+ git-http-push$X: http.o http-push.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
--		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
-+		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT) $(EXTLIBS)
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
+ 		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
  
  git-remote-testsvn$X: remote-testsvn.o GIT-LDFLAGS $(GITLIBS) $(VCSSVN_LIB)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS) \
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS) \
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS) \
  	$(VCSSVN_LIB)
  
  $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
-@@ -2054,8 +2060,8 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
+@@ -1917,8 +1925,8 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
  	cp $< $@
  
  $(REMOTE_CURL_PRIMARY): remote-curl.o http.o http-walker.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
 -		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT)
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
 +		$(LIBS) $(CURL_LIBCURL) $(EXPAT_LIBEXPAT) $(EXTLIBS)
  
  $(LIB_FILE): $(LIB_OBJS)
- 	$(QUIET_AR)$(RM) $@ && $(AR) rcs $@ $(LIB_OBJS)
-@@ -2261,7 +2267,7 @@ test-svn-fe$X: vcs-svn/lib.a
+ 	$(QUIET_AR)$(RM) $@ && $(AR) rcs $@ $^
+@@ -2131,7 +2139,7 @@ test-svn-fe$X: vcs-svn/lib.a
  .PRECIOUS: $(TEST_OBJS)
  
  test-%$X: test-%.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(filter %.a,$^) $(LIBS)
-+	$(QUIET_LINK)$(CXX) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(filter %.a,$^) $(LIBS)
++	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(filter %.a,$^) $(LIBS)
  
  check-sha1:: test-sha1$X
  	./test-sha1.sh
@@ -97,7 +99,7 @@ diff --git a/base85.c b/base85.c
 diff --git a/builtin/log.c b/builtin/log.c
 --- a/builtin/log.c
 +++ b/builtin/log.c
-@@ -199,7 +199,9 @@ static void show_early_header(struct rev_info *rev, const char *stage, int nr)
+@@ -229,7 +229,9 @@ static void show_early_header(struct rev_info *rev, const char *stage, int nr)
  	printf(_("Final output: %d %s\n"), nr, stage);
  }
  
@@ -107,7 +109,7 @@ diff --git a/builtin/log.c b/builtin/log.c
  
  static void log_show_early(struct rev_info *revs, struct commit_list *list)
  {
-@@ -241,9 +243,12 @@ static void log_show_early(struct rev_info *revs, struct commit_list *list)
+@@ -271,9 +273,12 @@ static void log_show_early(struct rev_info *revs, struct commit_list *list)
  	 * trigger every second even if we're blocked on a
  	 * reader!
  	 */
@@ -120,7 +122,7 @@ diff --git a/builtin/log.c b/builtin/log.c
  }
  
  static void early_output(int signal)
-@@ -262,11 +267,14 @@ static void setup_early_output(struct rev_info *rev)
+@@ -292,11 +297,14 @@ static void setup_early_output(struct rev_info *rev)
  	 * system dependencies and headers), and using
  	 * SA_RESTART.
  	 */
@@ -135,7 +137,7 @@ diff --git a/builtin/log.c b/builtin/log.c
  
  	/*
  	 * If we can get the whole output in less than a
-@@ -275,9 +283,12 @@ static void setup_early_output(struct rev_info *rev)
+@@ -305,9 +313,12 @@ static void setup_early_output(struct rev_info *rev)
  	 *
  	 * This is a one-time-only trigger.
  	 */
@@ -165,7 +167,7 @@ diff --git a/check-racy.c b/check-racy.c
 diff --git a/configure.ac b/configure.ac
 --- a/configure.ac
 +++ b/configure.ac
-@@ -608,11 +608,13 @@ GIT_CONF_SUBST([NO_DEFLATE_BOUND])
+@@ -616,11 +616,13 @@ GIT_CONF_SUBST([NO_DEFLATE_BOUND])
  #
  # Define NEEDS_SOCKET if linking with libc is not enough (SunOS,
  # Patrick Mauritz).
@@ -184,7 +186,7 @@ diff --git a/configure.ac b/configure.ac
  
  #
  # The next few tests will define NEEDS_RESOLV if linking with
-@@ -665,7 +667,8 @@ AC_CHECK_LIB([c], [basename],
+@@ -673,7 +675,8 @@ AC_CHECK_LIB([c], [basename],
  [NEEDS_LIBGEN=],
  [NEEDS_LIBGEN=YesPlease])
  GIT_CONF_SUBST([NEEDS_LIBGEN])
@@ -194,7 +196,7 @@ diff --git a/configure.ac b/configure.ac
  
  AC_CHECK_LIB([c], [gettext],
  [LIBC_CONTAINS_LIBINTL=YesPlease],
-@@ -815,7 +818,8 @@ AC_RUN_IFELSE(
+@@ -831,7 +834,8 @@ AC_RUN_IFELSE(
  		FILE *f = fopen(".", "r");
  		return f && fread(&c, 1, 1, f)]])],
  	[ac_cv_fread_reads_directories=no],
@@ -204,7 +206,7 @@ diff --git a/configure.ac b/configure.ac
  ])
  if test $ac_cv_fread_reads_directories = yes; then
  	FREAD_READS_DIRECTORIES=UnfortunatelyYes
-@@ -849,7 +853,8 @@ AC_RUN_IFELSE(
+@@ -865,7 +869,8 @@ AC_RUN_IFELSE(
  		  if (snprintf(buf, 3, "%s", "12345") != 5
  		      || strcmp(buf, "12")) return 1]])],
  	[ac_cv_snprintf_returns_bogus=no],
@@ -217,48 +219,45 @@ diff --git a/configure.ac b/configure.ac
 diff --git a/credential-cache--daemon.c b/credential-cache--daemon.c
 --- a/credential-cache--daemon.c
 +++ b/credential-cache--daemon.c
-@@ -252,7 +252,11 @@ static void check_socket_directory(const char *path)
+@@ -255,6 +255,10 @@ static void check_socket_directory(const char *path)
  	free(path_copy);
  }
  
 +#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#define main nacl_main
 +#endif
++
+ int main(int argc, const char **argv)
  {
- 	socket_path = argv[1];
- 
+ 	static const char *usage[] = {
 diff --git a/credential-cache.c b/credential-cache.c
 --- a/credential-cache.c
 +++ b/credential-cache.c
-@@ -83,7 +83,11 @@ static void do_cache(const char *socket, const char *action, int timeout,
+@@ -82,6 +82,10 @@ static void do_cache(const char *socket, const char *action, int timeout,
  	strbuf_release(&buf);
  }
  
 +#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#define main nacl_main
 +#endif
++
+ int main(int argc, const char **argv)
  {
  	char *socket_path = NULL;
- 	int timeout = 900;
 diff --git a/credential-store.c b/credential-store.c
 --- a/credential-store.c
 +++ b/credential-store.c
-@@ -114,7 +114,11 @@ static int lookup_credential(const char *fn, struct credential *c)
+@@ -115,6 +115,10 @@ static int lookup_credential(const char *fn, struct credential *c)
  	return c->username && c->password;
  }
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
  	const char * const usage[] = {
- 		"git credential-store [options] <action>",
 diff --git a/daemon.c b/daemon.c
 --- a/daemon.c
 +++ b/daemon.c
@@ -272,7 +271,7 @@ diff --git a/daemon.c b/daemon.c
  	} else {
  		/*
  		 * Since stderr is set to buffered mode, the
-@@ -1160,7 +1162,11 @@ static int serve(struct string_list *listen_addr, int listen_port,
+@@ -1096,7 +1098,11 @@ static int serve(struct string_list *listen_addr, int listen_port,
  	return service_loop(&socklist);
  }
  
@@ -284,7 +283,7 @@ diff --git a/daemon.c b/daemon.c
  {
  	int listen_port = 0;
  	struct string_list listen_addr = STRING_LIST_INIT_NODUP;
-@@ -1310,7 +1316,9 @@ int main(int argc, char **argv)
+@@ -1247,7 +1253,9 @@ int main(int argc, char **argv)
  	}
  
  	if (log_syslog) {
@@ -297,7 +296,7 @@ diff --git a/daemon.c b/daemon.c
 diff --git a/fast-import.c b/fast-import.c
 --- a/fast-import.c
 +++ b/fast-import.c
-@@ -525,6 +525,8 @@ static void checkpoint_signal(int signo)
+@@ -527,6 +527,8 @@ static void checkpoint_signal(int signo)
  
  static void set_checkpoint_signal(void)
  {
@@ -306,7 +305,7 @@ diff --git a/fast-import.c b/fast-import.c
  	struct sigaction sa;
  
  	memset(&sa, 0, sizeof(sa));
-@@ -532,6 +534,7 @@ static void set_checkpoint_signal(void)
+@@ -534,6 +536,7 @@ static void set_checkpoint_signal(void)
  	sigemptyset(&sa.sa_mask);
  	sa.sa_flags = SA_RESTART;
  	sigaction(SIGUSR1, &sa, NULL);
@@ -314,22 +313,21 @@ diff --git a/fast-import.c b/fast-import.c
  }
  
  #endif
-@@ -3347,7 +3350,11 @@ static void parse_argv(void)
+@@ -3350,6 +3353,10 @@ static void parse_argv(void)
  		read_marks();
  }
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
  	unsigned int i;
- 
 diff --git a/git-compat-util.h b/git-compat-util.h
 --- a/git-compat-util.h
 +++ b/git-compat-util.h
-@@ -654,8 +654,8 @@ void git_qsort(void *base, size_t nmemb, size_t size,
+@@ -754,8 +754,8 @@ void git_qsort(void *base, size_t nmemb, size_t size,
  #define ST_CTIME_NSEC(st) ((unsigned int)((st).st_ctimespec.tv_nsec))
  #define ST_MTIME_NSEC(st) ((unsigned int)((st).st_mtimespec.tv_nsec))
  #else
@@ -340,9 +338,9 @@ diff --git a/git-compat-util.h b/git-compat-util.h
  #endif
  #endif
  
-@@ -707,4 +707,12 @@ void warn_on_inaccessible(const char *path);
- /* Get the passwd entry for the UID of the current process. */
- struct passwd *xgetpwuid_self(void);
+@@ -828,4 +828,12 @@ struct tm *git_gmtime_r(const time_t *, struct tm *);
+ #define gmtime_r git_gmtime_r
+ #endif
  
 +#if defined(__native_client__) && !defined(__GLIBC__)
 +#define gethostname(dst, len) strcpy(dst, "localhost")
@@ -356,23 +354,21 @@ diff --git a/git-compat-util.h b/git-compat-util.h
 diff --git a/git.c b/git.c
 --- a/git.c
 +++ b/git.c
-@@ -513,8 +513,11 @@ static int run_argv(int *argcp, const char ***argv)
- 	return done_alias;
+@@ -614,6 +614,10 @@ static void restore_sigpipe_to_default(void)
+ 	signal(SIGPIPE, SIG_DFL);
  }
  
--
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **av)
  {
- 	const char *cmd;
- 
+ 	const char **argv = (const char **) av;
 diff --git a/http-backend.c b/http-backend.c
 --- a/http-backend.c
 +++ b/http-backend.c
-@@ -563,7 +563,11 @@ static struct service_cmd {
+@@ -557,7 +557,11 @@ static struct service_cmd {
  	{"POST", "/git-receive-pack$", service_rpc}
  };
  
@@ -387,22 +383,21 @@ diff --git a/http-backend.c b/http-backend.c
 diff --git a/http-fetch.c b/http-fetch.c
 --- a/http-fetch.c
 +++ b/http-fetch.c
-@@ -6,7 +6,11 @@
+@@ -6,6 +6,10 @@
  static const char http_fetch_usage[] = "git http-fetch "
  "[-c] [-t] [-a] [-v] [--recover] [-w ref] [--stdin] commit-id url";
  
 +#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#define main nacl_main
 +#endif
++
+ int main(int argc, const char **argv)
  {
  	struct walker *walker;
- 	int commits_on_stdin = 0;
 diff --git a/http-push.c b/http-push.c
 --- a/http-push.c
 +++ b/http-push.c
-@@ -1713,7 +1713,11 @@ static void run_request_queue(void)
+@@ -1710,7 +1710,11 @@ static void run_request_queue(void)
  #endif
  }
  
@@ -417,8 +412,8 @@ diff --git a/http-push.c b/http-push.c
 diff --git a/imap-send.c b/imap-send.c
 --- a/imap-send.c
 +++ b/imap-send.c
-@@ -1376,7 +1376,11 @@ static int git_imap_config(const char *key, const char *val, void *cb)
- 	return 0;
+@@ -1338,7 +1338,11 @@ static void git_imap_config(void)
+ 	git_config_get_string("imap.authmethod", &server.auth_method);
  }
  
 +#if defined(__native_client__)
@@ -432,7 +427,7 @@ diff --git a/imap-send.c b/imap-send.c
 diff --git a/progress.c b/progress.c
 --- a/progress.c
 +++ b/progress.c
-@@ -45,6 +45,8 @@ static void progress_interval(int signum)
+@@ -47,6 +47,8 @@ static void progress_interval(int signum)
  
  static void set_progress_signal(void)
  {
@@ -441,7 +436,7 @@ diff --git a/progress.c b/progress.c
  	struct sigaction sa;
  	struct itimerval v;
  
-@@ -60,14 +62,18 @@ static void set_progress_signal(void)
+@@ -62,14 +64,18 @@ static void set_progress_signal(void)
  	v.it_interval.tv_usec = 0;
  	v.it_value = v.it_interval;
  	setitimer(ITIMER_REAL, &v, NULL);
@@ -463,7 +458,7 @@ diff --git a/progress.c b/progress.c
 diff --git a/remote-curl.c b/remote-curl.c
 --- a/remote-curl.c
 +++ b/remote-curl.c
-@@ -866,7 +866,11 @@ static void parse_push(struct strbuf *buf)
+@@ -957,7 +957,11 @@ static void parse_push(struct strbuf *buf)
  	free(specs);
  }
  
@@ -478,18 +473,17 @@ diff --git a/remote-curl.c b/remote-curl.c
 diff --git a/remote-testsvn.c b/remote-testsvn.c
 --- a/remote-testsvn.c
 +++ b/remote-testsvn.c
-@@ -286,7 +286,11 @@ static int do_command(struct strbuf *line)
+@@ -283,6 +283,10 @@ static int do_command(struct strbuf *line)
  	return 0;
  }
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
  	struct strbuf buf = STRBUF_INIT, url_sb = STRBUF_INIT,
- 			private_ref_sb = STRBUF_INIT, marksfilename_sb = STRBUF_INIT,
 diff --git a/run-command.c b/run-command.c
 --- a/run-command.c
 +++ b/run-command.c
@@ -504,50 +498,29 @@ diff --git a/run-command.c b/run-command.c
  #ifndef SHELL_PATH
  # define SHELL_PATH "/bin/sh"
  #endif
-@@ -334,7 +338,7 @@ fail_pipe:
+@@ -351,7 +355,7 @@ fail_pipe:
  	trace_argv_printf(cmd->argv, "trace: run_command:");
  	fflush(NULL);
  
--#ifndef WIN32
-+#if !defined(WIN32) && !defined(__native_client__)
+-#ifndef GIT_WINDOWS_NATIVE
++#if !defined(GIT_WINDOWS_NATIVE) && !defined(__native_client__)
  {
  	int notify_pipe[2];
  	if (pipe(notify_pipe))
-@@ -474,8 +478,10 @@ fail_pipe:
- 	else if (cmd->out > 1)
- 		fhout = dup(cmd->out);
- 
-+#if !defined(__native_client__)
- 	if (cmd->env)
- 		env = make_augmented_environ(cmd->env);
-+#endif
- 
- 	if (cmd->git_cmd) {
- 		cmd->argv = prepare_git_cmd(cmd->argv);
-@@ -483,16 +489,23 @@ fail_pipe:
+@@ -493,8 +497,13 @@ fail_pipe:
+ 	else if (cmd->use_shell)
  		cmd->argv = prepare_shell_cmd(cmd->argv);
- 	}
  
 +#if defined(__native_client__)
-+        // TODO(bradnelson): Support pipes and cwd.
-+	cmd->pid = spawnve(P_NOWAIT, cmd->argv[0], cmd->argv, env);
++	// TODO(bradnelson): Support pipes and cwd.
++	cmd->pid = spawnve(P_NOWAIT, cmd->argv[0], (char**) cmd->argv, (char**) cmd->env);
 +#else
- 	cmd->pid = mingw_spawnvpe(cmd->argv[0], cmd->argv, env, cmd->dir,
- 				  fhin, fhout, fherr);
+ 	cmd->pid = mingw_spawnvpe(cmd->argv[0], cmd->argv, (char**) cmd->env,
+ 			cmd->dir, fhin, fhout, fherr);
 +#endif
  	failed_errno = errno;
  	if (cmd->pid < 0 && (!cmd->silent_exec_failure || errno != ENOENT))
  		error("cannot spawn %s: %s", cmd->argv[0], strerror(errno));
- 	if (cmd->clean_on_exit && cmd->pid >= 0)
- 		mark_child_for_cleanup(cmd->pid);
- 
-+#if !defined(__native_client__)
- 	if (cmd->env)
- 		free_environ(env);
-+#endif
- 	if (cmd->git_cmd)
- 		free(cmd->argv);
- 
 diff --git a/sh-i18n--envsubst.c b/sh-i18n--envsubst.c
 --- a/sh-i18n--envsubst.c
 +++ b/sh-i18n--envsubst.c
@@ -567,7 +540,7 @@ diff --git a/sh-i18n--envsubst.c b/sh-i18n--envsubst.c
 diff --git a/shell.c b/shell.c
 --- a/shell.c
 +++ b/shell.c
-@@ -142,7 +142,11 @@ static struct commands {
+@@ -138,7 +138,11 @@ static struct commands {
  	{ NULL },
  };
  
@@ -598,18 +571,30 @@ diff --git a/show-index.c b/show-index.c
 diff --git a/test-chmtime.c b/test-chmtime.c
 --- a/test-chmtime.c
 +++ b/test-chmtime.c
-@@ -56,7 +56,11 @@ static int timespec_arg(const char *arg, long int *set_time, int *set_eq)
+@@ -56,6 +56,10 @@ static int timespec_arg(const char *arg, long int *set_time, int *set_eq)
  	return 1;
  }
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char *argv[])
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char *argv[])
  {
  	static int verbose;
+diff --git a/test-config.c b/test-config.c
+--- a/test-config.c
++++ b/test-config.c
+@@ -32,6 +32,9 @@
+  *
+  */
  
++#ifdef __native_client__
++#define main nacl_main
++#endif
+ 
+ int main(int argc, char **argv)
+ {
 diff --git a/test-ctype.c b/test-ctype.c
 --- a/test-ctype.c
 +++ b/test-ctype.c
@@ -628,7 +613,7 @@ diff --git a/test-ctype.c b/test-ctype.c
 diff --git a/test-date.c b/test-date.c
 --- a/test-date.c
 +++ b/test-date.c
-@@ -43,7 +43,11 @@ static void parse_approxidate(char **argv, struct timeval *now)
+@@ -45,7 +45,11 @@ static void parse_approxidate(char **argv, struct timeval *now)
  	}
  }
  
@@ -668,8 +653,22 @@ diff --git a/test-dump-cache-tree.c b/test-dump-cache-tree.c
  int main(int ac, char **av)
 +#endif
  {
+ 	struct index_state istate;
  	struct cache_tree *another = cache_tree();
- 	if (read_cache() < 0)
+diff --git a/test-dump-split-index.c b/test-dump-split-index.c
+--- a/test-dump-split-index.c
++++ b/test-dump-split-index.c
+@@ -7,6 +7,10 @@ static void show_bit(size_t pos, void *data)
+ 	printf(" %d", (int)pos);
+ }
+ 
++#ifdef __native_client__
++#define main nacl_main
++#endif
++
+ int main(int ac, char **av)
+ {
+ 	struct split_index *si;
 diff --git a/test-genrandom.c b/test-genrandom.c
 --- a/test-genrandom.c
 +++ b/test-genrandom.c
@@ -685,20 +684,33 @@ diff --git a/test-genrandom.c b/test-genrandom.c
  {
  	unsigned long count, next = 0;
  	unsigned char *c;
+diff --git a/test-hashmap.c b/test-hashmap.c
+--- a/test-hashmap.c
++++ b/test-hashmap.c
+@@ -126,6 +126,10 @@ static void perf_hashmap(unsigned int method, unsigned int rounds)
+ 
+ #define DELIM " \t\r\n"
+ 
++#ifdef __native_client__
++#define main nacl_main
++#endif
++
+ /*
+  * Read stdin line by line and print result of commands to stdout:
+  *
 diff --git a/test-index-version.c b/test-index-version.c
 --- a/test-index-version.c
 +++ b/test-index-version.c
-@@ -1,6 +1,10 @@
+@@ -1,5 +1,9 @@
  #include "cache.h"
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
  	struct cache_header hdr;
- 	int version;
 diff --git a/test-line-buffer.c b/test-line-buffer.c
 --- a/test-line-buffer.c
 +++ b/test-line-buffer.c
@@ -732,18 +744,17 @@ diff --git a/test-match-trees.c b/test-match-trees.c
 diff --git a/test-mergesort.c b/test-mergesort.c
 --- a/test-mergesort.c
 +++ b/test-mergesort.c
-@@ -22,7 +22,11 @@ static int compare_strings(const void *a, const void *b)
+@@ -22,6 +22,10 @@ static int compare_strings(const void *a, const void *b)
  	return strcmp(x->text, y->text);
  }
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
  	struct line *line, *p = NULL, *lines = NULL;
- 	struct strbuf sb = STRBUF_INIT;
 diff --git a/test-mktemp.c b/test-mktemp.c
 --- a/test-mktemp.c
 +++ b/test-mktemp.c
@@ -762,23 +773,22 @@ diff --git a/test-mktemp.c b/test-mktemp.c
 diff --git a/test-parse-options.c b/test-parse-options.c
 --- a/test-parse-options.c
 +++ b/test-parse-options.c
-@@ -29,7 +29,11 @@ static int number_callback(const struct option *opt, const char *arg, int unset)
+@@ -29,6 +29,10 @@ static int number_callback(const struct option *opt, const char *arg, int unset)
  	return 0;
  }
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, const char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
  	const char *prefix = "prefix/";
- 	const char *usage[] = {
 diff --git a/test-path-utils.c b/test-path-utils.c
 --- a/test-path-utils.c
 +++ b/test-path-utils.c
-@@ -28,7 +28,11 @@ static int normalize_ceiling_entry(struct string_list_item *item, void *unused)
- 	return 1;
+@@ -41,7 +41,11 @@ static void normalize_argv_string(const char **var, const char *input)
+ 		die("Bad value: %s\n", input);
  }
  
 +#if defined(__native_client__)
@@ -789,11 +799,38 @@ diff --git a/test-path-utils.c b/test-path-utils.c
  {
  	if (argc == 3 && !strcmp(argv[1], "normalize_path_copy")) {
  		char *buf = xmalloc(PATH_MAX + 1);
+diff --git a/test-prio-queue.c b/test-prio-queue.c
+--- a/test-prio-queue.c
++++ b/test-prio-queue.c
+@@ -16,6 +16,10 @@ static void show(int *v)
+ 	free(v);
+ }
+ 
++#ifdef __native_client__
++#define main nacl_main
++#endif
++
+ int main(int argc, char **argv)
+ {
+ 	struct prio_queue pq = { intcmp };
+diff --git a/test-read-cache.c b/test-read-cache.c
+--- a/test-read-cache.c
++++ b/test-read-cache.c
+@@ -1,5 +1,9 @@
+ #include "cache.h"
+ 
++#ifdef __native_client__
++#define main nacl_main
++#endif
++
+ int main (int argc, char **argv)
+ {
+ 	int i, cnt = 1;
 diff --git a/test-regex.c b/test-regex.c
 --- a/test-regex.c
 +++ b/test-regex.c
 @@ -1,6 +1,10 @@
- #include <git-compat-util.h>
+ #include "git-compat-util.h"
  
 +#if defined(__native_client__)
 +int nacl_main(int argc, char *argv[])
@@ -831,12 +868,12 @@ diff --git a/test-run-command.c b/test-run-command.c
  int main(int argc, char **argv)
 +#endif
  {
- 	struct child_process proc;
+ 	struct child_process proc = CHILD_PROCESS_INIT;
  
 diff --git a/test-scrap-cache-tree.c b/test-scrap-cache-tree.c
 --- a/test-scrap-cache-tree.c
 +++ b/test-scrap-cache-tree.c
-@@ -4,7 +4,11 @@
+@@ -5,7 +5,11 @@
  
  static struct lock_file index_lock;
  
@@ -847,8 +884,22 @@ diff --git a/test-scrap-cache-tree.c b/test-scrap-cache-tree.c
 +int main(int argc, char **argv)
 +#endif
  {
- 	int fd = hold_locked_index(&index_lock, 1);
+ 	hold_locked_index(&index_lock, 1);
  	if (read_cache() < 0)
+diff --git a/test-sha1-array.c b/test-sha1-array.c
+--- a/test-sha1-array.c
++++ b/test-sha1-array.c
+@@ -6,6 +6,10 @@ static void print_sha1(const unsigned char sha1[20], void *data)
+ 	puts(sha1_to_hex(sha1));
+ }
+ 
++#ifdef __native_client__
++#define main nacl_main
++#endif
++
+ int main(int argc, char **argv)
+ {
+ 	struct sha1_array array = SHA1_ARRAY_INIT;
 diff --git a/test-sha1.c b/test-sha1.c
 --- a/test-sha1.c
 +++ b/test-sha1.c
@@ -882,7 +933,7 @@ diff --git a/test-string-list.c b/test-string-list.c
 --- a/test-string-list.c
 +++ b/test-string-list.c
 @@ -41,7 +41,11 @@ static int prefix_cb(struct string_list_item *item, void *cb_data)
- 	return !prefixcmp(item->string, prefix);
+ 	return starts_with(item->string, prefix);
  }
  
 +#if defined(__native_client__)
@@ -896,19 +947,17 @@ diff --git a/test-string-list.c b/test-string-list.c
 diff --git a/test-subprocess.c b/test-subprocess.c
 --- a/test-subprocess.c
 +++ b/test-subprocess.c
-@@ -1,7 +1,11 @@
+@@ -1,6 +1,10 @@
  #include "cache.h"
  #include "run-command.h"
  
--int main(int argc, const char **argv)
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
-+int main(int argc, char **argv) {
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
- 	struct child_process cp;
- 	int nogit = 0;
+ 	struct child_process cp = CHILD_PROCESS_INIT;
 diff --git a/test-svn-fe.c b/test-svn-fe.c
 --- a/test-svn-fe.c
 +++ b/test-svn-fe.c
@@ -924,25 +973,37 @@ diff --git a/test-svn-fe.c b/test-svn-fe.c
  {
  	if (argc == 2) {
  		if (svndump_init(argv[1]))
+diff --git a/test-urlmatch-normalization.c b/test-urlmatch-normalization.c
+--- a/test-urlmatch-normalization.c
++++ b/test-urlmatch-normalization.c
+@@ -1,6 +1,10 @@
+ #include "git-compat-util.h"
+ #include "urlmatch.h"
+ 
++#ifdef __native_client__
++#define main nacl_main
++#endif
++
+ int main(int argc, char **argv)
+ {
+ 	const char usage[] = "test-urlmatch-normalization [-p | -l] <url1> | <url1> <url2>";
 diff --git a/test-wildmatch.c b/test-wildmatch.c
 --- a/test-wildmatch.c
 +++ b/test-wildmatch.c
-@@ -73,7 +73,11 @@ static int perf(int ac, char **av)
- 	return 0;
- }
+@@ -1,5 +1,9 @@
+ #include "cache.h"
  
-+#if defined(__native_client__)
-+int nacl_main(int argc, char *argv[])
-+#else
- int main(int argc, char **argv)
++#ifdef __native_client__
++#define main nacl_main
 +#endif
++
+ int main(int argc, char **argv)
  {
  	int i;
- 
 diff --git a/upload-pack.c b/upload-pack.c
 --- a/upload-pack.c
 +++ b/upload-pack.c
-@@ -788,7 +788,11 @@ static int upload_pack_config(const char *var, const char *value, void *unused)
+@@ -791,7 +791,11 @@ static int upload_pack_config(const char *var, const char *value, void *unused)
  	return parse_hide_refs_config(var, value, "uploadpack");
  }
  

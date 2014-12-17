@@ -85,6 +85,8 @@ TEST_F(DevEnvFileTest, 'testGit', function() {
     return self.checkCommand(
         'git config --global user.email johndoe@example.com');
   }).then(function() {
+    return self.checkCommand('git config --global color.ui false');
+  }).then(function() {
     return self.checkCommand('mkdir foo');
   }).then(function() {
     return self.checkCommandReLines(
