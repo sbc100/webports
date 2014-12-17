@@ -76,6 +76,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r nethack-3.4.3.zip nethack
-  ChangeDir ${SRC_DIR}
+  CreateWebStoreZip nethack-${VERSION}.zip nethack
 }

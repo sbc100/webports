@@ -9,69 +9,15 @@
 # Written to avoid using anything other than bash, geturl, and unzip when
 # installing core packages.
 
-set -e
+set -o errexit
+set -o nounset
 shopt -s nullglob
 
 STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
 SDK_VERSION=${SDK_VERSION:-pepper_40}
 REVISION=${REVISION:-trunk-147-g49eb4c9}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
-
-NACL_ARCH_ALT="${NACL_ARCH}"
-if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
-  NACL_ARCH_ALT="pnacl"
-fi
-
-PACKAGE_LIST="${PACKAGE_LIST:-}"
-PACKAGE_FORCE=${PACKAGE_FORCE:-0}
-ALTERNATE_SOURCE=0
-while getopts "s:i:hLf" o; do
-  case "${o}" in
-    i)
-      PACKAGE_LIST+=" ${OPTARG}"
-      ;;
-    s)
-      PACKAGE_SOURCE="${OPTARG}"
-      ;;
-    L)
-      PACKAGE_SOURCE="http://localhost:5103/"
-      # Always force for localhost.
-      PACKAGE_FORCE=1
-      ;;
-    f)
-      PACKAGE_FORCE=1
-      ;;
-    *)
-      Usage
-      ;;
-  esac
-done
-shift $((OPTIND-1))
-if [ "$*" != "" ]; then
-  echo "Bad Options: $*"
-  Usage
-fi
-if [ "${PACKAGE_LIST}" = "" ]; then
-  echo "No packages selected."
-  Usage
-fi
-if [ "${PACKAGE_SOURCE:-}" = "" ]; then
-  PACKAGE_SOURCE="${PACKAGE_SOURCE:-${DEFAULT_SOURCE}}"
-  ALTERNATE_SOURCE=1
-fi
-
-# Special cases for certain packages.
-# Pairs of <package-name>:<source>:<package-subdir>[:<old-package-subdir>]
-PACKAGE_INFO="\
-coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
-mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
-emacs|${PACKAGE_SOURCE}|glibc/emacs-24.3.zip \
-git|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-make|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-lua|${PACKAGE_SOURCE}|${TOOLCHAIN}/lua.zip \
-ruby|${PACKAGE_SOURCE}|${TOOLCHAIN}/ruby.zip \
-python|${PACKAGE_SOURCE}|${TOOLCHAIN}/python.zip"
+VERBOSE=0
 
 RemoveDir() {
   local path="$1"
@@ -81,6 +27,9 @@ RemoveDir() {
   fi
 }
 
+#
+# $1 - package name
+#
 InstallPackage() {
   local package="$1"
   local subdir="${TOOLCHAIN}.zip"
@@ -92,7 +41,7 @@ InstallPackage() {
       if [ "${ALTERNATE_SOURCE}" == "0" ]; then
         source_base="${info_array[1]}"
       fi
-      if [[ "${ALTERNATE_SOURCE}" == "0" && "${info_array[3]}" != "" ]]; then
+      if [[ "${ALTERNATE_SOURCE}" == "0" && ${#info_array[@]} > 3 && "${info_array[3]}" != "" ]]; then
         subdir="${info_array[3]}"
       else
         subdir="${info_array[2]}"
@@ -101,6 +50,16 @@ InstallPackage() {
   done
 
   local url=${source_base}/${package}/${subdir}
+  InstallPackageFromUrl ${package} ${url}
+}
+
+#
+# $1 - package name
+# $2 - zip file url
+#
+InstallPackageFromUrl() {
+  local package=$1
+  local url=$2
   local package_dir=/mnt/html5/packages/${package}.${NACL_ARCH}
   local clobber=1
 
@@ -135,21 +94,32 @@ InstallPackage() {
   else
     echo "Installing ${package} package..."
   fi
-  local archive=/tmp/devenv.package.zip
+  local archive=/tmp/devenv.${package}.zip
   echo "Downloading ${url}..."
-  geturl ${url} ${archive}
+  if ! geturl ${url} ${archive}; then
+    echo "geturl failed"
+    exit 1
+  fi
+
+  echo "Extracting ${package}..."
   if [ ! -e ${archive} ]; then
     echo "${archive} does not exist!"
-    return
+    exit 1
   fi
-  echo "Extracting ${package}..."
   if [ "${clobber}" = 1 ]; then
     RemoveDir ${package_dir}
   fi
   if [ ! -d ${package_dir%/*} ]; then
     mkdir -p ${package_dir}
   fi
-  unzip -od ${package_dir} ${archive}
+  local unzip_flags=
+  if [ ${VERBOSE} != "1" ]; then
+    unzip_flags=-q
+  fi
+  if ! unzip -o $unzip_flags -d ${package_dir} ${archive}; then
+    echo "error: unzip failed"
+    exit 1
+  fi
   rm ${archive}
 
   # Update package_inside.
@@ -185,12 +155,6 @@ InstallPackage() {
   echo "Done."
 }
 
-function InstallPackages() {
-  for package in ${PACKAGE_LIST}; do
-    InstallPackage ${package}
-  done
-}
-
 function Usage() {
   echo "Usage: $0 [options]"
   echo "  -i <package> = install package"
@@ -201,4 +165,82 @@ function Usage() {
   exit 1
 }
 
-InstallPackages
+function main() {
+  PACKAGE_LIST=""
+  PACKAGE_FORCE=0
+  ALTERNATE_SOURCE=0
+
+  while getopts "vs:i:hLf" o; do
+    case "${o}" in
+      i)
+        PACKAGE_LIST+=" ${OPTARG}"
+        ;;
+      s)
+        PACKAGE_SOURCE="${OPTARG}"
+        ;;
+      L)
+        PACKAGE_SOURCE="http://localhost:5103/"
+        ;;
+      f)
+        PACKAGE_FORCE=1
+        ;;
+      v)
+        VERBOSE=1
+        ;;
+      *)
+        Usage
+        ;;
+    esac
+  done
+  shift $((OPTIND-1))
+
+  if [ "$*" != "" ]; then
+    echo "Bad Options: $*"
+    Usage
+  fi
+
+  if [ "${PACKAGE_LIST}" = "" ]; then
+    echo "No packages selected."
+    Usage
+  fi
+
+  if [ -z "${NACL_ARCH:-}" ]; then
+    echo "error: NACL_ARCH not set"
+    exit 1
+  fi
+
+  if [ -z "${TOOLCHAIN:-}" ]; then
+    echo "error: TOOLCHAIN not set"
+    exit 1
+  fi
+
+  NACL_ARCH_ALT="${NACL_ARCH}"
+  if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
+    NACL_ARCH_ALT="pnacl"
+  fi
+
+  if [ "${PACKAGE_SOURCE:-}" = "" ]; then
+    PACKAGE_SOURCE="${PACKAGE_SOURCE:-${DEFAULT_SOURCE}}"
+    ALTERNATE_SOURCE=1
+  fi
+
+  # Special cases for certain packages.
+  # Pairs of <package-name>:<source>:<package-subdir>[:<old-package-subdir>]
+  PACKAGE_INFO="\
+coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
+mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
+emacs|${PACKAGE_SOURCE}|glibc/emacs-24.3.zip \
+git|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+make|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+grep|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
+lua|${PACKAGE_SOURCE}|${TOOLCHAIN}/lua.zip \
+ruby|${PACKAGE_SOURCE}|${TOOLCHAIN}/ruby.zip \
+python|${PACKAGE_SOURCE}|${TOOLCHAIN}/python.zip"
+
+  for package in ${PACKAGE_LIST}; do
+    InstallPackage ${package}
+  done
+}
+
+main "$@"

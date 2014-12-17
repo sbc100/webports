@@ -4,13 +4,17 @@
 
 GETURL=geturl_$(NACL_ARCH)$(NACL_EXEEXT)
 
+CPPFLAGS += -Wall -Werror
+
 all: $(GETURL)
 
 EXTRA_LIBS=${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_spawn -lnacl_io \
 	   -lppapi -lppapi_cpp
 
 $(GETURL): geturl.cc
-	$(NACLCXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRA_LIBS)
+	$(NACLCXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRA_LIBS)
 
 clean:
 	rm -f $(GETURL)
+
+.PHONY: clean all

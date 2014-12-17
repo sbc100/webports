@@ -7,33 +7,44 @@
 # until the installation is completed. Also, you cannot use features
 # which nacl_io does not support yet (e.g., pipes and sub-shells).
 
+InstallBasePackages() {
+  # Core packages.
+  local default_packages="\
+    -i coreutils \
+    -i curl \
+    -i git \
+    -i make \
+    -i nano \
+    -i python \
+    -i grep \
+    -i vim"
+
+  local have_gcc=0
+  if [[ "${NACL_ARCH}" == "i686" || "${NACL_ARCH}" == "x86_64" ]]; then
+    default_packages+=" \
+  -i mingn.base \
+  -i mingn.lib"
+    have_gcc=1
+  fi
+
+  if [[ ${LOCAL} = "1" ]]; then
+    local args=-L
+  fi
+
+  # Check for updates on some packages.
+  package $args ${default_packages[@]}
+
+  if [ "${have_gcc}" == 0 ]; then
+    echo "WARNING: gcc not yet available for your platform (coming soon)." 
+  fi
+}
+
+export TOOLCHAIN=@TOOLCHAIN@
+
 # Setup environment once to get location of fixed things like coreutils.
 source /mnt/http/setup-environment
 
-# Core packages.
-DEFAULT_PACKAGES="\
-  -i coreutils \
-  -i curl \
-  -i git \
-  -i make \
-  -i nano \
-  -i python \
-  -i vim"
-
-HAVE_GCC=0
-if [[ "${NACL_ARCH}" == "i686" || "${NACL_ARCH}" == "x86_64" ]]; then
-  DEFAULT_PACKAGES+=" \
--i mingn.base \
--i mingn.lib"
-  HAVE_GCC=1
-fi
-
-# Check for updates on some packages.
-package ${DEFAULT_PACKAGES[@]}
-
-if [ "${HAVE_GCC}" == 0 ]; then
-  echo "WARNING: gcc not yet available for your platform (coming soon)." 
-fi
+InstallBasePackages
 
 # Setup environment again, to rescan the packages added.
 source /mnt/http/setup-environment

@@ -58,6 +58,8 @@ static int Download(const char* url, const char* dst) {
 
   char buffer[0x10000];
   ssize_t len;
+  int64_t received = 0;
+  int64_t total = 0;
   for (;;) {
     result = url_loader.ReadResponseBody(
         buffer, sizeof buffer, pp::BlockUntilComplete());
@@ -69,14 +71,14 @@ static int Download(const char* url, const char* dst) {
       close(fh);
       return 1;
     }
-    int64_t received;
-    int64_t total;
     url_loader.GetDownloadProgress(&received, &total);
-    printf("[%"PRId64"/%"PRId64" %d%%]\r",
-           received, total, received * 100 / total);
+    printf("[%"PRId64"/%"PRId64" KiB %"PRId64"%%]\r",
+           received / 1024, total / 1024, received * 100 / total);
     fflush(stdout);
   } while (result > 0);
-  printf("Done.                                        \n");
+  printf("                                           \r");
+  printf("[%"PRId64"/%"PRId64" KiB 100%%] Done.\n",
+         received / 1024, total / 1024);
 
   if (result != PP_OK) {
     fprintf(stderr, "ERROR: Failed downloading url (%d): %s\n", result, url);

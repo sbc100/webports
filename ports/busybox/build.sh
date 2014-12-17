@@ -76,5 +76,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r busybox-1.22.0.zip busybox
+  CreateWebStoreZip busybox-${VERSION}.zip busybox
 }

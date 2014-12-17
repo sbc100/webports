@@ -86,5 +86,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/emacs.js ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r emacs-24.3.zip emacs
+  CreateWebStoreZip emacs-${VERSION}.zip emacs
 }

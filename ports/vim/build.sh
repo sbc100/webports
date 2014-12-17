@@ -66,5 +66,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r vim-${VERSION}.zip vim
+  CreateWebStoreZip vim-${VERSION}.zip vim
 }

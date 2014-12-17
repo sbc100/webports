@@ -108,7 +108,7 @@ InstallStep() {
   fi
 
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r scummvm-1.2.1.zip scummvm
+  CreateWebStoreZip scummvm-${VERSION}.zip scummvm
 }
 
 CustomCheck() {

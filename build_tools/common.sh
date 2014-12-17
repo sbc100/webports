@@ -632,6 +632,7 @@ MakeDirs() {
 
 
 PublishByArchForDevEnv() {
+  DID_PUBLISH_FOR_DEVENV=1
   MakeDir "${PUBLISH_DIR}"
   local ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
   MakeDir "${ARCH_DIR}"
@@ -654,7 +655,8 @@ PublishByArchForDevEnv() {
     # TODO(bradnelson): Do something prettier.
     if [[ "$(head -c 2 ${nexe})" != "#!" && \
           "$(head -c 2 ${nexe})" != "# " && \
-          "${nexe}" != *.txt ]]; then
+          "${nexe}" != *.txt && \
+          "${nexe}" != config.status ]]; then
       # Strip non-scripts
       LogExecute "${NACLSTRIP}" "${ARCH_DIR}/${name}"
 
@@ -1361,6 +1363,22 @@ TranslatePexe() {
 }
 
 
+#
+# Create a zip file for uploading to the chrome web store.
+# $1 - zipfile to create
+# $2 - directory to zip
+#
+CreateWebStoreZip() {
+  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
+    echo "Skipping Web Store package create: $1"
+    return
+  fi
+  Banner "Creating Web Store package: $1"
+  Remove $1
+  LogExecute zip -r $1 $2/
+}
+
+
 PackageStep() {
   local basename=$(basename "${PACKAGE_FILE}")
   Banner "Packaging ${basename}"
@@ -1405,13 +1423,20 @@ ZipPublishDir() {
   if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
     return
   fi
-  if [ -d "${PUBLISH_DIR}" ]; then
-    # Remove existing zip as it may contain only some architectures.
-    LogExecute rm -f "${PUBLISH_DIR}.zip"
-    pushd "${PUBLISH_DIR}"
-    LogExecute zip -rq "${PUBLISH_DIR}.zip" ./
-    popd
+
+  if [ "${DID_PUBLISH_FOR_DEVENV:-}" ]; then
+    return
   fi
+
+  if [ ! -d "${PUBLISH_DIR}" ]; then
+    return
+  fi
+
+  # Remove existing zip as it may contain only some architectures.
+  LogExecute rm -f "${PUBLISH_DIR}.zip"
+  pushd "${PUBLISH_DIR}"
+  LogExecute zip -rq "${PUBLISH_DIR}.zip" ./
+  popd
 }
 
 

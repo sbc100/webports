@@ -49,6 +49,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${PUBLISH_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
-  Remove nano-${VERSION}.zip
-  LogExecute zip -r nano-${VERSION}.zip .
+  CreateWebStoreZip nano-${VERSION}.zip .
 }

@@ -61,5 +61,5 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
-  LogExecute zip -r toybox-0.4.7.zip toybox
+  CreateWebStoreZip toybox-${VERSION}.zip toybox
 }
