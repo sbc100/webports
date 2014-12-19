@@ -11,7 +11,7 @@
 
 #include "nacl_main.h"
 
-#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>

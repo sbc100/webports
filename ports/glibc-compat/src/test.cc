@@ -2,8 +2,11 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file. */
 
+#include <netinet/in.h>
+#include <endian.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <sys/endian.h>
 
 #include "gtest/gtest.h"
 
@@ -50,6 +53,28 @@ TEST(TestMktemp, mkstemp) {
 
   ASSERT_EQ(4, write(fd, "test", 4));
   ASSERT_EQ(0, close(fd));
+}
+
+TEST(TestEndian, byte_order) {
+#ifdef __native_client__
+  ASSERT_EQ(LITTLE_ENDIAN, BYTE_ORDER);
+  ASSERT_EQ(LITTLE_ENDIAN, BYTE_ORDER);
+#endif
+}
+
+TEST(TestEndian, byte_swap) {
+  // Test BSD byte-swapping macros
+  uint16_t num16 = 0x0102u;
+  uint32_t num32 = 0x01020304u;
+  ASSERT_EQ(num16, htole16(num16));
+  ASSERT_EQ(num32, htole32(num32));
+  ASSERT_EQ(num16, letoh16(num16));
+  ASSERT_EQ(num32, letoh32(num32));
+
+  ASSERT_EQ(htons(num16), htobe16(num16));
+  ASSERT_EQ(htonl(num32), htobe32(num32));
+  ASSERT_EQ(ntohs(num16), betoh16(num16));
+  ASSERT_EQ(ntohl(num32), betoh32(num32));
 }
 
 int main(int argc, char** argv) {
