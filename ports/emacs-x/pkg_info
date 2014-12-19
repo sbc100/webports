@@ -5,6 +5,3 @@ BUILD_OS=linux
 DEPENDS=(xorg-server emacs)
 # Disabled for bionic due to bash.
 DISABLED_LIBC=(bionic)
-# Temporarily disabaled due to build failure
-# https://code.google.com/p/naclports/issues/detail?id=165
-DISABLED=1
