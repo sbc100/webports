@@ -39,8 +39,6 @@ InstallBasePackages() {
   fi
 }
 
-export TOOLCHAIN=@TOOLCHAIN@
-
 # Setup environment once to get location of fixed things like coreutils.
 source /mnt/http/setup-environment
 

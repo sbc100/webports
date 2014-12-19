@@ -63,13 +63,14 @@ InstallStep() {
   LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js bash.nmf
   InstallNaClTerm ${APP_DIR}
 
-  RESOURCES="background.js bash.js package setup-environment
+  RESOURCES="background.js bash.js bashrc package
       graphical.html whitelist.js devenv_16.png devenv_48.png
       devenv_128.png"
   for resource in ${RESOURCES}; do
     LogExecute install ${START_DIR}/${resource} ${APP_DIR}/
   done
-  sed "s/@TOOLCHAIN@/${TOOLCHAIN}/g" ${START_DIR}/bashrc > ${APP_DIR}/bashrc
+  sed "s/@TOOLCHAIN@/${TOOLCHAIN}/g" \
+    ${START_DIR}/setup-environment > ${APP_DIR}/setup-environment
 
   # Generate a manifest.json.
   GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR} \

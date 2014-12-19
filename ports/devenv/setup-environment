@@ -6,6 +6,8 @@
 # This script is intended to be sourced.
 # It scans your packages and adds the appropriate things to the environment.
 
+export TOOLCHAIN=@TOOLCHAIN@
+
 LIB_DIR=lib32
 export PACKAGE_LIB_DIR=lib32
 export PACKAGE_ALT_LIB_DIR=_platform_specific/x86_32/lib32
