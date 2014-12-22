@@ -22,6 +22,7 @@ InstallBasePackages() {
   local have_gcc=0
   if [[ "${NACL_ARCH}" == "i686" || "${NACL_ARCH}" == "x86_64" ]]; then
     default_packages+=" \
+  -i emacs \
   -i mingn.base \
   -i mingn.lib"
     have_gcc=1
@@ -35,7 +36,8 @@ InstallBasePackages() {
   package $args ${default_packages[@]}
 
   if [ "${have_gcc}" == 0 ]; then
-    echo "WARNING: gcc not yet available for your platform (coming soon)." 
+    echo "WARNING: \
+emacs and gcc not yet available for your platform (coming soon)." 
   fi
 }
 

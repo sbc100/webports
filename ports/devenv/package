@@ -14,8 +14,8 @@ set -o nounset
 shopt -s nullglob
 
 STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
-SDK_VERSION=${SDK_VERSION:-pepper_40}
-REVISION=${REVISION:-trunk-147-g49eb4c9}
+SDK_VERSION=${SDK_VERSION:-pepper_41}
+REVISION=${REVISION:-trunk-241-g5777139}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 VERBOSE=0
 
