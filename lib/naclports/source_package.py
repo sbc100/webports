@@ -93,6 +93,10 @@ def InitGitRepo(directory):
     RunGitCmd(directory, ['branch', '-D', 'placeholder'])
   else:
     RunGitCmd(directory, ['init'])
+    # Setup a bogus identity on the buildbots.
+    if os.environ.get('BUILDBOT_BUILDERNAME'):
+      RunGitCmd(directory, ['config', 'user.name', 'Naclports'])
+      RunGitCmd(directory, ['config', 'user.email', 'nobody@example.com'])
     RunGitCmd(directory, ['add', '-f', '.'])
     RunGitCmd(directory, ['commit', '-m', 'Upstream version'])
     RunGitCmd(directory, ['checkout', '-b', 'upstream'])
