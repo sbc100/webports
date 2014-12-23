@@ -57,7 +57,7 @@ static int do_mount(const char *source, const char *target,
   return mount(source, target, filesystemtype, mountflags, data);
 }
 
-int cli_main(int argc, char* argv[]) {
+extern "C" int cli_main(int argc, char* argv[]) {
   umount("/");
   do_mount("", "/", "memfs", 0, NULL);
 

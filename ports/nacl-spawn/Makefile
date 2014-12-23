@@ -21,9 +21,6 @@ libcli_main.a: cli_main.o nacl_startup_untar.o
 	rm -f $@
 	$(NACLAR) rcs $@ $^
 
-cli_main.o: cli_main.c
-	$(NACLCC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
-
 nacl_startup_untar.o: nacl_startup_untar.c
 	$(NACLCC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
