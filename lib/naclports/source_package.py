@@ -307,19 +307,19 @@ class SourcePackage(package.Package):
     """Download upstream sources and verify integrity."""
     if self.IsGitUpstream():
       self.GitCloneToMirror()
-      return True
+      return
 
     archive = self.DownloadLocation()
     if not archive:
-      return True
-
-    if self.SHA1 is None:
-      Log('missing SHA1 attribute: %s' % self.info)
-      return False
+      return
 
     if force_mirror is None:
       force_mirror = os.environ.get('FORCE_MIRROR', False)
     self.DownloadArchive(force_mirror=force_mirror)
+
+    if self.SHA1 is None:
+      raise PkgFormatError('missing SHA1 attribute: %s' % self.info)
+
     util.VerifyHash(archive, self.SHA1)
     Log('verified: %s' % util.RelPath(archive))
 

@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 from mock import patch, Mock
+import mock
 import tempfile
 import textwrap
 import shutil
@@ -24,6 +25,8 @@ class TestSourcePackage(common.NaclportsTest):
     self.AddPatch(patch('naclports.paths.NACLPORTS_ROOT', self.tempdir))
     self.AddPatch(patch('naclports.paths.BUILD_ROOT',
                         os.path.join(self.tempdir, 'build_root')))
+    self.AddPatch(patch('naclports.paths.CACHE_ROOT',
+                         os.path.join(self.tempdir, 'cache')))
     self.AddPatch(patch('naclports.paths.OUT_DIR',
                          os.path.join(self.tempdir, 'out_dir')))
     self.AddPatch(patch('naclports.paths.STAMP_DIR',
@@ -209,3 +212,20 @@ class TestSourcePackage(common.NaclportsTest):
 
     # InitGitRepo should work on existing git repositories too.
     source_package.InitGitRepo(self.tempdir)
+
+  @patch('naclports.util.DownloadFile')
+  @patch('naclports.util.VerifyHash')
+  def testDownload(self, mock_verify, mock_download):
+    self.CreateTestPackage('foo', 'URL=foo/bar.tar.gz\nSHA1=X123')
+    pkg = source_package.CreatePackage('foo')
+    pkg.Download()
+    expected_filename = os.path.join(paths.CACHE_ROOT, 'bar.tar.gz')
+    mock_download.assert_called_once_with(expected_filename, mock.ANY)
+    mock_verify.assert_called_once_with(expected_filename, 'X123')
+
+  @patch('naclports.util.DownloadFile')
+  def testDownloadMissingSHA1(self, mock_download):
+    self.CreateTestPackage('foo', 'URL=foo/bar')
+    pkg = source_package.CreatePackage('foo')
+    with self.assertRaisesRegexp(error.Error, 'missing SHA1 attribute'):
+      pkg.Download()
