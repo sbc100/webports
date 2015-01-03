@@ -24,10 +24,11 @@ def MockFileObject(contents):
 class TestPatchConfigure(unittest.TestCase):
   @patch('sys.stderr', new_callable=StringIO.StringIO)
   def testMissingFile(self, stderr):
-    rtn = patch_configure.main(['foo'])
+    rtn = patch_configure.main(['non-existent/configure-script'])
     self.assertEqual(rtn, 1)
     self.assertRegexpMatches(stderr.getvalue(),
-                             '^configure script not found: foo$')
+                             '^configure script not found: '
+                             'non-existent/configure-script$')
 
 
 class TestScanPackages(unittest.TestCase):
