@@ -30,6 +30,7 @@ ConfigureStep() {
   export LIBS="-ltermcap"
   if [ "${NACL_LIBC}" = "newlib" ]; then
     LIBS+=" -lglibc-compat"
+    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi
   DefaultConfigureStep
   if [ "${NACL_LIBC}" = "newlib" ]; then
