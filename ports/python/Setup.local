@@ -100,3 +100,6 @@ cPickle cPickle.c
 zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
 
 bz2 bz2module.c -I$(prefix)/include -L$(exec_prefix)/lib -lbz2
+
+# Multiprocessing
+_multiprocessing _multiprocessing/multiprocessing.c _multiprocessing/socket_connection.c
