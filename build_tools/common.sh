@@ -40,12 +40,6 @@ export NACLSTRINGS
 export NACLSTRIP
 export NACL_EXEEXT
 
-# When run by a buildbot force all archives to come from the NaCl mirror
-# rather than using upstream URL.
-if [ -n "${BUILDBOT_BUILDERNAME:-}" ]; then
-  FORCE_MIRROR=${FORCE_MIRROR:-"yes"}
-fi
-
 # sha1check python script
 readonly SHA1CHECK=${TOOLS_DIR}/sha1check.py
 

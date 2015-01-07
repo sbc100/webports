@@ -37,6 +37,7 @@ RunCmd() {
 }
 
 NACLPORTS_ARGS="-v --ignore-disabled --from-source"
+export FORCE_MIRROR="yes"
 
 #
 # Build a single package for a single architecture
