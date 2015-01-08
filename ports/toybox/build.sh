@@ -37,7 +37,7 @@ BuildStep() {
   export LDFLAGS="${NACLPORTS_LDFLAGS}"
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CC
-  make clean
+  LogExecute make clean
   DefaultBuildStep
 }
 

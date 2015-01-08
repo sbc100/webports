@@ -1011,7 +1011,7 @@ NaClProcessManager.prototype.spawn = function(
     // no arguments set in the query parameters then add the default
     // NaClTerm.argv arguments.
     // TODO(bradnelson): Consider dropping this method of passing in parameters.
-    if (args['arg1'] === undefined && argv) {
+    if (args['arg0'] === undefined && args['arg1'] === undefined && argv) {
       var argn = 0;
       argv.forEach(function(arg) {
         var argname = 'arg' + argn;

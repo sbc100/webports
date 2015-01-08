@@ -369,7 +369,7 @@ diff --git a/lib/portability.c b/lib/portability.c
  extern char **environ;
  
  int clearenv(void)
-@@ -70,3 +70,152 @@ int clearenv(void)
+@@ -70,3 +70,156 @@ int clearenv(void)
    return 0;
  }
  #endif
@@ -427,7 +427,11 @@ diff --git a/lib/portability.c b/lib/portability.c
 +  // We are going to ignore flags here.
 +  //if (flags) perror_exit("fstatat_flags");
 +  _AT_WRAP_START("fstatat")
-+  int result = stat(pathname, buf);
++  int result;
++  if (flags & AT_SYMLINK_NOFOLLOW)
++    result = lstat(pathname, buf);
++  else
++    result = stat(pathname, buf);
 +  _AT_WRAP_END("fstatat")
 +  return result;
 +}
@@ -510,7 +514,7 @@ diff --git a/lib/portability.c b/lib/portability.c
 +int linkat(int olddirfd, const char *oldpath,
 +    int newdirfd, const char *newpath, int flags) {
 +  int result;
-+  if ((oldpath[0] == "/") && (newpath[0] == "/")) {
++  if ((oldpath[0] == '/') && (newpath[0] == '/')) {
 +    result = link(oldpath, newpath);
 +  } else {
 +    errno = EINVAL;
