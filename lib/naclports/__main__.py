@@ -12,7 +12,9 @@ through all packages and mirror them on Google Cloud Storage).
 
 from __future__ import print_function
 import os
+import subprocess
 import sys
+import tempfile
 
 if sys.version_info < (2, 7, 0):
   sys.stderr.write("python 2.7 or later is required run this script\n")
@@ -24,6 +26,10 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from naclports import configuration, error, source_package, util, paths
 import naclports.package
+
+
+def PrintStatus(msg):
+  sys.stderr.write('naclports: %s\n' % msg)
 
 
 def CmdList(config, options, args):
@@ -74,6 +80,32 @@ def CmdPkgContents(package, options):
 def CmdPkgDownload(package, options):
   """Download sources for given package(s)"""
   package.Download()
+
+
+def CmdPkgUscan(package, options):
+  """Use Debian's 'uscan' to check for upstream versions."""
+  if package.VERSION not in package.URL:
+    PrintStatus('%s: uscan only works if VERSION is embedded in URL' %
+                package.NAME)
+    return 0
+
+  temp_fd, temp_file = tempfile.mkstemp('naclports_watchfile')
+  try:
+    with os.fdopen(temp_fd, 'w') as f:
+      uscan_url = package.URL.replace(package.VERSION, '(.+)')
+      uscan_url = uscan_url.replace('download.sf.net', 'sf.net')
+      util.Trace('uscan pattern: %s' % uscan_url)
+      f.write("version = 3\n")
+      f.write("%s\n" % uscan_url)
+
+    cmd = ['uscan', '--upstream-version', package.VERSION, '--package',
+           package.NAME, '--watchfile', temp_file]
+    util.Trace(' '.join(cmd))
+    rtn = subprocess.call(cmd)
+  finally:
+    os.remove(temp_file)
+
+  return rtn
 
 
 def CmdPkgCheck(package, options):
@@ -148,8 +180,7 @@ def CleanAll(config):
   rmtree(util.GetInstallRoot(config))
 
 
-
-def run_main(args):
+def RunMain(args):
   base_commands = {
     'list': CmdList,
     'info': CmdInfo,
@@ -157,6 +188,7 @@ def run_main(args):
 
   pkg_commands = {
     'download': CmdPkgDownload,
+    'uscan': CmdPkgUscan,
     'check': CmdPkgCheck,
     'build': CmdPkgBuild,
     'install': CmdPkgInstall,
@@ -270,15 +302,14 @@ def run_main(args):
         p = source_package.CreatePackage(package_name, config)
       DoCmd(p)
 
-
 def main(args):
   try:
-    run_main(args)
+    RunMain(args)
   except KeyboardInterrupt:
-    sys.stderr.write('naclports: interrupted\n')
+    PrintStatus('interrupted')
     return 1
   except error.Error as e:
-    sys.stderr.write('naclports: %s\n' % e)
+    PrintStatus(str(e))
     return 1
 
   return 0

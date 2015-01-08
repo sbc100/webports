@@ -26,7 +26,7 @@ class TestMain(common.NaclportsTest):
     naclports.__main__.CleanAll(config)
     mock_rmtree.assert_any_call('/package/install/path')
 
-  @patch('naclports.__main__.run_main',
+  @patch('naclports.__main__.RunMain',
          Mock(side_effect=error.Error('oops')))
   def testErrorReport(self):
     # Verify that exceptions of the type error.Error are printed
@@ -40,7 +40,7 @@ class TestMain(common.NaclportsTest):
     mock_pkg = Mock()
     with patch('naclports.source_package.CreatePackage',
                Mock(return_value=mock_pkg)):
-      naclports.__main__.run_main(['clean', 'foo'])
+      naclports.__main__.RunMain(['clean', 'foo'])
     cmd_pkg_clean.assert_called_once_with(mock_pkg, mock.ANY)
 
   @patch('naclports.__main__.CmdPkgClean',
@@ -50,11 +50,11 @@ class TestMain(common.NaclportsTest):
     with patch('naclports.source_package.CreatePackage',
                Mock(return_value=mock_pkg)):
       with self.assertRaises(error.DisabledError):
-        naclports.__main__.run_main(['clean', 'foo'])
+        naclports.__main__.RunMain(['clean', 'foo'])
 
   @patch('naclports.__main__.CleanAll')
   def testMainCleanAll(self, clean_all_mock):
-    naclports.__main__.run_main(['clean', '--all'])
+    naclports.__main__.RunMain(['clean', '--all'])
     clean_all_mock.assert_called_once_with(Configuration())
 
 

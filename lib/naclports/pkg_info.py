@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 import shlex
+import string
+
 from naclports.error import PkgFormatError
 
 VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
@@ -54,11 +56,17 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
       value = shlex.split(value)[0]
     return (key, value)
 
+  def ExpandVars(value, substitutions):
+    if type(value) == str:
+      return string.Template(value).substitute(substitutions)
+    else:
+      return [string.Template(v).substitute(substitutions) for v in value]
+
   for i, line in enumerate(contents.splitlines()):
     if line[0] == '#':
       continue
-    key, value = ParsePkgInfoLine(line, i+1)
-    rtn[key] = value
+    key, raw_value = ParsePkgInfoLine(line, i+1)
+    rtn[key] = ExpandVars(raw_value, rtn)
 
   for required_key in required_keys:
     if required_key not in rtn:
