@@ -54,7 +54,7 @@ $(eval $(call NMF_RULE,$(TARGET),))
 
 CHROMEAPPS = $(NACL_SRC)/third_party/libapps/
 LIB_DOT = $(CHROMEAPPS)/libdot
-NASSH = $(CHROMEAPPS)/nassh
+HTERM = $(CHROMEAPPS)/hterm
 
 MIRROR_URL=http://storage.googleapis.com/nativeclient-mirror/nacl
 
@@ -83,7 +83,11 @@ install-tests: $(OUTBASE)/$(LUA_TESTS_FILE) $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(B
 
 install: install-tests
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
-	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(NASSH)/concat/nassh_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
+	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(HTERM)/concat/hterm_deps.concat -o $(INSTALL_DIR)/hterm.concat.js
+	LIBDOT_SEARCH_PATH=$(CHROMEAPPS) $(LIB_DOT)/bin/concat.sh -i $(HTERM)/concat/hterm.concat -o $(INSTALL_DIR)/hterm2.concat.js
+	chmod +w $(INSTALL_DIR)/hterm2.concat.js $(INSTALL_DIR)/hterm.concat.js
+	cat $(INSTALL_DIR)/hterm2.concat.js >> $(INSTALL_DIR)/hterm.concat.js
+	rm $(INSTALL_DIR)/hterm2.concat.js
 	cp $(OUTDIR)/lua*$(NACL_EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/lua.nmf $(INSTALL_DIR)
