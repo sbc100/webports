@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import contextlib
 import os
 import re
 import shutil
@@ -23,6 +24,23 @@ from naclports.error import Error, DisabledError, PkgFormatError
 
 class PkgConflictError(Error):
   pass
+
+
+@contextlib.contextmanager
+def RedirectStdoutStderr(filename):
+  """Context manager that replaces stdout and stderr streams."""
+  if filename is None:
+    yield
+    return
+
+  with open(filename, 'a') as stream:
+    sys.stdout = stream
+    sys.stderr = stream
+    try:
+      yield
+    finally:
+      sys.stdout = sys.__stdout__
+      sys.stderr = sys.__stdout__
 
 
 def FormatTimeDelta(delta):
@@ -257,51 +275,51 @@ class SourcePackage(package.Package):
     log_root = os.path.join(paths.OUT_DIR, 'logs')
     util.Makedirs(log_root)
 
-    stdout = os.path.join(log_root, '%s.log' % self.NAME)
-    if os.path.exists(stdout):
-      os.remove(stdout)
-
     if util.verbose:
       prefix = '*** '
     else:
       prefix = ''
     Log('%sBuilding %s' % (prefix, self.InfoString()))
 
+    if util.verbose:
+      log_filename = None
+    else:
+      log_filename = os.path.join(log_root, '%s_%s.log' % (self.NAME,
+          str(self.config).replace('/', '_')))
+      if os.path.exists(log_filename):
+        os.remove(log_filename)
+
     start = time.time()
     with util.BuildLock():
-      self.Download()
-      self.Extract()
-      self.Patch()
-      self.RunBuildSh(stdout)
+      with RedirectStdoutStderr(log_filename):
+        old_verbose = util.verbose
+        try:
+          util.verbose = True
+          self.Download()
+          self.Extract()
+          self.Patch()
+          self.RunBuildSh()
+        finally:
+          util.verbose = old_verbose
 
     duration = FormatTimeDelta(time.time() - start)
     Log('Build complete %s [took %s]' % (self.InfoString(), duration))
 
-  def RunBuildSh(self, stdout, args=None):
+  def RunBuildSh(self):
     build_port = os.path.join(paths.TOOLS_DIR, 'build_port.sh')
     cmd = [build_port]
-    if args is not None:
-      cmd += args
 
     env = os.environ.copy()
     env['TOOLCHAIN'] = self.config.toolchain
     env['NACL_ARCH'] = self.config.arch
     env['NACL_DEBUG'] = self.config.debug and '1' or '0'
-    if util.verbose:
-      rtn = subprocess.call(cmd, cwd=self.root, env=env)
-      if rtn != 0:
-        raise Error("Building %s: failed." % (self.NAME))
-    else:
-      with open(stdout, 'a+') as log_file:
-        rtn = subprocess.call(cmd,
-                              cwd=self.root,
-                              env=env,
-                              stdout=log_file,
-                              stderr=subprocess.STDOUT)
-      if rtn != 0:
-        with open(stdout) as log_file:
-          sys.stdout.write(log_file.read())
-        raise Error("Building '%s' failed." % (self.NAME))
+    rtn = subprocess.call(cmd,
+                          stdout=sys.stdout,
+                          stderr=sys.stderr,
+                          cwd=self.root,
+                          env=env)
+    if rtn != 0:
+      raise Error("Building %s: failed." % (self.NAME))
 
   def Download(self, force_mirror=None):
     """Download upstream sources and verify integrity."""
@@ -381,7 +399,11 @@ class SourcePackage(package.Package):
 
   def RunCmd(self, cmd, **args):
     try:
-      subprocess.check_call(cmd, cwd=self.GetBuildLocation(), **args)
+      subprocess.check_call(cmd,
+                            stdout=sys.stdout,
+                            stderr=sys.stderr,
+                            cwd=self.GetBuildLocation(),
+                            **args)
     except subprocess.CalledProcessError as e:
       raise Error(e)
 
@@ -407,7 +429,10 @@ class SourcePackage(package.Package):
 
     if os.path.exists(stamp_file):
       self.Log('Skipping patch step (cleaning source tree)')
-      self.RunCmd(['git', 'clean', '-f', '-d'])
+      cmd = ['git', 'clean', '-f', '-d']
+      if not util.verbose:
+        cmd.append('-q')
+      self.RunCmd(cmd)
       return
 
     self.Banner('Patching')

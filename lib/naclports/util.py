@@ -312,7 +312,7 @@ def Makedirs(directory):
   if os.path.exists(directory):
     raise error.Error('mkdir: File exists and is not a directory: %s'
                       % directory)
-  Log("mkdir: %s" % directory)
+  Trace("mkdir: %s" % directory)
   os.makedirs(directory)
 
 
