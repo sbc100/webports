@@ -28,8 +28,8 @@ from naclports import configuration, error, source_package, util, paths
 import naclports.package
 
 
-def PrintStatus(msg):
-  sys.stderr.write('naclports: %s\n' % msg)
+def PrintError(msg):
+  sys.stderr.write('naclports: %s\n' % util.Color(str(msg), 'red'))
 
 
 def CmdList(config, options, args):
@@ -84,8 +84,11 @@ def CmdPkgDownload(package, options):
 
 def CmdPkgUscan(package, options):
   """Use Debian's 'uscan' to check for upstream versions."""
+  if not package.URL:
+    return 0
+
   if package.VERSION not in package.URL:
-    PrintStatus('%s: uscan only works if VERSION is embedded in URL' %
+    PrintError('%s: uscan only works if VERSION is embedded in URL' %
                 package.NAME)
     return 0
 
@@ -217,6 +220,8 @@ def RunMain(args):
                       help='Make builds verbose (e.g. pass V=1 to make')
   parser.add_argument('--all', action='store_true',
                       help='Perform action on all known ports.')
+  parser.add_argument('--color', choices=('always', 'never', 'auto'),
+                      help='Enabled color terminal output', default='auto')
   parser.add_argument('-f', '--force', action='store_const', const='build',
                       help='Force building specified targets, '
                       'even if timestamps would otherwise skip it.')
@@ -257,6 +262,11 @@ def RunMain(args):
 
   util.CheckSDKRoot()
   config = configuration.Configuration(args.arch, args.toolchain, args.debug)
+  util.color_mode = args.color
+  if args.color == 'never':
+    util.Color.enabled = False
+  elif args.color == 'always':
+    util.Color.enabled = True
 
   if args.command in base_commands:
     base_commands[args.command](config, args, args.pkg)
@@ -306,10 +316,10 @@ def main(args):
   try:
     RunMain(args)
   except KeyboardInterrupt:
-    PrintStatus('interrupted')
+    PrintError('interrupted')
     return 1
   except error.Error as e:
-    PrintStatus(str(e))
+    PrintError(str(e))
     return 1
 
   return 0

@@ -9,6 +9,16 @@ import shutil
 import subprocess
 import sys
 
+# Allow use of this module even if termcolor is missing.  There are many
+# standalone python scripts in build_tools that can be run directly without
+# PYTHONPATH set (i.e. not via build/python_wrapper that adds this path.
+# TODO(sbc): we should probably just assume that all the module dependencies
+# are present.
+try:
+  import termcolor
+except ImportError:
+  termcolor = None
+
 from naclports import error, paths
 
 GS_URL = 'http://storage.googleapis.com/'
@@ -26,6 +36,18 @@ arch_to_pkgarch = {
 pkgarch_to_arch = {v:k for k, v in arch_to_pkgarch.items()}
 
 verbose = False
+color_mode = 'auto'
+
+def Color(message, color):
+  if termcolor and Color.enabled:
+    return termcolor.colored(message, color)
+  else:
+    return message
+
+
+def CheckStdoutForColorSupport():
+  if color_mode == 'auto':
+    Color.enabled = sys.stdout.isatty()
 
 
 def Memoize(f):
@@ -54,6 +76,20 @@ def Log(message):
   """Log a message to the console (stdout)."""
   sys.stdout.write(str(message) + '\n')
   sys.stdout.flush()
+
+
+def LogHeading(message, suffix=''):
+  """Log a colored/highlighted message with optional suffix."""
+  if Color.enabled:
+    Log(Color(message, 'green') + suffix)
+  else:
+    if verbose:
+      # When running in verbose mode make sure heading standout
+      Log('###################################################################')
+      Log(message + suffix)
+      Log('###################################################################')
+    else:
+      Log(message + suffix)
 
 
 def Warn(message):
@@ -244,7 +280,6 @@ def IsInstalled(package_name, config, stamp_content=None):
   """Returns True if the given package is installed."""
   stamp = GetInstallStamp(package_name, config)
   result = CheckStamp(stamp, stamp_content)
-  Trace("IsInstalled: %s -> %s" % (package_name, result))
   return result
 
 
@@ -351,3 +386,6 @@ class InstallLock(Lock):
   def __init__(self, config):
     root = GetInstallRoot(config)
     super(InstallLock, self).__init__(root)
+
+
+CheckStdoutForColorSupport()

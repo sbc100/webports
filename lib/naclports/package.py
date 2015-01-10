@@ -78,6 +78,12 @@ class Package(object):
   def InfoString(self):
     return "'%s' [%s]" % (self.NAME, self.config)
 
+  def LogStatus(self, message, suffix=''):
+    util.LogHeading(message, " '%s' [%s] %s" % (
+        util.Color(self.NAME, 'yellow'),
+        util.Color(self.config, 'blue'),
+        suffix))
+
   def CheckDeps(self, valid_packages):
     for package in self.DEPENDS:
       if package not in valid_packages:
@@ -113,7 +119,7 @@ class InstalledPackage(Package):
                                               self.BUILD_CONFIG == 'debug')
 
   def Uninstall(self):
-    Log("Uninstalling %s" % self.InfoString())
+    self.LogStatus('Uninstalling')
     self.DoUninstall()
 
   def Files(self):

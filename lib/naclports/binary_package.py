@@ -138,7 +138,7 @@ class BinaryPackage(package.Package):
     if self.IsAnyVersionInstalled():
       raise error.Error('package already installed: %s' % self.InfoString())
 
-    util.Log("Installing %s" % self.InfoString())
+    self.LogStatus('Installing')
     util.Makedirs(dest_tmp)
 
     names = []

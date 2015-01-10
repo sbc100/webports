@@ -9,3 +9,6 @@ from naclports.util import GetInstallRoot, InstallLock, BuildLock, IsInstalled
 from naclports.util import GS_BUCKET, GS_URL
 from naclports.paths import NACLPORTS_ROOT, OUT_DIR, TOOLS_DIR, PACKAGES_ROOT
 from naclports.paths import BUILD_ROOT, STAMP_DIR, PUBLISH_ROOT
+
+import colorama
+colorama.init()

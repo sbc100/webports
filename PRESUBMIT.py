@@ -8,6 +8,7 @@
 import os
 import subprocess
 
+PYTHON = 'build_tools/python_wrapper'
 
 _EXCLUDED_PATHS = (
     # patch_configure.py contains long lines embedded in multi-line
@@ -30,8 +31,8 @@ def RunPylint(input_api, output_api):
 
 
 def CheckBuildbot(input_api, output_api):
+  cmd = [PYTHON, 'build_tools/partition.py', '--check']
   try:
-    cmd = ['build_tools/partition.py', '--check']
     subprocess.check_call(cmd)
   except subprocess.CalledProcessError:
     return [output_api.PresubmitError('%s failed' % str(cmd))]
@@ -39,18 +40,19 @@ def CheckBuildbot(input_api, output_api):
 
 
 def CheckDeps(input_api, output_api):
+  cmd = [PYTHON, 'build_tools/check_deps.py']
   try:
-    subprocess.check_call(['build_tools/check_deps.py'])
+    subprocess.check_call(cmd)
   except subprocess.CalledProcessError:
-    message = 'update_mirror.py --check failed.'
-    message += '\nRun build_tools/update_mirror.py to update.'
+    message = 'check_deps.py failed.'
     return [output_api.PresubmitError(message)]
   return []
 
 
 def CheckMirror(input_api, output_api):
+  cmd = [PYTHON, 'build_tools/update_mirror.py', '--check']
   try:
-    subprocess.check_call(['build_tools/update_mirror.py', '--check'])
+    subprocess.check_call(cmd)
   except subprocess.CalledProcessError:
     message = 'update_mirror.py --check failed.'
     message += '\nRun build_tools/update_mirror.py to update.'
