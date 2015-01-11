@@ -79,7 +79,7 @@ Publish() {
 
 # Strip 'periodic-' prefix.
 BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
-PYTHON=python
+PYTHON=${SCRIPT_DIR}/python_wrapper
 
 if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   readonly OS=linux
