@@ -6,7 +6,9 @@
 RESULT=0
 MESSAGES=
 
-readonly BASE_DIR="$(dirname $0)/.."
+# SCRIPT_DIR must be defined by the including script
+readonly BASE_DIR="$(dirname ${SCRIPT_DIR})"
+readonly PYTHON=${SCRIPT_DIR}/python_wrapper
 cd ${BASE_DIR}
 
 UPLOAD_PATH=naclports/builds/${PEPPER_DIR}/

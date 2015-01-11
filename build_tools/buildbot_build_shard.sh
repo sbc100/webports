@@ -15,7 +15,7 @@ source ${SCRIPT_DIR}/buildbot_common.sh
 set -o nounset
 set -o errexit
 
-readonly PARTCMD="python build_tools/partition.py"
+readonly PARTCMD="${PYTHON} build_tools/partition.py"
 readonly SHARD_CMD="${PARTCMD} -t ${SHARD} -n ${SHARDS}"
 echo "Calculating targets for shard ${SHARD} of ${SHARDS}"
 readonly PACKAGE_LIST=$(${SHARD_CMD})

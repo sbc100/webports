@@ -247,6 +247,7 @@ def LoadCanned(parts):
   if os.environ.get('TEST_BUILDBOT'):
     partitions[0] = [
         'glibc-compat',
+        'nacl-spawn',
         'ncurses',
         'readline',
         'libtar',

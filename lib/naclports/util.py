@@ -138,9 +138,10 @@ def DownloadFile(filename, url):
     # Add --progress-bar but only if stdout is a TTY device.
     curl_cmd.append('--progress-bar')
   else:
-    # otherwise suppress all status output, since curl always
-    # assumes a TTY and writes \r and \b characters.
-    curl_cmd.append('--silent')
+    # otherwise suppress status output, since curl always assumes its
+    # talking to a TTY and writes \r and \b characters.  But add
+    # --show-error so that when curl fails it at least prints something.
+    curl_cmd += ['--silent', '--show-error']
   curl_cmd.append(url)
 
   if verbose:

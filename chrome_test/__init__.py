@@ -33,8 +33,7 @@ import naclports
 # Try to select a version that exists on all platforms.
 CHROME_REVISION = '293496'
 
-OUT_DIR = os.path.join(SRC_DIR, 'out')
-CHROME_SYNC_DIR = os.path.join(OUT_DIR, 'downloaded_chrome')
+CHROME_SYNC_DIR = os.path.join(naclports.paths.OUT_DIR, 'downloaded_chrome')
 
 GS_URL = 'http://storage.googleapis.com'
 CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%s/%s'
@@ -135,15 +134,13 @@ def DownloadChrome(url, destination):
   os.makedirs(destination)
 
   logging.info('Downloading chrome from %s to %s...' % (url, destination))
-  chrome_zip = os.path.join(OUT_DIR, 'cache', os.path.basename(url))
-  chrome_zip_tmp = chrome_zip + '.partial'
+  chrome_zip = os.path.join(naclports.paths.CACHE_ROOT, os.path.basename(url))
+  naclports.util.Makedirs(os.path.dirname(chrome_zip))
   try:
-    naclports.util.DownloadFile(chrome_zip_tmp, url)
+    naclports.util.DownloadFile(chrome_zip, url)
   except naclports.error.Error as e:
     logging.error('Unable to download chrome: %s' % str(e))
     sys.exit(1)
-
-  os.rename(chrome_zip_tmp, chrome_zip)
 
   logging.info('Exctracting chrome...')
   with zipfile.ZipFile(chrome_zip) as zip_archive:
