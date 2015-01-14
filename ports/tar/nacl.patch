@@ -5,7 +5,7 @@ diff --git a/lib/getcwd.c b/lib/getcwd.c
  # define MATCHING_INO(dp, ino) true
  #endif
  
-+#ifdef __native_client__ && defined _NEWLIB_VERSION
++#if defined __native_client__ && defined _NEWLIB_VERSION
 +/* openat() is currently non-existent for newlib builds, but AT_FDCWD is
 +   present in the headers.  Explicatly undefine it here to avoid use of
 +   openat().
