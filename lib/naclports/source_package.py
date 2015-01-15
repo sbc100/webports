@@ -291,16 +291,22 @@ class SourcePackage(package.Package):
 
     start = time.time()
     with util.BuildLock():
-      with RedirectStdoutStderr(log_filename):
-        old_verbose = util.verbose
-        try:
-          util.verbose = True
-          self.Download()
-          self.Extract()
-          self.Patch()
-          self.RunBuildSh()
-        finally:
-          util.verbose = old_verbose
+      try:
+        with RedirectStdoutStderr(log_filename):
+          old_verbose = util.verbose
+          try:
+            util.verbose = True
+            self.Download()
+            self.Extract()
+            self.Patch()
+            self.RunBuildSh()
+          finally:
+            util.verbose = old_verbose
+      except:
+        if log_filename:
+          with open(log_filename) as log_file:
+            sys.stdout.write(log_file.read())
+        raise
 
     duration = FormatTimeDelta(time.time() - start)
     util.LogHeading('Build complete', ' [took %s]' % duration)
