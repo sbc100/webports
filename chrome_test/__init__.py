@@ -31,7 +31,7 @@ import naclports
 
 # Pinned chrome revision. Update this to pull in a new chrome.
 # Try to select a version that exists on all platforms.
-CHROME_REVISION = '293496'
+CHROME_REVISION = '311001'
 
 CHROME_SYNC_DIR = os.path.join(naclports.paths.OUT_DIR, 'downloaded_chrome')
 
@@ -87,6 +87,18 @@ def ChromeDir(arch):
   return os.path.join(CHROME_SYNC_DIR, arch)
 
 
+def ChromeArchiveRoot():
+  if sys.platform == 'win32':
+    return 'chrome-win32'
+  elif sys.platform == 'darwin':
+    return 'chrome-mac'
+  elif sys.platform.startswith('linux'):
+    return 'chrome-linux'
+  else:
+    logging.error('Unknown platform: %s' % sys.platform)
+    sys.exit(1)
+
+
 def ChromeRunPath(arch):
   """Get the path to the chrome exectuable.
 
@@ -96,15 +108,15 @@ def ChromeRunPath(arch):
     Path to the chrome executable.
   """
   if sys.platform == 'win32':
-    path = 'chrome-win32/chrome.exe'
+    path = 'chrome.exe'
   elif sys.platform == 'darwin':
-    path = 'chrome-mac/Chromium.app/Contents/MacOS/Chromium'
+    path = 'Chromium.app/Contents/MacOS/Chromium'
   elif sys.platform.startswith('linux'):
-    path = 'chrome-linux/chrome-wrapper'
+    path = 'chrome-wrapper'
   else:
-    logging.error('Bad architecture %s' % arch)
+    logging.error('Unknown platform: %s' % sys.platform)
     sys.exit(1)
-  return os.path.join(ChromeDir(arch), path)
+  return os.path.join(ChromeDir(arch), ChromeArchiveRoot(), path)
 
 
 def DownloadChrome(url, destination):
@@ -142,7 +154,16 @@ def DownloadChrome(url, destination):
     logging.error('Unable to download chrome: %s' % str(e))
     sys.exit(1)
 
-  logging.info('Exctracting chrome...')
+  pnacl_url = os.path.join(os.path.dirname(url), 'pnacl.zip')
+  pnacl_zip = os.path.join(naclports.paths.CACHE_ROOT, 'pnacl.zip')
+  logging.info('Downloading pnacl component from %s ...' % url)
+  try:
+    naclports.util.DownloadFile(pnacl_zip, pnacl_url)
+  except naclports.error.Error as e:
+    logging.error('Unable to download chrome: %s' % str(e))
+    sys.exit(1)
+
+  logging.info('Extracting %s' % chrome_zip)
   with zipfile.ZipFile(chrome_zip) as zip_archive:
     zip_archive.extractall(destination)
     # Change the executables to be executable.
@@ -165,6 +186,15 @@ def DownloadChrome(url, destination):
         link = os.path.join(destination, 'chrome-linux', 'libudev.so.0')
         logging.info('creating link %s' % link)
         os.symlink(libudev1, link)
+
+  logging.info('Extracting %s' % pnacl_zip)
+  with zipfile.ZipFile(pnacl_zip) as zip_archive:
+    zip_archive.extractall(destination)
+
+  chrome_root = os.path.join(destination, ChromeArchiveRoot())
+  pnacl_root = os.path.join(destination, 'pnacl', 'pnacl')
+  logging.info('Renaming pnacl directory %s -> %s' % (pnacl_root, chrome_root))
+  os.rename(pnacl_root, os.path.join(chrome_root, 'pnacl'))
 
   logging.info('Writing stamp...')
   with open(stamp_filename, 'w') as fh:
@@ -458,6 +488,10 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
                 '-s', '-screen 0 1024x768x24 -ac']
       cmd += [chrome_path]
       cmd += ['--user-data-dir=' + work_dir]
+      # We want to pin the pnacl component to the one that we downloaded.
+      # This allows us to test features of the pnacl translator that are
+      # not yet in the public component.
+      cmd += ['--disable-component-update']
       # Pass testing extension id in user agent to make it widely available.
       # TODO(bradnelson): Drop this when hterm is fixed.
       # Hterm currently expects "Chrome/[0-9][0-9]" in the User Agent and
