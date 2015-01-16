@@ -30,6 +30,6 @@ InstallStep() {
   LogExecute ${NACL_SDK_ROOT}/tools/create_nmf.py -s . \
       quakespasm*${NACL_EXEEXT} -o quakespasm.nmf
   if [ "${NACL_ARCH}" = "pnacl" ]; then
-    sed -i.bak 's/x-nacl/x-pnacl/' quake.html
+    sed -i.bak 's/x-nacl/x-pnacl/' quakespasm.js
   fi
 }

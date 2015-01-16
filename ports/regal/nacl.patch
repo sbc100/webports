@@ -110,12 +110,42 @@ diff --git a/Makefile.regaltest b/Makefile.regaltest
  
  include build/regaltest.inc
  
-@@ -75,7 +75,7 @@ test: bin/$(SYSTEM)/regaltest$(BIN_EXTENSION)
+@@ -58,15 +58,24 @@ tmp/$(SYSTEM)/regaltest/static/%.o: tests/%.cpp
+ 	@mkdir -p $(dir $@)
+ 	$(LOG_CXX)$(CCACHE) $(CXX) $(REGAL.CFLAGS) $(REGALTEST.CFLAGS) $(CFLAGS) $(CFLAGS.SO) -o $@ -c $<
+ 
++ifeq ($(NACL_ARCH),pnacl)
++LINK_OUTPUT_EXT=.bc
++else
++LINK_OUTPUT_EXT=$(BIN_EXTENSION)
++endif
++
+ bin/$(SYSTEM)/regaltest$(BIN_EXTENSION): $(REGALTEST.OBJS) lib/$(SYSTEM)/$(GTEST.STATIC) lib/$(SYSTEM)/$(REGAL.STATIC) lib/$(SYSTEM)/$(PCRE.STATIC) $(REGAL.SHARED.DEPEND)
+ 	@mkdir -p $(dir $@)
+ ifdef APITRACE.STATIC
+ 	$(LOG_LD)$(CCACHE) $(LD) $(LDFLAGS.EXTRA) -o $@ $(REGALTEST.OBJS) $(REGALTEST.LIBS) $(LDFLAGS.STARTGROUP) lib/$(SYSTEM)/$(REGAL.STATIC) lib/$(SYSTEM)/$(APITRACE.STATIC) $(LDFLAGS.ENDGROUP) $(REGAL.SHARED.DEPEND) $(REGAL.LIBS) lib/$(SYSTEM)/$(PCRE.STATIC) lib/$(SYSTEM)/$(GTEST.STATIC) $(REGAL.LDFLAGS)
+ else
+-	$(LOG_LD)$(CCACHE) $(LD) $(LDFLAGS.EXTRA) -o $@ $(REGALTEST.OBJS) $(REGALTEST.LIBS) lib/$(SYSTEM)/$(REGAL.STATIC) lib/$(SYSTEM)/$(PCRE.STATIC) $(REGAL.SHARED.DEPEND) $(REGAL.LIBS) lib/$(SYSTEM)/$(GTEST.STATIC) $(REGAL.LDFLAGS)
++	$(LOG_LD)$(CCACHE) $(LD) $(LDFLAGS.EXTRA) -o $(@:$(BIN_EXTENSION)=$(LINK_OUTPUT_EXT)) $(REGALTEST.OBJS) $(REGALTEST.LIBS) lib/$(SYSTEM)/$(REGAL.STATIC) lib/$(SYSTEM)/$(PCRE.STATIC) $(REGAL.SHARED.DEPEND) $(REGAL.LIBS) lib/$(SYSTEM)/$(GTEST.STATIC) $(REGAL.LDFLAGS)
+ endif
+ ifneq ($(STRIP),)
+-	$(LOG_STRIP)$(STRIP) -x $@
++	$(LOG_STRIP)$(STRIP) $(@:$(BIN_EXTENSION)=$(LINK_OUTPUT_EXT))
++endif
++ifeq ($(NACL_ARCH),pnacl)
++	$(LOG_FINALIZE)$(FINALIZE) -o $@ $(@:$(BIN_EXTENSION)=$(LINK_OUTPUT_EXT))
+ endif
+ 
+ ifneq ($(NACL_ARCH),arm)
+@@ -75,7 +84,10 @@ test: bin/$(SYSTEM)/regaltest$(BIN_EXTENSION)
  ifeq ($(filter nacl%,$(SYSTEM)),)
  	$^
  else
 -	"$(NACL_SEL_LDR)" -a -B "$(NACL_IRT)" -- $^
-+	"$(NACL_SDK_ROOT)/tools/sel_ldr.py" $^
++ifeq ($(NACL_ARCH),pnacl)
++	$(LOG_FINALIZE)$(TRANSLATE) -arch x86-64 -o $(^:.pexe=.nexe) $^
++endif
++	"$(NACL_SDK_ROOT)/tools/sel_ldr.py" $(^:.pexe=.nexe)
  endif
  endif
  
@@ -219,16 +249,27 @@ diff --git a/build/regal.inc b/build/regal.inc
 diff --git a/config/Makefile.nacl-pnacl b/config/Makefile.nacl-pnacl
 --- a/config/Makefile.nacl-pnacl
 +++ b/config/Makefile.nacl-pnacl
-@@ -2,7 +2,7 @@ NACL_ARCH := pnacl
+@@ -2,18 +2,19 @@ NACL_ARCH := pnacl
  
  include config/nacl.inc
  
 -NACL_TOOLCHAIN := $(NACL_SDK_ROOT)/toolchain/$(NACL_OS)_x86_pnacl/$(NACL_LIBC)
 +NACL_TOOLCHAIN := $(NACL_SDK_ROOT)/toolchain/$(NACL_OS)_pnacl
  
- CC     := $(NACL_TOOLCHAIN)/bin/pnacl-clang
- CXX    := $(NACL_TOOLCHAIN)/bin/pnacl-clang++
-@@ -13,7 +13,6 @@ STRIP  ?=
+-CC     := $(NACL_TOOLCHAIN)/bin/pnacl-clang
+-CXX    := $(NACL_TOOLCHAIN)/bin/pnacl-clang++
+-LD     := $(NACL_TOOLCHAIN)/bin/pnacl-clang++
+-AR     := $(NACL_TOOLCHAIN)/bin/pnacl-ar
+-RANLIB :=
+-STRIP  ?=
++CC        := $(NACL_TOOLCHAIN)/bin/pnacl-clang
++CXX       := $(NACL_TOOLCHAIN)/bin/pnacl-clang++
++LD        := $(NACL_TOOLCHAIN)/bin/pnacl-clang++
++AR        := $(NACL_TOOLCHAIN)/bin/pnacl-ar
++FINALIZE  := $(NACL_TOOLCHAIN)/bin/pnacl-finalize
++TRANSLATE := $(NACL_TOOLCHAIN)/bin/pnacl-translate
++RANLIB    := $(NACL_TOOLCHAIN)/bin/pnacl-ranlib
++STRIP     ?=
  
  BIN_EXTENSION = .pexe
  EXT.DYNAMIC = so
