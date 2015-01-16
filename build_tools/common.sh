@@ -136,8 +136,6 @@ NACL_INSTALL_SUBDIR+=${PACKAGE_SUFFIX}
 readonly DEST_PYTHON_OBJS=${NACL_PACKAGES_BUILD}/python-modules/${NACL_BUILD_SUBDIR}
 PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
 
-# Don't support building with SDKs older than the current stable release
-MIN_SDK_VERSION=${MIN_SDK_VERSION:-40}
 NACLPORTS_QUICKBUILD=${NACLPORTS_QUICKBUILD:-0}
 
 if [ "${OS_NAME}" = "Darwin" ]; then
@@ -377,18 +375,6 @@ PatchSpecsFile() {
   # error when attempting to create a shared object.
   if [ "${NACL_SHARED}" != "1" ]; then
     sed -i.bak "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
-  fi
-}
-
-
-CheckSDKVersion() {
-  local GETOS=${NACL_SDK_ROOT}/tools/getos.py
-  local RESULT=$("${GETOS}" --check-version="${MIN_SDK_VERSION}" 2>&1)
-  if [ -n "${RESULT:-}" ]; then
-    echo "The SDK in \$NACL_SDK_ROOT is too old to build ${PACKAGE_NAME}."
-    echo "Please update your SDK, or use the pepper_XX naclports branches."
-    echo "${RESULT}"
-    exit -1
   fi
 }
 
@@ -1550,7 +1536,6 @@ RunInstallStep()    {
 ######################################################################
 CheckToolchain
 CheckPatchVersion
-CheckSDKVersion
 PatchSpecsFile
 InjectSystemHeaders
 InstallConfigSite

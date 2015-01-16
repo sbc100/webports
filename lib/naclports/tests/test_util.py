@@ -76,3 +76,23 @@ class TestUtil(unittest.TestCase):
   def testRelPath(self):
     self.assertEqual('bar', util.RelPath('/foo/bar'))
     self.assertEqual('../baz/bar', util.RelPath('/baz/bar'))
+
+
+class TestCheckSDKRoot(TestUtil):
+  def testMissingSDKROOT(self):
+    with self.assertRaisesRegexp(error.Error, 'NACL_SDK_ROOT does not exist'):
+      util.CheckSDKRoot()
+
+  @patch('os.path.exists', Mock())
+  @patch('os.path.isdir', Mock())
+  @patch('naclports.util.GetSDKVersion', Mock(return_value=10))
+  def testSDKVersionCheck(self):
+    with patch('naclports.util.MIN_SDK_VERSION', 9):
+      util.CheckSDKRoot()
+
+    with patch('naclports.util.MIN_SDK_VERSION', 10):
+      util.CheckSDKRoot()
+
+    with patch('naclports.util.MIN_SDK_VERSION', 11):
+      with self.assertRaisesRegexp(error.Error, 'requires at least version 11'):
+        util.CheckSDKRoot()

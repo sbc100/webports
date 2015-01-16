@@ -25,6 +25,12 @@ GS_URL = 'http://storage.googleapis.com/'
 GS_BUCKET = 'naclports'
 GS_MIRROR_URL = '%s%s/mirror' % (GS_URL, GS_BUCKET)
 
+# Require the latest version of the NaCl SDK. naclports is built
+# and tested against the pepper_canary release. To build aginst older
+# versions of the SDK use the one of the pepper_XX branches (or use
+# --skip-sdk-version-check).
+MIN_SDK_VERSION = 48
+
 arch_to_pkgarch = {
   'x86_64': 'x86-64',
   'i686': 'i686',
@@ -185,10 +191,15 @@ def GetSDKRoot():
 
 @Memoize
 def GetSDKVersion():
-  """Returns the version of the currently configured Native Client SDK."""
+  """Returns the version (as a string) of the current SDK."""
   getos = os.path.join(GetSDKRoot(), 'tools', 'getos.py')
   version = subprocess.check_output([getos, '--sdk-version']).strip()
   return version
+
+
+def CheckSDKVersion(version):
+  """Returns True if the currently configured SDK is 'version' or above."""
+  return int(GetSDKVersion()) >= int(version)
 
 
 @Memoize
@@ -293,10 +304,18 @@ def CheckSDKRoot():
   if not os.path.isdir(root):
     raise error.Error('$NACL_SDK_ROOT does not exist: %s' % root)
 
-  sentinel = os.path.join(root, 'tools', 'getos.py')
-  if not os.path.exists(sentinel):
+  landmark = os.path.join(root, 'tools', 'getos.py')
+  if not os.path.exists(landmark):
     raise error.Error("$NACL_SDK_ROOT (%s) doesn't look right. "
-                      "Couldn't find sentinel file (%s)" % (root, sentinel))
+                      "Couldn't find landmark file (%s)" % (root, landmark))
+
+  if not CheckSDKVersion(MIN_SDK_VERSION):
+    raise error.Error(
+        'This version of naclports requires at least version %s of\n'
+        'the NaCl SDK. The version in $NACL_SDK_ROOT is %s. If you want\n'
+        'to use naclports with an older version of the SDK please checkout\n'
+        'one of the pepper_XX branches (or run with\n'
+        '--skip-sdk-version-check).' % (MIN_SDK_VERSION, GetSDKVersion()))
 
 
 def HashFile(filename):

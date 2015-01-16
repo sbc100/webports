@@ -479,6 +479,11 @@ class SourcePackage(package.Package):
         raise DisabledError('%s: cannot be built with %s'
                             % (self.NAME, self.config.libc))
 
+    if self.MIN_SDK_VERSION is not None:
+      if not util.CheckSDKVersion(self.MIN_SDK_VERSION):
+        raise DisabledError('%s: requires SDK version %s or above'
+                            % (self.NAME, self.MIN_SDK_VERSION))
+
     if self.ARCH is not None:
       if self.config.arch not in self.ARCH:
         raise DisabledError('%s: disabled for current arch: %s'

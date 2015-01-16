@@ -184,6 +184,22 @@ class TestSourcePackage(common.NaclportsTest):
                                  'can only be built on solaris'):
       pkg.CheckBuildable()
 
+  @patch('naclports.util.GetSDKVersion', Mock(return_value=123))
+  def testMinSDKVersion(self):
+    self.CreateTestPackage('foo', 'MIN_SDK_VERSION=123')
+    pkg = source_package.CreatePackage('foo')
+    pkg.CheckBuildable()
+
+    self.CreateTestPackage('foo2', 'MIN_SDK_VERSION=121')
+    pkg = source_package.CreatePackage('foo2')
+    pkg.CheckBuildable()
+
+    self.CreateTestPackage('foo3', 'MIN_SDK_VERSION=124')
+    pkg = source_package.CreatePackage('foo3')
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'requires SDK version 124 or above'):
+      pkg.CheckBuildable()
+
   @patch('naclports.util.GetSDKVersion', Mock(return_value=1234))
   def testInstalledInfoContents(self):
     root = self.CreateTestPackage('foo')

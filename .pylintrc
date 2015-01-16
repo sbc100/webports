@@ -3,6 +3,7 @@ disable=invalid-name,no-member,missing-docstring,unused-argument,fixme,bad-conti
 
 [FORMAT]
 indent-string='  '
+max-line-length=80
 
 [REPORTS]
 reports=no

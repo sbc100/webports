@@ -218,6 +218,8 @@ def RunMain(args):
                       help='Output extra information.')
   parser.add_argument('-V', '--verbose-build', action='store_true',
                       help='Make builds verbose (e.g. pass V=1 to make')
+  parser.add_argument('--skip-sdk-version-check', action='store_true',
+                      help="Disable the NaCl SDK version check on startup.")
   parser.add_argument('--all', action='store_true',
                       help='Perform action on all known ports.')
   parser.add_argument('--color', choices=('always', 'never', 'auto'),
@@ -259,6 +261,9 @@ def RunMain(args):
       del os.environ['VERBOSE']
     if 'V' in os.environ:
       del os.environ['V']
+
+  if args.skip_sdk_version_check:
+    util.MIN_SDK_VERSION = -1
 
   util.CheckSDKRoot()
   config = configuration.Configuration(args.arch, args.toolchain, args.debug)
@@ -312,6 +317,7 @@ def RunMain(args):
         p = source_package.CreatePackage(package_name, config)
       DoCmd(p)
 
+
 def main(args):
   try:
     RunMain(args)
@@ -323,6 +329,7 @@ def main(args):
     return 1
 
   return 0
+
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))
