@@ -184,8 +184,8 @@ diff --git a/include/servermd.h b/include/servermd.h
  #define GLYPHPADBYTES		4
  #endif
  
-+/* nacl on ARM */
-+#if defined(__native_client__) && defined(__arm__)
++/* nacl on ARM/PNaCl */
++#if (defined(__native_client__) && defined(__arm__)) || defined(__pnacl__)
 +#define IMAGE_BYTE_ORDER	LSBFirst
 +#define BITMAP_BIT_ORDER	LSBFirst
 +#define GLYPHPADBYTES		4
