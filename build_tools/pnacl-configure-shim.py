@@ -25,16 +25,21 @@ import sys
 cmd = sys.argv[1:]
 configuring = False
 nacl_main = False
+sdl_main = False
 for arg in cmd:
   if arg == 'conftest.c':
     configuring = True
   if arg == '-Dmain=nacl_main':
     nacl_main = True
+  if arg == '-Dmain=SDL_main':
+    sdl_main = True
+
 
 DROP_FLAGS = set([
     '-O2',
     '-O3',
     '-Dmain=nacl_main',
+    '-Dmain=SDL_main',
     '-lnacl_io',
     '-lnacl_spawn',
     '-lppapi_simple',
@@ -44,8 +49,10 @@ DROP_FLAGS = set([
 
 if configuring:
   cmd = [i for i in cmd if i not in DROP_FLAGS]
-  if nacl_main:
+  if nacl_main or sdl_main:
     cmd = [i for i in cmd if i != '-lcli_main']
+  if sdl_main:
+    cmd = [i for i in cmd if i != '-lSDLmain']
   cmd += ['-O0']
 
 sys.exit(subprocess.call(cmd))

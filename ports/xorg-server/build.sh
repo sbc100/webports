@@ -57,6 +57,9 @@ PatchStep() {
 ConfigureStep() {
   ChangeDir ${SRC_DIR}
   autoreconf --force -v --install
+  # Without this xorg-server's configure script will run -print-program-path=ld
+  # which gives the wrong anser for PNaCl
+  export LD=${NACLLD}
   export GL_CFLAGS=" "
   export GL_LIBS="-lRegal"
   ChangeDir ${BUILD_DIR}
