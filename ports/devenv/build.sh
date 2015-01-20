@@ -84,7 +84,7 @@ InstallStep() {
 
   # Zip the full app for upload.
   ChangeDir ${PUBLISH_DIR}
-  CreateWebStoreZip devenv_small_test.zip devenv_app_upload
+  CreateWebStoreZip devenv_app_upload.zip devenv_app_upload
 
   # Copy the files for DevEnvWidget.
   local WIDGET_DIR=${PUBLISH_DIR}/devenvwidget
@@ -105,7 +105,8 @@ InstallStep() {
   LogExecute mv devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
       devenv_small_test_${NACL_ARCH}
 
-  CreateWebStoreZip devenv_small_test.zip .
+  Remove devenv_small_test.zip
+  LogExecute zip -r devenv_small_test.zip *
 }
 
 PostInstallTestStep() {
