@@ -32,9 +32,11 @@ class TestUtil(unittest.TestCase):
       util.FindInPath('foo')
 
     with patch('os.path.exists') as mock_exists:
-      executable = os.path.join('/x/y/z', 'somefile')
-      self.assertEqual(util.FindInPath('somefile'), executable)
-      mock_exists.assert_called_once_with(executable)
+      with patch('os.path.isfile') as mock_isfile:
+        executable = os.path.join('/x/y/z', 'somefile')
+        self.assertEqual(util.FindInPath('somefile'), executable)
+        mock_exists.assert_called_once_with(executable)
+        mock_isfile.assert_called_once_with(executable)
 
   def testCheckStamp_Missing(self):
     with patch('os.path.exists', Mock(return_value=False)):

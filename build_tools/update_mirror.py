@@ -93,6 +93,9 @@ def main(args):
   options = parser.parse_args(args)
   naclports.SetVerbose(options.verbose)
 
+  # Ensure gsutil is in the PATH.
+  naclports.util.FindInPath('gsutil')
+
   listing = GetMirrorListing(MIRROR_GS)
   source_packages = naclports.source_package.SourcePackageIterator()
 

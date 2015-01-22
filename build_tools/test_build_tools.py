@@ -51,6 +51,7 @@ class TestScanPackages(unittest.TestCase):
 
 
 class TestUpdateMirror(unittest.TestCase):
+  @patch('naclports.util.FindInPath', Mock())
   def testCheckMirror_CheckOnly(self):
     pkg = naclports.source_package.CreatePackage('zlib')
     pkg.GetArchiveFilename = Mock(return_value='file.tar.gz')
@@ -61,6 +62,7 @@ class TestUpdateMirror(unittest.TestCase):
     with self.assertRaises(SystemExit):
       update_mirror.CheckMirror(options, pkg, [])
 
+  @patch('naclports.util.FindInPath', Mock())
   @patch('update_mirror.GsUpload')
   def testCheckMirror_WithDownload(self, upload_mock):
     mock_download = Mock()
@@ -86,6 +88,7 @@ class TestUpdateMirror(unittest.TestCase):
                                mock.call(mock_options, 'c', mirror_listing)])
 
   @patch('naclports.source_package.SourcePackageIterator')
+  @patch('naclports.util.FindInPath', Mock())
   @patch('update_mirror.GetMirrorListing', Mock(return_value=['foo']))
   @patch('update_mirror.CheckPackages')
   def testMain(self, check_packages, source_package_iter):

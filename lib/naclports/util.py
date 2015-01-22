@@ -122,7 +122,7 @@ def FindInPath(command_name):
   for path in os.environ.get('PATH', '').split(os.pathsep):
     for ext in extensions:
       full_name = os.path.join(path, command_name + ext)
-      if os.path.exists(full_name):
+      if os.path.exists(full_name) and os.path.isfile(full_name):
         return full_name
 
   raise error.Error('command not found: %s' % command_name)
