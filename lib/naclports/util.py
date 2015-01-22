@@ -184,6 +184,12 @@ def CheckStamp(filename, contents=None):
 def GetSDKRoot():
   """Returns the root of the currently configured Native Client SDK."""
   root = os.environ.get('NACL_SDK_ROOT')
+  if root is None:
+    local_sdk_root = os.path.join(paths.OUT_DIR, 'nacl_sdk')
+    if os.path.exists(local_sdk_root):
+      root = local_sdk_root
+    else:
+      raise error.Error('$NACL_SDK_ROOT not set')
   if sys.platform == "cygwin":
     root = root.replace('\\', '/')
   return root
@@ -298,8 +304,6 @@ def IsInstalled(package_name, config, stamp_content=None):
 def CheckSDKRoot():
   """Check validity of NACL_SDK_ROOT."""
   root = GetSDKRoot()
-  if not root:
-    raise error.Error('$NACL_SDK_ROOT not set')
 
   if not os.path.isdir(root):
     raise error.Error('$NACL_SDK_ROOT does not exist: %s' % root)

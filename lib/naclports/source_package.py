@@ -319,6 +319,7 @@ class SourcePackage(package.Package):
     env['TOOLCHAIN'] = self.config.toolchain
     env['NACL_ARCH'] = self.config.arch
     env['NACL_DEBUG'] = self.config.debug and '1' or '0'
+    env['NACL_SDK_ROOT'] = util.GetSDKRoot()
     rtn = subprocess.call(cmd,
                           stdout=sys.stdout,
                           stderr=sys.stderr,
