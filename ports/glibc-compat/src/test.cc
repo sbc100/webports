@@ -6,7 +6,9 @@
 #include <endian.h>
 #include <errno.h>
 #include <stdlib.h>
+#ifndef __GLIBC__
 #include <sys/endian.h>
+#endif
 
 #include "gtest/gtest.h"
 
@@ -62,6 +64,7 @@ TEST(TestEndian, byte_order) {
 #endif
 }
 
+#ifndef __GLIBC__
 TEST(TestEndian, byte_swap) {
   // Test BSD byte-swapping macros
   uint16_t num16 = 0x0102u;
@@ -71,11 +74,19 @@ TEST(TestEndian, byte_swap) {
   ASSERT_EQ(num16, letoh16(num16));
   ASSERT_EQ(num32, letoh32(num32));
 
-  ASSERT_EQ(htons(num16), htobe16(num16));
-  ASSERT_EQ(htonl(num32), htobe32(num32));
-  ASSERT_EQ(ntohs(num16), betoh16(num16));
-  ASSERT_EQ(ntohl(num32), betoh32(num32));
+  // Can't inline these in the ASSERT_EQ statements as they can be
+  // 'statement expressions' (on bionic at least) which can't be
+  // template parameters apparently.
+  int n16 = htons(num16);
+  int n32 = htonl(num32);
+  int h16 = ntohs(num16);
+  int h32 = ntohl(num32);
+  ASSERT_EQ(n16, htobe16(num16));
+  ASSERT_EQ(n32, htobe32(num32));
+  ASSERT_EQ(h16, betoh16(num16));
+  ASSERT_EQ(h32, betoh32(num32));
 }
+#endif
 
 int main(int argc, char** argv) {
   setenv("TERM", "xterm-256color", 0);

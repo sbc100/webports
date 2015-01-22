@@ -3,22 +3,14 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  EXECUTABLES=out/glibc_compat_test
-fi
+EXECUTABLES=out/glibc_compat_test
 
 ConfigureStep() {
-  if [ "${NACL_LIBC}" != "newlib" ]; then
-    return
-  fi
   LogExecute cp -rf ${START_DIR}/* .
   LogExecute rm -rf out
 }
 
 BuildStep() {
-  if [ "${NACL_LIBC}" != "newlib" ]; then
-    return
-  fi
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -30,13 +22,11 @@ BuildStep() {
 }
 
 TestStep() {
-  if [ "${NACL_LIBC}" != "newlib" ]; then
-    return
+  if [ "${TOOLCHAIN}" = "pnacl" ]; then
+    RunSelLdrCommand ./out/glibc_compat_test
+  else
+    LogExecute ./out/glibc_compat_test.sh
   fi
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    return
-  fi
-  LogExecute ./out/glibc_compat_test.sh
 }
 
 InstallStep() {

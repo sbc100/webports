@@ -2,9 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+ifeq (,$(findstring $(TOOLCHAIN),glibc bionic))
+LIBC=newlib
+endif
+
 CFLAGS += -Wno-implicit-function-declaration
-CPPFLAGS := -Werror -Wno-unused-value
-CPPFLAGS += -pthread -Iinclude -Isrc -D_LIBC
+CPPFLAGS := -Werror -Wno-unused-value -pthread
 CPPFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
 CPPFLAGS += -I$(NACL_SDK_ROOT)/include
 OUT := out
@@ -44,20 +47,27 @@ CC_PREFIX =  @echo " CC  $@";
 AR_PREFIX =  @echo " AR  $@";
 endif
 
+
+ifeq ($(LIBC),newlib)
+LIB = $(OUT)/libglibc-compat.a
+CPPFLAGS += -Iinclude -Isrc -D_LIBC
+endif
+
 $(OUT)/%.o : src/%.c
 	@mkdir -p $(OUT)
 	$(CC_PREFIX)$(CC) -o $@ -c $< $(CFLAGS) $(CPPFLAGS)
 
-all: $(OUT)/libglibc-compat.a $(OUT)/glibc_compat_test
+all: $(LIB) $(OUT)/glibc_compat_test
 
 $(OUT)/libglibc-compat.a: $(OBJS)
 	$(AR_PREFIX)$(AR) rcs $@ $^
 
-LIBS=-lglibc-compat -lgtest -lpthread
+TEST_LIBS=$(LIB) -lgtest -lpthread
 
-$(OUT)/glibc_compat_test: src/test.cc $(OUT)/libglibc-compat.a
+$(OUT)/glibc_compat_test: src/test.cc $(LIB)
+	@mkdir -p $(OUT)
 	$(CXX_PREFIX)$(CXX) -o $@ $< -L$(OUT) $(LDFLAGS) $(CXXFLAGS) \
-		$(CPPFLAGS) $(LIBS)
+		$(CPPFLAGS) $(TEST_LIBS)
 
 test: $(OUT)/glibc_compat_test
 
