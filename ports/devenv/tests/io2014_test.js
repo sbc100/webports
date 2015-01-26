@@ -14,9 +14,7 @@
 TEST_F(DevEnvTest, 'testDefaultPackageInstall', function() {
   var self = this;
   return Promise.resolve().then(function() {
-    return self.runCommand('. /mnt/http/bashrc', '');
-  }).then(function(result) {
-    ASSERT_EQ(0, result.status, 'Expect sucessful install');
+    return self.installDefaultPackages();
   });
 });
 

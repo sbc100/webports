@@ -158,6 +158,17 @@ DevEnvTest.prototype.installPackage = function(name) {
   return this.checkCommand(cmd, 0);
 };
 
+DevEnvTest.prototype.installDefaultPackages = function(name) {
+  if (this.params['latest'] === '1') {
+    var cmd = 'bash /mnt/http/install-base-packages.sh';
+    cmd += ' -f -s ' + window.location.origin + '/publish';
+  } else {
+    var cmd = '. /mnt/http/bashrc';
+  }
+  chrometest.info(cmd);
+  return this.checkCommand(cmd, 0);
+};
+
 
 DevEnvTest.prototype.checkCommandReLines = function(
     cmd, expectedStatus, expectedOutput) {

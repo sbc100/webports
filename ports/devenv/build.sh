@@ -63,9 +63,8 @@ InstallStep() {
   LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js bash.nmf
   InstallNaClTerm ${APP_DIR}
 
-  RESOURCES="background.js bash.js bashrc package
-      graphical.html whitelist.js devenv_16.png devenv_48.png
-      devenv_128.png"
+  RESOURCES="background.js bash.js bashrc install-base-packages.sh package
+      graphical.html whitelist.js devenv_16.png devenv_48.png devenv_128.png"
   for resource in ${RESOURCES}; do
     LogExecute install ${START_DIR}/${resource} ${APP_DIR}/
   done
@@ -124,6 +123,13 @@ PostInstallTestStep() {
     LogExecute python ${START_DIR}/devenv_small_test.py -x -vv -a ${arch}
     if [[ ${NACL_ARCH} == pnacl ]]; then
       LogExecute python ${START_DIR}/jseval_test.py -x -vv -a ${arch}
+    fi
+    # Run large and io2014 tests only on the buildbots (against pinned revs).
+    if [[ "${BUILDBOT_BUILDERNAME:-}" != "" ]]; then
+      LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
+        -x -vv -a ${arch}
+      LogExecute python ${START_DIR}/../devenv/io2014_test.py \
+        -x -vv -a ${arch}
     fi
   done
 }
