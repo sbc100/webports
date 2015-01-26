@@ -32,6 +32,9 @@ DevEnvTest.prototype.setUp = function() {
     return chrometest.proxyExtension('TCP Interface');
   }).then(function(ext) {
     self.tcp = ext;
+    return self.initFileSystem();
+  }).then(function() {
+    return self.mkdir('/home/user');
   });
 };
 

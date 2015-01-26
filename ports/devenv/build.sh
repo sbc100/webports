@@ -61,6 +61,7 @@ InstallStep() {
   # Install the HTML/JS for the terminal.
   ChangeDir ${APP_DIR}
   LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js bash.nmf
+  LogExecute cp bash.nmf sh.nmf
   InstallNaClTerm ${APP_DIR}
 
   RESOURCES="background.js bash.js bashrc install-base-packages.sh package

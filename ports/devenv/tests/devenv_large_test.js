@@ -36,10 +36,6 @@ DevEnvFileTest.prototype.setUp = function() {
   var self = this;
   return Promise.resolve().then(function() {
     return DevEnvTest.prototype.setUp.call(self);
-  }).then(function() {
-    return self.initFileSystem();
-  }).then(function() {
-    return self.mkdir('/home/user');
   });
 };
 
