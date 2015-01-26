@@ -548,7 +548,7 @@ class SourcePackage(package.Package):
     mirror_dir = os.path.join(paths.CACHE_ROOT, git_mirror)
     if os.path.exists(mirror_dir):
       if RunGitCmd(mirror_dir,
-                   ['cat-file', '-t', git_commit], error_ok=True) != 0:
+                   ['rev-parse', git_commit + '^{commit}'], error_ok=True) != 0:
         Log('Updating git mirror: %s' % util.RelPath(mirror_dir))
         RunGitCmd(mirror_dir, ['remote', 'update', '--prune'])
     else:
