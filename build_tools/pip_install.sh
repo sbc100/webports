@@ -31,7 +31,7 @@ fi
 
 set -x
 # Pin locally install pip to a specific version
-pip install ${ARGS} "pip==6.0.6"
+pip install --user "pip==6.0.6"
 
 # At this point we know we have good pip install in $PATH and we can use
 # it to install the requirements.
