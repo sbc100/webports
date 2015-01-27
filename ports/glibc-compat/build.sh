@@ -3,14 +3,22 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
-EXECUTABLES=out/glibc_compat_test
+if [ "${TOOLCHAIN}" != "bionic" ]; then
+  EXECUTABLES=out/glibc_compat_test
+fi
 
 ConfigureStep() {
+  if [ "${TOOLCHAIN}" = "bionic" ]; then
+    return
+  fi
   LogExecute cp -rf ${START_DIR}/* .
   LogExecute rm -rf out
 }
 
 BuildStep() {
+  if [ "${TOOLCHAIN}" = "bionic" ]; then
+    return
+  fi
   # export the nacl tools
   export CC=${NACLCC}
   export CXX=${NACLCXX}
@@ -22,6 +30,9 @@ BuildStep() {
 }
 
 TestStep() {
+  if [ "${TOOLCHAIN}" = "bionic" ]; then
+    return
+  fi
   if [ "${TOOLCHAIN}" = "pnacl" ]; then
     RunSelLdrCommand ./out/glibc_compat_test
   else
