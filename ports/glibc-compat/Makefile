@@ -19,6 +19,7 @@ SOURCES := \
   src/in6_addr.c \
   src/inet_addr.c \
   src/inet_pton.c \
+  src/lockf.c \
   src/mktemp.c \
   src/ns_name.c \
   src/ns_netint.c \

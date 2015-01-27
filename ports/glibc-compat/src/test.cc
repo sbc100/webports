@@ -2,10 +2,14 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file. */
 
-#include <netinet/in.h>
 #include <endian.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <netinet/in.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #ifndef __GLIBC__
 #include <sys/endian.h>
 #endif
@@ -92,4 +96,14 @@ int main(int argc, char** argv) {
   setenv("TERM", "xterm-256color", 0);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
+}
+
+TEST(TestLockf, lockf) {
+  // The fcntl() method underlying lockf() is not implemented in NaCl.
+  ASSERT_EQ(-1, lockf(1, F_LOCK, 1));
+  ASSERT_EQ(ENOSYS, errno);
+  ASSERT_EQ(-1, lockf(1, F_TLOCK, 1));
+  ASSERT_EQ(ENOSYS, errno);
+  ASSERT_EQ(-1, lockf(1, F_ULOCK, 1));
+  ASSERT_EQ(ENOSYS, errno);
 }
