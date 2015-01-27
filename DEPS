@@ -3,6 +3,8 @@ deps = {
     "https://chromium.googlesource.com/apps/libapps.git@cd34b28",
   "src/third_party/zip.js":
     "git://github.com/gildas-lormeau/zip.js@4c93974",
+  "src/third_party/clang_tools":
+    "https://chromium.googlesource.com/chromium/src/tools/clang.git@7aa7166",
 }
 
 deps_os = {
