@@ -1,0 +1,6 @@
+NAME=cups
+VERSION=2.0.1
+URL=https://www.cups.org/software/2.0.1/cups-2.0.1-source.tar.bz2
+LICENSE=ICENSE=CUSTOM:LICENSE.txt
+SHA1=acbf4f5365b6c2a99d8d05965d168f15915135db
+DEPENDS=(glibc-compat)
