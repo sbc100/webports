@@ -29,3 +29,7 @@ fi
 # linking of the shared library currently fails because it
 # tries to link libppapi_stub.a which is not built with -fPIC.
 EXTRA_CONFIGURE_ARGS+=" --disable-shared"
+
+InstallStep() {
+  PublishByArchForDevEnv
+}
