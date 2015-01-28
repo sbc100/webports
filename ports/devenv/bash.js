@@ -27,3 +27,11 @@ window.onload = function() {
     onInit();
   });
 };
+
+// Patch hterm to intercept Ctrl-Shift-N to create new windows.
+hterm.Keyboard.KeyMap.prototype.onCtrlN_ = function(e, keyDef) {
+  if (e.shiftKey) {
+    chrome.runtime.sendMessage({'name': 'new_window'});
+  }
+  return '\x0e';
+};

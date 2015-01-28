@@ -6,14 +6,27 @@
 
 'use strict';
 
-chrome.app.runtime.onLaunched.addListener(function() {
+
+function newWindow() {
   chrome.app.window.create('bash.html', {
     'bounds': {
       'width': 800,
       'height': 600,
     },
   });
+}
+
+chrome.app.runtime.onLaunched.addListener(function() {
+  newWindow();
 });
+
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if (request.name === 'new_window') {
+      newWindow();
+    }
+  }
+);
 
 chrome.runtime.onMessageExternal.addListener(
   function(request, sender, sendResponse) {
