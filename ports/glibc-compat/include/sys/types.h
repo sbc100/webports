@@ -15,8 +15,12 @@ typedef uint32_t __gid_t;
 typedef int32_t _ssize_t;
 #endif
 
+/*
+ * TODO(sbc): remove once this is fixed:
+ * https://code.google.com/p/nativeclient/issues/detail?id=3790
+ */
 #include <limits.h>
-#define SSIZE_MAX LONG_MAX
+#define SSIZE_MAX ((ssize_t) (SIZE_MAX / 2))
 
 #include_next <sys/types.h>
 
