@@ -3,13 +3,12 @@
 # found in the LICENSE file.
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-fi
-
-if [ "${NACL_SHARED}" = "1" ]; then
-  EXE_DIR=".libs/"
-else
+  # TODO(sbc): remove once this is fixed:
+  # https://code.google.com/p/nativeclient/issues/detail?id=3790
+  NACLPORTS_CPPFLAGS+=" -DSSIZE_MAX=LONG_MAX"
   EXE_DIR=""
+else
+  EXE_DIR=".libs/"
 fi
 
 EXTRA_CONFIGURE_ARGS="--disable-largefile --without-fftw --without-xml"
