@@ -47,6 +47,11 @@ ConfigureStep() {
                         BUILDRANLIB=ranlib \
                         BUILDLIBS="
 
+  # TODO(phosek): we need to hardcode the package path because kpathsea which
+  # is normally responsible for resolving paths requires fork/spawn and pipes
+  sed -i "s+\$PACKAGEDIR+/mnt/html5/packages/texlive.${NACL_ARCH}+g" \
+    ${SRC_DIR}/texk/kpathsea/texmf.cnf
+
   export ac_exeext=${NACL_EXEEXT}
   DefaultConfigureStep
 }
@@ -79,12 +84,12 @@ InstallStep() {
   rm -rf ${INSTALL_TL_DIR}
 
   if [ "${OS_NAME}" != "Darwin" ]; then
-    local tl_executables=$(find ${ARCH_DIR}/usr/share/bin -type f -executable)
+    local tl_executables=$(find ${ARCH_DIR}/share/bin -type f -executable)
   else
-    local tl_executables=$(find ${ARCH_DIR}/usr/share/bin -type f -perm +u+x)
+    local tl_executables=$(find ${ARCH_DIR}/share/bin -type f -perm +u+x)
   fi
 
-  ChangeDir ${ARCH_DIR}/usr/share
+  ChangeDir ${ARCH_DIR}/share
   rm -rf bin
   rm -rf readme-html.dir readme-txt.dir
   rm -rf tlpkg
@@ -96,9 +101,12 @@ InstallStep() {
   done
   cp ${SRC_DIR}/texk/kpathsea/texmf.cnf texmf-dist/web2c/texmf.cnf
   ChangeDir ${ARCH_DIR}
-  tar cf texdata_${NACL_ARCH}.tar .
-  rm -rf usr
 
+  # TODO(phosek): The code below could be potentially replaced by
+  # PublishByArchForDevEnv, but there is a subtle difference in that we only
+  # copy executables valid for the selected scheme (tl_executables) and
+  # PublishByArchForDevEnv does not currently have an option to filter out
+  # specified files.
   if [ "${OS_NAME}" != "Darwin" ]; then
     local executables=$(find ${DESTDIR}${PREFIX}/bin -type f -executable)
   else

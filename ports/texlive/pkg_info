@@ -8,4 +8,3 @@ DISABLED_ARCH=(arm pnacl)
 DISABLED_LIBC=(bionic)
 DEPENDS=(fontconfig glibc-compat nacl-spawn)
 SHA1=8cb283ad26b1fe18e1089820cf64ecc63d8224e8
-DISABLED=1

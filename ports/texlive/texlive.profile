@@ -1,10 +1,10 @@
 selected_scheme scheme-%(scheme)s
-TEXDIR %(texdir)s/usr/share
+TEXDIR %(texdir)s/share
 TEXMFCONFIG ~/.texlive2014/texmf-config
 TEXMFHOME ~/texmf
-TEXMFLOCAL %(texdir)s/usr/texmf-local
-TEXMFSYSCONFIG %(texdir)s/usr/share/texmf-config
-TEXMFSYSVAR %(texdir)s/usr/share/texmf-var
+TEXMFLOCAL %(texdir)s/texmf-local
+TEXMFSYSCONFIG %(texdir)s/share/texmf-config
+TEXMFSYSVAR %(texdir)s/share/texmf-var
 TEXMFVAR ~/.texlive2014/texmf-var
 option_doc 0
 option_file_assocs 0

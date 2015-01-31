@@ -240,7 +240,8 @@ ruby|${PACKAGE_SOURCE}|${TOOLCHAIN}/ruby.zip \
 tk|${PACKAGE_SOURCE}|glibc/${NACL_ARCH_ALT}.zip \
 twm|${PACKAGE_SOURCE}|glibc/${NACL_ARCH_ALT}.zip \
 xeyes|${PACKAGE_SOURCE}|glibc/${NACL_ARCH_ALT}.zip \
-python|${PACKAGE_SOURCE}|${TOOLCHAIN}/python.zip"
+python|${PACKAGE_SOURCE}|${TOOLCHAIN}/python.zip \
+texlive|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip"
 
   for package in ${PACKAGE_LIST}; do
     InstallPackage ${package}

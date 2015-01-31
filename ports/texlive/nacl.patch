@@ -348,32 +348,21 @@ index cce4fc0..2c49d42 100644
  LIPO = @LIPO@
  LN_S = @LN_S@
 diff --git a/texk/bibtex-x/bibtex.c b/texk/bibtex-x/bibtex.c
-index 0964f4d..f4f5ddf 100644
+index 0964f4d..6010ee7 100644
 --- a/texk/bibtex-x/bibtex.c
 +++ b/texk/bibtex-x/bibtex.c
-@@ -115,6 +115,21 @@
+@@ -115,6 +115,10 @@
  #include "utils.h"
  #include "version.h"
  
 +#if defined(__native_client__)
 +#include "nacl_main.h"
-+#ifdef __arm__
-+#define DATA_FILE "texdata_arm.tar"
-+#elif defined __i386__
-+#define DATA_FILE "texdata_x86_32.tar"
-+#elif defined __x86_64__
-+#define DATA_FILE "texdata_x86_64.tar"
-+#elif defined __pnacl__
-+#define DATA_FILE "texdata_pnacl.tar"
-+#else
-+#error Unsuported architecture
-+#endif
 +#endif
 +
  
  /***************************************************************************
   * WEB section number:	 39
-@@ -226,11 +241,20 @@ END
+@@ -226,7 +230,11 @@ END
   * In addition, the program sends error messages and other remarks to the
   * |log_file| and terminal.
   ***************************************************************************/
@@ -385,15 +374,6 @@ index 0964f4d..f4f5ddf 100644
  BEGIN
      extern Integer8_T       history;
      int			    exit_status;
- 
-+#if defined(__native_client__)
-+    if (nacl_startup_untar(argv[0], DATA_FILE, "/"))
-+      return -1;
-+#endif
-+
-     /*-
-     **------------------------------------------------------------------------
-     ** Set |log_file| initially to point to NULL.  All writes to the log
 diff --git a/texk/dvipdfm-x/Makefile.in b/texk/dvipdfm-x/Makefile.in
 index 9a70d82..174b917 100644
 --- a/texk/dvipdfm-x/Makefile.in
@@ -541,7 +521,7 @@ index c4fe781..368efdf 100644
  #ifndef WIN32
  /* From a standalone program `ll' to expand symlinks written by Kimbo Mundy.
 diff --git a/texk/kpathsea/texmf.cnf b/texk/kpathsea/texmf.cnf
-index 77bcfb9..9eccf80 100644
+index 77bcfb9..7ae46a0 100644
 --- a/texk/kpathsea/texmf.cnf
 +++ b/texk/kpathsea/texmf.cnf
 @@ -51,23 +51,23 @@
@@ -549,28 +529,28 @@ index 77bcfb9..9eccf80 100644
  % Kpathsea sets SELFAUTOLOC (the directory with the binary),
  % SELFAUTODIR (its parent), and SELFAUTOPARENT (its grandparent).
 -TEXMFROOT = $SELFAUTOPARENT
-+TEXMFROOT = /usr/share
++TEXMFROOT = $PACKAGEDIR/share
  
  % The main tree of distributed packages and programs:
 -TEXMFDIST = $TEXMFROOT/texmf-dist
-+TEXMFDIST = /usr/share/texmf-dist
++TEXMFDIST = $PACKAGEDIR/share/texmf-dist
  
  % We used to have a separate /texmf tree with some core programs and files.
  % Keep the variable name.
 -TEXMFMAIN = $TEXMFDIST
-+TEXMFMAIN = /usr/share/texmf-dist
++TEXMFMAIN = $PACKAGEDIR/share/texmf-dist
  
  % Local additions to the distribution trees.
 -TEXMFLOCAL = $SELFAUTOGRANDPARENT/texmf-local
-+TEXMFLOCAL = /usr/texmf-local
++TEXMFLOCAL = $PACKAGEDIR/texmf-local
  
  % TEXMFSYSVAR, where *-sys store cached runtime data.
 -TEXMFSYSVAR = $TEXMFROOT/texmf-var
-+TEXMFSYSVAR = /usr/share/texmf-var
++TEXMFSYSVAR = $PACKAGEDIR/share/texmf-var
  
  % TEXMFSYSCONFIG, where *-sys store configuration data.
 -TEXMFSYSCONFIG = $TEXMFROOT/texmf-config
-+TEXMFSYSCONFIG = /usr/share/texmf-config
++TEXMFSYSCONFIG = $PACKAGEDIR/share/texmf-config
  
  % Per-user texmf tree(s) -- organized per the TDS, as usual.  To define
  % more than one per-user tree, set this to a list of directories in
@@ -579,10 +559,19 @@ index 77bcfb9..9eccf80 100644
  % fonts installed on the system (outside of TeX).  An empty default
  % value would add "//" to the search paths, so we give it a dummy value.
 -OSFONTDIR = /please/set/osfontdir/in/the/environment
-+OSFONTDIR = /usr/share/fonts
++OSFONTDIR = $PACKAGEDIR/share/fonts
  
  % PostScript Type 1 outline fonts.
  T1FONTS = .;$TEXMF/fonts/type1//;$OSFONTDIR//
+@@ -370,7 +370,7 @@ FONTCIDMAPS=.;$TEXMF/fonts/cid//
+ PDFTEXCONFIG = .;$TEXMF/pdftex/{$progname,}//
+ 
+ % Used by DMP (ditroff-to-mpx), called by makempx -troff.
+-TRFONTS = /usr{/local,}/share/groff/{current/font,site-font}/devps
++TRFONTS = $PACKAGEDIR{/local,}/share/groff/{current/font,site-font}/devps
+ MPSUPPORT = .;$TEXMF/metapost/support
+ 
+ % For xdvi to find mime.types and .mailcap, if they do not exist in
 @@ -481,33 +481,7 @@ RUBYINPUTS   = .;$TEXMF/scripts/{$progname,$engine,}/ruby//
  % since we don't want to scatter ../'s throughout the value.  Hence we
  % explicitly list every directory.  Arguably more understandable anyway.
@@ -614,7 +603,7 @@ index 77bcfb9..9eccf80 100644
 -$SELFAUTOPARENT/texmf-dist/web2c,\
 -$SELFAUTOPARENT/texmf/web2c\
 -}
-+TEXMFCNF = /usr/share;/usr/share/texmf-dist/web2c;/usr/texmf-local/web2c
++TEXMFCNF = $PACKAGEDIR/share;$PACKAGEDIR/share/texmf-dist/web2c;$PACKAGEDIR/texmf-local/web2c
  %
  % For reference, here is the old brace-using definition:
  %TEXMFCNF = {$SELFAUTOLOC,$SELFAUTODIR,$SELFAUTOPARENT}{,{/share,}/texmf{-local,}/web2c}
@@ -868,32 +857,21 @@ index 4c3249e..df4e81a 100644
  
  @x l.107 - Add Web2C version to banner.
 diff --git a/texk/web2c/lib/main.c b/texk/web2c/lib/main.c
-index d3f5a45..eb30910 100644
+index d3f5a45..2922ab8 100644
 --- a/texk/web2c/lib/main.c
 +++ b/texk/web2c/lib/main.c
-@@ -4,6 +4,21 @@
+@@ -4,6 +4,10 @@
  #include <w2c/config.h>
  #include "lib.h"
  
 +#if defined(__native_client__)
 +#include "nacl_main.h"
-+#ifdef __arm__
-+#define DATA_FILE "texdata_arm.tar"
-+#elif defined __i386__
-+#define DATA_FILE "texdata_x86_32.tar"
-+#elif defined __x86_64__
-+#define DATA_FILE "texdata_x86_64.tar"
-+#elif defined __pnacl__
-+#define DATA_FILE "texdata_pnacl.tar"
-+#else
-+#error Unsuported architecture
-+#endif
 +#endif
 +
  /* These variables are referenced from the change files.  */
  char **argv;
  int argc;
-@@ -12,8 +27,17 @@ int argc;
+@@ -12,7 +16,11 @@ int argc;
     have more to do.  We just have to set up the command line.  web2c
     transforms Pascal's main block into a procedure `main_body'.  */
  int
@@ -903,41 +881,24 @@ index d3f5a45..eb30910 100644
  main (int  ac,  string* av)
 +#endif
  {
-+#if defined(__native_client__)
-+  if (nacl_startup_untar(av[0], DATA_FILE, "/"))
-+    return -1;
-+#endif
-+
  #ifdef __EMX__
    _wildcard (&ac, &av);
-   _response (&ac, &av);
 diff --git a/texk/web2c/lib/texmfmp.c b/texk/web2c/lib/texmfmp.c
-index d6cdb40..ce84411 100644
+index d6cdb40..463f8dd 100644
 --- a/texk/web2c/lib/texmfmp.c
 +++ b/texk/web2c/lib/texmfmp.c
-@@ -37,6 +37,21 @@
+@@ -37,6 +37,10 @@
  
  #include <texmfmp-help.h>
  
 +#if defined(__native_client__)
 +#include "nacl_main.h"
-+#ifdef __arm__
-+#define DATA_FILE "texdata_arm.tar"
-+#elif defined __i386__
-+#define DATA_FILE "texdata_x86_32.tar"
-+#elif defined __x86_64__
-+#define DATA_FILE "texdata_x86_64.tar"
-+#elif defined __pnacl__
-+#define DATA_FILE "texdata_pnacl.tar"
-+#else
-+#error Unsuported architecture
-+#endif
 +#endif
 +
  /* {tex,mf}d.h defines TeX, MF, INI, and other such symbols.
     Unfortunately there's no way to get the banner into this code, so
     just repeat the text.  */
-@@ -886,10 +901,17 @@ maininit (int ac, string *av)
+@@ -886,6 +890,8 @@ maininit (int ac, string *av)
  int
  #if defined(WIN32) && !defined(__MINGW32__) && defined(DLLPROC)
  DLLPROC (int ac, string *av)
@@ -946,15 +907,6 @@ index d6cdb40..ce84411 100644
  #else
  main (int ac, string *av)
  #endif
- {
-+#if defined(__native_client__)
-+  if (nacl_startup_untar(av[0], DATA_FILE, "/"))
-+    return -1;
-+#endif
-+
- #ifdef __EMX__
-   _wildcard (&ac, &av);
-   _response (&ac, &av);
 diff --git a/texk/web2c/luatexdir/lua/loslibext.c b/texk/web2c/luatexdir/lua/loslibext.c
 index 78f1e48..007f5f9 100644
 --- a/texk/web2c/luatexdir/lua/loslibext.c
@@ -1034,32 +986,21 @@ index acee671..22bb1a3 100644
  #else
      t_socket sock = open(path, O_NOCTTY|O_RDWR);
 diff --git a/texk/web2c/luatexdir/luatex.c b/texk/web2c/luatexdir/luatex.c
-index fb65516..0ddf76c 100644
+index fb65516..e38ac94 100644
 --- a/texk/web2c/luatexdir/luatex.c
 +++ b/texk/web2c/luatexdir/luatex.c
-@@ -58,6 +58,21 @@ const char *engine_name = "luatex";     /* the name of this engine */
+@@ -58,6 +58,10 @@ const char *engine_name = "luatex";     /* the name of this engine */
  
  #include <signal.h>             /* Catch interrupts.  */
  
 +#if defined(__native_client__)
 +#include "nacl_main.h"
-+#ifdef __arm__
-+#define DATA_FILE "texdata_arm.tar"
-+#elif defined __i386__
-+#define DATA_FILE "texdata_x86_32.tar"
-+#elif defined __x86_64__
-+#define DATA_FILE "texdata_x86_64.tar"
-+#elif defined __pnacl__
-+#define DATA_FILE "texdata_pnacl.tar"
-+#else
-+#error Unsuported architecture
-+#endif
 +#endif
 +
  
  /* {tex,mf}d.h defines TeX, MF, INI, and other such symbols.
     Unfortunately there's no way to get the banner into this code, so
-@@ -460,10 +475,17 @@ const char *ptexbanner;
+@@ -460,6 +464,8 @@ const char *ptexbanner;
  int
  #if defined(WIN32) && !defined(__MINGW32__) && defined(DLLPROC)
  DLLPROC (int ac, string *av)
@@ -1068,15 +1009,6 @@ index fb65516..0ddf76c 100644
  #else
  main (int ac, string *av)
  #endif
- {
-+#if defined(__native_client__)
-+  if (nacl_startup_untar(av[0], DATA_FILE, "/"))
-+    return -1;
-+#endif
-+
- #  ifdef __EMX__
-     _wildcard(&ac, &av);
-     _response(&ac, &av);
 diff --git a/texk/web2c/mplibdir/mpost.w b/texk/web2c/mplibdir/mpost.w
 index f2165b5..bb9cb12 100644
 --- a/texk/web2c/mplibdir/mpost.w
