@@ -220,7 +220,7 @@ Modifying package sources / Working with patches
 ------------------------------------------------
 
 When a package is first built, its source is downloaded and extracted to
-``out/build/<PKG_NAME>``. A new git repository is then created in this
+``out/build/<pkg_name>``. A new git repository is then created in this
 folder with the original archive contents on a branch called ``upstream``. The
 optional ``nacl.patch`` file is then applied on the ``master`` branch. This
 means that at any given time you can see the changes from upstream using ``git
@@ -228,13 +228,12 @@ diff upstream``.
 
 To make changes to a package's patch file the recommended workflow is:
 
-1. Directly modify the sources in ``out/build/PKG_NAME``.
+1. Directly modify the sources in ``out/build/<pkg_name>``.
 2. Build the package and verify the changes.
-3. Use ``git diff upstream.. > ../path/to/nacl.patch`` to regenerate
-   the patch file.
+3. Use ``naclpors updatepatch <pkg_name>`` to (re)generate the patch file.
 
 Whenever the upstream archive or patch file changes and you try to build the
 package you will be prompted to remove the existing repository and start a new
-one. This is to avoid deleting a repository that might have unsaved changed.
+one. This is to avoid deleting a repository that might contain unsaved changed.
 
 Happy porting!
