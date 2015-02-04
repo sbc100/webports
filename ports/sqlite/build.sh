@@ -31,12 +31,12 @@ BuildStep() {
   fi
 
   # Build (at least shell.c) again but this time with nacl_io and -DPPAPI
+  NEW_LIBS="${NACL_CLI_MAIN_LIB}"
+  NEW_LIBS+=" -lppapi_simple -lnacl_io -pthread -lppapi_cpp -lppapi"
   Banner "Building sqlite3_ppapi"
   sed -i.bak "s/sqlite3\$(EXEEXT)/sqlite3_ppapi\$(EXEEXT)/" Makefile
   sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" Makefile
-  sed -i.bak \
-    "s/-lnacl_io/-lppapi_simple -lnacl_io -pthread -lppapi_cpp -lppapi/" \
-    Makefile
+  sed -i.bak "s/-lnacl_io/${NEW_LIBS}/" Makefile
   Remove shell.o
   DefaultBuildStep
 }
