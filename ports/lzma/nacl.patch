@@ -1,0 +1,80 @@
+diff --git a/src/lzma/Makefile.in b/src/lzma/Makefile.in
+--- a/src/lzma/Makefile.in
++++ b/src/lzma/Makefile.in
+@@ -277,7 +277,7 @@ clean-binPROGRAMS:
+ 	done
+ lzma$(EXEEXT): $(lzma_OBJECTS) $(lzma_DEPENDENCIES) 
+ 	@rm -f lzma$(EXEEXT)
+-	$(CXXLINK) $(lzma_OBJECTS) $(lzma_LDADD) $(LIBS)
++	$(CXXLINK) $(lzma_OBJECTS) $(lzma_LDADD) $(LIBS) $(EXTRA_LIBS)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+diff --git a/src/lzma/lzmp.cpp b/src/lzma/lzmp.cpp
+--- a/src/lzma/lzmp.cpp
++++ b/src/lzma/lzmp.cpp
+@@ -681,8 +681,11 @@ my_utimes(const char *name, int fd, time_t atime, time_t mtime)
+ 
+ } // namespace lzma
+ 
+-
++#if defined(__native_client__)
++extern "C" int nacl_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+ 	using namespace lzma;
+ 	using std::cerr;
+diff --git a/src/lzmadec/Makefile.in b/src/lzmadec/Makefile.in
+--- a/src/lzmadec/Makefile.in
++++ b/src/lzmadec/Makefile.in
+@@ -250,7 +250,7 @@ clean-binPROGRAMS:
+ 	done
+ lzmadec$(EXEEXT): $(lzmadec_OBJECTS) $(lzmadec_DEPENDENCIES) 
+ 	@rm -f lzmadec$(EXEEXT)
+-	$(LINK) $(lzmadec_OBJECTS) $(lzmadec_LDADD) $(LIBS)
++	$(LINK) $(lzmadec_OBJECTS) $(lzmadec_LDADD) $(LIBS) $(EXTRA_LIBS)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+diff --git a/src/lzmadec/lzmadec.c b/src/lzmadec/lzmadec.c
+--- a/src/lzmadec/lzmadec.c
++++ b/src/lzmadec/lzmadec.c
+@@ -16,6 +16,10 @@
+ #define CHUNKSIZE_IN 4096
+ #define CHUNKSIZE_OUT (1024*512)
+ 
++#if defined(__native_client__)
++# define main nacl_main
++#endif
++
+ int main(int argc, char **argv)
+ {
+ 	int ret;
+diff --git a/src/lzmainfo/Makefile.in b/src/lzmainfo/Makefile.in
+--- a/src/lzmainfo/Makefile.in
++++ b/src/lzmainfo/Makefile.in
+@@ -250,7 +250,7 @@ clean-binPROGRAMS:
+ 	done
+ lzmainfo$(EXEEXT): $(lzmainfo_OBJECTS) $(lzmainfo_DEPENDENCIES) 
+ 	@rm -f lzmainfo$(EXEEXT)
+-	$(LINK) $(lzmainfo_OBJECTS) $(lzmainfo_LDADD) $(LIBS)
++	$(LINK) $(lzmainfo_OBJECTS) $(lzmainfo_LDADD) $(LIBS) $(EXTRA_LIBS)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+diff --git a/src/lzmainfo/lzmainfo.c b/src/lzmainfo/lzmainfo.c
+--- a/src/lzmainfo/lzmainfo.c
++++ b/src/lzmainfo/lzmainfo.c
+@@ -89,6 +89,10 @@ lzmainfo (FILE *file, const char *name, const char *argv0)
+ 	return 0;
+ }
+ 
++#if defined(__native_client__)
++# define main nacl_main
++#endif
++
+ int
+ main (int argc, char **argv)
+ {
