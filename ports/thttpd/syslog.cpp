@@ -10,7 +10,7 @@
 
 #include "json/json.h"
 #include "my_syslog.h"
-#include "nacl_module.h"
+#include <ppapi_simple/ps_instance.h>
 
 #define MAX_FMT_SIZE 4096
 char formatted_string[MAX_FMT_SIZE];
@@ -40,23 +40,14 @@ void syslog(int level, const char* message, ...) {
   }
 }
 
-extern "C" void network_error() {
+extern "C" {
+
+void network_error() {
   Json::Value writerRoot;
   writerRoot["result"] = 1;
   writerRoot["type"] = "network error";
   Json::StyledWriter writer;
-  ThttpdInstance::getInstance()->PostMessage(writer.write(writerRoot));
+  PSInstance::GetInstance()->PostMessage(writer.write(writerRoot));
 }
 
-namespace pp {
-/// Factory function called by the browser when the module is first loaded.
-/// The browser keeps a singleton of this module.  It calls the
-/// CreateInstance() method on the object you return to make instances.  There
-/// is one instance per <embed> tag on the page.  This is the main binding
-/// point for your NaCl module with the browser.
-Module* CreateModule() {
-  return new ThttpdModule();
 }
-}  // namespace pp
-
-

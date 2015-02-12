@@ -5,7 +5,6 @@
 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script type="text/javascript" src="json2min.js"></script>
-  <script type="text/javascript" src="peppermount_helper.js"></script>
   <script type="text/javascript" src="nacl.js"></script>
 </head>
 <body>
@@ -16,7 +15,12 @@
        id="thttpd"
        width="1" height="1"
        src="thttpd.nmf"
-       type="application/x-nacl" />
+       type="application/x-nacl"
+       ARG1="-D"
+       ARG2="-p"
+       ARG3="8006"
+       PS_VERBOSITY="3"
+       />
   </div>
 </p>
 

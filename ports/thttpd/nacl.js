@@ -4,7 +4,7 @@
  * found in the LICENSE file.
  */
 
-var uploadURL = 'http://localhost:8006/upload/'
+var uploadURL = 'http://localhost:8006/tmp/'
 
 function moduleDidLoad() {
   $("#status_field").text("SUCCESS")
@@ -119,7 +119,7 @@ $(document).ready(function() {
     || window.webkitRequestFileSystem;
   navigator.webkitPersistentStorage.requestQuota(1024*1024,
   function(grantedBytes) {
-    window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
+    window.requestFileSystem(TEMPORARY, grantedBytes, onInitFs, errorHandler);
   }, function(e) {
       console.log('Error', e);
   });

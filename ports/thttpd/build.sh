@@ -8,8 +8,6 @@ ConfigureStep() {
   ChangeDir ${SRC_DIR}
   FILES="
 my_syslog.h
-nacl_module.cpp
-nacl_module.h
 syslog.cpp
 Makefile"
   for FILE in $FILES; do
@@ -33,7 +31,6 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
   install ${START_DIR}/thttpd.html ${PUBLISH_DIR}
   install ${START_DIR}/nacl.js ${PUBLISH_DIR}
-  install ${START_DIR}/peppermount_helper.js ${PUBLISH_DIR}
   install ${START_DIR}/json2min.js ${PUBLISH_DIR}
   cp ${BUILD_DIR}/thttpd ${BUILD_DIR}/thttpd_${NACL_ARCH}${NACL_EXEEXT}
   install ${BUILD_DIR}/thttpd_${NACL_ARCH}${NACL_EXEEXT} ${PUBLISH_DIR}/

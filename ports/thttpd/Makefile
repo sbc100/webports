@@ -48,12 +48,12 @@ CGIBINDIR =	$(WEBDIR)/cgi-bin
 # You shouldn't need to edit anything below here.
 
 CC =		$(NACLCC)
-CPP =		$(NACLCXX)
+CXX =		$(NACLCXX)
 CCOPT =		-O0
 DEFS =		-DHAVE_DAEMON=1 -DHAVE__PROGNAME=1 -DHAVE_GRP_H=1 -DHAVE_MEMORY_H=1 -DHAVE_PATHS_H=1 -DTIME_WITH_SYS_TIME=1 -DHAVE_DIRENT_H=1 -DHAVE_LIBCRYPT=1 -DHAVE_STRERROR=1 -DHAVE_VSNPRINTF=1  -DHAVE_SETSID=1 -DHAVE_GETADDRINFO=1 -DHAVE_GETNAMEINFO=1 -DHAVE_GAI_STRERROR=1 -DHAVE_SIGSET=1 -DHAVE_ATOLL=1 -DHAVE_UNISTD_H=1 -DHAVE_GETPAGESIZE=1 -DHAVE_SELECT=1 -DHAVE_TM_GMTOFF=1 -DHAVE_INT64T=1 -DHAVE_SOCKLENT=1 
 INCLS =		-I. $(NACLPORTS_CPPFLAGS)
 CFLAGS =	$(CCOPT) $(DEFS) $(NACLPORTS_CFLAGS) $(INCLS)
-LDFLAGS =	-Wl,--start-group  -lnacl_io -lppapi -l$(NACL_CPP_LIB) -lpthread -lppapi_cpp -lppapi_cpp_private -lcrypt -ljsoncpp -Wl,--end-group $(NACLPORTS_LDFLAGS)
+LDFLAGS =	-Wl,--start-group  -lnacl_io -lppapi_simple -lppapi ${NACL_CLI_MAIN_LIB} -lppapi_cpp -lppapi_cpp_private -lcrypt -ljsoncpp -Wl,--end-group $(NACLPORTS_LDFLAGS) -pthread
 LIBS =
 NETLIBS =	
 INSTALL =	/usr/bin/install -c
@@ -64,10 +64,10 @@ INSTALL =	/usr/bin/install -c
 
 .cpp.o:
 	@rm -f $@
-	$(CPP) $(CFLAGS) -c $*.cpp
+	$(CXX) $(CFLAGS) -c $*.cpp
 
 SRC =		thttpd.c libhttpd.c fdwatch.c mmc.c timers.c match.c tdate_parse.c
-SRCP =		nacl_module.cpp syslog.cpp
+SRCP =		syslog.cpp
 
 OBJ =		$(SRC:.c=.o) 
 OBJP =		$(SRCP:.cpp=.o) 
@@ -83,7 +83,7 @@ this:		$(ALL)
 
 thttpd: $(OBJ) $(OBJP)
 	@rm -f $@
-	$(CPP) $(CFLAGS) -o $@ $(OBJ) $(OBJP) $(LDFLAGS) $(LIBS) $(NETLIBS)
+	$(CXX) $(CFLAGS) -o $@ $(OBJ) $(OBJP) $(LDFLAGS) $(LIBS) $(NETLIBS)
 
 mime_encodings.h:	mime_encodings.txt
 	rm -f mime_encodings.h
@@ -130,10 +130,9 @@ tar:
 	  gzip $$name.tar
 
 thttpd.o:	config.h version.h libhttpd.h fdwatch.h mmc.h timers.h match.h \
-            nacl_module.h my_syslog.h
+            my_syslog.h
 libhttpd.o:	config.h version.h libhttpd.h mime_encodings.h mime_types.h \
 		mmc.h timers.h match.h tdate_parse.h my_syslog.h
-nacl_module.o: nacl_module.h
 syslog.o: my_syslog.h
 fdwatch.o:	fdwatch.h
 mmc.o:		mmc.h libhttpd.h my_syslog.h
