@@ -95,7 +95,7 @@ fi
 # libcli_main.a has a circular dependency which makes static link fail
 # (cli_main => nacl_io => ppapi_cpp => cli_main). To break this loop,
 # you should use this instead of -lcli_main.
-export NACL_CLI_MAIN_LIB="-Wl,-uPSUserCreateInstance -lcli_main"
+export NACL_CLI_MAIN_LIB="-Xlinker -uPSUserCreateInstance -lcli_main"
 
 # Python variables
 NACL_PYSETUP_ARGS=""
@@ -633,6 +633,8 @@ PublishByArchForDevEnv() {
     # TODO(bradnelson): Do something prettier.
     if [[ "$(head -c 2 ${nexe})" != "#!" && \
           "$(head -c 2 ${nexe})" != "# " && \
+          "${nexe}" != *.so && \
+          "${nexe}" != *.so.* && \
           "${nexe}" != *.txt && \
           "${nexe}" != config.status ]]; then
       # Strip non-scripts
@@ -646,7 +648,7 @@ PublishByArchForDevEnv() {
         # thing.
         LogExecute cp "${name}" tmp.nexe
         LogExecute python "${NACL_SDK_ROOT}/tools/create_nmf.py" \
-          tmp.nexe -s . -o tmp.nmf
+          tmp.nexe -s . -o tmp.nmf ${PUBLISH_CREATE_NMF_ARGS:-}
         LogExecute rm tmp.nexe
         LogExecute rm tmp.nmf
         popd

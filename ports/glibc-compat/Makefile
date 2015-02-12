@@ -12,6 +12,7 @@ CPPFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
 CPPFLAGS += -I$(NACL_SDK_ROOT)/include
 OUT := out
 SOURCES := \
+  src/alarm.c \
   src/getprotobyname_r.c \
   src/getservbyname_r.c \
   src/herrno.c \

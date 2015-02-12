@@ -1,7 +1,0 @@
-NAME=lzma
-VERSION=4.32.7
-URL=http://tukaani.org/lzma/lzma-4.32.7.tar.xz
-LICENSE=GPL
-SHA1=8f3ae9feed5edfd9a705f0e84958c551e49e8611
-DEPENDS=(glibc-compat nacl-spawn)
-DISABLED_LIBC=(bionic)
