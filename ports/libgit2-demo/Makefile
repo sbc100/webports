@@ -57,6 +57,7 @@ install:
 ifeq ($(TOOLCHAIN),glibc)
 	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
 endif
+	cp httpd.py $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
 	cp background.js $(INSTALL_DIR)
 	cp libgit2.js $(INSTALL_DIR)

@@ -10,5 +10,7 @@ void output(const char* message, ...);
 void do_git_status(const char* repo_dir);
 void do_git_clone(const char* repo_dir, const char* url);
 void do_git_init(const char* repo_dir);
+void do_git_push(const char* repo_dir, const char* refspec);
+void do_git_commit(const char* repo_dir, const char* filename);
 
 #endif

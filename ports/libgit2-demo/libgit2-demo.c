@@ -8,15 +8,18 @@
 #include <assert.h>
 #include <errno.h>
 #include <git2.h>
+#include <git2/transport.h>
 #include <nacl_main.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <ppapi/c/pp_errors.h>
 #include <ppapi/c/pp_var.h>
-#include <ppapi/c/ppb_var.h>
 #include <ppapi/c/ppb_messaging.h>
 #include <ppapi/c/ppb_var_array.h>
+#include <ppapi/c/ppb_var.h>
 #include <ppapi_simple/ps.h>
 #include <ppapi_simple/ps_event.h>
 
@@ -33,6 +36,10 @@ void post_message(const char* message) {
 void handle_cmd(const char* cmd, const char* repo_directory, const char* arg) {
   if (!strcmp(cmd, "clone")) {
     do_git_clone(repo_directory, arg);
+  } else if (!strcmp(cmd, "push")) {
+    do_git_push(repo_directory, arg);
+  } else if (!strcmp(cmd, "commit")) {
+    do_git_commit(repo_directory, arg);
   } else if (!strcmp(cmd, "init")) {
     do_git_init(repo_directory);
   } else if (!strcmp(cmd, "status")) {
@@ -119,12 +126,33 @@ void handle_message(struct PP_Var message) {
   handle_cmd(cmd, repo_directory, arg);
 }
 
+git_smart_subtransport_definition pepper_http_subtransport_definition = {
+  git_smart_subtransport_pepper_http,
+  1  /* use rpc */
+};
+
 int nacl_main(int argc, char** argv) {
+  srand(123);
   int rtn = git_threads_init();
   if (rtn) {
     output("git_threads_init failed: %d\n", rtn);
     return 1;
   }
+
+  rtn = git_smart_subtransport_pepper_http_init(PSGetInstanceId(),
+                                                PSGetInterface);
+  if (rtn) {
+    const git_error* err = giterr_last();
+    output("git_smart_subtransport_pepper_http_init failed %d [%d] %s\n", rtn,
+        err->klass, err->message);
+    return 1;
+  }
+
+  git_transport_register("pepper_http://", 2, git_transport_smart,
+                         &pepper_http_subtransport_definition);
+
+  git_transport_register("pepper_https://", 2, git_transport_smart,
+                         &pepper_http_subtransport_definition);
 
   var_iface = PSGetInterface(PPB_VAR_INTERFACE_1_2);
   array_iface = PSGetInterface(PPB_VAR_ARRAY_INTERFACE_1_0);

@@ -38,6 +38,16 @@ function mount() {
   });
 }
 
+function push() {
+  var refspec = document.getElementById('push_refspec').value;
+  runGitCmd('push', refspec);
+}
+
+function commit() {
+  var filename = document.getElementById('commit_filename').value;
+  runGitCmd('commit', filename);
+}
+
 function handleMessage(message) {
   var output = document.getElementById('output');
   output.value += message.data;
@@ -51,6 +61,8 @@ function onLoad() {
   document.getElementById('clone').addEventListener('click', clone);
   document.getElementById('status').addEventListener('click', status);
   document.getElementById('mount').addEventListener('click', mount);
+  document.getElementById('push').addEventListener('click', push);
+  document.getElementById('commit').addEventListener('click', commit);
 }
 
 window.onload = onLoad;

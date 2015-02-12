@@ -23,15 +23,33 @@
     library.
   </p>
   <p>
+    Clone and push normally will use the Pepper socket interface. These APIs
+    are only available when running as a Chrome App.
+  </p>
+  <p>
+    You can also use Pepper URL Loader as a transport for the
+    <code>http://</code> and <code>https://</code> schemes, by using
+    <code>pepper_http://</code> and <code>pepper_https://</code> instead.  These
+    will always work, but they require coordination with the server; if the git
+    server is on a different origin, they must respond with the correct CORS
+    headers. See httpd.py in this directory for an example.
+  </p>
+  <p>
     Working directory: <input type="text" id="directory" value="/tmp/test"></br>
     Clone URL: <input size="50" type="text" id="clone_url"
                       value="https://github.com/google/adb-sync.git"></br>
+    Commit filename: <input size="50" type="text" id="commit_filename"
+                            value="foobar"></br>
+    Push Refspec: <input size="50" type="text" id="push_refspec"
+                         value="refs/heads/master:refs/heads/master"></br>
   </p>
   <p>
     <button id="clone">clone</button>
     <button id="init">init</button>
     <button id="status">status</button>
     <button id="mount">mount filesystem</button>
+    <button id="commit">commit file</button>
+    <button id="push">push</button>
   </p>
   <p>
   Output:

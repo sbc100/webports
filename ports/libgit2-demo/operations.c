@@ -10,12 +10,16 @@
 
 #include "operations.h"
 
-#include <git2.h>
+#include <dirent.h>
 #include <stdarg.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
+
+#include <git2.h>
+
 
 static void voutput(const char* message, va_list args) {
   va_list args_copy;
@@ -80,6 +84,14 @@ void do_git_status(const char* repo_directory) {
   }
 
   git_repository_free(repo);
+
+  output("%s contents:\n", repo_directory);
+  DIR* dir = opendir(repo_directory);
+  struct dirent* ent;
+  while ((ent = readdir(dir)) != NULL) {
+    output("  %s\n", ent->d_name);
+  }
+  closedir(dir);
 }
 
 void do_git_init(const char* repo_directory) {
@@ -103,7 +115,7 @@ void do_git_clone(const char* repo_directory, const char* url) {
   git_remote_callbacks callbacks = GIT_REMOTE_CALLBACKS_INIT;
   callbacks.transfer_progress = &transfer_progress;
 
-  git_clone_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+  git_clone_options opts = GIT_CLONE_OPTIONS_INIT;
   opts.remote_callbacks = callbacks;
   opts.ignore_cert_errors = 1;
 
@@ -116,4 +128,217 @@ void do_git_clone(const char* repo_directory, const char* url) {
     const git_error* err = giterr_last();
     output("clone failed %d [%d] %s\n", rtn, err->klass, err->message);
   }
+}
+
+void do_git_push(const char* repo_directory, const char* refspec) {
+  git_repository* repo = init_repo(repo_directory);
+  if (!repo)
+    return;
+
+  git_push_options opts = GIT_PUSH_OPTIONS_INIT;
+  git_push* push = NULL;
+  git_remote* remote = NULL;
+  const git_error* err = NULL;
+  const char* failure = NULL;
+
+  int rtn;
+  rtn = git_remote_load(&remote, repo, "origin");
+  if (rtn != 0) {
+    failure = "git_remote_load";
+    goto error;
+  }
+
+  output("pushing %s [%s]\n", repo_directory, refspec);
+  rtn = git_push_new(&push, remote);
+  if (rtn != 0) {
+    failure = "git_push_new";
+    goto error;
+  }
+
+  rtn = git_push_set_options(push, &opts);
+  if (rtn != 0) {
+    failure = "git_push_set_options";
+    goto error;
+  }
+
+  rtn = git_push_add_refspec(push, refspec);
+  if (rtn != 0) {
+    failure = "git_push_add_refspec";
+    goto error;
+  }
+
+  rtn = git_push_finish(push);
+  if (rtn != 0) {
+    failure = "git_push_finish";
+    goto error;
+  }
+
+  rtn = git_push_unpack_ok(push);
+  if (rtn == 0) {
+    failure = "git_push_unpack_ok";
+    goto error;
+  }
+
+  goto cleanup;
+
+error:
+  err = giterr_last();
+  if (err) {
+    output("%s failed %d [%d] %s\n", failure, rtn, err->klass, err->message);
+  } else {
+    output("%s failed %d <unknown error>\n", failure, rtn);
+  }
+  return;
+
+cleanup:
+  git_push_free(push);
+  git_remote_free(remote);
+  git_repository_free(repo);
+
+  output("push success\n");
+}
+
+int index_matched_path_cb(const char* path, const char* matched_pathspec,
+                          void* payload) {
+  output("update_all matched: %s\n", path);
+  return 0;
+}
+
+void do_git_commit(const char* repo_directory, const char* filename) {
+  const char kUserName[] = "Foo Bar";
+  const char kUserEmail[] = "foobar@example.com";
+  const size_t kFileSize = 1024 * 50;
+
+  int rtn;
+  char buffer[1024];
+  git_signature* sig = NULL;
+  const char* failure = NULL;
+  git_repository* repo = init_repo(repo_directory);
+  git_index* index = NULL;
+  git_oid tree_id;
+  git_oid head_id;
+  git_commit* parent = NULL;
+  git_oid commit_id;
+  git_tree* tree = NULL;
+  FILE* f = NULL;
+  const git_error* err = NULL;
+
+  if (!repo)
+    return;
+
+  output("committing %s (%d random bytes) as \"%s <%s>\"\n", filename,
+         kFileSize, kUserName, kUserEmail);
+
+  rtn = git_signature_now(&sig, kUserName, kUserEmail);
+  if (rtn != 0) {
+    failure = "git_signature_now";
+    goto error;
+  }
+
+  rtn = git_repository_index(&index, repo);
+  if (rtn != 0) {
+    failure = "git_repository_index";
+    goto error;
+  }
+
+  rtn = git_index_read(index, 1);
+  if (rtn != 0) {
+    failure = "git_index_read";
+    goto error;
+  }
+
+  snprintf(buffer, 1024, "%s/%s", repo_directory, filename);
+
+  f = fopen(buffer, "wb");
+  if (!f) {
+    failure = "fopen";
+    goto error;
+  }
+
+  size_t size_left = kFileSize;
+  while (size_left > 0) {
+    int i;
+    size_t buffer_len = size_left;
+    if (buffer_len > 1024)
+      buffer_len = 1024;
+
+    for (i = 0; i < buffer_len; ++i) {
+      buffer[i] = rand() % 256;
+    }
+
+    if (fwrite(&buffer, 1, buffer_len, f) != buffer_len) {
+      failure = "fwrite";
+      goto error;
+    }
+    size_left -= buffer_len;
+  }
+
+  fclose(f);
+  f = NULL;
+
+  const char* paths[] = {"*"};
+  git_strarray arr = {(char**)paths, 1};
+  rtn = git_index_add_all(index, &arr, GIT_INDEX_ADD_DEFAULT,
+                          index_matched_path_cb, NULL);
+  if (rtn != 0) {
+    failure = "git_index_update_all";
+    goto error;
+  }
+
+  rtn = git_index_write_tree(&tree_id, index);
+  if (rtn != 0) {
+    failure = "git_index_write_tree";
+    goto error;
+  }
+
+  rtn = git_tree_lookup(&tree, repo, &tree_id);
+  if (rtn != 0) {
+    failure = "git_tree_lookup";
+    goto error;
+  }
+
+  rtn = git_reference_name_to_id(&head_id, repo, "HEAD");
+  if (rtn != 0) {
+    failure = "git_reference_name_to_id";
+    goto error;
+  }
+
+  rtn = git_commit_lookup(&parent, repo, &head_id);
+  if (rtn != 0) {
+    failure = "git_commit_lookup";
+    goto error;
+  }
+
+  snprintf(buffer, 1024, "Add file %s", filename);
+
+  rtn = git_commit_create_v(&commit_id, repo, "HEAD", sig, sig, NULL, buffer,
+                            tree, 1, parent);
+  if (rtn != 0) {
+    failure = "git_commit_create_v";
+    goto error;
+  }
+
+  goto cleanup;
+
+error:
+  err = giterr_last();
+  if (err) {
+    output("%s failed %d [%d] %s\n", failure, rtn, err->klass, err->message);
+  } else {
+    output("%s failed %d <unknown error>\n", failure, rtn);
+  }
+
+  return;
+
+cleanup:
+  if (f)
+    fclose(f);
+
+  git_commit_free(parent);
+  git_tree_free(tree);
+  git_index_free(index);
+  git_repository_free(repo);
+  git_signature_free(sig);
+
+  output("commit success\n");
 }
