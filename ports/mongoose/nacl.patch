@@ -10,16 +10,19 @@ diff --git a/Makefile b/Makefile
  
  # To build with Lua, download and unzip Lua 5.2.1 source code into the
  # mongoose directory, and then add $(LUA_SOURCES) to CFLAGS
-@@ -82,7 +82,7 @@ LINK = $(MSVC)/bin/link /incremental:no /libpath:$(MSVC)/lib /machine:IX86 \
+@@ -81,8 +81,10 @@ CL   = $(MSVC)/bin/cl /MD /TC /nologo $(DBG) /W3 /GA /I$(MSVC)/include
+ LINK = $(MSVC)/bin/link /incremental:no /libpath:$(MSVC)/lib /machine:IX86 \
         user32.lib shell32.lib comdlg32.lib ws2_32.lib advapi32.lib
  
++CCLD ?= $(CC)
++
  all:
 -	@echo "make (linux|bsd|solaris|mac|windows|mingw|cygwin)"
 +	@echo "make (linux|bsd|solaris|mac|windows|mingw|cygwin|nacl)"
  
  %.obj: %.c
  	$(CL) /c $(FLAGS) /Fo$@ $<
-@@ -105,6 +105,9 @@ linux_lua: $(ALL_OBJECTS)
+@@ -105,6 +107,9 @@ linux_lua: $(ALL_OBJECTS)
  linux:
  	$(CC) mongoose.c main.c -o $(PROG) -ldl $(CFLAGS)
  
@@ -32,30 +35,19 @@ diff --git a/Makefile b/Makefile
 diff --git a/main.c b/main.c
 --- a/main.c
 +++ b/main.c
-@@ -893,7 +893,36 @@ int main(int argc, char *argv[]) {
+@@ -893,7 +893,25 @@ int main(int argc, char *argv[]) {
    return EXIT_SUCCESS;
  }
  #else
 +
 +#ifdef __native_client__
 +#include <sys/mount.h>
-+#include "ppapi_simple/ps_main.h"
-+#define main mongoose_main
++#define main nacl_main
 +#endif
 +
  int main(int argc, char *argv[]) {
 +#ifdef __native_client__
-+  umount("/");
-+  mount("", "/", "memfs", 0, NULL);
-+  mkdir("/home", 0777);
-+  mkdir("/mnt", 0777);
-+  mkdir("/mnt/html5fs", 0777);
-+  setenv("HOME", "/home", 1);
-+  setenv("USER", "nacl", 1);
-+
-+  // Mount persistent filesystem
-+  int result = mount("", "/mnt/html5fs", "html5fs", 0, NULL);
-+  chdir("/mnt/html5fs");
++  chdir("/tmp");
 +
 +  struct stat buf;
 +  if (stat("index.html", &buf) != 0) {
@@ -69,14 +61,11 @@ diff --git a/main.c b/main.c
    init_server_name();
    start_mongoose(argc, argv);
    printf("%s started on port(s) %s with web root [%s]\n",
-@@ -910,4 +939,8 @@ int main(int argc, char *argv[]) {
+@@ -910,4 +928,5 @@ int main(int argc, char *argv[]) {
  
    return EXIT_SUCCESS;
  }
 +
-+#ifdef __native_client__
-+PPAPI_SIMPLE_REGISTER_MAIN(mongoose_main)
-+#endif
  #endif /* _WIN32 */
 diff --git a/mongoose.c b/mongoose.c
 --- a/mongoose.c

@@ -17,7 +17,7 @@ diff --git a/Makefile b/Makefile
  
 -ifeq ($(TARGET_OS),LINUX) 
 +ifeq ($(TARGET_OS),NACL)
-+	LIBS += -lppapi_simple -lnacl_io -lppapi_cpp -lppapi
++	LIBS += -Wl,-uPSUserCreateInstance  -lcli_main -lppapi_simple -lnacl_io -lppapi_cpp -lppapi
 +endif
 +
 +ifeq ($(TARGET_OS),LINUX)
@@ -71,7 +71,7 @@ diff --git a/src/main.c b/src/main.c
  #define MAX_OPTIONS 100
  #define MAX_CONF_FILE_LINE_SIZE (8 * 1024)
  
-@@ -1049,8 +1057,46 @@ int main(int argc, char *argv[])
+@@ -1049,8 +1057,28 @@ int main(int argc, char *argv[])
      return EXIT_SUCCESS;
  }
  #else
@@ -79,32 +79,14 @@ diff --git a/src/main.c b/src/main.c
 +#ifdef __native_client__
 +#include <assert.h>
 +#include <sys/mount.h>
-+#include "ppapi_simple/ps_main.h"
-+#define main civetweb_main
++#define main nacl_main
 +#endif
 +
  int main(int argc, char *argv[])
  {
 +#ifdef __native_client__
-+  int result = umount("/");
-+  assert(result == 0);
-+
-+  result = mount("", "/", "memfs", 0, NULL);
-+  assert(result == 0);
-+
-+  result = mkdir("/home", 0777);
-+  assert(result == 0);
-+  result = mkdir("/mnt", 0777);
-+  assert(result == 0);
-+  result = mkdir("/mnt/html5fs", 0777);
-+  assert(result == 0);
-+  setenv("HOME", "/home", 1);
-+  setenv("USER", "nacl", 1);
-+
-+  // Mount persistent filesystem
-+  result = mount("", "/mnt/html5fs", "html5fs", 0, NULL);
-+  assert(result == 0);
-+  result = chdir("/mnt/html5fs");
++  // Write index.html to HTML5 filesystem
++  int result = chdir("/tmp");
 +  assert(result == 0);
 +
 +  struct stat buf;
@@ -118,12 +100,9 @@ diff --git a/src/main.c b/src/main.c
      init_server_name();
      start_civetweb(argc, argv);
      printf("%s started on port(s) %s with web root [%s]\n",
-@@ -1067,4 +1113,8 @@ int main(int argc, char *argv[])
+@@ -1067,4 +1095,5 @@ int main(int argc, char *argv[])
  
      return EXIT_SUCCESS;
  }
 +
-+#ifdef __native_client__
-+PPAPI_SIMPLE_REGISTER_MAIN(civetweb_main)
-+#endif
  #endif /* _WIN32 */
