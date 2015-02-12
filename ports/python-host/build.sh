@@ -18,6 +18,15 @@ ConfigureStep() {
   LogExecute ${SRC_DIR}/configure --prefix=${NACL_HOST_PYROOT}
 }
 
+BuildStep() {
+  DefaultBuildStep
+  if ! find build -name "_ssl*" > /dev/null; then
+    echo "Failed to build _ssl python module."
+    echo "Check for 32-bit install of libssl and libcryto (see README.rst)"
+    exit 1
+  fi
+}
+
 InstallStep() {
   make install
 }
