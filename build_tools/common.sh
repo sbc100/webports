@@ -1214,7 +1214,7 @@ LIB_PATH_DEFAULT=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}
 LIB_PATH_DEFAULT=\${LIB_PATH_DEFAULT}:\${NACL_SDK_LIB}:\${SCRIPT_DIR}
 SEL_LDR_LIB_PATH=\${SEL_LDR_LIB_PATH}:\${LIB_PATH_DEFAULT}
 
-"\${SEL_LDR}" -a -B "\${IRT}" -- \\
+"\${SEL_LDR}" -E TERM=$TERM -a -B "\${IRT}" -- \\
     "\${NACL_SDK_LIB}/runnable-ld.so" --library-path "\${SEL_LDR_LIB_PATH}" \\
     "\${SCRIPT_DIR}/$2" "\$@"
 HERE
@@ -1230,7 +1230,7 @@ fi
 SEL_LDR=${NACL_SEL_LDR}
 IRT=${NACL_IRT_PATH}
 
-"\${SEL_LDR}" -a -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
+"\${SEL_LDR}" -E TERM=\${TERM} -a -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   fi
   chmod 750 "$1"
