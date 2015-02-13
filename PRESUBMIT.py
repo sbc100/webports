@@ -91,6 +91,7 @@ def CheckChangeOnCommit(input_api, output_api):
 
 
 TRYBOTS = [
+    'naclports-presubmit',
     'naclports-linux-glibc-0',
     'naclports-linux-glibc-1',
     'naclports-linux-glibc-2',
@@ -116,5 +117,5 @@ TRYBOTS = [
 
 def GetPreferredTryMasters(_, change):
   return {
-    'tryserver.chromium': { t: set(['defaulttests']) for t in TRYBOTS },
+    'tryserver.nacl': { t: set(['defaulttests']) for t in TRYBOTS },
   }
