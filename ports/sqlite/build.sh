@@ -41,9 +41,7 @@ BuildStep() {
   DefaultBuildStep
 }
 
-InstallStep() {
-  DefaultInstallStep
-
+PublishStep() {
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/sqlite"
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     PUBLISH_DIR+=/pnacl

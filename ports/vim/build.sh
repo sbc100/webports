@@ -36,9 +36,14 @@ ConfigureStep() {
 }
 
 InstallStep() {
+  return
+}
+
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/vim"
 
+  # TODO(sbc): avoid duplicating the install step here.
   DESTDIR=${ASSEMBLY_DIR}/vimtar
   DefaultInstallStep
 

@@ -13,6 +13,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   LIBS+=" -lglibc-compat"
 fi
 
-InstallStep() {
+PublishStep() {
   PublishByArchForDevEnv
 }

@@ -49,7 +49,7 @@ PatchStep() {
 # Today the install step copies emacs_x86_63.nexe to the publish dir, but we
 # need nacl_temacs.nexe instead.  Change to copy that here.
 
-InstallStep() {
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/emacs"
 

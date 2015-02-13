@@ -47,5 +47,4 @@ InstallStep() {
   MakeDir ${DESTDIR_INCLUDE}/civetweb
   LogExecute cp include/civetweb.h ${DESTDIR_INCLUDE}/civetweb
   LogExecute cp include/CivetServer.h ${DESTDIR_INCLUDE}/civetweb
-  PublishStep
 }

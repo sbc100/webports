@@ -37,8 +37,7 @@ BuildStep() {
   DefaultBuildStep
 }
 
-InstallStep() {
-  DefaultInstallStep
+PublishStep() {
   PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/curl"
 
   if [ "${NACL_SHARED}" = "1" ]; then

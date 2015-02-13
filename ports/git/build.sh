@@ -53,5 +53,9 @@ BuildStep() {
 }
 
 InstallStep() {
+  return
+}
+
+PublishStep() {
   PublishByArchForDevEnv
 }

@@ -17,6 +17,6 @@ PatchStep() {
   touch ${SRC_DIR}/doc/*
 }
 
-InstallStep() {
+PublishStep() {
   PublishByArchForDevEnv
 }

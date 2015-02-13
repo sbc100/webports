@@ -16,11 +16,10 @@ PatchStep() {
   cp ${START_DIR}/nano_pepper.c ${SRC_DIR}/src/
 }
 
-InstallStep() {
-  DefaultInstallStep
-
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
 
+  # TODO(sbc): avoid duplicating the install step here.
   DESTDIR=${PUBLISH_DIR}/nanotar
   MAKEFLAGS="prefix="
   DefaultInstallStep

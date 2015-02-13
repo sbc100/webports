@@ -1033,12 +1033,17 @@ DefaultPythonModuleBuildStep() {
 
 
 DefaultTestStep() {
-  echo "No tests defined for ${PACKAGE_NAME}"
+  echo "No TestStep defined for ${PACKAGE_NAME}"
+}
+
+
+DefaultPublishStep() {
+  echo "No PublishStep defined for ${PACKAGE_NAME}"
 }
 
 
 DefaultPostInstallTestStep() {
-  echo "No post-packaging tests defined for ${PACKAGE_NAME}"
+  echo "No PostInstallTestStep defined for ${PACKAGE_NAME}"
 }
 
 
@@ -1363,6 +1368,13 @@ PackageStep() {
   local basename=$(basename "${PACKAGE_FILE}")
   Banner "Packaging ${basename}"
   if [ -d "${INSTALL_DIR}${PREFIX}" ]; then
+    for item in "${INSTALL_DIR}"/*; do
+      if [ "$item" != "${INSTALL_DIR}${PREFIX}" ]; then
+        echo "INSTALL_DIR contains unexpected file or directory: $item"
+        echo "INSTALL_DIR should contain only '${PREFIX}'"
+        exit 1
+      fi
+    done
     mv "${INSTALL_DIR}${PREFIX}" "${INSTALL_DIR}/payload"
   fi
   local excludes="usr/doc share/man share/info info/
@@ -1429,6 +1441,7 @@ PackageInstall() {
   RunPostBuildStep
   RunTestStep
   RunInstallStep
+  RunPublishStep
   RunPostInstallTestStep
   ZipPublishDir
   PackageStep
@@ -1482,6 +1495,7 @@ BuildStep()           { DefaultBuildStep;           }
 PostBuildStep()       { DefaultPostBuildStep;       }
 TestStep()            { DefaultTestStep;            }
 InstallStep()         { DefaultInstallStep;         }
+PublishStep()         { DefaultPublishStep;         }
 PostInstallTestStep() { DefaultPostInstallTestStep; }
 
 RunDownloadStep()   { RunStep DownloadStep; }
@@ -1528,6 +1542,11 @@ RunInstallStep()    {
   Remove "${INSTALL_DIR}"
   MakeDir "${INSTALL_DIR}"
   RunStep InstallStep "Installing" "${BUILD_DIR}"
+}
+
+
+RunPublishStep()    {
+  RunStep PublishStep "Publishing" "${BUILD_DIR}"
 }
 
 

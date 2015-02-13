@@ -59,6 +59,6 @@ if [ "${TOOLCHAIN}" = "pnacl" ]; then
   NACLPORTS_CPPFLAGS+=" -Wno-return-type"
 fi
 
-InstallStep() {
+PublishStep() {
   PublishByArchForDevEnv
 }

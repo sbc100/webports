@@ -24,9 +24,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export LD="${NACLCXX}"
 fi
 
-InstallStep() {
-  DefaultInstallStep
-
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/openssh"
   MakeDir ${ASSEMBLY_DIR}

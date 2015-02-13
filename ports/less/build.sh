@@ -7,6 +7,6 @@ PatchStep() {
   DefaultPatchStep
 }
 
-InstallStep() {
+PublishStep() {
   PublishByArchForDevEnv
 }

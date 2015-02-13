@@ -23,7 +23,12 @@ BuildStep() {
 }
 
 InstallStep() {
-  export DESTDIR=${PUBLISH_DIR}/.data
+  return
+}
+
+PublishStep() {
+  # TODO(sbc): avoid duplicating the install step here.
+  DESTDIR=${PUBLISH_DIR}/.data
   DefaultInstallStep
 
   ChangeDir ${DESTDIR}

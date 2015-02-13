@@ -17,5 +17,9 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
 fi
 
 InstallStep() {
+  return
+}
+
+PublishStep() {
   PublishByArchForDevEnv
 }

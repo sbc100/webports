@@ -53,9 +53,7 @@ BuildStep() {
       -o ${BUILD_DIR}/test_module_${NACL_ARCH}.nexe -lppapi_cpp -lppapi
 }
 
-InstallStep() {
-  DefaultInstallStep
-
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
 
   # Tests

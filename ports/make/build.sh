@@ -13,6 +13,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -D_POSIX_VERSION"
 fi
 
-InstallStep() {
+PublishStep() {
   PublishByArchForDevEnv
 }

@@ -41,6 +41,10 @@ TestStep() {
 }
 
 InstallStep() {
+  return
+}
+
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   MakeDir ${PUBLISH_DIR}/${NACL_ARCH}
   LogExecute cp ninja ${PUBLISH_DIR}/${NACL_ARCH}/ninja
