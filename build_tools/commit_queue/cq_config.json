@@ -1,0 +1,31 @@
+{
+    "trybots": {
+        "launched": {
+            "tryserver.nacl": {
+                "naclports-presubmit": ["defaulttests"],
+                "naclports-linux-glibc-0": ["defaulttests"],
+                "naclports-linux-glibc-1": ["defaulttests"],
+                "naclports-linux-glibc-2": ["defaulttests"],
+                "naclports-linux-glibc-3": ["defaulttests"],
+                "naclports-linux-glibc-4": ["defaulttests"],
+                "naclports-linux-newlib-0": ["defaulttests"],
+                "naclports-linux-newlib-1": ["defaulttests"],
+                "naclports-linux-newlib-2": ["defaulttests"],
+                "naclports-linux-newlib-3": ["defaulttests"],
+                "naclports-linux-newlib-4": ["defaulttests"],
+                "naclports-linux-pnacl_newlib-0": ["defaulttests"],
+                "naclports-linux-pnacl_newlib-1": ["defaulttests"],
+                "naclports-linux-pnacl_newlib-2": ["defaulttests"],
+                "naclports-linux-pnacl_newlib-3": ["defaulttests"],
+                "naclports-linux-pnacl_newlib-4": ["defaulttests"],
+                "naclports-linux-bionic-0": ["defaulttests"],
+                "naclports-linux-bionic-1": ["defaulttests"],
+                "naclports-linux-bionic-2": ["defaulttests"],
+                "naclports-linux-bionic-3": ["defaulttests"],
+                "naclports-linux-bionic-4": ["defaulttests"]
+            }
+        },
+        "triggered": {
+        }
+    }
+}
