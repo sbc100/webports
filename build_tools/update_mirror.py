@@ -33,16 +33,16 @@ MIRROR_GS = 'gs://naclports/mirror'
 def GsUpload(options, filename, url):
   """Upload a file to Google cloud storage using gsutil"""
   naclports.Log("Uploading to mirror: %s" % url)
-  cmd = ['gsutil', 'cp', '-a', 'public-read', filename, url]
+  cmd = [options.gsutil, 'cp', '-a', 'public-read', filename, url]
   if options.dry_run:
     naclports.Log(cmd)
   else:
     subprocess.check_call(cmd)
 
 
-def GetMirrorListing(url):
+def GetMirrorListing(options, url):
   """Get filename listing for a Google cloud storage URL"""
-  listing = subprocess.check_output(['gsutil', 'ls', url])
+  listing = subprocess.check_output([options.gsutil, 'ls', url])
   listing = listing.splitlines()
   listing = [os.path.basename(l) for l in listing]
   return listing
@@ -94,9 +94,15 @@ def main(args):
   naclports.SetVerbose(options.verbose)
 
   # Ensure gsutil is in the PATH.
-  naclports.util.FindInPath('gsutil')
+  bot_gsutil = '/b/build/scripts/slave/gsutil'
+  if os.path.exists(bot_gsutil):
+    gsutil = bot_gsutil
+  else:
+    gsutil = 'gsutil'
+    naclports.util.FindInPath(gsutil)
+  options.gsutil = gsutil
 
-  listing = GetMirrorListing(MIRROR_GS)
+  listing = GetMirrorListing(options, MIRROR_GS)
   source_packages = naclports.source_package.SourcePackageIterator()
 
   return CheckPackages(options, source_packages, listing)

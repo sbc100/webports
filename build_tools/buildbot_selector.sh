@@ -43,13 +43,6 @@ if [ "${TEST_BUILDBOT:-}" = "1" -a -z "${BUILDBOT_BUILDERNAME:-}" ]; then
   export BUILDBOT_BUILDERNAME=linux-newlib-0
 fi
 
-# Handle presubmit trybot.
-if [ "${BUILDBOT_BUILDERNAME}" = "naclports-presubmit" ]; then
-  echo "@@@BUILD_STEP presubmit@@@"
-  git cl presubmit -f
-  exit 0
-fi
-
 BuildShard() {
   export TOOLCHAIN
   export SHARD
