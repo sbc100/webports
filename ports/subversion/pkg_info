@@ -1,8 +1,8 @@
 NAME=subversion
-VERSION=1.8.5
-URL=http://apache.mirrors.pair.com/subversion/subversion-1.8.5.tar.bz2
+VERSION=1.8.11
+URL=http://apache.mirrors.pair.com/subversion/subversion-1.8.11.tar.bz2
 LICENSE=APACHE
 # No APR on bionic at this point.
 DISABLED_LIBC=(bionic)
 DEPENDS=(apr apr-util sqlite zlib nacl-spawn)
-SHA1=d21de7daf37d9dd1cb0f777e999a529b96f83082
+SHA1=161edaee328f4fdcfd2a7c10ecd3fbcd51c61275
