@@ -18,11 +18,6 @@
                 "naclports-linux-pnacl_newlib-2": ["defaulttests"],
                 "naclports-linux-pnacl_newlib-3": ["defaulttests"],
                 "naclports-linux-pnacl_newlib-4": ["defaulttests"],
-                "naclports-linux-bionic-0": ["defaulttests"],
-                "naclports-linux-bionic-1": ["defaulttests"],
-                "naclports-linux-bionic-2": ["defaulttests"],
-                "naclports-linux-bionic-3": ["defaulttests"],
-                "naclports-linux-bionic-4": ["defaulttests"]
             }
         },
         "triggered": {

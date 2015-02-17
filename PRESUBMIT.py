@@ -107,11 +107,6 @@ TRYBOTS = [
     'naclports-linux-pnacl_newlib-2',
     'naclports-linux-pnacl_newlib-3',
     'naclports-linux-pnacl_newlib-4',
-    'naclports-linux-bionic-0',
-    'naclports-linux-bionic-1',
-    'naclports-linux-bionic-2',
-    'naclports-linux-bionic-3',
-    'naclports-linux-bionic-4',
 ]
 
 

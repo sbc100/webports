@@ -133,13 +133,13 @@ else
     SHARDS=2
   elif [ "${OS}" = "linux" ]; then
     if [ "${TOOLCHAIN}" = "glibc" ]; then
-      SHARDS=4
+      SHARDS=5
     elif [ "${TOOLCHAIN}" = "newlib" ]; then
-      SHARDS=3
+      SHARDS=5
     elif [ "${TOOLCHAIN}" = "bionic" ]; then
       SHARDS=1
     elif [ "${TOOLCHAIN}" = "pnacl" ]; then
-      SHARDS=4
+      SHARDS=5
     else
       echo "Unspecified sharding for TOOLCHAIN: ${TOOLCHAIN}" 1>&2
     fi
