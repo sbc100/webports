@@ -34,7 +34,6 @@ NACLPORTS_CFLAGS+=" -Dmain=SDL_main"
 export LIBS+="\
 -Wl,--undefined=nacl_main \
 -Wl,--undefined=SDL_main \
--lnacl_spawn \
 -lSDLmain -lSDL \
 ${NACL_CLI_MAIN_LIB} \
 -lppapi_simple -ltar -lnacl_io -lRegal -lglslopt \

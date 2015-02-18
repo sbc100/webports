@@ -122,7 +122,7 @@ toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/include
     # But also copy the debug ones.
     cp ${NACL_SDK_ROOT}/lib/glibc_${arch_alt}/Debug/* ${usr_lib_dir}/debug
 
-    local mingn_ldflags="-lcli_main -lppapi_simple -lnacl_spawn -lnacl_io"
+    local mingn_ldflags="${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io"
     mingn_ldflags+=" -lppapi -lppapi_cpp -lstdc++ -lm"
     # Create libmingn.so ldscripts.
     cat <<EOF > ${TOOLCHAIN_OUT_DIR}/${arch}-nacl/usr/lib/libmingn.so

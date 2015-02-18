@@ -26,8 +26,6 @@
 #endif
 
 /* TODO(bradnelson): Switch ipython to use cli_main and drop this. */
-int nacl_spawn_pid = -1;
-int nacl_spawn_ppid = -1;
 
 static int setup_unix_environment() {
     int ret = umount("/");

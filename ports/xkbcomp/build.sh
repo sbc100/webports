@@ -7,7 +7,6 @@ EXTRA_CONFIGURE_ARGS+=" --datarootdir=/share"
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 export LIBS+=" -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
   -lX11 -lxcb -lXau \
-  -lnacl_spawn \
   -lppapi_simple -ltar \
   -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 

@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
-  -lnacl_spawn -lppapi_simple \
+  -lppapi_simple \
   -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \

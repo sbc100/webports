@@ -1,7 +1,7 @@
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -33768,7 +33768,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+@@ -33696,7 +33696,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
      -Wattributes \
      -Wbad-function-cast \
      -Wbuiltin-macro-redefined \
@@ -9,7 +9,7 @@ diff --git a/configure b/configure
      -Wchar-subscripts \
      -Wclobbered \
      -Wcomment \
-@@ -33782,7 +33781,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+@@ -33711,7 +33710,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
      -Wdouble-promotion \
      -Wempty-body \
      -Wendif-labels \
@@ -17,7 +17,7 @@ diff --git a/configure b/configure
      -Wextra \
      -Wformat-contains-nul \
      -Wformat-extra-args \
-@@ -33805,14 +33803,11 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+@@ -33734,14 +33732,11 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
      -Wmain \
      -Wmaybe-uninitialized \
      -Wmissing-braces \
@@ -30,9 +30,9 @@ diff --git a/configure b/configure
      -Wnarrowing \
 -    -Wnested-externs \
      -Wnonnull \
-     -Wnormalized=nfc \
      -Wold-style-declaration \
-@@ -33838,8 +33833,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
+     -Wold-style-definition \
+@@ -33767,8 +33762,6 @@ printf "%s\n" "$gl_cv_cc_uninitialized_supported" >&6; }
      -Wstrict-prototypes \
      -Wsuggest-attribute=const \
      -Wsuggest-attribute=format \
@@ -44,7 +44,7 @@ diff --git a/configure b/configure
 diff --git a/lib/error.c b/lib/error.c
 --- a/lib/error.c
 +++ b/lib/error.c
-@@ -377,9 +377,14 @@ error_at_line (int status, int errnum, const char *file_name,
+@@ -382,9 +382,14 @@ error_at_line (int status, int errnum, const char *file_name,
    __fxprintf (NULL, file_name != NULL ? "%s:%d: " : " ",
                file_name, line_number);
  #else
@@ -62,7 +62,7 @@ diff --git a/lib/error.c b/lib/error.c
 diff --git a/lib/fcntl.c b/lib/fcntl.c
 --- a/lib/fcntl.c
 +++ b/lib/fcntl.c
-@@ -186,7 +186,12 @@ rpl_fcntl (int fd, int action, /* arg */...)
+@@ -202,7 +202,12 @@ rpl_fcntl (int fd, int action, /* arg */...)
        {
          int target = va_arg (arg, int);
          /* Detect invalid target; needed for cygwin 1.5.x.  */
@@ -146,19 +146,19 @@ diff --git a/lib/regex_internal.c b/lib/regex_internal.c
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
-@@ -1254,7 +1254,7 @@ clean-binPROGRAMS:
+@@ -1259,7 +1259,7 @@ clean-binPROGRAMS:
  
  grep$(EXEEXT): $(grep_OBJECTS) $(grep_DEPENDENCIES) $(EXTRA_grep_DEPENDENCIES) 
  	@rm -f grep$(EXEEXT)
 -	$(AM_V_CCLD)$(LINK) $(grep_OBJECTS) $(grep_LDADD) $(LIBS)
-+	$(AM_V_CCLD)$(LINK) $(grep_OBJECTS) $(grep_LDADD) -Wl,--undefined=PSUserCreateInstance -lcli_main -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -pthread $(LIBS)
++	$(AM_V_CCLD)$(LINK) $(grep_OBJECTS) $(grep_LDADD) -Wl,--undefined=PSUserCreateInstance -lcli_main -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -pthread $(LIBS)
  install-binSCRIPTS: $(bin_SCRIPTS)
  	@$(NORMAL_INSTALL)
  	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
 diff --git a/src/grep.c b/src/grep.c
 --- a/src/grep.c
 +++ b/src/grep.c
-@@ -1931,7 +1931,7 @@ fgrep_to_grep_pattern (size_t len, char const *keys,
+@@ -2107,7 +2107,7 @@ fgrep_to_grep_pattern (size_t len, char const *keys,
  }
  
  int

@@ -9,7 +9,7 @@ BUILD_DIR=${SRC_DIR}
 
 NACLPORTS_CPPFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB} -lnacl_spawn "
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 NACLPORTS_LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
 
 export HOSTCC=cc

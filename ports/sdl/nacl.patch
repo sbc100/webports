@@ -1,0 +1,12 @@
+diff --git a/configure.in b/configure.in
+--- a/configure.in
++++ b/configure.in
+@@ -921,7 +921,7 @@ AC_HELP_STRING([--enable-naclvideo], [enable the nacl video driver [[default=yes
+         AC_DEFINE(SDL_VIDEO_DRIVER_NACL)
+         SOURCES="$SOURCES $srcdir/src/video/nacl/*.c"
+         EXTRA_LDFLAGS="-lppapi_simple -l${NACL_CPP_LIB:-stdc++} $EXTRA_LDFLAGS"
+-        SDL_LIBS="-Wl,-unacl_main -Wl,-undefined=PSUserCreateInstance -lSDLmain $SDL_LIBS -lppapi_gles2 -lcli_main -ltar -lppapi_simple -lnacl_io -lppapi_cpp -lppapi -lm -l${NACL_CPP_LIB:-stdc++}"
++        SDL_LIBS="-Wl,-unacl_main -Wl,-undefined=PSUserCreateInstance -lSDLmain $SDL_LIBS -lppapi_gles2 -lcli_main -lnacl_spawn -ltar -lppapi_simple -lnacl_io -lppapi_cpp -lppapi -lm -l${NACL_CPP_LIB:-stdc++}"
+         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
+     fi
+ 

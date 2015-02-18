@@ -18,6 +18,7 @@ INSTALL_TARGETS="install-binaries"
 # The fallbacks seem to be non-general.
 export tcl_cv_strtod_buggy=ok
 export ac_cv_func_strtod=yes
+export ac_cv_func_memmove=yes
 export tcl_cv_strtod_unbroken=ok
 
 # Prevent non-cross compile clean parts of the build from assuming the host

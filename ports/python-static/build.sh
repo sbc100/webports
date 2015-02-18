@@ -37,7 +37,7 @@ ConfigureStep() {
   export MACHDEP=ppapi
   export LINKCC=${NACLCXX}
   if [ "${NACL_LIBC}" = "newlib" ]; then
-    LIBS+=" -lglibc-compat -lc"
+    LIBS+=" -lglibc-compat"
     NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi
   LogExecute cp ${START_DIR}/dynload_ppapi.c ${SRC_DIR}/Python/
@@ -57,9 +57,9 @@ ConfigureStep() {
   # Not sure why -uPSUserMainGet is needed here.  NACL_CLI_MAIN_LIB already
   # contains -uPSUserCreateInstance which should be enough to pull in both
   # symbols (they live int he same object file in libcli_main.a).
-  PY_LINK_LINE+=" ${PY_MOD_LIBS} -Wl,-uPSUserMainGet ${NACL_CLI_MAIN_LIB}"
+  PY_LINK_LINE+=" ${PY_MOD_LIBS} -Wl,-uPSUserMainGet -lcli_main -lnacl_spawn"
   PY_LINK_LINE+=" -lz -lppapi_simple -lppapi -lppapi_cpp -lnacl"
-  PY_LINK_LINE+=" -lnacl_io -lc -lbz2"
+  PY_LINK_LINE+=" -lnacl_io -lbz2"
   if [ "${NACL_LIBC}" = "newlib" ]; then
     PY_LINK_LINE+=" -lglibc-compat"
   fi

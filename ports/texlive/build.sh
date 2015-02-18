@@ -24,7 +24,7 @@ EXTRA_CONFIGURE_ARGS="--disable-native-texlive-build \
                       --with-banner-add=/NaCl \
                       --without-x"
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple -lnacl_spawn \
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple \
   -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then

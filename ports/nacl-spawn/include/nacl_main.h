@@ -22,7 +22,8 @@ __BEGIN_DECLS
 /*
  * Entry point expected by libcli_main.a
  */
-extern int nacl_main(int argc, char* argv[]);
+extern int nacl_main(int argc, char* argv[])
+    __attribute__ ((visibility ("default")));
 
 /*
  * Untar a startup bundle to a particular root.
@@ -35,6 +36,12 @@ extern int nacl_main(int argc, char* argv[]);
  */
 extern int nacl_startup_untar(
     const char* argv0, const char* tarfile, const char* root);
+
+/*
+ * Setup common environment variables and mounts.
+ */
+
+extern void nacl_setup_env();
 
 __END_DECLS
 

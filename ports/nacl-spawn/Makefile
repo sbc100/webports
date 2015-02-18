@@ -21,7 +21,7 @@ libcli_main.a: cli_main.o nacl_startup_untar.o
 	rm -f $@
 	$(NACLAR) rcs $@ $^
 
-nacl_startup_untar.o: nacl_startup_untar.c
+%.o: %.c
 	$(NACLCC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # Targets for libnacl_spawn

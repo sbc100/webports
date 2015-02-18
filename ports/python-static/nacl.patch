@@ -423,7 +423,7 @@ diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 diff --git a/Modules/python.c b/Modules/python.c
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -6,6 +6,36 @@
+@@ -6,6 +6,12 @@
  #include <floatingpoint.h>
  #endif
  
@@ -431,36 +431,12 @@ diff --git a/Modules/python.c b/Modules/python.c
 +#define main nacl_main
 +#include <stdio.h>
 +#include <sys/utsname.h>
-+
-+// Stubs for functions implemented through PPAPI.
-+int spawnv(int mode, const char* path, char *const argv[]) {
-+  return 0;
-+}
-+
-+int spawnve(int mode, const char* path,
-+            char *const argv[], char *const envp[]) {
-+  return 0;
-+}
-+
-+// Dummy implementation of uname.  This is only needed for the sel_ldr
-+// version of python.  Otherwise it gets provided by nacl_io.
-+int uname(struct utsname *buf)
-+{
-+	sprintf(buf->sysname, "NaCl");
-+	return 0;
-+}
 +#endif
-+
-+// Dummy implementation of nacl_spawn_vfork_exit, otherwise provided
-+// by nacl_spawn.
-+void nacl_spawn_vfork_exit(int status) {
-+  _exit(status);
-+}
 +
  int
  main(int argc, char **argv)
  {
-@@ -20,5 +44,9 @@ main(int argc, char **argv)
+@@ -20,5 +26,9 @@ main(int argc, char **argv)
  	m = fpgetmask();
  	fpsetmask(m & ~FP_X_OFL);
  #endif

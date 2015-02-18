@@ -4,7 +4,7 @@
 
 EXECUTABLES="ninja"
 
-LIBS+="${NACL_CLI_MAIN_LIB} -lnacl_spawn -lppapi_simple -lnacl_io \
+LIBS+="${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io \
     -lppapi -lppapi_cpp"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
