@@ -73,6 +73,10 @@ InstallPackageMultiArch() {
     if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
       continue
     fi
+    # nacl-clang doesn't work on arm for now (SDK libs not yet built)
+    if [ "${TOOLCHAIN}" = "clang-newlib" -a "${NACL_ARCH}" = "arm" ]; then
+      continue
+    fi
     # bionic only works on arm for now.
     if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
       continue
