@@ -4,11 +4,13 @@
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS+=" -lglibc-compat"
+  LIBS+=" -lglibc-compat"
 fi
 
 # The transtive dependencies of libxpm include nacl_io which is
 # written in C++. Without this sxpm binary fails to link.
 if [ "${NACL_SHARED}" != "1" ]; then
-  export LIBS="-l${NACL_CPP_LIB} -pthread"
+  LIBS+=" -l${NACL_CPP_LIB} -pthread"
 fi
+
+export LIBS
