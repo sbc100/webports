@@ -97,7 +97,7 @@ else
       readonly NIGHTLY=0
     fi
     readonly OS=${BASH_REMATCH[2]}
-    readonly LIBC=${BASH_REMATCH[3]}
+    readonly BOT_TYPE=${BASH_REMATCH[3]}
     readonly SHARD=${BASH_REMATCH[4]}
   else
     echo "Bad BUILDBOT_BUILDERNAME: ${BUILDBOT_BUILDERNAME}" 1>&2
@@ -114,34 +114,26 @@ else
     PYTHON=python.bat
   fi
 
-  # Select libc
-  if [ "${LIBC}" = "glibc" ]; then
-    TOOLCHAIN=glibc
-  elif [ "${LIBC}" = "newlib" ]; then
-    TOOLCHAIN=newlib
-  elif [ "${LIBC}" = "pnacl_newlib" ]; then
+  # Convert toolchain contains in the bot name to valid TOOLCHAIN value
+  # as expected by the SDK tools.
+  # TODO(sbc): remove this first case once that bot names contain 'pnacl'
+  # rather than 'pancl_newlib'.
+  if [ "${BOT_TYPE}" = "pnacl_newlib" ]; then
     TOOLCHAIN=pnacl
-  elif [ "${LIBC}" = "bionic" ]; then
-    TOOLCHAIN=bionic
+  elif [ "${BOT_TYPE}" = "clang" ]; then
+    TOOLCHAIN=clang-newlib
   else
-    echo "Bad LIBC: ${LIBC}" 1>&2
-    exit 1
+    TOOLCHAIN=${BOT_TYPE}
   fi
 
   # Select shard count
   if [ "${OS}" = "mac" ]; then
     SHARDS=2
   elif [ "${OS}" = "linux" ]; then
-    if [ "${TOOLCHAIN}" = "glibc" ]; then
-      SHARDS=5
-    elif [ "${TOOLCHAIN}" = "newlib" ]; then
-      SHARDS=5
-    elif [ "${TOOLCHAIN}" = "bionic" ]; then
+    if [ "${TOOLCHAIN}" = "bionic" ]; then
       SHARDS=1
-    elif [ "${TOOLCHAIN}" = "pnacl" ]; then
-      SHARDS=5
     else
-      echo "Unspecified sharding for TOOLCHAIN: ${TOOLCHAIN}" 1>&2
+      SHARDS=5
     fi
   else
     echo "Unspecified sharding for OS: ${OS}" 1>&2
