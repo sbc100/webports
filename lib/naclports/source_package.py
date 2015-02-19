@@ -480,6 +480,11 @@ class SourcePackage(package.Package):
         raise DisabledError('%s: cannot be built with %s'
                             % (self.NAME, self.config.libc))
 
+    if self.DISABLED_TOOLCHAIN is not None:
+      if self.config.toolchain in self.DISABLED_TOOLCHAIN:
+        raise DisabledError('%s: cannot be built with %s'
+                            % (self.NAME, self.config.toolchain))
+
     if self.MIN_SDK_VERSION is not None:
       if not util.CheckSDKVersion(self.MIN_SDK_VERSION):
         raise DisabledError('%s: requires SDK version %s or above'

@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Build OpenAL/ogg demo with Pepper in C
-VALID_TOOLCHAINS := glibc newlib pnacl
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = openal-ogg-demo

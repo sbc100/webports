@@ -148,7 +148,31 @@ diff --git a/modules/legacy/src/calibfilter.cpp b/modules/legacy/src/calibfilter
  
  CvCalibFilter::CvCalibFilter()
  {
-@@ -686,8 +689,8 @@ bool CvCalibFilter::SaveCameraParams( const char* filename )
+@@ -95,10 +98,11 @@ bool CvCalibFilter::SetEtalon( CvCalibEtalonType type, double* params,
+ 
+     Stop();
+ 
+-    if (latestPoints != NULL)
++    for( i = 0; i < MAX_CAMERAS; i++ )
+     {
+-        for( i = 0; i < MAX_CAMERAS; i++ )
++        if( latestPoints[i] != NULL ) {
+             cvFree( latestPoints + i );
++        }
+     }
+ 
+     if( type == CV_CALIB_ETALON_USER || type != etalonType )
+@@ -529,7 +533,8 @@ void CvCalibFilter::DrawPoints( CvMat** dstarr )
+         return;
+     }
+ 
+-    if( latestCounts )
++
++    if( 1 ) //latestCounts
+     {
+         for( i = 0; i < cameraCount; i++ )
+         {
+@@ -686,8 +691,8 @@ bool CvCalibFilter::SaveCameraParams( const char* filename )
          {
              for( j = 0; j < 4; j++ )
              {
@@ -159,7 +183,7 @@ diff --git a/modules/legacy/src/calibfilter.cpp b/modules/legacy/src/calibfilter
              }
              fprintf(f, "\n");
          }
-@@ -743,9 +746,9 @@ bool CvCalibFilter::LoadCameraParams( const char* filename )
+@@ -743,9 +748,9 @@ bool CvCalibFilter::LoadCameraParams( const char* filename )
      {
          for( j = 0; j < 4; j++ )
          {

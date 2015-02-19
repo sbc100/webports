@@ -5,6 +5,9 @@
 BUILD_DIR=${SRC_DIR}
 
 MAKE_ARGS="SYSTEM=nacl-${NACL_ARCH} NACL_LIBC=${NACL_LIBC} -j${OS_JOBS}"
+if [ "$TOOLCHAIN" = "clang-newlib" ]; then
+  MAKE_ARGS+=" NACL_CLANG=1"
+fi
 
 BuildStep() {
   LogExecute make ${MAKE_ARGS} clobber

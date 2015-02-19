@@ -1,3 +1,45 @@
+diff --git a/c++/cursesf.h b/c++/cursesf.h
+--- a/c++/cursesf.h
++++ b/c++/cursesf.h
+@@ -681,7 +681,7 @@ public:
+ 		   const T* p_UserData = STATIC_CAST(T*)(0),
+ 		   bool with_frame=FALSE,
+ 		   bool autoDelete_Fields=FALSE)
+-    : NCursesForm (Fields, with_frame, autoDelete_Fields) {
++    : NCursesForm (&Fields, with_frame, autoDelete_Fields) {
+       if (form)
+ 	set_user (const_cast<void *>(p_UserData));
+   };
+@@ -694,7 +694,7 @@ public:
+ 		   const T* p_UserData = STATIC_CAST(T*)(0),
+ 		   bool with_frame=FALSE,
+ 		   bool autoDelete_Fields=FALSE)
+-    : NCursesForm (Fields, nlines, ncols, begin_y, begin_x,
++    : NCursesForm (&Fields, nlines, ncols, begin_y, begin_x,
+ 		   with_frame, autoDelete_Fields) {
+       if (form)
+ 	set_user (const_cast<void *>(p_UserData));
+diff --git a/c++/cursesm.h b/c++/cursesm.h
+--- a/c++/cursesm.h
++++ b/c++/cursesm.h
+@@ -639,7 +639,7 @@ public:
+ 		   const T* p_UserData = STATIC_CAST(T*)(0),
+ 		   bool with_frame=FALSE,
+ 		   bool autoDelete_Items=FALSE)
+-    : NCursesMenu (Items, with_frame, autoDelete_Items) {
++    : NCursesMenu (&Items, with_frame, autoDelete_Items) {
+       if (menu)
+ 	set_user (const_cast<void *>(p_UserData));
+   };
+@@ -651,7 +651,7 @@ public:
+ 		   int begin_x = 0,
+ 		   const T* p_UserData = STATIC_CAST(T*)(0),
+ 		   bool with_frame=FALSE)
+-    : NCursesMenu (Items, nlines, ncols, begin_y, begin_x, with_frame) {
++    : NCursesMenu (&Items, nlines, ncols, begin_y, begin_x, with_frame) {
+       if (menu)
+ 	set_user (const_cast<void *>(p_UserData));
+   };
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
@@ -19,6 +61,26 @@ diff --git a/configure b/configure
  		if test "$DFT_LWR_MODEL" = "shared" ; then
  			LOCAL_LDFLAGS="${LD_RPATH_OPT}\$(LOCAL_LIBDIR)"
  			LOCAL_LDFLAGS2="$LOCAL_LDFLAGS"
+@@ -18894,8 +18894,8 @@ if test "$GCC" = yes ; then
+ 		LDFLAGS_SHARED=
+ 		;;
+     *) 	#( normally, except when broken
+-        LDFLAGS_STATIC=-static
+-        LDFLAGS_SHARED=-dynamic
++        LDFLAGS_STATIC=-Bstatic
++        LDFLAGS_SHARED=-Bdynamic
+         ;;
+     esac
+ else
+@@ -18948,7 +18948,7 @@ EOF
+ 
+ 	cf_save_LIBS="$LIBS"
+ 
+-	LIBS="$LDFLAGS_STATIC -L`pwd` -lconftest $LDFLAGS_DYNAMIC $LIBS"
++	LIBS="$LDFLAGS_STATIC -L`pwd` -lconftest $LDFLAGS_SHARED $LIBS"
+ 	cat >conftest.$ac_ext <<_ACEOF
+ #line 18953 "configure"
+ #include "confdefs.h"
 diff --git a/form/fty_num.c b/form/fty_num.c
 --- a/form/fty_num.c
 +++ b/form/fty_num.c

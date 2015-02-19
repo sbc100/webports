@@ -9,7 +9,7 @@
 # environment variables:
 #
 # $NACL_ARCH - i386, x86_64, arm or pnacl.  Default: x86_64
-# $TOOLAHIN - bionic, newlib, glibc or pnacl.  Default: newlib
+# $TOOLCHAIN - bionic, newlib, glibc or pnacl.  Default: newlib
 #
 # To import these variables into your environment do:
 # $ . nacl-env.sh
@@ -93,7 +93,8 @@ fi
 
 # Check TOOLCHAIN
 if [ ${TOOLCHAIN} != "newlib" -a ${TOOLCHAIN} != "pnacl" -a \
-     ${TOOLCHAIN} != "glibc" -a ${TOOLCHAIN} != "bionic" ]; then
+     ${TOOLCHAIN} != "glibc" -a ${TOOLCHAIN} != "bionic" -a \
+     ${TOOLCHAIN} != "clang-newlib" ]; then
   echo "Unknown value for TOOLCHAIN: '${TOOLCHAIN}'" 1>&2
   exit -1
 fi
@@ -220,11 +221,7 @@ InitializeNaClGccToolchain() {
     done
   fi
 
-  if [ "${NACL_DEBUG:-}" = "1" ]; then
-    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Debug"
-  else
-    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}/Release"
-  fi
+  NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_LIBC}_${NACL_ARCH_ALT}"
 }
 
 InitializeEmscriptenToolchain() {
@@ -257,11 +254,7 @@ InitializeEmscriptenToolchain() {
 
   LLVM=${TC_ROOT}/bin
 
-  if [ "${NACL_DEBUG:-}" = "1" ]; then
-    NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/emscripten/Debug"
-  else
-    NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/emscripten/Release"
-  fi
+  NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/${TOOLCHAIN}"
 }
 
 InitializePNaClToolchain() {
@@ -286,24 +279,28 @@ InitializePNaClToolchain() {
   NACLRANLIB=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ranlib
   NACLREADELF=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-readelf
   NACLLD=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-ld
-  # TODO(robertm): figure our why we do not have a pnacl-string
-  #NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
-  # until then use the host's strings tool
-  # (used only by the cairo package)
-  NACLSTRINGS="$(which strings)"
-  NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
-  NACL_EXEEXT=".pexe"
 
-  # pnacl's translator
-  TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
-  PNACLFINALIZE=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-finalize
-  # pnacl's pexe optimizer
-  PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
-
-  if [ "${NACL_DEBUG:-}" = "1" ]; then
-    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Debug"
+  if [ "$TOOLCHAIN" = "clang-newlib" ]; then
+    NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
+    NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+    NACL_EXEEXT=".nexe"
+    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${TOOLCHAIN}_${NACL_ARCH_ALT}"
   else
-    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${NACL_ARCH_ALT}/Release"
+    # TODO(sbc): figure our why we do not have a pnacl-string
+    #NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
+    # until then use the host's strings tool
+    # (used only by the cairo package)
+    NACLSTRINGS="$(which strings)"
+    NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
+    NACL_EXEEXT=".pexe"
+
+    # pnacl's translator
+    TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
+    PNACLFINALIZE=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-finalize
+    # pnacl's pexe optimizer
+    PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
+
+    NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${TOOLCHAIN}"
   fi
 }
 
@@ -322,21 +319,28 @@ NaClEnvExport() {
   export LDFLAGS=${NACL_LDFLAGS}
 }
 
-if [ "${NACL_ARCH}" = "pnacl" ]; then
+if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
   InitializePNaClToolchain
-elif [ "${NACL_ARCH}" = "emscripten" ]; then
+elif [ "${TOOLCHAIN}" = "emscripten" ]; then
   InitializeEmscriptenToolchain
 else
   InitializeNaClGccToolchain
 fi
 
+NACL_SDK_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
+
 # As of version 33 the PNaCl C++ standard library is LLVM's libc++,
 # others use GCC's libstdc++.
-NACL_SDK_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
-if [ "${NACL_ARCH}" = "pnacl" -a ${NACL_SDK_VERSION} -gt 32 ]; then
+if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
   export NACL_CPP_LIB="c++"
 else
   export NACL_CPP_LIB="stdc++"
+fi
+
+if [ "${NACL_DEBUG:-}" = "1" ]; then
+  NACL_SDK_LIBDIR+="/Debug"
+else
+  NACL_SDK_LIBDIR+="/Release"
 fi
 
 NACL_ARFLAGS="cr"

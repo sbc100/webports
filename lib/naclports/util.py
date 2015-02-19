@@ -236,7 +236,10 @@ def GetToolchainRoot(config):
       'i686': 'x86',
       'x86_64': 'x86'
     }[config.arch]
-    tc_dir = '%s_%s_%s' % (platform, tc_arch, config.toolchain)
+    if config.toolchain == 'clang-newlib':
+      tc_dir = '%s_pnacl' % platform
+    else:
+      tc_dir = '%s_%s_%s' % (platform, tc_arch, config.toolchain)
     tc_dir = os.path.join(tc_dir, '%s-nacl' % config.arch)
 
   rtn = os.path.join(GetSDKRoot(), 'toolchain', tc_dir)

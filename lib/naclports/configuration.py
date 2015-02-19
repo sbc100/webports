@@ -20,6 +20,7 @@ class Configuration(object):
   environment variables (TOOLCHAIN, NACL_ARCH, NACL_DEBUG).
   """
   default_toolchain = 'newlib'
+  valid_toolchains = ['newlib', 'glibc', 'bionic', 'pnacl', 'clang-newlib']
 
   def __init__(self, arch=None, toolchain=None, debug=None):
     self.debug = None
@@ -40,6 +41,9 @@ class Configuration(object):
       else:
         toolchain = self.default_toolchain
     self.toolchain = toolchain
+
+    if self.toolchain not in Configuration.valid_toolchains:
+      raise error.Error("Invalid toolchain: %s" % self.toolchain)
 
     if not arch:
       if self.toolchain == 'pnacl':

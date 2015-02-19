@@ -4,4 +4,6 @@ URL=ftp://ftp.fvwm.org/pub/fvwm/version-2/fvwm-2.6.5.tar.bz2
 LICENSE=GPL
 DEPENDS=(glibc-compat libpng fontconfig xbitmaps libx11 libxcb libxmu libxext libxau libxt libice libsm nacl-spawn)
 DISABLED_LIBC=(bionic)
+# configure fails (nacl_main must return a value)
+DISABLED_TOOLCHAIN=(clang-newlib)
 SHA1=c4cf96df65817d501b41c6fd79cf22658dd516a8

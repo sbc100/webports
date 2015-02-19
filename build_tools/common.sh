@@ -125,7 +125,7 @@ else
 fi
 
 if [ "${NACL_ARCH}" != "pnacl" ]; then
-  PACKAGE_SUFFIX+=_${NACL_LIBC}
+  PACKAGE_SUFFIX+=_${TOOLCHAIN}
 fi
 
 if [ "${NACL_DEBUG}" = "1" ]; then
@@ -211,12 +211,7 @@ fi
 DESTDIR_LIB=${DESTDIR}/${PREFIX}/lib
 DESTDIR_INCLUDE=${DESTDIR}/${PREFIX}/include
 
-PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}"
-if [ "${NACL_ARCH}" = "pnacl" ]; then
-  PUBLISH_DIR+=/pnacl
-else
-  PUBLISH_DIR+=/${NACL_LIBC}
-fi
+PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}/${TOOLCHAIN}"
 
 SKIP_SEL_LDR_TESTS=0
 
@@ -282,7 +277,13 @@ InstallConfigSite() {
 # into the toolchain itself from ${NACL_SDK_ROOT}/include/<toolchain>.
 #
 InjectSystemHeaders() {
-  local TC_INCLUDES=${NACL_SDK_ROOT}/include/${TOOLCHAIN}
+  if [ ${TOOLCHAIN} = "clang-newlib" ]; then
+    local TC_DIR=pnacl
+  else
+    local TC_DIR=${TOOLCHAIN}
+  fi
+
+  local TC_INCLUDES=${NACL_SDK_ROOT}/include/${TC_DIR}
   if [ ! -d "${TC_INCLUDES}" ]; then
     return
   fi
@@ -304,8 +305,9 @@ InjectSystemHeaders() {
 
 
 PatchSpecsFile() {
-  if [ "${NACL_ARCH}" = "pnacl" -o \
-       "${NACL_ARCH}" = "emscripten" ]; then
+  if [ "${TOOLCHAIN}" = "pnacl" -o \
+       "${TOOLCHAIN}" = "clang-newlib" -o \
+       "${TOOLCHAIN}" = "emscripten" ]; then
     # The emscripten and PNaCl toolchains already include the required
     # include and library paths by default. No need to patch them.
     return

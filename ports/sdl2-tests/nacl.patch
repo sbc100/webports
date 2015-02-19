@@ -1,0 +1,12 @@
+diff --git a/test/configure.in b/test/configure.in
+--- a/test/configure.in
++++ b/test/configure.in
+@@ -67,7 +67,7 @@ case "$host" in
+         ;;
+     *-*-nacl*)
+         case "$CC" in
+-            *pnacl*)
++            */pnacl-*)
+                 EXE=".pexe"
+                 ;;
+             *)

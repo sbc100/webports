@@ -6,7 +6,6 @@
 
 NACLPORTS_ROOT ?= ../..
 
-VALID_TOOLCHAINS := glibc newlib pnacl
 DEFINES = -Wall -Wno-long-long -pthread -DXP_UNIX -Werror -DGL_GLEXT_PROTOTYPES
 # Note that the OpenGL libraries are NOT included.  We use Mesa for rendering.
 LIBS = nacl_io ppapi_cpp ppapi OSMesa

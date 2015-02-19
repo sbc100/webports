@@ -606,7 +606,7 @@ diff --git a/include/atomic.h b/include/atomic.h
  
  /* Atomics using C11 */
 -#ifdef HAVE_C11_ATOMIC
-+#if defined(HAVE_C11_ATOMIC) && !defined(__pnacl__)
++#if defined(HAVE_C11_ATOMIC) && !defined(__native_client__)
  
  #include <stdatomic.h>
  
