@@ -91,7 +91,6 @@ def CheckChangeOnCommit(input_api, output_api):
 
 
 TRYBOTS = [
-    'naclports-presubmit',
     'naclports-linux-glibc-0',
     'naclports-linux-glibc-1',
     'naclports-linux-glibc-2',
