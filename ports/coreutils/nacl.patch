@@ -48,7 +48,7 @@ diff --git a/lib/__fpending.c b/lib/__fpending.c
  
  #include "__fpending.h"
  
-+#if !defined(__pnacl__)
++#if !(defined(__native_client__) && defined(__clang__))
  size_t
  __fpending (FILE *fp)
  {

@@ -5,4 +5,5 @@ ARCHIVE_ROOT=boost_1_55_0
 LICENSE=CUSTOM:LICENSE_1_0.txt
 DEPENDS=(glibc-compat zlib bzip2)
 BUILD_OS=linux
+DISABLED_TOOLCHAIN=(clang-newlib)
 SHA1=cef9a0cc7084b1d639e06cd3bc34e4251524c840
