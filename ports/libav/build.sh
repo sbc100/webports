@@ -5,12 +5,15 @@
 ConfigureStep() {
   SetupCrossEnvironment
   local extra_args=""
-  if [ "${NACL_ARCH}" = pnacl ]; then
-    extra_args="--cc=pnacl-clang --arch=pnacl"
+  if [ "${TOOLCHAIN}" = pnacl ]; then
+    extra_args="--cc=pnacl-clang"
+  elif [ "${TOOLCHAIN}" = "clang-newlib" ]; then
+    extra_args="--cc=${CC}"
   fi
+
   LogExecute ${SRC_DIR}/configure \
     --cross-prefix=${NACL_CROSS_PREFIX}- \
-    --arch="${NACL_ARCH}" \
+    --arch=${NACL_ARCH} \
     --target-os=linux \
     --enable-gpl \
     --enable-static \

@@ -13,12 +13,18 @@ ConfigureStep() {
   SetupCrossEnvironment
 
   local extra_args=""
-  if [ "${NACL_ARCH}" = pnacl ]; then
-    extra_args="--cc=pnacl-clang --arch=pnacl"
-  elif [ "${NACL_ARCH}" = arm ]; then
-    extra_args="--arch=arm"
+  if [ "${TOOLCHAIN}" = "pnacl" ]; then
+    extra_args="--cc=pnacl-clang"
+  elif [ "${TOOLCHAIN}" = "clang-newlib" ]; then
+    extra_args="--cc=${CC}"
+  fi
+
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    extra_args+=" --arch=pnacl"
+  elif [ "${NACL_ARCH}" = "arm" ]; then
+    extra_args+=" --arch=arm"
   else
-    extra_args="--arch=x86"
+    extra_args+=" --arch=x86"
   fi
 
   LogExecute ${SRC_DIR}/configure \
