@@ -74,7 +74,14 @@ InstallPackageMultiArch() {
       continue
     fi
     # nacl-clang doesn't work on arm for now (SDK libs not yet built)
+    # TODO(sbc): remove this once arm-nacl-clang support is in the SDK.
     if [ "${TOOLCHAIN}" = "clang-newlib" -a "${NACL_ARCH}" = "arm" ]; then
+      continue
+    fi
+    # i686-nacl-clang doesn't reference the i686-nacl/usr/include or
+    # i686-nacl/usr/lib.
+    # TODO(sbc): remove this once nacl-clang works with i686-nacl
+    if [ "${TOOLCHAIN}" = "clang-newlib" -a "${NACL_ARCH}" = "i686" ]; then
       continue
     fi
     # bionic only works on arm for now.
