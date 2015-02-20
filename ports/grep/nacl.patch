@@ -44,18 +44,22 @@ diff --git a/configure b/configure
 diff --git a/lib/error.c b/lib/error.c
 --- a/lib/error.c
 +++ b/lib/error.c
-@@ -382,9 +382,14 @@ error_at_line (int status, int errnum, const char *file_name,
-   __fxprintf (NULL, file_name != NULL ? "%s:%d: " : " ",
-               file_name, line_number);
- #else
-+# if defined(__pnacl__)
-+  fprintf (stderr, "%s:%d: ",
-+           file_name, line_number);
-+#else
-   fprintf (stderr, file_name != NULL ? "%s:%d: " : " ",
-            file_name, line_number);
+@@ -378,13 +378,14 @@ error_at_line (int status, int errnum, const char *file_name,
  #endif
-+#endif
+     }
+ 
++  if (file_name != NULL)
+ #if _LIBC
+-  __fxprintf (NULL, file_name != NULL ? "%s:%d: " : " ",
+-              file_name, line_number);
++    __fxprintf (NULL, "%s:%d: ", file_name, line_number);
+ #else
+-  fprintf (stderr, file_name != NULL ? "%s:%d: " : " ",
+-           file_name, line_number);
++    fprintf (stderr, "%s:%d: ", file_name, line_number);
+ #endif
++  else
++    fprintf (stderr, " ");
  
    va_start (args, message);
    error_tail (status, errnum, message, args);
@@ -134,8 +138,8 @@ diff --git a/lib/regex_internal.c b/lib/regex_internal.c
  internal_function
  re_node_set_remove_at (re_node_set *set, Idx idx)
  {
-+#if defined(__pnacl__)
-+  /* PNaCl notices this can never be negative. */
++#if defined(__clang__)
++  /* clang notices this can never be negative. */
 +  if (idx >= set->nelem)
 +#else
    if (idx < 0 || idx >= set->nelem)

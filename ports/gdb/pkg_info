@@ -3,6 +3,7 @@ VERSION=7.7
 URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@41afdf9d5
 LICENSE=CUSTOM
 DISABLED_ARCH=(pnacl)
+DISABLED_TOOLCHAIN=(clang-newlib)
 BUILD_OS=linux
 DISABLED_LIBC=(bionic)
 DEPENDS=(ncurses expat readline zlib glibc-compat nacl-spawn)

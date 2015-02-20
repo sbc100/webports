@@ -1,3 +1,5 @@
 NAME=libgit2-demo
 VERSION=0.1
+# undefined symbol in libgit: qsort_r
+DISABLED_ARCH=(clang-newlib)
 DEPENDS=(libgit2 nacl-spawn)
