@@ -475,15 +475,17 @@ class SourcePackage(package.Package):
       raise DisabledError('%s: cannot be built with %s'
                           % (self.NAME, self.config.libc))
 
-    if self.DISABLED_LIBC is not None:
-      if self.config.libc in self.DISABLED_LIBC:
-        raise DisabledError('%s: cannot be built with %s'
-                            % (self.NAME, self.config.libc))
+    if self.config.libc in self.DISABLED_LIBC:
+      raise DisabledError('%s: cannot be built with %s'
+                          % (self.NAME, self.config.libc))
 
-    if self.DISABLED_TOOLCHAIN is not None:
-      if self.config.toolchain in self.DISABLED_TOOLCHAIN:
-        raise DisabledError('%s: cannot be built with %s'
-                            % (self.NAME, self.config.toolchain))
+    if self.config.toolchain in self.DISABLED_TOOLCHAIN:
+      raise DisabledError('%s: cannot be built with %s'
+                          % (self.NAME, self.config.toolchain))
+
+    if self.config.arch in self.DISABLED_ARCH:
+      raise DisabledError('%s: disabled for current arch: %s'
+                          % (self.NAME, self.config.arch))
 
     if self.MIN_SDK_VERSION is not None:
       if not util.CheckSDKVersion(self.MIN_SDK_VERSION):
@@ -492,11 +494,6 @@ class SourcePackage(package.Package):
 
     if self.ARCH is not None:
       if self.config.arch not in self.ARCH:
-        raise DisabledError('%s: disabled for current arch: %s'
-                            % (self.NAME, self.config.arch))
-
-    if self.DISABLED_ARCH is not None:
-      if self.config.arch in self.DISABLED_ARCH:
         raise DisabledError('%s: disabled for current arch: %s'
                             % (self.NAME, self.config.arch))
 

@@ -25,7 +25,7 @@ diff --git a/src/xcb_conn.c b/src/xcb_conn.c
 +#include <stdarg.h>
 +
 +/*
-+ * Explicitly use nacl_fnctl.
++ * Explicitly use nacl_fcntl.
 + * When built as a shared library, without this xcb seems to hit stubs.
 + */
 +static int nacl_fcntl(int fd, int cmd, ...) {

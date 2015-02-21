@@ -617,7 +617,7 @@ diff --git a/src/keyboard.c b/src/keyboard.c
 +
 +/*
 + * TODO(bradnelson): Drop this when fcntl is sorted out in nacl_io.
-+ * Explicitly use nacl_fnctl.
++ * Explicitly use nacl_fcntl.
 + * When built as a shared library, without this emacs seems to hit stubs.
 + */
 +int nacl_fcntl(int fd, int cmd, ...) {

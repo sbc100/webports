@@ -26,6 +26,13 @@ def RemoveFile(filename):
 
 class Package(object):
   extra_keys = []
+  list_props = (
+    'DEPENDS',
+    'CONFLICTS',
+    'DISABLED_ARCH',
+    'DISABLED_LIBC',
+    'DISABLED_TOOLCHAIN'
+  )
 
   def __init__(self, info_file=None):
     self.info = info_file
@@ -38,7 +45,7 @@ class Package(object):
     required_keys = pkg_info.REQUIRED_KEYS + self.extra_keys
 
     for key in valid_keys:
-      if key in ('DEPENDS', 'CONFLICTS'):
+      if key in self.list_props:
         setattr(self, key, [])
       else:
         setattr(self, key, None)
@@ -53,16 +60,35 @@ class Package(object):
     for key, value in info.items():
       setattr(self, key, value)
 
+    self.Validate()
+
+  def Validate(self):
+    for libc in self.DISABLED_LIBC:
+      if libc not in configuration.VALID_LIBC:
+        raise Error('%s: invalid libc: %s' % (self.info, libc))
+
+    for toolchain in self.DISABLED_TOOLCHAIN:
+      if toolchain not in configuration.VALID_TOOLCHAINS:
+        raise Error('%s: invalid toolchain: %s' % (self.info, toolchain))
+
+    for arch in self.DISABLED_ARCH:
+      if arch not in util.arch_to_pkgarch:
+        raise Error('%s: invalid architecture: %s' % (self.info, arch))
+
     if '_' in self.NAME:
       raise Error('%s: package NAME cannot contain underscores' % self.info)
+
     if self.NAME != self.NAME.lower():
       raise Error('%s: package NAME cannot contain uppercase characters' %
                   self.info)
+
     if '_' in self.VERSION:
       raise Error('%s: package VERSION cannot contain underscores' % self.info)
-    if self.DISABLED_ARCH is not None and self.ARCH is not None:
+
+    if self.DISABLED_ARCH and self.ARCH is not None:
       raise Error('%s: contains both ARCH and DISABLED_ARCH' % self.info)
-    if self.DISABLED_LIBC is not None and self.LIBC is not None:
+
+    if self.DISABLED_LIBC and self.LIBC is not None:
       raise Error('%s: contains both LIBC and DISABLED_LIBC' % self.info)
 
   def __cmp__(self, other):

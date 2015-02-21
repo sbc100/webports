@@ -3,5 +3,5 @@ VERSION=f6e4951
 URL=https://chromium.googlesource.com/external/libyuv.git@f6e4951
 DEPENDS=(glibc-compat)
 # validation errors: improper memory address - bad index
-DISABLED_TOOLCHAIN=(nacl-clang)
+DISABLED_TOOLCHAIN=(clang-newlib)
 LICENSE=BSD
