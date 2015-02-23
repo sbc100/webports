@@ -38,7 +38,7 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
 
   def ParsePkgInfoLine(line, line_no):
     if '=' not in line:
-      raise PkgFormatError('Invalid info line %s:%d' % (line_no, filename))
+      raise PkgFormatError('Invalid info line %s:%d' % (filename, line_no))
     key, value = line.split('=', 1)
     key = key.strip()
     if key not in valid_keys:
