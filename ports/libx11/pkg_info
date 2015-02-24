@@ -6,4 +6,6 @@ LICENSE=GPL
 DEPENDS=(glibc-compat xproto kbproto xextproto xtrans libxcb inputproto)
 # No mac support, seems to clash with local headers.
 BUILD_OS=linux
+# Causes crash in arm-nacl-clang
+DISABLED_TOOLCHAIN=(clang-newlib)
 SHA1=8177535c9c59d8c3ab98d55ce53520b5737ccd1a

@@ -66,7 +66,7 @@ NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR} -Wl,-rpath-link=${NACLPORTS_LIBDIR}"
 
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
-if [ "${NACL_ARCH}" = "arm" ]; then
+if [ "${NACL_ARCH}" = "arm" -a "${TOOLCHAIN}" = "newlib" ]; then
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Wno-psabi"
   NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -Wno-psabi"
 fi

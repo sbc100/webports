@@ -3,6 +3,9 @@ VERSION=1.2.1
 URL=http://download.sf.net/flac/flac-src/flac-1.2.1-src/flac-1.2.1.tar.gz
 LICENSE=GPL,LGPL,BSD:COPYING.Xiph
 BUILD_OS=linux
+# arm-nacl-clang produces the following error:
+# 1685: Error: internal_relocation (type: OFFSET_IMM) not fixed up
+DISABLED_TOOLCHAIN=(clang-newlib)
 DEPENDS=(libogg glibc-compat)
 DISABLED_LIBC=(bionic)
 SHA1=bd54354900181b59db3089347cc84ad81e410b38

@@ -4,4 +4,6 @@ URL=http://www.complang.tuwien.ac.at/forth/gforth/gforth-0.7.2.tar.gz
 LICENSE=gpl3
 DEPENDS=(glibc-compat nacl-spawn libtar)
 DISABLED_LIBC=(bionic)
+# arm-nacl-clang crashes
+DISABLED_TOOLCHAIN=(clang-newlib)
 SHA1=fe662c60b74290b08b6245816b68faed2a1e5c20

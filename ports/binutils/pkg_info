@@ -5,3 +5,4 @@ LICENSE=GPL
 DEPENDS=(nacl-spawn)
 DISABLED_LIBC=(bionic)
 DISABLED_ARCH=(pnacl)
+DISABLED_TOOLCHAIN=(clang-newlib)

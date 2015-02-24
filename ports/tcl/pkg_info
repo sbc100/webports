@@ -7,4 +7,7 @@ DEPENDS=(glibc-compat nacl-spawn)
 # bionic build fails with undefined symbol:
 # https://code.google.com/p/nativeclient/issues/detail?id=3938
 DISABLED_LIBC=(bionic)
+# arm-nacl-clang failes with:
+# internal_relocation (type: OFFSET_IMM) not fixed up
+DISABLED_TOOLCHAIN=(clang-newlib)
 SHA1=5c83d44152cc0496cc0847a2495f659502a30e40
