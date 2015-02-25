@@ -216,6 +216,7 @@ for this is::
   shellcheck -e SC2044,SC2129,SC2046,SC2035,SC2034,SC2086,SC2148 \
     `git ls-files "*.sh"`
 
+
 Modifying package sources / Working with patches
 ------------------------------------------------
 
@@ -235,5 +236,19 @@ To make changes to a package's patch file the recommended workflow is:
 Whenever the upstream archive or patch file changes and you try to build the
 package you will be prompted to remove the existing repository and start a new
 one. This is to avoid deleting a repository that might contain unsaved changed.
+
+
+Coding Style
+------------
+
+For code that is authored in the naclports repository (as opposed to patches)
+we follow the Chromium style guide:
+http://www.chromium.org/developers/coding-style.
+
+C/C++ code can be automatically formatted with Chromium's clang-format:
+https://code.google.com/p/chromium/wiki/ClangFormat. If you have checkout of
+Chromium you can set CHROMIUM_BUILDTOOLS_PATH=<chromium>/src/buildtools
+which will enable the clang-format script in depot_tools to find the binary.
+
 
 Happy porting!
