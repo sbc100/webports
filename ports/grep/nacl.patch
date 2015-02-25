@@ -97,25 +97,20 @@ diff --git a/lib/gettimeofday.c b/lib/gettimeofday.c
 diff --git a/lib/glthread/lock.h b/lib/glthread/lock.h
 --- a/lib/glthread/lock.h
 +++ b/lib/glthread/lock.h
-@@ -102,6 +102,8 @@ extern int glthread_in_use (void);
- 
- # endif
- 
-+/* This confuses PNaCl */
-+#if !defined(__pnacl__)
- # if USE_POSIX_THREADS_WEAK
- 
- /* Use weak references to the POSIX threads library.  */
-@@ -155,6 +157,9 @@ extern int glthread_in_use (void);
- #  endif
- 
- # endif
-+#else
-+# define pthread_in_use() 1
+@@ -125,11 +125,13 @@ extern int glthread_in_use (void);
+ #  pragma weak pthread_mutex_lock
+ #  pragma weak pthread_mutex_unlock
+ #  pragma weak pthread_mutex_destroy
++#ifdef HAVE_PTHREAD_RWLOCK
+ #  pragma weak pthread_rwlock_init
+ #  pragma weak pthread_rwlock_rdlock
+ #  pragma weak pthread_rwlock_wrlock
+ #  pragma weak pthread_rwlock_unlock
+ #  pragma weak pthread_rwlock_destroy
 +#endif
- 
- /* -------------------------- gl_lock_t datatype -------------------------- */
- 
+ #  pragma weak pthread_once
+ #  pragma weak pthread_cond_init
+ #  pragma weak pthread_cond_wait
 diff --git a/lib/openat.c b/lib/openat.c
 --- a/lib/openat.c
 +++ b/lib/openat.c
