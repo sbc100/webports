@@ -10,7 +10,9 @@
 
 #include "json/json.h"
 #include "my_syslog.h"
-#include <ppapi_simple/ps_instance.h>
+#include <ppapi/c/pp_var.h>
+#include <ppapi_simple/ps.h>
+#include <ppapi_simple/ps_interface.h>
 
 #define MAX_FMT_SIZE 4096
 char formatted_string[MAX_FMT_SIZE];
@@ -47,7 +49,10 @@ void network_error() {
   writerRoot["result"] = 1;
   writerRoot["type"] = "network error";
   Json::StyledWriter writer;
-  PSInstance::GetInstance()->PostMessage(writer.write(writerRoot));
+  std::string msg(writer.write(writerRoot));
+  struct PP_Var var = PSInterfaceVar()->VarFromUtf8(msg.data(), msg.length());
+  PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), var);
+  PSInterfaceVar()->Release(var);
 }
 
 }

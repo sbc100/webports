@@ -12,7 +12,7 @@ export EXTRA_LIBS+="\
   -liconv \
   -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau \
   -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
+  -lppapi_simple -lnacl_io -lppapi -l${NACL_CPP_LIB}"
 # TODO(bradnelson): Find a better general pattern for this.
 # Repeat these here to include them which checking for X11 and linking libxcb,
 # which references ki_fcntl directly.

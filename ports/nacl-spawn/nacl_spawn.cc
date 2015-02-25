@@ -21,6 +21,7 @@
 #include <irt.h>
 #include <irt_dev.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -36,11 +37,14 @@
 #include <string>
 #include <vector>
 
-#include "ppapi/cpp/instance.h"
-#include "ppapi/cpp/var.h"
-#include "ppapi/cpp/var_array.h"
-#include "ppapi/cpp/var_dictionary.h"
+#include "ppapi/c/ppb_var.h"
+#include "ppapi/c/ppb_var_array.h"
+#include "ppapi/c/ppb_var_dictionary.h"
+
+#include "ppapi_simple/ps.h"
+#include "ppapi_simple/ps_event.h"
 #include "ppapi_simple/ps_instance.h"
+#include "ppapi_simple/ps_interface.h"
 
 #include "library_dependencies.h"
 #include "path_util.h"
@@ -55,9 +59,8 @@ struct NaClSpawnReply {
   pthread_mutex_t mu;
   pthread_cond_t cond;
 
-  pp::VarDictionary result;
+  struct PP_Var result_var;
 };
-
 
 // Get an environment variable as an int, or return -1 if the value cannot
 // be converted to an int.
@@ -176,6 +179,96 @@ extern void nacl_setup_env() {
   nacl_spawn_ppid = getenv_as_int("NACL_PPID");
 }
 
+static void VarAddRef(struct PP_Var var) {
+  PSInterfaceVar()->AddRef(var);
+}
+
+static void VarRelease(struct PP_Var var) {
+  PSInterfaceVar()->Release(var);
+}
+
+static struct PP_Var VarDictionaryCreate(void) {
+  struct PP_Var ret = PSInterfaceVarDictionary()->Create();
+  return ret;
+}
+
+static bool VarDictionaryHasKey(struct PP_Var dict,
+                                const char* key,
+                                struct PP_Var* out_value) {
+  assert(out_value);
+  struct PP_Var key_var = PSInterfaceVar()->VarFromUtf8(key, strlen(key));
+  bool has_value = PSInterfaceVarDictionary()->HasKey(dict, key_var);
+  if (has_value) {
+    *out_value = PSInterfaceVarDictionary()->Get(dict, key_var);
+  }
+  PSInterfaceVar()->Release(key_var);
+  return has_value;
+}
+
+static struct PP_Var VarDictionaryGet(struct PP_Var dict, const char* key) {
+  struct PP_Var key_var = PSInterfaceVar()->VarFromUtf8(key, strlen(key));
+  struct PP_Var ret = PSInterfaceVarDictionary()->Get(dict, key_var);
+  PSInterfaceVar()->Release(key_var);
+  return ret;
+}
+
+static void VarDictionarySet(struct PP_Var dict,
+                             const char* key,
+                             struct PP_Var value_var) {
+  struct PP_Var key_var = PSInterfaceVar()->VarFromUtf8(key, strlen(key));
+  PSInterfaceVarDictionary()->Set(dict, key_var, value_var);
+  PSInterfaceVar()->Release(key_var);
+  PSInterfaceVar()->Release(value_var);
+}
+
+static void VarDictionarySetString(struct PP_Var dict,
+                                   const char* key,
+                                   const char* value) {
+  struct PP_Var value_var = PSInterfaceVar()->VarFromUtf8(value, strlen(value));
+  VarDictionarySet(dict, key, value_var);
+}
+
+static struct PP_Var VarArrayCreate(void) {
+  struct PP_Var ret = PSInterfaceVarArray()->Create();
+  return ret;
+}
+
+static void VarArrayInsert(struct PP_Var array,
+                           uint32_t index,
+                           struct PP_Var value_var) {
+  uint32_t old_length = PSInterfaceVarArray()->GetLength(array);
+  PSInterfaceVarArray()->SetLength(array, old_length + 1);
+
+  for (uint32_t i = old_length; i > index; --i) {
+    struct PP_Var from_var = PSInterfaceVarArray()->Get(array, i - 1);
+    PSInterfaceVarArray()->Set(array, i, from_var);
+    PSInterfaceVar()->Release(from_var);
+  }
+  PSInterfaceVarArray()->Set(array, index, value_var);
+  PSInterfaceVar()->Release(value_var);
+}
+
+static void VarArraySetString(struct PP_Var array,
+                              uint32_t index,
+                              const char* value) {
+  struct PP_Var value_var = PSInterfaceVar()->VarFromUtf8(value, strlen(value));
+  PSInterfaceVarArray()->Set(array, index, value_var);
+  PSInterfaceVar()->Release(value_var);
+}
+
+static void VarArrayInsertString(struct PP_Var array,
+                                 uint32_t index,
+                                 const char* value) {
+  struct PP_Var value_var = PSInterfaceVar()->VarFromUtf8(value, strlen(value));
+  VarArrayInsert(array, index, value_var);
+}
+
+static void VarArrayAppendString(struct PP_Var array,
+                                 const char* value) {
+  uint32_t index = PSInterfaceVarArray()->GetLength(array);
+  VarArraySetString(array, index, value);
+}
+
 static std::string GetCwd() {
   char cwd[PATH_MAX] = ".";
   if (!getcwd(cwd, PATH_MAX)) {
@@ -209,39 +302,39 @@ static std::string GetRequestId() {
 // Handle reply from JavaScript. The key is the request string and the
 // value is Zero or positive on success or -errno on failure. The
 // user_data must be an instance of NaClSpawnReply.
-static void HandleNaClSpawnReply(const pp::Var& key,
-                                 const pp::Var& value,
+static void HandleNaClSpawnReply(struct PP_Var key,
+                                 struct PP_Var value,
                                  void* user_data) {
-  if (!key.is_string() || !value.is_dictionary()) {
+  if (key.type != PP_VARTYPE_STRING || value.type != PP_VARTYPE_DICTIONARY) {
     fprintf(stderr, "Invalid parameter for HandleNaClSpawnReply\n");
-    fprintf(stderr, "key=%s\n", key.DebugString().c_str());
-    fprintf(stderr, "value=%s\n", value.DebugString().c_str());
+    fprintf(stderr, "key type=%d\n", key.type);
+    fprintf(stderr, "value type=%d\n", value.type);
   }
-  assert(key.is_string());
-  assert(value.is_dictionary());
+  assert(key.type == PP_VARTYPE_STRING);
+  assert(value.type == PP_VARTYPE_DICTIONARY);
 
-  pp::VarDictionary valDict(value);
   NaClSpawnReply* reply = static_cast<NaClSpawnReply*>(user_data);
   pthread_mutex_lock(&reply->mu);
 
-  reply->result = valDict;
+  VarAddRef(value);
+  reply->result_var = value;
 
   pthread_cond_signal(&reply->cond);
   pthread_mutex_unlock(&reply->mu);
 }
 
 // Sends a spawn/wait request to JavaScript and returns the result.
-static pp::VarDictionary SendRequest(pp::VarDictionary* req) {
+static struct PP_Var SendRequest(struct PP_Var req_var) {
   const std::string& req_id = GetRequestId();
-  req->Set("id", req_id);
+  VarDictionarySetString(req_var, "id", req_id.c_str());
 
   NaClSpawnReply reply;
   pthread_mutex_init(&reply.mu, NULL);
   pthread_cond_init(&reply.cond, NULL);
-  PSInstance* instance = PSInstance::GetInstance();
-  instance->RegisterMessageHandler(req_id, &HandleNaClSpawnReply, &reply);
+  PSEventRegisterMessageHandler(req_id.c_str(), &HandleNaClSpawnReply, &reply);
 
-  instance->PostMessage(*req);
+  PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), req_var);
+  VarRelease(req_var);
 
   pthread_mutex_lock(&reply.mu);
   pthread_cond_wait(&reply.cond, &reply.mu);
@@ -250,9 +343,9 @@ static pp::VarDictionary SendRequest(pp::VarDictionary* req) {
   pthread_cond_destroy(&reply.cond);
   pthread_mutex_destroy(&reply.mu);
 
-  instance->RegisterMessageHandler(req_id, NULL, &reply);
+  PSEventRegisterMessageHandler(req_id.c_str(), NULL, &reply);
 
-  return reply.result;
+  return reply.result_var;
 }
 
 // Adds a file into nmf. |key| is the key for open_resource IRT or
@@ -261,21 +354,24 @@ static pp::VarDictionary SendRequest(pp::VarDictionary* req) {
 static void AddFileToNmf(const std::string& key,
                          const std::string& arch,
                          const std::string& filepath,
-                         pp::VarDictionary* dict) {
-  pp::VarDictionary url;
-  url.Set("url", filepath);
-  pp::VarDictionary archd;
-  archd.Set(arch, url);
-  dict->Set(key, archd);
+                         struct PP_Var dict_var) {
+
+  struct PP_Var url_dict_var = VarDictionaryCreate();
+  VarDictionarySetString(url_dict_var, "url", filepath.c_str());
+
+  struct PP_Var arch_dict_var = VarDictionaryCreate();
+  VarDictionarySet(arch_dict_var, arch.c_str(), url_dict_var);
+
+  VarDictionarySet(dict_var, key.c_str(), arch_dict_var);
 }
 
 static void AddNmfToRequestForShared(
     std::string prog,
     const std::string& arch,
     const std::vector<std::string>& dependencies,
-    pp::VarDictionary* req) {
-  pp::VarDictionary nmf;
-  pp::VarDictionary files;
+    struct PP_Var req_var) {
+  struct PP_Var nmf_var = VarDictionaryCreate();
+  struct PP_Var files_var = VarDictionaryCreate();
   const char* prog_base = basename(&prog[0]);
   for (size_t i = 0; i < dependencies.size(); i++) {
     std::string dep = dependencies[i];
@@ -286,44 +382,39 @@ static void AddNmfToRequestForShared(
     if (strcmp(prog_base, base) == 0)
       base = "main.nexe";
     if (strcmp(base, "runnable-ld.so") == 0) {
-      AddFileToNmf("program", arch, abspath, &nmf);
+      AddFileToNmf("program", arch, abspath, nmf_var);
     } else {
-      AddFileToNmf(base, arch, abspath, &files);
+      AddFileToNmf(base, arch, abspath, files_var);
     }
   }
-  nmf.Set("files", files);
-  req->Set("nmf", nmf);
+
+  VarDictionarySet(nmf_var, "files", files_var);
+  VarDictionarySet(req_var, "nmf", nmf_var);
 }
 
 static void AddNmfToRequestForStatic(const std::string& prog,
                                      const std::string& arch,
-                                     pp::VarDictionary* req) {
-  pp::VarDictionary nmf;
-  AddFileToNmf("program", arch, GetAbsPath(prog), &nmf);
-  req->Set("nmf", nmf);
+                                     struct PP_Var req_var) {
+  struct PP_Var nmf_var = VarDictionaryCreate();
+  AddFileToNmf("program", arch, GetAbsPath(prog), nmf_var);
+  VarDictionarySet(req_var, "nmf", nmf_var);
 }
 
 static void AddNmfToRequestForPNaCl(const std::string& prog,
-                                    pp::VarDictionary* req) {
-  pp::VarDictionary nmf;
+                                    struct PP_Var req_var) {
+  struct PP_Var url_dict_var = VarDictionaryCreate();
+  VarDictionarySetString(url_dict_var, "url", GetAbsPath(prog).c_str());
 
-  pp::VarDictionary url;
-  url.Set("url", GetAbsPath(prog));
-  pp::VarDictionary translate;
-  translate.Set("pnacl-translate", url);
-  pp::VarDictionary archd;
-  archd.Set("portable", translate);
-  nmf.Set("program", archd);
-  req->Set("nmf", nmf);
-}
+  struct PP_Var translate_dict_var = VarDictionaryCreate();
+  VarDictionarySet(translate_dict_var, "pnacl-translate", url_dict_var);
 
-static void VarArrayInsert(
-    uint32_t index, pp::Var value, pp::VarArray* dst) {
-  dst->SetLength(dst->GetLength() + 1);
-  for (uint32_t i = dst->GetLength() - 1; i > index; --i) {
-    dst->Set(i, dst->Get(i - 1));
-  }
-  dst->Set(index, value);
+  struct PP_Var arch_dict_var = VarDictionaryCreate();
+  VarDictionarySet(arch_dict_var, "portable", translate_dict_var);
+
+  struct PP_Var nmf_var = VarDictionaryCreate();
+  VarDictionarySet(nmf_var, "program", arch_dict_var);
+
+  VarDictionarySet(req_var, "nmf", nmf_var);
 }
 
 static void FindInterpreter(std::string* path) {
@@ -345,7 +436,7 @@ static void FindInterpreter(std::string* path) {
   *path = path->substr(i + 1);
 }
 
-static bool ExpandShBang(std::string* prog, pp::VarDictionary* req) {
+static bool ExpandShBang(std::string* prog, struct PP_Var req_var) {
   // Open script.
   int fh = open(prog->c_str(), O_RDONLY);
   if (fh < 0) {
@@ -386,36 +477,36 @@ static bool ExpandShBang(std::string* prog, pp::VarDictionary* req) {
     ++end;
   }
   // Update command to run.
-  pp::Var argsv = req->Get("args");
-  assert(argsv.is_array());
-  pp::VarArray args(argsv);
+  struct PP_Var args_var = VarDictionaryGet(req_var, "args");
+  assert(args_var.type == PP_VARTYPE_ARRAY);
   // Set argv[0] in case it was path expanded.
-  args.Set(0, *prog);
+  VarArraySetString(args_var, 0, prog->c_str());
   std::string interpreter;
   if (split) {
     interpreter = std::string(start, split - start);
     std::string arg(split + 1, end - (split + 1));
-    VarArrayInsert(0, arg, &args);
+    VarArrayInsertString(args_var, 0, arg.c_str());
   } else {
     interpreter = std::string(start, end - start);
   }
   FindInterpreter(&interpreter);
-  VarArrayInsert(0, interpreter, &args);
+  VarArrayInsertString(args_var, 0, interpreter.c_str());
+  VarRelease(args_var);
   *prog = interpreter;
   return true;
 }
 
-static bool UseBuiltInFallback(std::string* prog, pp::VarDictionary* req) {
+static bool UseBuiltInFallback(std::string* prog, struct PP_Var req_var) {
   if (prog->find('/') == std::string::npos) {
     const char* path_env = getenv("PATH");
     std::vector<std::string> paths;
     GetPaths(path_env, &paths);
     if (GetFileInPaths(*prog, paths, prog)) {
       // Update argv[0] to match prog if we ended up changing it.
-      pp::Var argsv = req->Get("args");
-      assert(argsv.is_array());
-      pp::VarArray args(argsv);
-      args.Set(0, *prog);
+      struct PP_Var args_var = VarDictionaryGet(req_var, "args");
+      assert(args_var.type == PP_VARTYPE_ARRAY);
+      VarArraySetString(args_var, 0, prog->c_str());
+      VarRelease(args_var);
     } else {
       // If the path does not contain a slash and we cannot find it
       // from PATH, we use NMF served with the JavaScript.
@@ -443,8 +534,8 @@ static bool IsPNaClType(const std::string& filename) {
 }
 
 // Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
-static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
-  if (UseBuiltInFallback(&prog, req)) {
+static bool AddNmfToRequest(std::string prog, struct PP_Var req_var) {
+  if (UseBuiltInFallback(&prog, req_var)) {
     return true;
   }
   if (access(prog.c_str(), R_OK) != 0) {
@@ -452,18 +543,18 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
     return false;
   }
 
-  if (!ExpandShBang(&prog, req)) {
+  if (!ExpandShBang(&prog, req_var)) {
     return false;
   }
 
   // Check fallback again in case of #! expanded to something else.
-  if (UseBuiltInFallback(&prog, req)) {
+  if (UseBuiltInFallback(&prog, req_var)) {
     return true;
   }
 
   // Check for pnacl.
   if (IsPNaClType(prog)) {
-    AddNmfToRequestForPNaCl(prog, req);
+    AddNmfToRequestForPNaCl(prog, req_var);
     return true;
   }
 
@@ -472,20 +563,22 @@ static bool AddNmfToRequest(std::string prog, pp::VarDictionary* req) {
   if (!FindArchAndLibraryDependencies(prog, &arch, &dependencies))
     return false;
   if (!dependencies.empty()) {
-    AddNmfToRequestForShared(prog, arch, dependencies, req);
+    AddNmfToRequestForShared(prog, arch, dependencies, req_var);
     return true;
   }
   // No dependencies means the main binary is statically linked.
-  AddNmfToRequestForStatic(prog, arch, req);
+  AddNmfToRequestForStatic(prog, arch, req_var);
   return true;
 }
 
 // Send a request, decode the result, and set errno on error.
-static int GetInt(pp::VarDictionary dict, const char* key) {
-  if (!dict.HasKey(key)) {
+static int GetInt(struct PP_Var dict_var, const char* key) {
+  struct PP_Var value_var;
+  if (!VarDictionaryHasKey(dict_var, key, &value_var)) {
     return -1;
   }
-  int value = dict.Get(key).AsInt();
+  assert(value_var.type == PP_VARTYPE_INT32);
+  int value = value_var.value.as_int;
   if (value < 0) {
     errno = -value;
     return -1;
@@ -493,12 +586,18 @@ static int GetInt(pp::VarDictionary dict, const char* key) {
   return value;
 }
 
+static int GetIntAndRelease(struct PP_Var dict_var, const char* key) {
+  int ret = GetInt(dict_var, key);
+  VarRelease(dict_var);
+  return ret;
+}
+
 static pid_t waitpid_impl(int pid, int* status, int options);
 
 // TODO(bradnelson): Add sysconf means to query this in all libc's.
 #define MAX_FILE_DESCRIPTOR 1000
 
-static int CloneFileDescriptors(pp::VarArray* envs) {
+static int CloneFileDescriptors(struct PP_Var envs_var) {
   int fd;
   int port;
 
@@ -534,7 +633,7 @@ static int CloneFileDescriptors(pp::VarArray* envs) {
       char entry[100];
       snprintf(entry, sizeof entry,
           "NACL_SPAWN_FD_PIPE_SOCKET=%d:%d", fd, port);
-      envs->Set(envs->GetLength(), entry);
+      VarArrayAppendString(envs_var, entry);
     }
   }
   return 0;
@@ -546,8 +645,10 @@ static NACL_SPAWN_TLS int vforking = 0;
 
 // Shared spawnve implementation. Declared static so that shared library
 // overrides doesn't break calls meant to be internal to this implementation.
-static int spawnve_impl(int mode, const char* path,
-                        char* const argv[], char* const envp[]) {
+static int spawnve_impl(int mode,
+                        const char* path,
+                        char* const argv[],
+                        char* const envp[]) {
   if (NULL == path || NULL == argv[0]) {
     errno = EINVAL;
     return -1;
@@ -582,33 +683,31 @@ static int spawnve_impl(int mode, const char* path,
     envp = environ;
   }
 
-  PSInstance* instance = PSInstance::GetInstance();
-  if (!instance) {
-    errno = ENOSYS;
-    return -1;
-  }
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_spawn");
 
-  pp::VarDictionary req;
-  req.Set("command", "nacl_spawn");
-  pp::VarArray args;
+  struct PP_Var args_var = VarArrayCreate();
   for (int i = 0; argv[i]; i++)
-    args.Set(i, argv[i]);
-  req.Set("args", args);
-  pp::VarArray envs;
+    VarArraySetString(args_var, i, argv[i]);
+  VarDictionarySet(req_var, "args", args_var);
+
+  struct PP_Var envs_var = VarArrayCreate();
   for (int i = 0; envp[i]; i++)
-    envs.Set(i, envp[i]);
-  if (CloneFileDescriptors(&envs) < 0) {
+    VarArraySetString(envs_var, i, envp[i]);
+
+  if (CloneFileDescriptors(envs_var) < 0) {
     return -1;
   }
-  req.Set("envs", envs);
-  req.Set("cwd", GetCwd());
 
-  if (!AddNmfToRequest(path, &req)) {
+  VarDictionarySet(req_var, "envs", envs_var);
+  VarDictionarySetString(req_var, "cwd", GetCwd().c_str());
+
+  if (!AddNmfToRequest(path, req_var)) {
     errno = ENOENT;
     return -1;
   }
 
-  return GetInt(SendRequest(&req), "pid");
+  return GetIntAndRelease(SendRequest(req_var), "pid");
 }
 
 // Spawn a new NaCl process. This is an alias for
@@ -627,21 +726,22 @@ int spawnve(int mode, const char* path,
 // Done as a static so that users that replace waitpid and call wait (gcc)
 // don't cause infinite recursion.
 static pid_t waitpid_impl(int pid, int* status, int options) {
-  pp::VarDictionary req;
-  pp::VarDictionary result;
-  req.Set("command", "nacl_wait");
-  req.Set("pid", pid);
-  req.Set("options", options);
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_wait");
+  VarDictionarySet(req_var, "pid", PP_MakeInt32(pid));
+  VarDictionarySet(req_var, "options", PP_MakeInt32(options));
 
-  result = SendRequest(&req);
-  int resultPid = GetInt(result, "pid");
+  struct PP_Var result_var = SendRequest(req_var);
+  int result_pid = GetInt(result_var, "pid");
 
   // WEXITSTATUS(s) is defined as ((s >> 8) & 0xff).
-  if (result.HasKey("status")) {
-    int rawStatus = result.Get("status").AsInt();
-    *status = (rawStatus & 0xff) << 8;
+  struct PP_Var status_var;
+  if (VarDictionaryHasKey(result_var, "status", &status_var)) {
+    int raw_status = status_var.value.as_int;
+    *status = (raw_status & 0xff) << 8;
   }
-  return resultPid;
+  VarRelease(result_var);
+  return result_pid;
 }
 
 extern "C" {
@@ -758,11 +858,11 @@ int posix_spawnp(
 
 // Get the process group ID of the given process.
 pid_t getpgid(pid_t pid) {
-  pp::VarDictionary req;
-  req.Set("command", "nacl_getpgid");
-  req.Set("pid", pid);
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_getpgid");
+  VarDictionarySet(req_var, "pid", PP_MakeInt32(pid));
 
-  return GetInt(SendRequest(&req), "pgid");
+  return GetIntAndRelease(SendRequest(req_var), "pgid");
 }
 
 // Get the process group ID of the current process. This is an alias for
@@ -773,12 +873,12 @@ pid_t getpgrp() {
 
 // Set the process group ID of the given process.
 pid_t setpgid(pid_t pid, pid_t pgid) {
-  pp::VarDictionary req;
-  req.Set("command", "nacl_setpgid");
-  req.Set("pid", pid);
-  req.Set("pgid", pgid);
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_setpgid");
+  VarDictionarySet(req_var, "pid", PP_MakeInt32(pid));
+  VarDictionarySet(req_var, "pgid", PP_MakeInt32(pgid));
 
-  return GetInt(SendRequest(&req), "result");
+  return GetIntAndRelease(SendRequest(req_var), "result");
 }
 
 // Set the process group ID of the given process. This is an alias for
@@ -789,34 +889,39 @@ pid_t setpgrp() {
 
 // Get the session ID of the given process.
 pid_t getsid(pid_t pid) {
-  pp::VarDictionary req;
-  req.Set("command", "nacl_getsid");
-  req.Set("pid", pid);
-  return GetInt(SendRequest(&req), "sid");
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_getsid");
+  VarDictionarySet(req_var, "pid", PP_MakeInt32(pid));
+  return GetIntAndRelease(SendRequest(req_var), "sid");
 }
 
 // Make the current process a session leader.
 pid_t setsid() {
-  pp::VarDictionary req;
-  req.Set("command", "nacl_setsid");
-  return GetInt(SendRequest(&req), "sid");
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_setsid");
+  return GetIntAndRelease(SendRequest(req_var), "sid");
 }
 
 void jseval(const char* cmd, char** data, size_t* len) {
-  pp::VarDictionary req;
-  req.Set("command", "nacl_jseval");
-  req.Set("cmd", cmd);
-  pp::VarDictionary result = SendRequest(&req);
-  std::string result_str = result.Get("result").AsString();
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_jseval");
+  VarDictionarySetString(req_var, "cmd", cmd);
+
+  struct PP_Var result_dict_var = SendRequest(req_var);
+  struct PP_Var result_var = VarDictionaryGet(result_dict_var, "result");
+  uint32_t result_len;
+  const char* result = PSInterfaceVar()->VarToUtf8(result_var, &result_len);
   if (len) {
-    *len = result_str.size();
+    *len = result_len;
   }
   if (data) {
-    *data = static_cast<char*>(malloc(result_str.size() + 1));
+    *data = static_cast<char*>(malloc(result_len + 1));
     assert(*data);
-    memcpy(*data, result_str.data(), result_str.size());
-    (*data)[result_str.size()] = '\0';
+    memcpy(*data, result, result_len);
+    (*data)[result_len] = '\0';
   }
+  VarRelease(result_var);
+  VarRelease(result_dict_var);
 }
 
 // This is the address for localhost (127.0.0.1).
@@ -848,40 +953,37 @@ static int TCPConnectToLocalhost(int port) {
 // Create a pipe. pipefd[0] will be the read end of the pipe and pipefd[1] the
 // write end of the pipe.
 int pipe(int pipefd[2]) {
-  PSInstance* instance = PSInstance::GetInstance();
-  if (!instance)
-    return ENOSYS;
-
-  pp::VarDictionary req, result;
-  int readPort, writePort, readSocket, writeSocket;
-
   if (pipefd == NULL) {
     errno = EFAULT;
     return -1;
   }
 
-  req.Set("command", "nacl_pipe");
-  result = SendRequest(&req);
-  readPort = GetInt(result, "read");
-  writePort = GetInt(result, "write");
-  if (readPort == -1 || writePort == -1) {
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_pipe");
+
+  struct PP_Var result_var = SendRequest(req_var);
+  int read_port = GetInt(result_var, "read");
+  int write_port = GetInt(result_var, "write");
+  VarRelease(result_var);
+
+  if (read_port == -1 || write_port == -1) {
     return -1;
   }
 
-  readSocket = TCPConnectToLocalhost(readPort);
-  writeSocket = TCPConnectToLocalhost(writePort);
-  if (readSocket < 0 || writeSocket < 0) {
-    if (readSocket >= 0) {
-      close(readSocket);
+  int read_socket = TCPConnectToLocalhost(read_port);
+  int write_socket = TCPConnectToLocalhost(write_port);
+  if (read_socket < 0 || write_socket < 0) {
+    if (read_socket >= 0) {
+      close(read_socket);
     }
-    if (writeSocket >= 0) {
-      close(writeSocket);
+    if (write_socket >= 0) {
+      close(write_socket);
     }
     return -1;
   }
 
-  pipefd[0] = readSocket;
-  pipefd[1] = writeSocket;
+  pipefd[0] = read_socket;
+  pipefd[1] = write_socket;
 
   return 0;
 }
@@ -901,10 +1003,11 @@ pid_t nacl_spawn_vfork_after(int jmping) {
 
 void nacl_spawn_vfork_exit(int status) {
   if (vforking) {
-    pp::VarDictionary req;
-    req.Set("command", "nacl_deadpid");
-    req.Set("status", status);
-    int result = GetInt(SendRequest(&req), "pid");
+    struct PP_Var req_var = VarDictionaryCreate();
+    VarDictionarySetString(req_var, "command", "nacl_deadpid");
+    VarDictionarySet(req_var, "status", PP_MakeInt32(status));
+
+    int result = GetIntAndRelease(SendRequest(req_var), "pid");
     if (result < 0) {
       errno = -result;
       vfork_pid = -1;

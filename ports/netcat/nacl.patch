@@ -5,7 +5,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  
  
  netcat_LDADD = @CONTRIBLIBS@ @INTLLIBS@
-+netcat_PPAPI = -lppapi_simple -lnacl_io -lppapi -lppapi_cpp
++netcat_PPAPI = -lppapi_simple -lnacl_io -lppapi
  
  EXTRA_DIST = *.h
  

@@ -37,7 +37,7 @@ export LIBS+="\
 -lSDLmain -lSDL \
 ${NACL_CLI_MAIN_LIB} \
 -lppapi_simple -ltar -lnacl_io -lRegal -lglslopt \
--lppapi -lppapi_cpp -lppapi_gles2 -lm \
+-lppapi -lppapi_gles2 -lm \
 -l${NACL_CPP_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then

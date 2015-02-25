@@ -336,7 +336,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  
  LIB_PTHREAD_SIGMASK = @LIB_PTHREAD_SIGMASK@
  
-+NACL_LIBS = ${NACL_CLI_MAIN_LIB} -lppapi_simple -lppapi -lnacl_io -ltar -lppapi_cpp -l${NACL_CPP_LIB}
++NACL_LIBS = ${NACL_CLI_MAIN_LIB} -lppapi_simple -lppapi -lnacl_io -ltar -l${NACL_CPP_LIB}
 +
  INTERVALS_H = dispextern.h intervals.h composite.h
  

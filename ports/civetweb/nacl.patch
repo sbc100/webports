@@ -17,7 +17,7 @@ diff --git a/Makefile b/Makefile
  
 -ifeq ($(TARGET_OS),LINUX) 
 +ifeq ($(TARGET_OS),NACL)
-+	LIBS += -Wl,-uPSUserCreateInstance  -lcli_main -lppapi_simple -lnacl_io -lppapi_cpp -lppapi
++	LIBS += -Wl,-uPSUserMainGet -lcli_main -lppapi_simple -lnacl_io -lppapi
 +endif
 +
 +ifeq ($(TARGET_OS),LINUX)

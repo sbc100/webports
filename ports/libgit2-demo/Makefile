@@ -4,10 +4,10 @@
 
 include $(NACL_SDK_ROOT)/tools/common.mk
 
-NACL_LDFLAGS += -Wl,--undefined=PSUserCreateInstance
-PNACL_LDFLAGS += -Wl,--undefined=PSUserCreateInstance
+NACL_LDFLAGS += -Wl,--undefined=PSUserMainGet
+PNACL_LDFLAGS += -Wl,--undefined=PSUserMainGet
 TARGET = libgit2-demo
-CORE_LIBS = cli_main nacl_spawn ppapi_simple nacl_io ppapi_cpp ppapi
+CORE_LIBS = cli_main nacl_spawn ppapi_simple nacl_io ppapi
 
 LIBS = git2 ssh2 ssl crypto z $(CORE_LIBS)
 ifeq ($(TOOLCHAIN),newlib)

@@ -6,7 +6,7 @@ include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = kernel
 LIBS = python2.7 freetype bz2 ssl crypto z png readline ncurses nacl_spawn \
-       ppapi_simple tar nacl_io ppapi_cpp ppapi
+       ppapi_simple_cpp tar nacl_io ppapi_cpp ppapi
 NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 ifeq ($(TOOLCHAIN),glibc)

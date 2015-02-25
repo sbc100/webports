@@ -39,7 +39,7 @@ diff --git a/gdb/Makefile.in b/gdb/Makefile.in
  MAKEHTML = $(MAKEINFO_CMD) --html
  MAKEHTMLFLAGS =
  
-+PEPPER_LIBS = $(NACL_CLI_MAIN_LIB) -lncurses -lppapi_simple -lnacl_io -lppapi -lppapi_cpp
++PEPPER_LIBS = $(NACL_CLI_MAIN_LIB) -lncurses -lppapi_simple -lnacl_io -lppapi
 +
  # Set this up with gcc if you have gnu ld and the loader will print out
  # line numbers for undefined references.

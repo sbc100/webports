@@ -14,7 +14,7 @@ LIBS += readline ncurses
 CFLAGS += -DLUA_USE_READLINE
 endif
 
-LIBS += nacl_io ppapi_cpp ppapi
+LIBS += nacl_io ppapi
 ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic

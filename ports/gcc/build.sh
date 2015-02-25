@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
+  -lppapi_simple -lnacl_io -lppapi -l${NACL_CPP_LIB}"
 
 # --with-build-sysroot is necessary to run "fixincl"
 # properly. Without this option, GCC's build system tries to create

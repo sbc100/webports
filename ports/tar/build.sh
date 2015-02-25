@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
--lppapi_cpp -l${NACL_CPP_LIB}"
+-l${NACL_CPP_LIB}"
 EXECUTABLES=src/tar
 
 # The default when cross compiling is to assume chown does not

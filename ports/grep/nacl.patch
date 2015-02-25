@@ -155,7 +155,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  grep$(EXEEXT): $(grep_OBJECTS) $(grep_DEPENDENCIES) $(EXTRA_grep_DEPENDENCIES) 
  	@rm -f grep$(EXEEXT)
 -	$(AM_V_CCLD)$(LINK) $(grep_OBJECTS) $(grep_LDADD) $(LIBS)
-+	$(AM_V_CCLD)$(LINK) $(grep_OBJECTS) $(grep_LDADD) -Wl,--undefined=PSUserCreateInstance -lcli_main -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -lppapi_cpp -pthread $(LIBS)
++	$(AM_V_CCLD)$(LINK) $(grep_OBJECTS) $(grep_LDADD) -Wl,--undefined=PSUserMainGet -lcli_main -lnacl_spawn -lppapi_simple -lnacl_io -lppapi -pthread $(LIBS)
  install-binSCRIPTS: $(bin_SCRIPTS)
  	@$(NORMAL_INSTALL)
  	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \

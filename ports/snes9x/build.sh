@@ -16,7 +16,7 @@ EXTRA_CONFIGURE_ARGS="\
       --without-x \
       --enable-sound"
 export EXTRA_LIBS="${NACLPORTS_LDFLAGS}"
-EXTRA_LIBS+=" -lppapi_simple -lnacl_io -lppapi_cpp -lppapi"
+EXTRA_LIBS+=" -lppapi_simple_cpp -lnacl_io -lppapi_cpp -lppapi"
 
 AutoconfStep() {
   echo "Autoconf..."

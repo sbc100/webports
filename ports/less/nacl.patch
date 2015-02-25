@@ -6,9 +6,9 @@ diff --git a/Makefile.in b/Makefile.in
  
  less$(EXEEXT): ${OBJ}
 -	${CC} ${LDFLAGS} -o $@ ${OBJ} ${LIBS}
-+	${CC} ${LDFLAGS} -o $@ ${OBJ} -Wl,--undefined=PSUserCreateInstance \
++	${CC} ${LDFLAGS} -o $@ ${OBJ} -Wl,--undefined=PSUserMainGet \
 +             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -lppapi_cpp -l${NACL_CPP_LIB} ${LIBS}
++             -l${NACL_CPP_LIB} ${LIBS}
  
  lesskey$(EXEEXT): lesskey.${O} version.${O}
  	${CC} ${LDFLAGS} -o $@ lesskey.${O} version.${O}

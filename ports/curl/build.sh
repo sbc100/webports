@@ -31,8 +31,7 @@ BuildStep() {
   Remove  src/curl-tool_main.o
   sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" src/Makefile
   sed -i.bak "s/curl\$(EXEEXT)/curl_ppapi\$(EXEEXT)/" src/Makefile
-  local sedlibs="-lppapi_simple,-lcli_main,-lnacl_spawn,"
-  sedlibs+="-lnacl_io,-lppapi_cpp,-lppapi"
+  local sedlibs="-lppapi_simple,-lcli_main,-lnacl_spawn,-lnacl_io,-lppapi"
   sedlibs="-Wl,--start-group,$sedlibs,--end-group -l${NACL_CPP_LIB}"
   sed -i.bak "s/LIBS = \$(BLANK_AT_MAKETIME)/LIBS = ${sedlibs}/" src/Makefile
   DefaultBuildStep
