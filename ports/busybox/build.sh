@@ -52,7 +52,7 @@ BuildStep() {
   export CPPFLAGS="${NACLPORTS_CPPFLAGS}"
   export EXTRA_CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export EXTRA_LDFLAGS="${NACLPORTS_LDFLAGS}"
-  EXTRA_LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi -lppapi_cpp"
+  EXTRA_LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi"
   DefaultBuildStep
 }
 
