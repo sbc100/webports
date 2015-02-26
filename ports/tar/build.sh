@@ -16,7 +16,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export LIBS="-lglibc-compat"
 fi
 
-InstallStep() {
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   cp src/tar ${PUBLISH_DIR}/tar_${NACL_ARCH}${NACL_EXEEXT}
   pushd ${PUBLISH_DIR}

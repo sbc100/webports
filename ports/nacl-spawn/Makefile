@@ -4,57 +4,74 @@
 
 # TODO(hamaji): include $NACL_SDK_ROOT/tools/common.mk.
 
-NACL_SPAWN_OBJS = nacl_spawn.o path_util.o
-# For now, we do not support spawning a new glibc process from newlib.
+NACL_SPAWN_OBJS = nacl_spawn.o path_util.o elf_reader.o library_dependencies.o
 
-NACL_SPAWN_OBJS += elf_reader.o library_dependencies.o
+TEST_EXES = test/unittests
+LIBRARIES = libcli_main.a libnacl_spawn.a
 
-TEST_EXES = test/elf_reader test/library_dependencies
-TEST_BINARIES = test/test_exe test/libtest1.so test/libtest2.so test/libtest3.so
 CPPFLAGS += -Wall -Werror -Iinclude
 
-all: test
+ifeq ($(TOOLCHAIN),glibc)
+TEST_EXES += test/elf_reader test/library_dependencies
+TEST_BINARIES = test/test_exe test/libtest1.so test/libtest2.so test/libtest3.so
+LIBRARIES += libnacl_spawn.so
+endif
+
+all: $(LIBRARIES) $(TEST_EXES) $(TEST_BINARIES)
+
+test: $(TEST_EXES) $(TEST_BINARIES)
 
 # Targets for libcli_main
 
 libcli_main.a: cli_main.o nacl_startup_untar.o
 	rm -f $@
-	$(NACLAR) rcs $@ $^
+	$(AR) rcs $@ $^
 
 %.o: %.c
-	$(NACLCC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # Targets for libnacl_spawn
 
 libnacl_spawn.so: $(NACL_SPAWN_OBJS)
-	$(NACLCXX) $(LDFLAGS) -shared $^ -o $@
+	$(CXX) $(LDFLAGS) -shared $^ -o $@
 
 libnacl_spawn.a: $(NACL_SPAWN_OBJS)
 	rm -f $@
-	$(NACLAR) rcs $@ $^
+	$(AR) rcs $@ $^
 
 %.o: %.cc
-	$(NACLCXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 # Targets for tests
 
-test: $(TEST_EXES) $(TEST_BINARIES)
+LIBS=-Xlinker -uPSUserMainGet -lcli_main -lnacl_spawn
+LIBS+=-lgtest -lppapi_simple_cpp -lnacl_io -lppapi_cpp -lppapi
+
+test/unittests: nacl_spawn_test.o $(LIBRARIES)
+	$(CXX) -L. $(LDFLAGS) $< -o $@ $(LIBS)
+
+
+ifeq ($(TOOLCHAIN),glibc)
+test:
 	./test/run_test.sh
 
 test/elf_reader: elf_reader.cc
-	$(NACLCXX) $(CPPFLAGS) $(CFLAGS) -DDEFINE_ELF_READER_MAIN $< -o $@
+	$(CXX) $(CPPFLAGS) $(CFLAGS) -DDEFINE_ELF_READER_MAIN $< -o $@
 test/library_dependencies: elf_reader.o path_util.o library_dependencies.cc
-	$(NACLCXX) $(CPPFLAGS) $(CFLAGS) -DDEFINE_LIBRARY_DEPENDENCIES_MAIN $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CFLAGS) -DDEFINE_LIBRARY_DEPENDENCIES_MAIN $^ -o $@
 
 # We use -nostdlib not to have libc.so in their dependencies.
 test/test_exe: test/test_exe.c test/libtest1.so test/libtest2.so
-	$(NACLCC) $(CPPFLAGS) $(CFLAGS) $< -nostdlib -Wl,-rpath-link=test -Ltest -ltest1 -ltest2 -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< -nostdlib -Wl,-rpath-link=test -Ltest -ltest1 -ltest2 -o $@
 test/libtest1.so: test/libtest1.c test/libtest3.so
-	$(NACLCC) $(CPPFLAGS) $(CFLAGS) $< -fPIC -nostdlib -shared -Ltest -ltest3 -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< -fPIC -nostdlib -shared -Ltest -ltest3 -o $@
 test/libtest2.so: test/libtest2.c test/libtest3.so
-	$(NACLCC) $(CPPFLAGS) $(CFLAGS) $< -fPIC -nostdlib -shared -Ltest -ltest3 -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< -fPIC -nostdlib -shared -Ltest -ltest3 -o $@
 test/libtest3.so: test/libtest3.c
-	$(NACLCC) $(CPPFLAGS) $(CFLAGS) $< -fPIC -nostdlib -shared -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< -fPIC -nostdlib -shared -o $@
+endif
 
 clean:
 	rm -f *.a *.o *.so $(TEST_EXES) $(TEST_BINARIES)
+
+.PHONY: clean all test

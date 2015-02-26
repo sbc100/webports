@@ -2,7 +2,22 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-NACLPORTS_CPPFLAGS+=" -I ${START_DIR}"
+NACLPORTS_CPPFLAGS+=" -I${START_DIR}"
+EXECUTABLES="test/unittests"
+
+if [ "${NACL_LIBC}" = "glibc" ]; then
+  EXECUTABLES+=" test/elf_reader test/library_dependencies"
+fi
+
+if [ "${NACL_SHARED}" = "1" ]; then
+  NACLPORTS_CFLAGS+=" -fPIC"
+  NACLPORTS_CXXFLAGS+=" -fPIC"
+  EXECUTABLES+=
+fi
+
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+fi
 
 ConfigureStep() {
   MakeDir ${BUILD_DIR}
@@ -10,24 +25,22 @@ ConfigureStep() {
 }
 
 BuildStep() {
-  MAKE_TARGETS="libcli_main.a libnacl_spawn.a"
-  if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "bionic" ]; then
-    NACLPORTS_CFLAGS+=" -fPIC"
-    NACLPORTS_CXXFLAGS+=" -fPIC"
-    MAKE_TARGETS+=" libnacl_spawn.so"
-  fi
-
-  if [ "${NACL_LIBC}" = "glibc" ]; then
-    MAKE_TARGETS+=" test"
-  else
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  fi
-
-  MAKEFLAGS+=" TOOLCHAIN=${TOOLCHAIN}"
-  MAKEFLAGS+=" NACL_ARCH=${NACL_ARCH_ALT}"
-  export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
-  export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
+  SetupCrossEnvironment
+  export TOOLCHAIN
   DefaultBuildStep
+}
+
+TestStep() {
+  if [ "${NACL_LIBC}" = "glibc" ]; then
+    SetupCrossEnvironment
+    export TOOLCHAIN
+    LogExecute make test
+  fi
+  if [ "${TOOLCHAIN}" = "pnacl" ]; then
+    RunSelLdrCommand test/unittests
+  else
+    LogExecute test/unittests.sh
+  fi
 }
 
 InstallStep() {

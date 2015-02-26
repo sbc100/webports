@@ -7,12 +7,21 @@
 /* Define a typical entry point for command line tools spawned by bash
  * (e.g., ls, objdump, and objdump). */
 
-#include "ppapi_simple/ps_main.h"
+#include "nacl_io/nacl_io.h"
 #include "nacl_main.h"
+#include "ppapi_simple/ps.h"
+#include "ppapi_simple/ps_main.h"
 
 int cli_main(int argc, char* argv[]) {
+  // TODO(sbc): remove this once ppapi_simple stops initializing
+  // nacl_io in the sel_ldr case.
+  if (PSGetInstanceId() == 0)
+    nacl_io_uninit();
   nacl_setup_env();
-  return nacl_main(argc, argv);
+  int rtn = nacl_main(argc, argv);
+  if (PSGetInstanceId() == 0)
+    nacl_io_init();
+  return rtn;
 }
 
 PPAPI_SIMPLE_REGISTER_MAIN(cli_main)

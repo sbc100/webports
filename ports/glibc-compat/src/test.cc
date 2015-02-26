@@ -38,7 +38,7 @@ TEST(TestMktemp, mkdtemp) {
   // Check that tempname starts with the correct prefix but has been
   // modified from the original.
   ASSERT_EQ(0, strncmp("tempfile_", tempdir, strlen("tempfile_")));
-  ASSERT_NE(0, strcmp("tempfile_XXXXXX", tempdir));
+  ASSERT_STRNE("tempfile_XXXXXX", tempdir);
 
   // Check the directory exists
   struct stat buf;
@@ -55,7 +55,7 @@ TEST(TestMktemp, mkstemp) {
   // Check that tempname starts with the correct prefix but has been
   // modified from the original.
   ASSERT_EQ(0, strncmp("tempfile_", tempfile, strlen("tempfile_")));
-  ASSERT_NE(0, strcmp("tempfile_XXXXXX", tempfile));
+  ASSERT_STRNE("tempfile_XXXXXX", tempfile);
 
   ASSERT_EQ(4, write(fd, "test", 4));
   ASSERT_EQ(0, close(fd));
@@ -92,12 +92,6 @@ TEST(TestEndian, byte_swap) {
 }
 #endif
 
-int main(int argc, char** argv) {
-  setenv("TERM", "xterm-256color", 0);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-
 TEST(TestLockf, lockf) {
   // The fcntl() method underlying lockf() is not implemented in NaCl.
   ASSERT_EQ(-1, lockf(1, F_LOCK, 1));
@@ -106,4 +100,10 @@ TEST(TestLockf, lockf) {
   ASSERT_EQ(ENOSYS, errno);
   ASSERT_EQ(-1, lockf(1, F_ULOCK, 1));
   ASSERT_EQ(ENOSYS, errno);
+}
+
+int main(int argc, char** argv) {
+  setenv("TERM", "xterm-256color", 0);
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

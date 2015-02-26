@@ -93,6 +93,12 @@ static int do_mount(const char *source, const char *target,
 }
 
 extern void nacl_setup_env() {
+  // If we running in sel_ldr then don't do any the filesystem/nacl_io
+  // setup. We detect sel_ldr by the absence of the Pepper Instance.
+  if (PSGetInstanceId() == 0) {
+    return;
+  }
+
   umount("/");
   do_mount("", "/", "memfs", 0, NULL);
 

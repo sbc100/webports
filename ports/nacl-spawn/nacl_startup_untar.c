@@ -14,8 +14,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-int nacl_startup_untar(
-    const char *argv0, const char* tarfile, const char* root) {
+#include "ppapi_simple/ps.h"
+
+int nacl_startup_untar(const char* argv0,
+                       const char* tarfile,
+                       const char* root) {
+  if (PSGetInstanceId() == 0) {
+    return 0;
+  }
+
   int ret;
   TAR* tar;
   char filename[PATH_MAX];
