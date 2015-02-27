@@ -23,8 +23,8 @@ BuildStep() {
   export NACLPORTS_INCLUDE
   export STRNCMPI=1
   cp ${START_DIR}/nethack_pepper.c ${SRC_DIR}/src
-  bash sys/unix/setup.sh
-  make
+  LogExecute bash sys/unix/setup.sh
+  LogExecute make
 }
 
 InstallStep() {

@@ -13,6 +13,8 @@ fi
 ConfigureStep() {
   LogExecute rm -f libz.*
   SetupCrossEnvironment
+  CFLAGS="${CPPFLAGS} ${CFLAGS}"
+  CXXFLAGS="${CPPFLAGS} ${CXXFLAGS}"
   CHOST=${NACL_CROSS_PREFIX} LogExecute ./configure --prefix="${PREFIX}"
 }
 

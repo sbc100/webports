@@ -56,13 +56,17 @@ readonly PREFIX=/naclports-dummydir
 NACLPORTS_CFLAGS=""
 NACLPORTS_CXXFLAGS=""
 NACLPORTS_CPPFLAGS="${NACL_CPPFLAGS}"
-
-# For the library path we always explicitly add to the link flags
-# otherwise 'libtool' won't find the libraries correctly.  This
-# is because libtool uses 'gcc -print-search-dirs' which does
-# not honor the external specs file.
 NACLPORTS_LDFLAGS="${NACL_LDFLAGS}"
-NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR} -Wl,-rpath-link=${NACLPORTS_LIBDIR}"
+
+# i686-nacl-clang doesn't currently know about i686-nacl/usr/include
+# or i686-nacl/usr/lib.  Instead it shared the headers with x86_64
+# and uses x86_64-nacl/usr/lib32.
+# TODO(sbc): remove this once we fix:
+# https://code.google.com/p/nativeclient/issues/detail?id=4108
+if [ "${TOOLCHAIN}" = "clang-newlib" -a "${NACL_ARCH}" = "i686" ]; then
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}"
+  NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR}"
+fi
 
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
@@ -378,6 +382,13 @@ PatchSpecsFile() {
   if [ "${NACL_SHARED}" != "1" ]; then
     sed -i.bak "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
   fi
+
+  # For the library path we always explicitly add to the link flags
+  # otherwise 'libtool' won't find the libraries correctly.  This
+  # is because libtool uses 'gcc -print-search-dirs' which does
+  # not honor the external specs file.
+  NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR}"
+  NACLPORTS_LDFLAGS+=" -Wl,-rpath-link=${NACLPORTS_LIBDIR}"
 }
 
 

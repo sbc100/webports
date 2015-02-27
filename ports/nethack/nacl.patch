@@ -220,7 +220,7 @@ diff --git a/sys/unix/Makefile.utl b/sys/unix/Makefile.utl
  #
  #	For Bull DPX/2 systems at B.O.S. 2.0 or higher use the following:
  #
-@@ -89,23 +89,23 @@
+@@ -89,23 +89,24 @@
  # flags for debugging:
  # CFLAGS = -g -I../include
  
@@ -228,6 +228,7 @@ diff --git a/sys/unix/Makefile.utl b/sys/unix/Makefile.utl
 -LFLAGS =
 +CFLAGS = -O -I../include -DSTRCMPI -DSTRNCMPI -m32
 +LFLAGS = -m32
++CPPFLAGS =
  
  LIBS =
   

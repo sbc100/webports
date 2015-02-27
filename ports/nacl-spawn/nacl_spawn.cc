@@ -163,7 +163,9 @@ extern void nacl_setup_env() {
   // Tell the NaCl architecture to /etc/bashrc of mingn.
 #if defined(__x86_64__)
   static const char kNaClArch[] = "x86_64";
-#elif defined(__i686__)
+  // Use __i386__ rather then __i686__ since the latter is not defined
+  // by i686-nacl-clang.
+#elif defined(__i386__)
   static const char kNaClArch[] = "i686";
 #elif defined(__arm__)
   static const char kNaClArch[] = "arm";

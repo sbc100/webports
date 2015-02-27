@@ -19,6 +19,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
 fi
 
 BuildForHost() {
+  Banner "Building for Host"
   MakeDir ${HOST_BUILD_DIR}
   ChangeDir ${HOST_BUILD_DIR}
   CFLAGS="" LDFLAGS="" LIBS="" CC="gcc -m32" \
@@ -29,6 +30,7 @@ BuildForHost() {
 
 ConfigureStep() {
   BuildForHost
+  Banner "Building for NaCl"
   ChangeDir ${BUILD_DIR}
   DefaultConfigureStep
 }
