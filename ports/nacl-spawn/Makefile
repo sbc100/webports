@@ -11,10 +11,13 @@ LIBRARIES = libcli_main.a libnacl_spawn.a
 
 CPPFLAGS += -Wall -Werror -Iinclude
 
+ifeq ($(NACL_SHARED),1)
+LIBRARIES += libnacl_spawn.so
+endif
+
 ifeq ($(TOOLCHAIN),glibc)
 TEST_EXES += test/elf_reader test/library_dependencies
 TEST_BINARIES = test/test_exe test/libtest1.so test/libtest2.so test/libtest3.so
-LIBRARIES += libnacl_spawn.so
 endif
 
 all: $(LIBRARIES) $(TEST_EXES) $(TEST_BINARIES)
