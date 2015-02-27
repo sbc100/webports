@@ -29,8 +29,10 @@ make ${TARGETS}
 
 # i686 NaCl
 NACL_ARCH=i686
-TOOLCHAIN=clang-newlib
-make ${TARGETS}
+# i686 is not yet working with clang-newlib
+# TODO(sbc): uncomment this once nacl-clang works with i686-nacl
+#TOOLCHAIN=clang-newlib
+#make ${TARGETS}
 TOOLCHAIN=glibc
 make ${TARGETS}
 TOOLCHAIN=newlib
