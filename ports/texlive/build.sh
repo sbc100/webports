@@ -30,13 +30,35 @@ export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple \
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS="-lglibc-compat"
+  export LIBS="-lglibc-compat -lm"
 fi
 
+BuildHostBinaries() {
+  local host_build=${WORK_DIR}/build_host
+  if [ ! -x ${host_build}/texk/web2c/tangleboot ]; then
+    Banner "Building texlive for host"
+    MakeDir ${host_build}
+    ChangeDir ${host_build}
+    LIBS="" EXTRA_LIBS="" LogExecute ${SRC_DIR}/configure \
+      --disable-all-pkgs --enable-web2c
+    LIBS="" EXTRA_LIBS="" LogExecute make -j${OS_JOBS}
+    cd -
+  fi
+  EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
+                        OTANGLE=${host_build}/texk/web2c/otangle \
+                        TIE=${host_build}/texk/web2c/tie \
+                        CTANGLE=${host_build}/texk/web2c/ctangle \
+                        CTANGLEBOOT=${host_build}/texk/web2c/ctangleboot \
+                        TANGLE=${host_build}/texk/web2c/tangle \
+                        TANGLEBOOT=${host_build}/texk/web2c/tangleboot"
+}
+
 ConfigureStep() {
-  # TODO(phosek): we should be able to run reautoconf at this point, but
-  # this requires automake > 1.12 which is not currently shipped in Ubuntu 12.04
-  #${SRC_DIR}/reautoconf
+  # We need to build a host version of TeX Live for tangle, ctangle, otangle,
+  # and tie which are used during the NaCl build.
+  # TODO(phosek): a better solution would be to distribute pexe's for these
+  # tools which would be translated for the host and ran using sel_ldr
+  BuildHostBinaries
 
   local build_host=$(${SRC_DIR}/build-aux/config.guess)
   EXTRA_CONFIGURE_ARGS="${EXTRA_CONFIGURE_ARGS} \
@@ -48,7 +70,8 @@ ConfigureStep() {
                         BUILDLIBS="
 
   # TODO(phosek): we need to hardcode the package path because kpathsea which
-  # is normally responsible for resolving paths requires fork/spawn and pipes
+  # is normally responsible for resolving paths requires fork/spawn and pipes;
+  # once nacl_io has support for pipes, we could remove this bit
   sed -i "s+\$PACKAGEDIR+/mnt/html5/packages/texlive.${NACL_ARCH}+g" \
     ${SRC_DIR}/texk/kpathsea/texmf.cnf
 
