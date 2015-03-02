@@ -6,18 +6,18 @@ diff --git a/find/Makefile.in b/find/Makefile.in
  find$(EXEEXT): $(find_OBJECTS) $(find_DEPENDENCIES) 
  	@rm -f find$(EXEEXT)
 -	$(LINK) $(find_OBJECTS) $(find_LDADD) $(LIBS)
-+	$(LINK) $(find_OBJECTS) $(find_LDADD)  -Wl,--undefined=PSUserCreateInstance \
++	$(LINK) $(find_OBJECTS) $(find_LDADD)  -Wl,--undefined=PSUserMainGet \
 +             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -lppapi_cpp -l${NACL_CPP_LIB} $(LIBS)
++             -l${NACL_CPP_LIB} $(LIBS)
  ftsfind$(EXEEXT): $(ftsfind_OBJECTS) $(ftsfind_DEPENDENCIES) 
  	@rm -f ftsfind$(EXEEXT)
  	$(LINK) $(ftsfind_OBJECTS) $(ftsfind_LDADD) $(LIBS)
  oldfind$(EXEEXT): $(oldfind_OBJECTS) $(oldfind_DEPENDENCIES) 
  	@rm -f oldfind$(EXEEXT)
 -	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD) $(LIBS)
-+	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD)  -Wl,--undefined=PSUserCreateInstance \
++	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD)  -Wl,--undefined=PSUserMainGet \
 +             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -lppapi_cpp -l${NACL_CPP_LIB} $(LIBS)
++             -l${NACL_CPP_LIB} $(LIBS)
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
