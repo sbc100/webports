@@ -142,12 +142,18 @@ PACKAGE_FILE=${NACL_PACKAGES_ROOT}/${NAME}_${VERSION}${PACKAGE_SUFFIX}.tar.bz2
 
 NACLPORTS_QUICKBUILD=${NACLPORTS_QUICKBUILD:-0}
 
-if [ "${OS_NAME}" = "Darwin" ]; then
-  OS_JOBS=4
-elif [ "${OS_NAME}" = "Linux" ]; then
-  OS_JOBS=$(nproc)
-else
-  OS_JOBS=1
+# Number of simultaneous jobs to run during parallel build.
+# Setting OS_JOBS=1 in the envrionment can be useful when debugging
+# build failures in building system that interleave the output of
+# of different jobs.
+if [ -z "${OS_JOBS:-}" ]; then
+  if [ "${OS_NAME}" = "Darwin" ]; then
+    OS_JOBS=4
+  elif [ "${OS_NAME}" = "Linux" ]; then
+    OS_JOBS=$(nproc)
+  else
+    OS_JOBS=1
+  fi
 fi
 
 GomaTest() {
