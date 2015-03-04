@@ -64,7 +64,7 @@ NACLPORTS_LDFLAGS="${NACL_LDFLAGS}"
 # TODO(sbc): remove this once we fix:
 # https://code.google.com/p/nativeclient/issues/detail?id=4108
 if [ "${TOOLCHAIN}" = "clang-newlib" -a "${NACL_ARCH}" = "i686" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}"
+  NACLPORTS_CPPFLAGS+=" -isystem ${NACLPORTS_INCLUDE}"
   NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR}"
 fi
 
@@ -989,6 +989,7 @@ ConfigureStep_CMake() {
   SetupCrossPaths
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
+  export LDFLAGS="${NACLPORTS_LDFLAGS}"
   LogExecute cmake "${SRC_DIR}" \
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
            -DNACLAR=${NACLAR} \

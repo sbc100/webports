@@ -19,7 +19,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   # newlib headers generate a lot of char-subscript warnings
   # for macros such as tolower()
-  NACLPORTS_CPPFLAGS+=" -Wno-char-subscripts"S
+  NACLPORTS_CPPFLAGS+=" -Wno-char-subscripts"
   if [ "$NACL_ARCH" != "arm" ]; then
     # Our x86 version of gcc generates a lot of strict aliasing
     # warnings.

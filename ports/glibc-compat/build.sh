@@ -26,6 +26,8 @@ BuildStep() {
   export NACL_SDK_VERSION
   export NACL_SDK_ROOT
   export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export CPPFLAGS=${NACLPORTS_CPPFLAGS}
+  export CFLAGS=${NACLPORTS_CFLAGS}
   DefaultBuildStep
 }
 

@@ -26,6 +26,7 @@ ConfigureStep() {
   if [ "${NACL_ARCH}" = "arm" ]; then
     EXTRA_ARGS+=" -mfpu=vfp"
   fi
+  EXTRA_ARGS+=" ${NACLPORTS_CPPFLAGS}"
 
   # Override $SYSTEM $RELEASE and $MACHINE, otherwise openssl's
   # config will use uname to try and guess them which has

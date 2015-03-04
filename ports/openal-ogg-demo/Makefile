@@ -9,7 +9,7 @@ TARGET = openal-ogg-demo
 LIBS = openal vorbisfile vorbis ogg m ppapi pthread
 SOURCES = openal_ogg.c ogg_buffer_reader.c
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/$(TARGET)/$(TOOLCHAIN)
-CFLAGS = -Wall -Werror
+CFLAGS += -Wall -Werror
 
 ifeq ($(TOOLCHAIN),pnacl)
 EXEEXT=.pexe

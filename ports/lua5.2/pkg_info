@@ -5,4 +5,5 @@ URL=http://www.lua.org/ftp/lua-5.2.3.tar.gz
 LICENSE=MIT
 DEPENDS=(readline)
 DISABLED_LIBC=(bionic)
+CONFLICTS=(lua5.1)
 SHA1=926b7907bc8d274e063d42804666b40a3f3c124c

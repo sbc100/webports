@@ -3,13 +3,12 @@
 # found in the LICENSE file.
 
 ifeq (,$(findstring $(TOOLCHAIN),glibc bionic))
-LIBC=newlib
+LIBC = newlib
 endif
 
 CFLAGS += -Wno-implicit-function-declaration
-CPPFLAGS := -Werror -Wno-unused-value -pthread
+CPPFLAGS += -Werror -Wno-unused-value -pthread
 CPPFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
-CPPFLAGS += -I$(NACL_SDK_ROOT)/include
 OUT := out
 SOURCES := \
   src/alarm.c \

@@ -8,7 +8,7 @@ TARGET = alut-demo
 LIBS = alut openal ppapi_simple nacl_io ppapi_cpp ppapi
 SOURCES = alut_hello_world.c
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/$(TARGET)/$(TOOLCHAIN)
-CFLAGS = -Wall -Werror
+CFLAGS += -Wall -Werror
 
 ifeq ($(TOOLCHAIN),pnacl)
 EXEEXT=.pexe

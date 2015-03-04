@@ -17,7 +17,9 @@ fi
 BuildStep() {
   LogExecute make PLAT=${PLAT} clean
   set -x
-  make AR="${NACLAR} rcu" RANLIB="${NACLRANLIB}" CC="${NACLCC}" PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} -j${OS_JOBS}
+  make MYLDFLAGS="${NACLPORTS_LDFLAGS}" MYCFLAGS="${NACLPORTS_CPPFLAGS}" \
+    AR="${NACLAR} rcu" RANLIB="${NACLRANLIB}" CC="${NACLCC}" PLAT=${PLAT} \
+    EXEEXT=${NACL_EXEEXT} -j${OS_JOBS}
   set +x
 }
 

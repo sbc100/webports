@@ -10,5 +10,7 @@ ConfigureStep() {
   export CXX=${NACLCXX}
   export AR=${NACLAR}
   export RANLIB=${NACLRANLIB}
+  export CFLAGS="${NACLPORTS_CFLAGS} ${NACLPORTS_CPPFLAGS}"
+  export LDFLAGS="${NACLPORTS_LDFLAGS}"
   ./unmaintained/autogen.sh --host=nacl --prefix=${PREFIX}
 }

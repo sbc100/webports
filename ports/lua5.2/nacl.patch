@@ -35,16 +35,16 @@ diff --git a/src/Makefile b/src/Makefile
  generic: $(ALL)
  
 +nacl-newlib:
-+	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_READLINE" MYLIBS="-lreadline -lhistory -lncurses -lglibc-compat"
++	$(MAKE) all SYSCFLAGS="-DLUA_USE_POSIX -DLUA_USE_READLINE" SYSLIBS="-lreadline -lhistory -lncurses -lglibc-compat"
 +
 +nacl-newlib-basic:
-+	$(MAKE) all MYCFLAGS=-DLUA_USE_POSIX
++	$(MAKE) all SYSCFLAGS="-DLUA_USE_POSIX"
 +
 +nacl-glibc:
-+	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-Wl,-E -ldl -lreadline -lhistory -lncurses"
++	$(MAKE) all SYSCFLAGS="-DLUA_USE_LINUX" SYSLIBS="-Wl,-E -ldl -lreadline -lhistory -lncurses"
 +
 +nacl-glibc-basic:
-+	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-Wl,-E -ldl"
++	$(MAKE) all SYSCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" SYSLIBS="-Wl,-E -ldl"
 +
  linux:
  	$(MAKE) $(ALL) SYSCFLAGS="-DLUA_USE_LINUX" SYSLIBS="-Wl,-E -ldl -lreadline"

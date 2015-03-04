@@ -15,6 +15,17 @@ diff --git a/Configure b/Configure
  #### So called "highgprs" target for z/Architecture CPUs
  # "Highgprs" is kernel feature first implemented in Linux 2.6.32, see
  # /proc/cpuinfo. The idea is to preserve most significant bits of
+@@ -865,6 +872,10 @@ PROCESS_ARGS:
+ 			# The check for the option is there so scripts aren't
+ 			# broken
+ 			}
++		elsif (/^[\/]/) # allow '-isystem /foo/bar' flags
++      {
++				$flags.=$_." ";
++      }
+ 		elsif (/^[-+]/)
+ 			{
+ 			if (/^-[lL](.*)$/ or /^-Wl,/)
 diff --git a/config b/config
 --- a/config
 +++ b/config

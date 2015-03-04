@@ -13,6 +13,20 @@ diff --git a/Makefile b/Makefile
 diff --git a/src/Makefile b/src/Makefile
 --- a/src/Makefile
 +++ b/src/Makefile
+@@ -8,11 +8,11 @@
+ PLAT= none
+ 
+ CC= gcc
+-CFLAGS= -O2 -Wall $(MYCFLAGS)
++CFLAGS= -O2 -Wall $(MYCFLAGS) $(EXTRA_CFLAGS)
+ AR= ar rcu
+ RANLIB= ranlib
+ RM= rm -f
+-LIBS= -lm $(MYLIBS)
++LIBS= -lm $(MYLIBS) $(EXTRA_LIBS)
+ 
+ MYCFLAGS=
+ MYLDFLAGS=
 @@ -95,6 +95,18 @@ freebsd:
  generic:
  	$(MAKE) all MYCFLAGS=
