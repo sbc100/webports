@@ -4,6 +4,11 @@
 
 export fu_cv_sys_mounted_fread=yes
 
+BuildStep() {
+  export AR=${NACLAR}
+  DefaultBuildStep
+}
+
 InstallStep() {
   PublishByArchForDevEnv
 }

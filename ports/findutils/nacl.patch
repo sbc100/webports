@@ -1,6 +1,15 @@
 diff --git a/find/Makefile.in b/find/Makefile.in
 --- a/find/Makefile.in
 +++ b/find/Makefile.in
+@@ -198,7 +198,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/build-aux/mkinstalldirs
+ CONFIG_HEADER = $(top_builddir)/config.h
+ CONFIG_CLEAN_FILES =
+ LIBRARIES = $(noinst_LIBRARIES)
+-AR = ar
++AR ?= ar
+ ARFLAGS = cru
+ libfindtools_a_AR = $(AR) $(ARFLAGS)
+ libfindtools_a_LIBADD =
 @@ -691,13 +691,17 @@ installcheck-binPROGRAMS: $(bin_PROGRAMS)
  	done; rm -f c$${pid}_.???; exit $$bad
  find$(EXEEXT): $(find_OBJECTS) $(find_DEPENDENCIES) 
@@ -64,6 +73,15 @@ diff --git a/gnulib/lib/Makefile.am b/gnulib/lib/Makefile.am
 diff --git a/gnulib/lib/Makefile.in b/gnulib/lib/Makefile.in
 --- a/gnulib/lib/Makefile.in
 +++ b/gnulib/lib/Makefile.in
+@@ -209,7 +209,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/build-aux/mkinstalldirs
+ CONFIG_HEADER = $(top_builddir)/config.h
+ CONFIG_CLEAN_FILES =
+ LIBRARIES = $(noinst_LIBRARIES)
+-AR = ar
++AR ?= ar
+ ARFLAGS = cru
+ libgnulib_a_AR = $(AR) $(ARFLAGS)
+ am__DEPENDENCIES_1 =
 @@ -609,7 +609,7 @@ EXTRA_DIST = alloca.c alloca.in.h areadlink.h argmatch.c argmatch.h \
  	$(top_srcdir)/build-aux/link-warning.h config.charset \
  	ref-add.sin ref-del.sin lseek.c lstat.c lstat.h malloc.c \
@@ -1109,6 +1127,18 @@ diff --git a/gnulib/m4/mktime.m4 b/gnulib/m4/mktime.m4
  # Prerequisites of lib/mktime.c.
  AC_DEFUN([gl_PREREQ_MKTIME],
  [
+diff --git a/lib/Makefile.in b/lib/Makefile.in
+--- a/lib/Makefile.in
++++ b/lib/Makefile.in
+@@ -197,7 +197,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/build-aux/mkinstalldirs
+ CONFIG_HEADER = $(top_builddir)/config.h
+ CONFIG_CLEAN_FILES =
+ LIBRARIES = $(noinst_LIBRARIES)
+-AR = ar
++AR ?= ar
+ ARFLAGS = cru
+ libfind_a_AR = $(AR) $(ARFLAGS)
+ am_libfind_a_OBJECTS = gnulib-version.$(OBJEXT) \
 diff --git a/lib/buildcmd.c b/lib/buildcmd.c
 --- a/lib/buildcmd.c
 +++ b/lib/buildcmd.c
@@ -1123,3 +1153,15 @@ diff --git a/lib/buildcmd.c b/lib/buildcmd.c
  
  #include <xalloc.h>
  #include <error.h>
+diff --git a/tests/Makefile.in b/tests/Makefile.in
+--- a/tests/Makefile.in
++++ b/tests/Makefile.in
+@@ -253,7 +253,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/build-aux/mkinstalldirs
+ CONFIG_HEADER = $(top_builddir)/config.h
+ CONFIG_CLEAN_FILES =
+ LIBRARIES = $(noinst_LIBRARIES)
+-AR = ar
++AR ?= ar
+ ARFLAGS = cru
+ libtests_a_AR = $(AR) $(ARFLAGS)
+ am__DEPENDENCIES_1 =
