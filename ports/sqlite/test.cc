@@ -29,3 +29,9 @@ TEST(SqliteTest, InsertValues) {
                          NULL, NULL, NULL), SQLITE_OK);
   ASSERT_EQ(sqlite3_close(db), SQLITE_OK);
 }
+
+int main(int argc, char** argv) {
+  setenv("TERM", "xterm-256color", 0);
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
