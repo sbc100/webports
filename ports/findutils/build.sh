@@ -6,6 +6,7 @@ export fu_cv_sys_mounted_fread=yes
 
 BuildStep() {
   export AR=${NACLAR}
+  export RANLIB=${NACLRANLIB}
   DefaultBuildStep
 }
 
