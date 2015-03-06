@@ -177,7 +177,7 @@ index 1b2ab30..0a0f5c0 100644
  #   include <TargetConditionals.h>
  #   if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE  /* variant of TARGET_OS_MAC */
 diff --git a/libs/icu/icu-53.1/source/configure b/libs/icu/icu-53.1/source/configure
-index 8680619..51b8fb7 100755
+index 8680619..b21637f 100755
 --- a/libs/icu/icu-53.1/source/configure
 +++ b/libs/icu/icu-53.1/source/configure
 @@ -4050,6 +4050,12 @@ esac
@@ -202,8 +202,30 @@ index 8680619..51b8fb7 100755
  i[34567]86-*-cygwin) icu_cv_host_frag=mh-cygwin ;;
  x86_64-*-cygwin) icu_cv_host_frag=mh-cygwin64 ;;
  *-*-mingw32|*-*-mingw64)
+@@ -5616,7 +5622,7 @@ if [ "$GXX" = yes ]; then
+     # and check that the compiler still works.
+     if ! echo "$CXXFLAGS" | grep '\-std=' >/dev/null 2>&1; then
+         OLD_CXXFLAGS="${CXXFLAGS}"
+-        CXXFLAGS="$CXXFLAGS --std=c++0x"
++        CXXFLAGS="$CXXFLAGS --std=gnu++0x"
+         { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we have a C++11 compiler" >&5
+ $as_echo_n "checking if we have a C++11 compiler... " >&6; }
+         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+@@ -5639,9 +5645,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cxx11_okay" >&5
+ $as_echo "$cxx11_okay" >&6; }
+         if [ $cxx11_okay = yes ]; then
+-            { $as_echo "$as_me:${as_lineno-$LINENO}: Adding CXXFLAGS option --std=c++0x" >&5
+-$as_echo "$as_me: Adding CXXFLAGS option --std=c++0x" >&6;}
+-            UCONFIG_CXXFLAGS="${UCONFIG_CXXFLAGS} --std=c++0x"
++            { $as_echo "$as_me:${as_lineno-$LINENO}: Adding CXXFLAGS option --std=gnu++0x" >&5
++$as_echo "$as_me: Adding CXXFLAGS option --std=gnu++0x" >&6;}
++            UCONFIG_CXXFLAGS="${UCONFIG_CXXFLAGS} --std=gnu++0x"
+         else
+             CXXFLAGS="$OLD_CXXFLAGS"
+         fi
 diff --git a/libs/icu/icu-53.1/source/configure.ac b/libs/icu/icu-53.1/source/configure.ac
-index d52b1e6..2569b46 100644
+index d52b1e6..fd1c3ff 100644
 --- a/libs/icu/icu-53.1/source/configure.ac
 +++ b/libs/icu/icu-53.1/source/configure.ac
 @@ -220,6 +220,12 @@ ICU_PROG_LINK
@@ -219,6 +241,23 @@ index d52b1e6..2569b46 100644
      *)      EXEEXT="" ;;
  esac
  ac_exeext=$EXEEXT
+@@ -475,13 +481,13 @@ if [[ "$GXX" = yes ]]; then
+     # and check that the compiler still works.
+     if ! echo "$CXXFLAGS" | grep '\-std=' >/dev/null 2>&1; then
+         OLD_CXXFLAGS="${CXXFLAGS}"
+-        CXXFLAGS="$CXXFLAGS --std=c++0x"
++        CXXFLAGS="$CXXFLAGS --std=gnu++0x"
+         AC_MSG_CHECKING([[if we have a C++11 compiler]])
+         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[]])],[cxx11_okay=yes],[cxx11_okay=no])
+         AC_MSG_RESULT($cxx11_okay)
+         if [[ $cxx11_okay = yes ]]; then
+-            AC_MSG_NOTICE([Adding CXXFLAGS option --std=c++0x])
+-            UCONFIG_CXXFLAGS="${UCONFIG_CXXFLAGS} --std=c++0x"
++            AC_MSG_NOTICE([Adding CXXFLAGS option --std=gnu++0x])
++            UCONFIG_CXXFLAGS="${UCONFIG_CXXFLAGS} --std=gnu++0x"
+         else
+             CXXFLAGS="$OLD_CXXFLAGS"
+         fi
 diff --git a/libs/icu/icu-53.1/source/data/Makefile.in b/libs/icu/icu-53.1/source/data/Makefile.in
 index df97376..fd2b4da 100644
 --- a/libs/icu/icu-53.1/source/data/Makefile.in

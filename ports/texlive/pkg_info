@@ -6,7 +6,6 @@ LICENSE=GPL
 # Disabled on arm due to issue 3205
 DISABLED_ARCH=(arm pnacl)
 DISABLED_LIBC=(bionic)
-DISABLED_TOOLCHAIN=(clang-newlib)
 DEPENDS=(fontconfig glibc-compat nacl-spawn)
 SHA1=8cb283ad26b1fe18e1089820cf64ecc63d8224e8
 # Disabled on OSX due to build errors
