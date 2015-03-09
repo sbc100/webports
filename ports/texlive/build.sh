@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+TLNET_URL=http://storage.googleapis.com/naclports/mirror/texlive-20150202
+
 SCHEME="small"
 
 NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}"
@@ -94,7 +96,7 @@ InstallStep() {
   ChangeDir ${PUBLISH_DIR}
   local INSTALL_TL="install-tl-unx.tar.gz"
   local INSTALL_TL_DIR=${ARCH_DIR}/install-tl
-  TryFetch "ftp://tug.org/texlive/tlnet/${INSTALL_TL}" ${INSTALL_TL}
+  TryFetch "${TLNET_URL}/${INSTALL_TL}" ${INSTALL_TL}
   MakeDir ${INSTALL_TL_DIR}
   tar -xf ${INSTALL_TL} --directory ${INSTALL_TL_DIR} --strip-components=1
   rm -rf ${INSTALL_TL}
@@ -103,7 +105,7 @@ InstallStep() {
     texdir=${ARCH_DIR} scheme=${SCHEME} > ${INSTALL_TL_DIR}/texlive.profile
 
   LogExecute ${INSTALL_TL_DIR}/install-tl \
-    --profile ${INSTALL_TL_DIR}/texlive.profile
+    -repository ${TLNET_URL} -profile ${INSTALL_TL_DIR}/texlive.profile
   rm -rf ${INSTALL_TL_DIR}
 
   if [ "${OS_NAME}" != "Darwin" ]; then
