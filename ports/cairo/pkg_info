@@ -3,9 +3,6 @@ VERSION=1.12.14
 URL=http://cairographics.org/releases/cairo-1.12.14.tar.xz
 LICENSE=GPL,MPL
 DEPENDS=(pixman fontconfig libpng)
-# x86_64-nacl-clang generates: undefined reference to `__udivti3'
-# https://code.google.com/p/nativeclient/issues/detail?id=4112
-DISABLED_TOOLCHAIN=(clang-newlib)
 # Disable for bionic due to fontconfig.
 DISABLED_LIBC=(bionic)
 SHA1=9106ab09b2e7b9f90521b18dd4a7e9577eba6c15

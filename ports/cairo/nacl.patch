@@ -72,3 +72,27 @@ diff --git a/configure b/configure
    if test "$ax_cv_c_float_words_bigendian" = unknown; then
      ax_cv_c_float_words_bigendian=no
    else
+diff --git a/src/cairo-wideint-type-private.h b/src/cairo-wideint-type-private.h
+--- a/src/cairo-wideint-type-private.h
++++ b/src/cairo-wideint-type-private.h
+@@ -124,12 +124,20 @@ typedef struct _cairo_quorem64 {
+     cairo_int64_t	rem;
+ } cairo_quorem64_t;
+ 
++/*
++ * TODO(phosek): nacl-clang declares __uint128_t (but not uint128_t), which
++ * is a gcc extension. However, it does not provide a runtime support for
++ * neither __uint128_t nor uint128_t in compiler-rt which causes an error
++ * during linking. The following check is a temporary workaround.
++ */
++#if !defined(__native_client__) || !defined(__clang__)
+ /* gcc has a non-standard name. */
+ #if HAVE___UINT128_T && !HAVE_UINT128_T
+ typedef __uint128_t uint128_t;
+ typedef __int128_t int128_t;
+ #define HAVE_UINT128_T 1
+ #endif
++#endif
+ 
+ #if !HAVE_UINT128_T
+ 
