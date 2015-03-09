@@ -13,15 +13,8 @@
 #include "ppapi_simple/ps_main.h"
 
 int cli_main(int argc, char* argv[]) {
-  // TODO(sbc): remove this once ppapi_simple stops initializing
-  // nacl_io in the sel_ldr case.
-  if (PSGetInstanceId() == 0)
-    nacl_io_uninit();
   nacl_setup_env();
-  int rtn = nacl_main(argc, argv);
-  if (PSGetInstanceId() == 0)
-    nacl_io_init();
-  return rtn;
+  return nacl_main(argc, argv);
 }
 
 PPAPI_SIMPLE_REGISTER_MAIN(cli_main)
