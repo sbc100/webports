@@ -29,6 +29,7 @@ HTML_TEMPLATE = '''\
     <script type="text/javascript" src="naclprocess.js"></script>
     <script type="text/javascript" src="naclterm.js"></script>
     <script type="text/javascript" src="%(module_name)s.js"></script>
+    %(style)s
     %(include)s
 
     <style type="text/css">
@@ -63,11 +64,12 @@ FORMAT = '%(filename)s: %(message)s'
 logging.basicConfig(format=FORMAT)
 
 
-def CreateTerm(filename, name=None, include=None):
+def CreateTerm(filename, name=None, style=None, include=None):
   if not name:
     basename = os.path.basename(filename)
     name, _ = os.path.splitext(basename)
 
+  style = style or []
   include = include or []
 
   htmlfile = name + '.html'
@@ -76,6 +78,9 @@ def CreateTerm(filename, name=None, include=None):
     args = {}
     args['title'] = name
     args['module_name'] = name
+
+    styleHTML = ['<link rel="stylesheet" href="%s">' % css for css in style]
+    args['style'] = '\n    '.join(styleHTML)
 
     includeHTML = ['<script src="%s"></script>' % js for js in include]
     args['include'] = '\n    '.join(includeHTML)
@@ -97,6 +102,8 @@ def main(args):
   parser.add_argument('-n', '--name', help='name of the application')
   parser.add_argument('-v', '--verbose', action='store_true',
                       help='be more verbose')
+  parser.add_argument('-s', '--style', action='append', default=[],
+                      help='include a CSS file in the generated HTML')
   parser.add_argument('-i', '--include', action='append', default=[],
                       help='include a JavaScript file in the generated HTML')
 
@@ -104,7 +111,7 @@ def main(args):
   if not options.verbose:
     logging.disable(logging.INFO)
 
-  CreateTerm(options.nmf, options.name, options.include)
+  CreateTerm(options.nmf, options.name, options.style, options.include)
   return 0
 
 
