@@ -244,7 +244,10 @@ def RunMain(args):
   parser.add_argument('--toolchain',
                       help='Set toolchain to use when building (newlib, glibc, '
                       'or pnacl)')
-  parser.add_argument('--debug', action='store_true',
+  # use store_const rather than store_true since we want to default for
+  # debug to be None (which then falls back to checking the NACL_DEBUG
+  # environment variable.
+  parser.add_argument('--debug', action='store_const', const=True,
                       help='Build debug configuration (release is the default)')
   parser.add_argument('--arch',
                       help='Set architecture to use when building (x86_64,'
