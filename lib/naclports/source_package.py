@@ -206,7 +206,7 @@ class SourcePackage(package.Package):
     # for pnacl toolchain and arch are the same
     if self.config.toolchain != self.config.arch:
       fullname.append(self.config.toolchain)
-    if os.environ.get('NACL_DEBUG') == '1':
+    if self.config.debug:
       fullname.append('debug')
     return '_'.join(fullname) + '.tar.bz2'
 
@@ -258,8 +258,9 @@ class SourcePackage(package.Package):
       self.Build(build_deps, force)
 
     if self.IsAnyVersionInstalled():
-      self.LogStatus('Uninstalling existing')
-      self.GetInstalledPackage().DoUninstall()
+      installed_pkg = self.GetInstalledPackage()
+      installed_pkg.LogStatus('Uninstalling existing')
+      installed_pkg.DoUninstall()
 
     binary_package.BinaryPackage(package_file).Install()
 
