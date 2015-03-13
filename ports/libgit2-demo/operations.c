@@ -20,7 +20,6 @@
 
 #include <git2.h>
 
-
 static void voutput(const char* message, va_list args) {
   va_list args_copy;
   va_copy(args_copy, args);
@@ -45,11 +44,12 @@ void output(const char* message, ...) {
 static int transfer_progress(const git_transfer_progress* stats,
                              void* payload) {
   output("transfered: %d/%d %d KiB\n", stats->received_objects,
-      stats->total_objects, stats->received_bytes/1024);
+         stats->total_objects, stats->received_bytes / 1024);
   return 0;
 }
 
-static int status_callback(const char* path, unsigned int flags,
+static int status_callback(const char* path,
+                           unsigned int flags,
                            void* payload) {
   output("%#x: %s\n", flags, path);
   return 0;
@@ -60,8 +60,8 @@ git_repository* init_repo(const char* repo_directory) {
   int rtn = git_repository_open(&repo, repo_directory);
   if (rtn != 0) {
     const git_error* err = giterr_last();
-    output("git_repository_open failed %d [%d] %s\n", rtn,
-        err->klass, err->message);
+    output("git_repository_open failed %d [%d] %s\n", rtn, err->klass,
+           err->message);
     return NULL;
   }
 
@@ -198,7 +198,8 @@ cleanup:
   output("push success\n");
 }
 
-int index_matched_path_cb(const char* path, const char* matched_pathspec,
+int index_matched_path_cb(const char* path,
+                          const char* matched_pathspec,
                           void* payload) {
   output("update_all matched: %s\n", path);
   return 0;

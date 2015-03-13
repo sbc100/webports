@@ -10,6 +10,6 @@
 // version, link against nacl_io instead.
 
 // TODO(sbc): Add uname() to libnacl (NaCl bug 3997).
-int uname(struct utsname *buf) {
+int uname(struct utsname* buf) {
   return -1;
 }

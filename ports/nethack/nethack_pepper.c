@@ -11,7 +11,7 @@
 
 #include "nacl_main.h"
 
-extern int nethack_main(int argc, char *argv[]);
+extern int nethack_main(int argc, char* argv[]);
 
 static void setup_unix_environment(const char* arg0) {
   mkdir("/usr", 0777);

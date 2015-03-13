@@ -20,17 +20,17 @@ char formatted_string[MAX_FMT_SIZE];
 void syslog(int level, const char* message, ...) {
   switch (level) {
     case LOG_INFO:
-    fprintf(stderr, "INFO: ");
-    break;
+      fprintf(stderr, "INFO: ");
+      break;
     case LOG_WARN:
-    fprintf(stderr, "WARN: ");
-    break;
+      fprintf(stderr, "WARN: ");
+      break;
     case LOG_ERR:
-    fprintf(stderr, "ERR: ");
-    break;
+      fprintf(stderr, "ERR: ");
+      break;
     case LOG_CRIT:
-    fprintf(stderr, "CRIT: ");
-    break;
+      fprintf(stderr, "CRIT: ");
+      break;
   }
   va_list argptr;
   va_start(argptr, message);
@@ -54,5 +54,4 @@ void network_error() {
   PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), var);
   PSInterfaceVar()->Release(var);
 }
-
 }

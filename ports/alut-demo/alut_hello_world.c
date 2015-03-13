@@ -14,24 +14,22 @@
 
 void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface);
 
-int
-nacl_main(int argc, char **argv)
-{
+int nacl_main(int argc, char** argv) {
   ALuint helloBuffer, helloSource;
 
   /*
    * This extra line is required by the underlying openAl
    * NaCl port.
    */
-  alSetPpapiInfo (PSGetInstanceId(), PSGetInterface);
+  alSetPpapiInfo(PSGetInstanceId(), PSGetInterface);
 
-  alutInit (&argc, argv);
-  helloBuffer = alutCreateBufferHelloWorld ();
-  alGenSources (1, &helloSource);
-  alSourcei (helloSource, AL_BUFFER, helloBuffer);
-  alSourcePlay (helloSource);
-  alutSleep (1);
-  alutExit ();
+  alutInit(&argc, argv);
+  helloBuffer = alutCreateBufferHelloWorld();
+  alGenSources(1, &helloSource);
+  alSourcei(helloSource, AL_BUFFER, helloBuffer);
+  alSourcePlay(helloSource);
+  alutSleep(1);
+  alutExit();
   return EXIT_SUCCESS;
 }
 

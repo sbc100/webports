@@ -4,7 +4,6 @@
  * found in the LICENSE file.
  */
 
-
 /* This example loads an ogg file using the C Pepper URLLoader interface,
  * decodes the file using libvorbis/libogg, and loop plays the file using
  * OpenAL.  Various properties of the audio source and listener can be changed
@@ -60,8 +59,8 @@ struct PepperState {
   const struct PPB_Var_1_1* var_interface;
   PP_Instance instance;
   int ready;
-  ALCdevice *alc_device;
-  ALCcontext *alc_context;
+  ALCdevice* alc_device;
+  ALCcontext* alc_context;
   ALuint buffer;
   ALuint source;
   float source_pos[3];
@@ -74,14 +73,17 @@ struct PepperState {
 struct PepperState g_MyState;
 int g_MyStateIsValid = 0;
 
-char *ogg_file_contents = NULL;
+char* ogg_file_contents = NULL;
 size_t ogg_file_size = 0;
 size_t ogg_file_alloced = 0;
 void ReadSome(void* data);
 
-extern void DecodeOggBuffer(void *inBuffer, size_t size,
-                            char** outBuffer, int* outBufferSize,
-                            int* outChannels, int* outRate);
+extern void DecodeOggBuffer(void* inBuffer,
+                            size_t size,
+                            char** outBuffer,
+                            int* outBufferSize,
+                            int* outChannels,
+                            int* outRate);
 
 void SetupAndPlayAudio() {
   g_MyState.source_pos[0] = 1.0f;
@@ -130,15 +132,13 @@ void DecodeAndPlayOggFile() {
   int buffer_size;
   int num_channels;
   int rate;
-  DecodeOggBuffer(ogg_file_contents, ogg_file_size,
-                  &pcm_buffer, &buffer_size, &num_channels, &rate);
+  DecodeOggBuffer(ogg_file_contents, ogg_file_size, &pcm_buffer, &buffer_size,
+                  &num_channels, &rate);
 
   /* Pass the decoded PCM buffer to OpenAL. */
   alBufferData(g_MyState.buffer,
                num_channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16,
-               pcm_buffer,
-               buffer_size,
-               rate);
+               pcm_buffer, buffer_size, rate);
   assert(alGetError() == AL_NO_ERROR);
 
   free(pcm_buffer);
@@ -160,7 +160,8 @@ static void ReadCallback(void* data, int32_t result) {
     /* 'result' bytes were read into memory. */
     ogg_file_size += (size_t)result;
     ReadSome(data);
-  } else assert(0);
+  } else
+    assert(0);
 }
 
 static void OpenCallback(void* data, int32_t result) {
@@ -174,7 +175,7 @@ static void OpenCallback(void* data, int32_t result) {
 void ReadSome(void* data) {
   while (ogg_file_alloced < ogg_file_size + BUFFER_READ_SIZE) {
     /* The buffer isn't big enough to hold BUFFER_READ_SIZE more bytes. */
-    char *temp = (char*)malloc(ogg_file_alloced * 2);
+    char* temp = (char*)malloc(ogg_file_alloced * 2);
     memcpy(temp, ogg_file_contents, ogg_file_size);
     free(ogg_file_contents);
     ogg_file_contents = temp;
@@ -186,11 +187,9 @@ void ReadSome(void* data) {
 #ifndef NDEBUG
   int32_t read_ret =
 #endif
-  g_MyState.loader_interface->ReadResponseBody(
-      (PP_Resource)data,
-      ogg_file_contents + ogg_file_size,
-      BUFFER_READ_SIZE,
-      cb);
+      g_MyState.loader_interface->ReadResponseBody(
+          (PP_Resource)data, ogg_file_contents + ogg_file_size,
+          BUFFER_READ_SIZE, cb);
   assert(read_ret == PP_OK_COMPLETIONPENDING);
 }
 
@@ -220,12 +219,12 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
   /* This sets up OpenAL with PPAPI info. */
   alSetPpapiInfo(instance, g_get_browser_interface);
 
-  const ALCchar *devices = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+  const ALCchar* devices = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
   setenv("ALSOFT_LOGLEVEL", "3", 0);
   printf("Audio devices available:\n");
   while (devices[0] != '\0') {
     printf("\t%s\n", devices);
-    devices = devices + strlen(devices)+1;
+    devices = devices + strlen(devices) + 1;
   }
 
   InitializeOpenAL();
@@ -235,8 +234,7 @@ static PP_Bool Instance_DidCreate(PP_Instance instance,
 
   PP_Resource request = g_MyState.request_interface->Create(instance);
   g_MyState.request_interface->SetProperty(
-      request,
-      PP_URLREQUESTPROPERTY_URL,
+      request, PP_URLREQUESTPROPERTY_URL,
       g_MyState.var_interface->VarFromUtf8(OGG_FILE, strlen(OGG_FILE)));
 
   PP_Resource loader = g_MyState.loader_interface->Create(instance);
@@ -270,13 +268,15 @@ static PP_Bool Instance_HandleDocumentLoad(PP_Instance pp_instance,
 
 static void Messaging_HandleMessage(PP_Instance pp_instance,
                                     struct PP_Var message) {
-  if (g_MyState.ready == 0) return;
-  if (message.type != PP_VARTYPE_STRING) return;
+  if (g_MyState.ready == 0)
+    return;
+  if (message.type != PP_VARTYPE_STRING)
+    return;
 
   uint32_t len;
   const char* str = g_MyState.var_interface->VarToUtf8(message, &len);
   int array_edit = 0;
-  float *array = NULL;
+  float* array = NULL;
   int array_index = 0;
 
   if (strstr(str, "source_pos")) {
@@ -292,10 +292,10 @@ static void Messaging_HandleMessage(PP_Instance pp_instance,
     array_edit = 1;
     array = g_MyState.listener_vel;
   } else if (strstr(str, "pitch")) {
-    double val = atof(strstr(str, "= ")+2);
+    double val = atof(strstr(str, "= ") + 2);
     g_MyState.pitch = val;
   } else if (strstr(str, "gain")) {
-    double val = atof(strstr(str, "= ")+2);
+    double val = atof(strstr(str, "= ") + 2);
     g_MyState.gain = val;
   }
 
@@ -307,7 +307,7 @@ static void Messaging_HandleMessage(PP_Instance pp_instance,
     } else if (strstr(str, "_z")) {
       array_index = 2;
     }
-    double val = atof(strstr(str, "= ")+2);
+    double val = atof(strstr(str, "= ") + 2);
     array[array_index] = val;
   }
 
@@ -326,31 +326,30 @@ static void Messaging_HandleMessage(PP_Instance pp_instance,
 }
 
 static PPP_Instance instance_interface = {
-  &Instance_DidCreate,
-  &Instance_DidDestroy,
-  &Instance_DidChangeView,
-  &Instance_DidChangeFocus,
-  &Instance_HandleDocumentLoad,
+    &Instance_DidCreate,
+    &Instance_DidDestroy,
+    &Instance_DidChangeView,
+    &Instance_DidChangeFocus,
+    &Instance_HandleDocumentLoad,
 };
 
 static PPP_Messaging messaging_interface = {
-  &Messaging_HandleMessage,
+    &Messaging_HandleMessage,
 };
 
 /* Global entrypoints --------------------------------------------------------*/
 
-PP_EXPORT int32_t PPP_InitializeModule(PP_Module module,
-                                       PPB_GetInterface get_browser_interface) {
+PP_EXPORT int32_t
+PPP_InitializeModule(PP_Module module, PPB_GetInterface get_browser_interface) {
   g_get_browser_interface = get_browser_interface;
   g_module = module;
 
-#define GET_INTERFFACE(MEMBER_NAME, IFACE_NAME) \
-  g_MyState.MEMBER_NAME = \
-    (typeof(g_MyState.MEMBER_NAME)) get_browser_interface(IFACE_NAME); \
-  if (g_MyState.MEMBER_NAME == NULL) \
-  { \
-    printf("Required interfaces are not available: %s\n", IFACE_NAME); \
-    return -1; \
+#define GET_INTERFFACE(MEMBER_NAME, IFACE_NAME)                         \
+  g_MyState.MEMBER_NAME =                                               \
+      (typeof(g_MyState.MEMBER_NAME))get_browser_interface(IFACE_NAME); \
+  if (g_MyState.MEMBER_NAME == NULL) {                                  \
+    printf("Required interfaces are not available: %s\n", IFACE_NAME);  \
+    return -1;                                                          \
   }
 
   GET_INTERFFACE(core_interface, PPB_CORE_INTERFACE_1_0);

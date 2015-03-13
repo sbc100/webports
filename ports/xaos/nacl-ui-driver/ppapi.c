@@ -36,7 +36,6 @@
 /* chrome cananot handle all that many refreshs */
 #define kRefreshInterval 40
 
-
 static struct {
   pthread_mutex_t mutex;
   pthread_cond_t condvar;
@@ -44,7 +43,6 @@ static struct {
   int num;
   struct PpapiEvent* queue[kMaxEvents];
 } EventQueue;
-
 
 static struct {
   pthread_mutex_t flush_mutex;
@@ -75,8 +73,7 @@ static struct {
   int num_viewchanges;
 } Global;
 
-
- int GetWidth() {
+int GetWidth() {
   return Video.width;
 }
 
@@ -87,7 +84,7 @@ int GetHeight() {
 extern int original_main(int argc, char* argv[]);
 
 static void* ThreadForRunningXaosMain(void* arg) {
-  char* argv[] = { "xaos", 0};
+  char* argv[] = {"xaos", 0};
   NaClLog(LOG_INFO, "Xaos main started\n");
   original_main(1, argv);
   NaClLog(LOG_INFO, "Xaos main stopped\n");
@@ -108,16 +105,14 @@ static void FlushCallbackFun(void* user_data, int32_t result) {
 }
 
 void CopyImageDataToVideo(void* data) {
-    pthread_mutex_lock(&Video.flush_mutex);
-    Video.dirty = 1;
-    memcpy(Video.image_data,
-           data,
-           Video.width * Video.height * BYTES_PER_PIXEL);
-    /* do not let anybody write into video buffer while flush in progress*/
-    pthread_mutex_unlock(&Video.flush_mutex);
+  pthread_mutex_lock(&Video.flush_mutex);
+  Video.dirty = 1;
+  memcpy(Video.image_data, data, Video.width * Video.height * BYTES_PER_PIXEL);
+  /* do not let anybody write into video buffer while flush in progress*/
+  pthread_mutex_unlock(&Video.flush_mutex);
 }
 
-struct PP_CompletionCallback FlushCallback = { FlushCallbackFun, NULL };
+struct PP_CompletionCallback FlushCallback = {FlushCallbackFun, NULL};
 
 void ScreenUpdateCallbackFun(void* user_data, int32_t result) {
   if (!Video.dirty) {
@@ -127,25 +122,20 @@ void ScreenUpdateCallbackFun(void* user_data, int32_t result) {
 
   pthread_mutex_lock(&Video.flush_mutex);
   struct PP_Point top_left = PP_MakePoint(0, 0);
-  Global.if_graphics_2d->PaintImageData(Video.device,
-                                        Video.image,
-                                        &top_left,
+  Global.if_graphics_2d->PaintImageData(Video.device, Video.image, &top_left,
                                         NULL);
-
 
   Global.if_graphics_2d->Flush(Video.device, FlushCallback);
 }
 
-struct PP_CompletionCallback ScreenUpdateCallback =
-{ ScreenUpdateCallbackFun, NULL };
-
+struct PP_CompletionCallback ScreenUpdateCallback = {ScreenUpdateCallbackFun,
+                                                     NULL};
 
 static void InitEvents() {
   NaClLog(LOG_INFO, "initialize event queue\n");
   pthread_mutex_init(&EventQueue.mutex, NULL);
   pthread_cond_init(&EventQueue.condvar, NULL);
 }
-
 
 static void InitScreenRefresh(PP_Instance instance,
                               const struct PP_Size* size) {
@@ -159,14 +149,12 @@ static void InitScreenRefresh(PP_Instance instance,
   Video.height = size->height;
 
   NaClLog(LOG_INFO, "create PPAPI graphics device\n");
-  Video.device = Global.if_graphics_2d->Create(instance,
-                                                size,
-                                                PP_FALSE);
+  Video.device = Global.if_graphics_2d->Create(instance, size, PP_FALSE);
   CHECK(Video.device != 0);
   NaClLog(LOG_INFO, "create PPAPI image");
   CHECK(Global.if_instance->BindGraphics(Global.instance, Video.device));
   Video.image = Global.if_image_data->Create(
-    instance, PP_IMAGEDATAFORMAT_BGRA_PREMUL, size, PP_TRUE);
+      instance, PP_IMAGEDATAFORMAT_BGRA_PREMUL, size, PP_TRUE);
   CHECK(Video.image != 0);
   NaClLog(LOG_INFO, "map image into shared memory\n");
   Video.image_data = (void*)Global.if_image_data->Map(Video.image);
@@ -182,7 +170,6 @@ static void InitScreenRefresh(PP_Instance instance,
 
   ScheduleScreenRefresh();
 }
-
 
 static void Init(PP_Instance instance, const struct PP_Size* size) {
   InitEvents();
@@ -219,7 +206,6 @@ static void DidDestroy(PP_Instance instance) {
   /* ignore this for now */
 }
 
-
 static void DidChangeView(PP_Instance instance, PP_Resource view) {
   ++Global.num_viewchanges;
   struct PP_Rect position;
@@ -228,8 +214,8 @@ static void DidChangeView(PP_Instance instance, PP_Resource view) {
   const int width = position.size.width;
   const int height = position.size.height;
 
-  NaClLog(LOG_INFO, "DidChangeView [%d] %d %d\n",
-          Global.num_viewchanges, width, height);
+  NaClLog(LOG_INFO, "DidChangeView [%d] %d %d\n", Global.num_viewchanges, width,
+          height);
 
   if (Global.num_viewchanges > 1) {
     NaClLog(LOG_INFO, "only first view change has any effect\n");
@@ -239,15 +225,13 @@ static void DidChangeView(PP_Instance instance, PP_Resource view) {
   Init(instance, &position.size);
 }
 
-static void DidChangeFocus(PP_Instance instance,
-                           PP_Bool has_focus) {
+static void DidChangeFocus(PP_Instance instance, PP_Bool has_focus) {
   NaClLog(LOG_INFO, "DidChangeFocus\n");
   /* force a refresh */
   Video.dirty = 1;
 }
 
-static PP_Bool HandleInputEvent(PP_Instance instance,
-                                PP_Resource input_event) {
+static PP_Bool HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
   NaClLog(LOG_INFO, "HandleInputEvent\n");
   if (!Global.if_mouse_input_event->IsMouseInputEvent(input_event)) {
     return PP_FALSE;
@@ -258,7 +242,7 @@ static PP_Bool HandleInputEvent(PP_Instance instance,
     return PP_FALSE;
   }
 
-  struct PpapiEvent* event = (struct PpapiEvent*) malloc(sizeof *event);
+  struct PpapiEvent* event = (struct PpapiEvent*)malloc(sizeof *event);
   event->type = Global.if_input_event->GetType(input_event);
   event->button = Global.if_mouse_input_event->GetButton(input_event);
   event->position = Global.if_mouse_input_event->GetPosition(input_event);
@@ -271,14 +255,14 @@ static PP_Bool HandleInputEvent(PP_Instance instance,
     int head = (EventQueue.tail + EventQueue.num) % kMaxEvents;
     EventQueue.queue[head] = event;
     ++EventQueue.num;
-    if (EventQueue.num >= kMaxEvents) EventQueue.num -= kMaxEvents;
+    if (EventQueue.num >= kMaxEvents)
+      EventQueue.num -= kMaxEvents;
     pthread_cond_signal(&EventQueue.condvar);
   }
 
   pthread_mutex_unlock(&EventQueue.mutex);
   return PP_TRUE;
 }
-
 
 struct PpapiEvent* GetEvent(int wait) {
   struct PpapiEvent* event = NULL;
@@ -290,7 +274,8 @@ struct PpapiEvent* GetEvent(int wait) {
   if (EventQueue.num > 0) {
     event = EventQueue.queue[EventQueue.tail];
     ++EventQueue.tail;
-    if (EventQueue.tail >= kMaxEvents) EventQueue.tail -= kMaxEvents;
+    if (EventQueue.tail >= kMaxEvents)
+      EventQueue.tail -= kMaxEvents;
     --EventQueue.num;
   }
   pthread_mutex_unlock(&EventQueue.mutex);
@@ -315,59 +300,49 @@ PP_EXPORT int32_t PPP_InitializeModule(PP_Module module_id,
                                        PPB_GetInterface get_browser_interface) {
   NaClLog(LOG_INFO, "PPP_InitializeModule\n");
   Global.module = module_id;
-  Global.if_core =
-    (PPB_Core*) get_browser_interface(PPB_CORE_INTERFACE);
+  Global.if_core = (PPB_Core*)get_browser_interface(PPB_CORE_INTERFACE);
   CHECK(Global.if_core != 0);
   Global.if_instance =
-    (PPB_Instance*) get_browser_interface(PPB_INSTANCE_INTERFACE);
+      (PPB_Instance*)get_browser_interface(PPB_INSTANCE_INTERFACE);
   CHECK(Global.if_instance != 0);
   Global.if_image_data =
-    (PPB_ImageData*) get_browser_interface(PPB_IMAGEDATA_INTERFACE);
+      (PPB_ImageData*)get_browser_interface(PPB_IMAGEDATA_INTERFACE);
   CHECK(Global.if_image_data != 0);
   Global.if_graphics_2d =
-    (PPB_Graphics2D*) get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
+      (PPB_Graphics2D*)get_browser_interface(PPB_GRAPHICS_2D_INTERFACE);
   CHECK(Global.if_graphics_2d != 0);
   Global.if_input_event =
-    (PPB_InputEvent*) get_browser_interface(PPB_INPUT_EVENT_INTERFACE);
+      (PPB_InputEvent*)get_browser_interface(PPB_INPUT_EVENT_INTERFACE);
   CHECK(Global.if_input_event != 0);
-  Global.if_mouse_input_event =
-    (PPB_MouseInputEvent*) get_browser_interface(PPB_MOUSE_INPUT_EVENT_INTERFACE);
+  Global.if_mouse_input_event = (PPB_MouseInputEvent*)get_browser_interface(
+      PPB_MOUSE_INPUT_EVENT_INTERFACE);
   CHECK(Global.if_input_event != 0);
-  Global.if_view =
-    (PPB_View*) get_browser_interface(PPB_VIEW_INTERFACE);
+  Global.if_view = (PPB_View*)get_browser_interface(PPB_VIEW_INTERFACE);
   CHECK(Global.if_view != 0);
   return PP_OK;
 }
-
 
 PP_EXPORT void PPP_ShutdownModule() {
   NaClLog(LOG_INFO, "PPP_ShutdownModule\n");
 }
 
-static PPP_Instance GlobalInstanceInterface = {
-  DidCreate,
-  DidDestroy,
-  DidChangeView,
-  DidChangeFocus,
-  HandleDocumentLoad
-};
+static PPP_Instance GlobalInstanceInterface = {DidCreate,
+                                               DidDestroy,
+                                               DidChangeView,
+                                               DidChangeFocus,
+                                               HandleDocumentLoad};
 
-static PPP_InputEvent GlobalInputEventInterface = {
-  HandleInputEvent
-};
-
+static PPP_InputEvent GlobalInputEventInterface = {HandleInputEvent};
 
 PP_EXPORT const void* PPP_GetInterface(const char* interface_name) {
   NaClLog(LOG_INFO, "PPP_GetInterface\n");
   if (0 == strncmp(PPP_INSTANCE_INTERFACE, interface_name,
-                     strlen(PPP_INSTANCE_INTERFACE))) {
-
-      return &GlobalInstanceInterface;
-    }
+                   strlen(PPP_INSTANCE_INTERFACE))) {
+    return &GlobalInstanceInterface;
+  }
   if (0 == strncmp(PPP_INPUT_EVENT_INTERFACE, interface_name,
                    strlen(PPP_INPUT_EVENT_INTERFACE))) {
-
-      return &GlobalInputEventInterface;
-    }
+    return &GlobalInputEventInterface;
+  }
   return NULL;
 }

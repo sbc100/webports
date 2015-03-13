@@ -64,7 +64,6 @@ void do_mount(PP_Resource filesystem, const char* prefix, const char* dir) {
     return;
   }
   output("st_mode %#x\n", buf.st_mode);
-
 }
 
 void handle_message(struct PP_Var message) {
@@ -84,7 +83,7 @@ void handle_message(struct PP_Var message) {
   var = array_iface->Get(message, 0);
   assert(var.type == PP_VARTYPE_STRING);
   var_str = var_iface->VarToUtf8(var, &len);
-  cmd = alloca(len+1);
+  cmd = alloca(len + 1);
   memcpy(cmd, var_str, len);
   cmd[len] = '\0';
   var_iface->Release(var);
@@ -92,7 +91,7 @@ void handle_message(struct PP_Var message) {
   var = array_iface->Get(message, 1);
   assert(var.type == PP_VARTYPE_STRING);
   var_str = var_iface->VarToUtf8(var, &len);
-  repo_directory = alloca(len+1);
+  repo_directory = alloca(len + 1);
   memcpy(repo_directory, var_str, len);
   repo_directory[len] = '\0';
   var_iface->Release(var);
@@ -104,7 +103,7 @@ void handle_message(struct PP_Var message) {
       PP_Resource fs = var_iface->VarToResource(var);
       var = array_iface->Get(message, 3);
       var_str = var_iface->VarToUtf8(var, &len);
-      prefix = alloca(len+1);
+      prefix = alloca(len + 1);
       memcpy(prefix, var_str, len);
       prefix[len] = '\0';
       var_iface->Release(var);
@@ -117,7 +116,7 @@ void handle_message(struct PP_Var message) {
       return;
     }
     var_str = var_iface->VarToUtf8(var, &len);
-    arg = alloca(len+1);
+    arg = alloca(len + 1);
     memcpy(arg, var_str, len);
     arg[len] = '\0';
     var_iface->Release(var);
@@ -127,8 +126,8 @@ void handle_message(struct PP_Var message) {
 }
 
 git_smart_subtransport_definition pepper_http_subtransport_definition = {
-  git_smart_subtransport_pepper_http,
-  1  /* use rpc */
+    git_smart_subtransport_pepper_http,
+    1 /* use rpc */
 };
 
 int nacl_main(int argc, char** argv) {
@@ -144,7 +143,7 @@ int nacl_main(int argc, char** argv) {
   if (rtn) {
     const git_error* err = giterr_last();
     output("git_smart_subtransport_pepper_http_init failed %d [%d] %s\n", rtn,
-        err->klass, err->message);
+           err->klass, err->message);
     return 1;
   }
 

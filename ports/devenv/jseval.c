@@ -17,7 +17,7 @@ static void usage(void) {
   exit(1);
 }
 
-static char *read_file_z(const char* filename) {
+static char* read_file_z(const char* filename) {
   FILE* file;
   char* data;
   size_t len;
@@ -65,15 +65,14 @@ static void write_file(const void* data, size_t len, const char* filename) {
   fclose(file);
 }
 
-int nacl_main(int argc, char **argv) {
+int nacl_main(int argc, char** argv) {
   char* indata = 0;
   const char* cmd;
   char* outdata;
   size_t outdata_len;
 
   if ((argc != 3 && argc != 4) ||
-      (strcmp(argv[1], "-f") != 0 &&
-       strcmp(argv[1], "-e") != 0)) {
+      (strcmp(argv[1], "-f") != 0 && strcmp(argv[1], "-e") != 0)) {
     usage();
     return 1;
   }

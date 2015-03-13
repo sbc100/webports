@@ -6,7 +6,7 @@
 
 #include "nacl_main.h"
 
-extern int nacl_nano_main(int argc, char *argv[]);
+extern int nacl_nano_main(int argc, char* argv[]);
 
 int nacl_main(int argc, char* argv[]) {
   if (nacl_startup_untar(argv[0], "nano.tar", "/"))

@@ -6,9 +6,6 @@
 
 #include "nacl_main.h"
 
-extern int nacl_startup_untar(
-    const char* argv0, const char* tarfile, const char* root);
-
 #ifdef __arm__
 #define DATA_FILE "_platform_specific/arm/pydata_arm.tar"
 #elif defined __i386__
@@ -21,7 +18,7 @@ extern int nacl_startup_untar(
 #error "Unknown arch"
 #endif
 
-int nacl_main(int argc, char **argv) {
+int nacl_main(int argc, char** argv) {
   if (nacl_startup_untar(argv[0], DATA_FILE, "/"))
     return -1;
 
