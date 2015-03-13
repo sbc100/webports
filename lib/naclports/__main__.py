@@ -244,7 +244,7 @@ def RunMain(args):
   parser.add_argument('--toolchain',
                       help='Set toolchain to use when building (newlib, glibc, '
                       'or pnacl)')
-  parser.add_argument('--debug',
+  parser.add_argument('--debug', action='store_true',
                       help='Build debug configuration (release is the default)')
   parser.add_argument('--arch',
                       help='Set architecture to use when building (x86_64,'
