@@ -575,7 +575,7 @@ def Main(argv):
       '-x', '--xvfb', action='store_true',
       help='Run Chrome thru xvfb on Linux.')
   parser.add_argument(
-      '-a', '--arch', default='i686',
+      '-a', '--arch', default='x86_64',
       help='Chrome architecture: i686 / x86_64.')
   parser.add_argument(
       '-v', '--verbose', default=0, action='count',
