@@ -32,10 +32,10 @@ fi
 
 NACLPORTS_CFLAGS+=" -Dmain=SDL_main"
 export LIBS+="\
--Wl,--undefined=nacl_main \
 -Wl,--undefined=SDL_main \
--lSDLmain -lSDL \
+-Wl,--undefined=nacl_startup_untar \
 ${NACL_CLI_MAIN_LIB} \
+-lSDLmain -lSDL \
 -lppapi_simple -ltar -lnacl_io -lRegal -lglslopt \
 -lppapi -lppapi_gles2 -lm \
 -l${NACL_CPP_LIB}"
