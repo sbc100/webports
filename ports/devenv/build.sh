@@ -73,7 +73,7 @@ InstallStep() {
 
   # Generate a manifest.json.
   GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR} \
-    ${START_DIR}/key.txt
+    key=$(cat ${START_DIR}/key.txt)
 
   # Create uploadable version (key not included).
   local APP_UPLOAD_DIR="${PUBLISH_DIR}/devenv_app_upload"

@@ -87,7 +87,7 @@ PublishStep() {
 
   # Generate a manifest.json (with key included).
   GenerateManifest ${START_DIR}/manifest.json.template \
-    ${GDB_APP_DIR} ${START_DIR}/key.txt
+    ${GDB_APP_DIR} key=$(cat ${START_DIR}/key.txt)
 
   # Create uploadable version (key not included).
   local GDB_APP_UPLOAD_DIR="${PUBLISH_DIR}/gdb_app_upload"

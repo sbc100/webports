@@ -827,15 +827,10 @@ GenerateManifest() {
     exit 1
   fi
 
-  if [ $# -gt 0 ]; then
-    local KEY="$(cat $1)"
-  else
-    local KEY=""
-  fi
   echo "Expanding ${SOURCE_FILE} > ${TARGET_DIR}/manifest.json"
   # Generate a manifest.json
   "${TEMPLATE_EXPAND}" "${SOURCE_FILE}" \
-    version=${REVISION} key="${KEY}" > ${TARGET_DIR}/manifest.json
+    version=${REVISION} $* > ${TARGET_DIR}/manifest.json
 }
 
 
