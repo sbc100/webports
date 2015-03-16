@@ -93,7 +93,8 @@ PublishStep() {
   local GDB_APP_UPLOAD_DIR="${PUBLISH_DIR}/gdb_app_upload"
   rm -rf ${GDB_APP_UPLOAD_DIR}
   LogExecute cp -r ${GDB_APP_DIR} ${GDB_APP_UPLOAD_DIR}
-  GenerateManifest ${START_DIR}/manifest.json.template ${GDB_APP_UPLOAD_DIR}
+  GenerateManifest ${START_DIR}/manifest.json.template \
+    ${GDB_APP_UPLOAD_DIR} key=
   # Zip for upload to the web store.
   pushd ${PUBLISH_DIR}
   rm -f gdb_app_upload.zip

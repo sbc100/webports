@@ -79,7 +79,8 @@ InstallStep() {
   local APP_UPLOAD_DIR="${PUBLISH_DIR}/devenv_app_upload"
   rm -rf ${APP_UPLOAD_DIR}
   LogExecute cp -r ${APP_DIR} ${APP_UPLOAD_DIR}
-  GenerateManifest ${START_DIR}/manifest.json.template ${APP_UPLOAD_DIR}
+  GenerateManifest ${START_DIR}/manifest.json.template \
+    ${APP_UPLOAD_DIR} key=
 
   # Zip the full app for upload.
   ChangeDir ${PUBLISH_DIR}
