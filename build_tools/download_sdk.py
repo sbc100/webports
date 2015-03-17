@@ -3,14 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Download Native Client SDK for the current platform.
+"""Download the very lastet version Native Client SDK.
 
-This script downloads toolchain bz2's and expands them. It requires
-gsutil to be in the bin PATH and assumes if building on windows that
-cygwin is installed to /cygwin.
+This script downloads toolchain bz2's and expands them.
 
 On Windows this script also required access to the cygtar python
-module which gets included by the gclient DEPS.
+module which gets included by the gclient DEPS, and assumes
+that cygwin is installed in /cygwin.
 """
 
 from __future__ import print_function
@@ -50,13 +49,8 @@ if sys.platform == 'win32':
   import cygtar  # pylint: disable=import-error
 
 BOT_GSUTIL = '/b/build/scripts/slave/gsutil'
-LOCAL_GSUTIL = 'gsutil'
-# For local testing on Windows
-#LOCAL_GSUTIL = 'python.exe C:\\bin\\gsutil\\gsutil'
-
 GS_URL_BASE = 'gs://nativeclient-mirror/nacl/nacl_sdk/'
 GSTORE = 'http://storage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/'
-
 
 
 def DetermineSDKURL(flavor, base_url, version):
@@ -70,24 +64,15 @@ def DetermineSDKURL(flavor, base_url, version):
   Returns:
     A tuple of the URL and version number.
   """
-  if (os.environ.get('BUILDBOT_BUILDERNAME') and
-      not os.environ.get('TEST_BUILDBOT')):
-    gsutil = BOT_GSUTIL
-    if not os.path.exists(gsutil):
-      raise naclports.Error('gsutil not found at: %s' % gsutil)
-  else:
-    gsutil = LOCAL_GSUTIL
-
-  if sys.platform in ['win32', 'cygwin']:
-    gsutil += '.bat'
-
+  # gsutil.py ships with depot_tools, which should be in PATH
+  gsutil = [sys.executable, naclports.util.FindInPath('gsutil.py')]
   path = flavor + '.tar.bz2'
 
   def GSList(path):
     """Run gsutil 'ls' on a path and return just the basenames of the
     elements within.
     """
-    cmd = [gsutil, 'ls', base_url + path]
+    cmd = gsutil + ['ls', base_url + path]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     p_stdout = p.communicate()[0]
     if p.returncode:

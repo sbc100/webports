@@ -6,8 +6,7 @@
 """Scan online binary packages to produce new package index.
 
 This script is indended to be run periodically and the
-results checked into source control.  This script depends on
-gsutil being installed.
+results checked into source control.
 """
 
 from __future__ import print_function
@@ -126,22 +125,23 @@ def main(args):
   if args.verbose:
     naclports.SetVerbose(True)
 
-  sdk_version = naclports.GetSDKVersion()
+  sdk_version = naclports.util.GetSDKVersion()
   Log('Scanning packages built for pepper_%s at revsion %s' %
       (sdk_version, args.revision))
   base_path = '%s/builds/pepper_%s/%s/packages' % (naclports.GS_BUCKET,
                                                    sdk_version,
                                                    args.revision)
   gs_url = 'gs://' + base_path
+  gsutil = naclports.util.FindInPath('gsutil.py')
   listing_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'listing.txt')
   if args.cache_listing and os.path.exists(listing_file):
     Log('Using pre-cached gs listing: %s' % listing_file)
     with open(listing_file) as f:
       listing = f.read()
   else:
-    Log("Searching for packages at: %s" % gs_url)
-    cmd = ['gsutil', 'ls', '-le', gs_url]
-    LogVerbose("Running: %s" % str(cmd))
+    Log('Searching for packages at: %s' % gs_url)
+    cmd = [sys.executable, gsutil, 'ls', '-le', gs_url]
+    LogVerbose('Running: %s' % str(cmd))
     try:
       listing = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:

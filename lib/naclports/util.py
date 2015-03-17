@@ -131,10 +131,9 @@ def FindInPath(command_name):
   Returns:
     Full path to executable.
   """
-  if os.name == 'nt':
+  extensions = ('',)
+  if not os.path.splitext(command_name)[1] and os.name == 'nt':
     extensions = ('.bat', '.com', '.exe')
-  else:
-    extensions = ('',)
 
   for path in os.environ.get('PATH', '').split(os.pathsep):
     for ext in extensions:

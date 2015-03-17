@@ -9,8 +9,8 @@ This script verifies that the URL for every package is mirrored on
 Google Cloud Storage.  If it finds missing URLs it downloads them to
 the local machine and then pushes them up using gsutil.
 
-gsutil is required the run this script and if any mirroring operations are
-required then the correct gsutil credentials will be required.
+If any mirroring operations are required then the correct gsutil
+credentials will be needed.
 """
 
 from __future__ import print_function
@@ -33,7 +33,7 @@ MIRROR_GS = 'gs://naclports/mirror'
 def GsUpload(options, filename, url):
   """Upload a file to Google cloud storage using gsutil"""
   naclports.Log("Uploading to mirror: %s" % url)
-  cmd = [options.gsutil, 'cp', '-a', 'public-read', filename, url]
+  cmd = options.gsutil + ['cp', '-a', 'public-read', filename, url]
   if options.dry_run:
     naclports.Log(cmd)
   else:
@@ -42,7 +42,7 @@ def GsUpload(options, filename, url):
 
 def GetMirrorListing(options, url):
   """Get filename listing for a Google cloud storage URL"""
-  listing = subprocess.check_output([options.gsutil, 'ls', url])
+  listing = subprocess.check_output(options.gsutil + ['ls', url])
   listing = listing.splitlines()
   listing = [os.path.basename(l) for l in listing]
   return listing
@@ -93,14 +93,8 @@ def main(args):
   options = parser.parse_args(args)
   naclports.SetVerbose(options.verbose)
 
-  # Ensure gsutil is in the PATH.
-  bot_gsutil = '/b/build/scripts/slave/gsutil'
-  if os.path.exists(bot_gsutil):
-    gsutil = bot_gsutil
-  else:
-    gsutil = 'gsutil'
-    naclports.util.FindInPath(gsutil)
-  options.gsutil = gsutil
+  # gsutil.py should be in PATH since its part of depot_tools.
+  options.gsutil = [sys.executable, naclports.util.FindInPath('gsutil.py')]
 
   listing = GetMirrorListing(options, MIRROR_GS)
   source_packages = naclports.source_package.SourcePackageIterator()
