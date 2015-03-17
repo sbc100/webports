@@ -26,7 +26,7 @@ import naclports
 import naclports.package
 import naclports.package_index
 
-from naclports import Log, Trace
+from naclports.util import Log, LogVerbose
 
 
 def FormatSize(num_bytes):
@@ -141,7 +141,7 @@ def main(args):
   else:
     Log("Searching for packages at: %s" % gs_url)
     cmd = ['gsutil', 'ls', '-le', gs_url]
-    Trace("Running: %s" % str(cmd))
+    LogVerbose("Running: %s" % str(cmd))
     try:
       listing = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:

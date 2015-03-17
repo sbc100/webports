@@ -4,7 +4,7 @@
 
 from naclports.error import Error, PkgFormatError, DisabledError
 from naclports.pkg_info import ParsePkgInfoFile, ParsePkgInfo
-from naclports.util import Log, Trace, Warn, DownloadFile, SetVerbose
+from naclports.util import Log, LogVerbose, Warn, DownloadFile, SetVerbose
 from naclports.util import GetInstallRoot, InstallLock, BuildLock, IsInstalled
 from naclports.util import GS_BUCKET, GS_URL
 from naclports.paths import NACLPORTS_ROOT, OUT_DIR, TOOLS_DIR, PACKAGES_ROOT

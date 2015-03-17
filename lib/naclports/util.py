@@ -41,7 +41,13 @@ arch_to_pkgarch = {
 # Inverse of arch_to_pkgarch
 pkgarch_to_arch = {v:k for k, v in arch_to_pkgarch.items()}
 
-verbose = False
+LOG_ERROR   = 0
+LOG_WARN    = 1
+LOG_INFO    = 2
+LOG_VERBOSE = 3
+LOG_TRACE   = 4
+
+log_level = LOG_INFO
 color_mode = 'auto'
 
 def Color(message, color):
@@ -73,13 +79,22 @@ def Memoize(f):
   return Memo(f)
 
 
-def SetVerbose(verbosity):
-  global verbose
-  verbose = verbosity
+def SetVerbose(enabled):
+  if enabled:
+    SetLogLevel(LOG_VERBOSE)
+  else:
+    SetLogLevel(LOG_INFO)
 
 
-def Log(message):
+def SetLogLevel(verbosity):
+  global log_level
+  log_level = verbosity
+
+
+def Log(message, verbosity=LOG_INFO):
   """Log a message to the console (stdout)."""
+  if log_level < verbosity:
+    return
   sys.stdout.write(str(message) + '\n')
   sys.stdout.flush()
 
@@ -89,7 +104,7 @@ def LogHeading(message, suffix=''):
   if Color.enabled:
     Log(Color(message, 'green') + suffix)
   else:
-    if verbose:
+    if log_level > LOG_WARN:
       # When running in verbose mode make sure heading standout
       Log('###################################################################')
       Log(message + suffix)
@@ -99,13 +114,15 @@ def LogHeading(message, suffix=''):
 
 
 def Warn(message):
-  Log('warning: ' + message)
+  Log('warning: ' + message, LOG_WARN)
 
 
 def Trace(message):
-  """Log a message to the console if running in verbose mode (-v)."""
-  if verbose:
-    Log(message)
+  Log(message, LOG_TRACE)
+
+
+def LogVerbose(message):
+  Log(message, LOG_VERBOSE)
 
 
 def FindInPath(command_name):
@@ -150,7 +167,7 @@ def DownloadFile(filename, url):
     curl_cmd += ['--silent', '--show-error']
   curl_cmd.append(url)
 
-  if verbose:
+  if log_level > LOG_WARN:
     Log('Downloading: %s [%s]' % (url, filename))
   else:
     Log('Downloading: %s' % url.replace(GS_URL, ''))

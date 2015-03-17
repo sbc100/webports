@@ -50,7 +50,7 @@ def GetMirrorListing(options, url):
 
 def CheckMirror(options, package, mirror_listing):
   """Check that is package has is archive mirrors on Google cloud storage"""
-  naclports.Trace('Checking %s' % package.NAME)
+  naclports.LogVerbose('Checking %s' % package.NAME)
   basename = package.GetArchiveFilename()
   if not basename:
     return

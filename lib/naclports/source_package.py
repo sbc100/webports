@@ -18,7 +18,7 @@ from naclports import package
 from naclports import package_index
 from naclports import util
 from naclports import paths
-from naclports.util import Log, Trace
+from naclports.util import Log, LogVerbose
 from naclports.error import Error, DisabledError, PkgFormatError
 
 
@@ -74,13 +74,13 @@ def ExtractArchive(archive, destination):
     cmd = ['unzip', '-q', '-d', destination, archive]
   else:
     raise Error('unhandled extension: %s' % ext)
-  Trace(cmd)
+  LogVerbose(cmd)
   subprocess.check_call(cmd)
 
 
 def RunGitCmd(directory, cmd, error_ok=False):
   cmd = ['git'] + cmd
-  Trace('%s' % ' '.join(cmd))
+  LogVerbose('%s' % ' '.join(cmd))
   p = subprocess.Popen(cmd,
                        cwd=directory,
                        stderr=subprocess.PIPE,
@@ -282,7 +282,7 @@ class SourcePackage(package.Package):
 
     self.LogStatus('Building')
 
-    if util.verbose:
+    if util.log_level > util.LOG_INFO:
       log_filename = None
     else:
       log_filename = os.path.join(log_root, '%s_%s.log' % (self.NAME,
@@ -294,15 +294,15 @@ class SourcePackage(package.Package):
     with util.BuildLock():
       try:
         with RedirectStdoutStderr(log_filename):
-          old_verbose = util.verbose
+          old_log_level = util.log_level
+          util.log_level = util.LOG_VERBOSE
           try:
-            util.verbose = True
             self.Download()
             self.Extract()
             self.Patch()
             self.RunBuildSh()
           finally:
-            util.verbose = old_verbose
+            util.log_level = old_log_level
       except:
         if log_filename:
           with open(log_filename) as log_file:
@@ -397,7 +397,7 @@ class SourcePackage(package.Package):
       src = os.path.join(tmp_output_path, new_foldername)
       if not os.path.isdir(src):
         raise Error('Archive contents not found: %s' % src)
-      Trace("renaming '%s' -> '%s'" % (src, dest))
+      LogVerbose("renaming '%s' -> '%s'" % (src, dest))
       os.rename(src, dest)
     finally:
       shutil.rmtree(tmp_output_path)
@@ -433,7 +433,7 @@ class SourcePackage(package.Package):
     if os.path.exists(stamp_file):
       self.Log('Skipping patch step (cleaning source tree)')
       cmd = ['git', 'clean', '-f', '-d']
-      if not util.verbose:
+      if not util.log_level > util.LOG_INFO:
         cmd.append('-q')
       self.RunCmd(cmd)
       return
@@ -445,7 +445,7 @@ class SourcePackage(package.Package):
     except subprocess.CalledProcessError as e:
       raise Error(e)
     if os.path.exists(self.GetPatchFile()):
-      Trace('applying patch to: %s' % src_dir)
+      LogVerbose('applying patch to: %s' % src_dir)
       cmd = ['patch', '-p1', '-g0', '--no-backup-if-mismatch']
       with open(self.GetPatchFile()) as f:
         self.RunCmd(cmd, stdin=f)

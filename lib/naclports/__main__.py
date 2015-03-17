@@ -97,13 +97,13 @@ def CmdPkgUscan(package, options):
     with os.fdopen(temp_fd, 'w') as f:
       uscan_url = package.URL.replace(package.VERSION, '(.+)')
       uscan_url = uscan_url.replace('download.sf.net', 'sf.net')
-      util.Trace('uscan pattern: %s' % uscan_url)
+      util.LogVerbose('uscan pattern: %s' % uscan_url)
       f.write("version = 3\n")
       f.write("%s\n" % uscan_url)
 
     cmd = ['uscan', '--upstream-version', package.VERSION, '--package',
            package.NAME, '--watchfile', temp_file]
-    util.Trace(' '.join(cmd))
+    util.LogVerbose(' '.join(cmd))
     rtn = subprocess.call(cmd)
   finally:
     os.remove(temp_file)
@@ -214,8 +214,8 @@ def RunMain(args):
 
   parser = argparse.ArgumentParser(prog='naclports', description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter, epilog=epilog)
-  parser.add_argument('-v', '--verbose', action='store_true',
-                      help='Output extra information.')
+  parser.add_argument('-v', '--verbose', dest='verbosity', action='count',
+                      default=0, help='Output extra information.')
   parser.add_argument('-V', '--verbose-build', action='store_true',
                       help='Make builds verbose (e.g. pass V=1 to make')
   parser.add_argument('--skip-sdk-version-check', action='store_true',
@@ -256,7 +256,11 @@ def RunMain(args):
   parser.add_argument('pkg', nargs='*', help="package name or directory")
   args = parser.parse_args(args)
 
-  util.SetVerbose(args.verbose or os.environ.get('VERBOSE') == '1')
+  if not args.verbosity and os.environ.get('VERBOSE') == '1':
+    args.verbosity = 1
+
+  util.SetLogLevel(util.LOG_INFO + args.verbosity)
+
   if args.verbose_build:
     os.environ['VERBOSE'] = '1'
   else:

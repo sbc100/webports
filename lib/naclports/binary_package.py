@@ -22,7 +22,7 @@ def InstallFile(filename, old_root, new_root):
   """
   oldname = os.path.join(old_root, filename)
 
-  util.Trace('install: %s' % filename)
+  util.LogVerbose('install: %s' % filename)
 
   newname = os.path.join(new_root, filename)
   dirname = os.path.dirname(newname)
@@ -139,6 +139,7 @@ class BinaryPackage(package.Package):
       raise error.Error('package already installed: %s' % self.InfoString())
 
     self.LogStatus('Installing')
+    util.LogVerbose('installing from: %s' % self.filename)
     util.Makedirs(dest_tmp)
 
     names = []
@@ -176,7 +177,7 @@ class BinaryPackage(package.Package):
   def WriteStamp(self):
     """Write stamp file containing pkg_info."""
     filename = util.GetInstallStamp(self.NAME, self.config)
-    util.Trace('stamp: %s' % filename)
+    util.LogVerbose('stamp: %s' % filename)
     pkg_info = self.GetPkgInfo()
     with open(filename, 'w') as f:
       f.write(pkg_info)

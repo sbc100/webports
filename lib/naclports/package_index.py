@@ -84,8 +84,8 @@ class PackageIndex(object):
       return False
     version = util.GetSDKVersion()
     if info['BUILD_SDK_VERSION'] != version:
-      util.Trace('Prebuilt package was built with different SDK version: '
-                 '%s vs %s' % (info['BUILD_SDK_VERSION'], version))
+      util.LogVerbose('Prebuilt package was built with different SDK version: '
+                      '%s vs %s' % (info['BUILD_SDK_VERSION'], version))
       return False
     return True
 

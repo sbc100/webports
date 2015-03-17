@@ -65,7 +65,7 @@ sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
 import naclports
 import naclports.source_package
-from naclports import Trace
+from naclports.util import LogVerbose
 
 
 class Error(naclports.Error):
@@ -96,15 +96,15 @@ def DownloadDataFromBuilder(builder, build):
   for _ in xrange(max_tries):
     url = 'http://build.chromium.org/p/client.nacl.ports/json'
     url += '/builders/%s/builds/%d' % (builder, build)
-    Trace('Downloading %s' % url)
+    LogVerbose('Downloading %s' % url)
     f = urllib2.urlopen(url)
     try:
       data = json.loads(f.read())
       text = data['text']
       if text == ['build', 'successful']:
-        Trace('  Success!')
+        LogVerbose('  Success!')
         return data
-      Trace('  Not successful, trying previous build.')
+      LogVerbose('  Not successful, trying previous build.')
     finally:
       f.close()
     build -= 1
@@ -230,7 +230,7 @@ def LoadCanned(parts):
   partitions = []
   partition = []
   input_file = os.path.join(SCRIPT_DIR, 'partition%d.txt' % parts)
-  Trace("LoadCanned: %s" % input_file)
+  LogVerbose("LoadCanned: %s" % input_file)
   with open(input_file) as fh:
     for line in fh:
       if line.strip()[0] == '#':
@@ -302,7 +302,7 @@ def GetCanned(index, parts):
   assert index >= 0 and index < parts, [index, parts]
   partitions = LoadCanned(parts)
   partitions = FixupCanned(partitions)
-  Trace("Found %d packages for shard %d" % (len(partitions[index]), index))
+  LogVerbose("Found %d packages for shard %d" % (len(partitions[index]), index))
   return partitions[index]
 
 
@@ -345,7 +345,7 @@ def main(args):
   projects = Projects()
   for bot in range(options.num_bots):
     bot_name = '%s%d' % (options.bot_prefix, bot)
-    Trace('Attempting to add data from "%s"' % bot_name)
+    LogVerbose('Attempting to add data from "%s"' % bot_name)
     projects.AddDataFromBuilder(bot_name, options.build_number)
   projects.PostProcessDeps()
 
