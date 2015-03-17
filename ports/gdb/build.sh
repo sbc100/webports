@@ -115,7 +115,7 @@ PublishStep() {
   LogExecute cp ${START_DIR}/extension/main.html ${DEBUG_EXT_DIR}
   LogExecute cp ${START_DIR}/extension/main.js ${DEBUG_EXT_DIR}
   GenerateManifest ${START_DIR}/extension/manifest.json.template \
-    ${DEBUG_EXT_DIR}
+    ${DEBUG_EXT_DIR} key=
 
   # Zip for upload to the web store.
   pushd ${PUBLISH_DIR}
