@@ -19,6 +19,8 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_LDFLAGS+=" -lglibc-compat"
 fi
 
+NACLPORTS_LDFLAGS+=" -l${NACL_CPP_LIB}"
+
 ConfigureStep() {
   LogExecute cp ${START_DIR}/toybox.config ${SRC_DIR}/.config
 }
@@ -26,11 +28,10 @@ ConfigureStep() {
 BuildStep() {
   # We can't use NACL_CROSS_PREFIX without also redefining the CC and HOSTCC
   # variables.
-  if [[ "${NACLCXX}" = *clang++ ]]; then
-    CC=clang++
+  if [[ "${NACLCC}" = *clang ]]; then
+    CC=clang
   else
     CC=gcc
-    NACLPORTS_LDFLAGS+=" -l${NACL_CPP_LIB}"
   fi
 
   export CROSS_COMPILE="${NACL_CROSS_PREFIX}-"

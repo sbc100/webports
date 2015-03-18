@@ -5,5 +5,6 @@ ARCHIVE_ROOT=regal-f106e4cd0e780b0995a26498365dceb0ed025832
 DEPENDS=(libpng)
 # issue with log2 macro
 DISABLED_LIBC=(bionic)
+# no support yet in the native build system
 DISABLED_TOOLCHAIN=(clang-newlib)
 SHA1=6e8cd18c44a83e7eb17d123b5e0ec8cdceff9ea2

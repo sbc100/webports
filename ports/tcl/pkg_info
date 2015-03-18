@@ -10,5 +10,5 @@ DISABLED_LIBC=(bionic)
 # arm-nacl-clang fails with:
 # internal_relocation (type: OFFSET_IMM) not fixed up
 # https://code.google.com/p/nativeclient/issues/detail?id=4115
-DISABLED_TOOLCHAIN=(clang-newlib)
+DISABLED_TOOLCHAIN=(clang-newlib/arm)
 SHA1=5c83d44152cc0496cc0847a2495f659502a30e40

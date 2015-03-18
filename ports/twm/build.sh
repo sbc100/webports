@@ -14,8 +14,9 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export LIBS+=" -lglibc-compat"
 fi
 
-if [ "${TOOLCHAIN}" = "pnacl" ]; then
-  NACLPORTS_CFLAGS+=" -Wno-return-type"
+if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
+  NACLPORTS_CFLAGS+=" -Wno-return-type -Wno-parentheses -Wno-dangling-else"
+  NACLPORTS_CPPFLAGS+=" -std=gnu89"
 fi
 
 BuildStep() {
@@ -26,11 +27,11 @@ BuildStep() {
     ${SRC_DIR}/system.twmrc >>${RC}
   echo '    (char *) 0 };' >>${RC}
 
-  flex ${SRC_DIR}/lex.l
-  bison --defines=gram.h ${SRC_DIR}/gram.y
+  LogExecute flex ${SRC_DIR}/lex.l
+  LogExecute bison --defines=gram.h ${SRC_DIR}/gram.y
   SetupCrossEnvironment
-  ${CC} ${CPPFLAGS} ${CFLAGS} -o twm ${SRC_DIR}/*.c *.c -I. -I${SRC_DIR} \
-    ${LDFLAGS} ${LIBS}
+  LogExecute ${CC} ${CPPFLAGS} ${CFLAGS} -o twm ${SRC_DIR}/*.c *.c -I. \
+    -I${SRC_DIR} ${LDFLAGS} ${LIBS}
 }
 
 InstallStep() {

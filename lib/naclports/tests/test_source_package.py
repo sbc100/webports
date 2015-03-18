@@ -156,7 +156,15 @@ class TestSourcePackage(common.NaclportsTest):
 
     pkg = source_package.CreatePackage('bar')
     with self.assertRaisesRegexp(error.DisabledError,
-                                 'disabled for current arch: x86_64'):
+                                 'disabled for architecture: x86_64'):
+      pkg.CheckInstallable()
+
+  def testSingleArch(self):
+    self.CreateTestPackage('bar', 'ARCH=(arm)')
+
+    pkg = source_package.CreatePackage('bar')
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'disabled for architecture: x86_64$'):
       pkg.CheckInstallable()
 
   def testDisabledLibc(self):
@@ -164,8 +172,29 @@ class TestSourcePackage(common.NaclportsTest):
 
     pkg = source_package.CreatePackage('bar')
     with self.assertRaisesRegexp(error.DisabledError,
-                                 'cannot be built with newlib'):
+                                 'cannot be built with newlib$'):
       pkg.CheckInstallable()
+
+  def testDisabledToolchain(self):
+    self.CreateTestPackage('bar', 'DISABLED_TOOLCHAIN=(newlib)')
+
+    pkg = source_package.CreatePackage('bar')
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'cannot be built with newlib$'):
+      pkg.CheckInstallable()
+
+  def testDisabledToolchainArch(self):
+    self.CreateTestPackage('bar', 'DISABLED_TOOLCHAIN=(newlib/x86_64)')
+
+    pkg = source_package.CreatePackage('bar')
+    with self.assertRaisesRegexp(error.DisabledError,
+                                 'cannot be built with newlib for x86_64$'):
+      pkg.CheckInstallable()
+
+    self.CreateTestPackage('bar2', 'DISABLED_TOOLCHAIN=(newlib/arm)')
+
+    pkg = source_package.CreatePackage('bar2')
+    pkg.CheckInstallable()
 
   def testCheckInstallableDepends(self):
     self.CreateTestPackage('foo', 'DEPENDS=(bar)')
@@ -173,7 +202,7 @@ class TestSourcePackage(common.NaclportsTest):
 
     pkg = source_package.CreatePackage('foo')
     with self.assertRaisesRegexp(error.DisabledError,
-                                 'bar: package is disabled'):
+                                 'bar: package is disabled$'):
       pkg.CheckInstallable()
 
   def testCheckBuildable(self):
@@ -181,7 +210,7 @@ class TestSourcePackage(common.NaclportsTest):
 
     pkg = source_package.CreatePackage('foo')
     with self.assertRaisesRegexp(error.DisabledError,
-                                 'can only be built on solaris'):
+                                 'can only be built on solaris$'):
       pkg.CheckBuildable()
 
   @patch('naclports.util.GetSDKVersion', Mock(return_value=123))

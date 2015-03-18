@@ -68,6 +68,10 @@ class Package(object):
         raise Error('%s: invalid libc: %s' % (self.info, libc))
 
     for toolchain in self.DISABLED_TOOLCHAIN:
+      if '/' in toolchain:
+        toolchain, arch = toolchain.split('/')
+        if arch not in util.arch_to_pkgarch:
+          raise Error('%s: invalid architecture: %s' % (self.info, arch))
       if toolchain not in configuration.VALID_TOOLCHAINS:
         raise Error('%s: invalid toolchain: %s' % (self.info, toolchain))
 

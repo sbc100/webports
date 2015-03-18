@@ -16,6 +16,11 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export LIBS="-lglibc-compat"
 fi
 
+if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
+  # correctly handle 'extern inline'
+  NACLPORTS_CPPFLAGS+=" -std=gnu89"
+fi
+
 PublishStep() {
   MakeDir ${PUBLISH_DIR}
   cp src/tar ${PUBLISH_DIR}/tar_${NACL_ARCH}${NACL_EXEEXT}

@@ -489,12 +489,20 @@ class SourcePackage(package.Package):
       raise DisabledError('%s: cannot be built with %s'
                           % (self.NAME, self.config.libc))
 
-    if self.config.toolchain in self.DISABLED_TOOLCHAIN:
-      raise DisabledError('%s: cannot be built with %s'
-                          % (self.NAME, self.config.toolchain))
+    for disabled_toolchain in self.DISABLED_TOOLCHAIN:
+      if '/' in disabled_toolchain:
+        disabled_toolchain, arch = disabled_toolchain.split('/')
+        if (self.config.arch == arch and
+            self.config.toolchain == disabled_toolchain):
+          raise DisabledError('%s: cannot be built with %s for %s'
+                              % (self.NAME, self.config.toolchain, arch))
+      else:
+        if self.config.toolchain == disabled_toolchain:
+          raise DisabledError('%s: cannot be built with %s'
+                              % (self.NAME, self.config.toolchain))
 
     if self.config.arch in self.DISABLED_ARCH:
-      raise DisabledError('%s: disabled for current arch: %s'
+      raise DisabledError('%s: disabled for architecture: %s'
                           % (self.NAME, self.config.arch))
 
     if self.MIN_SDK_VERSION is not None:
@@ -504,7 +512,7 @@ class SourcePackage(package.Package):
 
     if self.ARCH is not None:
       if self.config.arch not in self.ARCH:
-        raise DisabledError('%s: disabled for current arch: %s'
+        raise DisabledError('%s: disabled for architecture: %s'
                             % (self.NAME, self.config.arch))
 
     for conflicting_package in self.CONFLICTS:

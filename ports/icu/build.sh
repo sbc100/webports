@@ -14,10 +14,10 @@ if [ "${NACL_SHARED}" != "1" ]; then
   EXTRA_CONFIGURE_ARGS+=" --disable-shared --enable-static --disable-dyload"
 fi
 
-if [ "${TOOLCHAIN}" = "newlib" ]; then
+if [ "${NACL_LIBC}" = "newlib" ]; then
   # The newlib headers don't define tzset when --std=c++0x, only with
   # gnu++0x.  This prevents ICU from using its default of c++0x.
-  NACLPORTS_CXXFLAGS+=" --std=gnu++0x"
+  NACLPORTS_CXXFLAGS+=" -std=gnu++0x"
 fi
 
 if [ "${TOOLCHAIN}" = "pnacl" ]; then
