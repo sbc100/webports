@@ -5,7 +5,6 @@
 import contextlib
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -18,7 +17,7 @@ from naclports import package
 from naclports import package_index
 from naclports import util
 from naclports import paths
-from naclports.util import Log, LogVerbose
+from naclports.util import Log, Trace, LogVerbose
 from naclports.error import Error, DisabledError, PkgFormatError
 
 
@@ -53,7 +52,7 @@ def FormatTimeDelta(delta):
   Args:
     delta: the amount of time in seconds.
 
-  Returns: A string desribing the ammount of time passed in.
+  Returns: A string describing the amount of time passed in.
   """
   rtn = ''
   if delta >= 60:
@@ -92,21 +91,29 @@ def RunGitCmd(directory, cmd, error_ok=False):
     if stderr:
       Log(stderr)
     raise Error('git command failed: %s' % cmd)
+  Trace('git exited with %d' % p.returncode)
   return p.returncode
 
 
 def InitGitRepo(directory):
-  """Initialise the source git repository for a given package direcotry.
+  """Initialize the source git repository for a given package directory.
 
   This function works for unpacked tar files as well as cloned git
   repositories.  It sets up an 'upstream' branch pointing and the
-  pestine upstream sources and a 'master' bracnh will contain changes
+  pristine upstream sources and a 'master' branch will contain changes
   specific to naclports (normally the result of applying nacl.patch).
 
   Args:
-    directory: Direcotory containing unpacked package sources.
+    directory: Directory containing unpacked package sources.
   """
-  if os.path.exists(os.path.join(directory, '.git')):
+  git_dir = os.path.join(directory, '.git')
+
+  # If the upstream ref exists then we've already initialized this repo
+  if os.path.exists(os.path.join(git_dir, 'refs', 'heads', 'upstream')):
+    return
+
+  if os.path.exists(git_dir):
+    Log('Init existing git repo: %s' % directory)
     RunGitCmd(directory, ['checkout', '-b', 'placeholder'])
     RunGitCmd(directory, ['branch', '-D', 'upstream'], error_ok=True)
     RunGitCmd(directory, ['branch', '-D', 'master'], error_ok=True)
@@ -114,15 +121,22 @@ def InitGitRepo(directory):
     RunGitCmd(directory, ['checkout', '-b', 'master'])
     RunGitCmd(directory, ['branch', '-D', 'placeholder'])
   else:
+    Log('Init new git repo: %s' % directory)
     RunGitCmd(directory, ['init'])
-    # Setup a bogus identity on the buildbots.
-    if os.environ.get('BUILDBOT_BUILDERNAME'):
-      RunGitCmd(directory, ['config', 'user.name', 'Naclports'])
-      RunGitCmd(directory, ['config', 'user.email', 'nobody@example.com'])
-    RunGitCmd(directory, ['add', '-f', '.'])
-    RunGitCmd(directory, ['commit', '-m', 'Upstream version'])
-    RunGitCmd(directory, ['checkout', '-b', 'upstream'])
-    RunGitCmd(directory, ['checkout', 'master'])
+    try:
+      # Setup a bogus identity on the buildbots.
+      if os.environ.get('BUILDBOT_BUILDERNAME'):
+        RunGitCmd(directory, ['config', 'user.name', 'Naclports'])
+        RunGitCmd(directory, ['config', 'user.email', 'nobody@example.com'])
+      RunGitCmd(directory, ['add', '-f', '.'])
+      RunGitCmd(directory, ['commit', '-m', 'Upstream version'])
+      RunGitCmd(directory, ['checkout', '-b', 'upstream'])
+      RunGitCmd(directory, ['checkout', 'master'])
+    except: # pylint: disable=bare-except
+      # If git setup fails or is interrupted then remove the partially
+      # initialized repository.
+      util.RemoveTree(os.path.join(git_dir))
+
 
 
 def WriteStamp(stamp_file, stamp_contents):
@@ -357,8 +371,7 @@ class SourcePackage(package.Package):
 
     stamp_dir = os.path.join(paths.STAMP_DIR, self.NAME)
     Log('removing %s' % stamp_dir)
-    if os.path.exists(stamp_dir):
-      shutil.rmtree(stamp_dir)
+    util.RemoveTree(stamp_dir)
 
   def Extract(self):
     """Extract the package archive into its build location.
@@ -400,7 +413,7 @@ class SourcePackage(package.Package):
       LogVerbose("renaming '%s' -> '%s'" % (src, dest))
       os.rename(src, dest)
     finally:
-      shutil.rmtree(tmp_output_path)
+      util.RemoveTree(tmp_output_path)
 
     self.RemoveStamps()
     WriteStamp(stamp_file, stamp_contents)
@@ -439,11 +452,7 @@ class SourcePackage(package.Package):
       return
 
     util.LogHeading('Patching')
-    Log('Init git repo: %s' % src_dir)
-    try:
-      InitGitRepo(src_dir)
-    except subprocess.CalledProcessError as e:
-      raise Error(e)
+    InitGitRepo(src_dir)
     if os.path.exists(self.GetPatchFile()):
       LogVerbose('applying patch to: %s' % src_dir)
       cmd = ['patch', '-p1', '-g0', '--no-backup-if-mismatch']
@@ -686,7 +695,7 @@ class SourcePackage(package.Package):
 
 
 def SourcePackageIterator():
-  """Iterator which yields a Package object for each naclport package."""
+  """Iterator which yields a Package object for each naclports package."""
   ports_root = os.path.join(paths.NACLPORTS_ROOT, 'ports')
   for root, _, files in os.walk(ports_root):
     if 'pkg_info' in files:
