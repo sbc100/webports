@@ -41,6 +41,9 @@ ConfigureStep() {
 }
 
 BuildStep() {
+  if [ "${NACL_LIBC}" = "newlib" ]; then
+    export NO_RT_LIBRARY=1
+  fi
   export CROSS_COMPILE=1
   SetupCrossEnvironment
   ChangeDir ${SRC_DIR}

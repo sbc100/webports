@@ -1,7 +1,7 @@
 diff --git a/Makefile b/Makefile
 --- a/Makefile
 +++ b/Makefile
-@@ -889,14 +889,22 @@ BUILTIN_OBJS += builtin/verify-tag.o
+@@ -898,14 +898,22 @@ BUILTIN_OBJS += builtin/verify-tag.o
  BUILTIN_OBJS += builtin/write-tree.o
  
  GITLIBS = $(LIB_FILE) $(XDIFF_LIB)
@@ -25,7 +25,18 @@ diff --git a/Makefile b/Makefile
  ifndef sysconfdir
  ifeq ($(prefix),/usr)
  sysconfdir = /etc
-@@ -1610,7 +1618,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
+@@ -1407,8 +1415,10 @@ endif
+ 
+ ifdef HAVE_CLOCK_GETTIME
+ 	BASIC_CFLAGS += -DHAVE_CLOCK_GETTIME
++ifndef NO_RT_LIBRARY
+ 	EXTLIBS += -lrt
+ endif
++endif
+ 
+ ifdef HAVE_CLOCK_MONOTONIC
+ 	BASIC_CFLAGS += -DHAVE_CLOCK_MONOTONIC
+@@ -1642,7 +1652,7 @@ git.sp git.s git.o: EXTRA_CPPFLAGS = \
  	'-DGIT_INFO_PATH="$(infodir_relative_SQ)"'
  
  git$X: git.o GIT-LDFLAGS $(BUILTIN_OBJS) $(GITLIBS)
@@ -34,17 +45,17 @@ diff --git a/Makefile b/Makefile
  		$(BUILTIN_OBJS) $(LIBS)
  
  help.sp help.s help.o: common-cmds.h
-@@ -1893,21 +1901,21 @@ compat/nedmalloc/nedmalloc.sp: SPARSE_FLAGS += -Wno-non-pointer-null
+@@ -1931,21 +1941,21 @@ compat/nedmalloc/nedmalloc.sp: SPARSE_FLAGS += -Wno-non-pointer-null
  endif
  
  git-%$X: %.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS)
 +	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) $(LIBS)
  
- git-imap-send$X: imap-send.o GIT-LDFLAGS $(GITLIBS)
+ git-imap-send$X: imap-send.o $(IMAP_SEND_BUILDDEPS) GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
 +	$(QUIET_LINK)$(CCLD) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
- 		$(LIBS) $(OPENSSL_LINK) $(OPENSSL_LIBSSL) $(LIB_4_CRYPTO)
+ 		$(LIBS) $(IMAP_SEND_LDFLAGS)
  
  git-http-fetch$X: http.o http-walker.o http-fetch.o GIT-LDFLAGS $(GITLIBS)
 -	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $(ALL_LDFLAGS) $(filter %.o,$^) \
@@ -61,7 +72,7 @@ diff --git a/Makefile b/Makefile
  	$(VCSSVN_LIB)
  
  $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
-@@ -1917,8 +1925,8 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
+@@ -1955,8 +1965,8 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
  	cp $< $@
  
  $(REMOTE_CURL_PRIMARY): remote-curl.o http.o http-walker.o GIT-LDFLAGS $(GITLIBS)
@@ -72,7 +83,7 @@ diff --git a/Makefile b/Makefile
  
  $(LIB_FILE): $(LIB_OBJS)
  	$(QUIET_AR)$(RM) $@ && $(AR) rcs $@ $^
-@@ -2131,7 +2139,7 @@ test-svn-fe$X: vcs-svn/lib.a
+@@ -2169,7 +2179,7 @@ test-svn-fe$X: vcs-svn/lib.a
  .PRECIOUS: $(TEST_OBJS)
  
  test-%$X: test-%.o GIT-LDFLAGS $(GITLIBS)
@@ -196,7 +207,7 @@ diff --git a/configure.ac b/configure.ac
  
  AC_CHECK_LIB([c], [gettext],
  [LIBC_CONTAINS_LIBINTL=YesPlease],
-@@ -831,7 +834,8 @@ AC_RUN_IFELSE(
+@@ -844,7 +847,8 @@ AC_RUN_IFELSE(
  		FILE *f = fopen(".", "r");
  		return f && fread(&c, 1, 1, f)]])],
  	[ac_cv_fread_reads_directories=no],
@@ -206,7 +217,7 @@ diff --git a/configure.ac b/configure.ac
  ])
  if test $ac_cv_fread_reads_directories = yes; then
  	FREAD_READS_DIRECTORIES=UnfortunatelyYes
-@@ -865,7 +869,8 @@ AC_RUN_IFELSE(
+@@ -878,7 +882,8 @@ AC_RUN_IFELSE(
  		  if (snprintf(buf, 3, "%s", "12345") != 5
  		      || strcmp(buf, "12")) return 1]])],
  	[ac_cv_snprintf_returns_bogus=no],
@@ -327,7 +338,7 @@ diff --git a/fast-import.c b/fast-import.c
 diff --git a/git-compat-util.h b/git-compat-util.h
 --- a/git-compat-util.h
 +++ b/git-compat-util.h
-@@ -754,8 +754,8 @@ void git_qsort(void *base, size_t nmemb, size_t size,
+@@ -796,8 +796,8 @@ void git_qsort(void *base, size_t nmemb, size_t size,
  #define ST_CTIME_NSEC(st) ((unsigned int)((st).st_ctimespec.tv_nsec))
  #define ST_MTIME_NSEC(st) ((unsigned int)((st).st_mtimespec.tv_nsec))
  #else
@@ -338,7 +349,7 @@ diff --git a/git-compat-util.h b/git-compat-util.h
  #endif
  #endif
  
-@@ -828,4 +828,12 @@ struct tm *git_gmtime_r(const time_t *, struct tm *);
+@@ -870,4 +870,12 @@ struct tm *git_gmtime_r(const time_t *, struct tm *);
  #define gmtime_r git_gmtime_r
  #endif
  
@@ -397,7 +408,7 @@ diff --git a/http-fetch.c b/http-fetch.c
 diff --git a/http-push.c b/http-push.c
 --- a/http-push.c
 +++ b/http-push.c
-@@ -1710,7 +1710,11 @@ static void run_request_queue(void)
+@@ -1713,7 +1713,11 @@ static void run_request_queue(void)
  #endif
  }
  
@@ -412,9 +423,9 @@ diff --git a/http-push.c b/http-push.c
 diff --git a/imap-send.c b/imap-send.c
 --- a/imap-send.c
 +++ b/imap-send.c
-@@ -1338,7 +1338,11 @@ static void git_imap_config(void)
- 	git_config_get_string("imap.authmethod", &server.auth_method);
+@@ -1484,7 +1484,11 @@ static int curl_append_msgs_to_imap(struct imap_server_conf *server,
  }
+ #endif
  
 +#if defined(__native_client__)
 +int nacl_main(int argc, char *argv[])
@@ -423,7 +434,7 @@ diff --git a/imap-send.c b/imap-send.c
 +#endif
  {
  	struct strbuf all_msgs = STRBUF_INIT;
- 	struct strbuf msg = STRBUF_INIT;
+ 	int total;
 diff --git a/progress.c b/progress.c
 --- a/progress.c
 +++ b/progress.c
@@ -1003,7 +1014,7 @@ diff --git a/test-wildmatch.c b/test-wildmatch.c
 diff --git a/upload-pack.c b/upload-pack.c
 --- a/upload-pack.c
 +++ b/upload-pack.c
-@@ -791,7 +791,11 @@ static int upload_pack_config(const char *var, const char *value, void *unused)
+@@ -793,7 +793,11 @@ static int upload_pack_config(const char *var, const char *value, void *unused)
  	return parse_hide_refs_config(var, value, "uploadpack");
  }
  
