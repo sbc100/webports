@@ -86,7 +86,7 @@ diff --git a/dix/main.c b/dix/main.c
  #ifdef XQUARTZ
  #include <pthread.h>
  
-@@ -130,11 +134,22 @@ int
+@@ -130,11 +134,24 @@ int
  dix_main(int argc, char *argv[], char *envp[])
  #else
  int
@@ -104,6 +104,8 @@ diff --git a/dix/main.c b/dix/main.c
 +    char **envp = environ;
 +    unsetenv("NACL_SPAWN_MODE");
 +    if (nacl_startup_untar(argv[0], "xorg-xkb.tar", "/"))
++      return 1;
++    if (nacl_startup_untar(argv[0], "xorg-fonts.tar", "/"))
 +      return 1;
 +#endif
  

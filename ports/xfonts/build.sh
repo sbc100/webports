@@ -10,13 +10,14 @@ InstallStep() {
   MakeDir ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
 
-  LogExecute rm -rf fonts
-  LogExecute cp -fR ${NACL_PREFIX}/share/fonts ${PUBLISH_DIR}
-  for dir in $(find ${PUBLISH_DIR}/fonts/X11 -type d); do
-    LogExecute mkfontdir "$dir"
+  LogExecute rm -rf share
+  MakeDir share/fonts
+  LogExecute cp -fR ${NACL_PREFIX}/share/fonts ${PUBLISH_DIR}/share/
+  for dir in $(find ${PUBLISH_DIR}/share/fonts/X11 -type d); do
     LogExecute mkfontscale "$dir"
+    LogExecute mkfontdir "$dir"
   done
 
-  LogExecute zip -qr fonts.zip fonts
-  LogExecute rm -rf fonts
+  LogExecute tar cf xorg-fonts.tar share/
+  LogExecute rm -rf share
 }
