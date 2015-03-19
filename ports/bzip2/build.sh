@@ -3,19 +3,29 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
+EXECUTABLES="bzip2"
+
+NACLPORTS_CFLAGS+=" -Dmain=nacl_main -fPIC"
+export NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB} \
+-lppapi_simple -lnacl_io -lppapi -l${NACL_CPP_LIB}"
 
 ConfigureStep() {
   return
 }
 
 BuildStep() {
+  SetupCrossEnvironment
   LogExecute make clean
-  LogExecute make CC="${NACLCC}" AR="${NACLAR}" RANLIB="${NACLRANLIB}" \
-      -j${OS_JOBS} libbz2.a
+  LogExecute make \
+      CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" \
+      CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" \
+      -j${OS_JOBS} libbz2.a bzip2
   if [ "${NACL_SHARED}" = "1" ]; then
     LogExecute make -f Makefile-libbz2_so clean
-    LogExecute make -f Makefile-libbz2_so CC="${NACLCC}" AR="${NACLAR}" \
-        RANLIB="${NACLRANLIB}" -j${OS_JOBS}
+    LogExecute make -f Makefile-libbz2_so \
+      CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" \
+      CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" \
+      -j${OS_JOBS}
   fi
 }
 
@@ -33,4 +43,11 @@ InstallStep() {
     LogExecute cp -af libbz2.so* ${DESTDIR_LIB}
   fi
   LogExecute chmod a+r ${DESTDIR_LIB}/libbz2.*
+}
+
+PublishStep() {
+  # TODO(bradnelson): Figure out why the newlib version gets:
+  # Function not implemented
+  # when compressing with the bzip2 command-line tool.
+  PublishByArchForDevEnv
 }

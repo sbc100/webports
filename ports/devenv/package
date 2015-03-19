@@ -227,6 +227,7 @@ function main() {
   # Special cases for certain packages.
   # Pairs of <package-name>:<source>:<package-subdir>[:<old-package-subdir>]
   PACKAGE_INFO="\
+bzip2|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
 mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
 mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
