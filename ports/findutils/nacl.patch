@@ -17,7 +17,7 @@ diff --git a/find/Makefile.in b/find/Makefile.in
 -	$(LINK) $(find_OBJECTS) $(find_LDADD) $(LIBS)
 +	$(LINK) $(find_OBJECTS) $(find_LDADD)  -Wl,--undefined=PSUserMainGet \
 +             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -l${NACL_CPP_LIB} $(LIBS)
++             -l${NACL_CXX_LIB} $(LIBS)
  ftsfind$(EXEEXT): $(ftsfind_OBJECTS) $(ftsfind_DEPENDENCIES) 
  	@rm -f ftsfind$(EXEEXT)
  	$(LINK) $(ftsfind_OBJECTS) $(ftsfind_LDADD) $(LIBS)
@@ -26,7 +26,7 @@ diff --git a/find/Makefile.in b/find/Makefile.in
 -	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD) $(LIBS)
 +	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD)  -Wl,--undefined=PSUserMainGet \
 +             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -l${NACL_CPP_LIB} $(LIBS)
++             -l${NACL_CXX_LIB} $(LIBS)
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)

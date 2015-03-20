@@ -39,7 +39,7 @@ ${NACL_CLI_MAIN_LIB} \
 -lSDLmain -lSDL \
 -lppapi_simple -ltar -lnacl_io -lRegal -lglslopt \
 -lppapi -lppapi_gles2 -lm \
--l${NACL_CPP_LIB}"
+-l${NACL_CXX_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

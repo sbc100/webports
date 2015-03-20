@@ -19,7 +19,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_LDFLAGS+=" -lglibc-compat"
 fi
 
-NACLPORTS_LDFLAGS+=" -l${NACL_CPP_LIB}"
+NACLPORTS_LDFLAGS+=" -l${NACL_CXX_LIB}"
 
 ConfigureStep() {
   LogExecute cp ${START_DIR}/toybox.config ${SRC_DIR}/.config

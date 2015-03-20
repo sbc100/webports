@@ -6,7 +6,7 @@ EXECUTABLES=make${NACL_EXEEXT}
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 export LIBS+="${NACL_CLI_MAIN_LIB} \
--lppapi_simple -lnacl_io -lppapi -l${NACL_CPP_LIB}"
+-lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   export ac_cv_func_getrlimit=no

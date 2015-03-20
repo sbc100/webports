@@ -8,7 +8,7 @@ NACLPORTS_CPPFLAGS="-Dmain=nacl_main"
 
 export LIBS+="\
   -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lnacl_io -lppapi -l${NACL_CPP_LIB}"
+  -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
 
 MAKE_TARGETS="binaries"
 INSTALL_TARGETS="install-binaries"

@@ -332,9 +332,9 @@ NACL_SDK_VERSION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-version)
 # As of version 33 the PNaCl C++ standard library is LLVM's libc++,
 # others use GCC's libstdc++.
 if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
-  export NACL_CPP_LIB="c++"
+  export NACL_CXX_LIB="c++"
 else
-  export NACL_CPP_LIB="stdc++"
+  export NACL_CXX_LIB="stdc++"
 fi
 
 if [ "${NACL_DEBUG:-}" = "1" ]; then

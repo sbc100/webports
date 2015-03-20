@@ -8,7 +8,7 @@ diff --git a/Makefile.in b/Makefile.in
 -	${CC} ${LDFLAGS} -o $@ ${OBJ} ${LIBS}
 +	${CC} ${LDFLAGS} -o $@ ${OBJ} -Wl,--undefined=PSUserMainGet \
 +             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -l${NACL_CPP_LIB} ${LIBS}
++             -l${NACL_CXX_LIB} ${LIBS}
  
  lesskey$(EXEEXT): lesskey.${O} version.${O}
  	${CC} ${LDFLAGS} -o $@ lesskey.${O} version.${O}

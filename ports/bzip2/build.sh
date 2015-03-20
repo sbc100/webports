@@ -7,7 +7,7 @@ EXECUTABLES="bzip2"
 
 NACLPORTS_CFLAGS+=" -Dmain=nacl_main -fPIC"
 export NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB} \
--lppapi_simple -lnacl_io -lppapi -l${NACL_CPP_LIB}"
+-lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
 
 ConfigureStep() {
   return

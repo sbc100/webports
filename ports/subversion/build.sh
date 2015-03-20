@@ -11,7 +11,7 @@ OS_JOBS=1
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
 export LIBS+=" -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} -lppapi_simple \
-  -lnacl_io -lppapi -l${NACL_CPP_LIB}"
+  -lnacl_io -lppapi -l${NACL_CXX_LIB}"
 
 EXTRA_CONFIGURE_ARGS="--with-apr=${NACL_PREFIX}"
 EXTRA_CONFIGURE_ARGS+=" --with-apr-util=${NACL_PREFIX}"

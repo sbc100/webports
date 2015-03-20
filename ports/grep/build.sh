@@ -7,7 +7,7 @@ ConfigureStep() {
     NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
-  export LIBS+=" -l${NACL_CPP_LIB}"
+  export LIBS+=" -l${NACL_CXX_LIB}"
 
   # Grep fails to build NDEBUG defined
   # ib/chdir-long.c:62: error: unused variable 'close_fail'

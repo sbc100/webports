@@ -5,7 +5,7 @@
 export ac_cv_func_getrlimit=no
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple \
-  -lnacl_io -lppapi -l${NACL_CPP_LIB}"
+  -lnacl_io -lppapi -l${NACL_CXX_LIB}"
 EXTRA_CONFIGURE_ARGS="\
   --enable-targets=x86_64-nacl,arm-nacl,avr \
   --disable-werror \

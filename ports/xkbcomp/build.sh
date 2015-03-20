@@ -7,7 +7,7 @@ EXTRA_CONFIGURE_ARGS+=" --datarootdir=/share"
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 export LIBS+=" -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
   -lX11 -lxcb -lXau \
-  -lppapi_simple -ltar -lnacl_io -lppapi -l${NACL_CPP_LIB}"
+  -lppapi_simple -ltar -lnacl_io -lppapi -l${NACL_CXX_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

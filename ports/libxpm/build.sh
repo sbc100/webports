@@ -10,7 +10,7 @@ fi
 # The transtive dependencies of libxpm include nacl_io which is
 # written in C++. Without this sxpm binary fails to link.
 if [ "${NACL_SHARED}" != "1" ]; then
-  LIBS+=" -l${NACL_CPP_LIB} -pthread"
+  LIBS+=" -l${NACL_CXX_LIB} -pthread"
 fi
 
 export LIBS

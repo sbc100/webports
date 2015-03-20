@@ -15,7 +15,7 @@ new file mode 100644
 +# Converts cr/lf to just lf
 +DOS2UNIX = dos2unix
 +
-+LIBRARIES = -l$(NACL_CPP_LIB)
++LIBRARIES = -l$(NACL_CXX_LIB)
 +
 +MODULES = $(SRCS:.c=.o)
 +MODULES := $(MODULES:.cpp=.o)
