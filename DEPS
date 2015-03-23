@@ -1,6 +1,6 @@
 deps = {
   "src/third_party/libapps":
-    "https://chromium.googlesource.com/apps/libapps.git@cd34b28",
+    "https://chromium.googlesource.com/apps/libapps.git@6e65bd5",
   "src/third_party/zip.js":
     "git://github.com/gildas-lormeau/zip.js@4c93974",
   "src/third_party/clang_tools":
