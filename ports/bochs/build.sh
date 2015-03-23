@@ -5,6 +5,7 @@
 # Linux disk image
 readonly LINUX_IMG_URL=http://storage.googleapis.com/nativeclient-mirror/nacl/bochs-linux-img.tar.gz
 readonly LINUX_IMG_NAME=linux-img
+readonly LINUX_IMG_SHA1=70131438bd90534fa045c737017a2ca9a437bf5d
 
 BOCHS_EXAMPLE_DIR=${NACL_SRC}/ports/bochs
 EXECUTABLES=bochs
@@ -25,6 +26,8 @@ ConfigureStep() {
     --with-gnu-ld
 }
 
+# $1 - filename
+# $2 - root directory of archive
 ImageExtractStep() {
   Banner "Untaring $1 to $2"
   ChangeDir ${WORK_DIR}
@@ -74,36 +77,22 @@ InstallStep() {
   popd
 }
 
-CustomCheck() {
-  # verify sha1 checksum for tarball
-  if ${SHA1CHECK} <$1 &>/dev/null; then
-    return 0
-  else
-    return 1
-  fi
-}
-
+# $1 - url
+# $2 - filename
+# $3 - sha1
 ImageDownloadStep() {
   cd ${NACL_PACKAGES_CACHE}
   # if matching tarball already exists, don't download again
-  if ! CustomCheck $3; then
-    Fetch $1 $2.tar.gz
-    if ! CustomCheck $3 ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
+  if ! CheckHash $2 $3; then
+    Fetch $1 $2
+    if ! CheckHash $2 $3 ; then
+       Banner "$2 failed checksum!"
        exit -1
     fi
   fi
 }
 
-FetchLinuxStep() {
-  Banner "FetchLinuxStep"
-  ARCHIVE_NAME=$2.tar.gz
-  SHA1=${BOCHS_EXAMPLE_DIR}/$2/$2.sha1
-  ImageDownloadStep $1 $2 ${SHA1}
-  ImageExtractStep ${ARCHIVE_NAME} $2
-  unset ARCHIVE_NAME
-}
-
 DownloadStep() {
-  FetchLinuxStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}
+  ImageDownloadStep ${LINUX_IMG_URL} ${LINUX_IMG_NAME}.tar.gz ${LINUX_IMG_SHA1}
+  ImageExtractStep ${LINUX_IMG_NAME}.tar.gz ${LINUX_IMG_NAME}
 }

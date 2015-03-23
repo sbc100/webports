@@ -558,9 +558,13 @@ Fetch() {
 }
 
 
-Check() {
-  # verify sha1 checksum for tarball
-  if echo "${SHA1} *${ARCHIVE_NAME}" | "${SHA1CHECK}"; then
+#
+# verify the sha1 checksum of given file
+# $1 - checksum (as hex string)
+# $2 - filename
+#
+CheckHash() {
+  if echo "$2 *$1" | "${SHA1CHECK}"; then
     return 0
   else
     return 1

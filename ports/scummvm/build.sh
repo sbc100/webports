@@ -7,9 +7,11 @@ MIRROR_URL=http://storage.googleapis.com/naclports/mirror
 # Beneath a Steel Sky (floppy version)
 readonly BASS_FLOPPY_URL=${MIRROR_URL}/scummvm_games/bass/BASS-Floppy-1.3.zip
 readonly BASS_FLOPPY_NAME=BASS-Floppy-1.3
+readonly BASS_FLOPPY_SHA1=acd7a578879c73fb3994b9c72b6571dc62635f6e
 
 readonly LURE_URL=${MIRROR_URL}/scummvm_games/lure/lure-1.1.zip
 readonly LURE_NAME=lure-1.1
+readonly LURE_SHA1=b7d430b17c361396ccf81734148cb0abb4bb4abb
 
 EXECUTABLES=scummvm
 
@@ -111,44 +113,37 @@ InstallStep() {
   CreateWebStoreZip scummvm-${VERSION}.zip scummvm
 }
 
-CustomCheck() {
-  # verify sha1 checksum for tarball
-  if ${SHA1CHECK} <$1 &>/dev/null; then
-    return 0
-  else
-    return 1
-  fi
-}
-
+# $1 - url
+# $2 - filename
+# $3 - sha1
 DownloadZipStep() {
   cd ${NACL_PACKAGES_CACHE}
   # if matching zip already exists, don't download again
-  if ! CustomCheck $3; then
-    Fetch $1 $2.zip
-    if ! CustomCheck $3 ; then
-       Banner "${PACKAGE_NAME} failed checksum!"
+  if ! CheckHash $2 $3; then
+    Fetch $1 $2
+    if ! CheckHash $2 $3; then
+       Banner "$2 failed checksum!"
        exit -1
     fi
   fi
 }
 
 ExtractGameZipStep() {
-  Banner "Unzipping ${PACKAGE_NAME}.zip"
+  Banner "Unzipping ${2}"
   ChangeDir ${WORK_DIR}
   Remove ${1}
-  unzip -d ${1} ${NACL_PACKAGES_CACHE}/${PACKAGE_NAME}.zip
+  unzip -d ${1} ${NACL_PACKAGES_CACHE}/${2}
 }
 
+# $1 - url
+# $2 - filename
+# $3 - sha1
 GameGetStep() {
-  PACKAGE_NAME_TEMP=${PACKAGE_NAME}
-  PACKAGE_NAME=$2
-  SHA1=${SCUMMVM_EXAMPLE_DIR}/$2/$2.sha1
-  DownloadZipStep $1 $2 ${SHA1}
-  ExtractGameZipStep $2
-  PACKAGE_NAME=${PACKAGE_NAME_TEMP}
+  DownloadZipStep $1 $2.zip $3
+  ExtractGameZipStep $2 $2.zip
 }
 
 DownloadStep() {
-  GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME}
-  GameGetStep ${LURE_URL} ${LURE_NAME}
+  GameGetStep ${BASS_FLOPPY_URL} ${BASS_FLOPPY_NAME} ${BASS_FLOPPY_SHA1}
+  GameGetStep ${LURE_URL} ${LURE_NAME} ${LURE_SHA1}
 }
