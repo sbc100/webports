@@ -7,7 +7,8 @@ import platform
 
 from naclports import error, util
 
-VALID_TOOLCHAINS = ['newlib', 'glibc', 'bionic', 'pnacl', 'clang-newlib']
+VALID_TOOLCHAINS = ['newlib', 'glibc', 'bionic', 'pnacl',
+                    'clang-newlib', 'emscripten']
 VALID_LIBC = ['newlib', 'glibc', 'bionic']
 
 
@@ -41,6 +42,8 @@ class Configuration(object):
     if not toolchain:
       if arch == 'pnacl':
         toolchain = 'pnacl'
+      elif arch == 'emscripten':
+        toolchain = 'emscripten'
       else:
         toolchain = self.default_toolchain
     self.toolchain = toolchain
@@ -51,6 +54,8 @@ class Configuration(object):
     if not arch:
       if self.toolchain == 'pnacl':
         arch = 'pnacl'
+      elif self.toolchain == 'emscripten':
+        arch = 'emscripten'
       elif self.toolchain == 'bionic':
         arch = 'arm'
       elif platform.machine() == 'i686':
@@ -77,7 +82,7 @@ class Configuration(object):
       self.config_name = 'release'
 
   def SetLibc(self):
-    if self.toolchain in ('pnacl', 'clang-newlib'):
+    if self.toolchain in ('pnacl', 'clang-newlib', 'emscripten'):
       self.libc = 'newlib'
     else:
       self.libc = self.toolchain

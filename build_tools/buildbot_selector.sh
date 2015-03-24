@@ -18,6 +18,10 @@ DEFAULT_NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
 NACL_SDK_ROOT=${NACL_SDK_ROOT:-${DEFAULT_NACL_SDK_ROOT}}
 export NACL_SDK_ROOT
 
+DEFAULT_EMSCRIPTEN_ROOT="$(dirname ${SCRIPT_DIR})/out/emscripten_sdk"
+EMSCRIPTEN_ROOT=${EMSCRIPTEN_ROOT:-${DEFAULT_EMSCRIPTEN_ROOT}}
+EMSCRIPTEN="$(dirname ${DEFAULT_EMSCRIPTEN_ROOT})/master/emscripten"
+
 BOT_GSUTIL='/b/build/scripts/slave/gsutil'
 if [ -e ${BOT_GSUTIL} ]; then
   export GSUTIL=${BOT_GSUTIL}
@@ -160,6 +164,21 @@ if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   fi
   echo ${PYTHON} ${SCRIPT_DIR}/download_sdk.py ${ARGS}
   ${PYTHON} ${SCRIPT_DIR}/download_sdk.py ${ARGS}
+fi
+
+# Install Emscripten SDK
+if [ -z "${TEST_BUILDBOT:-}" ]; then
+  if [ ${TOOLCHAIN:-} = emscripten ]; then
+    echo "@@@BUILD_STEP Install Emscripten SDK@@@"
+    # Download the Emscripten SDK and set the environment variables
+    # TODO(gdeepti): Remove setting the EMSCRIPTEN variable here once configure
+    # env sets it correctly.
+    EMSCRIPTEN="$(dirname ${DEFAULT_EMSCRIPTEN_ROOT})/master/emscripten"
+    echo ${PYTHON} ${SCRIPT_DIR}/download_emscripten.py
+    ${PYTHON} ${SCRIPT_DIR}/download_emscripten.py
+    export EMSCRIPTEN
+    source ${EMSCRIPTEN_ROOT}/emsdk_env.sh
+  fi
 fi
 
 Unittests() {

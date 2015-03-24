@@ -127,7 +127,7 @@ else
   PACKAGE_SUFFIX="_${NACL_ARCH}"
 fi
 
-if [ "${NACL_ARCH}" != "pnacl" ]; then
+if [ "${NACL_ARCH}" != "pnacl" -a "${NACL_ARCH}" != "emscripten" ]; then
   PACKAGE_SUFFIX+=_${TOOLCHAIN}
 fi
 
@@ -172,7 +172,9 @@ GomaTest() {
 
 # If NACL_GOMA is defined then we check for goma and use it if its found.
 if [ -n "${NACL_GOMA:-}" ]; then
-  if [ "${NACL_ARCH}" != "pnacl" -a "${NACL_ARCH}" != "arm" ]; then
+  if [ "${NACL_ARCH}" != "pnacl" -a
+    "${NACL_ARCH}" != "arm" -a
+    "${NACL_ARCH}" != "emscripten"]; then
     # Assume that if CC is good then so is CXX since GomaTest is actually
     # quite slow
     if GomaTest "${NACLCC}"; then
@@ -939,6 +941,8 @@ ConfigureStep_Autoconf() {
   SetupCrossEnvironment
 
   local conf_host=${NACL_CROSS_PREFIX}
+  # TODO(gdeepti): Investigate whether emscripten accurately fits this case for
+  # long term usage.
   if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
     # The PNaCl tools use "pnacl-" as the prefix, but config.sub
     # does not know about "pnacl".  It only knows about "le32-nacl".

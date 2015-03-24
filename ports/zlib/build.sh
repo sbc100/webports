@@ -68,6 +68,8 @@ TestStep() {
     TranslateAndWriteSelLdrScript "${example_pexe}" x86-64 \
       example.x86-64.nexe "${example_script}"
     RunExample
+  elif [ "${NACL_ARCH}" = "emscripten" ]; then
+    return
   else
     RunMinigzip
     RunExample

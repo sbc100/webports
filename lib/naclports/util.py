@@ -36,6 +36,7 @@ arch_to_pkgarch = {
   'i686': 'i686',
   'arm': 'arm',
   'pnacl': 'pnacl',
+  'emscripten': 'emscripten',
 }
 
 # Inverse of arch_to_pkgarch
@@ -246,6 +247,8 @@ def GetToolchainRoot(config):
   platform = GetPlatform()
   if config.toolchain == 'pnacl':
     tc_dir = '%s_pnacl' % platform
+  elif config.toolchain == 'emscripten':
+    tc_dir = '%s_emscripten' % platform
   else:
     tc_arch = {
       'arm': 'arm',

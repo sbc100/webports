@@ -63,6 +63,8 @@ if [ "${TOOLCHAIN}" = "bionic" ]; then
   DEFAULT_ARCH=arm
 elif [ "${TOOLCHAIN}" = "pnacl" ]; then
   DEFAULT_ARCH=pnacl
+elif [ "${TOOLCHAIN}" = "emscripten" ]; then
+  DEFAULT_ARCH=emscripten
 else
   if [ "${HOST_IS_32BIT}" = "1" ]; then
     DEFAULT_ARCH=i686
@@ -94,16 +96,16 @@ fi
 # Check TOOLCHAIN
 if [ ${TOOLCHAIN} != "newlib" -a ${TOOLCHAIN} != "pnacl" -a \
      ${TOOLCHAIN} != "glibc" -a ${TOOLCHAIN} != "bionic" -a \
-     ${TOOLCHAIN} != "clang-newlib" ]; then
+     ${TOOLCHAIN} != "clang-newlib" -a ${TOOLCHAIN} != "emscripten" ]; then
   echo "Unknown value for TOOLCHAIN: '${TOOLCHAIN}'" 1>&2
   exit -1
 fi
 
-if [ "${NACL_ARCH}" = "emscripten" -a -z "${PEPPERJS_SRC_ROOT:-}" ]; then
+if [ "${NACL_ARCH}" = "emscripten" -a -z "${EMSCRIPTEN:-}" ]; then
   echo "-------------------------------------------------------------------"
-  echo "PEPPERJS_SRC_ROOT is unset."
+  echo "EMSCRIPTEN is unset."
   echo "This environment variable needs to be pointed at some version of"
-  echo "the pepper.js repository."
+  echo "the emscripten repository."
   echo "NOTE: set this to an absolute path."
   echo "-------------------------------------------------------------------"
   exit -1
@@ -226,7 +228,7 @@ InitializeNaClGccToolchain() {
 
 InitializeEmscriptenToolchain() {
   local TC_ROOT=${NACL_SDK_ROOT}/toolchain
-  local EM_ROOT=${PEPPERJS_SRC_ROOT}/emscripten
+  local EM_ROOT=${EMSCRIPTEN}
 
   # The PNaCl toolchain moved in pepper_31.  Check for
   # the existence of the old folder first and use that
@@ -253,8 +255,6 @@ InitializeEmscriptenToolchain() {
   NACL_EXEEXT=".js"
 
   LLVM=${TC_ROOT}/bin
-
-  NACL_SDK_LIBDIR="${PEPPERJS_SRC_ROOT}/lib/${TOOLCHAIN}"
 }
 
 InitializePNaClToolchain() {
