@@ -562,8 +562,8 @@ Fetch() {
 
 #
 # verify the sha1 checksum of given file
-# $1 - checksum (as hex string)
-# $2 - filename
+# $1 - filename
+# $2 - checksum (as hex string)
 #
 CheckHash() {
   if echo "$2 *$1" | "${SHA1CHECK}"; then

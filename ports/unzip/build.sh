@@ -4,6 +4,11 @@
 
 BUILD_DIR=${SRC_DIR}
 
+NACLPORTS_CPPFLAGS+=" -DHAVE_TERMIOS_H -DNO_CHMOD -DNO_FCHMOD -DNO_LCHMOD"
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+
+EXECUTABLES="funzip unzip unzipsfx"
+
 BuildStep() {
   make -f unix/Makefile clean
   # "generic" target, which runs unix/configure, is
@@ -15,14 +20,25 @@ BuildStep() {
   # (e.g., libppapi).
   make -j${OS_JOBS} -f unix/Makefile unzips \
       CC=${NACLCC} LD=${NACLCXX} \
-      CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS} \
-      -DHAVE_TERMIOS_H -DNO_CHMOD -DNO_FCHMOD -DNO_LCHMOD \
-      -Dmain=nacl_main" LF2= \
+      CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}" LF2= \
       LFLAGS1="${NACLPORTS_LDFLAGS} ${NACL_CLI_MAIN_LIB} \
                -lppapi_simple -lnacl_io -lppapi"
 }
 
 InstallStep() {
+  LogExecute make -f unix/Makefile install prefix=${DESTDIR}/${PREFIX}
+}
+
+TestStep() {
+  if [ "${TOOLCHAIN}" = "pnacl" ]; then
+    return
+  fi
+  TESTZIP=testmake.zip
+  LogExecute ./unzip.sh -bo ${TESTZIP} testmake.zipinfo
+  CheckHash testmake.zipinfo f0d76aa12768455728f4bb0f42ceab64aaddfae8
+}
+
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   for name in funzip unzip unzipsfx; do
     local exe="${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}"
