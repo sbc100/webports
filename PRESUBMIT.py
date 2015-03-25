@@ -30,46 +30,57 @@ def RunPylint(input_api, output_api):
   return output
 
 
-def CheckBuildbot(input_api, output_api):
-  cmd = [PYTHON, 'build_tools/partition.py', '--check']
+
+def RunCommand(name, cmd, input_api, output_api):
   try:
     subprocess.check_call(cmd)
   except subprocess.CalledProcessError:
-    return [output_api.PresubmitError('%s failed' % str(cmd))]
+    message = '%s failed.' % name
+    return [output_api.PresubmitError(message)]
   return []
+
+
+def RunPythonCommand(cmd, input_api, output_api):
+  return RunCommand(cmd[0], [PYTHON] + cmd, input_api, output_api)
+
+
+def CheckCQConfig(input_api, output_api):
+  def f(x):
+    return input_api.FilterSourceFile(x,
+        white_list=['build_tools/commit_queue/cq_config.json'])
+
+  if not input_api.AffectedFiles(file_filter=f):
+    return []
+
+  return RunPythonCommand(['build_tools/commit_queue/test_cq_config.py'],
+                          input_api,
+                          output_api)
+
+
+def CheckPartioning(input_api, output_api):
+  return RunPythonCommand(['build_tools/partition.py', '--check'],
+                          input_api,
+                          output_api)
 
 
 def CheckDeps(input_api, output_api):
-  cmd = [PYTHON, 'build_tools/check_deps.py']
-  try:
-    subprocess.check_call(cmd)
-  except subprocess.CalledProcessError:
-    message = 'check_deps.py failed.'
-    return [output_api.PresubmitError(message)]
-  return []
-
+  return RunPythonCommand(['build_tools/check_deps.py'],
+                          input_api,
+                          output_api)
 
 def CheckMirror(input_api, output_api):
-  cmd = [PYTHON, 'build_tools/update_mirror.py', '--check']
-  try:
-    subprocess.check_call(cmd)
-  except subprocess.CalledProcessError:
-    message = 'update_mirror.py --check failed.'
-    message += '\nRun build_tools/update_mirror.py to update.'
-    return [output_api.PresubmitError(message)]
-  return []
+  return RunPythonCommand(['build_tools/update_mirror.py', '--check'],
+                          input_api,
+                          output_api)
 
 
 def RunUnittests(input_api, output_api):
-  try:
-    subprocess.check_call(['make', 'test'])
-  except subprocess.CalledProcessError as e:
-    return [output_api.PresubmitError(str(e))]
-  return []
+  return RunCommand('unittests', ['make', 'test'], input_api, output_api)
 
 
 def CheckChangeOnUpload(input_api, output_api):
   report = []
+  report.extend(CheckCQConfig(input_api, output_api))
   report.extend(RunPylint(input_api, output_api))
   report.extend(RunUnittests(input_api, output_api))
   report.extend(CheckDeps(input_api, output_api))
@@ -83,7 +94,7 @@ def CheckChangeOnCommit(input_api, output_api):
   report = []
   report.extend(CheckChangeOnUpload(input_api, output_api))
   report.extend(CheckMirror(input_api, output_api))
-  report.extend(CheckBuildbot(input_api, output_api))
+  report.extend(CheckPartioning(input_api, output_api))
   report.extend(input_api.canned_checks.CheckTreeIsOpen(
       input_api, output_api,
       json_url='http://naclports-status.appspot.com/current?format=json'))
