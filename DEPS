@@ -2,7 +2,7 @@ deps = {
   "src/third_party/libapps":
     "https://chromium.googlesource.com/apps/libapps.git@6e65bd5",
   "src/third_party/zip.js":
-    "git://github.com/gildas-lormeau/zip.js@4c93974",
+    "https://github.com/gildas-lormeau/zip.js.git@4c93974",
   "src/third_party/clang_tools":
     "https://chromium.googlesource.com/chromium/src/tools/clang.git@7aa7166",
 }
