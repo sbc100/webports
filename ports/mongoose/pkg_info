@@ -6,3 +6,4 @@ LICENSE=MIT
 DEPENDS=(nacl-spawn)
 LIBC=glibc
 SHA1=a25a1a00c51bb8bc86283ef15fc69254292dd0fc
+DISABLED_TOOLCHAIN=(emscripten)

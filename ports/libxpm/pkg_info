@@ -9,3 +9,4 @@ DISABLED_LIBC=(bionic)
 # present, so making sure we hit that path.
 DEPENDS=(glibc-compat xproto libx11 libxt libxext)
 SHA1=eca9dbfa6253f7d6cc7d593dc83110c6c4876d7c
+DISABLED_TOOLCHAIN=(emscripten)

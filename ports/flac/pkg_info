@@ -6,7 +6,7 @@ BUILD_OS=linux
 # arm-nacl-clang produces the following error:
 # Error: internal_relocation (type: OFFSET_IMM) not fixed up
 # https://code.google.com/p/nativeclient/issues/detail?id=4115
-DISABLED_TOOLCHAIN=(clang-newlib/arm)
+DISABLED_TOOLCHAIN=(clang-newlib/arm emscripten)
 DEPENDS=(libogg glibc-compat)
 DISABLED_LIBC=(bionic)
 SHA1=bd54354900181b59db3089347cc84ad81e410b38

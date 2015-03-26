@@ -5,3 +5,4 @@ LICENSE=GPL
 SHA1=c1d6ac5f182d19dd685c4dfd74eedbfe3992425d
 DEPENDS=(glibc-compat)
 DISABLED_LIBC=(bionic)
+DISABLED_TOOLCHAIN=(emscripten)

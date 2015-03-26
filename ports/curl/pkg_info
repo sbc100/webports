@@ -4,3 +4,4 @@ URL=http://curl.haxx.se/download/curl-7.37.0.tar.bz2
 LICENSE=CUSTOM:README
 SHA1=3bde6fb2e599197e9579c0735ad255c1ddbd914d
 DEPENDS=(openssl nacl-spawn)
+DISABLED_TOOLCHAIN=(emscripten)

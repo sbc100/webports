@@ -8,3 +8,4 @@ DEPENDS=(glibc-compat)
 BUILD_OS=linux
 SHA1=be7d67e50d72ff067b2c0291311bc283add36965
 DISABLED_LIBC=(bionic)
+DISABLED_TOOLCHAIN=(emscripten)

@@ -6,3 +6,4 @@ DISABLED_LIBC=(newlib)
 # Disabled for now as it requires a recent cmake version.
 DISABLED=1
 CONFLICTS=(openssl)
+DISABLED_TOOLCHAIN=(emscripten)

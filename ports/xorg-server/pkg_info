@@ -6,3 +6,4 @@ DEPENDS=(glibc-compat pixman libxext libx11 glproto regal fixesproto damageproto
 # No mac support, due to libx11.
 BUILD_OS=linux
 SHA1=2edb151d39571dc0fcdedc299ea0a77fe6bfc076
+DISABLED_TOOLCHAIN=(emscripten)

@@ -10,3 +10,4 @@ DISABLED_LIBC=(bionic)
 # detect this on mac.
 BUILD_OS=linux
 SHA1=20cd63705a8805260da0320c65b979233f2e3c18
+DISABLED_TOOLCHAIN=(emscripten)

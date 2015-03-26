@@ -5,3 +5,4 @@ VERSION=1.17.0
 URL=https://code.google.com/p/leveldb.git@e353fbc
 LICENSE=BSD
 SHA1=17a85c7a37b4756264bceed94eb5b65ff624b13f
+DISABLED_TOOLCHAIN=(emscripten)

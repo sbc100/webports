@@ -67,6 +67,9 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
     if not line or line[0] == '#':
       continue
     key, raw_value = ParsePkgInfoLine(line, i+1)
+    if key in rtn:
+      raise PkgFormatError('Error parsing %s:%d: duplicate key (%s)' %
+                           (filename, i+1, key))
     rtn[key] = ExpandVars(raw_value, rtn)
 
   for required_key in required_keys:

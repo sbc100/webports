@@ -7,3 +7,4 @@ DEPENDS=(sdl2)
 # https://code.google.com/p/nativeclient/issues/detail?id=3938
 DISABLED_LIBC=(bionic)
 SHA1=e40051311b648e4e60ed1683f62a948d93a0a49f
+DISABLED_TOOLCHAIN=(emscripten)

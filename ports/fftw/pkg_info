@@ -5,5 +5,5 @@ CONFLICTS=(fftw-float)
 LICENSE=GPL
 # x86_64-nacl-clang error:
 # https://code.google.com/p/nativeclient/issues/detail?id=4123
-DISABLED_TOOLCHAIN=(clang-newlib/x86_64)
+DISABLED_TOOLCHAIN=(clang-newlib/x86_64 emscripten)
 SHA1=fd508bac8ac13b3a46152c54b7ac885b69734262

@@ -5,3 +5,4 @@ BUILD_OS=linux
 DEPENDS=(xorg-server emacs)
 # Disabled for bionic due to bash.
 DISABLED_LIBC=(bionic)
+DISABLED_TOOLCHAIN=(emscripten)

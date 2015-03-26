@@ -6,3 +6,4 @@ DEPENDS=(nacl-spawn)
 # getpwnam undefined
 DISABLED_LIBC=(bionic)
 SHA1=39c18053152f01448047f504f0867251e2c67b06
+DISABLED_TOOLCHAIN=(emscripten)

@@ -6,3 +6,4 @@ DEPENDS=(glibc-compat libssh2 zlib)
 LICENSE=CUSTOM:COPYING
 DISABLED_LIBC=(bionic)
 SHA1=a16a59df1bfe073483be0c58a81cdbc89f7b7070
+DISABLED_TOOLCHAIN=(emscripten)

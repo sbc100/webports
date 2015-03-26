@@ -5,3 +5,4 @@ URL=https://pypi.python.org/packages/source/d/darksky_catalog/darksky_catalog-0.
 LICENSE=BSD
 DEPENDS=(python-host yt thingking)
 SHA1=ab3310cb160a08ac6b1bca20364d08e1dcdb46c2
+DISABLED_TOOLCHAIN=(emscripten)

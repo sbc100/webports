@@ -5,3 +5,4 @@ LICENSE=BSD
 DEPENDS=(readline zlib)
 DISABLED_LIBC=(bionic)
 SHA1=850b93afb5914ee3f38f0769e309abf0cedf084b
+DISABLED_TOOLCHAIN=(emscripten)

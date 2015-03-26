@@ -2,3 +2,4 @@ NAME=python3-ppapi
 VERSION=3.4.2
 LICENSE=BSD
 DEPENDS=(python3 libtar nacl-spawn)
+DISABLED_TOOLCHAIN=(emscripten)

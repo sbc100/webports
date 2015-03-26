@@ -6,4 +6,4 @@ DEPENDS=(nacl-spawn)
 DISABLED_LIBC=(bionic)
 DISABLED_ARCH=(pnacl)
 # arm-nacl-clang asserts in llvm::ARMInstPrinter::printInstruction
-DISABLED_TOOLCHAIN=(clang-newlib/arm)
+DISABLED_TOOLCHAIN=(clang-newlib/arm emscripten)

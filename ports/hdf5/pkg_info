@@ -7,7 +7,7 @@ LICENSE=CUSTOM:COPYING
 # https://code.google.com/p/nativeclient/issues/detail?id=4115
 # x86_64-nacl-clang crashes:
 # https://code.google.com/p/nativeclient/issues/detail?id=4124
-DISABLED_TOOLCHAIN=(clang-newlib/arm clang-newlib/x86_64)
+DISABLED_TOOLCHAIN=(clang-newlib/arm clang-newlib/x86_64 emscripten)
 DEPENDS=(glibc-compat)
 DISABLED_LIBC=(bionic)
 SHA1=965d954d596cfa694f3260856a6406ea69e46e68

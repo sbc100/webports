@@ -3,3 +3,4 @@ VERSION=0.4.5
 URL=https://github.com/jedisct1/libsodium/releases/download/0.4.5/libsodium-0.4.5.tar.gz
 LICENSE=ISC
 SHA1=1ccb98a90ad499656eccef9b69e1c899e35d7139
+DISABLED_TOOLCHAIN=(emscripten)

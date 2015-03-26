@@ -8,3 +8,4 @@ DISABLED_LIBC=(bionic)
 BUILD_OS=linux
 DEPENDS=(readline zlib bzip2 gettext)
 SHA1=0727d8a8498733baabe6f51632b9bab0cbaa9ada
+DISABLED_TOOLCHAIN=(emscripten)

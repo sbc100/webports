@@ -6,3 +6,4 @@ BUILD_OS=linux
 DEPENDS=(python-host)
 DISABLED_LIBC=(bionic)
 SHA1=a2c02c5fb2ab8cf630982cddc6821e74f5769974
+DISABLED_TOOLCHAIN=(emscripten)

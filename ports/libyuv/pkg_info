@@ -4,5 +4,5 @@ URL=https://chromium.googlesource.com/external/libyuv.git@f6e4951
 DEPENDS=(glibc-compat)
 # validation errors: improper memory address - bad index
 # https://code.google.com/p/naclports/issues/detail?id=204
-DISABLED_TOOLCHAIN=(clang-newlib/x86_64)
+DISABLED_TOOLCHAIN=(clang-newlib/x86_64 emscripten)
 LICENSE=BSD

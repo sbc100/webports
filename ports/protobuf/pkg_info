@@ -6,3 +6,4 @@ SHA1=ab00a2c85d73ab718dd37595b2ae1a8f530dc26e
 # sched_yield missing
 DISABLED_LIBC=(bionic)
 CONFLICTS=(protobuf25)
+DISABLED_TOOLCHAIN=(emscripten)

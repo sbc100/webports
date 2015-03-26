@@ -5,3 +5,4 @@ LICENSE=CUSTOM:dat/license
 DEPENDS=(ncurses libtar nacl-spawn)
 DISABLED_LIBC=(bionic)
 SHA1=c26537093c38152bc0fbcec20468d975b35f59fd
+DISABLED_TOOLCHAIN=(emscripten)

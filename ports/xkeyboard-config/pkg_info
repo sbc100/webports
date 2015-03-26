@@ -6,3 +6,4 @@ DISABLED_LIBC=(bionic)
 # No mac support, due to lack of local xkbcomp install.
 BUILD_OS=linux
 SHA1=9a07cf04b1a7a13be7a86ce37c9f7efe1ec5fbc2
+DISABLED_TOOLCHAIN=(emscripten)

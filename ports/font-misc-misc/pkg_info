@@ -6,3 +6,4 @@ DEPENDS=(font-util)
 SHA1=c6d28c56880807963175cbbd682fb6f75a35f77d
 # Disabled on OSX due to lack of mkfontdir.
 BUILD_OS=linux
+DISABLED_TOOLCHAIN=(emscripten)

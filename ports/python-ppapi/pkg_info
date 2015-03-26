@@ -3,3 +3,4 @@ VERSION=2.7.7
 LICENSE=BSD
 DEPENDS=(python libtar nacl-spawn)
 DISABLED_LIBC=(bionic)
+DISABLED_TOOLCHAIN=(emscripten)

@@ -5,3 +5,4 @@ LICENSE=BSD
 DEPENDS=(zlib openssl)
 DISABLED_LIBC=(bionic)
 CONFLICTS=(libarchive)
+DISABLED_TOOLCHAIN=(emscripten)

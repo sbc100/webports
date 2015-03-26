@@ -2,3 +2,4 @@ NAME=mingn
 VERSION=0.1
 LIBC=glibc
 DEPENDS=(binutils gcc ncurses nacl-spawn zlib)
+DISABLED_TOOLCHAIN=(emscripten)

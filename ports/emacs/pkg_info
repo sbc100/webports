@@ -5,3 +5,4 @@ LICENSE=GPL
 DEPENDS=(ncurses libtar nacl-spawn libx11 libxaw jpeg8d libpng giflib tiff)
 LIBC=glibc
 SHA1=3c672a176df06e20d2661058ad49893f184b4956
+DISABLED_TOOLCHAIN=(emscripten)

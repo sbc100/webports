@@ -6,3 +6,4 @@ LICENSE=CUSTOM:LICENSE
 DEPENDS=(libpng jpeg8d bzip2 zlib)
 DISABLED_LIBC=(bionic)
 SHA1=4a2bc1c64f081ef6e5c1f44b97bdd6a0c526258b
+DISABLED_TOOLCHAIN=(emscripten)

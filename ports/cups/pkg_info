@@ -6,3 +6,4 @@ SHA1=acbf4f5365b6c2a99d8d05965d168f15915135db
 DEPENDS=(glibc-compat)
 DISABLED_LIBC=(bionic)
 BUILD_OS=linux
+DISABLED_TOOLCHAIN=(emscripten)

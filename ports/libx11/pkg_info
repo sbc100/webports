@@ -8,5 +8,5 @@ DEPENDS=(glibc-compat xproto kbproto xextproto xtrans libxcb inputproto)
 BUILD_OS=linux
 # Causes crash in arm-nacl-clang
 # https://code.google.com/p/nativeclient/issues/detail?id=4114
-DISABLED_TOOLCHAIN=(clang-newlib/arm)
+DISABLED_TOOLCHAIN=(clang-newlib/arm emscripten)
 SHA1=8177535c9c59d8c3ab98d55ce53520b5737ccd1a

@@ -8,3 +8,4 @@ DISABLED_LIBC=(bionic)
 # Disabled on OSX, doesn't build.
 BUILD_OS=linux
 SHA1=695d2f2824884d9e54aa1419282ae167fdea163b
+DISABLED_TOOLCHAIN=(emscripten)

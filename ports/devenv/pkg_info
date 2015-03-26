@@ -4,6 +4,6 @@ VERSION=0.1
 BUILD_OS=linux
 DEPENDS=(bash unzip geturl)
 # Disabled since the prebuilt packages are not yet available.
-DISABLED_TOOLCHAIN=(clang-newlib)
+DISABLED_TOOLCHAIN=(clang-newlib emscripten)
 # Disabled for bionic due to bash.
 DISABLED_LIBC=(bionic)

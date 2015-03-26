@@ -5,3 +5,4 @@ LICENSE=Apache
 DEPENDS=(python-host httplib2 openssl setuptools)
 DISABLED_LIBC=(bionic)
 SHA1=31ddb6e125b0683d29493c9f486d48a4f63c913b
+DISABLED_TOOLCHAIN=(emscripten)

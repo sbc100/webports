@@ -8,3 +8,4 @@ BUILD_OS=linux
 # Disabled for bionic due to sdl, due to regal.
 DISABLED_LIBC=(bionic)
 SHA1=f82ee01a52367d2a6daffa2774a1297b978f6821
+DISABLED_TOOLCHAIN=(emscripten)

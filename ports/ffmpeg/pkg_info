@@ -7,3 +7,4 @@ CONFLICTS=(libav)
 DISABLED_ARCH=(arm)
 DEPENDS=(lame libvorbis libtheora glibc-compat)
 SHA1=9dc54bbef673f3938e280bf48d07e7b24fe445ab
+DISABLED_TOOLCHAIN=(emscripten)

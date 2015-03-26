@@ -5,3 +5,4 @@ LICENSE=CUSTOM:LICENSE
 DEPENDS=(glibc-compat)
 SHA1=b28b3bcb1dc3ee7b55024c9f795be60eb3183e3c
 CONFLICTS=(boringssl)
+DISABLED_TOOLCHAIN=(emscripten)

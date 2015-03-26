@@ -5,3 +5,4 @@ LICENSE=BSD
 DEPENDS=(python-host openssl setuptools)
 DISABLED_LIBC=(bionic)
 SHA1=1529a1102da2fc671f2a9a5e387ebabd1ceacbbf
+DISABLED_TOOLCHAIN=(emscripten)

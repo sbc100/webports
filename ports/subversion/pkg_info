@@ -6,3 +6,4 @@ LICENSE=APACHE
 DISABLED_LIBC=(bionic)
 DEPENDS=(apr apr-util sqlite zlib nacl-spawn)
 SHA1=161edaee328f4fdcfd2a7c10ecd3fbcd51c61275
+DISABLED_TOOLCHAIN=(emscripten)

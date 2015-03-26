@@ -5,3 +5,4 @@ LICENSE=BSD
 LIBC=newlib
 DEPENDS=(python-host python-dateutil distribute numpy six hdf5 h5py pytz)
 SHA1=fe0ffb959f8204ef1302cf49c56a7138d4a7752a
+DISABLED_TOOLCHAIN=(emscripten)

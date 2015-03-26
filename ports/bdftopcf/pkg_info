@@ -5,3 +5,4 @@ LICENSE=GPL
 DISABLED_LIBC=(bionic)
 DEPENDS=(glibc-compat nacl-spawn libxfont)
 SHA1=146b4ece2867479045c3b4593b22c9f1d21da14a
+DISABLED_TOOLCHAIN=(emscripten)

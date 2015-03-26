@@ -7,3 +7,4 @@ DEPENDS=(glibc-compat nacl-spawn libx11 libxt libxext libxmu)
 # https://code.google.com/p/nativeclient/issues/detail?id=3939
 DISABLED_LIBC=(bionic)
 SHA1=49dea108cb2a825e5dfd517d34dd2a4d1608ccbc
+DISABLED_TOOLCHAIN=(emscripten)

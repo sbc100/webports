@@ -5,3 +5,4 @@ LICENSE=LGPL+BSD
 DISABLED_LIBC=(bionic)
 DEPENDS=(python-host cython zeromq)
 SHA1=775fcff7777d220f06f5ff9e531822d63a5671c0
+DISABLED_TOOLCHAIN=(emscripten)

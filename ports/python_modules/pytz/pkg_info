@@ -5,3 +5,4 @@ LICENSE=MIT
 LIBC=newlib
 DEPENDS=(python-host)
 SHA1=ca2ddf147dee651e211d77438a914e0fac6414f2
+DISABLED_TOOLCHAIN=(emscripten)

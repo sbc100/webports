@@ -6,3 +6,4 @@ DEPENDS=(apr expat)
 # Disabled for bionic due to apr.
 DISABLED_LIBC=(bionic)
 SHA1=de0184ee03dfdc6dec4d013970d1862251e86925
+DISABLED_TOOLCHAIN=(emscripten)

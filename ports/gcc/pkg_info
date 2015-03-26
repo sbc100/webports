@@ -4,3 +4,4 @@ URL=https://chromium.googlesource.com/native_client/nacl-gcc.git@396037926cd
 LICENSE=GPL
 LIBC=glibc
 DEPENDS=(nacl-spawn gmp mpfr mpc)
+DISABLED_TOOLCHAIN=(emscripten)

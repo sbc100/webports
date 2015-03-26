@@ -5,3 +5,4 @@ BUILD_OS=linux
 DEPENDS=(devenv coreutils git make python-ppapi curl)
 # Disabled for bionic due to bash.
 DISABLED_LIBC=(bionic)
+DISABLED_TOOLCHAIN=(emscripten)

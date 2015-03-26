@@ -7,5 +7,5 @@ DEPENDS=(zlib jpeg8d tiff)
 # arm-nacl-clang produces:
 # Error: internal_relocation (type: OFFSET_IMM) not fixed up
 # https://code.google.com/p/nativeclient/issues/detail?id=4115
-DISABLED_TOOLCHAIN=(clang-newlib/arm)
+DISABLED_TOOLCHAIN=(clang-newlib/arm emscripten)
 SHA1=9944902864283af49e4e21a1ca456db4e04ea7c2

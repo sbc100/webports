@@ -5,3 +5,4 @@ LICENSE=GPL2
 # log2f undefined with bionic.
 DISABLED_LIBC=(bionic)
 SHA1=3c749f5264b1eb5913fbe5a2182167d388628d83
+DISABLED_TOOLCHAIN=(emscripten)

@@ -2,3 +2,4 @@ NAME=geturl
 VERSION=0.1
 LICENSE=BSD
 DEPENDS=(nacl-spawn)
+DISABLED_TOOLCHAIN=(emscripten)
