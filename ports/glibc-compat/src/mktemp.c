@@ -4,9 +4,10 @@
 
 /*
  * Quick a dirty version of mkdtemp. This is needed since the one
- * compiled into newlib is currently non-functional.
+ * compiled into newlib is currently non-functional (it returns the
+ * same value each times its called).
  * TODO(sbc): remove this file once we fix:
- * https://code.google.com/p/nativeclient/issues/detail?id=4017
+ * https://code.google.com/p/nativeclient/issues/detail?id=4020
  */
 
 #include <assert.h>

@@ -47,6 +47,16 @@ TestStep() {
     ChangeDir ..
   fi
 
+  if [ "${LUA_NO_READLINE:-}" = 1 ]; then
+    # Dont run tests when LUA_NO_READLINE is set. In this case the lua
+    # binary not linked against glibc-compat, and therefore gets the
+    # newlib version mkstemp which is currently broken. TODO(sbc): remove
+    # this once we fix:
+    # https://code.google.com/p/nativeclient/issues/detail?id=4020
+    echo "Skipping tests as LUA_NO_READLINE is set"
+    return
+  fi
+
   # First, run the 'make test' target.  This currently just runs
   # lua -v.
   LogExecute make PLAT=${PLAT} test

@@ -68,7 +68,11 @@ BuildPackageAll() {
   for ARCH in ${ARCH_LIST}; do
     BuildPackageArchAll "${PACKAGE}" "${ARCH}"
   done
-  echo "naclports Build SUCCEEDED ${PACKAGE}"
+  if [[ ${RESULT} != 0 ]] ; then
+    echo "naclports Build FAILED ${PACKAGE}"
+  else
+    echo "naclports Build SUCCEEDED ${PACKAGE}"
+  fi
 }
 
 MoveLibs() {
