@@ -78,8 +78,36 @@ def RunUnittests(input_api, output_api):
   return RunCommand('unittests', ['make', 'test'], input_api, output_api)
 
 
+# This check was copied from the chromium version.
+# TODO(sbc): should we add this to canned_checks?
+def CheckAuthorizedAuthor(input_api, output_api):
+  """Verify the author's email address is in AUTHORS.
+  """
+  import fnmatch
+
+  author = input_api.change.author_email
+  if not author:
+    input_api.logging.info('No author, skipping AUTHOR check')
+    return []
+  authors_path = input_api.os_path.join(
+      input_api.PresubmitLocalPath(), 'AUTHORS')
+  valid_authors = (
+      input_api.re.match(r'[^#]+\s+\<(.+?)\>\s*$', line)
+      for line in open(authors_path))
+  valid_authors = [item.group(1).lower() for item in valid_authors if item]
+  if not any(fnmatch.fnmatch(author.lower(), valid) for valid in valid_authors):
+    input_api.logging.info('Valid authors are %s', ', '.join(valid_authors))
+    return [output_api.PresubmitPromptWarning(
+        ('%s is not in AUTHORS file. If you are a new contributor, please visit'
+        '\n'
+        'http://www.chromium.org/developers/contributing-code and read the '
+        '"Legal" section.\n') % author)]
+  return []
+
+
 def CheckChangeOnUpload(input_api, output_api):
   report = []
+  report.extend(CheckAuthorizedAuthor(input_api, output_api))
   report.extend(CheckCQConfig(input_api, output_api))
   report.extend(RunPylint(input_api, output_api))
   report.extend(RunUnittests(input_api, output_api))
