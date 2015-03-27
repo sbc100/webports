@@ -70,7 +70,7 @@ def CmdPkgContents(package, options):
   """List contents of an installed package"""
   install_root = util.GetInstallRoot(package.config)
   for filename in package.Files():
-    if options.verbose:
+    if util.log_level > util.LOG_INFO:
       filename = os.path.join(install_root, filename)
     if options.all:
       filename = package.NAME + ': ' + filename

@@ -24,9 +24,10 @@ sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 import naclports
 import naclports.source_package
 
-GS_EM_URL = 'gs://naclports/mirror/emscripten/emsdk-portable.tar'
-GSTORE = 'http://storage.googleapis.com/naclports/mirror'
-GSTORE += '/emscripten/emsdk-portable.tar'
+EMSDK_FILENAME = 'emsdk-portable-20150325.tar.gz'
+SHA1 = '18934e2a5b432915465eb5177d1caf265a2082a3'
+MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror/emscripten'
+URL = MIRROR_URL + '/' + EMSDK_FILENAME
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 SRC_DIR = os.path.dirname(SCRIPT_DIR)
@@ -34,10 +35,25 @@ OUT_DIR = os.path.join(SRC_DIR, 'out')
 TARGET_DIR = os.path.join(OUT_DIR, 'emscripten_sdk')
 
 
+def DownloadToCache(url, filename, sha1):
+  full_name = os.path.join(naclports.paths.CACHE_ROOT, filename)
+  if os.path.exists(full_name):
+    try:
+      naclports.util.VerifyHash(full_name, sha1)
+      naclports.Log("Verified existing SDK: %s" % full_name)
+      return full_name
+    except naclports.util.HashVerificationError:
+      naclports.Log("Hash mistmatch on existing SDK: %s" % full_name)
+
+  naclports.DownloadFile(full_name, url)
+  naclports.util.VerifyHash(full_name, sha1)
+  return full_name
+
+
 def DownloadAndInstallEmSDK():
   # Clean up old SDK versions
   if os.path.exists(TARGET_DIR):
-    print('Cleaning up old SDK...')
+    naclports.Log('Cleaning up old SDK...')
     cmd = ['rm', '-rf']
     cmd.append(TARGET_DIR)
     subprocess.check_call(cmd)
@@ -45,20 +61,14 @@ def DownloadAndInstallEmSDK():
   # Download the emscripten SDK tarball
   if not os.path.exists(OUT_DIR):
     os.makedirs(OUT_DIR)
-  tar_file = os.path.join(OUT_DIR, GSTORE.split('/')[-1])
 
-  print('Downloading "%s" to "%s"...' % (GSTORE, tar_file))
-  sys.stdout.flush()
-
-  naclports.DownloadFile(tar_file, GSTORE)
+  tar_file = DownloadToCache(URL, EMSDK_FILENAME, SHA1)
 
   # Extract the toolchain
-  cwd = os.getcwd()
   os.chdir(OUT_DIR)
+  naclports.Log('Exctacting SDK ...')
   if subprocess.call(['tar', 'xf', tar_file]):
     raise naclports.Error('Error unpacking Emscripten SDK')
-
-  em_sdk_dir = os.path.join(OUT_DIR, 'emsdk_portable')
 
   # TODO(gdeepti): The update/install scripts clone from external git
   # repositories which is not permitted on the bots. Enable this when
@@ -70,15 +80,7 @@ def DownloadAndInstallEmSDK():
   # subprocess.check_call(['./emsdk', 'install', 'latest'])
   # subprocess.check_call(['./emsdk', 'activate', 'latest'])
 
-  os.chdir(cwd)
-
-  print('Renaming toolchain "%s" -> "%s"' % (em_sdk_dir, TARGET_DIR))
-  os.rename(em_sdk_dir, TARGET_DIR)
-
-  # Clean up: Remove the sdk tar file
-  os.remove(tar_file)
-
-  print('Emscripten SDK Install complete.')
+  print('Emscripten SDK Install complete')
 
 
 def main(argv):

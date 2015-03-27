@@ -55,28 +55,23 @@ BuildPackage() {
   fi
 }
 
-ARCH_LIST="i686 x86_64 arm pnacl"
-TOOLCHAIN_LIST="pnacl newlib glibc bionic"
-
 InstallPackageMultiArch() {
   echo "@@@BUILD_STEP ${TOOLCHAIN} $1@@@"
-  for NACL_ARCH in ${ARCH_LIST}; do
+
+  if [ "${TOOLCHAIN}" = "pnacl" ]; then
+    arch_list="pnacl"
+  elif [ "${TOOLCHAIN}" = "emscripten" ]; then
+    arch_list="emscripten"
+  elif [ "${TOOLCHAIN}" = "bionic" ]; then
+    arch_list="arm"
+  elif [ "${TOOLCHAIN}" = "glibc" ]; then
+    arch_list="i686 x86_64"
+  else
+    arch_list="i686 x86_64 arm"
+  fi
+
+  for NACL_ARCH in ${arch_list}; do
     export NACL_ARCH
-    # pnacl only works on pnacl and nowhere else.
-    if [ "${TOOLCHAIN}" = "pnacl" -a "${NACL_ARCH}" != "pnacl" ]; then
-      continue
-    fi
-    if [ "${TOOLCHAIN}" != "pnacl" -a "${NACL_ARCH}" = "pnacl" ]; then
-      continue
-    fi
-    # glibc doesn't work on arm for now.
-    if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
-      continue
-    fi
-    # bionic only works on arm for now.
-    if [ "${TOOLCHAIN}" = "bionic" -a "${NACL_ARCH}" != "arm" ]; then
-      continue
-    fi
     if ! RunCmd bin/naclports uninstall --all ; then
       BuildFailure $1
       return
@@ -96,23 +91,20 @@ CleanToolchain() {
   # Don't use TOOLCHAIN and NACL_ARCH here as we don't want to
   # clobber the globals.
   TC=$1
-  for ARCH in ${ARCH_LIST}; do
-    # TODO(bradnelson): reduce the duplication here.
-    # pnacl only works on pnacl and nowhere else.
-    if [ "${TC}" = "pnacl" -a "${ARCH}" != "pnacl" ]; then
-      continue
-    fi
-    if [ "${TC}" != "pnacl" -a "${ARCH}" = "pnacl" ]; then
-      continue
-    fi
-    # glibc doesn't work on arm for now.
-    if [ "${TC}" = "glibc" -a "${ARCH}" = "arm" ]; then
-      continue
-    fi
-    # bionic only works on arm for now.
-    if [ "${TC}" = "bionic" -a "${ARCH}" != "arm" ]; then
-      continue
-    fi
+
+  if [ "${TC}" = "pnacl" ]; then
+    arch_list="pnacl"
+  elif [ "${TC}" = "emscripten" ]; then
+    arch_list="emscripten"
+  elif [ "${TC}" = "bionic" ]; then
+    arch_list="arm"
+  elif [ "${TC}" = "glibc" ]; then
+    arch_list="i686 x86_64"
+  else
+    arch_list="i686 x86_64 arm"
+  fi
+
+  for ARCH in ${arch_list}; do
     if ! TOOLCHAIN=${TC} NACL_ARCH=${ARCH} RunCmd \
         bin/naclports clean --all; then
       TOOLCHAIN=${TC} NACL_ARCH=${ARCH} BuildFailure clean
@@ -127,7 +119,7 @@ CleanCurrentToolchain() {
 
 CleanAllToolchains() {
   echo "@@@BUILD_STEP clean all@@@"
-  for TC in ${TOOLCHAIN_LIST}; do
+  for TC in pnacl newlib glibc bionic emscripten; do
     CleanToolchain ${TC}
   done
 }

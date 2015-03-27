@@ -16,7 +16,7 @@ ConfigureStep() {
 }
 
 BuildStep() {
-  if [ "${TOOLCHAIN}" = "bionic" ]; then
+  if [ "${TOOLCHAIN}" = "bionic" -o "${TOOLCHAIN}" = "emscripten" ]; then
     return
   fi
   # export the nacl tools
@@ -32,7 +32,7 @@ BuildStep() {
 }
 
 TestStep() {
-  if [ "${TOOLCHAIN}" = "bionic" ]; then
+  if [ "${TOOLCHAIN}" = "bionic" -o "${TOOLCHAIN}" = "emscripten" ]; then
     return
   fi
   if [ "${TOOLCHAIN}" = "pnacl" ]; then

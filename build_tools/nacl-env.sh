@@ -128,6 +128,12 @@ if [ "${TOOLCHAIN}" = "glibc" ]; then
     exit -1
   fi
   NACL_LIBC=glibc
+elif [ "${TOOLCHAIN}" = "emscripten" ]; then
+  if [ "${NACL_ARCH}" != "emscripten" ]; then
+    echo "emscripten does not support this architecture: ${NACL_ARCH}" 1>&2
+    exit -1
+  fi
+  NACL_LIBC=emscripten
 elif [ "${TOOLCHAIN}" = "bionic" ]; then
   if [ "${NACL_ARCH}" != "arm" ]; then
     echo "Bionic toolchain only supports ARM" 1>&2
@@ -366,7 +372,7 @@ if [ "${NACL_ARCH}" = "pnacl" ]; then
     readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
   fi
 elif [ "${NACL_ARCH}" = "emscripten" ]; then
-  readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr
+  readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/system/local
 else
   readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
 fi

@@ -106,7 +106,7 @@ class TestCommands(common.NaclportsTest):
       self.assertEqual(stdout.getvalue(), expected_output)
 
     # when the verbose option is set expect CmdContents to output full paths.
-    options.verbose = True
+    naclports.util.log_level = naclports.util.LOG_VERBOSE
     expected_output = [os.path.join('/package/install/path', f)
                        for f in file_list]
     expected_output = '\n'.join(expected_output) + '\n'

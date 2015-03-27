@@ -82,8 +82,10 @@ class Configuration(object):
       self.config_name = 'release'
 
   def SetLibc(self):
-    if self.toolchain in ('pnacl', 'clang-newlib', 'emscripten'):
+    if self.toolchain in ('pnacl', 'clang-newlib'):
       self.libc = 'newlib'
+    elif self.toolchain == 'emscripten':
+      self.libc = 'emscripten'
     else:
       self.libc = self.toolchain
 
@@ -95,7 +97,12 @@ class Configuration(object):
                (other.libc, other.toolchain, other.debug))
 
   def __str__(self):
-    return '%s/%s/%s' % (self.arch, self.toolchain, self.config_name)
+    if self.arch == self.toolchain:
+      # For some toolchains (emscripten and pnacl), arch will always match the
+      # toolchain name is redundant to report it twice.
+      return '%s/%s' % (self.toolchain, self.config_name)
+    else:
+      return '%s/%s/%s' % (self.arch, self.toolchain, self.config_name)
 
   def __repr__(self):
     return '<Configuration %s>' % str(self)

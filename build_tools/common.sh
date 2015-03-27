@@ -925,6 +925,14 @@ DefaultConfigureStep() {
     return
   fi
 
+  if [ "${TOOLCHAIN}" = "emscripten" ]; then
+    # This is a variable the emconfigure sets, presumably to make configure
+    # tests do the right thing.
+    # TODO(sbc): We should probably call emconfigure instead of trying to
+    # duplicate its functionality.
+    export EMMAKEN_JUST_CONFIGURE=1
+  fi
+
   if IsAutoconfProject; then
     ConfigureStep_Autoconf
   elif IsCMakeProject; then

@@ -248,7 +248,7 @@ def GetToolchainRoot(config):
   if config.toolchain == 'pnacl':
     tc_dir = '%s_pnacl' % platform
   elif config.toolchain == 'emscripten':
-    tc_dir = '%s_emscripten' % platform
+    return os.path.join(os.environ['EMSCRIPTEN'], 'system', 'local')
   else:
     tc_arch = {
       'arm': 'arm',

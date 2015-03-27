@@ -18,6 +18,8 @@ PACKAGE_DIR=${OUT_DIR}/packages
 OUT_BUNDLE_DIR=${OUT_DIR}/sdk_bundle
 OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
 
+ARCH_LIST="i686 x86_64 arm pnacl"
+
 cd ${NACLPORTS_ROOT}
 
 # Don't do a full clean of naclports when we're testing the buildbot scripts
