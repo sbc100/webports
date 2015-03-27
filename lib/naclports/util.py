@@ -248,7 +248,13 @@ def GetToolchainRoot(config):
   if config.toolchain == 'pnacl':
     tc_dir = '%s_pnacl' % platform
   elif config.toolchain == 'emscripten':
-    return os.path.join(os.environ['EMSCRIPTEN'], 'system', 'local')
+    emscripten = os.environ.get('EMSCRIPTEN')
+    if not emscripten:
+      raise error.Error('$EMSCRIPTEN environment variable not set')
+    if not os.path.isdir(emscripten):
+      raise error.Error('$EMSCRIPTEN environment variable does not point'
+          ' to a directory: %s' % emscripten)
+    return os.path.join(emscripten, 'system', 'local')
   else:
     tc_arch = {
       'arm': 'arm',

@@ -20,6 +20,13 @@ OUT_PORTS_DIR=${OUT_BUNDLE_DIR}/${PEPPER_DIR}/ports
 
 ARCH_LIST="i686 x86_64 arm pnacl"
 
+CleanAllToolchains() {
+  echo "@@@BUILD_STEP clean all@@@"
+  for TC in pnacl newlib glibc; do
+    CleanToolchain ${TC}
+  done
+}
+
 cd ${NACLPORTS_ROOT}
 
 # Don't do a full clean of naclports when we're testing the buildbot scripts
@@ -37,7 +44,7 @@ PACKAGES=$(make sdklibs_list)
 # Build a package in both Debug and Release configurations.
 # $1 - name of package
 # $2 - arch to build for
-# $3 - toolchain ('glibc', 'newlib', 'bionic', 'pnacl')
+# $3 - toolchain ('glibc', 'newlib', 'pnacl')
 CustomBuildPackage() {
   PACKAGE=$1
   export NACL_ARCH=$2

@@ -117,9 +117,3 @@ CleanCurrentToolchain() {
   CleanToolchain ${TOOLCHAIN}
 }
 
-CleanAllToolchains() {
-  echo "@@@BUILD_STEP clean all@@@"
-  for TC in pnacl newlib glibc bionic emscripten; do
-    CleanToolchain ${TC}
-  done
-}
