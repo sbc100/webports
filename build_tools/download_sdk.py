@@ -62,7 +62,7 @@ def DetermineSDKURL(flavor, base_url, version):
     version: version directory to select tarballs from
 
   Returns:
-    A tuple of the URL and version number.
+    The URL of the SDK archive
   """
   # gsutil.py ships with depot_tools, which should be in PATH
   gsutil = [sys.executable, naclports.util.FindInPath('gsutil.py')]
@@ -82,7 +82,7 @@ def DetermineSDKURL(flavor, base_url, version):
     return [os.path.basename(os.path.normpath(elem)) for elem in elements]
 
   if version == 'latest':
-    print('Looking for latest SDK upload...')
+    print('Looking for latest SDK build...')
     # List the top level of the nacl_sdk folder
     versions = GSList('')
     # Find all trunk revision
@@ -101,15 +101,14 @@ def DetermineSDKURL(flavor, base_url, version):
       raise naclports.Error('No SDK build (%s) found in last %d trunk builds' %
                             (path, HISTORY_SIZE))
 
-  version = int(version)
-  return ('%strunk.%d/%s' % (GSTORE, version, path), version)
+  return '%strunk.%s/%s' % (GSTORE, version, path)
 
 
 def Untar(bz2_filename):
   if sys.platform == 'win32':
     tar_file = None
     try:
-      print('Unpacking tarball...')
+      naclports.Log('Unpacking tarball...')
       tar_file = cygtar.CygTar(bz2_filename, 'r:bz2')
       tar_file.Extract()
     except Exception, err:
@@ -131,7 +130,7 @@ def FindCygwin():
     raise naclports.Error(r'failed to find cygwin in \cygwin or c:\cygwin')
 
 
-def DownloadAndInstallSDK(url):
+def DownloadAndInstallSDK(url, target_dir):
   bz2_dir = OUT_DIR
   if not os.path.exists(bz2_dir):
     os.makedirs(bz2_dir)
@@ -140,7 +139,7 @@ def DownloadAndInstallSDK(url):
   if sys.platform in ['win32', 'cygwin']:
     cygbin = os.path.join(FindCygwin(), 'bin')
 
-  print('Downloading "%s" to "%s"...' % (url, bz2_filename))
+  naclports.Log('Downloading "%s" to "%s"...' % (url, bz2_filename))
   sys.stdout.flush()
 
   # Download it.
@@ -162,18 +161,18 @@ def DownloadAndInstallSDK(url):
   actual_dir = os.path.join(bz2_dir, pepper_dir)
 
   # Drop old versions.
-  if os.path.exists(TARGET_DIR):
-    print('Cleaning up old SDK...')
+  if os.path.exists(target_dir):
+    naclports.Log('Cleaning up old SDK...')
     if sys.platform in ['win32', 'cygwin']:
       cmd = [os.path.join(cygbin, 'bin', 'rm.exe'), '-rf']
     else:
       cmd = ['rm', '-rf']
-    cmd.append(TARGET_DIR)
+    cmd.append(target_dir)
     returncode = subprocess.call(cmd)
     assert returncode == 0
 
-  print('Renaming toolchain "%s" -> "%s"' % (actual_dir, TARGET_DIR))
-  os.rename(actual_dir, TARGET_DIR)
+  naclports.Log('Renaming toolchain "%s" -> "%s"' % (actual_dir, target_dir))
+  os.rename(actual_dir, target_dir)
 
   if sys.platform in ['win32', 'cygwin']:
     time.sleep(2)  # Wait for windows.
@@ -181,7 +180,7 @@ def DownloadAndInstallSDK(url):
   # Clean up: remove the sdk bz2.
   os.remove(bz2_filename)
 
-  print('Install complete.')
+  naclports.Log('Install complete.')
 
 
 PLATFORM_COLLAPSE = {
@@ -206,21 +205,21 @@ def main(argv):
   else:
     flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
-  os.environ['NACL_SDK_ROOT'] = TARGET_DIR
-  getos = os.path.join(TARGET_DIR, 'tools', 'getos.py')
-  existing_version = 0
-  if os.path.exists(getos):
-    cmd = [sys.executable, getos, '--sdk-revision']
-    existing_version = int(subprocess.check_output(cmd).strip())
 
-  url, version = DetermineSDKURL(flavor,
-                                 base_url=GS_URL_BASE,
-                                 version=options.version)
-  if version == existing_version:
-    print('SDK revision %s already downloaded' % version)
-    return 0
+  url = DetermineSDKURL(flavor,
+                        base_url=GS_URL_BASE,
+                        version=options.version)
 
-  DownloadAndInstallSDK(url)
+  stamp_file = os.path.join(TARGET_DIR, 'stamp')
+  if os.path.exists(stamp_file):
+    with open(stamp_file) as f:
+      if f.read().strip() == url:
+        naclports.Log('SDK already installed: %s' % url)
+        return 0
+
+  DownloadAndInstallSDK(url, TARGET_DIR)
+  with open(stamp_file, 'w') as f:
+    f.write(url + '\n')
   return 0
 
 
