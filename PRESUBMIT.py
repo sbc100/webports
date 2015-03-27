@@ -122,6 +122,7 @@ TRYBOTS = [
     'naclports-linux-clang-2',
     'naclports-linux-clang-3',
     'naclports-linux-clang-4',
+    'naclports-linux-emscripten-0',
 ]
 
 
