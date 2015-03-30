@@ -12,8 +12,6 @@ module which gets included by the gclient DEPS, and assumes
 that cygwin is installed in /cygwin.
 """
 
-from __future__ import print_function
-
 import argparse
 import os
 import subprocess
@@ -82,7 +80,7 @@ def DetermineSDKURL(flavor, base_url, version):
     return [os.path.basename(os.path.normpath(elem)) for elem in elements]
 
   if version == 'latest':
-    print('Looking for latest SDK build...')
+    naclports.Log('Looking for latest SDK build...')
     # List the top level of the nacl_sdk folder
     versions = GSList('')
     # Find all trunk revision
@@ -138,9 +136,6 @@ def DownloadAndInstallSDK(url, target_dir):
 
   if sys.platform in ['win32', 'cygwin']:
     cygbin = os.path.join(FindCygwin(), 'bin')
-
-  naclports.Log('Downloading "%s" to "%s"...' % (url, bz2_filename))
-  sys.stdout.flush()
 
   # Download it.
   naclports.DownloadFile(bz2_filename, url)
@@ -213,9 +208,13 @@ def main(argv):
   stamp_file = os.path.join(TARGET_DIR, 'stamp')
   if os.path.exists(stamp_file):
     with open(stamp_file) as f:
-      if f.read().strip() == url:
+      installed_url = f.read().strip()
+      if installed_url == url:
         naclports.Log('SDK already installed: %s' % url)
         return 0
+      else:
+        naclports.Log('Ignoring currently installed SDK: %s' % installed_url)
+
 
   DownloadAndInstallSDK(url, TARGET_DIR)
   with open(stamp_file, 'w') as f:

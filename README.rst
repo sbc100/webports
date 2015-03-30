@@ -61,25 +61,22 @@ To build all ports you will also need these:
 - libglib2.0-dev >= 2.26.0 (if you want to build glib)
 - xsltproc
 
-To ensure you have all required packages you can run the
-install-build-deps.sh from the chromium repo.
-
 On Mac OS X you can use homebrew to install these using the following command::
 
   brew install autoconf automake cmake gettext libtool pkg-config
 
 The build system for some of the native Python modules relies on a 32-bit
 host build of Python itself, which in turn relies on the development version
-of zlib and libssl being available.  On 64-bit Ubuntu/Trust this means
+of zlib and libssl being available.  On 64-bit Ubuntu/Trusty this means
 installing:
 
 - zlib1g-dev:i386
 - libssl-dev:i386
 
-On older Debian/Ubuntu systems the packages were called:
+On older Debian/Ubuntu systems these packages were known as:
 
 - lib32z1-dev
-- libssl0.9.8:i
+- libssl0.9.8:i386
 
 
 Building
@@ -127,7 +124,7 @@ licenses before using these packages in your projects.
 
 **Note to Windows users**: These scripts are written in bash and must be
 launched from a Cygwin shell. While many of the scripts should work under
-Cygwin naclports is only tested on Linux and Mac so YMMV.
+Cygwin, naclports is only tested on Linux and Mac so YMMV.
 
 
 Binary Packages
@@ -144,6 +141,15 @@ source.
 
 If you want to force a package to be built from source you can pass
 ``--from-source`` to the naclports script.
+
+
+Emscripten Support
+------------------
+
+The build system contains very early alpha support for building packages
+with Emscripten.  To do requires the Emscripten SDK to be installed and
+configured (with the Emscripten tools in the PATH).  To build for Emscripten
+build with ``TOOLCHAIN=emscripten``.
 
 
 Running the examples

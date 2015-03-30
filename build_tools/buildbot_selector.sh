@@ -14,7 +14,8 @@ set -o errexit
 set -o nounset
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
-DEFAULT_NACL_SDK_ROOT="$(dirname ${SCRIPT_DIR})/out/nacl_sdk"
+NACLPORTS_SRC=$(dirname ${SCRIPT_DIR})
+DEFAULT_NACL_SDK_ROOT="${NACLPORTS_SRC}/out/nacl_sdk"
 NACL_SDK_ROOT=${NACL_SDK_ROOT:-${DEFAULT_NACL_SDK_ROOT}}
 export NACL_SDK_ROOT
 
@@ -166,19 +167,35 @@ fi
 InstallEmscripten() {
   echo "@@@BUILD_STEP Install Emscripten SDK@@@"
   # Download the Emscripten SDK and set the environment variables
-  local DEFAULT_EMSCRIPTEN_ROOT="$(dirname ${SCRIPT_DIR})/out/emsdk_portable"
+  local DEFAULT_EMSCRIPTEN_ROOT="${NACLPORTS_SRC}/out/emsdk_portable"
   local EMSCRIPTEN_ROOT=${EMSCRIPTEN_ROOT:-${DEFAULT_EMSCRIPTEN_ROOT}}
   echo ${PYTHON} ${SCRIPT_DIR}/download_emscripten.py
   ${PYTHON} ${SCRIPT_DIR}/download_emscripten.py
 
-  # Running activate with --embedded causes the .emscripten file to be
-  # written in the SDK itself, rather than to $HOME, which is desirable
-  # on the builder where we don't want to pollute $HOME if possible.
-  # We have to run this on each bot, rather than including the .emscripten
-  # file in the tarball since .emscripten embed absolute paths which will
-  # vary between bots.
-  ${EMSCRIPTEN_ROOT}/emsdk activate latest --embedded
+  # Mechanism by which emscripten patches can be tested on the trybots
+  if [ -f "${NACLPORTS_SRC}/emscripten.patch" ]; then
+    cd ${EMSCRIPTEN_ROOT}/emscripten/master
+    echo "Applying emscripten.patch"
+    git apply "${NACLPORTS_SRC}/emscripten.patch"
+    cd -
+  fi
+
+  # Add the node 'bin' directory to the PATH.
+  # TODO(sbc): probably cleaner to modify .emscripten file instead.
+  local node_bin=${NACLPORTS_SRC}/out/node-v0.12.1-linux-x64/bin/
+  if [ ! -d "${node_bin}" ]; then
+    echo "node bin directory not found: ${node_bin}"
+    exit 1
+  fi
+  echo "Adding node bin directory to PATH: ${node_bin}"
+  export PATH=${PATH}:${node_bin}
+
+  ${EMSCRIPTEN_ROOT}/emsdk activate latest
   source ${EMSCRIPTEN_ROOT}/emsdk_env.sh
+
+  # Finally, run 'emcc -v' which will check that the compiler is working
+  echo "Running emcc -v"
+  emcc -v
 }
 
 Unittests() {
