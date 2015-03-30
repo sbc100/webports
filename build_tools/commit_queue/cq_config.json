@@ -1,19 +1,21 @@
 {
     "commit_user": "commit-bot@chromium.org",
-    "committer_project": "chromium",
     "cq_status_url": "https://chromium-cq-status.appspot.com",
     "git_repo_url": "https://chromium.googlesource.com/external/naclports",
     "project_bases_legacy_from_git_repo_url": true,
-    "remote_branch": "refs/heads/master", 
-    "rietveld_url": "https://codereview.chromium.org", 
-    "rietveld_user": "commit-bot@chromium.org", 
+    "remote_branch": "refs/heads/master",
+    "rietveld_url": "https://codereview.chromium.org",
+    "rietveld_user": "commit-bot@chromium.org",
     "skip_throttle_users": [
         "commit-bot@chromium.org"
-    ], 
-    "tree_status_url": "https://naclports-status.appspot.com", 
+    ],
     "verifiers_no_patch": {
-        "reviewer_lgtm_verifier": {}, 
-        "tree_status_verifier": {}, 
+        "reviewer_lgtm_verifier": {
+            "committer_project": "chromium"
+        },
+        "tree_status_verifier": {
+            "tree_status_url": "https://naclports-status.appspot.com"
+        },
         "try_job_verifier": {
             "launched": {
                 "tryserver.nacl": {
