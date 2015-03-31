@@ -292,7 +292,7 @@ InitializePNaClToolchain() {
     NACL_EXEEXT=".nexe"
     NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${TOOLCHAIN}_${NACL_ARCH_ALT}"
   else
-    # TODO(sbc): figure our why we do not have a pnacl-string
+    # TODO(sbc): figure our why we do not have a pnacl-strings
     #NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
     # until then use the host's strings tool
     # (used only by the cairo package)
@@ -358,19 +358,7 @@ if [ "${TOOLCHAIN}" = "glibc" ]; then
 fi
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then
-  if [ -d ${NACL_TOOLCHAIN_ROOT}/le32-nacl ]; then
-    NACL_SDK_REVISION=$(${NACL_SDK_ROOT}/tools/getos.py --sdk-revision)
-    if [ "${NACL_SDK_VERSION}" -lt 40 ]; then
-      # pepper_39 shiped with le32-nacl/local in is default search path
-      readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/local
-    else
-      readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/usr
-    fi
-  else
-    # pre-pepper_39 used /usr/local
-    # TODO: remove this once pepper_39 is stable.
-    readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/usr/local
-  fi
+  readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/le32-nacl/usr
 elif [ "${NACL_ARCH}" = "emscripten" ]; then
   readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/system/local
 else

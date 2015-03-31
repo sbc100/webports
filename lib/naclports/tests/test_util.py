@@ -17,6 +17,8 @@ class TestUtil(unittest.TestCase):
   def setUp(self):
     common.AddPatch(self, patch('naclports.util.GetSDKRoot',
                                 Mock(return_value='/sdk/root')))
+    common.AddPatch(self, patch('naclports.util.GetEmscriptenRoot',
+                                Mock(return_value='/emscripten/root')))
     common.AddPatch(self, patch('naclports.util.GetPlatform',
                                 Mock(return_value='linux')))
 
@@ -53,16 +55,19 @@ class TestUtil(unittest.TestCase):
     self.assertTrue(util.CheckStamp(temp_name, stamp_contents))
     self.assertFalse(util.CheckStamp(temp_name, stamp_contents + 'x'))
 
-  def testGetToolchainRoot(self):
-    expected = '/sdk/root/toolchain/linux_x86_newlib/x86_64-nacl'
-    self.assertEqual(util.GetToolchainRoot(Configuration()), expected)
-
   def testGetInstallRoot(self):
     expected = '/sdk/root/toolchain/linux_x86_newlib/x86_64-nacl/usr'
     self.assertEqual(util.GetInstallRoot(Configuration()), expected)
 
-    expected = '/sdk/root/toolchain/linux_pnacl/usr/local'
+    expected = '/sdk/root/toolchain/linux_pnacl/le32-nacl/usr'
     self.assertEqual(util.GetInstallRoot(Configuration('pnacl')), expected)
+
+    expected = '/emscripten/root/system/local'
+    self.assertEqual(util.GetInstallRoot(Configuration('emscripten')), expected)
+
+    expected = '/sdk/root/toolchain/linux_pnacl/x86_64-nacl/usr'
+    self.assertEqual(util.GetInstallRoot(
+        Configuration(toolchain='clang-newlib')), expected)
 
   def testHashFile(self):
     temp_name = tempfile.mkstemp('naclports_test')[1]
