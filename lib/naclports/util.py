@@ -213,6 +213,23 @@ def GetSDKRoot():
 
 
 @Memoize
+def GetEmscriptenRoot():
+  emscripten = os.environ.get('EMSCRIPTEN')
+  if emscripten is None:
+    local_root = os.path.join(paths.OUT_DIR, 'emsdk_portable', 'emscripten',
+                              'master')
+    if os.path.exists(local_root):
+      emscripten = local_root
+    else:
+      raise error.Error('$EMSCRIPTEN not set')
+
+  if not os.path.isdir(emscripten):
+    raise error.Error('$EMSCRIPTEN environment variable does not point'
+        ' to a directory: %s' % emscripten)
+  return emscripten
+
+
+@Memoize
 def GetSDKVersion():
   """Returns the version (as a string) of the current SDK."""
   getos = os.path.join(GetSDKRoot(), 'tools', 'getos.py')
@@ -244,17 +261,12 @@ def GetPlatform():
 @Memoize
 def GetToolchainRoot(config):
   """Returns the toolchain folder for a given NaCl toolchain."""
+  if config.toolchain == 'emscripten':
+    return os.path.join(GetEmscriptenRoot(), 'system', 'local')
+
   platform = GetPlatform()
   if config.toolchain == 'pnacl':
     tc_dir = '%s_pnacl' % platform
-  elif config.toolchain == 'emscripten':
-    emscripten = os.environ.get('EMSCRIPTEN')
-    if not emscripten:
-      raise error.Error('$EMSCRIPTEN environment variable not set')
-    if not os.path.isdir(emscripten):
-      raise error.Error('$EMSCRIPTEN environment variable does not point'
-          ' to a directory: %s' % emscripten)
-    return os.path.join(emscripten, 'system', 'local')
   else:
     tc_arch = {
       'arm': 'arm',
