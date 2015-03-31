@@ -134,6 +134,8 @@ else
   elif [ "${OS}" = "linux" ]; then
     if [ "${TOOLCHAIN}" = "bionic" ]; then
       SHARDS=1
+    elif [ "${TOOLCHAIN}" = "emscripten" ]; then
+      SHARDS=1
     else
       SHARDS=5
     fi
@@ -143,7 +145,11 @@ else
 
   # For the trybots we have 5 shards for each toolchain
   if [ "${TRYBOT}" = "1" ]; then
-    SHARDS=5
+    if [ "${TOOLCHAIN}" = "emscripten" ]; then
+      SHARDS=1
+    else
+      SHARDS=5
+    fi
   fi
 fi
 

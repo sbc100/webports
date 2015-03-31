@@ -5,4 +5,3 @@ LICENSE=BSD
 DEPENDS=(python-host six setuptools)
 DISABLED_LIBC=(bionic)
 SHA1=fbafcd19ea0082b3ecb17695b4cb46070181699f
-DISABLED_TOOLCHAIN=(emscripten)
