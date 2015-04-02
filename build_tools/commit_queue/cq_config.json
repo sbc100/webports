@@ -21,73 +21,74 @@
                 "tryserver.nacl": {
                     "naclports-linux-clang-0": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-clang-1": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-clang-2": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-clang-3": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-clang-4": [
                         "defaulttests"
-                    ], 
+                    ],
+                    "naclports-linux-emscripten-0": [
+                        "defaulttests"
+                    ],
                     "naclports-linux-glibc-0": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-glibc-1": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-glibc-2": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-glibc-3": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-glibc-4": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-newlib-0": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-newlib-1": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-newlib-2": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-newlib-3": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-newlib-4": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-pnacl-0": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-pnacl-1": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-pnacl-2": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-pnacl-3": [
                         "defaulttests"
-                    ], 
+                    ],
                     "naclports-linux-pnacl-4": [
-                        "defaulttests"
-                    ], 
-                    "naclports-linux-emscripten-0": [
                         "defaulttests"
                     ],
                     "naclports-presubmit": [
                         "defaulttests"
                     ]
                 }
-            }, 
+            },
             "triggered": {}
         }
-    }
+    },
+    "version": 1
 }
