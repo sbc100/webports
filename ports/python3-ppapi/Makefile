@@ -77,7 +77,7 @@ endif
 
 install: install-hterm
 	mkdir -p $(INSTALL_DIR)
-	tar -h -c --exclude=*.pyc --exclude=__pycache__ -C ${NACL_PREFIX} -f $(INSTALL_DIR)/pydata_$(NACL_ARCH).tar lib/python3.4 ${EXTRA_ASSETS}
+	tar -h -c --exclude=*.pyc --exclude=__pycache__ -C ${NACL_PREFIX} -f $(INSTALL_ARCH_DIR)/pydata_$(NACL_ARCH).tar lib/python3.4 ${EXTRA_ASSETS}
 ifeq ($(TOOLCHAIN),pnacl)
 	cp $(OUTDIR)/python$(EXEEXT) $(INSTALL_ARCH_DIR)
 	cd $(INSTALL_DIR) && \
@@ -93,11 +93,11 @@ else
 endif
 	cp index.html $(INSTALL_DIR)
 	cp python.js $(INSTALL_DIR)
-	cp manifest.json ${INSTALL_DIR}
-	cp background.js ${INSTALL_DIR}
-	cp icon_16.png ${INSTALL_DIR}
-	cp icon_48.png ${INSTALL_DIR}
-	cp icon_128.png ${INSTALL_DIR}
+	cp manifest.json $(INSTALL_DIR)
+	cp background.js $(INSTALL_DIR)
+	cp icon_16.png $(INSTALL_DIR)
+	cp icon_48.png $(INSTALL_DIR)
+	cp icon_128.png $(INSTALL_DIR)
 	cd $(INSTALL_DIR) && rm -f python.zip && zip -r python.zip .
 
 .PHONY: install-hterm
