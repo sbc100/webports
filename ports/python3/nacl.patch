@@ -172,6 +172,24 @@ diff --git a/Modules/python.c b/Modules/python.c
  int
  main(int argc, char **argv)
  {
+diff --git a/Modules/readline.c b/Modules/readline.c
+--- a/Modules/readline.c
++++ b/Modules/readline.c
+@@ -1051,8 +1051,12 @@ setup_readline(readlinestate *mod_state)
+ 
+ /* Wrapper around GNU readline that handles signals differently. */
+ 
+-
+-#if defined(HAVE_RL_CALLBACK) && defined(HAVE_SELECT)
++/*
++ * Don't use the select()-based readline under Native Client. While select()
++ * is available and compile and link time it will fail at runtime under sel_ldr
++ * since there is no IRT/syscall implemenation of select().
++ */
++#if defined(HAVE_RL_CALLBACK) && defined(HAVE_SELECT) && !defined(__native_client__)
+ 
+ static  char *completed_input_string;
+ static void
 diff --git a/Modules/signalmodule.c b/Modules/signalmodule.c
 --- a/Modules/signalmodule.c
 +++ b/Modules/signalmodule.c
@@ -265,14 +283,27 @@ diff --git a/Python/dynload_shlib.c b/Python/dynload_shlib.c
 diff --git a/Python/fileutils.c b/Python/fileutils.c
 --- a/Python/fileutils.c
 +++ b/Python/fileutils.c
-@@ -707,6 +707,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
+@@ -599,6 +599,12 @@ get_inheritable(int fd, int raise)
+ 
+     flags = fcntl(fd, F_GETFD, 0);
+     if (flags == -1) {
++#if defined(__native_client__) && !defined(__GLIBC__)
++        /* When running under NaCl within the sel_ldr this fcntl() will always
++           fail.  However we don't want to completely remove this block since
++           fcntl() is emulated using nacl_io when running within chrome. */
++        return 0;
++#endif
+         if (raise)
+             PyErr_SetFromErrno(PyExc_OSError);
+         return -1;
+@@ -707,6 +713,12 @@ set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
      /* slow-path: fcntl() requires two syscalls */
      flags = fcntl(fd, F_GETFD);
      if (flags < 0) {
 +#if defined(__native_client__) && !defined(__GLIBC__)
-+        /* When running under NaCl within the sel_ldr this fcntl() will always fail.
-+        i  However we don't want to completely remove this block since fcntl() is
-+           emulated using nacl_io when running within chrome. */
++        /* When running under NaCl within the sel_ldr this fcntl() will always
++           fail.  However we don't want to completely remove this block since
++           fcntl() is emulated using nacl_io when running within chrome. */
 +        return 0;
 +#endif
          if (raise)

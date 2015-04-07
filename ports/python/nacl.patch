@@ -409,7 +409,7 @@ diff --git a/Modules/python.c b/Modules/python.c
  int
  main(int argc, char **argv)
  {
-@@ -20,5 +43,9 @@ main(int argc, char **argv)
+@@ -20,5 +49,9 @@ main(int argc, char **argv)
  	m = fpgetmask();
  	fpsetmask(m & ~FP_X_OFL);
  #endif
@@ -419,6 +419,23 @@ diff --git a/Modules/python.c b/Modules/python.c
 +#endif
  	return Py_Main(argc, argv);
  }
+diff --git a/Modules/readline.c b/Modules/readline.c
+--- a/Modules/readline.c
++++ b/Modules/readline.c
+@@ -950,7 +950,12 @@ setup_readline(void)
+ /* Wrapper around GNU readline that handles signals differently. */
+ 
+ 
+-#if defined(HAVE_RL_CALLBACK) && defined(HAVE_SELECT)
++/*
++ * Don't use the select()-based readline under Native Client. While select()
++ * is available and compile and link time it will fail at runtime under sel_ldr
++ * since there is no IRT/syscall implemenation of select().
++ */
++#if defined(HAVE_RL_CALLBACK) && defined(HAVE_SELECT) && !defined(__native_client__)
+ 
+ static  char *completed_input_string;
+ static void
 diff --git a/Modules/timemodule.c b/Modules/timemodule.c
 --- a/Modules/timemodule.c
 +++ b/Modules/timemodule.c
