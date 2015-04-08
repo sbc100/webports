@@ -415,7 +415,7 @@ static int apipe_release(const char* path, struct fuse_file_info* info) {
 
 static int apipe_fgetattr(
     const char* path, struct stat* st, struct fuse_file_info* info) {
-  memset(st, 0, sizeof(st));
+  memset(st, 0, sizeof(*st));
   st->st_ino = info->fh;
   st->st_mode = S_IFIFO | S_IRUSR | S_IWUSR;
   // TODO(bradnelson): Do something better.
@@ -795,7 +795,6 @@ static pid_t waitpid_impl(int pid, int* status, int options);
 
 static int CloneFileDescriptors(struct PP_Var envs_var) {
   int fd;
-  int port;
   int count = 0;
 
   for (fd = 0; fd < MAX_FILE_DESCRIPTOR; ++fd) {
@@ -806,7 +805,6 @@ static int CloneFileDescriptors(struct PP_Var envs_var) {
       }
       return -1;
     }
-    port = -1;
     if (S_ISREG(st.st_mode)) {
       // TODO(bradnelson): Land nacl_io ioctl to support this.
     } else if (S_ISDIR(st.st_mode)) {
