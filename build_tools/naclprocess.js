@@ -418,16 +418,18 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     //console.log(src.pid + '> ' + msg['command'] + ': ' + JSON.stringify(msg));
     var handler = handlers[msg['command']];
     handler[1].call(handler[0], msg, reply, src);
-  } else if (msg.indexOf(NaClProcessManager.prefix) === 0) {
+  } else if (typeof msg == 'string' &&
+             msg.indexOf(NaClProcessManager.prefix) === 0) {
     var out = msg.substring(NaClProcessManager.prefix.length);
     this.onStdout(out);
-  } else if (msg.indexOf('exited') === 0) {
+  } else if (typeof msg == 'string' &&
+             msg.indexOf('exited') === 0) {
     var exitCode = parseInt(msg.split(':', 2)[1]);
     if (isNaN(exitCode))
       exitCode = 0;
     this.exit(exitCode, src);
   } else {
-    console.log('unexpected message: ' + msg);
+    console.log('unexpected message: ' + JSON.stringify(msg));
     return;
   }
 }
