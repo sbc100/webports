@@ -46,8 +46,14 @@
 #include "ppapi_simple/ps_instance.h"
 #include "ppapi_simple/ps_interface.h"
 
+#include "nacl_io/nacl_io.h"
+#include "nacl_io/fuse.h"
+
 #include "library_dependencies.h"
 #include "path_util.h"
+
+
+#define MAX_OLD_PIPES 100
 
 
 extern char** environ;
@@ -61,131 +67,6 @@ struct NaClSpawnReply {
 
   struct PP_Var result_var;
 };
-
-// Get an environment variable as an int, or return -1 if the value cannot
-// be converted to an int.
-static int getenv_as_int(const char *env) {
-  const char* env_str = getenv(env);
-  if (!env_str) {
-    return -1;
-  }
-  errno = 0;
-  int env_int = strtol(env_str, NULL, 0);
-  if (errno) {
-    return -1;
-  }
-  return env_int;
-}
-
-static int mkdir_checked(const char* dir) {
-  int rtn =  mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
-  if (rtn != 0) {
-    fprintf(stderr, "mkdir '%s' failed: %s\n", dir, strerror(errno));
-  }
-  return rtn;
-}
-
-static int do_mount(const char *source, const char *target,
-                    const char *filesystemtype, unsigned long mountflags,
-                    const void *data) {
-  NACL_LOG("mount[%s] '%s' at '%s'\n", filesystemtype, source, target);
-  return mount(source, target, filesystemtype, mountflags, data);
-}
-
-extern void nacl_setup_env() {
-  // If we running in sel_ldr then don't do any the filesystem/nacl_io
-  // setup. We detect sel_ldr by the absence of the Pepper Instance.
-  if (PSGetInstanceId() == 0) {
-    return;
-  }
-
-  umount("/");
-  do_mount("", "/", "memfs", 0, NULL);
-
-  // Setup common environment variables, but don't override those
-  // set already by ppapi_simple.
-  setenv("HOME", "/home/user", 0);
-  setenv("PATH", "/bin", 0);
-  setenv("USER", "user", 0);
-  setenv("LOGNAME", "user", 0);
-
-  const char* home = getenv("HOME");
-  mkdir_checked("/home");
-  mkdir_checked(home);
-  mkdir_checked("/tmp");
-  mkdir_checked("/bin");
-  mkdir_checked("/etc");
-  mkdir_checked("/mnt");
-  mkdir_checked("/mnt/http");
-  mkdir_checked("/mnt/html5");
-
-  const char* data_url = getenv("NACL_DATA_URL");
-  if (!data_url)
-    data_url = "./";
-  NACL_LOG("NACL_DATA_URL=%s\n", data_url);
-
-  const char* mount_flags = getenv("NACL_DATA_MOUNT_FLAGS");
-  if (!mount_flags)
-    mount_flags = "";
-  NACL_LOG("NACL_DATA_MOUNT_FLAGS=%s\n", mount_flags);
-
-  if (do_mount(data_url, "/mnt/http", "httpfs", 0, mount_flags) != 0) {
-    perror("mounting http filesystem at /mnt/http failed");
-  }
-
-  if (do_mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
-    perror("Mounting HTML5 filesystem in /mnt/html5 failed");
-  } else {
-    mkdir("/mnt/html5/home", 0777);
-    struct stat st;
-    if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
-      perror("Unable to create home directory in persistent storage");
-    } else {
-      if (do_mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
-        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
-      }
-    }
-  }
-
-  if (do_mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
-    perror("Mounting HTML5 filesystem in /tmp failed");
-  }
-
-  /* naclprocess.js sends the current working directory using this
-   * environment variable. */
-  const char* pwd = getenv("PWD");
-  if (pwd != NULL) {
-    if (chdir(pwd)) {
-      fprintf(stderr, "chdir() to %s failed: %s\n", pwd, strerror(errno));
-    }
-  }
-
-  // Tell the NaCl architecture to /etc/bashrc of mingn.
-#if defined(__x86_64__)
-  static const char kNaClArch[] = "x86_64";
-  // Use __i386__ rather then __i686__ since the latter is not defined
-  // by i686-nacl-clang.
-#elif defined(__i386__)
-  static const char kNaClArch[] = "i686";
-#elif defined(__arm__)
-  static const char kNaClArch[] = "arm";
-#elif defined(__pnacl__)
-  static const char kNaClArch[] = "pnacl";
-#else
-# error "Unknown architecture"
-#endif
-  // Set NACL_ARCH with a guess if not set (0 == set if not already).
-  setenv("NACL_ARCH", kNaClArch, 0);
-  // Set NACL_BOOT_ARCH if not inherited from a parent (0 == set if not already
-  // set). This will let us prefer PNaCl if we started with PNaCl (for tests
-  // mainly).
-  setenv("NACL_BOOT_ARCH", kNaClArch, 0);
-
-  setlocale(LC_CTYPE, "");
-
-  nacl_spawn_pid = getenv_as_int("NACL_PID");
-  nacl_spawn_ppid = getenv_as_int("NACL_PPID");
-}
 
 static void VarAddRef(struct PP_Var var) {
   PSInterfaceVar()->AddRef(var);
@@ -277,21 +158,58 @@ static void VarArrayAppendString(struct PP_Var array,
   VarArraySetString(array, index, value);
 }
 
-static std::string GetCwd() {
-  char cwd[PATH_MAX] = ".";
-  if (!getcwd(cwd, PATH_MAX)) {
-    NACL_LOG("getcwd failed: %s\n", strerror(errno));
-    assert(0);
-  }
-  return cwd;
+static void SetInt(struct PP_Var dict_var, const char* key, int32_t v) {
+  VarDictionarySet(dict_var, key, PP_MakeInt32(v));
 }
 
-static std::string GetAbsPath(const std::string& path) {
-  assert(!path.empty());
-  if (path[0] == '/')
-    return path;
-  else
-    return GetCwd() + '/' + path;
+static int GetInt(struct PP_Var dict_var, const char* key) {
+  struct PP_Var value_var;
+  if (!VarDictionaryHasKey(dict_var, key, &value_var)) {
+    return -1;
+  }
+  assert(value_var.type == PP_VARTYPE_INT32);
+  int value = value_var.value.as_int;
+  if (value < 0) {
+    errno = -value;
+    return -1;
+  }
+  return value;
+}
+
+static int GetIntAndRelease(struct PP_Var dict_var, const char* key) {
+  int ret = GetInt(dict_var, key);
+  VarRelease(dict_var);
+  return ret;
+}
+
+// Get an environment variable as an int, or return -1 if the value cannot
+// be converted to an int.
+static int getenv_as_int(const char *env) {
+  const char* env_str = getenv(env);
+  if (!env_str) {
+    return -1;
+  }
+  errno = 0;
+  int env_int = strtol(env_str, NULL, 0);
+  if (errno) {
+    return -1;
+  }
+  return env_int;
+}
+
+static int mkdir_checked(const char* dir) {
+  int rtn =  mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
+  if (rtn != 0) {
+    fprintf(stderr, "mkdir '%s' failed: %s\n", dir, strerror(errno));
+  }
+  return rtn;
+}
+
+static int do_mount(const char *source, const char *target,
+                    const char *filesystemtype, unsigned long mountflags,
+                    const void *data) {
+  NACL_LOG("mount[%s] '%s' at '%s'\n", filesystemtype, source, target);
+  return mount(source, target, filesystemtype, mountflags, data);
 }
 
 // Returns a unique request ID to make all request strings different
@@ -354,6 +272,297 @@ static struct PP_Var SendRequest(struct PP_Var req_var) {
   PSEventRegisterMessageHandler(req_id.c_str(), NULL, &reply);
 
   return reply.result_var;
+}
+
+static void restore_pipes(void) {
+  int old_pipes[MAX_OLD_PIPES][3];
+  int old_pipe_count = 0;
+  int count = 0;
+  int i;
+  for (;;) {
+    char entry[100];
+    snprintf(entry, sizeof entry, "NACL_SPAWN_FD_SETUP_%d", count++);
+    const char *env_entry = getenv(entry);
+    if (!env_entry) {
+      break;
+    }
+    int fd, port, writer;
+    if (sscanf(env_entry, "pipe:%d:%d:%d", &fd, &port, &writer) != 3) {
+      unsetenv(entry);
+      continue;
+    }
+    unsetenv(entry);
+    // NOTE: This is necessary as the javascript assumes all instances
+    // of an anonymous pipe will be from the same file object.
+    // This allows nacl_io to do the reference counting.
+    // naclprocess.js then merely tracks which processes are readers and
+    // writers for a given pipe.
+    for (i = 0; i < old_pipe_count; ++i) {
+      if (old_pipes[i][0] == port && old_pipes[i][1] == writer) {
+        dup2(old_pipes[i][2], fd);
+        break;
+      }
+    }
+    if (i != old_pipe_count) continue;
+    char path[100];
+    sprintf(path, "/apipe/%d", port);
+    int fd_tmp = open(path, (writer ? O_WRONLY : O_RDONLY));
+    if (fd_tmp < 0) {
+      fprintf(stderr, "Failed to created pipe on port %d\n", port);
+      exit(1);
+    }
+    if (fd_tmp != fd) {
+      dup2(fd_tmp, fd);
+      close(fd_tmp);
+    }
+    if (old_pipe_count >= MAX_OLD_PIPES) {
+      fprintf(stderr, "Too many old pipes to restore!\n");
+      exit(1);
+    }
+    old_pipes[old_pipe_count][0] = port;
+    old_pipes[old_pipe_count][1] = writer;
+    old_pipes[old_pipe_count][2] = fd;
+    ++old_pipe_count;
+  }
+}
+
+static int apipe_open(
+    const char* path,
+    struct fuse_file_info* info) {
+  int id;
+  if (sscanf(path, "/%d", &id) != 1) {
+    return -ENOENT;
+  }
+  info->fh = id;
+  info->nonseekable = 1;
+  return 0;
+}
+
+static int apipe_read(
+    const char* path, char* buf, size_t count, off_t offset,
+    struct fuse_file_info* info) {
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_apipe_read");
+  SetInt(req_var, "pipe_id", info->fh);
+  SetInt(req_var, "count", count);
+
+  struct PP_Var result_var = SendRequest(req_var);
+  struct PP_Var data = VarDictionaryGet(result_var, "data");
+  assert(data.type == PP_VARTYPE_ARRAY_BUFFER);
+  uint32_t len;
+  if(!PSInterfaceVarArrayBuffer()->ByteLength(data, &len)) {
+    VarRelease(data);
+    VarRelease(result_var);
+    return -EIO;
+  }
+  void *p = PSInterfaceVarArrayBuffer()->Map(data);
+  if (len > 0 && !p) {
+    VarRelease(data);
+    VarRelease(result_var);
+    return -EIO;
+  }
+  assert(len <= count);
+  memcpy(buf, p, len);
+  PSInterfaceVarArrayBuffer()->Unmap(data);
+  VarRelease(data);
+  VarRelease(result_var);
+
+  return len;
+}
+
+static int apipe_write(
+    const char* path,
+    const char* buf,
+    size_t count,
+    off_t,
+    struct fuse_file_info* info) {
+  if (count == 0) return 0;
+
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_apipe_write");
+  SetInt(req_var, "pipe_id", info->fh);
+  struct PP_Var data = PSInterfaceVarArrayBuffer()->Create(count);
+  if (data.type == PP_VARTYPE_NULL) return -EIO;
+  void *p = PSInterfaceVarArrayBuffer()->Map(data);
+  if (count > 0 && !p) {
+    VarRelease(data);
+    VarRelease(req_var);
+    return -EIO;
+  }
+  memcpy(p, buf, count);
+  PSInterfaceVarArrayBuffer()->Unmap(data);
+  VarDictionarySet(req_var, "data", data);
+
+  struct PP_Var result_var = SendRequest(req_var);
+  int ret = GetInt(result_var, "count");
+  VarRelease(result_var);
+
+  return ret;
+}
+
+static int apipe_release(const char* path, struct fuse_file_info* info) {
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_apipe_close");
+  SetInt(req_var, "pipe_id", info->fh);
+  SetInt(req_var, "writer", info->flags == O_WRONLY);
+
+  struct PP_Var result_var = SendRequest(req_var);
+  int ret = GetInt(result_var, "result");
+  VarRelease(result_var);
+
+  return ret;
+}
+
+static int apipe_fgetattr(
+    const char* path, struct stat* st, struct fuse_file_info* info) {
+  memset(st, 0, sizeof(st));
+  st->st_ino = info->fh;
+  st->st_mode = S_IFIFO | S_IRUSR | S_IWUSR;
+  // TODO(bradnelson): Do something better.
+  // Stashing away the open flags (not a great place).
+  st->st_rdev = info->flags;
+  return 0;
+}
+
+static struct fuse_operations anonymous_pipe_ops;
+
+static void setup_anonymous_pipes(void) {
+  const char fs_type[] = "anonymous_pipe";
+  int result;
+
+  anonymous_pipe_ops.open = apipe_open;
+  anonymous_pipe_ops.read = apipe_read;
+  anonymous_pipe_ops.write = apipe_write;
+  anonymous_pipe_ops.release = apipe_release;
+  anonymous_pipe_ops.fgetattr = apipe_fgetattr;
+
+  result = nacl_io_register_fs_type(fs_type, &anonymous_pipe_ops);
+  if (!result) {
+    fprintf(stderr, "Error registering filesystem type %s.\n", fs_type);
+    exit(1);
+  }
+  mkdir_checked("/apipe");
+  result = do_mount("", "/apipe", fs_type, 0, NULL);
+  if (result != 0) {
+    fprintf(stderr, "Error mounting %s.\n", fs_type);
+    exit(1);
+  }
+}
+
+extern void nacl_setup_env() {
+  // If we running in sel_ldr then don't do any the filesystem/nacl_io
+  // setup. We detect sel_ldr by the absence of the Pepper Instance.
+  if (PSGetInstanceId() == 0) {
+    return;
+  }
+
+  umount("/");
+  do_mount("", "/", "memfs", 0, NULL);
+
+  setup_anonymous_pipes();
+
+  // Setup common environment variables, but don't override those
+  // set already by ppapi_simple.
+  setenv("HOME", "/home/user", 0);
+  setenv("PATH", "/bin", 0);
+  setenv("USER", "user", 0);
+  setenv("LOGNAME", "user", 0);
+
+  const char* home = getenv("HOME");
+  mkdir_checked("/home");
+  mkdir_checked(home);
+  mkdir_checked("/tmp");
+  mkdir_checked("/bin");
+  mkdir_checked("/etc");
+  mkdir_checked("/mnt");
+  mkdir_checked("/mnt/http");
+  mkdir_checked("/mnt/html5");
+
+  const char* data_url = getenv("NACL_DATA_URL");
+  if (!data_url)
+    data_url = "./";
+  NACL_LOG("NACL_DATA_URL=%s\n", data_url);
+
+  const char* mount_flags = getenv("NACL_DATA_MOUNT_FLAGS");
+  if (!mount_flags)
+    mount_flags = "";
+  NACL_LOG("NACL_DATA_MOUNT_FLAGS=%s\n", mount_flags);
+
+  if (do_mount(data_url, "/mnt/http", "httpfs", 0, mount_flags) != 0) {
+    perror("mounting http filesystem at /mnt/http failed");
+  }
+
+  if (do_mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
+    perror("Mounting HTML5 filesystem in /mnt/html5 failed");
+  } else {
+    mkdir("/mnt/html5/home", 0777);
+    struct stat st;
+    if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
+      perror("Unable to create home directory in persistent storage");
+    } else {
+      if (do_mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
+        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
+      }
+    }
+  }
+
+  if (do_mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
+    perror("Mounting HTML5 filesystem in /tmp failed");
+  }
+
+  /* naclprocess.js sends the current working directory using this
+   * environment variable. */
+  const char* pwd = getenv("PWD");
+  if (pwd != NULL) {
+    if (chdir(pwd)) {
+      fprintf(stderr, "chdir() to %s failed: %s\n", pwd, strerror(errno));
+    }
+  }
+
+  // Tell the NaCl architecture to /etc/bashrc of mingn.
+#if defined(__x86_64__)
+  static const char kNaClArch[] = "x86_64";
+  // Use __i386__ rather then __i686__ since the latter is not defined
+  // by i686-nacl-clang.
+#elif defined(__i386__)
+  static const char kNaClArch[] = "i686";
+#elif defined(__arm__)
+  static const char kNaClArch[] = "arm";
+#elif defined(__pnacl__)
+  static const char kNaClArch[] = "pnacl";
+#else
+# error "Unknown architecture"
+#endif
+  // Set NACL_ARCH with a guess if not set (0 == set if not already).
+  setenv("NACL_ARCH", kNaClArch, 0);
+  // Set NACL_BOOT_ARCH if not inherited from a parent (0 == set if not already
+  // set). This will let us prefer PNaCl if we started with PNaCl (for tests
+  // mainly).
+  setenv("NACL_BOOT_ARCH", kNaClArch, 0);
+
+  setlocale(LC_CTYPE, "");
+
+  nacl_spawn_pid = getenv_as_int("NACL_PID");
+  nacl_spawn_ppid = getenv_as_int("NACL_PPID");
+
+  restore_pipes();
+}
+
+static std::string GetCwd() {
+  char cwd[PATH_MAX] = ".";
+  if (!getcwd(cwd, PATH_MAX)) {
+    NACL_LOG("getcwd failed: %s\n", strerror(errno));
+    assert(0);
+  }
+  return cwd;
+}
+
+static std::string GetAbsPath(const std::string& path) {
+  assert(!path.empty());
+  if (path[0] == '/')
+    return path;
+  else
+    return GetCwd() + '/' + path;
 }
 
 // Adds a file into nmf. |key| is the key for open_resource IRT or
@@ -579,27 +788,6 @@ static bool AddNmfToRequest(std::string prog, struct PP_Var req_var) {
   return true;
 }
 
-// Send a request, decode the result, and set errno on error.
-static int GetInt(struct PP_Var dict_var, const char* key) {
-  struct PP_Var value_var;
-  if (!VarDictionaryHasKey(dict_var, key, &value_var)) {
-    return -1;
-  }
-  assert(value_var.type == PP_VARTYPE_INT32);
-  int value = value_var.value.as_int;
-  if (value < 0) {
-    errno = -value;
-    return -1;
-  }
-  return value;
-}
-
-static int GetIntAndRelease(struct PP_Var dict_var, const char* key) {
-  int ret = GetInt(dict_var, key);
-  VarRelease(dict_var);
-  return ret;
-}
-
 static pid_t waitpid_impl(int pid, int* status, int options);
 
 // TODO(bradnelson): Add sysconf means to query this in all libc's.
@@ -608,6 +796,7 @@ static pid_t waitpid_impl(int pid, int* status, int options);
 static int CloneFileDescriptors(struct PP_Var envs_var) {
   int fd;
   int port;
+  int count = 0;
 
   for (fd = 0; fd < MAX_FILE_DESCRIPTOR; ++fd) {
     struct stat st;
@@ -627,24 +816,44 @@ static int CloneFileDescriptors(struct PP_Var envs_var) {
     } else if (S_ISBLK(st.st_mode)) {
       // Unsupported.
     } else if (S_ISFIFO(st.st_mode)) {
-      // TODO(bradnelson): Support this once named pipe change lands.
+      char entry[100];
+      snprintf(entry, sizeof entry,
+          "NACL_SPAWN_FD_SETUP_%d=pipe:%d:%d:%d", count++, fd,
+          static_cast<int>(st.st_ino), st.st_rdev == O_WRONLY);
+      VarArrayAppendString(envs_var, entry);
     } else if (S_ISLNK(st.st_mode)) {
       // Unsupported.
     } else if (S_ISSOCK(st.st_mode)) {
-      struct sockaddr_in addr;
-      socklen_t addr_len = sizeof addr;
-      if (getsockname(fd, (struct sockaddr *) &addr, &addr_len) < 0) {
-        return -1;
-      }
-      port = ntohs(addr.sin_port);
-      // TODO(bradnelson): Handle host + non-pipes.
-      char entry[100];
-      snprintf(entry, sizeof entry,
-          "NACL_SPAWN_FD_PIPE_SOCKET=%d:%d", fd, port);
-      VarArrayAppendString(envs_var, entry);
+      // Unsupported.
     }
   }
   return 0;
+}
+
+static void stash_file_descriptors(void) {
+  int fd;
+
+  for (fd = 0; fd < MAX_FILE_DESCRIPTOR; ++fd) {
+    // TODO(bradnelson): Make this more robust if there are more than
+    // MAX_FILE_DESCRIPTOR descriptors.
+    if (dup2(fd, fd + MAX_FILE_DESCRIPTOR) < 0) {
+      assert(errno == EBADF);
+      continue;
+    }
+  }
+}
+
+static void unstash_file_descriptors(void) {
+  int fd;
+
+  for (fd = 0; fd < MAX_FILE_DESCRIPTOR; ++fd) {
+    int alt_fd = fd + MAX_FILE_DESCRIPTOR;
+    if (dup2(alt_fd, fd) < 0) {
+      assert(errno == EBADF);
+      continue;
+    }
+    close(alt_fd);
+  }
 }
 
 NACL_SPAWN_TLS jmp_buf nacl_spawn_vfork_env;
@@ -932,32 +1141,6 @@ void jseval(const char* cmd, char** data, size_t* len) {
   VarRelease(result_dict_var);
 }
 
-// This is the address for localhost (127.0.0.1).
-#define LOCAL_HOST 0x7F000001
-
-// Connect to a port on localhost and return the socket.
-static int TCPConnectToLocalhost(int port) {
-  int sockfd;
-  struct sockaddr_in addr;
-
-  memset(&addr, 0, sizeof addr);
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = htonl(LOCAL_HOST);
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-    return -1;
-  }
-
-  if (connect(sockfd, (struct sockaddr*)&addr, sizeof addr) < 0) {
-    close(sockfd);
-    return -1;
-  }
-
-  return sockfd;
-}
-
 // Create a pipe. pipefd[0] will be the read end of the pipe and pipefd[1] the
 // write end of the pipe.
 int pipe(int pipefd[2]) {
@@ -967,31 +1150,29 @@ int pipe(int pipefd[2]) {
   }
 
   struct PP_Var req_var = VarDictionaryCreate();
-  VarDictionarySetString(req_var, "command", "nacl_pipe");
+  VarDictionarySetString(req_var, "command", "nacl_apipe");
 
   struct PP_Var result_var = SendRequest(req_var);
-  int read_port = GetInt(result_var, "read");
-  int write_port = GetInt(result_var, "write");
+  int id = GetInt(result_var, "pipe_id");
   VarRelease(result_var);
 
-  if (read_port == -1 || write_port == -1) {
+  int read_fd;
+  int write_fd;
+  char path[100];
+  sprintf(path, "/apipe/%d", id);
+  read_fd = open(path, O_RDONLY);
+  write_fd = open(path, O_WRONLY);
+  if (read_fd < 0 || write_fd < 0) {
+    if (read_fd >= 0) {
+      close(read_fd);
+    }
+    if (write_fd >= 0) {
+      close(write_fd);
+    }
     return -1;
   }
-
-  int read_socket = TCPConnectToLocalhost(read_port);
-  int write_socket = TCPConnectToLocalhost(write_port);
-  if (read_socket < 0 || write_socket < 0) {
-    if (read_socket >= 0) {
-      close(read_socket);
-    }
-    if (write_socket >= 0) {
-      close(write_socket);
-    }
-    return -1;
-  }
-
-  pipefd[0] = read_socket;
-  pipefd[1] = write_socket;
+  pipefd[0] = read_fd;
+  pipefd[1] = write_fd;
 
   return 0;
 }
@@ -999,10 +1180,12 @@ int pipe(int pipefd[2]) {
 void nacl_spawn_vfork_before(void) {
   assert(!vforking);
   vforking = 1;
+  stash_file_descriptors();
 }
 
 pid_t nacl_spawn_vfork_after(int jmping) {
   if (jmping) {
+    unstash_file_descriptors();
     vforking = 0;
     return vfork_pid;
   }

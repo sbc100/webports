@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 
+#include <errno.h>
 #include <spawn.h>
 #include <unistd.h>
 
@@ -29,22 +30,14 @@ TEST(Plumbing, ProcessTests) {
 // as a subprocess.
 // Child takes args:
 // ./test return <return-code> <expected-foo-env>
-// ./test _exit <return-code> <expected-foo-env>
 // It will return 55 as a bad return value in the case
 // that the FOO environment variable isn't the expected
 // value.
-static int handle_child_startup(int argc, char **argv) {
-  if (argc == 4) {
-    if (strcmp(argv[3], getenv("FOO")) != 0) {
-      return 55;
-    }
-    if (strcmp(argv[1], "return") == 0) {
-      return atoi(argv[2]);
-    } else if(strcmp(argv[1], "_exit") == 0) {
-      _exit(atoi(argv[2]));
-    }
+static int return_child(int argc, char **argv) {
+  if (strcmp(argv[3], getenv("FOO")) != 0) {
+    return 55;
   }
-  return 0;
+  return atoi(argv[2]);
 }
 
 #define ARGV_FOR_CHILD(x) \
@@ -143,6 +136,22 @@ TEST(Vfork, execlpe) {
   }
 }
 
+// Used in main to allow the test exectuable to be started
+// as a subprocess.
+// Child takes args:
+// ./test _exit <return-code> <expected-foo-env>
+// It will return 55 as a bad return value in the case
+// that the FOO environment variable isn't the expected
+// value.
+static int exit_child(int argc, char **argv) {
+  if (strcmp(argv[3], getenv("FOO")) != 0) {
+    return 55;
+  }
+  _exit(atoi(argv[2]));
+  // Shouldn't get here.
+  return 55;
+}
+
 TEST(Vfork, exit) {
   int status;
   pid_t pid = vfork();
@@ -164,11 +173,147 @@ TEST(Vfork, RegularExit) {
   }
 }
 
+// Used in main to allow the test exectuable to be started
+// as an echo server.
+// Child takes args:
+// ./test pipes
+static int pipes_child(int argc, char **argv) {
+  char buffer[200];
+  for (;;) {
+    int len = read(0, buffer, sizeof(buffer));
+    if (len <= 0) {
+      break;
+    }
+    write(1, buffer, len);
+  }
+  close(1);
+  close(0);
+  return 0;
+}
+
+// Write to an echo process, get reply then close pipes.
+TEST(Pipes, Echo) {
+  int pipe_a[2];
+  int pipe_b[2];
+  // Create two pipe pairs pipe_a[1] ->  pipe_a[0]
+  //                       pipe_b[1] ->  pipe_b[0]
+  ASSERT_EQ(0, pipe(pipe_a));
+  ASSERT_EQ(0, pipe(pipe_b));
+  pid_t pid = vfork();
+  ASSERT_GE(pid, 0);
+  if (!pid) {
+    // Dup two ends of the pipes into stdin + stdout of the echo process.
+    ASSERT_EQ(0, dup2(pipe_a[0], 0));
+    EXPECT_EQ(0, close(pipe_a[0]));
+    EXPECT_EQ(0, close(pipe_a[1]));
+    EXPECT_EQ(1, dup2(pipe_b[1], 1));
+    EXPECT_EQ(0, close(pipe_b[0]));
+    EXPECT_EQ(0, close(pipe_b[1]));
+    execlp(argv0, argv0, "pipes", NULL);
+    // Don't get here.
+    ASSERT_TRUE(false);
+  }
+
+  EXPECT_EQ(0, close(pipe_a[0]));
+  EXPECT_EQ(0, close(pipe_b[1]));
+
+  const char test_message[] = "test message";
+
+  // Write to pipe_a.
+  int len = write(pipe_a[1], test_message, strlen(test_message));
+  EXPECT_EQ(strlen(test_message), len);
+  char buffer[100];
+  // Wait for an echo back on pipe_b.
+  int total = 0;
+  while (total < strlen(test_message)) {
+    len = read(pipe_b[0], buffer + total, sizeof(buffer));
+    ASSERT_GE(len, 0);
+    if (len == 0) break;
+    total += len;
+  }
+  EXPECT_EQ(strlen(test_message), len);
+  EXPECT_TRUE(memcmp(buffer, test_message, len) == 0);
+
+  EXPECT_EQ(0, close(pipe_a[1]));
+  EXPECT_EQ(0, close(pipe_b[0]));
+}
+
+// Write to an echo process, close immediately, then wait for reply.
+TEST(Pipes, PipeFastClose) {
+  int pipe_a[2];
+  int pipe_b[2];
+  // Create two pipe pairs pipe_a[1] ->  pipe_a[0]
+  //                       pipe_b[1] ->  pipe_b[0]
+  ASSERT_EQ(0, pipe(pipe_a));
+  ASSERT_EQ(0, pipe(pipe_b));
+  pid_t pid = vfork();
+  ASSERT_GE(pid, 0);
+  if (!pid) {
+    // Dup two ends of the pipes into stdin + stdout of the echo process.
+    ASSERT_EQ(0, dup2(pipe_a[0], 0));
+    EXPECT_EQ(0, close(pipe_a[0]));
+    EXPECT_EQ(0, close(pipe_a[1]));
+    EXPECT_EQ(1, dup2(pipe_b[1], 1));
+    EXPECT_EQ(0, close(pipe_b[0]));
+    EXPECT_EQ(0, close(pipe_b[1]));
+    execlp(argv0, argv0, "pipes", NULL);
+    // Don't get here.
+    ASSERT_TRUE(false);
+  }
+
+  EXPECT_EQ(0, close(pipe_a[0]));
+  EXPECT_EQ(0, close(pipe_b[1]));
+
+  const char test_message[] = "test message";
+
+  // Write to pipe_a.
+  int len = write(pipe_a[1], test_message, strlen(test_message));
+  EXPECT_EQ(strlen(test_message), len);
+  EXPECT_EQ(0, close(pipe_a[1]));
+
+  char buffer[100];
+  // Wait for an echo back on pipe_b.
+  int total = 0;
+  while (total < strlen(test_message)) {
+    len = read(pipe_b[0], buffer + total, sizeof(buffer));
+    ASSERT_GE(len, 0);
+    if (len == 0) break;
+    total += len;
+  }
+  EXPECT_EQ(strlen(test_message), len);
+  EXPECT_TRUE(memcmp(buffer, test_message, len) == 0);
+
+  EXPECT_EQ(0, close(pipe_b[0]));
+}
+
+TEST(Pipes, NullFeof) {
+  int p[2];
+  ASSERT_EQ(0, pipe(p));
+  ASSERT_EQ(0, close(p[1]));
+  ASSERT_EQ(0, dup2(p[0], 0));
+  while (!feof(stdin)) {
+    int ch = fgetc(stdin);
+  }
+}
+
+TEST(Pipes, Null) {
+  int p[2];
+  ASSERT_EQ(0, pipe(p));
+  ASSERT_EQ(0, close(p[1]));
+  char buffer[100];
+  ssize_t len = read(p[0], buffer, sizeof(buffer));
+  EXPECT_EQ(0, len);
+  ASSERT_EQ(0, close(p[0]));
+}
 
 extern "C" int nacl_main(int argc, char **argv) {
-  int ret = handle_child_startup(argc, argv);
-  if (ret)
-    return ret;
+  if (argc == 4 && strcmp(argv[1], "return") == 0) {
+    return return_child(argc, argv);
+  } else if (argc == 4 && strcmp(argv[1], "_exit") == 0) {
+    return exit_child(argc, argv);
+  } else if (argc == 2 && strcmp(argv[1], "pipes") == 0) {
+    return pipes_child(argc, argv);
+  }
   // Preserve argv[0] for use in some tests.
   argv0 = argv[0];
   testing::InitGoogleTest(&argc, argv);

@@ -262,19 +262,6 @@ DevEnvTest.prototype.rmRf = function(fileName) {
   });
 };
 
-DevEnvTest.prototype.pipe = function() {
-  var self = this;
-  return Promise.resolve().then(function() {
-    self.devEnv.postMessage({
-      'name': 'nacl_pipe'
-    });
-    return self.devEnv.wait();
-  }).then(function(msg) {
-    ASSERT_EQ('nacl_pipe_reply', msg.name);
-    return msg.pipes;
-  });
-};
-
 /**
  * Convert an Array to a string.
  * @param {Array} arr The Array to be converted.

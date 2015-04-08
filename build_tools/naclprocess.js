@@ -47,6 +47,9 @@ function NaClProcessManager() {
   // Start process IDs at 2, as PIDs 0 and 1 are reserved on real systems.
   self.pid = 2;
 
+  // Handles the set of pipes.
+  self.pipeServer = new PipeServer();
+
   // NaCl Architecture (initialized lazily by naclArch).
   self.naclArch_ = undefined;
 };
@@ -383,15 +386,21 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
   //   reply: a callback to reply to the command
   //   src: the DOM element from which the message was received
   var handlers = {
-    nacl_spawn: this.handleMessageSpawn_,
-    nacl_wait: this.handleMessageWait_,
-    nacl_getpgid: this.handleMessageGetPGID_,
-    nacl_setpgid: this.handleMessageSetPGID_,
-    nacl_getsid: this.handleMessageGetSID_,
-    nacl_setsid: this.handleMessageSetSID_,
-    nacl_pipe: this.handleMessagePipe_,
-    nacl_jseval: this.handleMessageJSEval_,
-    nacl_deadpid: this.handleMessageDeadPid_,
+    nacl_spawn: [this, this.handleMessageSpawn_],
+    nacl_wait: [this, this.handleMessageWait_],
+    nacl_getpgid: [this, this.handleMessageGetPGID_],
+    nacl_setpgid: [this, this.handleMessageSetPGID_],
+    nacl_getsid: [this, this.handleMessageGetSID_],
+    nacl_setsid: [this, this.handleMessageSetSID_],
+    nacl_apipe: [this.pipeServer, this.pipeServer.handleMessageAPipe],
+    nacl_apipe_write: [this.pipeServer,
+                       this.pipeServer.handleMessageAPipeWrite],
+    nacl_apipe_read: [this.pipeServer,
+                      this.pipeServer.handleMessageAPipeRead],
+    nacl_apipe_close: [this.pipeServer,
+                       this.pipeServer.handleMessageAPipeClose],
+    nacl_jseval: [this, this.handleMessageJSEval_],
+    nacl_deadpid: [this, this.handleMessageDeadPid_],
   };
 
   // TODO(channingh): Once pinned applications support "result" instead of
@@ -399,12 +408,16 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
   function reply(contents) {
     var reply = {};
     reply[msg['id']] = contents;
+    // Enable to debug message stream (disabled for speed).
+    //console.log(src.pid + '> reply: ' + JSON.stringify(reply));
     src.postMessage(reply);
   }
 
   if (msg['command'] && handlers[msg['command']]) {
-    console.log(msg['command'] + ': ' + JSON.stringify(msg));
-    handlers[msg['command']].call(this, msg, reply, src);
+    // Enable to debug message stream (disabled for speed).
+    //console.log(src.pid + '> ' + msg['command'] + ': ' + JSON.stringify(msg));
+    var handler = handlers[msg['command']];
+    handler[1].call(handler[0], msg, reply, src);
   } else if (msg.indexOf(NaClProcessManager.prefix) === 0) {
     var out = msg.substring(NaClProcessManager.prefix.length);
     this.onStdout(out);
@@ -598,24 +611,6 @@ NaClProcessManager.prototype.handleMessageSetSID_ = function(msg, reply, src) {
 }
 
 /**
- * Handle a pipe call.
- * @private
- */
-NaClProcessManager.prototype.handleMessagePipe_ = function(msg, reply) {
-  PipeServer.pipe().then(function(pipes) {
-    reply({
-      read: pipes[0],
-      write: pipes[1]
-    });
-  }, function() {
-    reply({
-      read: -1,
-      write: -1
-    });
-  });
-}
-
-/**
  * Handle a javascript invocation.
  * @private
  */
@@ -743,6 +738,7 @@ NaClProcessManager.prototype.exit = function(code, element) {
   var ppid = this.processes[pid].ppid;
   var pgid = this.processes[pid].pgid;
 
+  this.pipeServer.deleteProcess(pid);
   this.deleteProcessFromGroup_(pid);
 
   // Reply to processes waiting on the exited process.
@@ -1019,6 +1015,8 @@ NaClProcessManager.prototype.spawn = function(
         argn = argn + 1
       })
     }
+
+    self.pipeServer.addProcessPipes(fg.pid, params);
 
     if (params[NaClProcessManager.ENV_SPAWN_MODE] ===
         NaClProcessManager.ENV_SPAWN_POPUP_VALUE) {

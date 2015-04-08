@@ -87,14 +87,6 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
       case 'nacl_sigint':
         manager.sigint();
         break;
-      case 'nacl_pipe':
-        PipeServer.pipe().then(function(pipes) {
-          port.postMessage({
-            name: 'nacl_pipe_reply',
-            pipes: pipes
-          });
-        });
-        break;
 
       case 'file_init':
         files.init().then(

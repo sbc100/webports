@@ -63,37 +63,3 @@ TEST_F(DevEnvTest, 'testCTests', function() {
         './devenv_small_test_${NACL_BOOT_ARCH}', 0);
   });
 });
-
-// Test the Pipe Server.
-TEST_F(DevEnvTest, 'testPipeServer', function() {
-  var HOST = '127.0.0.1';
-  var STR = 'Hello, WoodlyDoodly!';
-
-  var self = this;
-  var pipes, socketRead, socketWrite;
-  var buffer = '';
-
-  return this.pipe().then(function(returnedPipes) {
-    pipes = returnedPipes;
-    return self.tcpConnect(HOST, pipes[0]);
-  }).then(function(msg) {
-    socketRead = msg.data;
-    return self.tcpConnect(HOST, pipes[1]);
-  }).then(function(msg) {
-    socketWrite = msg.data;
-    return self.tcpSend(socketWrite, STR);
-  }).then(function() {
-    return self.tcpClose(socketWrite);
-  }).then(function() {
-    return self.tcpRecv(socketRead);
-  }).then(function recvLoop(out) {
-    if (out === null) {
-      return buffer;
-    } else {
-      buffer += out;
-      return self.tcpRecv(socketRead).then(recvLoop);
-    }
-  }).then(function() {
-    ASSERT_EQ(STR, buffer);
-  });
-});
