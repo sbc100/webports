@@ -179,9 +179,6 @@ TEST_F(DevEnvFileTest, 'testGit', function() {
   });
 });
 
-// TODO(bradnelson): Renable after rolling forward pinned version.
-// Disabled due to change in pipe protocol.
-/*
 TEST_F(DevEnvFileTest, 'testMake', function() {
   var self = this;
   var i = 0;
@@ -217,7 +214,6 @@ TEST_F(DevEnvFileTest, 'testMake', function() {
     return checkOne();
   });
 });
-*/
 
 TEST_F(DevEnvFileTest, 'testPythonBasic', function() {
   var self = this;
