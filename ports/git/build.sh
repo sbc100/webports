@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-EXECUTABLES="git git-remote-http"
+EXECUTABLES="git git-remote-http git-remote-https"
 
 BUILD_DIR=${SRC_DIR}
 export EXTLIBS+="${NACL_CLI_MAIN_LIB} \
