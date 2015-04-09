@@ -288,7 +288,7 @@ TEST_F(DevEnvFileTest, 'testCurlAndUnzip', function() {
   var self = this;
   return Promise.resolve().then(function() {
     return self.checkCommand(
-       'curl http://nacltools.storage.googleapis.com/io2014/voronoi.zip -O');
+       'curl https://nacltools.storage.googleapis.com/io2014/voronoi.zip -O');
   }).then(function() {
     return self.checkCommand('unzip voronoi.zip');
   }).then(function() {

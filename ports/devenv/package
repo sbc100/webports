@@ -15,7 +15,7 @@ shopt -s nullglob
 
 STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
 SDK_VERSION=${SDK_VERSION:-pepper_44}
-REVISION=${REVISION:-trunk-410-gb09ca82}
+REVISION=${REVISION:-trunk-415-g7d8f6a2}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 VERBOSE=0
 
