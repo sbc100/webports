@@ -19,6 +19,60 @@ REVISION=${REVISION:-trunk-415-g7d8f6a2}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 VERBOSE=0
 
+NACL_ARCH_ALT="${NACL_ARCH}"
+if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
+  NACL_ARCH_ALT="pnacl"
+fi
+
+# Locations for package archives.
+# Prefer this one going forward:
+PACKAGE_BY_ARCH=${TOOLCHAIN}/${NACL_ARCH_ALT}.zip
+# Old default:
+PACKAGE_AS_ONE=${TOOLCHAIN}.zip
+
+# List of packages (keep sorted).
+# Pairs of <package-name>:<status><package-subdir>[:<source>:<alt-subdir>]
+PACKAGE_INFO="\
+blackbox|WIP|${PACKAGE_BY_ARCH} \
+busybox|WIP|glibc/busybox-1.22.0.zip \
+bzip2|ok|${PACKAGE_BY_ARCH} \
+civitweb|WIP|${PACKAGE_AS_ONE} \
+coreutils|ok|${PACKAGE_BY_ARCH} \
+curl|ok|${PACKAGE_AS_ONE} \
+drod|WIP|${PACKAGE_AS_ONE} \
+emacs|ok|glibc/emacs-24.3.zip \
+findutils|ok|${PACKAGE_BY_ARCH} \
+fvwm|ok|${PACKAGE_BY_ARCH} \
+gawk|ok|${PACKAGE_BY_ARCH} \
+gforth|ok|${PACKAGE_AS_ONE} \
+git|ok|${PACKAGE_BY_ARCH} \
+grep|ok|${PACKAGE_BY_ARCH} \
+less|ok|${PACKAGE_BY_ARCH} \
+lua|ok|${TOOLCHAIN}/lua.zip \
+m4|ok|${PACKAGE_BY_ARCH} \
+make|ok|${PACKAGE_BY_ARCH} \
+mingn.base|ok|glibc/tarballs/base.${NACL_ARCH}.zip \
+mingn.lib|ok|glibc/tarballs/lib.all.zip \
+nano|ok|${PACKAGE_AS_ONE} \
+nethack|ok|${PACKAGE_AS_ONE} \
+ninja|WIP|${PACKAGE_BY_ARCH} \
+openssh|ok|glibc.zip \
+python3|WIP|${TOOLCHAIN}/python.zip \
+python|ok|${TOOLCHAIN}/python.zip \
+ruby|ok|${TOOLCHAIN}/ruby.zip \
+sqlite|ok|${PACKAGE_AS_ONE} \
+subversion|WIP|${PACKAGE_BY_ARCH} \
+tar|WIP|${PACKAGE_AS_ONE} \
+texlive|ok|${PACKAGE_BY_ARCH} \
+thttpd|ok|glibc.zip \
+tk|ok|glibc/${NACL_ARCH_ALT}.zip \
+toybox|WIP|${TOOLCHAIN}/toybox-0.4.7.zip \
+twm|ok|glibc/${NACL_ARCH_ALT}.zip \
+vim|ok|${PACKAGE_AS_ONE} \
+xeyes|ok|glibc/${NACL_ARCH_ALT}.zip \
+xz|ok|${PACKAGE_BY_ARCH} \
+"
+
 RemoveDir() {
   local path="$1"
   if [ -d ${path} ]; then
@@ -32,19 +86,18 @@ RemoveDir() {
 #
 InstallPackage() {
   local package="$1"
-  local subdir="${TOOLCHAIN}.zip"
+  local subdir="${PACKAGE_BY_ARCH}"
   local source_base="${PACKAGE_SOURCE}"
 
   for info in ${PACKAGE_INFO}; do
     local info_array=(${info//|/ })
     if [ "${package}" = "${info_array[0]}" ]; then
-      if [ "${ALTERNATE_SOURCE}" == "0" ]; then
-        source_base="${info_array[1]}"
-      fi
-      if [[ "${ALTERNATE_SOURCE}" == "0" && ${#info_array[@]} > 3 && "${info_array[3]}" != "" ]]; then
-        subdir="${info_array[3]}"
-      else
-        subdir="${info_array[2]}"
+      subdir="${info_array[2]}"
+      if [[ "${ALTERNATE_SOURCE}" == "0" && \
+            ${#info_array[@]} > 3 && \
+            "${info_array[3]}" != "" ]]; then
+        source_base="${info_array[3]}"
+        subdir="${info_array[4]}"
       fi
     fi
   done
@@ -161,6 +214,7 @@ function Usage() {
   echo "  -s <source> = alternate package source"
   echo "  -L = local package source (use with make run in naclports)"
   echo "  -f = force install"
+  echo "  -l = list known packages"
   echo "  -h = help"
   exit 1
 }
@@ -170,7 +224,7 @@ function main() {
   PACKAGE_FORCE=0
   ALTERNATE_SOURCE=0
 
-  while getopts "vs:i:hLf" o; do
+  while getopts "vs:i:hLfl" o; do
     case "${o}" in
       i)
         PACKAGE_LIST+=" ${OPTARG}"
@@ -186,6 +240,16 @@ function main() {
         ;;
       v)
         VERBOSE=1
+        ;;
+      l)
+        NEXT_COL="\\r\\x1b[30C"
+        echo -e "PACKAGE${NEXT_COL}STATUS"
+        echo -e "-------${NEXT_COL}------"
+        for info in ${PACKAGE_INFO}; do
+          local info_array=(${info//|/ })
+          echo -e "${info_array[0]}${NEXT_COL}${info_array[1]}"
+        done
+        exit 0
         ;;
       *)
         Usage
@@ -214,36 +278,10 @@ function main() {
     exit 1
   fi
 
-  NACL_ARCH_ALT="${NACL_ARCH}"
-  if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
-    NACL_ARCH_ALT="pnacl"
-  fi
-
   if [ "${PACKAGE_SOURCE:-}" = "" ]; then
     PACKAGE_SOURCE="${PACKAGE_SOURCE:-${DEFAULT_SOURCE}}"
     ALTERNATE_SOURCE=1
   fi
-
-  # Special cases for certain packages.
-  # Pairs of <package-name>:<source>:<package-subdir>[:<old-package-subdir>]
-  PACKAGE_INFO="\
-bzip2|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-coreutils|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-mingn.base|${PACKAGE_SOURCE}|glibc/tarballs/base.${NACL_ARCH}.zip \
-mingn.lib|${PACKAGE_SOURCE}|glibc/tarballs/lib.all.zip \
-emacs|${PACKAGE_SOURCE}|glibc/emacs-24.3.zip \
-git|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-xz|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-make|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-grep|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-ninja|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip \
-lua|${PACKAGE_SOURCE}|${TOOLCHAIN}/lua.zip \
-ruby|${PACKAGE_SOURCE}|${TOOLCHAIN}/ruby.zip \
-tk|${PACKAGE_SOURCE}|glibc/${NACL_ARCH_ALT}.zip \
-twm|${PACKAGE_SOURCE}|glibc/${NACL_ARCH_ALT}.zip \
-xeyes|${PACKAGE_SOURCE}|glibc/${NACL_ARCH_ALT}.zip \
-python|${PACKAGE_SOURCE}|${TOOLCHAIN}/python.zip \
-texlive|${PACKAGE_SOURCE}|${TOOLCHAIN}/${NACL_ARCH_ALT}.zip"
 
   for package in ${PACKAGE_LIST}; do
     InstallPackage ${package}
