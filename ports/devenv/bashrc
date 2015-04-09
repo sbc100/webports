@@ -12,6 +12,9 @@ source /mnt/http/setup-environment
 
 /mnt/http/install-base-packages.sh
 
+# Setup environment again, to rescan the packages added.
+source /mnt/http/setup-environment
+
 # TODO(bradnelson): Drop this when we can install things in a more
 # normal location and when we include the git templates in the normal
 # location.
@@ -24,9 +27,6 @@ if [ ! -e /home/user/.gitconfig ]; then
   git config --global user.name "John Doe"
   git config --global user.email "john.doe@foo.com"
 fi
-
-# Setup environment again, to rescan the packages added.
-source /mnt/http/setup-environment
 
 cd ${HOME}
 
