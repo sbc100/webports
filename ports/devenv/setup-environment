@@ -56,6 +56,13 @@ export PAGER=cat
 # Allow ctrl-c to work.
 export ENABLE_CONTROL_C=1
 
+# TODO(bradnelson): Remove when we can install in a more normal location.
+# Usually this is in /etc/ssl/certs/, but we don't mount persistent storage
+# there yet.
+# Point git and curl at root certificates inside the curl package.
+export GIT_SSL_CAINFO=/mnt/html5/packages/curl.${NACL_ARCH}/ca-bundle.crt
+export CURL_CA_BUNDLE=/mnt/html5/packages/curl.${NACL_ARCH}/ca-bundle.crt
+
 # Scan through packages.
 for package_dir in /mnt/html5/packages/*; do
   # Find the name of the package.

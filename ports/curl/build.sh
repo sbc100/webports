@@ -67,6 +67,7 @@ PublishStep() {
   fi
 
   pushd ${PUBLISH_DIR}
+  ${SRC_DIR}/lib/mk-ca-bundle.pl
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${PUBLISH_DIR}/curl_ppapi*${NACL_EXEEXT} \
       -L${DESTDIR_LIB} \
