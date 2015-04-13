@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
-if [ "${TOOLCHAIN}" != "bionic" ]; then
+if [ "${TOOLCHAIN}" != "bionic" -a "${TOOLCHAIN}" != "emscripten" ]; then
   EXECUTABLES=out/glibc_compat_test
 fi
 

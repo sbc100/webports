@@ -11,7 +11,7 @@ TestStep() {
     for arch in x86-32 x86-64; do
       for exe in ${EXECUTABLES}; do
         local exe_noext=${exe%.*}
-        WriteSelLdrScriptForPNaCl ${exe_noext} ${exe_noext}.${arch}.nexe ${arch}
+        WriteLauncherScriptPNaCl ${exe_noext} ${exe_noext}.${arch}.nexe ${arch}
       done
       make test
     done
@@ -19,7 +19,7 @@ TestStep() {
     if [ "${NACL_SHARED}" = "1" ]; then
       for exe in ${EXECUTABLES}; do
        local script=$(basename ${exe%.*})
-        WriteSelLdrScript ${script} ${exe}
+        WriteLauncherScript ${script} ${exe}
       done
     fi
     make test

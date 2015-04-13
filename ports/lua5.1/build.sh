@@ -31,7 +31,7 @@ InstallStep() {
   ChangeDir src
   if [ "${NACL_ARCH}" = pnacl ]; then
     # Just do the x86-64 version for now.
-    TranslateAndWriteSelLdrScript lua x86-64 lua.x86-64.nexe lua.sh
-    TranslateAndWriteSelLdrScript luac x86-64 luac.x86-64.nexe luac.sh
+    TranslateAndWriteLauncherScript lua x86-64 lua.x86-64.nexe lua.sh
+    TranslateAndWriteLauncherScript luac x86-64 luac.x86-64.nexe luac.sh
   fi
 }

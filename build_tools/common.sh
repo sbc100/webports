@@ -1144,10 +1144,6 @@ Validate() {
 # for running them in sel_ldr.
 #
 DefaultPostBuildStep() {
-  if [ "${NACL_ARCH}" = "emscripten" ]; then
-    return
-  fi
-
   if [ -z "${EXECUTABLES}" ]; then
     return
   fi
@@ -1170,9 +1166,9 @@ DefaultPostBuildStep() {
     # of the script is the same as the name of the executable, either without
     # any extension or with the .sh extension.
     if [[ ${nexe} == *${NACL_EXEEXT} && ! -d ${nexe%%${NACL_EXEEXT}} ]]; then
-      WriteSelLdrScript "${nexe%%${NACL_EXEEXT}}" "$(basename ${nexe})"
+      WriteLauncherScript "${nexe%%${NACL_EXEEXT}}" "$(basename ${nexe})"
     else
-      WriteSelLdrScript "${nexe}.sh" "$(basename ${nexe})"
+      WriteLauncherScript "${nexe}.sh" "$(basename ${nexe})"
     fi
   done
 }
@@ -1195,10 +1191,10 @@ RunSelLdrCommand() {
     local SCRIPT_32=$1_32.sh
     local SCRIPT_64=$1_64.sh
     shift
-    TranslateAndWriteSelLdrScript "${PEXE}" x86-32 "${NEXE_32}" "${SCRIPT_32}"
+    TranslateAndWriteLauncherScript "${PEXE}" x86-32 "${NEXE_32}" "${SCRIPT_32}"
     echo "[sel_ldr x86-32] ${SCRIPT_32} $*"
     "./${SCRIPT_32}" "$@"
-    TranslateAndWriteSelLdrScript "${PEXE}" x86-64 "${NEXE_64}" "${SCRIPT_64}"
+    TranslateAndWriteLauncherScript "${PEXE}" x86-64 "${NEXE_64}" "${SCRIPT_64}"
     echo "[sel_ldr x86-64] ${SCRIPT_64} $*"
     "./${SCRIPT_64}" "$@"
   else
@@ -1211,7 +1207,7 @@ RunSelLdrCommand() {
     fi
 
     local SCRIPT=${nexe}.sh
-    WriteSelLdrScript "${SCRIPT}" ${basename}
+    WriteLauncherScript "${SCRIPT}" ${basename}
     shift
     echo "[sel_ldr] ${SCRIPT} $*"
     "./${SCRIPT}" "$@"
@@ -1224,8 +1220,31 @@ RunSelLdrCommand() {
 # $1 - Script name
 # $2 - Nexe name
 #
-WriteSelLdrScript() {
+WriteLauncherScript() {
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
+    return
+  fi
+
+  if [ "${TOOLCHAIN}" = "emscripten" ]; then
+    local node=node
+    if ! which node > /dev/null ; then
+      node=nodejs
+      if ! which nodejs > /dev/null ; then
+        echo "Failed to find 'node' or 'nodejs' in PATH"
+        exit 1
+      fi
+    fi
+    cat > "$1" <<HERE
+#!/bin/bash
+
+SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
+NODE=${node}
+
+cd "\${SCRIPT_DIR}"
+exec \${NODE} $2 "\$@"
+HERE
+    chmod 750 "$1"
+    echo "Wrote script $1 -> $2"
     return
   fi
 
@@ -1270,12 +1289,13 @@ IRT=${NACL_IRT_PATH}
     "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   fi
+
   chmod 750 "$1"
   echo "Wrote script $1 -> $2"
 }
 
 
-TranslateAndWriteSelLdrScript() {
+TranslateAndWriteLauncherScript() {
   local PEXE=$1
   local PEXE_FINAL=$1_final.pexe
   local ARCH=$2
@@ -1289,7 +1309,7 @@ TranslateAndWriteSelLdrScript() {
   if [ "${PEXE_FINAL}" -nt "${NEXE}" ]; then
     "${TRANSLATOR}" "${PEXE_FINAL}" -arch "${ARCH}" -o "${NEXE}"
   fi
-  WriteSelLdrScriptForPNaCl "${SCRIPT}" $(basename "${NEXE}") "${ARCH}"
+  WriteLauncherScriptPNaCl "${SCRIPT}" $(basename "${NEXE}") "${ARCH}"
 }
 
 
@@ -1299,7 +1319,7 @@ TranslateAndWriteSelLdrScript() {
 # $2 - Nexe name
 # $3 - sel_ldr architecture
 #
-WriteSelLdrScriptForPNaCl() {
+WriteLauncherScriptPNaCl() {
   local script_name=$1
   local nexe_name=$2
   local arch=$3

@@ -11,11 +11,19 @@ if [ "${NACL_SHARED}" = "1" ]; then
 fi
 
 ConfigureStep() {
+  local CONFIGURE_FLAGS="--prefix='${PREFIX}'"
+  if [ "${TOOLCHAIN}" = "emscripten" ]; then
+    # The emscripten toolchain will happily accept -shared (although it
+    # emits a warning if the output name ends with .so).  This means that
+    # zlib's configure script tries to build shared as well as static
+    # libraries until we explicitly disable shared libraries like this.
+    CONFIGURE_FLAGS+=" --static"
+  fi
   LogExecute rm -f libz.*
   SetupCrossEnvironment
   CFLAGS="${CPPFLAGS} ${CFLAGS}"
   CXXFLAGS="${CPPFLAGS} ${CXXFLAGS}"
-  CHOST=${NACL_CROSS_PREFIX} LogExecute ./configure --prefix="${PREFIX}"
+  CHOST=${NACL_CROSS_PREFIX} LogExecute ./configure ${CONFIGURE_FLAGS}
 }
 
 RunMinigzip() {
@@ -56,19 +64,21 @@ TestStep() {
     local example_pexe="example${NACL_EXEEXT}"
     local minigzip_script="minigzip"
     local example_script="example"
-    TranslateAndWriteSelLdrScript "${minigzip_pexe}" x86-32 \
+    TranslateAndWriteLauncherScript "${minigzip_pexe}" x86-32 \
       minigzip.x86-32.nexe "${minigzip_script}"
     RunMinigzip
-    TranslateAndWriteSelLdrScript "${minigzip_pexe}" x86-64 \
+    TranslateAndWriteLauncherScript "${minigzip_pexe}" x86-64 \
       minigzip.x86-64.nexe "${minigzip_script}"
     RunMinigzip
-    TranslateAndWriteSelLdrScript "${example_pexe}" x86-32 \
+    TranslateAndWriteLauncherScript "${example_pexe}" x86-32 \
       example.x86-32.nexe "${example_script}"
     RunExample
-    TranslateAndWriteSelLdrScript "${example_pexe}" x86-64 \
+    TranslateAndWriteLauncherScript "${example_pexe}" x86-64 \
       example.x86-64.nexe "${example_script}"
     RunExample
   elif [ "${NACL_ARCH}" = "emscripten" ]; then
+    # TODO(sbc): Remove this once we find out why the node tests are
+    # failing on the bots
     return
   else
     RunMinigzip

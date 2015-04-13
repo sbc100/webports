@@ -61,7 +61,7 @@ BuildStep() {
   DefaultBuildStep
   if [ $NACL_ARCH == "pnacl" ]; then
     # Just write the x86-64 version out for now.
-    TranslateAndWriteSelLdrScript ruby.pexe x86-64 ruby.x86-64.nexe ruby
+    TranslateAndWriteLauncherScript ruby.pexe x86-64 ruby.x86-64.nexe ruby
   fi
 }
 

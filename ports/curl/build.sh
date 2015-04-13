@@ -50,7 +50,7 @@ PublishStep() {
     # Just set up the x86-64 version for now.
     local pexe="${EXECUTABLE_DIR}/curl${NACL_EXEEXT}"
     (cd src;
-     TranslateAndWriteSelLdrScript ${pexe} x86-64 curl.x86-64.nexe curl
+     TranslateAndWriteLauncherScript ${pexe} x86-64 curl.x86-64.nexe curl
     )
     PUBLISH_DIR+="/pnacl"
   else

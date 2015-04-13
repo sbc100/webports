@@ -1,4 +1,4 @@
-# Copyright (c) The Native Client Authors. All rights reserved.
+# Copyright 2015 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -35,7 +35,7 @@ TestStep() {
     for arch in x86-32 x86-64; do
       for exe in ${EXECUTABLES}; do
         local exe_noext=${exe%.*}
-        WriteSelLdrScriptForPNaCl ${exe_noext} \
+        WriteLauncherScriptPNaCl ${exe_noext} \
             $(basename ${exe_noext}.${arch}.nexe) ${arch}
       done
       make check EXEEXT=

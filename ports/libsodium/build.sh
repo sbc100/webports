@@ -42,14 +42,14 @@ TestStep() {
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     local pexe=crypto_box_test${NACL_EXEEXT}
     (cd naclport_test;
-     TranslateAndWriteSelLdrScript ${pexe} x86-32 crypto_box_test.x86-32${EXT} crypto_box_test)
+     TranslateAndWriteLauncherScript ${pexe} x86-32 crypto_box_test.x86-32${EXT} crypto_box_test)
     RunTest
     (cd naclport_test;
-     TranslateAndWriteSelLdrScript ${pexe} x86-64 crypto_box_test.x86-64${EXT} crypto_box_test)
+     TranslateAndWriteLauncherScript ${pexe} x86-64 crypto_box_test.x86-64${EXT} crypto_box_test)
     RunTest
     echo "Tests OK"
   elif [ "$(uname -m)" = "${NACL_ARCH_ALT}" ]; then
-    WriteSelLdrScript naclport_test/crypto_box_test crypto_box_test${EXT}
+    WriteLauncherScript naclport_test/crypto_box_test crypto_box_test${EXT}
     RunTest
     echo "Tests OK"
   fi

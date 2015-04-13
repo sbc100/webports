@@ -42,8 +42,8 @@ TestStep() {
   if [ "${NACL_ARCH}" = pnacl ]; then
     ChangeDir src
     # Just do the x86-64 version for now.
-    TranslateAndWriteSelLdrScript lua.pexe x86-64 lua.x86-64.nexe lua
-    TranslateAndWriteSelLdrScript luac.pexe x86-64 luac.x86-64.nexe luac
+    TranslateAndWriteLauncherScript lua.pexe x86-64 lua.x86-64.nexe lua
+    TranslateAndWriteLauncherScript luac.pexe x86-64 luac.x86-64.nexe luac
     ChangeDir ..
   fi
 

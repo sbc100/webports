@@ -63,6 +63,6 @@ TestStep() {
     if [ ${OS_NAME} != "Linux" ]; then
       script+=".sh"
     fi
-    TranslateAndWriteSelLdrScript ${pexe} x86-64 python.x86-64.nexe ${script}
+    TranslateAndWriteLauncherScript ${pexe} x86-64 python.x86-64.nexe ${script}
   fi
 }

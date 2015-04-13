@@ -27,7 +27,7 @@ BuildStep() {
   DefaultBuildStep
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     local pexe=${EXECUTABLE_DIR}/sqlite3${NACL_EXEEXT}
-    TranslateAndWriteSelLdrScript ${pexe} x86-64 sqlite3.x86-64.nexe sqlite3
+    TranslateAndWriteLauncherScript ${pexe} x86-64 sqlite3.x86-64.nexe sqlite3
   fi
 
   # Build (at least shell.c) again but this time with nacl_io and -DPPAPI
@@ -97,16 +97,16 @@ TestStep() {
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     local pexe=test${NACL_EXEEXT}
     (cd naclport_test;
-     TranslateAndWriteSelLdrScript ${pexe} x86-32 test.x86-32${EXT} \
+     TranslateAndWriteLauncherScript ${pexe} x86-32 test.x86-32${EXT} \
        test)
     RunTest
     (cd naclport_test;
-     TranslateAndWriteSelLdrScript ${pexe} x86-64 test.x86-64${EXT} \
+     TranslateAndWriteLauncherScript ${pexe} x86-64 test.x86-64${EXT} \
        test)
     RunTest
     echo "Tests OK"
   elif [ "$(uname -m)" = "${NACL_ARCH_ALT}" ]; then
-    WriteSelLdrScript naclport_test/test test${EXT}
+    WriteLauncherScript naclport_test/test test${EXT}
     RunTest
     echo "Tests OK"
   fi

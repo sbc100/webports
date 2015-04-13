@@ -76,7 +76,7 @@ TestStep() {
   fi
   for exe in $CTEST_EXECUTABLES; do
     mv $exe $exe$NACL_EXEEXT
-    WriteSelLdrScript $exe $exe$NACL_EXEEXT
+    WriteLauncherScript $exe $exe$NACL_EXEEXT
   done
   # Disable running of tests until they are all passing
   # TODO(sbc): Fix the broken tests:

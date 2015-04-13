@@ -19,10 +19,10 @@ TestStep() {
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     local pexe=rgb2gif${NACL_EXEEXT}
     (cd util;
-     TranslateAndWriteSelLdrScript ${pexe} x86-32 rgb2gif.x86-32.nexe rgb2gif)
+     TranslateAndWriteLauncherScript ${pexe} x86-32 rgb2gif.x86-32.nexe rgb2gif)
     RunTest
     (cd util;
-     TranslateAndWriteSelLdrScript ${pexe} x86-64 rgb2gif.x86-64.nexe rgb2gif)
+     TranslateAndWriteLauncherScript ${pexe} x86-64 rgb2gif.x86-64.nexe rgb2gif)
     RunTest
   else
     RunTest

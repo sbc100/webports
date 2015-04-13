@@ -25,11 +25,11 @@ TestStep() {
   MAKE_TARGETS=examples
   DefaultBuildStep
   pushd examples
-  # TODO(jvoung): PNaCl can't use WriteSelLdrScript --
-  # It should use TranslateAndWriteSelLdrScript instead.
+  # TODO(jvoung): PNaCl can't use WriteLauncherScript --
+  # It should use TranslateAndWriteLauncherScript instead.
   # It probably shouldn't use .nexe as the extension either.
   for NEXE in *.nexe; do
-    WriteSelLdrScript ${NEXE%.*} ${NEXE}
+    WriteLauncherScript ${NEXE%.*} ${NEXE}
   done
   popd
 }
