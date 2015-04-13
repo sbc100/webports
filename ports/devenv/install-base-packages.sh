@@ -12,7 +12,10 @@ InstallBasePackages() {
   local default_packages="\
     -i coreutils \
     -i curl \
+    -i findutils \
+    -i grep \
     -i git \
+    -i less \
     -i make \
     -i nano \
     -i python \

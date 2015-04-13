@@ -50,9 +50,6 @@ export RUBYLIB=${RUBYLIB}:${RUBYLIB}/${NACL_ARCH}-nacl
 alias ruby='ruby /bin/irb'
 alias emacs='ENABLE_CONTROL_C=0 emacs'
 
-# Make vim emit directly until we have pipes.
-export PAGER=cat
-
 # Allow ctrl-c to work.
 export ENABLE_CONTROL_C=1
 

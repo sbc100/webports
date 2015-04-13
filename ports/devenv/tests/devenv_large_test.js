@@ -127,7 +127,7 @@ TEST_F(DevEnvFileTest, 'testGit', function() {
          ' delete mode 100644 test.txt']);
   }).then(function() {
     return self.checkCommandReLines(
-        'cd foo && git log --full-diff -p .', 0,
+        'cd foo && PAGER=cat git log --full-diff -p .', 0,
         [/^commit [0-9a-f]{40}$/,
          'Author: John Doe <johndoe@example.com>',
          /^Date:   .+$/,
