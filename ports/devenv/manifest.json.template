@@ -32,6 +32,13 @@
     "clipboardRead",
     "clipboardWrite",
     "unlimitedStorage",
+    {
+      "fileSystem": [
+        "write",
+	"directory",
+	"retainEntries"
+      ]
+    },
     "*://naclports.storage.googleapis.com/*",
     "*://nacltools.storage.googleapis.com/*",
     "*://0.0.0.0/*",

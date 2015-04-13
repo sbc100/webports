@@ -6,6 +6,33 @@
 
 'use strict';
 
+// TODO(gdeepti): extend to multiple mounts.
+/**
+ * Mount object contains the state of the local mount.
+ */
+var g_mount = {
+  // DirectoryEntry specified by the user
+  entry: undefined,
+
+  // Id of the entry object.
+  entryId: undefined,
+
+  // User's local file system
+  filesystem: undefined,
+
+  // Path of the directory on the local filesystem
+  fullPath: undefined,
+
+  // Local path to mount user directory
+  mountPoint: undefined,
+
+  // Mount is available
+  available: false,
+
+  // Mount has been mounted
+  mounted: false
+};
+
 /**
  * NaClProcessManager provides a framework for NaCl executables to run within a
  * web-based terminal.
@@ -35,6 +62,7 @@ function NaClProcessManager() {
   //       yet exited,
   //   pgid: the process group ID of the process
   //   ppid: the parent PID of the process
+  //   mounted: mount information for the process
   // }
   self.processes = {};
 
@@ -52,7 +80,11 @@ function NaClProcessManager() {
 
   // NaCl Architecture (initialized lazily by naclArch).
   self.naclArch_ = undefined;
-};
+
+  // Callback to be called each time a process responds with a mount status
+  // update.
+  self.mountUpdateCallback = null;
+}
 
 /**
  * Constants that correspond to values in errno.h.
@@ -270,7 +302,7 @@ NaClProcessManager.prototype.naclArch = function(callback) {
  */
 NaClProcessManager.prototype.setStdoutListener = function(callback) {
   this.onStdout = callback;
-}
+};
 
 /**
  * Handles an error event.
@@ -285,7 +317,7 @@ NaClProcessManager.prototype.setStdoutListener = function(callback) {
  */
 NaClProcessManager.prototype.setErrorListener = function(callback) {
   this.onError = callback;
-}
+};
 
 /**
  * Handles a progress event from the root process.
@@ -302,7 +334,7 @@ NaClProcessManager.prototype.setErrorListener = function(callback) {
  */
 NaClProcessManager.prototype.setRootProgressListener = function(callback) {
   this.onRootProgress = callback;
-}
+};
 
 /**
  * Handles a load event from the root process.
@@ -315,7 +347,7 @@ NaClProcessManager.prototype.setRootProgressListener = function(callback) {
  */
 NaClProcessManager.prototype.setRootLoadListener = function(callback) {
   this.onRootLoad = callback;
-}
+};
 
 /**
  * Is the given process the root process of this process manager? A root
@@ -325,7 +357,40 @@ NaClProcessManager.prototype.setRootLoadListener = function(callback) {
  */
 NaClProcessManager.prototype.isRootProcess = function(process) {
   return !process.parent;
-}
+};
+
+/**
+ * Broadcast message from javascript to all the processes.
+ * @message the message to be broadcasted
+ * @callback callback to be stashed away and called when
+ * a process responds with a mount status update
+ */
+NaClProcessManager.prototype.broadcastMessage = function(message, callback) {
+  this.mountUpdateCallback = callback;
+  for (var p in this.processes) {
+    this.processes[p].domElement.postMessage(message);
+  }
+};
+
+/**
+ * Sync Mount status every time a mount/unmount message
+ * is recieved from a process.
+ */
+NaClProcessManager.prototype.syncMountStatus_ = function() {
+  var result = true;
+
+  // TODO(gdeepti): Make the unmount status consistent for when all the
+  // processes have not unmounted completely.
+  for (var p in this.processes) {
+    result = (result && this.processes[p].mounted);
+  }
+
+  g_mount.mounted = result;
+  if (this.mountUpdateCallback !== null) {
+    this.mountUpdateCallback();
+  }
+  return result;
+};
 
 /**
  * Makes the path in a NMF entry to fully specified path.
@@ -371,7 +436,7 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
       entry[arch]['url'] = path;
     }
   }
-}
+};
 
 /**
  * Handle messages sent to us from NaCl.
@@ -401,6 +466,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
                        this.pipeServer.handleMessageAPipeClose],
     nacl_jseval: [this, this.handleMessageJSEval_],
     nacl_deadpid: [this, this.handleMessageDeadPid_],
+    nacl_mountfs: [this,this.handleMessageMountFs_],
   };
 
   // TODO(channingh): Once pinned applications support "result" instead of
@@ -409,7 +475,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     var reply = {};
     reply[msg['id']] = contents;
     // Enable to debug message stream (disabled for speed).
-    //console.log(src.pid + '> reply: ' + JSON.stringify(reply));
+    // console.log(src.pid + '> reply: ' + JSON.stringify(reply));
     src.postMessage(reply);
   }
 
@@ -418,6 +484,15 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     //console.log(src.pid + '> ' + msg['command'] + ': ' + JSON.stringify(msg));
     var handler = handlers[msg['command']];
     handler[1].call(handler[0], msg, reply, src);
+  } else if (msg['mount_status'] == 'success') {
+    // TODO(gdeepti): Remove monitoring mount status with strings.
+    this.processes[src.pid].mounted = true;
+    this.syncMountStatus_();
+  } else if (msg['unmount_status'] == 'success') {
+    this.processes[src.pid].mounted = false;
+    this.syncMountStatus_();
+  } else if (msg['mount_status'] == 'fail' || msg['unmount_status'] == 'fail') {
+    console.log('mounter_status: ' + JSON.stringify(msg));
   } else if (typeof msg == 'string' &&
              msg.indexOf(NaClProcessManager.prefix) === 0) {
     var out = msg.substring(NaClProcessManager.prefix.length);
@@ -432,7 +507,7 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
     console.log('unexpected message: ' + JSON.stringify(msg));
     return;
   }
-}
+};
 
 /**
  * Handle a nacl_spawn call.
@@ -480,7 +555,7 @@ NaClProcessManager.prototype.handleMessageSpawn_ = function(msg, reply, src) {
       reply(replyMsg);
     });
   }
-}
+};
 
 
 /**
@@ -494,7 +569,7 @@ NaClProcessManager.prototype.handleMessageWait_ = function(msg, reply, src) {
       status: status
     });
   }, src.pid);
-}
+};
 
 /**
  * Handle a getpgid call.
@@ -514,7 +589,7 @@ NaClProcessManager.prototype.handleMessageGetPGID_ = function(msg, reply, src) {
   reply({
     pgid: pgid,
   });
-}
+};
 
 /**
  * Handle a setpgid call.
@@ -569,7 +644,7 @@ NaClProcessManager.prototype.handleMessageSetPGID_ = function(msg, reply, src) {
   reply({
     result: setpgid(),
   });
-}
+};
 
 /**
  * Handle a getsid call.
@@ -588,7 +663,7 @@ NaClProcessManager.prototype.handleMessageGetSID_ = function(msg, reply, src) {
   reply({
     sid: sid
   });
-}
+};
 
 /**
  * Handle a setsid call.
@@ -610,7 +685,7 @@ NaClProcessManager.prototype.handleMessageSetSID_ = function(msg, reply, src) {
   reply({
     sid: sid
   });
-}
+};
 
 /**
  * Handle a javascript invocation.
@@ -619,7 +694,7 @@ NaClProcessManager.prototype.handleMessageSetSID_ = function(msg, reply, src) {
 NaClProcessManager.prototype.handleMessageJSEval_ = function(msg, reply) {
   // Using '' + so that undefined can be emitted as a string.
   reply({result: '' + eval(msg['cmd'])});
-}
+};
 
 /**
  * Create a process that immediately exits with a given status.
@@ -635,7 +710,25 @@ NaClProcessManager.prototype.handleMessageDeadPid_ = function(msg, reply, src) {
     self.exit(msg['status'], element);
     reply({pid: pid});
   });
-}
+};
+
+/**
+ * Handle a mount filesystem call.
+ */
+NaClProcessManager.prototype.handleMessageMountFs_ = function(msg, reply, src) {
+  if (g_mount.available) {
+    reply({
+      filesystem: g_mount.filesystem,
+      fullPath:   g_mount.fullPath,
+      available:  g_mount.available,
+      mountPoint: g_mount.mountPoint
+    });
+  } else {
+    reply({
+      available:  g_mount.available
+    });
+  }
+};
 
 /**
  * Handle progress event from NaCl.
@@ -645,7 +738,7 @@ NaClProcessManager.prototype.handleProgress_ = function(e) {
   if (this.isRootProcess(e.srcElement)) {
     this.onRootProgress(e.url, e.lengthComputable, e.loaded, e.total);
   }
-}
+};
 
 /**
  * Handle load event from NaCl.
@@ -655,7 +748,7 @@ NaClProcessManager.prototype.handleLoad_ = function(e) {
   if (this.isRootProcess(e.srcElement)) {
     this.onRootLoad();
   }
-}
+};
 
 /**
  * Handle abort event from NaCl.
@@ -663,7 +756,7 @@ NaClProcessManager.prototype.handleLoad_ = function(e) {
  */
 NaClProcessManager.prototype.handleLoadAbort_ = function(e) {
   this.exit(NaClProcessManager.EXIT_CODE_KILL, e.srcElement);
-}
+};
 
 /**
  * Handle load error event from NaCl.
@@ -672,7 +765,7 @@ NaClProcessManager.prototype.handleLoadAbort_ = function(e) {
 NaClProcessManager.prototype.handleLoadError_ = function(e) {
   this.onError(e.srcElement.commandName, e.srcElement.lastError);
   this.exit(NaClProcessManager.EX_NO_EXEC, e.srcElement);
-}
+};
 
 /**
  * Handle crash event from NaCl.
@@ -680,7 +773,7 @@ NaClProcessManager.prototype.handleLoadError_ = function(e) {
  */
 NaClProcessManager.prototype.handleCrash_ = function(e) {
   this.exit(e.srcElement.exitStatus, e.srcElement);
-}
+};
 
 /**
  * Create a process group with the given process as the leader and add the
@@ -699,7 +792,7 @@ NaClProcessManager.prototype.createProcessGroup_ = function(pid, sid) {
     processes: {}
   }
   this.processGroups[pid].processes[pid] = true;
-}
+};
 
 /**
  * Delete a process from the process group table. If a group has no more
@@ -720,7 +813,7 @@ NaClProcessManager.prototype.deleteProcessFromGroup_ = function(pid) {
   if (Object.keys(this.processGroups[pgid].processes).length === 0) {
     delete this.processGroups[pgid];
   }
-}
+};
 
 /**
  * Remove entries for a process from the process table.
@@ -728,7 +821,7 @@ NaClProcessManager.prototype.deleteProcessFromGroup_ = function(pid) {
  */
 NaClProcessManager.prototype.deleteProcessEntry_ = function(pid) {
   delete this.processes[pid];
-}
+};
 
 /**
  * Exit the command.
@@ -918,7 +1011,8 @@ NaClProcessManager.prototype.spawn = function(
       domElement: fg,
       exitCode: null,
       pgid: pgid,
-      ppid: ppid
+      ppid: ppid,
+      mounted: false,
     };
     if (!parent) {
       self.createProcessGroup_(fg.pid, fg.pid);
@@ -1059,7 +1153,7 @@ NaClProcessManager.prototype.spawn = function(
     // yield result.
     callback(fg.pid, fg);
   });
-}
+};
 
 /**
  * Handles the exiting of a process.
@@ -1147,7 +1241,7 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply, srcPid) {
     options: options,
     srcPid: srcPid
   });
-}
+};
 
 /**
  * Update the dimensions of the terminal on terminal resize.
@@ -1160,7 +1254,7 @@ NaClProcessManager.prototype.onTerminalResize = function(width, height) {
   if (this.foregroundProcess) {
     this.foregroundProcess.postMessage({'tty_resize': [ width, height ]});
   }
-}
+};
 
 /**
  * Handle a SIGINT signal.
@@ -1292,7 +1386,7 @@ GraphicalPopup.prototype.create = function() {
 
     win.onClosed.addListener(self.onClosed);
   });
-}
+};
 
 /**
  * Close the popup.
@@ -1306,4 +1400,4 @@ GraphicalPopup.prototype.destroy = function() {
 
   this.process = null;
   this.win = null;
-}
+};

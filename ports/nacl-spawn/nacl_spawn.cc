@@ -37,12 +37,12 @@
 #include <string>
 #include <vector>
 
+#include "ppapi/c/ppb_file_system.h"
 #include "ppapi/c/ppb_var.h"
 #include "ppapi/c/ppb_var_array.h"
 #include "ppapi/c/ppb_var_dictionary.h"
 
 #include "ppapi_simple/ps.h"
-#include "ppapi_simple/ps_event.h"
 #include "ppapi_simple/ps_instance.h"
 #include "ppapi_simple/ps_interface.h"
 
@@ -67,6 +67,14 @@ struct NaClSpawnReply {
 
   struct PP_Var result_var;
 };
+
+static int rmdir_checked(const char* dir) {
+  int rtn = rmdir(dir);
+  if (rtn != 0) {
+    fprintf(stderr, "rmdir '%s' failed: %s\n", dir, strerror(errno));
+  }
+  return rtn;
+}
 
 static void VarAddRef(struct PP_Var var) {
   PSInterfaceVar()->AddRef(var);
@@ -225,6 +233,74 @@ static std::string GetRequestId() {
   return buf;
 }
 
+static bool GetBool(struct PP_Var dict_var, const char* key) {
+  struct PP_Var value_var;
+  if (!VarDictionaryHasKey(dict_var, key, &value_var)) {
+    return -1;
+  }
+  assert(value_var.type == PP_BOOL);
+  bool value = value_var.value.as_bool;
+  return value;
+}
+
+static void MountLocalFs(struct PP_Var mount_data) {
+  bool available = GetBool(mount_data, "available");
+
+  if (!available) {
+    return;
+  } else {
+    PP_Var filesystem = VarDictionaryGet(mount_data, "filesystem");
+    PP_Resource filesystemResource =
+        PSInterfaceVar()->VarToResource(filesystem);
+    PP_Var filepath_var = VarDictionaryGet(mount_data, "fullPath");
+
+    uint32_t fp_len;
+    const char* filepath = PSInterfaceVar()->VarToUtf8(filepath_var, &fp_len);
+    mkdir("/mnt/local", 0777);
+    struct stat st;
+
+    if (stat("/mnt/local", &st) < 0 || !S_ISDIR(st.st_mode)) {
+      perror("Unable to create user directory");
+    } else {
+      struct PP_Var status_var = VarDictionaryCreate();
+      char fs[1024];
+      sprintf(fs, "filesystem_resource=%d\n", filesystemResource);
+
+      // TODO(gdeepti): Currently mount on the main thread always returns
+      // without an error and crashes the nacl module. Figure out a better
+      // way to detect a mount failure.
+      if (mount(filepath, "/mnt/local", "html5fs", 0, fs) != 0) {
+        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", filepath);
+        VarDictionarySetString(status_var, "mount_status", "fail");
+      } else {
+        VarDictionarySetString(status_var, "mount_status", "success");
+      }
+      PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
+    }
+    VarRelease(filesystem);
+    VarRelease(filepath_var);
+  }
+}
+
+static void UnmountLocalFs(struct PP_Var mount_data) {
+  bool mounted = GetBool(mount_data, "mounted");
+
+  if(!mounted) {
+    perror("Directory not mounted, unable to unmount");
+  } else {
+    struct PP_Var status_var = VarDictionaryCreate();
+    if(umount("/mnt/local") != 0) {
+      fprintf(stderr, "Unmounting filesystem in /mnt/user failed.\n");
+      VarDictionarySetString(status_var, "unmount_status", "fail");
+    } else {
+      VarDictionarySetString(status_var, "unmount_status", "success");
+    }
+    PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
+    rmdir_checked("/mnt/local");
+    VarRelease(status_var);
+  }
+}
+
 // Handle reply from JavaScript. The key is the request string and the
 // value is Zero or positive on success or -errno on failure. The
 // user_data must be an instance of NaClSpawnReply.
@@ -247,6 +323,33 @@ static void HandleNaClSpawnReply(struct PP_Var key,
 
   pthread_cond_signal(&reply->cond);
   pthread_mutex_unlock(&reply->mu);
+}
+
+static void HandleMountMessage(struct PP_Var key,
+                                 struct PP_Var value,
+                                 void* user_data) {
+  if (key.type != PP_VARTYPE_STRING || value.type != PP_VARTYPE_DICTIONARY) {
+    fprintf(stderr, "Invalid parameter for HandleNaClSpawnReply\n");
+    fprintf(stderr, "key type=%d\n", key.type);
+    fprintf(stderr, "value type=%d\n", value.type);
+    return;
+  }
+
+  MountLocalFs(value);
+}
+
+
+static void HandleUnmountMessage(struct PP_Var key,
+                                 struct PP_Var value,
+                                 void* user_data) {
+  if (key.type != PP_VARTYPE_STRING || value.type != PP_VARTYPE_DICTIONARY) {
+    fprintf(stderr, "Invalid parameter for HandleNaClSpawnReply\n");
+    fprintf(stderr, "key type=%d\n", key.type);
+    fprintf(stderr, "value type=%d\n", value.type);
+    return;
+  }
+
+  UnmountLocalFs(value);
 }
 
 // Sends a spawn/wait request to JavaScript and returns the result.
@@ -447,105 +550,6 @@ static void setup_anonymous_pipes(void) {
     fprintf(stderr, "Error mounting %s.\n", fs_type);
     exit(1);
   }
-}
-
-extern void nacl_setup_env() {
-  // If we running in sel_ldr then don't do any the filesystem/nacl_io
-  // setup. We detect sel_ldr by the absence of the Pepper Instance.
-  if (PSGetInstanceId() == 0) {
-    return;
-  }
-
-  umount("/");
-  do_mount("", "/", "memfs", 0, NULL);
-
-  setup_anonymous_pipes();
-
-  // Setup common environment variables, but don't override those
-  // set already by ppapi_simple.
-  setenv("HOME", "/home/user", 0);
-  setenv("PATH", "/bin", 0);
-  setenv("USER", "user", 0);
-  setenv("LOGNAME", "user", 0);
-
-  const char* home = getenv("HOME");
-  mkdir_checked("/home");
-  mkdir_checked(home);
-  mkdir_checked("/tmp");
-  mkdir_checked("/bin");
-  mkdir_checked("/etc");
-  mkdir_checked("/mnt");
-  mkdir_checked("/mnt/http");
-  mkdir_checked("/mnt/html5");
-
-  const char* data_url = getenv("NACL_DATA_URL");
-  if (!data_url)
-    data_url = "./";
-  NACL_LOG("NACL_DATA_URL=%s\n", data_url);
-
-  const char* mount_flags = getenv("NACL_DATA_MOUNT_FLAGS");
-  if (!mount_flags)
-    mount_flags = "";
-  NACL_LOG("NACL_DATA_MOUNT_FLAGS=%s\n", mount_flags);
-
-  if (do_mount(data_url, "/mnt/http", "httpfs", 0, mount_flags) != 0) {
-    perror("mounting http filesystem at /mnt/http failed");
-  }
-
-  if (do_mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
-    perror("Mounting HTML5 filesystem in /mnt/html5 failed");
-  } else {
-    mkdir("/mnt/html5/home", 0777);
-    struct stat st;
-    if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
-      perror("Unable to create home directory in persistent storage");
-    } else {
-      if (do_mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
-        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
-      }
-    }
-  }
-
-  if (do_mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
-    perror("Mounting HTML5 filesystem in /tmp failed");
-  }
-
-  /* naclprocess.js sends the current working directory using this
-   * environment variable. */
-  const char* pwd = getenv("PWD");
-  if (pwd != NULL) {
-    if (chdir(pwd)) {
-      fprintf(stderr, "chdir() to %s failed: %s\n", pwd, strerror(errno));
-    }
-  }
-
-  // Tell the NaCl architecture to /etc/bashrc of mingn.
-#if defined(__x86_64__)
-  static const char kNaClArch[] = "x86_64";
-  // Use __i386__ rather then __i686__ since the latter is not defined
-  // by i686-nacl-clang.
-#elif defined(__i386__)
-  static const char kNaClArch[] = "i686";
-#elif defined(__arm__)
-  static const char kNaClArch[] = "arm";
-#elif defined(__pnacl__)
-  static const char kNaClArch[] = "pnacl";
-#else
-# error "Unknown architecture"
-#endif
-  // Set NACL_ARCH with a guess if not set (0 == set if not already).
-  setenv("NACL_ARCH", kNaClArch, 0);
-  // Set NACL_BOOT_ARCH if not inherited from a parent (0 == set if not already
-  // set). This will let us prefer PNaCl if we started with PNaCl (for tests
-  // mainly).
-  setenv("NACL_BOOT_ARCH", kNaClArch, 0);
-
-  setlocale(LC_CTYPE, "");
-
-  nacl_spawn_pid = getenv_as_int("NACL_PID");
-  nacl_spawn_ppid = getenv_as_int("NACL_PPID");
-
-  restore_pipes();
 }
 
 static std::string GetCwd() {
@@ -1139,6 +1143,18 @@ void jseval(const char* cmd, char** data, size_t* len) {
   VarRelease(result_dict_var);
 }
 
+static void mountfs() {
+  struct PP_Var req_var = VarDictionaryCreate();
+  VarDictionarySetString(req_var, "command", "nacl_mountfs");
+  struct PP_Var result_dict_var = SendRequest(req_var);
+
+  MountLocalFs(result_dict_var);
+  VarRelease(result_dict_var);
+
+  PSEventRegisterMessageHandler("mount", &HandleMountMessage, NULL);
+  PSEventRegisterMessageHandler("unmount", &HandleUnmountMessage, NULL);
+}
+
 // Create a pipe. pipefd[0] will be the read end of the pipe and pipefd[1] the
 // write end of the pipe.
 int pipe(int pipefd[2]) {
@@ -1207,6 +1223,106 @@ void nacl_spawn_vfork_exit(int status) {
   } else {
     _exit(status);
   }
+}
+
+void nacl_setup_env() {
+  // If we running in sel_ldr then don't do any the filesystem/nacl_io
+  // setup. We detect sel_ldr by the absence of the Pepper Instance.
+  if (PSGetInstanceId() == 0) {
+    return;
+  }
+
+  umount("/");
+  do_mount("", "/", "memfs", 0, NULL);
+
+  setup_anonymous_pipes();
+
+  // Setup common environment variables, but don't override those
+  // set already by ppapi_simple.
+  setenv("HOME", "/home/user", 0);
+  setenv("PATH", "/bin", 0);
+  setenv("USER", "user", 0);
+  setenv("LOGNAME", "user", 0);
+
+  const char* home = getenv("HOME");
+  mkdir_checked("/home");
+  mkdir_checked(home);
+  mkdir_checked("/tmp");
+  mkdir_checked("/bin");
+  mkdir_checked("/etc");
+  mkdir_checked("/mnt");
+  mkdir_checked("/mnt/http");
+  mkdir_checked("/mnt/html5");
+
+  const char* data_url = getenv("NACL_DATA_URL");
+  if (!data_url)
+    data_url = "./";
+  NACL_LOG("NACL_DATA_URL=%s\n", data_url);
+
+  const char* mount_flags = getenv("NACL_DATA_MOUNT_FLAGS");
+  if (!mount_flags)
+    mount_flags = "";
+  NACL_LOG("NACL_DATA_MOUNT_FLAGS=%s\n", mount_flags);
+
+  if (do_mount(data_url, "/mnt/http", "httpfs", 0, mount_flags) != 0) {
+    perror("mounting http filesystem at /mnt/http failed");
+  }
+
+  if (do_mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
+    perror("Mounting HTML5 filesystem in /mnt/html5 failed");
+  } else {
+    mkdir("/mnt/html5/home", 0777);
+    struct stat st;
+    if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
+      perror("Unable to create home directory in persistent storage");
+    } else {
+      if (do_mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
+        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
+      }
+    }
+  }
+
+  if (do_mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
+    perror("Mounting HTML5 filesystem in /tmp failed");
+  }
+
+  /* naclprocess.js sends the current working directory using this
+   * environment variable. */
+  const char* pwd = getenv("PWD");
+  if (pwd != NULL) {
+    if (chdir(pwd)) {
+      fprintf(stderr, "chdir() to %s failed: %s\n", pwd, strerror(errno));
+    }
+  }
+
+  // Tell the NaCl architecture to /etc/bashrc of mingn.
+#if defined(__x86_64__)
+  static const char kNaClArch[] = "x86_64";
+  // Use __i386__ rather then __i686__ since the latter is not defined
+  // by i686-nacl-clang.
+#elif defined(__i386__)
+  static const char kNaClArch[] = "i686";
+#elif defined(__arm__)
+  static const char kNaClArch[] = "arm";
+#elif defined(__pnacl__)
+  static const char kNaClArch[] = "pnacl";
+#else
+# error "Unknown architecture"
+#endif
+  // Set NACL_ARCH with a guess if not set (0 == set if not already).
+  setenv("NACL_ARCH", kNaClArch, 0);
+  // Set NACL_BOOT_ARCH if not inherited from a parent (0 == set if not already
+  // set). This will let us prefer PNaCl if we started with PNaCl (for tests
+  // mainly).
+  setenv("NACL_BOOT_ARCH", kNaClArch, 0);
+
+  setlocale(LC_CTYPE, "");
+
+  nacl_spawn_pid = getenv_as_int("NACL_PID");
+  nacl_spawn_ppid = getenv_as_int("NACL_PPID");
+
+  mountfs();
+  restore_pipes();
 }
 
 #define VARG_TO_ARGV_START \

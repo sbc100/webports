@@ -29,7 +29,6 @@ HTML_TEMPLATE = '''\
     <script type="text/javascript" src="naclprocess.js"></script>
     <script type="text/javascript" src="naclterm.js"></script>
     <script type="text/javascript" src="%(module_name)s.js"></script>
-    %(style)s
     %(include)s
 
     <style type="text/css">
@@ -49,6 +48,7 @@ HTML_TEMPLATE = '''\
         height: 100%%;
       }
     </style>
+    %(style)s
   </head>
   <body>
     <div id="terminal"></div>

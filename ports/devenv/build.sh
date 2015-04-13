@@ -58,13 +58,16 @@ InstallStep() {
   fi
 
   # Install the HTML/JS for the terminal.
+  # TODO(gdeepti): Extend mounter to the other create_term.py apps.
   ChangeDir ${APP_DIR}
-  LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js bash.nmf
+  LogExecute python ${TOOLS_DIR}/create_term.py -i whitelist.js \
+      -i mounter.js -s mounter.css bash.nmf
   LogExecute cp bash.nmf sh.nmf
   InstallNaClTerm ${APP_DIR}
 
-  RESOURCES="background.js bash.js bashrc install-base-packages.sh package
-      graphical.html whitelist.js devenv_16.png devenv_48.png devenv_128.png"
+  RESOURCES="background.js mounter.css mounter.js bash.js bashrc
+      install-base-packages.sh package graphical.html whitelist.js devenv_16.png
+      devenv_48.png devenv_128.png"
   for resource in ${RESOURCES}; do
     LogExecute install ${START_DIR}/${resource} ${APP_DIR}/
   done
