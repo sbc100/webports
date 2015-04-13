@@ -1,0 +1,8 @@
+NAME=samba
+VERSION=4.1.16
+URL=http://ftp.samba.org/pub/samba/samba-4.1.16.tar.gz
+LICENSE=GPL
+DEPENDS=(nacl-spawn glibc-compat)
+DISABLED_ARCH=(i686)
+DISABLED_LIBC=(bionic newlib)
+SHA1=6fe5cbbec3ebf29a22af35229c17f699b6559c6d
