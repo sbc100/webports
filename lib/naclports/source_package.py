@@ -132,11 +132,10 @@ def InitGitRepo(directory):
       RunGitCmd(directory, ['commit', '-m', 'Upstream version'])
       RunGitCmd(directory, ['checkout', '-b', 'upstream'])
       RunGitCmd(directory, ['checkout', 'master'])
-    except: # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except
       # If git setup fails or is interrupted then remove the partially
       # initialized repository.
       util.RemoveTree(os.path.join(git_dir))
-
 
 
 def WriteStamp(stamp_file, stamp_contents):
@@ -299,8 +298,9 @@ class SourcePackage(package.Package):
     if util.log_level > util.LOG_INFO:
       log_filename = None
     else:
-      log_filename = os.path.join(log_root, '%s_%s.log' % (self.NAME,
-          str(self.config).replace('/', '_')))
+      log_filename = os.path.join(log_root, '%s_%s.log' %
+                                  (self.NAME,
+                                   str(self.config).replace('/', '_')))
       if os.path.exists(log_filename):
         os.remove(log_filename)
 
@@ -425,8 +425,7 @@ class SourcePackage(package.Package):
       subprocess.check_call(cmd,
                             stdout=sys.stdout,
                             stderr=sys.stderr,
-                            cwd=self.GetBuildLocation(),
-                            **args)
+                            cwd=self.GetBuildLocation(), **args)
     except subprocess.CalledProcessError as e:
       raise Error(e)
 
@@ -484,43 +483,43 @@ class SourcePackage(package.Package):
       raise DisabledError('%s: package is disabled' % self.NAME)
 
     if self.LIBC is not None and self.LIBC != self.config.libc:
-      raise DisabledError('%s: cannot be built with %s'
-                          % (self.NAME, self.config.libc))
+      raise DisabledError('%s: cannot be built with %s' %
+                          (self.NAME, self.config.libc))
 
     if self.config.libc in self.DISABLED_LIBC:
-      raise DisabledError('%s: cannot be built with %s'
-                          % (self.NAME, self.config.libc))
+      raise DisabledError('%s: cannot be built with %s' %
+                          (self.NAME, self.config.libc))
 
     for disabled_toolchain in self.DISABLED_TOOLCHAIN:
       if '/' in disabled_toolchain:
         disabled_toolchain, arch = disabled_toolchain.split('/')
         if (self.config.arch == arch and
             self.config.toolchain == disabled_toolchain):
-          raise DisabledError('%s: cannot be built with %s for %s'
-                              % (self.NAME, self.config.toolchain, arch))
+          raise DisabledError('%s: cannot be built with %s for %s' %
+                              (self.NAME, self.config.toolchain, arch))
       else:
         if self.config.toolchain == disabled_toolchain:
-          raise DisabledError('%s: cannot be built with %s'
-                              % (self.NAME, self.config.toolchain))
+          raise DisabledError('%s: cannot be built with %s' %
+                              (self.NAME, self.config.toolchain))
 
     if self.config.arch in self.DISABLED_ARCH:
-      raise DisabledError('%s: disabled for architecture: %s'
-                          % (self.NAME, self.config.arch))
+      raise DisabledError('%s: disabled for architecture: %s' %
+                          (self.NAME, self.config.arch))
 
     if self.MIN_SDK_VERSION is not None:
       if not util.CheckSDKVersion(self.MIN_SDK_VERSION):
-        raise DisabledError('%s: requires SDK version %s or above'
-                            % (self.NAME, self.MIN_SDK_VERSION))
+        raise DisabledError('%s: requires SDK version %s or above' %
+                            (self.NAME, self.MIN_SDK_VERSION))
 
     if self.ARCH is not None:
       if self.config.arch not in self.ARCH:
-        raise DisabledError('%s: disabled for architecture: %s'
-                            % (self.NAME, self.config.arch))
+        raise DisabledError('%s: disabled for architecture: %s' %
+                            (self.NAME, self.config.arch))
 
     for conflicting_package in self.CONFLICTS:
       if util.IsInstalled(conflicting_package, self.config):
         raise PkgConflictError("%s: conflicts with installed package: %s" %
-            (self.NAME, conflicting_package))
+                               (self.NAME, conflicting_package))
 
     for dep in self.Dependencies():
       try:
@@ -556,8 +555,8 @@ class SourcePackage(package.Package):
 
     if self.BUILD_OS is not None:
       if util.GetPlatform() != self.BUILD_OS:
-        raise DisabledError('%s: can only be built on %s'
-                            % (self.NAME, self.BUILD_OS))
+        raise DisabledError('%s: can only be built on %s' %
+                            (self.NAME, self.BUILD_OS))
 
   def GitCloneToMirror(self):
     """Clone the upstream git repo into a local mirror. """
@@ -569,8 +568,8 @@ class SourcePackage(package.Package):
     git_mirror = git_mirror.replace('/', '_')
     mirror_dir = os.path.join(paths.CACHE_ROOT, git_mirror)
     if os.path.exists(mirror_dir):
-      if RunGitCmd(mirror_dir,
-                   ['rev-parse', git_commit + '^{commit}'], error_ok=True) != 0:
+      if RunGitCmd(mirror_dir, ['rev-parse', git_commit + '^{commit}'],
+                   error_ok=True) != 0:
         Log('Updating git mirror: %s' % util.RelPath(mirror_dir))
         RunGitCmd(mirror_dir, ['remote', 'update', '--prune'])
     else:
@@ -647,7 +646,8 @@ class SourcePackage(package.Package):
 
     try:
       diff = subprocess.check_output(['git', 'diff', 'upstream',
-                                      '--no-ext-diff'], cwd=git_dir)
+                                      '--no-ext-diff'],
+                                     cwd=git_dir)
     except subprocess.CalledProcessError as e:
       raise Error('error running git in %s: %s' % (git_dir, str(e)))
 
@@ -655,11 +655,10 @@ class SourcePackage(package.Package):
     diff = re.sub('\nindex [^\n]+\n', '\n', diff)
 
     # Drop binary files, as they don't work anyhow.
-    diff = re.sub(
-        'diff [^\n]+\n'
-        '(new file [^\n]+\n)?'
-        '(deleted file mode [^\n]+\n)?'
-        'Binary files [^\n]+ differ\n', '', diff)
+    diff = re.sub('diff [^\n]+\n'
+                  '(new file [^\n]+\n)?'
+                  '(deleted file mode [^\n]+\n)?'
+                  'Binary files [^\n]+ differ\n', '', diff)
 
     # Filter out things from an optional per port skip list.
     diff_skip = os.path.join(self.root, 'diff_skip.txt')
@@ -711,7 +710,9 @@ def SourcePackageIterator():
     if 'pkg_info' in files:
       yield SourcePackage(root)
 
+
 DEFAULT_LOCATIONS = ('ports', 'ports/python_modules')
+
 
 def CreatePackage(package_name, config=None):
   """Create a Package object given a package name or path.

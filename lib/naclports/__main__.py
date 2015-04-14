@@ -1,7 +1,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Tool for manipulating naclports packages in python.
 
 This tool can be used to for working with naclports packages.
@@ -89,7 +88,7 @@ def CmdPkgUscan(package, options):
 
   if package.VERSION not in package.URL:
     PrintError('%s: uscan only works if VERSION is embedded in URL' %
-                package.NAME)
+               package.NAME)
     return 0
 
   temp_fd, temp_file = tempfile.mkstemp('naclports_watchfile')
@@ -122,6 +121,7 @@ def CmdPkgCheck(package, options):
     CmdPkgCheck.all_package_names = [os.path.basename(p.root) for p in packages]
   util.Log("Checking deps for %s .." % package.NAME)
   package.CheckDeps(CmdPkgCheck.all_package_names)
+
 
 CmdPkgCheck.all_package_names = None
 
@@ -171,6 +171,7 @@ def CmdPkgPatch(package, options):
 def CleanAll(config):
   """Remove all build directories and all pre-built packages as well
   as all installed packages for the given configuration."""
+
   def rmtree(path):
     util.Log('removing %s' % path)
     util.RemoveTree(path)
@@ -185,23 +186,23 @@ def CleanAll(config):
 
 def RunMain(args):
   base_commands = {
-    'list': CmdList,
-    'info': CmdInfo,
+      'list': CmdList,
+      'info': CmdInfo,
   }
 
   pkg_commands = {
-    'download': CmdPkgDownload,
-    'uscan': CmdPkgUscan,
-    'check': CmdPkgCheck,
-    'build': CmdPkgBuild,
-    'install': CmdPkgInstall,
-    'clean': CmdPkgClean,
-    'uninstall': CmdPkgUninstall,
-    'contents': CmdPkgContents,
-    'depends': CmdPkgListDeps,
-    'updatepatch': CmdPkgUpdatePatch,
-    'extract': CmdPkgExtract,
-    'patch': CmdPkgPatch
+      'download': CmdPkgDownload,
+      'uscan': CmdPkgUscan,
+      'check': CmdPkgCheck,
+      'build': CmdPkgBuild,
+      'install': CmdPkgInstall,
+      'clean': CmdPkgClean,
+      'uninstall': CmdPkgUninstall,
+      'contents': CmdPkgContents,
+      'depends': CmdPkgListDeps,
+      'updatepatch': CmdPkgUpdatePatch,
+      'extract': CmdPkgExtract,
+      'patch': CmdPkgPatch
   }
 
   installed_pkg_commands = ['contents', 'uninstall']

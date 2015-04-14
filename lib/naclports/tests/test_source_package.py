@@ -16,6 +16,7 @@ from naclports import paths
 
 
 class TestSourcePackage(common.NaclportsTest):
+
   def setUp(self):
     super(TestSourcePackage, self).setUp()
     self.tempdir = tempfile.mkdtemp(prefix='naclports_test_')
@@ -26,11 +27,11 @@ class TestSourcePackage(common.NaclportsTest):
     self.AddPatch(patch('naclports.paths.BUILD_ROOT',
                         os.path.join(self.tempdir, 'build_root')))
     self.AddPatch(patch('naclports.paths.CACHE_ROOT',
-                         os.path.join(self.tempdir, 'cache')))
+                        os.path.join(self.tempdir, 'cache')))
     self.AddPatch(patch('naclports.paths.OUT_DIR',
-                         os.path.join(self.tempdir, 'out_dir')))
+                        os.path.join(self.tempdir, 'out_dir')))
     self.AddPatch(patch('naclports.paths.STAMP_DIR',
-                         os.path.join(self.tempdir, 'stamp_dir')))
+                        os.path.join(self.tempdir, 'stamp_dir')))
 
   def CreateTestPackage(self, name, extra_info=''):
     """Creates a source package directory in a temporary directory.
@@ -100,8 +101,8 @@ class TestSourcePackage(common.NaclportsTest):
     pkg = source_package.SourcePackage(root)
     location = pkg.GetBuildLocation()
     self.assertTrue(location.startswith(paths.BUILD_ROOT))
-    self.assertEqual(os.path.basename(location),
-                     '%s-%s' % (pkg.NAME, pkg.VERSION))
+    self.assertEqual(os.path.basename(location), '%s-%s' %
+                     (pkg.NAME, pkg.VERSION))
 
   @patch('naclports.util.Log', Mock())
   def testExtract(self):
@@ -126,8 +127,7 @@ class TestSourcePackage(common.NaclportsTest):
     )
 
     for secs, expected_result in expectations:
-      self.assertEqual(expected_result,
-                       source_package.FormatTimeDelta(secs))
+      self.assertEqual(expected_result, source_package.FormatTimeDelta(secs))
 
   def testConflicts(self):
     root = self.CreateTestPackage('foo', 'CONFLICTS=(bar)')
@@ -147,8 +147,7 @@ class TestSourcePackage(common.NaclportsTest):
   def testDisabled(self):
     root = self.CreateTestPackage('foo', 'DISABLED=1')
     pkg = source_package.SourcePackage(root)
-    with self.assertRaisesRegexp(error.DisabledError,
-                                 'package is disabled'):
+    with self.assertRaisesRegexp(error.DisabledError, 'package is disabled'):
       pkg.CheckInstallable()
 
   def testDisabledArch(self):

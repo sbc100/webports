@@ -2,7 +2,6 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """
 Usage:
  sha1sum.py <filename>
@@ -19,6 +18,7 @@ from __future__ import print_function
 import hashlib
 import os
 import sys
+
 
 def main(args):
   if len(args) != 1:
@@ -38,6 +38,7 @@ def main(args):
     f.close()
 
   print("SHA1=%s" % filehash.lower())
+
 
 if __name__ == '__main__':
   # all files hashed with success

@@ -2,7 +2,6 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """A tiny web server.
 
 This is intended to be used for testing.
@@ -23,6 +22,7 @@ SERVER_PORT = 5103
 SERVER_HOST = ''
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.dirname(SCRIPT_DIR)
+
 
 class QuittableHTTPServer(SocketServer.ThreadingMixIn,
                           BaseHTTPServer.HTTPServer):
@@ -47,6 +47,7 @@ def KeyValuePair(string, sep='='):
 class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   """A small handler that looks for '?quit=1' query in the path and shuts itself
   down if it finds that parameter."""
+
   def do_OPTIONS(self):
     self.send_response(200, 'OK')
     self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD')
@@ -56,7 +57,7 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
   def do_GET(self):
     (_, _, _, query, _) = urlparse.urlsplit(self.path)
     url_params = dict([KeyValuePair(key_value)
-                      for key_value in query.split('&')])
+                       for key_value in query.split('&')])
     if 'quit' in url_params and '1' in url_params['quit']:
       self.send_response(200, 'OK')
       self.send_header('Content-type', 'text/html')
@@ -72,10 +73,10 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       if end != -1:
         line = headers[begin:end]
         ind = line.find('=')
-        byte_range = line[ind+1:].split('-')
+        byte_range = line[ind + 1:].split('-')
         byte_begin = int(byte_range[0])
         byte_end = int(byte_range[1])
-        length = byte_end-byte_begin+1
+        length = byte_end - byte_begin + 1
         f = self.send_partial(byte_begin, length)
         if f:
           shutil.copyfileobj(f, self.wfile, length)
@@ -125,7 +126,8 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
       return None
     self.send_response(206, 'Partial content')
     f.seek(offset, os.SEEK_CUR)
-    self.send_header("Content-Range", str(offset) + '-' + str(length+offset-1))
+    self.send_header("Content-Range",
+                     str(offset) + '-' + str(length + offset - 1))
     self.send_header("Content-Length", str(length))
     self.send_header("Content-type", ctype)
     self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))

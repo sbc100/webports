@@ -2,7 +2,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Script to patch a configure script in-place such that the libtool
 dynamic library detection works for NaCl.
 
@@ -69,6 +68,7 @@ nacl)
   lt_cv_deplibs_check_method=pass_all''']
 ]
 
+
 def main(args):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('configure', metavar='CONFIGURE_SCRIPT',
@@ -102,6 +102,7 @@ def main(args):
     output_file.write(filedata)
 
   return 0
+
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))

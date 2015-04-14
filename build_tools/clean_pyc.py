@@ -2,7 +2,6 @@
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Script to cleanup stale .pyc files.
 
 This script is run by gclient run-hooks (see DEPS)
@@ -13,6 +12,7 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+
 
 def main(args):
   parser = argparse.ArgumentParser(description=__doc__)

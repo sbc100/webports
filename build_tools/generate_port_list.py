@@ -2,7 +2,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Tool for generating list of ports in code.google.com wiki format.
 """
 
@@ -46,13 +45,13 @@ def OutputTableRow(package):
     if size < 1024:
       patch = '[%s/%s %d B]' % (SRC_URL, relative_path, size)
     else:
-      patch = '[%s/%s %d KiB]' % (SRC_URL, relative_path, size/1024)
+      patch = '[%s/%s %d KiB]' % (SRC_URL, relative_path, size / 1024)
   else:
     patch = ''
   url = '[%s %s]' % (package.URL, package.GetArchiveFilename())
   package_url = '[%s/%s %s]' % (SRC_URL,
-      os.path.relpath(package.root, NACLPORTS_ROOT),
-      package.NAME)
+                                os.path.relpath(package.root, NACLPORTS_ROOT),
+                                package.NAME)
 
   libc = package.LIBC
   if libc:
@@ -108,6 +107,7 @@ def main(args):
   print('\n_Total = %d_\n' % total)
 
   return rtn
+
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))

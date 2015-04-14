@@ -49,7 +49,9 @@ BUILD_SDK_VERSION=123
 BUILD_NACLPORTS_REVISION=98765
 '''
 
+
 class TestPackageIndex(common.NaclportsTest):
+
   def testParsingInvalid(self):
     contents = 'FOO=bar\nBAR=baz\n'
     expected_error = "Invalid key 'FOO' in info file dummy_file:1"

@@ -7,8 +7,8 @@ import platform
 
 from naclports import error, util
 
-VALID_TOOLCHAINS = ['newlib', 'glibc', 'bionic', 'pnacl',
-                    'clang-newlib', 'emscripten']
+VALID_TOOLCHAINS = ['newlib', 'glibc', 'bionic', 'pnacl', 'clang-newlib',
+                    'emscripten']
 VALID_LIBC = ['newlib', 'glibc', 'bionic']
 
 

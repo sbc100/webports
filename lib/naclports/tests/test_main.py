@@ -15,6 +15,7 @@ from naclports.configuration import Configuration
 
 # pylint: disable=no-self-use
 class TestMain(common.NaclportsTest):
+
   def setUp(self):
     super(TestMain, self).setUp()
     self.AddPatch(patch('naclports.util.CheckSDKRoot'))
@@ -26,8 +27,7 @@ class TestMain(common.NaclportsTest):
     naclports.__main__.CleanAll(config)
     mock_rmtree.assert_any_call('/package/install/path')
 
-  @patch('naclports.__main__.RunMain',
-         Mock(side_effect=error.Error('oops')))
+  @patch('naclports.__main__.RunMain', Mock(side_effect=error.Error('oops')))
   def testErrorReport(self):
     # Verify that exceptions of the type error.Error are printed
     # to stderr and result in a return code of 1
@@ -59,6 +59,7 @@ class TestMain(common.NaclportsTest):
 
 
 class TestCommands(common.NaclportsTest):
+
   def testListCommand(self):
     config = Configuration()
     pkg = Mock(NAME='foo', VERSION='0.1')

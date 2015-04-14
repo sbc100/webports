@@ -32,24 +32,25 @@ GS_MIRROR_URL = '%s%s/mirror' % (GS_URL, GS_BUCKET)
 MIN_SDK_VERSION = 43
 
 arch_to_pkgarch = {
-  'x86_64': 'x86-64',
-  'i686': 'i686',
-  'arm': 'arm',
-  'pnacl': 'pnacl',
-  'emscripten': 'emscripten',
+    'x86_64': 'x86-64',
+    'i686': 'i686',
+    'arm': 'arm',
+    'pnacl': 'pnacl',
+    'emscripten': 'emscripten',
 }
 
 # Inverse of arch_to_pkgarch
-pkgarch_to_arch = {v:k for k, v in arch_to_pkgarch.items()}
+pkgarch_to_arch = {v: k for k, v in arch_to_pkgarch.items()}
 
-LOG_ERROR   = 0
-LOG_WARN    = 1
-LOG_INFO    = 2
+LOG_ERROR = 0
+LOG_WARN = 1
+LOG_INFO = 2
 LOG_VERBOSE = 3
-LOG_TRACE   = 4
+LOG_TRACE = 4
 
 log_level = LOG_INFO
 color_mode = 'auto'
+
 
 def Color(message, color):
   if termcolor and Color.enabled:
@@ -65,7 +66,9 @@ def CheckStdoutForColorSupport():
 
 def Memoize(f):
   """Memoization decorator for functions taking one or more arguments."""
+
   class Memo(dict):
+
     def __init__(self, f):
       super(Memo, self).__init__()
       self.f = f
@@ -155,8 +158,8 @@ def DownloadFile(filename, url):
   temp_filename = filename + '.partial'
   # Ensure curl is in user's PATH
   FindInPath('curl')
-  curl_cmd = ['curl', '--fail', '--location', '--stderr', '-',
-              '-o', temp_filename]
+  curl_cmd = ['curl', '--fail', '--location', '--stderr', '-', '-o',
+              temp_filename]
   if hasattr(sys.stdout, 'fileno') and os.isatty(sys.stdout.fileno()):
     # Add --progress-bar but only if stdout is a TTY device.
     curl_cmd.append('--progress-bar')
@@ -177,7 +180,6 @@ def DownloadFile(filename, url):
     raise error.Error('Error downloading file: %s' % str(e))
 
   os.rename(temp_filename, filename)
-
 
 
 def CheckStamp(filename, contents=None):
@@ -225,7 +227,7 @@ def GetEmscriptenRoot():
 
   if not os.path.isdir(emscripten):
     raise error.Error('$EMSCRIPTEN environment variable does not point'
-        ' to a directory: %s' % emscripten)
+                      ' to a directory: %s' % emscripten)
   return emscripten
 
 
@@ -268,11 +270,7 @@ def GetInstallRoot(config):
   if config.toolchain == 'pnacl':
     tc_dir = os.path.join('%s_pnacl' % platform, 'le32-nacl')
   else:
-    tc_arch = {
-      'arm': 'arm',
-      'i686': 'x86',
-      'x86_64': 'x86'
-    }[config.arch]
+    tc_arch = {'arm': 'arm', 'i686': 'x86', 'x86_64': 'x86'}[config.arch]
     if config.toolchain == 'clang-newlib':
       tc_dir = '%s_pnacl' % platform
     else:
@@ -359,8 +357,7 @@ def VerifyHash(filename, sha1):
   if sha1 != file_sha1:
     raise HashVerificationError(
         'verification failed: %s\nExpected: %s\nActual: %s' %
-            (filename, sha1, file_sha1))
-
+        (filename, sha1, file_sha1))
 
 
 def RemoveTree(directory):
@@ -383,8 +380,8 @@ def Makedirs(directory):
   if os.path.isdir(directory):
     return
   if os.path.exists(directory):
-    raise error.Error('mkdir: File exists and is not a directory: %s'
-                      % directory)
+    raise error.Error('mkdir: File exists and is not a directory: %s' %
+                      directory)
   Trace("mkdir: %s" % directory)
   os.makedirs(directory)
 
@@ -395,6 +392,7 @@ class Lock(object):
   This class will raise an exception if another process already holds the
   lock for the given directory.
   """
+
   def __init__(self, lock_dir):
     if not os.path.exists(lock_dir):
       Makedirs(lock_dir)
@@ -415,12 +413,14 @@ class Lock(object):
 
 class BuildLock(Lock):
   """Lock used when building a package (essentially a lock on OUT_DIR)"""
+
   def __init__(self):
     super(BuildLock, self).__init__(paths.OUT_DIR)
 
 
 class InstallLock(Lock):
   """Lock used when installing/uninstalling package"""
+
   def __init__(self, config):
     root = GetInstallRoot(config)
     super(InstallLock, self).__init__(root)

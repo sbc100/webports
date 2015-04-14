@@ -51,9 +51,7 @@ class Package(object):
         setattr(self, key, None)
 
     # Parse pkg_info file
-    info = pkg_info.ParsePkgInfo(info_string,
-                                 self.info,
-                                 valid_keys,
+    info = pkg_info.ParsePkgInfo(info_string, self.info, valid_keys,
                                  required_keys)
 
     # Set attributres based on pkg_info setttings.
@@ -109,10 +107,9 @@ class Package(object):
     return "'%s' [%s]" % (self.NAME, self.config)
 
   def LogStatus(self, message, suffix=''):
-    util.LogHeading(message, " '%s' [%s] %s" % (
-        util.Color(self.NAME, 'yellow'),
-        util.Color(self.config, 'blue'),
-        suffix))
+    util.LogHeading(message, " '%s' [%s] %s" %
+                    (util.Color(self.NAME, 'yellow'),
+                     util.Color(self.config, 'blue'), suffix))
 
   def CheckDeps(self, valid_packages):
     for package in self.DEPENDS:

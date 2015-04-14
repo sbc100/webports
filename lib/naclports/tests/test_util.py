@@ -14,6 +14,7 @@ from naclports import error
 
 
 class TestUtil(unittest.TestCase):
+
   def setUp(self):
     common.AddPatch(self, patch('naclports.util.GetSDKRoot',
                                 Mock(return_value='/sdk/root')))
@@ -66,8 +67,8 @@ class TestUtil(unittest.TestCase):
     self.assertEqual(util.GetInstallRoot(Configuration('emscripten')), expected)
 
     expected = '/sdk/root/toolchain/linux_pnacl/x86_64-nacl/usr'
-    self.assertEqual(util.GetInstallRoot(
-        Configuration(toolchain='clang-newlib')), expected)
+    self.assertEqual(
+        util.GetInstallRoot(Configuration(toolchain='clang-newlib')), expected)
 
   def testHashFile(self):
     temp_name = tempfile.mkstemp('naclports_test')[1]
@@ -86,6 +87,7 @@ class TestUtil(unittest.TestCase):
 
 
 class TestCheckSDKRoot(TestUtil):
+
   def testMissingSDKROOT(self):
     with self.assertRaisesRegexp(error.Error, 'NACL_SDK_ROOT does not exist'):
       util.CheckSDKRoot()

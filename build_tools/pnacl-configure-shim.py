@@ -2,7 +2,6 @@
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Autoconf builds lots of small executables.
 This wreaks havock with pnacl's slow -O2 build time.
 Additionally linking nacl_io + ppapi_simple slows things down even more.

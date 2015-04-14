@@ -2,7 +2,6 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Download the very lastet version Native Client SDK.
 
 This script downloads toolchain bz2's and expands them.
@@ -200,10 +199,7 @@ def main(argv):
   else:
     flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
-
-  url = DetermineSDKURL(flavor,
-                        base_url=GS_URL_BASE,
-                        version=options.version)
+  url = DetermineSDKURL(flavor, base_url=GS_URL_BASE, version=options.version)
 
   stamp_file = os.path.join(TARGET_DIR, 'stamp')
   if os.path.exists(stamp_file):
@@ -214,7 +210,6 @@ def main(argv):
         return 0
       else:
         naclports.Log('Ignoring currently installed SDK: %s' % installed_url)
-
 
   DownloadAndInstallSDK(url, TARGET_DIR)
   with open(stamp_file, 'w') as f:

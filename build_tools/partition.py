@@ -2,7 +2,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Manage partitioning of port builds.
 
 Download historical data from the naclports builders, and use it to
@@ -110,10 +109,11 @@ def DownloadDataFromBuilder(builder, build):
     build -= 1
 
   raise Error('Unable to find a successful build:\nBuilder: %s\nRange: [%d, %d]'
-      % (builder, build - max_tries, build))
+              % (builder, build - max_tries, build))
 
 
 class Project(object):
+
   def __init__(self, name):
     self.name = name
     self.time = 0
@@ -134,6 +134,7 @@ class Project(object):
 
 
 class Projects(object):
+
   def __init__(self):
     self.projects = []
     self.project_map = {}
@@ -168,6 +169,7 @@ class Projects(object):
 
 
 class ProjectTimes(object):
+
   def __init__(self):
     self.project_names = set()
     self.projects = []

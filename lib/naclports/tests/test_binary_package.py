@@ -11,6 +11,7 @@ from naclports import binary_package
 
 # pylint: disable=no-self-use
 class TestBinaryPackage(common.NaclportsTest):
+
   @patch('os.rename')
   @patch('os.makedirs')
   @patch('os.path.isdir', Mock(return_value=False))

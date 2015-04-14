@@ -22,17 +22,18 @@ def MockFileObject(contents):
 
 
 class TestPatchConfigure(unittest.TestCase):
+
   @patch('sys.stderr', new_callable=StringIO.StringIO)
   def testMissingFile(self, stderr):
     rtn = patch_configure.main(['non-existent/configure-script'])
     self.assertEqual(rtn, 1)
-    self.assertRegexpMatches(stderr.getvalue(),
-                             '^configure script not found: '
-                             'non-existent/configure-script$')
+    expected = '^configure script not found: non-existent/configure-script$'
+    self.assertRegexpMatches(stderr.getvalue(), expected)
 
 
 class TestScanPackages(unittest.TestCase):
-  def testCheckHash(self): # pylint: disable=no-self-use
+
+  def testCheckHash(self):  # pylint: disable=no-self-use
     file_mock = MockFileObject('1234\n')
     md5 = Mock()
     md5.hexdigest.return_value('4321')
@@ -43,7 +44,7 @@ class TestScanPackages(unittest.TestCase):
   @patch('scan_packages.Log', Mock())
   @patch('scan_packages.CheckHash')
   @patch('os.path.exists', Mock(return_value=True))
-  def testDownloadFiles(self, check_hash_mock): # pylint: disable=no-self-use
+  def testDownloadFiles(self, check_hash_mock):  # pylint: disable=no-self-use
     check_hash_mock.return_value = True
     file_info = scan_packages.FileInfo('foo', 10, 'http://host/base', 'hashval')
     scan_packages.DownloadFiles([file_info])
@@ -51,6 +52,7 @@ class TestScanPackages(unittest.TestCase):
 
 
 class TestUpdateMirror(unittest.TestCase):
+
   @patch('naclports.util.FindInPath', Mock())
   def testCheckMirror_CheckOnly(self):
     pkg = naclports.source_package.CreatePackage('zlib')
@@ -75,7 +77,8 @@ class TestUpdateMirror(unittest.TestCase):
     update_mirror.CheckMirror(options, pkg, ['file.tar.gz'])
     update_mirror.CheckMirror(options, pkg, [])
 
-    upload_mock.assert_called_once_with(options, pkg.DownloadLocation(),
+    upload_mock.assert_called_once_with(
+        options, pkg.DownloadLocation(),
         update_mirror.MIRROR_GS + '/file.tar.gz')
 
   @patch('update_mirror.CheckMirror')

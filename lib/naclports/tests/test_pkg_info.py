@@ -9,6 +9,7 @@ import common
 
 
 class TestParsePkgInfo(common.NaclportsTest):
+
   def testInvalidLine(self):
     expected_error = 'Invalid info line dummy_file:1'
     with self.assertRaisesRegexp(error.Error, expected_error):

@@ -2,7 +2,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Tool which checks the dependencies of all packages.
 """
 
@@ -17,6 +16,7 @@ sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 
 import naclports
 import naclports.source_package
+
 
 def main(args):
   parser = argparse.ArgumentParser()
@@ -36,6 +36,7 @@ def main(args):
     count += 1
   naclports.Log("Verfied dependencies for %d packages" % count)
   return 0
+
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))

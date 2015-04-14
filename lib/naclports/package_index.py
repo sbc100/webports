@@ -110,12 +110,11 @@ class PackageIndex(object):
       return
 
     for info_files in index_data.split('\n\n'):
-      info = pkg_info.ParsePkgInfo(info_files, self.filename,
-                                   self.valid_keys, self.required_keys)
+      info = pkg_info.ParsePkgInfo(info_files, self.filename, self.valid_keys,
+                                   self.required_keys)
       debug = info['BUILD_CONFIG'] == 'debug'
       config = configuration.Configuration(info['BUILD_ARCH'],
-                                           info['BUILD_TOOLCHAIN'],
-                                           debug)
+                                           info['BUILD_TOOLCHAIN'], debug)
       key = (info['NAME'], config)
       if key in self.packages:
         error.Error('package index contains duplicate: %s' % str(key))

@@ -2,7 +2,6 @@
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Scan online binary packages to produce new package index.
 
 This script is indended to be run periodically and the
@@ -37,6 +36,7 @@ def FormatSize(num_bytes):
 
 
 FileInfo = collections.namedtuple('FileInfo', ['name', 'size', 'url', 'etag'])
+
 
 def ParseGsUtilLs(output):
   """Parse the output of gsutil -le.
@@ -94,14 +94,14 @@ def DownloadFiles(files, check_hashes=True):
         Log('Up-to-date: %s' % file_info.name)
         continue
     files_to_download.append(FileInfo(fullname, file_info.size, file_info.url,
-      file_info.etag))
+                                      file_info.etag))
 
   if not files_to_download:
     Log('All files up-to-date')
   else:
     total_size = sum(f[1] for f in files_to_download)
-    Log('Need to download %d/%d files [%s]' % (len(files_to_download),
-         len(files), FormatSize(total_size)))
+    Log('Need to download %d/%d files [%s]' %
+        (len(files_to_download), len(files), FormatSize(total_size)))
 
     for file_info in files_to_download:
       naclports.DownloadFile(file_info.name, file_info.url)
@@ -129,8 +129,7 @@ def main(args):
   Log('Scanning packages built for pepper_%s at revsion %s' %
       (sdk_version, args.revision))
   base_path = '%s/builds/pepper_%s/%s/packages' % (naclports.GS_BUCKET,
-                                                   sdk_version,
-                                                   args.revision)
+                                                   sdk_version, args.revision)
   gs_url = 'gs://' + base_path
   gsutil = naclports.util.FindInPath('gsutil.py')
   listing_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'listing.txt')

@@ -2,7 +2,6 @@
 # Copyright (c) 2012 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """
 Usage:
  sha1check.py <hashfile
@@ -24,6 +23,7 @@ from __future__ import print_function
 import hashlib
 import sys
 
+
 class Error(Exception):
   pass
 
@@ -43,9 +43,9 @@ def VerifyHash(filename, sha1sum):
 
   # verify the generated hash and embedded hash match
   if sha1sum.lower() != filehash.lower():
-    print("Filename: %s" %  filename)
-    print("Expected hash: %s" %  sha1sum)
-    print("Actual hash: %s" %  filehash)
+    print("Filename: %s" % filename)
+    print("Expected hash: %s" % sha1sum)
+    print("Actual hash: %s" % filehash)
     raise Error("sha1 checksum failed on file: " + filename)
 
 
@@ -80,6 +80,7 @@ def VerifyFile(file_input, verbose):
 
   return rtn
 
+
 def main():
   try:
     VerifyFile(sys.stdin, True)
@@ -88,7 +89,6 @@ def main():
     return 1
 
   return 0
-
 
 # all files hashed with success
 if __name__ == '__main__':

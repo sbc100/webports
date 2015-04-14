@@ -2,7 +2,6 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Tool that checks the LICENSE field of all packages.
 
 Currently it preforms the following simple check:
@@ -24,11 +23,11 @@ sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 import naclports
 import naclports.source_package
 
-VALID_LICENSES = ['GPL', 'GPL2', 'GPL3', 'LGPL', 'LGPL2', 'LGPL3', 'ISC',
-                  'MPL', 'BSD', 'MIT', 'ZLIB', 'CUSTOM', 'APACHE']
-
+VALID_LICENSES = ['GPL', 'GPL2', 'GPL3', 'LGPL', 'LGPL2', 'LGPL3', 'ISC', 'MPL',
+                  'BSD', 'MIT', 'ZLIB', 'CUSTOM', 'APACHE']
 
 options = None
+
 
 def CheckLicense(package):
   if not package.LICENSE:
@@ -76,6 +75,7 @@ def main(args):
     print("Verfied licenses for %d packages" % count)
 
   return rtn
+
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))

@@ -10,6 +10,7 @@ from naclports.configuration import Configuration
 
 
 class TestConfiguration(common.NaclportsTest):
+
   def testDefaults(self):
     config = Configuration()
     self.assertEqual(config.toolchain, 'newlib')
