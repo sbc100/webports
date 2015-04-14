@@ -5,4 +5,6 @@ LICENSE=GPL
 DEPENDS=(nacl-spawn glibc-compat)
 DISABLED_ARCH=(i686)
 DISABLED_LIBC=(bionic newlib)
+# Build broken on mac.
+BUILD_OS=linux
 SHA1=6fe5cbbec3ebf29a22af35229c17f699b6559c6d
