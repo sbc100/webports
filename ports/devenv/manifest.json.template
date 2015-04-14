@@ -35,8 +35,8 @@
     {
       "fileSystem": [
         "write",
-	"directory",
-	"retainEntries"
+	"retainEntries",
+	"directory"
       ]
     },
     "*://naclports.storage.googleapis.com/*",

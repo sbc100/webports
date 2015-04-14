@@ -1286,6 +1286,8 @@ void nacl_setup_env() {
     perror("Mounting HTML5 filesystem in /tmp failed");
   }
 
+  mountfs();
+
   /* naclprocess.js sends the current working directory using this
    * environment variable. */
   const char* pwd = getenv("PWD");
@@ -1321,7 +1323,6 @@ void nacl_setup_env() {
   nacl_spawn_pid = getenv_as_int("NACL_PID");
   nacl_spawn_ppid = getenv_as_int("NACL_PPID");
 
-  mountfs();
   restore_pipes();
 }
 
