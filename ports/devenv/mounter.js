@@ -159,7 +159,7 @@ function removeMountClicked(event) {
   mounterClient.onRemoveMount(mountControl.mount);
 }
 
-function addMountControl(mount, afterElement) {
+function addMountControl(mount, init) {
   var mountControl = document.createElement('div');
   mountControl.classList.add('mountControl');
 
@@ -202,21 +202,23 @@ function addMountControl(mount, afterElement) {
   unmountButton.onclick = unmountClicked;
 
   mountControl.mount = mount;
-  populateMountControl(mountControl);
 
+  init(function() {
+    populateMountControl(mountControl);
+  });
   mounter.appendChild(mountControl);
 
   return mountControl;
 }
 
-function initMounter(makeVisible, aMounterClient) {
+function initMounter(makeVisible, aMounterClient, init) {
   mounterBackground.onclick = backgroundClicked;
   mounter.onclick = mounterClicked;
   mounterThumb.onclick = thumbClicked;
 
   mounterClient = aMounterClient;
 
-  addMountControl(g_mount);
+  addMountControl(g_mount, init);
   changeVisibility(makeVisible);
 
   window.onresize = function() {

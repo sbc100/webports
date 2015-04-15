@@ -20,7 +20,28 @@ function handleChooseFolder(mount, callback) {
       mount.fullPath = entry.fullPath;
       mount.entryId = chrome.fileSystem.retainEntry(entry);
       mount.localPath = path;
+      chrome.storage.local.set({oldMounts: [mount.entryId]}, callback);
+    });
+  });
+}
+
+function restoreMount(mount, callback) {
+  chrome.storage.local.get('oldMounts', function(items) {
+    var oldMounts = items['oldMounts'];
+    if (oldMounts === undefined || oldMounts.length === 0) {
       callback();
+      return;
+    }
+    // TODO(gdeepti): Support multiple mounts.
+    chrome.fileSystem.restoreEntry(oldMounts[0], function(entry) {
+      chrome.fileSystem.getDisplayPath(entry, function(path) {
+        mount.entry = entry;
+        mount.filesystem = entry.filesystem;
+        mount.fullPath = entry.fullPath;
+        mount.entryId = chrome.fileSystem.retainEntry(entry);
+        mount.localPath = path;
+        callback();
+      });
     });
   });
 }
@@ -42,6 +63,7 @@ function handleUnmount(mount, callback) {
   message.unmount = parameters;
   window.term_.command.processManager.broadcastMessage(message, callback);
   addMount('/mnt/local/', null, '', false);
+  chrome.storage.local.remove('oldMounts', function() {});
 }
 
 function initMountSystem() {
@@ -49,7 +71,14 @@ function initMountSystem() {
   var mounterClient = new initMounterclient(g_mount, handleChooseFolder,
       handleMount, handleUnmount, terminal);
   addMount('/mnt/local/', null, '', false);
-  initMounter(false, mounterClient);
+  restoreMount(g_mount, function() {
+    initMounter(false, mounterClient, function(update) {
+      // Mount any restore mount.
+      if (g_mount.entryId !== '') {
+        handleMount(g_mount, update);
+      }
+    });
+  });
 }
 
 NaClTerm.nmf = 'bash.nmf';
@@ -58,15 +87,19 @@ NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
 // to the nexe.
 NaClProcessManager.useNaClAltHttp = true;
 
-function onInit() {
+function onInit(callback) {
   // Request 1GB storage.
   navigator.webkitPersistentStorage.requestQuota(
-      1024 * 1024 * 1024,
-      NaClTerm.init,
+      1024 * 1024 * 1024 * 10,
+      function() {
+        NaClTerm.init();
+        callback();
+      },
       function() {
         console.log("Failed to allocate space!\n");
         // Start the terminal even if FS failed to init.
         NaClTerm.init();
+        callback();
       });
 }
 
@@ -93,8 +126,9 @@ window.onload = function() {
   document.body.appendChild(mounterBackground);
 
   lib.init(function() {
-    onInit();
-    initMountSystem();
+    onInit(function() {
+      initMountSystem();
+    });
   });
 };
 
