@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "nacl_main.h"
@@ -25,7 +26,7 @@
 #include "ppapi/cpp/url_response_info.h"
 
 
-static int Download(const char* url, const char* dst) {
+static int Download(int quiet, const char* url, const char* dst) {
   int32_t result;
 
   pp::InstanceHandle instance(PSGetInstanceId());
@@ -72,13 +73,17 @@ static int Download(const char* url, const char* dst) {
       return 1;
     }
     url_loader.GetDownloadProgress(&received, &total);
-    printf("[%"PRId64"/%"PRId64" KiB %"PRId64"%%]\r",
-           received / 1024, total / 1024, received * 100 / total);
-    fflush(stdout);
+    if (!quiet) {
+      printf("[%"PRId64"/%"PRId64" KiB %"PRId64"%%]\r",
+             received / 1024, total / 1024, received * 100 / total);
+      fflush(stdout);
+    }
   } while (result > 0);
-  printf("                                           \r");
-  printf("[%"PRId64"/%"PRId64" KiB 100%%] Done.\n",
-         received / 1024, total / 1024);
+  if (!quiet) {
+    printf("                                           \r");
+    printf("[%"PRId64"/%"PRId64" KiB 100%%] Done.\n",
+           received / 1024, total / 1024);
+  }
 
   if (result != PP_OK) {
     fprintf(stderr, "ERROR: Failed downloading url (%d): %s\n", result, url);
@@ -95,14 +100,17 @@ static int Download(const char* url, const char* dst) {
 }
 
 int nacl_main(int argc, char *argv[]) {
-  if (argc != 3) {
-    fprintf(stderr, "USAGE: %s <url> <dst>\n", argv[0]);
-    fprintf(stderr, "\n");
-    fprintf(stderr, "NOTE: This utility can only be used to download URLs\n");
-    fprintf(stderr, "from the same origin or that have been whitelisted\n");
-    fprintf(stderr, "in an extension manifest\n");
-    return 1;
+  if (argc == 4 && strcmp(argv[1], "-q") == 0) {
+    return Download(1, argv[2], argv[3]);
+  } else if (argc == 3) {
+    return Download(0, argv[1], argv[2]);
   }
-
-  return Download(argv[1], argv[2]);
+  fprintf(stderr, "USAGE: %s [-q] <url> <dst>\n", argv[0]);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "-q = quiet mode\n");
+  fprintf(stderr, "\n");
+  fprintf(stderr, "NOTE: This utility can only be used to download URLs\n");
+  fprintf(stderr, "from the same origin or that have been whitelisted\n");
+  fprintf(stderr, "in an extension manifest\n");
+  return 1;
 }

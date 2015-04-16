@@ -735,6 +735,7 @@ NaClProcessManager.prototype.handleMessageMountFs_ = function(msg, reply, src) {
  * @private
  */
 NaClProcessManager.prototype.handleProgress_ = function(e) {
+  e.srcElement.moduleResponded = true;
   if (this.isRootProcess(e.srcElement)) {
     this.onRootProgress(e.url, e.lengthComputable, e.loaded, e.total);
   }
@@ -745,8 +746,19 @@ NaClProcessManager.prototype.handleProgress_ = function(e) {
  * @private
  */
 NaClProcessManager.prototype.handleLoad_ = function(e) {
+  e.srcElement.moduleResponded = true;
   if (this.isRootProcess(e.srcElement)) {
     this.onRootLoad();
+  }
+};
+
+/**
+ * Handle a timeout around module startup.
+ * @private
+ */
+NaClProcessManager.prototype.handleStartupTimeout_ = function(src) {
+  if (!src.moduleResponded) {
+    this.exit(NaClProcessManager.EX_NO_EXEC, src);
   }
 };
 
@@ -755,6 +767,7 @@ NaClProcessManager.prototype.handleLoad_ = function(e) {
  * @private
  */
 NaClProcessManager.prototype.handleLoadAbort_ = function(e) {
+  e.srcElement.moduleResponded = true;
   this.exit(NaClProcessManager.EXIT_CODE_KILL, e.srcElement);
 };
 
@@ -763,6 +776,7 @@ NaClProcessManager.prototype.handleLoadAbort_ = function(e) {
  * @private
  */
 NaClProcessManager.prototype.handleLoadError_ = function(e) {
+  e.srcElement.moduleResponded = true;
   this.onError(e.srcElement.commandName, e.srcElement.lastError);
   this.exit(NaClProcessManager.EX_NO_EXEC, e.srcElement);
 };
@@ -772,6 +786,7 @@ NaClProcessManager.prototype.handleLoadError_ = function(e) {
  * @private
  */
 NaClProcessManager.prototype.handleCrash_ = function(e) {
+  e.srcElement.moduleResponded = true;
   this.exit(e.srcElement.exitStatus, e.srcElement);
 };
 
@@ -1149,6 +1164,13 @@ NaClProcessManager.prototype.spawn = function(
 
     // Work around crbug.com/350445
     var junk = fg.offsetTop;
+
+    // Set a startup timeout to detect the case when running a module
+    // from html5 storage but nacl is not enabled.
+    fg.moduleResponded = false;
+    setTimeout(function() {
+      self.handleStartupTimeout_(fg);
+    }, 500);
 
     // yield result.
     callback(fg.pid, fg);

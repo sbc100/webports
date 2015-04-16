@@ -7,6 +7,32 @@
 # until the installation is completed. Also, you cannot use features
 # which nacl_io does not support yet (e.g., pipes and sub-shells).
 
+CheckNaClEnabled() {
+  if [[ "${NACL_ARCH}" == pnacl ]]; then
+    return
+  fi
+  geturl -q ${LOCATION_ORIGIN}/_platform_specific/${NACL_ARCH}/bash.nexe \
+    /tmp/.enable_nacl_check.nexe
+  /tmp/.enable_nacl_check.nexe -c 'exit 42'
+  if [[ $? != 42 ]]; then
+    echo "*********************** WARNING ***********************"
+    echo
+    echo "In order to use the NaCl Dev Environment, you must"
+    echo "currently enable 'Native Client' at the url:"
+    echo "  chrome://flags"
+    echo "You must then restart your browser."
+    echo
+    echo "Eventually this should not be required."
+    echo "Follow this issue: https://crbug.com/477808"
+    echo
+    echo "*********************** WARNING ***********************"
+    # Wait forever.
+    while [[ 1 == 1 ]]; do
+      read
+    done
+  fi
+}
+
 InstallBasePackages() {
   # Core packages.
   local default_packages="\
@@ -34,10 +60,11 @@ InstallBasePackages() {
   # Check for updates on some packages.
   package ${default_packages[@]} $@
 
-  if [ "${have_gcc}" == 0 ]; then
+  if [[ ${have_gcc} == 0 ]]; then
     echo "WARNING: \
 emacs and gcc not yet available for your platform (coming soon)."
   fi
 }
 
+CheckNaClEnabled
 InstallBasePackages $@
