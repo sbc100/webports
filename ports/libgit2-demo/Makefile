@@ -16,6 +16,9 @@ endif
 ifeq ($(TOOLCHAIN),pnacl)
 LIBS += glibc-compat
 endif
+ifeq ($(TOOLCHAIN),clang-newlib)
+LIBS += glibc-compat
+endif
 SOURCES = libgit2-demo.c operations.c
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/$(TARGET)/$(TOOLCHAIN)
 CFLAGS += -Wall -Werror
