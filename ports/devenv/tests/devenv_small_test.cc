@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <spawn.h>
 #include <unistd.h>
 
@@ -306,6 +307,57 @@ TEST(Pipes, Null) {
   ASSERT_EQ(0, close(p[0]));
 }
 
+static int cloexec_check_child(int argc, char *argv[]) {
+  int fd1;
+  int fd2;
+  struct stat st;
+
+  if (sscanf(argv[2], "%d", &fd1) != 1)
+    return 1;
+  if (sscanf(argv[3], "%d", &fd2) != 1)
+    return 1;
+  if (fstat(fd1, &st) != 0)
+    return 1;
+  if (fcntl(fd1, F_GETFD) & FD_CLOEXEC)
+    return 1;
+  if (fstat(fd2, &st) != -1)
+    return 1;
+  if (errno != EBADF)
+    return 1;
+  return 42;
+}
+
+// Confirm FD_CLOEXEC works for pipes.
+TEST(Pipes, CloseExec) {
+  int p[2];
+  ASSERT_EQ(0, pipe(p));
+
+  char fd1[20];
+  sprintf(fd1, "%d", p[0]);
+  char fd2[20];
+  sprintf(fd2, "%d", p[1]);
+
+  fcntl(p[1], F_SETFD, fcntl(p[1], F_GETFD) | FD_CLOEXEC);
+
+  pid_t pid = vfork();
+  ASSERT_GE(pid, 0);
+  if (!pid) {
+    // When running in the child.
+    execlp(argv0, argv0, "cloexec_check", fd1, fd2, NULL);
+    // Don't get here.
+    ASSERT_TRUE(false);
+  }
+
+  EXPECT_EQ(0, close(p[0]));
+  EXPECT_EQ(0, close(p[1]));
+
+  int status;
+  pid_t npid = waitpid(pid, &status, 0);
+  EXPECT_EQ(pid, npid);
+  EXPECT_TRUE(WIFEXITED(status));
+  EXPECT_EQ(42, WEXITSTATUS(status));
+}
+
 extern "C" int nacl_main(int argc, char **argv) {
   if (argc == 4 && strcmp(argv[1], "return") == 0) {
     return return_child(argc, argv);
@@ -313,6 +365,8 @@ extern "C" int nacl_main(int argc, char **argv) {
     return exit_child(argc, argv);
   } else if (argc == 2 && strcmp(argv[1], "pipes") == 0) {
     return pipes_child(argc, argv);
+  } else if (argc == 4 && strcmp(argv[1], "cloexec_check") == 0) {
+    return cloexec_check_child(argc, argv);
   }
   // Preserve argv[0] for use in some tests.
   argv0 = argv[0];

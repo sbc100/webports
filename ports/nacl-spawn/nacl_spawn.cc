@@ -809,6 +809,16 @@ static int CloneFileDescriptors(struct PP_Var envs_var) {
       }
       return -1;
     }
+    int flags = fcntl(fd, F_GETFD);
+    if (flags < 0) {
+      fprintf(stderr, "fcntl failed when spawning on descriptor %d: %s\n",
+          fd, strerror(errno));
+      return -1;
+    }
+    // Skip close on exec descriptors.
+    if (flags & FD_CLOEXEC) {
+      continue;
+    }
     if (S_ISREG(st.st_mode)) {
       // TODO(bradnelson): Land nacl_io ioctl to support this.
     } else if (S_ISDIR(st.st_mode)) {
