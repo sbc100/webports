@@ -22,7 +22,7 @@ source /mnt/http/setup-environment
 # Setiing up a default git identity, since we lack /etc/passwd as
 # a fallback.
 # Setup default .gitconfig if it doesn't already exist.
-if [ ! -e /home/user/.gitconfig ]; then
+if [[ ! -e /home/user/.gitconfig ]]; then
   git config --global init.templatedir ""
   git config --global user.name "John Doe"
   git config --global user.email "john.doe@foo.com"

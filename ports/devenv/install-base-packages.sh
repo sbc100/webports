@@ -8,12 +8,17 @@
 # which nacl_io does not support yet (e.g., pipes and sub-shells).
 
 CheckNaClEnabled() {
-  if [[ "${NACL_ARCH}" == pnacl ]]; then
+  # Skip check on if this isn't newlib.
+  if [[ "${TOOLCHAIN}" != newlib ]]; then
     return
   fi
-  geturl -q ${LOCATION_ORIGIN}/_platform_specific/${NACL_ARCH}/bash.nexe \
-    /tmp/.enable_nacl_check.nexe
-  /tmp/.enable_nacl_check.nexe -c 'exit 42'
+  TMP_CHECK_FILE="/tmp/.enable_nacl_check.nexe"
+  # Assume we can reuse the test file if presnet.
+  if [[ ! -e ${TMP_CHECK_FILE} ]]; then
+    geturl -q ${LOCATION_ORIGIN}/_platform_specific/${NACL_ARCH}/bash.nexe \
+      ${TMP_CHECK_FILE}
+  fi
+  ${TMP_CHECK_FILE} -c 'exit 42'
   if [[ $? != 42 ]]; then
     echo "*********************** WARNING ***********************"
     echo
