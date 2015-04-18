@@ -38,8 +38,6 @@ BuildStep() {
 }
 
 PublishStep() {
-  PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/curl"
-
   if [ "${NACL_SHARED}" = "1" ]; then
     EXECUTABLE_DIR=.libs
   else
@@ -52,9 +50,6 @@ PublishStep() {
     (cd src;
      TranslateAndWriteLauncherScript ${pexe} x86-64 curl.x86-64.nexe curl
     )
-    PUBLISH_DIR+="/pnacl"
-  else
-    PUBLISH_DIR+="/${NACL_LIBC}"
   fi
 
   MakeDir ${PUBLISH_DIR}

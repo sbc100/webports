@@ -42,13 +42,6 @@ BuildStep() {
 }
 
 PublishStep() {
-  PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/sqlite"
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    PUBLISH_DIR+=/pnacl
-  else
-    PUBLISH_DIR+=/${NACL_LIBC}
-  fi
-
   MakeDir ${PUBLISH_DIR}
 
   local exe=${PUBLISH_DIR}/sqlite3_ppapi_${NACL_ARCH}${NACL_EXEEXT}
