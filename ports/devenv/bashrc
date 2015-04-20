@@ -19,7 +19,7 @@ source /mnt/http/setup-environment
 # normal location and when we include the git templates in the normal
 # location.
 # Disabling templatedir as our git package lacks a default template set.
-# Setiing up a default git identity, since we lack /etc/passwd as
+# Setting up a default git identity, since we lack /etc/passwd as
 # a fallback.
 # Setup default .gitconfig if it doesn't already exist.
 if [[ ! -e /home/user/.gitconfig ]]; then
