@@ -39,6 +39,8 @@ chrome.runtime.onMessageExternal.addListener(
 chrome.runtime.onConnectExternal.addListener(function(port) {
   var files = new FileManager();
   var manager = new NaClProcessManager();
+  // Assume a default terminal size for headless processes.
+  manager.onTerminalResize(80, 24);
   manager.setStdoutListener(function(output) {
     port.postMessage({name: 'nacl_stdout', output: output});
   });

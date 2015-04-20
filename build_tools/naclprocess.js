@@ -84,6 +84,10 @@ function NaClProcessManager() {
   // Callback to be called each time a process responds with a mount status
   // update.
   self.mountUpdateCallback = null;
+
+  // Size of the terminal, must be set before spawning.
+  self.ttyWidth = null;
+  self.ttyHeight = null;
 }
 
 /**
@@ -994,6 +998,12 @@ NaClProcessManager.prototype.spawn = function(
         console.log(
             'Browser does not support NaCl or NaCl is disabled.');
       }
+      callback(-Errno.ENOEXEC);
+      return;
+    }
+
+    if (self.ttyWidth === null || self.ttyHeight === null) {
+      console.log('tty size not set! Call onTerminalResize.');
       callback(-Errno.ENOEXEC);
       return;
     }

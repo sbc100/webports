@@ -8,6 +8,8 @@
 
 function run(nmf, cmd) {
   var mgr = new NaClProcessManager();
+  // Assume a default terminal size for headless processes.
+  manager.onTerminalResize(80, 24);
   return new Promise(function(resolve, reject) {
     mgr.spawn(
         nmf, cmd, [], '/tmp', 'pnacl', null,
