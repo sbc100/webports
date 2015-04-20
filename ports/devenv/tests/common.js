@@ -274,7 +274,7 @@ DevEnvTest.array2Str = function(arr) {
 /**
  * Convert a string to an Array.
  * @param {string} str The String to be converted.
- * @returns {Array}
+ * @returns {Array} Bytes sent.
  */
 DevEnvTest.str2Array = function(str) {
   var arr = [];
@@ -316,7 +316,7 @@ DevEnvTest.prototype.tcpExec_ = function(msg) {
         }
       });
   }).then(function(msg) {
-    ASSERT_EQ(reply, msg.name);
+    ASSERT_EQ(reply, msg.name, 'Error is: ' + msg.error);
     return msg;
   });
 };
@@ -342,10 +342,13 @@ DevEnvTest.prototype.tcpConnect = function(addr, port) {
  * @returns {Promise}
  */
 DevEnvTest.prototype.tcpSend = function(socket, msg) {
-  return this.tcpExec_({
+  var self = this;
+  return self.tcpExec_({
     name: 'tcp_send',
     socket: socket,
     data: DevEnvTest.str2Array(msg)
+  }).then(function(msg) {
+    return msg.data;
   });
 };
 
