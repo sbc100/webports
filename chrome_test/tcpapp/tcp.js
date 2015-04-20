@@ -20,12 +20,12 @@ var portMap = {};
 
 // Convert an ArrayBuffer to an Array.
 function ab2Array(buf) {
-  return Array.apply(null, new Uint16Array(buf));
+  return Array.apply(null, new Uint8Array(buf));
 }
 
 // Convert an Array to an ArrayBuffer.
 function array2Ab(arr) {
-  return new Uint16Array(arr).buffer;
+  return new Uint8Array(arr).buffer;
 }
 
 // Route incoming TCP messages.
@@ -53,7 +53,6 @@ chrome.sockets.tcp.onReceiveError.addListener(function(info) {
     name: 'tcp_disconnect',
     socket: info.socketId
   });
-  delete portMap[info.socketId];
 });
 
 chrome.runtime.onConnectExternal.addListener(function(port) {
