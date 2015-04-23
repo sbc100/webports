@@ -19,7 +19,13 @@ ConfigureStep() {
   # with latest recent gcc versions (4.9.3)
   # Remove once this bug is fixes:
   # https://code.google.com/p/nativeclient/issues/detail?id=4000
-  if [ "${NACL_ARCH}" = "arm" ]; then
+  if [ "${TOOLCHAIN}" = "newlib" -a "${NACL_ARCH}" = "arm" ]; then
+    EXTRA_CONFIGURE_ARGS="--disable-werror"
+  fi
+
+  # clang produced a bunch of truncation warnings related to abs() being
+  # calloed the 'long long' arguments.
+  if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
     EXTRA_CONFIGURE_ARGS="--disable-werror"
   fi
 

@@ -1,8 +1,10 @@
 NAME=gdb
 VERSION=7.7
-URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@41afdf9d5
+URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@5deb479
 LICENSE=CUSTOM
-DISABLED_TOOLCHAIN=(clang-newlib pnacl emscripten)
+# arm-nacl-clang crashes
+# https://code.google.com/p/nativeclient/issues/detail?id=4114
+DISABLED_TOOLCHAIN=(clang-newlib/arm pnacl emscripten)
 BUILD_OS=linux
 DISABLED_LIBC=(bionic)
 DEPENDS=(ncurses expat readline zlib glibc-compat nacl-spawn)
