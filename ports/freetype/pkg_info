@@ -1,7 +1,7 @@
 NAME=freetype
-VERSION=2.5.3
-URL=http://download.savannah.gnu.org/releases/freetype/freetype-2.5.3.tar.bz2
+VERSION=2.5.5
+URL=http://download.savannah.gnu.org/releases/freetype/freetype-2.5.5.tar.bz2
 LICENSE=CUSTOM:docs/LICENSE.TXT
 DEPENDS=(bzip2 libpng zlib)
-SHA1=d3c26cc17ec7fe6c36f4efc02ef92ab6aa3f4b46
+SHA1=7b7460ef51a8fdb17baae53c6658fc1ad000a1c2
 DISABLED_TOOLCHAIN=(emscripten)
