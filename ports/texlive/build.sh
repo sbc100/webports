@@ -127,6 +127,10 @@ InstallStep() {
   cp ${SRC_DIR}/texk/kpathsea/texmf.cnf texmf-dist/web2c/texmf.cnf
   ChangeDir ${ARCH_DIR}
 
+  # TODO(phosek): Undo all source tree changes except for those coming from
+  # nacl.patch, this step could be removed once we get kpathsea to work.
+  (cd ${SRC_DIR}; git reset --hard)
+
   # TODO(phosek): The code below could be potentially replaced by
   # PublishByArchForDevEnv, but there is a subtle difference in that we only
   # copy executables valid for the selected scheme (tl_executables) and
