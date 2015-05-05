@@ -54,7 +54,8 @@ gforth|ok|${PACKAGE_AS_ONE} \
 git|ok|${PACKAGE_BY_ARCH} \
 grep|ok|${PACKAGE_BY_ARCH} \
 less|ok|${PACKAGE_BY_ARCH} \
-lua|ok|${TOOLCHAIN}/lua.zip \
+lua5.1|ok|${PACKAGE_BY_ARCH} \
+lua5.2|ok|${PACKAGE_BY_ARCH} \
 m4|ok|${PACKAGE_BY_ARCH} \
 make|ok|${PACKAGE_BY_ARCH} \
 mingn.base|ok|glibc/tarballs/base.${NACL_ARCH}.zip \
@@ -79,6 +80,10 @@ xeyes|ok|glibc/${NACL_ARCH_ALT}.zip \
 xz|ok|${PACKAGE_BY_ARCH} \
 "
 
+ALIASES="\
+lua|lua5.2
+"
+
 RemoveDir() {
   local path="$1"
   if [ -d ${path} ]; then
@@ -94,6 +99,14 @@ InstallPackage() {
   local package="$1"
   local subdir="${PACKAGE_BY_ARCH}"
   local source_base="${PACKAGE_SOURCE}"
+
+  # Replace package aliases with alternates.
+  for names in ${ALIASES}; do
+    local names_array=(${names//|/ })
+    if [ "${package}" = "${names_array[0]}" ]; then
+      package="${names_array[1]}"
+    fi
+  done
 
   for info in ${PACKAGE_INFO}; do
     local info_array=(${info//|/ })

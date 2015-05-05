@@ -5,6 +5,10 @@
 BUILD_DIR=${SRC_DIR}
 EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB} \
+  -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+
 if [ "${NACL_LIBC}" = "glibc" ]; then
   PLAT=nacl-glibc
 else
@@ -74,4 +78,8 @@ TestStep() {
 InstallStep() {
   LogExecute make PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} \
                   INSTALL_TOP=${DESTDIR}/${PREFIX} install
+}
+
+PublishStep() {
+  PublishByArchForDevEnv
 }
