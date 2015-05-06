@@ -383,10 +383,15 @@ NaClProcessManager.prototype.broadcastMessage = function(message, callback) {
 NaClProcessManager.prototype.syncMountStatus_ = function() {
   var result = true;
 
-  // TODO(gdeepti): Make the unmount status consistent for when all the
-  // processes have not unmounted completely.
-  for (var p in this.processes) {
-    result = (result && this.processes[p].mounted);
+  if (g_mount.available) {
+    for (var p in this.processes) {
+      result = (result && this.processes[p].mounted);
+    }
+  } else {
+    result = false;
+    for (var p in this.processes) {
+      result = (result || this.processes[p].mounted);
+    }
   }
 
   g_mount.mounted = result;

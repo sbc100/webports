@@ -117,7 +117,7 @@ function populateMountControl(mountControl) {
   mountControl.pathEdit.value = g_mount.mountPoint;
   // TODO(gdeepti): Enable this to accept mountPoint specified by th user.
   // Temporarily disabled to fix sync issues.
-  mountControl.pathEdit.disabled = true;
+  mountControl.pathEdit.disabled = g_mount.mounted;
   mountControl.localPathEdit.value = g_mount.localPath;
   mountControl.localPathEdit.disabled = g_mount.mounted;
   mountControl.selectButton.disabled = g_mount.mounted;

@@ -51,16 +51,15 @@ function handleMount(mount, callback) {
   mount.available = true;
   mount.mounted = false;
   var message = {};
-  message.mount = g_mount;
+  message.mount = mount;
   window.term_.command.processManager.broadcastMessage(message, callback);
 }
 
 function handleUnmount(mount, callback) {
-  var parameters = {};
-  parameters.mountPoint = mount.mountPoint;
-  parameters.operationId = 'unmount';
+  mount.operationId = 'unmount'
+  mount.available = false;
   var message = {};
-  message.unmount = parameters;
+  message.unmount = mount;
   window.term_.command.processManager.broadcastMessage(message, callback);
   addMount('/mnt/local/', null, '', false);
   chrome.storage.local.remove('oldMounts', function() {});

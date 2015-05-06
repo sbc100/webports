@@ -68,14 +68,6 @@ struct NaClSpawnReply {
   struct PP_Var result_var;
 };
 
-static int rmdir_checked(const char* dir) {
-  int rtn = rmdir(dir);
-  if (rtn != 0) {
-    fprintf(stderr, "rmdir '%s' failed: %s\n", dir, strerror(errno));
-  }
-  return rtn;
-}
-
 static void VarAddRef(struct PP_Var var) {
   PSInterfaceVar()->AddRef(var);
 }
@@ -253,51 +245,58 @@ static void MountLocalFs(struct PP_Var mount_data) {
     PP_Resource filesystemResource =
         PSInterfaceVar()->VarToResource(filesystem);
     PP_Var filepath_var = VarDictionaryGet(mount_data, "fullPath");
+    PP_Var mountpoint_var = VarDictionaryGet(mount_data, "mountPoint");
 
-    uint32_t fp_len;
-    const char* filepath = PSInterfaceVar()->VarToUtf8(filepath_var, &fp_len);
-    mkdir("/mnt/local", 0777);
+    uint32_t fp_len, mp_len;
+    const char* filepath = PSInterfaceVar()->VarToUtf8(filepath_var,
+                                                       &fp_len);
+    const char* mountpoint = PSInterfaceVar()->VarToUtf8(mountpoint_var,
+                                                         &mp_len);
+    // TODO(gdeepti): Currently mount on the main thread always returns
+    // without an error, crashes the nacl module and mkdir in /mnt/html5
+    // does not work because we do not allow blocking calls on the main thread.
+    // Move this off the main thread for better error checking.
     struct stat st;
-
-    if (stat("/mnt/local", &st) < 0 || !S_ISDIR(st.st_mode)) {
-      perror("Unable to create user directory");
-    } else {
-      struct PP_Var status_var = VarDictionaryCreate();
-      char fs[1024];
-      sprintf(fs, "filesystem_resource=%d\n", filesystemResource);
-
-      // TODO(gdeepti): Currently mount on the main thread always returns
-      // without an error and crashes the nacl module. Figure out a better
-      // way to detect a mount failure.
-      if (mount(filepath, "/mnt/local", "html5fs", 0, fs) != 0) {
-        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", filepath);
-        VarDictionarySetString(status_var, "mount_status", "fail");
-      } else {
-        VarDictionarySetString(status_var, "mount_status", "success");
-      }
-      PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
+    if (stat(mountpoint, &st) < 0) {
+      mkdir_checked(mountpoint);
     }
+
+    struct PP_Var status_var = VarDictionaryCreate();
+    char fs[1024];
+    sprintf(fs, "filesystem_resource=%d\n", filesystemResource);
+
+    if (do_mount(filepath, mountpoint, "html5fs", 0, fs) != 0) {
+      fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", filepath);
+      VarDictionarySetString(status_var, "mount_status", "fail");
+    } else {
+      VarDictionarySetString(status_var, "mount_status", "success");
+    }
+    PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
     VarRelease(filesystem);
     VarRelease(filepath_var);
+    VarRelease(mountpoint_var);
   }
 }
 
 static void UnmountLocalFs(struct PP_Var mount_data) {
   bool mounted = GetBool(mount_data, "mounted");
+  PP_Var mountpoint_var = VarDictionaryGet(mount_data, "mountPoint");
+  uint32_t mp_len;
+  const char* mountpoint = PSInterfaceVar()->VarToUtf8(mountpoint_var, &mp_len);
 
   if(!mounted) {
     perror("Directory not mounted, unable to unmount");
   } else {
     struct PP_Var status_var = VarDictionaryCreate();
-    if(umount("/mnt/local") != 0) {
-      fprintf(stderr, "Unmounting filesystem in /mnt/user failed.\n");
+    if(umount(mountpoint) != 0) {
+      fprintf(stderr, "Unmounting filesystem %s failed.\n", mountpoint);
       VarDictionarySetString(status_var, "unmount_status", "fail");
     } else {
       VarDictionarySetString(status_var, "unmount_status", "success");
     }
     PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
-    rmdir_checked("/mnt/local");
     VarRelease(status_var);
+    VarRelease(mountpoint_var);
   }
 }
 
