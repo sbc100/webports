@@ -230,7 +230,7 @@ static bool GetBool(struct PP_Var dict_var, const char* key) {
   if (!VarDictionaryHasKey(dict_var, key, &value_var)) {
     return -1;
   }
-  assert(value_var.type == PP_BOOL);
+  assert(value_var.type == PP_VARTYPE_BOOL);
   bool value = value_var.value.as_bool;
   return value;
 }
