@@ -73,8 +73,8 @@ class TestPackageIndex(common.NaclportsTest):
     config_release = Configuration('arm', 'newlib', False)
     self.assertFalse(index.Contains('foo', config_release))
     index.packages[('foo', config_release)] = {
-      'NAME': 'dummy',
-      'BUILD_SDK_VERSION': 123
+        'NAME': 'dummy',
+        'BUILD_SDK_VERSION': 123
     }
     with patch('naclports.util.GetSDKVersion') as mock_version:
       # Setting the mock SDK version to 123 should mean that the

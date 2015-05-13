@@ -1,7 +1,6 @@
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test harness for testing chrome apps / extensions."""
 
 import argparse
@@ -28,7 +27,6 @@ sys.path.insert(0, os.path.join(SRC_DIR, 'lib'))
 import httpd
 import naclports
 
-
 # Pinned chrome revision. Update this to pull in a new chrome.
 # Try to select a version that exists on all platforms.
 CHROME_REVISION = '311001'
@@ -40,7 +38,7 @@ CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%s/%s'
 
 TESTING_LIB = os.path.join(SCRIPT_DIR, 'chrome_test.js')
 TESTING_EXTENSION = os.path.join(SCRIPT_DIR, 'extension')
-TESTING_TCP_APP = os.path.join(SCRIPT_DIR, 'tcpapp');
+TESTING_TCP_APP = os.path.join(SCRIPT_DIR, 'tcpapp')
 
 RETURNCODE_KILL = -9
 
@@ -217,7 +215,7 @@ def KillSubprocessAndChildren(proc):
     # to invoke taskkill.
     subprocess.call(
         [os.path.join(os.environ['SYSTEMROOT'], 'System32', 'taskkill.exe'),
-        '/F', '/T', '/PID', str(proc.pid)])
+         '/F', '/T', '/PID', str(proc.pid)])
   else:
     # Send SIGKILL=9 to the entire process group associated with the child.
     os.kill(-proc.pid, 9)
@@ -236,6 +234,7 @@ def CommunicateWithTimeout(proc, timeout):
     timeout = None
 
   result = []
+
   def Target():
     result.append(list(proc.communicate()))
 
@@ -340,7 +339,7 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
         return
       # Allow the tests to request the current test filter string.
       elif ('filter' in params and len(params['filter']) == 1 and
-          params['filter'][0] == '1'):
+            params['filter'][0] == '1'):
         self.send_response(200, 'OK')
         self.send_header('Content-type', 'text/html')
         self.send_header('Content-length', str(len(self.server.filter_string)))
@@ -452,8 +451,7 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
   # Ensure all extension / app paths are absolute.
   load_extensions = [os.path.abspath(os.path.expanduser(i))
                      for i in load_extensions]
-  load_apps = [os.path.abspath(os.path.expanduser(i))
-               for i in load_apps]
+  load_apps = [os.path.abspath(os.path.expanduser(i)) for i in load_apps]
 
   # Add in the chrome_test extension and compute its id.
   load_extensions += [TESTING_EXTENSION, TESTING_TCP_APP]
@@ -484,8 +482,8 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
 
       cmd = []
       if sys.platform.startswith('linux') and use_xvfb:
-        cmd += ['xvfb-run', '--auto-servernum',
-                '-s', '-screen 0 1024x768x24 -ac']
+        cmd += ['xvfb-run', '--auto-servernum', '-s',
+                '-screen 0 1024x768x24 -ac']
       cmd += [chrome_path]
       cmd += ['--user-data-dir=' + work_dir]
       # We want to pin the pnacl component to the one that we downloaded.
@@ -516,9 +514,8 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
           # be certain we bring down Chrome on a timeout.
           os.setpgid(0, 0)
 
-      p = subprocess.Popen(
-          cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-          preexec_fn=ProcessGroup)
+      p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT, preexec_fn=ProcessGroup)
       logging.info('Started chrome with command line: %s' % (' '.join(cmd)))
       stdout, _, returncode = CommunicateWithTimeout(p, timeout=timeout)
       if logging.getLogger().isEnabledFor(logging.DEBUG):
@@ -542,19 +539,21 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
 
   if returncode == RETURNCODE_KILL:
     print '[ TIMEOUT   ] Timed out, ran %d tests, %d failed.' % (
-        len(s.tests), len(s.failed_tests))
+        len(s.tests), len(s.failed_tests)
+    )
     sys.exit(1)
   elif s.expected_test_count is None:
-    print ('[ XXXXXXXX ] Expected test count never emitted.')
+    print('[ XXXXXXXX ] Expected test count never emitted.')
     sys.exit(1)
   elif s.test_results != s.expected_test_count:
-    print ('[ XXXXXXXX ] '
-           'Expected %d tests, but only %d had results, with %d failures.' % (
-           s.expected_test_count, s.test_results, len(s.failed_tests)))
+    print('[ XXXXXXXX ] '
+          'Expected %d tests, but only %d had results, with %d failures.' % (
+              s.expected_test_count, s.test_results, len(s.failed_tests)
+          ))
     sys.exit(1)
   elif s.result != 0:
-    print '[ Failures ] Ran %d tests, %d failed.' % (
-        len(s.tests), len(s.failed_tests))
+    print '[ Failures ] Ran %d tests, %d failed.' % (len(s.tests),
+                                                     len(s.failed_tests))
     sys.exit(1)
   else:
     print '[ Success! ] Ran %d tests.' % len(s.tests)
@@ -568,42 +567,29 @@ def Main(argv):
   NOTE: Ends the process with sys.exit(1) on failure.
   """
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument(
-      'start_path', metavar='START_PATH',
-      help='location in which to run tests')
-  parser.add_argument(
-      '-x', '--xvfb', action='store_true',
-      help='Run Chrome thru xvfb on Linux.')
-  parser.add_argument(
-      '-a', '--arch', default='x86_64',
-      help='Chrome architecture: i686 / x86_64.')
-  parser.add_argument(
-      '-v', '--verbose', default=0, action='count',
-      help='Emit verbose output, use twice for more.')
-  parser.add_argument(
-      '-t', '--timeout', default=30, type=float,
-      help='Timeout for all tests (in seconds).')
-  parser.add_argument(
-      '-C', '--chdir', default=[], action='append',
-      help='Add a root directory.')
-  parser.add_argument(
-      '--load-extension', default=[], action='append',
-      help='Add an extension to load on start.')
-  parser.add_argument(
-      '--load-and-launch-app', default=[], action='append',
-      help='Add an app to load on start.')
-  parser.add_argument(
-      '--unlimited-storage', default=False, action='store_true',
-      help='Allow unlimited storage.')
-  parser.add_argument(
-      '--enable-nacl', default=False, action='store_true',
-      help='Enable NaCl generally.')
-  parser.add_argument(
-      '--enable-nacl-debug', default=False, action='store_true',
-      help='Enable NaCl debugging.')
-  parser.add_argument(
-      '-f', '--filter', default='*',
-      help='Filter on tests.')
+  parser.add_argument('start_path', metavar='START_PATH',
+                      help='location in which to run tests')
+  parser.add_argument('-x', '--xvfb', action='store_true',
+                      help='Run Chrome thru xvfb on Linux.')
+  parser.add_argument('-a', '--arch', default='x86_64',
+                      help='Chrome architecture: i686 / x86_64.')
+  parser.add_argument('-v', '--verbose', default=0, action='count',
+                      help='Emit verbose output, use twice for more.')
+  parser.add_argument('-t', '--timeout', default=30, type=float,
+                      help='Timeout for all tests (in seconds).')
+  parser.add_argument('-C', '--chdir', default=[], action='append',
+                      help='Add a root directory.')
+  parser.add_argument('--load-extension', default=[], action='append',
+                      help='Add an extension to load on start.')
+  parser.add_argument('--load-and-launch-app', default=[], action='append',
+                      help='Add an app to load on start.')
+  parser.add_argument('--unlimited-storage', default=False, action='store_true',
+                      help='Allow unlimited storage.')
+  parser.add_argument('--enable-nacl', default=False, action='store_true',
+                      help='Enable NaCl generally.')
+  parser.add_argument('--enable-nacl-debug', default=False, action='store_true',
+                      help='Enable NaCl debugging.')
+  parser.add_argument('-f', '--filter', default='*', help='Filter on tests.')
   parser.add_argument(
       '-p', '--param', default=[], action='append',
       help='Add a parameter to the end of the url, = separated.')
@@ -623,9 +609,8 @@ def Main(argv):
     logging.getLogger().setLevel(logging.INFO)
   else:
     logging.getLogger().setLevel(logging.WARNING)
-  logging.basicConfig(
-      format='%(asctime)-15s %(levelname)s: %(message)s',
-      datefmt='%Y-%m-%d %H:%M:%S')
+  logging.basicConfig(format='%(asctime)-15s %(levelname)s: %(message)s',
+                      datefmt='%Y-%m-%d %H:%M:%S')
   if not options.chdir:
     options.chdir.append('.')
 
