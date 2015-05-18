@@ -50,7 +50,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 +target_link_libraries(convert ${ly_lib_name})
 +
 +add_executable(libyuv_unittest ${ly_unittest_sources})
-+target_link_libraries(libyuv_unittest ${ly_lib_name} gtest)
++target_link_libraries(libyuv_unittest ${ly_lib_name} gtest pthread)
 +
 +if(NACL_LIBC STREQUAL "newlib")
 +  target_link_libraries(libyuv_unittest glibc-compat)
