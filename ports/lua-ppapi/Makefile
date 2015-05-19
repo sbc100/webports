@@ -6,13 +6,9 @@ include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = lua
 LIBS = lua ppapi_simple tar
+LIBS += readline ncurses
 NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
-
-ifeq ($(LUA_NO_READLINE),)
-LIBS += readline ncurses
-CFLAGS += -DLUA_USE_READLINE
-endif
 
 LIBS += nacl_io ppapi
 ifeq ($(TOOLCHAIN),glibc)
@@ -21,7 +17,7 @@ NACL_LDFLAGS += -Wl,-export-dynamic
 endif
 SOURCES = lua.c main.c
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/lua/$(TOOLCHAIN)
-CFLAGS += -DLUA_USE_POSIX
+CFLAGS += -DLUA_USE_POSIX -DLUA_USE_READLINE
 
 
 ifeq ($(TOOLCHAIN),pnacl)

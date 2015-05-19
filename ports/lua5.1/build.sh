@@ -14,9 +14,6 @@ if [ "${NACL_LIBC}" = "glibc" ]; then
 else
   PLAT=nacl-newlib
 fi
-if [ "${LUA_NO_READLINE:-}" = "1" ]; then
-  PLAT+=-basic
-fi
 
 
 BuildStep() {

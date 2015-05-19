@@ -1,4 +1,5 @@
 diff --git a/Makefile b/Makefile
+index 6e78f66..2ceb2f7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -38,7 +38,7 @@ RANLIB= ranlib
@@ -6,11 +7,12 @@ diff --git a/Makefile b/Makefile
  
  # Convenience platforms targets.
 -PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
-+PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris nacl-newlib nacl-newlib-basic nacl-glibc nacl-glibc-basic
++PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris nacl-newlib nacl-glibc
  
  # What to install.
  TO_BIN= lua luac
 diff --git a/src/Makefile b/src/Makefile
+index e4a3cd6..4f00263 100644
 --- a/src/Makefile
 +++ b/src/Makefile
 @@ -8,11 +8,11 @@
@@ -27,21 +29,15 @@ diff --git a/src/Makefile b/src/Makefile
  
  MYCFLAGS=
  MYLDFLAGS=
-@@ -95,6 +95,18 @@ freebsd:
+@@ -95,6 +95,12 @@ freebsd:
  generic:
  	$(MAKE) all MYCFLAGS=
  
 +nacl-newlib:
 +	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_READLINE" MYLIBS="-lreadline -lhistory -lncurses -lglibc-compat"
 +
-+nacl-newlib-basic:
-+	$(MAKE) all MYCFLAGS=-DLUA_USE_POSIX
-+
 +nacl-glibc:
 +	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-Wl,-E -ldl -lreadline -lhistory -lncurses"
-+
-+nacl-glibc-basic:
-+	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-Wl,-E -ldl"
 +
  linux:
  	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-Wl,-E -ldl -lreadline -lhistory -lncurses"
