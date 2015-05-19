@@ -2,7 +2,6 @@
     "commit_user": "commit-bot@chromium.org",
     "cq_status_url": "https://chromium-cq-status.appspot.com",
     "git_repo_url": "https://chromium.googlesource.com/external/naclports",
-    "project_bases_legacy_from_git_repo_url": true,
     "remote_branch": "refs/heads/master",
     "rietveld_url": "https://codereview.chromium.org",
     "rietveld_user": "commit-bot@chromium.org",
