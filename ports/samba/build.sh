@@ -64,5 +64,51 @@ BuildStep() {
 }
 
 InstallStep() {
-  return
+  MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR_INCLUDE}
+
+  # Copy the .so files.
+  LogExecute find bin/default/ -name *.so -exec \
+      cp -vuni '{}' "${DESTDIR_LIB}" ";"
+
+  # Copy the headers files.
+  MakeDir ${DESTDIR_INCLUDE}/samba
+  LogExecute cp -r bin/default/include/public/* ${DESTDIR_INCLUDE}/samba
+
+  # Make the symlinks for the versioned .so files.
+  # TODO(zentaro): Generate this mapping automatically.
+  #
+  # List created with;
+  # find out/build/samba/samba-4.1.16/bin/ -name *.so.* -exec ls -l '{}' ";" |
+  #     awk -F ' ' '{print $9, $11}'
+  ChangeDir ${DESTDIR_LIB}
+
+  LogExecute ln -sf libsmbclient.so libsmbclient.so.0
+  LogExecute ln -sf libsmbconf.so libsmbconf.so.0
+  LogExecute ln -sf libsamba-util.so libsamba-util.so.0
+  LogExecute ln -sf libndr.so libndr.so.0
+  LogExecute ln -sf libdcerpc-binding.so libdcerpc-binding.so.0
+  LogExecute ln -sf libsamdb.so libsamdb.so.0
+  LogExecute ln -sf libndr-nbt.so libndr-nbt.so.0
+  LogExecute ln -sf libwbclient.so libwbclient.so.0
+  LogExecute ln -sf libndr-standard.so libndr-standard.so.0
+  LogExecute ln -sf libgensec.so libgensec.so.0
+  LogExecute ln -sf libkrb5-samba4.so libkrb5-samba4.so.26
+  LogExecute ln -sf libtalloc.so libtalloc.so.2
+  LogExecute ln -sf libntdb.so libntdb.so.0
+  LogExecute ln -sf libtdb.so libtdb.so.1
+  LogExecute ln -sf libroken-samba4.so libroken-samba4.so.19
+  LogExecute ln -sf libcom_err-samba4.so libcom_err-samba4.so.0
+  LogExecute ln -sf libldb.so libldb.so.1
+  LogExecute ln -sf libhx509-samba4.so libhx509-samba4.so.5
+  LogExecute ln -sf libasn1-samba4.so libasn1-samba4.so.8
+  LogExecute ln -sf libwind-samba4.so libwind-samba4.so.0
+  LogExecute ln -sf libtevent.so libtevent.so.0
+  LogExecute ln -sf libgssapi-samba4.so libgssapi-samba4.so.2
+  LogExecute ln -sf libhcrypto-samba4.so libhcrypto-samba4.so.5
+  LogExecute ln -sf libheimbase-samba4.so libheimbase-samba4.so.1
+  LogExecute ln -sf libndr-krb5pac.so libndr-krb5pac.so.0
+  LogExecute ln -sf libtevent-util.so libtevent-util.so.0
+  LogExecute ln -sf libsamba-credentials.so libsamba-credentials.so.0
+  LogExecute ln -sf libsamba-hostconfig.so libsamba-hostconfig.so.0
 }
