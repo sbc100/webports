@@ -13,6 +13,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi
 
+EXTRA_CMAKE_ARGS="-DTEST=ON"
 EXECUTABLES="convert libyuv_unittest"
 
 TestStep() {
@@ -21,7 +22,8 @@ TestStep() {
   if [ "${NACL_ARCH}" = "i686" ]; then
     return
   fi
-  if [ "${NACL_ARCH}" != pnacl ]; then
-    LogExecute ./libyuv_unittest.sh
+  if [ "${NACL_ARCH}" = pnacl ]; then
+    return
   fi
+  LogExecute ./libyuv_unittest.sh --gtest_filter=-libyuvTest.ARGBRect_Unaligned
 }
