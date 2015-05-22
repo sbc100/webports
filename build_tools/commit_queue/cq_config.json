@@ -4,7 +4,7 @@
     "git_repo_url": "https://chromium.googlesource.com/external/naclports",
     "remote_branch": "refs/heads/master",
     "rietveld_url": "https://codereview.chromium.org",
-    "rietveld_user": "commit-bot@chromium.org",
+    "rietveld_auth": "oauth2",
     "skip_throttle_users": [
         "commit-bot@chromium.org"
     ],
