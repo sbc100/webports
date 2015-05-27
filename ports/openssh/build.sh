@@ -16,8 +16,7 @@ EXTRA_CONFIGURE_ARGS="--with-privsep-path=${PREFIX}/var/empty"
 export ac_cv_func_truncate=yes
 export ac_cv_func_sigaction=yes
 
-export SSHLIBS="-lppapi_simple -lnacl_io -lnacl_spawn -lcli_main -lppapi \
--l${NACL_CXX_LIB}"
+export SSHLIBS="${NACL_CLI_MAIN_LIB}"
 if [ "${NACL_LIBC}" = "newlib" ]; then
   CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   export LIBS=" -lcrypto -lglibc-compat"

@@ -32,14 +32,12 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
 fi
 
 NACLPORTS_CFLAGS+=" -Dmain=SDL_main"
-export LIBS+="\
+export LIBS="\
 -Wl,--undefined=SDL_main \
+-Wl,--undefined=nacl_main \
 -Wl,--undefined=nacl_startup_untar \
-${NACL_CLI_MAIN_LIB} \
--lSDLmain -lSDL \
--lppapi_simple -ltar -lnacl_io -lRegal -lglslopt \
--lppapi -lppapi_gles2 -lm \
--l${NACL_CXX_LIB}"
+-lSDLmain -lSDL -lRegal -lglslopt -lppapi_gles2 -lm \
+${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

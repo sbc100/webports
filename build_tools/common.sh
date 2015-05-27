@@ -99,7 +99,12 @@ fi
 # libcli_main.a has a circular dependency which makes static link fail
 # (cli_main => nacl_io => ppapi_cpp => cli_main). To break this loop,
 # you should use this instead of -lcli_main.
-export NACL_CLI_MAIN_LIB="-Xlinker -uPSUserMainGet -lcli_main -lnacl_spawn"
+export NACL_CLI_MAIN_LIB="-Xlinker -unacl_main -Xlinker -uPSUserMainGet \
+-lcli_main -lnacl_spawn -ltar -lppapi_simple -lnacl_io \
+-lppapi -l${NACL_CXX_LIB}"
+export NACL_CLI_MAIN_LIB_CPP="-Xlinker -unacl_main -Xlinker -uPSUserMainGet \
+-lcli_main -lnacl_spawn -ltar -lppapi_simple_cpp -lnacl_io \
+-lppapi_cpp -lppapi -l${NACL_CXX_LIB}"
 
 # Python variables
 NACL_PYSETUP_ARGS=""

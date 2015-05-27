@@ -10,8 +10,7 @@ EXECUTABLES="bdftruncate${NACL_EXEEXT} ucs2any${NACL_EXEEXT}"
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 NACLPORTS_LDFLAGS+=" -Dmain=nacl_main"
-export LIBS="-Wl,--undefined=nacl_main \
-  ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export LIBS="${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

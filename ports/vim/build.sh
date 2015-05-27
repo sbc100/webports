@@ -5,8 +5,7 @@
 BUILD_DIR=${SRC_DIR}
 EXTRA_CONFIGURE_ARGS="--with-tlib=ncurses --prefix=/usr --exec-prefix=/usr"
 EXECUTABLES=src/vim${NACL_EXEEXT}
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple -lnacl_io \
-  -lppapi -l${NACL_CXX_LIB}"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
 PatchStep() {
   DefaultPatchStep

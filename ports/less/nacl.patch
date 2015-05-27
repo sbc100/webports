@@ -1,14 +1,12 @@
 diff --git a/Makefile.in b/Makefile.in
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -54,7 +54,9 @@ OBJ = \
+@@ -54,7 +54,7 @@ OBJ = \
  all: less$(EXEEXT) lesskey$(EXEEXT) lessecho$(EXEEXT)
  
  less$(EXEEXT): ${OBJ}
 -	${CC} ${LDFLAGS} -o $@ ${OBJ} ${LIBS}
-+	${CC} ${LDFLAGS} -o $@ ${OBJ} -Wl,--undefined=PSUserMainGet \
-+             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -l${NACL_CXX_LIB} ${LIBS}
++	${CC} ${LDFLAGS} -o $@ ${OBJ} ${NACL_CLI_MAIN_LIB} ${LIBS}
  
  lesskey$(EXEEXT): lesskey.${O} version.${O}
  	${CC} ${LDFLAGS} -o $@ lesskey.${O} version.${O}

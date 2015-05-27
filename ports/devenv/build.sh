@@ -2,8 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
              jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"

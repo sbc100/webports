@@ -6,9 +6,7 @@ NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 
 NACLPORTS_CPPFLAGS="-Dmain=nacl_main"
 
-export LIBS+="\
-  -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export LIBS="${NACL_CLI_MAIN_LIB}"
 
 MAKE_TARGETS="binaries"
 INSTALL_TARGETS="install-binaries"

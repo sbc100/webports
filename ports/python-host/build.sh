@@ -20,7 +20,8 @@ ConfigureStep() {
 
 BuildStep() {
   DefaultBuildStep
-  if ! find build -name "_ssl*" > /dev/null; then
+  ssl_lib=$(find build -name "_ssl*")
+  if [ -z "${ssl_lib}" ]; then
     echo "Failed to build _ssl python module."
     echo "Check for 32-bit install of libssl and libcryto (see README.rst)"
     exit 1

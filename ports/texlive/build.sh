@@ -26,8 +26,7 @@ EXTRA_CONFIGURE_ARGS="--disable-native-texlive-build \
                       --with-banner-add=/NaCl \
                       --without-x"
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -ltar -lppapi_simple \
-  -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

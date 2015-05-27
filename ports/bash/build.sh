@@ -6,8 +6,7 @@ EXTRA_CONFIGURE_ARGS="--with-curses"
 EXTRA_CONFIGURE_ARGS+=" --with-installed-readline --enable-readline"
 NACLPORTS_CPPFLAGS+=" -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-export LIBS+="${NACL_CLI_MAIN_LIB} \
--lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export LIBS="${NACL_CLI_MAIN_LIB}"
 
 # Configure requires this variable to be pre-set when cross compiling.
 export bash_cv_getcwd_malloc=yes

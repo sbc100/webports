@@ -8,11 +8,7 @@ BUILD_DIR=${SRC_DIR}
 
 #NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
-#NACLPORTS_LDFLAGS+=" -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
-#  -lppapi_simple \
-#  -lnacl_io -lppapi -lppapi_cpp -l${NACL_CPP_LIB}"
-
-#NACLPORTS_LDFLAGS+="-lnacl_io"
+#NACLPORTS_LDFLAGS+="${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

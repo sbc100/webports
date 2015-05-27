@@ -9,8 +9,7 @@ else
 fi
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-export LIBS="${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
--lppapi_cpp -l${NACL_CXX_LIB}"
+export LIBS="${NACL_CLI_MAIN_LIB}"
 
 EXECUTABLES="tshark${NACL_EXEEXT}"
 

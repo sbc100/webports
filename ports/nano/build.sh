@@ -2,8 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -lncurses -ltar -lppapi_simple \
-  -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export EXTRA_LIBS="-lncurses ${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   EXTRA_CONFIGURE_ARGS="--enable-tiny"

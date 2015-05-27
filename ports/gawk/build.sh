@@ -8,8 +8,7 @@ if [ ${TOOLCHAIN} != "glibc" ]; then
   NACLPORTS_CFLAGS+=" -D__GNU_LIBRARY__ "
 fi
 
-export NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io \
-  -lppapi -l${NACL_CXX_LIB}"
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 
 BuildStep() {
   # SetupCrossEnvironment

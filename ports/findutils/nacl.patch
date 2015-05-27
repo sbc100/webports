@@ -10,23 +10,19 @@ diff --git a/find/Makefile.in b/find/Makefile.in
  ARFLAGS = cru
  libfindtools_a_AR = $(AR) $(ARFLAGS)
  libfindtools_a_LIBADD =
-@@ -691,13 +691,17 @@ installcheck-binPROGRAMS: $(bin_PROGRAMS)
+@@ -691,13 +691,13 @@ installcheck-binPROGRAMS: $(bin_PROGRAMS)
  	done; rm -f c$${pid}_.???; exit $$bad
  find$(EXEEXT): $(find_OBJECTS) $(find_DEPENDENCIES) 
  	@rm -f find$(EXEEXT)
 -	$(LINK) $(find_OBJECTS) $(find_LDADD) $(LIBS)
-+	$(LINK) $(find_OBJECTS) $(find_LDADD)  -Wl,--undefined=PSUserMainGet \
-+             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -l${NACL_CXX_LIB} $(LIBS)
++	$(LINK) $(find_OBJECTS) $(find_LDADD) ${NACL_CLI_MAIN_LIB} $(LIBS)
  ftsfind$(EXEEXT): $(ftsfind_OBJECTS) $(ftsfind_DEPENDENCIES) 
  	@rm -f ftsfind$(EXEEXT)
  	$(LINK) $(ftsfind_OBJECTS) $(ftsfind_LDADD) $(LIBS)
  oldfind$(EXEEXT): $(oldfind_OBJECTS) $(oldfind_DEPENDENCIES) 
  	@rm -f oldfind$(EXEEXT)
 -	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD) $(LIBS)
-+	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD)  -Wl,--undefined=PSUserMainGet \
-+             ${NACL_CLI_MAIN_LIB} -lppapi_simple -lnacl_io -lppapi \
-+             -l${NACL_CXX_LIB} $(LIBS)
++	$(LINK) $(oldfind_OBJECTS) $(oldfind_LDADD) ${NACL_CLI_MAIN_LIB} $(LIBS)
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)

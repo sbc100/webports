@@ -2,8 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS+="${NACL_CLI_MAIN_LIB} \
--lnacl_spawn -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
 export LIBS+="-pthread -lnacl_io -l${NACL_CXX_LIB}"
 

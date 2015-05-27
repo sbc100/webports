@@ -5,8 +5,7 @@
 EXECUTABLES="git git-remote-http git-remote-https"
 
 BUILD_DIR=${SRC_DIR}
-export EXTLIBS+="${NACL_CLI_MAIN_LIB} \
--lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export EXTLIBS="${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_SHARED}" != "1" ]; then
   # These are needed so that the configure can detect libcurl when statically

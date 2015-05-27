@@ -21,8 +21,7 @@ BuildStep() {
   make -j${OS_JOBS} -f unix/Makefile unzips \
       CC=${NACLCC} LD=${NACLCXX} \
       CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}" LF2= \
-      LFLAGS1="${NACLPORTS_LDFLAGS} ${NACL_CLI_MAIN_LIB} \
-               -lppapi_simple -lnacl_io -lppapi"
+      LFLAGS1="${NACLPORTS_LDFLAGS} ${NACL_CLI_MAIN_LIB}"
 }
 
 InstallStep() {

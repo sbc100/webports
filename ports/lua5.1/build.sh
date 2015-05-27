@@ -6,8 +6,7 @@ BUILD_DIR=${SRC_DIR}
 EXECUTABLES="src/lua src/luac"
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB} \
--lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "glibc" ]; then
   PLAT=nacl-glibc

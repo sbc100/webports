@@ -46,9 +46,7 @@ EXECUTABLES="\
   bin/fvwm-root${NACL_EXEEXT}"
 
 export LIBS+="\
-  -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau \
-  -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lnacl_io -lppapi -lm -l${NACL_CXX_LIB}"
+  -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau -lm ${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"

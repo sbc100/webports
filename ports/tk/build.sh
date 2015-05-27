@@ -5,9 +5,7 @@
 NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-export LIBS+=" -lX11 -lxcb -lXau \
-  -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
+export LIBS="-lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
 
 EXTRA_CONFIGURE_ARGS+=" --with-tcl=${NACLPORTS_LIBDIR}"
 
