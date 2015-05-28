@@ -25,8 +25,10 @@ fi
 EXTRA_CONFIGURE_ARGS=--host=none-none-none
 
 ConfigureStep() {
-  ChangeDir ${SRC_DIR}
-  BuildHostMpc
-  ChangeDir ${BUILD_DIR}
+  if [ "${OS_NAME}" = "Linux" ]; then
+    ChangeDir ${SRC_DIR}
+    BuildHostMpc
+    ChangeDir ${BUILD_DIR}
+  fi
   DefaultConfigureStep
 }

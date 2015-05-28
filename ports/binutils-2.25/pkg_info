@@ -5,6 +5,7 @@ LICENSE=GPL
 DEPENDS=(nacl-spawn)
 DISABLED_LIBC=(bionic)
 DISABLED_ARCH=(pnacl)
+BUILD_OS=linux
 SHA1=b46cc90ebaba7ffcf6c6d996d60738881b14e50d
 ARCHIVE_ROOT=binutils-2.25
 # arm-nacl-clang asserts in llvm::ARMInstPrinter::printInstruction:
