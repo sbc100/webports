@@ -6,6 +6,7 @@ DEPENDS=(nacl-spawn)
 DISABLED_LIBC=(bionic)
 DISABLED_ARCH=(pnacl)
 SHA1=b46cc90ebaba7ffcf6c6d996d60738881b14e50d
+ARCHIVE_ROOT=binutils-2.25
 # arm-nacl-clang asserts in llvm::ARMInstPrinter::printInstruction:
 # https://code.google.com/p/nativeclient/issues/detail?id=4114
 DISABLED_TOOLCHAIN=(clang-newlib/arm emscripten)
