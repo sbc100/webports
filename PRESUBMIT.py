@@ -44,19 +44,6 @@ def RunPythonCommand(cmd, input_api, output_api):
   return RunCommand(cmd[0], [PYTHON] + cmd, input_api, output_api)
 
 
-def CheckCQConfig(input_api, output_api):
-  def f(x):
-    return input_api.FilterSourceFile(x,
-        white_list=['build_tools/commit_queue/cq_config.json'])
-
-  if not input_api.AffectedFiles(file_filter=f):
-    return []
-
-  return RunPythonCommand(['build_tools/commit_queue/test_cq_config.py'],
-                          input_api,
-                          output_api)
-
-
 def CheckPartioning(input_api, output_api):
   return RunPythonCommand(['build_tools/partition.py', '--check'],
                           input_api,
@@ -108,7 +95,6 @@ def CheckAuthorizedAuthor(input_api, output_api):
 def CheckChangeOnUpload(input_api, output_api):
   report = []
   report.extend(CheckAuthorizedAuthor(input_api, output_api))
-  report.extend(CheckCQConfig(input_api, output_api))
   report.extend(RunPylint(input_api, output_api))
   report.extend(RunUnittests(input_api, output_api))
   report.extend(CheckDeps(input_api, output_api))
