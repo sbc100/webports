@@ -1,5 +1,5 @@
 {
-  "name": "Emacs",
+  "name": "%(TITLE)s",
   "description": "Emacs console application running using NativeClient",
   "version": "24.3.0.%(version)s",
   "manifest_version": 2,
