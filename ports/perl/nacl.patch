@@ -1,0 +1,52 @@
+diff --git a/Makefile.micro b/Makefile.micro
+old mode 100644
+new mode 100755
+--- a/Makefile.micro
++++ b/Makefile.micro
+@@ -1,11 +1,14 @@
+ LD = $(CC)
+ CCFLAGS = -c
++BUILD_CCFLAGS = -c
+ DEFINES = -DPERL_CORE -DPERL_MICRO -DSTANDARD_C -DPERL_USE_SAFE_PUTENV \
+ 	  -DNO_MATHOMS
+ OPTIMIZE = 
+ CFLAGS = $(DEFINES) $(OPTIMIZE)
+ LDFLAGS = 
++BUILD_LDFLAGS = 
+ LIBS = -lm
++BUILD_LIBS = -lm
+ _O = .o
+ ENV = env
+ PERL = perl
+@@ -14,7 +17,7 @@ RUN =
+ 
+ all:	microperl
+ 
+-O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
++O = uav$(_O) ucaretx$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
+ 	uglobals$(_O) ugv$(_O) uhv$(_O) umro$(_O)\
+ 	umg$(_O) uperlmain$(_O) uop$(_O) ureentr$(_O) \
+ 	upad$(_O) uperl$(_O) uperlio$(_O) uperly$(_O) upp$(_O) \
+@@ -66,6 +69,9 @@ perly.h: perly.y
+ 
+ uav$(_O):	$(HE) av.c
+ 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) av.c
++	
++ucaretx$(_O):	$(HE) caretx.c
++	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) caretx.c
+ 
+ udeb$(_O):	$(HE) deb.c
+ 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) deb.c
+@@ -184,10 +190,10 @@ ubitcount.h: ugenerate_uudmap$(_X)
+ 	$(RUN) ./ugenerate_uudmap$(_X) $(generated_headers)
+ 
+ ugenerate_uudmap$(_O): generate_uudmap.c
+-	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) generate_uudmap.c
++	$(BUILD_CC) $(BUILD_CCFLAGS) -o $@ $(CFLAGS) generate_uudmap.c
+ 
+ ugenerate_uudmap$(_X): ugenerate_uudmap$(_O)
+-	$(LD) -o ugenerate_uudmap $(LDFLAGS) ugenerate_uudmap$(_O) $(LIBS)
++	$(BUILD_LD) -o ugenerate_uudmap $(BUILD_LDFLAGS) ugenerate_uudmap$(_O) $(BUILD_LIBS)
+ 
+ microtest: microperl
+ 	- cd t && (rm -f perl; ln -s ../microperl perl) \
