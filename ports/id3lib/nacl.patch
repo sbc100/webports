@@ -1,3 +1,23 @@
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -10173,7 +10185,7 @@ done
+ 
+ 
+ 
+-for ac_header in fstream iostream iomanip vector \
++for ac_header in fstream iostream vector \
+ 
+ do
+ as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+@@ -10296,7 +10308,6 @@ done
+ 
+ for ac_header in \
+   string                        \
+-  iomanip.h                     \
+ 
+ do
+ as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 diff --git a/examples/demo_convert.cpp b/examples/demo_convert.cpp
 --- a/examples/demo_convert.cpp
 +++ b/examples/demo_convert.cpp
