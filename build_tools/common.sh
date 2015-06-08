@@ -861,6 +861,22 @@ FixupExecutablesList() {
   EXECUTABLES=${executables_modified}
 }
 
+VerifySharedLibraryOrder() {
+  if [ "${NACL_LIBC}" != "glibc" ]; then
+    return
+  fi
+  # Check that pthreads comes after nacl_io + nacl_spawn in the needed order.
+  # Pthreads has interception hooks that forward directly into glibc.
+  # If it gets loaded first, nacl_io doesn't get a chance to intercept.
+  for nexe in ${EXECUTABLES:-}; do
+    echo "Verifying shared library order for ${nexe}"
+    if ! ${TOOLS_DIR}/check_needed_order.py ${nexe}; then
+      echo "error: glibc shared library order check failed"
+      exit 1
+    fi
+  done
+}
+
 
 ######################################################################
 # Build Steps
@@ -1144,7 +1160,7 @@ Validate() {
 
 
 #
-# PostBuildStep by default will validae (using ncval) any executables
+# PostBuildStep by default will validate (using ncval) any executables
 # specified in the ${EXECUTABLES} as well as create wrapper scripts
 # for running them in sel_ldr.
 #
@@ -1176,6 +1192,8 @@ DefaultPostBuildStep() {
       WriteLauncherScript "${nexe}.sh" "$(basename ${nexe})"
     fi
   done
+
+  VerifySharedLibraryOrder
 }
 
 
