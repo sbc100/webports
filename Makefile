@@ -12,7 +12,7 @@
 # at out/sentinels/*
 
 SDK_LIBS = zlib tiff jpeg8d libpng freetype libogg
-SDK_LIBS += libtheora libvorbis libwebp libxml2 tinyxml openal-soft freealut
+SDK_LIBS += libtheora libvorbis libxml2 tinyxml openal-soft freealut
 
 PYLINT = build_tools/python_wrapper -m pylint
 COVERAGE = bin/coverage
