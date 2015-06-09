@@ -10,16 +10,16 @@
 
 readonly SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE}")" ; pwd)
 
-if [ ! -f pkg_info ]; then
+if [ ! -f ./pkg_info ]; then
   echo "No pkg_info found in current directory"
   exit 1
 fi
-source pkg_info
+source ./pkg_info
 
 source ${SCRIPT_DIR}/common.sh
 
-if [ -f build.sh ]; then
-  source build.sh
+if [ -f ./build.sh ]; then
+  source ./build.sh
 fi
 
 NaclportsMain "$@"
