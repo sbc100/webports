@@ -95,6 +95,7 @@ PYTHON=${SCRIPT_DIR}/python_wrapper
 
 if [ "${BUILDBOT_BUILDERNAME}" = "linux-sdk" ]; then
   readonly OS=linux
+  readonly NIGHTLY=0
 else
   # Decode buildername.
   readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
