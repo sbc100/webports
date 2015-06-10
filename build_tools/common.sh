@@ -870,7 +870,7 @@ VerifySharedLibraryOrder() {
   # If it gets loaded first, nacl_io doesn't get a chance to intercept.
   for nexe in ${EXECUTABLES:-}; do
     echo "Verifying shared library order for ${nexe}"
-    if ! ${TOOLS_DIR}/check_needed_order.py ${nexe}; then
+    if ! OBJDUMP=${NACLOBJDUMP} ${TOOLS_DIR}/check_needed_order.py ${nexe}; then
       echo "error: glibc shared library order check failed"
       exit 1
     fi

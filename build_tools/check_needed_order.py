@@ -5,13 +5,15 @@
 
 """Tool to check if a glibc binary has a valid NEEDED order."""
 
+import os
 import re
 import subprocess
 import sys
 
 
 def Check(filename):
-  lines = subprocess.check_output(['objdump', '-p', filename]).splitlines()
+  lines = subprocess.check_output(
+      [os.environ.get('OBJDUMP', 'objdump'), '-p', filename]).splitlines()
   needed = [i for i in lines if 'NEEDED' in i]
   names = [re.match('[ ]+NEEDED[ ]+(.*)', i).group(1) for i in needed]
   pthread = -1
