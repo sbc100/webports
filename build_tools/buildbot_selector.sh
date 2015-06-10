@@ -13,6 +13,18 @@
 set -o errexit
 set -o nounset
 
+# Use this variable to pin the naclports buildbots to a specific
+# SDK version.  This does not apply to the nightly builders, and
+# should be left unset unless there is ongoing issue with the lastest
+# SDK build.
+# TODO(sbc): Remove this pinned version once we fix he current
+# issues with pnacl/nacl-clang
+# https://code.google.com/p/nativeclient/issues/detail?id=4200
+# https://code.google.com/p/nativeclient/issues/detail?id=4201
+# https://code.google.com/p/nativeclient/issues/detail?id=4202
+# https://code.google.com/p/nativeclient/issues/detail?id=4203
+PINNED_SDK_VERSION=331926
+
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 NACLPORTS_SRC=$(dirname ${SCRIPT_DIR})
 DEFAULT_NACL_SDK_ROOT="${NACLPORTS_SRC}/out/nacl_sdk"
@@ -164,7 +176,10 @@ if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   echo "@@@BUILD_STEP Install Latest SDK@@@"
   ARGS=""
   if [ ${TOOLCHAIN:-} = bionic ]; then
-    ARGS="--bionic"
+    ARGS+=" --bionic"
+  fi
+  if [ "${PINNED_SDK_VERSION:-}" != "" -a "${NIGHTLY}" != "1" ]; then
+    ARGS+=" -v ${PINNED_SDK_VERSION}"
   fi
   echo ${PYTHON} ${SCRIPT_DIR}/download_sdk.py ${ARGS}
   ${PYTHON} ${SCRIPT_DIR}/download_sdk.py ${ARGS}
