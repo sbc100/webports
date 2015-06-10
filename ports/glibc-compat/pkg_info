@@ -1,2 +1,4 @@
 NAME=glibc-compat
 VERSION=0.1
+# See: https://code.google.com/p/nativeclient/issues/detail?id=4200
+DISABLED_TOOLCHAIN=(clang-newlib)
