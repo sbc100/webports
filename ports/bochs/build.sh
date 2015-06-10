@@ -13,10 +13,6 @@ EXECUTABLES=bochs
 ConfigureStep() {
   SetupCrossEnvironment
 
-  EXTRA_LINK_OPTS="-L${NACLPORTS_LIBDIR}"
-  EXTRA_LINK_OPTS+=" -lppapi_simple -ltar -lnacl_io"
-  export EXTRA_LINK_OPTS
-
   EXE=${NACL_EXEEXT} LogExecute ${SRC_DIR}/configure \
     --host=nacl \
     --prefix=${PREFIX} \
