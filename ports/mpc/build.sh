@@ -12,7 +12,8 @@ BuildHostMpc() {
       LogExecute ${SRC_DIR}/configure \
       --prefix=${HOST_INSTALL_DIR} \
       --with-gmp=${NACL_PACKAGES_BUILD}/gmp/install_host \
-      --with-mpfr=${NACL_PACKAGES_BUILD}/mpfr/install_host
+      --with-mpfr=${NACL_PACKAGES_BUILD}/mpfr/install_host \
+      --disable-shared
   LogExecute make
   LogExecute make install
 }
