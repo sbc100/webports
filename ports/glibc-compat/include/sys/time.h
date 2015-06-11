@@ -1,5 +1,25 @@
+/*
+ * Copyright (c) 2014 The Native Client Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
 #ifndef GLIBCEMU_SYS_TIME_H
 #define GLIBCEMU_SYS_TIME_H 1
+
+/* gnulib hack (it builds its own headers sometimes)
+  Include guard to prevent gnulib from defining conflicting types
+  bug at:
+  https://code.google.com/p/nativeclient/issues/detail?id=4198
+*/
+#if defined(__native_client__)
+#include <stdint.h>
+typedef int64_t _off_t;
+typedef int64_t __dev_t;
+typedef uint32_t __uid_t;
+typedef uint32_t __gid_t;
+typedef int32_t _ssize_t;
+#endif
+
 #include_next <sys/time.h>
 
 /* Convenience macros for operations on timevals.

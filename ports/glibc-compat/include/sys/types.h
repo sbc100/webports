@@ -6,6 +6,12 @@
 #ifndef GLIBCEMU_SYS_TYPES_H
 #define GLIBCEMU_SYS_TYPES_H 1
 
+
+/* gnulib hack (it builds its own headers sometimes)
+ Include guard to prevent gnulib from defining conflicting types
+ bug at:
+ https://code.google.com/p/nativeclient/issues/detail?id=4198
+*/
 #if defined(__native_client__)
 #include <stdint.h>
 typedef int64_t _off_t;
