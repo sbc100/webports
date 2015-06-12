@@ -90,7 +90,7 @@ def GetDependencies(projects):
 
 
 def DownloadDataFromBuilder(builder, build):
-  max_tries = 10
+  max_tries = 30
 
   for _ in xrange(max_tries):
     url = 'http://build.chromium.org/p/client.nacl.ports/json'
@@ -321,12 +321,12 @@ def main(args):
   parser.add_argument('-n', '--num-bots',
                       help='Number of builders on the waterfall to collect '
                       'data from or to print a canned partition for.',
-                      type=int, default=3)
+                      type=int, default=5)
   parser.add_argument('-p', '--num-parts',
                       help='Number of parts to partition things into '
                       '(this will differ from --num-bots when changing the '
                       'number of shards).',
-                      type=int, default=3)
+                      type=int, default=5)
   parser.add_argument('--build-number', help='Builder number to look at for '
                       'historical data on build times.', type=int, default=-1)
   options = parser.parse_args(args)
