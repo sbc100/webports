@@ -46,7 +46,8 @@ class TestScanPackages(unittest.TestCase):
   @patch('os.path.exists', Mock(return_value=True))
   def testDownloadFiles(self, check_hash_mock):  # pylint: disable=no-self-use
     check_hash_mock.return_value = True
-    file_info = scan_packages.FileInfo('foo', 10, 'http://host/base', 'hashval')
+    file_info = scan_packages.FileInfo(name='foo', size=10, gsurl='gs://test',
+                                       url='http://host/base', md5='hashval')
     scan_packages.DownloadFiles([file_info])
     check_hash_mock.assert_called_once_with('dummydir/base', 'hashval')
 

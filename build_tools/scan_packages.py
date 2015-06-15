@@ -11,6 +11,7 @@ results checked into source control.
 from __future__ import print_function
 
 import argparse
+import base64
 import collections
 import hashlib
 import os
@@ -35,39 +36,77 @@ def FormatSize(num_bytes):
     num_bytes /= 1024.0
 
 
-FileInfo = collections.namedtuple('FileInfo', ['name', 'size', 'url', 'etag'])
+class FileInfo(object):
+
+  def __init__(self, name, url, gsurl, size=0, md5=''):
+    self.name = name
+    self.url = url
+    self.gsurl = gsurl
+    self.size = size
+    self.md5 = md5
+
+  def __repr__(self):
+    return '<FileInfo %s [%s]>' % (self.name, self.size)
 
 
-def ParseGsUtilLs(output):
-  """Parse the output of gsutil -le.
-
-  gsutil -le outputs one file per line with the following format:
-  <size_in_bytes>  2014-07-01T00:21:05Z gs://bucket/file.txt etag=<sha1>
+def ParseGsUtilOutput(output):
+  """Parse the output of gsutil -L.
 
   Returns:
      List of FileInfo objects.
   """
+  # gsutil stat outputs the name of each file starting in column zero followed
+  # by zero or more fields indended with tab characters.
+  # gs://naclports/builds/pepper_44/..../agg-demo_0.1_x86-64_newlib.tar.bz2:
+  #  Creation time:    Wed, 13 May 2015 18:52:05 GMT
+  #  Content-Length:   342
+  #  Content-Type:     application/x-tar
+  #  Hash (crc32c):    sf+mJQ==
+  #  Hash (md5):       tXtj9ASElmzyncWl0k/PvA==
+  #  ETag:             CIjv79uxv8UCEAE=
+  #  Generation:       1431543125637000
+  #  Metageneration:   1
+  #
+  # Note that some fields contiue onto more than one line.
+  # The final line in the file starts with TOTAL
+
   result = []
+  info = None
   for line in output.splitlines():
-    if line.startswith("TOTAL"):
-      continue
-    size, _, filename, etag = line.split()
-    etag = etag.split('=', 1)[1]
-    filename = filename[len('gs://'):]
-    url = naclports.GS_URL + filename
-    if filename:
-      result.append(FileInfo(filename, int(size), url, etag))
+    if line[0] != '\t':
+      if info is not None:
+        assert info.size
+        assert info.md5
+        result.append(info)
+      # Handle final line
+      if line.startswith("TOTAL"):
+        continue
+      gsurl = line.strip()[:-1]
+      filename = gsurl[len('gs://'):]
+      url = naclports.GS_URL + filename
+      info = FileInfo(name=line.strip(), url=url, gsurl=gsurl)
+    else:
+      line = line.strip()
+      prop_name, prop_value = line.split(':', 1)
+      if prop_name == 'Content-Length':
+        info.size = int(prop_value)
+      elif prop_name == 'Hash (md5)':
+        info.md5 = base64.b64decode(prop_value).encode('hex')
+
   return result
+
+
+def GetHash(filename):
+  with open(filename) as f:
+    return hashlib.md5(f.read()).hexdigest()
 
 
 def CheckHash(filename, md5sum):
   """Return True is filename has the given md5sum, False otherwise."""
-  with open(filename) as f:
-    file_md5sum = hashlib.md5(f.read()).hexdigest()
-  return md5sum == file_md5sum
+  return md5sum == GetHash(filename)
 
 
-def DownloadFiles(files, check_hashes=True):
+def DownloadFiles(files, check_hashes=True, parallel=False):
   """Download one of more files to the local disk.
 
   Args:
@@ -87,28 +126,53 @@ def DownloadFiles(files, check_hashes=True):
 
   for file_info in files:
     basename = os.path.basename(file_info.url)
-    fullname = os.path.join(download_dir, basename)
-    filenames.append((fullname, file_info.url))
-    if os.path.exists(fullname):
-      if not check_hashes or CheckHash(fullname, file_info.etag):
+    file_info.name = os.path.join(download_dir, basename)
+    filenames.append((file_info.name, file_info.url))
+    if os.path.exists(file_info.name):
+      if not check_hashes or CheckHash(file_info.name, file_info.md5):
         Log('Up-to-date: %s' % file_info.name)
         continue
-    files_to_download.append(FileInfo(fullname, file_info.size, file_info.url,
-                                      file_info.etag))
+    files_to_download.append(file_info)
+
+  def Check(file_info):
+    if check_hashes and not CheckHash(file_info.name, file_info.md5):
+      raise naclports.Error(
+          'Checksum failed: %s\nExpected=%s\nActual=%s' %
+          (file_info.name, file_info.md5, GetHash(file_info.name)))
 
   if not files_to_download:
     Log('All files up-to-date')
   else:
-    total_size = sum(f[1] for f in files_to_download)
+    total_size = sum(f.size for f in files_to_download)
     Log('Need to download %d/%d files [%s]' %
         (len(files_to_download), len(files), FormatSize(total_size)))
 
-    for file_info in files_to_download:
-      naclports.DownloadFile(file_info.name, file_info.url)
-      if check_hashes and not CheckHash(file_info.name, file_info.etag):
-        raise naclports.Error('Checksum failed: %s' % file_info.name)
+    gsutil = FindGsutil()
+    if parallel:
+      remaining_files = files_to_download
+      num_files = 20
+      while remaining_files:
+        files = remaining_files[:num_files]
+        remaining_files = remaining_files[num_files:]
+        cmd = gsutil + ['-m', 'cp'] + [f.gsurl for f in files] + [download_dir]
+        LogVerbose(cmd)
+        subprocess.check_call(cmd)
+        for file_info in files:
+          Check(file_info)
+    else:
+      for file_info in files_to_download:
+        naclports.DownloadFile(file_info.name, file_info.url)
+        Check(file_info)
 
   return filenames
+
+
+def FindGsutil():
+  # Ideally we would use the gsutil that comes with depot_tools since users
+  # are much more likely to have that in thier PATH.  However I found this
+  # depot_tools version to be a lot slower.
+  # return [sys.executable, naclports.util.FindInPath('gsutil.py')]
+  return ['gsutil']
 
 
 def main(args):
@@ -117,8 +181,10 @@ def main(args):
                       help='naclports revision to to scan for.')
   parser.add_argument('-v', '--verbose', action='store_true',
                       help='Output extra information.')
+  parser.add_argument('-p', '--parallel', action='store_true',
+                      help='Download packages in parallel.')
   parser.add_argument('-l', '--cache-listing', action='store_true',
-                      help='Cached output of gsutil -le (for testing).')
+                      help='Cached output of gsutil -L (for testing).')
   parser.add_argument('--skip-md5', action='store_true',
                       help='Assume on-disk files are up-to-date (for testing).')
   args = parser.parse_args(args)
@@ -130,32 +196,31 @@ def main(args):
       (sdk_version, args.revision))
   base_path = '%s/builds/pepper_%s/%s/packages' % (naclports.GS_BUCKET,
                                                    sdk_version, args.revision)
-  gs_url = 'gs://' + base_path
-  gsutil = naclports.util.FindInPath('gsutil.py')
+  gs_url = 'gs://' + base_path + '/*'
   listing_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'listing.txt')
+
   if args.cache_listing and os.path.exists(listing_file):
     Log('Using pre-cached gs listing: %s' % listing_file)
     with open(listing_file) as f:
       listing = f.read()
   else:
     Log('Searching for packages at: %s' % gs_url)
-    cmd = [sys.executable, gsutil, 'ls', '-le', gs_url]
+    cmd = FindGsutil() + ['stat', gs_url]
     LogVerbose('Running: %s' % str(cmd))
     try:
       listing = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
-      naclports.Error(e)
-      return 1
+      raise naclports.Error("Command '%s' failed: %s" % (cmd, e))
+    if args.cache_listing:
+      with open(listing_file, 'w') as f:
+        f.write(listing)
 
-  all_files = ParseGsUtilLs(listing)
-  if args.cache_listing and not os.path.exists(listing_file):
-    with open(listing_file, 'w') as f:
-      f.write(listing)
+  all_files = ParseGsUtilOutput(listing)
 
   Log('Found %d packages [%s]' % (len(all_files),
                                   FormatSize(sum(f.size for f in all_files))))
 
-  binaries = DownloadFiles(all_files, not args.skip_md5)
+  binaries = DownloadFiles(all_files, not args.skip_md5, args.parallel)
   index_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
   Log('Generating %s' % index_file)
   naclports.package_index.WriteIndex(index_file, binaries)
@@ -164,4 +229,8 @@ def main(args):
 
 
 if __name__ == '__main__':
-  sys.exit(main(sys.argv[1:]))
+  try:
+    sys.exit(main(sys.argv[1:]))
+  except naclports.Error as e:
+    sys.stderr.write('%s\n' % e)
+    sys.exit(-1)
