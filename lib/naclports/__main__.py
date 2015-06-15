@@ -242,15 +242,15 @@ def RunMain(args):
                       help='Ignore attempts to build disabled packages.\n'
                       'Normally attempts to build such packages will result\n'
                       'in an error being returned.')
-  parser.add_argument('--toolchain',
+  parser.add_argument('-t', '--toolchain',
                       help='Set toolchain to use when building (newlib, glibc, '
                       'or pnacl)')
   # use store_const rather than store_true since we want to default for
   # debug to be None (which then falls back to checking the NACL_DEBUG
   # environment variable.
-  parser.add_argument('--debug', action='store_const', const=True,
+  parser.add_argument('-d', '--debug', action='store_const', const=True,
                       help='Build debug configuration (release is the default)')
-  parser.add_argument('--arch',
+  parser.add_argument('-a', '--arch',
                       help='Set architecture to use when building (x86_64,'
                       ' x86_32, arm, pnacl)')
   parser.add_argument('command', help="sub-command to run")
