@@ -79,7 +79,7 @@ builder 0 (total: 14973)
   nano
   mpc
   xaos
-  lua5.2
+  lua5.3
   lua-ppapi
   less
   perl

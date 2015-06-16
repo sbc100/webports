@@ -35,13 +35,13 @@ Testing
 -------
 
 The Lua test suite is installed into the application virtual files system
-at startup and is located at "/lua-5.2.2-tests".  The current working
+at startup and is located at "/lua-5.3.0-tests".  The current working
 directory is also set to this directory on startup so it is possible to
 run all the tests using the following URL::
 
   index.html?ARG1=all.lua&ARG2=-e_U%3dtrue
 
 For more information on how to running the lua test suite see the lua
-teste suite website at http://www.lua.org/tests/5.2/.
+teste suite website at http://www.lua.org/tests/.
 
 .. vim:ft=rst:

@@ -5,8 +5,7 @@
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = lua
-LIBS = lua ppapi_simple tar
-LIBS += readline ncurses
+LIBS = lua ppapi_simple tar readline ncurses
 NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 
@@ -15,9 +14,12 @@ ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic
 endif
+ifneq ($(TOOLCHAIN),glibc)
+LIBS += glibc-compat
+endif
 SOURCES = lua.c main.c
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/lua/$(TOOLCHAIN)
-CFLAGS += -DLUA_USE_POSIX -DLUA_USE_READLINE
+CFLAGS += -DLUA_USE_POSIX -DLUA_USE_READLINE -std=gnu99
 
 
 ifeq ($(TOOLCHAIN),pnacl)
@@ -54,28 +56,20 @@ HTERM = $(CHROMEAPPS)/hterm
 
 MIRROR_URL=http://storage.googleapis.com/nativeclient-mirror/nacl
 
-# Mirrored from http://luajit.org/download/scimark.lua
 SCIMARK=scimark.lua
-# Mirrored from http://kripken.github.io/lua.vm.js/binarytrees.lua
 BINARYTREES=binarytrees.lua
-# Mirrored from http://www.lua.org/tests/5.2/lua-5.2.2-tests.tar.gz
-LUA_TESTS_FILE=lua-5.2.2-tests.tar.gz
+# Mirrored from http://www.lua.org/tests/lua-5.3.0-tests.tar.gz
+LUA_TESTS_FILE=lua-5.3.0-tests.tar.gz
 
 $(OUTBASE)/$(LUA_TESTS_FILE):
 	cd $(OUTBASE) && curl -O --progress-bar $(MIRROR_URL)/$(LUA_TESTS_FILE)
 
-$(OUTBASE)/$(SCIMARK):
-	cd $(OUTBASE) && curl -O --progress-bar $(MIRROR_URL)/$(SCIMARK)
-
-$(OUTBASE)/$(BINARYTREES):
-	cd $(OUTBASE) && curl -O --progress-bar $(MIRROR_URL)/$(BINARYTREES)
-
-install-tests: $(OUTBASE)/$(LUA_TESTS_FILE) $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(BINARYTREES)
+install-tests: $(OUTBASE)/$(LUA_TESTS_FILE) 
 	tar -C $(OUTBASE) -xf $(OUTBASE)/$(LUA_TESTS_FILE)
-	cd $(OUTBASE)/lua-5.2.2-tests && patch -p1 < $(CURDIR)/lua_tests.patch
+	cd $(OUTBASE)/lua-5.3.0-tests && patch -p1 < $(CURDIR)/lua_tests.patch
 	mkdir -p $(INSTALL_DIR)
-	tar -c -f $(INSTALL_DIR)/luadata.tar -C $(OUTBASE) lua-5.2.2-tests
-	cp $(OUTBASE)/$(SCIMARK) $(OUTBASE)/$(BINARYTREES) $(INSTALL_DIR)
+	tar -c -f $(INSTALL_DIR)/luadata.tar -C $(OUTBASE) lua-5.3.0-tests
+	cp $(SCIMARK) $(BINARYTREES) $(INSTALL_DIR)
 
 install: install-tests
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json

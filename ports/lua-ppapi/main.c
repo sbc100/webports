@@ -13,7 +13,7 @@ int nacl_main(int argc, char **argv) {
   if (nacl_startup_untar(argv[0], "luadata.tar", "/"))
     return 1;
 
-  chdir("/lua-5.2.2-tests");
+  chdir("/lua-5.3.0-tests");
 
   return lua_main(argc, argv);
 }

@@ -73,7 +73,7 @@ builder 0 (total: 11062)
   leveldb
   cups
   mpc
-  lua5.2
+  lua5.3
   lua-ppapi
   zeromq
   pyzmq
