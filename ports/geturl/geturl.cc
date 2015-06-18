@@ -50,17 +50,18 @@ static int Download(int quiet, const char* url, const char* dst) {
     return 1;
   }
 
-  pp::URLResponseInfo info = url_loader.GetResponseInfo();
-  if (info.GetStatusCode() != 200) {
-    fprintf(stderr, "ERROR: got http error code %d for: %s\n",
-        info.GetStatusCode(), url);
-    return 1;
-  }
-
   char buffer[0x10000];
   ssize_t len;
   int64_t received = 0;
   int64_t total = 0;
+  pp::URLResponseInfo info = url_loader.GetResponseInfo();
+  if (info.GetStatusCode() != 200) {
+    fprintf(stderr, "ERROR: got http error code %d for: %s\n",
+        info.GetStatusCode(), url);
+    close(fh);
+    goto fail;
+  }
+
   for (;;) {
     result = url_loader.ReadResponseBody(
         buffer, sizeof buffer, pp::BlockUntilComplete());
@@ -70,7 +71,7 @@ static int Download(int quiet, const char* url, const char* dst) {
     if (len != result) {
       fprintf(stderr, "ERROR: Failed writing to file (%d): %s\n", errno, dst);
       close(fh);
-      return 1;
+      goto fail;
     }
     url_loader.GetDownloadProgress(&received, &total);
     if (!quiet) {
@@ -88,15 +89,22 @@ static int Download(int quiet, const char* url, const char* dst) {
   if (result != PP_OK) {
     fprintf(stderr, "ERROR: Failed downloading url (%d): %s\n", result, url);
     close(fh);
-    return 1;
+    goto fail;
   }
 
   if (close(fh) < 0) {
     fprintf(stderr, "ERROR: Failed closing file (%d): %s\n", errno, dst);
-    return 1;
+    goto fail;
   }
 
   return 0;
+
+fail:
+  result = remove(dst);
+  if (result < 0) {
+    fprintf(stderr, "ERROR: Failed removing file (%d): %s\n", errno, dst);
+  }
+  return 1;
 }
 
 int nacl_main(int argc, char *argv[]) {
