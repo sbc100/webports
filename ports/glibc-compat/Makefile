@@ -9,6 +9,10 @@ endif
 CFLAGS += -Wno-implicit-function-declaration
 CPPFLAGS += -Werror -Wno-unused-value -pthread
 CPPFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
+# Adding -g here to work around PNaCl toolchain issue
+# TODO(sbc): remove this once we fix:
+# https://code.google.com/p/nativeclient/issues/detail?id=4200
+CPPFLAGS += -g
 OUT := out
 SOURCES := \
   src/alarm.c \
@@ -58,6 +62,10 @@ $(OUT)/%.o : src/%.c
 	@mkdir -p $(OUT)
 	$(CC_PREFIX)$(CC) -o $@ -c $< $(CFLAGS) $(CPPFLAGS)
 
+$(OUT)/%.o : src/%.cc
+	@mkdir -p $(OUT)
+	$(CXX_PREFIX)$(CXX) -o $@ -c $< $(CXXFLAGS) $(CPPFLAGS)
+
 all: $(LIB) $(OUT)/glibc_compat_test
 
 $(OUT)/libglibc-compat.a: $(OBJS)
@@ -65,10 +73,9 @@ $(OUT)/libglibc-compat.a: $(OBJS)
 
 TEST_LIBS=$(LIB) -lgtest -lpthread
 
-$(OUT)/glibc_compat_test: src/test.cc $(LIB)
+$(OUT)/glibc_compat_test: $(OUT)/test.o $(LIB)
 	@mkdir -p $(OUT)
-	$(CXX_PREFIX)$(CXX) -o $@ $< -L$(OUT) $(LDFLAGS) $(CXXFLAGS) \
-		$(CPPFLAGS) $(TEST_LIBS)
+	$(CXX_PREFIX)$(CXX) -o $@ $< -L$(OUT) $(LDFLAGS) $(TEST_LIBS)
 
 test: $(OUT)/glibc_compat_test
 
