@@ -2,7 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-EXECUTABLES="glib/gtester${NACL_EXEEXT}"
+EXECUTABLES="
+  gio/gapplication${NACL_EXEEXT}
+  glib/gtester${NACL_EXEEXT}
+  gobject/gobject-query${NACL_EXEEXT}
+"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
@@ -14,7 +18,11 @@ ConfigureStep() {
     export LIBS+=" -lglibc-compat"
   fi
 
-  cp ${SRC_DIR}/nacl.cache nacl.cache.tmp
+  export glib_cv_stack_grows=no
+  export glib_cv_uscore=no
+  export ac_cv_func_issetugid=no
+  export ac_cv_func_posix_getpwuid_r=yes
+  export ac_cv_func_posix_getgrgid_r=yes
 
   LogExecute ${SRC_DIR}/configure \
     --host=nacl \
@@ -22,6 +30,5 @@ ConfigureStep() {
     --${NACL_OPTION}-mmx \
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \
-    --${NACL_OPTION}-asm \
-    --cache-file=nacl.cache.tmp
+    --${NACL_OPTION}-asm
 }

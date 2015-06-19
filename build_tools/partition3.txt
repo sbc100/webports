@@ -47,6 +47,7 @@ builder 0 (total: 11062)
   imagemagick
   python3-ppapi
   binutils
+  libffi
   glib
   pixman
   cairo
