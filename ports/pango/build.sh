@@ -4,3 +4,6 @@
 
 EXECUTABLES="pango-view/pango-view${NACL_EXEEXT}"
 EXTRA_CONFIGURE_ARGS="--with-included-modules --without-dynamic-modules"
+
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
