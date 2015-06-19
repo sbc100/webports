@@ -5,6 +5,10 @@
 HOST_BUILD_DIR=${WORK_DIR}/build_host
 HOST_INSTALL_DIR=${WORK_DIR}/install_host
 
+AVR_LIBC_URL=http://storage.googleapis.com/naclports/mirror/avr-libc-1.8.1.tar.bz2
+AVR_LIBC_SHA=b56fe21b30341869aa768689b0f6a07d896b17fa
+AVR_LIBC_VERSION=avr-libc-1.8.1
+
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 export PATH="${PATH}:${NACL_PACKAGES_BUILD}/binutils-2.25/install_host/bin"
 
@@ -37,4 +41,48 @@ ConfigureStep() {
   BuildHostGccAvr
   ChangeDir ${BUILD_DIR}
   DefaultConfigureStep
+}
+
+AvrLibcDownload() {
+  cd ${NACL_PACKAGES_CACHE}
+  # If matching tarball already exists, don't download again
+  if ! CheckHash ${AVR_LIBC_VERSION}.tar.bz2 ${AVR_LIBC_SHA}; then
+    Fetch ${AVR_LIBC_URL} ${AVR_LIBC_VERSION}.tar.bz2
+    if ! CheckHash ${AVR_LIBC_VERSION}.tar.bz2 ${AVR_LIBC_SHA} ; then
+       Banner "${AVR_LIBC_VERSION}.tar.bz2 failed checksum!"
+       exit -1
+    fi
+  fi
+}
+
+AvrLibcExtractAndInstall() {
+  # Return is avr-libc is already installed.
+  if [ -d ${WORK_DIR}/avr_libc_install ]; then
+    cp -r ${WORK_DIR}/avr_libc_install/* ${INSTALL_DIR}/naclports-dummydir
+    return
+  fi
+
+  # Install avr-libc
+  Banner "Untarring ${AVR_LIBC_VERSION}"
+  tar jxf ${NACL_PACKAGES_CACHE}/${AVR_LIBC_VERSION}.tar.bz2
+  ChangeDir ${AVR_LIBC_VERSION}
+  CC="avr-gcc"
+    LogExecute ./configure \
+    --prefix=${WORK_DIR}/avr_libc_install \
+    --host=avr \
+    --with-http=no \
+    --with-html=no \
+    --with-ftp=no \
+    --with-x=no
+  LogExecute make
+  LogExecute make install
+
+  # avr-libc needs to be in the same directory as the gcc-avr install
+  cp -r ${WORK_DIR}/avr_libc_install/* ${INSTALL_DIR}/naclports-dummydir
+}
+
+InstallStep() {
+  DefaultInstallStep
+  AvrLibcDownload
+  AvrLibcExtractAndInstall
 }

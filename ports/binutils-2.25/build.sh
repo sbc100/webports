@@ -35,24 +35,3 @@ ConfigureStep() {
 
   DefaultConfigureStep
 }
-
-BuildStep() {
-  export CONFIG_SITE
-  DefaultBuildStep
-}
-
-PublishStep() {
-  MakeDir ${PUBLISH_DIR}
-  for nexe in binutils/*.nexe gas/*.nexe ld/*.nexe; do
-    local name=$(basename $nexe .nexe | sed 's/-new//')
-    cp ${nexe} ${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}
-
-    pushd ${PUBLISH_DIR}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-        ${PUBLISH_DIR}/${name}_*${NACL_EXEEXT} \
-        -s . \
-        -o ${name}.nmf
-    popd
-  done
-  DefaultPublishStep
-}

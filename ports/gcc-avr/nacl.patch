@@ -282,6 +282,15 @@ diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
  #ifdef vfork /* Autoconf may define this to fork for us. */
  # define VFORK_STRING "fork"
  #else
+@@ -392,7 +404,7 @@ pex_child_error (struct pex_obj *obj, const char *executable,
+ 
+ extern char **environ;
+ 
+-#if defined(HAVE_SPAWNVE) && defined(HAVE_SPAWNVPE)
++#if (defined(HAVE_SPAWNVE) && defined(HAVE_SPAWNVPE)) || defined(__native_client__)
+ /* Implementation of pex->exec_child using the Cygwin spawn operation.  */
+ 
+ /* Subroutine of pex_unix_exec_child.  Move OLD_FD to a new file descriptor
 @@ -496,6 +508,12 @@ pex_unix_exec_child (struct pex_obj *obj ATTRIBUTE_UNUSED,
                       int in, int out, int errdes, int toclose,
  		     const char **errmsg, int *err)
