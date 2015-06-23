@@ -9,6 +9,7 @@
 export TOOLCHAIN=@TOOLCHAIN@
 
 LIB_DIR=lib32
+export SH=/bin/bash
 export PACKAGE_LIB_DIR=lib32
 export PACKAGE_ALT_LIB_DIR=_platform_specific/x86_32/lib32
 if [ ${NACL_ARCH} = "x86_64" ]; then
