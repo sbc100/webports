@@ -99,25 +99,21 @@ diff --git a/configure b/configure
 diff --git a/leim/Makefile.in b/leim/Makefile.in
 --- a/leim/Makefile.in
 +++ b/leim/Makefile.in
-@@ -31,7 +31,7 @@ srcdir=@srcdir@
+@@ -28,9 +28,12 @@ SHELL = /bin/sh
+ 
+ # Here are the things that we expect ../configure to edit.
+ srcdir=@srcdir@
++top_srcdir = @top_srcdir@
++abs_top_builddir = @abs_top_builddir@
++EXEEXT = @EXEEXT@
  
  # Which Emacs to use to convert TIT files to Emacs Lisp files,
  # byte-compile Emacs Lisp files, and generate the file leim-list.el.
 -EMACS = ../src/emacs
-+EMACS = ../src/emacs${EXEEXT}
++EMACS = ${abs_top_builddir}/src/emacs${EXEEXT}
  
  buildlisppath=${srcdir}/../lisp
- 
-@@ -81,7 +81,8 @@ TIT_MISC=${CHINESE_TIT} ${MISC}
- 	@echo Compiling $<
- 	@${RUN_EMACS} -l ${buildlisppath}/international/quail -f batch-byte-compile $<
- 
--all: leim-list.el compile-main
-+# all: leim-list.el compile-main
-+all: leim-list.el
- .PHONY: all
- 
- TIT_SOURCES= \
+
 diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
 --- a/lib-src/Makefile.in
 +++ b/lib-src/Makefile.in
@@ -231,13 +227,20 @@ diff --git a/lib/symlink.c b/lib/symlink.c
 diff --git a/lisp/Makefile.in b/lisp/Makefile.in
 --- a/lisp/Makefile.in
 +++ b/lisp/Makefile.in
-@@ -30,7 +30,8 @@ VPATH = $(srcdir)
+@@ -21,6 +21,7 @@ SHELL = /bin/sh
+ srcdir = @srcdir@
+ top_srcdir = @top_srcdir@
+ abs_top_builddir = @abs_top_builddir@
++EXEEXT = @EXEEXT@
+ lisp = $(srcdir)
+ VPATH = $(srcdir)
+ 
+@@ -30,7 +31,7 @@ VPATH = $(srcdir)
  # We sometimes change directory before running Emacs (typically when
  # building out-of-tree, we chdir to the source directory), so we need
  # to use an absolute file name.
 -EMACS = ${abs_top_builddir}/src/emacs
-+# TODO(petewil) Convert this to use ${EXEEXT} instead of .nexe - need symbol
-+EMACS = ${abs_top_builddir}/src/emacs.nexe
++EMACS = ${abs_top_builddir}/src/emacs${EXEEXT}
  
  # Command line flags for Emacs.
  
