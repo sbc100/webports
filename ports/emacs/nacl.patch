@@ -329,6 +329,21 @@ diff --git a/lisp/startup.el b/lisp/startup.el
  
  			  ;; If we did not find the user's init file,
  			  ;; set user-init-file conclusively.
+diff --git a/lisp/window.el b/lisp/window.el
+--- a/lisp/window.el
++++ b/lisp/window.el
+@@ -4001,7 +4001,10 @@ right, if any."
+     (let ((quit-restore (window-parameter old-window 'quit-restore)))
+       (when quit-restore
+ 	(set-window-parameter new-window 'quit-restore quit-restore)))
+-    new-window))
++    new-window)
++  ;; To workaround drawing issues with NaCl terminals, redraw now.
++  (if (equal system-type 'nacl)
++      (redraw-display)))
+ 
+ (defalias 'split-window-horizontally 'split-window-right)
+ 
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
