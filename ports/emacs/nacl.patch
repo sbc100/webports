@@ -285,6 +285,23 @@ diff --git a/lisp/loadup.el b/lisp/loadup.el
  
  (if (or (member (nth 3 command-line-args) '("dump" "bootstrap"))
  	(member (nth 4 command-line-args) '("dump" "bootstrap")))
+diff --git a/lisp/shell.el b/lisp/shell.el
+--- a/lisp/shell.el
++++ b/lisp/shell.el
+@@ -292,10 +292,11 @@ Value is a list of strings, which may be nil."
+     (if (and (not purify-flag)
+ 	     (equal name "bash")
+ 	     (file-executable-p prog)
+-	     (string-match "bad option"
++             (and (not (equal system-type 'nacl))
++	          (string-match "bad option"
+ 			   (shell-command-to-string
+ 			    (concat (shell-quote-argument prog)
+-				    " --noediting"))))
++				    " --noediting")))))
+ 	'("-i")
+       '("--noediting" "-i")))
+   "Args passed to inferior shell by \\[shell], if the shell is bash.
 diff --git a/lisp/startup.el b/lisp/startup.el
 --- a/lisp/startup.el
 +++ b/lisp/startup.el
