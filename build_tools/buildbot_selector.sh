@@ -17,13 +17,7 @@ set -o nounset
 # SDK version.  This does not apply to the nightly builders, and
 # should be left unset unless there is ongoing issue with the lastest
 # SDK build.
-# TODO(sbc): Remove this pinned version once we fix he current
-# issues with pnacl/nacl-clang
-# https://code.google.com/p/nativeclient/issues/detail?id=4200
-# https://code.google.com/p/nativeclient/issues/detail?id=4201
-# https://code.google.com/p/nativeclient/issues/detail?id=4202
-# https://code.google.com/p/nativeclient/issues/detail?id=4203
-PINNED_SDK_VERSION=331926
+PINNED_SDK_VERSION=
 
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 NACLPORTS_SRC=$(dirname ${SCRIPT_DIR})
