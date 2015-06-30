@@ -3,3 +3,10 @@
 # found in the LICENSE file.
 
 EXTRA_CONFIGURE_ARGS="--disable-docs --with-arch=x86"
+
+# TODO(sbc): Disable use of random(), because it creates the expectation
+#            that initstate(), setstate() are implemented too.
+#            Remove if initstate() and setstate() are added to libnacl.
+if [ ${NACL_LIBC} = "newlib" ]; then
+  export ac_cv_func_random=no
+fi
