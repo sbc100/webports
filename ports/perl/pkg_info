@@ -8,3 +8,4 @@ DEPENDS=(glibc-compat libtar nacl-spawn)
 # issue at http://code.google.com/p/naclports/issues/detail?id=220
 BUILD_OS=linux
 SHA1=07263da0703d97733a4d51bf77192039462d4a5a
+DISABLED_TOOLCHAIN=(bionic)
