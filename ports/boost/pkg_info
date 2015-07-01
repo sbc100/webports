@@ -7,5 +7,5 @@ DEPENDS=(glibc-compat zlib bzip2)
 BUILD_OS=linux
 # assertion failure in nacl-clang:
 # https://code.google.com/p/nativeclient/issues/detail?id=4122
-DISABLED_TOOLCHAIN=(clang-newlib emscripten)
+DISABLED_TOOLCHAIN=(emscripten)
 SHA1=cef9a0cc7084b1d639e06cd3bc34e4251524c840
