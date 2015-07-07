@@ -17,6 +17,15 @@ __BEGIN_DECLS
 #define F_ULOCK 0
 #define F_LOCK  1
 #define F_TLOCK 2
+
+#if __BSD_VISIBLE
+/* lock operations for flock(2) */
+#define LOCK_SH         0x01            /* shared file lock */
+#define LOCK_EX         0x02            /* exclusive file lock */
+#define LOCK_NB         0x04            /* don't block when locking */
+#define LOCK_UN         0x08            /* unlock file */
+#endif
+
 int lockf(int fd, int command, off_t size);
 
 __END_DECLS

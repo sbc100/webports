@@ -116,6 +116,9 @@ typedef Elf32_Phdr Elf_Phdr;
 /* Define neutral section headers. */
 typedef Elf32_Shdr Elf_Shdr;
 
+/* Define neutral section headers. */
+typedef Elf32_Sym Elf_Sym;
+
 EXTERN_C_END
 
 #endif  /* NATIVE_CLIENT_SRC_INCLUDE_ELF_H_ */

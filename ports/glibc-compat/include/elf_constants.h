@@ -16,6 +16,34 @@
  * http://en.wikipedia.org/wki/Executable_and_Linkable_Format
  */
 
+/*-
+* Copyright (c) 2000, 2001, 2008, 2011, David E. O'Brien
+* Copyright (c) 1998 John D. Polstra.
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+* 1. Redistributions of source code must retain the above copyright
+*   notice, this list of conditions and the following disclaimer.
+* 2. Redistributions in binary form must reproduce the above copyright
+*   notice, this list of conditions and the following disclaimer in the
+*   documentation and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+* OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+* LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+* OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+* SUCH DAMAGE.
+*
+* $FreeBSD$
+*/
 #ifndef NATIVE_CLIENT_SRC_INCLUDE_ELF_CONSTANTS_H_
 #define NATIVE_CLIENT_SRC_INCLUDE_ELF_CONSTANTS_H_
 
@@ -123,6 +151,10 @@ EXTERN_C_BEGIN
  * ELFMAG and SELFMAG are names/values from linux elf.h, for code usage
  * compatibility.
  */
+#define ELFMAG0         0x7f
+#define ELFMAG1         'E'
+#define ELFMAG2         'L'
+#define ELFMAG3         'F'
 #define ELFMAG          "\177ELF"
 #define SELFMAG         4
 
@@ -176,6 +208,24 @@ EXTERN_C_BEGIN
 #define SHF_EXECINSTR   0x4         /* Contains executable instructions */
 #define SHF_MASKOS      0x0f000000  /* Environment-specific use */
 #define SHF_MASKPROC    0xf0000000  /* Processor-specific use */
+
+/* Special section indexes.  */
+#define SHN_UNDEF            0          /* Undefined, missing, irrelevant. */
+#define SHN_ABS         0xfff1          /* Absolute values. */
+#define SHN_COMMON      0xfff2          /* Common data. */
+
+/* sh_type */
+#define SHT_PROGBITS            1       /* program defined information */
+#define SHT_SYMTAB              2       /* symbol table section */
+#define SHT_NOBITS              8       /* no space section */
+
+/* Symbol Binding - ELFNN_ST_BIND - st_info */
+#define STB_LOCAL       0       /* Local symbol */
+#define STB_GLOBAL      1       /* Global symbol */
+#define STB_WEAK        2       /* like global - lower precedence */
+
+/* Symbol type - ELFNN_ST_TYPE - st_info */
+#define STT_FILE        4       /* Source file. */
 
 #define DT_NULL     0
 #define DT_NEEDED   1

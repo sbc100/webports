@@ -16,6 +16,7 @@ CPPFLAGS += -g
 OUT := out
 SOURCES := \
   src/alarm.c \
+  src/err.c \
   src/getprotobyname_r.c \
   src/getservbyname_r.c \
   src/herrno.c \

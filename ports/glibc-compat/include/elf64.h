@@ -45,6 +45,33 @@
  * http://en.wikipedia.org/wki/Executable_and_Linkable_Format
  */
 
+/*-
+* Copyright (c) 1996-1998 John D. Polstra.
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+* 1. Redistributions of source code must retain the above copyright
+*    notice, this list of conditions and the following disclaimer.
+* 2. Redistributions in binary form must reproduce the above copyright
+*   notice, this list of conditions and the following disclaimer in the
+*   documentation and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+* OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+* LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+* OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+* SUCH DAMAGE.
+*
+* $FreeBSD$
+*/
 #ifndef NATIVE_CLIENT_SRC_INCLUDE_ELF64_H_
 #define NATIVE_CLIENT_SRC_INCLUDE_ELF64_H_
 
@@ -111,5 +138,18 @@ typedef struct {
     Elf64_Addr d_ptr;   /* Address value */
   } d_un;
 } Elf64_Dyn;
+
+/*
+  187  * Symbol table entries.
+  188  */
+
+typedef struct {
+  Elf64_Word      st_name;        /* String table index of name. */
+  unsigned char   st_info;        /* Type and binding information. */
+  unsigned char   st_other;       /* Reserved (not used). */
+  Elf64_Half      st_shndx;       /* Section index of symbol. */
+  Elf64_Addr      st_value;       /* Symbol value. */
+  Elf64_Xword     st_size;        /* Size of associated object. */
+} Elf64_Sym;
 
 #endif  /* NATIVE_CLIENT_SRC_INCLUDE_ELF64_H_ */

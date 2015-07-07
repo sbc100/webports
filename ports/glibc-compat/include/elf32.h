@@ -18,6 +18,33 @@
  * http://en.wikipedia.org/wki/Executable_and_Linkable_Format
  */
 
+/*-
+ * Copyright (c) 1996-1998 John D. Polstra.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * $FreeBSD: src/sys/sys/elf32.h,v 1.13 2006/10/17 05:43:30 jkoshy Exp $
+ */
 #ifndef NATIVE_CLIENT_SRC_INCLUDE_ELF32_H_
 #define NATIVE_CLIENT_SRC_INCLUDE_ELF32_H_
 
@@ -33,6 +60,7 @@ typedef uint16_t    Elf32_Half;   /* alignment 2 */
 typedef uint32_t    Elf32_Off;    /* alignment 4 */
 typedef int32_t     Elf32_Sword;  /* alignment 4 */
 typedef uint32_t    Elf32_Word;   /* alignment 4 */
+
 /* unsigned char, size 1, alignment 1 */
 
 /* Define the structure of the file header for 32 bits. */
@@ -116,6 +144,22 @@ typedef struct {
     } a_un;
 } Elf32_auxv_t;
 
+/*
+ * Symbol table entries.
+ */
+
+typedef struct {
+  Elf32_Word  st_name;  /* String table index of name. */
+  Elf32_Addr  st_value; /* Symbol value. */
+  Elf32_Word  st_size;  /* Size of associated object. */
+  unsigned char st_info;  /* Type and binding information. */
+  unsigned char st_other; /* Reserved (not used). */
+  Elf32_Half  st_shndx; /* Section index of symbol. */
+} Elf32_Sym;
+
+/* Macros for accessing the fields of st_info. */
+#define ELF32_ST_BIND(info)             ((info) >> 4)
+#define ELF32_ST_TYPE(info)             ((info) & 0xf)
 EXTERN_C_END
 
 #endif  /* NATIVE_CLIENT_SRC_INCLUDE_ELF32_H_ */
