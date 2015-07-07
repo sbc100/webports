@@ -17,6 +17,7 @@ from naclports import package
 from naclports import package_index
 from naclports import util
 from naclports import paths
+from naclports import bsd_pkg
 from naclports.util import Log, Trace, LogVerbose
 from naclports.error import Error, DisabledError, PkgFormatError
 
@@ -280,6 +281,27 @@ class SourcePackage(package.Package):
   def GetInstalledPackage(self):
     return package.CreateInstalledPackage(self.NAME, self.config)
 
+  def CreatePkgFile(self):
+    """Create and pkg file for use with the FreeBSD pkg tool.
+
+    This step is designed to run after the build scripts and will
+    package up any files published by the PublishByArchForDevEnv
+    step.
+    """
+
+    publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME, self.config.libc,
+        self.config.arch)
+    if not os.path.exists(publish_dir):
+      return
+    abi = 'pkg_' + self.config.arch
+    abi_dir = os.path.join(paths.PACKAGES_ROOT, abi)
+    pkg_file = os.path.join(abi_dir, '%s-%s.tar.bz2' % (self.NAME,
+      self.VERSION))
+
+    util.Makedirs(abi_dir)
+    bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
+        publish_dir, pkg_file)
+
   def Build(self, build_deps, force=None):
     self.CheckBuildable()
 
@@ -315,6 +337,7 @@ class SourcePackage(package.Package):
             self.Extract()
             self.Patch()
             self.RunBuildSh()
+            self.CreatePkgFile()
           finally:
             util.log_level = old_log_level
       except:
