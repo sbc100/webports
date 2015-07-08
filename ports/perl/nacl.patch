@@ -129,6 +129,108 @@ new mode 100755
      PerlInterpreter *my_perl;
  #ifdef PERL_GLOBAL_STRUCT
      struct perl_vars *my_vars = init_global_struct();
+diff --git a/perl.h b/perl.h
+old mode 100644
+new mode 100755
+--- a/perl.h
++++ b/perl.h
+@@ -3561,7 +3561,7 @@ my_swap16(const U16 x) {
+ #endif
+ 
+ #ifndef __cplusplus
+-#if !(defined(WIN32) || defined(UNDER_CE) || defined(SYMBIAN))
++#if !(defined(WIN32) || defined(UNDER_CE) || defined(SYMBIAN) || defined(__native_client__))
+ Uid_t getuid (void);
+ Uid_t geteuid (void);
+ Gid_t getgid (void);
+diff --git a/pod/Makefile.SH b/pod/Makefile.SH
+old mode 100644
+new mode 100755
+diff --git a/pp_sys.c b/pp_sys.c
+old mode 100644
+new mode 100755
+--- a/pp_sys.c
++++ b/pp_sys.c
+@@ -32,6 +32,10 @@
+ #include "time64.h"
+ #include "time64.c"
+ 
++#if defined(__native_client__)
++#include <spawn.h>
++#endif
++
+ #ifdef I_SHADOW
+ /* Shadow password support for solaris - pdo@cs.umd.edu
+  * Not just Solaris: at least HP-UX, IRIX, Linux.
+@@ -4114,7 +4118,7 @@ PP(pp_system)
+ 	TAINT_PROPER("system");
+     }
+     PERL_FLUSHALL_FOR_CHILD;
+-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
++#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__native_client__) && !defined(OS2) || defined(PERL_MICRO)
+     {
+ 	Pid_t childpid;
+ 	int pp[2];
+@@ -4213,26 +4217,58 @@ PP(pp_system)
+ 	}
+ 	PerlProc__exit(-1);
+     }
+-#else /* ! FORK or VMS or OS/2 */
++#else /* ! FORK or VMS or OS/2 or NaCl */
+     PL_statusvalue = 0;
+     result = 0;
++    char * args[(SP-MARK)+3];
++    args[0] = "bash";
++    args[1] = "-c";
++    int index = 2;
++    while (++MARK <= SP) {
++        if (*MARK) 
++            args[index++] = SvPV_nolen(*MARK);
++        else
++            args[index++] = "";
++    }
++    args[index] = NULL;
+     if (PL_op->op_flags & OPf_STACKED) {
+ 	SV * const really = *++MARK;
+ #  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
+ 	value = (I32)do_aspawn(really, MARK, SP);
+ #  else
++#  if defined(__native_client__)
++        /* In subsequent spawnv's, ideally "really"
++         * should be first checked. If it is not NULL,
++         * then it should be used instead of args[0]
++         * But I'm replacing with args[0] or "bash",
++         * since it always works.
++         */
++        value = (I32)spawnv(P_WAIT, args[0], args); 
++#  else
+ 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
+ #  endif
++#  endif
+     }
+     else if (SP - MARK != 1) {
+ #  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__) || defined(__VMS)
+ 	value = (I32)do_aspawn(NULL, MARK, SP);
+ #  else
++#  if defined(__native_client__)
++        /*
++         * "really" is NULL.
++         */
++        value = (I32)spawnv(P_WAIT, args[0], args);
++#  else
+ 	value = (I32)do_aspawn(NULL, (void **)MARK, (void **)SP);
+ #  endif
++#  endif
+     }
+     else {
++#  if defined(__native_client__)
++        value = (I32)spawnv(P_WAIT, args[0], args);
++#  else
+ 	value = (I32)do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
++#  endif
+     }
+     if (PL_statusvalue == -1)	/* hint that value must be returned as is */
+ 	result = 1;
 diff --git a/x2p/a2py.c b/x2p/a2py.c
 old mode 100644
 new mode 100755

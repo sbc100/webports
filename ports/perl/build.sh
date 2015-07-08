@@ -61,6 +61,13 @@ BuildHostMiniperl() {
   fi
 }
 
+# Don't include unistd.h for i686, because it causes issues
+# with spawn.h, which we need for spawnv
+UNDEF_FOR_I686='define'
+if [ "${NACL_ARCH}" = "i686" ] ; then
+  UNDEF_FOR_I686='undef'
+fi
+
 # This is required to change the parameters in config.sh as according
 # to their values on host, since just using them in config.sh (after
 # export) doesn't work
@@ -85,6 +92,7 @@ SedWork() {
   sed -i "s%\${PERL_STDIO_CNT}%${PERL_STDIO_CNT}%g" $1
   sed -i "s%\${PERL_STDIO_PTR}%${PERL_STDIO_PTR}%g" $1
   sed -i "s%\${PERL_DLSRC}%${PERL_DLSRC}%g" $1
+  sed -i "s%\$UNDEF_FOR_I686%${UNDEF_FOR_I686}%g" $1
 }
 
 # copy perl_pepper.c to source directory for core perl
