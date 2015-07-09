@@ -239,6 +239,37 @@ TEST(Pipes, Echo) {
   EXPECT_EQ(0, close(pipe_b[0]));
 }
 
+// Try stdout with pipes.
+TEST(Pipes, StdoutEcho) {
+  int pipes[2];
+
+  // Create pipe pair pipes[1] -> pipe[0]
+  ASSERT_EQ(0, pipe(pipes));
+
+  // Do a vfork, and do an echo from child.
+  pid_t pid = vfork();
+  ASSERT_GE(pid, 0);
+  if (!pid) {
+    // Tie child's stdout with pipe's write end.
+    ASSERT_EQ(1, dup2(pipes[1], 1));
+    EXPECT_EQ(0, close(pipes[0]));
+    execlp(argv0, argv0, "echo", NULL);
+  }
+
+  EXPECT_EQ(0, close(pipes[1]));
+  char check_msg[] = "test";
+  char buffer[100];
+  int total = 0, len;
+  while (total < strlen(check_msg)) {
+    len = read(pipes[0], buffer+total, sizeof(buffer));
+    ASSERT_GE(len, 0);
+    if (len == 0) break;
+    total += len;
+  }
+  ASSERT_EQ(0, memcmp(buffer, check_msg, len));
+  EXPECT_EQ(0, close(pipes[0]));
+}
+
 // Write to an echo process, close immediately, then wait for reply.
 TEST(Pipes, PipeFastClose) {
   int pipe_a[2];
@@ -367,6 +398,10 @@ extern "C" int nacl_main(int argc, char **argv) {
     return pipes_child(argc, argv);
   } else if (argc == 4 && strcmp(argv[1], "cloexec_check") == 0) {
     return cloexec_check_child(argc, argv);
+  } else if (argc == 2 && strcmp(argv[1], "echo") == 0) {
+    char msg[] = "test";
+    write(1, msg, sizeof(msg));
+    return 0;
   }
   // Preserve argv[0] for use in some tests.
   argv0 = argv[0];
