@@ -12,8 +12,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
 fi
 
 InstallStep() {
-  export PUBLISH_CREATE_NMF_ARGS="-L ${DESTDIR_LIB}"
-
   DefaultInstallStep
   PublishByArchForDevEnv
 }

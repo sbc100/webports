@@ -1,0 +1,686 @@
+diff --git a/compat/bsd_compat.h b/compat/bsd_compat.h
+--- a/compat/bsd_compat.h
++++ b/compat/bsd_compat.h
+@@ -57,6 +57,10 @@
+ #include <bsd/libutil.h>
+ #endif
+ 
++#ifdef __native_client__
++#include <stdio.h>
++#endif
++
+ #include <sys/stat.h>
+ #include "endian_util.h"
+ 
+@@ -146,11 +150,11 @@ char * strnstr(const char *s, const char *find, size_t slen);
+ #define __DECONST(type, var)    ((type)(uintptr_t)(const void *)(var))
+ #endif
+ 
+-#ifndef __unused
++#ifndef _UNUSED_
+ #ifdef __GNUC__
+-# define __unused __attribute__((__unused__))
++# define _UNUSED_  __attribute__((__unused__))
+ #else
+-# define __unused
++# define _UNUSED_
+ #endif
+ #endif
+ 
+diff --git a/compat/closefrom.c b/compat/closefrom.c
+--- a/compat/closefrom.c
++++ b/compat/closefrom.c
+@@ -52,7 +52,7 @@
+ #endif
+ 
+ #if 0
+-__unused static const char rcsid[] = "$Sudo: closefrom.c,v 1.11 2006/08/17 15:26:54 millert Exp $";
++_UNUSED_ static const char rcsid[] = "$Sudo: closefrom.c,v 1.11 2006/08/17 15:26:54 millert Exp $";
+ #endif /* lint */
+ 
+ /*
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -243,17 +243,7 @@ AC_SUBST([GIT_HEAD])
+ AC_DEFINE_UNQUOTED([GIT_HEAD], $GIT_HEAD)
+ AC_DEFINE([PKG_API], [api_ver])
+ 
+-AC_RUN_IFELSE(
+-  [AC_LANG_SOURCE(
+-    [[
+-    #include <sys/types.h>
+-    #include <sys/socket.h>
+-    int main() { return socket(AF_LOCAL, SOCK_SEQPACKET, 0) == -1 ? -1 : 0; }
+-    ]]
+-  )],
+-  [AC_DEFINE([HAVE_SEQPACKET], 1, [Define to 1 if you have SOCK_SEQPACKET working])]
+-)
+-
++AC_DEFINE([HAVE_SEQPACKET], 1, [Define to 1 if you have SOCK_SEQPACKET working])
+ AC_SUBST([HAVE_SEQPACKET])
+ 
+ AC_SEARCH_LIBS([lzma_version_string], [lzma], [], [
+diff --git a/external/libelf/_libelf_config.h b/external/libelf/_libelf_config.h
+--- a/external/libelf/_libelf_config.h
++++ b/external/libelf/_libelf_config.h
+@@ -40,7 +40,7 @@
+ 
+ #endif	/* __DragonFly__ */
+ 
+-#ifdef __FreeBSD__
++#if defined (__FreeBSD__) || defined(__native_client__)
+ 
+ /*
+  * Define LIBELF_{ARCH,BYTEORDER,CLASS} based on the machine architecture.
+diff --git a/external/libfetch/file.c b/external/libfetch/file.c
+--- a/external/libfetch/file.c
++++ b/external/libfetch/file.c
+@@ -115,13 +115,13 @@ fetch_stat_file(const char *fn, struct url_stat *us)
+ }
+ 
+ int
+-fetchStatFile(struct url *u, struct url_stat *us, const char *flags __unused)
++fetchStatFile(struct url *u, struct url_stat *us, const char *flags _UNUSED_)
+ {
+ 	return (fetch_stat_file(u->doc, us));
+ }
+ 
+ struct url_ent *
+-fetchListFile(struct url *u, const char *flags __unused)
++fetchListFile(struct url *u, const char *flags _UNUSED_)
+ {
+ 	struct dirent *de;
+ 	struct url_stat us;
+diff --git a/external/libfetch/ftp.c b/external/libfetch/ftp.c
+--- a/external/libfetch/ftp.c
++++ b/external/libfetch/ftp.c
+@@ -553,7 +553,7 @@ ftp_writefn(void *v, const char *buf, int len)
+ }
+ 
+ static off_t
+-ftp_seekfn(void *v, off_t pos __unused, int whence __unused)
++ftp_seekfn(void *v, off_t pos _UNUSED_, int whence _UNUSED_)
+ {
+ 	struct ftpio *io;
+ 
+@@ -1208,7 +1208,7 @@ fetchStatFTP(struct url *url, struct url_stat *us, const char *flags)
+  * List a directory
+  */
+ struct url_ent *
+-fetchListFTP(struct url *url __unused, const char *flags __unused)
++fetchListFTP(struct url *url _UNUSED_, const char *flags _UNUSED_)
+ {
+ 	warnx("fetchListFTP(): not implemented");
+ 	return (NULL);
+diff --git a/external/libfetch/http.c b/external/libfetch/http.c
+--- a/external/libfetch/http.c
++++ b/external/libfetch/http.c
+@@ -2042,7 +2042,7 @@ fetchGetHTTP(struct url *URL, const char *flags)
+  * Store a file by HTTP
+  */
+ FILE *
+-fetchPutHTTP(struct url *URL __unused, const char *flags __unused)
++fetchPutHTTP(struct url *URL _UNUSED_, const char *flags _UNUSED_)
+ {
+ 	warnx("fetchPutHTTP(): not implemented");
+ 	return (NULL);
+@@ -2067,7 +2067,7 @@ fetchStatHTTP(struct url *URL, struct url_stat *us, const char *flags)
+  * List a directory
+  */
+ struct url_ent *
+-fetchListHTTP(struct url *url __unused, const char *flags __unused)
++fetchListHTTP(struct url *url _UNUSED_, const char *flags _UNUSED_)
+ {
+ 	warnx("fetchListHTTP(): not implemented");
+ 	return (NULL);
+diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
+--- a/external/sqlite/sqlite3.c
++++ b/external/sqlite/sqlite3.c
+@@ -25482,7 +25482,7 @@ static int posixOpen(const char *zFile, int flags, int mode){
+ ** we are not running as root.
+ */
+ static int posixFchown(int fd, uid_t uid, gid_t gid){
+-#if OS_VXWORKS
++#if OS_VXWORKS || defined (__native_client__)
+   return 0;
+ #else
+   return geteuid() ? 0 : fchown(fd,uid,gid);
+diff --git a/libpkg/backup.c b/libpkg/backup.c
+--- a/libpkg/backup.c
++++ b/libpkg/backup.c
+@@ -42,7 +42,7 @@
+ #define NPAGES	4
+ 
+ static int
+-ps_cb(void *ps, int ncols, char **coltext, __unused char **colnames)
++ps_cb(void *ps, int ncols, char **coltext, _UNUSED_ char **colnames)
+ {
+ 	/* We should have exactly one row and one column of output */
+ 	if (ncols != 1)
+diff --git a/libpkg/dns_utils.c b/libpkg/dns_utils.c
+--- a/libpkg/dns_utils.c
++++ b/libpkg/dns_utils.c
+@@ -238,6 +238,8 @@ dns_getsrvinfo(const char *zone)
+ 
+ int
+ set_nameserver(const char *nsname) {
++  // This function may enable when getaddrinfo is available in nacl
++#if !defined(__native_client__)
+ 	struct __res_state res;
+ 	union res_sockaddr_union u[MAXNS];
+ 	struct addrinfo *answer = NULL;
+@@ -275,7 +277,7 @@ set_nameserver(const char *nsname) {
+ 		return (-1);
+ 
+ 	_res = res;
+-
++#endif
+ 	return (0);
+ }
+ #else
+diff --git a/libpkg/fetch.c b/libpkg/fetch.c
+--- a/libpkg/fetch.c
++++ b/libpkg/fetch.c
+@@ -43,6 +43,10 @@
+ 
+ #include <bsd_compat.h>
+ 
++#ifdef __native_client__
++#include <spawn.h>
++#endif
++
+ #include "pkg.h"
+ #include "private/event.h"
+ #include "private/pkg.h"
+@@ -346,7 +350,11 @@ start_ssh(struct pkg_repo *repo, struct url *u, off_t *sz)
+ 		    socketpair(AF_UNIX, SOCK_STREAM, 0, sshout) < 0)
+ 			return(EPKG_FATAL);
+ 
++#ifdef __native_client__
++		repo->sshio.pid = vfork();
++#else
+ 		repo->sshio.pid = fork();
++#endif
+ 		if (repo->sshio.pid == -1) {
+ 			pkg_emit_errno("Cannot fork", "start_ssh");
+ 			return (EPKG_FATAL);
+diff --git a/libpkg/pkg.c b/libpkg/pkg.c
+--- a/libpkg/pkg.c
++++ b/libpkg/pkg.c
+@@ -182,7 +182,7 @@ pkg_type(const struct pkg * restrict pkg)
+ }
+ 
+ static ucl_object_t *
+-manifest_schema_open(pkg_t type __unused)
++manifest_schema_open(pkg_t type _UNUSED_)
+ {
+ 	struct ucl_parser *parser;
+ 	static const char manifest_schema_str[] = ""
+@@ -1930,7 +1930,11 @@ pkg_open_root_fd(struct pkg *pkg)
+ 
+ 	strlcpy(pkg->rootpath, path, sizeof(pkg->rootpath));
+ 
++#ifdef __native_client__
++	if ((pkg->rootfd = opendir(path)) >= 0 )
++#else
+ 	if ((pkg->rootfd = open(path , O_DIRECTORY|O_CLOEXEC)) >= 0 )
++#endif
+ 		return (EPKG_OK);
+ 
+ 	pkg_emit_errno("open", obj ? pkg_object_string(obj) : "/");
+diff --git a/libpkg/pkg_create.c b/libpkg/pkg_create.c
+--- a/libpkg/pkg_create.c
++++ b/libpkg/pkg_create.c
+@@ -315,7 +315,11 @@ pkg_create_staged(const char *outdir, pkg_formats format, const char *rootdir,
+ 
+ 	pkg_debug(1, "Creating package from stage directory: '%s'", rootdir);
+ 
++#ifdef __native_client__
++	if ((mfd = opendir(md_dir)) == -1) {
++#else
+ 	if ((mfd = open(md_dir, O_DIRECTORY)) == -1) {
++#endif
+ 		pkg_emit_errno("open", md_dir);
+ 		goto cleanup;
+ 	}
+diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
+--- a/libpkg/pkg_delete.c
++++ b/libpkg/pkg_delete.c
+@@ -215,6 +215,7 @@ rmdir_p(struct pkgdb *db, struct pkg *pkg, char *dir, const char *prefix_r)
+ 	}
+ #endif
+ 
++#if !defined(__native_client__)
+ 	if (unlinkat(pkg->rootfd, dir, AT_REMOVEDIR) == -1) {
+ 		if (errno != ENOTEMPTY && errno != EBUSY)
+ 			pkg_emit_errno("unlinkat", dir);
+@@ -222,6 +223,7 @@ rmdir_p(struct pkgdb *db, struct pkg *pkg, char *dir, const char *prefix_r)
+ 		if (errno != ENOENT)
+ 			return;
+ 	}
++#endif
+ 
+ 	/* No recursivity for packages out of the prefix */
+ 	if (strncmp(prefix_r, dir, strlen(prefix_r)) != 0)
+@@ -279,12 +281,21 @@ pkg_delete_file(struct pkg *pkg, struct pkg_file *file, unsigned force)
+ 	/* Regular files and links */
+ 	/* check sha256 */
+ 	if (!force && file->sum[0] != '\0') {
++#ifdef __native_client__
++		if (fstatat(pkg->rootfd, path, &st, 0) == -1) {
++			pkg_emit_error("cannot stat %s%s%s: %s", pkg->rootpath,
++			pkg->rootpath[strlen(pkg->rootpath) - 1] == '/' ? "" : "/",
++				path, strerror(errno));
++			return;
++    		}
++#else
+ 		if (fstatat(pkg->rootfd, path, &st, AT_SYMLINK_NOFOLLOW) == -1) {
+ 			pkg_emit_error("cannot stat %s%s%s: %s", pkg->rootpath,
+ 			    pkg->rootpath[strlen(pkg->rootpath) - 1] == '/' ? "" : "/",
+ 			    path, strerror(errno));
+ 			return;
+ 		}
++#endif
+ 		if (S_ISLNK(st.st_mode)) {
+ 			if (pkg_symlink_cksumat(pkg->rootfd, path, NULL,
+ 			    sha256) != EPKG_OK)
+@@ -394,7 +405,7 @@ pkg_delete_dir(struct pkg *pkg, struct pkg_dir *dir)
+ }
+ 
+ int
+-pkg_delete_dirs(__unused struct pkgdb *db, struct pkg *pkg, struct pkg *new)
++pkg_delete_dirs(_UNUSED_ struct pkgdb *db, struct pkg *pkg, struct pkg *new)
+ {
+ 	struct pkg_dir	*dir = NULL;
+ 	struct pkg_dir	*d;
+diff --git a/libpkg/pkg_macho.c b/libpkg/pkg_macho.c
+--- a/libpkg/pkg_macho.c
++++ b/libpkg/pkg_macho.c
+@@ -146,7 +146,7 @@ analyse_macho(struct pkg *pkg, const char *fpath,
+ }
+ 
+ static int
+-add_dylibs_to_pkg(__unused void *actdata, struct pkg *pkg, const char *fpath,
++add_dylibs_to_pkg(_UNUSED_ void *actdata, struct pkg *pkg, const char *fpath,
+ 		  const char *name, bool is_shlib)
+ {
+ 	/* Skip references to system libraries */
+diff --git a/libpkg/pkg_ports.c b/libpkg/pkg_ports.c
+--- a/libpkg/pkg_ports.c
++++ b/libpkg/pkg_ports.c
+@@ -157,7 +157,7 @@ free_file_attr(struct file_attr *a)
+ }
+ 
+ static void
+-sbuf_append(struct sbuf *buf, __unused const char *comment, const char *str, ...)
++sbuf_append(struct sbuf *buf, _UNUSED_ const char *comment, const char *str, ...)
+ {
+ 	va_list ap;
+ 
+@@ -524,7 +524,7 @@ comment_key(struct plist *p, char *line, struct file_attr *a)
+ }
+ 
+ static int
+-ignore_next(struct plist *p, __unused char *line, struct file_attr *a)
++ignore_next(struct plist *p, _UNUSED_ char *line, struct file_attr *a)
+ {
+ 	p->ignore_next = true;
+ 	free_file_attr(a);
+diff --git a/libpkg/pkg_printf.c b/libpkg/pkg_printf.c
+--- a/libpkg/pkg_printf.c
++++ b/libpkg/pkg_printf.c
+@@ -1903,8 +1903,8 @@ format_short_checksum(struct sbuf *sbuf, const void *data, struct percent_esc *p
+  * %% -- Output a literal '%' character
+  */
+ struct sbuf *
+-format_literal_percent(struct sbuf *sbuf, __unused const void *data,
+-		       __unused struct percent_esc *p)
++format_literal_percent(struct sbuf *sbuf, _UNUSED_ const void *data,
++		       _UNUSED_ struct percent_esc *p)
+ {
+ 	sbuf_putc(sbuf, '%');
+ 	return (sbuf);
+@@ -1915,8 +1915,8 @@ format_literal_percent(struct sbuf *sbuf, __unused const void *data,
+  * the text through unchanged.
+  */
+ struct sbuf *
+-format_unknown(struct sbuf *sbuf, __unused const void *data,
+-		       __unused struct percent_esc *p)
++format_unknown(struct sbuf *sbuf, _UNUSED_ const void *data,
++		       _UNUSED_ struct percent_esc *p)
+ {
+ 	sbuf_putc(sbuf, '%');
+ 	return (NULL);
+diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
+--- a/libpkg/pkg_repo.c
++++ b/libpkg/pkg_repo.c
+@@ -36,7 +36,6 @@
+ 
+ #include <archive_entry.h>
+ #include <assert.h>
+-#include <fts.h>
+ #include <libgen.h>
+ #include <sqlite3.h>
+ #include <string.h>
+diff --git a/libpkg/pkg_repo_create.c b/libpkg/pkg_repo_create.c
+--- a/libpkg/pkg_repo_create.c
++++ b/libpkg/pkg_repo_create.c
+@@ -313,7 +313,11 @@ pkg_create_repo_worker(struct pkg_fts_item *start, size_t nelts,
+ 		}
+ 	}
+ 
++#ifdef __native_client__
++	pid = vfork();
++#else
+ 	pid = fork();
++#endif
+ 	switch(pid) {
+ 	case -1:
+ 		pkg_emit_errno("pkg_create_repo_worker", "fork");
+@@ -452,7 +456,11 @@ cleanup:
+ 	free(mdigest);
+ 
+ 	pkg_debug(1, "worker done");
++#ifdef __native_client__
++	_exit(ret);
++#else
+ 	exit(ret);
++#endif
+ }
+ 
+ static int
+diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
+--- a/libpkg/pkgdb.c
++++ b/libpkg/pkgdb.c
+@@ -189,7 +189,7 @@ pkgdb_regex_delete(void *p)
+ }
+ 
+ void
+-pkgdb_now(sqlite3_context *ctx, int argc, __unused sqlite3_value **argv)
++pkgdb_now(sqlite3_context *ctx, int argc, _UNUSED_ sqlite3_value **argv)
+ {
+ 	if (argc != 0) {
+ 		sqlite3_result_error(ctx, "Invalid usage of now() "
+@@ -864,7 +864,7 @@ pkgdb_access(unsigned mode, unsigned database)
+ }
+ 
+ static void
+-pkgdb_profile_callback(void *ud __unused, const char *req, sqlite3_uint64 nsec)
++pkgdb_profile_callback(void *ud _UNUSED_, const char *req, sqlite3_uint64 nsec)
+ {
+ 	/* According to sqlite3 documentation, nsec has milliseconds accuracy */
+ 	nsec /= 1000000LLU;
+@@ -2607,8 +2607,8 @@ pkgdb_file_set_cksum(struct pkgdb *db, struct pkg_file *file,
+  * Used both in the shell and pkgdb_open
+  */
+ int
+-pkgdb_sqlcmd_init(sqlite3 *db, __unused const char **err,
+-    __unused const void *noused)
++pkgdb_sqlcmd_init(sqlite3 *db, _UNUSED_ const char **err,
++    _UNUSED_ const void *noused)
+ {
+ 	sqlite3_create_function(db, "now", 0, SQLITE_ANY, NULL,
+ 	    pkgdb_now, NULL, NULL);
+diff --git a/libpkg/plugins.c b/libpkg/plugins.c
+--- a/libpkg/plugins.c
++++ b/libpkg/plugins.c
+@@ -31,7 +31,6 @@
+ 
+ #include <ctype.h>
+ #include <errno.h>
+-#include <fts.h>
+ #include <fcntl.h>
+ #include <dlfcn.h>
+ #include <stdbool.h>
+diff --git a/libpkg/private/pkg.h b/libpkg/private/pkg.h
+--- a/libpkg/private/pkg.h
++++ b/libpkg/private/pkg.h
+@@ -61,11 +61,11 @@
+ # define MAXLOGNAME 64
+ # endif
+ #endif
+-#ifndef __unused
++#ifndef _UNUSED_
+ # ifdef __GNUC__
+-# define __unused __attribute__ ((__unused__))
++# define _UNUSED_ __attribute__ ((__unused__))
+ # else
+-# define __unused
++# define _UNUSED_
+ # endif
+ #endif
+ 
+diff --git a/libpkg/private/pkg_printf.h b/libpkg/private/pkg_printf.h
+--- a/libpkg/private/pkg_printf.h
++++ b/libpkg/private/pkg_printf.h
+@@ -227,8 +227,8 @@ _static struct sbuf *format_version(struct sbuf *, const void *, struct percent_
+ _static struct sbuf *format_home_url(struct sbuf *, const void *, struct percent_esc *);
+ _static struct sbuf *format_pkgsize(struct sbuf *, const void *, struct percent_esc *);
+ _static struct sbuf *format_short_checksum(struct sbuf *, const void *, struct percent_esc *);
+-_static struct sbuf *format_literal_percent(struct sbuf *, __unused const void *, __unused struct percent_esc *);
+-_static struct sbuf *format_unknown(struct sbuf *, __unused const void *, __unused struct percent_esc *);
++_static struct sbuf *format_literal_percent(struct sbuf *, _UNUSED_ const void *, _UNUSED_ struct percent_esc *);
++_static struct sbuf *format_unknown(struct sbuf *, _UNUSED_ const void *, _UNUSED_ struct percent_esc *);
+ _static struct sbuf *format_provided(struct sbuf *, const void *, struct percent_esc *);
+ _static struct sbuf *format_required(struct sbuf *, const void *, struct percent_esc *);
+ _static struct sbuf *format_provide_name(struct sbuf *, const void *, struct percent_esc *);
+diff --git a/libpkg/private/pkgdb.h b/libpkg/private/pkgdb.h
+--- a/libpkg/private/pkgdb.h
++++ b/libpkg/private/pkgdb.h
+@@ -181,7 +181,7 @@ void pkgdb_regex(sqlite3_context *ctx, int argc, sqlite3_value **argv);
+ void pkgdb_regex_delete(void *p);
+ void pkgdb_split_uid(sqlite3_context *ctx, int argc, sqlite3_value **argv);
+ void pkgdb_split_version(sqlite3_context *ctx, int argc, sqlite3_value **argv);
+-void pkgdb_now(sqlite3_context *ctx, int argc, __unused sqlite3_value **argv);
++void pkgdb_now(sqlite3_context *ctx, int argc, _UNUSED_ sqlite3_value **argv);
+ void pkgdb_myarch(sqlite3_context *ctx, int argc, sqlite3_value **argv);
+ int pkgdb_sqlcmd_init(sqlite3 *db, const char **err, const void *noused);
+ int pkgdb_update_config_file_content(struct pkg *pkg, sqlite3 *s);
+diff --git a/libpkg/repo/binary/init.c b/libpkg/repo/binary/init.c
+--- a/libpkg/repo/binary/init.c
++++ b/libpkg/repo/binary/init.c
+@@ -315,7 +315,9 @@ pkg_repo_binary_open(struct pkg_repo *repo, unsigned mode)
+ 	/*
+ 	 * Fall back on unix-dotfile locking strategy if on a network filesystem
+ 	 */
+-#if defined(HAVE_SYS_STATVFS_H) && defined(ST_LOCAL)
++#ifdef __native_client__
++	sqlite3_vfs_register(sqlite3_vfs_find("unix-dotfile"), 1);
++#elif defined(HAVE_SYS_STATVFS_H) && defined(ST_LOCAL)
+ 	struct statvfs stfs;
+ 
+ 	if (statvfs(dbdir, &stfs) == 0) {
+@@ -433,7 +435,9 @@ pkg_repo_binary_create(struct pkg_repo *repo)
+ 	/*
+ 	 * Fall back on unix-dotfile locking strategy if on a network filesystem
+ 	 */
+-#if defined(HAVE_SYS_STATVFS_H) && defined(ST_LOCAL)
++#ifdef __native_client__
++	sqlite3_vfs_register(sqlite3_vfs_find("unix-dotfile"), 1);
++#elif defined(HAVE_SYS_STATVFS_H) && defined(ST_LOCAL)
+ 	struct statvfs stfs;
+ 
+ 	if (statvfs(dbdir, &stfs) == 0) {
+diff --git a/libpkg/repo/binary/update.c b/libpkg/repo/binary/update.c
+--- a/libpkg/repo/binary/update.c
++++ b/libpkg/repo/binary/update.c
+@@ -381,7 +381,7 @@ pkg_repo_binary_register_conflicts(const char *origin, char **conflicts,
+ 
+ static int
+ pkg_repo_binary_add_from_manifest(char *buf, sqlite3 *sqlite, size_t len,
+-		struct pkg_manifest_key **keys, struct pkg **p __unused,
++		struct pkg_manifest_key **keys, struct pkg **p _UNUSED_,
+ 		struct pkg_repo *repo)
+ {
+ 	int rc = EPKG_OK;
+@@ -417,7 +417,7 @@ cleanup:
+ 	return (rc);
+ }
+ 
+-static void __unused
++static void _UNUSED_
+ pkg_repo_binary_parse_conflicts(FILE *f, sqlite3 *sqlite)
+ {
+ 	size_t linecap = 0;
+diff --git a/src/convert.c b/src/convert.c
+--- a/src/convert.c
++++ b/src/convert.c
+@@ -122,7 +122,7 @@ convert_from_old(const char *pkg_add_dbdir, bool dry_run)
+ }
+ 
+ int
+-exec_convert(__unused int argc, __unused char **argv)
++exec_convert(_UNUSED_ int argc, _UNUSED_ char **argv)
+ {
+ 	int		 ch;
+ 	bool		 dry_run = false;
+diff --git a/src/event.c b/src/event.c
+--- a/src/event.c
++++ b/src/event.c
+@@ -51,6 +51,10 @@
+ #include <libutil.h>
+ #endif
+ 
++#ifdef __native_client__
++#include <spawn.h>
++#endif
++
+ #include <bsd_compat.h>
+ 
+ #include "pkg.h"
+@@ -202,7 +206,11 @@ event_sandboxed_call(pkg_sandbox_cb func, int fd, void *ud)
+ 	int status, ret;
+ 
+ 	ret = -1;
++#ifdef __native_client__
++	pid = vfork();
++#else
+ 	pid = fork();
++#endif
+ 
+ 	switch(pid) {
+ 	case -1:
+@@ -237,7 +245,11 @@ event_sandboxed_call(pkg_sandbox_cb func, int fd, void *ud)
+ #ifdef HAVE_CAPSICUM
+ 	if (cap_enter() < 0 && errno != ENOSYS) {
+ 		warn("cap_enter() failed");
++#ifdef __native_client__
++    		_exit (EPKG_FATAL);
++#else
+ 		return (EPKG_FATAL);
++#endif
+ 	}
+ #endif
+ 
+@@ -264,8 +276,11 @@ event_sandboxed_get_string(pkg_sandbox_cb func, char **result, int64_t *len,
+ 		return (EPKG_FATAL);
+ 	}
+ 
++#ifdef __native_client__
++  	pid = vfork();
++#else
+ 	pid = fork();
+-
++#endif
+ 	switch(pid) {
+ 	case -1:
+ 		warn("fork failed");
+@@ -341,7 +356,11 @@ event_sandboxed_get_string(pkg_sandbox_cb func, char **result, int64_t *len,
+ #ifdef HAVE_CAPSICUM
+ 	if (cap_enter() < 0 && errno != ENOSYS) {
+ 		warn("cap_enter() failed");
++#ifdef __native_client__
++		_exit (EPKG_FATAL);
++#else
+ 		return (EPKG_FATAL);
++#endif
+ 	}
+ #endif
+ 
+diff --git a/src/main.c b/src/main.c
+--- a/src/main.c
++++ b/src/main.c
+@@ -60,6 +60,10 @@
+ 
+ #include <pkg.h>
+ 
++#ifdef __native_client__
++#include <spawn.h>
++#endif
++
+ #include "pkgcli.h"
+ 
+ /* Used to define why do we show usage message to a user */
+@@ -453,6 +457,14 @@ start_process_worker(char *const *save_argv)
+ 	 * process only. */
+ 
+ 	while (1) {
++#ifdef __native_client__
++		child_pid = spawnve(P_NOWAIT, getprogname(), save_argv, NULL);
++		if (child_pid < 0) {
++			fprintf(stderr, "spawnve: %s\n", strerror(errno));
++			exit(1);
++		}
++		{
++#else
+ 		child_pid = fork();
+ 
+ 		if (child_pid == 0) {
+@@ -463,7 +475,7 @@ start_process_worker(char *const *save_argv)
+ 		} else {
+ 			if (child_pid == -1)
+ 				err(EX_OSERR, "Failed to fork worker process");
+-
++#endif
+ 			while (waitpid(child_pid, &status, 0) == -1) {
+ 				if (errno != EINTR)
+ 					err(EX_OSERR, "Child process pid=%d", (int)child_pid);
+diff --git a/src/plugins.c b/src/plugins.c
+--- a/src/plugins.c
++++ b/src/plugins.c
+@@ -47,7 +47,7 @@ exec_plugins(int argc, char **argv)
+ {
+ 	struct pkg_plugin *p = NULL;
+ 	int ch;
+-	bool __unused list_only = true;
++	bool _UNUSED_ list_only = true;
+ 
+ 	struct option longopts[] = {
+ 		{ "list-only",	no_argument,	NULL,	'l' },
+diff --git a/src/register.c b/src/register.c
+--- a/src/register.c
++++ b/src/register.c
+@@ -102,7 +102,7 @@ exec_register(int argc, char **argv)
+ 
+ 	bool		 developer;
+ 	bool		 legacy        = false;
+-	bool		 __unused metadata_only = false;
++	bool		 _UNUSED_ metadata_only = false;
+ 	bool		 testing_mode  = false;
+ 
+ 	int		 ch;
+diff --git a/src/ssh.c b/src/ssh.c
+--- a/src/ssh.c
++++ b/src/ssh.c
+@@ -51,7 +51,7 @@ usage_ssh(void)
+ }
+ 
+ int
+-exec_ssh(int argc, char **argv __unused)
++exec_ssh(int argc, char **argv _UNUSED_)
+ {
+ 	int fd = -1;
+ 	const char *restricted = NULL;
+diff --git a/src/version.c b/src/version.c
+--- a/src/version.c
++++ b/src/version.c
+@@ -365,7 +365,7 @@ free_categories(void)
+ static void
+ free_index(kh_index_t *index)
+ {
+-	const char *key __unused;
++	const char *key _UNUSED_;
+ 	struct index_entry *entry;
+ 
+ 	if (index == NULL)

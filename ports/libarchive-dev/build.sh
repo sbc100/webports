@@ -10,8 +10,15 @@ AutogenStep() {
   ChangeDir ${SRC_DIR}
   export MAKE_LIBARCHIVE_RELEASE="1"
   ./build/autogen.sh
+  PatchConfigure
   cd -
 }
+
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  LIBS+=" -lglibc-compat"
+  EXTRA_CONFIGURE_ARGS+=" --enable-shared=no"
+fi
 
 ConfigureStep() {
   AutogenStep
