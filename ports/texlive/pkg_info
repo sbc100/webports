@@ -1,13 +1,13 @@
 NAME=texlive
-VERSION=2014
-ARCHIVE_ROOT=texlive-20140525-source
-URL=ftp://tug.org/texlive/historic/2014/texlive-20140525-source.tar.xz
+VERSION=2015
+ARCHIVE_ROOT=texlive-20150521-source
+URL=ftp://tug.org/texlive/historic/2015/texlive-20150521-source.tar.xz
 LICENSE=GPL
 # Disabled on arm due to issue 3205
 DISABLED_ARCH=(arm pnacl)
 DISABLED_LIBC=(bionic)
 DEPENDS=(fontconfig glibc-compat nacl-spawn)
-SHA1=8cb283ad26b1fe18e1089820cf64ecc63d8224e8
+SHA1=a32df8d5d6b61f87f7dab907e864fb51b14f4143
 # Disabled on OSX due to build errors
 BUILD_OS=linux
 DISABLED_TOOLCHAIN=(emscripten)
