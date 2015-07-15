@@ -52,10 +52,20 @@ diff --git a/src/xcb_conn.c b/src/xcb_conn.c
      int i = 0;
      int ret = 0,err = 0;
      struct iovec *vec;
-@@ -191,10 +212,17 @@ static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
+@@ -190,11 +211,26 @@ static int write_vec(xcb_connection_t *c, struct iovec **vector, int *count)
+     vec = *vector;
      while(i < *count)
      {         	 
-          ret = send(c->fd,vec->iov_base,vec->iov_len,0);	 
+-         ret = send(c->fd,vec->iov_base,vec->iov_len,0);	 
++         /*
++          * TODO(bradnelson): Drop if nacl_io supports zero length sends.
++          *     https://code.google.com/p/naclports/issues/detail?id=228
++          */
++         if (vec->iov_len != 0) {
++           ret = send(c->fd,vec->iov_base,vec->iov_len,0);
++         } else {
++           ret = 0;
++         }
 +         /* Generalize to posix so this can be used with nacl newlib. */
 +#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +         if(ret < 0)

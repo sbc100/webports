@@ -72,11 +72,11 @@ subversion|WIP|${PACKAGE_BY_ARCH} \
 tar|WIP|${PACKAGE_AS_ONE} \
 texlive|ok|${PACKAGE_BY_ARCH} \
 thttpd|ok|glibc.zip \
-tk|ok|glibc/${NACL_ARCH_ALT}.zip \
+tk|ok|${PACKAGE_BY_ARCH} \
 toybox|WIP|${TOOLCHAIN}/toybox-0.4.7.zip \
-twm|ok|glibc/${NACL_ARCH_ALT}.zip \
+twm|ok|${PACKAGE_BY_ARCH} \
 vim|ok|${PACKAGE_AS_ONE} \
-xeyes|ok|glibc/${NACL_ARCH_ALT}.zip \
+xeyes|ok|${PACKAGE_BY_ARCH} \
 xz|ok|${PACKAGE_BY_ARCH} \
 "
 
