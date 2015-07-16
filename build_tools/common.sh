@@ -1280,12 +1280,10 @@ HERE
     local NACL_IRT_PATH=${NACL_IRT}
   fi
 
-  # TODO(sbc): Remove the EXPORTS hacks below once sel_ldr is updated to
-  # pass through all environment variables when -a is specified.
   if [ "${NACL_LIBC}" = "glibc" ]; then
     cat > "$1" <<HERE
 #!/bin/bash
-export NACLLOG=${LOGFILE}
+export NACLVERBOSITY=-3 # LOG_ERROR
 
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 SEL_LDR=${NACL_SEL_LDR}
@@ -1294,16 +1292,14 @@ NACL_SDK_LIB=${NACL_SDK_LIB}
 LIB_PATH_DEFAULT=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}
 LIB_PATH_DEFAULT=\${LIB_PATH_DEFAULT}:\${NACL_SDK_LIB}:\${SCRIPT_DIR}
 SEL_LDR_LIB_PATH=\${SEL_LDR_LIB_PATH}:\${LIB_PATH_DEFAULT}
-EXPORTS="-E TERM=\${TERM} -E srcdir=\${srcdir}"
 
-"\${SEL_LDR}" -E PATH="/bin:/usr/bin" \${EXPORTS} -a -B "\${IRT}" -- \\
-    "\${NACL_SDK_LIB}/runnable-ld.so" --library-path "\${SEL_LDR_LIB_PATH}" \\
-    "\${SCRIPT_DIR}/$2" "\$@"
+"\${SEL_LDR}" -qpa -B "\${IRT}" -- "\${NACL_SDK_LIB}/runnable-ld.so" \\
+    --library-path "\${SEL_LDR_LIB_PATH}" "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   else
     cat > "$1" <<HERE
 #!/bin/bash
-export NACLLOG=${LOGFILE}
+export NACLVERBOSITY=-3 # LOG_ERROR
 
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 if [ \$(uname -s) = CYGWIN* ]; then
@@ -1311,10 +1307,8 @@ if [ \$(uname -s) = CYGWIN* ]; then
 fi
 SEL_LDR=${NACL_SEL_LDR}
 IRT=${NACL_IRT_PATH}
-EXPORTS="-E TERM=\${TERM} -E srcdir=\${srcdir}"
 
-"\${SEL_LDR}" -E PATH="/bin:/usr/bin" \${EXPORTS} -a -B "\${IRT}" -- \\
-    "\${SCRIPT_DIR}/$2" "\$@"
+"\${SEL_LDR}" -qpa -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   fi
 
@@ -1368,15 +1362,13 @@ WriteLauncherScriptPNaCl() {
   esac
   cat > "${script_name}" <<HERE
 #!/bin/bash
-export NACLLOG=/dev/null
+export NACLVERBOSITY=-3 # LOG_ERROR
 
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 SEL_LDR=${nacl_sel_ldr}
 IRT=${irt_core}
-EXPORTS="-E TERM=\${TERM} -E srcdir=\${srcdir}"
 
-"\${SEL_LDR}" -E PATH="/bin:/usr/bin" \${EXPORTS} -a -B "\${IRT}" -- \\
-    "\${SCRIPT_DIR}/${nexe_name}" "\$@"
+"\${SEL_LDR}" -qpa -B "\${IRT}" -- "\${SCRIPT_DIR}/${nexe_name}" "\$@"
 HERE
   chmod 750 "${script_name}"
   echo "Wrote script ${PWD}/${script_name}"
