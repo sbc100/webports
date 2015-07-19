@@ -164,4 +164,8 @@ InstallStep() {
   ChangeDir ${ARCH_DIR}
   LogExecute rm -f ${ARCH_DIR}.zip
   LogExecute zip -r ${ARCH_DIR}.zip .
+
+  # Drop unzipped copy to reduce upload failures on the bots.
+  ChangeDir ${PUBLISH_DIR}
+  LogExecute rm -rf ${ARCH_DIR}
 }
