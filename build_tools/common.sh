@@ -68,6 +68,26 @@ if [ "${TOOLCHAIN}" = "clang-newlib" -a "${NACL_ARCH}" = "i686" ]; then
   NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR}"
 fi
 
+if [ "${TOOLCHAIN}" = "clang-newlib" -o "${TOOLCHAIN}" = "pnacl" -o \
+     "${TOOLCHAIN}" = "emscripten" ]; then
+  NACLPORTS_CLANG=1
+else
+  NACLPORTS_CLANG=0
+fi
+
+# If stderr is a tty enable clang color compiler diagnostics
+if [ -t 1 -a "${NACLPORTS_CLANG}" = "1" ]; then
+  NACLPORTS_CPPFLAGS+=" -fcolor-diagnostics"
+  NACLPORTS_LDFLAGS+=" -fcolor-diagnostics"
+fi
+
+# arm-nacl-gcc supports color diagnostics, but the x86 version is
+# too old for such things.
+if [ "${NACLPORTS_CLANG}" = "0" -a "${NACL_ARCH}" = "arm" ]; then
+  NACLPORTS_CPPFLAGS+=" -fdiagnostics-color=auto"
+  NACLPORTS_LDFLAGS+=" -fdiagnostics-color=auto"
+fi
+
 # The NaCl version of ARM gcc emits warnings about va_args that
 # are not particularly useful
 if [ "${NACL_ARCH}" = "arm" -a "${TOOLCHAIN}" = "newlib" ]; then
