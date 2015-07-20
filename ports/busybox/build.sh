@@ -14,27 +14,37 @@ ConfigureStep() {
     KBUILD_SRC=${SRC_DIR}
 
   BusyBoxDisable CONFIG_ACPID
+  BusyBoxDisable CONFIG_ARP
+  BusyBoxDisable CONFIG_ARPING
   BusyBoxDisable CONFIG_BLOCKDEV
   BusyBoxDisable CONFIG_BRCTL
+  BusyBoxDisable CONFIG_EJECT
   BusyBoxDisable CONFIG_ETHER_WAKE
   BusyBoxDisable CONFIG_FBSPLASH
+  BusyBoxDisable CONFIG_FDFLUSH
+  BusyBoxDisable CONFIG_FDISK
   BusyBoxDisable CONFIG_FEATURE_IFUPDOWN_IP_BUILTIN
   BusyBoxDisable CONFIG_FEATURE_IP_LINK
   BusyBoxDisable CONFIG_FEATURE_MOUNT_LOOP
   BusyBoxDisable CONFIG_FEATURE_SUID
   BusyBoxDisable CONFIG_FREE
+  BusyBoxDisable CONFIG_FREERAMDISK
   BusyBoxDisable CONFIG_FSTRIM
   BusyBoxDisable CONFIG_HDPARM
+  BusyBoxDisable CONFIG_IFCONFIG
   BusyBoxDisable CONFIG_IFENSLAVE
   BusyBoxDisable CONFIG_IFPLUGD
   BusyBoxDisable CONFIG_IP
   BusyBoxDisable CONFIG_LOSETUP
   BusyBoxDisable CONFIG_MKFS_EXT2
   BusyBoxDisable CONFIG_MKFS_VFAT
+  BusyBoxDisable CONFIG_MOUNT
   BusyBoxDisable CONFIG_NANDDUMP
   BusyBoxDisable CONFIG_NANDWRITE
   BusyBoxDisable CONFIG_NBDCLIENT
   BusyBoxDisable CONFIG_RAIDAUTORUN
+  BusyBoxDisable CONFIG_ROUTE
+  BusyBoxDisable CONFIG_SLATTACH
   BusyBoxDisable CONFIG_TUNCTL
   BusyBoxDisable CONFIG_UBIATTACH
   BusyBoxDisable CONFIG_UBIDETACH
@@ -43,6 +53,8 @@ ConfigureStep() {
   BusyBoxDisable CONFIG_UBIRSVOL
   BusyBoxDisable CONFIG_UBIUPDATEVOL
   BusyBoxDisable CONFIG_UDHCPC
+  BusyBoxDisable CONFIG_UDHCPD
+  BusyBoxDisable CONFIG_UMOUNT
   BusyBoxDisable CONFIG_UPTIME
   BusyBoxDisable CONFIG_WATCHDOG
 }
