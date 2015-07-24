@@ -43,6 +43,31 @@ diff --git a/gcc/collect2.c b/gcc/collect2.c
  {
    enum linker_select
      {
+diff --git a/gcc/config/avr/gen-avr-mmcu-specs.c b/gcc/config/avr/gen-avr-mmcu-specs.c
+--- a/gcc/config/avr/gen-avr-mmcu-specs.c
++++ b/gcc/config/avr/gen-avr-mmcu-specs.c
+@@ -165,6 +165,13 @@ print_mcu (const avr_mcu_t *mcu)
+   if (is_device)
+     fprintf (f, "%s\n", help_copy_paste);
+ 
++   // The code below creates specs which make the wrong assumptions about the
++   // directory structure supplied by avr-libc as of gcc 5.0. This is due to
++   // vendor specific changes to the AVR backend, avr-libc not yet adjusted to
++   // the new layout.
++   // As per http://savannah.nongnu.org/bugs/?44869, gcc 5.2.0 onwards will be
++   // compatible with avr-libc
++/*
+ #if defined (WITH_AVRLIBC)
+   // AVR-LibC specific.  See avrlibc.h for the specs using them as subspecs.
+ 
+@@ -179,6 +186,7 @@ print_mcu (const avr_mcu_t *mcu)
+       fprintf (f, "\n\n");
+     }
+ #endif  // WITH_AVRLIBC
++*/
+ 
+   // avr-gcc specific specs for the compilation / the compiler proper.
+ 
 diff --git a/gcc/config/i386/cpuid.h b/gcc/config/i386/cpuid.h
 --- a/gcc/config/i386/cpuid.h
 +++ b/gcc/config/i386/cpuid.h
