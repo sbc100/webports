@@ -162,7 +162,58 @@ new mode 100755
  #ifdef I_SHADOW
  /* Shadow password support for solaris - pdo@cs.umd.edu
   * Not just Solaris: at least HP-UX, IRIX, Linux.
-@@ -4114,7 +4118,7 @@ PP(pp_system)
+@@ -302,11 +306,31 @@ PP(pp_backtick)
+     const char *mode = "r";
+ 
+     TAINT_PROPER("``");
++    /* Kind of like an inline implementation of popen.
++     * Currently has race issues, and also possibly doesn't
++     * work with some coreutils utilities.
++     */
++#   if defined(__native_client__)
++    int pipe_ends[2];
++    char * popen_args[] = {"bash", "-c", tmps, NULL};
++    pipe(pipe_ends);
++    pid_t pid = vfork();
++    /* CHILD */
++    if (!pid) {
++        close(pipe_ends[0]);
++        dup2(pipe_ends[1], 1);
++        execv(popen_args[0], popen_args);
++    }
++    /* PARENT */
++    close(pipe_ends[1]);
++    fp = fdopen(pipe_ends[0], "r");
++#   else
+     if (PL_op->op_private & OPpOPEN_IN_RAW)
+ 	mode = "rb";
+     else if (PL_op->op_private & OPpOPEN_IN_CRLF)
+ 	mode = "rt";
+     fp = PerlProc_popen(tmps, mode);
++#   endif
+     if (fp) {
+         const char * const type = Perl_PerlIO_context_layers(aTHX_ NULL);
+ 	if (type && *type)
+@@ -342,7 +366,18 @@ PP(pp_backtick)
+ 		SvTAINTED_on(sv);
+ 	    }
+ 	}
++#       if defined(__native_client__)
++        /* Inline pclose */
++        int pstat;
++        (void) fclose(fp);
++        do {
++        pid = waitpid(pid, &pstat, 0);
++        } while (pid == -1 && errno == EINTR);
++        int ret = (pid == -1 ? -1 : pstat);
++	STATUS_NATIVE_CHILD_SET(ret);
++#       else
+ 	STATUS_NATIVE_CHILD_SET(PerlProc_pclose(fp));
++#       endif
+ 	TAINT;		/* "I believe that this is not gratuitous!" */
+     }
+     else {
+@@ -4114,7 +4149,7 @@ PP(pp_system)
  	TAINT_PROPER("system");
      }
      PERL_FLUSHALL_FOR_CHILD;
@@ -171,7 +222,7 @@ new mode 100755
      {
  	Pid_t childpid;
  	int pp[2];
-@@ -4213,26 +4217,58 @@ PP(pp_system)
+@@ -4213,26 +4248,58 @@ PP(pp_system)
  	}
  	PerlProc__exit(-1);
      }
@@ -231,6 +282,15 @@ new mode 100755
      }
      if (PL_statusvalue == -1)	/* hint that value must be returned as is */
  	result = 1;
+@@ -4240,7 +4307,7 @@ PP(pp_system)
+     do_execfree();
+     SP = ORIGMARK;
+     XPUSHi(result ? value : STATUS_CURRENT);
+-#endif /* !FORK or VMS or OS/2 */
++#endif /* !FORK or VMS or OS/2 or NaCl */
+ #endif
+     RETURN;
+ }
 diff --git a/x2p/a2py.c b/x2p/a2py.c
 old mode 100644
 new mode 100755
