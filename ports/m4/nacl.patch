@@ -53,20 +53,6 @@ diff --git a/configure b/configure
  
  
  $as_echo "#define gmtime rpl_gmtime" >>confdefs.h
-diff --git a/lib/canonicalize-lgpl.c b/lib/canonicalize-lgpl.c
---- a/lib/canonicalize-lgpl.c
-+++ b/lib/canonicalize-lgpl.c
-@@ -69,7 +69,9 @@
- #  define __getcwd(buf, max) getwd (buf)
- # endif
- # define __readlink readlink
--# define __set_errno(e) errno = (e)
-+# if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
-+#  define __set_errno(e) errno = (e)
-+# endif
- # ifndef MAXSYMLINKS
- #  ifdef SYMLOOP_MAX
- #   define MAXSYMLINKS SYMLOOP_MAX
 diff --git a/lib/getdtablesize.c b/lib/getdtablesize.c
 --- a/lib/getdtablesize.c
 +++ b/lib/getdtablesize.c

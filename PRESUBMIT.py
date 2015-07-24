@@ -14,10 +14,11 @@ _EXCLUDED_PATHS = (
     # patch_configure.py contains long lines embedded in multi-line
     # strings.
     r"^build_tools[\\\/]patch_configure.py",
-    # err.h and err.c are pulled from native client glibc. BSD license does
-    # not apply to that file.
+    # Many of the files in glibc-compat come from the other sources such as
+    # newlib and as such do not contain our copyright header.
     r"^ports[\/\\]glibc-compat[\/\\]include[\/\\]err\.h",
     r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]err\.c"
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]libc-symbols\.h"
 )
 
 def RunPylint(input_api, output_api):

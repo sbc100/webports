@@ -15,6 +15,7 @@
 #define attribute_hidden
 #define internal_function
 
+#define __set_errno(x) (errno = (x))
 
 #endif
 
