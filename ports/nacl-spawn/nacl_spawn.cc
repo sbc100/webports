@@ -1164,9 +1164,9 @@ static void mountfs() {
   PSEventRegisterMessageHandler("unmount", &HandleUnmountMessage, NULL);
 }
 
-// Create a pipe. pipefd[0] will be the read end of the pipe and pipefd[1] the
-// write end of the pipe.
-int pipe(int pipefd[2]) {
+// Create a javascript pipe. pipefd[0] will be the read end of the pipe
+// and pipefd[1] the write end of the pipe.
+int nacl_spawn_pipe(int pipefd[2]) {
   if (pipefd == NULL) {
     errno = EFAULT;
     return -1;

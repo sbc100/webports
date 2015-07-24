@@ -22,6 +22,7 @@ if [ ${OS_NAME} = "Darwin" ]; then
 fi
 
 ConfigureStep() {
+  NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
   ChangeDir ${SRC_DIR}
   autoconf
 

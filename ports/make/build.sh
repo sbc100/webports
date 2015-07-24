@@ -4,7 +4,7 @@
 
 EXECUTABLES=make${NACL_EXEEXT}
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -Dpipe=nacl_spawn_pipe"
 export LIBS="${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then

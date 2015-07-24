@@ -8,7 +8,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi
 
-NACLPORTS_CPPFLAGS+=" -DGNULIB_defined_struct_sigaction"
+NACLPORTS_CPPFLAGS+=" -DGNULIB_defined_struct_sigaction -Dpipe=nacl_spawn_pipe"
 
 PatchStep() {
   DefaultPatchStep

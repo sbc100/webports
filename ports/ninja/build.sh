@@ -11,6 +11,8 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   LIBS+=" -lglibc-compat"
 fi
 
+NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
+
 BuildHostNinja() {
   # Build a host version ninja in $SRC_DIR
   if [ -f "${SRC_DIR}/ninja" ];then

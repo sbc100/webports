@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 export fu_cv_sys_mounted_fread=yes
+NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
 BuildStep() {
   export AR=${NACLAR}
