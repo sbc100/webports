@@ -26,34 +26,37 @@ diff --git a/find/Makefile.in b/find/Makefile.in
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
-diff --git a/find/find.c b/find/find.c
---- a/find/find.c
-+++ b/find/find.c
-@@ -77,6 +77,10 @@
- static void init_mounted_dev_list(int mandatory);
- #endif
- 
-+#if defined(__native_client__)
-+#define main nacl_main
-+#endif
-+
- static void process_top_path PARAMS((char *pathname, mode_t mode));
- static int process_path PARAMS((char *pathname, char *name, boolean leaf, char *parent, mode_t type));
- static void process_dir PARAMS((char *pathname, char *name, int pathlen, const struct stat *statp, char *parent));
 diff --git a/find/ftsfind.c b/find/ftsfind.c
 --- a/find/ftsfind.c
 +++ b/find/ftsfind.c
-@@ -73,7 +73,9 @@
- /* See locate.c for explanation as to why not use (String) */
+@@ -74,7 +74,6 @@
  # define N_(String) String
  #endif
--
-+#if defined(__native_client__)
-+#define main nacl_main
-+#endif
  
+-
  static void set_close_on_exec(int fd)
  {
+ #if defined F_GETFD && defined FD_CLOEXEC
+diff --git a/find/pred.c b/find/pred.c
+--- a/find/pred.c
++++ b/find/pred.c
+@@ -24,6 +24,7 @@
+ #include <math.h>
+ #include <pwd.h>
+ #include <grp.h>
++#include <spawn.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <errno.h>
+@@ -1948,7 +1949,7 @@ launch (const struct buildcmd_control *ctl,
+       signal (SIGCHLD, SIG_DFL);
+     }
+ 
+-  child_pid = fork ();
++  child_pid = vfork ();
+   if (child_pid == -1)
+     error (1, errno, _("cannot fork"));
+   if (child_pid == 0)
 diff --git a/gnulib/lib/Makefile.am b/gnulib/lib/Makefile.am
 --- a/gnulib/lib/Makefile.am
 +++ b/gnulib/lib/Makefile.am
@@ -1161,3 +1164,30 @@ diff --git a/tests/Makefile.in b/tests/Makefile.in
  ARFLAGS = cru
  libtests_a_AR = $(AR) $(ARFLAGS)
  am__DEPENDENCIES_1 =
+diff --git a/xargs/xargs.c b/xargs/xargs.c
+--- a/xargs/xargs.c
++++ b/xargs/xargs.c
+@@ -51,6 +51,7 @@
+ #define ISSPACE(c) (ISBLANK (c) || (c) == '\n' || (c) == '\r' \
+ 		    || (c) == '\f' || (c) == '\v')
+ 
++#include <spawn.h>
+ #include <sys/types.h>
+ #include <stdio.h>
+ #include <errno.h>
+@@ -1128,13 +1129,13 @@ xargs_do_exec (const struct buildcmd_control *ctl, struct buildcmd_state *state)
+ 
+       /* If we run out of processes, wait for a child to return and
+          try again.  */
+-      while ((child = fork ()) < 0 && errno == EAGAIN && procs_executing)
++      while ((child = vfork ()) < 0 && errno == EAGAIN && procs_executing)
+ 	wait_for_proc (false, 1u);
+ 
+       switch (child)
+ 	{
+ 	case -1:
+-	  error (1, errno, _("cannot fork"));
++	  error (1, errno, _("cannot vfork"));
+ 
+ 	case 0:		/* Child.  */
+ 	  prep_child_for_exec();
