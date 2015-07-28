@@ -81,9 +81,9 @@ if [ -t 1 -a "${NACLPORTS_CLANG}" = "1" ]; then
   NACLPORTS_LDFLAGS+=" -fcolor-diagnostics"
 fi
 
-# arm-nacl-gcc supports color diagnostics, but the x86 version is
-# too old for such things.
-if [ "${NACLPORTS_CLANG}" = "0" -a "${NACL_ARCH}" = "arm" ]; then
+# The new arm-nacl-gcc glibc toolchain supports color diagnostics, but older
+# x86 and bionic versions do not.
+if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
   NACLPORTS_CPPFLAGS+=" -fdiagnostics-color=auto"
   NACLPORTS_LDFLAGS+=" -fdiagnostics-color=auto"
 fi
