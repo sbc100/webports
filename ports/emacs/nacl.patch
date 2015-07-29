@@ -99,7 +99,7 @@ diff --git a/configure b/configure
 diff --git a/leim/Makefile.in b/leim/Makefile.in
 --- a/leim/Makefile.in
 +++ b/leim/Makefile.in
-@@ -28,9 +28,12 @@ SHELL = /bin/sh
+@@ -28,10 +28,13 @@ SHELL = /bin/sh
  
  # Here are the things that we expect ../configure to edit.
  srcdir=@srcdir@
@@ -113,7 +113,7 @@ diff --git a/leim/Makefile.in b/leim/Makefile.in
 +EMACS = ${abs_top_builddir}/src/emacs${EXEEXT}
  
  buildlisppath=${srcdir}/../lisp
-
+ 
 diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
 --- a/lib-src/Makefile.in
 +++ b/lib-src/Makefile.in
@@ -514,20 +514,37 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  	else \
  	  $(RUN_TEMACS) --batch --load loadup bootstrap || exit 1; \
  	  test "X$(PAXCTL)" = X || $(PAXCTL) -zex emacs$(EXEEXT); \
+diff --git a/src/alloc.c b/src/alloc.c
+--- a/src/alloc.c
++++ b/src/alloc.c
+@@ -47,6 +47,11 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+ 
+ #include <verify.h>
+ 
++#ifdef NACL_EMACS
++#include <spawn.h>
++#define pipe nacl_spawn_pipe
++#endif
++
+ /* GC_CHECK_MARKED_OBJECTS means do sanity checks on allocated objects.
+    Doable only if GC_MARK_STACK.  */
+ #if ! GC_MARK_STACK
 diff --git a/src/callproc.c b/src/callproc.c
 --- a/src/callproc.c
 +++ b/src/callproc.c
-@@ -21,6 +21,9 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
- #include <config.h>
- #include <errno.h>
- #include <stdio.h>
+@@ -29,6 +29,11 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+ 
+ #include "lisp.h"
+ 
 +#ifdef NACL_EMACS
 +#include <spawn.h>
++#define pipe nacl_spawn_pipe
 +#endif
- #include <sys/types.h>
- #include <unistd.h>
- 
-@@ -655,6 +658,7 @@ usage: (call-process PROGRAM &optional INFILE BUFFER DISPLAY &rest ARGS)  */)
++
+ #ifdef WINDOWSNT
+ #define NOMINMAX
+ #include <windows.h>
+@@ -655,6 +660,7 @@ usage: (call-process PROGRAM &optional INFILE BUFFER DISPLAY &rest ARGS)  */)
      {
        if (fd[0] >= 0)
  	emacs_close (fd[0]);
@@ -535,7 +552,7 @@ diff --git a/src/callproc.c b/src/callproc.c
        report_file_error ("Doing vfork", Qnil);
      }
  
-@@ -1610,7 +1614,11 @@ init_callproc (void)
+@@ -1610,7 +1616,11 @@ init_callproc (void)
  		 Vdata_directory);
  
    sh = (char *) getenv ("SHELL");
@@ -550,7 +567,19 @@ diff --git a/src/callproc.c b/src/callproc.c
 diff --git a/src/emacs.c b/src/emacs.c
 --- a/src/emacs.c
 +++ b/src/emacs.c
-@@ -656,11 +656,27 @@ void (*__malloc_initialize_hook) (void) EXTERNALLY_VISIBLE = malloc_initialize_h
+@@ -31,6 +31,11 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+ 
+ #include "lisp.h"
+ 
++#ifdef NACL_EMACS
++#include <spawn.h>
++#define pipe nacl_spawn_pipe
++#endif
++
+ #ifdef WINDOWSNT
+ #include <fcntl.h>
+ #include "w32.h"
+@@ -656,11 +661,27 @@ void (*__malloc_initialize_hook) (void) EXTERNALLY_VISIBLE = malloc_initialize_h
  
  #endif /* DOUG_LEA_MALLOC */
  
@@ -579,7 +608,7 @@ diff --git a/src/emacs.c b/src/emacs.c
  #if GC_MARK_STACK
    Lisp_Object dummy;
  #endif
-@@ -2113,7 +2129,7 @@ decode_env_path (const char *evarname, const char *defalt)
+@@ -2113,7 +2134,7 @@ decode_env_path (const char *evarname, const char *defalt)
      path = getenv (evarname);
    else
      path = 0;
@@ -729,17 +758,19 @@ diff --git a/src/keyboard.c b/src/keyboard.c
 diff --git a/src/process.c b/src/process.c
 --- a/src/process.c
 +++ b/src/process.c
-@@ -27,6 +27,9 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
- #include <errno.h>
- #include <sys/types.h>		/* Some typedefs are used in sys/file.h.  */
- #include <sys/file.h>
+@@ -33,6 +33,11 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+ 
+ #include "lisp.h"
+ 
 +#ifdef NACL_EMACS
 +#include <spawn.h>
++#define pipe nacl_spawn_pipe
 +#endif
- #include <sys/stat.h>
- #include <unistd.h>
- #include <fcntl.h>
-@@ -1588,6 +1591,22 @@ create_process_1 (struct atimer *timer)
++
+ /* Only MS-DOS does not define `subprocesses'.  */
+ #ifdef subprocesses
+ 
+@@ -1588,6 +1593,22 @@ create_process_1 (struct atimer *timer)
    /* Nothing to do.  */
  }
  
@@ -762,7 +793,7 @@ diff --git a/src/process.c b/src/process.c
  
  static void
  create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
-@@ -1663,9 +1682,13 @@ create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
+@@ -1663,9 +1684,13 @@ create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
        tem = pipe (wait_child_setup);
        if (tem < 0)
  	report_file_error ("Creating pipe", Qnil);
@@ -779,16 +810,18 @@ diff --git a/src/process.c b/src/process.c
 diff --git a/src/sysdep.c b/src/sysdep.c
 --- a/src/sysdep.c
 +++ b/src/sysdep.c
-@@ -28,6 +28,9 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
- #include <grp.h>
- #endif /* HAVE_PWD_H */
- #include <limits.h>
+@@ -40,6 +40,11 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
+ #include "sysselect.h"
+ #include "blockinput.h"
+ 
 +#ifdef NACL_EMACS
 +#include <spawn.h>
++#define pipe nacl_spawn_pipe
 +#endif
- #include <unistd.h>
- 
- #include <allocator.h>
++
+ #ifdef BSD_SYSTEM
+ #include <sys/param.h>
+ #include <sys/sysctl.h>
 diff --git a/src/vm-limit.c b/src/vm-limit.c
 --- a/src/vm-limit.c
 +++ b/src/vm-limit.c
