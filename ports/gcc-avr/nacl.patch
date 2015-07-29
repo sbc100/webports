@@ -1,3 +1,32 @@
+diff --git a/fixincludes/Makefile.in b/fixincludes/Makefile.in
+--- a/fixincludes/Makefile.in
++++ b/fixincludes/Makefile.in
+@@ -33,6 +33,13 @@ LDFLAGS = @LDFLAGS@
+ INCLUDES = -I. -I$(srcdir) -I../include -I$(srcdir)/../include
+ FIXINC_CFLAGS = -DHAVE_CONFIG_H $(INCLUDES)
+ 
++# When building for NaCl, link glibc-compat headers
++ifeq ($(NACL_LIBC),newlib)
++ifneq ($(CC),gcc)
++	EXTRA_LINK = -lglibc-compat
++endif
++endif
++
+ # Directory where sources are, from where we are.
+ srcdir = @srcdir@
+ VPATH = $(srcdir)
+@@ -106,8 +113,10 @@ gen : $(srcdir)/fixincl.x
+ oneprocess : full-stamp
+ twoprocess : test-stamp $(AF)
+ 
++FULLSTAMP_LIBS = $(FI) $(ALLOBJ) $(LIBIBERTY) $(EXTRA_LINK)
++
+ full-stamp : $(ALLOBJ) $(LIBIBERTY)
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(FI) $(ALLOBJ) $(LIBIBERTY)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $(FULLSTAMP_LIBS)
+ 	$(STAMP) $@
+ 
+ test-stamp : $(TESTOBJ) $(LIBIBERTY)
 diff --git a/gcc/Makefile.in b/gcc/Makefile.in
 --- a/gcc/Makefile.in
 +++ b/gcc/Makefile.in
@@ -10,6 +39,15 @@ diff --git a/gcc/Makefile.in b/gcc/Makefile.in
  BACKENDLIBS = $(ISLLIBS) $(GMPLIBS) $(PLUGINLIBS) $(HOST_LIBS) \
  	$(ZLIB)
  # Any system libraries needed just for GNAT.
+@@ -1040,7 +1040,7 @@ INCLUDES = -I. -I$(@D) -I$(srcdir) -I$(srcdir)/$(@D) \
+ 	   $(CPPINC) $(GMPINC) $(DECNUMINC) $(BACKTRACEINC) \
+ 	   $(ISLINC)
+ 
+-COMPILE.base = $(COMPILER) -c $(ALL_COMPILERFLAGS) $(ALL_CPPFLAGS) -o $@
++COMPILE.base = $(COMPILER) -c $(ALL_COMPILERFLAGS) $(ALL_CPPFLAGS) $(EXTRA_INCLUDES) -o $@
+ ifeq ($(CXXDEPMODE),depmode=gcc3)
+ # Note a subtlety here: we use $(@D) for the directory part, to make
+ # things like the go/%.o rule work properly; but we use $(*F) for the
 diff --git a/gcc/collect2.c b/gcc/collect2.c
 --- a/gcc/collect2.c
 +++ b/gcc/collect2.c
@@ -43,31 +81,6 @@ diff --git a/gcc/collect2.c b/gcc/collect2.c
  {
    enum linker_select
      {
-diff --git a/gcc/config/avr/gen-avr-mmcu-specs.c b/gcc/config/avr/gen-avr-mmcu-specs.c
---- a/gcc/config/avr/gen-avr-mmcu-specs.c
-+++ b/gcc/config/avr/gen-avr-mmcu-specs.c
-@@ -165,6 +165,13 @@ print_mcu (const avr_mcu_t *mcu)
-   if (is_device)
-     fprintf (f, "%s\n", help_copy_paste);
- 
-+   // The code below creates specs which make the wrong assumptions about the
-+   // directory structure supplied by avr-libc as of gcc 5.0. This is due to
-+   // vendor specific changes to the AVR backend, avr-libc not yet adjusted to
-+   // the new layout.
-+   // As per http://savannah.nongnu.org/bugs/?44869, gcc 5.2.0 onwards will be
-+   // compatible with avr-libc
-+/*
- #if defined (WITH_AVRLIBC)
-   // AVR-LibC specific.  See avrlibc.h for the specs using them as subspecs.
- 
-@@ -179,6 +186,7 @@ print_mcu (const avr_mcu_t *mcu)
-       fprintf (f, "\n\n");
-     }
- #endif  // WITH_AVRLIBC
-+*/
- 
-   // avr-gcc specific specs for the compilation / the compiler proper.
- 
 diff --git a/gcc/config/i386/cpuid.h b/gcc/config/i386/cpuid.h
 --- a/gcc/config/i386/cpuid.h
 +++ b/gcc/config/i386/cpuid.h
@@ -90,6 +103,31 @@ diff --git a/gcc/config/i386/cpuid.h b/gcc/config/i386/cpuid.h
  }
  
  /* Return cpuid data for requested cpuid level, as found in returned
+diff --git a/gcc/configure b/gcc/configure
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -10754,13 +10754,14 @@ rlim_t l = 0;
+   return 0;
+ }
+ _ACEOF
+-if ac_fn_c_try_compile "$LINENO"; then :
+-
+-else
+-
+-$as_echo "#define rlim_t long" >>confdefs.h
+-
+-fi
++# Messes up newlib.
++#if ac_fn_c_try_compile "$LINENO"; then :
++#
++#else
++#
++#$as_echo "#define rlim_t long" >>confdefs.h
++#
++#fi
+ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+ 
+ # On AIX 5.2, <ldfcn.h> conflicts with <fcntl.h>, as both define incompatible
 diff --git a/gcc/gcc-ar.c b/gcc/gcc-ar.c
 --- a/gcc/gcc-ar.c
 +++ b/gcc/gcc-ar.c
@@ -285,6 +323,30 @@ diff --git a/gcc/main.c b/gcc/main.c
  {
    toplev toplev (true, /* use_TV_TOTAL */
  		 true /* init_signals */);
+diff --git a/libcpp/lex.c b/libcpp/lex.c
+--- a/libcpp/lex.c
++++ b/libcpp/lex.c
+@@ -1502,7 +1502,7 @@ lex_raw_string (cpp_reader *pfile, cpp_token *token, const uchar *base,
+   const uchar *orig_base;
+   unsigned int raw_prefix_len = 0, raw_suffix_len = 0;
+   enum raw_str_phase { RAW_STR_PREFIX, RAW_STR, RAW_STR_SUFFIX };
+-  raw_str_phase phase = RAW_STR_PREFIX;
++  enum raw_str_phase phase = RAW_STR_PREFIX;
+   enum cpp_ttype type;
+   size_t total_len = 0;
+   /* Index into temp_buffer during phases other than RAW_STR,
+diff --git a/libcpp/macro.c b/libcpp/macro.c
+--- a/libcpp/macro.c
++++ b/libcpp/macro.c
+@@ -453,7 +453,7 @@ builtin_macro (cpp_reader *pfile, cpp_hashnode *node, source_location loc)
+ 	 macro.  */
+       source_location *virt_locs = NULL;
+       _cpp_buff *token_buf = tokens_buff_new (pfile, 1, &virt_locs);
+-      const line_map * map =
++      const struct line_map * map =
+ 	linemap_enter_macro (pfile->line_table, node,
+ 					    token->src_loc, 1);
+       tokens_buff_add_token (token_buf, virt_locs, token,
 diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
 --- a/libiberty/pex-unix.c
 +++ b/libiberty/pex-unix.c

@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 HOST_BUILD_DIR=${WORK_DIR}/build_host
-HOST_INSTALL_DIR=${WORK_DIR}/install_host
+HOST_BIN_INSTALL_DIR=${NACL_PACKAGES_BUILD}/binutils-2.25/install_host
 
 AVR_LIBC_URL=http://storage.googleapis.com/naclports/mirror/avr-libc-1.8.1.tar.bz2
 AVR_LIBC_SHA=b56fe21b30341869aa768689b0f6a07d896b17fa
@@ -13,26 +13,37 @@ export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 export PATH="${PATH}:${NACL_PACKAGES_BUILD}/binutils-2.25/install_host/bin"
 NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  export EXTRA_INCLUDES=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+fi
+
 BuildHostGccAvr() {
+  # Host avr-gcc already installed, skip install.
+  if [ -e ${HOST_BIN_INSTALL_DIR}/bin/avr-gcc ]; then
+    return
+  fi
   MakeDir ${HOST_BUILD_DIR}
-  MakeDir ${HOST_INSTALL_DIR}
   ChangeDir ${HOST_BUILD_DIR}
-  CC="gcc" EXTRA_LIBS="" \
+  CC="gcc" EXTRA_LIBS="" LIBS="" \
     LogExecute ${SRC_DIR}/configure \
-    --prefix=${NACL_PACKAGES_BUILD}/binutils-2.25/install_host \
+    --prefix=${HOST_BIN_INSTALL_DIR} \
     --target=avr \
     --enable-languages=c,c++ \
     --disable-nls --disable-libssp \
     --with-gmp=${NACL_PACKAGES_BUILD}/gmp/install_host \
     --with-mpfr=${NACL_PACKAGES_BUILD}/mpfr/install_host \
     --with-mpc=${NACL_PACKAGES_BUILD}/mpc/install_host
-  EXTRA_LIBS="" LogExecute make
-  EXTRA_LIBS="" LogExecute make install
+  EXTRA_INCLUDES="" EXTRA_LIBS="" LIBS="" LogExecute make
+  EXTRA_INCLUDES="" EXTRA_LIBS="" LIBS="" LogExecute make install
 }
 
 EXTRA_CONFIGURE_ARGS="\
     --enable-languages=c,c++ --disable-nls \
     --disable-libssp --host=x86_64-nacl --target=avr"
+
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  EXTRA_CONFIGURE_ARGS+=" --with-newlib"
+fi
 
 ConfigureStep() {
   for cache_file in $(find . -name config.cache); do
