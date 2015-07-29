@@ -184,7 +184,7 @@ diff --git a/test/bs.c b/test/bs.c
  
      CATCHALL(uninitgame);
  
-+#if !defined(__native_client__) || !defined(__BIONIC__)
++#if !(defined(__native_client__) && (defined(__BIONIC__) || defined(__GLIBC__)))
      if ((tmpname = getlogin()) != 0) {
  	(void) strcpy(name, tmpname);
  	name[0] = (char) toupper(UChar(name[0]));

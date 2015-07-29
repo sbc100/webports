@@ -10,6 +10,7 @@ TEST_EXES = test/unittests
 LIBRARIES = libcli_main.a libnacl_spawn.a
 
 CPPFLAGS += -Wall -Werror -Iinclude
+LDFLAGS += -lnacl_io
 
 ifeq ($(NACL_SHARED),1)
 LIBRARIES += libnacl_spawn.so

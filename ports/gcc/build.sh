@@ -13,6 +13,11 @@ EXTRA_CONFIGURE_ARGS="\
     --target=x86_64-nacl \
     --disable-libstdcxx-pch --enable-threads=nacl"
 
+# Force gcc to think that makeinfo is old so it won't build documentation.
+# Actually the issue is that its too new on most installs these days
+# (Ubunut/Trusty for example) and causes the build to break.
+export gcc_cv_prog_makeinfo_modern=no
+
 ConfigureStep() {
   DefaultConfigureStep
   for cache_file in $(find . -name config.cache); do

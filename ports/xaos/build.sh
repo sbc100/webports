@@ -26,6 +26,8 @@ ConfigureStep() {
   LogExecute rm ./configure
   LogExecute autoconf
 
+  # xaos takes case of defining NDEBUG itself
+  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS/-DNDEBUG/}"
   NACLPORTS_LDFLAGS+=" -Wl,--undefined=PPP_GetInterface \
                   -Wl,--undefined=PPP_ShutdownModule \
                   -Wl,--undefined=PPP_InitializeModule \

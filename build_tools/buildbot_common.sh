@@ -78,8 +78,6 @@ InstallPackageMultiArch() {
     arch_list="emscripten"
   elif [ "${TOOLCHAIN}" = "bionic" ]; then
     arch_list="arm"
-  elif [ "${TOOLCHAIN}" = "glibc" ]; then
-    arch_list="i686 x86_64"
   else
     arch_list="i686 x86_64 arm"
   fi

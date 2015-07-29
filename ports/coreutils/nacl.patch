@@ -272,7 +272,20 @@ diff --git a/src/mknod.c b/src/mknod.c
 diff --git a/src/remove.c b/src/remove.c
 --- a/src/remove.c
 +++ b/src/remove.c
-@@ -908,6 +908,12 @@ remove_cwd_entries (Dirstack_state *ds, char **subdir, struct stat *subdir_sb,
+@@ -765,7 +765,11 @@ remove_entry (Dirstack_state const *ds, char const *filename,
+      unlink call.  If FILENAME is a command-line argument, then dp is NULL,
+      so we'll first try to unlink it.  Using unlink here is ok, because it
+      cannot remove a directory.  */
+-  if ((dp && DT_IS_DIR (dp)) || is_dir == T_YES)
++  if (is_dir == T_YES
++# if HAVE_STRUCT_DIRENT_D_TYPE
++      || (dp && DT_IS_DIR (dp))
++# endif
++      )
+     return RM_NONEMPTY_DIR;
+ 
+   DO_UNLINK (filename, x);
+@@ -908,6 +912,12 @@ remove_cwd_entries (Dirstack_state *ds, char **subdir, struct stat *subdir_sb,
  		status = RM_ERROR;
  		break;
  	      }
@@ -285,7 +298,7 @@ diff --git a/src/remove.c b/src/remove.c
  	    if (cycle_check (&ds->cycle_check_state, subdir_sb))
  	      {
  		error (0, 0, _("\
-@@ -918,6 +924,7 @@ The following directory is part of the cycle:\n  %s\n"),
+@@ -918,6 +928,7 @@ The following directory is part of the cycle:\n  %s\n"),
  		       quote (full_filename (".")));
  		longjmp (ds->current_arg_jumpbuf, 1);
  	      }

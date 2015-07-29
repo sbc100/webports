@@ -263,6 +263,24 @@ if [ "${NACL_ARCH}" = "x86_64" -a "${HOST_IS_32BIT}" = "1" ]; then
   SKIP_SEL_LDR_TESTS=1
 fi
 
+if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "arm" ]; then
+  # The recent glibc toolchain stubs out certain functions that nacl_io
+  # provides.  Because the stubs are listed in <gnu/stubs.h>, autoconf
+  # scripts will then detect them as missing even though that in the headers
+  # and nacl_io provides them at link time.
+  export ac_cv_func_fcntl=yes
+  export ac_cv_func_select=yes
+  export ac_cv_func_connect=yes
+  export ac_cv_func_tcgetattr=yes
+  export ac_cv_func_tcsetattr=yes
+  export ac_cv_func_getrusage=yes
+  export ac_cv_func_setrusage=yes
+  export ac_cv_func_setpgid=yes
+  export ac_cv_func_getpgid=yes
+  export ac_cv_func_getgroups=yes
+  export ac_cv_func_setgroups=yes
+fi
+
 
 ######################################################################
 # Always run

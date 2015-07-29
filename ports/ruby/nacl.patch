@@ -279,7 +279,7 @@ diff --git a/io.c b/io.c
 diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
 --- a/nacl/GNUmakefile.in
 +++ b/nacl/GNUmakefile.in
-@@ -4,48 +4,62 @@
+@@ -4,48 +4,59 @@
  include Makefile
  -include uncommon.mk
  
@@ -311,9 +311,7 @@ diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
 +endif
 +ifeq ($(dir $(RANLIB)),./)
  RANLIB:=$(NACL_TOOLCHAIN_DIR)/bin/$(RANLIB)
-+endif
-+ifeq ($(dir $(OBJDUMP)),./)
- OBJDUMP:=$(NACL_TOOLCHAIN_DIR)/bin/$(OBJDUMP)
+-OBJDUMP:=$(NACL_TOOLCHAIN_DIR)/bin/$(OBJDUMP)
 +endif
 +ifeq ($(dir $(OBJCOPY)),./)
  OBJCOPY:=$(NACL_TOOLCHAIN_DIR)/bin/$(OBJCOPY)
@@ -358,10 +356,45 @@ diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
  
  .rbconfig.time:
  	@$(MAKE) .rbconfig.raw.time RBCONFIG=.rbconfig.raw.time
+@@ -56,7 +67,6 @@ file.$(OBJEXT):
+ 	  -e 's!CONFIG\["AR"\] = .*!CONFIG\["AR"\] = "$(AR)"!' \
+ 	  -e 's!CONFIG\["AS"\] = .*!CONFIG\["AS"\] = "$(AS)"!' \
+ 	  -e 's!CONFIG\["RANLIB"\] = .*!CONFIG\["RANLIB"\] = "$(RANLIB)"!' \
+-	  -e 's!CONFIG\["OBJDUMP"\] = .*!CONFIG\["OBJDUMP"\] = "$(OBJDUMP)"!' \
+ 	  -e 's!CONFIG\["OBJCOPY"\] = .*!CONFIG\["OBJCOPY"\] = "$(OBJCOPY)"!' \
+ 	-i.bak rbconfig.rb
+ 	@touch .rbconfig.time
+@@ -80,7 +90,6 @@ show_naclflags:
+ 	@echo "        AR = $(AR)"
+ 	@echo "        AS = $(AS)"
+ 	@echo "        RANLIB = $(RANLIB)"
+-	@echo "        OBJDUMP = $(OBJDUMP)"
+ 	@echo "        OBJCOPY = $(OBJCOPY)"
+ 
+ clean-local::
+diff --git a/nacl/create_nmf.rb b/nacl/create_nmf.rb
+--- a/nacl/create_nmf.rb
++++ b/nacl/create_nmf.rb
+@@ -19,7 +19,6 @@ def create_dynamically_linked(nmf, exe)
+   cmd = [
+     PYTHON, CREATE_NMF,
+     '-o', nmf,
+-    '-D', OBJDUMP,
+     '-L', HOST_LIB,
+     exe
+   ]
 diff --git a/nacl/nacl-config.rb b/nacl/nacl-config.rb
 --- a/nacl/nacl-config.rb
 +++ b/nacl/nacl-config.rb
-@@ -27,14 +27,13 @@ module NaClConfig
+@@ -16,7 +16,6 @@ module NaClConfig
+ 
+   lib_suffix = config['host_cpu'][/i.86/] ? '32' : ''
+   PYTHON = config['PYTHON']
+-  OBJDUMP = config['OBJDUMP']
+   SDK_ROOT = config['NACL_SDK_ROOT']
+   CREATE_NMF = [
+     File.join(SDK_ROOT, 'build_tools', 'nacl_sdk_scons', 'site_tools', 'create_nmf.py'),
+@@ -27,14 +26,13 @@ module NaClConfig
    INSTALL_PROGRAM = config['INSTALL_PROGRAM']
    INSTALL_LIBRARY = config['INSTALL_DATA']
  

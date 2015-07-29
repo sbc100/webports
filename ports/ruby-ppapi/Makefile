@@ -9,7 +9,10 @@ LIBS = ruby-static readline ncurses ppapi_simple tar nacl_io ppapi
 NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 ifeq ($(TOOLCHAIN),glibc)
-LIBS += util dl rt crypt
+ifneq ($(NACL_ARCH),arm)
+LIBS += util
+endif
+LIBS += dl rt crypt
 NACL_LDFLAGS += -Wl,-export-dynamic
 else
 LIBS += c glibc-compat

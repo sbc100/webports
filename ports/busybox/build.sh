@@ -58,6 +58,13 @@ ConfigureStep() {
   BusyBoxDisable CONFIG_UMOUNT
   BusyBoxDisable CONFIG_UPTIME
   BusyBoxDisable CONFIG_WATCHDOG
+
+  if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
+    BusyBoxDisable CONFIG_INIT
+    BusyBoxDisable CONFIG_LINEEDIT
+    BusyBoxDisable CONFIG_FEATURE_UTMP
+    BusyBoxDisable CONFIG_FEATURE_VI_USE_SIGNALS
+  fi
 }
 
 BuildStep() {

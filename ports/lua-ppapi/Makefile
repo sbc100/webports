@@ -11,7 +11,10 @@ PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 
 LIBS += nacl_io ppapi
 ifeq ($(TOOLCHAIN),glibc)
-LIBS += util dl
+ifneq ($(NACL_ARCH),arm)
+LIBS += util
+endif
+LIBS += dl
 NACL_LDFLAGS += -Wl,-export-dynamic
 endif
 ifneq ($(TOOLCHAIN),glibc)

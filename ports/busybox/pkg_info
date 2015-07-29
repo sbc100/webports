@@ -5,4 +5,6 @@ LICENSE=GPL
 BUILD_OS=linux
 LIBC=glibc
 SHA1=486fb55c3efa71148fe07895fd713ea3a5ae343a
-DISABLED_TOOLCHAIN=(emscripten)
+# glibc/arm: SIGWINCH missing
+# https://code.google.com/p/nativeclient/issues/detail?id=4240
+DISABLED_TOOLCHAIN=(emscripten glibc/arm)

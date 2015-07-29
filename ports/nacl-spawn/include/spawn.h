@@ -44,7 +44,7 @@ __BEGIN_DECLS
  * Returns:
  *   Process id of the child or -1 for error.
  */
-extern int spawnv(int mode, const char* path, char *const argv[]);
+int spawnv(int mode, const char* path, char *const argv[]);
 
 /*
  * Spawn a child using the current environment and given args.
@@ -57,8 +57,7 @@ extern int spawnv(int mode, const char* path, char *const argv[]);
  * Returns:
  *   Process id of the child or -1 for error.
  */
-extern int spawnve(int mode, const char* path,
-                   char *const argv[], char *const envp[]);
+int spawnve(int mode, const char* path, char *const argv[], char *const envp[]);
 #define P_WAIT 0
 #define P_NOWAIT 1
 #define P_NOWAITO 1
@@ -72,7 +71,7 @@ extern int spawnve(int mode, const char* path,
  *   data: Pointer to a char* to receive eval string result.
  *   len: Pointer to a size_t to receive the length of the result.
  */
-extern void jseval(const char* cmd, char** data, size_t* len);
+void jseval(const char* cmd, char** data, size_t* len);
 
 /*
  * Implement vfork as a macro.
@@ -87,8 +86,9 @@ extern void jseval(const char* cmd, char** data, size_t* len);
  * followed by setjmp passing its result to an after function.
  * A global setjmp buffer is used.
  */
-extern void nacl_spawn_vfork_before(void);
-extern pid_t nacl_spawn_vfork_after(int jmping);
+void nacl_spawn_vfork_before(void);
+pid_t nacl_spawn_vfork_after(int jmping);
+
 extern NACL_SPAWN_TLS jmp_buf nacl_spawn_vfork_env;
 #define vfork() (nacl_spawn_vfork_before(), \
     nacl_spawn_vfork_after(setjmp(nacl_spawn_vfork_env)))
@@ -102,17 +102,20 @@ extern NACL_SPAWN_TLS jmp_buf nacl_spawn_vfork_env;
  * Implemented as a macro to ensure we get the nacl_spawn version hooked
  * to interoperate with vfork in the case of an error.
  */
-extern void nacl_spawn_vfork_exit(int status);
+void nacl_spawn_vfork_exit(int status);
 #if !defined(IN_NACL_SPAWN_CC)
 #define _exit(status) nacl_spawn_vfork_exit(status)
 #endif
 
 /*
  * Declarations of exec variants we support that aren't in our libc headers.
+ *
+ * The newer version of glibc already declared execvpe
  */
-extern int execvpe(const char *file, char *const argv[], char *const envp[]);
-extern int execlpe(const char *path,
-                   const char *arg, ...); /* char* const envp[] */
+#if !defined(__GLIBC__) ||  (__GLIBC__ == 2 && __GLIBC_MINOR__ == 9)
+int execvpe(const char *file, char *const argv[], char *const envp[]);
+#endif
+int execlpe(const char *path, const char *arg, ...); /* char* const envp[] */
 
 __END_DECLS
 

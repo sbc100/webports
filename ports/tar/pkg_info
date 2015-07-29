@@ -6,4 +6,6 @@ DEPENDS=(nacl-spawn)
 # missing sysexits.h
 DISABLED_LIBC=(bionic)
 SHA1=4ef190122a2c4b28bfd1c74e017c14805f81f0e0
-DISABLED_TOOLCHAIN=(emscripten)
+# Undefined macro _IOW used in MTIOCTOP
+# https://code.google.com/p/nativeclient/issues/detail?id=4243
+DISABLED_TOOLCHAIN=(emscripten glibc/arm)

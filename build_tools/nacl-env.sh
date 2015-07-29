@@ -123,10 +123,6 @@ if [ "${TOOLCHAIN}" = "glibc" ]; then
     echo "PNaCl is not supported by the glibc toolchain" 1>&2
     exit -1
   fi
-  if [ "${NACL_ARCH}" = "arm" ]; then
-    echo "ARM is not supported by the glibc toolcahin" 1>&2
-    exit -1
-  fi
   NACL_LIBC=glibc
 elif [ "${TOOLCHAIN}" = "emscripten" ]; then
   if [ "${NACL_ARCH}" != "emscripten" ]; then

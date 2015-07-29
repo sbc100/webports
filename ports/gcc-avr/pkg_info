@@ -7,4 +7,6 @@ DEPENDS=(nacl-spawn gmp mpfr mpc binutils-2.25)
 BUILD_OS=linux
 SHA1=b6c947b09adf780fe02065d0c48bfd7b4bdddfa3
 ARCHIVE_ROOT=gcc-5.1.0
-DISABLED_TOOLCHAIN=(emscripten)
+# ICE in glibc/arm toolchain:
+# https://code.google.com/p/nativeclient/issues/detail?id=4244
+DISABLED_TOOLCHAIN=(emscripten glibc/arm)

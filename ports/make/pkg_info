@@ -5,4 +5,6 @@ LICENSE=GPL
 DEPENDS=(nacl-spawn)
 DISABLED_LIBC=(bionic)
 SHA1=92d1b87a30d1c9482e52fb4a68e8a355e7946331
-DISABLED_TOOLCHAIN=(emscripten)
+# glibc/arm: getlogin missing
+# https://code.google.com/p/nativeclient/issues/detail?id=4236
+DISABLED_TOOLCHAIN=(emscripten glibc/arm)
