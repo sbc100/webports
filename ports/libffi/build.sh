@@ -3,5 +3,5 @@
 # found in the LICENSE file.
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi

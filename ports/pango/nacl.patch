@@ -25,3 +25,21 @@ diff --git a/pango/opentype/main.cc b/pango/opentype/main.cc
  int
  main (int argc, char **argv)
  {
+diff --git a/pango/pango-engine.c b/pango/pango-engine.c
+--- a/pango/pango-engine.c
++++ b/pango/pango-engine.c
+@@ -178,9 +178,13 @@ fallback_engine_covers (PangoEngineShape *engine G_GNUC_UNUSED,
+ }
+ 
+ 
++/* Pango macros don't work properly with gtk+
++  TODO(josephpereira): upgrade pango and remove? or else explan necessity
++  https://code.google.com/p/nativeclient/issues/detail?id=4253
++*/
+ static GType pango_fallback_engine_get_type (void);
+ 
+-G_DEFINE_ABSTRACT_TYPE (PangoFallbackEngine, pango_fallback_engine, PANGO_TYPE_ENGINE_SHAPE);
++G_DEFINE_TYPE (PangoFallbackEngine, pango_fallback_engine, PANGO_TYPE_ENGINE_SHAPE);
+ 
+ static void
+ pango_fallback_engine_init (PangoFallbackEngine *self)
