@@ -14,14 +14,14 @@ set -o nounset
 shopt -s nullglob
 
 STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
-SDK_VERSION=${SDK_VERSION:-pepper_44}
+SDK_VERSION=${SDK_VERSION:-pepper_46}
 
 # This default version for packages that are downloaded and installed.
 # To update this use 'git describe <rev>' to get the revision string.  Be
 # sure to wait until the bot have build all the packages for a given
 # revision before changing this value.
 
-REVISION=${REVISION:-trunk-437-g4255d10}
+REVISION=${REVISION:-trunk-557-ga26f685}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 VERBOSE=0
 
