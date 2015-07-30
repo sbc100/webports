@@ -6,7 +6,7 @@
 
 #terminal {
   display: block;
-  position: absolute;
+  position: fixed;
   top: 10px;
   width: 100%%;
   height: calc(100%% - 10px);
@@ -17,7 +17,7 @@
 }
 
 #mounterBackground {
-  position: absolute;
+  position: fixed;
   width: 100%;
   background-color: rgba(50, 50, 50, 0.7);
   -webkit-transition: top 0.2s cubic-bezier(1, 0, 0, 1);
@@ -26,6 +26,7 @@
   z-index: 100;
   font-family: sans-serif;
   font-size: medium;
+  top: 0px;
 }
 
 #mounter {

@@ -26,6 +26,11 @@ function handleChooseFolder(mount, callback) {
 }
 
 function restoreMount(mount, callback) {
+  // Skip restore mount if running in a page, so we don't get stuck.
+  if (chrome.storage === undefined) {
+    callback();
+    return;
+  }
   chrome.storage.local.get('oldMounts', function(items) {
     var oldMounts = items['oldMounts'];
     if (oldMounts === undefined || oldMounts.length === 0) {
@@ -120,6 +125,8 @@ window.onload = function() {
   mounterThumb = document.createElement('div');
   mounterThumb.id = 'mounterThumb';
   var sp = document.createElement("span");
+  var spText = document.createTextNode('. . .');
+  sp.appendChild(spText);
   mounterThumb.appendChild(sp);
   mounterBackground.appendChild(mounterThumb);
   document.body.appendChild(mounterBackground);
