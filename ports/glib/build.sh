@@ -27,6 +27,7 @@ ConfigureStep() {
   LogExecute ${SRC_DIR}/configure \
     --host=nacl \
     --prefix=${PREFIX} \
+    --disable-libelf \
     --${NACL_OPTION}-mmx \
     --${NACL_OPTION}-sse \
     --${NACL_OPTION}-sse2 \
