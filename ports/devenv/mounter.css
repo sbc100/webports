@@ -8,8 +8,8 @@
   display: block;
   position: fixed;
   top: 10px;
-  width: 100%%;
-  height: calc(100%% - 10px);
+  width: 100%;
+  height: calc(100% - 10px);
 }
 
 #spacer {
