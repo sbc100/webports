@@ -57,8 +57,12 @@ class TestUtil(unittest.TestCase):
     self.assertFalse(util.CheckStamp(temp_name, stamp_contents + 'x'))
 
   def testGetInstallRoot(self):
-    expected = '/sdk/root/toolchain/linux_x86_newlib/x86_64-nacl/usr'
+    expected = '/sdk/root/toolchain/linux_pnacl/le32-nacl/usr'
     self.assertEqual(util.GetInstallRoot(Configuration()), expected)
+
+    expected = '/sdk/root/toolchain/linux_x86_newlib/x86_64-nacl/usr'
+    self.assertEqual(
+        util.GetInstallRoot(Configuration(toolchain='newlib')), expected)
 
     expected = '/sdk/root/toolchain/linux_pnacl/le32-nacl/usr'
     self.assertEqual(util.GetInstallRoot(Configuration('pnacl')), expected)

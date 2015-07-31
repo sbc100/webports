@@ -13,6 +13,7 @@ import common
 from naclports import source_package
 from naclports import error
 from naclports import paths
+from naclports.configuration import Configuration
 
 
 class TestSourcePackage(common.NaclportsTest):
@@ -153,7 +154,8 @@ class TestSourcePackage(common.NaclportsTest):
   def testDisabledArch(self):
     self.CreateTestPackage('bar', 'DISABLED_ARCH=(x86_64)')
 
-    pkg = source_package.CreatePackage('bar')
+    pkg = source_package.CreatePackage(
+        'bar', config=Configuration(toolchain='clang-newlib'))
     with self.assertRaisesRegexp(error.DisabledError,
                                  'disabled for architecture: x86_64'):
       pkg.CheckInstallable()
@@ -163,7 +165,7 @@ class TestSourcePackage(common.NaclportsTest):
 
     pkg = source_package.CreatePackage('bar')
     with self.assertRaisesRegexp(error.DisabledError,
-                                 'disabled for architecture: x86_64$'):
+                                 'disabled for architecture: pnacl$'):
       pkg.CheckInstallable()
 
   def testDisabledLibc(self):
@@ -175,22 +177,23 @@ class TestSourcePackage(common.NaclportsTest):
       pkg.CheckInstallable()
 
   def testDisabledToolchain(self):
-    self.CreateTestPackage('bar', 'DISABLED_TOOLCHAIN=(newlib)')
+    self.CreateTestPackage('bar', 'DISABLED_TOOLCHAIN=(pnacl)')
 
     pkg = source_package.CreatePackage('bar')
     with self.assertRaisesRegexp(error.DisabledError,
-                                 'cannot be built with newlib$'):
+                                 'cannot be built with pnacl$'):
       pkg.CheckInstallable()
 
   def testDisabledToolchainArch(self):
     self.CreateTestPackage('bar', 'DISABLED_TOOLCHAIN=(newlib/x86_64)')
 
-    pkg = source_package.CreatePackage('bar')
-    with self.assertRaisesRegexp(error.DisabledError,
-                                 'cannot be built with newlib for x86_64$'):
+    pkg = source_package.CreatePackage(
+        'bar', config=Configuration(toolchain='newlib'))
+    with self.assertRaisesRegexp(
+        error.DisabledError, 'cannot be built with newlib for x86_64$'):
       pkg.CheckInstallable()
 
-    self.CreateTestPackage('bar2', 'DISABLED_TOOLCHAIN=(newlib/arm)')
+    self.CreateTestPackage('bar2', 'DISABLED_TOOLCHAIN=(pnacl/arm)')
 
     pkg = source_package.CreatePackage('bar2')
     pkg.CheckInstallable()
@@ -236,8 +239,8 @@ class TestSourcePackage(common.NaclportsTest):
       NAME=foo
       VERSION=1.0
       BUILD_CONFIG=release
-      BUILD_ARCH=x86_64
-      BUILD_TOOLCHAIN=newlib
+      BUILD_ARCH=pnacl
+      BUILD_TOOLCHAIN=pnacl
       BUILD_SDK_VERSION=1234
       ''')
     self.assertRegexpMatches(pkg.InstalledInfoContents(), expected_contents)

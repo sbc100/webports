@@ -13,8 +13,8 @@ class TestConfiguration(common.NaclportsTest):
 
   def testDefaults(self):
     config = Configuration()
-    self.assertEqual(config.toolchain, 'newlib')
-    self.assertEqual(config.arch, 'x86_64')
+    self.assertEqual(config.toolchain, 'pnacl')
+    self.assertEqual(config.arch, 'pnacl')
     self.assertEqual(config.debug, False)
     self.assertEqual(config.config_name, 'release')
     self.assertEqual(config.libc, 'newlib')
@@ -23,9 +23,13 @@ class TestConfiguration(common.NaclportsTest):
     # We default to x86_64 except in the special case where the build
     # machine is i686 hardware, in which case we default to i686.
     with patch('platform.machine', Mock(return_value='i686')):
-      self.assertEqual(Configuration().arch, 'i686')
+      self.assertEqual(Configuration().arch, 'pnacl')
     with patch('platform.machine', Mock(return_value='dummy')):
-      self.assertEqual(Configuration().arch, 'x86_64')
+      self.assertEqual(Configuration().arch, 'pnacl')
+    with patch('platform.machine', Mock(return_value='i686')):
+      self.assertEqual(Configuration(toolchain='clang-newlib').arch, 'i686')
+    with patch('platform.machine', Mock(return_value='dummy')):
+      self.assertEqual(Configuration(toolchain='clang-newlib').arch, 'x86_64')
 
   def testEnvironmentVariables(self):
     with patch.dict('os.environ', {'NACL_ARCH': 'arm'}):

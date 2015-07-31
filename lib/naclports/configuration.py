@@ -24,7 +24,7 @@ class Configuration(object):
   If not specified in the constructor these are read from the
   environment variables (TOOLCHAIN, NACL_ARCH, NACL_DEBUG).
   """
-  default_toolchain = 'newlib'
+  default_toolchain = 'pnacl'
 
   def __init__(self, arch=None, toolchain=None, debug=None):
     self.debug = None
