@@ -80,7 +80,7 @@ InstallStep() {
       -o Xsdl.nmf
 
   # Bash is already platform specific split, copy the whole thing.
-  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash
+  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash_multiarch
   LogExecute cp -fR ${BASH_DIR}/* ${ASSEMBLY_DIR}
 
   local XKBCOMP_DIR=${NACL_PACKAGES_PUBLISH}/xkbcomp/${TOOLCHAIN}/${NACL_ARCH}

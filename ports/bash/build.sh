@@ -8,6 +8,8 @@ NACLPORTS_CPPFLAGS+=" -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -Dpipe=nacl_spawn_pipe"
 export LIBS="${NACL_CLI_MAIN_LIB}"
 
+EXECUTABLES="bash${NACL_EXEEXT}"
+
 # Configure requires this variable to be pre-set when cross compiling.
 export bash_cv_getcwd_malloc=yes
 
@@ -32,9 +34,13 @@ BuildStep() {
   DefaultBuildStep
 }
 
-InstallStep() {
+PublishStep() {
+  # Publish a generic per-arch copy for use by programs like emacs.
+  PublishByArchForDevEnv
+
+  # Assemble a multi-arch version for use in the devenv packaged app.
   MakeDir ${PUBLISH_DIR}
-  local ASSEMBLY_DIR="${PUBLISH_DIR}/bash"
+  local ASSEMBLY_DIR="${PUBLISH_DIR}/bash_multiarch"
 
   local platform_dir="${ASSEMBLY_DIR}/_platform_specific/${NACL_ARCH}"
   MakeDir ${platform_dir}
