@@ -4,6 +4,18 @@
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  NACLPORTS_LDFLAGS+=" -lglibc-compat"
 fi
 
-NACLPORTS_LDFLAGS+=" -lnacl_io"
+InstallStep() {
+    DefaultInstallStep
+    if [ "${NACL_LIBC}" = "newlib" ]; then
+        if ! grep -Eq "lglibc-compat" \
+             ${INSTALL_DIR}/naclports-dummydir/lib/pkgconfig/xcb.pc ; then
+            sed -i 's/-lxcb/-lxcb -lglibc-compat/'\
+                ${INSTALL_DIR}/naclports-dummydir/lib/pkgconfig/xcb.pc
+        fi
+    fi
+}
+
+NACLPORTS_LDFLAGS+=" -lnacl_io -l${NACL_CXX_LIB}"

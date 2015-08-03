@@ -11,7 +11,7 @@ fi
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
-if [ "${NACL_LIBC}" != "glibc"]; then
+if [ "${NACL_LIBC}" != "glibc" ]; then
     NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 else
     # moved cli_main flags here to alleviate glibc for linker order problems

@@ -5,7 +5,7 @@
 ConfigureStep() {
   if [ "${NACL_LIBC}" = "newlib" ]; then
     # newlib requires different library order to deal with static libraries
-    export LIBS+=" -lXext -lX11 -lxcb -lXau"
+    export LIBS+=" -lXext -lX11 -lxcb -lXau -lglibc-compat"
     NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
@@ -13,6 +13,11 @@ ConfigureStep() {
   # for things that depend on glib
   sed -i 's/-lglib-2.0 -lintl/-lglib-2.0 -lffi -lintl/'\
    ${NACLPORTS_LIBDIR}/pkgconfig/glib-2.0.pc
+
+  if [ "${NACL_LIBC}" = "newlib" ]; then
+      sed -i 's/-lffi -lintl/-lffi -lglibc-compat -lintl/'\
+          ${NACLPORTS_LIBDIR}/pkgconfig/glib-2.0.pc
+  fi
 
   EXTRA_CONFIGURE_ARGS+=" --disable-shm --enable-explicit-deps --disable-cups \
    --enable-gtk-doc-html=no"

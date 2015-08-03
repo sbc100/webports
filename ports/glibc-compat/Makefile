@@ -9,14 +9,13 @@ endif
 CFLAGS += -Wno-implicit-function-declaration
 CPPFLAGS += -Werror -Wno-unused-value -pthread
 CPPFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
-# Adding -g here to work around PNaCl toolchain issue
-# TODO(sbc): remove this once we fix:
-# https://code.google.com/p/nativeclient/issues/detail?id=4200
-CPPFLAGS += -g
 OUT := out
 SOURCES := \
   src/alarm.c \
+  src/dirfd.c \
   src/err.c \
+  src/flock.c \
+  src/fts.c \
   src/getprotobyname_r.c \
   src/getservbyname_r.c \
   src/herrno.c \
@@ -29,6 +28,7 @@ SOURCES := \
   src/ns_name.c \
   src/ns_netint.c \
   src/ns_samedomain.c \
+  src/openat.c \
   src/qsort_r.c \
   src/random.c \
   src/realpath.c \
@@ -39,7 +39,9 @@ SOURCES := \
   src/res_libc.c \
   src/res_mkquery.c \
   src/res_query.c \
-  src/res_send.c
+  src/res_send.c \
+  src/timegm.c \
+  src/writev.c
 
 OBJS := $(patsubst src/%.c,$(OUT)/%.o,$(SOURCES))
 

@@ -25,10 +25,20 @@
 #define _SC_MONOTONIC_CLOCK (-1)
 #define _SC_OPEN_MAX (-1)
 #define _SC_CLK_TCK (-1)
+#define _SC_ARG_MAX (-1)
 
 /* TODO(bradnelson): Drop this once we've landed nacl_io pipe support. */
 extern int mknod(const char *pathname, mode_t mode, dev_t dev);
 extern int mkfifo(const char *pathname, mode_t mode);
 
+int readlinkat(int dirfd, const char *pathname,
+                      char *buf, size_t bufsiz);
+int unlinkat(int dirfd, const char *pathname, int flags);
+int faccessat(int dirfd, const char *pathname, int mode, int flags);
+int fchownat(int dirfd, const char *pathname,
+                    uid_t owner, gid_t group, int flags);
+int symlinkat(const char *oldpath, int newdirfd, const char *newpath);
+int linkat(int olddirfd, const char *oldpath,
+           int newdirfd, const char *newpath, int flags);
 
 #endif

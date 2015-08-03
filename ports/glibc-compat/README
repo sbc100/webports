@@ -17,4 +17,5 @@ directory of Native Client with revisions to:
 Some more contents are added to elf*.h from freebsd source tree
 https://svnweb.freebsd.org/base/release/10.1.0/
 
-err.h and err.c are pulled from freebsd 10.1 with some modifications. 
+flock.c, fts.h, fts.c, err.h, err.c and timegm are pulled from freebsd 10.1 with
+some modifications.

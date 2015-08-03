@@ -23,6 +23,10 @@ typedef int32_t _ssize_t;
 #include <limits.h>
 #define SSIZE_MAX LONG_MAX
 
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64
+#endif
+
 #include_next <sys/types.h>
 
 /* TODO(sbc): Remove these once they get added to newlib headers */

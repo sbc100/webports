@@ -17,6 +17,10 @@ __BEGIN_DECLS
 #define F_ULOCK 0
 #define F_LOCK  1
 #define F_TLOCK 2
+#define AT_EACCESS              1
+#define AT_SYMLINK_NOFOLLOW     2
+#define AT_SYMLINK_FOLLOW       4
+#define AT_REMOVEDIR            8
 
 #if __BSD_VISIBLE
 /* lock operations for flock(2) */
@@ -27,6 +31,7 @@ __BEGIN_DECLS
 #endif
 
 int lockf(int fd, int command, off_t size);
+int flock(int fd, int operation);
 
 __END_DECLS
 

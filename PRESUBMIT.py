@@ -17,8 +17,14 @@ _EXCLUDED_PATHS = (
     # Many of the files in glibc-compat come from the other sources such as
     # newlib and as such do not contain our copyright header.
     r"^ports[\/\\]glibc-compat[\/\\]include[\/\\]err\.h",
-    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]err\.c"
-    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]libc-symbols\.h"
+    r"^ports[\/\\]glibc-compat[\/\\]include[\/\\]fts\.h",
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]err\.c",
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]libc-symbols\.h",
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]dirfd.c",
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]flock.c",
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]fts.c",
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]herror.c",
+    r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]timegm.c",
 )
 
 def RunPylint(input_api, output_api):

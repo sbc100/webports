@@ -14,7 +14,13 @@
 __BEGIN_DECLS
 #endif
 
+int dirfd(DIR *dirp);
 int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
+int alphasort(const void *a, const void *b);
+int scandir(const char *dirp, struct dirent ***namelist,
+              int (*filter)(const struct dirent *),
+              int (*compar)(const struct dirent **, const struct dirent **));
+DIR *fdopendir(int fd);
 
 /* Work around a dirent.h wrapping includes in extern "C". */
 #if defined(_DIRENT_H_)

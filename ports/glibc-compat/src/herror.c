@@ -84,15 +84,6 @@ herror(const char *s) {
 	v++;
 	v->iov_base = "\n";
 	v->iov_len = 1;
-#ifndef writev
-#define writev(fd, iov, iovcnt) \
-	do { \
-		int i; \
-		for (i = 0; i < (iovcnt); ++i) { \
-			write((fd), (iov)[i].iov_base, (iov)[i].iov_len); \
-		} \
-	} while (0)
-#endif
 	writev(STDERR_FILENO, iov, (v - iov) + 1);
 }
 
