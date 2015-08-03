@@ -15,7 +15,7 @@ ConfigureStep() {
    ${NACLPORTS_LIBDIR}/pkgconfig/glib-2.0.pc
 
   if [ "${NACL_LIBC}" = "newlib" ]; then
-      sed -i 's/-lffi -lintl/-lffi -lglibc-compat -lintl/'\
+      sed -i.bak 's/-lffi -lintl/-lffi -lglibc-compat -lintl/'\
           ${NACLPORTS_LIBDIR}/pkgconfig/glib-2.0.pc
   fi
 

@@ -28,7 +28,7 @@ ConfigureStep() {
         ln ${NACLPORTS_LIBDIR}/../lib${NACL_BIT_ARCH_ID}/libffi.so.6.0.4\
          ${NACLPORTS_LIBDIR}/libffi.so.6
       fi
-      sed -i 's/\/\//\//g' ${NACLPORTS_LIBDIR}/*.la
+      sed -i.bak 's/\/\//\//g' ${NACLPORTS_LIBDIR}/*.la
       if ! [ -e "${NACLPORTS_LIBDIR}/libffi.so" ]; then
         ln ${NACLPORTS_LIBDIR}/../lib${NACL_BIT_ARCH_ID}/libffi.so.6.0.4\
          ${NACLPORTS_LIBDIR}/libffi.so
@@ -66,11 +66,11 @@ InstallStep() {
   DefaultInstallStep
   # fix pkgconfig files to explicitly include libffi
   # for things that depend on glib
-  sed -i 's/-lglib-2.0 -lintl/-lglib-2.0 -lffi -lintl/'\
+  sed -i.bak 's/-lglib-2.0 -lintl/-lglib-2.0 -lffi -lintl/'\
       ${INSTALL_DIR}/naclports-dummydir/lib/pkgconfig/glib-2.0.pc
 
   if [ "${NACL_LIBC}" = "newlib" ]; then
-      sed -i 's/-lffi -lintl/-lffi -lglibc-compat -lintl/'\
+      sed -i.bak 's/-lffi -lintl/-lffi -lglibc-compat -lintl/'\
           ${INSTALL_DIR}/naclports-dummydir/lib/pkgconfig/glib-2.0.pc
   fi
 }

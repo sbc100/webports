@@ -6,4 +6,3 @@ DEPENDS=(glibc-compat zlib libarchive-dev bzip2 xz libtar nacl-spawn libelf libb
 SHA1=2e58510fa9b9eb97b6d9e0d62e527228601af1c1
 DISABLED_LIBC=(newlib bionic)
 DISABLED_TOOLCHAIN=(emscripten)
-BUILD_OS=linux

@@ -12,7 +12,7 @@ InstallStep() {
     if [ "${NACL_LIBC}" = "newlib" ]; then
         if ! grep -Eq "lglibc-compat" \
              ${INSTALL_DIR}/naclports-dummydir/lib/pkgconfig/xcb.pc ; then
-            sed -i 's/-lxcb/-lxcb -lglibc-compat/'\
+            sed -i.bak 's/-lxcb/-lxcb -lglibc-compat/'\
                 ${INSTALL_DIR}/naclports-dummydir/lib/pkgconfig/xcb.pc
         fi
     fi

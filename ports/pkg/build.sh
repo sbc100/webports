@@ -12,7 +12,7 @@ NACLPORTS_CFLAGS+=" -Dmain=nacl_main"
 # BUG=https://code.google.com/p/nativeclient/issues/detail?id=4207
 # BUG=https://code.google.com/p/nativeclient/issues/detail?id=4208
 PatchGlibcHeaders() {
-  sed -i \
+  sed -i.bak \
     "s/#ifdef __USE_FILE_OFFSET64\
 /#if defined __USE_FILE_OFFSET64 \&\& !defined(__native_client__)/" \
     ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/include/fts.h
