@@ -43,6 +43,7 @@ InstallBasePackages() {
   # Core packages.
   local default_packages="\
     -i coreutils \
+    -i bash \
     -i curl \
     -i findutils \
     -i grep \

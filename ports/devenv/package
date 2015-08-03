@@ -21,7 +21,7 @@ SDK_VERSION=${SDK_VERSION:-pepper_46}
 # sure to wait until the bot have build all the packages for a given
 # revision before changing this value.
 
-REVISION=${REVISION:-trunk-557-ga26f685}
+REVISION=${REVISION:-trunk-565-g5037ce4}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 VERBOSE=0
 
@@ -39,6 +39,7 @@ PACKAGE_AS_ONE=${TOOLCHAIN}.zip
 # List of packages (keep sorted).
 # Pairs of <package-name>:<status><package-subdir>[:<source>:<alt-subdir>]
 PACKAGE_INFO="\
+bash|ok|${PACKAGE_BY_ARCH} \
 blackbox|WIP|${PACKAGE_BY_ARCH} \
 busybox|WIP|glibc/busybox-1.22.0.zip \
 bzip2|ok|${PACKAGE_BY_ARCH} \
