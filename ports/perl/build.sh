@@ -37,8 +37,16 @@ if [ "${NACL_LIBC}" = "newlib" -o "${NACL_ARCH}" = "pnacl" ] ; then
   NACLPORTS_CCDLFLAGS=""
 else
   LIBS+=" -ldl -lm -ltar"
-  DYNAMIC_EXT="Cwd Fcntl Math/BigInt/FastCalc Opcode PerlIO/encoding \
-               PerlIO/mmap PerlIO/scalar PerlIO/via POSIX"
+  # disabled DB_File GDBM_File NDBM_File ODBM_File
+  DYNAMIC_EXT="arybase attributes B Compress/Raw/Bzip2 Compress/Raw/Zlib \
+               Cwd Data/Dumper Devel/Peek Devel/PPPort Digest/MD5 Digest/SHA \
+               Encode Fcntl File/DosGlob File/Glob Filter/Util/Call Hash/Util \
+               Hash/Util/FieldHash I18N/Langinfo IO IPC/SysV List/Util \
+               Math/BigInt/FastCalc MIME/Base64 mro Opcode PerlIO/encoding \
+               PerlIO/mmap PerlIO/scalar PerlIO/via POSIX re SDBM_File \
+               Socket Storable Sys/Hostname Sys/Syslog threads \
+               threads/shared Tie/Hash/NamedCapture Time/HiRes Time/Piece \
+               Unicode/Collate Unicode/Normalize XS/APItest XS/Typemap"
   NACL_GLIBC_DEF="define"
   PERL_STDIO_BASE="((fp)->_IO_read_base)"
   PERL_STDIO_BUFSIZ="((fp)->_IO_read_end - (fp)->_IO_read_base)"
