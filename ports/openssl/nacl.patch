@@ -1,21 +1,21 @@
 diff --git a/Configure b/Configure
 --- a/Configure
 +++ b/Configure
-@@ -362,6 +362,13 @@ my %table=(
- "linux-ia64-icc","icc:-DL_ENDIAN -DTERMIO -O2 -Wall -no_cpprt::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHUNK DES_RISC1 DES_INT:${ia64_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
- "linux-x86_64",	"gcc:-m64 -DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHUNK DES_INT DES_UNROLL:${x86_64_asm}:elf:dlfcn:linux-shared:-fPIC:-m64:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::64",
- "linux64-s390x",	"gcc:-m64 -DB_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL:${s390x_asm}:64:dlfcn:linux-shared:-fPIC:-m64:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::64",
+@@ -419,6 +419,13 @@ my %table=(
+ "linux-x86_64-icc", "icc:-DL_ENDIAN -O2::-D_REENTRANT::-ldl -no_cpprt:SIXTY_FOUR_BIT_LONG RC4_CHUNK DES_INT DES_UNROLL:${x86_64_asm}:elf:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::64",
+ "linux-x32",	"gcc:-mx32 -DL_ENDIAN -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT RC4_CHUNK_LL DES_INT DES_UNROLL:${x86_64_asm}:elf:dlfcn:linux-shared:-fPIC:-mx32:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::x32",
+ "linux64-s390x",	"gcc:-m64 -DB_ENDIAN -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHAR RC4_CHUNK DES_INT DES_UNROLL:${s390x_asm}:64:dlfcn:linux-shared:-fPIC:-m64:.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR):::64",
 +
 +#### NaCl configurations (glibc is much like linux-elf, newlib is
 +# similar to linux-aout, since it's statically linked.
-+"nacl-le32newlib",	"gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT:::BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_asm}:a.out",
-+"nacl-le32bionic",	"gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_elf_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
-+"nacl-le32glibc",	"gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_elf_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
++"nacl-le32newlib",     "gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT:::BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_asm}:a.out",
++"nacl-le32bionic",     "gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_elf_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
++"nacl-le32glibc",      "gcc:-DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_elf_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 +
  #### So called "highgprs" target for z/Architecture CPUs
  # "Highgprs" is kernel feature first implemented in Linux 2.6.32, see
  # /proc/cpuinfo. The idea is to preserve most significant bits of
-@@ -865,6 +872,10 @@ PROCESS_ARGS:
+@@ -932,6 +939,10 @@ PROCESS_ARGS:
  			# The check for the option is there so scripts aren't
  			# broken
  			}
@@ -25,11 +25,11 @@ diff --git a/Configure b/Configure
 +      }
  		elsif (/^[-+]/)
  			{
- 			if (/^-[lL](.*)$/ or /^-Wl,/)
+ 			if (/^--prefix=(.*)$/)
 diff --git a/config b/config
 --- a/config
 +++ b/config
-@@ -660,6 +660,9 @@ case "$GUESSOS" in
+@@ -679,6 +679,9 @@ case "$GUESSOS" in
  	#fi
  	OUT="linux64-s390x"
  	;;
@@ -42,11 +42,11 @@ diff --git a/config b/config
 diff --git a/crypto/rand/rand_unix.c b/crypto/rand/rand_unix.c
 --- a/crypto/rand/rand_unix.c
 +++ b/crypto/rand/rand_unix.c
-@@ -133,7 +133,30 @@
- # define FD_SETSIZE (8*sizeof(fd_set))
- #endif
+@@ -134,7 +134,30 @@
+ #  define FD_SETSIZE (8*sizeof(fd_set))
+ # endif
  
--#if defined(OPENSSL_SYS_VOS)
+-# if defined(OPENSSL_SYS_VOS)
 +#if defined(__native_client__)
 +#include <stdlib.h>
 +#include <irt.h>
@@ -72,5 +72,5 @@ diff --git a/crypto/rand/rand_unix.c b/crypto/rand/rand_unix.c
 +}
 +#elif defined(OPENSSL_SYS_VOS)
  
- /* The following algorithm repeatedly samples the real-time clock
-    (RTC) to generate a sequence of unpredictable data.  The algorithm
+ /*
+  * The following algorithm repeatedly samples the real-time clock (RTC) to
