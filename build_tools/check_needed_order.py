@@ -19,16 +19,15 @@ def Check(filename):
   pthread = -1
   nacl_io = -1
   nacl_spawn = -1
-  for i in xrange(len(names)):
-    if nacl_io < 0 and names[i] == 'libnacl_io.so':
+  for i, name in enumerate(names):
+    if nacl_io < 0 and name == 'libnacl_io.so':
       nacl_io = i
-    elif nacl_spawn < 0 and names[i] == 'libnacl_spawn.so':
+    elif nacl_spawn < 0 and name == 'libnacl_spawn.so':
       nacl_spawn = i
-    elif pthread < 0 and names[i].startswith('libpthread.so'):
+    elif pthread < 0 and name.startswith('libpthread.so'):
       pthread = i
-  if pthread < nacl_io or pthread < nacl_spawn:
-    print 'Executable %s has bad NEEDED order: %s' % (
-        filename, ' '.join(names))
+  if pthread != -1 and (pthread < nacl_io or pthread < nacl_spawn):
+    print 'Executable %s has bad NEEDED order: %s' % (filename, ' '.join(names))
     return 1
   return 0
 
