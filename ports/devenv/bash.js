@@ -87,6 +87,9 @@ function initMountSystem() {
 
 NaClTerm.nmf = 'bash.nmf';
 NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
+// Uncomment this line to use only locally built packages
+//NaClTerm.env = ['NACL_DEVENV_LOCAL=1']
+
 // TODO(bradnelson): Drop this hack once tar extraction first checks relative
 // to the nexe.
 NaClProcessManager.useNaClAltHttp = true;

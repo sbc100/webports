@@ -23,6 +23,7 @@ SDK_VERSION=${SDK_VERSION:-pepper_46}
 
 REVISION=${REVISION:-trunk-565-g5037ce4}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
+LOCAL_SOURCE="http://localhost:5103/"
 VERBOSE=0
 
 NACL_ARCH_ALT="${NACL_ARCH}"
@@ -253,7 +254,7 @@ function main() {
         PACKAGE_SOURCE="${OPTARG}"
         ;;
       L)
-        PACKAGE_SOURCE="http://localhost:5103/"
+        PACKAGE_SOURCE="${LOCAL_SOURCE}"
         ;;
       f)
         PACKAGE_FORCE=1
@@ -299,8 +300,12 @@ function main() {
   fi
 
   if [ "${PACKAGE_SOURCE:-}" = "" ]; then
-    PACKAGE_SOURCE="${PACKAGE_SOURCE:-${DEFAULT_SOURCE}}"
-    ALTERNATE_SOURCE=1
+    if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
+      PACKAGE_SOURCE="${LOCAL_SOURCE}"
+    else
+      PACKAGE_SOURCE="${DEFAULT_SOURCE}"
+      ALTERNATE_SOURCE=1
+    fi
   fi
 
   for package in ${PACKAGE_LIST}; do

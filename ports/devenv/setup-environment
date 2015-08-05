@@ -8,6 +8,8 @@
 
 export TOOLCHAIN=@TOOLCHAIN@
 
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
 LIB_DIR=lib32
 export SHELL=/mnt/html5/packages/bash.${NACL_ARCH}/bash
 export PACKAGE_LIB_DIR=lib32
@@ -24,7 +26,7 @@ LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
 LD_LIBRARY_PATH+=:/mnt/html5/coreutils.${NACL_ARCH}/${PACKAGE_LIB_DIR}
 export LD_LIBRARY_PATH
 export LIBRARY_PATH=${LD_LIBRARY_PATH}
-export PATH=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
+PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
 # TODO(bradnelson): Figure out why this is now needed to find cc1.
 PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/libexec/gcc/x86_64-nacl/4.4.3
 PATH+=:/mnt/html5/coreutils.${NACL_ARCH}

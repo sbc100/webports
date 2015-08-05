@@ -181,12 +181,18 @@ static bool ExpandShBang(std::string* prog, struct PP_Var req_var) {
     return true;
   }
   const char* start = buffer + 2;
+  // Skip leading space
+  while (start < buffer + len && *start == ' ') {
+    ++start;
+  }
+
   // Find the end of the line while also looking for the first space.
   // Mimicking Linux behavior, in which the first space marks a split point
   // where everything before is the interpreter path and everything after is
   // (including spaces) is treated as a single extra argument.
-  const char* end = start;
   const char* split = NULL;
+  const char* end = start;
+
   while (buffer - end < len && *end != '\n' && *end != '\r') {
     if (*end == ' ' && split == NULL) {
       split = end;

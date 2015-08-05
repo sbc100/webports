@@ -65,7 +65,7 @@ InstallStep() {
   LogExecute cp bash.nmf sh.nmf
   InstallNaClTerm ${APP_DIR}
 
-  RESOURCES="background.js mounter.css mounter.js bash.js bashrc
+  RESOURCES="background.js mounter.css mounter.js bash.js bashrc which
       install-base-packages.sh package graphical.html whitelist.js devenv_16.png
       devenv_48.png devenv_128.png"
   for resource in ${RESOURCES}; do
