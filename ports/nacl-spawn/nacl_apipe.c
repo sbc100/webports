@@ -11,9 +11,9 @@
 #include <string.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
-#include <sys/statvfs.h>
 
 /* TODO(sbc): These types should really be forward declared in fuse.h */
+struct statvfs;
 struct fuse_pollhandle;
 struct fuse_bufvec;
 
