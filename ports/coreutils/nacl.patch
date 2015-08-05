@@ -22,6 +22,15 @@ diff --git a/Makefile.in b/Makefile.in
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
+@@ -13907,7 +13907,7 @@ else
+   echo "$as_me: failed program was:" >&5
+ sed 's/^/| /' conftest.$ac_ext >&5
+ 
+-fu_cv_sys_stat_statvfs=no
++fu_cv_sys_stat_statvfs=yes
+ fi
+ rm -f conftest.err conftest.$ac_objext \
+       conftest$ac_exeext conftest.$ac_ext
 @@ -27324,11 +27324,15 @@ _ACEOF
  fi
  
@@ -141,7 +150,29 @@ diff --git a/man/Makefile.in b/man/Makefile.in
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
-@@ -716,7 +716,7 @@ CPP = @CPP@
+@@ -38,9 +38,10 @@ NORMAL_UNINSTALL = :
+ PRE_UNINSTALL = :
+ POST_UNINSTALL = :
+ host_triplet = @host@
++SKIPPED_PROGRAMS = who$(EXEEXT) pinky$(EXEEXT) uptime$(EXEEXT) users$(EXEEXT)
+ EXTRA_PROGRAMS = chroot$(EXEEXT) df$(EXEEXT) hostid$(EXEEXT) \
+-	nice$(EXEEXT) pinky$(EXEEXT) stty$(EXEEXT) su$(EXEEXT) \
+-	uname$(EXEEXT) uptime$(EXEEXT) users$(EXEEXT) who$(EXEEXT)
++	nice$(EXEEXT) stty$(EXEEXT) su$(EXEEXT) \
++	uname$(EXEEXT)
+ bin_PROGRAMS = [$(EXEEXT) chgrp$(EXEEXT) chown$(EXEEXT) chmod$(EXEEXT) \
+ 	cp$(EXEEXT) dd$(EXEEXT) dircolors$(EXEEXT) du$(EXEEXT) \
+ 	ginstall$(EXEEXT) link$(EXEEXT) ln$(EXEEXT) dir$(EXEEXT) \
+@@ -61,7 +62,7 @@ bin_PROGRAMS = [$(EXEEXT) chgrp$(EXEEXT) chown$(EXEEXT) chmod$(EXEEXT) \
+ 	printenv$(EXEEXT) printf$(EXEEXT) pwd$(EXEEXT) seq$(EXEEXT) \
+ 	sleep$(EXEEXT) tee$(EXEEXT) test$(EXEEXT) true$(EXEEXT) \
+ 	tty$(EXEEXT) whoami$(EXEEXT) yes$(EXEEXT) $(am__EXEEXT_1) \
+-	$(am__EXEEXT_2)
++	$(am__EXEEXT_2) $(EXTRA_PROGRAMS)
+ noinst_PROGRAMS = setuidgid$(EXEEXT)
+ subdir = src
+ DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
+@@ -716,7 +717,7 @@ CPP = @CPP@
  CPPFLAGS = @CPPFLAGS@
  CYGPATH_W = @CYGPATH_W@
  DEFAULT_POSIX2_VERSION = @DEFAULT_POSIX2_VERSION@
@@ -150,7 +181,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  DEPDIR = @DEPDIR@
  DF_PROG = @DF_PROG@
  ECHO_C = @ECHO_C@
-@@ -742,7 +742,7 @@ LDFLAGS = @LDFLAGS@
+@@ -742,7 +743,7 @@ LDFLAGS = @LDFLAGS@
  LIBICONV = @LIBICONV@
  LIBINTL = @LIBINTL@
  LIBOBJS = @LIBOBJS@
@@ -159,6 +190,21 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
  LIB_CRYPT = @LIB_CRYPT@
  LIB_NANOSLEEP = @LIB_NANOSLEEP@
+diff --git a/src/chroot.c b/src/chroot.c
+--- a/src/chroot.c
++++ b/src/chroot.c
+@@ -81,7 +81,11 @@ main (int argc, char **argv)
+       usage (EXIT_FAIL);
+     }
+ 
++#if defined(__native_client__)
++  errno = ENOSYS;
++#else
+   if (chroot (argv[1]))
++#endif
+     error (EXIT_FAIL, errno, _("cannot change root directory to %s"), argv[1]);
+ 
+   if (chdir ("/"))
 diff --git a/src/copy.c b/src/copy.c
 --- a/src/copy.c
 +++ b/src/copy.c
@@ -197,6 +243,36 @@ diff --git a/src/copy.c b/src/copy.c
      }
    else
  #ifdef S_ISLNK
+diff --git a/src/df.c b/src/df.c
+--- a/src/df.c
++++ b/src/df.c
+@@ -906,11 +906,15 @@ main (int argc, char **argv)
+ 	}
+     }
+ 
++#if defined(__native_client__)
++  mount_list = NULL;
++#else
+   mount_list =
+     read_filesystem_list ((fs_select_list != NULL
+ 			   || fs_exclude_list != NULL
+ 			   || print_type
+ 			   || show_local_fs));
++#endif
+ 
+   if (mount_list == NULL)
+     {
+@@ -923,8 +927,10 @@ main (int argc, char **argv)
+ 	     _("%scannot read table of mounted filesystems"), warning);
+     }
+ 
++#if !defined(__native_client__)
+   if (require_sync)
+     sync ();
++#endif
+ 
+   if (optind < argc)
+     {
 diff --git a/src/fs.h b/src/fs.h
 --- a/src/fs.h
 +++ b/src/fs.h
@@ -212,6 +288,21 @@ diff --git a/src/fs.h b/src/fs.h
  # define S_MAGIC_AFFS 0xADFF
  # define S_MAGIC_DEVPTS 0x1CD1
  # define S_MAGIC_EXT 0x137D
+diff --git a/src/hostid.c b/src/hostid.c
+--- a/src/hostid.c
++++ b/src/hostid.c
+@@ -79,7 +79,11 @@ main (int argc, char **argv)
+       usage (EXIT_FAILURE);
+     }
+ 
++#if defined(__native_client__)
++  id = 0x12345678;
++#else
+   id = gethostid ();
++#endif
+   printf ("%lx\n", id);
+ 
+   exit (EXIT_SUCCESS);
 diff --git a/src/md5sum.c b/src/md5sum.c
 --- a/src/md5sum.c
 +++ b/src/md5sum.c
@@ -269,6 +360,42 @@ diff --git a/src/mknod.c b/src/mknod.c
        break;
  
      default:
+diff --git a/src/nice.c b/src/nice.c
+--- a/src/nice.c
++++ b/src/nice.c
+@@ -43,11 +43,15 @@
+ 
+ #define AUTHORS "David MacKenzie"
+ 
++#if defined(__native_client__)
++# define GET_PRIORITY() 10
++#else
+ #ifdef NICE_PRIORITY
+ # define GET_PRIORITY() nice (0)
+ #else
+ # define GET_PRIORITY() getpriority (PRIO_PROCESS, 0)
+ #endif
++#endif
+ 
+ /* The name this program was run with. */
+ char *program_name;
+@@ -184,6 +188,8 @@ main (int argc, char **argv)
+       exit (EXIT_SUCCESS);
+     }
+ 
++  /* Just pretend for nacl. */
++#if !defined(__native_client__)
+ #ifndef NICE_PRIORITY
+   errno = 0;
+   current_priority = GET_PRIORITY ();
+@@ -194,6 +200,7 @@ main (int argc, char **argv)
+   if (nice (adjustment) == -1)
+ #endif
+     error (EXIT_FAIL, errno, _("cannot set priority"));
++#endif
+ 
+   execvp (argv[i], &argv[i]);
+ 
 diff --git a/src/remove.c b/src/remove.c
 --- a/src/remove.c
 +++ b/src/remove.c

@@ -3,12 +3,12 @@
 # found in the LICENSE file.
 
 BARE_EXECUTABLES="\
-[ basename cat chgrp chmod chown cksum comm cp csplit cut date dd dir dircolors
-dirname du echo env expand expr factor false fmt fold ginstall head hostname id
-join kill link ln logname ls md5sum mkdir mkfifo mknod mv nl nohup od paste
-pathchk pr printenv printf ptx pwd readlink rm rmdir seq setuidgid sha1sum
-shred sleep sort split stat stty su sum sync tac tail tee test touch tr true
-tsort tty unexpand uniq unlink vdir wc whoami yes"
+[ basename cat chgrp chmod chown cksum comm cp csplit cut date dd df dir
+dircolors dirname du echo env expand expr factor false fmt fold ginstall head
+hostname id join kill link ln logname ls md5sum mkdir mkfifo mknod mv nl nice
+nohup od paste pathchk pr printenv printf ptx pwd readlink rm rmdir seq
+setuidgid sha1sum shred sleep sort split stat stty su sum sync tac tail tee
+test touch tr true tsort tty unexpand uniq unlink uname vdir wc whoami yes"
 
 EXECUTABLES=""
 for exe in ${BARE_EXECUTABLES}; do
