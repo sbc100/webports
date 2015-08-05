@@ -4,11 +4,13 @@
 
 # TODO(hamaji): include $NACL_SDK_ROOT/tools/common.mk.
 
-NACL_SPAWN_OBJS = nacl_spawn.o path_util.o elf_reader.o library_dependencies.o
+NACL_SPAWN_OBJS = nacl_spawn.o nacl_setup_env.o path_util.o elf_reader.o \
+                  library_dependencies.o nacl_apipe.o nacl_pp_helpers.o
 
 TEST_EXES = test/unittests
 LIBRARIES = libcli_main.a libnacl_spawn.a
 
+CFLAGS += -std=gnu99
 CPPFLAGS += -Wall -Werror -Iinclude
 LDFLAGS += -lnacl_io
 
@@ -60,9 +62,9 @@ test:
 	./test/run_test.sh
 
 test/elf_reader: elf_reader.cc
-	$(CXX) $(CPPFLAGS) $(CFLAGS) -DDEFINE_ELF_READER_MAIN $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DDEFINE_ELF_READER_MAIN $< -o $@
 test/library_dependencies: elf_reader.o path_util.o library_dependencies.cc
-	$(CXX) $(CPPFLAGS) $(CFLAGS) -DDEFINE_LIBRARY_DEPENDENCIES_MAIN $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DDEFINE_LIBRARY_DEPENDENCIES_MAIN $^ -o $@
 
 # We use -nostdlib not to have libc.so in their dependencies.
 test/test_exe: test/test_exe.c test/libtest1.so test/libtest2.so
