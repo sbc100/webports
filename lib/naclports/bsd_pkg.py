@@ -14,9 +14,9 @@ on this package format.
 import collections
 import hashlib
 import os
+import shutil
 import subprocess
 import tarfile
-import tempfile
 
 from naclports import util
 
@@ -80,17 +80,20 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile):
   manifest['maintainer'] = 'native-client-discuss@googlegroups.com'
   manifest['www'] = 'https://code.google.com/p/naclports/'
   manifest['prefix'] = '/mnt/html5/usr/local/'
-  temp_dir = tempfile.mkdtemp()
+  temp_dir = os.path.splitext(outfile)[0] + '.tmp'
+  if os.path.exists(temp_dir):
+    shutil.rmtree(temp_dir)
+  os.mkdir(temp_dir)
+
   content_dir = os.path.join(temp_dir, 'mnt/html5/usr/local')
-  util.Makedirs(content_dir)
-  os.system("cp -r %s/* %s" % (payload_dir, content_dir))
+  shutil.copytree(payload_dir, content_dir)
   WriteUCL(os.path.join(temp_dir, '+COMPACT_MANIFEST'), manifest)
   file_dict = collections.OrderedDict()
   ParseDir(temp_dir, file_dict, '/')
   manifest['files'] = file_dict
   WriteUCL(os.path.join(temp_dir, '+MANIFEST'), manifest)
 
-  with tarfile.open(outfile, 'w') as tar:
+  with tarfile.open(outfile, 'w:bz2') as tar:
     for filename in os.listdir(temp_dir):
       if filename.startswith('+'):
         fullname = os.path.join(temp_dir, filename)
@@ -100,6 +103,4 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile):
       if not filename.startswith('+'):
         fullname = os.path.join(temp_dir, filename)
         AddFilesInDir(fullname, tar, temp_dir)
-
-  subprocess.check_call(['xz', '-zf', outfile])
-  subprocess.check_call(['rm', '-rf', temp_dir])
+  shutil.rmtree(temp_dir)
