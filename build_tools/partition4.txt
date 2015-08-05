@@ -329,6 +329,7 @@ builder 3 (total: 8408)
   cairo
   pango
   scummvm
+  xz
   libarchive-dev
   findutils
   bochs

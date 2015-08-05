@@ -288,14 +288,19 @@ class SourcePackage(package.Package):
     package up any files published by the PublishByArchForDevEnv
     step.
     """
-
-    publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME, self.config.libc,
-        self.config.arch)
+    if self.config.arch == self.config.toolchain:
+      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
+                                 self.config.arch)
+    else:
+      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
+                                 self.config.libc, self.config.arch)
     if not os.path.exists(publish_dir):
       return
-    abi = 'pkg_' + self.config.arch
-    abi_dir = os.path.join(paths.PACKAGES_ROOT, abi)
-    pkg_file = os.path.join(abi_dir, '%s-%s.tar.bz2' % (self.NAME,
+    abi = 'pkg_' + self.config.toolchain
+    if self.config.arch != self.config.toolchain:
+      abi += "_" + util.arch_to_pkgarch[self.config.arch]
+    abi_dir = os.path.join(paths.PUBLISH_ROOT, abi)
+    pkg_file = os.path.join(abi_dir, '%s-%s.tar' % (self.NAME,
       self.VERSION))
 
     util.Makedirs(abi_dir)

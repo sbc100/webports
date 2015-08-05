@@ -249,6 +249,7 @@ builder 1 (total: 15415)
   pcre
   grep
   scummvm
+  xz
   libarchive-dev
   jpeg8d
   libyuv

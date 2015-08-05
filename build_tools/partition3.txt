@@ -158,6 +158,7 @@ builder 1 (total: 11298)
   make
   devenv-latest
   mp4v2
+  xz
   libarchive-dev
   sdl2
   sdl2-tests

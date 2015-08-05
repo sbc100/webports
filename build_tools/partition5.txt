@@ -106,6 +106,7 @@ builder 1 (total: 6880)
   libav
   gsl
   mp4v2
+  xz
   libarchive-dev
   vim
   freeimage

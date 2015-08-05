@@ -2,10 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export LIBS+="${NACL_CLI_MAIN_LIB} -pthread -lresolv -ldl -lrt"
-EXECUTABLES="src/pkg${NACL_EXEEXT} src/pkg-static${NACL_EXEEXT}"
+EXECUTABLES="src/pkg${NACL_EXEEXT}"
+export LIBS+="${NACL_CLI_MAIN_LIB} -pthread"
 
 NACLPORTS_CFLAGS+=" -Dmain=nacl_main"
+
+# TODO: remove getprogname patch once it is implemented
+# BUG=https://code.google.com/p/naclports/issues/detail?id=230
 
 # TODO: Remove this hack once glibc header bug is fixed
 # Can also remove __unused -> _UNUSED_ patch in nacl.patch
@@ -17,6 +20,16 @@ PatchGlibcHeaders() {
 /#if defined __USE_FILE_OFFSET64 \&\& !defined(__native_client__)/" \
     ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/include/fts.h
 }
+
+if [ "${NACL_SHARED}" = "1" ]; then
+  LIBS+=" -lresolv -ldl -lrt"
+  EXECUTABLES+=" src/pkg-static${NACL_EXEEXT}"
+  EXTRA_CONFIGURE_ARGS+=" --enable-shared=yes --with-staticonly=no"
+else
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  LIBS+=" -lglibc-compat -lbsd"
+  EXTRA_CONFIGURE_ARGS+=" --enable-shared=no --with-staticonly=yes"
+fi
 
 ConfigureStep() {
   if [ "${NACL_LIBC}" = "glibc" ]; then
@@ -30,6 +43,21 @@ ConfigureStep() {
   PatchConfigure
   ChangeDir ${BUILD_DIR}
   DefaultConfigureStep
+}
+
+BuildStep() {
+  DefaultBuildStep
+  if [ "${NACL_SHARED}" = "0" ]; then
+    mv src/pkg-static${NACL_EXEEXT} src/pkg${NACL_EXEEXT}
+  fi
+}
+
+InstallStep() {
+  DefaultInstallStep
+  if [ "${NACL_SHARED}" = "0" ]; then
+      LogExecute mv ${DESTDIR}/${PREFIX}/sbin/pkg-static${NACL_EXEEXT}\
+         ${DESTDIR}/${PREFIX}/sbin/pkg${NACL_EXEEXT}
+  fi
 }
 
 PublishStep() {
