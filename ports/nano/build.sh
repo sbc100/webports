@@ -32,6 +32,7 @@ PublishStep() {
   rm -rf bin
   rm -rf share/man
   tar cf ${PUBLISH_DIR}/nano.tar .
+  md5sum ${PUBLISH_DIR}/nano.tar > ${PUBLISH_DIR}/nano.tar.hash
   rm -rf ${PUBLISH_DIR}/nanotar
   cd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \

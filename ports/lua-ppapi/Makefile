@@ -72,6 +72,7 @@ install-tests: $(OUTBASE)/$(LUA_TESTS_FILE)
 	cd $(OUTBASE)/lua-5.3.0-tests && patch -p1 < $(CURDIR)/lua_tests.patch
 	mkdir -p $(INSTALL_DIR)
 	tar -c -f $(INSTALL_DIR)/luadata.tar -C $(OUTBASE) lua-5.3.0-tests
+	md5sum $(INSTALL_DIR)/luadata.tar > $(INSTALL_DIR)/luadata.tar.hash
 	cp $(SCIMARK) $(BINARYTREES) $(INSTALL_DIR)
 
 install: install-tests

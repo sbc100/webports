@@ -77,9 +77,11 @@ ifeq ($(TOOLCHAIN),pnacl)
 	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/naclprocess.js
 endif
 
+TAR_FILE = $(INSTALL_ARCH_DIR)/pydata_$(NACL_ARCH).tar
 install: install-hterm
 	../../build_tools/template_expand.py manifest.json version=$(NACLPORTS_REVISION) > $(INSTALL_DIR)/manifest.json
-	tar -h -c -C ${NACL_PREFIX} -f $(INSTALL_ARCH_DIR)/pydata_$(NACL_ARCH).tar --exclude lib/python2.7/site-packages ${ASSETS}
+	tar -h -c -C ${NACL_PREFIX} -f $(TAR_FILE) --exclude lib/python2.7/site-packages ${ASSETS}
+	md5sum $(TAR_FILE) > $(TAR_FILE).hash
 ifeq ($(TOOLCHAIN),pnacl)
 	cp $(OUTDIR)/python$(EXEEXT) $(INSTALL_ARCH_DIR)
 	cd $(INSTALL_DIR) && \

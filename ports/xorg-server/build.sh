@@ -107,8 +107,11 @@ InstallStep() {
 
   ChangeDir ${NACL_PREFIX}
   LogExecute tar cvf ${ASSEMBLY_DIR}/xorg-xkb.tar share/X11/xkb
+  LogExecute md5sum ${ASSEMBLY_DIR}/xorg-xkb.tar > \
+      ${ASSEMBLY_DIR}/xorg-xkb.tar.hash
   local XFONTS_DIR=${NACL_PACKAGES_PUBLISH}/xfonts/${TOOLCHAIN}
-  LogExecute cp ${XFONTS_DIR}/xorg-fonts.tar ${ASSEMBLY_DIR}/xorg-fonts.tar
+  LogExecute cp ${XFONTS_DIR}/xorg-fonts.tar ${ASSEMBLY_DIR}/
+  LogExecute cp ${XFONTS_DIR}/xorg-fonts.tar.hash ${ASSEMBLY_DIR}/
 
   ChangeDir ${PUBLISH_DIR}
   LogExecute zip -r xorg-server.zip xorg-server

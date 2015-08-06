@@ -88,6 +88,7 @@ install: install-hterm
 ifeq ($(TOOLCHAIN),glibc)
 	tar -h -r -C ${NACL_PREFIX} -f $(DATA_ARCHIVE) ${EXTRA_LIBS}
 endif
+	md5sum $(DATA_ARCHIVE) > $(DATA_ARCHIVE).hash
 	cp $(OUTDIR)/ruby*$(EXEEXT) $(INSTALL_DIR)
 	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/ruby.nmf $(INSTALL_DIR)

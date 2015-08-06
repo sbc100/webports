@@ -160,6 +160,7 @@ PublishStep() {
   ChangeDir ${TAR_DIR}
   LogExecute cp -rf ${SRC_DIR}/lib ${TAR_DIR}
   LogExecute tar cf ${ARCH_DIR}/perl.tar .
+  LogExecute md5sum ${ARCH_DIR}/perl.tar > ${ARCH_DIR}/perl.tar.hash
   ChangeDir ${SRC_DIR}
   LogExecute rm -rf ${TAR_DIR}
   PublishByArchForDevEnv

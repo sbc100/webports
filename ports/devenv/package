@@ -56,8 +56,7 @@ gforth|ok|${PACKAGE_AS_ONE} \
 git|ok|${PACKAGE_BY_ARCH} \
 grep|ok|${PACKAGE_BY_ARCH} \
 less|ok|${PACKAGE_BY_ARCH} \
-lua5.1|ok|${PACKAGE_BY_ARCH} \
-lua5.2|ok|${PACKAGE_BY_ARCH} \
+lua5.3|ok|${PACKAGE_BY_ARCH} \
 m4|ok|${PACKAGE_BY_ARCH} \
 make|ok|${PACKAGE_BY_ARCH} \
 mingn.base|ok|glibc/tarballs/base.${NACL_ARCH}.zip \
@@ -83,7 +82,7 @@ xz|ok|${PACKAGE_BY_ARCH} \
 "
 
 ALIASES="\
-lua|lua5.2
+lua|lua5.3
 "
 
 RemoveDir() {
