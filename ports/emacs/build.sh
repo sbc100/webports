@@ -70,7 +70,7 @@ PublishStep() {
   cp ${START_DIR}/init.el ${ASSEMBLY_DIR}/emacstar/home/user/.emacs.d
   tar cf ${ASSEMBLY_DIR}/emacs.tar .
   rm -rf ${ASSEMBLY_DIR}/emacstar
-  md5sum ${ASSEMBLY_DIR}/emacs.tar > ${ASSEMBLY_DIR}/emacs.tar.hash
+  shasum ${ASSEMBLY_DIR}/emacs.tar > ${ASSEMBLY_DIR}/emacs.tar.hash
   cd ${ASSEMBLY_DIR}
   # TODO(petewil) this is expecting an exe, but we give it a shell script
   # since we have emacs running "unpacked", so it fails. Give it

@@ -64,7 +64,7 @@ InstallStep() {
   rm -f ${TAR_DIR}/lib/gforth/0.7.2/gforth-ditc
   tar cf ${PUBLISH_DIR}/gforth.tar naclports-dummydir
   rm -rf ${TAR_DIR}
-  md5sum ${PUBLISH_DIR}/gforth.tar > ${PUBLISH_DIR}/gforth.tar.hash
+  shasum ${PUBLISH_DIR}/gforth.tar > ${PUBLISH_DIR}/gforth.tar.hash
 
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       gforth_*${NACL_EXEEXT} \

@@ -53,7 +53,7 @@ PublishStep() {
   rm -rf usr/share/man
   tar cf ${ASSEMBLY_DIR}/vim.tar .
   rm -rf ${ASSEMBLY_DIR}/vimtar
-  md5sum ${ASSEMBLY_DIR}/vim.tar > ${ASSEMBLY_DIR}/vim.tar.hash
+  shasum ${ASSEMBLY_DIR}/vim.tar > ${ASSEMBLY_DIR}/vim.tar.hash
   cd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       vim_*${NACL_EXEEXT} \

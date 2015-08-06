@@ -19,6 +19,6 @@ InstallStep() {
   done
 
   LogExecute tar cf xorg-fonts.tar share/
-  LogExecute md5sum xorg-fonts.tar > xorg-fonts.tar.hash
+  LogExecute shasum xorg-fonts.tar > xorg-fonts.tar.hash
   LogExecute rm -rf share
 }
