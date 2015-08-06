@@ -576,19 +576,7 @@ diff --git a/libpkg/fetch.c b/libpkg/fetch.c
 diff --git a/libpkg/pkg.c b/libpkg/pkg.c
 --- a/libpkg/pkg.c
 +++ b/libpkg/pkg.c
-@@ -39,6 +39,11 @@
- #include "private/pkg.h"
- #include "private/utils.h"
- 
-+#ifdef __native_client__
-+#include <sys/types.h>
-+#include <dirent.h>
-+#endif
-+
- static ucl_object_t *manifest_schema = NULL;
- 
- struct pkg_key pkg_keys[PKG_NUM_FIELDS] = {
-@@ -182,7 +187,7 @@ pkg_type(const struct pkg * restrict pkg)
+@@ -182,7 +182,7 @@ pkg_type(const struct pkg * restrict pkg)
  }
  
  static ucl_object_t *
@@ -597,28 +585,6 @@ diff --git a/libpkg/pkg.c b/libpkg/pkg.c
  {
  	struct ucl_parser *parser;
  	static const char manifest_schema_str[] = ""
-@@ -1927,11 +1932,20 @@ pkg_open_root_fd(struct pkg *pkg)
- 		path = pkg_rootdir;
- 	if (path == NULL)
- 		path = "/";
--
- 	strlcpy(pkg->rootpath, path, sizeof(pkg->rootpath));
- 
-+#ifdef __native_client__
-+	DIR * dir = opendir(path);
-+	if (dir == NULL) {
-+		pkg_emit_errno("open", obj ? pkg_object_string(obj) : "/");
-+		return (EPKG_FATAL);
-+	}
-+	if ((pkg->rootfd = dirfd(dir)) >= 0 )
-+		return (EPKG_OK);
-+#else
- 	if ((pkg->rootfd = open(path , O_DIRECTORY|O_CLOEXEC)) >= 0 )
- 		return (EPKG_OK);
-+#endif
- 
- 	pkg_emit_errno("open", obj ? pkg_object_string(obj) : "/");
- 
 diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
 --- a/libpkg/pkg_config.c
 +++ b/libpkg/pkg_config.c
@@ -686,38 +652,6 @@ diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
  
  	return;
  }
-diff --git a/libpkg/pkg_create.c b/libpkg/pkg_create.c
---- a/libpkg/pkg_create.c
-+++ b/libpkg/pkg_create.c
-@@ -39,6 +39,11 @@
- #include "private/event.h"
- #include "private/pkg.h"
- 
-+#ifdef __native_client__
-+#include <sys/types.h>
-+#include <dirent.h>
-+#endif
-+
- #define TICK	100
- 
- static int pkg_create_from_dir(struct pkg *, const char *, struct packing *);
-@@ -315,7 +320,16 @@ pkg_create_staged(const char *outdir, pkg_formats format, const char *rootdir,
- 
- 	pkg_debug(1, "Creating package from stage directory: '%s'", rootdir);
- 
-+// TODO: Remove this patch once nacl_io support open with O_DIRECTORY
-+// BUG= https://code.google.com/p/chromium/issues/detail?id=516502
-+#ifdef __native_client__
-+	DIR * mddir = opendir(md_dir);
-+	if (mddir == NULL)
-+		pkg_emit_errno("open", md_dir);
-+	if ((mfd = dirfd(mddir)) == -1) {
-+#else
- 	if ((mfd = open(md_dir, O_DIRECTORY)) == -1) {
-+#endif
- 		pkg_emit_errno("open", md_dir);
- 		goto cleanup;
- 	}
 diff --git a/libpkg/pkg_cudf.c b/libpkg/pkg_cudf.c
 --- a/libpkg/pkg_cudf.c
 +++ b/libpkg/pkg_cudf.c
@@ -812,7 +746,7 @@ diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
  int
  pkg_delete(struct pkg *pkg, struct pkgdb *db, unsigned flags)
  {
-@@ -279,12 +350,21 @@ pkg_delete_file(struct pkg *pkg, struct pkg_file *file, unsigned force)
+@@ -279,12 +348,21 @@ pkg_delete_file(struct pkg *pkg, struct pkg_file *file, unsigned force)
  	/* Regular files and links */
  	/* check sha256 */
  	if (!force && file->sum[0] != '\0') {
@@ -834,7 +768,7 @@ diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
  		if (S_ISLNK(st.st_mode)) {
  			if (pkg_symlink_cksumat(pkg->rootfd, path, NULL,
  			    sha256) != EPKG_OK)
-@@ -394,7 +474,7 @@ pkg_delete_dir(struct pkg *pkg, struct pkg_dir *dir)
+@@ -394,7 +472,7 @@ pkg_delete_dir(struct pkg *pkg, struct pkg_dir *dir)
  }
  
  int
@@ -1568,6 +1502,51 @@ diff --git a/src/Makefile.am b/src/Makefile.am
  			-lbz2 \
  			-llzma \
  			-lssl \
+diff --git a/src/add.c b/src/add.c
+--- a/src/add.c
++++ b/src/add.c
+@@ -36,6 +36,10 @@
+ #include <sysexits.h>
+ #include <unistd.h>
+ #include <getopt.h>
++#ifdef __native_client__
++#include <sys/wait.h>
++#include <spawn.h>
++#endif
+ 
+ #include <pkg.h>
+ 
+@@ -146,9 +150,29 @@ exec_add(int argc, char **argv)
+ 		if (is_url(argv[i]) == EPKG_OK) {
+ 			snprintf(path, sizeof(path), "%s/%s.XXXXX",
+ 			    getenv("TMPDIR") != NULL ? getenv("TMPDIR") : "/tmp", basename(argv[i]));
++#ifdef __native_client__
++			int pid = vfork();
++			if (pid == -1) {
++				retcode = EPKG_FATAL;
++				break;
++			} else if (pid == 0) {
++				char* geturl_argv[4];
++				geturl_argv[0] = "geturl";
++				geturl_argv[1] = argv[i];
++				geturl_argv[2] = path;
++				geturl_argv[3] = NULL;
++				execvp("geturl", geturl_argv);
++				_exit(0);
++			} else {
++				int status;
++				waitpid(pid, &status, 0);
++				if (WEXITSTATUS(status) == 1)
++					break;
++			}
++#else
+ 			if ((retcode = pkg_fetch_file(NULL, argv[i], path, 0, 0, 0)) != EPKG_OK)
+ 				break;
+-
++#endif
+ 			file = path;
+ 		} else {
+ 			file = argv[i];
 diff --git a/src/convert.c b/src/convert.c
 --- a/src/convert.c
 +++ b/src/convert.c
