@@ -300,7 +300,7 @@ class SourcePackage(package.Package):
     if self.config.arch != self.config.toolchain:
       abi += "_" + util.arch_to_pkgarch[self.config.arch]
     abi_dir = os.path.join(paths.PUBLISH_ROOT, abi)
-    pkg_file = os.path.join(abi_dir, '%s-%s.tar.bz2' % (self.NAME,
+    pkg_file = os.path.join(abi_dir, '%s-%s.tbz' % (self.NAME,
       self.VERSION))
 
     util.Makedirs(abi_dir)
