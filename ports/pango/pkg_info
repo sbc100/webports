@@ -1,7 +1,7 @@
 NAME=pango
-VERSION=1.29.3
-URL=http://ftp.gnome.org/pub/GNOME/sources/pango/1.29/pango-1.29.3.tar.bz2
+VERSION=1.36.8
+URL=http://ftp.gnome.org/pub/GNOME/sources/pango/1.36/pango-1.36.8.tar.xz
 LICENSE=LGPL2
-DEPENDS=(glib cairo)
-SHA1=467a3dacc0f3173e6fd457524b9ccd9772039a62
+DEPENDS=(glib cairo harfbuzz)
+SHA1=c6ba02ee8f9d8b22b7cfd74c4b6ae170bebc8d2b
 DISABLED_TOOLCHAIN=(emscripten)

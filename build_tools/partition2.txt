@@ -242,6 +242,7 @@ builder 1 (total: 15415)
   sdl-ttf
   drod
   cairo
+  harfbuzz
   pango
   nethack
   dosbox

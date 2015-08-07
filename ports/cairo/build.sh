@@ -35,6 +35,7 @@ EXTRA_CONFIGURE_ARGS+=" --disable-xlib-xcb"
 EXTRA_CONFIGURE_ARGS+=" --disable-xcb-shm"
 # gobjects required for gdk-pixbuf -> gtk+
 EXTRA_CONFIGURE_ARGS+=" --enable-gobject=yes"
+EXTRA_CONFIGURE_ARGS+=" --enable-ft"
 
 export ac_cv_func_XRenderCreateLinearGradient=yes
 export ac_cv_func_XRenderCreateRadialGradient=yes

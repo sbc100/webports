@@ -51,6 +51,7 @@ builder 0 (total: 11062)
   glib
   pixman
   cairo
+  harfbuzz
   pango
   libogg
   libvorbis

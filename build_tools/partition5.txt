@@ -362,6 +362,7 @@ builder 4 (total: 7031)
   drod
   fontconfig
   cairo
+  harfbuzz
   pango
   sdl2
   sdl2-tests

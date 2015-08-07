@@ -327,6 +327,7 @@ builder 3 (total: 8408)
   drod
   fontconfig
   cairo
+  harfbuzz
   pango
   scummvm
   xz

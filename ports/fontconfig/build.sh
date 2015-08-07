@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXECUTABLES="fc-cache/fc-cache${NACL_EXEEXT}"
 EXTRA_CONFIGURE_ARGS="--disable-docs --with-arch=x86"
 
 # TODO(sbc): Disable use of random(), because it creates the expectation
@@ -10,3 +11,6 @@ EXTRA_CONFIGURE_ARGS="--disable-docs --with-arch=x86"
 if [ ${NACL_LIBC} = "newlib" ]; then
   export ac_cv_func_random=no
 fi
+
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"

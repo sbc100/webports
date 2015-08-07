@@ -1,45 +1,15 @@
-diff --git a/pango/opentype/hb-common.h b/pango/opentype/hb-common.h
---- a/pango/opentype/hb-common.h
-+++ b/pango/opentype/hb-common.h
-@@ -29,7 +29,7 @@
- 
- # ifdef HAVE_STDINT_H
- #  include <stdint.h>
--# else ifdef HAVE_INTTYPES_H
-+# elif defined(HAVE_INTTYPES_H)
- # include <inttypes.h>
- # endif
- 
-diff --git a/pango/opentype/main.cc b/pango/opentype/main.cc
---- a/pango/opentype/main.cc
-+++ b/pango/opentype/main.cc
-@@ -33,6 +33,11 @@
- #include <stdlib.h>
- #include <stdio.h>
+diff --git a/tests/cxx-test.C b/tests/cxx-test.C
+--- a/tests/cxx-test.C
++++ b/tests/cxx-test.C
+@@ -22,6 +22,11 @@
+ #include <pango/pangocairo.h>
+ #endif
  
 +#ifdef __native_client__
-+extern "C" int nacl_main(int argc, char **argv);
++extern "C" int nacl_main();
 +#define main nacl_main
 +#endif
 +
  int
- main (int argc, char **argv)
+ main ()
  {
-diff --git a/pango/pango-engine.c b/pango/pango-engine.c
---- a/pango/pango-engine.c
-+++ b/pango/pango-engine.c
-@@ -178,9 +178,13 @@ fallback_engine_covers (PangoEngineShape *engine G_GNUC_UNUSED,
- }
- 
- 
-+/* Pango macros don't work properly with gtk+
-+  TODO(josephpereira): upgrade pango and remove? or else explan necessity
-+  https://code.google.com/p/nativeclient/issues/detail?id=4253
-+*/
- static GType pango_fallback_engine_get_type (void);
- 
--G_DEFINE_ABSTRACT_TYPE (PangoFallbackEngine, pango_fallback_engine, PANGO_TYPE_ENGINE_SHAPE);
-+G_DEFINE_TYPE (PangoFallbackEngine, pango_fallback_engine, PANGO_TYPE_ENGINE_SHAPE);
- 
- static void
- pango_fallback_engine_init (PangoFallbackEngine *self)

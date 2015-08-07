@@ -22,6 +22,19 @@ diff --git a/Makefile.in b/Makefile.in
  
  # require automake 1.4
  AUTOMAKE_OPTIONS = 1.7
+diff --git a/demos/gtk-demo/main.c b/demos/gtk-demo/main.c
+--- a/demos/gtk-demo/main.c
++++ b/demos/gtk-demo/main.c
+@@ -934,6 +934,9 @@ main (int argc, char **argv)
+   GtkWidget *tree;
+   GtkTextTag *tag;
+ 
++  if (nacl_startup_untar(argv[0], "gtk-demo.tar", "/"))
++    return -1;
++
+   /* Most code in gtk-demo is intended to be exemplary, but not
+    * these few lines, which are just a hack so gtk-demo will work
+    * in the GTK tree without installing it.
 diff --git a/perf/marshalers.c b/perf/marshalers.c
 --- a/perf/marshalers.c
 +++ b/perf/marshalers.c

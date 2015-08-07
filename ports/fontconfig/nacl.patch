@@ -1,7 +1,7 @@
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -13976,6 +13976,15 @@ $as_echo_n "checking for scandir... " >&6; }
+@@ -13976,6 +13989,15 @@ $as_echo_n "checking for scandir... " >&6; }
  /* end confdefs.h.  */
  
  		#include <dirent.h>
@@ -17,3 +17,33 @@ diff --git a/configure b/configure
  		int main(void);
  
  int
+diff --git a/src/fcatomic.c b/src/fcatomic.c
+--- a/src/fcatomic.c
++++ b/src/fcatomic.c
+@@ -101,7 +101,7 @@ FcAtomicLock (FcAtomic *atomic)
+     int		ret;
+     struct stat	lck_stat;
+ 
+-#ifdef HAVE_LINK
++#if defined(HAVE_LINK) && !defined(__native_client__)
+     int		fd = -1;
+     FILE	*f = 0;
+     FcBool	no_link = FcFalse;
+@@ -156,7 +156,7 @@ FcAtomicLock (FcAtomic *atomic)
+ 	    time_t  now = time (0);
+ 	    if ((long int) (now - lck_stat.st_mtime) > 10 * 60)
+ 	    {
+-#ifdef HAVE_LINK
++#if defined(HAVE_LINK) && !defined(__native_client__)
+ 		if (no_link)
+ 		{
+ 		    if (rmdir ((char *) atomic->lck) == 0)
+@@ -211,7 +211,7 @@ FcAtomicDeleteNew (FcAtomic *atomic)
+ void
+ FcAtomicUnlock (FcAtomic *atomic)
+ {
+-#ifdef HAVE_LINK
++#if defined(HAVE_LINK) && !defined(__native_client__)
+     if (unlink ((char *) atomic->lck) == -1)
+ 	rmdir ((char *) atomic->lck);
+ #else
