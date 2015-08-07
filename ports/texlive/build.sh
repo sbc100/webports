@@ -73,7 +73,7 @@ ConfigureStep() {
   # TODO(phosek): we need to hardcode the package path because kpathsea which
   # is normally responsible for resolving paths requires fork/spawn and pipes;
   # once nacl_io has support for pipes, we could remove this bit
-  sed -i "s+\$PACKAGEDIR+/mnt/html5/packages/texlive.${NACL_ARCH}+g" \
+  sed -i "s+\$PACKAGEDIR+/packages/texlive.${NACL_ARCH}+g" \
     ${SRC_DIR}/texk/kpathsea/texmf.cnf
 
   export ac_exeext=${NACL_EXEEXT}

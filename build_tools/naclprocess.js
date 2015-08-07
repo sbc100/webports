@@ -156,7 +156,7 @@ NaClProcessManager.NO_FG_ERROR = 'No foreground process running.';
  * The TTY prefix for communicating with NaCl processes.
  * @const
  */
-NaClProcessManager.prefix = 'nacl_process';
+NaClProcessManager.prefix = 'tty_msg';
 
 /**
  * The "no hang" flag for waitpid().
@@ -415,30 +415,25 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
       var path = entry[arch]['pnacl-translate']['url'];
     } else {
       if (entry[arch]['url'] === undefined) {
-       return;
+        return;
       }
       var path = entry[arch]['url'];
     }
-    // TODO(bradnelson): Generalize this.
-    var html5MountPoint = '/mnt/html5/';
-    var homeMountPoint = '/home/user/';
+
+    // Convert 'path' from the NaCl VFS into an HTML5 filesystem: URL
     var tmpMountPoint = '/tmp/';
-    if (path.indexOf(html5MountPoint) === 0) {
-      path = path.replace(html5MountPoint,
-                          'filesystem:' + location.origin + '/persistent/');
-    } else if (path.indexOf(homeMountPoint) === 0) {
-      path = path.replace(homeMountPoint,
-                          'filesystem:' + location.origin +
-                          '/persistent/home/');
-    } else if (path.indexOf(tmpMountPoint) === 0) {
-      path = path.replace(tmpMountPoint,
-                          'filesystem:' + location.origin +
-                          '/temporary/');
+    var fsname = '/persistent/';
+    if (path.indexOf(tmpMountPoint) === 0) {
+      // Strip the /tmp/ prefix
+      path = path.replace(tmpMountPoint, '');
+      fsname = '/temporary/';
     } else {
-      // This is for the dynamic loader.
-      var base = location.href.match('.*/')[0];
-      path = base + path;
+      if (NaClProcessManager.fsroot !== undefined) {
+        path = NaClProcessManager.fsroot + path;
+      }
     }
+    path = 'filesystem:' + location.origin + fsname + path;
+
     if (arch === 'portable') {
       entry[arch]['pnacl-translate']['url'] = path;
     } else {
@@ -1050,18 +1045,9 @@ NaClProcessManager.prototype.spawn = function(
     self.processGroups[pgid].processes[fg.pid] = true;
 
     var params = {};
-
-    envs.push('NACL_PID=' + fg.pid);
-    envs.push('NACL_PPID=' + ppid);
-    if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
-      if (naclArch === null) {
-        console.log(
-            'Browser does not support NaCl/PNaCl or is disabled.');
-        callback(-Errno.ENOEXEC, fg);
-        return;
-      }
-      envs.push('NACL_ARCH=' + naclArch);
-    }
+    // Default environment variables (can be overridden by envs)
+    params['PS_VERBOSITY'] = '2';
+    params['TERM'] = 'xterm-256color';
 
     for (var i = 0; i < envs.length; i++) {
       var env = envs[i];
@@ -1076,6 +1062,7 @@ NaClProcessManager.prototype.spawn = function(
       params[key] = env.substring(index + 1);
     }
 
+    // Addition environment variables (these override the incoming env)
     params['PS_TTY_PREFIX'] = NaClProcessManager.prefix;
     params['PS_TTY_RESIZE'] = 'tty_resize';
     params['PS_TTY_COLS'] = self.ttyWidth;
@@ -1083,15 +1070,23 @@ NaClProcessManager.prototype.spawn = function(
     params['PS_STDIN'] = '/dev/tty';
     params['PS_STDOUT'] = '/dev/tty';
     params['PS_STDERR'] = '/dev/tty';
-    params['PS_VERBOSITY'] = '2';
     params['PS_EXIT_MESSAGE'] = 'exited';
-    params['TERM'] = 'xterm-256color';
     params['LOCATION_ORIGIN'] = location.origin;
     params['PWD'] = cwd;
-    // TODO(bradnelson): Drop self hack once tar extraction first checks
-    // relative to the nexe.
-    if (NaClProcessManager.useNaClAltHttp === true) {
-      params['NACL_ALT_HTTP'] = '1';
+    params['NACL_PID'] = fg.pid;
+    params['NACL_PPID'] = ppid;
+    if (NaClProcessManager.fsroot !== undefined) {
+      params['NACL_HTML5_ROOT'] = NaClProcessManager.fsroot;
+    }
+
+    if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
+      if (naclArch === null) {
+        console.log(
+            'Browser does not support NaCl/PNaCl or is disabled.');
+        callback(-Errno.ENOEXEC, fg);
+        return;
+      }
+      params['NACL_ARCH'] = naclArch;
     }
 
     function addParam(name, value) {

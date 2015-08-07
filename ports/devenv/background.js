@@ -6,7 +6,6 @@
 
 'use strict';
 
-
 function newWindow() {
   chrome.app.window.create('bash.html', {
     'bounds': {
@@ -141,18 +140,6 @@ function FileManager() {
 FileManager.FS_SIZE = 1024*1024;
 
 /**
- * The path to the HTML5 directory.
- * @const
- */
-FileManager.HTML5_MOUNT_POINT = '/mnt/html5';
-
-/**
- * The path to the home directory.
- * @const
- */
-FileManager.HOME_MOUNT_POINT = '/home/user';
-
-/**
  * The path to the tmp directory.
  * @const
  */
@@ -174,23 +161,16 @@ FileManager.FS_NOT_INITIALIZED = 'File system not initialized.';
  * @returns {string} pathInfo.path The translated path.
  */
 FileManager.prototype.translatePath = function(path) {
-  if (path.indexOf(FileManager.HTML5_MOUNT_POINT) === 0) {
-    return {
-      fs: this.persistentFs,
-      path: path.replace(FileManager.HTML5_MOUNT_POINT, '')
-    };
-  } else if (path.indexOf(FileManager.HOME_MOUNT_POINT) === 0) {
-    return {
-      fs: this.persistentFs,
-      path: path.replace(FileManager.HOME_MOUNT_POINT, '/home')
-    };
-  } else if (path.indexOf(FileManager.TMP_MOUNT_POINT) === 0) {
+  if (path.indexOf(FileManager.TMP_MOUNT_POINT) === 0) {
     return {
       fs: this.temporaryFs,
       path: path.replace(FileManager.TMP_MOUNT_POINT, '')
     };
   } else {
-    throw new Error('path is outside of HTML5 filesystem');
+    return {
+      fs: this.persistentFs,
+      path: NaClProcessManager.fsroot + path
+    };
   }
 };
 
@@ -210,12 +190,12 @@ FileManager.prototype.init = function() {
 
   return Promise.all([
     requestFs(window.PERSISTENT),
-    requestFs(window.TEMPORARY)
+    requestFs(window.TEMPORARY),
   ]).then(function(filesystems) {
     self.persistentFs = filesystems[0];
     self.temporaryFs = filesystems[1];
     self.isInitialized = true;
-  });
+  }).then(makeRootDir);
 };
 
 /**

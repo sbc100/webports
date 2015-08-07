@@ -47,7 +47,7 @@ bool nspawn_dict_getbool(struct PP_Var dict_var, const char* key);
 /* Sends a spawn/wait request to JavaScript and returns the result. */
 struct PP_Var nspawn_send_request(struct PP_Var req_var);
 
-void nspawn_setup_anonymous_pipes(void);
+int nspawn_setup_anonymous_pipes(void);
 
 extern int nspawn_pid;
 extern int nspawn_ppid;

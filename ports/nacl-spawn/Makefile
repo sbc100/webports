@@ -62,9 +62,9 @@ test:
 	./test/run_test.sh
 
 test/elf_reader: elf_reader.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DDEFINE_ELF_READER_MAIN $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -DDEFINE_ELF_READER_MAIN $< -o $@
 test/library_dependencies: elf_reader.o path_util.o library_dependencies.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DDEFINE_LIBRARY_DEPENDENCIES_MAIN $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -DDEFINE_LIBRARY_DEPENDENCIES_MAIN $^ -o $@
 
 # We use -nostdlib not to have libc.so in their dependencies.
 test/test_exe: test/test_exe.c test/libtest1.so test/libtest2.so

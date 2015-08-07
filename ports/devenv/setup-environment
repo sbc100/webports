@@ -11,7 +11,7 @@ export TOOLCHAIN=@TOOLCHAIN@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 
 LIB_DIR=lib32
-export SHELL=/mnt/html5/packages/bash.${NACL_ARCH}/bash
+export SHELL=/packages/bash.${NACL_ARCH}/bash
 export PACKAGE_LIB_DIR=lib32
 export PACKAGE_ALT_LIB_DIR=_platform_specific/x86_32/lib32
 if [ ${NACL_ARCH} = "x86_64" ]; then
@@ -19,17 +19,17 @@ if [ ${NACL_ARCH} = "x86_64" ]; then
   export PACKAGE_LIB_DIR=lib64
   export PACKAGE_ALT_LIB_DIR=_platform_specific/x86_64/lib64
 fi
-export NACL_SDK_ROOT=/mnt/html5/mingn
+export NACL_SDK_ROOT=/mingn
 export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
 LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
 LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
-LD_LIBRARY_PATH+=:/mnt/html5/coreutils.${NACL_ARCH}/${PACKAGE_LIB_DIR}
+LD_LIBRARY_PATH+=:/coreutils.${NACL_ARCH}/${PACKAGE_LIB_DIR}
 export LD_LIBRARY_PATH
 export LIBRARY_PATH=${LD_LIBRARY_PATH}
 PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
 # TODO(bradnelson): Figure out why this is now needed to find cc1.
 PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/libexec/gcc/x86_64-nacl/4.4.3
-PATH+=:/mnt/html5/coreutils.${NACL_ARCH}
+PATH+=:/coreutils.${NACL_ARCH}
 PATH+=:/mnt/http
 
 # Allow cross development by exporting alternate library paths.
@@ -60,11 +60,11 @@ export ENABLE_CONTROL_C=1
 # Usually this is in /etc/ssl/certs/, but we don't mount persistent storage
 # there yet.
 # Point git and curl at root certificates inside the curl package.
-export GIT_SSL_CAINFO=/mnt/html5/packages/curl.${NACL_ARCH}/ca-bundle.crt
-export CURL_CA_BUNDLE=/mnt/html5/packages/curl.${NACL_ARCH}/ca-bundle.crt
+export GIT_SSL_CAINFO=/packages/curl.${NACL_ARCH}/ca-bundle.crt
+export CURL_CA_BUNDLE=/packages/curl.${NACL_ARCH}/ca-bundle.crt
 
 # Scan through packages.
-for package_dir in /mnt/html5/packages/*; do
+for package_dir in /packages/*; do
   # Find the name of the package.
   package=${package_dir##*/}
   package_root=${package%.*}

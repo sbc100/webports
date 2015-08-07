@@ -34,6 +34,8 @@ DevEnvTest.prototype.setUp = function() {
     self.tcp = ext;
     return self.initFileSystem();
   }).then(function() {
+    return self.mkdir('/home');
+  }).then(function() {
     return self.mkdir('/home/user');
   });
 };
@@ -119,6 +121,7 @@ DevEnvTest.prototype.waitCommand = function(pid) {
 DevEnvTest.prototype.runCommand = function(cmd, cmdPrefix) {
   var self = this;
   var earlyOutput;
+  chrometest.info('runCommand');
   return Promise.resolve().then(function() {
     return self.spawnCommand(cmd, cmdPrefix);
   }).then(function(msg) {

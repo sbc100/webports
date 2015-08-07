@@ -87,27 +87,26 @@ function initMountSystem() {
 
 NaClTerm.nmf = 'bash.nmf';
 NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
+NaClTerm.env = []
 // Uncomment this line to use only locally built packages
-//NaClTerm.env = ['NACL_DEVENV_LOCAL=1']
+//NaClTerm.env.push('NACL_DEVENV_LOCAL=1')
+// Uncomment this line to enable pepper_simple logging
+//NaClTerm.env.push('PS_VERBOSITY=3')
 
-// TODO(bradnelson): Drop this hack once tar extraction first checks relative
-// to the nexe.
-NaClProcessManager.useNaClAltHttp = true;
-
-function onInit(callback) {
-  // Request 1GB storage.
-  navigator.webkitPersistentStorage.requestQuota(
-      1024 * 1024 * 1024 * 10,
-      function() {
-        NaClTerm.init();
-        callback();
-      },
-      function() {
-        console.log("Failed to allocate space!\n");
-        // Start the terminal even if FS failed to init.
-        NaClTerm.init();
-        callback();
-      });
+function allocateStorage() {
+  // Request 10GB storage.
+  return new Promise(function(resolve, reject) {
+    navigator.webkitPersistentStorage.requestQuota(
+        10 * 1024 * 1024 * 1024,
+        function(grantedBytes) {
+          resolve();
+        },
+        function() {
+          console.log("Failed to allocate space!\n");
+          reject();
+        }
+    );
+  });
 }
 
 window.onload = function() {
@@ -135,9 +134,10 @@ window.onload = function() {
   document.body.appendChild(mounterBackground);
 
   lib.init(function() {
-    onInit(function() {
-      initMountSystem();
-    });
+    allocateStorage()
+        .then(initMountSystem)
+        .then(makeRootDir)
+        .then(NaClTerm.init);
   });
 };
 

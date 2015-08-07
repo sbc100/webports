@@ -171,24 +171,6 @@ diff --git a/gcc/gcc-main.c b/gcc/gcc-main.c
  {
    driver d;
  
-diff --git a/gcc/gcc.c b/gcc/gcc.c
---- a/gcc/gcc.c
-+++ b/gcc/gcc.c
-@@ -6939,6 +6939,14 @@ void
- driver::expand_at_files (int *argc, char ***argv) const
- {
-   char **old_argv = *argv;
-+#if defined(__native_client__)
-+  /* Use /mnt/html5/tmp as TMPDIR. We cannot use /tmp because /tmp is
-+     nacl_io's memory file system and its contents will not be shared
-+     among multiple processes (e.g., cc1 and as). */
-+  if (mkdir ("/mnt/html5/tmp", 0777) < 0 && errno != EEXIST)
-+    fatal_error (input_location, "Failed to create /mnt/html5/tmp");
-+  setenv ("TMPDIR", "/mnt/html5/tmp", 1  /* overwrite */);
-+#endif
- 
-   expandargv (argc, argv);
- 
 diff --git a/gcc/gcov-dump.c b/gcc/gcov-dump.c
 --- a/gcc/gcov-dump.c
 +++ b/gcc/gcov-dump.c

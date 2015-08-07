@@ -24,9 +24,7 @@
 #include "nacl_main.h"
 #include "nacl_spawn.h"
 
-
 #define MAX_OLD_PIPES 100
-
 
 /*
  * Get an environment variable as an int, or return -1 if the value cannot
@@ -46,7 +44,7 @@ static int getenv_as_int(const char *env) {
 }
 
 static int mkdir_checked(const char* dir) {
-  int rtn =  mkdir(dir, 0777);
+  int rtn = mkdir(dir, 0777);
   if (rtn != 0) {
     fprintf(stderr, "mkdir '%s' failed: %s\n", dir, strerror(errno));
   }
@@ -63,44 +61,43 @@ static int do_mount(const char *source, const char *target,
 static void MountLocalFs(struct PP_Var mount_data) {
   bool available = nspawn_dict_getbool(mount_data, "available");
 
-  if (!available) {
+  if (!available)
     return;
-  } else {
-    struct PP_Var filesystem = nspawn_dict_get(mount_data, "filesystem");
-    PP_Resource filesystemResource =
-        PSInterfaceVar()->VarToResource(filesystem);
-    struct PP_Var filepath_var = nspawn_dict_get(mount_data, "fullPath");
-    struct PP_Var mountpoint_var = nspawn_dict_get(mount_data, "mountPoint");
 
-    uint32_t fp_len, mp_len;
-    const char* filepath = PSInterfaceVar()->VarToUtf8(filepath_var,
-                                                       &fp_len);
-    const char* mountpoint = PSInterfaceVar()->VarToUtf8(mountpoint_var,
-                                                         &mp_len);
-    // TODO(gdeepti): Currently mount on the main thread always returns
-    // without an error, crashes the nacl module and mkdir in /mnt/html5
-    // does not work because we do not allow blocking calls on the main thread.
-    // Move this off the main thread for better error checking.
-    struct stat st;
-    if (stat(mountpoint, &st) < 0) {
-      mkdir_checked(mountpoint);
-    }
+  struct PP_Var filesystem = nspawn_dict_get(mount_data, "filesystem");
+  PP_Resource filesystemResource =
+      PSInterfaceVar()->VarToResource(filesystem);
+  struct PP_Var filepath_var = nspawn_dict_get(mount_data, "fullPath");
+  struct PP_Var mountpoint_var = nspawn_dict_get(mount_data, "mountPoint");
 
-    struct PP_Var status_var = nspawn_dict_create();
-    char fs[1024];
-    sprintf(fs, "filesystem_resource=%d\n", filesystemResource);
-
-    if (do_mount(filepath, mountpoint, "html5fs", 0, fs) != 0) {
-      fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", filepath);
-      nspawn_dict_setstring(status_var, "mount_status", "fail");
-    } else {
-      nspawn_dict_setstring(status_var, "mount_status", "success");
-    }
-    PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
-    nspawn_var_release(filesystem);
-    nspawn_var_release(filepath_var);
-    nspawn_var_release(mountpoint_var);
+  uint32_t fp_len, mp_len;
+  const char* filepath = PSInterfaceVar()->VarToUtf8(filepath_var,
+                                                     &fp_len);
+  const char* mountpoint = PSInterfaceVar()->VarToUtf8(mountpoint_var,
+                                                       &mp_len);
+  // TODO(gdeepti): Currently mount on the main thread always returns
+  // without an error, crashes the nacl module and mkdir in /mnt/html5
+  // does not work because we do not allow blocking calls on the main thread.
+  // Move this off the main thread for better error checking.
+  struct stat st;
+  if (stat(mountpoint, &st) < 0) {
+    mkdir_checked(mountpoint);
   }
+
+  struct PP_Var status_var = nspawn_dict_create();
+  char fs[1024];
+  sprintf(fs, "filesystem_resource=%d\n", filesystemResource);
+
+  if (do_mount(filepath, mountpoint, "html5fs", 0, fs) != 0) {
+    fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", filepath);
+    nspawn_dict_setstring(status_var, "mount_status", "fail");
+  } else {
+    nspawn_dict_setstring(status_var, "mount_status", "success");
+  }
+  PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
+  nspawn_var_release(filesystem);
+  nspawn_var_release(filepath_var);
+  nspawn_var_release(mountpoint_var);
 }
 
 static void UnmountLocalFs(struct PP_Var mount_data) {
@@ -111,18 +108,19 @@ static void UnmountLocalFs(struct PP_Var mount_data) {
 
   if (!mounted) {
     perror("Directory not mounted, unable to unmount");
-  } else {
-    struct PP_Var status_var = nspawn_dict_create();
-    if (umount(mountpoint) != 0) {
-      fprintf(stderr, "Unmounting filesystem %s failed.\n", mountpoint);
-      nspawn_dict_setstring(status_var, "unmount_status", "fail");
-    } else {
-      nspawn_dict_setstring(status_var, "unmount_status", "success");
-    }
-    PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
-    nspawn_var_release(status_var);
-    nspawn_var_release(mountpoint_var);
+    return;
   }
+
+  struct PP_Var status_var = nspawn_dict_create();
+  if (umount(mountpoint) != 0) {
+    fprintf(stderr, "Unmounting filesystem %s failed.\n", mountpoint);
+    nspawn_dict_setstring(status_var, "unmount_status", "fail");
+  } else {
+    nspawn_dict_setstring(status_var, "unmount_status", "success");
+  }
+  PSInterfaceMessaging()->PostMessage(PSGetInstanceId(), status_var);
+  nspawn_var_release(status_var);
+  nspawn_var_release(mountpoint_var);
 }
 
 static void HandleMountMessage(struct PP_Var key,
@@ -137,7 +135,6 @@ static void HandleMountMessage(struct PP_Var key,
 
   MountLocalFs(value);
 }
-
 
 static void HandleUnmountMessage(struct PP_Var key,
                                  struct PP_Var value,
@@ -164,7 +161,7 @@ static void mountfs() {
   PSEventRegisterMessageHandler("unmount", &HandleUnmountMessage, NULL);
 }
 
-static void restore_pipes(void) {
+static int restore_pipes(void) {
   int old_pipes[MAX_OLD_PIPES][3];
   int old_pipe_count = 0;
   int count = 0;
@@ -201,7 +198,7 @@ static void restore_pipes(void) {
     int fd_tmp = open(path, (writer ? O_WRONLY : O_RDONLY));
     if (fd_tmp < 0) {
       fprintf(stderr, "Failed to created pipe on port %d\n", port);
-      exit(1);
+      return 1;
     }
     if (fd_tmp != fd) {
       dup2(fd_tmp, fd);
@@ -209,28 +206,50 @@ static void restore_pipes(void) {
     }
     if (old_pipe_count >= MAX_OLD_PIPES) {
       fprintf(stderr, "Too many old pipes to restore!\n");
-      exit(1);
+      return 1;
     }
     old_pipes[old_pipe_count][0] = port;
     old_pipes[old_pipe_count][1] = writer;
     old_pipes[old_pipe_count][2] = fd;
     ++old_pipe_count;
   }
+
+  return 0;
 }
 
-void nacl_setup_env() {
+int nacl_setup_env() {
   /*
    * If we running in sel_ldr then don't do any the filesystem/nacl_io
    * setup. We detect sel_ldr by the absence of the Pepper Instance.
    */
   if (PSGetInstanceId() == 0) {
-    return;
+    NACL_LOG("nacl_setup_env: skipping setup; running under sel_ldr\n");
+    return 0;
   }
 
   umount("/");
-  do_mount("", "/", "memfs", 0, NULL);
 
-  nspawn_setup_anonymous_pipes();
+  /*
+   * By default we use an ephemeral memfs for the root filesystem.
+   * However apps can set NACL_HTML5_ROOT if they prefer to use html5
+   * persistent storage, such is the dev env we multi-process and memfs
+   * doesn't make much sense since we want a common filesystem between
+   * processes.
+   */
+  const char* html5_root = getenv("NACL_HTML5_ROOT");
+  if (html5_root != NULL) {
+    NACL_LOG("nacl_setup_env: devenv\n");
+    if (do_mount(html5_root, "/", "html5fs", 0, "type=PERSISTENT") != 0)
+      return 1;
+  } else {
+    NACL_LOG("nacl_setup_env: standalone\n");
+    if (do_mount("", "/", "memfs", 0, NULL) != 0)
+      return 1;
+  }
+
+  int rtn = nspawn_setup_anonymous_pipes();
+  if (rtn != 0)
+    return rtn;
 
   /*
    * Setup common environment variables, but don't override those
@@ -249,36 +268,41 @@ void nacl_setup_env() {
   mkdir_checked("/etc");
   mkdir_checked("/mnt");
   mkdir_checked("/mnt/http");
-  mkdir_checked("/mnt/html5");
 
+  /* HTTP mount */
   const char* data_url = getenv("NACL_DATA_URL");
   if (!data_url)
     data_url = "./";
-  NACL_LOG("NACL_DATA_URL=%s\n", data_url);
+  NACL_LOG("nacl_setup_env: NACL_DATA_URL=%s\n", data_url);
 
   const char* mount_flags = getenv("NACL_DATA_MOUNT_FLAGS");
   if (!mount_flags)
     mount_flags = "";
-  NACL_LOG("NACL_DATA_MOUNT_FLAGS=%s\n", mount_flags);
+  NACL_LOG("nacl_setup_env: NACL_DATA_MOUNT_FLAGS=%s\n", mount_flags);
 
   if (do_mount(data_url, "/mnt/http", "httpfs", 0, mount_flags) != 0) {
     perror("mounting http filesystem at /mnt/http failed");
   }
 
-  if (do_mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
-    perror("Mounting HTML5 filesystem in /mnt/html5 failed");
-  } else {
-    mkdir("/mnt/html5/home", 0777);
-    struct stat st;
-    if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
-      perror("Unable to create home directory in persistent storage");
+  /* HTML5 mount (if we didn't already mount it as root) */
+  if (!html5_root) {
+    mkdir_checked("/mnt/html5");
+    if (do_mount("/", "/mnt/html5", "html5fs", 0, "type=PERSISTENT") != 0) {
+      perror("Mounting HTML5 filesystem in /mnt/html5 failed");
     } else {
-      if (do_mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
-        fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
+      mkdir("/mnt/html5/home", 0777);
+      struct stat st;
+      if (stat("/mnt/html5/home", &st) < 0 || !S_ISDIR(st.st_mode)) {
+        perror("Unable to create home directory in persistent storage");
+      } else {
+        if (do_mount("/home", home, "html5fs", 0, "type=PERSISTENT") != 0) {
+          fprintf(stderr, "Mounting HTML5 filesystem in %s failed.\n", home);
+        }
       }
     }
   }
 
+  /* HTML5 temporary mount */
   if (do_mount("/", "/tmp", "html5fs", 0, "type=TEMPORARY") != 0) {
     perror("Mounting HTML5 filesystem in /tmp failed");
   }
@@ -291,6 +315,7 @@ void nacl_setup_env() {
   if (pwd != NULL) {
     if (chdir(pwd)) {
       fprintf(stderr, "chdir() to %s failed: %s\n", pwd, strerror(errno));
+      return 1;
     }
   }
 
@@ -320,5 +345,8 @@ void nacl_setup_env() {
   nspawn_pid = getenv_as_int("NACL_PID");
   nspawn_ppid = getenv_as_int("NACL_PPID");
 
-  restore_pipes();
+  if (restore_pipes())
+    return 1;
+
+  return 0;
 }

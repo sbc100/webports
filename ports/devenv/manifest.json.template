@@ -59,7 +59,8 @@
         "background.js",
         "pipeserver.js",
         "naclprocess.js",
-        "whitelist.js"
+        "whitelist.js",
+        "devenv.js"
       ]
     }
   },

@@ -133,22 +133,22 @@ InstallPackage() {
 InstallPackageFromUrl() {
   local package=$1
   local url=$2
-  local package_dir=/mnt/html5/packages/${package}.${NACL_ARCH}
+  local package_dir=/packages/${package}.${NACL_ARCH}
   local clobber=1
 
   # Special case for MinGN.
   if [[ "${package}" = "mingn.base" || "${package}" = "mingn.lib" ]]; then
     url="${PACKAGE_SOURCE}/mingn/${subdir}"
-    package_dir="/mnt/html5"
+    package_dir="/"
     clobber=0
   fi
   # Special case for coreutils.
   if [[ "${package}" = "coreutils" ]]; then
-    package_dir="/mnt/html5/coreutils.${NACL_ARCH}"
+    package_dir="/coreutils.${NACL_ARCH}"
     clobber=0
   fi
 
-  local stamp_dir=/mnt/html5/stamps/${package}.${NACL_ARCH}
+  local stamp_dir=/stamps/${package}.${NACL_ARCH}
   local url_stamp="${stamp_dir}/${url//\//_}"
 
   if [ -d ${package_dir}/${package} ]; then

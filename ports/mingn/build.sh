@@ -138,8 +138,8 @@ EOF
 
   # Modify GCC's specs file. E.g.,
   # /path/to/nacl_sdk/pepper_canary/toolchain/linux_x86_glibc
-  # => /mnt/html5/mingn/toolchain/nacl_x86_glibc.
-  sed -i.bak 's@/\S*/pepper_[^/]*/toolchain/[^/]*_x86_glibc@/mnt/html5/mingn/toolchain/nacl_x86_glibc@g' \
+  # => /mingn/toolchain/nacl_x86_glibc.
+  sed -i.bak 's@/\S*/pepper_[^/]*/toolchain/[^/]*_x86_glibc@/mingn/toolchain/nacl_x86_glibc@g' \
       ${TOOLCHAIN_OUT_DIR}/lib/gcc/x86_64-nacl/4.4.3/specs
 
   CreateMingnPackage lib all

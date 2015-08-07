@@ -87,22 +87,6 @@ diff --git a/gcc/gcc.c b/gcc/gcc.c
  {
    size_t i;
    int value;
-@@ -6278,6 +6278,15 @@ main (int argc, char **argv)
-   struct user_specs *uptr;
-   char **old_argv = argv;
- 
-+#if defined(__native_client__)
-+  /* Use /mnt/html5/tmp as TMPDIR. We cannot use /tmp because /tmp is
-+     nacl_io's memory file system and its contents will not be shared
-+     among multiple processes (e.g., cc1 and as). */
-+  if (mkdir ("/mnt/html5/tmp", 0777) < 0 && errno != EEXIST)
-+    fatal ("Failed to create /mnt/html5/tmp");
-+  setenv ("TMPDIR", "/mnt/html5/tmp", 1  /* overwrite */);
-+#endif
-+
-   /* Initialize here, not in definition.  The IRIX 6 O32 cc sometimes chokes
-      on ?: in file-scope variable initializations.  */
-   asm_debug = ASM_DEBUG_SPEC;
 diff --git a/gcc/gcov-dump.c b/gcc/gcov-dump.c
 --- a/gcc/gcov-dump.c
 +++ b/gcc/gcov-dump.c

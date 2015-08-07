@@ -123,7 +123,7 @@ static int apipe_fgetattr(
   return 0;
 }
 
-void nspawn_setup_anonymous_pipes(void) {
+int nspawn_setup_anonymous_pipes(void) {
   const char fs_type[] = "anonymous_pipe";
   int result;
 
@@ -135,13 +135,15 @@ void nspawn_setup_anonymous_pipes(void) {
 
   result = nacl_io_register_fs_type(fs_type, &anonymous_pipe_ops);
   if (!result) {
-    fprintf(stderr, "Error registering filesystem type %s.\n", fs_type);
-    exit(1);
+    fprintf(stderr, "error: resigstering fstype '%s' failed.\n", fs_type);
+    return 1;
   }
   mkdir("/apipe", 0777);
   result = mount("", "/apipe", fs_type, 0, NULL);
   if (result != 0) {
-    fprintf(stderr, "Error mounting %s.\n", fs_type);
-    exit(1);
+    fprintf(stderr, "error: mount of '%s' failed: %d.\n", fs_type, result);
+    return 1;;
   }
+
+  return 0;
 }

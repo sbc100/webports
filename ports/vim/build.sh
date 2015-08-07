@@ -3,7 +3,8 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
-EXTRA_CONFIGURE_ARGS="--with-tlib=ncurses --prefix=/usr --exec-prefix=/usr"
+EXTRA_CONFIGURE_ARGS+="--enable-gui=no --with-tlib=ncurses"
+EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 EXECUTABLES=src/vim${NACL_EXEEXT}
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 

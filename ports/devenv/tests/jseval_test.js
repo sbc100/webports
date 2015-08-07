@@ -6,6 +6,9 @@
 
 'use strict';
 
+// TODO(sbc): Remove this once html5f becomes the default for nacl-spawn
+NaClProcessManager.fsroot = '/'
+
 function run(nmf, cmd) {
   var mgr = new NaClProcessManager();
   // Assume a default terminal size for headless processes.
@@ -14,10 +17,8 @@ function run(nmf, cmd) {
     mgr.spawn(
         nmf, cmd, [], '/tmp', 'pnacl', null,
         function(pid) {
-      mgr.waitpid(pid, 0, function(pid, code) {
-        resolve(code);
-      });
-    });
+          mgr.waitpid(pid, 0, function(pid, code) { resolve(code); });
+        });
   });
 }
 
