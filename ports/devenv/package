@@ -21,7 +21,7 @@ SDK_VERSION=${SDK_VERSION:-pepper_46}
 # sure to wait until the bot have build all the packages for a given
 # revision before changing this value.
 
-REVISION=${REVISION:-trunk-565-g5037ce4}
+REVISION=${REVISION:-trunk-583-g2ea9c03}
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
 LOCAL_SOURCE="http://localhost:5103/"
 VERBOSE=0

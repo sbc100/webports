@@ -130,13 +130,12 @@ PostInstallTestStep() {
     if [[ ${NACL_ARCH} == pnacl ]]; then
       LogExecute python ${START_DIR}/jseval_test.py -x -vv -a ${arch}
     fi
-    # TODO(sbc): Re-enable large tests once the online packages are updated
     # Run large and io2014 tests only on the buildbots (against pinned revs).
-    #if [[ "${BUILDBOT_BUILDERNAME:-}" != "" ]]; then
-      #LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
-        #-x -vv -a ${arch}
-      #LogExecute python ${START_DIR}/../devenv/io2014_test.py \
-        #-x -vv -a ${arch}
-    #fi
+    if [[ "${BUILDBOT_BUILDERNAME:-}" != "" ]]; then
+      LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
+        -x -vv -a ${arch}
+      LogExecute python ${START_DIR}/../devenv/io2014_test.py \
+        -x -vv -a ${arch}
+    fi
   done
 }
