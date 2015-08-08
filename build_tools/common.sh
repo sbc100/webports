@@ -729,6 +729,36 @@ PublishByArchForDevEnv() {
   LogExecute zip -r "${ARCH_DIR}.zip" .
 }
 
+PublishMultiArch() {
+  local binary=$1
+  local target=$2
+
+  # Assemble a multi-arch version for use in the devenv packaged app.
+  local assembly_dir="${PUBLISH_DIR}/${target}_multiarch"
+
+  local platform_dir="${assembly_dir}/_platform_specific/${NACL_ARCH}"
+  MakeDir ${platform_dir}
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    # Add something to the per-arch directory there so the store will accept
+    # the app even if nothing else ends up there. This currently happens in
+    # the pnacl case, where there's nothing that's per architecture.
+    touch ${platform_dir}/MARKER
+
+    local exe="${assembly_dir}/${target}${NACL_EXEEXT}"
+    LogExecute ${PNACLFINALIZE} ${BUILD_DIR}/${binary} -o ${exe}
+    ChangeDir ${assembly_dir}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        ${exe} -s . -o ${target}.nmf
+  else
+    local exe="${platform_dir}/${target}${NACL_EXEEXT}"
+    LogExecute cp ${BUILD_DIR}/${binary} ${exe}
+    ChangeDir ${assembly_dir}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        _platform_specific/*/${target}*${NACL_EXEEXT} \
+        -s . -o ${target}.nmf
+  fi
+}
+
 
 #
 # CheckStamp: checks for the existence of a stamp file

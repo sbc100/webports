@@ -40,6 +40,11 @@ builder 0 (total: 6869)
   curl
   git
   bash
+  libelf
+  xz
+  libarchive-dev
+  libbsd
+  pkg
   devenv
   make
   devenv-latest
@@ -106,8 +111,6 @@ builder 1 (total: 6880)
   libav
   gsl
   mp4v2
-  xz
-  libarchive-dev
   vim
   freeimage
   openscenegraph
@@ -156,7 +159,6 @@ builder 2 (total: 7283)
   geturl
   unzip
   bash
-  devenv
   libogg
   libvorbis
   libtheora

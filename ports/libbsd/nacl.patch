@@ -14,35 +14,15 @@ diff --git a/config.h.in b/config.h.in
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -5940,7 +5940,8 @@ irix5* | irix6* | nonstopux*)
-   ;;
- 
- # This must be glibc/ELF.
--linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
-+# Patched by naclports using patch_configure.py
-+linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu* | nacl*)
-   lt_cv_deplibs_check_method=pass_all
-   ;;
- 
-@@ -11158,6 +11159,18 @@ uts4*)
-   shlibpath_var=LD_LIBRARY_PATH
-   ;;
- 
-+nacl)
-+  # Patched by naclports using patch_configure.py
-+  if libc_so=`$CC -print-file-name=libc.so` && [ "$libc_so" != libc.so ]; then
-+    dynamic_linker="GNU/NaCl ld.so"
-+    version_type=linux
-+    library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}${major} ${libname}${shared_ext}'
-+    soname_spec='${libname}${release}${shared_ext}$major'
-+  else
-+    dynamic_linker=no
-+  fi
-+  ;;
-+
- *)
-   dynamic_linker=no
-   ;;
+@@ -13017,7 +13030,7 @@ int
+ main ()
+ {
+ extern char *__progname;
+-	                   const char *p = __progname;
++return (int)__progname;
+   ;
+   return 0;
+ }
 @@ -13035,7 +13048,7 @@ fi
  rm -f core conftest.err conftest.$ac_objext \
      conftest$ac_exeext conftest.$ac_ext
@@ -86,21 +66,6 @@ diff --git a/include/bsd/stdio.h b/include/bsd/stdio.h
  
  int fpurge(FILE *fp);
  __END_DECLS
-diff --git a/include/bsd/stdlib.h b/include/bsd/stdlib.h
---- a/include/bsd/stdlib.h
-+++ b/include/bsd/stdlib.h
-@@ -55,8 +55,11 @@ u_int32_t arc4random_uniform(u_int32_t upper_bound);
- 
- int dehumanize_number(const char *str, int64_t *size);
- 
-+// __progname is not set for newlib and these two functions are not supported.
-+#ifndef _NEWLIB_VERSION
- const char *getprogname(void);
- void setprogname(const char *);
-+#endif
- 
- int heapsort (void *, size_t, size_t, int (*)(const void *, const void *));
- int mergesort(void *base, size_t nmemb, size_t size,
 diff --git a/src/err.c b/src/err.c
 --- a/src/err.c
 +++ b/src/err.c
@@ -224,20 +189,3 @@ diff --git a/src/nlist.c b/src/nlist.c
  }
  #endif /* _NLIST_DO_ELF */
 +#endif /* not __native_client__*/
-diff --git a/src/progname.c b/src/progname.c
---- a/src/progname.c
-+++ b/src/progname.c
-@@ -33,6 +33,8 @@
- #include <string.h>
- #include <stdlib.h>
- 
-+/* Newlib does not have __progname setup */
-+#ifndef _NEWLIB_VERSION
- #ifdef HAVE___PROGNAME
- extern const char *__progname;
- #else
-@@ -65,3 +67,4 @@ setprogname(const char *progname)
- 	else
- 		__progname = last_slash + 1;
- }
-+#endif

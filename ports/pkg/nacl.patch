@@ -257,23 +257,7 @@ diff --git a/external/libfetch/ftp.c b/external/libfetch/ftp.c
 diff --git a/external/libfetch/http.c b/external/libfetch/http.c
 --- a/external/libfetch/http.c
 +++ b/external/libfetch/http.c
-@@ -1701,9 +1701,14 @@ http_request_body(struct url *URL, const char *op, struct url_stat *us,
- 				http_cmd(conn, "User-Agent: %s", p);
- 		} else {
- 			/* default User-Agent */
-+#ifdef __native_client__
-+			http_cmd(conn, "User-Agent: %s " _LIBFETCH_VER,
-+               "pkg");
-+#else
- 			http_cmd(conn, "User-Agent: %s " _LIBFETCH_VER,
- 			    getprogname());
--		}
-+#endif
-+    }
- 		if (url->offset > 0)
- 			http_cmd(conn, "Range: bytes=%lld-", (long long)url->offset);
- 		http_cmd(conn, "Connection: close");
-@@ -2042,7 +2047,7 @@ fetchGetHTTP(struct url *URL, const char *flags)
+@@ -2042,7 +2042,7 @@ fetchGetHTTP(struct url *URL, const char *flags)
   * Store a file by HTTP
   */
  FILE *
@@ -282,7 +266,7 @@ diff --git a/external/libfetch/http.c b/external/libfetch/http.c
  {
  	warnx("fetchPutHTTP(): not implemented");
  	return (NULL);
-@@ -2067,7 +2072,7 @@ fetchStatHTTP(struct url *URL, struct url_stat *us, const char *flags)
+@@ -2067,7 +2067,7 @@ fetchStatHTTP(struct url *URL, struct url_stat *us, const char *flags)
   * List a directory
   */
  struct url_ent *
@@ -1088,26 +1072,6 @@ diff --git a/libpkg/pkg_solve.c b/libpkg/pkg_solve.c
  			got_sat = true;
  		}
  		else if (got_sat) {
-diff --git a/libpkg/pkg_status.c b/libpkg/pkg_status.c
---- a/libpkg/pkg_status.c
-+++ b/libpkg/pkg_status.c
-@@ -60,6 +60,8 @@ pkg_status(int *count)
- 	   $LOCALBASE/sbin/pkg.  Ditto: pkg-static. Portability:
- 	   assumes setprogname() has been called */
- 
-+  // There are no way to check this without __progname being set
-+#ifndef __native_client__
- 	progname = getprogname();
- 	if (progname == NULL)
- 		return (PKG_STATUS_UNINSTALLED);
-@@ -69,6 +71,7 @@ pkg_status(int *count)
- 	    !is_exec_at_localbase(PKG_EXEC_NAME)   &&
- 	    !is_exec_at_localbase(PKG_STATIC_NAME))
- 		return (PKG_STATUS_UNINSTALLED);
-+#endif
- 
- 	/* Does the local.sqlite pkg database exist, and can we open
- 	   it for reading? */
 diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
 --- a/libpkg/pkgdb.c
 +++ b/libpkg/pkgdb.c
@@ -1651,20 +1615,6 @@ diff --git a/src/event.c b/src/event.c
  	}
  #endif
  
-@@ -776,8 +803,12 @@ event_callback(void *data, struct pkg_event *ev)
- 		break;
- 	case PKG_EVENT_NOREMOTEDB:
- 		fprintf(stderr, "Unable to open remote database \"%s\". "
-+#ifdef __native_client__
-+		    "Try running 'pkg update' first.\n", ev->e_remotedb.repo);
-+#else
- 		    "Try running '%s update' first.\n", ev->e_remotedb.repo,
--		    getprogname());
-+                    getprogname());
-+#endif
- 		break;
- 	case PKG_EVENT_NOLOCALDB:
- 		fprintf(stderr, "Local package database nonexistent!\n");
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
@@ -1748,29 +1698,20 @@ diff --git a/src/main.c b/src/main.c
  	show_repository_info();
  
  	exit(EX_OK);
-@@ -453,17 +467,29 @@ start_process_worker(char *const *save_argv)
- 	 * process only. */
+@@ -438,9 +452,12 @@ export_arg_option (char *arg)
+ 	}
+ }
  
- 	while (1) {
-+#ifdef __native_client__
-+		child_pid = vfork();
-+#else
- 		child_pid = fork();
-+#endif
- 
- 		if (child_pid == 0) {
- 			/* Load the new Pkg image */
- 			if (ret == EX_NEEDRESTART)
-+#ifdef __native_client__
-+				execvp("pkg", save_argv);
-+#else
- 				execvp(getprogname(), save_argv);
-+#endif
-+#ifdef __native_client__
-+			_exit(0);
-+#else
- 			return;
-+#endif
++#ifndef __native_client__
++/* The use of fork here is not compatible with NaCl, which only has vfork() */
+ static void
+ start_process_worker(char *const *save_argv)
+ {
++  fprintf(stderr, "start_process_worker %s %s\n", getprogname(), save_argv[0]);
+ 	int	ret = EX_OK;
+ 	int	status;
+ 	pid_t	child_pid;
+@@ -463,7 +480,7 @@ start_process_worker(char *const *save_argv)
  		} else {
  			if (child_pid == -1)
  				err(EX_OSERR, "Failed to fork worker process");
@@ -1779,7 +1720,15 @@ diff --git a/src/main.c b/src/main.c
  			while (waitpid(child_pid, &status, 0) == -1) {
  				if (errno != EINTR)
  					err(EX_OSERR, "Child process pid=%d", (int)child_pid);
-@@ -580,7 +606,9 @@ main(int argc, char **argv)
+@@ -486,6 +503,7 @@ start_process_worker(char *const *save_argv)
+ 	exit(ret);
+ 	/* NOTREACHED */
+ }
++#endif
+ 
+ static int
+ expand_aliases(int argc, char ***argv)
+@@ -580,7 +598,9 @@ main(int argc, char **argv)
  #ifdef HAVE_LIBJAIL
  		{ "jail",		required_argument,	NULL,	'j' },
  #endif
@@ -1789,7 +1738,7 @@ diff --git a/src/main.c b/src/main.c
  		{ "config",		required_argument,	NULL,	'C' },
  		{ "repo-conf-dir",	required_argument,	NULL,	'R' },
  		{ "rootdir",		required_argument,	NULL,	'r' },
-@@ -622,9 +650,11 @@ main(int argc, char **argv)
+@@ -622,9 +642,11 @@ main(int argc, char **argv)
  		case 'd':
  			debug++;
  			break;
@@ -1801,7 +1750,18 @@ diff --git a/src/main.c b/src/main.c
  		case 'C':
  			conffile = optarg;
  			break;
-@@ -699,9 +729,11 @@ main(int argc, char **argv)
+@@ -684,8 +706,10 @@ main(int argc, char **argv)
+ 	optreset = 1;
+ 	optind = 1;
+ 
++#ifndef __native_client__
+ 	if (debug == 0 && version == 0)
+ 		start_process_worker(save_argv);
++#endif
+ 
+ #ifdef HAVE_ARC4RANDOM
+ 	/* Ensure that random is stirred after a possible fork */
+@@ -699,9 +723,11 @@ main(int argc, char **argv)
  		    "-j, -c and/or -r cannot be used at the same time!\n");
  	}
  
@@ -1813,7 +1773,7 @@ diff --git a/src/main.c b/src/main.c
  
  #ifdef HAVE_LIBJAIL
  	if (jail_str != NULL) {
-@@ -740,6 +772,7 @@ main(int argc, char **argv)
+@@ -740,6 +766,7 @@ main(int argc, char **argv)
  
  	plugins_enabled = pkg_object_bool(pkg_config_get("PKG_ENABLE_PLUGINS"));
  
@@ -1821,7 +1781,7 @@ diff --git a/src/main.c b/src/main.c
  	if (plugins_enabled) {
  		struct pkg_plugin	*p = NULL;
  
-@@ -766,6 +799,7 @@ main(int argc, char **argv)
+@@ -766,6 +793,7 @@ main(int argc, char **argv)
  			}
  		}
  	}
@@ -1832,15 +1792,7 @@ diff --git a/src/main.c b/src/main.c
 diff --git a/src/pkgcli.h b/src/pkgcli.h
 --- a/src/pkgcli.h
 +++ b/src/pkgcli.h
-@@ -31,14 +31,16 @@
- #include <stdint.h>
- #include <bsd_compat.h>
- 
-+#ifdef __native_client__
-+# define pkg_warnx(fmt, ...) pkg_fprintf(stderr, "%S: " fmt, "pkg", __VA_ARGS__, -1)
-+#else
- #define pkg_warnx(fmt, ...) pkg_fprintf(stderr, "%S: " fmt, getprogname(), __VA_ARGS__, -1)
-+#endif
+@@ -35,10 +35,8 @@
  
  extern bool quiet;
  extern int nbactions;
@@ -1851,7 +1803,7 @@ diff --git a/src/pkgcli.h b/src/pkgcli.h
  
  /* pkg add */
  int exec_add(int, char **);
-@@ -89,9 +91,11 @@ void usage_info(void);
+@@ -89,9 +87,11 @@ void usage_info(void);
  int exec_install(int, char **);
  void usage_install(void);
  
@@ -1900,21 +1852,6 @@ diff --git a/src/register.c b/src/register.c
  	bool		 testing_mode  = false;
  
  	int		 ch;
-diff --git a/src/search.c b/src/search.c
---- a/src/search.c
-+++ b/src/search.c
-@@ -409,7 +409,11 @@ exec_search(int argc, char **argv)
- 		return (EX_NOPERM);
- 	case EPKG_ENODB:
- 		if (!auto_update) {
-+#ifdef __native_client__
-+			warnx("Unable to open remote repository catalogues. Try running 'pkg update' first.");
-+#else
- 			warnx("Unable to open remote repository catalogues. Try running '%s update' first.", getprogname());
-+#endif
- 			return (EX_IOERR);
- 		}
- 		break;
 diff --git a/src/ssh.c b/src/ssh.c
 --- a/src/ssh.c
 +++ b/src/ssh.c

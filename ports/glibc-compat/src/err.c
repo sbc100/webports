@@ -43,6 +43,15 @@ __FBSDID("$FreeBSD: release/10.1.0/lib/libc/gen/err.c 177893 2008-04-03 20:36:44
 static FILE *err_file; /* file to use for error output */
 static void (*err_exit)(int);
 
+const char * getprogname(void) __attribute__((weak));
+
+static const char * _getprogname(void) {
+  if (getprogname)
+    return getprogname();
+  else
+    return "missing_getprogname";
+}
+
 /*
  * This is declared to take a `void *' so that the caller is not required
  * to include <stdio.h> first.  However, it is really a `FILE *', and the
@@ -97,9 +106,7 @@ verrc(int eval, int code, const char *fmt, va_list ap)
 {
 	if (err_file == 0)
 		err_set_file((FILE *)0);
-#ifndef _NEWLIB_VERSION
 	fprintf(err_file, "%s: ", _getprogname());
-#endif
 	if (fmt != NULL) {
 		vfprintf(err_file, fmt, ap);
 		fprintf(err_file, ": ");
@@ -124,9 +131,7 @@ verrx(int eval, const char *fmt, va_list ap)
 {
 	if (err_file == 0)
 		err_set_file((FILE *)0);
-#ifndef _NEWLIB_VERSION
 	fprintf(err_file, "%s: ", _getprogname());
-#endif
 	if (fmt != NULL)
 		vfprintf(err_file, fmt, ap);
 	fprintf(err_file, "\n");
@@ -166,9 +171,7 @@ vwarnc(int code, const char *fmt, va_list ap)
 {
 	if (err_file == 0)
 		err_set_file((FILE *)0);
-#ifndef _NEWLIB_VERSION
 	fprintf(err_file, "%s: ", _getprogname());
-#endif
 	if (fmt != NULL) {
 		vfprintf(err_file, fmt, ap);
 		fprintf(err_file, ": ");
@@ -190,9 +193,7 @@ vwarnx(const char *fmt, va_list ap)
 {
 	if (err_file == 0)
 		err_set_file((FILE *)0);
-#ifndef _NEWLIB_VERSION
 	fprintf(err_file, "%s: ", _getprogname());
-#endif
 	if (fmt != NULL)
 		vfprintf(err_file, fmt, ap);
 	fprintf(err_file, "\n");

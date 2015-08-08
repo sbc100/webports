@@ -3,12 +3,9 @@
 # found in the LICENSE file.
 
 EXECUTABLES="src/pkg${NACL_EXEEXT}"
-export LIBS+="${NACL_CLI_MAIN_LIB} -pthread"
+export LIBS+="-lbsd ${NACL_CLI_MAIN_LIB} -pthread"
 
 NACLPORTS_CFLAGS+=" -Dmain=nacl_main"
-
-# TODO: remove getprogname patch once it is implemented
-# BUG=https://code.google.com/p/naclports/issues/detail?id=230
 
 # TODO: Remove this hack once glibc header bug is fixed
 # Can also remove __unused -> _UNUSED_ patch in nacl.patch
@@ -28,7 +25,7 @@ if [ "${NACL_SHARED}" = "1" ]; then
   NACLPORTS_CPPFLAGS+=" -D_GNU_SOURCE"
 else
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  LIBS+=" -lglibc-compat -lbsd"
+  LIBS+=" -lglibc-compat"
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=no --with-staticonly=yes"
 fi
 
@@ -63,4 +60,5 @@ InstallStep() {
 
 PublishStep() {
   PublishByArchForDevEnv
+  PublishMultiArch src/pkg-static${NACL_EXEEXT} pkg
 }

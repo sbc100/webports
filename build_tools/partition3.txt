@@ -141,6 +141,9 @@ builder 1 (total: 11298)
   geturl
   unzip
   bash
+  libelf
+  libbsd
+  pkg
   devenv
   libogg
   libvorbis

@@ -10,6 +10,7 @@ NaClProcessManager.nmfWhitelist = [
     'geturl',
     'jseval',
     'sh',
+    'pkg',
     'unzip',
     'unzipsfx',
 ];

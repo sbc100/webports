@@ -33,6 +33,12 @@ builder 0 (total: 8304)
   geturl
   unzip
   bash
+  xz
+  libelf
+  openssl
+  libarchive-dev
+  libbsd
+  pkg
   devenv
   libogg
   libvorbis
@@ -121,6 +127,11 @@ builder 1 (total: 8350)
   curl
   git
   bash
+  xz
+  libelf
+  libarchive-dev
+  libbsd
+  pkg
   devenv
   make
   devenv-latest
