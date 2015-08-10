@@ -24,11 +24,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export LIBS+=" -lglibc-compat"
 fi
 
-InstallStep() {
-  # Skip install step as these will clash with host binaries.
-  return
-}
-
 PublishStep() {
   PublishByArchForDevEnv
 }

@@ -11,6 +11,24 @@ from naclports import configuration, package, util, error
 
 PAYLOAD_DIR = 'payload'
 
+ELF_MAGIC = '\x7fELF'
+
+def IsElfFile(filename):
+  with open(filename) as f:
+    header = f.read(4)
+  return header == ELF_MAGIC
+
+
+def FilterOutExecutables(filenames, root):
+  rtn = []
+  for name in filenames:
+    full_name = os.path.join(root, name)
+    if os.path.split(name)[0] == 'bin' and IsElfFile(full_name):
+      continue
+    rtn.append(name)
+
+  return rtn
+
 
 def InstallFile(filename, old_root, new_root):
   """Install a single file by moving it into a new location.
@@ -164,6 +182,12 @@ class BinaryPackage(package.Package):
 
         tar.extractall(dest_tmp)
         payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
+
+        # Filter out ELF binaries in the bin directory.  We don't want NaCl
+        # exectuables installed in the toolchain's bin directory since we
+        # add this to the PATH during the build process, and NaCl executables
+        # can't be run on the host system (not without sel_ldr anyway).
+        names = FilterOutExecutables(names, payload_tree)
         for name in names:
           InstallFile(name, payload_tree, dest)
     finally:
@@ -171,6 +195,7 @@ class BinaryPackage(package.Package):
 
     for name in names:
       RelocateFile(name, dest)
+
     self.WriteFileList(names)
     self.WriteStamp()
 
