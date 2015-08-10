@@ -14,6 +14,8 @@ PAYLOAD_DIR = 'payload'
 ELF_MAGIC = '\x7fELF'
 
 def IsElfFile(filename):
+  if os.path.islink(filename):
+    return False
   with open(filename) as f:
     header = f.read(4)
   return header == ELF_MAGIC
