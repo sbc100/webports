@@ -44,6 +44,8 @@ def ParseDir(payload_dir, file_dict, prefix):
       fullname = os.path.join(payload_dir, filename)
       if os.path.isdir(fullname):
         ParseDir(fullname, file_dict, prefix + filename + '/')
+      elif os.path.islink(fullname):
+        continue
       else:
         with open(fullname, 'rb') as f:
           file_dict[prefix + filename] = hashlib.sha256(f.read()).hexdigest()
@@ -54,6 +56,9 @@ def AddFilesInDir(content_dir, tar, prefix):
     fullname = os.path.join(content_dir, filename)
     if os.path.isdir(fullname):
       AddFilesInDir(fullname, tar, prefix)
+    elif os.path.islink(fullname):
+      # devenv does not yet support symlinks
+      continue
     else:
       # Rather convoluted way to add files to a tar archive that are
       # abolute (i.e. start with /).  pkg requires this, but python's
@@ -64,7 +69,7 @@ def AddFilesInDir(content_dir, tar, prefix):
         tar.addfile(info, fileobj=f)
 
 
-def CreatePkgFile(name, version, arch, payload_dir, outfile):
+def CreatePkgFile(name, version, arch, payload_dir, outfile, prefix='usr'):
   """Create an archive file in FreeBSD's pkg file format"""
   util.Log('Creating pkg package: %s' % outfile)
   manifest = collections.OrderedDict()
@@ -79,14 +84,14 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile):
   manifest['desc'] = 'desc not available'
   manifest['maintainer'] = 'native-client-discuss@googlegroups.com'
   manifest['www'] = 'https://code.google.com/p/naclports/'
-  manifest['prefix'] = '/mnt/html5/usr/local/'
+  manifest['prefix'] = '/' + prefix
   temp_dir = os.path.splitext(outfile)[0] + '.tmp'
   if os.path.exists(temp_dir):
     shutil.rmtree(temp_dir)
   os.mkdir(temp_dir)
 
-  content_dir = os.path.join(temp_dir, 'mnt/html5/usr/local')
-  shutil.copytree(payload_dir, content_dir)
+  content_dir = os.path.join(temp_dir, prefix)
+  shutil.copytree(payload_dir, content_dir, symlinks=True)
   WriteUCL(os.path.join(temp_dir, '+COMPACT_MANIFEST'), manifest)
   file_dict = collections.OrderedDict()
   ParseDir(temp_dir, file_dict, '/')

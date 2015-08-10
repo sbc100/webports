@@ -179,6 +179,12 @@ class SourcePackage(package.Package):
     if self.NAME != os.path.basename(self.root):
       raise Error('%s: package NAME must match directory name' % self.info)
 
+  def GetInstallLocation(self):
+    install_dir = 'install_%s' % util.arch_to_pkgarch[self.config.arch]
+    if self.config.arch != self.config.toolchain:
+       install_dir += '_' + self.config.toolchain
+    return os.path.join(paths.BUILD_ROOT, self.NAME, install_dir, 'payload')
+
   def GetBuildLocation(self):
     package_dir = self.ARCHIVE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
     return os.path.join(paths.BUILD_ROOT, self.NAME, package_dir)
@@ -288,14 +294,7 @@ class SourcePackage(package.Package):
     package up any files published by the PublishByArchForDevEnv
     step.
     """
-    if self.config.arch == self.config.toolchain:
-      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
-                                 self.config.arch)
-    else:
-      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
-                                 self.config.libc, self.config.arch)
-    if not os.path.exists(publish_dir):
-      return
+
     abi = 'pkg_' + self.config.toolchain
     if self.config.arch != self.config.toolchain:
       abi += "_" + util.arch_to_pkgarch[self.config.arch]
@@ -304,8 +303,28 @@ class SourcePackage(package.Package):
       self.VERSION))
 
     util.Makedirs(abi_dir)
-    bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
-        publish_dir, pkg_file)
+
+    # First create a package from the result of the package's
+    # InstallStep.
+    install_dir = self.GetInstallLocation()
+    if os.path.exists(install_dir):
+      bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
+          self.GetInstallLocation(), pkg_file)
+
+    if self.config.arch == self.config.toolchain:
+      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
+                                 self.config.arch)
+    else:
+      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
+                                 self.config.toolchain, self.config.arch)
+
+    # Optionally create a second package from the result of the publish step
+    if os.path.exists(publish_dir):
+      name = self.NAME + '_published'
+      pkg_file = os.path.join(abi_dir, '%s-%s.tbz' % (name, self.VERSION))
+      bsd_pkg.CreatePkgFile(name, self.VERSION, self.config.arch,
+        publish_dir, pkg_file, prefix='published/%s' % self.NAME)
+
 
   def Build(self, build_deps, force=None):
     self.CheckBuildable()

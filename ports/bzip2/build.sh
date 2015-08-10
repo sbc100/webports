@@ -33,7 +33,9 @@ InstallStep() {
   # that need things not available in newlib.
   MakeDir ${DESTDIR_INCLUDE}
   MakeDir ${DESTDIR_LIB}
+  MakeDir ${DESTDIR}${PREFIX}/bin
   LogExecute cp -f bzlib.h ${DESTDIR_INCLUDE}
+  LogExecute cp -f bzip2 ${DESTDIR}${PREFIX}/bin
   LogExecute chmod a+r ${DESTDIR_INCLUDE}/bzlib.h
 
   LogExecute cp -f libbz2.a ${DESTDIR_LIB}

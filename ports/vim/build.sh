@@ -36,24 +36,23 @@ ConfigureStep() {
 }
 
 InstallStep() {
-  return
+  DefaultInstallStep
+  LogExecute mv ${INSTALL_DIR}/usr ${INSTALL_DIR}${PREFIX}
 }
 
 PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/vim"
 
-  # TODO(sbc): avoid duplicating the install step here.
-  DESTDIR=${ASSEMBLY_DIR}/vimtar
-  DefaultInstallStep
-
+  MakeDir ${ASSEMBLY_DIR}/vimtar/usr
   ChangeDir ${ASSEMBLY_DIR}/vimtar
-  cp usr/bin/vim${NACL_EXEEXT} ../vim_${NACL_ARCH}${NACL_EXEEXT}
-  cp $SRC_DIR/runtime/vimrc_example.vim usr/share/vim/vimrc
-  rm -rf usr/bin
-  rm -rf usr/share/man
+  LogExecute cp -ar ${INSTALL_DIR}${PREFIX}/* ./usr/
+  LogExecute cp usr/bin/vim${NACL_EXEEXT} ../vim_${NACL_ARCH}${NACL_EXEEXT}
+  LogExecute cp $SRC_DIR/runtime/vimrc_example.vim usr/share/vim/vimrc
+  LogExecute rm -rf usr/bin
+  LogExecute rm -rf usr/share/man
   tar cf ${ASSEMBLY_DIR}/vim.tar .
-  rm -rf ${ASSEMBLY_DIR}/vimtar
+  Remove ${ASSEMBLY_DIR}/vimtar
   shasum ${ASSEMBLY_DIR}/vim.tar > ${ASSEMBLY_DIR}/vim.tar.hash
   cd ${ASSEMBLY_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
