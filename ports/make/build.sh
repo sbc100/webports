@@ -8,7 +8,10 @@ NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -Dpipe=nacl_spawn_pipe"
 export LIBS="${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
+  # TODO(sbc): remove once nacl_io implements these.
   export ac_cv_func_getrlimit=no
+  export ac_cv_func_seteuid=no
+  export ac_cv_func_setegid=no
   NACLPORTS_CPPFLAGS+=" -D_POSIX_VERSION"
 fi
 
