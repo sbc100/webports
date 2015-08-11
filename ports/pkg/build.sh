@@ -59,6 +59,5 @@ InstallStep() {
 }
 
 PublishStep() {
-  PublishByArchForDevEnv
   PublishMultiArch src/pkg-static${NACL_EXEEXT} pkg
 }

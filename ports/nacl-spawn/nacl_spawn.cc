@@ -223,8 +223,8 @@ static bool UseBuiltInFallback(std::string* prog, struct PP_Var req_var) {
   if (prog->find('/') == std::string::npos) {
     const char* path_env = getenv("PATH");
     std::vector<std::string> paths;
-    GetPaths(path_env, &paths);
-    if (GetFileInPaths(*prog, paths, prog)) {
+    nspawn_get_paths(path_env, &paths);
+    if (nspawn_find_in_paths(*prog, paths, prog)) {
       // Update argv[0] to match prog if we ended up changing it.
       struct PP_Var args_var = nspawn_dict_get(req_var, "args");
       assert(args_var.type == PP_VARTYPE_ARRAY);
@@ -283,14 +283,16 @@ static bool AddNmfToRequest(std::string prog, struct PP_Var req_var) {
 
   std::string arch;
   std::vector<std::string> dependencies;
-  if (!FindArchAndLibraryDependencies(prog, &arch, &dependencies))
+  if (!nspawn_find_arch_and_library_deps(prog, &arch, &dependencies))
     return false;
+
   if (!dependencies.empty()) {
     AddNmfToRequestForShared(prog, arch, dependencies, req_var);
-    return true;
+  } else  {
+    // No dependencies means the main binary is statically linked.
+    AddNmfToRequestForStatic(prog, arch, req_var);
   }
-  // No dependencies means the main binary is statically linked.
-  AddNmfToRequestForStatic(prog, arch, req_var);
+
   return true;
 }
 

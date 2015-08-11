@@ -16,18 +16,26 @@
 #include "elf_reader.h"
 #include "path_util.h"
 
-static bool GetLibraryPaths(std::vector<std::string>* paths) {
+#define PROGRAM_NAME "nacl_spawn"
+
+static bool s_debug;
+
+static void get_library_paths(std::vector<std::string>* paths) {
+  // Partially emulate the behaviour of ls.so.
+  // Search LD_LIBRARY_PATH first, then fall back to the defaults paths
+  // (/lib and /usr/lib).
   const char* path_env = getenv("LD_LIBRARY_PATH");
-  GetPaths(path_env, paths);
-  if (paths->empty()) {
-    fprintf(stderr, "LD_LIBRARY_PATH is not set\n");
-    errno = ENOENT;
-    return false;
+  nspawn_get_paths(path_env, paths);
+  paths->push_back("/lib");
+  paths->push_back("/usr/lib");
+  if (s_debug) {
+    for (size_t i = 0; i < paths->size(); i++)
+      fprintf(stderr, "%s: searching: %s\n", PROGRAM_NAME,
+          paths->at(i).c_str());
   }
-  return true;
 }
 
-static bool FindArchAndLibraryDependenciesImpl(
+static bool find_arch_and_library_deps(
     const std::string& filename,
     const std::vector<std::string>& paths,
     std::string* arch,
@@ -35,6 +43,11 @@ static bool FindArchAndLibraryDependenciesImpl(
   if (!dependencies->insert(filename).second) {
     // We have already added this file.
     return true;
+  }
+
+  if (s_debug) {
+    fprintf(stderr, "%s: resolving deps for: %s\n", PROGRAM_NAME,
+        filename.c_str());
   }
 
   ElfReader elf_reader(filename.c_str());
@@ -56,7 +69,13 @@ static bool FindArchAndLibraryDependenciesImpl(
       *arch = "x86-32";
     } else if (machine == EM_ARM) {
       *arch = "arm";
+    } else {
+      fprintf(stderr, "%s: unknown arch (%d): %s\n", PROGRAM_NAME, machine,
+          filename.c_str());
+      return false;
     }
+    if (s_debug)
+      fprintf(stderr, "%s: arch=%s\n", PROGRAM_NAME, arch->c_str());
   }
 
   if (elf_reader.is_static()) {
@@ -66,7 +85,8 @@ static bool FindArchAndLibraryDependenciesImpl(
       dependencies->clear();
       return true;
     } else {
-      fprintf(stderr, "%s: unexpected static binary\n", filename.c_str());
+      fprintf(stderr, "%s: unexpected static binary: %s\n", PROGRAM_NAME,
+          filename.c_str());
       errno = ENOEXEC;
       return false;
     }
@@ -83,12 +103,12 @@ static bool FindArchAndLibraryDependenciesImpl(
       // as the initial nexe by nacl). Since all glibc NMFs include
       // ld-runnable.so (which has ld-nacl-*.so.1 as its SONAME), they will
       // already have this dependency, so we can ignore it.
-    } else if (GetFileInPaths(needed_name, paths, &needed_path)) {
-      if (!FindArchAndLibraryDependenciesImpl(
-            needed_path, paths, NULL, dependencies))
+    } else if (nspawn_find_in_paths(needed_name, paths, &needed_path)) {
+      if (!find_arch_and_library_deps(needed_path, paths, NULL, dependencies))
         return false;
     } else {
-      fprintf(stderr, "%s: library not found\n", needed_name.c_str());
+      fprintf(stderr, "%s: library not found: %s\n", PROGRAM_NAME,
+          needed_name.c_str());
       errno = ENOENT;
       return false;
     }
@@ -96,22 +116,23 @@ static bool FindArchAndLibraryDependenciesImpl(
   return true;
 }
 
-bool FindArchAndLibraryDependencies(const std::string& filename,
-                                    std::string* arch,
-                                    std::vector<std::string>* dependencies) {
+bool nspawn_find_arch_and_library_deps(const std::string& filename,
+                                       std::string* arch,
+                                       std::vector<std::string>* dependencies) {
   std::vector<std::string> paths;
-  GetLibraryPaths(&paths);
+
+  s_debug = getenv("LD_DEBUG") != NULL;
+  get_library_paths(&paths);
 
   std::set<std::string> dep_set;
-  if (!FindArchAndLibraryDependenciesImpl(
-        filename.c_str(), paths, arch, &dep_set))
+  if (!find_arch_and_library_deps(filename.c_str(), paths, arch, &dep_set))
     return false;
   dependencies->assign(dep_set.begin(), dep_set.end());
 
   // If we find any, also add runnable-ld.so, which we will also need.
   if (!dependencies->empty()) {
     std::string needed_path;
-    if (GetFileInPaths("runnable-ld.so", paths, &needed_path)) {
+    if (nspawn_find_in_paths("runnable-ld.so", paths, &needed_path)) {
       dependencies->push_back(needed_path);
     }
   }
@@ -144,7 +165,7 @@ int main(int argc, char* argv[]) {
 
   std::string arch;
   std::vector<std::string> dependencies;
-  if (!FindArchAndLibraryDependencies(argv[1], &arch, &dependencies)) {
+  if (!nspawn_find_arch_and_library_deps(argv[1], &arch, &dependencies)) {
     perror("failed");
     return 1;
   }

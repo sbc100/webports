@@ -48,6 +48,11 @@ def ParseDir(payload_dir, file_dict, prefix):
         continue
       else:
         with open(fullname, 'rb') as f:
+          # TODO(sbc): These extensions should probably be stripped out earlier
+          # or never generated.
+          basename, ext = os.path.splitext(filename)
+          if ext in ('.nexe', '.pexe'):
+            filename = basename
           file_dict[prefix + filename] = hashlib.sha256(f.read()).hexdigest()
 
 
@@ -66,6 +71,11 @@ def AddFilesInDir(content_dir, tar, prefix):
       with open(fullname, 'r') as f:
         info = tar.gettarinfo(fileobj=f)
         info.name = fullname.replace(prefix, '')
+        # TODO(sbc): These extensions should probably be stripped out earlier
+        # or never generated.
+        basename, ext = os.path.splitext(info.name)
+        if ext in ('.nexe', '.pexe'):
+          info.name = basename
         tar.addfile(info, fileobj=f)
 
 

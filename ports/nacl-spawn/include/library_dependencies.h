@@ -14,8 +14,8 @@
 // in |dependencies| if |filename| is dynamically linked. Otherwise,
 // |dependencies| will be empty. Returns false and update errno
 // appropriately on error.
-bool FindArchAndLibraryDependencies(const std::string& filename,
-                                    std::string* arch,
-                                    std::vector<std::string>* dependencies);
+bool nspawn_find_arch_and_library_deps(const std::string& filename,
+                                       std::string* arch,
+                                       std::vector<std::string>* dependencies);
 
 #endif  // NACL_SPAWN_LIBRARY_DEPENDENCIES_H_

@@ -125,6 +125,12 @@ int nacl_startup_untar(const char* argv0,
     NACL_LOG("nacl_startup_untar: skipping untar; running in sel_ldr\n");
     return 0;
   }
+
+  if (getenv("NACL_DEVENV") != NULL) {
+    NACL_LOG("nacl_startup_untar: running in NaCl Dev Env\n");
+    return 0;
+  }
+
   NACL_LOG("nacl_startup_untar[%s]: %s -> %s\n", argv0, tarfile, root);
 
   /* First try relative to argv[0]. */
@@ -160,13 +166,13 @@ int nacl_startup_untar(const char* argv0,
 
   ret = tar_open(&tar, filename, NULL, O_RDONLY, 0, 0);
   if (ret) {
-    fprintf(stderr, "error opening %s\n", filename);
+    fprintf(stderr, "nacl_startup_untar: error opening %s\n", filename);
     return 1;
   }
 
   ret = tar_extract_all(tar, (char*)root);
   if (ret) {
-    fprintf(stderr, "error extracting %s\n", filename);
+    fprintf(stderr, "nacl_startup_untar: error extracting %s\n", filename);
     return 1;
   }
 

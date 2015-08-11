@@ -422,17 +422,23 @@ NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
 
     // Convert 'path' from the NaCl VFS into an HTML5 filesystem: URL
     var tmpMountPoint = '/tmp/';
+    var httpMountPoint = '/mnt/http/';
     var fsname = '/persistent/';
     if (path.indexOf(tmpMountPoint) === 0) {
       // Strip the /tmp/ prefix
       path = path.replace(tmpMountPoint, '');
       fsname = '/temporary/';
+      path = 'filesystem:' + location.origin + fsname + path;
+    } else if (path.indexOf(httpMountPoint) === 0) {
+      path = path.replace(httpMountPoint, '');
+      var base = location.href.match('.*/')[0];
+      path = base + path;
     } else {
       if (NaClProcessManager.fsroot !== undefined) {
         path = NaClProcessManager.fsroot + path;
       }
+      path = 'filesystem:' + location.origin + fsname + path;
     }
-    path = 'filesystem:' + location.origin + fsname + path;
 
     if (arch === 'portable') {
       entry[arch]['pnacl-translate']['url'] = path;

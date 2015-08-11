@@ -6,7 +6,7 @@
 
 #include <unistd.h>
 
-void GetPaths(const char* env, std::vector<std::string>* paths) {
+void nspawn_get_paths(const char* env, std::vector<std::string>* paths) {
   if (!env || !*env)
     return;
   for (const char* p = env; *p; p++) {
@@ -21,9 +21,9 @@ void GetPaths(const char* env, std::vector<std::string>* paths) {
   paths->push_back(env);
 }
 
-bool GetFileInPaths(const std::string& basename,
-                    const std::vector<std::string>& paths,
-                    std::string* out_path) {
+bool nspawn_find_in_paths(const std::string& basename,
+                          const std::vector<std::string>& paths,
+                          std::string* out_path) {
   for (size_t i = 0; i < paths.size(); i++) {
     const std::string path = paths[i] + '/' + basename;
     // We use this function for executables and shared objects, so

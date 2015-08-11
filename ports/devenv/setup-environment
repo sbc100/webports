@@ -23,7 +23,7 @@ export NACL_SDK_ROOT=/mingn
 export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
 LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
 LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
-LD_LIBRARY_PATH+=:/coreutils.${NACL_ARCH}/${PACKAGE_LIB_DIR}
+LD_LIBRARY_PATH+=:/mnt/http/_platform_specific/${NACL_ARCH}
 export LD_LIBRARY_PATH
 export LIBRARY_PATH=${LD_LIBRARY_PATH}
 PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin

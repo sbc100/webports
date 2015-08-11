@@ -729,12 +729,19 @@ PublishByArchForDevEnv() {
   LogExecute zip -r "${ARCH_DIR}.zip" .
 }
 
+#
+# Assemble a multi-arch version for use in the devenv packaged app.
+#
+#
 PublishMultiArch() {
   local binary=$1
   local target=$2
 
-  # Assemble a multi-arch version for use in the devenv packaged app.
-  local assembly_dir="${PUBLISH_DIR}/${target}_multiarch"
+  if [ $# -gt 2 ]; then
+    local assembly_dir="${PUBLISH_DIR}/$3"
+  else
+    local assembly_dir="${PUBLISH_DIR}"
+  fi
 
   local platform_dir="${assembly_dir}/_platform_specific/${NACL_ARCH}"
   MakeDir ${platform_dir}
@@ -753,7 +760,7 @@ PublishMultiArch() {
     local exe="${platform_dir}/${target}${NACL_EXEEXT}"
     LogExecute cp ${BUILD_DIR}/${binary} ${exe}
     ChangeDir ${assembly_dir}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py --no-arch-prefix \
         _platform_specific/*/${target}*${NACL_EXEEXT} \
         -s . -o ${target}.nmf
   fi

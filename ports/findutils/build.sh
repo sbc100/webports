@@ -12,6 +12,6 @@ BuildStep() {
   DefaultBuildStep
 }
 
-InstallStep() {
+PublishStep() {
   PublishByArchForDevEnv
 }

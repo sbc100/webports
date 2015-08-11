@@ -34,18 +34,14 @@ InstallStep() {
 
   # Set up files for bootstrap.
   local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash_multiarch
-  local PKG_DIR=${NACL_PACKAGES_PUBLISH}/pkg/${TOOLCHAIN}/pkg_multiarch
+  local PKG_DIR=${NACL_PACKAGES_PUBLISH}/pkg/${TOOLCHAIN}
   local GETURL_DIR=${NACL_PACKAGES_PUBLISH}/geturl/${TOOLCHAIN}
   local UNZIP_DIR=${NACL_PACKAGES_PUBLISH}/unzip/${TOOLCHAIN}
 
   LogExecute cp -fR ${BASH_DIR}/* ${APP_DIR}
   LogExecute cp -fR ${PKG_DIR}/* ${APP_DIR}
-
-  # On newlib there won't be libs, so turn on null glob for these copies.
-  shopt -s nullglob
-  LogExecute cp -fR ${GETURL_DIR}/{*.nexe,*.pexe,*.nmf,lib*} ${APP_DIR}
-  LogExecute cp -fR ${UNZIP_DIR}/{*.nexe,*.pexe,*.nmf,lib*} ${APP_DIR}
-  shopt -u nullglob
+  LogExecute cp -fR ${GETURL_DIR}/* ${APP_DIR}
+  LogExecute cp -fR ${UNZIP_DIR}/* ${APP_DIR}
 
   # Install jseval only for pnacl (as it can't really work otherwise).
   if [ "${NACL_ARCH}" = "pnacl" ]; then

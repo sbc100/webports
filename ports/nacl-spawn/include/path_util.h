@@ -9,13 +9,13 @@
 #include <vector>
 
 // Parses path environment variables such as PATH or LD_LIBRARY_PATH.
-void GetPaths(const char* env, std::vector<std::string>* paths);
+void nspawn_get_paths(const char* env, std::vector<std::string>* paths);
 
 // Gets a file for the specified basename in paths. Returns true on
 // success and out_path will be updated. On failure, this function
 // returns false and out_path will not be updated.
-bool GetFileInPaths(const std::string& basename,
-                    const std::vector<std::string>& paths,
-                    std::string* out_path);
+bool nspawn_find_in_paths(const std::string& basename,
+                          const std::vector<std::string>& paths,
+                          std::string* out_path);
 
 #endif  // NACL_SPAWN_PATH_UTIL_H_

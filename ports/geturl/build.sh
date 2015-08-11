@@ -16,19 +16,5 @@ BuildStep() {
 }
 
 InstallStep() {
-  MakeDir ${PUBLISH_DIR}
-  local name=geturl_${NACL_ARCH_ALT}${NACL_EXEEXT}
-  local exe=${PUBLISH_DIR}/${name}
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    LogExecute ${PNACLFINALIZE} ${name} -o ${exe}
-  else
-    LogExecute cp ${name} ${exe}
-  fi
-  pushd ${PUBLISH_DIR}
-  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${PUBLISH_DIR}/geturl*${NACL_EXEEXT} \
-      -L${DESTDIR_LIB} \
-      -s . \
-      -o geturl.nmf
-  popd
+  PublishMultiArch geturl_${NACL_ARCH_ALT}${NACL_EXEEXT} geturl
 }
