@@ -16,9 +16,11 @@ class TestBinaryPackage(common.NaclportsTest):
   @patch('os.makedirs')
   @patch('os.path.isdir', Mock(return_value=False))
   def testInstallFile(self, makedirs_mock, rename_mock):
-    binary_package.InstallFile('fname', 'location1', 'location2')
-    makedirs_mock.assert_called_once_with('location2')
-    rename_mock.assert_has_calls([call('location1/fname', 'location2/fname')])
+    mock_file = common.MockFileObject()
+    with patch('__builtin__.open', Mock(return_value=mock_file)):
+      binary_package.InstallFile('fname', 'location1', 'location2')
+      makedirs_mock.assert_called_once_with('location2')
+      rename_mock.assert_has_calls([call('location1/fname', 'location2/fname')])
 
   def testRelocateFile(self):
     # Only certain files should be relocated. A file called 'testfile'

@@ -282,7 +282,7 @@ class SourcePackage(package.Package):
       installed_pkg.LogStatus('Uninstalling existing')
       installed_pkg.DoUninstall()
 
-    binary_package.BinaryPackage(package_file).Install()
+    binary_package.BinaryPackage(package_file).Install(force)
 
   def GetInstalledPackage(self):
     return package.CreateInstalledPackage(self.NAME, self.config)

@@ -5,6 +5,7 @@
 import os
 import posixpath
 import shutil
+import stat
 import tarfile
 
 from naclports import configuration, package, util, error
@@ -19,17 +20,6 @@ def IsElfFile(filename):
   with open(filename) as f:
     header = f.read(4)
   return header == ELF_MAGIC
-
-
-def FilterOutExecutables(filenames, root):
-  rtn = []
-  for name in filenames:
-    full_name = os.path.join(root, name)
-    if os.path.split(name)[0] == 'bin' and IsElfFile(full_name):
-      continue
-    rtn.append(name)
-
-  return rtn
 
 
 def InstallFile(filename, old_root, new_root):
@@ -49,6 +39,14 @@ def InstallFile(filename, old_root, new_root):
   if not os.path.isdir(dirname):
     util.Makedirs(dirname)
   os.rename(oldname, newname)
+
+  # When install binarie ELF files into the toolchain direcoties, remove
+  # the X bit so that they do not found when searching the PATH.
+  if IsElfFile(newname):
+    mode = os.stat(newname).st_mode
+    mode = mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    os.chmod(newname, mode)
+
 
 
 def RelocateFile(filename, dest):
@@ -144,12 +142,12 @@ class BinaryPackage(package.Package):
     with tarfile.open(self.filename) as tar:
       return tar.extractfile('./pkg_info').read()
 
-  def Install(self):
+  def Install(self, force):
     """Install binary package into toolchain directory."""
     with util.InstallLock(self.config):
-      self._Install()
+      self._Install(force)
 
-  def _Install(self):
+  def _Install(self, force):
     dest = util.GetInstallRoot(self.config)
     dest_tmp = os.path.join(dest, 'install_tmp')
     if os.path.exists(dest_tmp):
@@ -177,19 +175,15 @@ class BinaryPackage(package.Package):
           name = name[len(PAYLOAD_DIR) + 1:]
           names.append(name)
 
-        for name in names:
-          full_name = os.path.join(dest, name)
-          if os.path.exists(full_name):
-            raise error.Error('file already exists: %s' % full_name)
+        if not force:
+          for name in names:
+            full_name = os.path.join(dest, name)
+            if os.path.exists(full_name) :
+              raise error.Error('file already exists: %s' % full_name)
 
         tar.extractall(dest_tmp)
         payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
 
-        # Filter out ELF binaries in the bin directory.  We don't want NaCl
-        # exectuables installed in the toolchain's bin directory since we
-        # add this to the PATH during the build process, and NaCl executables
-        # can't be run on the host system (not without sel_ldr anyway).
-        names = FilterOutExecutables(names, payload_tree)
         for name in names:
           InstallFile(name, payload_tree, dest)
     finally:
