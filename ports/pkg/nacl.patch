@@ -584,15 +584,6 @@ diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
  #include <errno.h>
  #include <fcntl.h>
  #ifdef HAVE_OSRELDATE_H
-@@ -82,7 +86,7 @@ static struct config_entry c[] = {
- 	{
- 		PKG_STRING,
- 		"PKG_DBDIR",
--		"/var/db/pkg",
-+		"/mnt/html5/db/pkg",
- 		"Where the package databases are stored",
- 	},
- 	{
 @@ -181,12 +185,21 @@ static struct config_entry c[] = {
  		PREFIX"/lib/pkg/",
  		"Directory which pkg(8) will load plugins from",
@@ -892,6 +883,26 @@ diff --git a/libpkg/pkg_event.c b/libpkg/pkg_event.c
  	case PKG_EVENT_INCREMENTAL_UPDATE:
  		sbuf_printf(msg, "{ \"type\": \"INFO_INCREMENTAL_UPDATE\", "
  		    "\"data\": {"
+diff --git a/libpkg/pkg_jobs.c b/libpkg/pkg_jobs.c
+--- a/libpkg/pkg_jobs.c
++++ b/libpkg/pkg_jobs.c
+@@ -2108,6 +2108,8 @@ pkg_jobs_fetch(struct pkg_jobs *j)
+ 	if (dlsize == 0)
+ 		return (EPKG_OK);
+ 
++// No statvfs or statfs in NaCl
++#ifndef __native_client__
+ #ifdef HAVE_STATFS
+ 	struct statfs fs;
+ 	while (statfs(cachedir, &fs) == -1) {
+@@ -2133,6 +2135,7 @@ pkg_jobs_fetch(struct pkg_jobs *j)
+ 	}
+ 	fs_avail = fs.f_bsize * (int64_t)fs.f_bavail;
+ #endif
++#endif
+ 
+ 	if (fs_avail != -1 && dlsize > fs_avail) {
+ 		char dlsz[9], fsz[9];
 diff --git a/libpkg/pkg_macho.c b/libpkg/pkg_macho.c
 --- a/libpkg/pkg_macho.c
 +++ b/libpkg/pkg_macho.c
@@ -992,6 +1003,175 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  #include <libgen.h>
  #include <sqlite3.h>
  #include <string.h>
+@@ -56,6 +54,10 @@
+ #include "private/pkg.h"
+ #include "private/pkgdb.h"
+ 
++#ifdef __native_client__
++#include <spawn.h>
++#endif
++
+ struct sig_cert {
+ 	char name[MAXPATHLEN];
+ 	char *sig;
+@@ -96,6 +98,29 @@ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
+ 	mkdirs(tmpdir);
+ 	snprintf(tmp, sizeof(tmp), "%s/%s.%s.XXXXXX", tmpdir, filename, extension);
+ 
++#ifdef __native_client__
++	int pid = vfork();
++	if (pid == -1) {
++		rc = EPKG_FATAL;
++		return (rc);
++	} else if (pid == 0) {
++		char* geturl_argv[4];
++		geturl_argv[0] = "geturl";
++		geturl_argv[1] = url;
++		geturl_argv[2] = tmp;
++		geturl_argv[3] = NULL;
++		execvp("geturl", geturl_argv);
++		_exit(1);
++	} else {
++		int status;
++		waitpid(pid, &status, 0);
++		if (WEXITSTATUS(status) != 0) {
++			*rc = EPKG_FATAL;
++			return (-1);
++		}
++	}
++	fd = open(tmp, O_RDONLY);
++#else
+ 	fd = mkstemp(tmp);
+ 	if (fd == -1) {
+ 		pkg_emit_error("Could not create temporary file %s, "
+@@ -109,7 +134,7 @@ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
+ 		close(fd);
+ 		fd = -1;
+ 	}
+-
++#endif
+ 	return (fd);
+ }
+ 
+@@ -532,6 +557,67 @@ pkg_repo_parse_sigkeys(const char *in, int inlen, struct sig_cert **sc)
+ 	return (rc);
+ }
+ 
++#ifdef __native_client__
++static int
++pkg_repo_meta_extract_signature_pubkey_nacl(int fd, void *ud)
++{
++	struct archive *a = NULL;
++	struct archive_entry *ae = NULL;
++	struct pkg_extract_cbdata *cb = ud;
++	int siglen;
++	void *sig;
++	int rc = EPKG_FATAL;
++
++	pkg_debug(1, "PkgRepo: extracting signature of repo in a sandbox");
++
++	a = archive_read_new();
++	archive_read_support_filter_all(a);
++	archive_read_support_format_tar(a);
++
++	archive_read_open_fd(a, cb->afd, 4096);
++	while (archive_read_next_header(a, &ae) == ARCHIVE_OK) {
++		if (cb->need_sig && strcmp(archive_entry_pathname(ae), "signature") == 0) {
++			siglen = archive_entry_size(ae);
++			sig = malloc(siglen);
++			if (sig == NULL) {
++				pkg_emit_errno("pkg_repo_meta_extract_signature",
++						"malloc failed");
++				return (EPKG_FATAL);
++			}
++			if (archive_read_data(a, sig, siglen) == -1) {
++				pkg_emit_errno("pkg_repo_meta_extract_signature",
++						"archive_read_data failed");
++				free(sig);
++				return (EPKG_FATAL);
++			}
++			if (write(fd, sig, siglen) == -1) {
++				pkg_emit_errno("pkg_repo_meta_extract_signature",
++						"write failed");
++				free(sig);
++				return (EPKG_FATAL);
++			}
++			free(sig);
++			rc = EPKG_OK;
++		}
++		else if (strcmp(archive_entry_pathname(ae), cb->fname) == 0) {
++			if (archive_read_data_into_fd(a, cb->tfd) != 0) {
++				pkg_emit_errno("archive_read_extract", "extract error");
++				rc = EPKG_FATAL;
++				break;
++			}
++			else if (!cb->need_sig) {
++				rc = EPKG_OK;
++			}
++		}
++	}
++	if (a != NULL) {
++		archive_read_close(a);
++		archive_read_free(a);
++	}
++	return (rc);
++}
++#endif
++
+ static int
+ pkg_repo_archive_extract_archive(int fd, const char *file,
+     const char *dest, struct pkg_repo *repo, int dest_fd,
+@@ -606,6 +692,13 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
+ 	}
+ 	else {
+ 		cbdata.need_sig = false;
++// Socketpair is broken in NaCl
++// Don't check pubkey now.
++#ifdef __native_client__
++		// Pass in a invalide fd now
++		// Not using the signature part of code
++		pkg_repo_meta_extract_signature_pubkey_nacl(-1, &cbdata);
++#else
+ 		if (pkg_emit_sandbox_get_string(pkg_repo_meta_extract_signature_pubkey,
+ 			&cbdata, (char **)&sig, &siglen) == EPKG_OK) {
+ 			free(sig);
+@@ -614,6 +707,7 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
+ 			pkg_emit_error("Repo extraction failed");
+ 			return (EPKG_FATAL);
+ 		}
++#endif
+ 	}
+ 	(void)lseek(fd, 0, SEEK_SET);
+ 	if (dest_fd != -1)
+@@ -728,8 +822,10 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
+ 		*rc = EPKG_FATAL;
+ 		return (-1);
+ 	}
+-
++// POSIX semantics does not apply here
++#ifndef __native_client__
+ 	(void)unlink(tmp);
++#endif
+ 	if (pkg_repo_archive_extract_check_archive(fd, filename, NULL, repo, dest_fd)
+ 			!= EPKG_OK) {
+ 		*rc = EPKG_FATAL;
+@@ -925,6 +1021,8 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+ 			return (EPKG_FATAL);
+ 	}
+ 
++  // No pubkey or fingerprint for nacl repo now.
++#ifndef __native_client__
+ 	/* Map meta file for extracting pubkeys from it */
+ 	if (stat(filepath, &st) == -1) {
+ 		pkg_emit_errno("pkg_repo_fetch_meta", "cannot stat meta fetched");
+@@ -944,6 +1042,7 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+ 		rc = EPKG_FATAL;
+ 		goto cleanup;
+ 	}
++#endif
+ 
+ 	if (repo->signature_type == SIG_FINGERPRINT) {
+ 		cbdata.len = st.st_size;
 diff --git a/libpkg/pkg_repo_create.c b/libpkg/pkg_repo_create.c
 --- a/libpkg/pkg_repo_create.c
 +++ b/libpkg/pkg_repo_create.c
@@ -1300,6 +1480,69 @@ diff --git a/libpkg/private/pkgdb.h b/libpkg/private/pkgdb.h
  void pkgdb_myarch(sqlite3_context *ctx, int argc, sqlite3_value **argv);
  int pkgdb_sqlcmd_init(sqlite3 *db, const char **err, const void *noused);
  int pkgdb_update_config_file_content(struct pkg *pkg, sqlite3 *s);
+diff --git a/libpkg/repo/binary/fetch.c b/libpkg/repo/binary/fetch.c
+--- a/libpkg/repo/binary/fetch.c
++++ b/libpkg/repo/binary/fetch.c
+@@ -42,6 +42,11 @@
+ #include <limits.h>
+ 
+ #include <libgen.h>
++#ifdef __native_client__
++#include <sys/types.h>
++#include <sys/wait.h>
++#include <spawn.h>
++#endif
+ 
+ #include "pkg.h"
+ #include "private/event.h"
+@@ -110,6 +115,9 @@ pkg_repo_binary_create_symlink(struct pkg *pkg, const char *fname,
+ 	/* Trim the path to just the filename. */
+ 	if ((dest_fname = strrchr(fname, '/')) != NULL)
+ 		++dest_fname;
++
++// Symlink does not work in devenv
++#ifndef __native_client__
+ 	if (symlink(dest_fname, link_dest_tmp) == -1) {
+ 		pkg_emit_errno("symlink", link_dest);
+ 		return (EPKG_FATAL);
+@@ -120,7 +128,7 @@ pkg_repo_binary_create_symlink(struct pkg *pkg, const char *fname,
+ 		unlink(link_dest_tmp);
+ 		return (EPKG_FATAL);
+ 	}
+-
++#endif
+ 	return (EPKG_OK);
+ }
+ 
+@@ -200,8 +208,27 @@ pkg_repo_binary_try_fetch(struct pkg_repo *repo, struct pkg *pkg,
+ 		free(dir);
+ 		return (EPKG_OK);
+ 	}
+-
++#ifdef __native_client__
++	int pid = vfork();
++        if (pid == -1) {
++		retcode = EPKG_FATAL;
++        } else if (pid == 0) {
++                char* geturl_argv[4];
++		geturl_argv[0] = "geturl";
++		geturl_argv[1] = url;
++		geturl_argv[2] = dest;
++		geturl_argv[3] = NULL;
++		execvp("geturl", geturl_argv);
++	} else {
++		int status;
++		waitpid(pid, &status, 0);
++		if (WEXITSTATUS(status) != 0) {
++			retcode = EPKG_FATAL;
++		}
++	}
++#else
+ 	retcode = pkg_fetch_file(repo, url, dest, 0, offset, pkg->pkgsize);
++#endif
+ 	fetched = 1;
+ 
+ 	if (retcode != EPKG_OK)
 diff --git a/libpkg/repo/binary/init.c b/libpkg/repo/binary/init.c
 --- a/libpkg/repo/binary/init.c
 +++ b/libpkg/repo/binary/init.c
@@ -1480,7 +1723,7 @@ diff --git a/src/add.c b/src/add.c
  
  #include <pkg.h>
  
-@@ -146,9 +150,29 @@ exec_add(int argc, char **argv)
+@@ -146,9 +150,30 @@ exec_add(int argc, char **argv)
  		if (is_url(argv[i]) == EPKG_OK) {
  			snprintf(path, sizeof(path), "%s/%s.XXXXX",
  			    getenv("TMPDIR") != NULL ? getenv("TMPDIR") : "/tmp", basename(argv[i]));
@@ -1496,12 +1739,13 @@ diff --git a/src/add.c b/src/add.c
 +				geturl_argv[2] = path;
 +				geturl_argv[3] = NULL;
 +				execvp("geturl", geturl_argv);
-+				_exit(0);
 +			} else {
 +				int status;
 +				waitpid(pid, &status, 0);
-+				if (WEXITSTATUS(status) == 1)
++				if (WEXITSTATUS(status) != 0) {
++					retcode = EPKG_FATAL;
 +					break;
++				}
 +			}
 +#else
  			if ((retcode = pkg_fetch_file(NULL, argv[i], path, 0, 0, 0)) != EPKG_OK)

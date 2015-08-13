@@ -11,7 +11,7 @@ NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/.. && pwd)"
 PKG_HOST_DIR=${NACLPORTS_ROOT}/pkg_host/
 PKG_FILENAME=pkg-1.5.5
 PKG_URL=http://storage.googleapis.com/naclports/mirror/${PKG_FILENAME}.tar.gz
-
+SDK_VERSION=pepper_46
 
 #
 # Attempt to download a file from a given URL
@@ -54,7 +54,7 @@ BuildPkg() {
 }
 
 WriteMetaFile() {
-  echo "version = 1;" >> $1
+  echo "version = 1;" > $1
   echo "packing_format = "tbz";" >> $1
   echo "digest_format = "sha256_base32";" >> $1
   echo "digests = "digests";" >> $1
@@ -68,10 +68,21 @@ WriteMetaFile() {
 BuildRepo() {
   cd ${SCRIPT_DIR}
   ./download_pkg.py $1
+  local REPO_DIR=${NACLPORTS_ROOT}/out/packages/prebuilt/repo
   for pkg_dir in ${NACLPORTS_ROOT}/out/packages/prebuilt/pkg/*/ ; do
     WriteMetaFile "${pkg_dir}/meta"
+    local SUB_REPO_DIR=${REPO_DIR}/$(basename ${pkg_dir})
+    mkdir -p "${SUB_REPO_DIR}"
     "${PKG_HOST_DIR}/${PKG_FILENAME}/src/pkg" repo \
-                                              -m "${pkg_dir}/meta" "${pkg_dir}"
+                 -m "${pkg_dir}/meta" -o "${SUB_REPO_DIR}" "${pkg_dir}"
+    cd ${SUB_REPO_DIR}
+    tar -xf packagesite.txz
+    tar -xf digests.txz
+    tar -jcf packagesite.tbz packagesite.yaml
+    tar -jcf digests.tbz digests
+    cd ${SCRIPT_DIR}
+    gsutil cp -a public-read "${SUB_REPO_DIR}/*.tbz" \
+        gs://naclports/builds/${SDK_VERSION}/"$1"/publish/$(basename ${pkg_dir})
   done
 }
 

@@ -63,9 +63,21 @@ InstallStep() {
   LogExecute cp bash.nmf sh.nmf
   InstallNaClTerm ${APP_DIR}
 
+  # Create Nacl.conf file
+  echo "NACL: {" > ${APP_DIR}/Nacl.conf
+  local PKG_ARCH=${NACL_ARCH}
+  if [ "${PKG_ARCH}" = "x86_64" ]; then
+    PKG_ARCH=x86-64
+  fi
+  echo "    url: http://storage.googleapis.com/naclports/builds/pepper_46/\
+trunk-589-gffe037b/publish/\
+pkg_${TOOLCHAIN}_${PKG_ARCH}," >> ${APP_DIR}/Nacl.conf
+  echo "    MIRROR_TYPE: HTTP," >> ${APP_DIR}/Nacl.conf
+  echo "}" >> ${APP_DIR}/Nacl.conf
+
   RESOURCES="background.js mounter.css mounter.js bash.js bashrc which
       install-base-packages.sh package graphical.html devenv.js whitelist.js
-      devenv_16.png devenv_48.png devenv_128.png"
+      devenv_16.png devenv_48.png devenv_128.png FreeBSD.conf pkg.conf"
   for resource in ${RESOURCES}; do
     LogExecute install ${START_DIR}/${resource} ${APP_DIR}/
   done
