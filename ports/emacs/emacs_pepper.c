@@ -4,6 +4,9 @@
  * found in the LICENSE file.
  */
 
+// TODO(bradnelson): Find a better workaround.
+#define NACL_SKIP_GETOPT
+
 #include "nacl_main.h"
 
 // Some things that Lisp.h needs:
@@ -12,7 +15,6 @@
 #include <errno.h>
 #include <sys/file.h>
 #include <sys/time.h>
-#include <unistd.h>
 
 #include "lisp.h"
 
