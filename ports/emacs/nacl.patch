@@ -56,25 +56,11 @@ diff --git a/configure b/configure
  
  case $opsys in
 -      hpux* | irix6-5 | openbsd | sol2* | unixware )
-+      hpux* | irix6-5 | openbsd | sol2* | unixware)
++      hpux* | irix6-5 | openbsd | sol2* | unixware | nacl )
      emacs_broken_SIGIO=yes
      ;;
  
-@@ -15179,6 +15185,13 @@ $as_echo "#define BROKEN_GET_CURRENT_DIR_NAME 1" >>confdefs.h
- 
-     ;;
- 
-+  nacl)
-+
-+    emacs_broken_SIGIO=yes
-+$as_echo "#define BROKEN_GET_CURRENT_DIR_NAME 1" >>confdefs.h
-+
-+    ;;
-+
-   freebsd)
- 
- $as_echo "#define BROKEN_PTY_READ_AFTER_EAGAIN 1" >>confdefs.h
-@@ -15277,7 +15290,7 @@ case $opsys in
+@@ -15277,7 +15283,7 @@ case $opsys in
  
      ;;
  
@@ -83,7 +69,7 @@ diff --git a/configure b/configure
          if test "x$ac_cv_func_grantpt" = xyes; then
  
  $as_echo "#define UNIX98_PTYS 1" >>confdefs.h
-@@ -15430,7 +15443,7 @@ if test $emacs_glibc = yes; then
+@@ -15430,7 +15436,7 @@ if test $emacs_glibc = yes; then
    emacs_pending_output=unknown
  
    case $opsys in
@@ -92,7 +78,7 @@ diff --git a/configure b/configure
        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for style of pending output formalism" >&5
  $as_echo_n "checking for style of pending output formalism... " >&6; }
                    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-@@ -15929,7 +15942,7 @@ if ${emacs_cv_usable_FIONREAD+:} false; then :
+@@ -15929,7 +15935,7 @@ if ${emacs_cv_usable_FIONREAD+:} false; then :
    $as_echo_n "(cached) " >&6
  else
    case $opsys in
@@ -101,7 +87,7 @@ diff --git a/configure b/configure
                emacs_cv_usable_FIONREAD=no
         ;;
  
-@@ -24659,7 +24672,7 @@ LD_FIRSTFLAG=
+@@ -24659,7 +24665,7 @@ LD_FIRSTFLAG=
  ORDINARY_LINK=
  case "$opsys" in
    ## gnu: GNU needs its own crt0.
@@ -194,7 +180,7 @@ diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
  movemail${EXEEXT}: ${srcdir}/movemail.c pop.o $(config_h)
  	$(CC) ${ALL_CFLAGS} ${MOVE_FLAGS} ${srcdir}/movemail.c pop.o \
 -	  $(LOADLIBES) $(LIBS_MOVE) -o movemail
-+	  $(LOADLIBES) $(LIBS_MOVE) -o movemail${EXEEXT} ${COMPAT_LIBS}
++	  $(LOADLIBES) $(LIBS_MOVE) -o movemail${EXEEXT}
  
  pop.o: ${srcdir}/pop.c ${srcdir}/../lib/min-max.h $(config_h)
  	$(CC) -c ${CPP_CFLAGS} ${MOVE_FLAGS} ${srcdir}/pop.c
@@ -203,7 +189,7 @@ diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
  	$(CC) ${ALL_CFLAGS} ${srcdir}/emacsclient.c \
  	   -DVERSION="\"${version}\"" \
 -	   $(LOADLIBES) -o emacsclient
-+	   $(LOADLIBES) -o emacsclient${EXEEXT} ${COMPAT_LIBS}
++	   $(LOADLIBES) -o emacsclient${EXEEXT}
  
  hexl${EXEEXT}: ${srcdir}/hexl.c $(config_h)
 -	$(CC) ${ALL_CFLAGS} ${srcdir}/hexl.c $(LOADLIBES) -o hexl
@@ -227,22 +213,6 @@ diff --git a/lib-src/profile.c b/lib-src/profile.c
  
  static EMACS_TIME TV1;
  static int watch_not_started = 1; /* flag */
-diff --git a/lib/getopt.in.h b/lib/getopt.in.h
---- a/lib/getopt.in.h
-+++ b/lib/getopt.in.h
-@@ -16,6 +16,7 @@
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
- 
-+#if !defined(NACL_SKIP_GETOPT)
- #ifndef _@GUARD_PREFIX@_GETOPT_H
- 
- #if __GNUC__ >= 3
-@@ -251,3 +252,4 @@ extern int getopt_long_only (int ___argc, char *__getopt_argv_const *___argv,
- 
- #endif /* _@GUARD_PREFIX@_GETOPT_H */
- #endif /* _@GUARD_PREFIX@_GETOPT_H */
-+#endif
 diff --git a/lib/symlink.c b/lib/symlink.c
 --- a/lib/symlink.c
 +++ b/lib/symlink.c
@@ -379,28 +349,6 @@ diff --git a/lisp/startup.el b/lisp/startup.el
  
  			  ;; If we did not find the user's init file,
  			  ;; set user-init-file conclusively.
-diff --git a/lisp/vc/vc-git.el b/lisp/vc/vc-git.el
---- a/lisp/vc/vc-git.el
-+++ b/lisp/vc/vc-git.el
-@@ -164,12 +164,12 @@ matching the resulting Git log output, and KEYWORDS is a list of
- 
- ;;; STATE-QUERYING FUNCTIONS
- 
--;;;###autoload (defun vc-git-registered (file)
--;;;###autoload   "Return non-nil if FILE is registered with git."
--;;;###autoload   (if (vc-find-root file ".git")       ; Short cut.
--;;;###autoload       (progn
--;;;###autoload         (load "vc-git")
--;;;###autoload         (vc-git-registered file))))
-+;;;###autonotload (defun vc-git-registered (file)
-+;;;###autonotload   "Return non-nil if FILE is registered with git."
-+;;;###autonotload   (if (vc-find-root file ".git")       ; Short cut.
-+;;;###autonotload       (progn
-+;;;###autonotload         (load "vc-git")
-+;;;###autonotload         (vc-git-registered file))))
- 
- (defun vc-git-registered (file)
-   "Check whether FILE is registered with git."
 diff --git a/lisp/window.el b/lisp/window.el
 --- a/lisp/window.el
 +++ b/lisp/window.el
@@ -423,7 +371,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  
  LIB_PTHREAD_SIGMASK = @LIB_PTHREAD_SIGMASK@
  
-+NACL_LIBS = ${EXTRA_LIBS}
++NACL_LIBS = ${NACL_CLI_MAIN_LIB} -lppapi_simple -lppapi -lnacl_io -ltar -l${NACL_CXX_LIB}
 +
  INTERVALS_H = dispextern.h intervals.h composite.h
  
@@ -539,7 +487,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  temacs$(EXEEXT): $(START_FILES) stamp-oldxmenu $(obj) $(otherobj) $(lib)/libgnu.a
  	$(CC) $(LD_FIRSTFLAG) $(ALL_CFLAGS) $(TEMACS_LDFLAGS) $(LDFLAGS) \
 -	  -o temacs $(START_FILES) $(obj) $(otherobj) $(lib)/libgnu.a $(LIBES)
-+	  -o temacs$(EXEEXT) $(START_FILES) $(obj) $(otherobj) $(lib)/libgnu.a $(LIBES) ${COMPAT_LIBS}
++	  -o temacs$(EXEEXT) $(START_FILES) $(obj) $(otherobj) $(lib)/libgnu.a $(LIBES)
 +	test "$(CANNOT_DUMP)" = "yes" || \
 +	  test "X$(PAXCTL)" = X || $(PAXCTL) -r temacs$(EXEEXT)
 +
@@ -547,7 +495,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
 +## emacs_pepper
 +nacl_temacs$(EXEEXT): $(START_FILES) stamp-oldxmenu $(nacl_obj) $(otherobj) $(lib)/libgnu.a
 +	$(CC) $(LD_FIRSTFLAG) $(ALL_CFLAGS) $(TEMACS_LDFLAGS) $(LDFLAGS) \
-+	  -o nacl_temacs$(EXEEXT) $(START_FILES) $(nacl_obj) $(otherobj) $(lib)/libgnu.a $(NACL_LIBS) $(LIBES) ${COMPAT_LIBS}
++	  -o nacl_temacs$(EXEEXT) $(START_FILES) $(nacl_obj) $(otherobj) $(lib)/libgnu.a $(NACL_LIBS) $(LIBES)
  	test "$(CANNOT_DUMP)" = "yes" || \
  	  test "X$(PAXCTL)" = X || $(PAXCTL) -r temacs$(EXEEXT)
  
@@ -807,19 +755,6 @@ diff --git a/src/keyboard.c b/src/keyboard.c
  #else
  # error "Cannot read without possibly delaying"
  #endif
-diff --git a/src/lisp.h b/src/lisp.h
---- a/src/lisp.h
-+++ b/src/lisp.h
-@@ -190,7 +190,8 @@ enum Lisp_Bits
- #ifndef USE_LSB_TAG
- /* 1.  We know malloc returns a multiple of 8.  */
- # if (defined GNU_MALLOC || defined DOUG_LEA_MALLOC || defined __GLIBC__ \
--      || defined DARWIN_OS || defined __sun)
-+      || defined DARWIN_OS || defined __sun \
-+      || (defined __native_client__ && defined _NEWLIB_VERSION))
- /* 2.  We can specify multiple-of-8 alignment on static variables.  */
- #  ifdef alignas
- /* 3.  Pointers-as-ints exceed VAL_MAX.
 diff --git a/src/process.c b/src/process.c
 --- a/src/process.c
 +++ b/src/process.c
@@ -880,58 +815,13 @@ diff --git a/src/sysdep.c b/src/sysdep.c
  #include "blockinput.h"
  
 +#ifdef NACL_EMACS
-+# include <spawn.h>
-+# define pipe nacl_spawn_pipe
++#include <spawn.h>
++#define pipe nacl_spawn_pipe
 +#endif
 +
  #ifdef BSD_SYSTEM
  #include <sys/param.h>
  #include <sys/sysctl.h>
-@@ -2438,7 +2443,7 @@ cfmakeraw (struct termios *termios_p)
- }
- #endif /* !defined (HAVE_CFMAKERAW */
- 
--#if !defined (HAVE_CFSETSPEED)
-+#if !defined (HAVE_CFSETSPEED) && !defined(__native_client__)
- /* Workaround for targets which are missing cfsetspeed.  */
- static int
- cfsetspeed (struct termios *termios_p, speed_t vitesse)
-diff --git a/src/term.c b/src/term.c
---- a/src/term.c
-+++ b/src/term.c
-@@ -2918,6 +2918,7 @@ set_tty_hooks (struct terminal *terminal)
- static void
- dissociate_if_controlling_tty (int fd)
- {
-+#ifndef __native_client__
- #ifndef DOS_NT
-   pid_t pgid = tcgetpgrp (fd); /* If tcgetpgrp succeeds, fd is the ctty. */
-   if (pgid != -1)
-@@ -2948,6 +2949,7 @@ dissociate_if_controlling_tty (int fd)
- #endif  /* ! USG */
-     }
- #endif	/* !DOS_NT */
-+#endif
- }
- 
- /* Create a termcap display on the tty device with the given name and
-diff --git a/src/unexelf.c b/src/unexelf.c
---- a/src/unexelf.c
-+++ b/src/unexelf.c
-@@ -616,6 +616,7 @@ find_section (const char *name, const char *section_names, const char *file_name
- void
- unexec (const char *new_name, const char *old_name)
- {
-+#if !defined(__native_client__)
-   int new_file, old_file, new_file_size;
- 
- #if defined (emacs) || !defined (DEBUG)
-@@ -1318,4 +1319,5 @@ temacs:
-   stat_buf.st_mode |= 0111 & ~n;
-   if (chmod (new_name, stat_buf.st_mode) == -1)
-     fatal ("Can't chmod (%s): errno %d\n", new_name, errno);
-+#endif
- }
 diff --git a/src/vm-limit.c b/src/vm-limit.c
 --- a/src/vm-limit.c
 +++ b/src/vm-limit.c
