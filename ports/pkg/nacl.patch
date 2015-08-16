@@ -1014,14 +1014,57 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  struct sig_cert {
  	char name[MAXPATHLEN];
  	char *sig;
-@@ -96,6 +98,29 @@ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
+@@ -67,12 +69,23 @@ struct sig_cert {
+ 	bool trusted;
+ };
+ 
++#ifdef __native_client__
++static int
++pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
++		const char *filename, const char *extension, time_t *t, int *rc,
++                char** tmp_file)
++#else
+ static int
+ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
+ 		const char *filename, const char *extension, time_t *t, int *rc)
++#endif
+ {
+ 	char url[MAXPATHLEN];
++#ifdef __native_client__
++	char * tmp = (char *) calloc(MAXPATHLEN, sizeof(char));
++#else
+ 	char tmp[MAXPATHLEN];
++#endif
+ 	int fd;
+ 	const char *tmpdir, *dot;
+ 
+@@ -81,7 +94,11 @@ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
+ 	 */
+ 	dot = strrchr(filename, '.');
+ 	if (dot != NULL) {
++#ifdef __native_client__
++		snprintf(tmp, MIN(MAXPATHLEN, dot - filename + 1), "%s", filename);
++#else
+ 		snprintf(tmp, MIN(sizeof(tmp), dot - filename + 1), "%s", filename);
++#endif
+ 		snprintf(url, sizeof(url), "%s/%s.%s", pkg_repo_url(repo), tmp,
+ 				extension);
+ 	}
+@@ -94,8 +111,41 @@ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
+ 	if (tmpdir == NULL)
+ 		tmpdir = "/tmp";
  	mkdirs(tmpdir);
++#ifdef __native_client__
++	snprintf(tmp, MAXPATHLEN, "%s/%s.%s.XXXXXX", tmpdir, filename, extension);
++#else
  	snprintf(tmp, sizeof(tmp), "%s/%s.%s.XXXXXX", tmpdir, filename, extension);
++#endif
  
 +#ifdef __native_client__
 +	int pid = vfork();
 +	if (pid == -1) {
 +		rc = EPKG_FATAL;
++		free(tmp);
 +		return (rc);
 +	} else if (pid == 0) {
 +		char* geturl_argv[4];
@@ -1030,21 +1073,26 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
 +		geturl_argv[2] = tmp;
 +		geturl_argv[3] = NULL;
 +		execvp("geturl", geturl_argv);
-+		_exit(1);
++		// error when execvp returns
++		free(tmp);
++		*rc = EPKG_FATAL;
++		_exit(-1);
 +	} else {
 +		int status;
 +		waitpid(pid, &status, 0);
 +		if (WEXITSTATUS(status) != 0) {
 +			*rc = EPKG_FATAL;
++			free(tmp);
 +			return (-1);
 +		}
 +	}
++	*tmp_file = tmp;
 +	fd = open(tmp, O_RDONLY);
 +#else
  	fd = mkstemp(tmp);
  	if (fd == -1) {
  		pkg_emit_error("Could not create temporary file %s, "
-@@ -109,7 +134,7 @@ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
+@@ -109,7 +159,7 @@ pkg_repo_fetch_remote_tmp(struct pkg_repo *repo,
  		close(fd);
  		fd = -1;
  	}
@@ -1053,7 +1101,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	return (fd);
  }
  
-@@ -532,6 +557,67 @@ pkg_repo_parse_sigkeys(const char *in, int inlen, struct sig_cert **sc)
+@@ -532,6 +582,67 @@ pkg_repo_parse_sigkeys(const char *in, int inlen, struct sig_cert **sc)
  	return (rc);
  }
  
@@ -1121,7 +1169,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  static int
  pkg_repo_archive_extract_archive(int fd, const char *file,
      const char *dest, struct pkg_repo *repo, int dest_fd,
-@@ -606,6 +692,13 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
+@@ -606,6 +717,13 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
  	}
  	else {
  		cbdata.need_sig = false;
@@ -1135,7 +1183,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  		if (pkg_emit_sandbox_get_string(pkg_repo_meta_extract_signature_pubkey,
  			&cbdata, (char **)&sig, &siglen) == EPKG_OK) {
  			free(sig);
-@@ -614,6 +707,7 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
+@@ -614,6 +732,7 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
  			pkg_emit_error("Repo extraction failed");
  			return (EPKG_FATAL);
  		}
@@ -1143,7 +1191,52 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	}
  	(void)lseek(fd, 0, SEEK_SET);
  	if (dest_fd != -1)
-@@ -728,8 +822,10 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
+@@ -702,23 +821,43 @@ cleanup:
+ 	return rc;
+ }
+ 
++#ifdef __native_client__
++static int
++pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
++    time_t *t, int *rc, char** tmp_dest_file)
++#else
+ static int
+ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
+     time_t *t, int *rc)
++#endif
+ {
+ 	int fd, dest_fd;
+ 	const char *tmpdir;
++#ifdef __native_client__
++	char* tmp = (char*)malloc(MAXPATHLEN*sizeof(char));
++#else
+ 	char tmp[MAXPATHLEN];
+-
++#endif
++#ifdef __native_client__
++	char* tmp_file;
++	fd = pkg_repo_fetch_remote_tmp(repo, filename,
++			packing_format_to_string(repo->meta->packing_format), t, rc,
++			&tmp_file);
++#else
+ 	fd = pkg_repo_fetch_remote_tmp(repo, filename,
+ 			packing_format_to_string(repo->meta->packing_format), t, rc);
++#endif
+ 	if (fd == -1)
+ 		return (-1);
+ 
+ 	tmpdir = getenv("TMPDIR");
+ 	if (tmpdir == NULL)
+ 		tmpdir = "/tmp";
++#ifdef __native_client__
++        snprintf(tmp, MAXPATHLEN, "%s/%s.XXXXXX", tmpdir, filename);
++#else
+ 	snprintf(tmp, sizeof(tmp), "%s/%s.XXXXXX", tmpdir, filename);
++#endif
+ 
+ 	dest_fd = mkstemp(tmp);
+ 	if (dest_fd == -1) {
+@@ -728,8 +867,10 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
  		*rc = EPKG_FATAL;
  		return (-1);
  	}
@@ -1155,7 +1248,92 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	if (pkg_repo_archive_extract_check_archive(fd, filename, NULL, repo, dest_fd)
  			!= EPKG_OK) {
  		*rc = EPKG_FATAL;
-@@ -925,6 +1021,8 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+@@ -740,7 +881,11 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
+ 
+ 	/* Thus removing archived file as well */
+ 	close(fd);
+-
++#ifdef __native_client__
++	(void)unlink(tmp_file);
++	free(tmp_file);
++#endif
++	*tmp_dest_file = tmp;
+ 	return (dest_fd);
+ }
+ 
+@@ -752,7 +897,12 @@ pkg_repo_fetch_remote_extract_mmap(struct pkg_repo *repo, const char *filename,
+ 	struct stat st;
+ 	unsigned char *map;
+ 
++#ifdef __native_client__
++	char* tmp_file;
++	fd = pkg_repo_fetch_remote_extract_fd(repo, filename, t, rc, &tmp_file);
++#else
+ 	fd = pkg_repo_fetch_remote_extract_fd(repo, filename, t, rc);
++#endif
+ 	if (fd == -1) {
+ 		return (NULL);
+ 	}
+@@ -771,6 +921,10 @@ pkg_repo_fetch_remote_extract_mmap(struct pkg_repo *repo, const char *filename,
+ 
+ 	map = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+ 	close(fd);
++#ifdef __native_client__
++	(void)unlink(tmp_file);
++	free(tmp_file);
++#endif
+ 	if (map == MAP_FAILED) {
+ 		pkg_emit_errno("pkg_repo_fetch_remote_mmap", "cannot mmap fetched");
+ 		*rc = EPKG_FATAL;
+@@ -786,8 +940,12 @@ pkg_repo_fetch_remote_extract_tmp(struct pkg_repo *repo, const char *filename,
+ {
+ 	int dest_fd;
+ 	FILE *res;
+-
++#ifdef __native_client__
++	char * tmp_file;
++	dest_fd = pkg_repo_fetch_remote_extract_fd(repo, filename, t, rc, &tmp_file);
++#else
+ 	dest_fd = pkg_repo_fetch_remote_extract_fd(repo, filename, t, rc);
++#endif
+ 	if (dest_fd == -1) {
+ 		*rc = EPKG_FATAL;
+ 		return (NULL);
+@@ -801,6 +959,10 @@ pkg_repo_fetch_remote_extract_tmp(struct pkg_repo *repo, const char *filename,
+ 		return (NULL);
+ 	}
+ 
++#ifdef __native_client__
++	(void)unlink(tmp_file);
++	free(tmp_file);
++#endif
+ 	*rc = EPKG_OK;
+ 	return (res);
+ }
+@@ -887,7 +1049,12 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+ 
+ 	dbdir = pkg_object_string(pkg_config_get("PKG_DBDIR"));
+ 
++#ifdef __native_client__
++	char* tmp_file;
++	fd = pkg_repo_fetch_remote_tmp(repo, "meta", "txz", t, &rc, &tmp_file);
++#else
+ 	fd = pkg_repo_fetch_remote_tmp(repo, "meta", "txz", t, &rc);
++#endif
+ 	if (fd == -1)
+ 		return (rc);
+ 
+@@ -919,12 +1086,18 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+ 	}
+ 
+ 	close(fd);
++#ifdef __native_client__
++	(void)unlink(tmp_file);
++	free(tmp_file);
++#endif
+ 
+ 	if (repo->signature_type == SIG_FINGERPRINT && repo->trusted_fp == NULL) {
+ 		if (pkg_repo_load_fingerprints(repo) != EPKG_OK)
  			return (EPKG_FATAL);
  	}
  
@@ -1164,7 +1342,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	/* Map meta file for extracting pubkeys from it */
  	if (stat(filepath, &st) == -1) {
  		pkg_emit_errno("pkg_repo_fetch_meta", "cannot stat meta fetched");
-@@ -944,6 +1042,7 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+@@ -944,6 +1117,7 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
  		rc = EPKG_FATAL;
  		goto cleanup;
  	}
@@ -1514,7 +1692,7 @@ diff --git a/libpkg/repo/binary/fetch.c b/libpkg/repo/binary/fetch.c
  	return (EPKG_OK);
  }
  
-@@ -200,8 +208,27 @@ pkg_repo_binary_try_fetch(struct pkg_repo *repo, struct pkg *pkg,
+@@ -200,8 +208,29 @@ pkg_repo_binary_try_fetch(struct pkg_repo *repo, struct pkg *pkg,
  		free(dir);
  		return (EPKG_OK);
  	}
@@ -1530,6 +1708,8 @@ diff --git a/libpkg/repo/binary/fetch.c b/libpkg/repo/binary/fetch.c
 +		geturl_argv[2] = dest;
 +		geturl_argv[3] = NULL;
 +		execvp("geturl", geturl_argv);
++		// execvp returns when there is error
++		retcode = EPKG_FATAL;
 +	} else {
 +		int status;
 +		waitpid(pid, &status, 0);
@@ -1723,7 +1903,7 @@ diff --git a/src/add.c b/src/add.c
  
  #include <pkg.h>
  
-@@ -146,9 +150,30 @@ exec_add(int argc, char **argv)
+@@ -146,9 +150,32 @@ exec_add(int argc, char **argv)
  		if (is_url(argv[i]) == EPKG_OK) {
  			snprintf(path, sizeof(path), "%s/%s.XXXXX",
  			    getenv("TMPDIR") != NULL ? getenv("TMPDIR") : "/tmp", basename(argv[i]));
@@ -1739,6 +1919,8 @@ diff --git a/src/add.c b/src/add.c
 +				geturl_argv[2] = path;
 +				geturl_argv[3] = NULL;
 +				execvp("geturl", geturl_argv);
++				// execvp returns when there is error.
++				_exit(1);
 +			} else {
 +				int status;
 +				waitpid(pid, &status, 0);

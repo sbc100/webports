@@ -15,10 +15,9 @@ source /mnt/http/setup-environment
 # Setup environment again, to rescan the packages added.
 source /mnt/http/setup-environment
 
-mkdir -p /etc/pkg/repos
-cp /mnt/http/FreeBSD.conf /etc/pkg/repos/
-cp /mnt/http/Nacl.conf /etc/pkg/repos/
-cp /mnt/http/pkg.conf /etc/
+mkdir -p /usr/etc/pkg/repos
+cp /mnt/http/FreeBSD.conf /usr/etc/pkg/repos/
+cp /mnt/http/Nacl.conf /usr/etc/pkg/repos/
 
 # TODO(bradnelson): Drop this when we can install things in a more
 # normal location and when we include the git templates in the normal

@@ -47,7 +47,6 @@ static char *xgetcwd(void) {
 
 int openat(int dirfd, const char *pathname, int flags, ...) {
   _AT_WRAP_START("openat")
-    printf("New dir is: %s\n", xgetcwd());
   int fd = open(pathname, flags);
   _AT_WRAP_END("openat")
   return fd;

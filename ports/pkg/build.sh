@@ -5,6 +5,7 @@
 EXECUTABLES="src/pkg${NACL_EXEEXT}"
 export LIBS+="-lbsd ${NACL_CLI_MAIN_LIB} -pthread"
 
+EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 NACLPORTS_CFLAGS+=" -Dmain=nacl_main"
 
 # TODO: Remove this hack once glibc header bug is fixed
@@ -52,6 +53,7 @@ BuildStep() {
 
 InstallStep() {
   DefaultInstallStep
+  LogExecute mv ${DESTDIR}/usr ${DESTDIR}/${PREFIX}
   if [ "${NACL_SHARED}" = "0" ]; then
       LogExecute mv ${DESTDIR}/${PREFIX}/sbin/pkg-static${NACL_EXEEXT}\
          ${DESTDIR}/${PREFIX}/sbin/pkg${NACL_EXEEXT}
