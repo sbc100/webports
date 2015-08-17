@@ -2,8 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 EXECUTABLES=python${NACL_EXEEXT}
+
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
 # Currently this package only builds on linux.
 # The build relies on certain host binaries and python's configure
@@ -37,9 +38,14 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
   export LIBS="-ltermcap"
+  LIBS+=" ${NACL_CLI_MAIN_LIB}"
   if [ "${NACL_LIBC}" = "newlib" ]; then
     NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     LIBS+=" -lglibc-compat"
+    # When python builds with wait3/wait4 support it also expects struct rusage
+    # to have certain fields and newlib lacks.
+    export ac_cv_func_wait3=no
+    export ac_cv_func_wait4=no
   fi
   DefaultConfigureStep
   if [ "${NACL_LIBC}" = "newlib" ]; then
@@ -65,4 +71,41 @@ TestStep() {
     fi
     TranslateAndWriteLauncherScript ${pexe} x86-64 python.x86-64.nexe ${script}
   fi
+}
+
+PublishStep() {
+  local assembly_dir="${PUBLISH_DIR}/python3"
+  MakeDir ${assembly_dir}
+
+  ChangeDir ${assembly_dir}
+  if [[ $TOOLCHAIN == pnacl ]]; then
+    local tar_file=pydata.tar
+    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/python3${NACL_EXEEXT} \
+        python3${NACL_EXEEXT}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        python3${NACL_EXEEXT} -s . -o python.nmf
+  else
+    local tar_file=_platform_specific/${NACL_ARCH}/pydata.tar
+    MakeDir _platform_specific/${NACL_ARCH}
+    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/python3${NACL_EXEEXT} \
+        _platform_specific/${NACL_ARCH}/python3${NACL_EXEEXT}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py --no-arch-prefix \
+        _platform_specific/*/python3${NACL_EXEEXT} -s . -o python.nmf
+  fi
+
+  LogExecute tar cf ${tar_file} -C ${INSTALL_DIR}${PREFIX} lib/python3.4
+  LogExecute shasum ${tar_file} > ${tar_file}.hash
+
+  LogExecute python ${TOOLS_DIR}/create_term.py python.nmf
+
+  GenerateManifest ${START_DIR}/manifest.json ${assembly_dir}
+  InstallNaClTerm ${assembly_dir}
+  LogExecute cp ${START_DIR}/background.js ${assembly_dir}
+  LogExecute cp ${START_DIR}/python.js ${assembly_dir}
+  LogExecute cp ${START_DIR}/index.html ${assembly_dir}
+  LogExecute cp ${START_DIR}/icon_16.png ${assembly_dir}
+  LogExecute cp ${START_DIR}/icon_48.png ${assembly_dir}
+  LogExecute cp ${START_DIR}/icon_128.png ${assembly_dir}
+  ChangeDir ${PUBLISH_DIR}
+  CreateWebStoreZip python3-${VERSION}.zip python3
 }

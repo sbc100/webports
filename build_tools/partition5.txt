@@ -35,7 +35,6 @@ builder 0 (total: 6869)
   binutils
   geturl
   unzip
-  python-ppapi
   coreutils
   curl
   git
@@ -166,7 +165,6 @@ builder 2 (total: 7283)
   ffmpeg
   protobuf
   libunistring
-  python3-ppapi
   libpng
   regal
   sdl

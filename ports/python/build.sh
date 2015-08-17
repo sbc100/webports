@@ -4,6 +4,8 @@
 
 EXECUTABLES=python${NACL_EXEEXT}
 
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+
 # This build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.
 HOST_BUILD_DIR=${WORK_DIR}/build_host
@@ -28,9 +30,14 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
   export LIBS="-ltermcap"
+  LIBS+=" ${NACL_CLI_MAIN_LIB}"
   if [ "${NACL_LIBC}" = "newlib" ]; then
     LIBS+=" -lglibc-compat"
     NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+    # When python builds with wait3/wait4 support it also expects struct rusage
+    # to have certain fields and newlib lacks.
+    export ac_cv_func_wait3=no
+    export ac_cv_func_wait4=no
   fi
   DefaultConfigureStep
   if [ "${NACL_LIBC}" = "newlib" ]; then
@@ -62,4 +69,42 @@ TestStep() {
     fi
     TranslateAndWriteLauncherScript ${pexe} x86-64 python.x86-64.nexe ${script}
   fi
+}
+
+PublishStep() {
+  local assembly_dir=${PUBLISH_DIR}
+  MakeDir ${assembly_dir}
+
+
+  ChangeDir ${assembly_dir}
+  if [[ $TOOLCHAIN == pnacl ]]; then
+    local tar_file=pydata.tar
+    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/python${NACL_EXEEXT} \
+        python${NACL_EXEEXT}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+        python${NACL_EXEEXT} -s . -o python.nmf
+  else
+    local tar_file=_platform_specific/${NACL_ARCH}/pydata.tar
+    MakeDir _platform_specific/${NACL_ARCH}
+    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/python${NACL_EXEEXT} \
+        _platform_specific/${NACL_ARCH}/python${NACL_EXEEXT}
+    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py --no-arch-prefix \
+        _platform_specific/*/python${NACL_EXEEXT} -s . -o python.nmf
+  fi
+
+  LogExecute tar cf ${tar_file} -C ${INSTALL_DIR}${PREFIX} lib/python2.7
+  LogExecute shasum ${tar_file} > ${tar_file}.hash
+
+  LogExecute python ${TOOLS_DIR}/create_term.py python.nmf
+
+  GenerateManifest ${START_DIR}/manifest.json ${assembly_dir}
+  InstallNaClTerm ${assembly_dir}
+  LogExecute cp ${START_DIR}/background.js ${assembly_dir}
+  LogExecute cp ${START_DIR}/python.js ${assembly_dir}
+  LogExecute cp ${START_DIR}/index.html ${assembly_dir}
+  LogExecute cp ${START_DIR}/icon_16.png ${assembly_dir}
+  LogExecute cp ${START_DIR}/icon_48.png ${assembly_dir}
+  LogExecute cp ${START_DIR}/icon_128.png ${assembly_dir}
+  ChangeDir ${PUBLISH_DIR}
+  CreateWebStoreZip python.zip .
 }

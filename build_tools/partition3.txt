@@ -45,7 +45,6 @@ builder 0 (total: 11062)
   protobuf
   jpeg8d
   imagemagick
-  python3-ppapi
   binutils
   libffi
   glib
@@ -155,7 +154,6 @@ builder 1 (total: 11298)
   opencv
   gmp
   python
-  python-ppapi
   coreutils
   curl
   git

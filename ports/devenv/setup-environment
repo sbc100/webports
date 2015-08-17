@@ -12,19 +12,22 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 
 LIB_DIR=lib32
 export SHELL=/packages/bash.${NACL_ARCH}/bash
-export PACKAGE_LIB_DIR=lib32
-export PACKAGE_ALT_LIB_DIR=_platform_specific/x86_32/lib32
+PACKAGE_LIB_DIR=lib32
+PACKAGE_ALT_LIB_DIR=_platform_specific/i686/lib32
+PACKAGE_ALT_LIB_DIR2=_platform_specific/i686
+PACKAGE_ALT_LIB_DIR3=_platform_specific/x86_32/lib32
 if [ ${NACL_ARCH} = "x86_64" ]; then
   LIB_DIR=lib
-  export PACKAGE_LIB_DIR=lib64
-  export PACKAGE_ALT_LIB_DIR=_platform_specific/x86_64/lib64
+  PACKAGE_LIB_DIR=lib64
+  PACKAGE_ALT_LIB_DIR=_platform_specific/x86_64/lib64
+  PACKAGE_ALT_LIB_DIR2=_platform_specific/x86_64
+  PACKAGE_ALT_LIB_DIR3=""
 fi
 export NACL_SDK_ROOT=/mingn
 export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
 LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
 LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
 LD_LIBRARY_PATH+=:/mnt/http/_platform_specific/${NACL_ARCH}
-export LD_LIBRARY_PATH
 export LIBRARY_PATH=${LD_LIBRARY_PATH}
 PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
 # TODO(bradnelson): Figure out why this is now needed to find cc1.
@@ -76,14 +79,27 @@ for package_dir in /packages/*; do
   fi
 
   # Add package to the path and library path.
-  export PATH=${PATH}:${package_inside}
+  PATH=${PATH}:${package_inside}
   package_libs=${package_inside}/${PACKAGE_LIB_DIR}
   if [ -d ${package_libs} ]; then
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
   fi
   # Add optional platform specific library path.
   package_libs=${package_inside}/${PACKAGE_ALT_LIB_DIR}
   if [ -d ${package_libs} ]; then
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+  else
+    package_libs=${package_inside}/${PACKAGE_ALT_LIB_DIR2}
+    if [ -d ${package_libs} ]; then
+      LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+    fi
+    if [ -n "${PACKAGE_ALT_LIB_DIR3}" ]; then
+      package_libs=${package_inside}/${PACKAGE_ALT_LIB_DIR3}
+      if [ -d ${package_libs} ]; then
+        LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
+      fi
+    fi
   fi
 done
+
+export LD_LIBRARY_PATH

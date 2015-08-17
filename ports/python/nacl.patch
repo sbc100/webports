@@ -373,49 +373,36 @@ diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 diff --git a/Modules/python.c b/Modules/python.c
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -6,6 +6,35 @@
+@@ -6,6 +6,20 @@
  #include <floatingpoint.h>
  #endif
  
-+#ifdef __native_client__
-+#include <stdio.h>
-+#include <sys/utsname.h>
++#include "nacl_main.h"
 +
-+// Stubs for functions implemented through PPAPI.
-+int spawnv(int mode, const char* path, char *const argv[]) {
-+  return 0;
-+}
-+
-+int spawnve(int mode, const char* path,
-+            char *const argv[], char *const envp[]) {
-+  return 0;
-+}
-+
-+// Dummy implementation of uname.  This is only needed for the sel_ldr
-+// version of python.  Otherwise it gets provided by nacl_io.
-+int uname(struct utsname *buf)
-+{
-+	sprintf(buf->sysname, "NaCl");
-+	return 0;
-+}
++#ifdef __arm__
++#define DATA_FILE "_platform_specific/arm/pydata.tar"
++#elif defined __i386__
++#define DATA_FILE "_platform_specific/i686/pydata.tar"
++#elif defined __x86_64__
++#define DATA_FILE "_platform_specific/x86_64/pydata.tar"
++#elif defined __pnacl__
++#define DATA_FILE "pydata.tar"
++#else
++#error "Unknown arch"
 +#endif
-+
-+// Dummy implementation of nacl_spawn_vfork_exit, otherwise provided
-+// by nacl_spawn.
-+void nacl_spawn_vfork_exit(int status) {
-+  _exit(status);
-+}
 +
  int
  main(int argc, char **argv)
  {
-@@ -20,5 +49,9 @@ main(int argc, char **argv)
+@@ -20,5 +34,11 @@ main(int argc, char **argv)
  	m = fpgetmask();
  	fpsetmask(m & ~FP_X_OFL);
  #endif
 +#ifdef __native_client__
 +	setvbuf(stdout, NULL, _IOLBF, 0);
 +	setvbuf(stdin, NULL, _IOLBF, 0);
++	if (nacl_startup_untar(argv[0], DATA_FILE, "/"))
++		return -1;
 +#endif
  	return Py_Main(argc, argv);
  }

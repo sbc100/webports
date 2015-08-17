@@ -152,26 +152,40 @@ diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 diff --git a/Modules/python.c b/Modules/python.c
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -15,6 +15,19 @@ wmain(int argc, wchar_t **argv)
+@@ -15,6 +15,22 @@ wmain(int argc, wchar_t **argv)
  }
  #else
  
 +#ifdef __native_client__
-+#include <stdio.h>
-+#include <sys/utsname.h>
++#include "nacl_main.h"
 +
-+// Dummy implementation of uname.  This is only needed for the sel_ldr
-+// version of python.  Otherwise it gets provided by nacl_io.
-+int uname(struct utsname *buf)
-+{
-+	sprintf(buf->sysname, "NaCl");
-+	return 0;
-+}
++#ifdef __arm__
++#define DATA_FILE "_platform_specific/arm/pydata.tar"
++#elif defined __i386__
++#define DATA_FILE "_platform_specific/i686/pydata.tar"
++#elif defined __x86_64__
++#define DATA_FILE "_platform_specific/x86_64/pydata.tar"
++#elif defined __pnacl__
++#define DATA_FILE "pydata.tar"
++#else
++#error "Unknown arch"
++#endif
 +#endif
 +
  int
  main(int argc, char **argv)
  {
+@@ -26,6 +42,10 @@ main(int argc, char **argv)
+ #ifdef __FreeBSD__
+     fp_except_t m;
+ #endif
++#ifdef __native_client__
++    if (nacl_startup_untar(argv[0], DATA_FILE, "/"))
++        return -1;
++#endif
+ 
+     argv_copy = (wchar_t **)PyMem_RawMalloc(sizeof(wchar_t*) * (argc+1));
+     argv_copy2 = (wchar_t **)PyMem_RawMalloc(sizeof(wchar_t*) * (argc+1));
 diff --git a/Modules/readline.c b/Modules/readline.c
 --- a/Modules/readline.c
 +++ b/Modules/readline.c

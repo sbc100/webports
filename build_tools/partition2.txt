@@ -49,7 +49,6 @@ builder 0 (total: 14973)
   libunistring
   gmp
   binutils
-  python-ppapi
   coreutils
   curl
   git
@@ -239,7 +238,6 @@ builder 1 (total: 15415)
   tiff
   jpeg6b
   opencv
-  python3-ppapi
   libmikmod
   sdl-mixer
   metakit

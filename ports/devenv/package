@@ -204,12 +204,13 @@ InstallPackageFromUrl() {
 
   # TODO(bradnelson): Do something better.
   # Rename appropriate nexe/pexe to unsuffixed version.
-  local suffixes=".pexe _pnacl.pexe _${NACL_ARCH}.nexe"
+  local suffixes=".pexe _pnacl.pexe _${NACL_ARCH}.nexe .nexe"
   local platform_dirs="_platform_specific/${NACL_ARCH}/ \
                        _platform_specific/all/"
   if [ "${NACL_ARCH}" = "i686" ]; then
     suffixes+=" _x86_32.nexe"
     platform_dirs+=" _platform_specific/x86_32/"
+    platform_dirs+=" _platform_specific/i686/"
   fi
   for alt in "" _ppapi; do
     for plat in "" ${platform_dirs}; do

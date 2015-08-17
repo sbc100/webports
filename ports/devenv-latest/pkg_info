@@ -2,7 +2,7 @@ NAME=devenv-latest
 VERSION=0.1
 # Currently only builds on linux (due to dependency on openssl)
 BUILD_OS=linux
-DEPENDS=(devenv coreutils git make python-ppapi curl)
+DEPENDS=(devenv coreutils git make python curl)
 # Disabled for bionic due to bash.
 DISABLED_LIBC=(bionic)
 DISABLED_TOOLCHAIN=(emscripten)
