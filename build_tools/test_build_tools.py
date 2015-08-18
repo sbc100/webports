@@ -11,6 +11,7 @@ import naclports
 import patch_configure
 import scan_packages
 import update_mirror
+from find_effected_packages import find_effected_packages
 
 
 def MockFileObject(contents):
@@ -101,3 +102,21 @@ class TestUpdateMirror(unittest.TestCase):
 
     update_mirror.main([])
     check_packages.assert_called_once_with(mock.ANY, mock_iter, ['foo'])
+
+
+class TestFindEffectedPackages(unittest.TestCase):
+
+   def test_non_port_files(self):
+     self.assertEqual(find_effected_packages(['foo/bar'], False), ['all'])
+
+   def test_deps(self):
+     self.assertEqual(
+         find_effected_packages(['ports/vim', 'ports/nano'], False),
+         ['vim', 'nano'])
+
+     # The common dependencies of vim and nano should only appear once in this
+     # list.
+     self.assertEqual(
+         find_effected_packages(['ports/vim', 'ports/nano'], True),
+         ['corelibs', 'glibc-compat', 'ncurses', 'zlib', 'libtar',
+          'nacl-spawn', 'vim', 'nano'])

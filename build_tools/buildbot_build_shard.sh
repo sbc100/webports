@@ -41,19 +41,11 @@ if [ "${TRYBOT}" = "1" ]; then
       $EFFECTED_FILES)
   echo "Patch effects the following packages: ${EFFECTED_PACKAGES}"
   if [[ $EFFECTED_PACKAGES != "all" ]]; then
-    BUILD_PACKAGES=""
-    for PKG in ${PACKAGE_LIST}; do
-      for EFFECTED_PKG in ${EFFECTED_PACKAGES}; do
-        if [[ $PKG == $EFFECTED_PKG ]]; then
-          for DEP in $(bin/naclports depends $PKG); do
-            BUILD_PACKAGES+=" $DEP"
-          done
-          BUILD_PACKAGES+=" $PKG"
-        fi
-      done
-    done
-    echo "Building packages: ${BUILD_PACKAGES}"
-    PACKAGE_LIST=$BUILD_PACKAGES
+    # Run find_effected_packages again with --deps to include the dependecies
+    # of the effected packages
+    PACKAGE_LIST=$(${PYTHON} build_tools/find_effected_packages.py --deps \
+        $EFFECTED_FILES)
+    echo "Building package subset: ${PACKAGE_LIST}"
   fi
 fi
 

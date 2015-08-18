@@ -22,37 +22,44 @@ import naclports.source_package
 def main(args):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('-v', '--verbose', action='store_true')
+  parser.add_argument('--deps', action='store_true',
+                      help='include dependencies of effected packages.')
   parser.add_argument('files', nargs='+', help='Changes files.')
   options = parser.parse_args(args)
   naclports.SetVerbose(options.verbose)
 
+  print '\n'.join(find_effected_packages(options.files, options.deps))
+  return 0
+
+
+def find_effected_packages(files, include_deps):
   packages = []
   to_resolve = []
 
-  def AddPackage(package_name):
-    packages.append(package_name)
-    to_resolve.append(package_name)
+  def AddPackage(package):
+    if package.NAME not in packages:
+      if include_deps:
+        for dep in package.TransitiveDependencies():
+          if dep.NAME not in packages:
+            packages.append(dep.NAME)
+      packages.append(package.NAME)
+      to_resolve.append(package)
 
-  for filename in options.files:
+  for filename in files:
     parts = filename.split(os.path.sep)
     if parts[0] != 'ports':
-      print 'all'
-      return 0
+      return ['all']
 
     package_name = parts[1]
-    AddPackage(package_name)
+    pkg = naclports.source_package.CreatePackage(package_name)
+    AddPackage(pkg)
 
   while to_resolve:
-    package_name = to_resolve.pop()
-    pkg = naclports.source_package.CreatePackage(package_name)
+    pkg = to_resolve.pop()
     for r in pkg.ReverseDependencies():
-      if r.NAME not in packages:
-        AddPackage(r.NAME)
+      AddPackage(r)
 
-  for p in packages:
-    print p
-
-  return 0
+  return packages
 
 
 if __name__ == '__main__':
