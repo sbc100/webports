@@ -29,7 +29,7 @@ GS_MIRROR_URL = '%s%s/mirror' % (GS_URL, GS_BUCKET)
 # and tested against the pepper_canary release. To build aginst older
 # versions of the SDK use the one of the pepper_XX branches (or use
 # --skip-sdk-version-check).
-MIN_SDK_VERSION = 43
+MIN_SDK_VERSION = 46
 
 arch_to_pkgarch = {
     'x86_64': 'x86-64',
