@@ -1,4 +1,5 @@
 builder 0 (total: 11062)
+  corelibs
   glibc-compat
   zlib
   libtar
@@ -106,6 +107,7 @@ builder 0 (total: 11062)
   mingn
   blis
 builder 1 (total: 11298)
+  corelibs
   python-host
   numpy
   glibc-compat

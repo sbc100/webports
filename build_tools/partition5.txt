@@ -1,4 +1,5 @@
 builder 0 (total: 6869)
+  corelibs
   glibc-compat
   zlib
   libtar
@@ -73,6 +74,7 @@ builder 0 (total: 6869)
   samba
   blis
 builder 1 (total: 6880)
+  corelibs
   python-host
   numpy
   fftw-float
@@ -139,6 +141,7 @@ builder 1 (total: 6880)
   ipython
   ipython-ppapi
 builder 2 (total: 7283)
+  corelibs
   zlib
   libtar
   glibc-compat
@@ -199,6 +202,7 @@ builder 2 (total: 7283)
   mpc
   gcc-avr
 builder 3 (total: 7062)
+  corelibs
   clapack
   icu
   fftw

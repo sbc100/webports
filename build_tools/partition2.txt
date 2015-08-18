@@ -1,4 +1,5 @@
 builder 0 (total: 14973)
+  corelibs
   glibc-compat
   zlib
   libtar

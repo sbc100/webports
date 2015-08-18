@@ -1,4 +1,5 @@
 builder 0 (total: 8304)
+  corelibs
   glibc-compat
   zlib
   libtar
@@ -88,6 +89,7 @@ builder 0 (total: 8304)
   gcc-avr
   mingn
 builder 1 (total: 8350)
+  corelibs
   python-host
   numpy
   glibc-compat
@@ -165,6 +167,7 @@ builder 1 (total: 8350)
   jsoncpp
   openssh
 builder 2 (total: 8297)
+  corelibs
   zlib
   libtar
   glibc-compat
