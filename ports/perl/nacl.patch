@@ -291,6 +291,132 @@ new mode 100755
  #endif
      RETURN;
  }
+@@ -4561,12 +4628,17 @@ PP(pp_sleep)
+     Time_t when;
+ 
+     (void)time(&lasttime);
++    #if defined(__native_client__)
++    duration = POPi;
++    sleep((unsigned int)duration);
++    #else
+     if (MAXARG < 1 || (!TOPs && !POPs))
+ 	PerlProc_pause();
+     else {
+ 	duration = POPi;
+ 	PerlProc_sleep((unsigned int)duration);
+     }
++    #endif
+     (void)time(&when);
+     XPUSHi(when - lasttime);
+     RETURN;
+diff --git a/util.c b/util.c
+old mode 100644
+new mode 100755
+--- a/util.c
++++ b/util.c
+@@ -26,6 +26,10 @@
+ #include "perl.h"
+ #include "reentr.h"
+ 
++#if defined(__native_client__)
++#include <spawn.h>
++#endif
++
+ #if defined(USE_PERLIO)
+ #include "perliol.h" /* For PerlIOUnix_refcnt */
+ #endif
+@@ -2285,6 +2289,9 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+     /* Try for another pipe pair for error return */
+     if (PerlProc_pipe(pp) >= 0)
+ 	did_pipes = 1;
++    #if defined(__native_client__)
++    pid = vfork();
++    #else
+     while ((pid = PerlProc_fork()) < 0) {
+ 	if (errno != EAGAIN) {
+ 	    PerlLIO_close(p[This]);
+@@ -2298,6 +2305,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+ 	Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
+ 	sleep(5);
+     }
++    #endif
+     if (pid == 0) {
+ 	/* Child */
+ #undef THIS
+@@ -2335,7 +2343,24 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+ 	    }
+ 	}
+ #endif
++	#if defined(__native_client__)
++	/* Extract the char data in args to execv according to us */
++        char * exec_args[n+3]; 
++        int i = 2;
++        exec_args[0] = "bash";
++        exec_args[1] = "-c";
++        SV **beg = args-1, **end = args-1+n;
++	while (++beg <= end) {
++	    if (*beg)
++		exec_args[i++] = SvPV_nolen_const(*beg);
++	    else
++		exec_args[i++] = "";
++	}
++        exec_args[i] = NULL;
++        execv(exec_args[0], exec_args);
++        #else
+ 	do_aexec5(NULL, args-1, args-1+n, pp[1], did_pipes);
++	#endif
+ 	PerlProc__exit(1);
+ #undef THIS
+ #undef THAT
+@@ -2430,6 +2455,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+ 	return NULL;
+     if (doexec && PerlProc_pipe(pp) >= 0)
+ 	did_pipes = 1;
++    #if defined(__native_client__)
++    pid = vfork();
++    #else
+     while ((pid = PerlProc_fork()) < 0) {
+ 	if (errno != EAGAIN) {
+ 	    PerlLIO_close(p[This]);
+@@ -2445,6 +2473,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+ 	Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
+ 	sleep(5);
+     }
++    #endif
+     if (pid == 0) {
+ 
+ #undef THIS
+@@ -2480,7 +2509,12 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+ 	    }
+ #endif
+ 	    /* may or may not use the shell */
++    	    #if defined(__native_client__)
++            char * exec_args[] = {"bash", "-c", cmd, NULL};
++            execv(exec_args[0], exec_args);
++            #else
+ 	    do_exec3(cmd, pp[1], did_pipes);
++	    #endif
+ 	    PerlProc__exit(1);
+ 	}
+ #endif	/* defined OS2 */
+@@ -2616,7 +2650,17 @@ Perl_my_fork(void)
+ #else
+     /* atfork_lock() and atfork_unlock() are installed as pthread_atfork()
+      * handlers elsewhere in the code */
++    /* (TODO) agaurav77 : Remove vfork when all modules and functions using
++     *                    fork have been patched to work fine, or when fork
++     *                    is available. Currently doing a vfork is
++     *                    advantageous in some situations and risky in some 
++     *                    other situations.
++     */
++    # if defined(__native_client__)
++    pid = vfork();
++    # else
+     pid = fork();
++    # endif
+ #endif
+     return pid;
+ #else
 diff --git a/x2p/a2py.c b/x2p/a2py.c
 old mode 100644
 new mode 100755
