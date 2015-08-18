@@ -21,9 +21,14 @@ if [ ${OS_NAME} = "Darwin" ]; then
   export PATH=${PATH}:/usr/local/opt/gettext/bin
 fi
 
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  export NO_RT_LIBRARY=1
+fi
+export CROSS_COMPILE=1
+export NEEDS_CRYPTO_WITH_SSL=YesPlease
+
 ConfigureStep() {
   NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
-  ChangeDir ${SRC_DIR}
   autoconf
 
   if [ "${NACL_LIBC}" = "newlib" ]; then
@@ -41,22 +46,25 @@ ConfigureStep() {
 }
 
 BuildStep() {
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    export NO_RT_LIBRARY=1
-  fi
-  export CROSS_COMPILE=1
   SetupCrossEnvironment
-  ChangeDir ${SRC_DIR}
+  export CCLD=${CXX}
   # Git's build doesn't support building outside the source tree.
   # Do a clean to make rebuild after failure predictable.
   LogExecute make clean
-  export CCLD=${CXX}
-  export NEEDS_CRYPTO_WITH_SSL=YesPlease
   DefaultBuildStep
 }
 
 InstallStep() {
-  return
+  SetupCrossEnvironment
+  export CCLD=${CXX}
+  DefaultInstallStep
+  # Remove some of the git symlinks to save some space (since symlinks are
+  # currnely only supported via file copying).
+  for f in ${DESTDIR}${PREFIX}/libexec/git-core/*; do
+    if [ -L $f ]; then
+      Remove $f
+    fi
+  done
 }
 
 PublishStep() {

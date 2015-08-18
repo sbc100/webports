@@ -5,3 +5,10 @@
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi
+
+InstallStep() {
+  if [[ $TOOLCHAIN == newlib ]]; then
+     INSTALL_TARGETS="install LIBEXT=.a"
+  fi
+  DefaultInstallStep
+}

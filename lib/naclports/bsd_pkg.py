@@ -18,8 +18,9 @@ import shutil
 import subprocess
 import tarfile
 
-from naclports import util
+from naclports import util, binary_package
 
+INSTALL_PREFIX = 'usr'
 
 def WriteUCL(outfile, ucl_dict):
   """Write a dictionary to file in UCL format"""
@@ -59,18 +60,37 @@ def ParseDir(payload_dir, file_dict, prefix):
 def AddFilesInDir(content_dir, tar, prefix):
   for filename in os.listdir(content_dir):
     fullname = os.path.join(content_dir, filename)
+    arcname = fullname.replace(prefix, '')
+
+    # Resolve symbolic link by duplicating the target file
+    # TODO(sbc): remove this once devenv (nacl_io) supports symlinks.
+    if os.path.islink(fullname):
+      link_target = os.path.realpath(fullname)
+      if os.path.isabs(link_target):
+        print '%s -> %s' % (fullname, link_target)
+        link_target = link_target.replace(binary_package.INSTALL_PREFIX, prefix
+            + '/' + INSTALL_PREFIX)
+        print(link_target)
+      if not os.path.exists(link_target):
+        raise Exception('Package contains dangling link: %s' % fullname)
+      if os.path.isdir(link_target):
+        continue
+      os.remove(fullname)
+      shutil.copyfile(link_target, fullname)
+
     if os.path.isdir(fullname):
       AddFilesInDir(fullname, tar, prefix)
     elif os.path.islink(fullname):
-      # devenv does not yet support symlinks
-      continue
+      info = tar.gettarinfo(fullname)
+      info.name = arcname
+      tar.addfile(info)
     else:
       # Rather convoluted way to add files to a tar archive that are
       # abolute (i.e. start with /).  pkg requires this, but python's
       # tar.py calls lstrip('/') on arcname in the tar.add() method.
       with open(fullname, 'r') as f:
         info = tar.gettarinfo(fileobj=f)
-        info.name = fullname.replace(prefix, '')
+        info.name = arcname
         # TODO(sbc): These extensions should probably be stripped out earlier
         # or never generated.
         basename, ext = os.path.splitext(info.name)
@@ -79,7 +99,7 @@ def AddFilesInDir(content_dir, tar, prefix):
         tar.addfile(info, fileobj=f)
 
 
-def CreatePkgFile(name, version, arch, payload_dir, outfile, prefix='usr'):
+def CreatePkgFile(name, version, arch, payload_dir, outfile):
   """Create an archive file in FreeBSD's pkg file format"""
   util.Log('Creating pkg package: %s' % outfile)
   manifest = collections.OrderedDict()
@@ -94,13 +114,13 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile, prefix='usr'):
   manifest['desc'] = 'desc not available'
   manifest['maintainer'] = 'native-client-discuss@googlegroups.com'
   manifest['www'] = 'https://code.google.com/p/naclports/'
-  manifest['prefix'] = '/' + prefix
+  manifest['prefix'] = INSTALL_PREFIX
   temp_dir = os.path.splitext(outfile)[0] + '.tmp'
   if os.path.exists(temp_dir):
     shutil.rmtree(temp_dir)
   os.mkdir(temp_dir)
 
-  content_dir = os.path.join(temp_dir, prefix)
+  content_dir = os.path.join(temp_dir, INSTALL_PREFIX)
   shutil.copytree(payload_dir, content_dir, symlinks=True)
   WriteUCL(os.path.join(temp_dir, '+COMPACT_MANIFEST'), manifest)
   file_dict = collections.OrderedDict()

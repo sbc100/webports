@@ -86,11 +86,14 @@ BuildStep() {
 }
 
 InstallStep() {
+  INSTALL_TARGETS="install-strip texlinks"
+  DefaultInstallStep
+  Remove ${DESTDIR}${PREFIX}/bin/mktexfmt
+}
+
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
-
-  INSTALL_TARGETS="install-strip texlinks"
-  (DefaultInstallStep)
 
   ChangeDir ${PUBLISH_DIR}
   local INSTALL_TL="install-tl-unx.tar.gz"
@@ -167,5 +170,5 @@ InstallStep() {
 
   # Drop unzipped copy to reduce upload failures on the bots.
   ChangeDir ${PUBLISH_DIR}
-  LogExecute rm -rf ${ARCH_DIR}
+  LogExecute rm -rf ${PUBLISH_DIR}/${ARCH_DIR}
 }

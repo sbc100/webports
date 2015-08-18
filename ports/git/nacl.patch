@@ -45,7 +45,15 @@ diff --git a/Makefile b/Makefile
  		$(BUILTIN_OBJS) $(LIBS)
  
  help.sp help.s help.o: common-cmds.h
-@@ -1931,21 +1941,21 @@ compat/nedmalloc/nedmalloc.sp: SPARSE_FLAGS += -Wno-non-pointer-null
+@@ -1660,7 +1670,6 @@ version.sp version.s version.o: EXTRA_CPPFLAGS = \
+ 
+ $(BUILT_INS): git$X
+ 	$(QUIET_BUILT_IN)$(RM) $@ && \
+-	ln $< $@ 2>/dev/null || \
+ 	ln -s $< $@ 2>/dev/null || \
+ 	cp $< $@
+ 
+@@ -1931,32 +1940,31 @@ compat/nedmalloc/nedmalloc.sp: SPARSE_FLAGS += -Wno-non-pointer-null
  endif
  
  git-%$X: %.o GIT-LDFLAGS $(GITLIBS)
@@ -72,7 +80,9 @@ diff --git a/Makefile b/Makefile
  	$(VCSSVN_LIB)
  
  $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
-@@ -1955,8 +1965,8 @@ $(REMOTE_CURL_ALIASES): $(REMOTE_CURL_PRIMARY)
+ 	$(QUIET_LNCP)$(RM) $@ && \
+-	ln $< $@ 2>/dev/null || \
+ 	ln -s $< $@ 2>/dev/null || \
  	cp $< $@
  
  $(REMOTE_CURL_PRIMARY): remote-curl.o http.o http-walker.o GIT-LDFLAGS $(GITLIBS)
@@ -83,7 +93,7 @@ diff --git a/Makefile b/Makefile
  
  $(LIB_FILE): $(LIB_OBJS)
  	$(QUIET_AR)$(RM) $@ && $(AR) rcs $@ $^
-@@ -2169,7 +2179,7 @@ test-svn-fe$X: vcs-svn/lib.a
+@@ -2169,7 +2177,7 @@ test-svn-fe$X: vcs-svn/lib.a
  .PRECIOUS: $(TEST_OBJS)
  
  test-%$X: test-%.o GIT-LDFLAGS $(GITLIBS)
@@ -92,6 +102,29 @@ diff --git a/Makefile b/Makefile
  
  check-sha1:: test-sha1$X
  	./test-sha1.sh
+@@ -2264,14 +2272,12 @@ endif
+ 	for p in $(filter $(install_bindir_programs),$(BUILT_INS)); do \
+ 		$(RM) "$$bindir/$$p" && \
+ 		test -z "$(NO_INSTALL_HARDLINKS)" && \
+-		ln "$$bindir/git$X" "$$bindir/$$p" 2>/dev/null || \
+ 		ln -s "git$X" "$$bindir/$$p" 2>/dev/null || \
+ 		cp "$$bindir/git$X" "$$bindir/$$p" || exit; \
+ 	done && \
+ 	for p in $(BUILT_INS); do \
+ 		$(RM) "$$execdir/$$p" && \
+ 		test -z "$(NO_INSTALL_HARDLINKS)" && \
+-		ln "$$execdir/git$X" "$$execdir/$$p" 2>/dev/null || \
+ 		ln -s "git$X" "$$execdir/$$p" 2>/dev/null || \
+ 		cp "$$execdir/git$X" "$$execdir/$$p" || exit; \
+ 	done && \
+@@ -2279,7 +2285,6 @@ endif
+ 	for p in $$remote_curl_aliases; do \
+ 		$(RM) "$$execdir/$$p" && \
+ 		test -z "$(NO_INSTALL_HARDLINKS)" && \
+-		ln "$$execdir/git-remote-http$X" "$$execdir/$$p" 2>/dev/null || \
+ 		ln -s "git-remote-http$X" "$$execdir/$$p" 2>/dev/null || \
+ 		cp "$$execdir/git-remote-http$X" "$$execdir/$$p" || exit; \
+ 	done && \
 diff --git a/base85.c b/base85.c
 --- a/base85.c
 +++ b/base85.c

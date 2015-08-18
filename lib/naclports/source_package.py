@@ -295,6 +295,9 @@ class SourcePackage(package.Package):
     package up any files published by the PublishByArchForDevEnv
     step.
     """
+    install_dir = self.GetInstallLocation()
+    if not os.path.exists(install_dir):
+      return
 
     abi = 'pkg_' + self.config.toolchain
     if self.config.arch != self.config.toolchain:
@@ -305,27 +308,8 @@ class SourcePackage(package.Package):
 
     util.Makedirs(abi_dir)
 
-    # First create a package from the result of the package's
-    # InstallStep.
-    install_dir = self.GetInstallLocation()
-    if os.path.exists(install_dir):
-      bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
-          self.GetInstallLocation(), pkg_file)
-
-    if self.config.arch == self.config.toolchain:
-      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
-                                 self.config.arch)
-    else:
-      publish_dir = os.path.join(paths.PUBLISH_ROOT, self.NAME,
-                                 self.config.toolchain, self.config.arch)
-
-    # Optionally create a second package from the result of the publish step
-    if os.path.exists(publish_dir):
-      name = self.NAME + '_published'
-      pkg_file = os.path.join(abi_dir, '%s-%s.tbz' % (name, self.VERSION))
-      bsd_pkg.CreatePkgFile(name, self.VERSION, self.config.arch,
-        publish_dir, pkg_file, prefix='published/%s' % self.NAME)
-
+    bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
+        self.GetInstallLocation(), pkg_file)
 
   def Build(self, build_deps, force=None):
     self.CheckBuildable()

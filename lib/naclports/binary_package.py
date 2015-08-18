@@ -11,6 +11,7 @@ import tarfile
 from naclports import configuration, package, util, error
 
 PAYLOAD_DIR = 'payload'
+INSTALL_PREFIX = '/naclports-dummydir'
 
 ELF_MAGIC = '\x7fELF'
 
@@ -87,7 +88,7 @@ def RelocateFile(filename, dest):
     mode = os.stat(filename).st_mode
     os.chmod(filename, 0777)
     with open(filename, 'r+') as f:
-      f.write(data.replace('/naclports-dummydir', dest))
+      f.write(data.replace(INSTALL_PREFIX, dest))
     os.chmod(filename, mode)
 
 

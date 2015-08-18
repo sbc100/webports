@@ -643,13 +643,14 @@ ChangeDir() {
 
 
 Remove() {
-  local NAME="$1"
-  if VerifyPath "${NAME}"; then
-    rm -rf "${NAME}"
-  else
-    echo "Remove called with bad path."
-    exit -1
-  fi
+  for filename in $*; do
+    if VerifyPath "${filename}"; then
+      rm -rf "${filename}"
+    else
+      echo "Remove called with bad path: ${filename}"
+      exit -1
+    fi
+  done
 }
 
 

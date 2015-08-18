@@ -15,6 +15,13 @@ PatchStep() {
   cp ${START_DIR}/nano_pepper.c ${SRC_DIR}/src/
 }
 
+InstallStep() {
+  DefaultInstallStep
+  # The nano build results in a dangling symlink (symlink doesn't honor the
+  # EXEEXT).   We don't care about rnano anyway, so just remove it.
+  LogExecute rm ${DESTDIR}${PREFIX}/bin/rnano
+}
+
 PublishStep() {
   MakeDir ${PUBLISH_DIR}/nanotar
   ChangeDir ${PUBLISH_DIR}/nanotar
