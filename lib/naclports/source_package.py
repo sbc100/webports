@@ -591,12 +591,22 @@ class SourcePackage(package.Package):
     for dep_name in self.DEPENDS:
       yield CreatePackage(dep_name, self.config)
 
+  def ReverseDependencies(self):
+    """Yields the set of packages that depend directly on this one"""
+    for pkg in SourcePackageIterator():
+      if self.NAME in pkg.DEPENDS:
+        yield pkg
+
   def TransitiveDependencies(self):
     """Yields the set of packages that this package transitively depends on"""
-    rtn = set(self.Dependencies())
-    for dep in set(rtn):
-      rtn |= dep.TransitiveDependencies()
-    return rtn
+    deps = []
+    for dep in self.Dependencies():
+      for d in dep.TransitiveDependencies():
+        if d not in deps:
+          deps.append(d)
+      if dep not in deps:
+        deps.append(dep)
+    return deps
 
   def CheckBuildable(self):
     self.CheckInstallable()

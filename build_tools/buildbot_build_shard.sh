@@ -15,16 +15,48 @@ source ${SCRIPT_DIR}/buildbot_common.sh
 set -o nounset
 set -o errexit
 
+readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
+if [[ ${BUILDBOT_BUILDERNAME} =~ ${BNAME_REGEX} ]]; then
+  readonly PREFIX=${BASH_REMATCH[1]}
+  if [ "${PREFIX}" = "naclports-" ]; then
+    readonly TRYBOT=1
+  else
+    readonly TRYBOT=0
+  fi
+fi
+
 readonly PARTCMD="${PYTHON} build_tools/partition.py"
 readonly SHARD_CMD="${PARTCMD} -t ${SHARD} -n ${SHARDS}"
 echo "Calculating targets for shard ${SHARD} of ${SHARDS}"
-readonly PACKAGE_LIST=$(${SHARD_CMD})
+PACKAGE_LIST=$(${SHARD_CMD})
 if [ -z "${PACKAGE_LIST}" ]; then
   echo "sharding command failed: ${SHARD_CMD}"
   exit 1
 fi
 
-echo "Building the following packages: ${PACKAGE_LIST}"
+echo "Shard contains following packages: ${PACKAGE_LIST}"
+if [ "${TRYBOT}" = "1" ]; then
+  EFFECTED_FILES=$(git diff --cached --name-only origin/master)
+  EFFECTED_PACKAGES=$(${PYTHON} build_tools/find_effected_packages.py \
+      $EFFECTED_FILES)
+  echo "Patch effects the following packages: ${EFFECTED_PACKAGES}"
+  if [[ $EFFECTED_PACKAGES != "all" ]]; then
+    BUILD_PACKAGES=""
+    for PKG in ${PACKAGE_LIST}; do
+      for EFFECTED_PKG in ${EFFECTED_PACKAGES}; do
+        if [[ $PKG == $EFFECTED_PKG ]]; then
+          for DEP in $(bin/naclports depends $PKG); do
+            BUILD_PACKAGES+=" $DEP"
+          done
+          BUILD_PACKAGES+=" $PKG"
+        fi
+      done
+    done
+    echo "Building packages: ${BUILD_PACKAGES}"
+    PACKAGE_LIST=$BUILD_PACKAGES
+  fi
+fi
+
 for PKG in ${PACKAGE_LIST}; do
   InstallPackageMultiArch ${PKG}
 done
