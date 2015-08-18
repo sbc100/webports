@@ -27,7 +27,7 @@ fi
 
 readonly PARTCMD="${PYTHON} build_tools/partition.py"
 readonly SHARD_CMD="${PARTCMD} -t ${SHARD} -n ${SHARDS}"
-echo "Calculating targets for shard ${SHARD} of ${SHARDS}"
+echo "Calculating targets for shard $((${SHARD} + 1)) of ${SHARDS}"
 PACKAGE_LIST=$(${SHARD_CMD})
 if [ -z "${PACKAGE_LIST}" ]; then
   echo "sharding command failed: ${SHARD_CMD}"
