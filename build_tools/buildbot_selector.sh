@@ -183,14 +183,15 @@ fi
 InstallEmscripten() {
   echo "@@@BUILD_STEP Install Emscripten SDK@@@"
   # Download the Emscripten SDK and set the environment variables
-  local DEFAULT_EMSCRIPTEN_ROOT="${NACLPORTS_SRC}/out/emsdk_portable"
-  local EMSCRIPTEN_ROOT=${EMSCRIPTEN_ROOT:-${DEFAULT_EMSCRIPTEN_ROOT}}
+  local DEFAULT_EMSCRIPTEN_ROOT="${NACLPORTS_SRC}/out/emsdk"
+  local EMSDK_ROOT=${EMSDK_ROOT:-${DEFAULT_EMSCRIPTEN_ROOT}}
+  local EMSCRIPTEN_ROOT=${EMSDK_ROOT}/emscripten
   echo ${PYTHON} ${SCRIPT_DIR}/download_emscripten.py
   ${PYTHON} ${SCRIPT_DIR}/download_emscripten.py
 
   # Mechanism by which emscripten patches can be tested on the trybots
   if [ -f "${NACLPORTS_SRC}/emscripten.patch" ]; then
-    cd ${EMSCRIPTEN_ROOT}/emscripten/master
+    cd ${EMSCRIPTEN_ROOT}
     echo "Applying emscripten.patch"
     git apply "${NACLPORTS_SRC}/emscripten.patch"
     cd -
@@ -206,8 +207,12 @@ InstallEmscripten() {
   echo "Adding node bin directory to PATH: ${node_bin}"
   export PATH=${PATH}:${node_bin}
 
-  ${EMSCRIPTEN_ROOT}/emsdk activate latest
-  source ${EMSCRIPTEN_ROOT}/emsdk_env.sh
+  export EM_CONFIG=${EMSDK_ROOT}/.emscripten
+  export EMSCRIPTEN=${EMSDK_ROOT}/emscripten
+  echo "Setting EM_CONFIG: ${EM_CONFIG} EMSCRIPTEN: ${EMSCRIPTEN}"
+
+  echo "Adding emscripten to PATH: ${EMSCRIPTEN_ROOT}"
+  export PATH=${PATH}:${EMSCRIPTEN_ROOT}
 
   # Finally, run 'emcc -v' which will check that the compiler is working
   echo "Running emcc -v"

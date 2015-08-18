@@ -23,10 +23,10 @@ sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 import naclports
 import naclports.source_package
 
-MIRROR_URL = 'http://storage.googleapis.com/naclports/mirror/emscripten'
+MIRROR_URL = 'http://storage.googleapis.com/naclports/prebuilt/emscripten'
 
-EMSDK_SHA1 = '979f2a9f41de3b7057ea9893c663261c44dc7322'
-EMSDK_URL = MIRROR_URL + '/emsdk-portable-20150330.tar.gz'
+EMSDK_SHA1 = '89c962d5f06c874f63b06917913e2071d45e3c2e'
+EMSDK_URL = MIRROR_URL + '/emsdk-20150817.tar.gz'
 
 NODEJS_SHA1 = '79880ff2bc95a674bd0701a6dd4ed38f8366db27'
 NODEJS_URL = MIRROR_URL + '/node-v0.12.1-linux-x64.tar.gz'
@@ -79,7 +79,7 @@ def main(argv):
     naclports.Error('Emscripten support is currently not available on Windows.')
     return 1
 
-  DownloadAndExtract(EMSDK_URL, EMSDK_SHA1, 'emsdk_portable')
+  DownloadAndExtract(EMSDK_URL, EMSDK_SHA1, 'emsdk')
   DownloadAndExtract(NODEJS_URL, NODEJS_SHA1, 'node-v0.12.1-linux-x64')
   naclports.Log('Emscripten SDK Install complete')
   return 0

@@ -218,12 +218,12 @@ def GetSDKRoot():
 def GetEmscriptenRoot():
   emscripten = os.environ.get('EMSCRIPTEN')
   if emscripten is None:
-    local_root = os.path.join(paths.OUT_DIR, 'emsdk_portable', 'emscripten',
-                              'master')
+    local_root = os.path.join(paths.OUT_DIR, 'emsdk', 'emscripten')
     if os.path.exists(local_root):
       emscripten = local_root
     else:
-      raise error.Error('$EMSCRIPTEN not set')
+      raise error.Error('$EMSCRIPTEN not set and %s does not exist.' %
+                        local_root)
 
   if not os.path.isdir(emscripten):
     raise error.Error('$EMSCRIPTEN environment variable does not point'
