@@ -8,6 +8,12 @@ NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
              jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"
 
+STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
+SDK_VERSION=pepper_46
+BUILT_REVISION=${BUILT_REVISION:-trunk-589-gffe037b}
+DEFAULT_SOURCE=${STORAGE_URL}/${SDK_VERSION}/${BUILT_REVISION}/publish
+LOCAL_SOURCE=http://localhost:5103
+
 BuildStep() {
   SetupCrossEnvironment
 
@@ -24,6 +30,23 @@ BuildStep() {
       ${START_DIR}/tests/devenv_small_test.cc \
       -o ${BUILD_DIR}/tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
       -lgtest ${EXTRA_LIBS}
+}
+
+# $1: Name of repo conf file to write to.
+# $2: The http address of repo.
+CreateRepoConfFile() {
+  echo "NACL: {" > $1
+  local PKG_ARCH=${NACL_ARCH}
+  if [ "${PKG_ARCH}" = "x86_64" ]; then
+    PKG_ARCH=x86-64
+  fi
+  if [ "${NACL_ARCH}" = "${TOOLCHAIN}" ]; then
+    echo "    url: $2/pkg_${PKG_ARCH}," >> $1
+  else
+    echo "    url: $2/pkg_${TOOLCHAIN}_${PKG_ARCH}," >> $1
+  fi
+  echo "    MIRROR_TYPE: HTTP," >> $1
+  echo "}" >> $1
 }
 
 InstallStep() {
@@ -64,22 +87,8 @@ InstallStep() {
   InstallNaClTerm ${APP_DIR}
 
   # Create Nacl.conf file
-  echo "NACL: {" > ${APP_DIR}/Nacl.conf
-  local PKG_ARCH=${NACL_ARCH}
-  if [ "${PKG_ARCH}" = "x86_64" ]; then
-    PKG_ARCH=x86-64
-  fi
-  if [ "${NACL_ARCH}" = "${TOOLCHAIN}" ]; then
-   echo "    url: http://storage.googleapis.com/naclports/builds/pepper_46/\
-trunk-589-gffe037b/publish/\
-pkg_${PKG_ARCH}," >> ${APP_DIR}/Nacl.conf
-  else
-    echo "    url: http://storage.googleapis.com/naclports/builds/pepper_46/\
-trunk-589-gffe037b/publish/\
-pkg_${TOOLCHAIN}_${PKG_ARCH}," >> ${APP_DIR}/Nacl.conf
-  fi
-  echo "    MIRROR_TYPE: HTTP," >> ${APP_DIR}/Nacl.conf
-  echo "}" >> ${APP_DIR}/Nacl.conf
+  CreateRepoConfFile "${APP_DIR}/Nacl_local.conf" "${LOCAL_SOURCE}"
+  CreateRepoConfFile "${APP_DIR}/Nacl.conf" "${DEFAULT_SOURCE}"
 
   RESOURCES="background.js mounter.css mounter.js bash.js bashrc which
       install-base-packages.sh package graphical.html devenv.js whitelist.js

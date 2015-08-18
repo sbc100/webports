@@ -8,7 +8,7 @@ set -o nounset
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/.. && pwd)"
 
-PKG_HOST_DIR=${NACLPORTS_ROOT}/pkg_host/
+PKG_HOST_DIR=${NACLPORTS_ROOT}/out/pkg_host/
 PKG_FILENAME=pkg-1.5.5
 PKG_URL=http://storage.googleapis.com/naclports/mirror/${PKG_FILENAME}.tar.gz
 SDK_VERSION=pepper_46
@@ -86,9 +86,62 @@ BuildRepo() {
   done
 }
 
-if [[ $# -ne 1 ]]; then
-  echo "./build_repo.sh REVISION"
+BuildLocalRepo() {
+  local REPO_DIR=${NACLPORTS_ROOT}/out/publish/
+  for pkg_dir in ${REPO_DIR}/pkg_*/ ; do
+    WriteMetaFile "${pkg_dir}/meta"
+    "${PKG_HOST_DIR}/${PKG_FILENAME}/src/pkg" repo \
+                 -m "${pkg_dir}/meta" "${pkg_dir}"
+    cd ${pkg_dir}
+    tar -xf packagesite.txz
+    tar -xf digests.txz
+    tar -jcf packagesite.tbz packagesite.yaml
+    tar -jcf digests.tbz digests
+    cd ${SCRIPT_DIR}
+  done
+}
+
+UsageHelp() {
+  echo "./build_repo.sh - Build pkg repository using \
+local/remote built packages"
+  echo ""
+  echo "./build_repo.sh [-l] [-r REVISION]"
+  echo "Either provide a revision(-r) for remote built pakcages or \
+use -l for local built packages"
+  echo ""
+  echo "Description"
+  echo "-h   show help messages"
+  echo "-l   build pkg repository using local built packages"
+  echo "-r   build pkg repository using remote built packages"
+}
+
+if [[ $# -lt 1 ]]; then
+  UsageHelp
   exit 1
 fi
+
+OPTIND=1
+
+while getopts "h?lr:" opt; do
+  case "$opt" in
+    h|\?)
+        UsageHelp
+        exit 0
+        ;;
+    l)  local=1
+        ;;
+    r)  local=0
+        revision=$OPTARG
+        ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
 BuildPkg
-BuildRepo $1
+if [ ${local} = "1" ]; then
+  BuildLocalRepo
+else
+  BuildRepo $revision
+fi
+

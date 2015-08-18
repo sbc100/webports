@@ -17,7 +17,11 @@ source /mnt/http/setup-environment
 
 mkdir -p /usr/etc/pkg/repos
 cp /mnt/http/FreeBSD.conf /usr/etc/pkg/repos/
-cp /mnt/http/Nacl.conf /usr/etc/pkg/repos/
+if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
+  cp /mnt/http/Nacl_local.conf /usr/etc/pkg/repos/Nacl.conf
+else
+  cp /mnt/http/Nacl.conf /usr/etc/pkg/repos/Nacl.conf
+fi
 
 # TODO(bradnelson): Drop this when we can install things in a more
 # normal location and when we include the git templates in the normal
