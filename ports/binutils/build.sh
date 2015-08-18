@@ -17,6 +17,18 @@ BuildStep() {
 }
 
 InstallStep() {
+  DefaultInstallStep
+
+  # The ldscripts that ship with this verion of binutils doesn't seem to
+  # work with the glibc toolchain devenv.  Instead we copy the linker scripts
+  # out of the SDK root.
+  rm -rf ${DESTDIR}${PREFIX}/${NACL_ARCH}-nacl/lib/ldscripts
+  LogExecute cp -r \
+   ${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR}_x86_glibc/x86_64-nacl/lib/ldscripts \
+   ${DESTDIR}${PREFIX}/${NACL_ARCH}-nacl/lib/
+}
+
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   for nexe in binutils/*.nexe gas/*.nexe ld/*.nexe; do
     local name=$(basename $nexe .nexe | sed 's/-new//')

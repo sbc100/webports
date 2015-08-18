@@ -10,15 +10,14 @@ InstallStep() {
   MakeDir ${INSTALL_DIR}${PREFIX}
   ChangeDir ${INSTALL_DIR}${PREFIX}
 
-  MakeDir lib
+  if [ "${NACL_SHARED}" = "1" ]; then
+    MakeDir lib
+    # Copy core libraries
+    LogExecute cp -r ${NACL_SDK_LIB}/lib*.so* lib/
 
-  # Copy SDK libs
-  LogExecute cp -r ${NACL_SDK_LIBDIR}/* lib/
-
-  # Copy in SDK includes.
-  LogExecute cp -r ${NACL_SDK_ROOT}/include ./
-  LogExecute rm -fr include/gtest
-  LogExecute rm -fr include/gmock
-  LogExecute rm -fr lib/libgtest.*
-  LogExecute rm -fr lib/libgmock.*
+    # Copy SDK libs
+    LogExecute cp -r ${NACL_SDK_LIBDIR}/lib*.so* lib/
+    LogExecute rm -fr lib/libgtest.*so*
+    LogExecute rm -fr lib/libgmock.*so*
+  fi
 }

@@ -261,17 +261,7 @@ InitializeEmscriptenToolchain() {
 }
 
 InitializePNaClToolchain() {
-  local TC_ROOT=${NACL_SDK_ROOT}/toolchain
-  # The PNaCl toolchain moved in pepper_31.  Check for
-  # the existence of the old folder first and use that
-  # if found.
-  if [ -d "${TC_ROOT}/${OS_SUBDIR}_x86_pnacl" ]; then
-    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_x86_pnacl/newlib
-  elif [ -d "${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib" ]; then
-    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib
-  else
-    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl
-  fi
+  local TC_ROOT=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR}_pnacl
 
   readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${TC_ROOT}}
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
@@ -288,6 +278,14 @@ InitializePNaClToolchain() {
     NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
     NACL_EXEEXT=".nexe"
     NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${TOOLCHAIN}_${NACL_ARCH_ALT}"
+
+    if [ ${NACL_ARCH} = "arm" ]; then
+      local NACL_LIBDIR=arm-nacl/lib
+    elif [ ${NACL_ARCH} = "x86_64" ]; then
+      local NACL_LIBDIR=x86_64-nacl/lib64
+    else
+      local NACL_LIBDIR=x86_64-nacl/lib32
+    fi
   else
     # TODO(sbc): figure our why we do not have a pnacl-strings
     #NACLSTRINGS=${NACL_BIN_PATH}/pnacl-strings
@@ -304,7 +302,10 @@ InitializePNaClToolchain() {
     PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
 
     NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${TOOLCHAIN}"
+    local NACL_LIBDIR=le32-nacl/lib
   fi
+
+  readonly NACL_SDK_LIB=${NACL_TOOLCHAIN_ROOT}/${NACL_LIBDIR}
 }
 
 NaClEnvExport() {

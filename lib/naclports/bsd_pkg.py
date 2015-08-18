@@ -67,10 +67,8 @@ def AddFilesInDir(content_dir, tar, prefix):
     if os.path.islink(fullname):
       link_target = os.path.realpath(fullname)
       if os.path.isabs(link_target):
-        print '%s -> %s' % (fullname, link_target)
         link_target = link_target.replace(binary_package.INSTALL_PREFIX, prefix
             + '/' + INSTALL_PREFIX)
-        print(link_target)
       if not os.path.exists(link_target):
         raise Exception('Package contains dangling link: %s' % fullname)
       if os.path.isdir(link_target):
