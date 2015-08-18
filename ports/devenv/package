@@ -210,7 +210,6 @@ InstallPackageFromUrl() {
   if [ "${NACL_ARCH}" = "i686" ]; then
     suffixes+=" _x86_32.nexe"
     platform_dirs+=" _platform_specific/x86_32/"
-    platform_dirs+=" _platform_specific/i686/"
   fi
   for alt in "" _ppapi; do
     for plat in "" ${platform_dirs}; do
