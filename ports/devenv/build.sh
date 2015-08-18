@@ -87,8 +87,8 @@ InstallStep() {
   InstallNaClTerm ${APP_DIR}
 
   # Create Nacl.conf file
-  CreateRepoConfFile "${APP_DIR}/Nacl_local.conf" "${LOCAL_SOURCE}"
-  CreateRepoConfFile "${APP_DIR}/Nacl.conf" "${DEFAULT_SOURCE}"
+  CreateRepoConfFile "${APP_DIR}/NaCl_local.conf" "${LOCAL_SOURCE}"
+  CreateRepoConfFile "${APP_DIR}/NaCl.conf" "${DEFAULT_SOURCE}"
 
   RESOURCES="background.js mounter.css mounter.js bash.js bashrc which
       install-base-packages.sh package graphical.html devenv.js whitelist.js

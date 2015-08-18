@@ -627,6 +627,18 @@ diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
  
  	return;
  }
+@@ -1057,7 +1074,10 @@ pkg_ini(const char *path, const char *reposdir, pkg_init_flags flags)
+ 	if (evpipe != NULL)
+ 		connect_evpipe(evpipe);
+ 
+-	debug_level = pkg_object_int(pkg_config_get("DEBUG_LEVEL"));
++	/* Only set debug level if it was not already set (e.g. by the cmd line) */
++	if (debug_level == 0) {
++		debug_level = pkg_object_int(pkg_config_get("DEBUG_LEVEL"));
++	}
+ 	developer_mode = pkg_object_bool(pkg_config_get("DEVELOPER_MODE"));
+ 
+ 	it = NULL;
 diff --git a/libpkg/pkg_cudf.c b/libpkg/pkg_cudf.c
 --- a/libpkg/pkg_cudf.c
 +++ b/libpkg/pkg_cudf.c
@@ -721,7 +733,23 @@ diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
  int
  pkg_delete(struct pkg *pkg, struct pkgdb *db, unsigned flags)
  {
-@@ -279,12 +348,21 @@ pkg_delete_file(struct pkg *pkg, struct pkg_file *file, unsigned force)
+@@ -216,7 +285,15 @@ rmdir_p(struct pkgdb *db, struct pkg *pkg, char *dir, const char *prefix_r)
+ #endif
+ 
+ 	if (unlinkat(pkg->rootfd, dir, AT_REMOVEDIR) == -1) {
++#ifdef __native_client__
++		/*
++		 * TODO(sbc): nacl_io generates EPERM rather than ENOTEMPTY.  We should
++		 * fix nacl_io and remove this patch: http://crbug.com/522169
++		 */
++		if (errno != ENOTEMPTY && errno != EBUSY && errno != EPERM)
++#else
+ 		if (errno != ENOTEMPTY && errno != EBUSY)
++#endif
+ 			pkg_emit_errno("unlinkat", dir);
+ 		/* If the directory was already removed by a bogus script, continue removing parents */
+ 		if (errno != ENOENT)
+@@ -279,12 +356,21 @@ pkg_delete_file(struct pkg *pkg, struct pkg_file *file, unsigned force)
  	/* Regular files and links */
  	/* check sha256 */
  	if (!force && file->sum[0] != '\0') {
@@ -743,7 +771,7 @@ diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
  		if (S_ISLNK(st.st_mode)) {
  			if (pkg_symlink_cksumat(pkg->rootfd, path, NULL,
  			    sha256) != EPKG_OK)
-@@ -394,7 +472,7 @@ pkg_delete_dir(struct pkg *pkg, struct pkg_dir *dir)
+@@ -394,7 +480,7 @@ pkg_delete_dir(struct pkg *pkg, struct pkg_dir *dir)
  }
  
  int
@@ -2199,7 +2227,17 @@ diff --git a/src/main.c b/src/main.c
  
  #ifdef HAVE_LIBJAIL
  	if (jail_str != NULL) {
-@@ -740,6 +766,7 @@ main(int argc, char **argv)
+@@ -727,9 +753,6 @@ main(int argc, char **argv)
+ 	if (pkg_ini(conffile, reposdir, init_flags) != EPKG_OK)
+ 		errx(EX_SOFTWARE, "Cannot parse configuration file!");
+ 
+-	if (debug > 0)
+-		pkg_set_debug_level(debug);
+-
+ 	if (atexit(&pkg_shutdown) != 0)
+ 		errx(EX_SOFTWARE, "register pkg_shutdown() to run at exit");
+ 
+@@ -740,6 +763,7 @@ main(int argc, char **argv)
  
  	plugins_enabled = pkg_object_bool(pkg_config_get("PKG_ENABLE_PLUGINS"));
  
@@ -2207,7 +2245,7 @@ diff --git a/src/main.c b/src/main.c
  	if (plugins_enabled) {
  		struct pkg_plugin	*p = NULL;
  
-@@ -766,6 +793,7 @@ main(int argc, char **argv)
+@@ -766,6 +790,7 @@ main(int argc, char **argv)
  			}
  		}
  	}
