@@ -308,8 +308,12 @@ class SourcePackage(package.Package):
 
     util.Makedirs(abi_dir)
 
+    deps = self.DEPENDS
+    if self.config.toolchain != 'glibc':
+        deps = []
     bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
-        self.GetInstallLocation(), pkg_file)
+        self.GetInstallLocation(), pkg_file, deps)
+
 
   def Build(self, build_deps, force=None):
     self.CheckBuildable()

@@ -18,7 +18,8 @@ import shutil
 import subprocess
 import tarfile
 
-from naclports import util, binary_package
+from naclports import binary_package, package, paths, util
+from naclports.error import Error
 
 INSTALL_PREFIX = 'usr'
 
@@ -33,6 +34,14 @@ def WriteUCL(outfile, ucl_dict):
         f.write('  "%s": \n  {\n' % key)
         for file_name, file_hash in value.iteritems():
           f.write('    "%s": "%s",\n' % (file_name, file_hash))
+        f.write('  }\n')
+      elif key == 'deps':
+        f.write('  "%s": \n  {\n' % key)
+        for dep_name, dep_dict in value.iteritems():
+          f.write('    "%s": \n    {\n' % dep_name)
+          for dep_dict_key, dep_dict_value in dep_dict.iteritems():
+            f.write('        "%s": "%s",\n' % (dep_dict_key, dep_dict_value))
+          f.write('    },\n')
         f.write('  }\n')
       else:
         f.write('  "%s": "%s",\n' % (key, value))
@@ -97,7 +106,37 @@ def AddFilesInDir(content_dir, tar, prefix):
         tar.addfile(info, fileobj=f)
 
 
-def CreatePkgFile(name, version, arch, payload_dir, outfile):
+DEFAULT_LOCATIONS = ('ports', 'ports/python_modules')
+
+
+def AddPackageDep(dep_dict, dep):
+  dep_dict['origin'] = dep
+
+  if os.path.isdir(dep):
+    dep_dict['version'] = package.Package(info_file =
+                                          os.path.join(dep, 'pkg_info')).VERSION
+    return
+
+  for subdir in DEFAULT_LOCATIONS:
+    pkg_info_file = os.path.join(paths.NACLPORTS_ROOT,
+                                 subdir, dep, 'pkg_info')
+
+    if os.path.exists(pkg_info_file):
+      dep_dict['version'] = package.Package(info_file=pkg_info_file).VERSION
+      return
+
+  raise Error("Package not found: %s" % dep)
+
+
+def CreateDependencies(depends_dict, depends):
+  for dep in depends:
+    if dep != 'glibc-compat':
+      dep_dict = collections.OrderedDict()
+      AddPackageDep(dep_dict, dep)
+      depends_dict[dep] = dep_dict
+
+
+def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):
   """Create an archive file in FreeBSD's pkg file format"""
   util.Log('Creating pkg package: %s' % outfile)
   manifest = collections.OrderedDict()
@@ -113,6 +152,12 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile):
   manifest['maintainer'] = 'native-client-discuss@googlegroups.com'
   manifest['www'] = 'https://code.google.com/p/naclports/'
   manifest['prefix'] = INSTALL_PREFIX
+
+  if depends:
+    depends_dict = collections.OrderedDict()
+    CreateDependencies(depends_dict, depends)
+    manifest['deps'] = depends_dict
+
   temp_dir = os.path.splitext(outfile)[0] + '.tmp'
   if os.path.exists(temp_dir):
     shutil.rmtree(temp_dir)
