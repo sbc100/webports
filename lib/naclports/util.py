@@ -48,8 +48,6 @@ LOG_INFO = 2
 LOG_VERBOSE = 3
 LOG_TRACE = 4
 
-ELF_MAGIC = '\x7fELF'
-
 log_level = LOG_INFO
 color_mode = 'auto'
 
@@ -64,14 +62,6 @@ def Color(message, color):
 def CheckStdoutForColorSupport():
   if color_mode == 'auto':
     Color.enabled = sys.stdout.isatty()
-
-
-def IsElfFile(filename):
-  if os.path.islink(filename):
-    return False
-  with open(filename) as f:
-    header = f.read(4)
-  return header == ELF_MAGIC
 
 
 def Memoize(f):

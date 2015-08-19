@@ -13,6 +13,15 @@ from naclports import configuration, package, util, error
 PAYLOAD_DIR = 'payload'
 INSTALL_PREFIX = '/naclports-dummydir'
 
+ELF_MAGIC = '\x7fELF'
+
+def IsElfFile(filename):
+  if os.path.islink(filename):
+    return False
+  with open(filename) as f:
+    header = f.read(4)
+  return header == ELF_MAGIC
+
 
 def InstallFile(filename, old_root, new_root):
   """Install a single file by moving it into a new location.
@@ -34,7 +43,7 @@ def InstallFile(filename, old_root, new_root):
 
   # When install binarie ELF files into the toolchain direcoties, remove
   # the X bit so that they do not found when searching the PATH.
-  if util.IsElfFile(newname):
+  if IsElfFile(newname):
     mode = os.stat(newname).st_mode
     mode = mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     os.chmod(newname, mode)

@@ -83,11 +83,6 @@ def AddFilesInDir(content_dir, tar, prefix):
       info.name = arcname
       tar.addfile(info)
     else:
-      # Strip all elf files before creating pkg file (except .o files since
-      # we don't want to strip, for example, crt1.o)
-      if util.IsElfFile(fullname) and os.path.splitext(fullname)[1] != '.o':
-        subprocess.check_call(['strip', fullname])
-
       # Rather convoluted way to add files to a tar archive that are
       # abolute (i.e. start with /).  pkg requires this, but python's
       # tar.py calls lstrip('/') on arcname in the tar.add() method.
