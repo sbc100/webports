@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/.. && pwd)"
 
 PKG_HOST_DIR=${NACLPORTS_ROOT}/out/pkg_host/
-PKG_FILENAME=pkg-1.5.5
+PKG_FILENAME=pkg-1.5.6
 PKG_URL=http://storage.googleapis.com/naclports/mirror/${PKG_FILENAME}.tar.gz
 SDK_VERSION=pepper_46
 

@@ -8,17 +8,6 @@ export LIBS+="-lbsd ${NACL_CLI_MAIN_LIB} -pthread"
 EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 NACLPORTS_CFLAGS+=" -Dmain=nacl_main"
 
-# TODO: Remove this hack once glibc header bug is fixed
-# Can also remove __unused -> _UNUSED_ patch in nacl.patch
-# BUG=https://code.google.com/p/nativeclient/issues/detail?id=4207
-# BUG=https://code.google.com/p/nativeclient/issues/detail?id=4208
-PatchGlibcHeaders() {
-  sed -i.bak \
-    "s/#ifdef __USE_FILE_OFFSET64\
-/#if defined __USE_FILE_OFFSET64 \&\& !defined(__native_client__)/" \
-    ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/include/fts.h
-}
-
 if [ "${NACL_SHARED}" = "1" ]; then
   LIBS+=" -lresolv -ldl -lrt"
   EXECUTABLES+=" src/pkg-static${NACL_EXEEXT}"
@@ -31,12 +20,6 @@ else
 fi
 
 ConfigureStep() {
-  if [ "${NACL_LIBC}" = "glibc" ]; then
-    if ! grep -Eq "#ifdef __USE_FILE_OFFSET64 &&" \
-      ${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/include/fts.h ; then
-      PatchGlibcHeaders
-    fi
-  fi
   ChangeDir ${SRC_DIR}
   ./autogen.sh
   PatchConfigure

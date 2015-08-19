@@ -40,33 +40,6 @@ diff --git a/compat/bsd_compat.h b/compat/bsd_compat.h
  #include <sys/stat.h>
  #include "endian_util.h"
  
-@@ -146,11 +150,11 @@ char * strnstr(const char *s, const char *find, size_t slen);
- #define __DECONST(type, var)    ((type)(uintptr_t)(const void *)(var))
- #endif
- 
--#ifndef __unused
-+#ifndef _UNUSED_
- #ifdef __GNUC__
--# define __unused __attribute__((__unused__))
-+# define _UNUSED_  __attribute__((__unused__))
- #else
--# define __unused
-+# define _UNUSED_
- #endif
- #endif
- 
-diff --git a/compat/closefrom.c b/compat/closefrom.c
---- a/compat/closefrom.c
-+++ b/compat/closefrom.c
-@@ -52,7 +52,7 @@
- #endif
- 
- #if 0
--__unused static const char rcsid[] = "$Sudo: closefrom.c,v 1.11 2006/08/17 15:26:54 millert Exp $";
-+_UNUSED_ static const char rcsid[] = "$Sudo: closefrom.c,v 1.11 2006/08/17 15:26:54 millert Exp $";
- #endif /* lint */
- 
- /*
 diff --git a/configure.ac b/configure.ac
 --- a/configure.ac
 +++ b/configure.ac
@@ -179,14 +152,6 @@ diff --git a/external/libelf/_libelf_config.h b/external/libelf/_libelf_config.h
  #else
  #error	Unknown FreeBSD architecture.
  #endif
-@@ -112,7 +119,6 @@
-  * Definitions for Minix3.
-  */
- #ifdef __minix
--
- #define	LIBELF_ARCH		EM_386
- #define	LIBELF_BYTEORDER	ELFDATA2LSB
- #define	LIBELF_CLASS		ELFCLASS32
 diff --git a/external/libelf/libelf.h b/external/libelf/libelf.h
 --- a/external/libelf/libelf.h
 +++ b/external/libelf/libelf.h
@@ -214,67 +179,6 @@ diff --git a/external/libfetch/fetch.h b/external/libfetch/fetch.h
  struct url {
  	char		 scheme[URL_SCHEMELEN+1];
  	char		 user[URL_USERLEN+1];
-diff --git a/external/libfetch/file.c b/external/libfetch/file.c
---- a/external/libfetch/file.c
-+++ b/external/libfetch/file.c
-@@ -115,13 +115,13 @@ fetch_stat_file(const char *fn, struct url_stat *us)
- }
- 
- int
--fetchStatFile(struct url *u, struct url_stat *us, const char *flags __unused)
-+fetchStatFile(struct url *u, struct url_stat *us, const char *flags _UNUSED_)
- {
- 	return (fetch_stat_file(u->doc, us));
- }
- 
- struct url_ent *
--fetchListFile(struct url *u, const char *flags __unused)
-+fetchListFile(struct url *u, const char *flags _UNUSED_)
- {
- 	struct dirent *de;
- 	struct url_stat us;
-diff --git a/external/libfetch/ftp.c b/external/libfetch/ftp.c
---- a/external/libfetch/ftp.c
-+++ b/external/libfetch/ftp.c
-@@ -553,7 +553,7 @@ ftp_writefn(void *v, const char *buf, int len)
- }
- 
- static off_t
--ftp_seekfn(void *v, off_t pos __unused, int whence __unused)
-+ftp_seekfn(void *v, off_t pos _UNUSED_, int whence _UNUSED_)
- {
- 	struct ftpio *io;
- 
-@@ -1208,7 +1208,7 @@ fetchStatFTP(struct url *url, struct url_stat *us, const char *flags)
-  * List a directory
-  */
- struct url_ent *
--fetchListFTP(struct url *url __unused, const char *flags __unused)
-+fetchListFTP(struct url *url _UNUSED_, const char *flags _UNUSED_)
- {
- 	warnx("fetchListFTP(): not implemented");
- 	return (NULL);
-diff --git a/external/libfetch/http.c b/external/libfetch/http.c
---- a/external/libfetch/http.c
-+++ b/external/libfetch/http.c
-@@ -2042,7 +2042,7 @@ fetchGetHTTP(struct url *URL, const char *flags)
-  * Store a file by HTTP
-  */
- FILE *
--fetchPutHTTP(struct url *URL __unused, const char *flags __unused)
-+fetchPutHTTP(struct url *URL _UNUSED_, const char *flags _UNUSED_)
- {
- 	warnx("fetchPutHTTP(): not implemented");
- 	return (NULL);
-@@ -2067,7 +2067,7 @@ fetchStatHTTP(struct url *URL, struct url_stat *us, const char *flags)
-  * List a directory
-  */
- struct url_ent *
--fetchListHTTP(struct url *url __unused, const char *flags __unused)
-+fetchListHTTP(struct url *url _UNUSED_, const char *flags _UNUSED_)
- {
- 	warnx("fetchListHTTP(): not implemented");
- 	return (NULL);
 diff --git a/external/libsbuf/subr_sbuf.c b/external/libsbuf/subr_sbuf.c
 --- a/external/libsbuf/subr_sbuf.c
 +++ b/external/libsbuf/subr_sbuf.c
@@ -432,18 +336,6 @@ diff --git a/libpkg/Makefile.am b/libpkg/Makefile.am
  
  DYNLIBS=		libpkg.la
  lib_LTLIBRARIES=	libpkg_static.la
-diff --git a/libpkg/backup.c b/libpkg/backup.c
---- a/libpkg/backup.c
-+++ b/libpkg/backup.c
-@@ -42,7 +42,7 @@
- #define NPAGES	4
- 
- static int
--ps_cb(void *ps, int ncols, char **coltext, __unused char **colnames)
-+ps_cb(void *ps, int ncols, char **coltext, _UNUSED_ char **colnames)
- {
- 	/* We should have exactly one row and one column of output */
- 	if (ncols != 1)
 diff --git a/libpkg/dns_utils.c b/libpkg/dns_utils.c
 --- a/libpkg/dns_utils.c
 +++ b/libpkg/dns_utils.c
@@ -557,18 +449,6 @@ diff --git a/libpkg/fetch.c b/libpkg/fetch.c
  		if (line[linelen -1 ] == '\n')
  			line[linelen -1 ] = '\0';
  
-diff --git a/libpkg/pkg.c b/libpkg/pkg.c
---- a/libpkg/pkg.c
-+++ b/libpkg/pkg.c
-@@ -182,7 +182,7 @@ pkg_type(const struct pkg * restrict pkg)
- }
- 
- static ucl_object_t *
--manifest_schema_open(pkg_t type __unused)
-+manifest_schema_open(pkg_t type _UNUSED_)
- {
- 	struct ucl_parser *parser;
- 	static const char manifest_schema_str[] = ""
 diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
 --- a/libpkg/pkg_config.c
 +++ b/libpkg/pkg_config.c
@@ -771,15 +651,6 @@ diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
  		if (S_ISLNK(st.st_mode)) {
  			if (pkg_symlink_cksumat(pkg->rootfd, path, NULL,
  			    sha256) != EPKG_OK)
-@@ -394,7 +480,7 @@ pkg_delete_dir(struct pkg *pkg, struct pkg_dir *dir)
- }
- 
- int
--pkg_delete_dirs(__unused struct pkgdb *db, struct pkg *pkg, struct pkg *new)
-+pkg_delete_dirs(_UNUSED_ struct pkgdb *db, struct pkg *pkg, struct pkg *new)
- {
- 	struct pkg_dir	*dir = NULL;
- 	struct pkg_dir	*d;
 diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
 --- a/libpkg/pkg_elf.c
 +++ b/libpkg/pkg_elf.c
@@ -931,18 +802,6 @@ diff --git a/libpkg/pkg_jobs.c b/libpkg/pkg_jobs.c
  
  	if (fs_avail != -1 && dlsize > fs_avail) {
  		char dlsz[9], fsz[9];
-diff --git a/libpkg/pkg_macho.c b/libpkg/pkg_macho.c
---- a/libpkg/pkg_macho.c
-+++ b/libpkg/pkg_macho.c
-@@ -146,7 +146,7 @@ analyse_macho(struct pkg *pkg, const char *fpath,
- }
- 
- static int
--add_dylibs_to_pkg(__unused void *actdata, struct pkg *pkg, const char *fpath,
-+add_dylibs_to_pkg(_UNUSED_ void *actdata, struct pkg *pkg, const char *fpath,
- 		  const char *name, bool is_shlib)
- {
- 	/* Skip references to system libraries */
 diff --git a/libpkg/pkg_old.c b/libpkg/pkg_old.c
 --- a/libpkg/pkg_old.c
 +++ b/libpkg/pkg_old.c
@@ -959,24 +818,6 @@ diff --git a/libpkg/pkg_old.c b/libpkg/pkg_old.c
 diff --git a/libpkg/pkg_ports.c b/libpkg/pkg_ports.c
 --- a/libpkg/pkg_ports.c
 +++ b/libpkg/pkg_ports.c
-@@ -157,7 +157,7 @@ free_file_attr(struct file_attr *a)
- }
- 
- static void
--sbuf_append(struct sbuf *buf, __unused const char *comment, const char *str, ...)
-+sbuf_append(struct sbuf *buf, _UNUSED_ const char *comment, const char *str, ...)
- {
- 	va_list ap;
- 
-@@ -524,7 +524,7 @@ comment_key(struct plist *p, char *line, struct file_attr *a)
- }
- 
- static int
--ignore_next(struct plist *p, __unused char *line, struct file_attr *a)
-+ignore_next(struct plist *p, _UNUSED_ char *line, struct file_attr *a)
- {
- 	p->ignore_next = true;
- 	free_file_attr(a);
 @@ -1250,7 +1250,11 @@ ports_parse_plist(struct pkg *pkg, const char *plist, const char *stage)
  		return (EPKG_FATAL);
  	}
@@ -990,31 +831,6 @@ diff --git a/libpkg/pkg_ports.c b/libpkg/pkg_ports.c
  		if (line[linelen - 1] == '\n')
  			line[linelen - 1] = '\0';
  		ret = plist_parse_line(pplist, line);
-diff --git a/libpkg/pkg_printf.c b/libpkg/pkg_printf.c
---- a/libpkg/pkg_printf.c
-+++ b/libpkg/pkg_printf.c
-@@ -1903,8 +1903,8 @@ format_short_checksum(struct sbuf *sbuf, const void *data, struct percent_esc *p
-  * %% -- Output a literal '%' character
-  */
- struct sbuf *
--format_literal_percent(struct sbuf *sbuf, __unused const void *data,
--		       __unused struct percent_esc *p)
-+format_literal_percent(struct sbuf *sbuf, _UNUSED_ const void *data,
-+		       _UNUSED_ struct percent_esc *p)
- {
- 	sbuf_putc(sbuf, '%');
- 	return (sbuf);
-@@ -1915,8 +1915,8 @@ format_literal_percent(struct sbuf *sbuf, __unused const void *data,
-  * the text through unchanged.
-  */
- struct sbuf *
--format_unknown(struct sbuf *sbuf, __unused const void *data,
--		       __unused struct percent_esc *p)
-+format_unknown(struct sbuf *sbuf, _UNUSED_ const void *data,
-+		       _UNUSED_ struct percent_esc *p)
- {
- 	sbuf_putc(sbuf, '%');
- 	return (NULL);
 diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
 --- a/libpkg/pkg_repo.c
 +++ b/libpkg/pkg_repo.c
@@ -1473,23 +1289,6 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  /* An application using a libpkg() DBVERSION is assumed to be compatible
     with:
  
-@@ -189,7 +194,7 @@ pkgdb_regex_delete(void *p)
- }
- 
- void
--pkgdb_now(sqlite3_context *ctx, int argc, __unused sqlite3_value **argv)
-+pkgdb_now(sqlite3_context *ctx, int argc, _UNUSED_ sqlite3_value **argv)
- {
- 	if (argc != 0) {
- 		sqlite3_result_error(ctx, "Invalid usage of now() "
-@@ -227,7 +232,6 @@ pkgdb_upgrade(struct pkgdb *db)
- 	int		 i, ret;
- 
- 	assert(db != NULL);
--
- 	ret = get_pragma(db->sqlite, "PRAGMA user_version;", &db_version, false);
- 	if (ret != EPKG_OK)
- 		return (EPKG_FATAL);
 @@ -675,8 +679,15 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
  	struct stat	sb;
  
@@ -1524,15 +1323,6 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  	return (EPKG_OK);
  }
  
-@@ -864,7 +877,7 @@ pkgdb_access(unsigned mode, unsigned database)
- }
- 
- static void
--pkgdb_profile_callback(void *ud __unused, const char *req, sqlite3_uint64 nsec)
-+pkgdb_profile_callback(void *ud _UNUSED_, const char *req, sqlite3_uint64 nsec)
- {
- 	/* According to sqlite3 documentation, nsec has milliseconds accuracy */
- 	nsec /= 1000000LLU;
 @@ -969,7 +982,9 @@ pkgdb_open_all(struct pkgdb **db_p, pkgdb_t type, const char *reponame)
  		/*
  		 * Fall back on unix-dotfile locking strategy if on a network filesystem
@@ -1544,17 +1334,6 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  		struct statvfs stfs;
  
  		if (statvfs(dbdir, &stfs) == 0) {
-@@ -2607,8 +2622,8 @@ pkgdb_file_set_cksum(struct pkgdb *db, struct pkg_file *file,
-  * Used both in the shell and pkgdb_open
-  */
- int
--pkgdb_sqlcmd_init(sqlite3 *db, __unused const char **err,
--    __unused const void *noused)
-+pkgdb_sqlcmd_init(sqlite3 *db, _UNUSED_ const char **err,
-+    _UNUSED_ const void *noused)
- {
- 	sqlite3_create_function(db, "now", 0, SQLITE_ANY, NULL,
- 	    pkgdb_now, NULL, NULL);
 diff --git a/libpkg/pkgdb_iterator.c b/libpkg/pkgdb_iterator.c
 --- a/libpkg/pkgdb_iterator.c
 +++ b/libpkg/pkgdb_iterator.c
@@ -1642,50 +1421,6 @@ diff --git a/libpkg/plugins.c b/libpkg/plugins.c
  
  const pkg_object *
  pkg_plugin_conf(struct pkg_plugin *p)
-diff --git a/libpkg/private/pkg.h b/libpkg/private/pkg.h
---- a/libpkg/private/pkg.h
-+++ b/libpkg/private/pkg.h
-@@ -61,11 +61,11 @@
- # define MAXLOGNAME 64
- # endif
- #endif
--#ifndef __unused
-+#ifndef _UNUSED_
- # ifdef __GNUC__
--# define __unused __attribute__ ((__unused__))
-+# define _UNUSED_ __attribute__ ((__unused__))
- # else
--# define __unused
-+# define _UNUSED_
- # endif
- #endif
- 
-diff --git a/libpkg/private/pkg_printf.h b/libpkg/private/pkg_printf.h
---- a/libpkg/private/pkg_printf.h
-+++ b/libpkg/private/pkg_printf.h
-@@ -227,8 +227,8 @@ _static struct sbuf *format_version(struct sbuf *, const void *, struct percent_
- _static struct sbuf *format_home_url(struct sbuf *, const void *, struct percent_esc *);
- _static struct sbuf *format_pkgsize(struct sbuf *, const void *, struct percent_esc *);
- _static struct sbuf *format_short_checksum(struct sbuf *, const void *, struct percent_esc *);
--_static struct sbuf *format_literal_percent(struct sbuf *, __unused const void *, __unused struct percent_esc *);
--_static struct sbuf *format_unknown(struct sbuf *, __unused const void *, __unused struct percent_esc *);
-+_static struct sbuf *format_literal_percent(struct sbuf *, _UNUSED_ const void *, _UNUSED_ struct percent_esc *);
-+_static struct sbuf *format_unknown(struct sbuf *, _UNUSED_ const void *, _UNUSED_ struct percent_esc *);
- _static struct sbuf *format_provided(struct sbuf *, const void *, struct percent_esc *);
- _static struct sbuf *format_required(struct sbuf *, const void *, struct percent_esc *);
- _static struct sbuf *format_provide_name(struct sbuf *, const void *, struct percent_esc *);
-diff --git a/libpkg/private/pkgdb.h b/libpkg/private/pkgdb.h
---- a/libpkg/private/pkgdb.h
-+++ b/libpkg/private/pkgdb.h
-@@ -181,7 +181,7 @@ void pkgdb_regex(sqlite3_context *ctx, int argc, sqlite3_value **argv);
- void pkgdb_regex_delete(void *p);
- void pkgdb_split_uid(sqlite3_context *ctx, int argc, sqlite3_value **argv);
- void pkgdb_split_version(sqlite3_context *ctx, int argc, sqlite3_value **argv);
--void pkgdb_now(sqlite3_context *ctx, int argc, __unused sqlite3_value **argv);
-+void pkgdb_now(sqlite3_context *ctx, int argc, _UNUSED_ sqlite3_value **argv);
- void pkgdb_myarch(sqlite3_context *ctx, int argc, sqlite3_value **argv);
- int pkgdb_sqlcmd_init(sqlite3 *db, const char **err, const void *noused);
- int pkgdb_update_config_file_content(struct pkg *pkg, sqlite3 *s);
 diff --git a/libpkg/repo/binary/fetch.c b/libpkg/repo/binary/fetch.c
 --- a/libpkg/repo/binary/fetch.c
 +++ b/libpkg/repo/binary/fetch.c
@@ -1813,27 +1548,6 @@ diff --git a/libpkg/repo/binary/query.c b/libpkg/repo/binary/query.c
  #include <regex.h>
  #include <grp.h>
  #include <stdlib.h>
-diff --git a/libpkg/repo/binary/update.c b/libpkg/repo/binary/update.c
---- a/libpkg/repo/binary/update.c
-+++ b/libpkg/repo/binary/update.c
-@@ -381,7 +381,7 @@ pkg_repo_binary_register_conflicts(const char *origin, char **conflicts,
- 
- static int
- pkg_repo_binary_add_from_manifest(char *buf, sqlite3 *sqlite, size_t len,
--		struct pkg_manifest_key **keys, struct pkg **p __unused,
-+		struct pkg_manifest_key **keys, struct pkg **p _UNUSED_,
- 		struct pkg_repo *repo)
- {
- 	int rc = EPKG_OK;
-@@ -417,7 +417,7 @@ cleanup:
- 	return (rc);
- }
- 
--static void __unused
-+static void _UNUSED_
- pkg_repo_binary_parse_conflicts(FILE *f, sqlite3 *sqlite)
- {
- 	size_t linecap = 0;
 diff --git a/libpkg/scripts.c b/libpkg/scripts.c
 --- a/libpkg/scripts.c
 +++ b/libpkg/scripts.c
@@ -1965,18 +1679,6 @@ diff --git a/src/add.c b/src/add.c
  			file = path;
  		} else {
  			file = argv[i];
-diff --git a/src/convert.c b/src/convert.c
---- a/src/convert.c
-+++ b/src/convert.c
-@@ -122,7 +122,7 @@ convert_from_old(const char *pkg_add_dbdir, bool dry_run)
- }
- 
- int
--exec_convert(__unused int argc, __unused char **argv)
-+exec_convert(_UNUSED_ int argc, _UNUSED_ char **argv)
- {
- 	int		 ch;
- 	bool		 dry_run = false;
 diff --git a/src/event.c b/src/event.c
 --- a/src/event.c
 +++ b/src/event.c
@@ -2290,44 +1992,11 @@ diff --git a/src/plugins.c b/src/plugins.c
  void
  usage_plugins(void)
  {
-@@ -47,7 +48,7 @@ exec_plugins(int argc, char **argv)
- {
- 	struct pkg_plugin *p = NULL;
- 	int ch;
--	bool __unused list_only = true;
-+	bool _UNUSED_ list_only = true;
- 
- 	struct option longopts[] = {
- 		{ "list-only",	no_argument,	NULL,	'l' },
 @@ -81,3 +82,4 @@ exec_plugins(int argc, char **argv)
  
  	return (EX_OK);
  }
 +#endif
-diff --git a/src/register.c b/src/register.c
---- a/src/register.c
-+++ b/src/register.c
-@@ -102,7 +102,7 @@ exec_register(int argc, char **argv)
- 
- 	bool		 developer;
- 	bool		 legacy        = false;
--	bool		 __unused metadata_only = false;
-+	bool		 _UNUSED_ metadata_only = false;
- 	bool		 testing_mode  = false;
- 
- 	int		 ch;
-diff --git a/src/ssh.c b/src/ssh.c
---- a/src/ssh.c
-+++ b/src/ssh.c
-@@ -51,7 +51,7 @@ usage_ssh(void)
- }
- 
- int
--exec_ssh(int argc, char **argv __unused)
-+exec_ssh(int argc, char **argv _UNUSED_)
- {
- 	int fd = -1;
- 	const char *restricted = NULL;
 diff --git a/src/updating.c b/src/updating.c
 --- a/src/updating.c
 +++ b/src/updating.c
@@ -2400,15 +2069,6 @@ diff --git a/src/version.c b/src/version.c
  		/* line is pkgname|portdir|... */
  
  		l = line;
-@@ -365,7 +373,7 @@ free_categories(void)
- static void
- free_index(kh_index_t *index)
- {
--	const char *key __unused;
-+	const char *key _UNUSED_;
- 	struct index_entry *entry;
- 
- 	if (index == NULL)
 diff --git a/tests/Makefile.am b/tests/Makefile.am
 --- a/tests/Makefile.am
 +++ b/tests/Makefile.am
