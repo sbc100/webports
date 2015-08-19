@@ -27,7 +27,7 @@ LIBS=" ${NACL_CLI_MAIN_LIB}"
 if [ "${NACL_LIBC}" = "newlib" -o "${NACL_ARCH}" = "pnacl" ] ; then
   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat "
   LIBS+=" -lm -ltar -lglibc-compat "
-  DYNAMIC_EXT="undef"
+  DYNAMIC_EXT=""
   NACL_GLIBC_DEF="undef"
   PERL_STDIO_BASE="(((fp)->_bf)._base)"
   PERL_STDIO_BUFSIZ="(((fp)->_bf)._size)"
@@ -54,6 +54,11 @@ else
   PERL_STDIO_PTR="((fp)->_IO_read_ptr)"
   PERL_DLSRC="dl_dlopen.xs"
   NACLPORTS_CCDLFLAGS="-Wl,-E"
+fi
+# include Errno in pnacl
+NONXS_EXT=""
+if [ "${NACL_ARCH}" = "pnacl" ] ; then
+  NONXS_EXT="Errno"
 fi
 
 # BuildHostMiniperl builds miniperl for host, which is needed for
@@ -101,6 +106,7 @@ SedWork() {
   sed -i "s%\${PERL_STDIO_PTR}%${PERL_STDIO_PTR}%g" $1
   sed -i "s%\${PERL_DLSRC}%${PERL_DLSRC}%g" $1
   sed -i "s%\$UNDEF_FOR_I686%${UNDEF_FOR_I686}%g" $1
+  sed -i "s%\${NONXS_EXT}%${NONXS_EXT}%g" $1
 }
 
 # copy perl_pepper.c to source directory for core perl

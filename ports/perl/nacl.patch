@@ -151,18 +151,19 @@ old mode 100644
 new mode 100755
 --- a/pp_sys.c
 +++ b/pp_sys.c
-@@ -32,6 +32,10 @@
+@@ -32,6 +32,11 @@
  #include "time64.h"
  #include "time64.c"
  
 +#if defined(__native_client__)
 +#include <spawn.h>
++#define pipe nacl_spawn_pipe
 +#endif
 +
  #ifdef I_SHADOW
  /* Shadow password support for solaris - pdo@cs.umd.edu
   * Not just Solaris: at least HP-UX, IRIX, Linux.
-@@ -302,11 +306,31 @@ PP(pp_backtick)
+@@ -302,11 +307,31 @@ PP(pp_backtick)
      const char *mode = "r";
  
      TAINT_PROPER("``");
@@ -194,7 +195,7 @@ new mode 100755
      if (fp) {
          const char * const type = Perl_PerlIO_context_layers(aTHX_ NULL);
  	if (type && *type)
-@@ -342,7 +366,18 @@ PP(pp_backtick)
+@@ -342,7 +367,18 @@ PP(pp_backtick)
  		SvTAINTED_on(sv);
  	    }
  	}
@@ -213,7 +214,7 @@ new mode 100755
  	TAINT;		/* "I believe that this is not gratuitous!" */
      }
      else {
-@@ -4114,7 +4149,7 @@ PP(pp_system)
+@@ -4114,7 +4150,7 @@ PP(pp_system)
  	TAINT_PROPER("system");
      }
      PERL_FLUSHALL_FOR_CHILD;
@@ -222,7 +223,7 @@ new mode 100755
      {
  	Pid_t childpid;
  	int pp[2];
-@@ -4213,26 +4248,58 @@ PP(pp_system)
+@@ -4213,26 +4249,62 @@ PP(pp_system)
  	}
  	PerlProc__exit(-1);
      }
@@ -233,10 +234,12 @@ new mode 100755
 +    char * args[(SP-MARK)+3];
 +    args[0] = "bash";
 +    args[1] = "-c";
-+    int index = 2;
++    int index = 2, counter = 0;
 +    while (++MARK <= SP) {
-+        if (*MARK) 
++        if (*MARK) {
 +            args[index++] = SvPV_nolen(*MARK);
++            counter++;
++        }
 +        else
 +            args[index++] = "";
 +    }
@@ -251,9 +254,11 @@ new mode 100755
 +         * should be first checked. If it is not NULL,
 +         * then it should be used instead of args[0]
 +         * But I'm replacing with args[0] or "bash",
-+         * since it always works.
++         * since it always works. Also handling the
++         * case when system() is called without any
++         * arguments.
 +         */
-+        value = (I32)spawnv(P_WAIT, args[0], args); 
++        if (counter > 0) value = (I32)spawnv(P_WAIT, args[0], args); 
 +#  else
  	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
  #  endif
@@ -267,7 +272,7 @@ new mode 100755
 +        /*
 +         * "really" is NULL.
 +         */
-+        value = (I32)spawnv(P_WAIT, args[0], args);
++        if (counter > 0) value = (I32)spawnv(P_WAIT, args[0], args);
 +#  else
  	value = (I32)do_aspawn(NULL, (void **)MARK, (void **)SP);
  #  endif
@@ -275,14 +280,14 @@ new mode 100755
      }
      else {
 +#  if defined(__native_client__)
-+        value = (I32)spawnv(P_WAIT, args[0], args);
++        if (counter > 0) value = (I32)spawnv(P_WAIT, args[0], args);
 +#  else
  	value = (I32)do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
 +#  endif
      }
      if (PL_statusvalue == -1)	/* hint that value must be returned as is */
  	result = 1;
-@@ -4240,7 +4307,7 @@ PP(pp_system)
+@@ -4240,7 +4312,7 @@ PP(pp_system)
      do_execfree();
      SP = ORIGMARK;
      XPUSHi(result ? value : STATUS_CURRENT);
@@ -291,7 +296,7 @@ new mode 100755
  #endif
      RETURN;
  }
-@@ -4561,12 +4628,17 @@ PP(pp_sleep)
+@@ -4561,12 +4633,17 @@ PP(pp_sleep)
      Time_t when;
  
      (void)time(&lasttime);
@@ -314,18 +319,19 @@ old mode 100644
 new mode 100755
 --- a/util.c
 +++ b/util.c
-@@ -26,6 +26,10 @@
+@@ -26,6 +26,11 @@
  #include "perl.h"
  #include "reentr.h"
  
 +#if defined(__native_client__)
 +#include <spawn.h>
++#define pipe nacl_spawn_pipe
 +#endif
 +
  #if defined(USE_PERLIO)
  #include "perliol.h" /* For PerlIOUnix_refcnt */
  #endif
-@@ -2285,6 +2289,9 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+@@ -2285,6 +2290,9 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
      /* Try for another pipe pair for error return */
      if (PerlProc_pipe(pp) >= 0)
  	did_pipes = 1;
@@ -335,7 +341,7 @@ new mode 100755
      while ((pid = PerlProc_fork()) < 0) {
  	if (errno != EAGAIN) {
  	    PerlLIO_close(p[This]);
-@@ -2298,6 +2305,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+@@ -2298,6 +2306,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
  	Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
  	sleep(5);
      }
@@ -343,7 +349,7 @@ new mode 100755
      if (pid == 0) {
  	/* Child */
  #undef THIS
-@@ -2335,7 +2343,24 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
+@@ -2335,7 +2344,24 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
  	    }
  	}
  #endif
@@ -368,7 +374,7 @@ new mode 100755
  	PerlProc__exit(1);
  #undef THIS
  #undef THAT
-@@ -2430,6 +2455,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+@@ -2430,6 +2456,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
  	return NULL;
      if (doexec && PerlProc_pipe(pp) >= 0)
  	did_pipes = 1;
@@ -378,7 +384,7 @@ new mode 100755
      while ((pid = PerlProc_fork()) < 0) {
  	if (errno != EAGAIN) {
  	    PerlLIO_close(p[This]);
-@@ -2445,6 +2473,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+@@ -2445,6 +2474,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
  	Perl_ck_warner(aTHX_ packWARN(WARN_PIPE), "Can't fork, trying again in 5 seconds");
  	sleep(5);
      }
@@ -386,7 +392,7 @@ new mode 100755
      if (pid == 0) {
  
  #undef THIS
-@@ -2480,7 +2509,12 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
+@@ -2480,7 +2510,12 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
  	    }
  #endif
  	    /* may or may not use the shell */
@@ -399,7 +405,7 @@ new mode 100755
  	    PerlProc__exit(1);
  	}
  #endif	/* defined OS2 */
-@@ -2616,7 +2650,17 @@ Perl_my_fork(void)
+@@ -2616,7 +2651,17 @@ Perl_my_fork(void)
  #else
      /* atfork_lock() and atfork_unlock() are installed as pthread_atfork()
       * handlers elsewhere in the code */
