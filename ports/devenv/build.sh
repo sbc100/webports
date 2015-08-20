@@ -10,7 +10,7 @@ EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
 
 STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
 SDK_VERSION=pepper_46
-BUILT_REVISION=${BUILT_REVISION:-trunk-589-gffe037b}
+BUILT_REVISION=${BUILT_REVISION:-trunk-618-g9937e26}
 DEFAULT_SOURCE=${STORAGE_URL}/${SDK_VERSION}/${BUILT_REVISION}/publish
 LOCAL_SOURCE=http://localhost:5103
 

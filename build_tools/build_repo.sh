@@ -81,6 +81,8 @@ BuildRepo() {
     tar -jcf packagesite.tbz packagesite.yaml
     tar -jcf digests.tbz digests
     cd ${SCRIPT_DIR}
+    gsutil cp -a public-read "${SUB_REPO_DIR}/meta.txz" \
+        gs://naclports/builds/${SDK_VERSION}/"$1"/publish/$(basename ${pkg_dir})
     gsutil cp -a public-read "${SUB_REPO_DIR}/*.tbz" \
         gs://naclports/builds/${SDK_VERSION}/"$1"/publish/$(basename ${pkg_dir})
   done
