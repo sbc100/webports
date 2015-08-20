@@ -14,6 +14,18 @@ diff --git a/lib/hostip4.c b/lib/hostip4.c
  /*
   * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
   *
+diff --git a/src/Makefile.in b/src/Makefile.in
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -749,7 +749,7 @@ clean-binPROGRAMS:
+ 
+ curl$(EXEEXT): $(curl_OBJECTS) $(curl_DEPENDENCIES) $(EXTRA_curl_DEPENDENCIES) 
+ 	@rm -f curl$(EXEEXT)
+-	$(AM_V_CCLD)$(curl_LINK) $(curl_OBJECTS) $(curl_LDADD) $(LIBS)
++	$(AM_V_CCLD)$(curl_LINK) $(curl_OBJECTS) $(curl_LDADD) $(LIBS) $(EXTRA_LIBS)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
 diff --git a/src/tool_main.c b/src/tool_main.c
 --- a/src/tool_main.c
 +++ b/src/tool_main.c
@@ -21,7 +33,7 @@ diff --git a/src/tool_main.c b/src/tool_main.c
    config->last = NULL;
  }
  
-+#ifdef PPAPI
++#ifdef __native_client__
 +#define main nacl_main
 +#endif
 +

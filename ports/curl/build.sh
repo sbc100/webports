@@ -5,36 +5,27 @@
 export ac_cv_func_gethostbyname=yes
 export ac_cv_func_getaddrinfo=no
 export ac_cv_func_connect=yes
-export LIBS="-lnacl_io -pthread -l${NACL_CXX_LIB}"
+
+# Can't use LIBS here otherwise nacl-spawn gets linked into the libcurl.so
+# which we don't ever want.
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -l${NACL_CXX_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  LIBS+=" -lglibc-compat"
+  EXTRA_LIBS+=" -lglibc-compat"
 fi
 
 EXECUTABLES="src/curl${NACL_EXEEXT}"
+
 if [ "${NACL_DEBUG}" = "1" ]; then
-  CFLAGS+=" -DDEBUGBUILD"
+  NACLPORTS_CPPFLAGS+=" -DDEBUGBUILD"
   EXTRA_CONFIGURE_ARGS="--enable-debug --disable-curldebug"
 fi
 
-BuildStep() {
-  # Run the build twice, initially to build the sel_ldr version
-  # and secondly to build the PPAPI version based on nacl_io.
-  # Remove curl-tool_main.o between builds to ensure it gets
-  # rebuilt.  This is the only object that depends on the PPAPI
-  # define and therefore will differ between PPAPI and sel_ldr
-  # versions.
-  Remove src/curl-tool_main.o
-  DefaultBuildStep
-
-  Banner "Build curl_ppapi"
-  Remove  src/curl-tool_main.o
-  sed -i.bak "s/CFLAGS = /CFLAGS = -DPPAPI /" src/Makefile
-  sed -i.bak "s/curl\$(EXEEXT)/curl_ppapi\$(EXEEXT)/" src/Makefile
-  local sedlibs="-lppapi_simple,-lcli_main,-lnacl_spawn,-lnacl_io,-lppapi"
-  sedlibs="-Wl,--start-group,$sedlibs,--end-group -l${NACL_CXX_LIB}"
-  sed -i.bak "s/LIBS = \$(BLANK_AT_MAKETIME)/LIBS = ${sedlibs}/" src/Makefile
-  DefaultBuildStep
+InstallStep() {
+  DefaultInstallStep
+  MakeDir ${DESTDIR}${PREFIX}/share/curl
+  LogExecute ${SRC_DIR}/lib/mk-ca-bundle.pl \
+      ${DESTDIR}${PREFIX}/share/curl/ca-bundle.crt
 }
 
 PublishStep() {
@@ -54,17 +45,17 @@ PublishStep() {
 
   MakeDir ${PUBLISH_DIR}
 
-  local exe=${PUBLISH_DIR}/curl_ppapi_${NACL_ARCH}${NACL_EXEEXT}
+  local exe=${PUBLISH_DIR}/curl_${NACL_ARCH}${NACL_EXEEXT}
 
-  LogExecute mv src/${EXECUTABLE_DIR}/curl_ppapi${NACL_EXEEXT} ${exe}
+  LogExecute cp ${DESTDIR}${PREFIX}/share/curl/ca-bundle.crt ${PUBLISH_DIR}
+  LogExecute cp src/${EXECUTABLE_DIR}/curl${NACL_EXEEXT} ${exe}
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     LogExecute ${PNACLFINALIZE} ${exe}
   fi
 
   pushd ${PUBLISH_DIR}
-  ${SRC_DIR}/lib/mk-ca-bundle.pl
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${PUBLISH_DIR}/curl_ppapi*${NACL_EXEEXT} \
+      ${PUBLISH_DIR}/curl*${NACL_EXEEXT} \
       -L${DESTDIR_LIB} \
       -s . \
       -o curl.nmf
