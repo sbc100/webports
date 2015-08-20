@@ -87,7 +87,7 @@ function initMountSystem() {
 
 NaClTerm.nmf = 'bash.nmf';
 NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
-NaClTerm.env = []
+NaClTerm.env = ['NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt']
 // Uncomment this line to use only locally built packages
 //NaClTerm.env.push('NACL_DEVENV_LOCAL=1')
 // Uncomment this line to enable pepper_simple logging

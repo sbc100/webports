@@ -87,17 +87,24 @@ InstallStep() {
   InstallNaClTerm ${APP_DIR}
 
   # Create Nacl.conf file
-  CreateRepoConfFile "${APP_DIR}/NaCl_local.conf" "${LOCAL_SOURCE}"
-  CreateRepoConfFile "${APP_DIR}/NaCl.conf" "${DEFAULT_SOURCE}"
+  MakeDir ${APP_DIR}/repos
+  LogExecute install -m 644 ${START_DIR}/repos/FreeBSD.conf ${APP_DIR}/repos
+  CreateRepoConfFile "${APP_DIR}/repos/NaCl_local.conf" "${LOCAL_SOURCE}"
+  CreateRepoConfFile "${APP_DIR}/repos/NaCl.conf" "${DEFAULT_SOURCE}"
 
   RESOURCES="background.js mounter.css mounter.js bash.js bashrc which
       install-base-packages.sh package graphical.html devenv.js whitelist.js
-      devenv_16.png devenv_48.png devenv_128.png FreeBSD.conf"
+      devenv_16.png devenv_48.png devenv_128.png"
   for resource in ${RESOURCES}; do
-    LogExecute install ${START_DIR}/${resource} ${APP_DIR}/
+    LogExecute install -m 644 ${START_DIR}/${resource} ${APP_DIR}/
   done
   sed "s/@TOOLCHAIN@/${TOOLCHAIN}/g" \
     ${START_DIR}/setup-environment > ${APP_DIR}/setup-environment
+
+  # Generate manifest.txt so that nacl_io can list the directory
+  rm -f manifest.txt
+  (cd ${APP_DIR} && ${NACL_SDK_ROOT}/tools/genhttpfs.py . -r > ../manifest.txt)
+  mv ../manifest.txt .
 
   # Generate a manifest.json.
   GenerateManifest ${START_DIR}/manifest.json.template ${APP_DIR} \

@@ -18,11 +18,11 @@ source /mnt/http/setup-environment
 mkdir -p /usr/etc/pkg/repos
 rm -f /usr/etc/pkg/repos/FreeBSD.conf
 rm -f /usr/etc/pkg/repos/NaCl.conf
-cp /mnt/http/FreeBSD.conf /usr/etc/pkg/repos/
+cp /mnt/http/repos/FreeBSD.conf /usr/etc/pkg/repos/
 if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
-  cp /mnt/http/NaCl_local.conf /usr/etc/pkg/repos/NaCl.conf
+  cp /mnt/http/repos/NaCl_local.conf /usr/etc/pkg/repos/NaCl.conf
 else
-  cp /mnt/http/NaCl.conf /usr/etc/pkg/repos/NaCl.conf
+  cp /mnt/http/repos/NaCl.conf /usr/etc/pkg/repos/NaCl.conf
 fi
 
 # TODO(bradnelson): Drop this when we can install things in a more
