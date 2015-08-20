@@ -93,6 +93,7 @@ def ParseGsUtilOutput(output):
       elif prop_name == 'Hash (md5)':
         info.md5 = base64.b64decode(prop_value).encode('hex')
 
+  result.append(info)
   return result
 
 
