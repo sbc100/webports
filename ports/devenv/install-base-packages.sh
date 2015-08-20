@@ -40,7 +40,10 @@ CheckNaClEnabled() {
 }
 
 InstallBasePackages() {
-  local default_packages=""
+  local default_packages="
+    -i corelibs \
+    -i nacl-spawn \
+  "
 
   # For glibc, we need to install some library dependencies first
   if [[ ${TOOLCHAIN} == glibc ]]; then
@@ -52,10 +55,7 @@ InstallBasePackages() {
       -i readline"
   fi
 
-  # Core packages.
   local default_packages+="\
-    -i corelibs \
-    -i nacl-spawn \
     -i coreutils \
     -i bash \
     -i curl \
