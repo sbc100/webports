@@ -35,7 +35,3 @@ InstallStep() {
     TranslateAndWriteLauncherScript luac x86-64 luac.x86-64.nexe luac.sh
   fi
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

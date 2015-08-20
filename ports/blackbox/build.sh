@@ -22,7 +22,3 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   # library.
   export EXTRA_LIBS+=" -lglibc-compat"
 fi
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

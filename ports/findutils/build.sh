@@ -11,7 +11,3 @@ BuildStep() {
   export RANLIB=${NACLRANLIB}
   DefaultBuildStep
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

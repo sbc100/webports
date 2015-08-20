@@ -29,6 +29,7 @@ class TestInstalledPackage(common.NaclportsTest):
   @patch('naclports.package.Log', Mock())
   @patch('naclports.package.RemoveFile')
   @patch('os.path.lexists', Mock(return_value=True))
+  @patch('os.path.exists', Mock(return_value=True))
   def testUninstall(self, remove_patch):  # pylint: disable=no-self-use
     pkg = CreateMockInstalledPackage()
     pkg.Files = Mock(return_value=['f1', 'f2'])

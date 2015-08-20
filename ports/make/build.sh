@@ -12,9 +12,8 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export ac_cv_func_getrlimit=no
   export ac_cv_func_seteuid=no
   export ac_cv_func_setegid=no
+  # Without this configure will sometimes erroneously define
+  # GETLOADAVG_PRIVILEGED=1 (seem to be in the presence of libbsd)
+  export ac_cv_func_getloadavg_setgid=no
   NACLPORTS_CPPFLAGS+=" -D_POSIX_VERSION"
 fi
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

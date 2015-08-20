@@ -62,7 +62,3 @@ InstallStep() {
   # Remove dangling symlinks
   Remove ${DESTDIR}${PREFIX}/bin/fvwm2 ${DESTDIR}${PREFIX}/bin/xpmroot
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

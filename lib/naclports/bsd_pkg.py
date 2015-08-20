@@ -128,12 +128,24 @@ def AddPackageDep(dep_dict, dep):
   raise Error("Package not found: %s" % dep)
 
 
+# These packages are are built-time only depednecies and we won't want
+# encode them into the pkg file deps.
+BUILD_ONLY_DEPS = [
+  'glibc-compat',
+  'libtar',
+  'python-host',
+  'gmp',
+  'mpfr',
+  'mpc',
+]
+
 def CreateDependencies(depends_dict, depends):
   for dep in depends:
-    if dep != 'glibc-compat':
-      dep_dict = collections.OrderedDict()
-      AddPackageDep(dep_dict, dep)
-      depends_dict[dep] = dep_dict
+    if dep in BUILD_ONLY_DEPS:
+      continue
+    dep_dict = collections.OrderedDict()
+    AddPackageDep(dep_dict, dep)
+    depends_dict[dep] = dep_dict
 
 
 def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):

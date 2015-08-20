@@ -45,10 +45,3 @@ InstallStep() {
   fi
   LogExecute chmod a+r ${DESTDIR_LIB}/libbz2.*
 }
-
-PublishStep() {
-  # TODO(bradnelson): Figure out why the newlib version gets:
-  # Function not implemented
-  # when compressing with the bzip2 command-line tool.
-  PublishByArchForDevEnv
-}

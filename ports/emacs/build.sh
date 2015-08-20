@@ -46,25 +46,26 @@ PatchStep() {
   LogExecute cp ${START_DIR}/emacs_pepper.c ${SRC_DIR}/src/emacs_pepper.c
 }
 
-# Today the install step copies emacs_x86_63.nexe to the publish dir, but we
-# need nacl_temacs.nexe instead.  Change to copy that here.
+InstallStep() {
+  # Today the install step copies emacs_x86_64.nexe to the publish dir, but we
+  # need nacl_temacs.nexe instead.  Change to copy that here.
+  DefaultInstallStep
+  LogExecute cp ${BUILD_DIR}/src/nacl_temacs${NACL_EXEEXT} \
+      ${DESTDIR}${PREFIX}/bin/emacs${NACL_EXEEXT}
+}
 
 PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/emacs"
 
-  DESTDIR=${ASSEMBLY_DIR}/emacstar
-  DefaultInstallStep
-
-  #Copy all the elisp files and other files emacs needs to here.
+  # Copy all installed files into tarball
+  MakeDir ${ASSEMBLY_DIR}/emacstar/usr
   ChangeDir ${ASSEMBLY_DIR}/emacstar
-  echo "****** pwd is " $(pwd)
-  echo cp ${BUILD_DIR}/src/nacl_temacs${NACL_EXEEXT} \
+  LogExecute cp -ar ${DESTDIR}${PREFIX}/* ./usr
+  LogExecute cp usr/bin/emacs${NACL_EXEEXT} \
        ../emacs_${NACL_ARCH}${NACL_EXEEXT}
-  cp ${BUILD_DIR}/src/nacl_temacs${NACL_EXEEXT} \
-     ../emacs_${NACL_ARCH}${NACL_EXEEXT}
-  rm -rf bin
-  rm -rf share/man
+  rm -rf usr/bin
+  rm -rf usr/share/man
   find . -iname "*.nexe" -delete
   mkdir -p ${ASSEMBLY_DIR}/emacstar/home/user/.emacs.d
   cp ${START_DIR}/init.el ${ASSEMBLY_DIR}/emacstar/home/user/.emacs.d

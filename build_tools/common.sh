@@ -245,6 +245,7 @@ if [ -z "${DESTDIR:-}" ]; then
 fi
 
 DESTDIR_LIB=${DESTDIR}/${PREFIX}/lib
+DESTDIR_BIN=${DESTDIR}/${PREFIX}/bin
 DESTDIR_INCLUDE=${DESTDIR}/${PREFIX}/include
 
 PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}/${TOOLCHAIN}"
@@ -679,56 +680,6 @@ MakeDirs() {
   MakeDir "${WORK_DIR}"
 }
 
-
-PublishByArchForDevEnv() {
-  MakeDir "${PUBLISH_DIR}"
-  local ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
-  MakeDir "${ARCH_DIR}"
-  # TODO(bradnelson): Drop this once all pors that have executables list them
-  # explicitly (required for pnacl to work right anyhow).
-  if [ "${EXECUTABLES:-}" != "" ]; then
-    local executables="${EXECUTABLES}"
-  elif [ "${OS_NAME}" != "Darwin" ]; then
-    # -executable is not supported on BSD and -perm +nn is not
-    # supported on linux
-    local executables=$(find . -type f -executable -not -path "*/.git/*")
-  else
-    local executables=$(find . -type f -perm +u+x -not -path "*/.git/*")
-  fi
-  for nexe in ${executables}; do
-    local name=$(basename ${nexe})
-    name=${name/%.nexe/}
-    name=${name/%.pexe/}
-    LogExecute cp "${nexe}" "${ARCH_DIR}/${name}"
-    # TODO(bradnelson): Do something prettier.
-    if [[ "$(head -c 2 ${nexe})" != "#!" && \
-          "$(head -c 2 ${nexe})" != "# " && \
-          "${nexe}" != *.so && \
-          "${nexe}" != *.so.* && \
-          "${nexe}" != *.txt && \
-          "${nexe}" != config.status ]]; then
-      # Strip non-scripts
-      LogExecute "${NACLSTRIP}" "${ARCH_DIR}/${name}"
-
-      # Run create_nmf for non-scripts.
-      # Stage libraries for toolchains that support dynamic linking.
-      if [[ "${TOOLCHAIN}" = "glibc" || "${TOOLCHAIN}" = "bionic" ]]; then
-        pushd "${ARCH_DIR}"
-        # Create a temporary name ending in .nexe so create_nmf does the right
-        # thing.
-        LogExecute cp "${name}" tmp.nexe
-        LogExecute python "${NACL_SDK_ROOT}/tools/create_nmf.py" \
-          tmp.nexe -s . -o tmp.nmf ${PUBLISH_CREATE_NMF_ARGS:-}
-        LogExecute rm tmp.nexe
-        LogExecute rm tmp.nmf
-        popd
-      fi
-    fi
-  done
-  ChangeDir "${ARCH_DIR}"
-  Remove "${ARCH_DIR}.zip"
-  LogExecute zip -r "${ARCH_DIR}.zip" .
-}
 
 #
 # Assemble a multi-arch version for use in the devenv packaged app.
@@ -1560,29 +1511,6 @@ PackageStep() {
 }
 
 
-ZipPublishDir() {
-  # If something exists in the publish directory, zip it for download by mingn.
-  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
-    return
-  fi
-
-  if [ ! -d "${PUBLISH_DIR}" ]; then
-    return
-  fi
-
-  # If an arch specfic zip already exists (e.g. from PublishByArchForDevEnv)
-  # then skip supping the whole publish dir
-  if [ -f "${PUBLISH_DIR}/${NACL_ARCH}.zip" ]; then
-    return
-  fi
-
-  # Remove existing zip as it may contain only some architectures.
-  Remove "${PUBLISH_DIR}.zip"
-  ChangeDir "${PUBLISH_DIR}"
-  LogExecute zip -rq "${PUBLISH_DIR}.zip" ./
-}
-
-
 PackageInstall() {
   RunDownloadStep
   RunPatchStep
@@ -1593,7 +1521,6 @@ PackageInstall() {
   RunInstallStep
   RunPublishStep
   RunPostInstallTestStep
-  ZipPublishDir
   PackageStep
 }
 

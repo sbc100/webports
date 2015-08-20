@@ -737,7 +737,7 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
 +#ifdef __arm__
 +	const char* cpu_name = "arm";
 +#elif defined __i386__
-+	const char* cpu_name = "i386";
++	const char* cpu_name = "i686";
 +#elif defined __x86_64__
 +	const char* cpu_name = "x86_64";
 +#elif defined __pnacl__
@@ -1289,7 +1289,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  /* An application using a libpkg() DBVERSION is assumed to be compatible
     with:
  
-@@ -675,8 +679,15 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
+@@ -675,8 +680,15 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
  	struct stat	sb;
  
  	if (install_as_user) {
@@ -1305,7 +1305,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  	} else {
  		fileowner = 0;
  		filegroup = 0;
-@@ -691,6 +702,8 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
+@@ -691,6 +703,8 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
  			return (EPKG_FATAL);
  	}
  
@@ -1314,7 +1314,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  	/* if fileowner == 0, root ownership and no group or other
  	   read access.  if fileowner != 0, require no other read
  	   access and group read access IFF the group ownership ==
-@@ -721,7 +734,7 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
+@@ -721,7 +735,7 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
  			       path, fileowner, filegroup, sb.st_uid, sb.st_gid);
  		return (EPKG_INSECURE);
  	}
@@ -1323,7 +1323,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  	return (EPKG_OK);
  }
  
-@@ -969,7 +982,9 @@ pkgdb_open_all(struct pkgdb **db_p, pkgdb_t type, const char *reponame)
+@@ -969,7 +983,9 @@ pkgdb_open_all(struct pkgdb **db_p, pkgdb_t type, const char *reponame)
  		/*
  		 * Fall back on unix-dotfile locking strategy if on a network filesystem
  		 */

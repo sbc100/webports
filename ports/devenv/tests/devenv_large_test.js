@@ -11,15 +11,29 @@
 TEST_F(DevEnvTest, 'testPackageInstall', function() {
   var self = this;
   return Promise.resolve().then(function() {
+    return self.installPackage('corelibs');
+  }).then(function() {
+    return self.installPackage('nacl-spawn');
+  }).then(function() {
     return self.installPackage('coreutils');
   }).then(function() {
-    return self.installPackage('git');
+    return self.installPackage('zlib');
+  }).then(function() {
+    return self.installPackage('bzip2');
+  }).then(function() {
+    return self.installPackage('openssl');
+  }).then(function() {
+    return self.installPackage('ncurses');
+  }).then(function() {
+    return self.installPackage('readline');
+  }).then(function() {
+    return self.installPackage('curl');
   }).then(function() {
     return self.installPackage('make');
   }).then(function() {
     return self.installPackage('python');
   }).then(function() {
-    return self.installPackage('curl');
+    return self.installPackage('git');
   });
 });
 

@@ -183,6 +183,8 @@ class SourcePackage(package.Package):
     install_dir = 'install_%s' % util.arch_to_pkgarch[self.config.arch]
     if self.config.arch != self.config.toolchain:
        install_dir += '_' + self.config.toolchain
+    if self.config.config_name == 'debug':
+       install_dir += '_debug'
     return os.path.join(paths.BUILD_ROOT, self.NAME, install_dir, 'payload')
 
   def GetBuildLocation(self):
@@ -282,8 +284,7 @@ class SourcePackage(package.Package):
       installed_pkg.LogStatus('Uninstalling existing')
       installed_pkg.DoUninstall()
 
-    if self.TOOLCHAIN_INSTALL != '0':
-      binary_package.BinaryPackage(package_file).Install(force)
+    binary_package.BinaryPackage(package_file).Install(force)
 
   def GetInstalledPackage(self):
     return package.CreateInstalledPackage(self.NAME, self.config)
@@ -291,12 +292,11 @@ class SourcePackage(package.Package):
   def CreatePkgFile(self):
     """Create and pkg file for use with the FreeBSD pkg tool.
 
-    This step is designed to run after the build scripts and will
-    package up any files published by the PublishByArchForDevEnv
-    step.
+    Create a package from the result of the package's InstallStep.
     """
     install_dir = self.GetInstallLocation()
     if not os.path.exists(install_dir):
+      Log('Skiping pkg creation. Install dir not found: %s' % install_dir)
       return
 
     abi = 'pkg_' + self.config.toolchain
@@ -305,9 +305,7 @@ class SourcePackage(package.Package):
     abi_dir = os.path.join(paths.PUBLISH_ROOT, abi)
     pkg_file = os.path.join(abi_dir, '%s-%s.tbz' % (self.NAME,
       self.VERSION))
-
     util.Makedirs(abi_dir)
-
     deps = self.DEPENDS
     if self.config.toolchain != 'glibc':
         deps = []

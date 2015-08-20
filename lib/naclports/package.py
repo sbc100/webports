@@ -151,6 +151,9 @@ class InstalledPackage(Package):
 
   def Files(self):
     """Yields the list of files currently installed by this package."""
+    file_list = self.GetListFile()
+    if not os.path.exists(file_list):
+      return
     with open(self.GetListFile()) as f:
       for line in f:
         yield line.strip()
@@ -168,7 +171,8 @@ class InstalledPackage(Package):
         LogVerbose('uninstall: %s' % filename)
         RemoveFile(fullname)
 
-      RemoveFile(self.GetListFile())
+      if os.path.exists(self.GetListFile()):
+        RemoveFile(self.GetListFile())
 
 
 def InstalledPackageIterator(config):

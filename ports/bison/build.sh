@@ -9,7 +9,3 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
 fi
 
 NACLPORTS_CPPFLAGS+=" -DGNULIB_defined_struct_sigaction"
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

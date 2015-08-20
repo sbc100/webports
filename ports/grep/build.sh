@@ -16,7 +16,3 @@ ConfigureStep() {
   NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS/-DNDEBUG/}"
   DefaultConfigureStep
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

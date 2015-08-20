@@ -13,9 +13,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
 fi
 
 InstallStep() {
-  return
-}
-
-PublishStep() {
-  PublishByArchForDevEnv
+  DefaultInstallStep
+  LogExecute mv ${DESTDIR}/share ${DESTDIR}${PREFIX}/
 }

@@ -10,19 +10,11 @@ fi
 
 NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 
-BuildStep() {
+#BuildStep() {
   # SetupCrossEnvironment
   # including readline because it is not linked by itself
   # ncurses also has to be linked otherwise multiple
   # undefined errors appear in linking readline
-  LogExecute make -j${OS_JOBS} \
-    LIBREADLINE="-lreadline -lncurses" gawk${NACL_EXEEXT}
-}
-
-InstallStep() {
-  return
-}
-
-PublishStep() {
-  PublishByArchForDevEnv
-}
+  #LogExecute make -j${OS_JOBS} \
+    #LIBREADLINE="-lreadline -lncurses" gawk${NACL_EXEEXT}
+#}

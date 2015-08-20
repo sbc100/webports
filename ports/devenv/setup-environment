@@ -6,50 +6,28 @@
 # This script is intended to be sourced.
 # It scans your packages and adds the appropriate things to the environment.
 
-export TOOLCHAIN=@TOOLCHAIN@
-
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 
-LIB_DIR=lib32
 export SHELL=/packages/bash.${NACL_ARCH}/bash
-PACKAGE_LIB_DIR=lib32
-PACKAGE_ALT_LIB_DIR=_platform_specific/i686/lib32
-PACKAGE_ALT_LIB_DIR2=_platform_specific/i686
-PACKAGE_ALT_LIB_DIR3=_platform_specific/x86_32/lib32
+
+# PACKAGE_LIB_DIR is still used by the devenv tests
+# TODO(sbc): remove this and move it into devenv test code somehow
 if [ ${NACL_ARCH} = "x86_64" ]; then
-  LIB_DIR=lib
   PACKAGE_LIB_DIR=lib64
-  PACKAGE_ALT_LIB_DIR=_platform_specific/x86_64/lib64
-  PACKAGE_ALT_LIB_DIR2=_platform_specific/x86_64
-  PACKAGE_ALT_LIB_DIR3=""
+else
+  PACKAGE_LIB_DIR=lib32
 fi
-export NACL_SDK_ROOT=/mingn
-export NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc
-LD_LIBRARY_PATH=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/${LIB_DIR}
-LD_LIBRARY_PATH+=:${NACL_TOOLCHAIN_ROOT}/${NACL_ARCH}-nacl/usr/lib
+
+LD_LIBRARY_PATH=/lib:/usr/lib:/usr/${NACL_ARCH}-nacl/usr/lib
 LD_LIBRARY_PATH+=:/mnt/http/_platform_specific/${NACL_ARCH}
-export LIBRARY_PATH=${LD_LIBRARY_PATH}
-PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/bin
-# TODO(bradnelson): Figure out why this is now needed to find cc1.
-PATH+=:${NACL_SDK_ROOT}/toolchain/nacl_x86_glibc/libexec/gcc/x86_64-nacl/4.4.3
-PATH+=:/coreutils.${NACL_ARCH}
+LIBRARY_PATH=${LD_LIBRARY_PATH}
 PATH+=:/mnt/http
 
 # Allow cross development by exporting alternate library paths.
-LIBRARY_PATH32=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib32
-LIBRARY_PATH32+=:${NACL_TOOLCHAIN_ROOT}/i686-nacl/usr/lib
-export LIBRARY_PATH32
-LIBRARY_PATH64=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/lib
-LIBRARY_PATH64+=:${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/usr/lib
-export LIBRARY_PATH64
-
-# TODO(bradnelson): Figure out why it can't find them normally.
-# Compiler has trouble finding its c++ headers, workaround.
-tc_inc=${NACL_TOOLCHAIN_ROOT}/x86_64-nacl/include/c++/4.4.3
-export CPLUS_INCLUDE_PATH=${tc_inc}:${tc_inc}/x86_64-nacl
-
-export PYTHONHOME=/lib/python2.7
-export PYTHONPATH=/lib/python2.7
+LIBRARY_PATH32=/usr/x86_64-nacl/lib32
+LIBRARY_PATH32+=:/usr/i686-nacl/usr/lib
+LIBRARY_PATH64=/usr/x86_64-nacl/lib
+LIBRARY_PATH64+=:/usr/x86_64-nacl/usr/lib
 
 export RUBYLIB=/usr/lib/ruby/2.0.0
 export RUBYLIB=${RUBYLIB}:${RUBYLIB}/${NACL_ARCH}-nacl
@@ -63,43 +41,13 @@ export ENABLE_CONTROL_C=1
 # Usually this is in /etc/ssl/certs/, but we don't mount persistent storage
 # there yet.
 # Point git and curl at root certificates inside the curl package.
-export GIT_SSL_CAINFO=/packages/curl.${NACL_ARCH}/ca-bundle.crt
-export CURL_CA_BUNDLE=/packages/curl.${NACL_ARCH}/ca-bundle.crt
+export GIT_SSL_CAINFO=/usr/share/curl/ca-bundle.crt
+export CURL_CA_BUNDLE=/usr/share/curl/ca-bundle.crt
 
-# Scan through packages.
-for package_dir in /packages/*; do
-  # Find the name of the package.
-  package=${package_dir##*/}
-  package_root=${package%.*}
-  # Figure out the main package dir.
-  if [ -d ${package_dir}/${package_root} ]; then
-    package_inside=${package_dir}/${package_root}
-  else
-    package_inside=${package_dir}
-  fi
-
-  # Add package to the path and library path.
-  PATH=${PATH}:${package_inside}
-  package_libs=${package_inside}/${PACKAGE_LIB_DIR}
-  if [ -d ${package_libs} ]; then
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
-  fi
-  # Add optional platform specific library path.
-  package_libs=${package_inside}/${PACKAGE_ALT_LIB_DIR}
-  if [ -d ${package_libs} ]; then
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
-  else
-    package_libs=${package_inside}/${PACKAGE_ALT_LIB_DIR2}
-    if [ -d ${package_libs} ]; then
-      LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
-    fi
-    if [ -n "${PACKAGE_ALT_LIB_DIR3}" ]; then
-      package_libs=${package_inside}/${PACKAGE_ALT_LIB_DIR3}
-      if [ -d ${package_libs} ]; then
-        LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${package_libs}
-      fi
-    fi
-  fi
-done
-
+export TOOLCHAIN=@TOOLCHAIN@
+export NACL_DEVENV=1
+export LIBRARY_PATH32
+export LIBRARY_PATH64
 export LD_LIBRARY_PATH
+export LIBRARY_PATH
+export PATH

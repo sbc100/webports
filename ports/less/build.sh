@@ -8,7 +8,3 @@ PatchStep() {
   LogExecute chmod 777 ${SRC_DIR}/configure
   DefaultPatchStep
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

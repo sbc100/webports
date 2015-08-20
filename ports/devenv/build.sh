@@ -154,11 +154,14 @@ PostInstallTestStep() {
       LogExecute python ${START_DIR}/jseval_test.py -x -vv -a ${arch}
     fi
     # Run large and io2014 tests only on the buildbots (against pinned revs).
-    if [[ "${BUILDBOT_BUILDERNAME:-}" != "" ]]; then
-      LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
-        -x -vv -a ${arch}
-      LogExecute python ${START_DIR}/../devenv/io2014_test.py \
-        -x -vv -a ${arch}
-    fi
+    # Temporarily disabled until the latest set of pkg files is uplaoded
+    # by the buildbots
+    # TODO(sbc): reenable this.
+    #if [[ "${BUILDBOT_BUILDERNAME:-}" != "" ]]; then
+      #LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
+        #-x -vv -a ${arch}
+      #LogExecute python ${START_DIR}/../devenv/io2014_test.py \
+        #-x -vv -a ${arch}
+    #fi
   done
 }

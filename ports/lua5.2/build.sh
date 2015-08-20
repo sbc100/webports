@@ -65,7 +65,3 @@ InstallStep() {
   LogExecute make PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} \
                   INSTALL_TOP=${DESTDIR}/${PREFIX} install
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

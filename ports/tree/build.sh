@@ -13,7 +13,3 @@ BuildStep() {
   LogExecute make -j${OS_JOBS} CC="${NACLCC}" CFLAGS=" -c \
     ${NACLPORTS_CFLAGS}" LDFLAGS="${NACLPORTS_LDFLAGS}" tree
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

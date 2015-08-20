@@ -35,7 +35,5 @@ BuildStep() {
 }
 
 PublishStep() {
-  # Publish a generic per-arch copy for use by programs like emacs.
-  PublishByArchForDevEnv
   PublishMultiArch bash${NACL_EXEEXT} bash bash_multiarch
 }

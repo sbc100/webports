@@ -24,18 +24,3 @@ ConfigureStep() {
     Remove $cache_file
   done
 }
-
-PublishStep() {
-  MakeDir ${PUBLISH_DIR}
-  for nexe in gcc/xgcc gcc/g++ gcc/cpp gcc/cc1 gcc/cc1plus gcc/collect2; do
-    local name=$(basename $nexe | sed 's/xgcc/gcc/')
-    cp ${nexe} ${PUBLISH_DIR}/${name}_${NACL_ARCH}${NACL_EXEEXT}
-
-    pushd ${PUBLISH_DIR}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-        ${PUBLISH_DIR}/${name}_*${NACL_EXEEXT} \
-        -s . \
-        -o ${name}.nmf
-    popd
-  done
-}

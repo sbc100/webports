@@ -14,6 +14,13 @@ PAYLOAD_DIR = 'payload'
 INSTALL_PREFIX = '/naclports-dummydir'
 
 ELF_MAGIC = '\x7fELF'
+PEXE_MAGIC = 'PEXE'
+
+def MakeDirIfNeeded(filename):
+  dirname = os.path.dirname(filename)
+  if not os.path.isdir(dirname):
+    util.Makedirs(dirname)
+
 
 def IsElfFile(filename):
   if os.path.islink(filename):
@@ -21,6 +28,14 @@ def IsElfFile(filename):
   with open(filename) as f:
     header = f.read(4)
   return header == ELF_MAGIC
+
+
+def IsPexeFile(filename):
+  if os.path.islink(filename):
+    return False
+  with open(filename) as f:
+    header = f.read(4)
+  return header == PEXE_MAGIC
 
 
 def InstallFile(filename, old_root, new_root):
@@ -43,7 +58,7 @@ def InstallFile(filename, old_root, new_root):
 
   # When install binarie ELF files into the toolchain direcoties, remove
   # the X bit so that they do not found when searching the PATH.
-  if IsElfFile(newname):
+  if IsElfFile(newname) or IsPexeFile(newname):
     mode = os.stat(newname).st_mode
     mode = mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     os.chmod(newname, mode)
@@ -149,6 +164,11 @@ class BinaryPackage(package.Package):
       self._Install(force)
 
   def _Install(self, force):
+    if self.TOOLCHAIN_INSTALL != '0':
+        self._InstallFiles(force)
+    self.WriteStamp()
+
+  def _InstallFiles(self, force):
     dest = util.GetInstallRoot(self.config)
     dest_tmp = os.path.join(dest, 'install_tmp')
     if os.path.exists(dest_tmp):
@@ -194,11 +214,11 @@ class BinaryPackage(package.Package):
       RelocateFile(name, dest)
 
     self.WriteFileList(names)
-    self.WriteStamp()
 
   def WriteStamp(self):
     """Write stamp file containing pkg_info."""
     filename = util.GetInstallStamp(self.NAME, self.config)
+    MakeDirIfNeeded(filename)
     util.LogVerbose('stamp: %s' % filename)
     pkg_info = self.GetPkgInfo()
     with open(filename, 'w') as f:
@@ -207,9 +227,7 @@ class BinaryPackage(package.Package):
   def WriteFileList(self, file_names):
     """Write the file list for this package."""
     filename = self.GetListFile()
-    dirname = os.path.dirname(filename)
-    if not os.path.isdir(dirname):
-      util.Makedirs(dirname)
+    MakeDirIfNeeded(filename)
     with open(filename, 'w') as f:
       for name in file_names:
         f.write(name + '\n')

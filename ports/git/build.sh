@@ -66,7 +66,3 @@ InstallStep() {
     fi
   done
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

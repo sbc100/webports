@@ -156,18 +156,6 @@ BuildStep() {
 
 InstallStep() {
   # microperl, perl don't require make install
-  return
-}
-
-PublishStep() {
-  MakeDir ${ARCH_DIR}
-  TAR_DIR=${ARCH_DIR}/perltar
-  MakeDir ${TAR_DIR}
-  ChangeDir ${TAR_DIR}
-  LogExecute cp -rf ${SRC_DIR}/lib ${TAR_DIR}
-  LogExecute tar cf ${ARCH_DIR}/perl.tar .
-  LogExecute shasum ${ARCH_DIR}/perl.tar > ${ARCH_DIR}/perl.tar.hash
-  ChangeDir ${SRC_DIR}
-  LogExecute rm -rf ${TAR_DIR}
-  PublishByArchForDevEnv
+  MakeDir ${DESTDIR_LIB}
+  LogExecute cp -rf ${SRC_DIR}/lib/* ${DESTDIR_LIB}/
 }

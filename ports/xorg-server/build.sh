@@ -83,8 +83,7 @@ InstallStep() {
   local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash_multiarch
   LogExecute cp -fR ${BASH_DIR}/* ${ASSEMBLY_DIR}
 
-  local XKBCOMP_DIR=${NACL_PACKAGES_PUBLISH}/xkbcomp/${TOOLCHAIN}/${NACL_ARCH}
-  LogExecute cp ${XKBCOMP_DIR}/xkbcomp \
+  LogExecute cp ${NACLPORTS_BIN}/xkbcomp${NACL_EXEEXT} \
       ${ASSEMBLY_DIR}/xkbcomp_${NACL_ARCH}${NACL_EXEEXT}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${ASSEMBLY_DIR}/xkbcomp_*${NACL_EXEEXT} \

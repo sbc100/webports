@@ -10,7 +10,3 @@ TestStep() {
   fi
   LogExecute ./hello
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

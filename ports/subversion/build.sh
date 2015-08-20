@@ -20,12 +20,3 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   export LIBS+=" -lglibc-compat"
 fi
-
-InstallStep() {
-  return
-}
-
-PublishStep() {
-  PublishByArchForDevEnv
-}
-

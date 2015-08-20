@@ -13,6 +13,14 @@ set -o errexit
 set -o nounset
 shopt -s nullglob
 
+PKG_ARCH="${NACL_ARCH}"
+if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
+  PKG_ARCH="pnacl"
+fi
+if [[ "${NACL_ARCH}" == "x86_64" ]]; then
+  PKG_ARCH="x86-64"
+fi
+
 STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
 SDK_VERSION=${SDK_VERSION:-pepper_46}
 
@@ -21,85 +29,74 @@ SDK_VERSION=${SDK_VERSION:-pepper_46}
 # sure to wait until the bot have build all the packages for a given
 # revision before changing this value.
 
-REVISION=${REVISION:-trunk-583-g2ea9c03}
-DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish"
-LOCAL_SOURCE="http://localhost:5103/"
+REVISION=${REVISION:-trunk-607-g70861c5}
+PKG_DIR=pkg_${TOOLCHAIN}_${PKG_ARCH}
+DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish/${PKG_DIR}"
+LOCAL_SOURCE="http://localhost:5103/${PKG_DIR}"
 VERBOSE=0
-
-NACL_ARCH_ALT="${NACL_ARCH}"
-if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
-  NACL_ARCH_ALT="pnacl"
-fi
-
-# Locations for package archives.
-# Prefer this one going forward:
-PACKAGE_BY_ARCH=${TOOLCHAIN}/${NACL_ARCH_ALT}.zip
-# Old default:
-PACKAGE_AS_ONE=${TOOLCHAIN}.zip
 
 # List of packages (keep sorted).
 # Pairs of <package-name>:<status><package-subdir>[:<source>:<alt-subdir>]
 PACKAGE_INFO="\
-bash|ok|${PACKAGE_BY_ARCH} \
-blackbox|WIP|${PACKAGE_BY_ARCH} \
-busybox|WIP|glibc/busybox-1.22.0.zip \
-bzip2|ok|${PACKAGE_BY_ARCH} \
-civitweb|WIP|${PACKAGE_AS_ONE} \
-coreutils|ok|${PACKAGE_BY_ARCH} \
-curl|ok|${PACKAGE_AS_ONE} \
-drod|WIP|${PACKAGE_AS_ONE} \
-emacs|ok|glibc/emacs-24.3.zip \
-findutils|ok|${PACKAGE_BY_ARCH} \
-fvwm|ok|${PACKAGE_BY_ARCH} \
-gawk|ok|${PACKAGE_BY_ARCH} \
-gforth|ok|${PACKAGE_AS_ONE} \
-git|ok|${PACKAGE_BY_ARCH} \
-grep|ok|${PACKAGE_BY_ARCH} \
-less|ok|${PACKAGE_BY_ARCH} \
-lua5.3|ok|${PACKAGE_BY_ARCH} \
-m4|ok|${PACKAGE_BY_ARCH} \
-make|ok|${PACKAGE_BY_ARCH} \
-mingn.base|ok|glibc/tarballs/base.${NACL_ARCH}.zip \
-mingn.lib|ok|glibc/tarballs/lib.all.zip \
-nano|ok|${PACKAGE_AS_ONE} \
-nethack|ok|${PACKAGE_AS_ONE} \
-ninja|WIP|${PACKAGE_BY_ARCH} \
-openssh|ok|glibc.zip \
-python3|WIP|${TOOLCHAIN}/python.zip \
-python|ok|${TOOLCHAIN}/python.zip \
-ruby|ok|${TOOLCHAIN}/ruby.zip \
-sqlite|ok|${PACKAGE_AS_ONE} \
-subversion|WIP|${PACKAGE_BY_ARCH} \
-tar|WIP|${PACKAGE_AS_ONE} \
-texlive|ok|${PACKAGE_BY_ARCH} \
-thttpd|ok|glibc.zip \
-tk|ok|${PACKAGE_BY_ARCH} \
-toybox|WIP|${TOOLCHAIN}/toybox-0.4.7.zip \
-twm|ok|${PACKAGE_BY_ARCH} \
-vim|ok|${PACKAGE_AS_ONE} \
-xeyes|ok|${PACKAGE_BY_ARCH} \
-xz|ok|${PACKAGE_BY_ARCH} \
 "
 
 ALIASES="\
-lua|lua5.3
+bash|bash-4.3 \
+binutils|binutils-7dc2f2590 \
+gcc|gcc-396037926 \
+blackbox|blackbox
+busybox|busybox-1.22.0
+bzip2|bzip2-1.0.6 \
+civitweb|civitweb \
+coreutils|coreutils-5.2.1 \
+nacl-spawn|nacl-spawn-0.1 \
+corelibs|corelibs-0.2 \
+file|file-5.24 \
+curl|curl-7.37.0 \
+drod|drod \
+emacs|emacs-24.3 \
+findutils|findutils-4.4.2 \
+fvwm|fvwm \
+gawk|gawk \
+gforth|gforth \
+tree|tree-1.7.0 \
+git|git-2.3.0 \
+pcre|pcre-8.36 \
+grep|grep-2.21 \
+less|less-451 \
+lua|lua-5.3 \
+m4|m4 \
+make|make-3.82 \
+mingn|mingn-0.2 \
+nano|nano-2.2.6 \
+nethack|nethack \
+ninja|ninja \
+openssh|openssh \
+python3|python3-3.4 \
+python|python-2.7.7 \
+ruby|ruby \
+sqlite|sqlite \
+subversion|subversion \
+tar|tar \
+texlive|texlive \
+thttpd|thttpd \
+tk|tk \
+toybox|toybox \
+twm|twm \
+vim|vim-7.4 \
+xeyes|xeyes \
+xz|xz \
+zlib|zlib-1.2.8 \
+openssl|openssl-1.0.2d \
+ncurses|ncurses-5.9 \
+readline|readline-6.3 \
 "
-
-RemoveDir() {
-  local path="$1"
-  if [ -d ${path} ]; then
-    rm -rf ${path}/* || true
-    rm -rf ${path}
-  fi
-}
 
 #
 # $1 - package name
 #
 InstallPackage() {
-  local package="$1"
-  local subdir="${PACKAGE_BY_ARCH}"
-  local source_base="${PACKAGE_SOURCE}"
+  package=$1
 
   # Replace package aliases with alternates.
   for names in ${ALIASES}; do
@@ -108,124 +105,16 @@ InstallPackage() {
       package="${names_array[1]}"
     fi
   done
-
-  for info in ${PACKAGE_INFO}; do
-    local info_array=(${info//|/ })
-    if [ "${package}" = "${info_array[0]}" ]; then
-      subdir="${info_array[2]}"
-      if [[ "${ALTERNATE_SOURCE}" == "0" && \
-            ${#info_array[@]} > 3 && \
-            "${info_array[3]}" != "" ]]; then
-        source_base="${info_array[3]}"
-        subdir="${info_array[4]}"
-      fi
+  if [[ ${PACKAGE_FORCE} != 1 ]]; then
+    if pkg info --quiet ${package}; then
+      return
     fi
-  done
-
-  local url=${source_base}/${package}/${subdir}
-  InstallPackageFromUrl ${package} ${url}
-}
-
-#
-# $1 - package name
-# $2 - zip file url
-#
-InstallPackageFromUrl() {
-  local package=$1
-  local url=$2
-  local package_dir=/packages/${package}.${NACL_ARCH}
-  local clobber=1
-
-  # Special case for MinGN.
-  if [[ "${package}" = "mingn.base" || "${package}" = "mingn.lib" ]]; then
-    url="${PACKAGE_SOURCE}/mingn/${subdir}"
-    package_dir="/"
-    clobber=0
-  fi
-  # Special case for coreutils.
-  if [[ "${package}" = "coreutils" ]]; then
-    package_dir="/coreutils.${NACL_ARCH}"
-    clobber=0
   fi
 
-  local stamp_dir=/stamps/${package}.${NACL_ARCH}
-  local url_stamp="${stamp_dir}/${url//\//_}"
-
-  if [ -d ${package_dir}/${package} ]; then
-    local package_inside=${package_dir}/${package}
-  else
-    local package_inside=${package_dir}
-  fi
-
-  if [[ ${PACKAGE_FORCE} != 1 && -d ${url_stamp} ]]; then
-    # Package is up to date.
-    return
-  fi
-
-  if [ -d ${stamp_dir} ]; then
-    echo "Updating ${package} package..."
-  else
-    echo "Installing ${package} package..."
-  fi
-  local archive=/tmp/devenv.${package}.zip
-  echo "Downloading ${url}..."
-  if ! geturl ${url} ${archive}; then
-    echo "geturl failed"
+  if ! pkg add ${PACKAGE_SOURCE}/${package}.tbz; then
+    echo "pkg add failed: $?"
     exit 1
   fi
-
-  echo "Extracting ${package}..."
-  if [ ! -e ${archive} ]; then
-    echo "${archive} does not exist!"
-    exit 1
-  fi
-  if [ "${clobber}" = 1 ]; then
-    RemoveDir ${package_dir}
-  fi
-  if [ ! -d ${package_dir%/*} ]; then
-    mkdir -p ${package_dir}
-  fi
-  local unzip_flags=
-  if [ ${VERBOSE} != "1" ]; then
-    unzip_flags=-q
-  fi
-  if ! unzip -o $unzip_flags -d ${package_dir} ${archive}; then
-    echo "error: unzip failed"
-    exit 1
-  fi
-  rm ${archive}
-
-  # Update package_inside.
-  if [ -d ${package_dir}/${package} ]; then
-    package_inside=${package_dir}/${package}
-  else
-    package_inside=${package_dir}
-  fi
-
-  # TODO(bradnelson): Do something better.
-  # Rename appropriate nexe/pexe to unsuffixed version.
-  local suffixes=".pexe _pnacl.pexe _${NACL_ARCH}.nexe .nexe"
-  local platform_dirs="_platform_specific/${NACL_ARCH}/ \
-                       _platform_specific/all/"
-  if [ "${NACL_ARCH}" = "i686" ]; then
-    suffixes+=" _x86_32.nexe"
-    platform_dirs+=" _platform_specific/x86_32/"
-  fi
-  for alt in "" _ppapi; do
-    for plat in "" ${platform_dirs}; do
-      for suffix in ${suffixes}; do
-        local exe=${package_inside}/${plat}${package}${alt}${suffix}
-        if [ -e ${exe} ]; then
-          cp ${exe} ${package_inside}/${package}
-        fi
-      done
-    done
-  done
-
-  # Remove out stamps and write out new one.
-  RemoveDir ${stamp_dir}
-  mkdir -p ${url_stamp}
-  echo "Done."
 }
 
 function Usage() {
@@ -250,7 +139,7 @@ function main() {
         PACKAGE_LIST+=" ${OPTARG}"
         ;;
       s)
-        PACKAGE_SOURCE="${OPTARG}"
+        PACKAGE_SOURCE="${OPTARG}/${PKG_DIR}"
         ;;
       L)
         PACKAGE_SOURCE="${LOCAL_SOURCE}"

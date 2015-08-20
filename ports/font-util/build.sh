@@ -33,7 +33,3 @@ ConfigureStep() {
   ChangeDir ${BUILD_DIR}
   DefaultConfigureStep
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

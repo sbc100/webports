@@ -9,7 +9,7 @@
 
 CheckNaClEnabled() {
   # Skip check on if this isn't newlib.
-  if [[ "${TOOLCHAIN}" != newlib ]]; then
+  if [[ ${TOOLCHAIN} != newlib ]]; then
     return
   fi
   TMP_CHECK_FILE="/tmp/.enable_nacl_check.nexe"
@@ -40,28 +40,44 @@ CheckNaClEnabled() {
 }
 
 InstallBasePackages() {
+  local default_packages=""
+
+  # For glibc, we need to install some library dependencies first
+  if [[ ${TOOLCHAIN} == glibc ]]; then
+    default_packages+="\
+      -i zlib \
+      -i bzip2 \
+      -i openssl \
+      -i ncurses \
+      -i readline"
+  fi
+
   # Core packages.
-  local default_packages="\
+  local default_packages+="\
+    -i corelibs \
+    -i nacl-spawn \
     -i coreutils \
     -i bash \
     -i curl \
     -i findutils \
+    -i pcre \
     -i grep \
     -i git \
     -i less \
     -i make \
     -i nano \
     -i python \
-    -i grep \
     -i vim"
 
   local have_gcc=0
-  if [[ "${NACL_ARCH}" == "i686" || "${NACL_ARCH}" == "x86_64" ]]; then
-    default_packages+=" \
-  -i emacs \
-  -i mingn.base \
-  -i mingn.lib"
-    have_gcc=1
+  if [[ ${TOOLCHAIN} == glibc ]]; then
+    if [[ ${NACL_ARCH} == i686 || ${NACL_ARCH} == x86_64 ]]; then
+      default_packages+=" \
+    -i binutils \
+    -i gcc \
+    -i mingn"
+      have_gcc=1
+    fi
   fi
 
   # Check for updates on some packages.

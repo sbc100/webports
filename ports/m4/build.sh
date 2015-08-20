@@ -15,7 +15,3 @@ PatchStep() {
   # Touch documentation to prevent it from updating.
   touch ${SRC_DIR}/doc/*
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}

@@ -13,7 +13,7 @@ InstallStep() {
   if [ "${NACL_SHARED}" = "1" ]; then
     MakeDir lib
     # Copy core libraries
-    LogExecute cp -r ${NACL_SDK_LIB}/lib*.so* lib/
+    LogExecute cp -r ${NACL_SDK_LIB}/*.so* lib/
 
     # Copy SDK libs
     LogExecute cp -r ${NACL_SDK_LIBDIR}/lib*.so* lib/

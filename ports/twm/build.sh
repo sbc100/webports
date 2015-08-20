@@ -36,15 +36,16 @@ BuildStep() {
 }
 
 InstallStep() {
-  return
+  MakeDir ${DESTDIR_BIN}
+  LogExecute cp -f ${BUILD_DIR}/twm${NACL_EXEEXT} ${DESTDIR_BIN}/twm
 }
 
 PublishStep() {
-  PublishByArchForDevEnv
+  MakeDir ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
   LogExecute cp -f ${BUILD_DIR}/twm${NACL_EXEEXT} twm_${NACL_ARCH}${NACL_EXEEXT}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py\
-   twm_*${NACL_EXEEXT} -s . -o twm.nmf
+     twm_*${NACL_EXEEXT} -s . -o twm.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py -n twm twm.nmf
   InstallNaClTerm .
   LogExecute cp -f ${START_DIR}/*.js .

@@ -23,7 +23,3 @@ ConfigureStep() {
 
   DefaultConfigureStep
 }
-
-PublishStep() {
-  PublishByArchForDevEnv
-}
