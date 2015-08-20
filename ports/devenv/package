@@ -26,7 +26,7 @@ SDK_VERSION=${SDK_VERSION:-pepper_46}
 # sure to wait until the bot have build all the packages for a given
 # revision before changing this value.
 
-REVISION=${REVISION:-trunk-607-g70861c5}
+REVISION=${REVISION:-trunk-618-g9937e26}
 if [[ ${TOOLCHAIN} == ${PKG_ARCH} ]]; then
   PKG_DIR=pkg_${TOOLCHAIN}
 else
