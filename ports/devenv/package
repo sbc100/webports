@@ -14,9 +14,6 @@ set -o nounset
 shopt -s nullglob
 
 PKG_ARCH="${NACL_ARCH}"
-if [[ "${TOOLCHAIN}" == "pnacl" ]]; then
-  PKG_ARCH="pnacl"
-fi
 if [[ "${NACL_ARCH}" == "x86_64" ]]; then
   PKG_ARCH="x86-64"
 fi
@@ -30,7 +27,12 @@ SDK_VERSION=${SDK_VERSION:-pepper_46}
 # revision before changing this value.
 
 REVISION=${REVISION:-trunk-607-g70861c5}
-PKG_DIR=pkg_${TOOLCHAIN}_${PKG_ARCH}
+if [[ ${TOOLCHAIN} == ${PKG_ARCH} ]]; then
+  PKG_DIR=pkg_${TOOLCHAIN}
+else
+  PKG_DIR=pkg_${TOOLCHAIN}_${PKG_ARCH}
+fi
+
 DEFAULT_SOURCE="${STORAGE_URL}/${SDK_VERSION}/${REVISION}/publish/${PKG_DIR}"
 LOCAL_SOURCE="http://localhost:5103/${PKG_DIR}"
 VERBOSE=0
