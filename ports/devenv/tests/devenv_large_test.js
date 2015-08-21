@@ -216,7 +216,7 @@ TEST_F(DevEnvFileTest, 'testMake', function() {
   }).then(function() {
     function checkOne() {
       return Promise.resolve().then(function() {
-        return self.readFile('/home/user/part' + i + '.z', foo);
+        return self.readFile('/home/user/part' + i + '.z');
       }).then(function(data) {
         ASSERT_EQ(foo, data);
         i++;

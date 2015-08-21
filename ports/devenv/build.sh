@@ -8,9 +8,9 @@ NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
              jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"
 
-STORAGE_URL=${STORAGE_URL:-https://naclports.storage.googleapis.com/builds}
+STORAGE_URL=https://naclports.storage.googleapis.com/builds
 SDK_VERSION=pepper_46
-BUILT_REVISION=${BUILT_REVISION:-trunk-618-g9937e26}
+BUILT_REVISION=trunk-626-gb638392
 DEFAULT_SOURCE=${STORAGE_URL}/${SDK_VERSION}/${BUILT_REVISION}/publish
 LOCAL_SOURCE=http://localhost:5103
 
@@ -35,7 +35,7 @@ BuildStep() {
 # $1: Name of repo conf file to write to.
 # $2: The http address of repo.
 CreateRepoConfFile() {
-  echo "NACL: {" > $1
+  echo "NaCl: {" > $1
   local PKG_ARCH=${NACL_ARCH}
   if [ "${PKG_ARCH}" = "x86_64" ]; then
     PKG_ARCH=x86-64
@@ -88,8 +88,8 @@ InstallStep() {
 
   # Create Nacl.conf file
   MakeDir ${APP_DIR}/repos
-  LogExecute install -m 644 ${START_DIR}/repos/FreeBSD.conf ${APP_DIR}/repos
-  CreateRepoConfFile "${APP_DIR}/repos/NaCl_local.conf" "${LOCAL_SOURCE}"
+  MakeDir ${APP_DIR}/repos_local
+  CreateRepoConfFile "${APP_DIR}/repos_local/NaCl.conf" "${LOCAL_SOURCE}"
   CreateRepoConfFile "${APP_DIR}/repos/NaCl.conf" "${DEFAULT_SOURCE}"
 
   RESOURCES="background.js mounter.css mounter.js bash.js bashrc which

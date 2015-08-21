@@ -7,22 +7,29 @@
 # until the installation is completed. Also, you cannot use features
 # which nacl_io does not support yet (e.g., pipes and sub-shells).
 
-# Setup environment once to get location of fixed things like coreutils.
 source /mnt/http/setup-environment
 
-/mnt/http/install-base-packages.sh
-
-# Setup environment again, to rescan the packages added.
-source /mnt/http/setup-environment
-
-mkdir -p /usr/etc/pkg/repos
-rm -f /usr/etc/pkg/repos/FreeBSD.conf
-rm -f /usr/etc/pkg/repos/NaCl.conf
-cp /mnt/http/repos/FreeBSD.conf /usr/etc/pkg/repos/
-if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
-  cp /mnt/http/repos/NaCl_local.conf /usr/etc/pkg/repos/NaCl.conf
-else
-  cp /mnt/http/repos/NaCl.conf /usr/etc/pkg/repos/NaCl.conf
+marker=/var/lib/devenv_setup_complete
+if [[ ! -e $marker ]]; then
+  echo "Performing initial devenv setup"
+  if /mnt/http/install-base-packages.sh; then
+    echo "===> Setting up pkg"
+    # Now that we have coreutils installed we can copy the pkg config
+    # files into place with 'cp'
+    if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
+      repos_dir=/mnt/http/repos_local
+    else
+      repos_dir=/mnt/http/repos
+    fi
+    mkdir -p /usr/etc/pkg/repos
+    rm -f /usr/etc/pkg/repos/NaCl.conf
+    cp $repos_dir/NaCl.conf /usr/etc/pkg/repos/
+    pkg update
+    mkdir -p /var/lib
+    touch $marker
+  else
+    echo "*** devenv setup failed ***"
+  fi
 fi
 
 # TODO(bradnelson): Drop this when we can install things in a more

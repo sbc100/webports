@@ -7,6 +7,8 @@
 # until the installation is completed. Also, you cannot use features
 # which nacl_io does not support yet (e.g., pipes and sub-shells).
 
+set -e
+
 CheckNaClEnabled() {
   # Skip check on if this isn't newlib.
   if [[ ${TOOLCHAIN} != newlib ]]; then
@@ -31,8 +33,8 @@ CheckNaClEnabled() {
     echo "Follow this issue: https://crbug.com/477808"
     echo
     echo "*********************** ERROR ***********************"
-    // TODO: A more proper way to handle error would be "exit 1" here
-    // and keep window open so that error message could be shown.
+    # TODO: A more proper way to handle error would be "exit 1" here
+    # and keep window open so that error message could be shown.
     while [[ 1 == 1 ]]; do
       read
     done

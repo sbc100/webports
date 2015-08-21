@@ -40,13 +40,13 @@ Fetch() {
 }
 
 BuildPkg() {
-  if [ -d ${PKG_HOST_DIR} ]; then
+  if [ -d ${PKG_HOST_DIR}/${PKG_FILENAME} ]; then
       return
   fi
   mkdir -p ${PKG_HOST_DIR}
   Fetch ${PKG_URL} ${PKG_HOST_DIR}/${PKG_FILENAME}
   cd "${PKG_HOST_DIR}"
-  tar -xvf ${PKG_FILENAME}
+  tar xf ${PKG_FILENAME}
   cd ${PKG_FILENAME}
   ./autogen.sh
   ./configure --with-ldns

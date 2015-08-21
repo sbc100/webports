@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 BuildStep() {
-  # Meta package, no build.
-  return
+  # Build a local package index of pkg files
+  ${NACL_SRC}/build_tools/build_repo.sh -l
 }
 
 InstallStep() {
