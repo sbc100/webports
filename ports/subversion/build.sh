@@ -14,6 +14,7 @@ export LIBS="${NACL_CLI_MAIN_LIB}"
 
 EXTRA_CONFIGURE_ARGS="--with-apr=${NACL_PREFIX}"
 EXTRA_CONFIGURE_ARGS+=" --with-apr-util=${NACL_PREFIX}"
+EXTRA_CONFIGURE_ARGS+=" --without-apxs"
 EXTRA_CONFIGURE_ARGS+=" --enable-all-static"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
