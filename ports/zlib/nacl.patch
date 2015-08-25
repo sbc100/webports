@@ -1,7 +1,7 @@
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -188,6 +188,12 @@ if test "$gcc" -eq 1 && ($cc -c $test.c) >> configure.log 2>&1; then
+@@ -188,6 +188,15 @@ if test "$gcc" -eq 1 && ($cc -c $test.c) >> configure.log 2>&1; then
    *BSD | *bsd* | DragonFly)
          LDSHARED=${LDSHARED-"$cc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map"}
          LDCONFIG="ldconfig -m" ;;
@@ -11,6 +11,9 @@ diff --git a/configure b/configure
 +  nacl)
 +        LDSHARED=${LDSHARED-"$cc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map"}
 +        EXE='.nexe' ;;
++  em)
++        LDSHARED=${LDSHARED-"$cc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map"}
++        EXE='.js' ;;
    CYGWIN* | Cygwin* | cygwin* | OS/2*)
          EXE='.exe' ;;
    MINGW* | mingw*)

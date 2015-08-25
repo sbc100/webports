@@ -76,10 +76,6 @@ TestStep() {
     TranslateAndWriteLauncherScript "${example_pexe}" x86-64 \
       example.x86-64.nexe "${example_script}"
     RunExample
-  elif [ "${NACL_ARCH}" = "emscripten" ]; then
-    # TODO(sbc): Remove this once we find out why the node tests are
-    # failing on the bots
-    return
   else
     RunMinigzip
     RunExample

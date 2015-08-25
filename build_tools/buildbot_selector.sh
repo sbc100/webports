@@ -217,6 +217,11 @@ InstallEmscripten() {
   # Finally, run 'emcc -v' which will check that the compiler is working
   echo "Running emcc -v"
   emcc -v
+
+  # Run using -O2 to compile the native js-optimizer
+  touch ${NACLPORTS_SRC}/out/test.c
+  emcc -O2 -o ${NACLPORTS_SRC}/out/test.js ${NACLPORTS_SRC}/out/test.c
+  rm ${NACLPORTS_SRC}/out/test.{c,js}
 }
 
 Unittests() {
