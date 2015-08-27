@@ -43,7 +43,15 @@ diff --git a/compat/bsd_compat.h b/compat/bsd_compat.h
 diff --git a/configure.ac b/configure.ac
 --- a/configure.ac
 +++ b/configure.ac
-@@ -243,17 +243,7 @@ AC_SUBST([GIT_HEAD])
+@@ -157,6 +157,7 @@ AC_CHECK_FUNCS_ONCE([strnstr])
+ AC_CHECK_FUNCS_ONCE([funopen])
+ AC_CHECK_FUNCS_ONCE([fopencookie])
+ AC_CHECK_FUNCS_ONCE([sysctlbyname])
++AC_CHECK_FUNCS_ONCE([res_setservers])
+ AC_CHECK_DECLS(
+ 	[[fstatat], [openat], [unlinkat], [readlinkat], [faccessat]],
+ 	[], [], [
+@@ -243,31 +244,16 @@ AC_SUBST([GIT_HEAD])
  AC_DEFINE_UNQUOTED([GIT_HEAD], $GIT_HEAD)
  AC_DEFINE([PKG_API], [api_ver])
  
@@ -61,16 +69,68 @@ diff --git a/configure.ac b/configure.ac
 +AC_DEFINE([HAVE_SEQPACKET], 1, [Define to 1 if you have SOCK_SEQPACKET working])
  AC_SUBST([HAVE_SEQPACKET])
  
- AC_SEARCH_LIBS([lzma_version_string], [lzma], [], [
-@@ -403,7 +393,7 @@ else
+-AC_SEARCH_LIBS([lzma_version_string], [lzma], [], [
+-  AC_MSG_ERROR([unable to find the liblzma])
+-])
+-AC_SEARCH_LIBS([BZ2_bzReadOpen], [bz2], [], [
+-  AC_MSG_ERROR([unable to find the libbz2])
+-])
+-AC_SEARCH_LIBS([zlibVersion], [z], [], [
+-  AC_MSG_ERROR([unable to find the zlib])
+-])
++AC_SEARCH_LIBS([lzma_version_string], [lzma], [], [])
++AC_SEARCH_LIBS([BZ2_bzReadOpen], [bz2], [], [])
++AC_SEARCH_LIBS([zlibVersion], [z], [], [])
+ AC_SEARCH_LIBS([archive_read_open], [archive], [], [
+   AC_MSG_ERROR([unable to find the archive_read() function])
+ ])
++AC_SEARCH_LIBS([__res_query], [resolv], [], [])
+ 
+ AC_CHECK_HEADER([archive.h],
+ 	[pkg_found_archive_headers=yes])
+@@ -282,7 +268,13 @@ AC_SEARCH_LIBS([jail_getid], [jail], [
+ AC_SEARCH_LIBS([getprogname], [bsd], [
+ 	AC_DEFINE(HAVE_LIBBSD, 1, [Define to 1 if you have the 'bsd' library (-lbsd).])
+ 	LIBBSD_LIB="-lbsd"
+-	], [])
++	], [
++    case $host_os in
++      linux*)
++        AC_MSG_ERROR([Unable to find the libbsd])
++        ;;
++    esac
++  ])
+ 
+ AC_CHECK_HEADERS([gelf.h libelf.h], [
+ 	AC_CHECK_TYPES([Elf_Note], [
+@@ -403,7 +395,7 @@ else
  	AC_MSG_RESULT([no])
  fi
  
 -AM_CONDITIONAL(DYNAMIC, test "$with_staticonly" != "no")
-+AM_CONDITIONAL(DYNAMIC, test "$with_staticonly" = "no")
++AM_CONDITIONAL(DYNAMIC, test "$with_staticonly" != "yes")
  
  dnl Select appropriate ABI
  AS_CASE(
+diff --git a/external/Makefile.am b/external/Makefile.am
+--- a/external/Makefile.am
++++ b/external/Makefile.am
+@@ -155,7 +155,7 @@ libelf_la_SOURCES=	libelf/elf.c \
+ nodist_libelf_la_SOURCES=	libelf/libelf_fsize.c \
+ 				libelf/libelf_msize.c \
+ 				libelf/libelf_convert.c
+-libelf_la_CFLAGS=	-I$(top_srcdir)/external/libelf
++libelf_la_CFLAGS=	-I$(top_srcdir)/external/libelf -I$(top_builddir)/external/libelf
+ libelf_static_la_SOURCES=	${libelf_la_SOURCES}
+ nodist_libelf_static_la_SOURCES=	$(nodist_libelf_la_SOURCES)
+ libelf_static_la_CFLAGS=	$(libelf_la_CFLAGS) -static
+@@ -283,4 +283,4 @@ libelf/native-elf-format.h:
+ 
+ endif
+ 
+-SUBDIRS=	blake2
+\ No newline at end of file
++SUBDIRS=	blake2
 diff --git a/external/blake2/Makefile.am b/external/blake2/Makefile.am
 --- a/external/blake2/Makefile.am
 +++ b/external/blake2/Makefile.am
@@ -165,6 +225,27 @@ diff --git a/external/libelf/libelf.h b/external/libelf/libelf.h
  
  /* Library private data structures */
  typedef struct _Elf Elf;
+diff --git a/external/libfetch/common.c b/external/libfetch/common.c
+--- a/external/libfetch/common.c
++++ b/external/libfetch/common.c
+@@ -28,9 +28,6 @@
+  */
+ 
+ #include <sys/cdefs.h>
+-#include "bsd_compat.h"
+-
+-__FBSDID("$FreeBSD: head/lib/libfetch/common.c 273124 2014-10-15 07:35:50Z des $");
+ 
+ #include <sys/param.h>
+ #include <sys/socket.h>
+@@ -55,6 +52,7 @@ __FBSDID("$FreeBSD: head/lib/libfetch/common.c 273124 2014-10-15 07:35:50Z des $
+ #include <openssl/x509v3.h>
+ #endif
+ 
++#include "bsd_compat.h"
+ #include "fetch.h"
+ #include "common.h"
+ 
 diff --git a/external/libfetch/fetch.h b/external/libfetch/fetch.h
 --- a/external/libfetch/fetch.h
 +++ b/external/libfetch/fetch.h
@@ -179,6 +260,46 @@ diff --git a/external/libfetch/fetch.h b/external/libfetch/fetch.h
  struct url {
  	char		 scheme[URL_SCHEMELEN+1];
  	char		 user[URL_USERLEN+1];
+diff --git a/external/libfetch/ftp.c b/external/libfetch/ftp.c
+--- a/external/libfetch/ftp.c
++++ b/external/libfetch/ftp.c
+@@ -27,8 +27,6 @@
+  */
+ 
+ #include <sys/cdefs.h>
+-#include "bsd_compat.h"
+-__FBSDID("$FreeBSD: head/lib/libfetch/ftp.c 226537 2011-10-19 11:43:51Z des $");
+ 
+ /*
+  * Portions of this code were taken from or based on ftpio.c:
+@@ -74,6 +72,7 @@ __FBSDID("$FreeBSD: head/lib/libfetch/ftp.c 226537 2011-10-19 11:43:51Z des $");
+ #include <time.h>
+ #include <unistd.h>
+ 
++#include "bsd_compat.h"
+ #include "fetch.h"
+ #include "common.h"
+ #include "ftperr.h"
+diff --git a/external/libfetch/http.c b/external/libfetch/http.c
+--- a/external/libfetch/http.c
++++ b/external/libfetch/http.c
+@@ -27,8 +27,6 @@
+  */
+ 
+ #include <sys/cdefs.h>
+-#include "bsd_compat.h"
+-__FBSDID("$FreeBSD: head/lib/libfetch/http.c 267133 2014-06-05 22:16:26Z bapt $");
+ 
+ /*
+  * The following copyright applies to the base64 code:
+@@ -90,6 +88,7 @@ __FBSDID("$FreeBSD: head/lib/libfetch/http.c 267133 2014-06-05 22:16:26Z bapt $"
+ #include <netinet/in.h>
+ #include <netinet/tcp.h>
+ 
++#include "bsd_compat.h"
+ #include "fetch.h"
+ #include "common.h"
+ #include "httperr.h"
 diff --git a/external/libsbuf/subr_sbuf.c b/external/libsbuf/subr_sbuf.c
 --- a/external/libsbuf/subr_sbuf.c
 +++ b/external/libsbuf/subr_sbuf.c
@@ -339,24 +460,42 @@ diff --git a/libpkg/Makefile.am b/libpkg/Makefile.am
 diff --git a/libpkg/dns_utils.c b/libpkg/dns_utils.c
 --- a/libpkg/dns_utils.c
 +++ b/libpkg/dns_utils.c
-@@ -238,6 +238,8 @@ dns_getsrvinfo(const char *zone)
+@@ -27,7 +27,6 @@
+ 
+ #include <pkg_config.h>
+ 
+-#include <bsd_compat.h>
+ #include <sys/stat.h> /* for private.utils.h */
+ 
+ #include <string.h>
+@@ -41,6 +40,7 @@
+ #endif
+ #include <netdb.h>
+ 
++#include <bsd_compat.h>
+ #include "private/utils.h"
+ #include "pkg.h"
+ 
+@@ -238,6 +238,9 @@ dns_getsrvinfo(const char *zone)
  
  int
  set_nameserver(const char *nsname) {
-+  // This function may enable when getaddrinfo is available in nacl
-+#if !defined(__native_client__)
++#ifndef HAVE_RES_SETSERVERS
++	return (-1);
++#else
  	struct __res_state res;
  	union res_sockaddr_union u[MAXNS];
  	struct addrinfo *answer = NULL;
-@@ -275,7 +277,7 @@ set_nameserver(const char *nsname) {
+@@ -275,8 +278,8 @@ set_nameserver(const char *nsname) {
  		return (-1);
  
  	_res = res;
 -
-+#endif
  	return (0);
++#endif
  }
  #else
+ 
 diff --git a/libpkg/elfhints.c b/libpkg/elfhints.c
 --- a/libpkg/elfhints.c
 +++ b/libpkg/elfhints.c
@@ -1110,8 +1249,8 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
 +#ifdef __native_client__
 +	(void)unlink(tmp_file);
 +	free(tmp_file);
-+#endif
 +	*tmp_dest_file = tmp;
++#endif
  	return (dest_fd);
  }
  

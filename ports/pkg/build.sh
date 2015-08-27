@@ -27,10 +27,42 @@ ConfigureStep() {
   DefaultConfigureStep
 }
 
+BuildHost() {
+  HOST_BUILD_DIR=${WORK_DIR}/build_host
+  if [[ ! -f ${HOST_BUILD_DIR}/src/pkg ]]; then
+    MakeDir ${HOST_BUILD_DIR}
+    Banner "Build host pkg"
+
+    local libarchive_install=${WORK_DIR}/../libarchive-dev/install_host
+    local libbsd_install=${WORK_DIR}/../libbsd/install_host
+    export CPPFLAGS="-I${libarchive_install}/usr/local/include"
+    export LDFLAGS="-L${libarchive_install}/usr/local/lib"
+    CPPFLAGS+=" -I${libbsd_install}/usr/local/include"
+    LDFLAGS+=" -L${libbsd_install}/usr/local/lib"
+
+    cd ${HOST_BUILD_DIR}
+    LogExecute ${SRC_DIR}/configure
+    LogExecute make -j${OS_JOBS}
+    cd -
+  fi
+}
+
 BuildStep() {
+  (unset LIBS && BuildHost)
   DefaultBuildStep
   if [ "${NACL_SHARED}" = "0" ]; then
-    mv src/pkg-static${NACL_EXEEXT} src/pkg${NACL_EXEEXT}
+    LogExecute mv src/pkg-static${NACL_EXEEXT} src/pkg${NACL_EXEEXT}
+  fi
+}
+
+TestStep() {
+  if [[ ${TOOLCHAIN} = pnacl ]]; then
+    return
+  fi
+  if [[ ${NACL_SHARED} = 1 ]]; then
+    LogExecute ${BUILD_DIR}/src/pkg-static -v
+  else
+    LogExecute ${BUILD_DIR}/src/pkg -v
   fi
 }
 

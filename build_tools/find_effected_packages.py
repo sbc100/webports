@@ -9,6 +9,7 @@ packages.  Outputs 'all' if any shared/non-package-specific
 file if changed."""
 
 import argparse
+import fnmatch
 import os
 import sys
 
@@ -31,6 +32,14 @@ def main(args):
   print '\n'.join(find_effected_packages(options.files, options.deps))
   return 0
 
+# Normally when changins files outside of the 'ports' directory will
+# trigger the rebuilding of all packages.  However certainly files are
+# known to not effect the building on packages and those are listed here.
+IGNORE_FILES = [
+    'build_tools/find_effected_packages.py',
+    'build_tools/partition*.txt',
+    '*/test_*.py',
+]
 
 def find_effected_packages(files, include_deps):
   packages = []
@@ -48,6 +57,8 @@ def find_effected_packages(files, include_deps):
   for filename in files:
     parts = filename.split(os.path.sep)
     if parts[0] != 'ports':
+      if any(fnmatch.fnmatch(filename, ignore) for ignore in IGNORE_FILES):
+        continue
       return ['all']
 
     package_name = parts[1]
