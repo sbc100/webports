@@ -8,9 +8,5 @@ NaClTerm.nmf = 'emacs.nmf';
 NaClTerm.cwd = '/home/user';
 NaClTerm.argv = ['-nw'];
 NaClTerm.env = [
-  'EMACSLOADPATH=' +
-  '/naclports-dummydir/share/emacs/24.3/lisp' +
-  ':/naclports-dummydir/share/emacs/24.3/lisp/emacs-lisp',
-
   'DISPLAY=:42',
 ];

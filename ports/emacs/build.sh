@@ -9,6 +9,7 @@ export NACL_SEL_LDR
 export RUNPROGRAM_ARGS="-a -B ${NACL_IRT} -- ${NACL_SDK_LIB}/runnable-ld.so \
   --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
 
+EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 EXTRA_CONFIGURE_ARGS+=" --with-x"
 EXTRA_CONFIGURE_ARGS+=" --with-x-toolkit=athena"
 EXTRA_CONFIGURE_ARGS+=" --with-xpm=no"
@@ -50,6 +51,7 @@ InstallStep() {
   # Today the install step copies emacs_x86_64.nexe to the publish dir, but we
   # need nacl_temacs.nexe instead.  Change to copy that here.
   DefaultInstallStep
+  LogExecute mv ${INSTALL_DIR}/usr ${INSTALL_DIR}${PREFIX}
   LogExecute cp ${BUILD_DIR}/src/nacl_temacs${NACL_EXEEXT} \
       ${DESTDIR}${PREFIX}/bin/emacs${NACL_EXEEXT}
 }
