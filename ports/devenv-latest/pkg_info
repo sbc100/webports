@@ -4,5 +4,5 @@ VERSION=0.1
 BUILD_OS=linux
 DEPENDS=(corelibs devenv coreutils git make python curl)
 # Disabled for bionic due to bash.
-DISABLED_LIBC=(bionic)
-DISABLED_TOOLCHAIN=(emscripten)
+# TODO(sbc): re-enable PNaCl toolchain
+DISABLED_TOOLCHAIN=(emscripten bionic pnacl)
