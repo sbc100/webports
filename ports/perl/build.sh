@@ -159,3 +159,24 @@ InstallStep() {
   MakeDir ${DESTDIR_LIB}
   LogExecute cp -rf ${SRC_DIR}/lib/* ${DESTDIR_LIB}/
 }
+
+TestStep() {
+  export NACL_SDK_ROOT
+  export TOOLCHAIN
+  cd ${SRC_DIR}
+  # ignore error messages for now
+  # skip for pnacl
+  if [ "${NACL_ARCH}" != "pnacl" ] ; then
+      ${START_DIR}/tests.sh 2>/dev/null 1>tests.txt
+      MATCHING_LOG=${START_DIR}/expected_${TOOLCHAIN}.txt
+      DIFF=$(diff tests.txt ${MATCHING_LOG})
+      STATUS=$?
+      if [[ "${STATUS}" != "0" ]]; then
+        echo "Difference in results for ${TOOLCHAIN}, quitting."
+        echo $DIFF
+        exit 1
+      else
+        echo "Tests work as expected."
+      fi
+  fi
+}
