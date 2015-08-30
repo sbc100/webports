@@ -9,6 +9,18 @@ diff --git a/.gitignore b/.gitignore
  /doc/capi
  /enc.mk
  /encdb.h
+diff --git a/Makefile.in b/Makefile.in
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -199,7 +199,7 @@ miniruby$(EXEEXT):
+ $(PROGRAM):
+ 		@$(RM) $@
+ 		$(ECHO) linking $@
+-		$(Q) $(PURIFY) $(CC) $(LDFLAGS) $(XLDFLAGS) $(MAINOBJ) $(EXTOBJS) $(LIBRUBYARG) $(MAINLIBS) $(LIBS) $(EXTLIBS) $(OUTFLAG)$@
++		$(Q) $(PURIFY) $(CC) $(LDFLAGS) $(XLDFLAGS) $(MAINOBJ) $(EXTOBJS) $(LIBRUBYARG) $(MAINLIBS) $(EXTLIBS) $(LIBS) $(OUTFLAG)$@
+ 		$(Q) $(POSTLINK)
+ 
+ # We must `rm' the library each time this rule is invoked because "updating" a
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure

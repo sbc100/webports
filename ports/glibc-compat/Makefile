@@ -12,8 +12,10 @@ CPPFLAGS += -DNACL_SDK_VERSION=$(NACL_SDK_VERSION)
 OUT := out
 SOURCES := \
   src/alarm.c \
-  src/dirfd.c \
+  src/getpass.c \
   src/err.c \
+  src/fpending.c \
+  src/dirfd.c \
   src/flock.c \
   src/fts.c \
   src/getprotobyname_r.c \
@@ -40,6 +42,8 @@ SOURCES := \
   src/res_mkquery.c \
   src/res_query.c \
   src/res_send.c \
+  src/setregid.c \
+  src/tcgetpgrp.c \
   src/timegm.c \
   src/writev.c
 

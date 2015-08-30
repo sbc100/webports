@@ -2,12 +2,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export RUNPROGRAM="${NACL_SEL_LDR} -a -B ${NACL_IRT} -- \
-  ${NACL_SDK_LIB}/runnable-ld.so \
-  --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
+OS_JOBS=1
+
+if [ "${NACL_LIBC}" = "glibc" ]; then
+  export RUNPROGRAM="${NACL_SEL_LDR} -a -B ${NACL_IRT} -- \
+    ${NACL_SDK_LIB}/runnable-ld.so \
+    --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
+  export RUNPROGRAM_ARGS="-a -B ${NACL_IRT} -- ${NACL_SDK_LIB}/runnable-ld.so \
+    --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
+else
+  export RUNPROGRAM="${NACL_SEL_LDR} -a -B ${NACL_IRT} -- "
+  export RUNPROGRAM_ARGS="-a -B ${NACL_IRT} -- "
+fi
 export NACL_SEL_LDR
-export RUNPROGRAM_ARGS="-a -B ${NACL_IRT} -- ${NACL_SDK_LIB}/runnable-ld.so \
-  --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
 
 EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 EXTRA_CONFIGURE_ARGS+=" --with-x"
@@ -17,6 +24,22 @@ EXTRA_CONFIGURE_ARGS+=" --with-jpeg=yes"
 EXTRA_CONFIGURE_ARGS+=" --with-png=yes"
 EXTRA_CONFIGURE_ARGS+=" --with-gif=yes"
 EXTRA_CONFIGURE_ARGS+=" --with-tiff=yes"
+
+export COMPAT_LIBS="-l${NACL_CXX_LIB}"
+
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
+  -lppapi_simple -lppapi -lnacl_io -ltar -l${NACL_CXX_LIB}"
+
+if [ "${NACL_LIBC}" = "newlib" ]; then
+  export emacs_cv_func__setjmp=no
+  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  # Additional transitive dependencies not usually on the link line,
+  # but required for static linking.
+  DEP_LIBS="-pthread -lxcb -lXau -lXpm -lnacl_io -lglibc-compat"
+  COMPAT_LIBS="${DEP_LIBS} ${COMPAT_LIBS}"
+  export LIBS+=" ${COMPAT_LIBS}"
+  EXTRA_LIBS+=" -lglibc-compat"
+fi
 
 ConfigureStep() {
   export CFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include"
@@ -44,6 +67,9 @@ PatchStep() {
   rm -f lisp/files.elc
   rm -f lisp/international/quail.elc
   rm -f lisp/startup.elc
+  rm -f lisp/loaddefs.el
+  rm -f lisp/loaddefs.elc
+  rm -f lisp/vc/vc-git.elc
   LogExecute cp ${START_DIR}/emacs_pepper.c ${SRC_DIR}/src/emacs_pepper.c
 }
 
