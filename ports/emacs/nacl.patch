@@ -872,6 +872,30 @@ diff --git a/src/process.c b/src/process.c
        if (tem < 0)
  	{
  	  emacs_close (wait_child_setup[0]);
+@@ -4633,13 +4658,23 @@ wait_reading_process_output (intmax_t time_limit, int nsecs, int read_kbd,
+           nfds = xg_select
+ #elif defined (HAVE_NS)
+ 	  nfds = ns_select
++#elif defined (NACL_EMACS)
++          // NACL doesn't support pselect yet, so use select instead.
++          // (glibc stubs out pselect in terms of select).
++          // Select takes a different kind of time, and one fewer argument.
++          struct timeval timevalue = {0,0};
++          nfds = select
+ #else
+ 	  nfds = pselect
+ #endif
+             (max (max_process_desc, max_input_desc) + 1,
+              &Available,
+              (check_write ? &Writeok : (SELECT_TYPE *)0),
++#if defined (NACL_EMACS)
++             NULL, &timevalue);
++#else
+              NULL, &timeout, NULL);
++#endif
+ 
+ #ifdef HAVE_GNUTLS
+           /* GnuTLS buffers data internally.  In lowat mode it leaves
 diff --git a/src/sysdep.c b/src/sysdep.c
 --- a/src/sysdep.c
 +++ b/src/sysdep.c
