@@ -96,7 +96,6 @@ PublishStep() {
   rm -rf usr/share/man
   find . -iname "*.nexe" -delete
   mkdir -p ${ASSEMBLY_DIR}/emacstar/home/user/.emacs.d
-  cp ${START_DIR}/init.el ${ASSEMBLY_DIR}/emacstar/home/user/.emacs.d
   tar cf ${ASSEMBLY_DIR}/emacs.tar .
   rm -rf ${ASSEMBLY_DIR}/emacstar
   shasum ${ASSEMBLY_DIR}/emacs.tar > ${ASSEMBLY_DIR}/emacs.tar.hash
