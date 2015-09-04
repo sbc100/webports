@@ -107,6 +107,7 @@ SedWork() {
   sed -i "s%\${PERL_DLSRC}%${PERL_DLSRC}%g" $1
   sed -i "s%\$UNDEF_FOR_I686%${UNDEF_FOR_I686}%g" $1
   sed -i "s%\${NONXS_EXT}%${NONXS_EXT}%g" $1
+  sed -i "s%\$DESTDIR%${DESTDIR}/${PREFIX}%g" $1
 }
 
 # copy perl_pepper.c to source directory for core perl
@@ -150,14 +151,20 @@ BuildStep() {
   LogExecute make -j${OS_JOBS} libs="${LIBS}" all
   # test_prep prepares the perl for tests, might use this later
   LogExecute make -j${OS_JOBS} libs="${LIBS}" test_prep
-  # clean removes everything, so moving in microperl
   LogExecute mv -f ${HOST_BUILD}/microperl ${SRC_DIR}
 }
 
 InstallStep() {
-  # microperl, perl don't require make install
-  MakeDir ${DESTDIR_LIB}
-  LogExecute cp -rf ${SRC_DIR}/lib/* ${DESTDIR_LIB}/
+  if [ "${NACL_LIBC}" == "glibc" ] ; then
+    # Install without man files due to the following bug
+    # https://rt.perl.org/Public/Bug/Display.html?id=123532
+    LogExecute make -j${OS_JOBS} libs="${LIBS}" install.perl
+  else
+    MakeDir ${DESTDIR_LIB}
+    LogExecute cp -rf ${SRC_DIR}/lib/* ${DESTDIR_LIB}/
+    MakeDir ${DESTDIR_BIN}
+    LogExecute cp -f ${SRC_DIR}/{perl,microperl} ${DESTDIR_BIN}/
+  fi
 }
 
 TestStep() {
