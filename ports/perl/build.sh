@@ -67,9 +67,8 @@ BuildHostMiniperl() {
   if [ ! -x ${HOST_BUILD}/miniperl ]; then
     MakeDir ${HOST_BUILD}
     ChangeDir ${SRC_DIR}
-    LogExecute ${SRC_DIR}/Configure -des -Dprefix=${HOST_BUILD} \
-      -DNACL_BUILD=host
-    LogExecute make -j${OS_JOBS} NACL_BUILD=host miniperl
+    LogExecute ${SRC_DIR}/Configure -des -Dprefix=${HOST_BUILD}
+    LogExecute make -j${OS_JOBS} miniperl
     LogExecute cp miniperl ${HOST_BUILD}
   fi
 }
@@ -108,12 +107,6 @@ SedWork() {
   sed -i "s%\$UNDEF_FOR_I686%${UNDEF_FOR_I686}%g" $1
   sed -i "s%\${NONXS_EXT}%${NONXS_EXT}%g" $1
   sed -i "s%\$DESTDIR%${DESTDIR}/${PREFIX}%g" $1
-}
-
-# copy perl_pepper.c to source directory for core perl
-PatchStep() {
-  DefaultPatchStep
-  LogExecute cp ${START_DIR}/perl_pepper.c ${SRC_DIR}
 }
 
 ConfigureStep() {

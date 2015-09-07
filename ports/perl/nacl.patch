@@ -1,31 +1,3 @@
-diff --git a/Makefile.SH b/Makefile.SH
---- a/Makefile.SH
-+++ b/Makefile.SH
-@@ -478,7 +478,11 @@ c3 = taint.c toke.c util.c deb.c run.c universal.c pad.c globals.c keywords.c
- c4 = perlio.c perlapi.c numeric.c mathoms.c locale.c pp_pack.c pp_sort.c caretx.c
- c5 = $(madlysrc) $(mallocsrc)
- 
-+ifeq  ($(NACL_BUILD), host)
- c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c opmini.c perlmini.c
-+else
-+c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c opmini.c perlmini.c perl_pepper.c
-+endif
- 
- obj0 = op$(OBJ_EXT) perl$(OBJ_EXT)
- obj0mini = perlmini$(OBJ_EXT) opmini$(OBJ_EXT) miniperlmain$(OBJ_EXT)
-@@ -489,7 +493,12 @@ obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ
- minindt_obj = $(obj0mini) $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
- mini_obj = $(minindt_obj) $(MINIDTRACE_O)
- ndt_obj = $(obj0) $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
-+
-+ifeq  ($(NACL_BUILD), host)
- obj = $(ndt_obj) $(DTRACE_O)
-+else
-+obj = $(ndt_obj) $(DTRACE_O) perl_pepper$(OBJ_EXT)
-+endif
- 
- perltoc_pod_prereqs = extra.pods pod/perl5202delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
- generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 diff --git a/Makefile.micro b/Makefile.micro
 old mode 100644
 new mode 100755
@@ -88,14 +60,14 @@ new mode 100755
  extern char **environ;
  int
 +#ifdef __native_client__
-+nacl_perl_main(int argc, char **argv)
++nacl_main(int argc, char **argv)
 +#else
  main(int argc, char **argv)
 +#endif
  #else
  int
 +#ifdef __native_client__
-+nacl_perl_main(int argc, char **argv, char **env)
++nacl_main(int argc, char **argv, char **env)
 +#else
  main(int argc, char **argv, char **env)
  #endif
@@ -113,7 +85,7 @@ new mode 100755
  
  #ifdef NO_ENV_ARRAY_IN_MAIN
 +#ifdef __native_client__
-+int nacl_perl_main(int argc, char **argv) {
++int nacl_main(int argc, char **argv) {
 +    char **env;
 +#else
  int main(int argc, char **argv) {
@@ -121,7 +93,7 @@ new mode 100755
 +#endif
 +#else
 +#ifdef __native_client__
-+int nacl_perl_main(int argc, char **argv, char **env) {
++int nacl_main(int argc, char **argv, char **env) {
  #else
  int main(int argc, char **argv, char **env) {
  #endif
