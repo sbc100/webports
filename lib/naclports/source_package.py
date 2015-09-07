@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import contextlib
+import fnmatch
 import os
 import re
 import subprocess
@@ -704,21 +705,28 @@ class SourcePackage(package.Package):
                   '(deleted file mode [^\n]+\n)?'
                   'Binary files [^\n]+ differ\n', '', diff)
 
-    # Filter out things from an optional per port skip list.
-    diff_skip = os.path.join(self.root, 'diff_skip.txt')
-    if os.path.exists(diff_skip):
-      names = open(diff_skip).read().splitlines()
-      new_diff = ''
-      skipping = False
-      for line in diff.splitlines():
-        if line.startswith('diff --git '):
-          skipping = False
-          for name in names:
-            if line == 'diff --git a/%s b/%s' % (name, name):
-              skipping = True
-        if not skipping:
-          new_diff += line + '\n'
-      diff = new_diff
+    # Always filter out config.sub changes
+    diff_skip = ['*config.sub']
+
+    # Add optional per-port skip list.
+    diff_skip_file = os.path.join(self.root, 'diff_skip.txt')
+    if os.path.exists(diff_skip_file):
+      with open(diff_skip) as f:
+        diff_skip += f.read().splitlines()
+
+    new_diff = ''
+    skipping = False
+    for line in diff.splitlines():
+      if line.startswith('diff --git a/'):
+        filename = line.lstrip('diff --git a/').split()[0]
+        skipping = False
+        for skip in diff_skip:
+          if fnmatch.fnmatch(filename, skip):
+            skipping = True
+            break
+      if not skipping:
+        new_diff += line + '\n'
+    diff = new_diff
 
     # Write back out the diff.
     patch_path = self.GetPatchFile()
