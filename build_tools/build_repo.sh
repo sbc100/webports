@@ -23,22 +23,24 @@ WriteMetaFile() {
   echo "filesite_archive = "filesite";" >> $1
 }
 
+RunPkg() {
+  local pkg_dir=$1
+  local out_dir=$2
+  WriteMetaFile "${pkg_dir}/meta"
+  mkdir -p "${out_dir}"
+  local cmd="$PKG repo -m ${pkg_dir}/meta -o ${out_dir} ${pkg_dir}"
+  echo $cmd
+  $cmd
+  cd ${out_dir}
+}
+
 BuildRepo() {
-  cd ${SCRIPT_DIR}
   local gs_url="gs://naclports/builds/${SDK_VERSION}/$1/publish"
-  ./download_pkg.py $1
+  ${SCRIPT_DIR}/download_pkg.py $1
   local REPO_DIR=${NACLPORTS_ROOT}/out/packages/prebuilt/repo
   for pkg_dir in ${NACLPORTS_ROOT}/out/packages/prebuilt/pkg/*/ ; do
-    WriteMetaFile "${pkg_dir}/meta"
-    local SUB_REPO_DIR=${REPO_DIR}/$(basename ${pkg_dir})
-    mkdir -p "${SUB_REPO_DIR}"
-    $PKG repo -m "${pkg_dir}/meta" -o "${SUB_REPO_DIR}" "${pkg_dir}"
-    cd ${SUB_REPO_DIR}
-    tar -xf packagesite.txz
-    tar -xf digests.txz
-    tar -jcf packagesite.tbz packagesite.yaml
-    tar -jcf digests.tbz digests
-    rm -f packagesite.txz digests.txz digests packagesite.yaml
+    local out_dir=${REPO_DIR}/$(basename ${pkg_dir})
+    RunPkg $pkg_dir $out_dir
     gsutil cp -a public-read meta.txz ${gs_url}/$(basename ${pkg_dir})
     gsutil cp -a public-read *.tbz ${gs_url}/$(basename ${pkg_dir})
   done
@@ -47,15 +49,7 @@ BuildRepo() {
 BuildLocalRepo() {
   local REPO_DIR=${NACLPORTS_ROOT}/out/publish/
   for pkg_dir in ${REPO_DIR}/pkg_*/ ; do
-    WriteMetaFile "${pkg_dir}/meta"
-    $PKG repo -m "${pkg_dir}/meta" "${pkg_dir}"
-    cd ${pkg_dir}
-    tar -xf packagesite.txz
-    tar -xf digests.txz
-    tar -jcf packagesite.tbz packagesite.yaml
-    tar -jcf digests.tbz digests
-    rm -f packagesite.txz digests.txz digests packagesite.yaml
-    cd ${SCRIPT_DIR}
+    RunPkg $pkg_dir $pkg_dir
   done
 }
 

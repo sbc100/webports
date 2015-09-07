@@ -4,12 +4,8 @@
 
 BuildStep() {
   # Build a local package index of pkg files
-  # Currently the bots don't have the dependencies required to build pkg
-  # do don't try ot build the pkg repo yet.
-  # TODO(sbc): get this working on the bots so we can use 'pkg repo' to create
-  # local repo metadata.
-  #${NACL_SRC}/build_tools/build_repo.sh -l
-  return
+  Banner "Building pkg for host"
+  ${NACL_SRC}/build_tools/build_repo.sh -l
 }
 
 InstallStep() {

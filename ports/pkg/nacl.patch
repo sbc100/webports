@@ -1405,6 +1405,16 @@ diff --git a/libpkg/pkg_repo_create.c b/libpkg/pkg_repo_create.c
  			buf = *sig;
  			continue;
  		} else if (strcmp(line, "CERT\n") == 0) {
+@@ -1030,9 +1046,6 @@ pkg_finish_repo(const char *output_dir, pem_password_cb *password_cb,
+ 			rsa_free(rsa);
+ 			return (EPKG_FATAL);
+ 		}
+-		else {
+-			meta = pkg_repo_meta_default();
+-		}
+ 		if (pkg_repo_pack_db(repo_meta_file, repo_path, repo_path, rsa, meta,
+ 			argv, argc) != EPKG_OK) {
+ 			ret = EPKG_FATAL;
 diff --git a/libpkg/pkg_solve.c b/libpkg/pkg_solve.c
 --- a/libpkg/pkg_solve.c
 +++ b/libpkg/pkg_solve.c
