@@ -38,6 +38,24 @@ def IsPexeFile(filename):
   return header == PEXE_MAGIC
 
 
+def FilterOutExecutables(filenames, root):
+  """Filter out ELF binaries in the bin directory.
+
+  We don't want NaCl exectuables installed in the toolchain's bin directory
+  since we add this to the PATH during the build process, and NaCl executables
+  can't be run on the host system (not without sel_ldr anyway).
+  """
+  rtn = []
+  for name in filenames:
+    full_name = os.path.join(root, name)
+    if os.path.split(name)[0] == 'bin':
+      if not os.path.splitext(name)[1] and IsElfFile(full_name):
+        continue
+    rtn.append(name)
+
+  return rtn
+
+
 def InstallFile(filename, old_root, new_root):
   """Install a single file by moving it into a new location.
 
@@ -56,7 +74,7 @@ def InstallFile(filename, old_root, new_root):
     util.Makedirs(dirname)
   os.rename(oldname, newname)
 
-  # When install binarie ELF files into the toolchain direcoties, remove
+  # When install binaries ELF files into the toolchain direcoties, remove
   # the X bit so that they do not found when searching the PATH.
   if IsElfFile(newname) or IsPexeFile(newname):
     mode = os.stat(newname).st_mode
@@ -204,6 +222,8 @@ class BinaryPackage(package.Package):
 
         tar.extractall(dest_tmp)
         payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
+
+        names = FilterOutExecutables(names, payload_tree)
 
         for name in names:
           InstallFile(name, payload_tree, dest)
