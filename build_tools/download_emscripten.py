@@ -39,7 +39,10 @@ TARGET_DIR = os.path.join(OUT_DIR, 'emscripten_sdk')
 
 def DownloadToCache(url, sha1):
   filename = os.path.basename(url)
-  full_name = os.path.join(naclports.paths.CACHE_ROOT, filename)
+  download_dir = naclports.paths.CACHE_ROOT
+  if not os.path.exists(download_dir):
+    os.makedirs(download_dir)
+  full_name = os.path.join(download_dir, filename)
   if os.path.exists(full_name):
     try:
       naclports.util.VerifyHash(full_name, sha1)
