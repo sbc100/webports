@@ -711,14 +711,14 @@ class SourcePackage(package.Package):
     # Add optional per-port skip list.
     diff_skip_file = os.path.join(self.root, 'diff_skip.txt')
     if os.path.exists(diff_skip_file):
-      with open(diff_skip) as f:
+      with open(diff_skip_file) as f:
         diff_skip += f.read().splitlines()
 
     new_diff = ''
     skipping = False
     for line in diff.splitlines():
       if line.startswith('diff --git a/'):
-        filename = line.lstrip('diff --git a/').split()[0]
+        filename = line[len('diff --git a/'):].split()[0]
         skipping = False
         for skip in diff_skip:
           if fnmatch.fnmatch(filename, skip):
