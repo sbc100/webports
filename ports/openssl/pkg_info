@@ -5,6 +5,4 @@ LICENSE=CUSTOM:LICENSE
 DEPENDS=(glibc-compat)
 SHA1=d01d17b44663e8ffa6a33a5a30053779d9593c3d
 CONFLICTS=(boringssl)
-# glibc/arm: termio.h missing:
-# https://code.google.com/p/nativeclient/issues/detail?id=4235
-DISABLED_TOOLCHAIN=(emscripten glibc/arm)
+DISABLED_TOOLCHAIN=(emscripten)

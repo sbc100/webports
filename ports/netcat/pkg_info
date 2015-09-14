@@ -4,6 +4,4 @@ URL=http://sf.net/projects/netcat/files/netcat/0.7.1/netcat-0.7.1.tar.bz2
 LICENSE=GPL
 DEPENDS=(glibc-compat)
 SHA1=b761d70fe9e3e8b3fe33a329b9bc31300dc04d11
-# arm/glibc: missing ioctls (e.g. SIOCGIFFLAGS)
-# https://code.google.com/p/nativeclient/issues/detail?id=4233
-DISABLED_TOOLCHAIN=(emscripten glibc/arm)
+DISABLED_TOOLCHAIN=(emscripten)

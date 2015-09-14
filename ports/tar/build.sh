@@ -10,6 +10,9 @@ EXECUTABLES=src/tar
 # does not compile under newlib (missing O_NOCTTY).
 export gl_cv_func_chown_follows_symlink=yes
 
+# The mtio.h we currently ship with the arm/glibc toolchain is not usable
+export ac_cv_header_sys_mtio_h=no
+
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   export LIBS="-lglibc-compat"

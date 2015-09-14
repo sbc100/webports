@@ -23,6 +23,12 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export LD="${NACLCXX}"
 fi
 
+if [ "${NACL_LIBC}" = "glibc" ]; then
+  # The host version of 'strip' doesn't always recognise NaCl binaries
+  # and ssh runs 'install -s' which doesn't always runs the host 'strip'
+  EXTRA_CONFIGURE_ARGS+=" --disable-strip"
+fi
+
 PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/openssh"

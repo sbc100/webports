@@ -17,6 +17,11 @@ fi
 #
 # The module downloader is patterned after the Bochs image downloading step.
 
+SetOptFlags() {
+  # Python build system sets its own opt flags
+  return
+}
+
 ConfigureStep() {
   SetupCrossEnvironment
   export CROSS_COMPILE=true
@@ -30,6 +35,9 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS="--disable-ipv6"
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=i686-linux-gnu --disable-shared --enable-static"
+  if [ "${NACL_DEBUG}" = 1 ]; then
+    EXTRA_CONFIGURE_ARGS+=" --with-pydebug"
+  fi
   export SO=.a
   export MAKEFLAGS="PGEN=${NACL_HOST_PYBUILD}/Parser/pgen"
   export LIBS="-ltermcap"

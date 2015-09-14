@@ -270,7 +270,13 @@ if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "arm" ]; then
   # scripts will then detect them as missing even though that in the headers
   # and nacl_io provides them at link time.
   export ac_cv_func_fcntl=yes
+  export ac_cv_func_pipe=yes
   export ac_cv_func_select=yes
+  export ac_cv_func_socket=yes
+  export ac_cv_func_poll=yes
+  export ac_cv_func_statvfs=yes
+  export ac_cv_func_fstatvfs=yes
+  export ac_cv_func_setsid=yes
   export ac_cv_func_connect=yes
   export ac_cv_func_tcgetattr=yes
   export ac_cv_func_tcsetattr=yes

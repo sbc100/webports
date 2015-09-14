@@ -17,6 +17,11 @@ if [ "${NACL_ARCH}" = "arm" ]; then
   NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
 fi
 
+SetOptFlags() {
+  # Python build system sets its own opt flags
+  return
+}
+
 ConfigureStep() {
   # We pre-seed configure with certain results that it cannot determine
   # since we are doing a cross compile.  The $CONFIG_SITE file is sourced
@@ -29,6 +34,9 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS="--disable-ipv6"
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
+  if [ "${NACL_DEBUG}" = 1 ]; then
+    EXTRA_CONFIGURE_ARGS+=" --with-pydebug"
+  fi
   export LIBS="-ltermcap"
   LIBS+=" ${NACL_CLI_MAIN_LIB}"
   if [ "${NACL_LIBC}" = "newlib" ]; then

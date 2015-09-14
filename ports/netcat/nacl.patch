@@ -101,7 +101,7 @@ diff --git a/src/udphelper.c b/src/udphelper.c
  
  int udphelper_sockets_open(int **sockbuf, in_port_t nport)
  {
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++#if defined(__native_client__)
 +  /*
 +   * TODO(bradnelson): figure out if nacl_io can support these calls.
 +   */

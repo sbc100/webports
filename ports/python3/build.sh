@@ -13,6 +13,11 @@ NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 HOST_BUILD_DIR=${WORK_DIR}/build_host
 export PATH=${HOST_BUILD_DIR}/inst/usr/local/bin:${PATH}
 
+SetOptFlags() {
+  # Python build system sets its own opt flags
+  return
+}
+
 BuildHostPython() {
   MakeDir ${HOST_BUILD_DIR}
   ChangeDir ${HOST_BUILD_DIR}
@@ -37,6 +42,15 @@ ConfigureStep() {
   EXTRA_CONFIGURE_ARGS="--disable-ipv6"
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
+  if [ "${NACL_DEBUG}" = 1 ]; then
+    EXTRA_CONFIGURE_ARGS+=" --with-pydebug"
+  fi
+  if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
+    # Ignore sys/xattr.h, since glibc/arm toolchain does not define
+    # XATTR_SIZE_MAX:
+    # https://code.google.com/p/nativeclient/issues/detail?id=4300
+    export ac_cv_header_sys_xattr_h=no
+  fi
   export LIBS="-ltermcap"
   LIBS+=" ${NACL_CLI_MAIN_LIB}"
   if [ "${NACL_LIBC}" = "newlib" ]; then
