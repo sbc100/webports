@@ -189,7 +189,6 @@ builder 1 (total: 11298)
   ninja
   faad2
   agg
-  lua5.1
   libmodplug
   libssh
   jsoncpp

@@ -96,7 +96,6 @@ builder 0 (total: 14973)
   giflib
   agg
   faac
-  lua5.1
   netcat
   libmodplug
   libssh

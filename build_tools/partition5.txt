@@ -256,7 +256,6 @@ builder 3 (total: 7062)
   pyzmq
   ninja
   giflib
-  lua5.1
   libxext
   xineramaproto
   libxinerama

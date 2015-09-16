@@ -73,7 +73,6 @@ builder 0 (total: 8304)
   x264
   xeyes
   twm
-  lua5.1
   renderproto
   libxrender
   jsoncpp
