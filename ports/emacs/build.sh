@@ -4,17 +4,7 @@
 
 OS_JOBS=1
 
-if [ "${NACL_LIBC}" = "glibc" ]; then
-  export RUNPROGRAM="${NACL_SEL_LDR} -a -B ${NACL_IRT} -- \
-    ${NACL_SDK_LIB}/runnable-ld.so \
-    --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
-  export RUNPROGRAM_ARGS="-a -B ${NACL_IRT} -- ${NACL_SDK_LIB}/runnable-ld.so \
-    --library-path ${NACL_SDK_LIBDIR}:${NACL_SDK_LIB}:${NACLPORTS_LIBDIR}"
-else
-  export RUNPROGRAM="${NACL_SEL_LDR} -a -B ${NACL_IRT} -- "
-  export RUNPROGRAM_ARGS="-a -B ${NACL_IRT} -- "
-fi
-export NACL_SEL_LDR
+export RUNPROGRAM="${NACL_SDK_ROOT}/tools/sel_ldr.py"
 
 EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 EXTRA_CONFIGURE_ARGS+=" --with-x"

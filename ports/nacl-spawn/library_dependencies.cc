@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
   }
 
   // For test.
-  setenv("LD_LIBRARY_PATH", ".", 0);
+  setenv("LD_LIBRARY_PATH", ".", 1);
 
   std::string arch;
   std::vector<std::string> dependencies;
@@ -175,6 +175,8 @@ int main(int argc, char* argv[]) {
       printf(" ");
     printf("%s", dependencies[i].c_str());
   }
+
+  printf("\n");
 }
 
 #endif  // DEFINE_LIBRARY_DEPENDENCIES_MAIN

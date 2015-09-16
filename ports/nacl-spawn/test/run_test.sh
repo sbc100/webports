@@ -13,11 +13,15 @@ cd $(dirname $0)
 AssertCommandResultEquals() {
   local expected="$1"
   local command="$2"
+  echo "[ RUN      ] $command"
   local actual="$(python ${NACL_SDK_ROOT}/tools/sel_ldr.py ${command})"
   if [ "x${expected}" != "x${actual}" ]; then
-    echo "$command failed: expected=$expected actual=$actual"
+    echo "command failed: $command"
+    echo "  expected=$expected"
+    echo "  actual=$actual"
     exit 1
   fi
+  echo "[  PASSED  ]"
 }
 
 # test_exe depends on libtest1.so and libtest2.so.
@@ -34,5 +38,3 @@ AssertCommandResultEquals "./libtest3.so libtest1.so" \
 AssertCommandResultEquals \
     "./libtest1.so ./libtest2.so ./libtest3.so test_exe" \
     "./library_dependencies test_exe"
-
-echo PASS

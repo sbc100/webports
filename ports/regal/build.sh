@@ -15,6 +15,10 @@ BuildStep() {
 }
 
 TestStep() {
+  # Regal build system doesn't yet know how to run the arm tests
+  if [ "${NACL_ARCH}" = "arm" ]; then
+    return
+  fi
   LogExecute make ${MAKE_ARGS} test
 }
 

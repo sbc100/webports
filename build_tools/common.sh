@@ -253,8 +253,8 @@ PUBLISH_CREATE_NMF_ARGS="-L ${DESTDIR_LIB}"
 
 SKIP_SEL_LDR_TESTS=0
 
-# Skip sel_ldr tests when building for arm
-if [ "${NACL_ARCH}" = "arm" ]; then
+# Skip sel_ldr tests on ARM, except on linux where we have qemu-arm available.
+if [ "${NACL_ARCH}" = "arm" -a "${OS_NAME}" != "Linux" ]; then
   SKIP_SEL_LDR_TESTS=1
 fi
 
@@ -1003,6 +1003,13 @@ ConfigureStep_Autoconf() {
 
   SetupCrossEnvironment
 
+  # Without this autoconf builds will use the same CFLAGS/LDFLAGS for host
+  # builds as NaCl builds and not all the flags we use are supported by the
+  # host compiler, which could be an older version of gcc
+  # (e.g. -fdiagnostics-color=auto).
+  export CFLAGS_FOR_BUILD=""
+  export LDFLAGS_FOR_BUILD=""
+
   local conf_host=${NACL_CROSS_PREFIX}
   # TODO(gdeepti): Investigate whether emscripten accurately fits this case for
   # long term usage.
@@ -1307,41 +1314,37 @@ HERE
 
   if [ "${OS_NAME}" = "Cygwin" ]; then
     local LOGFILE=nul
-    local NACL_IRT_PATH=$(cygpath -m "${NACL_IRT}")
   else
     local LOGFILE=/dev/null
-    local NACL_IRT_PATH=${NACL_IRT}
   fi
 
   if [ "${NACL_LIBC}" = "glibc" ]; then
     cat > "$1" <<HERE
 #!/bin/bash
-export NACLVERBOSITY=-3 # LOG_ERROR
-
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
-SEL_LDR=${NACL_SEL_LDR}
-IRT=${NACL_IRT_PATH}
+if [ \$(uname -s) = CYGWIN* ]; then
+  SCRIPT_DIR=\$(cygpath -m \${SCRIPT_DIR})
+fi
+NACL_SDK_ROOT=${NACL_SDK_ROOT}
+
 NACL_SDK_LIB=${NACL_SDK_LIB}
 LIB_PATH_DEFAULT=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}
 LIB_PATH_DEFAULT=\${LIB_PATH_DEFAULT}:\${NACL_SDK_LIB}:\${SCRIPT_DIR}
 SEL_LDR_LIB_PATH=\${SEL_LDR_LIB_PATH}:\${LIB_PATH_DEFAULT}
 
-"\${SEL_LDR}" -qpa -B "\${IRT}" -- "\${NACL_SDK_LIB}/runnable-ld.so" \\
-    --library-path "\${SEL_LDR_LIB_PATH}" "\${SCRIPT_DIR}/$2" "\$@"
+"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p --library-path "\${SEL_LDR_LIB_PATH}" \
+    -- "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   else
     cat > "$1" <<HERE
 #!/bin/bash
-export NACLVERBOSITY=-3 # LOG_ERROR
-
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 if [ \$(uname -s) = CYGWIN* ]; then
   SCRIPT_DIR=\$(cygpath -m \${SCRIPT_DIR})
 fi
-SEL_LDR=${NACL_SEL_LDR}
-IRT=${NACL_IRT_PATH}
+NACL_SDK_ROOT=${NACL_SDK_ROOT}
 
-"\${SEL_LDR}" -qpa -B "\${IRT}" -- "\${SCRIPT_DIR}/$2" "\$@"
+"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p -- "\${SCRIPT_DIR}/$2" "\$@"
 HERE
   fi
 
@@ -1378,30 +1381,12 @@ WriteLauncherScriptPNaCl() {
   local script_name=$1
   local nexe_name=$2
   local arch=$3
-  local nacl_sel_ldr="no-sel-ldr"
-  local irt_core="no-irt-core"
-  case ${arch} in
-    x86-32)
-      nacl_sel_ldr="${NACL_SEL_LDR_X8632}"
-      irt_core="${NACL_IRT_X8632}"
-      ;;
-    x86-64)
-      nacl_sel_ldr="${NACL_SEL_LDR_X8664}"
-      irt_core="${NACL_IRT_X8664}"
-      ;;
-    *)
-      echo "error: No sel_ldr for ${arch}"
-      exit 1
-  esac
   cat > "${script_name}" <<HERE
 #!/bin/bash
-export NACLVERBOSITY=-3 # LOG_ERROR
-
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
-SEL_LDR=${nacl_sel_ldr}
-IRT=${irt_core}
+NACL_SDK_ROOT="${NACL_SDK_ROOT}"
 
-"\${SEL_LDR}" -qpa -B "\${IRT}" -- "\${SCRIPT_DIR}/${nexe_name}" "\$@"
+"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p -- "\${SCRIPT_DIR}/${nexe_name}" "\$@"
 HERE
   chmod 750 "${script_name}"
   echo "Wrote script ${PWD}/${script_name}"

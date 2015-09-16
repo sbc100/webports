@@ -163,20 +163,22 @@ InstallStep() {
 TestStep() {
   export NACL_SDK_ROOT
   export TOOLCHAIN
-  cd ${SRC_DIR}
-  # ignore error messages for now
+
   # skip for pnacl
-  if [ "${NACL_ARCH}" != "pnacl" ] ; then
-      ${START_DIR}/tests.sh 2>/dev/null 1>tests.txt
-      MATCHING_LOG=${START_DIR}/expected_${TOOLCHAIN}.txt
-      DIFF=$(diff tests.txt ${MATCHING_LOG})
-      STATUS=$?
-      if [[ "${STATUS}" != "0" ]]; then
-        echo "Difference in results for ${TOOLCHAIN}, quitting."
-        echo $DIFF
-        exit 1
-      else
-        echo "Tests work as expected."
-      fi
+  if [ "${NACL_ARCH}" = "pnacl" ] ; then
+    return
   fi
+
+  # ignore error messages for now
+  echo "Running ${START_DIR}/tests.sh"
+  ${START_DIR}/tests.sh 2>tests_err.txt 1>tests_out.txt
+  EXPECTED=${START_DIR}/expected_${TOOLCHAIN}.txt
+  if ! cmp tests_out.txt ${EXPECTED}; then
+    echo "Test output did not match expected output"
+    echo "See ${PWD}/tests_err.txt"
+    diff -u tests_out.txt ${EXPECTED}
+    exit 1
+  fi
+
+  echo "PASSED"
 }

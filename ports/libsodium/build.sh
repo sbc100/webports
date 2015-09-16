@@ -17,7 +17,7 @@ TestStep() {
   /bin/bash ../../libtool --mode=install /usr/bin/install \
     -c libsodium.la $(cd ../../naclport_test/lib && pwd))
 
-  if [[ ${NACL_ARCH} == "pnacl" ]]; then
+  if [[ ${NACL_ARCH} == pnacl ]]; then
     EXT=.bc
   else
     EXT=${NACL_EXEEXT}
@@ -25,7 +25,10 @@ TestStep() {
 
   # on newlib_arm compilation crashed when without -lssp,
   # on other platforms it was ok without it
-  LSSP="" && [[ ${NACL_ARCH} == "arm" ]] && LSSP="-lssp"
+  LSSP=""
+  if [[ ${NACL_ARCH} == arm && ${TOOLCHAIN} == newlib ]]; then
+    LSSP="-lssp"
+  fi
   INCLUDES="-Isrc/libsodium/include -Isrc/libsodium/include/sodium  \
             -I${SRC_DIR}/src/libsodium/include \
             -I${SRC_DIR}/src/libsodium/include/sodium"

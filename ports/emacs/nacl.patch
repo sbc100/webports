@@ -157,7 +157,7 @@ diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
 -	$(CC) ${ALL_CFLAGS} -o test-distrib ${srcdir}/test-distrib.c
 -	./test-distrib ${srcdir}/testfile
 +	$(CC) ${ALL_CFLAGS} -o test-distrib${EXEEXT} ${srcdir}/test-distrib.c
-+	$(RUNPROGRAM) ./test-distrib${EXEEXT} ${srcdir}/testfile
++	$(RUNPROGRAM) -- ./test-distrib${EXEEXT} ${srcdir}/testfile
  
  ../lib/libgnu.a: $(config_h)
  	cd ../lib && $(MAKE) libgnu.a
@@ -430,7 +430,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  GETLOADAVG_LIBS = @GETLOADAVG_LIBS@
  
 -RUN_TEMACS = `/bin/pwd`/temacs
-+RUN_TEMACS = $(RUNPROGRAM) `/bin/pwd`/temacs
++RUN_TEMACS = $(RUNPROGRAM) -- `/bin/pwd`/temacs
  
  UNEXEC_OBJ = @UNEXEC_OBJ@
  
@@ -506,9 +506,9 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  	  rm -f emacs$(EXEEXT); \
 -	  ln temacs$(EXEEXT) emacs$(EXEEXT); \
 +	  echo "#!/bin/bash" > emacs$(EXEEXT); \
-+	  echo "$(NACL_SEL_LDR) -E \\" >> emacs$(EXEEXT); \
-+	  echo 'EMACSLOADPATH=$${EMACSLOADPATH} \' >> emacs$(EXEEXT); \
-+	  echo "$(RUNPROGRAM_ARGS) $(PWD)/temacs$(EXEEXT) \\" >> emacs$(EXEEXT); \
++	  echo 'EMACSLOADPATH=$${EMACSLOADPATH} \\' >> emacs$(EXEEXT); \
++	  echo "$(RUNPROGRAM) -p \\" >> emacs$(EXEEXT); \
++	  echo "$(RUNPROGRAM_ARGS) -- $(PWD)/temacs$(EXEEXT) \\" >> emacs$(EXEEXT); \
 +	  echo ' "$$@"' >> emacs$(EXEEXT); \
 +	  chmod a+x emacs$(EXEEXT); \
  	else \
@@ -520,8 +520,8 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  	-rm -f $(etc)/DOC
 -	$(libsrc)/make-docfile -d $(srcdir) $(SOME_MACHINE_OBJECTS) $(obj) > $(etc)/DOC
 -	$(libsrc)/make-docfile -a $(etc)/DOC -d $(lispsource) `sed -n -e 's| \\\\||' -e 's|^[ 	]*$$(lispsource)/||p' $(srcdir)/lisp.mk`
-+	cd $(srcdir) $(RUNPROGRAM) ${PWD}/$(libsrc)/make-docfile$(EXEEXT) $(SOME_MACHINE_OBJECTS) ${PWD}/$(obj) > ${PWD}/$(etc)/DOC
-+	cd $(libspsource) && $(RUNPROGRAM) ${PWD}/$(libsrc)/make-docfile$(EXEEXT) -a ${PWD}/$(etc)/DOC `sed -n -e 's| \\\\||' -e 's|^[ 	]*$$(lispsource)/||p' ${PWD}/$(srcdir)/lisp.mk`
++	cd $(srcdir) $(RUNPROGRAM) -- ${PWD}/$(libsrc)/make-docfile$(EXEEXT) $(SOME_MACHINE_OBJECTS) ${PWD}/$(obj) > ${PWD}/$(etc)/DOC
++	cd $(libspsource) && $(RUNPROGRAM) -- ${PWD}/$(libsrc)/make-docfile$(EXEEXT) -a ${PWD}/$(etc)/DOC `sed -n -e 's| \\\\||' -e 's|^[ 	]*$$(lispsource)/||p' ${PWD}/$(srcdir)/lisp.mk`
  
  $(libsrc)/make-docfile$(EXEEXT):
  	cd $(libsrc); $(MAKE) $(MFLAGS) make-docfile$(EXEEXT)
@@ -530,7 +530,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  gl-stamp: $(libsrc)/make-docfile$(EXEEXT) $(GLOBAL_SOURCES)
  	@rm -f gl-tmp
 -	$(libsrc)/make-docfile -d $(srcdir) -g $(obj) > gl-tmp
-+	cd $(srcdir) && $(RUNPROGRAM) ${PWD}/$(libsrc)/make-docfile$(EXEEXT) -g $(obj) > ${PWD}/gl-tmp
++	cd $(srcdir) && $(RUNPROGRAM) -- ${PWD}/$(libsrc)/make-docfile$(EXEEXT) -g $(obj) > ${PWD}/gl-tmp
  	$(srcdir)/../build-aux/move-if-change gl-tmp globals.h
  	echo timestamp > $@
  
@@ -558,9 +558,9 @@ diff --git a/src/Makefile.in b/src/Makefile.in
 -	  rm -f bootstrap-emacs$(EXEEXT); \
 -	  ln temacs$(EXEEXT) bootstrap-emacs$(EXEEXT); \
 +	  echo "#!/bin/bash" > bootstrap-emacs$(EXEEXT); \
-+	  echo "$(NACL_SEL_LDR) -E \\" >> bootstrap-emacs$(EXEEXT); \
 +	  echo 'EMACSLOADPATH=$${EMACSLOADPATH} \' >> bootstrap-emacs$(EXEEXT); \
-+	  echo "$(RUNPROGRAM_ARGS) $(PWD)/temacs$(EXEEXT) \\" >> bootstrap-emacs$(EXEEXT); \
++	  echo "$(RUNPROGRAM) -p \\" >> bootstrap-emacs$(EXEEXT); \
++	  echo "$(RUNPROGRAM_ARGS) -- $(PWD)/temacs$(EXEEXT) \\" >> bootstrap-emacs$(EXEEXT); \
 +	  echo ' "$$@"' >> bootstrap-emacs$(EXEEXT); \
 +	  chmod a+x bootstrap-emacs$(EXEEXT); \
  	else \

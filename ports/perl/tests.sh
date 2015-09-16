@@ -55,8 +55,7 @@ for DIR in $INCLUDE_DIRS; do
     if [[ ${FILE:(-2)} == ".t" &&
           ${INCLUDE_FILES[$ARRAY_IDX]} == *${FILE::(-2)}* ]]; then
       # do the test
-      OUTPUT=`env -i ../perl.sh ${DIR}/${FILE}` ||
-             ``
+      OUTPUT=`../perl.sh ${DIR}/${FILE}`
       RE='^1..[0-9]+$'
       LIMITS=$(echo $OUTPUT | cut -d' ' -f 1)
       if ! [[ "${LIMITS}" =~ $RE ]]; then
