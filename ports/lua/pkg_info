@@ -1,4 +1,4 @@
-NAME=lua5.3
+NAME=lua
 VERSION=5.3.0
 ARCHIVE_ROOT=lua-5.3.0
 URL=http://www.lua.org/ftp/lua-5.3.0.tar.gz

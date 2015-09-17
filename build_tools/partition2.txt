@@ -83,8 +83,7 @@ builder 0 (total: 14973)
   nano
   mpc
   xaos
-  lua5.3
-  lua-ppapi
+  lua
   less
   perl
   libsodium

@@ -4,7 +4,7 @@ Lua for Chrome
 This is package of the Lua interactive shell built to run under Native Client
 within Chrome/Chromium.
 
-The NaCL binary is essentially an slightly modfied version of the 'lua'
+The NaCl binary is essentially an slightly modfied version of the 'lua'
 executable linked with the 'nacl_io' library in order to provide emulated POSIX
 I/O within Chrome.  The terminal is rendered in HTML/CSS using hterm
 (https://github.com/libapps-mirror/libapps).  See naclterm.js for more

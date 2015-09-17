@@ -254,8 +254,7 @@ def LoadCanned(parts):
         'readline',
         'libtar',
         'zlib',
-        'lua5.3',
-        'lua-ppapi',
+        'lua',
     ]
   return partitions
 

@@ -5,6 +5,7 @@
  */
 
 NaClTerm.nmf = 'lua.nmf'
+NaClTerm.env = ['NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt']
 
 function log(message) {
   document.getElementById('log').textContent = message;

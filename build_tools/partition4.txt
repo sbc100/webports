@@ -141,8 +141,7 @@ builder 1 (total: 8350)
   id3lib
   cups
   xaos
-  lua5.3
-  lua-ppapi
+  lua
   libsodium
   libogg
   liboggz

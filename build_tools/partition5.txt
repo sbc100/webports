@@ -383,8 +383,7 @@ builder 4 (total: 7031)
   tiff
   libwebp
   sdl2-image
-  lua5.3
-  lua-ppapi
+  lua
   sdl-image
   xeyes
   twm
