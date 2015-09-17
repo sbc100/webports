@@ -54,7 +54,7 @@ coreutils|coreutils-5.2.1 \
 nacl-spawn|nacl-spawn-0.1 \
 corelibs|corelibs-0.2 \
 file|file-5.24 \
-curl|curl-7.37.0 \
+curl|curl-7.44.0 \
 drod|drod \
 emacs|emacs-24.3 \
 findutils|findutils-4.4.2 \
