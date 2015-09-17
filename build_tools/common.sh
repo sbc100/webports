@@ -258,6 +258,11 @@ if [ "${NACL_ARCH}" = "arm" -a "${OS_NAME}" != "Linux" ]; then
   SKIP_SEL_LDR_TESTS=1
 fi
 
+# sel_ldr.py doesn't know how to run bionic-built nexes
+if [ "${TOOLCHAIN}" = "bionic" ]; then
+  SKIP_SEL_LDR_TESTS=1
+fi
+
 # Skip sel_ldr tests when building x86_64 targets on a 32-bit host
 if [ "${NACL_ARCH}" = "x86_64" -a "${HOST_IS_32BIT}" = "1" ]; then
   echo "WARNING: Building x86_64 targets on i686 host. Cannot run tests."
