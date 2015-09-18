@@ -4,5 +4,4 @@ URL=http://curl.haxx.se/download/curl-7.44.0.tar.bz2
 LICENSE=CUSTOM:README
 SHA1=879a186944e7b06e619a2eb07cef729b5702345c
 DEPENDS=(openssl nacl-spawn)
-# fcntl detection failing for glibc/arm
-DISABLED_TOOLCHAIN=(emscripten glibc/arm)
+DISABLED_TOOLCHAIN=(emscripten)
