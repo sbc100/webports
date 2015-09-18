@@ -269,30 +269,6 @@ if [ "${NACL_ARCH}" = "x86_64" -a "${HOST_IS_32BIT}" = "1" ]; then
   SKIP_SEL_LDR_TESTS=1
 fi
 
-if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "arm" ]; then
-  # The recent glibc toolchain stubs out certain functions that nacl_io
-  # provides.  Because the stubs are listed in <gnu/stubs.h>, autoconf
-  # scripts will then detect them as missing even though that in the headers
-  # and nacl_io provides them at link time.
-  export ac_cv_func_fcntl=yes
-  export ac_cv_func_pipe=yes
-  export ac_cv_func_select=yes
-  export ac_cv_func_socket=yes
-  export ac_cv_func_poll=yes
-  export ac_cv_func_statvfs=yes
-  export ac_cv_func_fstatvfs=yes
-  export ac_cv_func_setsid=yes
-  export ac_cv_func_connect=yes
-  export ac_cv_func_tcgetattr=yes
-  export ac_cv_func_tcsetattr=yes
-  export ac_cv_func_getrusage=yes
-  export ac_cv_func_setrusage=yes
-  export ac_cv_func_setpgid=yes
-  export ac_cv_func_getpgid=yes
-  export ac_cv_func_getgroups=yes
-  export ac_cv_func_setgroups=yes
-fi
-
 
 ######################################################################
 # Always run
@@ -338,6 +314,22 @@ InstallConfigSite() {
 
 
 #
+# $1 - src
+# $2 - dest
+#
+InstallHeader() {
+  local src=$1
+  local dest=$2
+  if [ -f "${dest}" ]; then
+    if cmp "${src}" "${dest}" > /dev/null; then
+      return
+    fi
+  fi
+  MakeDir "$(dirname ${dest})"
+  LogExecute install -m 644 "${src}" "${dest}"
+}
+
+#
 # When configure checks for system headers is doesn't pass CFLAGS
 # to the compiler.  This means that any includes that live in paths added
 # with -I are not found.  Here we push the additional newlib headers
@@ -350,6 +342,10 @@ InjectSystemHeaders() {
     local TC_DIR=${TOOLCHAIN}
   fi
 
+  if [ ${TOOLCHAIN} = "glibc" ]; then
+    InstallHeader "${TOOLS_DIR}/stubs.h" "${NACLPORTS_INCLUDE}/gnu/stubs.h"
+  fi
+
   local TC_INCLUDES=${NACL_SDK_ROOT}/include/${TC_DIR}
   if [ ! -d "${TC_INCLUDES}" ]; then
     return
@@ -358,15 +354,10 @@ InjectSystemHeaders() {
   MakeDir ${NACLPORTS_INCLUDE}
   for inc in $(find ${TC_INCLUDES} -type f); do
     inc="${inc#${TC_INCLUDES}}"
+    inc="${inc#${TOOLS_DIR}}"
     src="${TC_INCLUDES}${inc}"
     dest="${NACLPORTS_INCLUDE}${inc}"
-    if [ -f "${dest}" ]; then
-      if cmp "${src}" "${dest}" > /dev/null; then
-        continue
-      fi
-    fi
-    MakeDir "$(dirname ${dest})"
-    LogExecute install -m 644 "${src}" "${dest}"
+    InstallHeader $src $dest
   done
 }
 
