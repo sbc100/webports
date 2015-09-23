@@ -29,12 +29,12 @@ BuildStep() {
   CXXFLAGS="${CXXFLAGS/-O2/-O1}"
 
   # assumes pwd has makefile
-  LogExecute make clean
-  LogExecute make -j${OS_JOBS} ENABLE_SHARED=${NACL_SHARED}
+  LogExecute make -f Makefile.gnu clean
+  LogExecute make -f Makefile.gnu -j${OS_JOBS} ENABLE_SHARED=${NACL_SHARED}
 }
 
 InstallStep() {
   export INCDIR=${DESTDIR_INCLUDE}
   export INSTALLDIR=${DESTDIR_LIB}
-  LogExecute make install ENABLE_SHARED=${NACL_SHARED}
+  LogExecute make -f Makefile.gnu install ENABLE_SHARED=${NACL_SHARED}
 }
