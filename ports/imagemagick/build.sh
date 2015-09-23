@@ -11,7 +11,12 @@ else
   EXE_DIR=".libs/"
 fi
 
-EXTRA_CONFIGURE_ARGS="--disable-largefile --without-fftw --without-xml"
+EXTRA_CONFIGURE_ARGS="
+--disable-largefile
+--without-fftw
+--without-xml
+--without-fontconfig
+--without-pango"
 
 EXECUTABLES="
   utilities/animate${NACL_EXEEXT}
