@@ -53,6 +53,7 @@ readonly NACLPORTS_BIN=${NACL_PREFIX}/bin
 # embed this this information.
 readonly PREFIX=/naclports-dummydir
 
+NACLPORTS_LIBS=""
 NACLPORTS_CFLAGS=""
 NACLPORTS_CXXFLAGS=""
 NACLPORTS_CPPFLAGS="${NACL_CPPFLAGS}"
@@ -778,7 +779,7 @@ SetupSDKBuildSystem() {
   export OUTBASE=${SRC_DIR}
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
   export NACL_PREFIX
   export NACL_PACKAGES_PUBLISH
   export NACL_SRC
@@ -837,14 +838,16 @@ SetupCrossEnvironment() {
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
   export ARFLAGS=${NACL_ARFLAGS}
   export AR_FLAGS=${NACL_ARFLAGS}
+  export LIBS=${LIBS:-${NACLPORTS_LIBS}}
 
   echo "CPPFLAGS=${CPPFLAGS}"
   echo "CFLAGS=${CFLAGS}"
   echo "CXXFLAGS=${CXXFLAGS}"
   echo "LDFLAGS=${LDFLAGS}"
+  echo "LIBS=${LIBS}"
 }
 
 GetRevision() {
@@ -1058,7 +1061,7 @@ ConfigureStep_CMake() {
   SetupCrossPaths
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
-  export LDFLAGS="${NACLPORTS_LDFLAGS}"
+  export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
   LogExecute cmake "${SRC_DIR}" \
            -DCMAKE_TOOLCHAIN_FILE=${TOOLS_DIR}/XCompile-nacl.cmake \
            -DNACLAR=${NACLAR} \
@@ -1111,7 +1114,8 @@ DefaultPythonModuleBuildStep() {
   export NACL_BUILD_TREE=${NACL_DEST_PYROOT}
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
-  export LDFLAGS=${NACLPORTS_LDFLAGS}
+  export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
+  export LIBS="${NACLPORTS_LIBS}"
   LogExecute "${NACL_HOST_PYTHON}" setup.py \
     ${NACL_PYSETUP_ARGS:-} \
     install "--prefix=${NACL_DEST_PYROOT}"
