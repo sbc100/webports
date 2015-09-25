@@ -1,86 +1,61 @@
-diff --git a/lib/getcwd.c b/lib/getcwd.c
---- a/lib/getcwd.c
-+++ b/lib/getcwd.c
-@@ -106,6 +106,14 @@
- # define MATCHING_INO(dp, ino) true
- #endif
- 
-+#if defined __native_client__ && defined _NEWLIB_VERSION
-+/* openat() is currently non-existent for newlib builds, but AT_FDCWD is
-+   present in the headers.  Explicatly undefine it here to avoid use of
-+   openat().
-+   TODO(sbc): remove this once we fix this bug: http://crbug.com/436533 */
-+#undef AT_FDCWD
-+#endif
-+
- #if !_LIBC
- # define __getcwd getcwd
- # define __lstat lstat
-diff --git a/lib/mktime.c b/lib/mktime.c
---- a/lib/mktime.c
-+++ b/lib/mktime.c
-@@ -141,8 +141,11 @@ ydhms_diff (long int year1, long int yday1, int hour1, int min1, int sec1,
- 	    int year0, int yday0, int hour0, int min0, int sec0)
- {
-   verify (C99_integer_division, -1 / 2 == 0);
-+  /* This check looks simply wrong. tar-1.27.1 does not have this check. */
-+#if !defined(__native_client__)
-   verify (long_int_year_and_yday_are_wide_enough,
- 	  INT_MAX <= LONG_MAX / 2 || TIME_T_MAX <= UINT_MAX);
-+#endif
- 
-   /* Compute intervening leap days correctly even if year is negative.
-      Take care to avoid integer overflow here.  */
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -34537,7 +34537,6 @@ $as_echo "$gl_cv_cc_uninitialized_supported" >&6; }
+     -Wswitch \
+     -Wswitch-default \
+     -Wsync-nand \
+-    -Wsystem-headers \
+     -Wtrampolines \
+     -Wtrigraphs \
+     -Wtype-limits \
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
-@@ -178,7 +178,7 @@ LDFLAGS = @LDFLAGS@
+@@ -873,7 +873,7 @@ LIBGNU_LTLIBDEPS = @LIBGNU_LTLIBDEPS@
  LIBICONV = @LIBICONV@
  LIBINTL = @LIBINTL@
  LIBOBJS = @LIBOBJS@
 -LIBS = @LIBS@
 +LIBS = @LIBS@ $(EXTRA_LIBS)
- LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
- LIB_SETSOCKOPT = @LIB_SETSOCKOPT@
- LTLIBICONV = @LTLIBICONV@
+ LIBUNISTRING_UNITYPES_H = @LIBUNISTRING_UNITYPES_H@
+ LIBUNISTRING_UNIWIDTH_H = @LIBUNISTRING_UNIWIDTH_H@
+ LIB_ACL = @LIB_ACL@
 diff --git a/src/extract.c b/src/extract.c
 --- a/src/extract.c
 +++ b/src/extract.c
-@@ -255,6 +255,14 @@ set_stat (char const *file_name,
- 
- 	  utimbuf.modtime = stat_info->st_mtime;
- 
-+          /* TODO(bradnelson): Remove this when all mounts handle utime. */
-+#if defined(__native_client__)
-+	  if (utime (file_name, &utimbuf) < 0) {
-+            if (errno != ENOSYS && errno != EINVAL) {
-+	      utime_error (file_name);
-+            }
-+          }
-+#else
- 	  if (utime (file_name, &utimbuf) < 0)
- 	    utime_error (file_name);
- 	  else
-@@ -262,6 +270,7 @@ set_stat (char const *file_name,
- 	      check_time (file_name, utimbuf.actime);
- 	      check_time (file_name, utimbuf.modtime);
- 	    }
-+#endif
+@@ -357,6 +357,10 @@ set_stat (char const *file_name,
+ 	  check_time (file_name, ts[1]);
  	}
+       else if (typeflag != SYMTYPE || implemented (errno))
++        /* TODO(bradnelson): Remove this when all mounts handle utime. */
++#if defined(__native_client__)
++	if (errno != ENOSYS && errno != EINVAL)
++#endif
+ 	utime_error (file_name);
+     }
  
-       /* Some systems allow non-root users to give files away.  Once this
 diff --git a/src/tar.c b/src/tar.c
 --- a/src/tar.c
 +++ b/src/tar.c
-@@ -37,6 +37,7 @@
- #include "common.h"
- 
- #include <getdate.h>
+@@ -42,6 +42,7 @@
+ #include <closeout.h>
+ #include <configmake.h>
+ #include <exitfail.h>
 +#include <locale.h>
- #include <localedir.h>
+ #include <parse-datetime.h>
  #include <rmt.h>
- #include <prepargs.h>
-@@ -1617,7 +1618,7 @@ decode_options (int argc, char **argv)
+ #include <rmt-command.h>
+@@ -1348,7 +1349,7 @@ static char const *const sort_mode_arg[] = {
+ static int sort_mode_flag[] = {
+     SAVEDIR_SORT_NONE,
+     SAVEDIR_SORT_NAME,
+-    SAVEDIR_SORT_INODE
++    SAVEDIR_SORT_FASTREAD
+ };
+ 
+ ARGMATCH_VERIFY (sort_mode_arg, sort_mode_flag);
+@@ -2716,7 +2717,7 @@ more_options (int argc, char **argv)
  
  /* Main routine for tar.  */
  int
@@ -88,4 +63,4 @@ diff --git a/src/tar.c b/src/tar.c
 +nacl_main (int argc, char **argv)
  {
    set_start_time ();
-   program_name = argv[0];
+   set_program_name (argv[0]);

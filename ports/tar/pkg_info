@@ -1,9 +1,9 @@
 NAME=tar
-VERSION=1.15
-URL=http://ftp.gnu.org/gnu/tar/tar-1.15.tar.bz2
+VERSION=1.28
+URL=http://ftp.gnu.org/gnu/tar/tar-1.28.tar.bz2
 LICENSE=GPL
 DEPENDS=(nacl-spawn)
 # missing sysexits.h
 DISABLED_LIBC=(bionic)
-SHA1=4ef190122a2c4b28bfd1c74e017c14805f81f0e0
+SHA1=668ea52014ef7e70afc4ff7324410ee32f2970ef
 DISABLED_TOOLCHAIN=(emscripten)
