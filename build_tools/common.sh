@@ -275,21 +275,6 @@ fi
 # Always run
 ######################################################################
 
-CheckPatchVersion() {
-  # refuse patch 2.6
-  if ! which patch > /dev/null; then
-    echo 'error: patch command not found, please install and try again.'
-    exit 1
-  fi
-  if [ "$(patch --version 2> /dev/null | sed q)" = "patch 2.6" ]; then
-    echo "patch 2.6 is incompatible with these scripts."
-    echo "Please install either version 2.5.9 (or earlier)"
-    echo "or version 2.6.1 (or later.)"
-    exit -1
-  fi
-}
-
-
 CheckToolchain() {
   if [ -n "${LIBC:-}" ]; then
     if [ "${LIBC}" == "glibc" ]; then
@@ -465,16 +450,6 @@ Banner() {
 LogExecute() {
   echo "$@"
   "$@"
-}
-
-
-# Set the ARCHIVE_NAME variable to the name of the upstream
-# tarball.  If ${URL} is not define (when there is no upstream)
-# then leave ARCHIVE_NAME unset.
-ArchiveName() {
-  if [ -z "${ARCHIVE_NAME:-}" -a -n "${URL:-}" ]; then
-    ARCHIVE_NAME=${URL_FILENAME:-$(basename ${URL})}
-  fi
 }
 
 
@@ -894,6 +869,7 @@ FixupExecutablesList() {
   EXECUTABLES=${executables_modified}
 }
 
+
 VerifySharedLibraryOrder() {
   if [ "${NACL_LIBC}" != "glibc" ]; then
     return
@@ -949,7 +925,7 @@ DefaultPatchStep() {
   # TODO(sbc): migrate auto patching of config sub and configure
   # and remove this function.
 
-  if [ -z "${ARCHIVE_NAME:-}" ] && ! IsGitRepo; then
+  if [ -z "${URL:-}" ] && ! IsGitRepo; then
     return
   fi
 
@@ -1182,18 +1158,7 @@ Validate() {
     return
   fi
 
-  # new SDKs have a single validator called ncval whereas older (<= 28)
-  # have a different validator for each arch.
-  if [ -f "${NACL_SDK_ROOT}/tools/ncval" ]; then
-    NACL_VALIDATE="${NACL_SDK_ROOT}/tools/ncval"
-  elif [ "${NACL_ARCH}" = "arm" ]; then
-    NACL_VALIDATE="${NACL_SDK_ROOT}/tools/ncval_arm"
-  elif [ "${NACL_ARCH}" = "x86_64" ]; then
-    NACL_VALIDATE="${NACL_SDK_ROOT}/tools/ncval_x86_64 --errors"
-  else
-    NACL_VALIDATE="${NACL_SDK_ROOT}/tools/ncval_x86_32"
-  fi
-  LogExecute "${NACL_VALIDATE}" "$@"
+  LogExecute "${NACL_SDK_ROOT}/tools/ncval" "$@"
   if [ $? != 0 ]; then
     exit 1
   fi
@@ -1547,7 +1512,6 @@ RunStep() {
     fi
     ChangeDir "${DIR}"
   fi
-  ArchiveName
   # Step functions are run in sub-shell so that they are independent
   # from each other.
   ( ${STEP_FUNCTION} )
@@ -1624,7 +1588,6 @@ RunPublishStep()    {
 # any essential checking/setup operations.
 ######################################################################
 CheckToolchain
-CheckPatchVersion
 PatchSpecsFile
 InjectSystemHeaders
 InstallConfigSite
