@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXECUTABLES="convert libyuv_unittest"
+
 # Workaround for arm-gcc bug:
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 # TODO(sbc): remove this once the issue is fixed
@@ -13,8 +15,11 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
 fi
 
+if [ "${NACL_ARCH}" = "x86_64" ]; then
+  NACLPORTS_CPPFLAGS+=" -DLIBYUV_DISABLE_X86=1"
+fi
+
 EXTRA_CMAKE_ARGS="-DTEST=ON"
-EXECUTABLES="convert libyuv_unittest"
 
 TestStep() {
   # TODO(sbc): re-enable i686 testing once we fix this gtest-releated issue:

@@ -5,4 +5,4 @@ LICENSE=BSD:COPYING.txt
 SHA1=0edc0866f9abe2665fed276094aa618bfb2efb6b
 # sched_yield missing
 DISABLED_LIBC=(bionic)
-DISABLED_TOOLCHAIN=(emscripten clang-newlib/i686)
+DISABLED_TOOLCHAIN=(emscripten)

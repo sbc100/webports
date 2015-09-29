@@ -2,7 +2,5 @@ NAME=libyuv
 VERSION=632c50f
 URL=https://chromium.googlesource.com/external/libyuv.git@632c50f
 DEPENDS=(glibc-compat jpeg8d)
-# validation errors: improper memory address - bad index
-# https://code.google.com/p/naclports/issues/detail?id=204
-DISABLED_TOOLCHAIN=(clang-newlib/x86_64 emscripten)
+DISABLED_TOOLCHAIN=(emscripten)
 LICENSE=BSD

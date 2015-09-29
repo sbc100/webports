@@ -1,6 +1,15 @@
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
+@@ -6492,7 +6492,7 @@ int i; static j; int *p; char *c;
+   switch (*p = p = *c) { case 0: printf("%Q", c, p); }
+   *c = &i; c = p;
+   while (1 || (unsigned int)3 >= 0 || ((int)-1) == ((unsigned int)1));
+-  return;
++  return 0;
+   ;
+   return 0;
+ }
 @@ -12610,10 +12610,10 @@ done
  $as_echo_n "checking if mkstemp is safe... " >&6; }
    if test x$ac_cv_func_mkstemp != xno; then
