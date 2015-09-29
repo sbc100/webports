@@ -1,6 +1,6 @@
 NAME=regal
-VERSION=f106e4cd
-URL=https://github.com/p3/regal/archive/f106e4cd/Regal-f106e4cd.tar.gz
+VERSION=1ba938a
+URL=https://github.com/p3/regal/archive/f106e4cd/Regal-1ba938a.tar.gz
 ARCHIVE_ROOT=regal-f106e4cd0e780b0995a26498365dceb0ed025832
 DEPENDS=(libpng)
 # bionic: issue with log2 macro
