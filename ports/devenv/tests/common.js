@@ -37,6 +37,19 @@ DevEnvTest.prototype.setUp = function() {
     return self.mkdir('/home');
   }).then(function() {
     return self.mkdir('/home/user');
+  }).then(function() {
+    return self.mkdir('/usr');
+  }).then(function() {
+    return self.mkdir('/usr/etc');
+  }).then(function() {
+    return self.mkdir('/usr/etc/pkg');
+  }).then(function() {
+    return self.mkdir('/usr/etc/pkg/repos');
+  }).then(function() {
+    if (self.params['latest'] === '1')
+      return self.setRepo(window.location.origin + '/publish');
+  }).then(function() {
+    return self.mkdir('/home/user');
   });
 };
 
@@ -87,13 +100,18 @@ DevEnvTest.prototype.spawnCommand = function(cmd, cmdPrefix) {
     cmdPrefix = '. /mnt/http/setup-environment && ';
   }
 
+  var env = ['HOME=/home/user', 'NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt'];
+  if (this.params['latest'] === '1') {
+    env.push('NACL_DEVENV_LOCAL=1');
+  }
+
   return Promise.resolve().then(function() {
     self.devEnv.postMessage({
       'name': 'nacl_spawn',
       'nmf': 'bash.nmf',
       'argv': ['bash', '-c', cmdPrefix + cmd],
       'cwd': '/home/user',
-      'envs': ['HOME=/home/user'],
+      'envs': env,
     });
     return self.gatherStdoutUntil('nacl_spawn_reply');
   }).then(function(msg) {
@@ -156,21 +174,13 @@ DevEnvTest.prototype.sigint = function(pid) {
 };
 
 DevEnvTest.prototype.installPackage = function(name) {
-  var cmd = 'bash /mnt/http/package -f -i ' + name;
-  if (this.params['latest'] === '1') {
-    cmd += ' -s ' + window.location.origin + '/publish';
-  }
+  var cmd = 'pkg -d install -f -y ' + name;
   chrometest.info(cmd);
   return this.checkCommand(cmd, 0);
 };
 
 DevEnvTest.prototype.installDefaultPackages = function(name) {
-  if (this.params['latest'] === '1') {
-    var cmd = 'bash /mnt/http/install-base-packages.sh';
-    cmd += ' -f -s ' + window.location.origin + '/publish';
-  } else {
-    var cmd = '. /mnt/http/bashrc';
-  }
+  var cmd = 'bash /mnt/http/install-base-packages.sh';
   chrometest.info(cmd);
   return this.checkCommand(cmd, 0);
 };
@@ -222,6 +232,19 @@ DevEnvTest.prototype.writeFile = function(fileName, data) {
     return self.devEnv.wait();
   }).then(function(msg) {
     ASSERT_EQ('file_write_reply', msg.name);
+  });
+};
+
+DevEnvTest.prototype.setRepo = function(data) {
+  var self = this;
+  return Promise.resolve().then(function() {
+    self.devEnv.postMessage({
+      'name': 'set_repo',
+      'data': data
+    });
+    return self.devEnv.wait();
+  }).then(function(msg) {
+    ASSERT_EQ('set_repo_reply', msg.name);
   });
 };
 

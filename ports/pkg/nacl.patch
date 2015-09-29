@@ -646,7 +646,49 @@ diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
  
  	return;
  }
-@@ -1057,7 +1074,10 @@ pkg_ini(const char *path, const char *reposdir, pkg_init_flags flags)
+@@ -704,8 +721,25 @@ load_repo_files(const char *repodir, pkg_init_flags flags)
+ 
+ 	pkg_debug(1, "PkgConfig: loading repositories in %s", repodir);
+ 
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++	/*
++	 * scandir is currnetly broken with newlib and nacl_io
++	 * TODO(sbc): remove this once the fix lands:
++	 * https://codereview.chromium.org/1304983004/
++	 */
++	nents = 1;
++	ent = malloc(sizeof(void*));
++	i = 0;
++	DIR* dir = opendir(repodir);
++	if (!dir)
++		return;
++	while (ent[i] = readdir(dir)) {
++		if (ent[i]->d_name[0] == '.')
++			continue;
++#else
+ 	nents = scandir(repodir, &ent, nodots, alphasort);
+ 	for (i = 0; i < nents; i++) {
++#endif
+ 		if ((n = strlen(ent[i]->d_name)) <= 5)
+ 			continue;
+ 		p = &ent[i]->d_name[n - 5];
+@@ -716,10 +750,15 @@ load_repo_files(const char *repodir, pkg_init_flags flags)
+ 			    ent[i]->d_name);
+ 			load_repo_file(path, flags);
+ 		}
++#if !(defined(__native_client__) && defined(_NEWLIB_VERSION))
+ 		free(ent[i]);
++#endif
+ 	}
+ 	if (nents >= 0)
+ 		free(ent);
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
++	closedir(dir);
++#endif
+ }
+ 
+ static void
+@@ -1057,7 +1096,10 @@ pkg_ini(const char *path, const char *reposdir, pkg_init_flags flags)
  	if (evpipe != NULL)
  		connect_evpipe(evpipe);
  
@@ -1303,7 +1345,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	*rc = EPKG_OK;
  	return (res);
  }
-@@ -887,7 +1049,12 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+@@ -887,9 +1049,21 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
  
  	dbdir = pkg_object_string(pkg_config_get("PKG_DBDIR"));
  
@@ -1312,11 +1354,22 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
 +	fd = pkg_repo_fetch_remote_tmp(repo, "meta", "txz", t, &rc, &tmp_file);
 +#else
  	fd = pkg_repo_fetch_remote_tmp(repo, "meta", "txz", t, &rc);
+-	if (fd == -1)
+-		return (rc);
 +#endif
- 	if (fd == -1)
- 		return (rc);
++	if (fd == -1) {
++#ifdef __native_client__
++		fd = pkg_repo_fetch_remote_tmp(repo, "meta", "tbz", t, &rc, &tmp_file);
++#else
++		fd = pkg_repo_fetch_remote_tmp(repo, "meta", "tbz", t, &rc);
++#endif
++		if (fd == -1)
++			return (rc);
++	}
  
-@@ -919,12 +1086,18 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+ 	snprintf(filepath, sizeof(filepath), "%s/%s.meta", dbdir, pkg_repo_name(repo));
+ 
+@@ -919,12 +1093,18 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
  	}
  
  	close(fd);
@@ -1335,7 +1388,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	/* Map meta file for extracting pubkeys from it */
  	if (stat(filepath, &st) == -1) {
  		pkg_emit_errno("pkg_repo_fetch_meta", "cannot stat meta fetched");
-@@ -944,6 +1117,7 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+@@ -944,6 +1124,7 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
  		rc = EPKG_FATAL;
  		goto cleanup;
  	}

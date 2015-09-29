@@ -78,9 +78,6 @@ function NaClProcessManager() {
   // Handles the set of pipes.
   self.pipeServer = new PipeServer();
 
-  // NaCl Architecture (initialized lazily by naclArch).
-  self.naclArch_ = undefined;
-
   // Callback to be called each time a process responds with a mount status
   // update.
   self.mountUpdateCallback = null;
@@ -272,25 +269,24 @@ NaClProcessManager.EMBED_HEIGHT_DEFAULT  = '50%';
  * Called to get the nacl architectgure.
  * @param {naclArchCallback} callback.
  */
-NaClProcessManager.prototype.naclArch = function(callback) {
-  var self = this;
-  if (self.naclArch_ === undefined) {
+function getNaClArch(callback) {
+  if (getNaClArch.naclArch_ === undefined) {
     if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
       chrome.runtime.getPlatformInfo(function(platformInfo) {
-        self.naclArch_ = {
+        getNaClArch.naclArch_ = {
           'x86-32': 'i686',
           'x86-64': 'x86_64',
           'arm': 'arm',
         }[platformInfo.nacl_arch] || platformInfo.nacl_arch;
-        callback(self.naclArch_);
+        callback(getNaClArch.naclArch_);
       });
       return;
     } else {
-      self.naclArch_ = null;
+      getNaClArch.naclArch_ = null;
     }
   }
   setTimeout(function() {
-    callback(self.naclArch_);
+    callback(getNaClArch.naclArch_);
   }, 0);
 };
 
@@ -994,7 +990,7 @@ NaClProcessManager.prototype.spawn = function(
     nmf, argv, envs, cwd, naclType, parent, callback) {
   var self = this;
 
-  self.naclArch(function(naclArch) {
+  getNaClArch(function(arch) {
     var mimetype = 'application/x-' + naclType;
     if (navigator.mimeTypes[mimetype] === undefined) {
       if (mimetype.indexOf('pnacl') != -1) {
@@ -1086,13 +1082,13 @@ NaClProcessManager.prototype.spawn = function(
     }
 
     if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
-      if (naclArch === null) {
+      if (arch === null) {
         console.log(
             'Browser does not support NaCl/PNaCl or is disabled.');
         callback(-Errno.ENOEXEC, fg);
         return;
       }
-      params['NACL_ARCH'] = naclArch;
+      params['NACL_ARCH'] = arch;
     }
 
     function addParam(name, value) {

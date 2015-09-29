@@ -44,9 +44,9 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
     port.postMessage({name: 'nacl_stdout', output: output});
   });
 
-  function fileReply(name) {
+  function fileReply(name, data) {
     return function() {
-      port.postMessage({name: name});
+      port.postMessage({name: name, data: data});
     };
   }
   function fileError(name) {
@@ -87,6 +87,31 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         break;
       case 'nacl_sigint':
         manager.sigint();
+        break;
+
+      case 'set_repo':
+        /*
+         * Copy the the local NaCl.conf into /usr/etc/pkg/repos/ replacing
+         * the origin.
+         */
+        console.log('set_repo')
+        getNaClArch(function(arch) {
+          var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+              if (xhr.status != 200) {
+                fileError('set_repo_error status=' + xhr.status)('xhr error');
+                return;
+              }
+              var data = xhr.responseText.replace('http://localhost:5103',
+                  msg.data);
+              files.writeText('/usr/etc/pkg/repos/NaCl.conf', data).then(
+                  fileReply('set_repo_reply'), fileError('set_repo_error'));
+            }
+          };
+          xhr.open('GET', '/repos_local_' + arch + '/NaCl.conf', true);
+          xhr.send();
+        });
         break;
 
       case 'file_init':

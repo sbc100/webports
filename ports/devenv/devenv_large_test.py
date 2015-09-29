@@ -22,7 +22,7 @@ test_dir = os.path.join(SCRIPT_DIR, 'tests')
 chrome_test.Main([
     '-C', test_dir,
     '-p', 'TOOLCHAIN=' + TOOLCHAIN,
-    '-t', '120',
+    '-t', '180',
     '--enable-nacl',
     '--load-extension', app,
     'devenv_large_test.html'] + sys.argv[1:])

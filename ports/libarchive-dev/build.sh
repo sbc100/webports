@@ -45,7 +45,7 @@ BuildHost() {
     Banner "Build host version"
     MakeDir ${HOST_BUILD_DIR}
     ChangeDir ${HOST_BUILD_DIR}
-    LogExecute ${SRC_DIR}/configure
+    LogExecute ${SRC_DIR}/configure --without-lzma
     LogExecute make -j${OS_JOBS}
     LogExecute make install DESTDIR=${HOST_INSTALL_DIR}
     cd -

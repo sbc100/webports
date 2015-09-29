@@ -42,48 +42,55 @@ CheckNaClEnabled() {
 }
 
 InstallBasePackages() {
-  local default_packages="
-    -i corelibs \
-    -i nacl-spawn \
-  "
+  echo "===> Installing core packages"
+  local core_packages="
+    coreutils \
+    bash \
+    curl \
+    git \
+    make"
 
-  # For glibc, we need to install some library dependencies first
-  if [[ ${TOOLCHAIN} == glibc ]]; then
-    default_packages+="\
-      -i zlib \
-      -i bzip2 \
-      -i openssl \
-      -i ncurses \
-      -i readline"
+  if [[ -f /usr/etc/pkg/repos/NaCl.conf ]]; then
+    pkg install -y $core_packages
+  else
+    if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
+      local repos_dir=/mnt/http/repos_local_${NACL_ARCH}
+    else
+      local repos_dir=/mnt/http/repos_${NACL_ARCH}
+    fi
+    pkg -R $repos_dir install -y $core_packages
+
+    echo "===> Setting up pkg"
+    # Now that we have coreutils installed we can copy the pkg config
+    # files into place with 'cp'
+    mkdir -p /usr/etc/pkg/repos
+    rm -f /usr/etc/pkg/repos/NaCl.conf
+    cp $repos_dir/NaCl.conf /usr/etc/pkg/repos/
+    pkg update
   fi
 
-  local default_packages+="\
-    -i coreutils \
-    -i bash \
-    -i curl \
-    -i findutils \
-    -i pcre \
-    -i grep \
-    -i git \
-    -i less \
-    -i make \
-    -i nano \
-    -i python \
-    -i vim"
+  echo "===> Installing extra packages"
+  local extra_packages="
+    findutils \
+    grep \
+    less \
+    nano \
+    python \
+    vim"
+  pkg install -y -U $extra_packages
 
   local have_gcc=0
   if [[ ${TOOLCHAIN} == glibc ]]; then
     if [[ ${NACL_ARCH} == i686 || ${NACL_ARCH} == x86_64 ]]; then
-      default_packages+=" \
-    -i binutils \
-    -i gcc \
-    -i mingn"
+      echo "===> Installing compiler packages"
+      dev_packages+=" \
+    binutils \
+    gcc \
+    mingn"
       have_gcc=1
+      pkg install -y -U $dev_packages
     fi
   fi
-
-  # Check for updates on some packages.
-  package ${default_packages[@]} $@
 
   if [[ ${have_gcc} == 0 ]]; then
     echo "WARNING: \

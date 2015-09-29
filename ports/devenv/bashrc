@@ -13,18 +13,6 @@ marker=/var/lib/devenv_setup_complete
 if [[ ! -e $marker ]]; then
   echo "Performing initial devenv setup"
   if /mnt/http/install-base-packages.sh; then
-    echo "===> Setting up pkg"
-    # Now that we have coreutils installed we can copy the pkg config
-    # files into place with 'cp'
-    if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
-      repos_dir=/mnt/http/repos_local
-    else
-      repos_dir=/mnt/http/repos
-    fi
-    mkdir -p /usr/etc/pkg/repos
-    rm -f /usr/etc/pkg/repos/NaCl.conf
-    cp $repos_dir/NaCl.conf /usr/etc/pkg/repos/
-    pkg update
     mkdir -p /var/lib
     touch $marker
   else

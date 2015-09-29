@@ -47,7 +47,20 @@ builder 0 (total: 6869)
   pkg
   devenv
   make
+  pcre
+  grep
+  gcc
+  binutils
+  gmp
+  mpfr
+  mpc
+  mingn
+  nano
+  vim
+  findutils
   devenv-latest
+  binutils-2.25
+  gcc-avr
   libxpm
   libxaw
   yajl
@@ -112,7 +125,6 @@ builder 1 (total: 6880)
   libav
   gsl
   mp4v2
-  vim
   freeimage
   openscenegraph
   libxml2
@@ -123,7 +135,6 @@ builder 1 (total: 6880)
   nettle
   id3lib
   cups
-  nano
   perl
   toybox
   liboggz
@@ -156,7 +167,6 @@ builder 2 (total: 7283)
   bzip2
   gettext
   python3
-  binutils-2.25
   ruby
   geturl
   unzip
@@ -173,7 +183,6 @@ builder 2 (total: 7283)
   sdl
   dosbox
   scummvm
-  findutils
   bochs
   sdl-tests
   m4
@@ -197,10 +206,6 @@ builder 2 (total: 7283)
   libuuid
   alut-demo
   openal-ogg-demo
-  gmp
-  mpfr
-  mpc
-  gcc-avr
 builder 3 (total: 7062)
   corelibs
   clapack
@@ -227,10 +232,8 @@ builder 3 (total: 7062)
   gmp
   mpfr
   snes9x
-  pcre
   libtar
   nacl-spawn
-  grep
   libtomcrypt
   jpeg8d
   libyuv
@@ -265,11 +268,8 @@ builder 3 (total: 7062)
   ipython
   box2d
   dreadthread
-  gcc
   markupsafe
   jinja2
-  binutils
-  mingn
 builder 4 (total: 7031)
   glibc-compat
   zlib

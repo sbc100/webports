@@ -32,24 +32,35 @@ BuildStep() {
       -lgtest ${EXTRA_LIBS}
 }
 
-# $1: Name of repo conf file to write to.
+InstallStep() {
+  return
+}
+
+#
+# $1: Name of directory in which to create the conf file.
 # $2: The http address of repo.
+#
 CreateRepoConfFile() {
-  echo "NaCl: {" > $1
+  MakeDir $1
   local PKG_ARCH=${NACL_ARCH}
   if [ "${PKG_ARCH}" = "x86_64" ]; then
     PKG_ARCH=x86-64
   fi
   if [ "${NACL_ARCH}" = "${TOOLCHAIN}" ]; then
-    echo "    url: $2/pkg_${PKG_ARCH}," >> $1
+    local url="$2/pkg_${PKG_ARCH}"
   else
-    echo "    url: $2/pkg_${TOOLCHAIN}_${PKG_ARCH}," >> $1
+    local url="$2/pkg_${TOOLCHAIN}_${PKG_ARCH}"
   fi
-  echo "    MIRROR_TYPE: HTTP," >> $1
-  echo "}" >> $1
+
+  cat > $1/NaCl.conf <<EOF
+NaCl: {
+    url: $url,
+    MIRROR_TYPE: HTTP,
+}
+EOF
 }
 
-InstallStep() {
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
 
   local APP_DIR=${PUBLISH_DIR}/app
@@ -87,13 +98,11 @@ InstallStep() {
   InstallNaClTerm ${APP_DIR}
 
   # Create Nacl.conf file
-  MakeDir ${APP_DIR}/repos
-  MakeDir ${APP_DIR}/repos_local
-  CreateRepoConfFile "${APP_DIR}/repos_local/NaCl.conf" "${LOCAL_SOURCE}"
-  CreateRepoConfFile "${APP_DIR}/repos/NaCl.conf" "${DEFAULT_SOURCE}"
+  CreateRepoConfFile "${APP_DIR}/repos_local_${NACL_ARCH}" "${LOCAL_SOURCE}"
+  CreateRepoConfFile "${APP_DIR}/repos_${NACL_ARCH}" "${DEFAULT_SOURCE}"
 
   RESOURCES="background.js mounter.css mounter.js bash.js bashrc which
-      install-base-packages.sh package graphical.html devenv.js whitelist.js
+      install-base-packages.sh graphical.html devenv.js whitelist.js
       devenv_16.png devenv_48.png devenv_128.png"
   for resource in ${RESOURCES}; do
     LogExecute install -m 644 ${START_DIR}/${resource} ${APP_DIR}/

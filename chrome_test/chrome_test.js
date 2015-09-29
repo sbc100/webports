@@ -773,7 +773,8 @@ function ASSERT_EQ(expected, actual, context) {
   expected = JSON.stringify(expected);
   actual = JSON.stringify(actual);
   chrometest.assert(expected == actual, 'Expected ' + expected + ' but got ' +
-                    JSON.stringify(actual) + ' when ' + context);
+                    JSON.stringify(actual) + ' when ' +
+                    JSON.stringify(context));
 }
 
 function ASSERT_NE(expected, actual, context) {

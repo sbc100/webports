@@ -41,7 +41,6 @@ BuildRepo() {
   for pkg_dir in ${NACLPORTS_ROOT}/out/packages/prebuilt/pkg/*/ ; do
     local out_dir=${REPO_DIR}/$(basename ${pkg_dir})
     RunPkg $pkg_dir $out_dir
-    gsutil cp -a public-read meta.txz ${gs_url}/$(basename ${pkg_dir})
     gsutil cp -a public-read *.tbz ${gs_url}/$(basename ${pkg_dir})
   done
 }

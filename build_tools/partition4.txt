@@ -27,7 +27,6 @@ builder 0 (total: 8304)
   libxmu
   xbitmaps
   fvwm
-  binutils-2.25
   ncurses
   readline
   ruby
@@ -46,21 +45,12 @@ builder 0 (total: 8304)
   libtheora
   lame
   ffmpeg
-  gmp
-  binutils
-  mpfr
   libav
   snes9x
-  pcre
-  grep
   mp4v2
-  libtomcrypt
-  vim
   libiconv
   blackbox
   m4
-  gawk
-  nettle
   flac
   jpeg8d
   tiff
@@ -69,7 +59,6 @@ builder 0 (total: 8304)
   sdl2
   sdl2-image
   ruby-ppapi
-  mpc
   x264
   xeyes
   twm
@@ -83,10 +72,7 @@ builder 0 (total: 8304)
   libuuid
   tinyxml
   libelf
-  gcc
   thttpd
-  gcc-avr
-  mingn
 builder 1 (total: 8350)
   corelibs
   python-host
@@ -133,6 +119,23 @@ builder 1 (total: 8350)
   pkg
   devenv
   make
+  pcre
+  grep
+  vim
+  gmp
+  nettle
+  libtomcrypt
+  gawk
+  mpfr
+  mpc
+  gcc
+  binutils-2.25
+  gcc-avr
+  binutils
+  mingn
+  nano
+  findutils
+  less
   devenv-latest
   requests
   thingking
@@ -216,8 +219,6 @@ builder 2 (total: 8297)
   lcms
   devil
   yajl
-  nano
-  less
   perl
   zeromq
   toybox
@@ -342,7 +343,6 @@ builder 3 (total: 8408)
   scummvm
   xz
   libarchive-dev
-  findutils
   bochs
   tcl
   tk

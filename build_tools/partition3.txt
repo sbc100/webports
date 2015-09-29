@@ -46,7 +46,6 @@ builder 0 (total: 11062)
   protobuf
   jpeg8d
   imagemagick
-  binutils
   libffi
   glib
   pixman
@@ -57,11 +56,8 @@ builder 0 (total: 11062)
   libvorbis
   lame
   libav
-  pcre
-  grep
   gmp
   libtomcrypt
-  findutils
   libiconv
   blackbox
   libxml2
@@ -97,13 +93,11 @@ builder 0 (total: 11062)
   ipython
   libelf
   dreadthread
-  gcc
   markupsafe
   jinja2
   mongoose
   busybox
   samba
-  mingn
   blis
 builder 1 (total: 11298)
   corelibs
@@ -159,6 +153,13 @@ builder 1 (total: 11298)
   curl
   git
   make
+  mingn
+  gcc
+  binutils
+  vim
+  pcre
+  grep
+  findutils
   devenv-latest
   mp4v2
   xz
@@ -320,7 +321,6 @@ builder 2 (total: 11302)
   scummvm
   jpeg8d
   libyuv
-  vim
   bochs
   tcl
   tk

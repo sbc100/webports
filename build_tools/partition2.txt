@@ -54,6 +54,9 @@ builder 0 (total: 14973)
   curl
   git
   make
+  pcre
+  grep
+  findutils
   devenv-latest
   mpfr
   snes9x
@@ -248,14 +251,11 @@ builder 1 (total: 15415)
   nethack
   dosbox
   libav
-  pcre
-  grep
   scummvm
   xz
   libarchive-dev
   jpeg8d
   libyuv
-  findutils
   bochs
   libiconv
   blackbox
