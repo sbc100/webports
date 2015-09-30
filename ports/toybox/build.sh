@@ -14,10 +14,7 @@ NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 
 export HOSTCC=cc
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  NACLPORTS_LDFLAGS+=" -lglibc-compat"
-fi
+EnableGlibcCompat
 
 NACLPORTS_LDFLAGS+=" -l${NACL_CXX_LIB}"
 

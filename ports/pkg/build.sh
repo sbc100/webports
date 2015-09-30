@@ -14,10 +14,10 @@ if [ "${NACL_SHARED}" = "1" ]; then
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=yes --with-staticonly=no"
   NACLPORTS_CPPFLAGS+=" -D_GNU_SOURCE"
 else
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  LIBS+=" -lglibc-compat"
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=no --with-staticonly=yes"
 fi
+
+EnableGlibcCompat
 
 ConfigureStep() {
   ChangeDir ${SRC_DIR}

@@ -11,9 +11,7 @@ if [ "${NACL_ARCH}" = "arm" ]; then
   NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
 fi
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-fi
+EnableGlibcCompat
 
 if [ "${NACL_ARCH}" = "x86_64" ]; then
   NACLPORTS_CPPFLAGS+=" -DLIBYUV_DISABLE_X86=1"

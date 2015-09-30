@@ -30,10 +30,7 @@ ConfigureStep() {
   NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
   export LIBS+=" -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
       -ltar -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-    LIBS+=" -lglibc-compat"
-  fi
+  EnableGlibcCompat
   ChangeDir ${BUILD_DIR}
   EXTRA_CONFIGURE_ARGS="--without-check"
   DefaultConfigureStep

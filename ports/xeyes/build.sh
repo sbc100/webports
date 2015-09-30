@@ -6,7 +6,4 @@ NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
 export LIBS="-lSM -lICE -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  LIBS+=" -lglibc-compat"
-fi
+EnableGlibcCompat

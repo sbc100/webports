@@ -2,21 +2,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EnableGlibcCompat
+
 EXTRA_CONFIGURE_ARGS="--with-curses"
 EXTRA_CONFIGURE_ARGS+=" --with-installed-readline --enable-readline"
 NACLPORTS_CPPFLAGS+=" -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -Dpipe=nacl_spawn_pipe"
-export LIBS="${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
 
 EXECUTABLES="bash${NACL_EXEEXT}"
 
 # Configure requires this variable to be pre-set when cross compiling.
 export bash_cv_getcwd_malloc=yes
-
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS+=" -lglibc-compat"
-fi
 
 PatchStep() {
   DefaultPatchStep

@@ -5,9 +5,10 @@
 ConfigureStep() {
   if [ "${NACL_LIBC}" = "newlib" ]; then
     # newlib requires different library order to deal with static libraries
-    export LIBS+=" -lXext -lX11 -lxcb -lXau -lglibc-compat"
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+    NACLPORTS_LIBS+=" -lXext -lX11 -lxcb -lXau"
   fi
+
+  EnableGlibcCompat
 
   EXTRA_CONFIGURE_ARGS+=" --disable-shm --enable-explicit-deps --disable-cups \
    --enable-gtk-doc-html=no"

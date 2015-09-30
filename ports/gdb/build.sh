@@ -2,11 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="-lncurses -lppapi_simple -lnacl_io -lppapi"
+NACLPORTS_LIBS+=" -lncurses ${NACL_CLI_MAIN_LIB} -lm"
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+
+EnableGlibcCompat
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  EXTRA_LIBS+=" -lglibc-compat"
   # Since the final link is done with -lnacl_io and not -lglibc-compat
   # we disable getrlimit and setrlimit.  TODO(sbc): add these back if/when
   # nacl_io evolves to include these functions.
@@ -17,21 +18,8 @@ fi
 ConfigureStep() {
   SetupCrossEnvironment
 
-  # TODO(sbc): workaround for compiler warning in gdb-7.7 when building
-  # with latest recent gcc versions (4.9.3)
-  # Remove once this bug is fixes:
-  # https://code.google.com/p/nativeclient/issues/detail?id=4000
-  if [ "${TOOLCHAIN}" = "newlib" -a "${NACL_ARCH}" = "arm" ]; then
-    EXTRA_CONFIGURE_ARGS="--disable-werror"
-  fi
-
-  # clang produced a bunch of truncation warnings related to abs() being
-  # calloed the 'long long' arguments.
-  if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
-    EXTRA_CONFIGURE_ARGS="--disable-werror"
-  fi
-
   LogExecute ${SRC_DIR}/configure --with-curses --with-expat \
+      --disable-werror \
       --with-system-readline \
       --disable-libmcheck \
       --prefix=${PREFIX} \
@@ -56,9 +44,14 @@ BuildStep() {
   DefaultBuildStep
 
   # Build test module.
-  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
+  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${NACLPORTS_LDFLAGS} -g \
       ${START_DIR}/test_module.cc \
       -o ${BUILD_DIR}/test_module_${NACL_ARCH}.nexe -lppapi_cpp -lppapi
+}
+
+InstallStep() {
+  cd gdb
+  DefaultInstallStep
 }
 
 PublishStep() {

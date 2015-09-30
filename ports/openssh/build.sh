@@ -18,8 +18,7 @@ export ac_cv_func_sigaction=yes
 
 export SSHLIBS="${NACL_CLI_MAIN_LIB}"
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS=" -lcrypto -lglibc-compat"
+  NACLPORTS_LIBS+=" -lcrypto"
   export LD="${NACLCXX}"
 fi
 
@@ -29,7 +28,11 @@ if [ "${NACL_LIBC}" = "glibc" ]; then
   EXTRA_CONFIGURE_ARGS+=" --disable-strip"
 fi
 
+EnableGlibcCompat
+
 PublishStep() {
+  DefaultInstallStep
+
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/openssh"
   MakeDir ${ASSEMBLY_DIR}

@@ -4,9 +4,7 @@
 
 BUILD_DIR=${SRC_DIR}
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -isystem ${NACLPORTS_INCLUDE}/glibc-compat"
-fi
+EnableGlibcCompat
 
 if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then
   # TODO(sbc): Should probably use clang here

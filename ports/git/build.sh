@@ -10,8 +10,7 @@ export EXTLIBS="${NACL_CLI_MAIN_LIB}"
 if [ "${NACL_SHARED}" != "1" ]; then
   # These are needed so that the configure can detect libcurl when statically
   # linked.
-  export LIBS="-lcurl -lssl -lcrypto -lz"
-  EXTLIBS+=" -lglibc-compat"
+  NACLPORTS_LIBS+=" -lcurl -lssl -lcrypto -lz"
 fi
 
 if [ ${OS_NAME} = "Darwin" ]; then
@@ -23,18 +22,16 @@ fi
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   export NO_RT_LIBRARY=1
+  EXTLIBS+=" -lglibc-compat"
 fi
 export CROSS_COMPILE=1
 export NEEDS_CRYPTO_WITH_SSL=YesPlease
 
+EnableGlibcCompat
+
 ConfigureStep() {
   NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
   autoconf
-
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-    LIBS+=" -lglibc-compat"
-  fi
 
   if [ "${NACL_LIBC}" = "glibc" ]; then
     # Because libcrypto.a needs dlsym we need to add this explicitly.

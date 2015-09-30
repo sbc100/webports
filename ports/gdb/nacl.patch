@@ -32,32 +32,20 @@ diff --git a/config/dfp.m4 b/config/dfp.m4
        enable_decimal_float=yes
        ;;
      *)
-diff --git a/gdb/Makefile.in b/gdb/Makefile.in
---- a/gdb/Makefile.in
-+++ b/gdb/Makefile.in
-@@ -120,10 +120,12 @@ MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
- MAKEHTML = $(MAKEINFO_CMD) --html
- MAKEHTMLFLAGS =
+diff --git a/gas/as.c b/gas/as.c
+--- a/gas/as.c
++++ b/gas/as.c
+@@ -1134,6 +1134,10 @@ create_obj_attrs_section (void)
+ #endif
+ 
  
-+PEPPER_LIBS = $(NACL_CLI_MAIN_LIB) $(EXTRA_LIBS)
++#ifdef __native_client__
++int nacl_main(int argc, char ** argv);
++#endif
 +
- # Set this up with gcc if you have gnu ld and the loader will print out
- # line numbers for undefined references.
- #CC_LD=gcc -static
--CC_LD=$(CC)
-+CC_LD=$(CXX)
- 
- # Where is our "include" directory?  Typically $(srcdir)/../include.
- # This is essentially the header file directory for the library
-@@ -1237,7 +1239,7 @@ gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
- 	rm -f gdb$(EXEEXT)
- 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
- 		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
--		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
-+		$(TDEPLIBS) $(TUI_LIBRARY) $(subst -lglibc-compat,,$(CLIBS)) $(LOADLIBES) $(PEPPER_LIBS)
- 
- # Convenience rule to handle recursion.
- $(LIBGNU) $(GNULIB_H): all-lib
+ int
+ main (int argc, char ** argv)
+ {
 diff --git a/gdb/charset.c b/gdb/charset.c
 --- a/gdb/charset.c
 +++ b/gdb/charset.c
@@ -104,21 +92,6 @@ diff --git a/gdb/configure b/gdb/configure
  else
    gdb_native=no
  fi
-diff --git a/gdb/gdb.c b/gdb/gdb.c
---- a/gdb/gdb.c
-+++ b/gdb/gdb.c
-@@ -21,8 +21,9 @@
- #include <string.h>
- #include "interps.h"
- 
--int
--main (int argc, char **argv)
-+extern int nacl_main(int argc, char **argv);
-+
-+int nacl_main(int argc, char **argv)
- {
-   struct captured_main_args args;
- 
 diff --git a/gdb/inflow.c b/gdb/inflow.c
 --- a/gdb/inflow.c
 +++ b/gdb/inflow.c

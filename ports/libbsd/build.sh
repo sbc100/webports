@@ -6,9 +6,10 @@ EXTRA_CONFIGURE_ARGS="--disable-largefile"
 
 export getline=getline
 
+EnableGlibcCompat
+
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat -std=gnu99"
-  NACLPORTS_LDFLAGS+=" -lglibc-compat"
+  NACLPORTS_CPPFLAGS+=" -std=gnu99"
   export getline=__getline
 fi
 

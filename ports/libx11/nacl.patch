@@ -1,3 +1,14 @@
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -729,6 +729,7 @@ LDFLAGS_FOR_BUILD
+ CFLAGS_FOR_BUILD
+ CPPFLAGS_FOR_BUILD
+ CC_FOR_BUILD
++LIBS_FOR_BUILD
+ HAVE_PERL_FALSE
+ HAVE_PERL_TRUE
+ PERL
 diff --git a/src/CrGlCur.c b/src/CrGlCur.c
 --- a/src/CrGlCur.c
 +++ b/src/CrGlCur.c
@@ -71,6 +82,15 @@ diff --git a/src/Makefile.in b/src/Makefile.in
 diff --git a/src/util/Makefile.in b/src/util/Makefile.in
 --- a/src/util/Makefile.in
 +++ b/src/util/Makefile.in
+@@ -144,7 +144,7 @@ LD = @LD@
+ LDFLAGS = @LDFLAGS_FOR_BUILD@
+ LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@
+ LIBOBJS = @LIBOBJS@
+-LIBS = @LIBS@
++LIBS = @LIBS_FOR_BUILD@
+ LIBTOOL = @LIBTOOL@
+ LIB_MAN_DIR = @LIB_MAN_DIR@
+ LIB_MAN_SUFFIX = @LIB_MAN_SUFFIX@
 @@ -355,7 +355,8 @@ distclean-compile:
  @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
  

@@ -4,9 +4,7 @@
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-fi
+EnableGlibcCompat
 
 NACLPORTS_CPPFLAGS+=" -DGNULIB_defined_struct_sigaction -Dpipe=nacl_spawn_pipe"
 

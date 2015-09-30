@@ -2,17 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="-lncurses ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LIBS+=" -lncurses"
+
+EnableGlibcCompat
+
+NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   EXTRA_CONFIGURE_ARGS="--enable-tiny"
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export EXTRA_LIBS+=" -lglibc-compat"
 fi
 
 PatchStep() {
   DefaultPatchStep
-  cp ${START_DIR}/nano_pepper.c ${SRC_DIR}/src/
+  LogExecute cp ${START_DIR}/nano_pepper.c ${SRC_DIR}/src/
 }
 
 InstallStep() {

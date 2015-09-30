@@ -31,22 +31,21 @@ ConfigureStep() {
   # Disable ipv6 since configure claims it requires a working getaddrinfo
   # which we do not provide.  TODO(sbc): remove this once nacl_io supports
   # getaddrinfo.
-  EXTRA_CONFIGURE_ARGS="--disable-ipv6"
+  EXTRA_CONFIGURE_ARGS+=" --disable-ipv6"
   EXTRA_CONFIGURE_ARGS+=" --with-suffix=${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --build=x86_64-linux-gnu"
   if [ "${NACL_DEBUG}" = 1 ]; then
     EXTRA_CONFIGURE_ARGS+=" --with-pydebug"
   fi
-  export LIBS="-ltermcap"
-  LIBS+=" ${NACL_CLI_MAIN_LIB}"
+  NACLPORTS_LIBS+=" -ltermcap"
+  NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
   if [ "${NACL_LIBC}" = "newlib" ]; then
-    LIBS+=" -lglibc-compat"
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     # When python builds with wait3/wait4 support it also expects struct rusage
     # to have certain fields and newlib lacks.
     export ac_cv_func_wait3=no
     export ac_cv_func_wait4=no
   fi
+  EnableGlibcCompat
   DefaultConfigureStep
   if [ "${NACL_LIBC}" = "newlib" ]; then
     # For static linking we copy in a pre-baked Setup.local

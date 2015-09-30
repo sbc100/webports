@@ -6,10 +6,7 @@ EXTRA_CONFIGURE_ARGS+=" --disable-oggtest"
 EXTRA_CONFIGURE_ARGS+=" --disable-xmms-plugin"
 EXTRA_CONFIGURE_ARGS+=" --without-metaflac-test-files"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS="-lglibc-compat"
-fi
+EnableGlibcCompat
 
 InstallStep() {
   # assumes pwd has makefile

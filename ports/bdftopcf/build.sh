@@ -8,7 +8,4 @@ NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 NACLPORTS_LDFLAGS+=" -Dmain=nacl_main"
 export LIBS="-lz ${NACL_CLI_MAIN_LIB}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS+=" -lglibc-compat"
-fi
+EnableGlibcCompat

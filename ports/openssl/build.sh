@@ -9,15 +9,13 @@ OS_JOBS=1
 BUILD_DIR=${SRC_DIR}
 INSTALL_TARGETS="install_sw INSTALL_PREFIX=${DESTDIR}"
 
+EnableGlibcCompat
+
 ConfigureStep() {
   if [ "${NACL_SHARED}" = "1" ] ; then
     local EXTRA_ARGS="shared"
   else
     local EXTRA_ARGS="no-dso"
-  fi
-
-  if [ "${NACL_LIBC}" = "newlib" ] ; then
-    EXTRA_ARGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   fi
 
   # Workaround for arm-gcc bug:

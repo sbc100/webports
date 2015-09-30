@@ -7,10 +7,7 @@ export bash_cv_wcwidth_broken=no
 
 MAKEFLAGS+=" EXEEXT=.${NACL_EXEEXT}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-   export LIBS="-lglibc-compat"
-fi
+EnableGlibcCompat
 
 if [ "${NACL_SHARED}" = "0" ]; then
    EXTRA_CONFIGURE_ARGS="--disable-shared"

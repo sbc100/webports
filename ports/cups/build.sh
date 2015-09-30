@@ -9,11 +9,12 @@ EXTRA_CONFIGURE_ARGS="--prefix=${DESTDIR}/payload"
 EXTRA_CONFIGURE_ARGS+=" --with-components=core-and-image"
 EXTRA_CONFIGURE_ARGS+=" --disable-gssapi --disable-threads"
 
+
 ConfigureStep() {
+  EnableGlibcCompat
+
   if [ "${NACL_LIBC}" = "newlib" ]; then
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
     EXTRA_CONFIGURE_ARGS+=" --disable-shared --enable-static"
-    export LIBS+=" -lglibc-compat"
     export LSB_BUILD="y"
   fi
 

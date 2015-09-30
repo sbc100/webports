@@ -17,7 +17,4 @@ EXTRA_CONFIGURE_ARGS+=" --with-apr-util=${NACL_PREFIX}"
 EXTRA_CONFIGURE_ARGS+=" --without-apxs"
 EXTRA_CONFIGURE_ARGS+=" --enable-all-static"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS+=" -lglibc-compat"
-fi
+EnableGlibcCompat

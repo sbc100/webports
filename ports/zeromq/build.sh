@@ -4,10 +4,7 @@
 
 export LIBS="-lnacl_io"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-   NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-   export LIBS="${LIBS} -lglibc-compat"
-fi
+EnableGlibcCompat
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then
    NACLPORTS_CPPFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"

@@ -19,15 +19,11 @@ if [ "${NACL_ARCH}" = "pnacl" ] ; then
   EXTRA_CONFIGURE_ARGS+=" --without-cxx-binding"
 fi
 
+EnableGlibcCompat
+
 ConfigureStep() {
   export cf_cv_ar_flags=${NACL_ARFLAGS}
   NACL_ARFLAGS=""
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    # Changing NACLCC rather than CFLAGS as otherwise the configure script
-    # fails to detect termios and tries to use gtty.
-    NACLCC+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-    export LIBS="-lglibc-compat"
-  fi
 
   DefaultConfigureStep
   # Glibc inaccurately reports having sigvec.
@@ -37,7 +33,6 @@ ConfigureStep() {
 
 InstallStep() {
   DefaultInstallStep
-  cd ${DESTDIR_LIB}
-  ln -sf libncurses.a libtermcap.a
-  cd -
+  ChangeDir ${DESTDIR_LIB}
+  LogExecute ln -sf libncurses.a libtermcap.a
 }

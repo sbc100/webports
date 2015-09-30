@@ -524,6 +524,13 @@ SetOptFlags() {
   fi
 }
 
+EnableGlibcCompat() {
+  if [ "${NACL_LIBC}" = "newlib" ]; then
+    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+    NACLPORTS_LIBS+=" -lglibc-compat"
+  fi
+}
+
 #
 # Attempt to download a file from a given URL
 # $1 - URL to fetch

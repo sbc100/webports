@@ -51,16 +51,15 @@ ConfigureStep() {
     # https://code.google.com/p/nativeclient/issues/detail?id=4300
     export ac_cv_header_sys_xattr_h=no
   fi
-  export LIBS="-ltermcap"
-  LIBS+=" ${NACL_CLI_MAIN_LIB}"
+  NACLPORTS_LIBS+=" -ltermcap"
+  NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
   if [ "${NACL_LIBC}" = "newlib" ]; then
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-    LIBS+=" -lglibc-compat"
     # When python builds with wait3/wait4 support it also expects struct rusage
     # to have certain fields and newlib lacks.
     export ac_cv_func_wait3=no
     export ac_cv_func_wait4=no
   fi
+  EnableGlibcCompat
   DefaultConfigureStep
   if [ "${NACL_LIBC}" = "newlib" ]; then
     LogExecute cp ${START_DIR}/Setup.local Modules/

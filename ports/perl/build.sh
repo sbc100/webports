@@ -18,15 +18,14 @@ NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 # we need a working perl on host to build things for target
 HOST_BUILD=${WORK_DIR}/build_host
 ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
-LIBS=" ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LIBS=" ${NACL_CLI_MAIN_LIB}"
 # PNaCl and newlib dont have dynamic loading, so
 # using Perl's internal stub file dl_none.xs
 # specifically for systems which do not support it
 # Also, FILE pointer is structured a bit differently
 # Relevant stdio parameters found via sel_ldr on Linux
 if [ "${NACL_LIBC}" = "newlib" -o "${NACL_ARCH}" = "pnacl" ] ; then
-  NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat "
-  LIBS+=" -lm -ltar -lglibc-compat "
+  NACLPORTS_LIBS+=" -lm -ltar"
   DYNAMIC_EXT=""
   NACL_GLIBC_DEF="undef"
   PERL_STDIO_BASE="(((fp)->_bf)._base)"
@@ -36,7 +35,7 @@ if [ "${NACL_LIBC}" = "newlib" -o "${NACL_ARCH}" = "pnacl" ] ; then
   PERL_DLSRC="dl_none.xs"
   NACLPORTS_CCDLFLAGS=""
 else
-  LIBS+=" -ldl -lm -ltar"
+  NACLPORTS_LIBS+=" -ldl -lm -ltar"
   # disabled DB_File GDBM_File NDBM_File ODBM_File
   DYNAMIC_EXT="arybase attributes B Compress/Raw/Bzip2 Compress/Raw/Zlib \
                Cwd Data/Dumper Devel/Peek Devel/PPPort Digest/MD5 Digest/SHA \
@@ -60,6 +59,8 @@ NONXS_EXT=""
 if [ "${NACL_ARCH}" = "pnacl" ] ; then
   NONXS_EXT="Errno"
 fi
+
+EnableGlibcCompat
 
 # BuildHostMiniperl builds miniperl for host, which is needed for
 # building Perl for the target
@@ -141,9 +142,9 @@ BuildStep() {
   LogExecute ${BUILD_CC} -c -DPERL_CORE -fwrapv -fno-strict-aliasing -pipe \
     -O2 -Wall generate_uudmap.c
   LogExecute ${BUILD_LD} -o generate_uudmap generate_uudmap.o -lm
-  LogExecute make -j${OS_JOBS} libs="${LIBS}" all
+  LogExecute make -j${OS_JOBS} libs="${NACLPORTS_LIBS}" all
   # test_prep prepares the perl for tests, might use this later
-  LogExecute make -j${OS_JOBS} libs="${LIBS}" test_prep
+  LogExecute make -j${OS_JOBS} libs="${NACLPORTS_LIBS}" test_prep
   LogExecute mv -f ${HOST_BUILD}/microperl ${SRC_DIR}
 }
 
@@ -151,7 +152,7 @@ InstallStep() {
   if [ "${NACL_LIBC}" == "glibc" ] ; then
     # Install without man files due to the following bug
     # https://rt.perl.org/Public/Bug/Display.html?id=123532
-    LogExecute make -j${OS_JOBS} libs="${LIBS}" install.perl
+    LogExecute make -j${OS_JOBS} libs="${NACLPORTS_LIBS}" install.perl
   else
     MakeDir ${DESTDIR_LIB}
     LogExecute cp -rf ${SRC_DIR}/lib/* ${DESTDIR_LIB}/

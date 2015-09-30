@@ -10,15 +10,10 @@ EXECUTABLES="src/blackbox util/bsetroot util/bstyleconvert"
 
 export EXTRA_LIBS+="-liconv \
   -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
+
 # TODO(bradnelson): Find a better general pattern for this.
 # Repeat these here to include them which checking for X11 and linking libxcb,
 # which references ki_fcntl directly.
-export LIBS+=" -lnacl_io -lppapi"
+NACLPORTS_LIBS+=" -lnacl_io -pthread"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS+=" -lglibc-compat"
-  # List again at the end of the others to resolve use of getservbyname in an X
-  # library.
-  export EXTRA_LIBS+=" -lglibc-compat"
-fi
+EnableGlibcCompat

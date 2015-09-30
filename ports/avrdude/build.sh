@@ -5,6 +5,4 @@
 EXECUTABLES=avrdude${NACL_EXEEXT}
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-fi
+EnableGlibcCompat

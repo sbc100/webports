@@ -4,7 +4,4 @@
 
 EXECUTABLES="mp4tags${NACL_EXEEXT} mp4info${NACL_EXEEXT}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS="-lglibc-compat"
-fi
+EnableGlibcCompat

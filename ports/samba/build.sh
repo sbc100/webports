@@ -10,10 +10,7 @@ BUILD_DIR=${SRC_DIR}
 
 #NACLPORTS_LDFLAGS+="${NACL_CLI_MAIN_LIB}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  NACLPORTS_LDFLAGS+=" -lglibc-compat"
-fi
+EnableGlibcCompat
 
 ConfigureStep() {
   conf_build=$(/bin/sh "${SCRIPT_DIR}/config.guess")

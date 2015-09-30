@@ -28,10 +28,12 @@ EXTRA_CONFIGURE_ARGS="--disable-native-texlive-build \
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
+EnableGlibcCompat
+
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_CFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   NACLPORTS_CXXFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS="-lglibc-compat -lm"
+  NACLPORTS_LIBS+=" -lm"
 fi
 
 BuildHostBinaries() {

@@ -17,19 +17,18 @@ EXTRA_CONFIGURE_ARGS+=" --with-tiff=yes"
 
 export COMPAT_LIBS="-l${NACL_CXX_LIB}"
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} \
-  -lppapi_simple -lppapi -lnacl_io -ltar -l${NACL_CXX_LIB}"
+export EXTRA_LIBS="-ltar ${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   export emacs_cv_func__setjmp=no
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
   # Additional transitive dependencies not usually on the link line,
   # but required for static linking.
-  DEP_LIBS="-pthread -lxcb -lXau -lXpm -lnacl_io -lglibc-compat"
-  COMPAT_LIBS="${DEP_LIBS} ${COMPAT_LIBS}"
-  export LIBS+=" ${COMPAT_LIBS}"
-  EXTRA_LIBS+=" -lglibc-compat"
+  COMPAT_LIBS="-pthread -lxcb -lXau -lXpm -lnacl_io ${COMPAT_LIBS}"
+  COMPAT_LIBS+=" -lglibc-compat"
+  NACLPORTS_LIBS+=" ${COMPAT_LIBS}"
 fi
+
+EnableGlibcCompat
 
 ConfigureStep() {
   export CFLAGS="${NACLPORTS_CFLAGS} -I${NACL_SDK_ROOT}/include"

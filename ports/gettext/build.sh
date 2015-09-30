@@ -4,6 +4,8 @@
 
 EXECUTABLES="gettext-tools/src/msgfmt${NACL_EXEEXT}"
 
+EnableGlibcCompat
+
 if [ "${NACL_LIBC}" = "glibc" ]; then
   # The configure test for sigaction detects the fact
   # that glibc contains only stubs for sigation.  We
@@ -12,7 +14,5 @@ if [ "${NACL_LIBC}" = "glibc" ]; then
 fi
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS="-lglibc-compat"
   export lt_cv_archive_cmds_need_lc=no
 fi

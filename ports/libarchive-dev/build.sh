@@ -14,11 +14,11 @@ AutogenStep() {
   cd -
 }
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  NACLPORTS_LDFLAGS+=" -lglibc-compat"
+if [ "${NACL_SHARED}" = "0" ]; then
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=no"
 fi
+
+EnableGlibcCompat
 
 ConfigureStep() {
   AutogenStep

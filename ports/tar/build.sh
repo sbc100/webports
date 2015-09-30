@@ -13,10 +13,7 @@ export gl_cv_func_chown_follows_symlink=yes
 # The mtio.h we currently ship with the arm/glibc toolchain is not usable
 export ac_cv_header_sys_mtio_h=no
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  export LIBS="-lglibc-compat"
-fi
+EnableGlibcCompat
 
 if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" != "arm" ]; then
   # TODO(sbc): remove this once we fix glibc issue:
@@ -38,10 +35,9 @@ fi
 PublishStep() {
   MakeDir ${PUBLISH_DIR}
   cp src/tar${NACL_EXEEXT} ${PUBLISH_DIR}/tar_${NACL_ARCH}${NACL_EXEEXT}
-  pushd ${PUBLISH_DIR}
+  ChangeDir ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       ${PUBLISH_DIR}/tar_*${NACL_EXEEXT} \
       -s . \
       -o tar.nmf
-  popd
 }

@@ -5,12 +5,8 @@
 EXECUTABLES=gzip${NACL_EXEEXT}
 
 ConfigureStep() {
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  fi
-
+  EnableGlibcCompat
   NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-
   NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 
   export gzip_cv_assembler=no

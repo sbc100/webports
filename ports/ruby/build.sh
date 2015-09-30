@@ -24,10 +24,10 @@ ConfigureStep() {
   # TODO(sbc): remove once getaddrinfo() is working
   EXTRA_CONFIGURE_ARGS=--disable-ipv6
 
+  EnableGlibcCompat
+
   if [ "${NACL_LIBC}" = "newlib" ]; then
     EXTRA_CONFIGURE_ARGS+=" --with-static-linked-ext --with-newlib"
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-    export LIBS="-lglibc-compat"
   else
     EXTRA_CONFIGURE_ARGS+=" --with-out-ext=openssl,digest/*"
   fi

@@ -10,15 +10,14 @@ export ac_cv_func_connect=yes
 # which we don't ever want.
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -l${NACL_CXX_LIB}"
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  EXTRA_LIBS+=" -lglibc-compat"
-fi
+EnableGlibcCompat
 
 EXECUTABLES="src/curl${NACL_EXEEXT}"
 
+EXTRA_CONFIGURE_ARGS+=" --without-libssh2"
 if [ "${NACL_DEBUG}" = "1" ]; then
   NACLPORTS_CPPFLAGS+=" -DDEBUGBUILD"
-  EXTRA_CONFIGURE_ARGS="--enable-debug --disable-curldebug"
+  EXTRA_CONFIGURE_ARGS+=" --enable-debug --disable-curldebug"
 fi
 
 InstallStep() {

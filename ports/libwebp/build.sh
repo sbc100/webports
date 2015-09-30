@@ -4,7 +4,7 @@
 
 if [ "${NACL_SHARED}" != "1" ]; then
   # Without this the test for libpng fails with undefined math functions
-  export LIBS="-lz -lm"
+  NACLPORTS_LIBS="-lz -lm"
 fi
 
 EXECUTABLES="

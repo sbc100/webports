@@ -5,7 +5,7 @@
 NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-export LIBS="-lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LIBS+=" -lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
 
 EXTRA_CONFIGURE_ARGS+=" --with-tcl=${NACLPORTS_LIBDIR}"
 
@@ -18,10 +18,7 @@ fi
 # The fallbacks seem to be non-general.
 export tcl_cv_strtod_buggy=ok
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  LIBS+=" -lglibc-compat"
-fi
+EnableGlibcCompat
 
 # Ideally we would only add this flag for newlib builds but
 # linking of the shared library currently fails because it

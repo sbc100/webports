@@ -44,10 +44,7 @@ ConfigureStep() {
   export DYNLOADFILE=dynload_ppapi.o
   export MACHDEP=ppapi
   export LINKCC=${NACLCXX}
-  if [ "${NACL_LIBC}" = "newlib" ]; then
-    LIBS+=" -lglibc-compat"
-    NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-  fi
+  EnableGlibcCompat
   LogExecute cp ${START_DIR}/dynload_ppapi.c ${SRC_DIR}/Python/
   # This next step is costly, but it sets the environment variables correctly.
   DefaultConfigureStep

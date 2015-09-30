@@ -15,9 +15,7 @@ if [ "${NACL_SHARED}" = "1" ]; then
   EXECUTABLES+=
 fi
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
-  NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
-fi
+EnableGlibcCompat
 
 ConfigureStep() {
   MakeDir ${BUILD_DIR}
