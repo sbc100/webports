@@ -334,6 +334,8 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
           'level' in params and len(params['level']) == 1):
         level = LOG_LEVEL_MAP.get(params['level'][0], logging.ERROR)
         message = params['log'][0]
+        if message[-1] == '\n':
+          message = message[:-1]
         logging.log(level, message)
         self.SendEmptyReply()
         return

@@ -1050,6 +1050,9 @@ NaClProcessManager.prototype.spawn = function(
     // Default environment variables (can be overridden by envs)
     params['PS_VERBOSITY'] = '2';
     params['TERM'] = 'xterm-256color';
+    params['PS_STDIN'] = '/dev/tty';
+    params['PS_STDOUT'] = '/dev/tty';
+    params['PS_STDERR'] = '/dev/tty';
 
     for (var i = 0; i < envs.length; i++) {
       var env = envs[i];
@@ -1069,9 +1072,6 @@ NaClProcessManager.prototype.spawn = function(
     params['PS_TTY_RESIZE'] = 'tty_resize';
     params['PS_TTY_COLS'] = self.ttyWidth;
     params['PS_TTY_ROWS'] = self.ttyHeight;
-    params['PS_STDIN'] = '/dev/tty';
-    params['PS_STDOUT'] = '/dev/tty';
-    params['PS_STDERR'] = '/dev/tty';
     params['PS_EXIT_MESSAGE'] = 'exited';
     params['LOCATION_ORIGIN'] = location.origin;
     params['PWD'] = cwd;

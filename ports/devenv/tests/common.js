@@ -84,7 +84,7 @@ DevEnvTest.prototype.gatherStdoutUntil = function(name) {
       function body(msg) {
         ASSERT_EQ('nacl_stdout', msg.name);
         output += msg.output;
-        chrometest.info(msg.output);
+        chrometest.info('stdout: ' + msg.output);
       });
   }).then(function(msg) {
     ASSERT_EQ(name, msg.name, 'expected message');
@@ -139,7 +139,7 @@ DevEnvTest.prototype.waitCommand = function(pid) {
 DevEnvTest.prototype.runCommand = function(cmd, cmdPrefix) {
   var self = this;
   var earlyOutput;
-  chrometest.info('runCommand');
+  chrometest.info('runCommand: ' + cmd);
   return Promise.resolve().then(function() {
     return self.spawnCommand(cmd, cmdPrefix);
   }).then(function(msg) {

@@ -8,10 +8,10 @@ import os
 import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(SCRIPT_DIR, '../..'))
 SRC_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+sys.path.append(SRC_DIR)
 TOOLCHAIN = os.environ.get('TOOLCHAIN', 'newlib')
-DEVENV_OUT_DIR = os.path.join(SRC_DIR, 'out/publish/devenv', TOOLCHAIN)
+DEVENV_OUT_DIR = os.path.join(SRC_DIR, 'out', 'publish', 'devenv', TOOLCHAIN)
 
 import chrome_test
 

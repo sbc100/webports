@@ -25,9 +25,16 @@
 #include "ppapi/cpp/url_request_info.h"
 #include "ppapi/cpp/url_response_info.h"
 
+static bool IsTTY() {
+  if (getenv("NO_TTY") != NULL)
+    return false;
+  return isatty(STDOUT_FILENO) != 0;
+}
 
 static int Download(int quiet, const char* url, const char* dst) {
   int32_t result;
+  int percent_recieved = 0;
+  int percent_recieved_previous = 0;
 
   pp::InstanceHandle instance(PSGetInstanceId());
 
@@ -75,15 +82,27 @@ static int Download(int quiet, const char* url, const char* dst) {
     }
     url_loader.GetDownloadProgress(&received, &total);
     if (!quiet) {
-      printf("[%"PRId64"/%"PRId64" KiB %"PRId64"%%]\r",
-             received / 1024, total / 1024, received * 100 / total);
-      fflush(stdout);
+      percent_recieved = received * 100 / total;
+      if (IsTTY()) {
+        printf("[%"PRId64"/%"PRId64" KiB %d%%]\r",
+               received / 1024, total / 1024, percent_recieved);
+        fflush(stdout);
+      } else {
+        if (percent_recieved / 10 > percent_recieved_previous / 10) {
+          printf(".");
+          percent_recieved_previous = percent_recieved;
+        }
+      }
     }
   } while (result > 0);
   if (!quiet) {
-    printf("                                           \r");
-    printf("[%"PRId64"/%"PRId64" KiB 100%%] Done.\n",
-           received / 1024, total / 1024);
+    if (IsTTY()) {
+      printf("                                           \r");
+      printf("[%"PRId64"/%"PRId64" KiB 100%%] Done.\n",
+             received / 1024, total / 1024);
+    } else {
+        printf(" Done.\n");
+    }
   }
 
   if (result != PP_OK) {

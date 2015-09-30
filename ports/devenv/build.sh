@@ -165,9 +165,9 @@ PostInstallTestStep() {
     arches="${NACL_ARCH}"
   fi
   for arch in ${arches}; do
-    LogExecute python ${START_DIR}/devenv_small_test.py -x -vv -a ${arch}
+    LogExecute python ${START_DIR}/devenv_small_test.py -x -v -a ${arch}
     if [[ ${NACL_ARCH} == pnacl ]]; then
-      LogExecute python ${START_DIR}/jseval_test.py -x -vv -a ${arch}
+      LogExecute python ${START_DIR}/jseval_test.py -x -v -a ${arch}
     fi
     # Run large and io2014 tests only on the buildbots (against pinned revs).
     # Temporarily disabled until the latest set of pkg files is uplaoded
