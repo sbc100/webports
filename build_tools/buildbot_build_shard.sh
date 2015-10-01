@@ -43,8 +43,9 @@ if [ "${TRYBOT}" = "1" ]; then
   if [[ $EFFECTED_PACKAGES != "all" ]]; then
     # Run find_effected_packages again with --deps to include the dependecies
     # of the effected packages
+
     PACKAGE_LIST=$(${PYTHON} build_tools/find_effected_packages.py --deps \
-        $EFFECTED_FILES)
+        $EFFECTED_FILES <<< ${PACKAGE_LIST})
     echo "Building package subset: ${PACKAGE_LIST}"
   fi
 fi

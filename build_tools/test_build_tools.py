@@ -107,16 +107,21 @@ class TestUpdateMirror(unittest.TestCase):
 class TestFindEffectedPackages(unittest.TestCase):
 
    def test_non_port_files(self):
-     self.assertEqual(find_effected_packages(['foo/bar'], False), ['all'])
+     self.assertEqual(find_effected_packages(['foo/bar'], False, None), ['all'])
 
    def test_deps(self):
      self.assertEqual(
-         find_effected_packages(['ports/hello', 'ports/ruby'], False),
+         find_effected_packages(['ports/hello', 'ports/ruby'], False, None),
          ['hello', 'ruby', 'ruby-ppapi'])
 
      # The common dependencies of vim and nano should only appear once in this
      # list.
      self.assertEqual(
-         find_effected_packages(['ports/hello', 'ports/ruby'], True),
+         find_effected_packages(['ports/hello', 'ports/ruby'], True, None),
          ['hello', 'corelibs', 'glibc-compat', 'ncurses', 'readline', 'zlib',
           'ruby', 'libtar', 'nacl-spawn', 'ruby-ppapi'])
+
+   def test_filter(self):
+     effected = find_effected_packages(['ports/corelibs'], True,
+         ['corelibs', 'glibc-compat'])
+     self.assertEqual(effected, ['corelibs', 'glibc-compat'])

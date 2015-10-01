@@ -29,7 +29,14 @@ def main(args):
   options = parser.parse_args(args)
   naclports.SetVerbose(options.verbose)
 
-  print '\n'.join(find_effected_packages(options.files, options.deps))
+  if options.deps:
+    package_filter = sys.stdin.read().split()
+  else:
+    package_filter = None
+
+  effected_packages = find_effected_packages(options.files, options.deps,
+      package_filter)
+  print '\n'.join(effected_packages)
   return 0
 
 # Normally when changins files outside of the 'ports' directory will
@@ -41,11 +48,14 @@ IGNORE_FILES = [
     '*/test_*.py',
 ]
 
-def find_effected_packages(files, include_deps):
+def find_effected_packages(files, include_deps, package_filter):
   packages = []
   to_resolve = []
 
   def AddPackage(package):
+    if package_filter and package.NAME not in package_filter:
+      naclports.LogVerbose('Filtered out package: %s' % package.NAME)
+      return
     if package.NAME not in packages:
       if include_deps:
         for dep in package.TransitiveDependencies():
@@ -57,6 +67,7 @@ def find_effected_packages(files, include_deps):
   for filename in files:
     parts = filename.split(os.path.sep)
     if parts[0] != 'ports':
+      naclports.LogVerbose('effected file outside of ports tree: %s' % filename)
       if any(fnmatch.fnmatch(filename, ignore) for ignore in IGNORE_FILES):
         continue
       return ['all']
@@ -70,6 +81,8 @@ def find_effected_packages(files, include_deps):
     for r in pkg.ReverseDependencies():
       AddPackage(r)
 
+  if package_filter:
+    packages = [p for p in packages if p in package_filter]
   return packages
 
 

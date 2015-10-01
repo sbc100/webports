@@ -248,6 +248,7 @@ def LoadCanned(parts):
   # Return a small set of packages for testing.
   if os.environ.get('TEST_BUILDBOT'):
     partitions[0] = [
+        'corelibs',
         'glibc-compat',
         'nacl-spawn',
         'ncurses',
