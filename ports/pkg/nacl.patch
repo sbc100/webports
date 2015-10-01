@@ -3,15 +3,15 @@ diff --git a/compat/Makefile.am b/compat/Makefile.am
 +++ b/compat/Makefile.am
 @@ -1,8 +1,7 @@
 -noinst_LTLIBRARIES=	libbsd_compat.la
- noinst_HEADERS=		bsd_compat.h endian_util.h gr_util.h \
+ noinst_HEADERS=		bsd_compat.h endian_util.h \
  			humanize_number.h
  
 -libbsd_compat_la_SOURCES=	basename.c \
-+sources= basename.c \
++sources=	basename.c \
  				closefrom.c \
  				dirname.c \
  				file_at.c \
-@@ -12,4 +11,14 @@ libbsd_compat_la_SOURCES=	basename.c \
+@@ -11,4 +10,14 @@ libbsd_compat_la_SOURCES=	basename.c \
  				strnstr.c \
  				funopen.c
  
@@ -43,15 +43,7 @@ diff --git a/compat/bsd_compat.h b/compat/bsd_compat.h
 diff --git a/configure.ac b/configure.ac
 --- a/configure.ac
 +++ b/configure.ac
-@@ -157,6 +157,7 @@ AC_CHECK_FUNCS_ONCE([strnstr])
- AC_CHECK_FUNCS_ONCE([funopen])
- AC_CHECK_FUNCS_ONCE([fopencookie])
- AC_CHECK_FUNCS_ONCE([sysctlbyname])
-+AC_CHECK_FUNCS_ONCE([res_setservers])
- AC_CHECK_DECLS(
- 	[[fstatat], [openat], [unlinkat], [readlinkat], [faccessat]],
- 	[], [], [
-@@ -243,31 +244,16 @@ AC_SUBST([GIT_HEAD])
+@@ -244,28 +244,12 @@ AC_SUBST([GIT_HEAD])
  AC_DEFINE_UNQUOTED([GIT_HEAD], $GIT_HEAD)
  AC_DEFINE([PKG_API], [api_ver])
  
@@ -84,26 +76,7 @@ diff --git a/configure.ac b/configure.ac
  AC_SEARCH_LIBS([archive_read_open], [archive], [], [
    AC_MSG_ERROR([unable to find the archive_read() function])
  ])
-+AC_SEARCH_LIBS([__res_query], [resolv], [], [])
- 
- AC_CHECK_HEADER([archive.h],
- 	[pkg_found_archive_headers=yes])
-@@ -282,7 +268,13 @@ AC_SEARCH_LIBS([jail_getid], [jail], [
- AC_SEARCH_LIBS([getprogname], [bsd], [
- 	AC_DEFINE(HAVE_LIBBSD, 1, [Define to 1 if you have the 'bsd' library (-lbsd).])
- 	LIBBSD_LIB="-lbsd"
--	], [])
-+	], [
-+    case $host_os in
-+      linux*)
-+        AC_MSG_ERROR([Unable to find the libbsd])
-+        ;;
-+    esac
-+  ])
- 
- AC_CHECK_HEADERS([gelf.h libelf.h], [
- 	AC_CHECK_TYPES([Elf_Note], [
-@@ -403,7 +395,7 @@ else
+@@ -411,7 +395,7 @@ else
  	AC_MSG_RESULT([no])
  fi
  
@@ -112,25 +85,6 @@ diff --git a/configure.ac b/configure.ac
  
  dnl Select appropriate ABI
  AS_CASE(
-diff --git a/external/Makefile.am b/external/Makefile.am
---- a/external/Makefile.am
-+++ b/external/Makefile.am
-@@ -155,7 +155,7 @@ libelf_la_SOURCES=	libelf/elf.c \
- nodist_libelf_la_SOURCES=	libelf/libelf_fsize.c \
- 				libelf/libelf_msize.c \
- 				libelf/libelf_convert.c
--libelf_la_CFLAGS=	-I$(top_srcdir)/external/libelf
-+libelf_la_CFLAGS=	-I$(top_srcdir)/external/libelf -I$(top_builddir)/external/libelf
- libelf_static_la_SOURCES=	${libelf_la_SOURCES}
- nodist_libelf_static_la_SOURCES=	$(nodist_libelf_la_SOURCES)
- libelf_static_la_CFLAGS=	$(libelf_la_CFLAGS) -static
-@@ -283,4 +283,4 @@ libelf/native-elf-format.h:
- 
- endif
- 
--SUBDIRS=	blake2
-\ No newline at end of file
-+SUBDIRS=	blake2
 diff --git a/external/blake2/Makefile.am b/external/blake2/Makefile.am
 --- a/external/blake2/Makefile.am
 +++ b/external/blake2/Makefile.am
@@ -225,27 +179,6 @@ diff --git a/external/libelf/libelf.h b/external/libelf/libelf.h
  
  /* Library private data structures */
  typedef struct _Elf Elf;
-diff --git a/external/libfetch/common.c b/external/libfetch/common.c
---- a/external/libfetch/common.c
-+++ b/external/libfetch/common.c
-@@ -28,9 +28,6 @@
-  */
- 
- #include <sys/cdefs.h>
--#include "bsd_compat.h"
--
--__FBSDID("$FreeBSD: head/lib/libfetch/common.c 273124 2014-10-15 07:35:50Z des $");
- 
- #include <sys/param.h>
- #include <sys/socket.h>
-@@ -55,6 +52,7 @@ __FBSDID("$FreeBSD: head/lib/libfetch/common.c 273124 2014-10-15 07:35:50Z des $
- #include <openssl/x509v3.h>
- #endif
- 
-+#include "bsd_compat.h"
- #include "fetch.h"
- #include "common.h"
- 
 diff --git a/external/libfetch/fetch.h b/external/libfetch/fetch.h
 --- a/external/libfetch/fetch.h
 +++ b/external/libfetch/fetch.h
@@ -260,46 +193,6 @@ diff --git a/external/libfetch/fetch.h b/external/libfetch/fetch.h
  struct url {
  	char		 scheme[URL_SCHEMELEN+1];
  	char		 user[URL_USERLEN+1];
-diff --git a/external/libfetch/ftp.c b/external/libfetch/ftp.c
---- a/external/libfetch/ftp.c
-+++ b/external/libfetch/ftp.c
-@@ -27,8 +27,6 @@
-  */
- 
- #include <sys/cdefs.h>
--#include "bsd_compat.h"
--__FBSDID("$FreeBSD: head/lib/libfetch/ftp.c 226537 2011-10-19 11:43:51Z des $");
- 
- /*
-  * Portions of this code were taken from or based on ftpio.c:
-@@ -74,6 +72,7 @@ __FBSDID("$FreeBSD: head/lib/libfetch/ftp.c 226537 2011-10-19 11:43:51Z des $");
- #include <time.h>
- #include <unistd.h>
- 
-+#include "bsd_compat.h"
- #include "fetch.h"
- #include "common.h"
- #include "ftperr.h"
-diff --git a/external/libfetch/http.c b/external/libfetch/http.c
---- a/external/libfetch/http.c
-+++ b/external/libfetch/http.c
-@@ -27,8 +27,6 @@
-  */
- 
- #include <sys/cdefs.h>
--#include "bsd_compat.h"
--__FBSDID("$FreeBSD: head/lib/libfetch/http.c 267133 2014-06-05 22:16:26Z bapt $");
- 
- /*
-  * The following copyright applies to the base64 code:
-@@ -90,6 +88,7 @@ __FBSDID("$FreeBSD: head/lib/libfetch/http.c 267133 2014-06-05 22:16:26Z bapt $"
- #include <netinet/in.h>
- #include <netinet/tcp.h>
- 
-+#include "bsd_compat.h"
- #include "fetch.h"
- #include "common.h"
- #include "httperr.h"
 diff --git a/external/libsbuf/subr_sbuf.c b/external/libsbuf/subr_sbuf.c
 --- a/external/libsbuf/subr_sbuf.c
 +++ b/external/libsbuf/subr_sbuf.c
@@ -316,7 +209,7 @@ diff --git a/external/libsbuf/subr_sbuf.c b/external/libsbuf/subr_sbuf.c
 diff --git a/external/libucl/src/ucl_parser.c b/external/libucl/src/ucl_parser.c
 --- a/external/libucl/src/ucl_parser.c
 +++ b/external/libucl/src/ucl_parser.c
-@@ -691,12 +691,21 @@ ucl_maybe_parse_number (ucl_object_t *obj,
+@@ -694,12 +694,21 @@ ucl_maybe_parse_number (ucl_object_t *obj,
  		dv = strtod (c, &endptr);
  	}
  	else {
@@ -341,7 +234,7 @@ diff --git a/external/libucl/src/ucl_parser.c b/external/libucl/src/ucl_parser.c
 diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
 --- a/external/sqlite/sqlite3.c
 +++ b/external/sqlite/sqlite3.c
-@@ -19660,6 +19660,9 @@ SQLITE_PRIVATE sqlite3_mutex_methods const *sqlite3DefaultMutex(void){
+@@ -19857,6 +19857,9 @@ SQLITE_PRIVATE sqlite3_mutex_methods const *sqlite3DefaultMutex(void){
  ** processor and returns that value.  This can be used for high-res
  ** profiling.
  */
@@ -351,7 +244,7 @@ diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
  #if (defined(__GNUC__) || defined(_MSC_VER)) && \
        (defined(i386) || defined(__i386__) || defined(_M_IX86))
  
-@@ -19719,6 +19722,8 @@ SQLITE_PRIVATE sqlite3_mutex_methods const *sqlite3DefaultMutex(void){
+@@ -19916,6 +19919,8 @@ SQLITE_PRIVATE sqlite3_mutex_methods const *sqlite3DefaultMutex(void){
  SQLITE_PRIVATE   sqlite_uint64 sqlite3Hwtime(void){ return ((sqlite_uint64)0); }
  
  #endif
@@ -360,7 +253,7 @@ diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
  
  #endif /* !defined(_HWTIME_H_) */
  
-@@ -25482,7 +25487,7 @@ static int posixOpen(const char *zFile, int flags, int mode){
+@@ -25702,7 +25707,7 @@ static int posixOpen(const char *zFile, int flags, int mode){
  ** we are not running as root.
  */
  static int posixFchown(int fd, uid_t uid, gid_t gid){
@@ -369,12 +262,12 @@ diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
    return 0;
  #else
    return geteuid() ? 0 : fchown(fd,uid,gid);
-@@ -25542,14 +25547,14 @@ static struct unix_syscall {
+@@ -25762,14 +25767,14 @@ static struct unix_syscall {
    { "read",         (sqlite3_syscall_ptr)read,       0  },
  #define osRead      ((ssize_t(*)(int,void*,size_t))aSyscall[8].pCurrent)
  
--#if defined(USE_PREAD) || (SQLITE_ENABLE_LOCKING_STYLE && !OS_VXWORKS)
-+#if defined(USE_PREAD) || (SQLITE_ENABLE_LOCKING_STYLE && !OS_VXWORKS) && !defined(__native_client__)
+-#if defined(USE_PREAD) || SQLITE_ENABLE_LOCKING_STYLE
++#if defined(USE_PREAD) || SQLITE_ENABLE_LOCKING_STYLE && !defined(__native_client__)
    { "pread",        (sqlite3_syscall_ptr)pread,      0  },
  #else
    { "pread",        (sqlite3_syscall_ptr)0,          0  },
@@ -386,16 +279,16 @@ diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
    { "pread64",      (sqlite3_syscall_ptr)pread64,    0  },
  #else
    { "pread64",      (sqlite3_syscall_ptr)0,          0  },
-@@ -25559,7 +25564,7 @@ static struct unix_syscall {
+@@ -25779,7 +25784,7 @@ static struct unix_syscall {
    { "write",        (sqlite3_syscall_ptr)write,      0  },
  #define osWrite     ((ssize_t(*)(int,const void*,size_t))aSyscall[11].pCurrent)
  
--#if defined(USE_PREAD) || (SQLITE_ENABLE_LOCKING_STYLE && !OS_VXWORKS)
-+#if defined(USE_PREAD) || (SQLITE_ENABLE_LOCKING_STYLE && !OS_VXWORKS) && !defined(__native_client__)
+-#if defined(USE_PREAD) || SQLITE_ENABLE_LOCKING_STYLE
++#if defined(USE_PREAD) || SQLITE_ENABLE_LOCKING_STYLE && !defined(__native_client__)
    { "pwrite",       (sqlite3_syscall_ptr)pwrite,     0  },
  #else
    { "pwrite",       (sqlite3_syscall_ptr)0,          0  },
-@@ -25567,7 +25572,7 @@ static struct unix_syscall {
+@@ -25787,7 +25792,7 @@ static struct unix_syscall {
  #define osPwrite    ((ssize_t(*)(int,const void*,size_t,off_t))\
                      aSyscall[12].pCurrent)
  
@@ -404,7 +297,7 @@ diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
    { "pwrite64",     (sqlite3_syscall_ptr)pwrite64,   0  },
  #else
    { "pwrite64",     (sqlite3_syscall_ptr)0,          0  },
-@@ -28285,7 +28290,7 @@ static int nfsUnlock(sqlite3_file *id, int eFileLock){
+@@ -28512,7 +28517,7 @@ static int nfsUnlock(sqlite3_file *id, int eFileLock){
  static int seekAndRead(unixFile *id, sqlite3_int64 offset, void *pBuf, int cnt){
    int got;
    int prior = 0;
@@ -413,7 +306,7 @@ diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
    i64 newOffset;
  #endif
    TIMER_START;
-@@ -28293,10 +28298,10 @@ static int seekAndRead(unixFile *id, sqlite3_int64 offset, void *pBuf, int cnt){
+@@ -28520,10 +28525,10 @@ static int seekAndRead(unixFile *id, sqlite3_int64 offset, void *pBuf, int cnt){
    assert( id->h>2 );
    cnt &= 0x1ffff;
    do{
@@ -426,22 +319,22 @@ diff --git a/external/sqlite/sqlite3.c b/external/sqlite/sqlite3.c
      got = osPread64(id->h, pBuf, cnt, offset);
      SimulateIOError( got = -1 );
  #else
-@@ -28409,9 +28414,9 @@ static int seekAndWriteFd(
+@@ -28636,9 +28641,9 @@ static int seekAndWriteFd(
    nBuf &= 0x1ffff;
    TIMER_START;
  
 -#if defined(USE_PREAD)
 +#if defined(USE_PREAD) && !defined(__native_client__)
-   do{ rc = osPwrite(fd, pBuf, nBuf, iOff); }while( rc<0 && errno==EINTR );
+   do{ rc = (int)osPwrite(fd, pBuf, nBuf, iOff); }while( rc<0 && errno==EINTR );
 -#elif defined(USE_PREAD64)
 +#elif defined(USE_PREAD64) && !defined(__native_client__)
-   do{ rc = osPwrite64(fd, pBuf, nBuf, iOff);}while( rc<0 && errno==EINTR);
+   do{ rc = (int)osPwrite64(fd, pBuf, nBuf, iOff);}while( rc<0 && errno==EINTR);
  #else
    do{
 diff --git a/libpkg/Makefile.am b/libpkg/Makefile.am
 --- a/libpkg/Makefile.am
 +++ b/libpkg/Makefile.am
-@@ -73,6 +73,7 @@ libpkg_la_SOURCES+=	pkg_macho.c
+@@ -75,6 +75,7 @@ libpkg_la_SOURCES+=	pkg_macho.c
  pkg_common_cflags+=	-I$(top_srcdir)/external/libmachista
  endif
  
@@ -449,7 +342,7 @@ diff --git a/libpkg/Makefile.am b/libpkg/Makefile.am
  libpkg_la_CFLAGS=	@OS_CFLAGS@ $(pkg_common_cflags) -shared
  libpkg_la_LIBADD=	$(top_builddir)/compat/libbsd_compat.la \
  			$(top_builddir)/external/libucl.la \
-@@ -109,6 +110,7 @@ if HAVE_LD_VERSION_SCRIPT
+@@ -112,6 +113,7 @@ if HAVE_LD_VERSION_SCRIPT
  libpkg_la_LDFLAGS+=	-version-info @LIBPKG_SO_VERSION@ -Wl,--version-script=$(srcdir)/libpkg.ver
  EXTRA_libpkg_la_DEPENDENCIES+=	libpkg.ver
  endif
@@ -457,45 +350,6 @@ diff --git a/libpkg/Makefile.am b/libpkg/Makefile.am
  
  DYNLIBS=		libpkg.la
  lib_LTLIBRARIES=	libpkg_static.la
-diff --git a/libpkg/dns_utils.c b/libpkg/dns_utils.c
---- a/libpkg/dns_utils.c
-+++ b/libpkg/dns_utils.c
-@@ -27,7 +27,6 @@
- 
- #include <pkg_config.h>
- 
--#include <bsd_compat.h>
- #include <sys/stat.h> /* for private.utils.h */
- 
- #include <string.h>
-@@ -41,6 +40,7 @@
- #endif
- #include <netdb.h>
- 
-+#include <bsd_compat.h>
- #include "private/utils.h"
- #include "pkg.h"
- 
-@@ -238,6 +238,9 @@ dns_getsrvinfo(const char *zone)
- 
- int
- set_nameserver(const char *nsname) {
-+#ifndef HAVE_RES_SETSERVERS
-+	return (-1);
-+#else
- 	struct __res_state res;
- 	union res_sockaddr_union u[MAXNS];
- 	struct addrinfo *answer = NULL;
-@@ -275,8 +278,8 @@ set_nameserver(const char *nsname) {
- 		return (-1);
- 
- 	_res = res;
--
- 	return (0);
-+#endif
- }
- #else
- 
 diff --git a/libpkg/elfhints.c b/libpkg/elfhints.c
 --- a/libpkg/elfhints.c
 +++ b/libpkg/elfhints.c
@@ -588,6 +442,21 @@ diff --git a/libpkg/fetch.c b/libpkg/fetch.c
  		if (line[linelen -1 ] == '\n')
  			line[linelen -1 ] = '\0';
  
+diff --git a/libpkg/pkg_add.c b/libpkg/pkg_add.c
+--- a/libpkg/pkg_add.c
++++ b/libpkg/pkg_add.c
+@@ -360,7 +360,11 @@ pkg_globmatch(char *pattern, const char *name)
+ 	char *buf, *buf2;
+ 	char *path = NULL;
+ 
++#ifdef GLOB_NOMATCH
+ 	if (glob(pattern, 0, NULL, &g) == GLOB_NOMATCH) {
++#else
++	if (glob(pattern, 0, NULL, &g) < 0) {
++#endif
+ 		globfree(&g);
+ 
+ 		return (NULL);
 diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
 --- a/libpkg/pkg_config.c
 +++ b/libpkg/pkg_config.c
@@ -625,28 +494,27 @@ diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
  	{
  		PKG_ARRAY,
  		"PLUGINS",
-@@ -452,15 +465,19 @@ pkg_config_dump(void)
+@@ -458,7 +471,8 @@ pkg_config_dump(void)
  static void
  disable_plugins_if_static(void)
  {
 -	void *dlh;
++#ifndef _NEWLIB_VERSION
 +	void *dlh = NULL;
  
-+#ifndef _NEWLIB_VERSION
- 	dlh = dlopen(0, 0);
-+#endif
+ 	dlh = dlopen(0, RTLD_NOW);
  
- 	/* if dlh is NULL then we are in static binary */
- 	if (dlh == NULL)
+@@ -467,8 +481,7 @@ disable_plugins_if_static(void)
  		ucl_object_replace_key(config, ucl_object_frombool(false), "PKG_ENABLE_PLUGINS", 18, false);
-+#ifndef _NEWLIB_VERSION
  	else
  		dlclose(dlh);
+-
+-	return;
 +#endif
- 
- 	return;
  }
-@@ -704,8 +721,25 @@ load_repo_files(const char *repodir, pkg_init_flags flags)
+ 
+ static void
+@@ -710,8 +723,25 @@ load_repo_files(const char *repodir, pkg_init_flags flags)
  
  	pkg_debug(1, "PkgConfig: loading repositories in %s", repodir);
  
@@ -672,7 +540,7 @@ diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
  		if ((n = strlen(ent[i]->d_name)) <= 5)
  			continue;
  		p = &ent[i]->d_name[n - 5];
-@@ -716,10 +750,15 @@ load_repo_files(const char *repodir, pkg_init_flags flags)
+@@ -722,10 +752,15 @@ load_repo_files(const char *repodir, pkg_init_flags flags)
  			    ent[i]->d_name);
  			load_repo_file(path, flags);
  		}
@@ -688,7 +556,7 @@ diff --git a/libpkg/pkg_config.c b/libpkg/pkg_config.c
  }
  
  static void
-@@ -1057,7 +1096,10 @@ pkg_ini(const char *path, const char *reposdir, pkg_init_flags flags)
+@@ -1065,7 +1100,10 @@ pkg_ini(const char *path, const char *reposdir, pkg_init_flags flags)
  	if (evpipe != NULL)
  		connect_evpipe(evpipe);
  
@@ -794,7 +662,7 @@ diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
  int
  pkg_delete(struct pkg *pkg, struct pkgdb *db, unsigned flags)
  {
-@@ -216,7 +285,15 @@ rmdir_p(struct pkgdb *db, struct pkg *pkg, char *dir, const char *prefix_r)
+@@ -242,7 +311,15 @@ rmdir_p(struct pkgdb *db, struct pkg *pkg, char *dir, const char *prefix_r)
  #endif
  
  	if (unlinkat(pkg->rootfd, dir, AT_REMOVEDIR) == -1) {
@@ -810,28 +678,6 @@ diff --git a/libpkg/pkg_delete.c b/libpkg/pkg_delete.c
  			pkg_emit_errno("unlinkat", dir);
  		/* If the directory was already removed by a bogus script, continue removing parents */
  		if (errno != ENOENT)
-@@ -279,12 +356,21 @@ pkg_delete_file(struct pkg *pkg, struct pkg_file *file, unsigned force)
- 	/* Regular files and links */
- 	/* check sha256 */
- 	if (!force && file->sum[0] != '\0') {
-+#ifdef __native_client__
-+		if (fstatat(pkg->rootfd, path, &st, 0) == -1) {
-+			pkg_emit_error("cannot stat %s%s%s: %s", pkg->rootpath,
-+			pkg->rootpath[strlen(pkg->rootpath) - 1] == '/' ? "" : "/",
-+				path, strerror(errno));
-+			return;
-+    		}
-+#else
- 		if (fstatat(pkg->rootfd, path, &st, AT_SYMLINK_NOFOLLOW) == -1) {
- 			pkg_emit_error("cannot stat %s%s%s: %s", pkg->rootpath,
- 			    pkg->rootpath[strlen(pkg->rootpath) - 1] == '/' ? "" : "/",
- 			    path, strerror(errno));
- 			return;
- 		}
-+#endif
- 		if (S_ISLNK(st.st_mode)) {
- 			if (pkg_symlink_cksumat(pkg->rootfd, path, NULL,
- 			    sha256) != EPKG_OK)
 diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
 --- a/libpkg/pkg_elf.c
 +++ b/libpkg/pkg_elf.c
@@ -861,7 +707,7 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
  #include <fcntl.h>
  #include <gelf.h>
  #include <libgen.h>
-@@ -453,10 +455,12 @@ pkg_analyse_files(struct pkgdb *db, struct pkg *pkg, const char *stage)
+@@ -457,10 +459,12 @@ pkg_analyse_files(struct pkgdb *db, struct pkg *pkg, const char *stage)
  
  	shlib_list_init();
  
@@ -875,7 +721,7 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
  	/* Assume no architecture dependence, for contradiction */
  	if (developer_mode)
  		pkg->flags &= ~(PKG_CONTAINS_ELF_OBJECTS |
-@@ -933,6 +937,7 @@ pkg_arch_to_legacy(const char *arch, char *dest, size_t sz)
+@@ -938,6 +942,7 @@ pkg_arch_to_legacy(const char *arch, char *dest, size_t sz)
  	return (0);
  }
  
@@ -883,7 +729,7 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
  int
  pkg_get_myarch_legacy(char *dest, size_t sz)
  {
-@@ -947,8 +952,9 @@ pkg_get_myarch_legacy(char *dest, size_t sz)
+@@ -952,8 +957,9 @@ pkg_get_myarch_legacy(char *dest, size_t sz)
  
  	return (0);
  }
@@ -894,7 +740,7 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
  int
  pkg_get_myarch(char *dest, size_t sz)
  {
-@@ -982,3 +988,49 @@ pkg_get_myarch(char *dest, size_t sz)
+@@ -987,3 +993,49 @@ pkg_get_myarch(char *dest, size_t sz)
  }
  #endif
  
@@ -947,7 +793,7 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
 diff --git a/libpkg/pkg_event.c b/libpkg/pkg_event.c
 --- a/libpkg/pkg_event.c
 +++ b/libpkg/pkg_event.c
-@@ -302,6 +302,7 @@ pipeevent(struct pkg_event *ev)
+@@ -304,6 +304,7 @@ pipeevent(struct pkg_event *ev)
  		    ev->e_file_mismatch.pkg,
  		    sbuf_json_escape(buf, ev->e_file_mismatch.file->path));
  		break;
@@ -955,7 +801,7 @@ diff --git a/libpkg/pkg_event.c b/libpkg/pkg_event.c
  	case PKG_EVENT_PLUGIN_ERRNO:
  		sbuf_printf(msg, "{ \"type\": \"ERROR_PLUGIN\", "
  		    "\"data\": {"
-@@ -333,6 +334,7 @@ pipeevent(struct pkg_event *ev)
+@@ -335,6 +336,7 @@ pipeevent(struct pkg_event *ev)
  		    pkg_plugin_get(ev->e_plugin_info.plugin, PKG_PLUGIN_NAME),
  		    sbuf_json_escape(buf, ev->e_plugin_info.msg));
  		break;
@@ -966,7 +812,7 @@ diff --git a/libpkg/pkg_event.c b/libpkg/pkg_event.c
 diff --git a/libpkg/pkg_jobs.c b/libpkg/pkg_jobs.c
 --- a/libpkg/pkg_jobs.c
 +++ b/libpkg/pkg_jobs.c
-@@ -1388,7 +1388,8 @@ jobs_solve_autoremove(struct pkg_jobs *j)
+@@ -1384,7 +1384,8 @@ jobs_solve_autoremove(struct pkg_jobs *j)
  			pkg_emit_locked(pkg);
  		}
  		else if (pkg_jobs_test_automatic(j, pkg)) {
@@ -976,7 +822,7 @@ diff --git a/libpkg/pkg_jobs.c b/libpkg/pkg_jobs.c
  		}
  
  		pkg = NULL;
-@@ -2108,6 +2109,8 @@ pkg_jobs_fetch(struct pkg_jobs *j)
+@@ -2131,6 +2132,8 @@ pkg_jobs_fetch(struct pkg_jobs *j)
  	if (dlsize == 0)
  		return (EPKG_OK);
  
@@ -985,7 +831,7 @@ diff --git a/libpkg/pkg_jobs.c b/libpkg/pkg_jobs.c
  #ifdef HAVE_STATFS
  	struct statfs fs;
  	while (statfs(cachedir, &fs) == -1) {
-@@ -2133,6 +2136,7 @@ pkg_jobs_fetch(struct pkg_jobs *j)
+@@ -2156,6 +2159,7 @@ pkg_jobs_fetch(struct pkg_jobs *j)
  	}
  	fs_avail = fs.f_bsize * (int64_t)fs.f_bavail;
  #endif
@@ -1009,7 +855,7 @@ diff --git a/libpkg/pkg_old.c b/libpkg/pkg_old.c
 diff --git a/libpkg/pkg_ports.c b/libpkg/pkg_ports.c
 --- a/libpkg/pkg_ports.c
 +++ b/libpkg/pkg_ports.c
-@@ -1250,7 +1250,11 @@ ports_parse_plist(struct pkg *pkg, const char *plist, const char *stage)
+@@ -1287,7 +1287,11 @@ ports_parse_plist(struct pkg *pkg, const char *plist, const char *stage)
  		return (EPKG_FATAL);
  	}
  
@@ -1136,7 +982,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	return (fd);
  }
  
-@@ -532,6 +582,67 @@ pkg_repo_parse_sigkeys(const char *in, int inlen, struct sig_cert **sc)
+@@ -535,6 +585,67 @@ pkg_repo_parse_sigkeys(const char *in, int inlen, struct sig_cert **sc)
  	return (rc);
  }
  
@@ -1204,7 +1050,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  static int
  pkg_repo_archive_extract_archive(int fd, const char *file,
      const char *dest, struct pkg_repo *repo, int dest_fd,
-@@ -606,6 +717,13 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
+@@ -609,6 +720,13 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
  	}
  	else {
  		cbdata.need_sig = false;
@@ -1218,7 +1064,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  		if (pkg_emit_sandbox_get_string(pkg_repo_meta_extract_signature_pubkey,
  			&cbdata, (char **)&sig, &siglen) == EPKG_OK) {
  			free(sig);
-@@ -614,6 +732,7 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
+@@ -617,6 +735,7 @@ pkg_repo_archive_extract_archive(int fd, const char *file,
  			pkg_emit_error("Repo extraction failed");
  			return (EPKG_FATAL);
  		}
@@ -1226,7 +1072,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	}
  	(void)lseek(fd, 0, SEEK_SET);
  	if (dest_fd != -1)
-@@ -702,23 +821,43 @@ cleanup:
+@@ -705,23 +824,43 @@ cleanup:
  	return rc;
  }
  
@@ -1271,7 +1117,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  
  	dest_fd = mkstemp(tmp);
  	if (dest_fd == -1) {
-@@ -728,8 +867,10 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
+@@ -731,8 +870,10 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
  		*rc = EPKG_FATAL;
  		return (-1);
  	}
@@ -1283,7 +1129,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	if (pkg_repo_archive_extract_check_archive(fd, filename, NULL, repo, dest_fd)
  			!= EPKG_OK) {
  		*rc = EPKG_FATAL;
-@@ -740,7 +881,11 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
+@@ -743,7 +884,11 @@ pkg_repo_fetch_remote_extract_fd(struct pkg_repo *repo, const char *filename,
  
  	/* Thus removing archived file as well */
  	close(fd);
@@ -1296,7 +1142,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	return (dest_fd);
  }
  
-@@ -752,7 +897,12 @@ pkg_repo_fetch_remote_extract_mmap(struct pkg_repo *repo, const char *filename,
+@@ -755,7 +900,12 @@ pkg_repo_fetch_remote_extract_mmap(struct pkg_repo *repo, const char *filename,
  	struct stat st;
  	unsigned char *map;
  
@@ -1309,7 +1155,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	if (fd == -1) {
  		return (NULL);
  	}
-@@ -771,6 +921,10 @@ pkg_repo_fetch_remote_extract_mmap(struct pkg_repo *repo, const char *filename,
+@@ -774,6 +924,10 @@ pkg_repo_fetch_remote_extract_mmap(struct pkg_repo *repo, const char *filename,
  
  	map = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
  	close(fd);
@@ -1320,7 +1166,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	if (map == MAP_FAILED) {
  		pkg_emit_errno("pkg_repo_fetch_remote_mmap", "cannot mmap fetched");
  		*rc = EPKG_FATAL;
-@@ -786,8 +940,12 @@ pkg_repo_fetch_remote_extract_tmp(struct pkg_repo *repo, const char *filename,
+@@ -789,8 +943,12 @@ pkg_repo_fetch_remote_extract_tmp(struct pkg_repo *repo, const char *filename,
  {
  	int dest_fd;
  	FILE *res;
@@ -1334,7 +1180,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	if (dest_fd == -1) {
  		*rc = EPKG_FATAL;
  		return (NULL);
-@@ -801,6 +959,10 @@ pkg_repo_fetch_remote_extract_tmp(struct pkg_repo *repo, const char *filename,
+@@ -804,6 +962,10 @@ pkg_repo_fetch_remote_extract_tmp(struct pkg_repo *repo, const char *filename,
  		return (NULL);
  	}
  
@@ -1345,7 +1191,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	*rc = EPKG_OK;
  	return (res);
  }
-@@ -887,9 +1049,21 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+@@ -890,9 +1052,21 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
  
  	dbdir = pkg_object_string(pkg_config_get("PKG_DBDIR"));
  
@@ -1369,7 +1215,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  
  	snprintf(filepath, sizeof(filepath), "%s/%s.meta", dbdir, pkg_repo_name(repo));
  
-@@ -919,12 +1093,18 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+@@ -922,12 +1096,18 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
  	}
  
  	close(fd);
@@ -1388,7 +1234,7 @@ diff --git a/libpkg/pkg_repo.c b/libpkg/pkg_repo.c
  	/* Map meta file for extracting pubkeys from it */
  	if (stat(filepath, &st) == -1) {
  		pkg_emit_errno("pkg_repo_fetch_meta", "cannot stat meta fetched");
-@@ -944,6 +1124,7 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
+@@ -947,6 +1127,7 @@ pkg_repo_fetch_meta(struct pkg_repo *repo, time_t *t)
  		rc = EPKG_FATAL;
  		goto cleanup;
  	}
@@ -1445,7 +1291,7 @@ diff --git a/libpkg/pkg_repo_create.c b/libpkg/pkg_repo_create.c
  		if (sysctlbyname("hw.ncpu", &num_workers, &len, NULL, 0) == -1)
  			num_workers = 6;
  #else
-@@ -885,8 +898,12 @@ pkg_repo_sign(char *path, char **argv, int argc, struct sbuf **sig, struct sbuf
+@@ -886,8 +899,12 @@ pkg_repo_sign(char *path, char **argv, int argc, struct sbuf **sig, struct sbuf
  	if (*cert == NULL)
  		*cert = sbuf_new_auto();
  
@@ -1459,7 +1305,7 @@ diff --git a/libpkg/pkg_repo_create.c b/libpkg/pkg_repo_create.c
  			buf = *sig;
  			continue;
  		} else if (strcmp(line, "CERT\n") == 0) {
-@@ -1030,9 +1047,6 @@ pkg_finish_repo(const char *output_dir, pem_password_cb *password_cb,
+@@ -1032,9 +1049,6 @@ pkg_finish_repo(const char *output_dir, pem_password_cb *password_cb,
  			rsa_free(rsa);
  			return (EPKG_FATAL);
  		}
@@ -1472,7 +1318,7 @@ diff --git a/libpkg/pkg_repo_create.c b/libpkg/pkg_repo_create.c
 diff --git a/libpkg/pkg_solve.c b/libpkg/pkg_solve.c
 --- a/libpkg/pkg_solve.c
 +++ b/libpkg/pkg_solve.c
-@@ -1227,8 +1227,12 @@ pkg_solve_parse_sat_output(FILE *f, struct pkg_solve_problem *problem)
+@@ -1435,8 +1435,12 @@ pkg_solve_parse_sat_output(FILE *f, struct pkg_solve_problem *problem)
  		HASH_ADD_INT(ordered_variables, order, nord);
  	}
  
@@ -1490,7 +1336,7 @@ diff --git a/libpkg/pkg_solve.c b/libpkg/pkg_solve.c
 diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
 --- a/libpkg/pkgdb.c
 +++ b/libpkg/pkgdb.c
-@@ -71,6 +71,11 @@
+@@ -73,6 +73,11 @@
  
  #include "private/db_upgrades.h"
  
@@ -1502,7 +1348,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  /* An application using a libpkg() DBVERSION is assumed to be compatible
     with:
  
-@@ -675,8 +680,15 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
+@@ -731,8 +736,15 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
  	struct stat	sb;
  
  	if (install_as_user) {
@@ -1518,7 +1364,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  	} else {
  		fileowner = 0;
  		filegroup = 0;
-@@ -691,6 +703,8 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
+@@ -747,6 +759,8 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
  			return (EPKG_FATAL);
  	}
  
@@ -1527,7 +1373,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  	/* if fileowner == 0, root ownership and no group or other
  	   read access.  if fileowner != 0, require no other read
  	   access and group read access IFF the group ownership ==
-@@ -721,7 +735,7 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
+@@ -777,7 +791,7 @@ pkgdb_is_insecure_mode(const char *path, bool install_as_user)
  			       path, fileowner, filegroup, sb.st_uid, sb.st_gid);
  		return (EPKG_INSECURE);
  	}
@@ -1536,7 +1382,7 @@ diff --git a/libpkg/pkgdb.c b/libpkg/pkgdb.c
  	return (EPKG_OK);
  }
  
-@@ -969,7 +983,9 @@ pkgdb_open_all(struct pkgdb **db_p, pkgdb_t type, const char *reponame)
+@@ -1025,7 +1039,9 @@ pkgdb_open_all(struct pkgdb **db_p, pkgdb_t type, const char *reponame)
  		/*
  		 * Fall back on unix-dotfile locking strategy if on a network filesystem
  		 */
@@ -1602,7 +1448,7 @@ diff --git a/libpkg/plugins.c b/libpkg/plugins.c
  
  static int
  pkg_plugin_hook_free(struct pkg_plugin *p)
-@@ -261,6 +264,7 @@ pkg_plugins(struct pkg_plugin **plugin)
+@@ -267,6 +270,7 @@ pkg_plugins(struct pkg_plugin **plugin)
  		return (EPKG_OK);
  }
  
@@ -1610,7 +1456,7 @@ diff --git a/libpkg/plugins.c b/libpkg/plugins.c
  int
  pkg_plugins_init(void)
  {
-@@ -317,6 +321,7 @@ pkg_plugins_init(void)
+@@ -323,6 +327,7 @@ pkg_plugins_init(void)
  
  	return (EPKG_OK);
  }
@@ -1618,7 +1464,7 @@ diff --git a/libpkg/plugins.c b/libpkg/plugins.c
  
  int
  pkg_plugin_parse(struct pkg_plugin *p)
-@@ -373,6 +378,7 @@ pkg_plugin_parse(struct pkg_plugin *p)
+@@ -379,6 +384,7 @@ pkg_plugin_parse(struct pkg_plugin *p)
  	return (EPKG_OK);
  }
  
@@ -1626,7 +1472,7 @@ diff --git a/libpkg/plugins.c b/libpkg/plugins.c
  void
  pkg_plugins_shutdown(void)
  {
-@@ -396,6 +402,7 @@ pkg_plugins_shutdown(void)
+@@ -402,6 +408,7 @@ pkg_plugins_shutdown(void)
  
  	return;
  }
@@ -1637,9 +1483,9 @@ diff --git a/libpkg/plugins.c b/libpkg/plugins.c
 diff --git a/libpkg/private/utils.h b/libpkg/private/utils.h
 --- a/libpkg/private/utils.h
 +++ b/libpkg/private/utils.h
-@@ -40,6 +40,10 @@
+@@ -39,6 +39,10 @@
+ #include <openssl/pem.h>
  #include <openssl/rsa.h>
- #include <openssl/sha.h>
  
 +#ifndef MAXHOSTNAMELEN
 +#define MAXHOSTNAMELEN 64
@@ -1682,11 +1528,10 @@ diff --git a/libpkg/repo/binary/fetch.c b/libpkg/repo/binary/fetch.c
  	return (EPKG_OK);
  }
  
-@@ -200,8 +208,29 @@ pkg_repo_binary_try_fetch(struct pkg_repo *repo, struct pkg *pkg,
- 		free(dir);
+@@ -200,7 +208,29 @@ pkg_repo_binary_try_fetch(struct pkg_repo *repo, struct pkg *pkg,
  		return (EPKG_OK);
  	}
--
+ 
 +#ifdef __native_client__
 +	int pid = vfork();
 +        if (pid == -1) {
@@ -1710,7 +1555,7 @@ diff --git a/libpkg/repo/binary/fetch.c b/libpkg/repo/binary/fetch.c
 +#else
  	retcode = pkg_fetch_file(repo, url, dest, 0, offset, pkg->pkgsize);
 +#endif
- 	fetched = 1;
+ 	fetched = true;
  
  	if (retcode != EPKG_OK)
 diff --git a/libpkg/repo/binary/init.c b/libpkg/repo/binary/init.c
@@ -1726,7 +1571,7 @@ diff --git a/libpkg/repo/binary/init.c b/libpkg/repo/binary/init.c
  #include <regex.h>
  #include <grp.h>
  #include <stdlib.h>
-@@ -315,7 +318,9 @@ pkg_repo_binary_open(struct pkg_repo *repo, unsigned mode)
+@@ -316,7 +319,9 @@ pkg_repo_binary_open(struct pkg_repo *repo, unsigned mode)
  	/*
  	 * Fall back on unix-dotfile locking strategy if on a network filesystem
  	 */
@@ -1737,7 +1582,7 @@ diff --git a/libpkg/repo/binary/init.c b/libpkg/repo/binary/init.c
  	struct statvfs stfs;
  
  	if (statvfs(dbdir, &stfs) == 0) {
-@@ -348,8 +353,13 @@ pkg_repo_binary_open(struct pkg_repo *repo, unsigned mode)
+@@ -349,8 +354,13 @@ pkg_repo_binary_open(struct pkg_repo *repo, unsigned mode)
  		return (EPKG_ENOACCESS);
  
  	flags = (mode & W_OK) != 0 ? SQLITE_OPEN_READWRITE : SQLITE_OPEN_READONLY;
@@ -1751,7 +1596,7 @@ diff --git a/libpkg/repo/binary/init.c b/libpkg/repo/binary/init.c
  
  	/* Sanitise sqlite database */
  	if (get_pragma(sqlite, "SELECT count(name) FROM sqlite_master "
-@@ -433,7 +443,9 @@ pkg_repo_binary_create(struct pkg_repo *repo)
+@@ -434,7 +444,9 @@ pkg_repo_binary_create(struct pkg_repo *repo)
  	/*
  	 * Fall back on unix-dotfile locking strategy if on a network filesystem
  	 */
@@ -1778,7 +1623,7 @@ diff --git a/libpkg/repo/binary/query.c b/libpkg/repo/binary/query.c
 diff --git a/libpkg/scripts.c b/libpkg/scripts.c
 --- a/libpkg/scripts.c
 +++ b/libpkg/scripts.c
-@@ -126,7 +126,11 @@ pkg_script_run(struct pkg * const pkg, pkg_script type)
+@@ -127,7 +127,11 @@ pkg_script_run(struct pkg * const pkg, pkg_script type)
  			   if a pipe is required to /bin/sh -s. Similar to
  			   find(1) determination */
  			if ((argmax = sysconf(_SC_ARG_MAX)) == -1)
@@ -1791,7 +1636,7 @@ diff --git a/libpkg/scripts.c b/libpkg/scripts.c
  			argmax -= 1024;
  			for (ep = environ; *ep != NULL; ep++)
  				argmax -= strlen(*ep) + 1 + sizeof(*ep);
-@@ -227,4 +231,3 @@ cleanup:
+@@ -228,4 +232,3 @@ cleanup:
  
  	return (ret);
  }
@@ -1814,7 +1659,7 @@ diff --git a/libpkg/ssh.c b/libpkg/ssh.c
 diff --git a/libpkg/utils.c b/libpkg/utils.c
 --- a/libpkg/utils.c
 +++ b/libpkg/utils.c
-@@ -560,7 +560,11 @@ process_spawn_pipe(FILE *inout[2], const char *command)
+@@ -475,7 +475,11 @@ process_spawn_pipe(FILE *inout[2], const char *command)
  	argv[2] = __DECONST(char *, command);
  	argv[3] = NULL;
  
@@ -1826,7 +1671,7 @@ diff --git a/libpkg/utils.c b/libpkg/utils.c
  	if (pid > 0) {
  		/* Parent process */
  		inout[0] = fdopen(pipes[0], "r");
-@@ -587,7 +591,11 @@ process_spawn_pipe(FILE *inout[2], const char *command)
+@@ -502,7 +506,11 @@ process_spawn_pipe(FILE *inout[2], const char *command)
  
  		execve(_PATH_BSHELL, argv, environ);
  
@@ -2144,19 +1989,21 @@ diff --git a/src/main.c b/src/main.c
  
  #ifdef HAVE_ARC4RANDOM
  	/* Ensure that random is stirred after a possible fork */
-@@ -699,9 +723,11 @@ main(int argc, char **argv)
+@@ -699,11 +723,13 @@ main(int argc, char **argv)
  		    "-j, -c and/or -r cannot be used at the same time!\n");
  	}
  
 +#ifndef _NEWLIB_VERSION
- 	if (chroot_path != NULL)
- 		if (chroot(chroot_path) == -1)
- 			errx(EX_SOFTWARE, "chroot failed!");
+ 	if (chroot_path != NULL) {
+ 		if (chroot(chroot_path) == -1) {
+ 			err(EX_SOFTWARE, "chroot failed");
+ 		}
+ 	}
 +#endif
  
  #ifdef HAVE_LIBJAIL
  	if (jail_str != NULL) {
-@@ -727,9 +753,6 @@ main(int argc, char **argv)
+@@ -729,9 +755,6 @@ main(int argc, char **argv)
  	if (pkg_ini(conffile, reposdir, init_flags) != EPKG_OK)
  		errx(EX_SOFTWARE, "Cannot parse configuration file!");
  
@@ -2166,7 +2013,7 @@ diff --git a/src/main.c b/src/main.c
  	if (atexit(&pkg_shutdown) != 0)
  		errx(EX_SOFTWARE, "register pkg_shutdown() to run at exit");
  
-@@ -740,6 +763,7 @@ main(int argc, char **argv)
+@@ -742,6 +765,7 @@ main(int argc, char **argv)
  
  	plugins_enabled = pkg_object_bool(pkg_config_get("PKG_ENABLE_PLUGINS"));
  
@@ -2174,7 +2021,7 @@ diff --git a/src/main.c b/src/main.c
  	if (plugins_enabled) {
  		struct pkg_plugin	*p = NULL;
  
-@@ -766,6 +790,7 @@ main(int argc, char **argv)
+@@ -768,6 +792,7 @@ main(int argc, char **argv)
  			}
  		}
  	}

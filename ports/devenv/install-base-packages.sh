@@ -20,6 +20,7 @@ CheckNaClEnabled() {
     geturl -q _platform_specific/${NACL_ARCH}/bash.nexe \
       ${TMP_CHECK_FILE} || exit 1
   fi
+  set +e
   ${TMP_CHECK_FILE} -c 'exit 42'
   if [[ $? != 42 ]]; then
     echo "*********************** ERROR ***********************"
@@ -39,6 +40,7 @@ CheckNaClEnabled() {
       read
     done
   fi
+  set -e
 }
 
 InstallBasePackages() {
