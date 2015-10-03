@@ -48,6 +48,9 @@ LOG_INFO = 2
 LOG_VERBOSE = 3
 LOG_TRACE = 4
 
+ELF_MAGIC = '\x7fELF'
+PEXE_MAGIC = 'PEXE'
+
 log_level = LOG_INFO
 color_mode = 'auto'
 
@@ -62,6 +65,22 @@ def Color(message, color):
 def CheckStdoutForColorSupport():
   if color_mode == 'auto':
     Color.enabled = sys.stdout.isatty()
+
+
+def IsElfFile(filename):
+  if os.path.islink(filename):
+    return False
+  with open(filename) as f:
+    header = f.read(4)
+  return header == ELF_MAGIC
+
+
+def IsPexeFile(filename):
+  if os.path.islink(filename):
+    return False
+  with open(filename) as f:
+    header = f.read(4)
+  return header == PEXE_MAGIC
 
 
 def Memoize(f):
@@ -261,23 +280,34 @@ def GetPlatform():
 
 
 @Memoize
-def GetInstallRoot(config):
+def GetToolchainRoot(config):
   """Returns the toolchain folder for a given NaCl toolchain."""
   if config.toolchain == 'emscripten':
-    return os.path.join(GetEmscriptenRoot(), 'system', 'local')
+    return GetEmscriptenRoot()
 
   platform = GetPlatform()
-  if config.toolchain == 'pnacl':
-    tc_dir = os.path.join('%s_pnacl' % platform, 'le32-nacl')
+  if config.toolchain in ('pnacl', 'clang-newlib'):
+    tc_dir = os.path.join('%s_pnacl' % platform)
   else:
     tc_arch = {'arm': 'arm', 'i686': 'x86', 'x86_64': 'x86'}[config.arch]
-    if config.toolchain == 'clang-newlib':
-      tc_dir = '%s_pnacl' % platform
-    else:
-      tc_dir = '%s_%s_%s' % (platform, tc_arch, config.toolchain)
-    tc_dir = os.path.join(tc_dir, '%s-nacl' % config.arch)
+    tc_dir = '%s_%s_%s' % (platform, tc_arch, config.toolchain)
 
-  return os.path.join(GetSDKRoot(), 'toolchain', tc_dir, 'usr')
+  return os.path.join(GetSDKRoot(), 'toolchain', tc_dir)
+
+
+@Memoize
+def GetInstallRoot(config):
+  """Returns the naclports install location given NaCl configuration."""
+  tc_dir = GetToolchainRoot(config)
+
+  if config.toolchain == 'emscripten':
+    return os.path.join(tc_dir, 'system', 'local')
+
+  if config.toolchain == 'pnacl':
+    tc_dir = os.path.join(tc_dir, 'le32-nacl')
+  else:
+    tc_dir = os.path.join(tc_dir, '%s-nacl' % config.arch)
+  return os.path.join(tc_dir, 'usr')
 
 
 @Memoize
@@ -285,6 +315,15 @@ def GetInstallStampRoot(config):
   """Returns the installation metadata folder for the give configuration."""
   tc_root = GetInstallRoot(config)
   return os.path.join(tc_root, 'var', 'lib', 'npkg')
+
+
+@Memoize
+def GetStrip(config):
+  tc_dir = GetToolchainRoot(config)
+  if config.toolchain == 'pnacl':
+    return os.path.join(tc_dir, 'bin', 'pnacl-strip')
+  else:
+    return os.path.join(tc_dir, 'bin', '%s-nacl-strip' % config.arch)
 
 
 def GetInstallStamp(package_name, config):

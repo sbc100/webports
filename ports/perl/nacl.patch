@@ -75,6 +75,30 @@ new mode 100755
  {
      int exitstatus, i;
  #ifdef PERL_GLOBAL_STRUCT
+diff --git a/installperl b/installperl
+--- a/installperl
++++ b/installperl
+@@ -383,9 +383,9 @@ foreach my $file (@corefiles) {
+     if (copy_if_diff($file,"$installarchlib/CORE/$file")) {
+ 	if ($file =~ /\.(\Q$so\E|\Q$dlext\E)$/) {
+ 	    strip("-S", "$installarchlib/CORE/$file") if $^O eq 'darwin';
+-	    chmod(0555, "$installarchlib/CORE/$file");
++	    chmod(0755, "$installarchlib/CORE/$file");
+ 	} else {
+-	    chmod(0444, "$installarchlib/CORE/$file");
++	    chmod(0644, "$installarchlib/CORE/$file");
+ 	}
+     }
+ }
+@@ -753,7 +753,7 @@ sub installlib {
+             if (copy_if_diff($_, "$installlib/$name")) {
+                 strip("-S", "$installlib/$name")
+                     if $^O eq 'darwin' and /\.(?:so|$dlext|a)$/;
+-                chmod(/\.(so|$dlext)$/ ? 0555 : 0444, "$installlib/$name");
++                chmod(/\.(so|$dlext)$/ ? 0755 : 0644, "$installlib/$name");
+             }
+ 	}
+     }
 diff --git a/lib/ExtUtils/t/Embed.t b/lib/ExtUtils/t/Embed.t
 old mode 100644
 new mode 100755

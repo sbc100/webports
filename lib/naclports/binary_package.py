@@ -13,29 +13,10 @@ from naclports import configuration, package, util, error
 PAYLOAD_DIR = 'payload'
 INSTALL_PREFIX = '/naclports-dummydir'
 
-ELF_MAGIC = '\x7fELF'
-PEXE_MAGIC = 'PEXE'
-
 def MakeDirIfNeeded(filename):
   dirname = os.path.dirname(filename)
   if not os.path.isdir(dirname):
     util.Makedirs(dirname)
-
-
-def IsElfFile(filename):
-  if os.path.islink(filename):
-    return False
-  with open(filename) as f:
-    header = f.read(4)
-  return header == ELF_MAGIC
-
-
-def IsPexeFile(filename):
-  if os.path.islink(filename):
-    return False
-  with open(filename) as f:
-    header = f.read(4)
-  return header == PEXE_MAGIC
 
 
 def FilterOutExecutables(filenames, root):
@@ -49,7 +30,7 @@ def FilterOutExecutables(filenames, root):
   for name in filenames:
     full_name = os.path.join(root, name)
     if os.path.split(name)[0] == 'bin':
-      if not os.path.splitext(name)[1] and IsElfFile(full_name):
+      if not os.path.splitext(name)[1] and util.IsElfFile(full_name):
         continue
     rtn.append(name)
 
@@ -76,7 +57,7 @@ def InstallFile(filename, old_root, new_root):
 
   # When install binaries ELF files into the toolchain direcoties, remove
   # the X bit so that they do not found when searching the PATH.
-  if IsElfFile(newname) or IsPexeFile(newname):
+  if util.IsElfFile(newname) or util.IsPexeFile(newname):
     mode = os.stat(newname).st_mode
     mode = mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     os.chmod(newname, mode)

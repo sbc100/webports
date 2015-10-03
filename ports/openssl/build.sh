@@ -69,8 +69,8 @@ InstallStep() {
   # not writable.  This causes issues when create_nmf copies the libraries
   # and then tries to overwrite them later.
   if [ "${NACL_SHARED}" = "1" ] ; then
-    LogExecute chmod 644 ${DESTDIR_LIB}/libssl.so.*
-    LogExecute chmod 644 ${DESTDIR_LIB}/libcrypto.so.*
+    LogExecute chmod 644 ${DESTDIR_LIB}/lib*.so*
+    LogExecute chmod 644 ${DESTDIR_LIB}/engines/lib*.so*
   fi
 }
 

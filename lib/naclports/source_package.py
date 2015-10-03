@@ -300,6 +300,18 @@ class SourcePackage(package.Package):
       Log('Skiping pkg creation. Install dir not found: %s' % install_dir)
       return
 
+    # Strip all elf or pexe files in the install directory (except .o files
+    # since we don't want to strip, for example, crt1.o)
+    if not self.config.debug:
+      strip = util.GetStrip(self.config)
+      for root, _, files in os.walk(install_dir):
+        for filename in files:
+          fullname = os.path.join(root, filename)
+          if (os.path.isfile(fullname) and util.IsElfFile(fullname)
+              and os.path.splitext(fullname)[1] != '.o'):
+            Log('stripping: %s %s' % (strip, fullname))
+            subprocess.check_call([strip, fullname])
+
     abi = 'pkg_' + self.config.toolchain
     if self.config.arch != self.config.toolchain:
       abi += "_" + util.arch_to_pkgarch[self.config.arch]
@@ -312,7 +324,6 @@ class SourcePackage(package.Package):
         deps = []
     bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
         self.GetInstallLocation(), pkg_file, deps)
-
 
   def Build(self, build_deps, force=None):
     self.CheckBuildable()
