@@ -7,7 +7,6 @@ DEPENDS=(libffi zlib gettext)
 # detect this on mac.
 BUILD_OS=linux
 SHA1=495f7cc9281847ecfbbaf9d3edd9eb2a2123350e
-# pnacl: ABI verfification fails during build
 # arm/glibc: missing FIONREAD
 # https://code.google.com/p/nativeclient/issues/detail?id=4233
-DISABLED_TOOLCHAIN=(emscripten bionic pnacl glibc/arm)
+DISABLED_TOOLCHAIN=(emscripten bionic glibc/arm)

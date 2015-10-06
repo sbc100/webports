@@ -7,4 +7,4 @@ EXECUTABLES="util/hb-shape${NACL_EXEEXT}\
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 
-EXTRA_CONFIGURE_ARGS+=" --with-gobject"
+EXTRA_CONFIGURE_ARGS+=" --with-gobject --without-icu"
