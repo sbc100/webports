@@ -136,19 +136,10 @@ elif [ "${OS}" = "linux" ]; then
   elif [ "${TOOLCHAIN}" = "emscripten" ]; then
     SHARDS=1
   else
-    SHARDS=5
+    SHARDS=6
   fi
 else
   echo "Unspecified sharding for OS: ${OS}" 1>&2
-fi
-
-# For the trybots we have 5 shards for each toolchain
-if [ "${TRYBOT}" = "1" ]; then
-  if [ "${TOOLCHAIN}" = "emscripten" ]; then
-    SHARDS=1
-  else
-    SHARDS=5
-  fi
 fi
 
 # Optional Clobber (if checked in the buildbot ui).
