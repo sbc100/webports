@@ -1,3 +1,15 @@
+diff --git a/include/dos_inc.h b/include/dos_inc.h
+--- a/include/dos_inc.h
++++ b/include/dos_inc.h
+@@ -28,6 +28,8 @@
+ #include "mem.h"
+ #endif
+ 
++#include <cstddef>
++
+ #ifdef _MSC_VER
+ #pragma pack (1)
+ #endif
 diff --git a/include/setup.h b/include/setup.h
 --- a/include/setup.h
 +++ b/include/setup.h

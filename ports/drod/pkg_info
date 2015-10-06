@@ -6,5 +6,4 @@ LICENSE=MPL
 DEPENDS=(sdl sdl-mixer sdl-ttf zlib metakit libtar libpng expat)
 SHA1=33b465c4d8fcb09523b97d14833591e1eb5343f2
 # Generates abigous references at compile time
-DISABLED_ARCH=(pnacl)
-DISABLED_TOOLCHAIN=(emscripten)
+DISABLED_TOOLCHAIN=(emscripten pnacl clang-newlib)
