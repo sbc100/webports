@@ -98,8 +98,9 @@ variable. e.g.::
   $ NACL_ARCH=arm make openssl
 
 For some architectures there is more than one toolchain available.  For example
-for x86 you can choose between newlib and glibc.  The toolchain defaults to
-newlib and can be specified by setting the ``TOOLCHAIN`` environment variable::
+for x86 you can choose between clang-newlib and glibc.  The toolchain defaults
+to pnacl and can be specified by setting the ``TOOLCHAIN`` environment
+variable::
 
   $ NACL_ARCH=i686 TOOLCHAIN=glibc make openssl
 

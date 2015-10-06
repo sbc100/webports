@@ -290,7 +290,7 @@ def GetToolchainRoot(config):
     tc_dir = os.path.join('%s_pnacl' % platform)
   else:
     tc_arch = {'arm': 'arm', 'i686': 'x86', 'x86_64': 'x86'}[config.arch]
-    tc_dir = '%s_%s_%s' % (platform, tc_arch, config.toolchain)
+    tc_dir = '%s_%s_%s' % (platform, tc_arch, config.libc)
 
   return os.path.join(GetSDKRoot(), 'toolchain', tc_dir)
 
@@ -321,9 +321,11 @@ def GetInstallStampRoot(config):
 def GetStrip(config):
   tc_dir = GetToolchainRoot(config)
   if config.toolchain == 'pnacl':
-    return os.path.join(tc_dir, 'bin', 'pnacl-strip')
+    strip = os.path.join(tc_dir, 'bin', 'pnacl-strip')
   else:
-    return os.path.join(tc_dir, 'bin', '%s-nacl-strip' % config.arch)
+    strip = os.path.join(tc_dir, 'bin', '%s-nacl-strip' % config.arch)
+  assert os.path.exists(strip), 'strip executable not found: %s' % strip
+  return strip
 
 
 def GetInstallStamp(package_name, config):

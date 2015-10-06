@@ -333,6 +333,8 @@ def main(args):
     PrintError('interrupted')
     return 1
   except error.Error as e:
+    if os.environ.get('DEBUG'):
+      raise
     PrintError(str(e))
     return 1
 

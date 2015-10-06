@@ -185,12 +185,12 @@ class TestSourcePackage(common.NaclportsTest):
       pkg.CheckInstallable()
 
   def testDisabledToolchainArch(self):
-    self.CreateTestPackage('bar', 'DISABLED_TOOLCHAIN=(newlib/x86_64)')
+    self.CreateTestPackage('bar', 'DISABLED_TOOLCHAIN=(glibc/x86_64)')
 
     pkg = source_package.CreatePackage(
-        'bar', config=Configuration(toolchain='newlib'))
+        'bar', config=Configuration(toolchain='glibc'))
     with self.assertRaisesRegexp(
-        error.DisabledError, 'cannot be built with newlib for x86_64$'):
+        error.DisabledError, 'cannot be built with glibc for x86_64$'):
       pkg.CheckInstallable()
 
     self.CreateTestPackage('bar2', 'DISABLED_TOOLCHAIN=(pnacl/arm)')

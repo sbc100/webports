@@ -17,7 +17,7 @@ class TestPackage(unittest.TestCase):
 
   def testValidLibcDisabled(self):  # pylint: disable=no-self-use
     pkg = package.Package()
-    pkg.ParseInfo(test_info + 'DISABLED_LIBC=(newlib glibc bionic)')
+    pkg.ParseInfo(test_info + 'DISABLED_LIBC=(newlib glibc)')
 
   def testInvalidLibcDisabled(self):
     pkg = package.Package()
@@ -27,7 +27,7 @@ class TestPackage(unittest.TestCase):
 
   def testValidToolchainDisabled(self):  # pylint: disable=no-self-use
     pkg = package.Package()
-    pkg.ParseInfo(test_info + 'DISABLED_TOOLCHAIN=(newlib glibc clang-newlib)')
+    pkg.ParseInfo(test_info + 'DISABLED_TOOLCHAIN=(pnacl glibc clang-newlib)')
 
   def testInvalidToolchainDisabled(self):
     pkg = package.Package()

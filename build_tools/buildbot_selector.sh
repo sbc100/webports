@@ -8,7 +8,7 @@
 
 # Main entry point for buildbots.
 # For local testing set BUILDBOT_BUILDERNAME and TEST_BUILDBOT, e.g:
-#  TEST_BUILDBOT=1 BUILDBOT_BUILDERNAME=linux-newlib-0 ./buildbot_selector.sh
+#  TEST_BUILDBOT=1 BUILDBOT_BUILDERNAME=linux-pnacl-0 ./buildbot_selector.sh
 
 set -o errexit
 set -o nounset
@@ -48,7 +48,7 @@ RESULT=0
 export PATH=${PATH}:/opt/local/bin
 
 if [ "${TEST_BUILDBOT:-}" = "1" -a -z "${BUILDBOT_BUILDERNAME:-}" ]; then
-  export BUILDBOT_BUILDERNAME=linux-newlib-0
+  export BUILDBOT_BUILDERNAME=linux-clang-0
 fi
 
 BuildShard() {
@@ -121,11 +121,7 @@ fi
 
 # Convert toolchain contains in the bot name to valid TOOLCHAIN value
 # as expected by the SDK tools.
-# TODO(sbc): remove this first case once that bot names contain 'pnacl'
-# rather than 'pancl_newlib'.
-if [ "${BOT_TYPE}" = "pnacl_newlib" ]; then
-  TOOLCHAIN=pnacl
-elif [ "${BOT_TYPE}" = "clang" ]; then
+if [ "${BOT_TYPE}" = "clang" ]; then
   TOOLCHAIN=clang-newlib
 else
   TOOLCHAIN=${BOT_TYPE}

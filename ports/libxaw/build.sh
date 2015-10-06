@@ -5,7 +5,7 @@
 EnableGlibcCompat
 
 InstallStep() {
-  if [[ $TOOLCHAIN == newlib ]]; then
+  if [[ $NACL_SHARED == 0 ]]; then
      INSTALL_TARGETS="install LIBEXT=.a"
   fi
   DefaultInstallStep

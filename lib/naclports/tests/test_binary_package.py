@@ -39,7 +39,7 @@ class TestBinaryPackage(common.NaclportsTest):
       VERSION=1.0
       BUILD_CONFIG=release
       BUILD_ARCH=arm
-      BUILD_TOOLCHAIN=newlib
+      BUILD_TOOLCHAIN=glibc
       BUILD_SDK_VERSION=38
       BUILD_NACLPORTS_REVISION=1414
       ''')

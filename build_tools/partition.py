@@ -10,7 +10,7 @@ about the same amount of time.
 
 Example use:
 
-    $ ./partition.py -b linux-newlib-
+    $ ./partition.py -b linux-clang-
 
     builder 0 (total: 2786)
       bzip2
@@ -58,7 +58,7 @@ import urllib2
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
-TOOLCHAINS = ('bionic', 'newlib', 'glibc', 'pnacl')
+TOOLCHAINS = ('bionic', 'clang-newlib', 'glibc', 'pnacl')
 
 sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
@@ -317,7 +317,7 @@ def main(args):
   parser.add_argument('-t', '--print-canned', type=int,
                       help='Print a the canned partition list and exit.')
   parser.add_argument('-b', '--bot-prefix', help='builder name prefix.',
-                      default='linux-newlib-')
+                      default='linux-clang-')
   parser.add_argument('-n', '--num-bots',
                       help='Number of builders on the waterfall to collect '
                       'data from or to print a canned partition for.',

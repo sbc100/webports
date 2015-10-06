@@ -2,11 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO: Remove this once LLONG_MAX is defined for x86_64-newlib.
-if [ "$NACL_ARCH" != "pnacl" ] && [ "$TOOLCHAIN" = "newlib" ]; then
-  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -std=c99"
-fi
-
 BuildStep() {
   DefaultPythonModuleBuildStep
   # This avoids name conflicts with Python's parser.o

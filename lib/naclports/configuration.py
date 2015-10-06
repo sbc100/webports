@@ -7,8 +7,7 @@ import platform
 
 from naclports import error, util
 
-VALID_TOOLCHAINS = ['newlib', 'glibc', 'bionic', 'pnacl', 'clang-newlib',
-                    'emscripten']
+VALID_TOOLCHAINS = ['glibc', 'bionic', 'pnacl', 'clang-newlib', 'emscripten']
 VALID_LIBC = ['newlib', 'glibc', 'bionic']
 
 
@@ -16,7 +15,7 @@ class Configuration(object):
   """Class representing the build configuration for naclports packages.
 
   This consists of the following attributes:
-    toolchain   - newlib, glibc, bionic, pnacl
+    toolchain   - clang-newlib, glibc, bionic, pnacl
     arch        - x86_64, x86_32, arm, pnacl
     debug       - True/False
     config_name - 'debug' or 'release'
@@ -46,8 +45,8 @@ class Configuration(object):
         toolchain = 'emscripten'
       else:
         toolchain = self.default_toolchain
-    self.toolchain = toolchain
 
+    self.toolchain = toolchain
     if self.toolchain not in VALID_TOOLCHAINS:
       raise error.Error("Invalid toolchain: %s" % self.toolchain)
 

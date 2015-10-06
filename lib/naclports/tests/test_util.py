@@ -60,9 +60,9 @@ class TestUtil(unittest.TestCase):
     expected = '/sdk/root/toolchain/linux_pnacl/le32-nacl/usr'
     self.assertEqual(util.GetInstallRoot(Configuration()), expected)
 
-    expected = '/sdk/root/toolchain/linux_x86_newlib/x86_64-nacl/usr'
+    expected = '/sdk/root/toolchain/linux_x86_glibc/x86_64-nacl/usr'
     self.assertEqual(
-        util.GetInstallRoot(Configuration(toolchain='newlib')), expected)
+        util.GetInstallRoot(Configuration(toolchain='glibc')), expected)
 
     expected = '/sdk/root/toolchain/linux_pnacl/le32-nacl/usr'
     self.assertEqual(util.GetInstallRoot(Configuration('pnacl')), expected)

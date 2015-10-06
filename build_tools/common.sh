@@ -89,13 +89,6 @@ if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
   NACLPORTS_LDFLAGS+=" -fdiagnostics-color=auto"
 fi
 
-# The NaCl version of ARM gcc emits warnings about va_args that
-# are not particularly useful
-if [ "${NACL_ARCH}" = "arm" -a "${TOOLCHAIN}" = "newlib" ]; then
-  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS} -Wno-psabi"
-  NACLPORTS_CXXFLAGS="${NACLPORTS_CXXFLAGS} -Wno-psabi"
-fi
-
 if [ "${NACL_ARCH}" = "emscripten" ]; then
   NACLPORTS_CFLAGS+=" -Wno-warn-absolute-paths"
   NACLPORTS_CXXFLAGS+=" -Wno-warn-absolute-paths"
@@ -275,23 +268,6 @@ fi
 # Always run
 ######################################################################
 
-CheckToolchain() {
-  if [ -n "${LIBC:-}" ]; then
-    if [ "${LIBC}" == "glibc" ]; then
-      if [ "${NACL_LIBC}" != "glibc" ]; then
-        echo "This package must be built with glibc (\$TOOLCHAIN=glibc)"
-        exit 1
-      fi
-    elif [ "${LIBC}" == "newlib" ]; then
-      if [ "${NACL_LIBC}" != "newlib" ]; then
-        echo "This package must be built with newlib (\$TOOLCHAIN=newlib)"
-        exit 1
-      fi
-    fi
-  fi
-}
-
-
 InstallConfigSite() {
   CONFIG_SITE=${NACL_PREFIX}/share/config.site
   MakeDir "${NACL_PREFIX}/share"
@@ -418,7 +394,7 @@ PatchSpecsFile() {
       s|$| -rpath-link=${SED_SAFE_SPACES_USR_LIB} -L${SED_SAFE_SPACES_USR_LIB}|
     }" > "${SPECS_FILE}"
 
-  # For static-only toolchains (i.e. newlib), modify the specs file to give an
+  # For static-only toolchains (i.e. pnacl), modify the specs file to give an
   # error when attempting to create a shared object.
   if [ "${NACL_SHARED}" != "1" ]; then
     sed -i.bak "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
@@ -1594,7 +1570,6 @@ RunPublishStep()    {
 # These functions are called when this script is imported to do
 # any essential checking/setup operations.
 ######################################################################
-CheckToolchain
 PatchSpecsFile
 InjectSystemHeaders
 InstallConfigSite

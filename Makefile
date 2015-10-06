@@ -47,7 +47,6 @@ endif
 
 export NACL_ARCH
 export TOOLCHAIN
-export NACL_GLIBC
 
 all:
 	bin/naclports --all install $(BUILD_FLAGS)

@@ -18,10 +18,10 @@ LICENSE=BSD
 DEPENDS=(agg)
 BUILD_CONFIG=release
 BUILD_ARCH=arm
-BUILD_TOOLCHAIN=newlib
+BUILD_TOOLCHAIN=glibc
 BUILD_SDK_VERSION=38
 BUILD_NACLPORTS_REVISION=98765
-BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_arm_newlib.tar.bz2
+BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_arm_glibc.tar.bz2
 BIN_SIZE=10240
 BIN_SHA1=f300618f52188a291804dd60d6a5e04361c0ffe6
 
@@ -31,10 +31,10 @@ LICENSE=BSD
 DEPENDS=(agg)
 BUILD_CONFIG=release
 BUILD_ARCH=i686
-BUILD_TOOLCHAIN=newlib
+BUILD_TOOLCHAIN=glibc
 BUILD_SDK_VERSION=38
 BUILD_NACLPORTS_REVISION=98765
-BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_i686_newlib.tar.bz2
+BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_i686_glibc.tar.bz2
 BIN_SIZE=10240
 BIN_SHA1=0cb0d2d1380831b38c2b8461528836aa7992435f
 '''
@@ -44,7 +44,7 @@ NAME=foo
 VERSION=bar
 BUILD_ARCH=arm
 BUILD_CONFIG=debug
-BUILD_TOOLCHAIN=newlib
+BUILD_TOOLCHAIN=glibc
 BUILD_SDK_VERSION=123
 BUILD_NACLPORTS_REVISION=98765
 '''
@@ -60,8 +60,8 @@ class TestPackageIndex(common.NaclportsTest):
 
   def testParsingValid(self):
     index = package_index.PackageIndex('dummy_file', test_index)
-    arm_config = Configuration('arm', 'newlib', False)
-    i686_config = Configuration('i686', 'newlib', False)
+    arm_config = Configuration('arm', 'glibc', False)
+    i686_config = Configuration('i686', 'glibc', False)
     self.assertEqual(len(index.packages), 2)
     self.assertTrue(index.Contains('agg-demo', arm_config))
     self.assertTrue(index.Contains('agg-demo', i686_config))
@@ -69,8 +69,8 @@ class TestPackageIndex(common.NaclportsTest):
   def testContains(self):
     # Create an empty package index and add a single entry to it
     index = package_index.PackageIndex('dummy_file', '')
-    config_debug = Configuration('arm', 'newlib', True)
-    config_release = Configuration('arm', 'newlib', False)
+    config_debug = Configuration('arm', 'glibc', True)
+    config_release = Configuration('arm', 'glibc', False)
     self.assertFalse(index.Contains('foo', config_release))
     index.packages[('foo', config_release)] = {
         'NAME': 'dummy',
@@ -98,7 +98,7 @@ class TestPackageIndex(common.NaclportsTest):
   @patch('naclports.util.DownloadFile')
   def testDownload(self, download_file_mock):
     index = package_index.PackageIndex('dummy_file', test_index)
-    arm_config = Configuration('arm', 'newlib', False)
+    arm_config = Configuration('arm', 'glibc', False)
     index.Download('agg-demo', arm_config)
     self.assertEqual(download_file_mock.call_count, 1)
 

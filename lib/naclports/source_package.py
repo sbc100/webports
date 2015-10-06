@@ -302,7 +302,7 @@ class SourcePackage(package.Package):
 
     # Strip all elf or pexe files in the install directory (except .o files
     # since we don't want to strip, for example, crt1.o)
-    if not self.config.debug:
+    if not self.config.debug and self.config.toolchain != 'emscripten':
       strip = util.GetStrip(self.config)
       for root, _, files in os.walk(install_dir):
         for filename in files:

@@ -90,7 +90,7 @@ done
 shift $((OPTIND - 1))
 
 if [[ ! -f ${PKG} ]]; then
-  TOOLCHAIN=newlib make pkg F=1 V=1
+  TOOLCHAIN=clang-newlib make pkg F=1 V=1
 fi
 
 if [[ ${local} = 1 ]]; then

@@ -53,6 +53,8 @@ def IndexFromFile(filename):
 
 
 def GetCurrentIndex():
+  if not os.path.exists(DEFAULT_INDEX):
+    return PackageIndex('', '')
   return IndexFromFile(DEFAULT_INDEX)
 
 
@@ -66,7 +68,6 @@ class PackageIndex(object):
   required_keys = pkg_info.REQUIRED_KEYS + EXTRA_KEYS
 
   def __init__(self, filename, index_data):
-
     self.filename = filename
     self.packages = {}
     self.ParseIndex(index_data)

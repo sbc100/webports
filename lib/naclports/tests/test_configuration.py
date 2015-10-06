@@ -44,19 +44,19 @@ class TestConfiguration(common.NaclportsTest):
 
   def testDefaultLibc(self):
     self.assertEqual(Configuration(toolchain='pnacl').libc, 'newlib')
-    self.assertEqual(Configuration(toolchain='newlib').libc, 'newlib')
+    self.assertEqual(Configuration(toolchain='clang-newlib').libc, 'newlib')
     self.assertEqual(Configuration(toolchain='glibc').libc, 'glibc')
     self.assertEqual(Configuration(toolchain='bionic').libc, 'bionic')
 
   def testConfigStringForm(self):
-    config = Configuration('arm', 'newlib', True)
-    self.assertEqual(str(config), 'arm/newlib/debug')
+    config = Configuration('arm', 'glibc', True)
+    self.assertEqual(str(config), 'arm/glibc/debug')
     self.assertRegexpMatches(repr(config), '<Configuration .*>')
 
   def testConfigEquality(self):
-    config1 = Configuration('arm', 'newlib', True)
-    config2 = Configuration('arm', 'newlib', True)
-    config3 = Configuration('arm', 'newlib', False)
+    config1 = Configuration('arm', 'glibc', True)
+    config2 = Configuration('arm', 'glibc', True)
+    config3 = Configuration('arm', 'glibc', False)
     self.assertEqual(config1, config2)
     self.assertNotEqual(config1, config3)
 

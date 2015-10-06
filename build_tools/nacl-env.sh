@@ -9,7 +9,7 @@
 # environment variables:
 #
 # $NACL_ARCH - i386, x86_64, arm or pnacl.  Default: x86_64
-# $TOOLCHAIN - bionic, newlib, glibc or pnacl.  Default: newlib
+# $TOOLCHAIN - bionic, clang-newlib, glibc or pnacl.  Default: pnacl
 #
 # To import these variables into your environment do:
 # $ . nacl-env.sh
@@ -76,14 +76,8 @@ fi
 # Default value for NACL_ARCH
 NACL_ARCH=${NACL_ARCH:-${DEFAULT_ARCH}}
 
-# Default Value for TOOLCHAIN, taking into account legacy
-# NACL_GLIBC varible.
-if [ "${NACL_GLIBC:-}" = "1" ]; then
-  echo "WARNING: \$NACL_GLIBC is deprecated (use \$TOOLCHAIN=glibc instead)"
-  TOOLCHAIN=${TOOLCHAIN:-glibc}
-else
-  TOOLCHAIN=${TOOLCHAIN:-newlib}
-fi
+# Default Value for TOOLCHAIN
+TOOLCHAIN=${TOOLCHAIN:-pnacl}
 
 # Check NACL_ARCH
 if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
@@ -94,7 +88,7 @@ if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
 fi
 
 # Check TOOLCHAIN
-if [ ${TOOLCHAIN} != "newlib" -a ${TOOLCHAIN} != "pnacl" -a \
+if [ ${TOOLCHAIN} != "pnacl" -a \
      ${TOOLCHAIN} != "glibc" -a ${TOOLCHAIN} != "bionic" -a \
      ${TOOLCHAIN} != "clang-newlib" -a ${TOOLCHAIN} != "emscripten" ]; then
   echo "Unknown value for TOOLCHAIN: '${TOOLCHAIN}'" 1>&2
@@ -217,19 +211,7 @@ InitializeNaClGccToolchain() {
 }
 
 InitializeEmscriptenToolchain() {
-  local TC_ROOT=${NACL_SDK_ROOT}/toolchain
   local EM_ROOT=${EMSCRIPTEN}
-
-  # The PNaCl toolchain moved in pepper_31.  Check for
-  # the existence of the old folder first and use that
-  # if found.
-  if [ -d "${TC_ROOT}/${OS_SUBDIR}_x86_pnacl" ]; then
-    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_x86_pnacl/newlib
-  elif [ -d "${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib" ]; then
-    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl/newlib
-  else
-    TC_ROOT=${TC_ROOT}/${OS_SUBDIR}_pnacl
-  fi
 
   readonly NACL_TOOLCHAIN_ROOT=${EM_ROOT}
   readonly NACL_BIN_PATH=${EM_ROOT}
@@ -243,8 +225,6 @@ InitializeEmscriptenToolchain() {
   NACLSTRINGS=/bin/true
   NACLSTRIP=/bin/true
   NACL_EXEEXT=".js"
-
-  LLVM=${TC_ROOT}/bin
 }
 
 InitializePNaClToolchain() {
