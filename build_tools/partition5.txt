@@ -1,20 +1,56 @@
-builder 0 (total: 6869)
-  corelibs
-  glibc-compat
+builder 0 (total: 11914)
   zlib
   libtar
+  gmp
+  mpfr
+  mpc
+  corelibs
+  glibc-compat
   nacl-spawn
+  binutils-2.25
+  gcc-avr
+  perl
+  python-host
+  numpy
+  cython
   bzip2
-  expat
+  pyparsing
+  setuptools
+  distribute
+  hdf5
+  h5py
+  six
   libpng
   freetype
-  fontconfig
-  texlive
-  xcb-proto
+  python-dateutil
+  nose
+  matplotlib
+  sympy
+  yt
+  tiff
+  jpeg6b
+  opencv
+  gsl
+  samba
+  libmikmod
+  regal
+  libogg
+  sdl
+  libvorbis
+  sdl-mixer
+  expat
+  metakit
+  sdl-ttf
+  drod
+  ncurses
+  nethack
+  freeimage
   xproto
   libxau
+  xcb-proto
   libxcb
   xextproto
+  fontconfig
   xtrans
   libice
   kbproto
@@ -26,258 +62,132 @@ builder 0 (total: 6869)
   libxmu
   xbitmaps
   fvwm
-  ncurses
-  readline
-  gdb
-  boost
   openssl
-  python-host
-  python
-  binutils
-  geturl
-  unzip
-  coreutils
-  curl
-  git
-  bash
-  libelf
-  xz
-  libarchive-dev
-  libbsd
-  pkg
-  devenv
-  make
-  pcre
-  grep
-  gcc
-  binutils
-  gmp
-  mpfr
-  mpc
-  mingn
-  nano
-  vim
-  findutils
-  devenv-latest
-  binutils-2.25
-  gcc-avr
-  libxpm
-  libxaw
-  yajl
-  xaos
-  less
-  libsodium
-  x264
-  cfitsio
-  agg
-  renderproto
-  libxrender
-  jsoncpp
+  requests
+  thingking
+  darksky-catalog
+  libiconv
+  blackbox
+  hello
+  xcb-util
+  jpeg8d
+  libwebp
+  lcms
+  libmng
+  devil
+  python-gflags
   civetweb
-  gc
+  cfitsio
+  xaos
+  xeyes
   tree
-  agg-demo
-  httplib2
-  setuptools
-  google-api-python-client
-  thttpd
-  mongoose
-  busybox
-  openssh
-  samba
-  blis
-builder 1 (total: 6880)
-  corelibs
+  sdl2
+  sdl2-image
+  pytz
+  pandas
+builder 1 (total: 12131)
+  fftw-float
   python-host
   numpy
-  fftw-float
-  cython
+  clapack
+  corelibs
   glibc-compat
+  openssl
+  cython
   zlib
   libtar
   nacl-spawn
   bzip2
   ncurses
-  openssl
   libpng
   freetype
   readline
   pyppapi
   python-static
-  hdf5
-  h5py
-  pyparsing
-  setuptools
-  distribute
-  nose
-  six
-  python-dateutil
-  matplotlib
-  sympy
-  yt
-  jpeg8d
-  imagemagick
-  gmp
-  nethack
-  libogg
-  libvorbis
-  lame
-  libav
-  gsl
-  mp4v2
-  freeimage
-  openscenegraph
-  libxml2
-  libarchive
-  requests
-  thingking
-  darksky-catalog
-  nettle
-  id3lib
-  cups
-  perl
-  toybox
-  liboggz
-  faad2
-  faac
-  libmodplug
-  libssh
-  libtool
-  libffi
-  libtommath
-  libatomic-ops
-  tinyxml
-  libelf
-  python-gflags
-  ipython
-  ipython-ppapi
-builder 2 (total: 7283)
-  corelibs
-  zlib
-  libtar
-  glibc-compat
-  nacl-spawn
-  ncurses
-  readline
-  sqlite
-  expat
-  apr
-  apr-util
-  subversion
-  bzip2
-  gettext
-  python3
-  ruby
+  python
+  less
+  vim
+  xz
   geturl
+  libarchive-dev
+  libelf
+  libbsd
+  pkg
+  curl
+  pcre
+  git
+  nano
   unzip
   bash
-  libogg
-  libvorbis
-  libtheora
-  lame
-  ffmpeg
-  protobuf
-  libunistring
-  libpng
+  devenv
+  make
+  coreutils
+  grep
+  findutils
+  devenv-latest
+  bullet
+  libssh2
+  libgit2
+  libiconv
+  gforth
   regal
   sdl
   dosbox
+  libogg
+  libvorbis
   scummvm
-  bochs
-  sdl-tests
-  m4
-  gforth
-  bullet
-  mesa
-  xz
-  tar
-  leveldb
-  ruby-ppapi
-  openal-soft
-  mpg123
-  quakespasm
-  sdl-net
-  speex
-  netcat
-  freealut
-  sdlquake
-  protobuf-c
-  openjpeg
-  libuuid
-  alut-demo
-  openal-ogg-demo
-builder 3 (total: 7062)
-  corelibs
-  clapack
-  icu
-  fftw
-  python-host
-  numpy
-  cython
-  setuptools
-  six
-  glibc-compat
-  hdf5
-  pyparsing
-  distribute
-  python-dateutil
-  pytz
-  h5py
-  pandas
-  zlib
-  libpng
-  tiff
-  jpeg6b
-  opencv
-  gmp
-  mpfr
-  snes9x
-  libtar
-  nacl-spawn
-  libtomcrypt
-  jpeg8d
-  libyuv
-  kbproto
-  xextproto
-  xproto
-  xcb-proto
-  xtrans
-  libxau
-  libxcb
-  inputproto
-  libx11
-  tcl
-  tk
-  ncurses
-  readline
-  gawk
-  libmng
-  lcms
-  devil
-  mpc
-  zeromq
-  pyzmq
   ninja
-  giflib
-  libxext
-  xineramaproto
-  libxinerama
-  xcb-util
-  libpng12
+  lua
+  zeromq
+  cups
+  pyzmq
+  agg
+  bochs
+  libtool
+  libssh
+  sdl-tests
+  jpeg8d
+  sdl-image
+  libgit2-demo
+  netcat
+  agg-demo
+  httplib2
+  sdl-net
+  libatomic-ops
+  faad2
+  setuptools
+  google-api-python-client
+  avrdude
+  faac
+  protobuf-c
+  clipper
+  libtommath
   physfs
   ipython
-  box2d
-  dreadthread
   markupsafe
   jinja2
-builder 4 (total: 7031)
+  pyparsing
+  distribute
+  six
+  nose
+  python-dateutil
+  matplotlib
+  ipython-ppapi
+builder 2 (total: 11877)
+  fftw
+  eigen3
+  icu
+  corelibs
   glibc-compat
+  ncurses
   zlib
-  gettext
-  glib
+  readline
+  ruby
+  protobuf
   libtar
   nacl-spawn
-  wireshark
+  bzip2
+  boost
   font-util
   font-sony-misc
   font-cronyx-cyrillic
@@ -290,36 +200,35 @@ builder 4 (total: 7031)
   libpciaccess
   xkeyboard-config
   scrnsaverproto
-  xcb-proto
   xproto
   libxau
+  xcb-proto
   libxcb
   font-misc-misc
   font-bh-ttf
   xextproto
-  videoproto
+  font-bh-100dpi
   libfontenc
   font-bh-lucidatypewriter-75dpi
-  ncurses
-  readline
   bash
   font-bh-75dpi
-  bzip2
   renderproto
   font-adobe-utopia-type1
   kbproto
   xtrans
   inputproto
   libx11
-  font-bh-100dpi
+  expat
   libpng
   freetype
+  fontconfig
   fontsproto
   libxfont
   font-screen-cyrillic
   resourceproto
   libxkbfile
   regal
+  videoproto
   glproto
   font-cursor-misc
   font-daewoo-misc
@@ -355,48 +264,233 @@ builder 4 (total: 7031)
   bigreqsproto
   xineramaproto
   xorg-server
-  libmikmod
+  mesa
+  ruby-ppapi
+  libffi
+  gettext
+  glib
+  fuseiso
+  busybox
+  openal-soft
+  mpg123
   libogg
   libvorbis
-  sdl-mixer
-  expat
-  metakit
-  sdl-ttf
-  drod
-  fontconfig
-  cairo
-  harfbuzz
-  pango
-  sdl2
-  sdl2-tests
-  libiconv
+  quakespasm
+  toybox
+  libxinerama
+  libhangul
+  sdlquake
+  bdftopcf
+  freealut
+  openjpeg
+  box2d
+  openal-ogg-demo
+  alut-demo
+  wireshark
+builder 3 (total: 12248)
+  kbproto
+  xextproto
+  corelibs
+  glibc-compat
+  xproto
+  xcb-proto
+  xtrans
+  libxau
+  libxcb
+  inputproto
+  libx11
+  tiff
   libice
   libsm
   libxt
+  libxext
   libxmu
-  xbitmaps
-  blackbox
-  libssh2
-  libgit2
-  flac
   jpeg8d
-  tiff
-  libwebp
-  sdl2-image
-  lua
-  sdl-image
-  xeyes
-  twm
-  libxi
-  libxtst
-  libhangul
-  bdftopcf
-  sdl2-ttf
-  sdl2-gfx
-  libgit2-demo
-  giflib
   libxpm
   libxaw
+  zlib
+  libtar
+  nacl-spawn
+  giflib
+  libpng
+  ncurses
   emacs
+  leveldb
+  bzip2
+  gettext
+  readline
+  python3
+  libffi
+  glib
+  font-util
+  font-cronyx-cyrillic
+  font-dec-misc
+  json-glib
+  tar
+  font-isas-misc
+  expat
+  renderproto
+  freetype
+  fontconfig
+  pixman
+  libxrender
+  cairo
+  harfbuzz
+  font-bitstream-75dpi
+  font-mutt-misc
+  font-alias
+  font-misc-misc
+  font-bh-ttf
+  font-sony-misc
+  font-bh-lucidatypewriter-75dpi
+  font-bh-75dpi
+  font-adobe-utopia-type1
+  font-bh-100dpi
+  gdk-pixbuf
+  font-screen-cyrillic
+  regal
+  font-cursor-misc
+  font-daewoo-misc
+  font-adobe-75dpi
+  font-xfree86-type1
+  font-bh-type1
+  font-adobe-utopia-75dpi
+  font-bh-lucidatypewriter-100dpi
+  font-sun-misc
+  font-schumacher-misc
+  font-micro-misc
+  font-misc-ethiopic
+  font-jis-misc
+  font-adobe-utopia-100dpi
+  font-winitzki-cyrillic
+  font-misc-cyrillic
+  font-misc-meltho
+  font-bitstream-100dpi
+  font-ibm-type1
+  font-adobe-100dpi
+  font-bitstream-type1
+  xfonts
+  babl
+  pango
+  atk
+  gtk+
+  sdl
+  jsoncpp
+  gegl
+  gimp
+  randrproto
+  fontsproto
+  libfontenc
+  libxfont
+  damageproto
+  xcmiscproto
+  libpciaccess
+  xkeyboard-config
+  scrnsaverproto
+  bash
+  resourceproto
+  libxkbfile
+  videoproto
+  glproto
+  fixesproto
+  xkbcomp
+  compositeproto
+  recordproto
+  openssl
+  bigreqsproto
+  xineramaproto
+  xorg-server
+  xbitmaps
+  twm
+  gimp-app
   emacs-x
-Difference between total time of builders: 413
+  gtk-demo
+builder 4 (total: 11864)
+  corelibs
+  glibc-compat
+  zlib
+  libtar
+  nacl-spawn
+  bzip2
+  expat
+  libpng
+  freetype
+  fontconfig
+  texlive
+  yajl
+  gmp
+  mpfr
+  mpc
+  gcc
+  ncurses
+  readline
+  sqlite
+  apr
+  apr-util
+  subversion
+  lame
+  libogg
+  libvorbis
+  libtheora
+  ffmpeg
+  libtomcrypt
+  jpeg8d
+  libyuv
+  imagemagick
+  texinfo
+  libunistring
+  gdb
+  libav
+  m4
+  bison
+  snes9x
+  mp4v2
+  openssl
+  jsoncpp
+  openssh
+  binutils
+  mingn
+  flac
+  gawk
+  libxml2
+  libarchive
+  openscenegraph
+  tcl
+  gzip
+  sdl2
+  nettle
+  libsodium
+  kbproto
+  xextproto
+  xproto
+  xcb-proto
+  xtrans
+  libxau
+  libxcb
+  inputproto
+  libx11
+  tk
+  sdl2-tests
+  id3lib
+  liboggz
+  libmodplug
+  sdl2-ttf
+  libebml
+  libmatroska
+  speex
+  mongoose
+  libxext
+  libxi
+  recordproto
+  libxtst
+  x264
+  thttpd
+  libpng12
+  gc
+  sdl2-gfx
+  libuuid
+  tinyxml
+  poly2tri
+  dreadthread
+  blis
+Difference between total time of builders: 383
