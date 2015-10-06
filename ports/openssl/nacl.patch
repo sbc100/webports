@@ -26,6 +26,20 @@ diff --git a/Configure b/Configure
  		elsif (/^[-+]/)
  			{
  			if (/^--prefix=(.*)$/)
+diff --git a/apps/speed.c b/apps/speed.c
+--- a/apps/speed.c
++++ b/apps/speed.c
+@@ -108,6 +108,10 @@
+ #  include <signal.h>
+ # endif
+ 
++#ifdef __native_client__
++#undef SIGALRM
++#endif
++
+ # if defined(_WIN32) || defined(__CYGWIN__)
+ #  include <windows.h>
+ #  if defined(__CYGWIN__) && !defined(_WIN32)
 diff --git a/config b/config
 --- a/config
 +++ b/config
