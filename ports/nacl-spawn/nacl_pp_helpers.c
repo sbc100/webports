@@ -182,6 +182,18 @@ static void handle_reply(struct PP_Var key, struct PP_Var value,
 }
 
 struct PP_Var nspawn_send_request(struct PP_Var req_var) {
+  /*
+   * naclprocess.js is required in order send requests to JavasCript.
+   * If NACL_PROCESS is not set in the environment then we assume it is
+   * not present and exit early. Without this check we would block forever
+   * waiting for a response for the JavaScript side.
+   */
+  const char* naclprocess = getenv("NACL_PROCESS");
+  if (naclprocess == NULL) {
+    fprintf(stderr, "nspawn_send_request called without NACL_PROCESS set\n");
+    return PP_MakeNull();
+  }
+
   int64_t id = get_request_id();
   char req_id[64];
   sprintf(req_id, "%lld", id);
@@ -196,13 +208,23 @@ struct PP_Var nspawn_send_request(struct PP_Var req_var) {
   nspawn_var_release(req_var);
 
   pthread_mutex_lock(&reply.mu);
-  pthread_cond_wait(&reply.cond, &reply.mu);
+  /*
+   * Wait for response for JavaScript.  This can block for an unbounded amount
+   * of time (e.g. waiting for a response to waitpid).
+   */
+  int error = pthread_cond_wait(&reply.cond, &reply.mu);
   pthread_mutex_unlock(&reply.mu);
 
   pthread_cond_destroy(&reply.cond);
   pthread_mutex_destroy(&reply.mu);
 
   PSEventRegisterMessageHandler(req_id, NULL, &reply);
+
+  if (error != 0) {
+    fprintf(stderr, "nspawn_send_request: pthread_cond_timedwait: %s\n",
+          strerror(error));
+    return PP_MakeNull();
+  }
 
   return reply.result_var;
 }

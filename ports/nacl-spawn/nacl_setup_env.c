@@ -150,9 +150,17 @@ static void HandleUnmountMessage(struct PP_Var key,
 }
 
 static void mountfs() {
+  /* naclprocess.js is required in order to setup dynmamic mounts */
+  const char* naclprocess = getenv("NACL_PROCESS");
+  if (naclprocess == NULL) {
+    return;
+  }
+
   struct PP_Var req_var = nspawn_dict_create();
   nspawn_dict_setstring(req_var, "command", "nacl_mountfs");
   struct PP_Var result_dict_var = nspawn_send_request(req_var);
+  if (result_dict_var.type == PP_VARTYPE_NULL)
+    return;
 
   MountLocalFs(result_dict_var);
   nspawn_var_release(result_dict_var);

@@ -1075,6 +1075,7 @@ NaClProcessManager.prototype.spawn = function(
     params['PS_EXIT_MESSAGE'] = 'exited';
     params['LOCATION_ORIGIN'] = location.origin;
     params['PWD'] = cwd;
+    params['NACL_PROCESS'] = '1';
     params['NACL_PID'] = fg.pid;
     params['NACL_PPID'] = ppid;
     if (NaClProcessManager.fsroot !== undefined) {
