@@ -31,8 +31,6 @@ EXTRA_CONFIGURE_ARGS="
 --without-plugins
 --without-pcap
 --without-zlib
---without-static
---disable-static
 --disable-glibtest
 --disable-gtktest
 "

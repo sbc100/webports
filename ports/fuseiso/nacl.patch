@@ -22,7 +22,7 @@ diff --git a/linux/iso_fs.h b/linux/iso_fs.h
  #ifndef _ISOFS_FS_H
  #define _ISOFS_FS_H
  
-+#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++#if !defined(__native_client__)
  #include <linux/types.h>
 +#endif
 +
