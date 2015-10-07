@@ -3,4 +3,6 @@ VERSION=2.0.3
 URL=https://github.com/sbc100/SDL-mirror.git@b406d6b
 LICENSE=ZLIB
 DEPENDS=(libtar)
-DISABLED_TOOLCHAIN=(emscripten)
+# PNaCl temporarily disabled:
+# https://code.google.com/p/nativeclient/issues/detail?id=4333
+DISABLED_TOOLCHAIN=(emscripten pnacl)
