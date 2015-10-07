@@ -465,7 +465,7 @@ diff --git a/config/Makefile.nacl-x86_64 b/config/Makefile.nacl-x86_64
 diff --git a/config/nacl.inc b/config/nacl.inc
 --- a/config/nacl.inc
 +++ b/config/nacl.inc
-@@ -6,16 +6,20 @@ endif
+@@ -6,13 +6,13 @@ endif
  
  #
  # Specify on the command-line:
@@ -483,13 +483,17 @@ diff --git a/config/nacl.inc b/config/nacl.inc
  PICFLAG = -fPIC
  endif
  
+@@ -32,6 +32,10 @@ else
+   endif
+ endif
+ 
 +ifeq ($(TOOLCHAIN),clang-newlib)
-+NACL_TOOLCHAIN := $(NACL_SDK_ROOT)/toolchain/linux_pnacl
++NACL_TOOLCHAIN := $(NACL_SDK_ROOT)/toolchain/$(NACL_OS)_pnacl
 +endif
 +
- #
- # Detect the OS - linux, mac or win
- #
+ # ccache by default hashes the compiler’s mtime and size, but this
+ # is insufficient for distinguising between glibc and newlib NaCl
+ # variants
 @@ -40,18 +44,18 @@ endif
  # -rwxr-xr-x  2 user  user  384 Oct  1 09:21 pepper_25/toolchain/mac_x86_glibc/bin/i686-nacl-g++
  # -rwxr-xr-x  2 user  user  384 Oct  1 09:21 pepper_25/toolchain/mac_x86_newlib/bin/i686-nacl-g++
