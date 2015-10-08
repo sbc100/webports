@@ -174,7 +174,7 @@ DevEnvTest.prototype.sigint = function(pid) {
 };
 
 DevEnvTest.prototype.installPackage = function(name) {
-  var cmd = 'pkg -d install -f -y ' + name;
+  var cmd = 'pkg install -f -y ' + name;
   chrometest.info(cmd);
   return this.checkCommand(cmd, 0);
 };

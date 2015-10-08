@@ -22,6 +22,7 @@
 #undef __stub_poll
 #undef __stub_statvfs
 #undef __stub_fstatvfs
+#undef __stub_fstatat
 #undef __stub_setsid
 #undef __stub_connect
 #undef __stub_tcgetattr

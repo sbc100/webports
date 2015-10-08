@@ -1,3 +1,0 @@
-We are intentionally using an old version of GNU coreutils. nacl_io
-does not have openat as of February 2014 and more recent releases of
-GNU coreutils heavily uses it.

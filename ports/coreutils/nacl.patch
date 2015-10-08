@@ -1,103 +1,44 @@
-diff --git a/Makefile.in b/Makefile.in
---- a/Makefile.in
-+++ b/Makefile.in
-@@ -184,7 +184,7 @@ CPP = @CPP@
- CPPFLAGS = @CPPFLAGS@
- CYGPATH_W = @CYGPATH_W@
- DEFAULT_POSIX2_VERSION = @DEFAULT_POSIX2_VERSION@
--DEFS = @DEFS@
-+DEFS = @DEFS@ -Dmain=nacl_main
- DEPDIR = @DEPDIR@
- DF_PROG = @DF_PROG@
- ECHO_C = @ECHO_C@
-@@ -210,7 +210,7 @@ LDFLAGS = @LDFLAGS@
- LIBICONV = @LIBICONV@
- LIBINTL = @LIBINTL@
- LIBOBJS = @LIBOBJS@
--LIBS = @LIBS@
-+LIBS = @LIBS@ $(EXTRA_LIBS)
- LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
- LIB_CRYPT = @LIB_CRYPT@
- LIB_NANOSLEEP = @LIB_NANOSLEEP@
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -13907,7 +13907,7 @@ else
-   echo "$as_me: failed program was:" >&5
- sed 's/^/| /' conftest.$ac_ext >&5
+@@ -39821,7 +39821,7 @@ fi
  
--fu_cv_sys_stat_statvfs=no
-+fu_cv_sys_stat_statvfs=yes
- fi
- rm -f conftest.err conftest.$ac_objext \
-       conftest$ac_exeext conftest.$ac_ext
-@@ -27324,11 +27324,15 @@ _ACEOF
- fi
  
- if test -z "$ac_list_mounted_fs"; then
--  { { echo "$as_me:$LINENO: error: could not determine how to read list of mounted filesystems" >&5
--echo "$as_me: error: could not determine how to read list of mounted filesystems" >&2;}
--   { (exit 1); exit 1; }; }
-+  # For nacl, countinue even if we don't know how to read a list of mounted
-+  # filesystems.
-+  if [[ "$host" != *nacl* ]]; then
-+    { { echo "$as_me:$LINENO: error: could not determine how to read list of mounted filesystems" >&5
-+    echo "$as_me: error: could not determine how to read list of mounted filesystems" >&2;}
-+    { (exit 1); exit 1; }; }
-   # FIXME -- no need to abort building the whole package
-   # Can't build mountlist.c or anything that needs its functions
-+  fi
- fi
+ # Determine how to get the list of mounted file systems.
+-ac_list_mounted_fs=
++ac_list_mounted_fs:=
  
- if test $ac_list_mounted_fs = found; then
-diff --git a/lib/__fpending.c b/lib/__fpending.c
---- a/lib/__fpending.c
-+++ b/lib/__fpending.c
-@@ -23,8 +23,10 @@
- 
- #include "__fpending.h"
- 
-+#if !(defined(__native_client__) && defined(__clang__))
- size_t
- __fpending (FILE *fp)
+ # If the getmntent function is available but not in the standard library,
+ # make sure LIBS contains the appropriate -l option.
+diff --git a/lib/cycle-check.c b/lib/cycle-check.c
+--- a/lib/cycle-check.c
++++ b/lib/cycle-check.c
+@@ -58,7 +58,12 @@ bool
+ cycle_check (struct cycle_check_state *state, struct stat const *sb)
  {
-   return PENDING_OUTPUT_N_BYTES;
+   assure (state->magic == CC_MAGIC);
+-
++  /*
++   * TODO(bradnelson): Drop this once we have real looking inodes.
++   * nacl_io doesn't provide sufficiently real inodes to allow this
++   * cycle check to work.
++   */
++#if !defined(__native_client__)
+   /* If the current directory ever happens to be the same
+      as the one we last recorded for the cycle detection,
+      then it's obviously part of a cycle.  */
+@@ -80,6 +85,7 @@ cycle_check (struct cycle_check_state *state, struct stat const *sb)
+       state->dev_ino.st_dev = sb->st_dev;
+       state->dev_ino.st_ino = sb->st_ino;
+     }
++#endif
+ 
+   return false;
  }
-+#endif
-diff --git a/lib/getopt.c b/lib/getopt.c
---- a/lib/getopt.c
-+++ b/lib/getopt.c
-@@ -51,6 +51,11 @@
- # endif
- #endif
- 
-+/* All our libc's have this. */
-+#if defined(__native_client__)
-+# define ELIDE_CODE
-+#endif
-+
- #ifndef ELIDE_CODE
- 
- 
-diff --git a/lib/getopt1.c b/lib/getopt1.c
---- a/lib/getopt1.c
-+++ b/lib/getopt1.c
-@@ -47,6 +47,11 @@
- #endif
- #endif
- 
-+/* All our libc's have this. */
-+#if defined(__native_client__)
-+# define ELIDE_CODE
-+#endif
-+
- #ifndef ELIDE_CODE
- 
- 
 diff --git a/lib/getpass.c b/lib/getpass.c
 --- a/lib/getpass.c
 +++ b/lib/getpass.c
-@@ -106,7 +106,9 @@ getpass (const char *prompt)
+@@ -105,7 +105,9 @@ getpass (const char *prompt)
    else
      {
        /* We do the locking ourselves.  */
@@ -107,163 +48,110 @@ diff --git a/lib/getpass.c b/lib/getpass.c
  
        out = in = tty;
      }
-diff --git a/lib/mktime.c b/lib/mktime.c
---- a/lib/mktime.c
-+++ b/lib/mktime.c
-@@ -127,8 +127,8 @@ ydhms_diff (long int year1, long int yday1, int hour1, int min1, int sec1,
- 	    int year0, int yday0, int hour0, int min0, int sec0)
- {
-   verify (C99_integer_division, -1 / 2 == 0);
--  verify (long_int_year_and_yday_are_wide_enough,
--	  INT_MAX <= LONG_MAX / 2 || TIME_T_MAX <= UINT_MAX);
-+  /* We removed unnecessary verification. Recent coreutils does not
-+   * have this check either. */
+diff --git a/lib/same-inode.h b/lib/same-inode.h
+--- a/lib/same-inode.h
++++ b/lib/same-inode.h
+@@ -18,6 +18,12 @@
+ #ifndef SAME_INODE_H
+ # define SAME_INODE_H 1
  
-   /* Compute intervening leap days correctly even if year is negative.
-      Take care to avoid integer overflow here.  */
-diff --git a/lib/regex.c b/lib/regex.c
---- a/lib/regex.c
-+++ b/lib/regex.c
-@@ -8181,7 +8181,7 @@ regerror (int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
-     {
-       if (msg_size > errbuf_size)
-         {
--#if defined HAVE_MEMPCPY || defined _LIBC
-+#if (defined HAVE_MEMPCPY || defined _LIBC) && !defined(__native_client__) && !defined(_NEWLIB_VERSION)
- 	  *((char *) __mempcpy (errbuf, msg, errbuf_size - 1)) = '\0';
- #else
-           memcpy (errbuf, msg, errbuf_size - 1);
-diff --git a/man/Makefile.in b/man/Makefile.in
---- a/man/Makefile.in
-+++ b/man/Makefile.in
-@@ -143,7 +143,9 @@ DIST_SOURCES =
- man1dir = $(mandir)/man1
- am__installdirs = "$(DESTDIR)$(man1dir)"
- NROFF = nroff
--MANS = $(dist_man_MANS)
-+# The build rule for man pages are broken for NaCl, and we do not need
-+# man pages anyway.
-+#MANS = $(dist_man_MANS)
- DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
- ACLOCAL = @ACLOCAL@
- ALLOCA = @ALLOCA@
-diff --git a/src/Makefile.in b/src/Makefile.in
---- a/src/Makefile.in
-+++ b/src/Makefile.in
-@@ -38,9 +38,10 @@ NORMAL_UNINSTALL = :
- PRE_UNINSTALL = :
- POST_UNINSTALL = :
- host_triplet = @host@
-+SKIPPED_PROGRAMS = who$(EXEEXT) pinky$(EXEEXT) uptime$(EXEEXT) users$(EXEEXT)
- EXTRA_PROGRAMS = chroot$(EXEEXT) df$(EXEEXT) hostid$(EXEEXT) \
--	nice$(EXEEXT) pinky$(EXEEXT) stty$(EXEEXT) su$(EXEEXT) \
--	uname$(EXEEXT) uptime$(EXEEXT) users$(EXEEXT) who$(EXEEXT)
-+	nice$(EXEEXT) stty$(EXEEXT) su$(EXEEXT) \
-+	uname$(EXEEXT)
- bin_PROGRAMS = [$(EXEEXT) chgrp$(EXEEXT) chown$(EXEEXT) chmod$(EXEEXT) \
- 	cp$(EXEEXT) dd$(EXEEXT) dircolors$(EXEEXT) du$(EXEEXT) \
- 	ginstall$(EXEEXT) link$(EXEEXT) ln$(EXEEXT) dir$(EXEEXT) \
-@@ -61,7 +62,7 @@ bin_PROGRAMS = [$(EXEEXT) chgrp$(EXEEXT) chown$(EXEEXT) chmod$(EXEEXT) \
- 	printenv$(EXEEXT) printf$(EXEEXT) pwd$(EXEEXT) seq$(EXEEXT) \
- 	sleep$(EXEEXT) tee$(EXEEXT) test$(EXEEXT) true$(EXEEXT) \
- 	tty$(EXEEXT) whoami$(EXEEXT) yes$(EXEEXT) $(am__EXEEXT_1) \
--	$(am__EXEEXT_2)
-+	$(am__EXEEXT_2) $(EXTRA_PROGRAMS)
- noinst_PROGRAMS = setuidgid$(EXEEXT)
- subdir = src
- DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
-@@ -716,7 +717,7 @@ CPP = @CPP@
- CPPFLAGS = @CPPFLAGS@
- CYGPATH_W = @CYGPATH_W@
- DEFAULT_POSIX2_VERSION = @DEFAULT_POSIX2_VERSION@
--DEFS = @DEFS@
-+DEFS = @DEFS@ -Dmain=nacl_main
- DEPDIR = @DEPDIR@
- DF_PROG = @DF_PROG@
- ECHO_C = @ECHO_C@
-@@ -742,7 +743,7 @@ LDFLAGS = @LDFLAGS@
- LIBICONV = @LIBICONV@
- LIBINTL = @LIBINTL@
- LIBOBJS = @LIBOBJS@
--LIBS = @LIBS@
-+LIBS = @LIBS@ $(EXTRA_LIBS)
- LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
- LIB_CRYPT = @LIB_CRYPT@
- LIB_NANOSLEEP = @LIB_NANOSLEEP@
++/*
++ * TODO(bradnelson): Drop this once nacl_io inode support is better.
++ */
++#if defined(__native_client__)
++# define SAME_INODE(Stat_buf_1, Stat_buf_2) 1
++#else
+ # ifdef __VMS
+ #  define SAME_INODE(a, b)             \
+     ((a).st_ino[0] == (b).st_ino[0]    \
+@@ -29,5 +35,6 @@
+     ((a).st_ino == (b).st_ino \
+      && (a).st_dev == (b).st_dev)
+ # endif
++#endif
+ 
+ #endif
+diff --git a/lib/sys_types.in.h b/lib/sys_types.in.h
+--- a/lib/sys_types.in.h
++++ b/lib/sys_types.in.h
+@@ -20,6 +20,18 @@
+ #endif
+ @PRAGMA_COLUMNS@
+ 
++/*
++ * Workaround for old newlib toolchain incompatability with gnulib
++ * This was fixed in the native_client repo but the newlib toolchain
++ * is not longer being updated:
++ * https://codereview.chromium.org/1163893003
++ */
++#ifndef __nlink_t_defined
++#define __nlink_t_defined
++typedef unsigned int __nlink_t;
++typedef __nlink_t nlink_t;
++#endif
++
+ #ifndef _@GUARD_PREFIX@_SYS_TYPES_H
+ 
+ /* The include_next requires a split double-inclusion guard.  */
 diff --git a/src/chroot.c b/src/chroot.c
 --- a/src/chroot.c
 +++ b/src/chroot.c
-@@ -81,7 +81,11 @@ main (int argc, char **argv)
-       usage (EXIT_FAIL);
+@@ -325,7 +325,11 @@ main (int argc, char **argv)
+ #endif
      }
  
 +#if defined(__native_client__)
 +  errno = ENOSYS;
 +#else
-   if (chroot (argv[1]))
+   if (chroot (newroot) != 0)
 +#endif
-     error (EXIT_FAIL, errno, _("cannot change root directory to %s"), argv[1]);
+     error (EXIT_CANCELED, errno, _("cannot change root directory to %s"),
+            quote (newroot));
  
-   if (chdir ("/"))
 diff --git a/src/copy.c b/src/copy.c
 --- a/src/copy.c
 +++ b/src/copy.c
-@@ -1436,23 +1436,34 @@ copy_internal (const char *src_path, const char *dst_path,
- #ifdef S_ISFIFO
-   if (S_ISFIFO (src_type))
+@@ -2632,6 +2632,10 @@ copy_internal (char const *src_name, char const *dst_name,
+     }
+   else if (S_ISBLK (src_mode) || S_ISCHR (src_mode) || S_ISSOCK (src_mode))
      {
 +#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+      error (0, ENOSYS, _("cannot create fifo %s"), quote (dst_path));
++      error (0, ENOSYS, _("cannot create special file %s"), quote (dst_name));
 +      goto un_backup;
 +#else
-       if (mkfifo (dst_path, get_dest_mode (x, src_mode)))
- 	{
- 	  error (0, errno, _("cannot create fifo %s"), quote (dst_path));
- 	  goto un_backup;
- 	}
+       if (mknod (dst_name, src_mode & ~omitted_permissions, src_sb.st_rdev)
+           != 0)
+         {
+@@ -2639,6 +2643,7 @@ copy_internal (char const *src_name, char const *dst_name,
+                  quote (dst_name));
+           goto un_backup;
+         }
 +#endif
      }
-   else
- #endif
-     if (S_ISBLK (src_type) || S_ISCHR (src_type)
- 	|| S_ISSOCK (src_type))
+   else if (S_ISLNK (src_mode))
      {
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+      error (0, ENOSYS, _("cannot create special file %s"),
-+             quote (dst_path));
-+      goto un_backup;
-+#else
-       if (mknod (dst_path, get_dest_mode (x, src_mode), src_sb.st_rdev))
- 	{
- 	  error (0, errno, _("cannot create special file %s"),
- 		 quote (dst_path));
- 	  goto un_backup;
- 	}
-+#endif
-     }
-   else
- #ifdef S_ISLNK
 diff --git a/src/df.c b/src/df.c
 --- a/src/df.c
 +++ b/src/df.c
-@@ -906,11 +906,15 @@ main (int argc, char **argv)
- 	}
+@@ -1669,12 +1669,16 @@ main (int argc, char **argv)
+         }
      }
  
 +#if defined(__native_client__)
 +  mount_list = NULL;
 +#else
    mount_list =
-     read_filesystem_list ((fs_select_list != NULL
- 			   || fs_exclude_list != NULL
- 			   || print_type
- 			   || show_local_fs));
+     read_file_system_list ((fs_select_list != NULL
+                             || fs_exclude_list != NULL
+                             || print_type
+                             || field_data[FSTYPE_FIELD].used
+                             || show_local_fs));
 +#endif
  
    if (mount_list == NULL)
      {
-@@ -923,8 +927,10 @@ main (int argc, char **argv)
- 	     _("%scannot read table of mounted filesystems"), warning);
+@@ -1696,8 +1700,10 @@ main (int argc, char **argv)
+              _("cannot read table of mounted file systems"));
      }
  
 +#if !defined(__native_client__)
@@ -271,27 +159,27 @@ diff --git a/src/df.c b/src/df.c
      sync ();
 +#endif
  
-   if (optind < argc)
-     {
+   get_field_list ();
+   get_header ();
 diff --git a/src/fs.h b/src/fs.h
 --- a/src/fs.h
 +++ b/src/fs.h
 @@ -2,7 +2,10 @@
-    Please send additions to meskes@debian.org.
-    This file is generated automatically from ./stat.c. */
+    Please send additions to bug-coreutils@gnu.org and meskes@debian.org.
+    This file is generated automatically from ./src/stat.c. */
  
 -#if defined __linux__
 +/* nacl_io does not have statfs so the following magic numbers which
 +   specify the type of a filesystem is useless, but we need their
 +   definitions to compile everything in coreutils. */
 +#if defined __linux__ || defined __native_client__
+ # define S_MAGIC_ADFS 0xADF5
  # define S_MAGIC_AFFS 0xADFF
- # define S_MAGIC_DEVPTS 0x1CD1
- # define S_MAGIC_EXT 0x137D
+ # define S_MAGIC_AFS 0x5346414F
 diff --git a/src/hostid.c b/src/hostid.c
 --- a/src/hostid.c
 +++ b/src/hostid.c
-@@ -79,7 +79,11 @@ main (int argc, char **argv)
+@@ -75,7 +75,11 @@ main (int argc, char **argv)
        usage (EXIT_FAILURE);
      }
  
@@ -300,310 +188,90 @@ diff --git a/src/hostid.c b/src/hostid.c
 +#else
    id = gethostid ();
 +#endif
-   printf ("%lx\n", id);
  
-   exit (EXIT_SUCCESS);
-diff --git a/src/md5sum.c b/src/md5sum.c
---- a/src/md5sum.c
-+++ b/src/md5sum.c
-@@ -49,7 +49,7 @@
- #  define TEXT1TO1 "rb", "ctx=stm"
- #  define TEXTCNVT "r", "ctx=stm"
- # else
--#  if UNIX || __UNIX__ || unix || __unix__ || _POSIX_VERSION
-+#  if UNIX || __UNIX__ || unix || __unix__ || _POSIX_VERSION || defined(__native_client__)
- #   define OPENOPTS(BINARY) "r"
- #  else
-     /* The following line is intended to evoke an error.
-diff --git a/src/mkfifo.c b/src/mkfifo.c
---- a/src/mkfifo.c
-+++ b/src/mkfifo.c
-@@ -129,7 +129,11 @@ main (int argc, char **argv)
- 
-   for (; optind < argc; ++optind)
-     {
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+      int fail = ENOSYS;
-+#else
-       int fail = mkfifo (argv[optind], newmode);
-+#endif
-       if (fail)
- 	error (0, errno, _("cannot create fifo %s"), quote (argv[optind]));
- 
+   /* POSIX says gethostid returns a "32-bit identifier" but is silent
+      whether it's sign-extended.  Turn off any sign-extension.  This
 diff --git a/src/mknod.c b/src/mknod.c
 --- a/src/mknod.c
 +++ b/src/mknod.c
-@@ -197,8 +197,12 @@ numbers must be specified"));
- 	  error (EXIT_FAILURE, 0, _("invalid device %s %s"), s_major, s_minor);
- #endif
+@@ -248,8 +248,12 @@ main (int argc, char **argv)
+         if (set_security_context)
+           defaultcon (argv[optind], node_type);
  
 +#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +        error (EXIT_FAILURE, ENOSYS, "%s", quote (argv[optind]));
 +#else
- 	if (mknod (argv[optind], newmode | node_type, device) != 0)
- 	  error (EXIT_FAILURE, errno, "%s", quote (argv[optind]));
+         if (mknod (argv[optind], newmode | node_type, device) != 0)
+           error (EXIT_FAILURE, errno, "%s", quote (argv[optind]));
 +#endif
        }
        break;
  
-@@ -212,9 +216,13 @@ numbers must be specified"));
- major and minor device numbers may not be specified for fifo files"));
- 	  usage (EXIT_FAILURE);
- 	}
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+      error (EXIT_FAILURE, ENOSYS, "%s", quote (argv[optind]));
-+#else
-       if (mkfifo (argv[optind], newmode))
- 	error (EXIT_FAILURE, errno, "%s", quote (argv[optind]));
- #endif
-+#endif
-       break;
- 
-     default:
-diff --git a/src/nice.c b/src/nice.c
---- a/src/nice.c
-+++ b/src/nice.c
-@@ -43,11 +43,15 @@
- 
- #define AUTHORS "David MacKenzie"
- 
-+#if defined(__native_client__)
-+# define GET_PRIORITY() 10
-+#else
- #ifdef NICE_PRIORITY
- # define GET_PRIORITY() nice (0)
- #else
- # define GET_PRIORITY() getpriority (PRIO_PROCESS, 0)
- #endif
-+#endif
- 
- /* The name this program was run with. */
- char *program_name;
-@@ -184,6 +188,8 @@ main (int argc, char **argv)
-       exit (EXIT_SUCCESS);
-     }
- 
-+  /* Just pretend for nacl. */
-+#if !defined(__native_client__)
- #ifndef NICE_PRIORITY
-   errno = 0;
-   current_priority = GET_PRIORITY ();
-@@ -194,6 +200,7 @@ main (int argc, char **argv)
-   if (nice (adjustment) == -1)
- #endif
-     error (EXIT_FAIL, errno, _("cannot set priority"));
-+#endif
- 
-   execvp (argv[i], &argv[i]);
- 
-diff --git a/src/remove.c b/src/remove.c
---- a/src/remove.c
-+++ b/src/remove.c
-@@ -765,7 +765,11 @@ remove_entry (Dirstack_state const *ds, char const *filename,
-      unlink call.  If FILENAME is a command-line argument, then dp is NULL,
-      so we'll first try to unlink it.  Using unlink here is ok, because it
-      cannot remove a directory.  */
--  if ((dp && DT_IS_DIR (dp)) || is_dir == T_YES)
-+  if (is_dir == T_YES
-+# if HAVE_STRUCT_DIRENT_D_TYPE
-+      || (dp && DT_IS_DIR (dp))
-+# endif
-+      )
-     return RM_NONEMPTY_DIR;
- 
-   DO_UNLINK (filename, x);
-@@ -908,6 +912,12 @@ remove_cwd_entries (Dirstack_state *ds, char **subdir, struct stat *subdir_sb,
- 		status = RM_ERROR;
- 		break;
- 	      }
-+            /* 
-+             * TODO(bradnelson): Drop this once we have real looking inodes.
-+             * nacl_io doesn't provide sufficiently real inodes to allow this
-+             * cycle check to work.
-+             */
-+#if !defined(__native_client__)
- 	    if (cycle_check (&ds->cycle_check_state, subdir_sb))
- 	      {
- 		error (0, 0, _("\
-@@ -918,6 +928,7 @@ The following directory is part of the cycle:\n  %s\n"),
- 		       quote (full_filename (".")));
- 		longjmp (ds->current_arg_jumpbuf, 1);
- 	      }
-+#endif
- 
- 	    *subdir = xstrdup (f);
- 	    break;
 diff --git a/src/shred.c b/src/shred.c
 --- a/src/shred.c
 +++ b/src/shred.c
-@@ -1398,7 +1398,11 @@ wipename (char *oldname, char const *qoldname, struct Options const *flags)
- 		{
- 		  if (dir_fd < 0
- 		      || (fdatasync (dir_fd) < 0 && fsync (dir_fd) < 0))
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+                    {}
-+#else
- 		    sync ();	/* Force directory out */
+@@ -355,7 +355,9 @@ dosync (int fd, char const *qname)
+       return -1;
+     }
+ 
++#if !(defined(__native_client__) && defined(_NEWLIB_VERSION))
+   sync ();
 +#endif
- 		  if (flags->verbose)
- 		    {
- 		      /*
-@@ -1431,7 +1435,11 @@ wipename (char *oldname, char const *qoldname, struct Options const *flags)
-   free (newname);
-   err = unlink (oldname);
-   if (dir_fd < 0 || (fdatasync (dir_fd) < 0 && fsync (dir_fd) < 0))
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+    {}
-+#else
-     sync ();
-+#endif
-   close (dir_fd);
-   if (!err && flags->verbose)
-     error (0, 0, _("%s: removed"), qoldname);
+   return 0;
+ }
+ 
 diff --git a/src/stat.c b/src/stat.c
 --- a/src/stat.c
 +++ b/src/stat.c
-@@ -106,6 +106,7 @@ static int G_fail;
+@@ -210,6 +210,7 @@ static char const *trailing_delim = "";
+ static char const *decimal_point;
+ static size_t decimal_point_len;
  
- char *program_name;
- 
-+#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++#if !(defined(__native_client__) && defined(_NEWLIB_VERSION))
  /* Return the type of the specified file system.
-    Some systems have statfvs.f_basetype[FSTYPSZ]. (AIX, HP-UX, and Solaris)
-    Others have statfs.f_fstypename[MFSNAMELEN]. (NetBSD 1.5.2)
-@@ -316,6 +317,7 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
-   }
+    Some systems have statfvs.f_basetype[FSTYPSZ] (AIX, HP-UX, and Solaris).
+    Others have statvfs.f_fstypename[_VFS_NAMELEN] (NetBSD 3.0).
+@@ -530,6 +531,7 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+     }
  #endif
  }
 +#endif
  
- static char *
+ static char * ATTRIBUTE_WARN_UNUSED_RESULT
  human_access (struct stat const *statbuf)
-@@ -342,6 +344,7 @@ human_time (time_t t, int t_ns)
-   return str;
+@@ -742,6 +744,7 @@ out_file_context (char *pformat, size_t prefix_len, char const *filename)
+   return fail;
  }
  
-+#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
- /* print statfs info */
- static void
- print_statfs (char *pformat, char m, char const *filename,
-@@ -407,13 +410,13 @@ print_statfs (char *pformat, char m, char const *filename,
-       strcat (pformat, PRIdMAX);
-       printf (pformat, (intmax_t) (statfsbuf->f_ffree));
-       break;
--
-     default:
-       strcat (pformat, "c");
-       printf (pformat, m);
-       break;
++#if !(defined(__native_client__) && defined(_NEWLIB_VERSION))
+ /* Print statfs info.  Return zero upon success, nonzero upon failure.  */
+ static bool ATTRIBUTE_WARN_UNUSED_RESULT
+ print_statfs (char *pformat, size_t prefix_len, unsigned int m,
+@@ -828,6 +831,7 @@ print_statfs (char *pformat, size_t prefix_len, unsigned int m,
      }
+   return fail;
  }
 +#endif
  
- /* print stat info */
- static void
-@@ -617,6 +620,7 @@ print_it (char const *masterformat, char const *filename,
- static void
- do_statfs (char const *filename, int terse, char const *format)
+ /* Return any bind mounted source for a path.
+    The caller should not free the returned buffer.
+@@ -1258,6 +1262,7 @@ print_it (char const *format, int fd, char const *filename,
+ static bool ATTRIBUTE_WARN_UNUSED_RESULT
+ do_statfs (char const *filename, char const *format)
  {
-+#if !defined(__native_client__) || !defined(_NEWLIB_VERSION)
++#if !(defined(__native_client__) && defined(_NEWLIB_VERSION))
    STRUCT_STATVFS statfsbuf;
-   int i = statfs (filename, &statfsbuf);
  
-@@ -638,6 +642,10 @@ do_statfs (char const *filename, int terse, char const *format)
-     }
+   if (STREQ (filename, "-"))
+@@ -1276,6 +1281,11 @@ do_statfs (char const *filename, char const *format)
  
-   print_it (format, filename, print_statfs, &statfsbuf);
+   bool fail = print_it (format, -1, filename, print_statfs, &statfsbuf);
+   return ! fail;
 +#else
 +  error (0, ENOSYS, _("cannot read file system information for %s"),
 +         quote (filename));
++  return false;
 +#endif
  }
  
  /* stat the file and print what we find */
-diff --git a/src/su.c b/src/su.c
---- a/src/su.c
-+++ b/src/su.c
-@@ -291,7 +291,11 @@ correct_password (const struct passwd *pw)
-       error (0, 0, _("getpass: cannot open /dev/tty"));
-       return 0;
-     }
-+#if defined(__native_client__) && defined(_NEWLIB_VERSION)
-+  encrypted = unencrypted;
-+#else
-   encrypted = crypt (unencrypted, correct);
-+#endif
-   memset (unencrypted, 0, strlen (unencrypted));
-   return strcmp (encrypted, correct) == 0;
- }
-diff --git a/src/sync.c b/src/sync.c
---- a/src/sync.c
-+++ b/src/sync.c
-@@ -70,6 +70,8 @@ main (int argc, char **argv)
-   if (1 < argc)
-     error (0, 0, _("ignoring all arguments"));
- 
-+#if !defined(__native_client__)
-   sync ();
-+#endif
-   exit (EXIT_SUCCESS);
- }
-diff --git a/src/system.h b/src/system.h
---- a/src/system.h
-+++ b/src/system.h
-@@ -746,9 +746,16 @@ uid_t getuid ();
- /* Include automatically-generated macros for unlocked I/O.  */
- #include "unlocked-io.h"
- 
--#define SAME_INODE(Stat_buf_1, Stat_buf_2) \
-+/*
-+ * TODO(bradnelson): Drop this once nacl_io inode support is better.
-+ */
-+#if defined(__native_client__)
-+# define SAME_INODE(Stat_buf_1, Stat_buf_2) 1
-+#else
-+# define SAME_INODE(Stat_buf_1, Stat_buf_2) \
-   ((Stat_buf_1).st_ino == (Stat_buf_2).st_ino \
-    && (Stat_buf_1).st_dev == (Stat_buf_2).st_dev)
-+#endif
- 
- #define DOT_OR_DOTDOT(Basename) \
-   (Basename[0] == '.' && (Basename[1] == '\0' \
-diff --git a/src/tee.c b/src/tee.c
---- a/src/tee.c
-+++ b/src/tee.c
-@@ -31,6 +31,8 @@
- 
- #define AUTHORS "Mike Parker", "Richard M. Stallman", "David MacKenzie"
- 
-+/* Recent coreutils uses tee_files instead of tee to avoid a conflict. */
-+#define tee tee_files
- static int tee (int nfiles, const char **files);
- 
- /* If nonzero, append to output files rather than truncating them. */
-@@ -158,7 +160,7 @@ main (int argc, char **argv)
-    Return 0 if successful, 1 if any errors occur. */
- 
- static int
--tee (int nfiles, const char **files)
-+tee_files (int nfiles, const char **files)
- {
-   FILE **descriptors;
-   char buffer[BUFSIZ];
-diff --git a/src/test.c b/src/test.c
---- a/src/test.c
-+++ b/src/test.c
-@@ -124,7 +124,13 @@ test_syntax_error (char const *format, char const *arg)
- #if HAVE_SETREUID && HAVE_SETREGID
- /* Do the same thing access(2) does, but use the effective uid and gid.  */
- 
-+/* Remove static as nacl-glibc declares this function as non-static
-+ * function but does not provide the implementation. */
-+#if defined(__native_client__)
-+int
-+#else
- static int
-+#endif
- eaccess (char const *file, int mode)
- {
-   static int have_ids;
