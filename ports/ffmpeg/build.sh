@@ -38,9 +38,6 @@ ConfigureStep() {
     --disable-amd3dnow \
     --disable-amd3dnowext \
     --disable-indevs \
-    --disable-protocols \
-    --disable-network \
-    --enable-protocol=file \
     --enable-libmp3lame \
     --enable-libvorbis \
     --enable-libtheora \
