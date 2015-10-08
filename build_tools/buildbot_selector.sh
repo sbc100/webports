@@ -178,32 +178,6 @@ InstallEmscripten() {
     git apply "${NACLPORTS_SRC}/emscripten.patch"
     cd -
   fi
-
-  # Add the node 'bin' directory to the PATH.
-  # TODO(sbc): probably cleaner to modify .emscripten file instead.
-  local node_bin=${NACLPORTS_SRC}/out/node-v0.12.1-linux-x64/bin/
-  if [ ! -d "${node_bin}" ]; then
-    echo "node bin directory not found: ${node_bin}"
-    exit 1
-  fi
-  echo "Adding node bin directory to PATH: ${node_bin}"
-  export PATH=${PATH}:${node_bin}
-
-  export EM_CONFIG=${EMSDK_ROOT}/.emscripten
-  export EMSCRIPTEN=${EMSDK_ROOT}/emscripten
-  echo "Setting EM_CONFIG: ${EM_CONFIG} EMSCRIPTEN: ${EMSCRIPTEN}"
-
-  echo "Adding emscripten to PATH: ${EMSCRIPTEN_ROOT}"
-  export PATH=${PATH}:${EMSCRIPTEN_ROOT}
-
-  # Finally, run 'emcc -v' which will check that the compiler is working
-  echo "Running emcc -v"
-  emcc -v
-
-  # Run using -O2 to compile the native js-optimizer
-  touch ${NACLPORTS_SRC}/out/test.c
-  emcc -O2 -o ${NACLPORTS_SRC}/out/test.js ${NACLPORTS_SRC}/out/test.c
-  rm ${NACLPORTS_SRC}/out/test.{c,js}
 }
 
 Unittests() {

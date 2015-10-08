@@ -376,13 +376,13 @@ class SourcePackage(package.Package):
     build_port = os.path.join(paths.TOOLS_DIR, 'build_port.sh')
     cmd = [build_port]
 
+    if self.config.toolchain == 'emscripten':
+      util.SetupEmscripten()
     env = os.environ.copy()
     env['TOOLCHAIN'] = self.config.toolchain
     env['NACL_ARCH'] = self.config.arch
     env['NACL_DEBUG'] = self.config.debug and '1' or '0'
     env['NACL_SDK_ROOT'] = util.GetSDKRoot()
-    if self.config.toolchain == 'emscripten':
-      env['EMSCRIPTEN'] = util.GetEmscriptenRoot()
     rtn = subprocess.call(cmd,
                           stdout=sys.stdout,
                           stderr=sys.stderr,

@@ -7,8 +7,6 @@
 This script downloads the emscripten tarball and expands it.
 It requires gsutil to be in the bin PATH and is currently
 supported on Linux and Mac OSX and not windows.
-
-Additional prerequisites include cmake, node.js and Java.
 """
 
 import os
@@ -56,7 +54,7 @@ def DownloadToCache(url, sha1):
   return full_name
 
 
-def DownloadAndExtract(url, sha1, target_dir):
+def DownloadAndExtract(url, sha1, target_dir, link_name=None):
   tar_file = DownloadToCache(url, sha1)
 
   if not os.path.exists(OUT_DIR):
@@ -76,6 +74,28 @@ def DownloadAndExtract(url, sha1, target_dir):
   if subprocess.call(['tar', 'xf', tar_file]):
     raise naclports.Error('Error unpacking Emscripten SDK')
 
+  if link_name:
+    if os.path.exists(link_name):
+      os.remove(link_name)
+    os.symlink(target_dir, link_name)
+
+
+def BuildOptimizer():
+  emsdk_root = os.path.join(OUT_DIR, 'emsdk')
+  node_bin = os.path.join(OUT_DIR, 'node', 'bin')
+  emscripten_root = os.path.join(emsdk_root, 'emscripten')
+  os.environ['EMSDK_ROOT'] = emscripten_root
+  os.environ['EM_CONFIG'] = os.path.join(emsdk_root, '.emscripten')
+  os.environ['PATH'] += ':' + node_bin
+  os.environ['PATH'] += ':' + emscripten_root
+
+  # Run using -O2 to compile the native js-optimizer
+  open('test.c', 'w').close()
+  subprocess.check_call(['emcc', '-O2', '-o', 'test.js', 'test.c'])
+  os.remove('test.js')
+  os.remove('test.c')
+  return 0
+
 
 def main(argv):
   if sys.platform in ['win32', 'cygwin']:
@@ -83,7 +103,9 @@ def main(argv):
     return 1
 
   DownloadAndExtract(EMSDK_URL, EMSDK_SHA1, 'emsdk')
-  DownloadAndExtract(NODEJS_URL, NODEJS_SHA1, 'node-v0.12.1-linux-x64')
+  DownloadAndExtract(NODEJS_URL, NODEJS_SHA1, 'node-v0.12.1-linux-x64', 'node')
+  BuildOptimizer()
+
   naclports.Log('Emscripten SDK Install complete')
   return 0
 

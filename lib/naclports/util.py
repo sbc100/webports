@@ -250,6 +250,26 @@ def GetEmscriptenRoot():
   return emscripten
 
 
+def SetupEmscripten():
+  if 'EMSCRIPTEN' in os.environ:
+    return
+
+  local_root = GetEmscriptenRoot()
+  os.environ['EMSCRIPTEN'] = local_root
+  os.environ['EM_CONFIG'] = os.path.join(os.path.dirname(local_root),
+                                         '.emscripten')
+  try:
+    FindInPath('node')
+  except error.Error:
+    node_bin = os.path.join(paths.OUT_DIR, 'node', 'bin')
+    if not os.path.isdir(node_bin):
+      raise error.Error('node not found in path and default path not found: %s'
+                        % node_bin)
+
+    os.environ['PATH'] += ':' + node_bin
+    FindInPath('node')
+
+
 @Memoize
 def GetSDKVersion():
   """Returns the version (as a string) of the current SDK."""
@@ -277,7 +297,6 @@ def GetPlatform():
   getos = os.path.join(GetSDKRoot(), 'tools', 'getos.py')
   platform = subprocess.check_output([getos]).strip()
   return platform
-
 
 @Memoize
 def GetToolchainRoot(config):
