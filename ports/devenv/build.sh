@@ -9,8 +9,8 @@ EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
              jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"
 
 STORAGE_URL=https://naclports.storage.googleapis.com/builds
-SDK_VERSION=pepper_46
-BUILT_REVISION=trunk-626-gb638392
+SDK_VERSION=pepper_48
+BUILT_REVISION=trunk-685-g8fc4bb8
 DEFAULT_SOURCE=${STORAGE_URL}/${SDK_VERSION}/${BUILT_REVISION}/publish
 LOCAL_SOURCE=http://localhost:5103
 
