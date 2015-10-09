@@ -1146,6 +1146,7 @@ Validate() {
       echo "error: missing binary: ${binary}"
       exit 1
     fi
+    return
   fi
 
   LogExecute "${NACL_SDK_ROOT}/tools/ncval" "${binary}"
