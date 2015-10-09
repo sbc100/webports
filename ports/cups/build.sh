@@ -22,8 +22,5 @@ ConfigureStep() {
   # out-of-tree builds.
   LogExecute cp -R ${SRC_DIR}/* .
 
-  # Add a file that provides a dummy implementation of uname().
-  cp ${START_DIR}/uname.c cups
-
   DefaultConfigureStep
 }

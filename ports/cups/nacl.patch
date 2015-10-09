@@ -34,7 +34,7 @@ diff --git a/Makefile b/Makefile
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -5846,6 +5846,10 @@ case "$COMPONENTS" in
+@@ -5928,6 +5928,10 @@ case "$COMPONENTS" in
  		BUILDDIRS="data locale"
  		;;
  
@@ -45,19 +45,6 @@ diff --git a/configure b/configure
  	*)
  		as_fn_error $? "Bad build component \"$COMPONENT\" specified!" "$LINENO" 5
  		;;
-diff --git a/cups/Makefile b/cups/Makefile
---- a/cups/Makefile
-+++ b/cups/Makefile
-@@ -79,7 +79,8 @@ LIBOBJS	=	\
- 		tls.o \
- 		transcode.o \
- 		usersys.o \
--		util.o
-+		util.o \
-+		uname.o
- TESTOBJS	= \
- 		testadmin.o \
- 		testarray.o \
 diff --git a/cups/backchannel.c b/cups/backchannel.c
 --- a/cups/backchannel.c
 +++ b/cups/backchannel.c
@@ -69,16 +56,3 @@ diff --git a/cups/backchannel.c b/cups/backchannel.c
  
  /*
   * Local functions...
-diff --git a/cups/usersys.c b/cups/usersys.c
---- a/cups/usersys.c
-+++ b/cups/usersys.c
-@@ -1044,7 +1044,9 @@ cups_read_client_conf(
- 	  options = 0;
-       }
- 
-+#ifdef HAVE_SSL
-       _httpTLSSetOptions(options);
-+#endif /* HAVE_SSL */
-     }
-   }
- 
