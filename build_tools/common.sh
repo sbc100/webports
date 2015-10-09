@@ -1139,12 +1139,17 @@ DefaultPythonModuleInstallStep() {
 # $1 - Execuatable file (.nexe)
 #
 Validate() {
-  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
-    return
+  local binary=$1
+
+  if [[ ${NACL_ARCH} = pnacl || ${NACL_ARCH} = emscripten ]]; then
+    if [[ ! -f $binary ]]; then
+      echo "error: missing binary: ${binary}"
+      exit 1
+    fi
   fi
 
-  LogExecute "${NACL_SDK_ROOT}/tools/ncval" "$@"
-  if [ $? != 0 ]; then
+  LogExecute "${NACL_SDK_ROOT}/tools/ncval" "${binary}"
+  if [[ $? != 0 ]]; then
     exit 1
   fi
 }
@@ -1239,11 +1244,6 @@ WriteLauncherScript() {
   local binary=$2
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
-  fi
-
-  if [[ ! -f $binary ]]; then
-    echo "error: missing binary: ${binary}"
-    exit 1
   fi
 
   if [ "${TOOLCHAIN}" = "emscripten" ]; then
