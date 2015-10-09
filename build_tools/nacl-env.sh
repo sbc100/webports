@@ -148,7 +148,7 @@ fi
 if [ ${NACL_ARCH} = "pnacl" ]; then
   NACL_CROSS_PREFIX=pnacl
 elif [ ${NACL_ARCH} = "emscripten" ]; then
-  NACL_CROSS_PREFIX=em
+  NACL_CROSS_PREFIX=emscripten
 else
   NACL_CROSS_PREFIX=${NACL_ARCH}-nacl
 fi

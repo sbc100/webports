@@ -833,6 +833,10 @@ case $basic_machine in
 		basic_machine=le32-unknown
 		os=-nacl
 		;;
+	emscripten)
+		basic_machine=asmjs-unknown
+		os=-emscripten
+		;;
 	ncr3000)
 		basic_machine=i486-ncr
 		os=-sysv4
@@ -1496,6 +1500,8 @@ case $os in
 		os=-dicos
 		;;
 	-nacl*)
+		;;
+	-emscripten*)
 		;;
 	-none)
 		;;

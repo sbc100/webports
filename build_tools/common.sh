@@ -885,11 +885,13 @@ PatchConfigSub() {
 
   for sub in ${CONFIG_SUB}; do
     if grep -q 'nacl)' "${sub}" /dev/null; then
-      echo "${CONFIG_SUB} supports NaCl"
-    else
-      echo "Patching ${sub}"
-      /bin/cp -f "${TOOLS_DIR}/config.sub" "${sub}"
+      if grep -q 'emscripten)' "${sub}" /dev/null; then
+        echo "${CONFIG_SUB} supports NaCl + emscripten"
+        continue
+      fi
     fi
+    echo "Patching ${sub}"
+    /bin/cp -f "${TOOLS_DIR}/config.sub" "${sub}"
   done
 }
 
@@ -971,7 +973,7 @@ ConfigureStep_Autoconf() {
   local conf_host=${NACL_CROSS_PREFIX}
   # TODO(gdeepti): Investigate whether emscripten accurately fits this case for
   # long term usage.
-  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
+  if [[ ${TOOLCHAIN} == pnacl ]]; then
     # The PNaCl tools use "pnacl-" as the prefix, but config.sub
     # does not know about "pnacl".  It only knows about "le32-nacl".
     # Unfortunately, most of the config.subs here are so old that
@@ -1233,8 +1235,15 @@ RunSelLdrCommand() {
 # $2 - Nexe name
 #
 WriteLauncherScript() {
+  local script=$1
+  local binary=$2
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
     return
+  fi
+
+  if [[ ! -f $binary ]]; then
+    echo "error: missing binary: ${binary}"
+    exit 1
   fi
 
   if [ "${TOOLCHAIN}" = "emscripten" ]; then
@@ -1246,17 +1255,17 @@ WriteLauncherScript() {
         exit 1
       fi
     fi
-    cat > "$1" <<HERE
+    cat > "$script" <<HERE
 #!/bin/bash
 
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 NODE=${node}
 
 cd "\${SCRIPT_DIR}"
-exec \${NODE} $2 "\$@"
+exec \${NODE} $binary "\$@"
 HERE
-    chmod 750 "$1"
-    echo "Wrote script $1 -> $2"
+    chmod 750 "$script"
+    echo "Wrote script $script -> $binary"
     return
   fi
 
@@ -1267,7 +1276,7 @@ HERE
   fi
 
   if [ "${NACL_LIBC}" = "glibc" ]; then
-    cat > "$1" <<HERE
+    cat > "$script" <<HERE
 #!/bin/bash
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 if [ \$(uname -s) = CYGWIN* ]; then
@@ -1281,10 +1290,10 @@ LIB_PATH_DEFAULT=\${LIB_PATH_DEFAULT}:\${NACL_SDK_LIB}:\${SCRIPT_DIR}
 SEL_LDR_LIB_PATH=\${SEL_LDR_LIB_PATH}:\${LIB_PATH_DEFAULT}
 
 "\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p --library-path "\${SEL_LDR_LIB_PATH}" \
-    -- "\${SCRIPT_DIR}/$2" "\$@"
+    -- "\${SCRIPT_DIR}/$binary" "\$@"
 HERE
   else
-    cat > "$1" <<HERE
+    cat > "$script" <<HERE
 #!/bin/bash
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 if [ \$(uname -s) = CYGWIN* ]; then
@@ -1292,12 +1301,12 @@ if [ \$(uname -s) = CYGWIN* ]; then
 fi
 NACL_SDK_ROOT=${NACL_SDK_ROOT}
 
-"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p -- "\${SCRIPT_DIR}/$2" "\$@"
+"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p -- "\${SCRIPT_DIR}/$binary" "\$@"
 HERE
   fi
 
-  chmod 750 "$1"
-  echo "Wrote script $1 -> $2"
+  chmod 750 "$script"
+  echo "Wrote script $script -> $binary"
 }
 
 
