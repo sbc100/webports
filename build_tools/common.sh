@@ -82,6 +82,12 @@ if [ -t 1 -a "${NACLPORTS_CLANG}" = "1" ]; then
   NACLPORTS_LDFLAGS+=" -fcolor-diagnostics"
 fi
 
+# TODO(sbc): Remove once the toolchainge gets fixed:
+# https://code.google.com/p/nativeclient/issues/detail?id=4333
+if [[ ${TOOLCHAIN} = pnacl ]]; then
+  NACLPORTS_CPPFLAGS+=" -fgnu-inline-asm"
+fi
+
 # The new arm-nacl-gcc glibc toolchain supports color diagnostics, but older
 # x86 and bionic versions do not.
 if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
