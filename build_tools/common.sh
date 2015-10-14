@@ -20,7 +20,7 @@ set -o errexit
 unset MAKEFLAGS
 
 readonly TOOLS_DIR=$(cd "$(dirname "${BASH_SOURCE}")" ; pwd)
-readonly START_DIR=${PWD}
+START_DIR=${PWD}
 readonly NACL_SRC=$(dirname "${TOOLS_DIR}")
 readonly NACL_PACKAGES=${NACL_SRC}
 

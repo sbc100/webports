@@ -1,7 +1,7 @@
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -13976,6 +13989,15 @@ $as_echo_n "checking for scandir... " >&6; }
+@@ -13976,6 +13976,15 @@ $as_echo_n "checking for scandir... " >&6; }
  /* end confdefs.h.  */
  
  		#include <dirent.h>
@@ -17,6 +17,18 @@ diff --git a/configure b/configure
  		int main(void);
  
  int
+diff --git a/src/Makefile.in b/src/Makefile.in
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -542,7 +542,7 @@ clean-libLTLIBRARIES:
+ 	}
+ 
+ libfontconfig.la: $(libfontconfig_la_OBJECTS) $(libfontconfig_la_DEPENDENCIES) $(EXTRA_libfontconfig_la_DEPENDENCIES) 
+-	$(AM_V_CCLD)$(libfontconfig_la_LINK) -rpath $(libdir) $(libfontconfig_la_OBJECTS) $(libfontconfig_la_LIBADD) $(LIBS)
++	$(AM_V_CCLD)$(libfontconfig_la_LINK) -rpath $(libdir) $(libfontconfig_la_OBJECTS) $(libfontconfig_la_LIBADD)
+ 
+ clean-noinstPROGRAMS:
+ 	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
 diff --git a/src/fcatomic.c b/src/fcatomic.c
 --- a/src/fcatomic.c
 +++ b/src/fcatomic.c

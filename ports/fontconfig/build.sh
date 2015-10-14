@@ -13,4 +13,4 @@ if [ ${NACL_LIBC} = "newlib" ]; then
 fi
 
 NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+export LIBS=" ${NACL_CLI_MAIN_LIB}"

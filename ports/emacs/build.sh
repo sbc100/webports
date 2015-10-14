@@ -7,13 +7,23 @@ OS_JOBS=1
 export RUNPROGRAM="${NACL_SDK_ROOT}/tools/sel_ldr.py"
 
 EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
-EXTRA_CONFIGURE_ARGS+=" --with-x"
-EXTRA_CONFIGURE_ARGS+=" --with-x-toolkit=athena"
-EXTRA_CONFIGURE_ARGS+=" --with-xpm=no"
-EXTRA_CONFIGURE_ARGS+=" --with-jpeg=yes"
-EXTRA_CONFIGURE_ARGS+=" --with-png=yes"
-EXTRA_CONFIGURE_ARGS+=" --with-gif=yes"
-EXTRA_CONFIGURE_ARGS+=" --with-tiff=yes"
+
+if [ ${EMACS_X:-0} = 1 ]; then
+  EXTRA_CONFIGURE_ARGS+=" --with-x"
+  EXTRA_CONFIGURE_ARGS+=" --with-x-toolkit=athena"
+  EXTRA_CONFIGURE_ARGS+=" --with-xpm=no"
+  EXTRA_CONFIGURE_ARGS+=" --with-jpeg=yes"
+  EXTRA_CONFIGURE_ARGS+=" --with-png=yes"
+  EXTRA_CONFIGURE_ARGS+=" --with-gif=yes"
+  EXTRA_CONFIGURE_ARGS+=" --with-tiff=yes"
+else
+  EXTRA_CONFIGURE_ARGS+=" --with-x=no"
+  EXTRA_CONFIGURE_ARGS+=" --with-xpm=no"
+  EXTRA_CONFIGURE_ARGS+=" --with-jpeg=no"
+  EXTRA_CONFIGURE_ARGS+=" --with-png=no"
+  EXTRA_CONFIGURE_ARGS+=" --with-gif=no"
+  EXTRA_CONFIGURE_ARGS+=" --with-tiff=no"
+fi
 
 export COMPAT_LIBS="-l${NACL_CXX_LIB}"
 
@@ -23,7 +33,11 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   export emacs_cv_func__setjmp=no
   # Additional transitive dependencies not usually on the link line,
   # but required for static linking.
-  COMPAT_LIBS="-pthread -lxcb -lXau -lXpm -lnacl_io ${COMPAT_LIBS}"
+  COMPAT_LIBS="-pthread ${COMPAT_LIBS}"
+  if [ ${EMACS_X:-0} = 1 ]; then
+    COMPAT_LIBS="-lxcb -lXau -lXpm ${COMPAT_LIBS}"
+  fi
+  COMPAT_LIBS="-lnacl_io ${COMPAT_LIBS}"
   COMPAT_LIBS+=" -lglibc-compat"
   NACLPORTS_LIBS+=" ${COMPAT_LIBS}"
 fi
@@ -75,6 +89,12 @@ PublishStep() {
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/emacs"
 
+  if [ ${EMACS_X:-0} = 1 ]; then
+    EMACS_NAME="EmacsXWindows"
+  else
+    EMACS_NAME="Emacs"
+  fi
+
   # Copy all installed files into tarball
   MakeDir ${ASSEMBLY_DIR}/emacstar/usr
   ChangeDir ${ASSEMBLY_DIR}/emacstar
@@ -97,14 +117,29 @@ PublishStep() {
       -s . \
       -o emacs.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py emacs.nmf
-
   InstallNaClTerm ${ASSEMBLY_DIR}
-  GenerateManifest ${START_DIR}/manifest.json ${ASSEMBLY_DIR} "TITLE"="Emacs"
+  GenerateManifest ${START_DIR}/manifest.json \
+    ${ASSEMBLY_DIR} "TITLE"="${EMACS_NAME}"
+
   LogExecute cp ${START_DIR}/background.js ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_16.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_48.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   LogExecute cp ${START_DIR}/emacs.js ${ASSEMBLY_DIR}
+  if [ ${EMACS_X:-0} = 1 ]; then
+    local XORG_DIR=${NACL_PACKAGES_PUBLISH}/xorg-server/${TOOLCHAIN}/xorg-server
+    LogExecute cp -r ${XORG_DIR}/_platform_specific ${ASSEMBLY_DIR}/
+    LogExecute cp ${XORG_DIR}/*.nmf ${ASSEMBLY_DIR}/
+    LogExecute cp ${XORG_DIR}/*.nexe ${ASSEMBLY_DIR}/
+    if [[ ${NACL_SHARED} == 1 ]]; then
+      LogExecute cp -r ${XORG_DIR}/lib* ${ASSEMBLY_DIR}/
+    fi
+    LogExecute cp ${XORG_DIR}/*.tar ${ASSEMBLY_DIR}/
+    LogExecute cp ${XORG_DIR}/*.js ${ASSEMBLY_DIR}/
+    LogExecute cp ${XORG_DIR}/*.html ${ASSEMBLY_DIR}/
+
+    LogExecute cp ${START_DIR}/../emacs-x/Xsdl.js ${ASSEMBLY_DIR}/
+  fi
   ChangeDir ${PUBLISH_DIR}
   CreateWebStoreZip emacs-${VERSION}.zip emacs
 }

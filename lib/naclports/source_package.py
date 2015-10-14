@@ -193,7 +193,8 @@ class SourcePackage(package.Package):
     return os.path.join(paths.BUILD_ROOT, self.NAME, package_dir)
 
   def GetPatchFile(self):
-    return os.path.join(self.root, 'nacl.patch')
+    patch_name = self.PATCH_NAME or 'nacl.patch'
+    return os.path.join(self.root, patch_name)
 
   def GetArchiveFilename(self):
     if self.URL_FILENAME:
