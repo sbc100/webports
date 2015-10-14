@@ -6,5 +6,5 @@ DEPENDS=(glibc-compat nacl-spawn libtar)
 DISABLED_LIBC=(bionic)
 # arm-nacl-clang crashes
 # https://code.google.com/p/nativeclient/issues/detail?id=4114
-DISABLED_TOOLCHAIN=(clang-newlib/arm clang-newlib/i686 emscripten)
+DISABLED_TOOLCHAIN=(clang-newlib/arm emscripten)
 SHA1=fe662c60b74290b08b6245816b68faed2a1e5c20

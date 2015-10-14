@@ -209,6 +209,20 @@ diff --git a/engine/io.c b/engine/io.c
  #    undef NEW_TTY_DRIVER
  #    define TERMIO_TTY_DRIVER
  #    include <termio.h>
+diff --git a/engine/longlong.h b/engine/longlong.h
+--- a/engine/longlong.h
++++ b/engine/longlong.h
+@@ -335,8 +335,8 @@ UDItype __umulsidi3 (USItype, USItype);
+ 	     "rm" ((USItype) (v)))
+ #define udiv_qrnnd(q, r, n1, n0, dv) \
+   __asm__ ("divl %4"							\
+-	   : "=a" ((USItype) (q)),					\
+-	     "=d" ((USItype) (r))					\
++	   : "=a" (q),					\
++	     "=d" (r)					\
+ 	   : "0" ((USItype) (n0)),					\
+ 	     "1" ((USItype) (n1)),					\
+ 	     "rm" ((USItype) (dv)))
 diff --git a/engine/main.c b/engine/main.c
 --- a/engine/main.c
 +++ b/engine/main.c
