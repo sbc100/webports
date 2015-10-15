@@ -57,5 +57,9 @@ ConfigureStep() {
   # is missing sovles this issues as the expense of missing man pages.
   export PERL=missing
 
+  # TODO(bradnelson): Re-enable when bots have a newer texinfo.
+  # Disabling texinfo, as the version on the bots is too old.
+  export MAKEINFO=true
+
   DefaultConfigureStep
 }
