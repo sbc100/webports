@@ -78,6 +78,7 @@ InstallBasePackages() {
     less \
     nano \
     python \
+    emacs \
     vim"
   pkg install -y -U $extra_packages
 
