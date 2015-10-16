@@ -46,7 +46,7 @@ PublishStep() {
 
   MakeDir ${ASSEMBLY_DIR}/vimtar/usr
   ChangeDir ${ASSEMBLY_DIR}/vimtar
-  LogExecute cp -ar ${INSTALL_DIR}${PREFIX}/* ./usr/
+  LogExecute cp -a ${INSTALL_DIR}${PREFIX}/* ./usr/
   LogExecute cp usr/bin/vim${NACL_EXEEXT} ../vim_${NACL_ARCH}${NACL_EXEEXT}
   LogExecute cp $SRC_DIR/runtime/vimrc_example.vim usr/share/vim/vimrc
   LogExecute rm -rf usr/bin

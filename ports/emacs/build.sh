@@ -98,7 +98,7 @@ PublishStep() {
   # Copy all installed files into tarball
   MakeDir ${ASSEMBLY_DIR}/emacstar/usr
   ChangeDir ${ASSEMBLY_DIR}/emacstar
-  LogExecute cp -ar ${DESTDIR}${PREFIX}/* ./usr
+  LogExecute cp -a ${DESTDIR}${PREFIX}/* ./usr
   LogExecute cp usr/bin/emacs${NACL_EXEEXT} \
        ../emacs_${NACL_ARCH}${NACL_EXEEXT}
   rm -rf usr/bin
