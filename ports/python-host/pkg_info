@@ -1,6 +1,6 @@
 NAME=python-host
-VERSION=2.7.7
-ARCHIVE_ROOT=Python-2.7.7
-URL=http://www.python.org/ftp/python/2.7.7/Python-2.7.7.tgz
+VERSION=2.7.10
+ARCHIVE_ROOT=Python-2.7.10
+URL=http://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz
 LICENSE=CUSTOM:LICENSE
-SHA1=1db01d7f325d8ceaf986976800106018b82ae45a
+SHA1=49089f1f6ab445dc8ace97beeb276095c4c8039b

@@ -1,7 +1,7 @@
 {
   "name": "Python",
   "description": "Python interactive shell built with Native Client",
-  "version": "2.7.7.%(version)s",
+  "version": "2.7.10.%(version)s",
   "manifest_version": 2,
   "minimum_chrome_version": "30",
   "icons": {

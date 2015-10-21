@@ -11,9 +11,7 @@ BuildStep() {
   export CC="gcc -m32"
   export CXX="g++ -m32"
   export LD="gcc -m32"
-  LogExecute ${NACL_HOST_PYTHON} setup.py \
-    ${NACL_PYSETUP_ARGS:-} \
-    install --prefix=${NACL_HOST_PYROOT}
+  LogExecute ${NACL_HOST_PYTHON} setup.py install --prefix=${NACL_HOST_PYROOT}
 }
 
 InstallStep() {

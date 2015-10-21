@@ -33,6 +33,8 @@ _elementtree -I$(srcdir)/Modules/expat -DHAVE_EXPAT_CONFIG_H -DUSE_PYEXPAT_CAPI 
 datetime datetimemodule.c	# date/time type
 _bisect _bisectmodule.c	# Bisection algorithms
 
+_json _json.c
+
 unicodedata unicodedata.c
 
 # Standard I/O baseline
@@ -49,7 +51,7 @@ fcntl fcntlmodule.c	# fcntl(2) and ioctl(2)
 select selectmodule.c	# select(2); not on ancient System V
 
 # Memory-mapped files (also works on Win32).
-# mmap mmapmodule.c
+mmap mmapmodule.c
 
 # CSV file helper
 _csv _csv.c
@@ -61,7 +63,7 @@ _socket socketmodule.c timemodule.c
 # are not supported by all UNIX systems:
 
 #nis nismodule.c -lnsl	# Sun yellow pages -- not everywhere
-#termios termios.c	# Steen Lumholt's termios module
+termios termios.c	# Steen Lumholt's termios module
 #resource resource.c	# Jeremy Hylton's rlimit interface
 
 _ssl _ssl.c -DUSE_SSL -lssl -lcrypto

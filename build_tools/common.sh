@@ -1083,8 +1083,7 @@ DefaultPythonModuleBuildStep() {
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
   export LIBS="${NACLPORTS_LIBS}"
-  LogExecute "${NACL_HOST_PYTHON}" setup.py \
-    ${NACL_PYSETUP_ARGS:-} \
+  LogExecute "${NACL_HOST_PYTHON}" setup.py ${NACL_PYSETUP_ARGS} \
     install "--prefix=${NACL_DEST_PYROOT}"
   MakeDir "${DEST_PYTHON_OBJS}/${PACKAGE_NAME}"
   LogExecute find build -name "*.o" -execdir cp -v {} \

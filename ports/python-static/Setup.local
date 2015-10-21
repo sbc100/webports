@@ -103,5 +103,7 @@ cPickle cPickle.c
 # See http://www.gzip.org/zlib/
 zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
 
+bz2 bz2module.c -I$(prefix)/include -L$(exec_prefix)/lib -lbz2
+
 # This file will have appended to it the contents of the registered modules in
 # the host python tree.

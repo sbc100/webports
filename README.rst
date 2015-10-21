@@ -76,7 +76,7 @@ installing:
 On older Debian/Ubuntu systems these packages were known as:
 
 - lib32z1-dev
-- libssl0.9.8:i386
+- libssl1.0.0:i386
 
 
 Building

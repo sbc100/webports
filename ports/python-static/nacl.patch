@@ -10,52 +10,18 @@ diff --git a/Include/datetime.h b/Include/datetime.h
  /* Macros for type checking when building the Python core. */
  #define PyDate_Check(op) PyObject_TypeCheck(op, &PyDateTime_DateType)
  #define PyDate_CheckExact(op) (Py_TYPE(op) == &PyDateTime_DateType)
-diff --git a/Lib/distutils/unixccompiler.py b/Lib/distutils/unixccompiler.py
---- a/Lib/distutils/unixccompiler.py
-+++ b/Lib/distutils/unixccompiler.py
-@@ -286,3 +286,42 @@ class UnixCCompiler(CCompiler):
+diff --git a/Lib/platform.py b/Lib/platform.py
+--- a/Lib/platform.py
++++ b/Lib/platform.py
+@@ -1001,7 +1001,7 @@ def _syscmd_uname(option,default=''):
  
-         # Oops, didn't find it in *any* of 'dirs'
-         return None
-+
-+# Thanks to the GPAW project for this function.
-+def _link_shared_object (self,
-+                     objects,
-+                     output_filename,
-+                     output_dir=None,
-+                     libraries=None,
-+                     library_dirs=None,
-+                     runtime_library_dirs=None,
-+                     export_symbols=None,
-+                     debug=0,
-+                     extra_preargs=None,
-+                     extra_postargs=None,
-+                     build_temp=None,
-+                     target_lang=None):
-+
-+    if output_dir is None:
-+        (output_dir, output_filename) = os.path.split(output_filename)
-+    output_fullname = os.path.join(output_dir, output_filename)
-+    output_fullname = os.path.abspath(output_fullname)
-+    linkline = "%s %s" % (output_filename[:-2], output_fullname)
-+    for l in library_dirs:
-+        linkline += " -L" + l
-+    for l in libraries:
-+        linkline += " -l" + l
-+    old_fmt = self.static_lib_format
-+    self.static_lib_format = "%s%.0s"
-+    self.create_static_lib(objects,
-+                           output_filename,
-+                           output_dir,
-+                           debug,
-+                           target_lang)
-+
-+    self.static_lib_format = old_fmt
-+
-+# Only override when the NACL_SDK_ROOT
-+import os
-+if os.environ.get("NACL_PORT_BUILD", None) in ["dest", "bootstrap"]:
-+    UnixCCompiler.link_shared_object = _link_shared_object
+     """ Interface to the system's uname command.
+     """
+-    if sys.platform in ('dos','win32','win16','os2'):
++    if sys.platform in ('dos','win32','win16','os2','nacl'):
+         # XXX Others too ?
+         return default
+     try:
 diff --git a/Lib/subprocess.py b/Lib/subprocess.py
 --- a/Lib/subprocess.py
 +++ b/Lib/subprocess.py
@@ -67,7 +33,7 @@ diff --git a/Lib/subprocess.py b/Lib/subprocess.py
  
  import os
  import types
-@@ -1198,7 +1199,10 @@ class Popen(object):
+@@ -1206,7 +1207,10 @@ class Popen(object):
                  args = list(args)
  
              if shell:
@@ -79,7 +45,7 @@ diff --git a/Lib/subprocess.py b/Lib/subprocess.py
                  if executable:
                      args[0] = executable
  
-@@ -1209,6 +1213,15 @@ class Popen(object):
+@@ -1217,6 +1221,15 @@ class Popen(object):
                  os.close(fd)
                  to_close.remove(fd)
  
@@ -98,7 +64,7 @@ diff --git a/Lib/subprocess.py b/Lib/subprocess.py
 diff --git a/Makefile.pre.in b/Makefile.pre.in
 --- a/Makefile.pre.in
 +++ b/Makefile.pre.in
-@@ -439,7 +439,7 @@ coverage:
+@@ -442,7 +442,7 @@ coverage:
  $(BUILDPYTHON):	Modules/python.o $(LIBRARY) $(LDLIBRARY)
  		$(LINKCC) $(LDFLAGS) $(LINKFORSHARED) -o $@ \
  			Modules/python.o \
@@ -107,7 +73,7 @@ diff --git a/Makefile.pre.in b/Makefile.pre.in
  
  platform: $(BUILDPYTHON) pybuilddir.txt
  	$(RUNSHARED) $(PYTHON_FOR_BUILD) -c 'import sys ; from sysconfig import get_platform ; print get_platform()+"-"+sys.version[0:3]' >platform
-@@ -597,14 +597,18 @@ Modules/pwdmodule.o: $(srcdir)/Modules/pwdmodule.c $(srcdir)/Modules/posixmodule
+@@ -610,14 +610,18 @@ Modules/pwdmodule.o: $(srcdir)/Modules/pwdmodule.c $(srcdir)/Modules/posixmodule
  
  $(GRAMMAR_H): $(GRAMMAR_INPUT) $(PGENSRCS)
  		@$(MKDIR_P) Include
@@ -126,7 +92,7 @@ diff --git a/Makefile.pre.in b/Makefile.pre.in
  
  Parser/grammar.o:	$(srcdir)/Parser/grammar.c \
  				$(srcdir)/Include/token.h \
-@@ -1009,6 +1013,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
+@@ -1042,6 +1046,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
  		$(INSTALL_DATA) $(srcdir)/Modules/xxmodule.c \
  			$(DESTDIR)$(LIBDEST)/distutils/tests ; \
  	fi
@@ -134,7 +100,7 @@ diff --git a/Makefile.pre.in b/Makefile.pre.in
  	PYTHONPATH=$(DESTDIR)$(LIBDEST)  $(RUNSHARED) \
  		$(PYTHON_FOR_BUILD) -Wi -tt $(DESTDIR)$(LIBDEST)/compileall.py \
  		-d $(LIBDEST) -f \
-@@ -1027,6 +1032,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
+@@ -1060,6 +1065,7 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
  		$(PYTHON_FOR_BUILD) -Wi -t -O $(DESTDIR)$(LIBDEST)/compileall.py \
  		-d $(LIBDEST)/site-packages -f \
  		-x badsyntax $(DESTDIR)$(LIBDEST)/site-packages
@@ -145,7 +111,7 @@ diff --git a/Makefile.pre.in b/Makefile.pre.in
 diff --git a/Modules/_ctypes/libffi/configure b/Modules/_ctypes/libffi/configure
 --- a/Modules/_ctypes/libffi/configure
 +++ b/Modules/_ctypes/libffi/configure
-@@ -13393,7 +13393,7 @@ case "$host" in
+@@ -17261,7 +17261,7 @@ case "$host" in
  	TARGETDIR=x86
  	if test $ac_cv_sizeof_size_t = 4; then
  	  case "$host" in
@@ -154,26 +120,303 @@ diff --git a/Modules/_ctypes/libffi/configure b/Modules/_ctypes/libffi/configure
  	      TARGET=X86_64
  	      ;;
  	    *)
-diff --git a/Modules/_ctypes/libffi/src/x86/ffi64.c b/Modules/_ctypes/libffi/src/x86/ffi64.c
---- a/Modules/_ctypes/libffi/src/x86/ffi64.c
-+++ b/Modules/_ctypes/libffi/src/x86/ffi64.c
-@@ -202,10 +202,12 @@ classify_argument (ffi_type *type, enum x86_64_reg_class classes[],
-     case FFI_TYPE_DOUBLE:
-       classes[0] = X86_64_SSEDF_CLASS;
-       return 1;
-+#if FFI_TYPE_DOUBLE != FFI_TYPE_LONGDOUBLE
-     case FFI_TYPE_LONGDOUBLE:
-       classes[0] = X86_64_X87_CLASS;
-       classes[1] = X86_64_X87UP_CLASS;
-       return 2;
-+#endif
-     case FFI_TYPE_STRUCT:
-       {
- 	const int UNITS_PER_WORD = 8;
+diff --git a/Modules/_ctypes/libffi/src/x86/unix64.S b/Modules/_ctypes/libffi/src/x86/unix64.S
+--- a/Modules/_ctypes/libffi/src/x86/unix64.S
++++ b/Modules/_ctypes/libffi/src/x86/unix64.S
+@@ -1,5 +1,6 @@
+ /* -----------------------------------------------------------------------
+-   unix64.S - Copyright (c) 2013  The Written Word, Inc.
++   unix64.S - Copyright (c) 2015 Georgia Institute of Technology
++	    - Copyright (c) 2013  The Written Word, Inc.
+ 	    - Copyright (c) 2008  Red Hat, Inc
+ 	    - Copyright (c) 2002  Bo Thorsen <bo@suse.de>
+ 
+@@ -31,6 +32,24 @@
+ #include <fficonfig.h>
+ #include <ffi.h>
+ 
++.section .rodata
++.Lstore_table:
++	.long	.Lst_void-.Lstore_table		/* FFI_TYPE_VOID */
++	.long	.Lst_sint32-.Lstore_table	/* FFI_TYPE_INT */
++	.long	.Lst_float-.Lstore_table	/* FFI_TYPE_FLOAT */
++	.long	.Lst_double-.Lstore_table	/* FFI_TYPE_DOUBLE */
++	.long	.Lst_ldouble-.Lstore_table	/* FFI_TYPE_LONGDOUBLE */
++	.long	.Lst_uint8-.Lstore_table	/* FFI_TYPE_UINT8 */
++	.long	.Lst_sint8-.Lstore_table	/* FFI_TYPE_SINT8 */
++	.long	.Lst_uint16-.Lstore_table	/* FFI_TYPE_UINT16 */
++	.long	.Lst_sint16-.Lstore_table	/* FFI_TYPE_SINT16 */
++	.long	.Lst_uint32-.Lstore_table	/* FFI_TYPE_UINT32 */
++	.long	.Lst_sint32-.Lstore_table	/* FFI_TYPE_SINT32 */
++	.long	.Lst_int64-.Lstore_table	/* FFI_TYPE_UINT64 */
++	.long	.Lst_int64-.Lstore_table	/* FFI_TYPE_SINT64 */
++	.long	.Lst_struct-.Lstore_table	/* FFI_TYPE_STRUCT */
++	.long	.Lst_int64-.Lstore_table	/* FFI_TYPE_POINTER */
++
+ .text
+ 
+ /* ffi_call_unix64 (void *args, unsigned long bytes, unsigned flags,
+@@ -48,115 +67,122 @@ ffi_call_unix64:
+ .LUW0:
+ 	movq	(%rsp), %r10		/* Load return address.  */
+ 	leaq	(%rdi, %rsi), %rax	/* Find local stack base.  */
+-	movq	%rdx, (%rax)		/* Save flags.  */
+-	movq	%rcx, 8(%rax)		/* Save raddr.  */
+-	movq	%rbp, 16(%rax)		/* Save old frame pointer.  */
+-	movq	%r10, 24(%rax)		/* Relocate return address.  */
+-	movq	%rax, %rbp		/* Finalize local stack frame.  */
++	movq	%rdx, %nacl:0(%r15, %rax)		/* Save flags.  */
++	movq	%rcx, %nacl:8(%r15, %rax)		/* Save raddr.  */
++	movq	%rbp, %nacl:16(%r15, %rax)		/* Save old frame pointer.  */
++	movq	%r10, %nacl:24(%r15, %rax)		/* Relocate return address.  */
++	naclrestbp	%eax, %r15		/* Finalize local stack frame.  */
+ .LUW1:
+-	movq	%rdi, %r10		/* Save a copy of the register area. */
+-	movq	%r8, %r11		/* Save a copy of the target fn.  */
++	movl	%edi, %r10d		/* Save a copy of the register area. */
++	movl	%r8d, %r11d		/* Save a copy of the target fn.  */
+ 	movl	%r9d, %eax		/* Set number of SSE registers.  */
+ 
+ 	/* Load up all argument registers.  */
+-	movq	(%r10), %rdi
+-	movq	8(%r10), %rsi
+-	movq	16(%r10), %rdx
+-	movq	24(%r10), %rcx
+-	movq	32(%r10), %r8
+-	movq	40(%r10), %r9
++	movq	%nacl:0(%r15, %r10), %rdi
++	movq	%nacl:8(%r15, %r10), %rsi
++	movq	%nacl:16(%r15, %r10), %rdx
++	movq	%nacl:24(%r15, %r10), %rcx
++	movq	%nacl:32(%r15, %r10), %r8
++	movq	%nacl:40(%r15, %r10), %r9
+ 	testl	%eax, %eax
+ 	jnz	.Lload_sse
+ .Lret_from_load_sse:
+ 
+ 	/* Deallocate the reg arg area.  */
+-	leaq	176(%r10), %rsp
++	.bundle_lock
++		leal	176(%r10), %esp
++		addq	%r15, %rsp
++	.bundle_unlock
+ 
+ 	/* Call the user function.  */
+-	call	*%r11
++	naclcall	%r11d, %r15
+ 
+ 	/* Deallocate stack arg area; local stack frame in redzone.  */
+-	leaq	24(%rbp), %rsp
++	.bundle_lock
++		leal	24(%rbp), %esp
++		addq	%r15, %rsp
++	.bundle_unlock
+ 
+ 	movq	0(%rbp), %rcx		/* Reload flags.  */
+ 	movq	8(%rbp), %rdi		/* Reload raddr.  */
+-	movq	16(%rbp), %rbp		/* Reload old frame pointer.  */
++	naclrestbp	16(%rbp), %r15	/* Reload old frame pointer.  */
+ .LUW2:
+ 
+ 	/* The first byte of the flags contains the FFI_TYPE.  */
+ 	movzbl	%cl, %r10d
+-	leaq	.Lstore_table(%rip), %r11
+-	movslq	(%r11, %r10, 4), %r10
+-	addq	%r11, %r10
+-	jmp	*%r10
+-
+-.Lstore_table:
+-	.long	.Lst_void-.Lstore_table		/* FFI_TYPE_VOID */
+-	.long	.Lst_sint32-.Lstore_table	/* FFI_TYPE_INT */
+-	.long	.Lst_float-.Lstore_table	/* FFI_TYPE_FLOAT */
+-	.long	.Lst_double-.Lstore_table	/* FFI_TYPE_DOUBLE */
+-	.long	.Lst_ldouble-.Lstore_table	/* FFI_TYPE_LONGDOUBLE */
+-	.long	.Lst_uint8-.Lstore_table	/* FFI_TYPE_UINT8 */
+-	.long	.Lst_sint8-.Lstore_table	/* FFI_TYPE_SINT8 */
+-	.long	.Lst_uint16-.Lstore_table	/* FFI_TYPE_UINT16 */
+-	.long	.Lst_sint16-.Lstore_table	/* FFI_TYPE_SINT16 */
+-	.long	.Lst_uint32-.Lstore_table	/* FFI_TYPE_UINT32 */
+-	.long	.Lst_sint32-.Lstore_table	/* FFI_TYPE_SINT32 */
+-	.long	.Lst_int64-.Lstore_table	/* FFI_TYPE_UINT64 */
+-	.long	.Lst_int64-.Lstore_table	/* FFI_TYPE_SINT64 */
+-	.long	.Lst_struct-.Lstore_table	/* FFI_TYPE_STRUCT */
+-	.long	.Lst_int64-.Lstore_table	/* FFI_TYPE_POINTER */
++	leal	.Lstore_table(%rip), %r11d
++	leal	(%r11, %r10, 4), %r10d
++	movl	%nacl:(%r15, %r10), %r10d
++	addl	%r11d, %r10d
++	nacljmp	%r10d, %r15
+ 
+-	.align 2
++	.align 32
+ .Lst_void:
+-	ret
+-	.align 2
++	pop	%r11
++	nacljmp	%r11d, %r15
+ 
++	.align 32
+ .Lst_uint8:
+ 	movzbq	%al, %rax
+-	movq	%rax, (%rdi)
+-	ret
+-	.align 2
++	movq	%rax, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
++
++	.align 32
+ .Lst_sint8:
+ 	movsbq	%al, %rax
+-	movq	%rax, (%rdi)
+-	ret
+-	.align 2
++	movq	%rax, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
++
++	.align 32
+ .Lst_uint16:
+ 	movzwq	%ax, %rax
+-	movq	%rax, (%rdi)
+-	.align 2
++	movq	%rax, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
++
++	.align 32
+ .Lst_sint16:
+ 	movswq	%ax, %rax
+-	movq	%rax, (%rdi)
+-	ret
+-	.align 2
++	movq	%rax, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
++
++	.align 32
+ .Lst_uint32:
+ 	movl	%eax, %eax
+-	movq	%rax, (%rdi)
+-	.align 2
++	movq	%rax, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
++
++	.align 32
+ .Lst_sint32:
+ 	cltq
+-	movq	%rax, (%rdi)
+-	ret
+-	.align 2
++	movq	%rax, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
++
++	.align 32
+ .Lst_int64:
+-	movq	%rax, (%rdi)
+-	ret
++	movq	%rax, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
+ 
+-	.align 2
++	.align 32
+ .Lst_float:
+-	movss	%xmm0, (%rdi)
+-	ret
+-	.align 2
++	movss	%xmm0, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
++
++	.align 32
+ .Lst_double:
+-	movsd	%xmm0, (%rdi)
+-	ret
+ .Lst_ldouble:
+-	fstpt	(%rdi)
+-	ret
++	movsd	%xmm0, %nacl:0(%r15, %rdi)
++	pop	%r11
++	nacljmp	%r11d, %r15
+ 
+-	.align 2
++	.align 32
+ .Lst_struct:
+ 	leaq	-20(%rsp), %rsi		/* Scratch area in redzone.  */
+ 
+@@ -175,14 +201,15 @@ ffi_call_unix64:
+ 	testl	$0x400, %ecx
+ 	cmovnz	%r10, %rax
+ 	cmovnz	%r11, %rdx
+-	movq	%rax, (%rsi)
+-	movq	%rdx, 8(%rsi)
++	movq	%rax, %nacl:0(%r15, %rsi)
++	movq	%rdx, %nacl:8(%r15, %rsi)
+ 
+ 	/* Bits 12-31 contain the true size of the structure.  Copy from
+ 	   the scratch area to the true destination.  */
+ 	shrl	$12, %ecx
+-	rep movsb
+-	ret
++	rep	movs	%nacl:(%rsi), %nacl:(%rdi), %r15
++	pop	%r11
++	nacljmp	%r11d, %r15
+ 
+ 	/* Many times we can avoid loading any SSE registers at all.
+ 	   It's not worth an indirect jump to load the exact set of
+@@ -190,14 +217,14 @@ ffi_call_unix64:
+ 	.align 2
+ .LUW3:
+ .Lload_sse:
+-	movdqa	48(%r10), %xmm0
+-	movdqa	64(%r10), %xmm1
+-	movdqa	80(%r10), %xmm2
+-	movdqa	96(%r10), %xmm3
+-	movdqa	112(%r10), %xmm4
+-	movdqa	128(%r10), %xmm5
+-	movdqa	144(%r10), %xmm6
+-	movdqa	160(%r10), %xmm7
++	movdqa	%nacl:48(%r15, %r10), %xmm0
++	movdqa	%nacl:64(%r15, %r10), %xmm1
++	movdqa	%nacl:80(%r15, %r10), %xmm2
++	movdqa	%nacl:96(%r15, %r10), %xmm3
++	movdqa	%nacl:112(%r15, %r10), %xmm4
++	movdqa	%nacl:128(%r15, %r10), %xmm5
++	movdqa	%nacl:144(%r15, %r10), %xmm6
++	movdqa	%nacl:160(%r15, %r10), %xmm7
+ 	jmp	.Lret_from_load_sse
+ 
+ .LUW4:
+@@ -208,6 +235,10 @@ ffi_call_unix64:
+ 	.type	ffi_closure_unix64,@function
+ 
+ ffi_closure_unix64:
++#ifdef __native_client__
++	hlt
++#else
++	/* THIS IMPLEMENTATION VIOLATES NATIVE CLIENT SFI MODEL */
+ .LUW5:
+ 	/* The carry flag is set by the trampoline iff SSE registers
+ 	   are used.  Don't clobber it before the branch instruction.  */
+@@ -422,9 +453,10 @@ ffi_closure_unix64:
+ 
+ 	.align 8
+ .LEFDE3:
+-
+ #endif /* __GNUC__ */
+ 	
++#endif /* __native_client__ */
++
+ #endif /* __x86_64__ */
+ 
+ #if defined __ELF__ && defined __linux__
 diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
 --- a/Modules/_testcapimodule.c
 +++ b/Modules/_testcapimodule.c
-@@ -1278,6 +1278,9 @@ static int test_run_counter = 0;
+@@ -1378,6 +1378,9 @@ static int test_run_counter = 0;
  
  static PyObject *
  test_datetime_capi(PyObject *self, PyObject *args) {
@@ -183,7 +426,7 @@ diff --git a/Modules/_testcapimodule.c b/Modules/_testcapimodule.c
      if (PyDateTimeAPI) {
          if (test_run_counter) {
              /* Probably regrtest.py -R */
-@@ -1295,6 +1298,7 @@ test_datetime_capi(PyObject *self, PyObject *args) {
+@@ -1395,6 +1398,7 @@ test_datetime_capi(PyObject *self, PyObject *args) {
          Py_RETURN_NONE;
      else
          return NULL;
@@ -198,7 +441,7 @@ diff --git a/Modules/mmapmodule.c b/Modules/mmapmodule.c
  #  define MAP_ANONYMOUS MAP_ANON
  #endif
  
-+#ifdef __native_client__
++#if defined(__native_client__) && defined(_NEWLIB_VERSION)
 +#define MS_SYNC 0
 +/* Defined in glibc-compat */
 +int msync(void *addr, size_t length, int flags);
@@ -224,7 +467,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
  #ifdef HAVE_UTIME_H
  #include <utime.h>
  #endif /* HAVE_UTIME_H */
-@@ -663,9 +670,13 @@ posix_error_with_unicode_filename(Py_UNICODE* name)
+@@ -718,9 +725,13 @@ posix_error_with_unicode_filename(Py_UNICODE* name)
  
  
  static PyObject *
@@ -240,7 +483,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(name);
      return rc;
  }
-@@ -826,7 +837,7 @@ posix_1str(PyObject *args, char *format, int (*func)(const char*))
+@@ -881,7 +892,7 @@ posix_1str(PyObject *args, char *format, int (*func)(const char*))
      res = (*func)(path1);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -249,7 +492,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path1);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -1859,7 +1870,7 @@ posix_chmod(PyObject *self, PyObject *args)
+@@ -1913,7 +1924,7 @@ posix_chmod(PyObject *self, PyObject *args)
      res = chmod(path, i);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -258,7 +501,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -1906,7 +1917,7 @@ posix_lchmod(PyObject *self, PyObject *args)
+@@ -1960,7 +1971,7 @@ posix_lchmod(PyObject *self, PyObject *args)
      res = lchmod(path, i);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -267,7 +510,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path);
      Py_RETURN_NONE;
  }
-@@ -1931,7 +1942,7 @@ posix_chflags(PyObject *self, PyObject *args)
+@@ -1985,7 +1996,7 @@ posix_chflags(PyObject *self, PyObject *args)
      res = chflags(path, flags);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -276,7 +519,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -1957,7 +1968,7 @@ posix_lchflags(PyObject *self, PyObject *args)
+@@ -2011,7 +2022,7 @@ posix_lchflags(PyObject *self, PyObject *args)
      res = lchflags(path, flags);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -285,7 +528,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -2028,7 +2039,7 @@ posix_chown(PyObject *self, PyObject *args)
+@@ -2082,7 +2093,7 @@ posix_chown(PyObject *self, PyObject *args)
      res = chown(path, uid, gid);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -294,7 +537,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -2083,7 +2094,7 @@ posix_lchown(PyObject *self, PyObject *args)
+@@ -2137,7 +2148,7 @@ posix_lchown(PyObject *self, PyObject *args)
      res = lchown(path, uid, gid);
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -303,7 +546,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -2478,7 +2489,7 @@ posix_listdir(PyObject *self, PyObject *args)
+@@ -2532,7 +2543,7 @@ posix_listdir(PyObject *self, PyObject *args)
      dirp = opendir(name);
      Py_END_ALLOW_THREADS
      if (dirp == NULL) {
@@ -312,7 +555,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      }
      if ((d = PyList_New(0)) == NULL) {
          Py_BEGIN_ALLOW_THREADS
-@@ -2500,7 +2511,7 @@ posix_listdir(PyObject *self, PyObject *args)
+@@ -2554,7 +2565,7 @@ posix_listdir(PyObject *self, PyObject *args)
                  closedir(dirp);
                  Py_END_ALLOW_THREADS
                  Py_DECREF(d);
@@ -321,7 +564,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
              }
          }
          if (ep->d_name[0] == '.' &&
-@@ -2660,7 +2671,7 @@ posix_mkdir(PyObject *self, PyObject *args)
+@@ -2714,7 +2725,7 @@ posix_mkdir(PyObject *self, PyObject *args)
  #endif
      Py_END_ALLOW_THREADS
      if (res < 0)
@@ -330,7 +573,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(path);
      Py_INCREF(Py_None);
      return Py_None;
-@@ -3059,7 +3070,7 @@ done:
+@@ -3113,7 +3124,7 @@ done:
  #endif /* HAVE_UTIMES */
      }
      if (res < 0) {
@@ -339,7 +582,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      }
      PyMem_Free(path);
      Py_INCREF(Py_None);
-@@ -3376,7 +3387,7 @@ posix_spawnv(PyObject *self, PyObject *args)
+@@ -3430,7 +3441,7 @@ posix_spawnv(PyObject *self, PyObject *args)
      }
      argvlist[argc] = NULL;
  
@@ -348,7 +591,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      Py_BEGIN_ALLOW_THREADS
      spawnval = spawnv(mode, path, argvlist);
      Py_END_ALLOW_THREADS
-@@ -3521,7 +3532,7 @@ posix_spawnve(PyObject *self, PyObject *args)
+@@ -3575,7 +3586,7 @@ posix_spawnve(PyObject *self, PyObject *args)
      }
      envlist[envc] = 0;
  
@@ -357,7 +600,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      Py_BEGIN_ALLOW_THREADS
      spawnval = spawnve(mode, path, argvlist, envlist);
      Py_END_ALLOW_THREADS
-@@ -6316,7 +6327,7 @@ posix_readlink(PyObject *self, PyObject *args)
+@@ -6370,7 +6381,7 @@ posix_readlink(PyObject *self, PyObject *args)
      n = readlink(path, buf, (int) sizeof buf);
      Py_END_ALLOW_THREADS
      if (n < 0)
@@ -366,7 +609,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
  
      PyMem_Free(path);
      v = PyString_FromStringAndSize(buf, n);
-@@ -6562,7 +6573,7 @@ posix_open(PyObject *self, PyObject *args)
+@@ -6616,7 +6627,7 @@ posix_open(PyObject *self, PyObject *args)
      PyErr_Clear();
  #endif
  
@@ -375,7 +618,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
                            Py_FileSystemDefaultEncoding, &file,
                            &flag, &mode))
          return NULL;
-@@ -6571,7 +6582,7 @@ posix_open(PyObject *self, PyObject *args)
+@@ -6625,7 +6636,7 @@ posix_open(PyObject *self, PyObject *args)
      fd = open(file, flag, mode);
      Py_END_ALLOW_THREADS
      if (fd < 0)
@@ -384,7 +627,7 @@ diff --git a/Modules/posixmodule.c b/Modules/posixmodule.c
      PyMem_Free(file);
      return PyInt_FromLong((long)fd);
  }
-@@ -9376,6 +9387,11 @@ all_ins(PyObject *d)
+@@ -9431,6 +9442,11 @@ all_ins(PyObject *d)
      if (ins(d, "P_TILDE", (long)P_TILDE)) return -1;
      if (ins(d, "P_UNRELATED", (long)P_UNRELATED)) return -1;
      if (ins(d, "P_DEBUGDESC", (long)P_DEBUGDESC)) return -1;
@@ -432,29 +675,57 @@ diff --git a/Modules/pwdmodule.c b/Modules/pwdmodule.c
 diff --git a/Modules/python.c b/Modules/python.c
 --- a/Modules/python.c
 +++ b/Modules/python.c
-@@ -6,6 +6,12 @@
+@@ -6,6 +6,21 @@
  #include <floatingpoint.h>
  #endif
  
 +#ifdef __native_client__
 +#define main nacl_main
-+#include <stdio.h>
-+#include <sys/utsname.h>
++#ifdef __arm__
++#define DATA_FILE "_platform_specific/arm/pydata.tar"
++#elif defined __i386__
++#define DATA_FILE "_platform_specific/i686/pydata.tar"
++#elif defined __x86_64__
++#define DATA_FILE "_platform_specific/x86_64/pydata.tar"
++#elif defined __pnacl__
++#define DATA_FILE "pydata.tar"
++#else
++#error "Unknown arch"
++#endif
 +#endif
 +
  int
  main(int argc, char **argv)
  {
-@@ -20,5 +26,9 @@ main(int argc, char **argv)
+@@ -20,5 +35,11 @@ main(int argc, char **argv)
  	m = fpgetmask();
  	fpsetmask(m & ~FP_X_OFL);
  #endif
 +#ifdef __native_client__
 +	setvbuf(stdout, NULL, _IOLBF, 0);
 +	setvbuf(stdin, NULL, _IOLBF, 0);
++	if (nacl_startup_untar(argv[0], DATA_FILE, "/"))
++		return -1;
 +#endif
  	return Py_Main(argc, argv);
  }
+diff --git a/Modules/readline.c b/Modules/readline.c
+--- a/Modules/readline.c
++++ b/Modules/readline.c
+@@ -965,7 +965,12 @@ setup_readline(void)
+ /* Wrapper around GNU readline that handles signals differently. */
+ 
+ 
+-#if defined(HAVE_RL_CALLBACK) && defined(HAVE_SELECT)
++/*
++ * Don't use the select()-based readline under Native Client. While select()
++ * is available and compile and link time it will fail at runtime under sel_ldr
++ * since there is no IRT/syscall implemenation of select().
++ */
++#if defined(HAVE_RL_CALLBACK) && defined(HAVE_SELECT) && !defined(__native_client__)
+ 
+ static  char *completed_input_string;
+ static void
 diff --git a/Modules/timemodule.c b/Modules/timemodule.c
 --- a/Modules/timemodule.c
 +++ b/Modules/timemodule.c
@@ -507,68 +778,37 @@ diff --git a/Python/getversion.c b/Python/getversion.c
  		      PY_VERSION, Py_GetBuildInfo(), Py_GetCompiler());
  	return version;
  }
-diff --git a/Python/thread.c b/Python/thread.c
---- a/Python/thread.c
-+++ b/Python/thread.c
-@@ -14,9 +14,19 @@
-    library (e.g. gnu pth in pthread emulation) */
- # ifdef HAVE_PTHREAD_H
- #  include <pthread.h> /* _POSIX_THREADS */
-+#  if defined __native_client__ && !defined __GLIBC__
-+     /* Under NaCl newlib neither pthread.h nor unistd.h defines _POSIX_THREADS.
-+        However this file expects it to be defined if pthreads are present so we
-+        define it here after including pthread.h
-+        TODO(sbc): remove this hack once newlib is fixed:
-+        https://code.google.com/p/nativeclient/issues/detail?id=3551
-+        */
-+#    define _POSIX_THREADS
-+#  endif
- # endif
- #endif
- 
-+
- #ifndef DONT_HAVE_STDIO_H
- #include <stdio.h>
- #endif
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -2861,19 +2861,26 @@ if test "$cross_compiling" = yes; then
+@@ -2880,6 +2880,11 @@ if test "$cross_compiling" = yes; then
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python interpreter for cross build" >&5
  $as_echo_n "checking for python interpreter for cross build... " >&6; }
      if test -z "$PYTHON_FOR_BUILD"; then
--        for interp in python$PACKAGE_VERSION python2 python; do
--	    which $interp >/dev/null 2>&1 || continue
--	    if $interp -c 'import sys;sys.exit(not (sys.version_info[:2] >= (2,7) and sys.version_info[0] < 3))'; then
--	        break
--	    fi
--            interp=
--	done
 +	case "$host" in
 +	*-*-nacl*)
 +	    interp=$(cd ../../python-host/build_host && pwd)/python
 +	    ;;
 +	*)
-+	    for interp in python$PACKAGE_VERSION python2 python; do
-+		which $interp >/dev/null 2>&1 || continue
-+		if $interp -c 'import sys;sys.exit(not (sys.version_info@<:@:2@:>@ >= (2,7) and sys.version_info@<:@0@:>@ < 3))'; then
-+		    break
-+		fi
-+		interp=
-+	    done
-+	    ;;
+         for interp in python$PACKAGE_VERSION python2 python; do
+ 	    which $interp >/dev/null 2>&1 || continue
+ 	    if $interp -c 'import sys;sys.exit(not (sys.version_info[:2] >= (2,7) and sys.version_info[0] < 3))'; then
+@@ -2887,12 +2892,13 @@ $as_echo_n "checking for python interpreter for cross build... " >&6; }
+ 	    fi
+             interp=
+ 	done
 +	esac
          if test x$interp = x; then
  	    as_fn_error $? "python$PACKAGE_VERSION interpreter not found" "$LINENO" 5
  	fi
          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $interp" >&5
  $as_echo "$interp" >&6; }
--	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(srcdir)/Lib:$(srcdir)/Lib/plat-$(MACHDEP) '$interp
-+	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(abs_srcdir)/Lib:$(abs_srcdir)/Lib/plat-$(MACHDEP) '$interp
+-	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(srcdir)/Lib:$(srcdir)/Lib/$(PLATDIR) '$interp
++	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(abs_srcdir)/Lib:$(abs_srcdir)/Lib/$(PLATDIR) '$interp
      fi
  elif test "$cross_compiling" = maybe; then
      as_fn_error $? "Cross compiling required --host=HOST-TUPLE and --build=ARCH" "$LINENO" 5
-@@ -3177,6 +3184,9 @@ then
+@@ -3196,6 +3202,9 @@ then
         # `define_xopen_source' in the case statement below. For the
         # current supported cross builds, this macro is not adjusted.
  	case "$host" in
@@ -578,7 +818,7 @@ diff --git a/configure b/configure
  	*-*-linux*)
  		ac_sys_system=Linux
  		;;
-@@ -3226,6 +3236,15 @@ if test "$cross_compiling" = yes; then
+@@ -3245,6 +3254,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -594,7 +834,7 @@ diff --git a/configure b/configure
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -5146,7 +5165,11 @@ if test -d casesensitivetestdir
+@@ -5168,7 +5186,11 @@ if test -d casesensitivetestdir
  then
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
  $as_echo "yes" >&6; }
@@ -607,7 +847,7 @@ diff --git a/configure b/configure
  else
  	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
  $as_echo "no" >&6; }
-@@ -5944,11 +5967,11 @@ then
+@@ -5966,11 +5988,11 @@ then
  		# debug builds.
  		OPT="-g -O0 -Wall $STRICT_PROTO"
  	    else
@@ -621,8 +861,8 @@ diff --git a/configure b/configure
  	    ;;
  	esac
  	case $ac_sys_system in
-@@ -8235,7 +8258,7 @@ then
- 			fi
+@@ -8270,7 +8292,7 @@ then
+ 			BLDSHARED="$LDSHARED"
  		fi
  		;;
 -	Linux*|GNU*|QNX*)
@@ -630,7 +870,7 @@ diff --git a/configure b/configure
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -8309,7 +8332,7 @@ then
+@@ -8344,7 +8366,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -639,7 +879,7 @@ diff --git a/configure b/configure
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -8343,7 +8366,7 @@ then
+@@ -8378,7 +8400,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
@@ -651,41 +891,33 @@ diff --git a/configure b/configure
 diff --git a/configure.ac b/configure.ac
 --- a/configure.ac
 +++ b/configure.ac
-@@ -19,18 +19,25 @@ AC_SUBST(host)
+@@ -22,6 +22,11 @@ rm -f pybuilddir.txt
  if test "$cross_compiling" = yes; then
      AC_MSG_CHECKING([for python interpreter for cross build])
      if test -z "$PYTHON_FOR_BUILD"; then
--        for interp in python$PACKAGE_VERSION python2 python; do
--	    which $interp >/dev/null 2>&1 || continue
--	    if $interp -c 'import sys;sys.exit(not (sys.version_info@<:@:2@:>@ >= (2,7) and sys.version_info@<:@0@:>@ < 3))'; then
--	        break
--	    fi
--            interp=
--	done
 +	case "$host" in
 +	*-*-nacl*)
 +	    interp=$(cd ../../python-host/build_host && pwd)/python
 +	    ;;
 +	*)
-+	    for interp in python$PACKAGE_VERSION python2 python; do
-+		which $interp >/dev/null 2>&1 || continue
-+		if $interp -c 'import sys;sys.exit(not (sys.version_info@<:@:2@:>@ >= (2,7) and sys.version_info@<:@0@:>@ < 3))'; then
-+		    break
-+		fi
-+		interp=
-+	    done
-+	    ;;
+         for interp in python$PACKAGE_VERSION python2 python; do
+ 	    which $interp >/dev/null 2>&1 || continue
+ 	    if $interp -c 'import sys;sys.exit(not (sys.version_info@<:@:2@:>@ >= (2,7) and sys.version_info@<:@0@:>@ < 3))'; then
+@@ -29,11 +34,12 @@ if test "$cross_compiling" = yes; then
+ 	    fi
+             interp=
+ 	done
 +	esac
          if test x$interp = x; then
  	    AC_MSG_ERROR([python$PACKAGE_VERSION interpreter not found])
  	fi
          AC_MSG_RESULT($interp)
--	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(srcdir)/Lib:$(srcdir)/Lib/plat-$(MACHDEP) '$interp
-+	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(abs_srcdir)/Lib:$(abs_srcdir)/Lib/plat-$(MACHDEP) '$interp
+-	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(srcdir)/Lib:$(srcdir)/Lib/$(PLATDIR) '$interp
++	PYTHON_FOR_BUILD='_PYTHON_PROJECT_BASE=$(abs_builddir) _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(abs_srcdir)/Lib:$(abs_srcdir)/Lib/$(PLATDIR) '$interp
      fi
  elif test "$cross_compiling" = maybe; then
      AC_MSG_ERROR([Cross compiling required --host=HOST-TUPLE and --build=ARCH])
-@@ -319,6 +326,9 @@ then
+@@ -322,6 +328,9 @@ then
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
@@ -695,7 +927,7 @@ diff --git a/configure.ac b/configure.ac
  	*)
  		# for now, limit cross builds to known configurations
  		MACHDEP="unknown"
-@@ -362,6 +372,15 @@ if test "$cross_compiling" = yes; then
+@@ -365,6 +374,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -711,8 +943,8 @@ diff --git a/configure.ac b/configure.ac
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -2017,7 +2036,7 @@ then
- 			fi
+@@ -2036,7 +2054,7 @@ then
+ 			BLDSHARED="$LDSHARED"
  		fi
  		;;
 -	Linux*|GNU*|QNX*)
@@ -720,7 +952,7 @@ diff --git a/configure.ac b/configure.ac
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -2089,7 +2108,7 @@ then
+@@ -2108,7 +2126,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -729,7 +961,7 @@ diff --git a/configure.ac b/configure.ac
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -2121,7 +2140,7 @@ then
+@@ -2140,7 +2158,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
