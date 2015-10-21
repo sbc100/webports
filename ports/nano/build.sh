@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 NACLPORTS_LIBS+=" -lncurses"
+EXECUTABLES=src/nano${NACL_EXEEXT}
 
 EnableGlibcCompat
 
@@ -13,11 +14,6 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   EXTRA_CONFIGURE_ARGS="--enable-tiny"
 fi
 
-PatchStep() {
-  DefaultPatchStep
-  LogExecute cp ${START_DIR}/nano_pepper.c ${SRC_DIR}/src/
-}
-
 InstallStep() {
   DefaultInstallStep
   # The nano build results in a dangling symlink (symlink doesn't honor the
@@ -26,19 +22,19 @@ InstallStep() {
 }
 
 PublishStep() {
-  MakeDir ${PUBLISH_DIR}/nanotar
+  MakeDir ${PUBLISH_DIR}
+
+  LogExecute mv src/nano${NACL_EXEEXT} \
+    "${PUBLISH_DIR}/nano_${NACL_ARCH}${NACL_EXEEXT}"
+
+  rm -rf ${PUBLISH_DIR}/nanotar
+  MakeDir ${PUBLISH_DIR}/nanotar/usr
   ChangeDir ${PUBLISH_DIR}/nanotar
-  local exe="../nano_${NACL_ARCH}${NACL_EXEEXT}"
-  LogExecute cp -a ${DESTDIR}${PREFIX}/* .
-  LogExecute cp bin/nano${NACL_EXEEXT} $exe
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    LogExecute ${PNACLFINALIZE} ${exe}
-  fi
-  rm -rf bin
-  rm -rf share/man
+  LogExecute cp -a ${DESTDIR}${PREFIX}/share usr/
   tar cf ${PUBLISH_DIR}/nano.tar .
   shasum ${PUBLISH_DIR}/nano.tar > ${PUBLISH_DIR}/nano.tar.hash
   rm -rf ${PUBLISH_DIR}/nanotar
+
   cd ${PUBLISH_DIR}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
       nano_*${NACL_EXEEXT} \

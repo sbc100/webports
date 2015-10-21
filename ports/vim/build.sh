@@ -8,11 +8,6 @@ EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 EXECUTABLES=src/vim${NACL_EXEEXT}
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
-PatchStep() {
-  DefaultPatchStep
-  LogExecute cp ${START_DIR}/vim_pepper.c ${SRC_DIR}/src/vim_pepper.c
-}
-
 ConfigureStep() {
   # These settings are required by vim's configure when cross compiling.
   # These are the standard valued detected when configuring for linux/glibc.
