@@ -24,6 +24,7 @@ import argparse
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from naclports import configuration, error, source_package, util, paths
+from naclports import installed_package
 import naclports.package
 
 
@@ -38,9 +39,9 @@ def CmdList(config, options, args):
   if options.all:
     iterator = source_package.SourcePackageIterator()
   else:
-    iterator = naclports.package.InstalledPackageIterator(config)
+    iterator = installed_package.InstalledPackageIterator(config)
   for package in iterator:
-    if options.verbose:
+    if options.verbosity:
       sys.stdout.write('%-15s %s\n' % (package.NAME, package.VERSION))
     else:
       sys.stdout.write(package.NAME + '\n')
@@ -52,7 +53,7 @@ def CmdInfo(config, options, args):
   if len(args) != 1:
     raise error.Error('info command takes a single package name')
   package_name = args[0]
-  pkg = naclports.package.CreateInstalledPackage(package_name, config)
+  pkg = installed_package.CreateInstalledPackage(package_name, config)
   info_file = pkg.GetInstallStamp()
   print('Install receipt: %s' % info_file)
   with open(info_file) as f:
@@ -110,6 +111,30 @@ def CmdPkgUscan(package, options):
   return rtn
 
 
+def CmdCheck(config, options, args):
+  """Verify the dependecies of all install packages are also installed."""
+  if len(args):
+    raise error.Error('check command takes no arguments')
+
+  installed_packages = installed_package.InstalledPackageIterator(config)
+  installed_map = {pkg.NAME: pkg for pkg in installed_packages}
+
+  checked = set()
+  def CheckDeps(pkg_name, required_by):
+    if pkg_name in checked:
+      return
+    checked.add(pkg_name)
+    pkg = installed_map.get(pkg_name)
+    if not pkg:
+      raise error.Error("missing package '%s' required by '%s'" % (pkg_name,
+          required_by))
+    for dep in pkg.DEPENDS:
+      CheckDeps(dep, pkg.NAME)
+
+  for pkg in installed_map.itervalues():
+    CheckDeps(pkg.NAME, None)
+
+
 def CmdPkgCheck(package, options):
   """Verify dependency information for given package(s)"""
   # The fact that we got this far means the pkg_info is basically valid.
@@ -131,12 +156,18 @@ def CmdPkgBuild(package, options):
   package.Build(options.build_deps, force=options.force)
 
 
+def PerformUninstall(package):
+  for dep in package.ReverseDependencies():
+    PerformUninstall(dep)
+  package.Uninstall()
+
+
 def CmdPkgInstall(package, options):
   """Install package(s)"""
   if options.all:
     for conflict in package.TransitiveConflicts():
       if conflict.IsInstalled():
-        conflict.GetInstalledPackage().Uninstall()
+        PerformUninstall(conflict)
 
   package.Install(options.build_deps, force=options.force,
                   from_source=options.from_source)
@@ -144,6 +175,13 @@ def CmdPkgInstall(package, options):
 
 def CmdPkgUninstall(package, options):
   """Uninstall package(s)"""
+  for dep in package.ReverseDependencies():
+    if options.force or options.all:
+      PerformUninstall(dep)
+    else:
+      raise error.Error("unable to uninstall '%s'. another package is "
+          "installed which depends on it: '%s'" % (package.NAME, dep.NAME))
+
   package.Uninstall()
 
 
@@ -188,6 +226,7 @@ def RunMain(args):
   base_commands = {
       'list': CmdList,
       'info': CmdInfo,
+      'check': CmdCheck,
   }
 
   pkg_commands = {
@@ -312,7 +351,7 @@ def RunMain(args):
       CleanAll(config)
     else:
       if args.command in installed_pkg_commands:
-        package_iterator = naclports.package.InstalledPackageIterator(config)
+        package_iterator = installed_package.InstalledPackageIterator(config)
       else:
         package_iterator = source_package.SourcePackageIterator()
       for p in package_iterator:
@@ -320,7 +359,7 @@ def RunMain(args):
   else:
     for package_name in package_names:
       if args.command in installed_pkg_commands:
-        p = naclports.package.CreateInstalledPackage(package_name, config)
+        p = installed_package.CreateInstalledPackage(package_name, config)
       else:
         p = source_package.CreatePackage(package_name, config)
       DoCmd(p)

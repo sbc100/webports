@@ -5,7 +5,7 @@
 from mock import call, patch, Mock
 
 import common
-from naclports import package
+from naclports import installed_package
 
 test_info = '''\
 NAME=foo
@@ -21,13 +21,15 @@ BUILD_NACLPORTS_REVISION=98765
 def CreateMockInstalledPackage():
   file_mock = common.MockFileObject(test_info)
   with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
-    return package.InstalledPackage('dummy_file')
+    return installed_package.InstalledPackage('dummy_file')
 
 
 class TestInstalledPackage(common.NaclportsTest):
 
   @patch('naclports.package.Log', Mock())
-  @patch('naclports.package.RemoveFile')
+  @patch('naclports.installed_package.RemoveFile')
+  @patch('naclports.installed_package.InstalledPackageIterator',
+      Mock(return_value=[]))
   @patch('os.path.lexists', Mock(return_value=True))
   @patch('os.path.exists', Mock(return_value=True))
   def testUninstall(self, remove_patch):  # pylint: disable=no-self-use

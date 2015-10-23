@@ -284,7 +284,7 @@ class SourcePackage(package.Package):
     if self.IsAnyVersionInstalled():
       installed_pkg = self.GetInstalledPackage()
       installed_pkg.LogStatus('Uninstalling existing')
-      installed_pkg.DoUninstall()
+      installed_pkg.DoUninstall(force=True)
 
     binary_package.BinaryPackage(package_file).Install(force)
 

@@ -11,19 +11,6 @@ from naclports import configuration, pkg_info, util
 EXTRA_KEYS = ['BUILD_CONFIG', 'BUILD_ARCH', 'BUILD_TOOLCHAIN',
               'BUILD_SDK_VERSION', 'BUILD_NACLPORTS_REVISION']
 
-
-def RemoveEmptyDirs(dirname):
-  """Recursively remove a directoy and its parents if they are empty."""
-  while not os.listdir(dirname):
-    os.rmdir(dirname)
-    dirname = os.path.dirname(dirname)
-
-
-def RemoveFile(filename):
-  os.remove(filename)
-  RemoveEmptyDirs(os.path.dirname(filename))
-
-
 class Package(object):
   extra_keys = []
   list_props = (
@@ -135,60 +122,3 @@ class Package(object):
     """Returns the name of the installed file list for this package."""
     return util.GetListFile(self.NAME, self.config)
 
-
-class InstalledPackage(Package):
-  extra_keys = EXTRA_KEYS
-
-  def __init__(self, info_file):
-    super(InstalledPackage, self).__init__(info_file)
-    self.config = configuration.Configuration(self.BUILD_ARCH,
-                                              self.BUILD_TOOLCHAIN,
-                                              self.BUILD_CONFIG == 'debug')
-
-  def Uninstall(self):
-    self.LogStatus('Uninstalling')
-    self.DoUninstall()
-
-  def Files(self):
-    """Yields the list of files currently installed by this package."""
-    file_list = self.GetListFile()
-    if not os.path.exists(file_list):
-      return
-    with open(self.GetListFile()) as f:
-      for line in f:
-        yield line.strip()
-
-  def DoUninstall(self):
-    with util.InstallLock(self.config):
-      RemoveFile(self.GetInstallStamp())
-
-      root = util.GetInstallRoot(self.config)
-      for filename in self.Files():
-        fullname = os.path.join(root, filename)
-        if not os.path.lexists(fullname):
-          Warn('File not found while uninstalling: %s' % fullname)
-          continue
-        LogVerbose('uninstall: %s' % filename)
-        RemoveFile(fullname)
-
-      if os.path.exists(self.GetListFile()):
-        RemoveFile(self.GetListFile())
-
-
-def InstalledPackageIterator(config):
-  stamp_root = util.GetInstallStampRoot(config)
-  if not os.path.exists(stamp_root):
-    return
-
-  for filename in os.listdir(stamp_root):
-    if os.path.splitext(filename)[1] != '.info':
-      continue
-    yield InstalledPackage(os.path.join(stamp_root, filename))
-
-
-def CreateInstalledPackage(package_name, config=None):
-  stamp_root = util.GetInstallStampRoot(config)
-  info_file = os.path.join(stamp_root, package_name + '.info')
-  if not os.path.exists(info_file):
-    raise Error('package not installed: %s [%s]' % (package_name, config))
-  return InstalledPackage(info_file)

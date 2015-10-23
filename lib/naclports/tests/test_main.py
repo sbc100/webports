@@ -63,7 +63,7 @@ class TestCommands(common.NaclportsTest):
   def testListCommand(self):
     config = Configuration()
     pkg = Mock(NAME='foo', VERSION='0.1')
-    with patch('naclports.package.InstalledPackageIterator',
+    with patch('naclports.installed_package.InstalledPackageIterator',
                Mock(return_value=[pkg])):
       with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
         options = Mock(all=False)
@@ -75,16 +75,16 @@ class TestCommands(common.NaclportsTest):
   def testListCommandVerbose(self):
     config = Configuration()
     pkg = Mock(NAME='foo', VERSION='0.1')
-    with patch('naclports.package.InstalledPackageIterator',
+    with patch('naclports.installed_package.InstalledPackageIterator',
                Mock(return_value=[pkg])):
       with patch('sys.stdout', new_callable=StringIO.StringIO) as stdout:
-        options = Mock(verbose=False, all=False)
+        options = Mock(verbosity=0, all=False)
         naclports.__main__.CmdList(config, options, [])
         lines = stdout.getvalue().splitlines()
         self.assertRegexpMatches(lines[0], "^foo$")
         self.assertEqual(len(lines), 1)
 
-  @patch('naclports.package.CreateInstalledPackage', Mock())
+  @patch('naclports.installed_package.CreateInstalledPackage', Mock())
   def testInfoCommand(self):
     config = Configuration()
     options = Mock()
@@ -98,7 +98,7 @@ class TestCommands(common.NaclportsTest):
   def testContentsCommand(self):
     file_list = ['foo', 'bar']
 
-    options = Mock(verbose=False, all=False)
+    options = Mock(verbosity=0, all=False)
     package = Mock(NAME='test', Files=Mock(return_value=file_list))
 
     expected_output = '\n'.join(file_list) + '\n'
