@@ -771,19 +771,20 @@ diff --git a/Python/getversion.c b/Python/getversion.c
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -2880,6 +2880,11 @@ if test "$cross_compiling" = yes; then
+@@ -2880,6 +2880,12 @@ if test "$cross_compiling" = yes; then
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python interpreter for cross build" >&5
  $as_echo_n "checking for python interpreter for cross build... " >&6; }
      if test -z "$PYTHON_FOR_BUILD"; then
 +	case "$host" in
 +	*-*-nacl*)
-+	    interp=$(cd ../../python-host/build_host && pwd)/python
++	    interp=$(cd ../../python-host/build_host && pwd)/python.exe
++	    if [ ! -f $interp ]; then interp=$(cd ../../python-host/build_host && pwd)/python; fi
 +	    ;;
 +	*)
          for interp in python$PACKAGE_VERSION python2 python; do
  	    which $interp >/dev/null 2>&1 || continue
  	    if $interp -c 'import sys;sys.exit(not (sys.version_info[:2] >= (2,7) and sys.version_info[0] < 3))'; then
-@@ -2887,12 +2892,13 @@ $as_echo_n "checking for python interpreter for cross build... " >&6; }
+@@ -2887,12 +2893,13 @@ $as_echo_n "checking for python interpreter for cross build... " >&6; }
  	    fi
              interp=
  	done
@@ -798,7 +799,7 @@ diff --git a/configure b/configure
      fi
  elif test "$cross_compiling" = maybe; then
      as_fn_error $? "Cross compiling required --host=HOST-TUPLE and --build=ARCH" "$LINENO" 5
-@@ -3196,6 +3202,9 @@ then
+@@ -3196,6 +3203,9 @@ then
         # `define_xopen_source' in the case statement below. For the
         # current supported cross builds, this macro is not adjusted.
  	case "$host" in
@@ -808,7 +809,7 @@ diff --git a/configure b/configure
  	*-*-linux*)
  		ac_sys_system=Linux
  		;;
-@@ -3245,6 +3254,15 @@ if test "$cross_compiling" = yes; then
+@@ -3245,6 +3255,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -824,7 +825,7 @@ diff --git a/configure b/configure
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -5168,7 +5186,11 @@ if test -d casesensitivetestdir
+@@ -5168,7 +5187,11 @@ if test -d casesensitivetestdir
  then
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
  $as_echo "yes" >&6; }
@@ -837,7 +838,7 @@ diff --git a/configure b/configure
  else
  	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
  $as_echo "no" >&6; }
-@@ -5966,11 +5988,11 @@ then
+@@ -5966,11 +5989,11 @@ then
  		# debug builds.
  		OPT="-g -O0 -Wall $STRICT_PROTO"
  	    else
@@ -851,7 +852,7 @@ diff --git a/configure b/configure
  	    ;;
  	esac
  	case $ac_sys_system in
-@@ -8270,7 +8292,7 @@ then
+@@ -8270,7 +8293,7 @@ then
  			BLDSHARED="$LDSHARED"
  		fi
  		;;
@@ -860,7 +861,7 @@ diff --git a/configure b/configure
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -8344,7 +8366,7 @@ then
+@@ -8344,7 +8367,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -869,7 +870,7 @@ diff --git a/configure b/configure
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -8378,7 +8400,7 @@ then
+@@ -8378,7 +8401,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
@@ -881,19 +882,20 @@ diff --git a/configure b/configure
 diff --git a/configure.ac b/configure.ac
 --- a/configure.ac
 +++ b/configure.ac
-@@ -22,6 +22,11 @@ rm -f pybuilddir.txt
+@@ -22,6 +22,12 @@ rm -f pybuilddir.txt
  if test "$cross_compiling" = yes; then
      AC_MSG_CHECKING([for python interpreter for cross build])
      if test -z "$PYTHON_FOR_BUILD"; then
 +	case "$host" in
 +	*-*-nacl*)
-+	    interp=$(cd ../../python-host/build_host && pwd)/python
++	    interp=$(cd ../../python-host/build_host && pwd)/python.exe
++	    if [ ! -f $interp ]; then interp=$(cd ../../python-host/build_host && pwd)/python; fi
 +	    ;;
 +	*)
          for interp in python$PACKAGE_VERSION python2 python; do
  	    which $interp >/dev/null 2>&1 || continue
  	    if $interp -c 'import sys;sys.exit(not (sys.version_info@<:@:2@:>@ >= (2,7) and sys.version_info@<:@0@:>@ < 3))'; then
-@@ -29,11 +34,12 @@ if test "$cross_compiling" = yes; then
+@@ -29,11 +35,12 @@ if test "$cross_compiling" = yes; then
  	    fi
              interp=
  	done
@@ -907,7 +909,7 @@ diff --git a/configure.ac b/configure.ac
      fi
  elif test "$cross_compiling" = maybe; then
      AC_MSG_ERROR([Cross compiling required --host=HOST-TUPLE and --build=ARCH])
-@@ -322,6 +328,9 @@ then
+@@ -322,6 +329,9 @@ then
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
@@ -917,7 +919,7 @@ diff --git a/configure.ac b/configure.ac
  	*)
  		# for now, limit cross builds to known configurations
  		MACHDEP="unknown"
-@@ -365,6 +374,15 @@ if test "$cross_compiling" = yes; then
+@@ -365,6 +375,15 @@ if test "$cross_compiling" = yes; then
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -933,7 +935,7 @@ diff --git a/configure.ac b/configure.ac
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -2036,7 +2054,7 @@ then
+@@ -2036,7 +2055,7 @@ then
  			BLDSHARED="$LDSHARED"
  		fi
  		;;
@@ -942,7 +944,7 @@ diff --git a/configure.ac b/configure.ac
  		LDSHARED='$(CC) -shared'
  		LDCXXSHARED='$(CXX) -shared';;
  	BSD/OS*/4*)
-@@ -2108,7 +2126,7 @@ then
+@@ -2108,7 +2127,7 @@ then
  		 then CCSHARED="-fPIC";
  		 else CCSHARED="+z";
  		 fi;;
@@ -951,7 +953,7 @@ diff --git a/configure.ac b/configure.ac
  	BSD/OS*/4*) CCSHARED="-fpic";;
  	FreeBSD*|NetBSD*|OpenBSD*|DragonFly*) CCSHARED="-fPIC";;
  	OpenUNIX*|UnixWare*)
-@@ -2140,7 +2158,7 @@ then
+@@ -2140,7 +2159,7 @@ then
  	    LINKFORSHARED="-Wl,-E -Wl,+s";;
  #	    LINKFORSHARED="-Wl,-E -Wl,+s -Wl,+b\$(BINLIBDEST)/lib-dynload";;
  	BSD/OS/4*) LINKFORSHARED="-Xlinker -export-dynamic";;
