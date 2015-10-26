@@ -2,78 +2,30 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-BusyBoxDisable() {
-  # Switch one option in the busybox config from yes to no.
-  sed -i.bak "s/$*=y/$*=n/" .config
-}
+EXECUTABLES="busybox"
+
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
 ConfigureStep() {
-  SetupCrossEnvironment
-
-  LogExecute make -f ${SRC_DIR}/Makefile defconfig BUILD_LIBBUSYBOX=y \
-    KBUILD_SRC=${SRC_DIR}
-
-  BusyBoxDisable CONFIG_ACPID
-  BusyBoxDisable CONFIG_ARP
-  BusyBoxDisable CONFIG_ARPING
-  BusyBoxDisable CONFIG_BLOCKDEV
-  BusyBoxDisable CONFIG_BRCTL
-  BusyBoxDisable CONFIG_EJECT
-  BusyBoxDisable CONFIG_ETHER_WAKE
-  BusyBoxDisable CONFIG_FBSPLASH
-  BusyBoxDisable CONFIG_FDFLUSH
-  BusyBoxDisable CONFIG_FDISK
-  BusyBoxDisable CONFIG_FEATURE_IFUPDOWN_IP_BUILTIN
-  BusyBoxDisable CONFIG_FEATURE_INETD_RPC
-  BusyBoxDisable CONFIG_FEATURE_IP_LINK
-  BusyBoxDisable CONFIG_FEATURE_MOUNT_LOOP
-  BusyBoxDisable CONFIG_FEATURE_SUID
-  BusyBoxDisable CONFIG_FREE
-  BusyBoxDisable CONFIG_FREERAMDISK
-  BusyBoxDisable CONFIG_FSTRIM
-  BusyBoxDisable CONFIG_HDPARM
-  BusyBoxDisable CONFIG_IFCONFIG
-  BusyBoxDisable CONFIG_IFENSLAVE
-  BusyBoxDisable CONFIG_IFPLUGD
-  BusyBoxDisable CONFIG_IP
-  BusyBoxDisable CONFIG_LOSETUP
-  BusyBoxDisable CONFIG_MKFS_EXT2
-  BusyBoxDisable CONFIG_MKFS_VFAT
-  BusyBoxDisable CONFIG_MOUNT
-  BusyBoxDisable CONFIG_NANDDUMP
-  BusyBoxDisable CONFIG_NANDWRITE
-  BusyBoxDisable CONFIG_NBDCLIENT
-  BusyBoxDisable CONFIG_RAIDAUTORUN
-  BusyBoxDisable CONFIG_ROUTE
-  BusyBoxDisable CONFIG_SLATTACH
-  BusyBoxDisable CONFIG_TUNCTL
-  BusyBoxDisable CONFIG_UBIATTACH
-  BusyBoxDisable CONFIG_UBIDETACH
-  BusyBoxDisable CONFIG_UBIMKVOL
-  BusyBoxDisable CONFIG_UBIRMVOL
-  BusyBoxDisable CONFIG_UBIRSVOL
-  BusyBoxDisable CONFIG_UBIUPDATEVOL
-  BusyBoxDisable CONFIG_UDHCPC
-  BusyBoxDisable CONFIG_UDHCPD
-  BusyBoxDisable CONFIG_UMOUNT
-  BusyBoxDisable CONFIG_UPTIME
-  BusyBoxDisable CONFIG_WATCHDOG
+  cp "${START_DIR}/defconfig" .
 
   if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
-    BusyBoxDisable CONFIG_INIT
-    BusyBoxDisable CONFIG_LINEEDIT
-    BusyBoxDisable CONFIG_FEATURE_UTMP
-    BusyBoxDisable CONFIG_FEATURE_VI_USE_SIGNALS
+   echo "CONFIG_INIT=n" >> defconfig
+   echo "CONFIG_LINEEDIT=n" >> defconfig
+   echo "CONFIG_FEATURE_UTMP=n" >> defconfig
+   echo "CONFIG_FEATURE_VI_USE_SIGNALS=n" >> defconfig
   fi
-}
 
-BuildStep() {
-  export CROSS_COMPILE=${NACL_CROSS_PREFIX}-
-  export CPPFLAGS="${NACLPORTS_CPPFLAGS}"
-  export EXTRA_CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
-  export EXTRA_LDFLAGS="${NACLPORTS_LDFLAGS}"
-  EXTRA_LDFLAGS+=" -lppapi_simple -lnacl_io -lppapi"
-  DefaultBuildStep
+  echo "CONFIG_EXTRA_CFLAGS=\"${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}\"" \
+      >> defconfig
+  echo "CONFIG_EXTRA_LDFLAGS=\"${NACLPORTS_LDFLAGS}\"" >> defconfig
+  echo "CONFIG_EXTRA_LDLIBS=\"${NACLPORTS_LIBS}\"" >> defconfig
+  echo "CONFIG_CROSS_COMPILER_PREFIX=\"${NACL_CROSS_PREFIX}-\"" >> defconfig
+
+  SetupCrossEnvironment
+  LogExecute make -f ${SRC_DIR}/Makefile defconfig BUILD_LIBBUSYBOX=y \
+    KBUILD_SRC=${SRC_DIR} KBUILD_DEFCONFIG=defconfig
 }
 
 InstallStep() {
@@ -97,4 +49,16 @@ InstallStep() {
   LogExecute cp ${START_DIR}/icon_128.png ${ASSEMBLY_DIR}
   ChangeDir ${PUBLISH_DIR}
   CreateWebStoreZip busybox-${VERSION}.zip busybox
+}
+
+TestStep() {
+  if [[ ${TOOLCHAIN} = pnacl ]]; then
+    return
+  fi
+
+  # Simple test of "cat" command to ensure basic functionality
+  # TODO(sbc): run the full test suite
+  echo "Running ./busybox.sh cat busybox.sh > test.out"
+  $(./busybox.sh cat busybox.sh > test.out)
+  LogExecute diff -u busybox.sh test.out
 }
