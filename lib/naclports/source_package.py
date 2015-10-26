@@ -16,6 +16,7 @@ from naclports import binary_package
 from naclports import configuration
 from naclports import package
 from naclports import package_index
+from naclports import installed_package
 from naclports import util
 from naclports import paths
 from naclports import bsd_pkg
@@ -289,7 +290,7 @@ class SourcePackage(package.Package):
     binary_package.BinaryPackage(package_file).Install(force)
 
   def GetInstalledPackage(self):
-    return package.CreateInstalledPackage(self.NAME, self.config)
+    return installed_package.CreateInstalledPackage(self.NAME, self.config)
 
   def CreatePkgFile(self):
     """Create and pkg file for use with the FreeBSD pkg tool.

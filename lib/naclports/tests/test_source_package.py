@@ -97,6 +97,12 @@ class TestSourcePackage(common.NaclportsTest):
     self.assertEqual(len(pkgs), 1)
     self.assertEqual(pkgs[0].NAME, 'foo')
 
+  def testGetInstalledPackage(self):
+    root = self.CreateTestPackage('foo')
+    pkg = source_package.SourcePackage(root)
+    with self.assertRaisesRegexp(error.Error, 'package not installed: foo'):
+      pkg.GetInstalledPackage()
+
   def testGetBuildLocation(self):
     root = self.CreateTestPackage('foo')
     pkg = source_package.SourcePackage(root)
