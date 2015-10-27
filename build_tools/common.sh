@@ -339,6 +339,13 @@ PatchSpecsFile() {
     return
   fi
 
+  # For the library path we always explicitly add to the link flags
+  # otherwise 'libtool' won't find the libraries correctly.  This
+  # is because libtool uses 'gcc -print-search-dirs' which does
+  # not honor the external specs file.
+  NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR}"
+  NACLPORTS_LDFLAGS+=" -Wl,-rpath-link=${NACLPORTS_LIBDIR}"
+
   # SPECS_FILE is where nacl-gcc 'specs' file will be installed
   local SPECS_DIR=
   if [ "${NACL_ARCH}" = "arm" ]; then
@@ -406,12 +413,6 @@ PatchSpecsFile() {
     sed -i.bak "s/%{shared:-shared/%{shared:%e${ERROR_MSG}/" "${SPECS_FILE}"
   fi
 
-  # For the library path we always explicitly add to the link flags
-  # otherwise 'libtool' won't find the libraries correctly.  This
-  # is because libtool uses 'gcc -print-search-dirs' which does
-  # not honor the external specs file.
-  NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR}"
-  NACLPORTS_LDFLAGS+=" -Wl,-rpath-link=${NACLPORTS_LIBDIR}"
 }
 
 

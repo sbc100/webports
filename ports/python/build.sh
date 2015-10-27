@@ -82,7 +82,6 @@ PublishStep() {
   local assembly_dir=${PUBLISH_DIR}
   MakeDir ${assembly_dir}
 
-
   ChangeDir ${assembly_dir}
   if [[ $TOOLCHAIN == pnacl ]]; then
     local tar_file=pydata.tar
@@ -100,6 +99,12 @@ PublishStep() {
   fi
 
   LogExecute tar cf ${tar_file} -C ${INSTALL_DIR}${PREFIX} lib/python2.7
+  if [[ $NACL_SHARED == 1 ]]; then
+    # Extra shared libraries depedencies requires by python loadable modules
+    LogExecute tar rf ${tar_file} -h -C ${NACL_PREFIX} lib/libz.so.1 \
+      lib/libreadline.so lib/libncurses.so.5 lib/libbz2.so.1.0 \
+      lib/libssl.so.1.0.0 lib/libcrypto.so.1.0.0
+  fi
   LogExecute shasum ${tar_file} > ${tar_file}.hash
 
   LogExecute python ${TOOLS_DIR}/create_term.py python.nmf
