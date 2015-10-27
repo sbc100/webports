@@ -667,7 +667,7 @@ class SourcePackage(package.Package):
 
     # Set the origing to the original URL so it is possible to push directly
     # from the build tree.
-    RunGitCmd(dest, ['remote', 'set-url', 'origin', '${GIT_URL}'])
+    RunGitCmd(dest, ['remote', 'set-url', 'origin', self.URL.split('@')[0]])
 
     self.RemoveStamps()
     WriteStamp(stamp_file, stamp_content)

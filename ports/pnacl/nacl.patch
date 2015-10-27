@@ -1,0 +1,35 @@
+diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchain_build_pnacl.py
+--- a/toolchain_build/toolchain_build_pnacl.py
++++ b/toolchain_build/toolchain_build_pnacl.py
+@@ -532,10 +532,12 @@ def HostTools(host, options):
+   #            too many arguments for format.
+   binutils_do_werror = not TripleIsWindows(host)
+   extra_gold_deps = []
++  install_step = 'install-strip'
+   if host == 'le32-nacl':
+     # TODO(bradnelson): Fix warnings so this can go away.
+     binutils_do_werror = False
+     extra_gold_deps = [H('llvm')]
++    install_step = 'install'
+ 
+   # Binutils still has some warnings when building with clang
+   if not options.gcc:
+@@ -574,7 +576,7 @@ def HostTools(host, options):
+                   '--without-gas'
+                   ]),
+               command.Command(MakeCommand(host)),
+-              command.Command(MAKE_DESTDIR_CMD + ['install-strip'])] +
++              command.Command(MAKE_DESTDIR_CMD + [install_step])] +
+               [command.RemoveDirectory(os.path.join('%(output)s', dir))
+                for dir in ('lib', 'lib32')] +
+               # Since it has dual use, just create links for both sets of names
+@@ -624,7 +626,8 @@ def HostTools(host, options):
+   # TODO(jfb) Windows currently uses MinGW's GCC 4.8.1 which generates warnings
+   #           on upstream LLVM code. Turn on -Werror once these are fixed.
+   #           The same applies for the default GCC on current Ubuntu.
+-  llvm_do_werror = not (TripleIsWindows(host) or options.gcc)
++  llvm_do_werror = not (TripleIsWindows(host) or options.gcc or
++                        host == 'le32-nacl')
+ 
+   llvm_cmake = {
+       H('llvm'): {
