@@ -28,7 +28,8 @@ dependencies that that the package has.
 Links
 -----
 
-Project home: https://code.google.com/p/naclports/
+Git: https://chromium.googlesource.com/external/naclports.git
+Bugs: https://bugs.chromium.org/p/naclports/issues/list
 Continuous builder: http://build.chromium.org/p/client.nacl.ports/
 Continuous build artifacts: http://gsdview.appspot.com/naclports/builds/
 
@@ -77,6 +78,30 @@ On older Debian/Ubuntu systems these packages were known as:
 
 - lib32z1-dev
 - libssl1.0.0:i386
+
+
+How to Checkout
+---------------
+
+Although the code is stored in git naclports uses ``gclient`` to manage
+the checkout of dependencies.  You will need to install ``depot_tools``
+in order to gclient.
+
+Use the following steps to correctly checkout naclports:
+
+1. Create a directory::
+
+   $ mkdir naclports
+   $ cd naclports
+
+2. Create a .gclient Configuration::
+
+   $ gclient config --name=src \
+        https://chromium.googlesource.com/external/naclports.git
+
+3. Sync to the dependencies::
+
+   $ gclient sync
 
 
 Building
