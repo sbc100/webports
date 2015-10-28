@@ -432,6 +432,7 @@ builder 4 (total: 11864)
   libogg
   libvorbis
   libtheora
+  libvpx
   ffmpeg
   libtomcrypt
   jpeg8d

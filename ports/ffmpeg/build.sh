@@ -41,6 +41,7 @@ ConfigureStep() {
     --enable-libmp3lame \
     --enable-libvorbis \
     --enable-libtheora \
+    --enable-libvpx \
     --disable-ffplay \
     --disable-ffserver \
     --disable-demuxer=rtsp \

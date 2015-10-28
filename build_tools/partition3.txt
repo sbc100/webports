@@ -139,6 +139,7 @@ builder 1 (total: 17316)
   libogg
   libvorbis
   libtheora
+  libvpx
   ffmpeg
   boost
   gmp

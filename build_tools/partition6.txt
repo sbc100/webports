@@ -133,6 +133,7 @@ builder 2 (total: 9714)
   libogg
   libvorbis
   libtheora
+  libvpx
   ffmpeg
   jpeg8d
   libyuv
