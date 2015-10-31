@@ -9,14 +9,18 @@ OS_JOBS=1
 HOST_BUILD_DIR=${WORK_DIR}/build_host
 HOST_INSTALL_DIR=${WORK_DIR}/install_host
 
-EXECUTABLES="gforth-ditc${NACL_EXEEXT}"
-MAKE_TARGETS="${EXECUTABLES}"
+EXECUTABLE="gforth-ditc${NACL_EXEEXT}"
+EXECUTABLES="${EXECUTABLE}"
+MAKE_TARGETS="${EXECUTABLE}"
 
 BuildHostGforth() {
+  if [[ -f "${HOST_INSTALL_DIR}/bin/gforth-ditc" ]]; then
+    return
+  fi
+  Banner "Building ${PACKAGE_NAME} for host"
   MakeDir ${HOST_BUILD_DIR}
   ChangeDir ${HOST_BUILD_DIR}
-  CC="gcc -m32" \
-      LogExecute ${SRC_DIR}/configure --prefix=${HOST_INSTALL_DIR}
+  CC="gcc -m32" LogExecute ${SRC_DIR}/configure --prefix=${HOST_INSTALL_DIR}
   LogExecute make -j${OS_JOBS}
   LogExecute make install
 }
@@ -25,6 +29,7 @@ ConfigureStep() {
   ChangeDir ${SRC_DIR}
   ./autogen.sh
   BuildHostGforth
+  Banner "Building ${PACKAGE_NAME} for NaCl"
   export PATH="${HOST_INSTALL_DIR}/bin:${PATH}"
   export skipcode=no
   NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
@@ -36,18 +41,15 @@ ConfigureStep() {
   DefaultConfigureStep
 }
 
-BuildStep() {
-  rm -f gforth
-  DefaultBuildStep
-  cp ${MAKE_TARGETS} gforth
+InstallStep() {
+  return
 }
 
-InstallStep() {
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
 
-  cp ${BUILD_DIR}/gforth-ditc${NACL_EXEEXT} \
-    ${PUBLISH_DIR}/gforth_${NACL_ARCH}${NACL_EXEEXT}
+  LogExecute cp ${BUILD_DIR}/${EXECUTABLE} gforth_${NACL_ARCH}${NACL_EXEEXT}
 
   # TODO(bradnelson): Make this nicer.
   local TAR_DIR=${PUBLISH_DIR}/naclports-dummydir
