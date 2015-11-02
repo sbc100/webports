@@ -69,18 +69,13 @@ PublishStep() {
   popd
 
   # GDB App
-  local GDB_APP_DIR="${PUBLISH_DIR}/gdb_app"
-  MakeDir ${GDB_APP_DIR}/_platform_specific/${NACL_ARCH}
-  LogExecute cp gdb/gdb.nexe \
-      ${GDB_APP_DIR}/_platform_specific/${NACL_ARCH}/gdb${NACL_EXEEXT}
+  PublishMultiArch gdb/gdb${NACL_EXEEXT} gdb gdb_app
 
+  local GDB_APP_DIR="${PUBLISH_DIR}/gdb_app"
   pushd ${GDB_APP_DIR}
-  python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      _platform_specific/*/gdb*${NACL_EXEEXT} \
-      -s . \
-      -o gdb.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py gdb.nmf
   popd
+  InstallNaClTerm ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/background.js ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/ladybug_16.png ${GDB_APP_DIR}
   LogExecute cp ${START_DIR}/ladybug_48.png ${GDB_APP_DIR}

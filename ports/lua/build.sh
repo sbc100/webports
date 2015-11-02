@@ -72,18 +72,7 @@ PublishStep() {
   MakeDir ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
 
-  if [[ $TOOLCHAIN == pnacl ]]; then
-    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/lua${NACL_EXEEXT} \
-        lua${NACL_EXEEXT}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-        lua${NACL_EXEEXT} -s . -o lua.nmf
-  else
-    MakeDir _platform_specific/${NACL_ARCH}
-    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/lua${NACL_EXEEXT} \
-        _platform_specific/${NACL_ARCH}/lua${NACL_EXEEXT}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py --no-arch-prefix \
-        _platform_specific/*/lua${NACL_EXEEXT} -s . -o lua.nmf
-  fi
+  PublishMultiArch src/lua${NACL_EXEEXT} lua
 
   LogExecute python ${TOOLS_DIR}/create_term.py lua
 

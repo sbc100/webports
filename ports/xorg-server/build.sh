@@ -65,12 +65,8 @@ InstallStep() {
   MakeDir ${ASSEMBLY_DIR}
 
   ChangeDir ${ASSEMBLY_DIR}
-  LogExecute cp ${BUILD_DIR}/hw/kdrive/sdl/Xsdl${NACL_EXEEXT} \
-                ${ASSEMBLY_DIR}/Xsdl_${NACL_ARCH}${NACL_EXEEXT}
-  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      ${ASSEMBLY_DIR}/Xsdl_*${NACL_EXEEXT} \
-      -s . \
-      -o Xsdl.nmf
+
+  PublishMultiArch hw/kdrive/sdl/Xsdl${NACL_EXEEXT} Xsdl xorg-server
 
   # Bash is already platform specific split, copy the whole thing.
   local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash_multiarch

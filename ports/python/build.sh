@@ -79,23 +79,14 @@ TestStep() {
 }
 
 PublishStep() {
-  local assembly_dir=${PUBLISH_DIR}
-  MakeDir ${assembly_dir}
+  MakeDir ${PUBLISH_DIR}
 
-  ChangeDir ${assembly_dir}
+  PublishMultiArch python${NACL_EXEEXT} python
+  ChangeDir ${PUBLISH_DIR}
   if [[ $TOOLCHAIN == pnacl ]]; then
     local tar_file=pydata.tar
-    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/python${NACL_EXEEXT} \
-        python${NACL_EXEEXT}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-        python${NACL_EXEEXT} -s . -o python.nmf
   else
     local tar_file=_platform_specific/${NACL_ARCH}/pydata.tar
-    MakeDir _platform_specific/${NACL_ARCH}
-    LogExecute cp ${INSTALL_DIR}${PREFIX}/bin/python${NACL_EXEEXT} \
-        _platform_specific/${NACL_ARCH}/python${NACL_EXEEXT}
-    LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py --no-arch-prefix \
-        _platform_specific/*/python${NACL_EXEEXT} -s . -o python.nmf
   fi
 
   LogExecute tar cf ${tar_file} -C ${INSTALL_DIR}${PREFIX} lib/python2.7
@@ -109,14 +100,14 @@ PublishStep() {
 
   LogExecute python ${TOOLS_DIR}/create_term.py python.nmf
 
-  GenerateManifest ${START_DIR}/manifest.json ${assembly_dir}
-  InstallNaClTerm ${assembly_dir}
-  LogExecute cp ${START_DIR}/background.js ${assembly_dir}
-  LogExecute cp ${START_DIR}/python.js ${assembly_dir}
-  LogExecute cp ${START_DIR}/index.html ${assembly_dir}
-  LogExecute cp ${START_DIR}/icon_16.png ${assembly_dir}
-  LogExecute cp ${START_DIR}/icon_48.png ${assembly_dir}
-  LogExecute cp ${START_DIR}/icon_128.png ${assembly_dir}
+  GenerateManifest ${START_DIR}/manifest.json ${PUBLISH_DIR}
+  InstallNaClTerm ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/background.js ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/python.js ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/index.html ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/icon_16.png ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/icon_48.png ${PUBLISH_DIR}
+  LogExecute cp ${START_DIR}/icon_128.png ${PUBLISH_DIR}
   ChangeDir ${PUBLISH_DIR}
-  CreateWebStoreZip python.zip .
+  CreateWebStoreZip python-${VERSION}.zip .
 }
