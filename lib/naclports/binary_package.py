@@ -117,6 +117,7 @@ class BinaryPackage(package.Package):
   extra_keys = package.EXTRA_KEYS
 
   def __init__(self, filename):
+    util.Trace('BinaryPackage: %s' % filename)
     super(BinaryPackage, self).__init__()
     self.filename = filename
     self.info = filename
@@ -137,9 +138,8 @@ class BinaryPackage(package.Package):
       raise error.Error('invalid file extension: %s' % extension)
 
     try:
-      with tarfile.open(self.filename) as tar:
-        if './pkg_info' not in tar.getnames():
-          raise error.PkgFormatError('package does not contain pkg_info file')
+      with tarfile.open(self.filename):
+        pass
     except tarfile.TarError as e:
       raise error.PkgFormatError(e)
 
@@ -155,10 +155,14 @@ class BinaryPackage(package.Package):
   def GetPkgInfo(self):
     """Extract the contents of the pkg_info file from the binary package."""
     with tarfile.open(self.filename) as tar:
-      return tar.extractfile('./pkg_info').read()
+      for member in tar:
+        if member.name != 'pkg_info':
+          raise error.PkgFormatError('pkg_info not first member in archive')
+        return tar.extractfile(member).read()
 
   def Install(self, force):
     """Install binary package into toolchain directory."""
+    util.Trace('Installing %s' % self.filename)
     with util.InstallLock(self.config):
       self._Install(force)
 

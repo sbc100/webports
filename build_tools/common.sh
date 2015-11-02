@@ -828,7 +828,7 @@ GenerateManifest() {
   shift
   local TARGET_DIR=$1
   shift
-  local TEMPLATE_EXPAND="${START_DIR}/../../build_tools/template_expand.py"
+  local TEMPLATE_EXPAND="${SCRIPT_DIR}/template_expand.py"
 
   # TODO(sbc): deal with versions greater than 16bit.
   if (( REVISION >= 65536 )); then
@@ -1458,10 +1458,14 @@ PackageStep() {
   else
     local args=""
   fi
+  args+=" pkg_info"
+  if [[ -d ${INSTALL_DIR}/payload ]]; then
+    args+=" payload"
+  fi
   # Create packge in temporary location and move into place once
   # done.  This prevents partially created packages from being
   # left lying around if this process is interrupted.
-  LogExecute tar cjf "${PACKAGE_FILE}.tmp" -C "${INSTALL_DIR}" ${args} .
+  LogExecute tar cjf "${PACKAGE_FILE}.tmp" -C "${INSTALL_DIR}" ${args}
   LogExecute mv -f "${PACKAGE_FILE}.tmp" "${PACKAGE_FILE}"
 }
 
