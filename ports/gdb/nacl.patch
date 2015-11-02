@@ -32,20 +32,6 @@ diff --git a/config/dfp.m4 b/config/dfp.m4
        enable_decimal_float=yes
        ;;
      *)
-diff --git a/gas/as.c b/gas/as.c
---- a/gas/as.c
-+++ b/gas/as.c
-@@ -1134,6 +1134,10 @@ create_obj_attrs_section (void)
- #endif
- 
- 
-+#ifdef __native_client__
-+int nacl_main(int argc, char ** argv);
-+#endif
-+
- int
- main (int argc, char ** argv)
- {
 diff --git a/gdb/charset.c b/gdb/charset.c
 --- a/gdb/charset.c
 +++ b/gdb/charset.c

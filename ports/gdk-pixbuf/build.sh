@@ -3,8 +3,7 @@
 # found in the LICENSE file.
 
 ConfigureStep() {
-  NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-  NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+  EnableCliMain
   EXTRA_CONFIGURE_ARGS+=" --with-x11"
 
   export gio_can_sniff=no

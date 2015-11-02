@@ -5,8 +5,8 @@
 BUILD_DIR=${SRC_DIR}
 EXECUTABLES="bzip2"
 
-NACLPORTS_CFLAGS+=" -Dmain=nacl_main -fPIC"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+EnableCliMain
+NACLPORTS_CFLAGS+=" -fPIC"
 
 ConfigureStep() {
   return

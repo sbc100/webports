@@ -17,9 +17,7 @@ done
 
 TRANSLATE_PEXES=no
 
-NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-
+EnableCliMain
 EnableGlibcCompat
 
 ConfigureStep() {

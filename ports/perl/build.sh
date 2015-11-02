@@ -8,17 +8,15 @@ export BUILD_LD=cc
 # use -Wno-return-type to suppress return-type errors encountered
 # with pnacl, arm's clang-newlib (microperl)
 NACLPORTS_CFLAGS_MICRO=$NACLPORTS_CFLAGS
-NACLPORTS_CFLAGS_MICRO+=" -Dmain=nacl_main -Wno-return-type "
+NACLPORTS_CFLAGS_MICRO+=" -Wno-return-type "
 NACLPORTS_CFLAGS+=" -I${NACL_SDK_ROOT}/include -I${NACLPORTS_INCLUDE} \
   -Wno-return-type"
 BUILD_DIR=${SRC_DIR}
 # keeping microperl for now
 EXECUTABLES="perl microperl"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 # we need a working perl on host to build things for target
 HOST_BUILD=${WORK_DIR}/build_host
 ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
-NACLPORTS_LIBS=" ${NACL_CLI_MAIN_LIB}"
 # PNaCl and newlib dont have dynamic loading, so
 # using Perl's internal stub file dl_none.xs
 # specifically for systems which do not support it
@@ -60,6 +58,7 @@ if [ "${NACL_ARCH}" = "pnacl" ] ; then
   NONXS_EXT="Errno"
 fi
 
+EnableCliMain
 EnableGlibcCompat
 
 # BuildHostMiniperl builds miniperl for host, which is needed for
@@ -135,7 +134,7 @@ BuildStep() {
   # microperl build from Makefile.micro
   LogExecute make -j${OS_JOBS} -f Makefile.micro CC="${NACLCC}" \
     CCFLAGS=" -c -DHAS_DUP2 -DPERL_MICRO ${NACLPORTS_CFLAGS_MICRO}" \
-    LDFLAGS="${NACLPORTS_LDFLAGS}"
+    LDFLAGS="${NACLPORTS_LDFLAGS}" LIBS="${NACLPORTS_LIBS}"
   # now make perl
   LogExecute cp -f microperl ${HOST_BUILD}
   LogExecute make clean

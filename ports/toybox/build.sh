@@ -8,15 +8,12 @@ EXECUTABLES="toybox"
 BUILD_DIR=${SRC_DIR}
 
 NACLPORTS_CPPFLAGS+=" -DBYTE_ORDER=LITTLE_ENDIAN"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
 
 export HOSTCC=cc
 
+EnableCliMain
 EnableGlibcCompat
-
-NACLPORTS_LDFLAGS+=" -l${NACL_CXX_LIB}"
 
 ConfigureStep() {
   LogExecute cp ${START_DIR}/toybox.config ${SRC_DIR}/.config
@@ -34,6 +31,7 @@ BuildStep() {
   export CROSS_COMPILE="${NACL_CROSS_PREFIX}-"
   export LDFLAGS="${NACLPORTS_LDFLAGS}"
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
+  export LIBS="${NACLPORTS_LIBS}"
   export CC
   LogExecute make clean
   DefaultBuildStep

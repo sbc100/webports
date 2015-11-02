@@ -4,8 +4,6 @@
 
 #include "gtest/gtest.h"
 
-#include "nacl_main.h"
-
 // These unittests should be run in the sel_ldr.  In this mode
 // nacl_io should not be initialized since we want direct access
 // to the real filesystem.  Verify this by checking the value
@@ -16,7 +14,13 @@ TEST(NaClSpawn, test_nacl_io_not_initialized) {
   ASSERT_NE((char*)NULL, strstr(cwd, "out/build/nacl-spawn"));
 }
 
-int nacl_main(int argc, char** argv) {
+extern bool _cli_main_init;
+
+TEST(NaClSpawn, test_cli_main_called) {
+  ASSERT_EQ(true, _cli_main_init);
+}
+
+int main(int argc, char** argv) {
   setenv("TERM", "xterm-256color", 0);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

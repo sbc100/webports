@@ -9,8 +9,7 @@ if [ "${NACL_ARCH}" = "arm" ]; then
   NACLPORTS_CPPFLAGS+=" -mfpu=vfp"
 fi
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
+EnableCliMain
 
 EXECUTABLES="test/cairo-test-suite${NACL_EXEEXT}"
 

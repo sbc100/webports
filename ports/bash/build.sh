@@ -3,12 +3,12 @@
 # found in the LICENSE file.
 
 EnableGlibcCompat
+EnableCliMain
 
 EXTRA_CONFIGURE_ARGS="--with-curses"
 EXTRA_CONFIGURE_ARGS+=" --with-installed-readline --enable-readline"
 NACLPORTS_CPPFLAGS+=" -DHAVE_GETHOSTNAME -DNO_MAIN_ENV_ARG"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -Dpipe=nacl_spawn_pipe"
-NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
 EXECUTABLES="bash${NACL_EXEEXT}"
 

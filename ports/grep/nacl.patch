@@ -154,15 +154,3 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  install-binSCRIPTS: $(bin_SCRIPTS)
  	@$(NORMAL_INSTALL)
  	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
-diff --git a/src/grep.c b/src/grep.c
---- a/src/grep.c
-+++ b/src/grep.c
-@@ -2107,7 +2107,7 @@ fgrep_to_grep_pattern (size_t len, char const *keys,
- }
- 
- int
--main (int argc, char **argv)
-+nacl_main (int argc, char **argv)
- {
-   char *keys;
-   size_t keycc, oldcc, keyalloc;

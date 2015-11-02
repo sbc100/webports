@@ -6,8 +6,6 @@ include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = kernel
 LIBS = freetype bz2 ssl crypto z png readline ncurses
-NACL_LDFLAGS += -lpython2.7 $(NACL_CLI_MAIN_LIB_CPP)
-PNACL_LDFLAGS += -lpython2.7 $(NACL_CLI_MAIN_LIB_CPP)
 ifeq ($(TOOLCHAIN),glibc)
 LIBS += util dl
 NACL_LDFLAGS += -Wl,-export-dynamic

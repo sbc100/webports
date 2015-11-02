@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-NACLPORTS_LIBS+=" -lncurses ${NACL_CLI_MAIN_LIB} -lm"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-
+EnableCliMain
 EnableGlibcCompat
+
+NACLPORTS_LIBS+=" -lncurses -lm"
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   # Since the final link is done with -lnacl_io and not -lglibc-compat

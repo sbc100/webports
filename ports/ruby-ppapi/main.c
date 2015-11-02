@@ -27,7 +27,7 @@
 
 #define DATA_ARCHIVE "rbdata-" NACL_ARCH ".tar"
 
-int nacl_main(int argc, char** argv) {
+int main(int argc, char** argv) {
   if (nacl_startup_untar(argv[0], DATA_ARCHIVE, "/"))
     return -1;
 

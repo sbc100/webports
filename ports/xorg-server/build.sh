@@ -8,6 +8,7 @@ NACLPORTS_CPPFLAGS+=" -DFASYNC=O_NONBLOCK -DFNDELAY=O_NONBLOCK"
 
 EXECUTABLES=hw/kdrive/sdl/Xsdl${NACL_EXEEXT}
 
+EnableCliMain
 EnableGlibcCompat
 
 EXTRA_CONFIGURE_ARGS+=" --disable-glx"
@@ -30,13 +31,9 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
 fi
 
 NACLPORTS_CPPFLAGS+=" -Dmain=SDL_main"
-export LIBS="\
-${NACL_CLI_MAIN_LIB} \
--Wl,--undefined=SDL_main \
--Wl,--undefined=nacl_main \
--Wl,--undefined=nacl_startup_untar \
--lSDLmain -lSDL -lRegal -lglslopt -lppapi_gles2 -lm \
--l${NACL_CXX_LIB}"
+NACLPORTS_LDFLAGS+=" -Wl,--undefined=nacl_startup_untar"
+NACLPORTS_LDFLAGS+=" -Wl,--undefined=SDL_main"
+NACLPORTS_LIBS+=" -lSDLmain -lSDL -lRegal -lglslopt -lppapi_gles2 -lm"
 
 PatchStep() {
   DefaultPatchStep

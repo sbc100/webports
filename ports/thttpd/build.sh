@@ -4,6 +4,8 @@
 
 BUILD_DIR=${SRC_DIR}
 
+EnableCliMain
+
 ConfigureStep() {
   ChangeDir ${SRC_DIR}
   FILES="
@@ -24,6 +26,7 @@ BuildStep() {
   export NACLPORTS_CPPFLAGS
   export NACLPORTS_CFLAGS
   export NACLPORTS_LDFLAGS
+  export NACLPORTS_LIBS
   LogExecute make -j${OS_JOBS} thttpd
 }
 

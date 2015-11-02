@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <AL/alut.h>
 
-#include <ppapi_simple/ps_main.h>
 #include <ppapi/c/ppb.h>
+#include <ppapi_simple/ps.h>
 
 /*
   This is the 'Hello World' program from the ALUT
@@ -14,7 +14,7 @@
 
 void alSetPpapiInfo(PP_Instance instance, PPB_GetInterface get_interface);
 
-int nacl_main(int argc, char** argv) {
+int main(int argc, char** argv) {
   ALuint helloBuffer, helloSource;
 
   /*
@@ -32,5 +32,3 @@ int nacl_main(int argc, char** argv) {
   alutExit();
   return EXIT_SUCCESS;
 }
-
-PPAPI_SIMPLE_REGISTER_MAIN(nacl_main)

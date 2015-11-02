@@ -5,9 +5,11 @@
 EXECUTABLES=civetweb
 BUILD_DIR=${SRC_DIR}
 
+EnableCliMain
+
 BuildStep() {
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
-  export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACL_CLI_MAIN_LIB}"
+  export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
 
   CFLAGS+=" -DNO_SSL -DNO_CGI"
   if [ "${NACL_LIBC}" = "glibc" ]; then

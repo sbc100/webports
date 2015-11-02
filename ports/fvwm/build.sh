@@ -9,8 +9,6 @@ EXTRA_CONFIGURE_ARGS+=" --with-bidi=no"
 EXTRA_CONFIGURE_ARGS+=" --with-gnome=no"
 EXTRA_CONFIGURE_ARGS+=" --disable-shm"
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-
 export ac_cv_func_setpgrp_void=no
 
 EXECUTABLES="\
@@ -46,8 +44,9 @@ EXECUTABLES="\
   bin/fvwm-root${NACL_EXEEXT}"
 
 NACLPORTS_LIBS+="\
-  -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau -lm ${NACL_CLI_MAIN_LIB}"
+  -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau -lm"
 
+EnableCliMain
 EnableGlibcCompat
 
 if [ "${TOOLCHAIN}" = "pnacl" ]; then

@@ -119,12 +119,11 @@ fi
 # libcli_main.a has a circular dependency which makes static link fail
 # (cli_main => nacl_io => ppapi_cpp => cli_main). To break this loop,
 # you should use this instead of -lcli_main.
-export NACL_CLI_MAIN_LIB="-Xlinker -unacl_main -Xlinker -uPSUserMainGet \
--lcli_main -lnacl_spawn -ltar -lppapi_simple -lnacl_io \
--lppapi -l${NACL_CXX_LIB}"
-export NACL_CLI_MAIN_LIB_CPP="-Xlinker -unacl_main -Xlinker -uPSUserMainGet \
--lcli_main -lnacl_spawn -ltar -lppapi_simple_cpp -lnacl_io \
--lppapi_cpp -lppapi -l${NACL_CXX_LIB}"
+NACL_CLI_MAIN_LDFLAGS="-Xlinker -uPSUserMainGet"
+NACL_CLI_MAIN_LIB="-lcli_main -lnacl_spawn -ltar -lppapi_simple \
+-lnacl_io -lppapi -l${NACL_CXX_LIB}"
+NACL_CLI_MAIN_LIB_CPP="-lcli_main -lnacl_spawn -ltar -lppapi_simple_cpp \
+-lnacl_io  -lppapi_cpp -lppapi -l${NACL_CXX_LIB}"
 
 # Python variables
 NACL_PYSETUP_ARGS=""
@@ -507,6 +506,16 @@ SetOptFlags() {
   fi
 }
 
+EnableCliMain() {
+  NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LDFLAGS}"
+  NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
+}
+
+EnableCliMainCxx() {
+  NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LDFLAGS}"
+  NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB_CPP}"
+}
+
 EnableGlibcCompat() {
   if [ "${NACL_LIBC}" = "newlib" ]; then
     NACLPORTS_CPPFLAGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
@@ -772,6 +781,7 @@ SetupSDKBuildSystem() {
   export MAKEFLAGS
 
   BUILD_DIR=${START_DIR}
+  echo "LDFLAGS=${LDFLAGS}"
 }
 
 SetupCrossPaths() {
@@ -803,7 +813,7 @@ SetupCrossEnvironment() {
   export CFLAGS=${NACLPORTS_CFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CXXFLAGS=${NACLPORTS_CXXFLAGS}
-  export LDFLAGS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
+  export LDFLAGS=${NACLPORTS_LDFLAGS}
   export ARFLAGS=${NACL_ARFLAGS}
   export AR_FLAGS=${NACL_ARFLAGS}
   export LIBS=${LIBS:-${NACLPORTS_LIBS}}

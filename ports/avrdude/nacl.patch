@@ -6,7 +6,7 @@ diff --git a/Makefile.in b/Makefile.in
  avrdude$(EXEEXT): $(avrdude_OBJECTS) $(avrdude_DEPENDENCIES) $(EXTRA_avrdude_DEPENDENCIES) 
  	@rm -f avrdude$(EXEEXT)
 -	$(AM_V_CCLD)$(avrdude_LINK) $(avrdude_OBJECTS) $(avrdude_LDADD) $(LIBS)
-+	$(AM_V_CCLD)$(avrdude_LINK) $(avrdude_OBJECTS) $(EXTRA_LIBS) $(avrdude_LDADD) $(LIBS)
++	$(AM_V_CCLD)$(avrdude_LINK) $(avrdude_OBJECTS) $(LIBS) $(avrdude_LDADD)
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
@@ -258,18 +258,3 @@ diff --git a/flip2.c b/flip2.c
  
    return cmd_result;
  }
-diff --git a/main.c b/main.c
---- a/main.c
-+++ b/main.c
-@@ -297,7 +297,11 @@ static void cleanup_main(void)
- /*
-  * main routine
-  */
-+#if defined(__native_client__)
-+int nacl_main(int argc, char **argv)
-+#else
- int main(int argc, char * argv [])
-+#endif
- {
-   int              rc;          /* general return code checking */
-   int              exitrc;      /* exit code for main() */

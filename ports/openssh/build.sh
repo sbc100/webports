@@ -16,7 +16,6 @@ EXTRA_CONFIGURE_ARGS="--with-privsep-path=${PREFIX}/var/empty"
 export ac_cv_func_truncate=yes
 export ac_cv_func_sigaction=yes
 
-export SSHLIBS="${NACL_CLI_MAIN_LIB}"
 if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_LIBS+=" -lcrypto"
   export LD="${NACLCXX}"
@@ -28,11 +27,10 @@ if [ "${NACL_LIBC}" = "glibc" ]; then
   EXTRA_CONFIGURE_ARGS+=" --disable-strip"
 fi
 
+EnableCliMain
 EnableGlibcCompat
 
 PublishStep() {
-  DefaultInstallStep
-
   MakeDir ${PUBLISH_DIR}
   local ASSEMBLY_DIR="${PUBLISH_DIR}/openssh"
   MakeDir ${ASSEMBLY_DIR}

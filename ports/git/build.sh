@@ -5,7 +5,6 @@
 EXECUTABLES="git git-remote-http git-remote-https"
 
 BUILD_DIR=${SRC_DIR}
-export EXTLIBS="${NACL_CLI_MAIN_LIB}"
 
 if [ "${NACL_SHARED}" != "1" ]; then
   # These are needed so that the configure can detect libcurl when statically
@@ -22,11 +21,11 @@ fi
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   export NO_RT_LIBRARY=1
-  EXTLIBS+=" -lglibc-compat"
 fi
 export CROSS_COMPILE=1
 export NEEDS_CRYPTO_WITH_SSL=YesPlease
 
+EnableCliMain
 EnableGlibcCompat
 
 ConfigureStep() {
@@ -36,7 +35,7 @@ ConfigureStep() {
   if [ "${NACL_LIBC}" = "glibc" ]; then
     # Because libcrypto.a needs dlsym we need to add this explicitly.
     # This is not normally needed when libcyrpto is a shared library.
-    NACLPORTS_LDFLAGS+=" -ldl"
+    NACLPORTS_LIBS+=" -ldl"
   fi
 
   DefaultConfigureStep
@@ -45,6 +44,7 @@ ConfigureStep() {
 BuildStep() {
   SetupCrossEnvironment
   export CCLD=${CXX}
+  export EXTLIBS=${LIBS}
   # Git's build doesn't support building outside the source tree.
   # Do a clean to make rebuild after failure predictable.
   LogExecute make clean
@@ -54,6 +54,7 @@ BuildStep() {
 InstallStep() {
   SetupCrossEnvironment
   export CCLD=${CXX}
+  export EXTLIBS=${LIBS}
   DefaultInstallStep
   # Remove some of the git symlinks to save some space (since symlinks are
   # currnely only supported via file copying).

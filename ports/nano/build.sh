@@ -6,9 +6,7 @@ NACLPORTS_LIBS+=" -lncurses"
 EXECUTABLES=src/nano${NACL_EXEEXT}
 
 EnableGlibcCompat
-
-NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+EnableCliMain
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   EXTRA_CONFIGURE_ARGS="--enable-tiny"

@@ -2,8 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+NACLPORTS_LIBS="-lSM -lICE -lxcb -lXau"
 
-export LIBS="-lSM -lICE -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
-
+EnableCliMain
 EnableGlibcCompat

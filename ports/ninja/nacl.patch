@@ -63,7 +63,16 @@ diff --git a/configure.py b/configure.py
  n.variable('cxx', CXX)
  if platform.is_msvc():
      n.variable('ar', 'link')
-@@ -354,9 +362,12 @@ def shell_escape(str):
+@@ -326,6 +334,8 @@ if platform.is_mingw():
+     ldflags.append('-static')
+ elif platform.is_solaris():
+     cflags.remove('-fvisibility=hidden')
++elif platform.is_nacl():
++    cflags.remove('-fvisibility=hidden')
+ elif platform.is_msvc():
+     pass
+ else:
+@@ -354,9 +364,12 @@ def shell_escape(str):
  
  if 'CFLAGS' in configure_env:
      cflags.append(configure_env['CFLAGS'])
@@ -77,7 +86,7 @@ diff --git a/configure.py b/configure.py
  n.variable('ldflags', ' '.join(shell_escape(flag) for flag in ldflags))
  n.newline()
  
-@@ -403,10 +414,10 @@ objs = []
+@@ -403,10 +416,10 @@ objs = []
  if platform.supports_ninja_browse():
      n.comment('browse_py.h is used to inline browse.py.')
      n.rule('inline',
@@ -90,7 +99,7 @@ diff --git a/configure.py b/configure.py
              variables=[('varname', 'kBrowsePy')])
      n.newline()
  
-@@ -469,10 +480,11 @@ else:
+@@ -469,10 +482,11 @@ else:
      ninja_lib = n.build(built('libninja.a'), 'ar', objs)
  n.newline()
  
@@ -104,7 +113,7 @@ diff --git a/configure.py b/configure.py
  
  all_targets = []
  
-@@ -583,7 +595,7 @@ if not host.is_mingw():
+@@ -583,7 +597,7 @@ if not host.is_mingw():
                 options.with_python,
             generator=True)
      n.build('build.ninja', 'configure',
@@ -170,21 +179,6 @@ diff --git a/src/manifest_parser_perftest.cc b/src/manifest_parser_perftest.cc
  
    const int kNumRepetitions = 5;
    vector<int> times;
-diff --git a/src/ninja.cc b/src/ninja.cc
---- a/src/ninja.cc
-+++ b/src/ninja.cc
-@@ -42,6 +42,11 @@
- #include "util.h"
- #include "version.h"
- 
-+#if defined(__native_client__)
-+# include "nacl_main.h"
-+# define main nacl_main
-+#endif
-+
- #ifdef _MSC_VER
- // Defined in msvc_helper_main-win32.cc.
- int MSVCHelperMain(int argc, char** argv);
 diff --git a/src/ninja_test.cc b/src/ninja_test.cc
 --- a/src/ninja_test.cc
 +++ b/src/ninja_test.cc
@@ -196,22 +190,21 @@ diff --git a/src/ninja_test.cc b/src/ninja_test.cc
  
  #ifdef _WIN32
  #include "getopt.h"
-@@ -21,6 +22,14 @@
+@@ -21,6 +22,13 @@
  #include <getopt.h>
  #endif
  
 +#if defined(__native_client__)
++#include <nacl_io/nacl_io.h>
 +#include <sys/stat.h>
 +#include <sys/mount.h>
-+#include "nacl_main.h"
-+#include "nacl_io/nacl_io.h"
-+#define main nacl_main
++#include <unistd.h>
 +#endif
 +
  #include "test.h"
  #include "line_printer.h"
  
-@@ -123,6 +132,16 @@ bool testing::Test::Check(bool condition, const char* file, int line,
+@@ -123,6 +131,16 @@ bool testing::Test::Check(bool condition, const char* file, int line,
  }
  
  int main(int argc, char **argv) {
@@ -228,7 +221,7 @@ diff --git a/src/ninja_test.cc b/src/ninja_test.cc
    int tests_started = 0;
  
    const char* test_filter = "*";
-@@ -152,5 +171,8 @@ int main(int argc, char **argv) {
+@@ -152,5 +170,8 @@ int main(int argc, char **argv) {
    }
  
    printer.PrintOnNewLine(passed ? "passed\n" : "failed\n");

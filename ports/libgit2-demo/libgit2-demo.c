@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <git2.h>
 #include <git2/transport.h>
-#include <nacl_main.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -130,7 +129,7 @@ git_smart_subtransport_definition pepper_http_subtransport_definition = {
     1 /* use rpc */
 };
 
-int nacl_main(int argc, char** argv) {
+int main(int argc, char** argv) {
   srand(123);
   int rtn = git_threads_init();
   if (rtn) {

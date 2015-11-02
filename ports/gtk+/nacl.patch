@@ -54,15 +54,3 @@ diff --git a/perf/marshalers.c b/perf/marshalers.c
  
  /* VOID:ENUM,OBJECT,DOUBLE (./marshalers.list:2) */
  void
-diff --git a/tests/autotestkeywords.cc b/tests/autotestkeywords.cc
---- a/tests/autotestkeywords.cc
-+++ b/tests/autotestkeywords.cc
-@@ -36,4 +36,8 @@
- #undef GDK_ROOT_WINDOW
- #endif
- 
-+#ifdef __native_client__
-+extern "C" int nacl_main();
-+#endif
-+
- int main() { return 0; }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2014 Google Inc. All rights reserved.
+/* Copyright (c) 2014 The Native Client Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file. */
 
@@ -10,14 +10,14 @@
 #include <sys/mount.h>
 #include <errno.h>
 
-#include "ppapi/cpp/var.h"
-#include "ppapi/cpp/var_array.h"
-#include "ppapi/cpp/var_dictionary.h"
-#include "ppapi_simple/ps_interface.h"
+#include <ppapi/cpp/var.h>
+#include <ppapi/cpp/var_array.h>
+#include <ppapi/cpp/var_dictionary.h>
+#include <ppapi_simple/ps_interface.h>
 
-#include "nacl_io/nacl_io.h"
-#include "ppapi_simple/ps_main.h"
-#include "ppapi_simple/ps_instance.h"
+#include <nacl_io/nacl_io.h>
+#include <ppapi_simple/ps_instance.h>
+#include <ppapi_simple/ps_main.h>
 
 #ifdef __pnacl__
 #define DATA_FILE "pydata_pnacl.tar"
@@ -145,7 +145,7 @@ static PyMethodDef PPMessageMethods[] = {
   {NULL, NULL, 0, NULL}
 };
 
-int ipython_kernel_main(int argc, char **argv) {
+int main(int argc, char **argv) {
   printf("Setting up unix environment...\n");
   if (setup_unix_environment()) {
     printf("Error: %s\n", strerror(errno));
@@ -181,5 +181,3 @@ int ipython_kernel_main(int argc, char **argv) {
 
   return 0;
 }
-
-PPAPI_SIMPLE_REGISTER_MAIN(ipython_kernel_main)

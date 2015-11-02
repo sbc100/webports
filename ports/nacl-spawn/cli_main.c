@@ -12,11 +12,14 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "nacl_io/nacl_io.h"
 #include "nacl_main.h"
 #include "ppapi_simple/ps.h"
 #include "ppapi_simple/ps_main.h"
+
+bool _cli_main_init = false;
 
 #ifdef _NEWLIB_VERSION
 void setprogname(const char *progname) __attribute__((weak));
@@ -37,7 +40,10 @@ void nacl_setprogname(char* argv0) {
 #endif
 }
 
+int main(int argc, char* argv[]);
+
 int cli_main(int argc, char* argv[]) {
+  _cli_main_init = true;
   if (argv && argv[0])
     nacl_setprogname(argv[0]);
 
@@ -46,7 +52,8 @@ int cli_main(int argc, char* argv[]) {
     fprintf(stderr, "nacl_setup_env failed: %d\n", rtn);
     return 1;
   }
-  return nacl_main(argc, argv);
+
+  return main(argc, argv);
 }
 
 PPAPI_SIMPLE_REGISTER_MAIN(cli_main)

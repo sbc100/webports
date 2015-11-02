@@ -4,10 +4,6 @@
 
 NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 
-NACLPORTS_CPPFLAGS="-Dmain=nacl_main"
-
-export LIBS="${NACL_CLI_MAIN_LIB}"
-
 MAKE_TARGETS="binaries"
 INSTALL_TARGETS="install-binaries"
 
@@ -23,19 +19,23 @@ export tcl_cv_strtod_unbroken=ok
 # system influences things (needed for OSX).
 export tcl_cv_sys_version=Generic
 
-if [ "${NACL_SHARED}" = "1" ]; then
+if [[ ${NACL_SHARED} == 1 ]]; then
   NACLPORTS_CFLAGS+=" -fPIC"
+  # Without this some of the configure tests fail with:
+  # ld: conftest: hidden symbol `main' in /tmp/ccQC0Erg.o is referenced by DSO
+  export tcl_cv_cc_visibility_hidden=no
 fi
 
+EnableCliMain
 EnableGlibcCompat
 
-if [ "${NACL_LIBC}" = "newlib" ]; then
+if [[ ${NACL_LIBC} == newlib ]]; then
   NACLPORTS_CPPFLAGS+=" -DHAVE_STRLCPY=1"
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=no"
   EXTRA_CONFIGURE_ARGS+=" --enable-load=no"
   export tcl_cv_strtoul_unbroken=ok
 fi
 
-if [ "${NACL_LIBC}" = "bionic" ]; then
+if [[ ${NACL_LIBC} == bionic ]]; then
   NACLPORTS_CPPFLAGS+=" -DHAVE_STRLCPY=1"
 fi

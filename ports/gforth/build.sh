@@ -13,6 +13,8 @@ EXECUTABLE="gforth-ditc${NACL_EXEEXT}"
 EXECUTABLES="${EXECUTABLE}"
 MAKE_TARGETS="${EXECUTABLE}"
 
+EnableCliMain
+
 BuildHostGforth() {
   if [[ -f "${HOST_INSTALL_DIR}/bin/gforth-ditc" ]]; then
     return
@@ -32,9 +34,6 @@ ConfigureStep() {
   Banner "Building ${PACKAGE_NAME} for NaCl"
   export PATH="${HOST_INSTALL_DIR}/bin:${PATH}"
   export skipcode=no
-  NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-  export LIBS+=" -Wl,--undefined=nacl_main ${NACL_CLI_MAIN_LIB} \
-      -ltar -lppapi_simple -lnacl_io -lppapi -l${NACL_CXX_LIB}"
   EnableGlibcCompat
   ChangeDir ${BUILD_DIR}
   EXTRA_CONFIGURE_ARGS="--without-check"

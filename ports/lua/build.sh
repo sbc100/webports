@@ -5,8 +5,7 @@
 BUILD_DIR=${SRC_DIR}
 EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+EnableCliMain
 
 if [ "${NACL_LIBC}" = "glibc" ]; then
   PLAT=nacl-glibc
@@ -41,6 +40,7 @@ BuildStep() {
   set -x
   make MYLDFLAGS="${NACLPORTS_LDFLAGS}" MYCFLAGS="${NACLPORTS_CPPFLAGS}" \
       AR="${NACLAR} rcu" RANLIB="${NACLRANLIB}" CC="${NACLCC} -std=gnu99" \
+      MYLIBS="${NACLPORTS_LIBS}" \
       PLAT=${PLAT} EXEEXT=${NACL_EXEEXT} -j${OS_JOBS}
   set +x
 }

@@ -12,5 +12,4 @@ if [ ${NACL_LIBC} = "newlib" ]; then
   export ac_cv_func_random=no
 fi
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-export LIBS=" ${NACL_CLI_MAIN_LIB}"
+EnableCliMain

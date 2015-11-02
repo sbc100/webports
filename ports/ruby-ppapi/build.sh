@@ -4,4 +4,5 @@
 
 NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
+EnableCliMain
 SetupSDKBuildSystem

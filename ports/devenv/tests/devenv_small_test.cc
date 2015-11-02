@@ -454,7 +454,7 @@ TEST(Pipes, CloseExec) {
   EXPECT_EQ(42, WEXITSTATUS(status));
 }
 
-extern "C" int nacl_main(int argc, char **argv) {
+int main(int argc, char **argv) {
   if (argc == 4 && strcmp(argv[1], "return") == 0) {
     return return_child(argc, argv);
   } else if (argc == 4 && strcmp(argv[1], "_exit") == 0) {

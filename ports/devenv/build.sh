@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
+EnableCliMain
 NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
@@ -22,14 +22,14 @@ BuildStep() {
   LogExecute ${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} -O2 \
       ${START_DIR}/jseval.c \
       -o ${BUILD_DIR}/jseval/jseval_${NACL_ARCH}${NACL_EXEEXT} \
-      ${EXTRA_LIBS}
+      ${LIBS}
 
   # Build test module.
   MakeDir ${BUILD_DIR}/tests
   LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
       ${START_DIR}/tests/devenv_small_test.cc \
       -o ${BUILD_DIR}/tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
-      -lgtest ${EXTRA_LIBS}
+      -lgtest ${LIBS}
 }
 
 InstallStep() {

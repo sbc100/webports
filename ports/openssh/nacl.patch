@@ -129,7 +129,7 @@ diff --git a/ssh.c b/ssh.c
   */
  int
 -main(int ac, char **av)
-+nacl_main(int ac, char **av)
++main(int ac, char **av)
  {
 +	mkdir("/home", 0777);
 +	setenv("HOME", "/home", 1);

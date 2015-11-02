@@ -4,8 +4,6 @@
 
 include $(NACL_SDK_ROOT)/tools/common.mk
 
-NACL_LDFLAGS += ${NACL_CLI_MAIN_LIB}
-PNACL_LDFLAGS += ${NACL_CLI_MAIN_LIB}
 TARGET = libgit2-demo
 
 LIBS = git2 ssh2 ssl crypto z

@@ -3,11 +3,11 @@
 # found in the LICENSE file.
 
 EXECUTABLES="twm${NACL_EXEEXT}"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
 NACLPORTS_LIBS+="\
-  -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
+  -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau"
 
+EnableCliMain
 EnableGlibcCompat
 
 if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then

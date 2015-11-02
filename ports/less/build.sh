@@ -4,6 +4,8 @@
 
 NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
+EnableCliMain
+
 PatchStep() {
   LogExecute chmod 777 ${SRC_DIR}/configure
   DefaultPatchStep

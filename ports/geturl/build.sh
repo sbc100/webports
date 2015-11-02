@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EnableCliMainCxx
+
 ConfigureStep() {
   MakeDir ${BUILD_DIR}
   cp -rf ${START_DIR}/* ${BUILD_DIR}
@@ -12,6 +14,7 @@ BuildStep() {
   export CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}"
   export CXXFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CXXFLAGS}"
   export LDFLAGS="${NACLPORTS_LDFLAGS}"
+  export LIBS="${NACLPORTS_LIBS}"
   DefaultBuildStep
 }
 

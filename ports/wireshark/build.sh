@@ -8,8 +8,7 @@ else
   export CC_FOR_BUILD=gcc
 fi
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-export LIBS="${NACL_CLI_MAIN_LIB}"
+EnableCliMain
 
 EXECUTABLES="tshark${NACL_EXEEXT}"
 

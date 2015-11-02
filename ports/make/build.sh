@@ -4,8 +4,8 @@
 
 EXECUTABLES=make${NACL_EXEEXT}
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -Dpipe=nacl_spawn_pipe"
-export LIBS="${NACL_CLI_MAIN_LIB}"
+NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
+EnableCliMain
 
 if [ "${NACL_LIBC}" = "newlib" ]; then
   # TODO(sbc): remove once nacl_io implements these.

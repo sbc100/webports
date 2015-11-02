@@ -4,9 +4,9 @@
 
 EXECUTABLES="ninja"
 
-NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
 NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
+EnableCliMain
 EnableGlibcCompat
 
 BuildHostNinja() {

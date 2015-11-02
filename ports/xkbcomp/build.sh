@@ -4,9 +4,9 @@
 
 EXTRA_CONFIGURE_ARGS+=" --datarootdir=/share"
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-export LIBS="-lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LIBS+=" -lX11 -lxcb -lXau"
 
+EnableCliMain
 EnableGlibcCompat
 
 InstallStep() {

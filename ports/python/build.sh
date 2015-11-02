@@ -4,8 +4,6 @@
 
 EXECUTABLES=python${NACL_EXEEXT}
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-
 # This build relies on certain host binaries and python's configure
 # requires us to set --build= as well as --host=.
 HOST_BUILD_DIR=${WORK_DIR}/build_host
@@ -38,13 +36,13 @@ ConfigureStep() {
     EXTRA_CONFIGURE_ARGS+=" --with-pydebug"
   fi
   NACLPORTS_LIBS+=" -ltermcap"
-  NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
   if [ "${NACL_LIBC}" = "newlib" ]; then
     # When python builds with wait3/wait4 support it also expects struct rusage
     # to have certain fields and newlib lacks.
     export ac_cv_func_wait3=no
     export ac_cv_func_wait4=no
   fi
+  EnableCliMain
   EnableGlibcCompat
   DefaultConfigureStep
   if [ "${NACL_LIBC}" = "newlib" ]; then

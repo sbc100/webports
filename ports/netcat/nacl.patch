@@ -59,30 +59,6 @@ diff --git a/src/flagset.c b/src/flagset.c
      ret = netcat_flag_next(ret);
  
    /* don't return this same flag again */
-diff --git a/src/netcat.c b/src/netcat.c
---- a/src/netcat.c
-+++ b/src/netcat.c
-@@ -135,7 +135,11 @@ static void ncexec(nc_sock_t *ncsock)
- 
- /* main: handle command line arguments and listening status */
- 
-+#if defined(__native_client__)
-+int nacl_ppapi_main(int argc, char *argv[])
-+#else
- int main(int argc, char *argv[])
-+#endif
- {
-   int c, glob_ret = EXIT_FAILURE;
-   int total_ports, left_ports, accept_ret = -1, connect_ret = -1;
-@@ -616,3 +620,8 @@ int main(int argc, char *argv[])
-   netcat_printstats(FALSE);
-   return glob_ret;
- }				/* end of main() */
-+
-+#if defined(__native_client__)
-+#include "ppapi_simple/ps_main.h"
-+PPAPI_SIMPLE_REGISTER_MAIN(nacl_ppapi_main)
-+#endif
 diff --git a/src/udphelper.c b/src/udphelper.c
 --- a/src/udphelper.c
 +++ b/src/udphelper.c

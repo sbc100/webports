@@ -25,6 +25,7 @@ _EXCLUDED_PATHS = (
     r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]fts.c",
     r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]herror.c",
     r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]timegm.c",
+    r"^ports[\\\/]alut-demo[\\\/]alut_hello_world.c",
 )
 
 def RunPylint(input_api, output_api):

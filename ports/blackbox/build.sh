@@ -8,12 +8,12 @@ EXTRA_CONFIGURE_ARGS+=" --x-libraries=${NACLPORTS_LIBDIR}"
 
 EXECUTABLES="src/blackbox util/bsetroot util/bstyleconvert"
 
-export EXTRA_LIBS+="-liconv \
-  -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LIBS+=" -liconv -lXext -lXmu -lSM -lICE -lXt -lX11 -lxcb -lXau"
 
-# TODO(bradnelson): Find a better general pattern for this.
-# Repeat these here to include them which checking for X11 and linking libxcb,
-# which references ki_fcntl directly.
-NACLPORTS_LIBS+=" -lnacl_io -pthread"
+if [[ ${NACL_LIBC} == newlib ]]; then
+  # Due to missing sys/ipc.h header
+  EXTRA_CONFIGURE_ARGS+=" --disable-mitshm"
+fi
 
+EnableCliMain
 EnableGlibcCompat

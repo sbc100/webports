@@ -182,18 +182,6 @@ diff --git a/src/builtin.c b/src/builtin.c
 diff --git a/src/m4.c b/src/m4.c
 --- a/src/m4.c
 +++ b/src/m4.c
-@@ -362,7 +362,11 @@ process_file (const char *name)
- #endif
- 
- int
-+#if defined(__native_client__)
-+nacl_main (int argc, const char *argv[])
-+#else
- main (int argc, char *const *argv)
-+#endif
- {
-   struct sigaction act;
-   macro_definition *head;       /* head of deferred argument list */
 @@ -403,7 +407,11 @@ main (int argc, char *const *argv)
    sigemptyset (&act.sa_mask);
    /* One-shot - if we fault while handling a fault, we want to revert

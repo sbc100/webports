@@ -4,7 +4,8 @@
 
 export ac_cv_func_getrlimit=no
 
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
+EnableCliMain
+
 EXTRA_CONFIGURE_ARGS="\
   --enable-targets=x86_64-nacl,arm-nacl,avr \
   --disable-werror \

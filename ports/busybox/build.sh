@@ -4,8 +4,7 @@
 
 EXECUTABLES="busybox"
 
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
+EnableCliMain
 
 ConfigureStep() {
   cp "${START_DIR}/defconfig" .

@@ -6,7 +6,6 @@ ConfigureStep() {
   EnableGlibcCompat
   EXTRA_CONFIGURE_ARGS+=" --disable-docs"
   NACLPORTS_CFLAGS+=" -std=gnu99"
-  NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-  NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+  EnableCliMain
   DefaultConfigureStep
 }

@@ -577,7 +577,7 @@ diff --git a/thttpd.c b/thttpd.c
  
  int
 -main( int argc, char** argv )
-+nacl_main( int argc, char** argv )
++main( int argc, char** argv )
      {
      char* cp;
      struct passwd* pwd;

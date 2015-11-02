@@ -65,7 +65,7 @@ static void write_file(const void* data, size_t len, const char* filename) {
   fclose(file);
 }
 
-int nacl_main(int argc, char** argv) {
+int main(int argc, char** argv) {
   char* indata = 0;
   const char* cmd;
   char* outdata;

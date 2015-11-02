@@ -614,19 +614,23 @@ diff --git a/scripts/install.c b/scripts/install.c
 diff --git a/scripts/make.sh b/scripts/make.sh
 --- a/scripts/make.sh
 +++ b/scripts/make.sh
-@@ -162,9 +162,11 @@ echo "Library probe..."
- # that doesn't exist, so we have to detect and skip nonexistent libraries
- # for it.
- 
--OPTLIBS="$(for i in util crypt m; do echo "int main(int argc, char *argv[]) {return 0;}" | ${CROSS_COMPILE}${CC} -xc - -o /dev/null -Wl,--as-needed -l$i > /dev/null 2>/dev/null && echo -l$i; done)"
-+OPTLIBS="$(for i in glibc-compat nacl_io util crypt m; do echo "int main(int argc, char *argv[]) {return 0;}" | ${CROSS_COMPILE}${CC} -xc - -o /dev/null -Wl,--as-needed -l$i > /dev/null 2>/dev/null && echo -l$i; done)"
+@@ -165,6 +165,7 @@ echo "Library probe..."
+ OPTLIBS="$(for i in util crypt m; do echo "int main(int argc, char *argv[]) {return 0;}" | ${CROSS_COMPILE}${CC} -xc - -o /dev/null -Wl,--as-needed -l$i > /dev/null 2>/dev/null && echo -l$i; done)"
  
  echo "Compile toybox..."
-+OPTLIBS="${LDFLAGS}"
-+echo $OPTLIBS
++OPTLIBS="${LIBS}"
  
  do_loudly()
  {
+@@ -172,7 +173,7 @@ do_loudly()
+   "$@"
+ }
+ 
+-do_loudly ${CROSS_COMPILE}${CC} $CFLAGS -I . -o toybox_unstripped $OPTIMIZE \
++do_loudly ${CROSS_COMPILE}${CC} $CFLAGS $LDFLAGS -I . -o toybox_unstripped $OPTIMIZE \
+   main.c lib/*.c $TOYFILES -Wl,--as-needed $OPTLIBS  || exit 1
+ do_loudly ${CROSS_COMPILE}${STRIP} toybox_unstripped -o toybox || exit 1
+ # gcc 4.4's strip command is buggy, and doesn't set the executable bit on
 diff --git a/toys.h b/toys.h
 --- a/toys.h
 +++ b/toys.h

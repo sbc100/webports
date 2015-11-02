@@ -4,8 +4,6 @@
 
 EnableGlibcCompat
 
-NACLPORTS_LIBS+=" -lnacl_io -l${NACL_CXX_LIB}"
-
 InstallStep() {
   DefaultInstallStep
   if [ "${NACL_LIBC}" = "newlib" ]; then

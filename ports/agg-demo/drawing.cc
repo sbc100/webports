@@ -24,7 +24,6 @@
 #include <agg-2.5/agg_scanline_u.h>
 
 #include "ppapi_simple/ps_context_2d.h"
-#include "ppapi_simple/ps_main.h"
 
 
 // Drawing class holds information and functionality needed to render
@@ -163,11 +162,8 @@ void DrawingDemo::Run() {
 }
 
 
-int example_main(int argc, char **argv) {
+int main(int argc, char **argv) {
   DrawingDemo demo;
   demo.Run();
   return 0;
 }
-
-
-PPAPI_SIMPLE_REGISTER_MAIN(example_main);

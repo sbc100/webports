@@ -4,8 +4,7 @@
 
 NACL_CONFIGURE_PATH=${SRC_DIR}/unix/configure
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LIBS+=" -lX11 -lxcb -lXau ${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LIBS+=" -lX11 -lxcb -lXau"
 
 EXTRA_CONFIGURE_ARGS+=" --with-tcl=${NACLPORTS_LIBDIR}"
 
@@ -18,6 +17,7 @@ fi
 # The fallbacks seem to be non-general.
 export tcl_cv_strtod_buggy=ok
 
+EnableCliMain
 EnableGlibcCompat
 
 # Ideally we would only add this flag for newlib builds but

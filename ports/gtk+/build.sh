@@ -9,12 +9,11 @@ ConfigureStep() {
   fi
 
   EnableGlibcCompat
+  EnableCliMain
 
   EXTRA_CONFIGURE_ARGS+=" --disable-shm --enable-explicit-deps --disable-cups \
    --enable-gtk-doc-html=no"
 
-  NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main -pthread"
-  NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
   export enable_gtk_doc=no
 
   DefaultConfigureStep

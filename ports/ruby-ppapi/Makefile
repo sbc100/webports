@@ -6,8 +6,6 @@ include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = ruby
 LIBS = ruby-static readline ncurses ppapi_simple tar nacl_io ppapi
-NACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
-PNACL_LDFLAGS += $(NACL_CLI_MAIN_LIB)
 ifeq ($(TOOLCHAIN),glibc)
 ifneq ($(NACL_ARCH),arm)
 LIBS += util

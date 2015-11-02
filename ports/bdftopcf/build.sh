@@ -4,8 +4,8 @@
 
 EXECUTABLES="bdftopcf${NACL_EXEEXT}"
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LDFLAGS+=" -Dmain=nacl_main"
-export LIBS="-lz ${NACL_CLI_MAIN_LIB}"
-
+EnableCliMain
 EnableGlibcCompat
+
+NACLPORTS_LIBS+=" -lz"
+

@@ -5,9 +5,7 @@
 ConfigureStep() {
   EXTRA_CONFIGURE_ARGS+=" --disable-python --without-dbus --without-webkit"
   EXTRA_CONFIGURE_ARGS+=" --with-gnu-ld"
-  NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-  NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
-
+  EnableCliMain
   DefaultConfigureStep
 }
 

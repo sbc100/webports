@@ -8,9 +8,7 @@ HOST_INSTALL_DIR=${WORK_DIR}/install_host
 
 EXECUTABLES="bdftruncate${NACL_EXEEXT} ucs2any${NACL_EXEEXT}"
 
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LDFLAGS+=" -Dmain=nacl_main"
-export LIBS="${NACL_CLI_MAIN_LIB}"
+EnableCliMain
 
 EnableGlibcCompat
 

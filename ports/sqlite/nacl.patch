@@ -1,17 +1,6 @@
 diff --git a/shell.c b/shell.c
 --- a/shell.c
 +++ b/shell.c
-@@ -2935,6 +2939,10 @@ static char *cmdline_option_value(int argc, char **argv, int i){
-   return argv[i];
- }
- 
-+#ifdef PPAPI
-+#define main nacl_main
-+#endif
-+
- int main(int argc, char **argv){
-   char *zErrMsg = 0;
-   struct callback_data data;
 @@ -2952,6 +2968,10 @@ int main(int argc, char **argv){
    main_init(&data);
    stdin_is_interactive = isatty(0);

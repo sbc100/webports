@@ -3,9 +3,8 @@
 # found in the LICENSE file.
 
 export ac_cv_func_sigaction=yes
-NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
-NACLPORTS_CFLAGS+=" -Dmain=nacl_main"
 
+EnableCliMain
 EnableGlibcCompat
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then

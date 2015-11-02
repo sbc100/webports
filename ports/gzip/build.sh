@@ -6,8 +6,7 @@ EXECUTABLES=gzip${NACL_EXEEXT}
 
 ConfigureStep() {
   EnableGlibcCompat
-  NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-  NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+  EnableCliMain
 
   export gzip_cv_assembler=no
   export gl_cv_header_wchar_h_correct_inline=yes

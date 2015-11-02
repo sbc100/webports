@@ -8,7 +8,8 @@ export ac_cv_func_connect=yes
 
 # Can't use LIBS here otherwise nacl-spawn gets linked into the libcurl.so
 # which we don't ever want.
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB} -l${NACL_CXX_LIB}"
+export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
+NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LDFLAGS}"
 
 EnableGlibcCompat
 

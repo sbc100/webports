@@ -3,6 +3,6 @@
 # found in the LICENSE file.
 
 EXECUTABLES=avrdude${NACL_EXEEXT}
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 
+EnableCliMain
 EnableGlibcCompat

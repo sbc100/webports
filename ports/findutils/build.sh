@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 export fu_cv_sys_mounted_fread=yes
-NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe -Dmain=nacl_main"
-export LIBS="${NACL_CLI_MAIN_LIB}"
+NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
+EnableCliMain
 
 BuildStep() {
   export AR=${NACLAR}

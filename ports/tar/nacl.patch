@@ -55,12 +55,3 @@ diff --git a/src/tar.c b/src/tar.c
  };
  
  ARGMATCH_VERIFY (sort_mode_arg, sort_mode_flag);
-@@ -2716,7 +2717,7 @@ more_options (int argc, char **argv)
- 
- /* Main routine for tar.  */
- int
--main (int argc, char **argv)
-+nacl_main (int argc, char **argv)
- {
-   set_start_time ();
-   set_program_name (argv[0]);

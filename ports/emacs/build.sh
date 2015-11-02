@@ -42,6 +42,7 @@ if [ "${NACL_LIBC}" = "newlib" ]; then
   NACLPORTS_LIBS+=" ${COMPAT_LIBS}"
 fi
 
+EnableCliMain
 EnableGlibcCompat
 
 ConfigureStep() {

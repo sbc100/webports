@@ -43,7 +43,7 @@ static void setup_unix_environment(const char* arg0) {
   }
 }
 
-int nacl_main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
   setup_unix_environment(argv[0]);
   return nethack_main(argc, argv);
 }

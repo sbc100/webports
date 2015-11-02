@@ -4,7 +4,6 @@
 
 EXECUTABLES="util/hb-shape${NACL_EXEEXT}\
  util/hb-ot-shape-closure${NACL_EXEEXT}"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LIB}"
+EnableCliMain
 
 EXTRA_CONFIGURE_ARGS+=" --with-gobject --without-icu"

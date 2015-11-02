@@ -13,8 +13,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "nacl_main.h"
-
 #include "ppapi_simple/ps.h"
 
 #include "ppapi/c/pp_errors.h"
@@ -126,7 +124,7 @@ fail:
   return 1;
 }
 
-int nacl_main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   if (argc == 4 && strcmp(argv[1], "-q") == 0) {
     return Download(1, argv[2], argv[3]);
   } else if (argc == 3) {

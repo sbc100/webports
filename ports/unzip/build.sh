@@ -4,8 +4,9 @@
 
 BUILD_DIR=${SRC_DIR}
 
+EnableCliMain
+
 NACLPORTS_CPPFLAGS+=" -DHAVE_TERMIOS_H -DNO_CHMOD -DNO_FCHMOD -DNO_LCHMOD"
-NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
 
 EXECUTABLES="funzip unzip unzipsfx"
 
@@ -20,8 +21,8 @@ BuildStep() {
   # (e.g., libppapi).
   make -j${OS_JOBS} -f unix/Makefile unzips \
       CC=${NACLCC} LD=${NACLCXX} \
-      CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}" LF2= \
-      LFLAGS1="${NACLPORTS_LDFLAGS} ${NACL_CLI_MAIN_LIB}"
+      CFLAGS="${NACLPORTS_CPPFLAGS} ${NACLPORTS_CFLAGS}" \
+      LFLAGS1="${NACLPORTS_LDFLAGS}" LF2="${NACLPORTS_LIBS}"
 }
 
 InstallStep() {

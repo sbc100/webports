@@ -6,10 +6,6 @@
 # Samba doesn't seem to support building outside the source tree.
 BUILD_DIR=${SRC_DIR}
 
-#NACLPORTS_CPPFLAGS+=" -Dmain=nacl_main"
-
-#NACLPORTS_LDFLAGS+="${NACL_CLI_MAIN_LIB}"
-
 EnableGlibcCompat
 
 ConfigureStep() {

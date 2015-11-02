@@ -26,17 +26,3 @@ diff --git a/src/Makefile.in b/src/Makefile.in
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
-diff --git a/src/tool_main.c b/src/tool_main.c
---- a/src/tool_main.c
-+++ b/src/tool_main.c
-@@ -213,6 +213,10 @@ static void main_free(struct GlobalConfig *config)
-   config->last = NULL;
- }
- 
-+#ifdef __native_client__
-+#define main nacl_main
-+#endif
-+
- /*
- ** curl tool main function.
- */

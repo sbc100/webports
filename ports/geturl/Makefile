@@ -8,10 +8,8 @@ CPPFLAGS += -Wall -Werror
 
 all: $(GETURL)
 
-EXTRA_LIBS = ${NACL_CLI_MAIN_LIB_CPP}
-
 $(GETURL): geturl.cc
-	$(NACLCXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRA_LIBS)
+	$(NACLCXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 clean:
 	rm -f $(GETURL)

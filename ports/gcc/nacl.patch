@@ -40,15 +40,6 @@ diff --git a/gcc/collect2.c b/gcc/collect2.c
  /* On certain systems, we have code that works by scanning the object file
     directly.  But this code uses system-specific header files and library
     functions, so turn it off in a cross-compiler.  Likewise, the names of
-@@ -763,7 +771,7 @@ prefix_from_string (const char *p, struct path_prefix *pprefix)
- /* Main program.  */
- 
- int
--main (int argc, char **argv)
-+nacl_main (int argc, char **argv)
- {
-   static const char *const ld_suffix	= "ld";
-   static const char *const real_ld_suffix = "real-ld";
 diff --git a/gcc/config/i386/cpuid.h b/gcc/config/i386/cpuid.h
 --- a/gcc/config/i386/cpuid.h
 +++ b/gcc/config/i386/cpuid.h
@@ -71,79 +62,6 @@ diff --git a/gcc/config/i386/cpuid.h b/gcc/config/i386/cpuid.h
  }
  
  /* Return cpuid data for requested cpuid level, as found in returned
-diff --git a/gcc/gcc.c b/gcc/gcc.c
---- a/gcc/gcc.c
-+++ b/gcc/gcc.c
-@@ -6262,10 +6262,10 @@ fatal_error (int signum)
-   kill (getpid (), signum);
- }
- 
--extern int main (int, char **);
-+extern int nacl_main (int, char **);
- 
- int
--main (int argc, char **argv)
-+nacl_main (int argc, char **argv)
- {
-   size_t i;
-   int value;
-diff --git a/gcc/gcov-dump.c b/gcc/gcov-dump.c
---- a/gcc/gcov-dump.c
-+++ b/gcc/gcov-dump.c
-@@ -37,7 +37,7 @@ static void tag_arcs (const char *, unsigned, unsigned);
- static void tag_lines (const char *, unsigned, unsigned);
- static void tag_counters (const char *, unsigned, unsigned);
- static void tag_summary (const char *, unsigned, unsigned);
--extern int main (int, char **);
-+extern int nacl_main (int, char **);
- 
- typedef struct tag_format
- {
-@@ -73,7 +73,7 @@ static const tag_format_t tag_table[] =
- };
- 
- int
--main (int argc ATTRIBUTE_UNUSED, char **argv)
-+nacl_main (int argc ATTRIBUTE_UNUSED, char **argv)
- {
-   int opt;
- 
-diff --git a/gcc/gcov.c b/gcc/gcov.c
---- a/gcc/gcov.c
-+++ b/gcc/gcov.c
-@@ -349,10 +349,10 @@ static int output_branch_count (FILE *, int, const arc_t *);
- static void output_lines (FILE *, const source_t *);
- static char *make_gcov_file_name (const char *, const char *);
- static void release_structures (void);
--extern int main (int, char **);
-+extern int nacl_main (int, char **);
- 
- int
--main (int argc, char **argv)
-+nacl_main (int argc, char **argv)
- {
-   int argno;
- 
-diff --git a/gcc/main.c b/gcc/main.c
---- a/gcc/main.c
-+++ b/gcc/main.c
-@@ -23,14 +23,14 @@ along with GCC; see the file COPYING3.  If not see
- #include "tm.h"
- #include "toplev.h"
- 
--int main (int argc, char **argv);
-+int nacl_main (int argc, char **argv);
- 
- /* We define main() to call toplev_main(), which is defined in toplev.c.
-    We do this in a separate file in order to allow the language front-end
-    to define a different main(), if it so desires.  */
- 
- int
--main (int argc, char **argv)
-+nacl_main (int argc, char **argv)
- {
-   return toplev_main (argc, (const char **) argv);
- }
 diff --git a/libiberty/pex-unix.c b/libiberty/pex-unix.c
 --- a/libiberty/pex-unix.c
 +++ b/libiberty/pex-unix.c

@@ -43,19 +43,18 @@ diff --git a/src/auto/configure b/src/auto/configure
 diff --git a/src/main.c b/src/main.c
 --- a/src/main.c
 +++ b/src/main.c
-@@ -14,6 +14,11 @@
+@@ -14,6 +14,10 @@
  # include <spawno.h>		/* special MS-DOS swapping library */
  #endif
  
 +#ifdef __native_client__
 +#include <nacl_main.h>
-+#define main nacl_main
 +#endif
 +
  #ifdef __CYGWIN__
  # ifndef WIN32
  #  include <cygwin/version.h>
-@@ -165,6 +170,11 @@ main
+@@ -165,6 +169,11 @@ main
      int		argc;
      char	**argv;
  {

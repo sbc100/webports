@@ -22,7 +22,6 @@ configuring = 'conftest.c' in cmd or 'conftest.pexe' in cmd
 DROP_FLAGS = {
     '-O2',
     '-O3',
-    '-Dmain=nacl_main',
     '-Dmain=SDL_main',
     '-lnacl_io',
     '-lnacl_spawn',

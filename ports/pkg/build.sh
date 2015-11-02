@@ -3,13 +3,12 @@
 # found in the LICENSE file.
 
 EXECUTABLES="src/pkg${NACL_EXEEXT}"
-export LIBS+="-lbsd ${NACL_CLI_MAIN_LIB} -pthread"
+NACLPORTS_LIBS+=" -lbsd -pthread"
 
 EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
-NACLPORTS_CFLAGS+=" -Dmain=nacl_main"
 
 if [ "${NACL_SHARED}" = "1" ]; then
-  LIBS+=" -lresolv -ldl -lrt"
+  NACLPORTS_LIBS+=" -lresolv -ldl -lrt"
   EXECUTABLES+=" src/pkg-static${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=yes --with-staticonly=no"
   NACLPORTS_CPPFLAGS+=" -D_GNU_SOURCE"
@@ -17,6 +16,7 @@ else
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=no --with-staticonly=yes"
 fi
 
+EnableCliMain
 EnableGlibcCompat
 
 ConfigureStep() {
@@ -48,7 +48,7 @@ BuildHost() {
 }
 
 BuildStep() {
-  (unset LIBS && BuildHost)
+  (BuildHost)
   DefaultBuildStep
   if [ "${NACL_SHARED}" = "0" ]; then
     LogExecute mv src/pkg-static${NACL_EXEEXT} src/pkg${NACL_EXEEXT}

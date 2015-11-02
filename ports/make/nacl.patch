@@ -15,22 +15,12 @@ diff --git a/job.c b/job.c
 diff --git a/main.c b/main.c
 --- a/main.c
 +++ b/main.c
-@@ -911,6 +911,9 @@ open_tmpfile(char **name, const char *template)
- #ifdef _AMIGA
- int
- main (int argc, char **argv)
-+#elif defined(__native_client__)
-+int
-+nacl_main (int argc, char **argv)
- #else
- int
- main (int argc, char **argv, char **envp)
 @@ -921,6 +924,9 @@ main (int argc, char **argv, char **envp)
    struct dep *read_makefiles;
    PATH_VAR (current_directory);
    unsigned int restarts = 0;
 +#if defined(__native_client__)
-+  char **envp = environ;
++  envp = environ;
 +#endif
  #ifdef WINDOWS32
    char *unix_path = NULL;

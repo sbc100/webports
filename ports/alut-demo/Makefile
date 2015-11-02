@@ -5,7 +5,7 @@
 include $(NACL_SDK_ROOT)/tools/common.mk
 
 TARGET = alut-demo
-LIBS = alut openal ppapi_simple nacl_io ppapi_cpp ppapi
+LIBS = alut openal
 SOURCES = alut_hello_world.c
 INSTALL_DIR = $(NACL_PACKAGES_PUBLISH)/$(TARGET)/$(TOOLCHAIN)
 CFLAGS += -Wall -Werror
