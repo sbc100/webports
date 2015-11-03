@@ -4,11 +4,8 @@
 # found in the LICENSE file.
 
 # This script is intended to be sourced.
-# It scans your packages and adds the appropriate things to the environment.
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-
-export SHELL=/packages/bash.${NACL_ARCH}/bash
 
 # PACKAGE_LIB_DIR is still used by the devenv tests
 # TODO(sbc): remove this and move it into devenv test code somehow
