@@ -7,8 +7,10 @@ EXECUTABLES="src/lua${NACL_EXEEXT} src/luac${NACL_EXEEXT}"
 
 EnableCliMain
 
-if [ "${NACL_LIBC}" = "glibc" ]; then
+if [ ${TOOLCHAIN} == glibc ]; then
   PLAT=nacl-glibc
+elif [ ${TOOLCHAIN} == emscripten ]; then
+  PLAT=emscripten
 else
   PLAT=nacl-newlib
 fi
@@ -46,7 +48,7 @@ BuildStep() {
 }
 
 TestStep() {
-  if [ "${NACL_ARCH}" = pnacl ]; then
+  if [[ ${NACL_ARCH} == pnacl ]]; then
     ChangeDir src
     # Just do the x86-64 version for now.
     TranslateAndWriteLauncherScript lua.pexe x86-64 lua.x86-64.nexe lua
@@ -57,6 +59,11 @@ TestStep() {
   # First, run the 'make test' target.  This currently just runs
   # lua -v.
   LogExecute make PLAT=${PLAT} test
+
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    # TODO(sbc): fix lua tests running under node.js
+    return
+  fi
 
   # Second, run the lua unittests. See: http://www.lua.org/tests/
   ChangeDir lua-5.3.0-tests

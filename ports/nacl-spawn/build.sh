@@ -3,16 +3,23 @@
 # found in the LICENSE file.
 
 NACLPORTS_CPPFLAGS+=" -I${START_DIR}"
-EXECUTABLES="test/unittests"
 
-if [ "${NACL_LIBC}" = "glibc" ]; then
+if [[ ${TOOLCHAIN} != emscripten ]]; then
+  EXECUTABLES="test/unittests"
+fi
+
+if [[ ${NACL_LIBC} == glibc ]]; then
   EXECUTABLES+=" test/elf_reader test/library_dependencies"
 fi
 
-if [ "${NACL_SHARED}" = "1" ]; then
+if [[ ${NACL_SHARED} = 1 ]]; then
   NACLPORTS_CFLAGS+=" -fPIC"
   NACLPORTS_CXXFLAGS+=" -fPIC"
   EXECUTABLES+=
+fi
+
+if [[ ${TOOLCHAIN} == emscripten ]]; then
+  NACLPORTS_CPPFLAGS+=" -I${EMSCRIPTEN}//system/lib/libcxxabi/include"
 fi
 
 EnableGlibcCompat
@@ -23,6 +30,9 @@ ConfigureStep() {
 }
 
 BuildStep() {
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    return
+  fi
   SetupCrossEnvironment
   export TOOLCHAIN
   export NACL_SHARED
@@ -30,13 +40,16 @@ BuildStep() {
 }
 
 TestStep() {
-  if [ "${NACL_LIBC}" = "glibc" ]; then
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    return
+  fi
+  if [[ ${NACL_LIBC} == glibc ]]; then
     SetupCrossEnvironment
     export TOOLCHAIN
     export NACL_SHARED
     LogExecute make test
   fi
-  if [ "${TOOLCHAIN}" = "pnacl" ]; then
+  if [[ ${TOOLCHAIN} == pnacl ]]; then
     RunSelLdrCommand test/unittests
   else
     LogExecute test/unittests.sh
@@ -44,16 +57,19 @@ TestStep() {
 }
 
 InstallStep() {
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    return
+  fi
   MakeDir ${DESTDIR_LIB}
   LogExecute cp libnacl_spawn.a ${DESTDIR_LIB}
-  if [ "${NACL_SHARED}" = "1" ]; then
+  if [[ ${NACL_SHARED} == 1 ]]; then
     LogExecute cp libnacl_spawn.so ${DESTDIR_LIB}
   fi
   LogExecute cp libcli_main.a ${DESTDIR_LIB}
   MakeDir ${DESTDIR_INCLUDE}
   LogExecute cp -f ${START_DIR}/include/spawn.h ${DESTDIR_INCLUDE}/
   LogExecute cp -f ${START_DIR}/include/nacl_main.h ${DESTDIR_INCLUDE}/
-  if [ "${TOOLCHAIN}" = "bionic" ]; then
+  if [[ ${TOOLCHAIN} == bionic ]]; then
     LogExecute cp -f ${START_DIR}/include/bsd_spawn.h ${DESTDIR_INCLUDE}/
   fi
 }

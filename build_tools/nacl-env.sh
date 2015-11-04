@@ -225,6 +225,8 @@ InitializeEmscriptenToolchain() {
   NACLSTRINGS=/bin/true
   NACLSTRIP=/bin/true
   NACL_EXEEXT=".js"
+
+  NACL_SDK_LIBDIR="${NACL_SDK_ROOT}/lib/${TOOLCHAIN}"
 }
 
 InitializePNaClToolchain() {
@@ -315,11 +317,16 @@ else
 fi
 
 NACL_ARFLAGS="cr"
-NACL_LDFLAGS="-L${NACL_SDK_LIBDIR}"
-NACL_CPPFLAGS="-I${NACL_SDK_ROOT}/include"
+NACL_CPPFLAGS=""
+NACL_LDFLAGS=""
 
-if [ "${TOOLCHAIN}" = "glibc" ]; then
-  NACL_LDFLAGS+=" -Wl,-rpath-link=${NACL_SDK_LIBDIR}"
+if [[ $TOOLCHAIN != emscripten ]]; then
+  NACL_LDFLAGS+=" -L${NACL_SDK_LIBDIR}"
+  NACL_CPPFLAGS+=" -I${NACL_SDK_ROOT}/include"
+
+  if [[ ${TOOLCHAIN} == glibc ]]; then
+    NACL_LDFLAGS+=" -Wl,-rpath-link=${NACL_SDK_LIBDIR}"
+  fi
 fi
 
 if [ "${NACL_ARCH}" = "pnacl" ]; then

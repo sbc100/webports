@@ -9,8 +9,17 @@ MAKEFLAGS+=" EXEEXT=.${NACL_EXEEXT}"
 
 EnableGlibcCompat
 
-if [ "${NACL_SHARED}" = "0" ]; then
-   EXTRA_CONFIGURE_ARGS="--disable-shared"
+if [[ ${NACL_SHARED} = 0 ]]; then
+  EXTRA_CONFIGURE_ARGS="--disable-shared"
+fi
+
+if [[ ${TOOLCHAIN} == emscripten ]]; then
+  export bash_cv_signal_vintage=posix
+  # Emscripten tends to let autoconf thinks things work when they don't.
+  # Without this autoconf will detect that -lutil and -ldir are needed which
+  # generated a lot of warnings during the build
+  export ac_cv_lib_util_openpty=no
+  export ac_cv_lib_dir_opendir=no
 fi
 
 TestStep() {

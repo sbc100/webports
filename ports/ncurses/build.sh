@@ -15,21 +15,23 @@ if [ "${NACL_SHARED}" = 1 ]; then
   EXTRA_CONFIGURE_ARGS+=" --with-shared"
 fi
 
-if [ "${NACL_ARCH}" = "pnacl" ] ; then
+if [ "${TOOLCHAIN}" = "pnacl" ]; then
   EXTRA_CONFIGURE_ARGS+=" --without-cxx-binding"
 fi
 
+
 EnableGlibcCompat
 
-ConfigureStep() {
-  export cf_cv_ar_flags=${NACL_ARFLAGS}
-  NACL_ARFLAGS=""
+export cf_cv_ar_flags=${NACL_ARFLAGS}
+NACL_ARFLAGS=""
 
-  DefaultConfigureStep
-  # Glibc inaccurately reports having sigvec.
-  # Change the define
-  sed -i.bak 's/HAVE_SIGVEC 1/HAVE_SIGVEC 0/' include/ncurses_cfg.h
-}
+if [[ ${TOOLCHAIN} == emscripten ]]; then
+  export cf_cv_posix_c_source=no
+fi
+
+if [[ ${TOOLCHAIN} == glibc ]]; then
+  export ac_cv_func_sigvec=no
+fi
 
 InstallStep() {
   DefaultInstallStep

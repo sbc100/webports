@@ -507,11 +507,17 @@ SetOptFlags() {
 }
 
 EnableCliMain() {
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    return
+  fi
   NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LDFLAGS}"
   NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB}"
 }
 
 EnableCliMainCxx() {
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    return
+  fi
   NACLPORTS_LDFLAGS+=" ${NACL_CLI_MAIN_LDFLAGS}"
   NACLPORTS_LIBS+=" ${NACL_CLI_MAIN_LIB_CPP}"
 }
@@ -672,9 +678,14 @@ PublishMultiArch() {
     local assembly_dir="${PUBLISH_DIR}"
   fi
 
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    LogExecute cp ${BUILD_DIR}/${binary} ${target}${NACL_EXEEXT}
+    return
+  fi
+
   local platform_dir="${assembly_dir}/_platform_specific/${NACL_ARCH}"
   MakeDir ${platform_dir}
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [[ ${TOOLCHAIN} == pnacl ]]; then
     # Add something to the per-arch directory there so the store will accept
     # the app even if nothing else ends up there. This currently happens in
     # the pnacl case, where there's nothing that's per architecture.
@@ -1004,6 +1015,11 @@ ConfigureStep_Autoconf() {
     CC="${PNACL_CONF_SHIM} ${CC}"
   fi
 
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
+    echo "export EMMAKEN_JUST_CONFIGURE=1"
+    export EMMAKEN_JUST_CONFIGURE=1
+  fi
+
   # Specify both --build and --host options.  This forces autoconf into cross
   # compile mode.  This is useful since the autodection doesn't always works.
   # For example a trivial PNaCl binary can sometimes run on the linux host if
@@ -1278,8 +1294,7 @@ WriteLauncherScript() {
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
 NODE=${node}
 
-cd "\${SCRIPT_DIR}"
-exec \${NODE} $binary "\$@"
+exec \${NODE} "\${SCRIPT_DIR}/${binary}" "\$@"
 HERE
     chmod 750 "$script"
     echo "Wrote script $script -> $binary"
@@ -1306,8 +1321,8 @@ LIB_PATH_DEFAULT=${NACL_SDK_LIBDIR}:${NACLPORTS_LIBDIR}
 LIB_PATH_DEFAULT=\${LIB_PATH_DEFAULT}:\${NACL_SDK_LIB}:\${SCRIPT_DIR}
 SEL_LDR_LIB_PATH=\${SEL_LDR_LIB_PATH}:\${LIB_PATH_DEFAULT}
 
-"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p --library-path "\${SEL_LDR_LIB_PATH}" \
-    -- "\${SCRIPT_DIR}/$binary" "\$@"
+exec "\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p --library-path \
+  "\${SEL_LDR_LIB_PATH}" -- "\${SCRIPT_DIR}/$binary" "\$@"
 HERE
   else
     cat > "$script" <<HERE
@@ -1318,7 +1333,7 @@ if [ \$(uname -s) = CYGWIN* ]; then
 fi
 NACL_SDK_ROOT=${NACL_SDK_ROOT}
 
-"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p -- "\${SCRIPT_DIR}/$binary" "\$@"
+exec "\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p -- "\${SCRIPT_DIR}/$binary" "\$@"
 HERE
   fi
 

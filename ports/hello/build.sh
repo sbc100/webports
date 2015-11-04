@@ -5,7 +5,7 @@
 EXECUTABLES=hello${NACL_EXEEXT}
 
 TestStep() {
-  if [ "${TOOLCHAIN}" = "pnacl" ]; then
+  if [[ ${TOOLCHAIN} == pnacl ]]; then
     return
   fi
   LogExecute ./hello
