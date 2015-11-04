@@ -2,6 +2,7 @@
 /third_party/
 /native_client/
 
+naclports.lock
 *.pyc
 *~
 /out

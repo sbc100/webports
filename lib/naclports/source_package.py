@@ -352,7 +352,7 @@ class SourcePackage(package.Package):
         os.remove(log_filename)
 
     start = time.time()
-    with util.BuildLock():
+    with util.DirLock(self.root):
       try:
         with RedirectStdoutStderr(log_filename):
           old_log_level = util.log_level

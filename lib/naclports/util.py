@@ -446,7 +446,7 @@ def Makedirs(directory):
   os.makedirs(directory)
 
 
-class Lock(object):
+class DirLock(object):
   """Per-directory flock()-based context manager
 
   This class will raise an exception if another process already holds the
@@ -471,14 +471,14 @@ class Lock(object):
     self.fd.close()
 
 
-class BuildLock(Lock):
+class BuildLock(DirLock):
   """Lock used when building a package (essentially a lock on OUT_DIR)"""
 
   def __init__(self):
     super(BuildLock, self).__init__(paths.OUT_DIR)
 
 
-class InstallLock(Lock):
+class InstallLock(DirLock):
   """Lock used when installing/uninstalling package"""
 
   def __init__(self, config):
