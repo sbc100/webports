@@ -1917,7 +1917,7 @@ diff --git a/src/main.c b/src/main.c
  	show_repository_info();
  
  	exit(EX_OK);
-@@ -438,9 +452,12 @@ export_arg_option (char *arg)
+@@ -438,6 +452,8 @@ export_arg_option (char *arg)
  	}
  }
  
@@ -1926,11 +1926,7 @@ diff --git a/src/main.c b/src/main.c
  static void
  start_process_worker(char *const *save_argv)
  {
-+  fprintf(stderr, "start_process_worker %s %s\n", getprogname(), save_argv[0]);
- 	int	ret = EX_OK;
- 	int	status;
- 	pid_t	child_pid;
-@@ -463,7 +480,7 @@ start_process_worker(char *const *save_argv)
+@@ -463,7 +479,7 @@ start_process_worker(char *const *save_argv)
  		} else {
  			if (child_pid == -1)
  				err(EX_OSERR, "Failed to fork worker process");
@@ -1939,7 +1935,7 @@ diff --git a/src/main.c b/src/main.c
  			while (waitpid(child_pid, &status, 0) == -1) {
  				if (errno != EINTR)
  					err(EX_OSERR, "Child process pid=%d", (int)child_pid);
-@@ -486,6 +503,7 @@ start_process_worker(char *const *save_argv)
+@@ -486,6 +502,7 @@ start_process_worker(char *const *save_argv)
  	exit(ret);
  	/* NOTREACHED */
  }
@@ -1947,7 +1943,7 @@ diff --git a/src/main.c b/src/main.c
  
  static int
  expand_aliases(int argc, char ***argv)
-@@ -580,7 +598,9 @@ main(int argc, char **argv)
+@@ -580,7 +597,9 @@ main(int argc, char **argv)
  #ifdef HAVE_LIBJAIL
  		{ "jail",		required_argument,	NULL,	'j' },
  #endif
@@ -1957,7 +1953,7 @@ diff --git a/src/main.c b/src/main.c
  		{ "config",		required_argument,	NULL,	'C' },
  		{ "repo-conf-dir",	required_argument,	NULL,	'R' },
  		{ "rootdir",		required_argument,	NULL,	'r' },
-@@ -622,9 +642,11 @@ main(int argc, char **argv)
+@@ -622,9 +641,11 @@ main(int argc, char **argv)
  		case 'd':
  			debug++;
  			break;
@@ -1969,7 +1965,7 @@ diff --git a/src/main.c b/src/main.c
  		case 'C':
  			conffile = optarg;
  			break;
-@@ -684,8 +706,10 @@ main(int argc, char **argv)
+@@ -684,8 +705,10 @@ main(int argc, char **argv)
  	optreset = 1;
  	optind = 1;
  
@@ -1980,7 +1976,7 @@ diff --git a/src/main.c b/src/main.c
  
  #ifdef HAVE_ARC4RANDOM
  	/* Ensure that random is stirred after a possible fork */
-@@ -699,11 +723,13 @@ main(int argc, char **argv)
+@@ -699,11 +722,13 @@ main(int argc, char **argv)
  		    "-j, -c and/or -r cannot be used at the same time!\n");
  	}
  
@@ -1994,7 +1990,7 @@ diff --git a/src/main.c b/src/main.c
  
  #ifdef HAVE_LIBJAIL
  	if (jail_str != NULL) {
-@@ -729,9 +755,6 @@ main(int argc, char **argv)
+@@ -729,9 +754,6 @@ main(int argc, char **argv)
  	if (pkg_ini(conffile, reposdir, init_flags) != EPKG_OK)
  		errx(EX_SOFTWARE, "Cannot parse configuration file!");
  
@@ -2004,7 +2000,7 @@ diff --git a/src/main.c b/src/main.c
  	if (atexit(&pkg_shutdown) != 0)
  		errx(EX_SOFTWARE, "register pkg_shutdown() to run at exit");
  
-@@ -742,6 +765,7 @@ main(int argc, char **argv)
+@@ -742,6 +764,7 @@ main(int argc, char **argv)
  
  	plugins_enabled = pkg_object_bool(pkg_config_get("PKG_ENABLE_PLUGINS"));
  
@@ -2012,7 +2008,7 @@ diff --git a/src/main.c b/src/main.c
  	if (plugins_enabled) {
  		struct pkg_plugin	*p = NULL;
  
-@@ -768,6 +792,7 @@ main(int argc, char **argv)
+@@ -768,6 +791,7 @@ main(int argc, char **argv)
  			}
  		}
  	}

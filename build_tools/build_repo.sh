@@ -31,23 +31,27 @@ RunPkg() {
   local cmd="$PKG repo -m ${pkg_dir}/meta -o ${out_dir} ${pkg_dir}"
   echo $cmd
   $cmd
-  cd ${out_dir}
 }
 
 BuildRepo() {
-  local gs_url="gs://naclports/builds/${SDK_VERSION}/$1/publish"
-  ${SCRIPT_DIR}/download_pkg.py $1
-  local REPO_DIR=${NACLPORTS_ROOT}/out/packages/prebuilt/repo
-  for pkg_dir in ${NACLPORTS_ROOT}/out/packages/prebuilt/pkg/*/ ; do
-    local out_dir=${REPO_DIR}/$(basename ${pkg_dir})
+  local revision=$1
+  local gs_url="gs://naclports/builds/${SDK_VERSION}/${revision}/publish"
+  ${SCRIPT_DIR}/download_pkg.py ${revision}
+  cd ${NACLPORTS_ROOT}
+  local repo_dir=out/packages/prebuilt/repo
+  for pkg_dir in out/packages/prebuilt/pkg/*/ ; do
+    local out_dir=${repo_dir}/$(basename ${pkg_dir})
     RunPkg $pkg_dir $out_dir
+    echo "Uploading to ${gs_url}/$(basename ${pkg_dir})"
+    cd ${out_dir}
     gsutil cp -a public-read *.tbz ${gs_url}/$(basename ${pkg_dir})
+    cd -
   done
 }
 
 BuildLocalRepo() {
-  local REPO_DIR=${NACLPORTS_ROOT}/out/publish/
-  for pkg_dir in ${REPO_DIR}/pkg_*/ ; do
+  cd ${NACLPORTS_ROOT}/out/publish
+  for pkg_dir in pkg_* ; do
     RunPkg $pkg_dir $pkg_dir
   done
 }

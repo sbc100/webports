@@ -48,10 +48,11 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
   for file_info in files:
     basename = os.path.basename(file_info.url)
     file_info.name = os.path.join(download_dir, basename)
+    file_info.rel_name = file_info.name[len(naclports.paths.NACLPORTS_ROOT)+1:]
     filenames.append((file_info.name, file_info.url))
     if os.path.exists(file_info.name):
       if not check_hashes or CheckHash(file_info.name, file_info.md5):
-        Log('Up-to-date: %s' % file_info.name)
+        Log('Up-to-date: %s' % file_info.rel_name)
         continue
     files_to_download.append(file_info)
 
@@ -59,7 +60,7 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
     if check_hashes and not CheckHash(file_info.name, file_info.md5):
       raise naclports.Error(
           'Checksum failed: %s\nExpected=%s\nActual=%s' %
-          (file_info.name, file_info.md5, GetHash(file_info.name)))
+          (file_info.rel_name, file_info.md5, GetHash(file_info.name)))
 
   if not files_to_download:
     Log('All files up-to-date')
