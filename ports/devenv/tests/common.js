@@ -38,18 +38,10 @@ DevEnvTest.prototype.setUp = function() {
   }).then(function() {
     return self.mkdir('/home/user');
   }).then(function() {
-    return self.mkdir('/usr');
-  }).then(function() {
-    return self.mkdir('/usr/etc');
-  }).then(function() {
-    return self.mkdir('/usr/etc/pkg');
-  }).then(function() {
-    return self.mkdir('/usr/etc/pkg/repos');
+    return self.checkCommand('bash -c exit 0', 0);
   }).then(function() {
     if (self.params['latest'] === '1')
-      return self.setRepo(window.location.origin + '/publish');
-  }).then(function() {
-    return self.mkdir('/home/user');
+      return self.setLocalRepo(window.location.origin);
   });
 };
 
@@ -93,12 +85,8 @@ DevEnvTest.prototype.gatherStdoutUntil = function(name) {
   });
 };
 
-DevEnvTest.prototype.spawnCommand = function(cmd, cmdPrefix) {
+DevEnvTest.prototype.spawnCommand = function(cmd) {
   var self = this;
-
-  if (cmdPrefix === undefined) {
-    cmdPrefix = '. /mnt/http/setup-environment && ';
-  }
 
   var env = ['HOME=/home/user', 'NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt'];
   if (this.params['latest'] === '1') {
@@ -109,7 +97,7 @@ DevEnvTest.prototype.spawnCommand = function(cmd, cmdPrefix) {
     self.devEnv.postMessage({
       'name': 'nacl_spawn',
       'nmf': 'bash.nmf',
-      'argv': ['bash', '-c', cmdPrefix + cmd],
+      'argv': ['bash', '--login', '-c', cmd],
       'cwd': '/home/user',
       'envs': env,
     });
@@ -136,12 +124,12 @@ DevEnvTest.prototype.waitCommand = function(pid) {
   });
 };
 
-DevEnvTest.prototype.runCommand = function(cmd, cmdPrefix) {
+DevEnvTest.prototype.runCommand = function(cmd) {
   var self = this;
   var earlyOutput;
   chrometest.info('runCommand: ' + cmd);
   return Promise.resolve().then(function() {
-    return self.spawnCommand(cmd, cmdPrefix);
+    return self.spawnCommand(cmd);
   }).then(function(msg) {
     earlyOutput = msg.output;
     return self.waitCommand(msg.pid);
@@ -235,16 +223,16 @@ DevEnvTest.prototype.writeFile = function(fileName, data) {
   });
 };
 
-DevEnvTest.prototype.setRepo = function(data) {
+DevEnvTest.prototype.setLocalRepo = function(data) {
   var self = this;
   return Promise.resolve().then(function() {
     self.devEnv.postMessage({
-      'name': 'set_repo',
+      'name': 'set_local_repo',
       'data': data
     });
     return self.devEnv.wait();
   }).then(function(msg) {
-    ASSERT_EQ('set_repo_reply', msg.name);
+    ASSERT_EQ('set_local_repo_reply', msg.name);
   });
 };
 

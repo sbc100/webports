@@ -86,8 +86,14 @@ function initMountSystem() {
 }
 
 NaClTerm.nmf = 'bash.nmf';
-NaClTerm.argv = ['--init-file', '/mnt/http/bashrc'];
-NaClTerm.env = ['NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt']
+NaClTerm.argv = ['--login'];
+NaClTerm.env = [
+  'NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt',
+  // Signals to /etc/profile to install the base packages on first
+  // use.  By default (for testing) no packages are installed.
+  'INSTALL_BASE_PACKAGES=1',
+];
+
 // Uncomment this line to use only locally built packages
 //NaClTerm.env.push('NACL_DEVENV_LOCAL=1')
 // Uncomment this line to enable pepper_simple logging

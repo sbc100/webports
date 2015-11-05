@@ -3,13 +3,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This script is intended to be sourced.
+# This is for bash on NaCl. Note that you cannot use external commands
+# until the installation is completed. Also, you cannot use features
+# which nacl_io does not support yet (e.g., pipes and sub-shells).
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 
 # PACKAGE_LIB_DIR is still used by the devenv tests
 # TODO(sbc): remove this and move it into devenv test code somehow
-if [ ${NACL_ARCH} = "x86_64" ]; then
+if [[ ${NACL_ARCH} == x86_64 ]]; then
   PACKAGE_LIB_DIR=lib64
 else
   PACKAGE_LIB_DIR=lib32
@@ -28,8 +30,6 @@ LIBRARY_PATH64+=:/usr/x86_64-nacl/usr/lib
 
 export RUBYLIB=/usr/lib/ruby/2.0.0
 export RUBYLIB=${RUBYLIB}:${RUBYLIB}/${NACL_ARCH}-nacl
-alias ruby='ruby /bin/irb'
-alias emacs='ENABLE_CONTROL_C=0 emacs'
 
 # Allow ctrl-c to work.
 export ENABLE_CONTROL_C=1
@@ -48,3 +48,22 @@ export LIBRARY_PATH64
 export LD_LIBRARY_PATH
 export LIBRARY_PATH
 export PATH
+
+if [[ -n $INSTALL_BASE_PACKAGES ]]; then
+  marker=/var/lib/devenv_setup_complete
+  if [[ ! -e $marker ]]; then
+    echo "Performing initial devenv setup"
+    if /mnt/http/install-base-packages.sh; then
+      mkdir -p /var/lib
+      touch $marker
+    else
+      echo "*** devenv setup failed ***"
+    fi
+  fi
+fi
+
+cd ${HOME}
+
+if [[ -f ~/.bashrc ]]; then
+  . ~/.bashrc
+fi

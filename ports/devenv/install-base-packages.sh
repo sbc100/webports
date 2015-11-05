@@ -52,24 +52,13 @@ InstallBasePackages() {
     git \
     make"
 
-  if [[ -f /usr/etc/pkg/repos/NaCl.conf ]]; then
-    pkg install -y $core_packages
-  else
-    if [ "${NACL_DEVENV_LOCAL:-}" = "1" ]; then
-      local repos_dir=/mnt/http/repos_local_${NACL_ARCH}
-    else
-      local repos_dir=/mnt/http/repos_${NACL_ARCH}
-    fi
-    pkg -R $repos_dir install -y $core_packages
+  pkg install -y $core_packages
 
-    echo "===> Setting up pkg"
-    # Now that we have coreutils installed we can copy the pkg config
-    # files into place with 'cp'
-    mkdir -p /usr/etc/pkg/repos
-    rm -f /usr/etc/pkg/repos/NaCl.conf
-    cp $repos_dir/NaCl.conf /usr/etc/pkg/repos/
-    pkg update
-  fi
+  # Some programs (noteabley make) expect /bin/sh to exist and use
+  # this to run command (even if SHELL is set)
+  # TODO(sbc): This should be a symlink, or at least install via a post
+  # install script.
+  cp /usr/bin/bash /bin/sh
 
   echo "===> Installing extra packages"
   local extra_packages="

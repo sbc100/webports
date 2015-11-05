@@ -66,7 +66,7 @@ InstallStep() {
   PublishMultiArch hw/kdrive/sdl/Xsdl${NACL_EXEEXT} Xsdl xorg-server
 
   # Bash is already platform specific split, copy the whole thing.
-  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}/bash_multiarch
+  local BASH_DIR=${NACL_PACKAGES_PUBLISH}/bash/${TOOLCHAIN}
   LogExecute cp -fR ${BASH_DIR}/* ${ASSEMBLY_DIR}
 
   LogExecute cp ${NACLPORTS_BIN}/xkbcomp${NACL_EXEEXT} \

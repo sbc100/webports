@@ -148,7 +148,7 @@
     return {
       name: 'nacl_spawn',
       nmf: 'bash.nmf',
-      argv: ['bash', '-c', '. /mnt/http/setup-environment && ' + cmd],
+      argv: ['bash', '--login', '-c', cmd],
       cwd: '/home/user',
       envs: []
     };

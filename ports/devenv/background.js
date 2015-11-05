@@ -88,32 +88,29 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
       case 'nacl_sigint':
         manager.sigint();
         break;
-
-      case 'set_repo':
+      case 'set_local_repo':
         /*
-         * Copy the the local NaCl.conf into /usr/etc/pkg/repos/ replacing
-         * the origin.
+         * Modify /usr/etc/pkg/repos/Local.conf, updating the URL and
+         * enabling the repo.
+         * Also, disable /usr/etc/pkg/repos/NaCl.conf.
          */
-        console.log('set_repo')
-        getNaClArch(function(arch) {
-          var xhr = new XMLHttpRequest();
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-              if (xhr.status != 200) {
-                fileError('set_repo_error status=' + xhr.status)('xhr error');
-                return;
-              }
-              var data = xhr.responseText.replace('http://localhost:5103',
-                  msg.data);
-              files.writeText('/usr/etc/pkg/repos/NaCl.conf', data).then(
-                  fileReply('set_repo_reply'), fileError('set_repo_error'));
-            }
-          };
-          xhr.open('GET', '/repos_local_' + arch + '/NaCl.conf', true);
-          xhr.send();
-        });
+        console.log('set_local_repo')
+        var local_repo_file = '/usr/etc/pkg/repos/Local.conf';
+        files.readText(local_repo_file).then(function(data) {
+          data = data.replace('http://localhost:5103', msg.data);
+          data = data.replace('ENABLED: NO', 'ENABLED: YES', data);
+          return files.writeText(local_repo_file, data);
+        }).then(function() {
+          var repo_file = '/usr/etc/pkg/repos/NaCl.conf';
+          files.readText(repo_file).then(function(data) {
+            data = data.replace('ENABLED: YES', 'ENABLED: NO', data);
+            return files.writeText(repo_file, data);
+          });
+        }).then(
+          fileReply('set_local_repo_reply'),
+          fileError('set_local_repo_error')
+        );
         break;
-
       case 'file_init':
         files.init().then(
             fileReply('file_init_reply'), fileError('file_init_error'));
@@ -273,10 +270,14 @@ FileManager.prototype.writeText = function(fileName, content) {
       var blob = new Blob([content], {type:'text/plain'})
       // Discard arguments.
       writer.onwriteend = function() {
-        resolve();
+        // truncate done, write data
+        if (writer.length === 0)
+          writer.write(blob);
+        else
+          resolve();
       }
       writer.onerror = reject;
-      writer.write(blob);
+      writer.truncate(0);
     }
   });
 };

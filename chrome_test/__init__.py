@@ -29,7 +29,7 @@ import naclports
 
 # Pinned chrome revision. Update this to pull in a new chrome.
 # Try to select a version that exists on all platforms.
-CHROME_REVISION = '311001'
+CHROME_REVISION = '344999'
 
 TESTING_LIB = os.path.join(SCRIPT_DIR, 'chrome_test.js')
 TESTING_EXTENSION = os.path.join(SCRIPT_DIR, 'extension')

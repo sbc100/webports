@@ -27,7 +27,7 @@ PostInstallTestStep() {
   for arch in ${arches}; do
     LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
       -p latest=1 \
-      -C ${NACL_SRC}/out \
+      -C ${NACL_SRC}/out/publish \
       -x -v -a ${arch}
     # TODO(bradnelson): Enable this when dependencies are right.
     #LogExecute python ${START_DIR}/../devenv/io2014_test.py \
