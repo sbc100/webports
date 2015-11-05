@@ -21,6 +21,82 @@ diff --git a/find/ftsfind.c b/find/ftsfind.c
  static void set_close_on_exec(int fd)
  {
  #if defined F_GETFD && defined FD_CLOEXEC
+@@ -89,6 +88,75 @@ static void set_close_on_exec(int fd)
+ }
+ 
+ 
++#if defined (__native_client__) && defined(__GLIBC__) && !defined(__arm__)
++// xgetcwd is pulled from toybox lib/xwrap.c
++char *xgetcwd(void) {
++	char *buf = (char*)malloc(sizeof(char) * (PATH_MAX+1));
++	if (buf == NULL) {
++		fprintf(stderr, "malloc failed\n");
++		exit(1);
++	}
++	buf = getwd(buf);
++	if (!buf) {
++		perror("xgetcwd");
++		exit(1);
++	}
++	return buf;
++}
++
++// The following functions are pulled from toybox nacl.patch
++#define _AT_WRAP_START(A)                             \
++	int fchdir_err = 0;                           \
++	char *save = xgetcwd();                       \
++	if (!save) {                                  \
++		perror("fd_wrapper_"A);               \
++		exit(1);                              \
++	}                                             \
++	if (dirfd != AT_FDCWD) {                      \
++		fchdir_err = fchdir(dirfd);           \
++		if (fchdir_err == -1)                 \
++			perror("fchdir");             \
++	}
++
++#define _AT_WRAP_END(A)                               \
++	if (dirfd != AT_FDCWD) chdir(save);           \
++	free(save);
++
++int fstatat(int dirfd, const char *pathname, struct stat *buf, int flags) {
++	// We are going to ignore flags here.
++	//if (flags) perror_exit("fstatat_flags");
++	_AT_WRAP_START("fstatat")
++	int result;
++	if (flags & AT_SYMLINK_NOFOLLOW)
++		result = lstat(pathname, buf);
++	else
++		result = stat(pathname, buf);
++	_AT_WRAP_END("fstatat")
++	return result;
++}
++
++int openat(int dirfd, const char *pathname, int flags, ...) {
++	_AT_WRAP_START("openat")
++	int fd = open(pathname, flags);
++	_AT_WRAP_END("openat")
++	return fd;
++}
++
++int unlinkat(int dirfd, const char *pathname, int flags) {
++	// We are going to ignore flags here.
++	//if (flags) perror_exit("unlinkat_flags");
++	_AT_WRAP_START("unlinkat")
++	int result;
++	if(flags & AT_REMOVEDIR) {
++		result = rmdir(pathname);
++	} else {
++		result = unlink(pathname);
++	}
++	_AT_WRAP_END("unlinkat")
++	return result;
++}
++#endif
++
+ 
+ /* FTS_TIGHT_CYCLE_CHECK tries to work around Savannah bug #17877
+  * (but actually using it doesn't fix the bug).
 diff --git a/find/pred.c b/find/pred.c
 --- a/find/pred.c
 +++ b/find/pred.c
