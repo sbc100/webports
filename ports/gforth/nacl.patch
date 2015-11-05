@@ -32,8 +32,12 @@ diff --git a/Makefile.in b/Makefile.in
  		$(PREFORTH) prims2x.fs -e "forth-flag on s\" prim.b\" ' output-forth ' output-forth-combined process-file bye" >>$@-
  		$(CP) $@- $@
  		$(RM) $@-
-@@ -1004,15 +1007,19 @@ Makefile Makedist engine/Makefile gforthmi vmgen preforth machpc.fs doc/version.
- config.status: configure
+@@ -1001,18 +1004,22 @@ stamp-h: engine/config.h.in config.status stamp-h.in
+ Makefile Makedist engine/Makefile gforthmi vmgen preforth machpc.fs doc/version.texi envos.fs build-ec:	Makefile.in Makedist.in engine/Makefile.in gforthmi.in vmgen.in preforth.in machpc.fs.in doc/version.texi.in config.status configure.in envos.fs.in build-ec.in engine/libcc.h.in
+ 	./config.status
+ 
+-config.status: configure
++config.status: $(srcdir)/configure
  	./config.status --recheck
  
 +# NOTE: Redone to work correctly with VPATH.
