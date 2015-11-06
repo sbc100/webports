@@ -55,7 +55,7 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
     return (key, value)
 
   def ExpandVars(value, substitutions):
-    if type(value) == str:
+    if isinstance(value, str):
       return string.Template(value).substitute(substitutions)
     else:
       return [string.Template(v).substitute(substitutions) for v in value]

@@ -184,9 +184,9 @@ class SourcePackage(package.Package):
   def GetInstallLocation(self):
     install_dir = 'install_%s' % util.arch_to_pkgarch[self.config.arch]
     if self.config.arch != self.config.toolchain:
-       install_dir += '_' + self.config.toolchain
+      install_dir += '_' + self.config.toolchain
     if self.config.config_name == 'debug':
-       install_dir += '_debug'
+      install_dir += '_debug'
     return os.path.join(paths.BUILD_ROOT, self.NAME, install_dir, 'payload')
 
   def GetBuildLocation(self):
@@ -323,7 +323,7 @@ class SourcePackage(package.Package):
     util.Makedirs(abi_dir)
     deps = self.DEPENDS
     if self.config.toolchain != 'glibc':
-        deps = []
+      deps = []
     bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
         self.GetInstallLocation(), pkg_file, deps)
 

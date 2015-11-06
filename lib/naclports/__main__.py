@@ -25,7 +25,6 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from naclports import configuration, error, source_package, util, paths
 from naclports import installed_package
-import naclports.package
 
 
 def PrintError(msg):

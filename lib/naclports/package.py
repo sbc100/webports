@@ -2,9 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import os
-
-from naclports.util import Log, Warn, LogVerbose
 from naclports.error import Error
 from naclports import configuration, pkg_info, util
 
@@ -101,12 +98,12 @@ class Package(object):
   def CheckDeps(self, valid_packages):
     for package in self.DEPENDS:
       if package not in valid_packages:
-        Log('%s: Invalid dependency: %s' % (self.info, package))
+        util.Log('%s: Invalid dependency: %s' % (self.info, package))
         return False
 
     for package in self.CONFLICTS:
       if package not in valid_packages:
-        Log('%s: Invalid conflict: %s' % (self.info, package))
+        util.Log('%s: Invalid conflict: %s' % (self.info, package))
         return False
 
     return True

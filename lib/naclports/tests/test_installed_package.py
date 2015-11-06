@@ -26,7 +26,7 @@ def CreateMockInstalledPackage():
 
 class TestInstalledPackage(common.NaclportsTest):
 
-  @patch('naclports.package.Log', Mock())
+  @patch('naclports.util.Log', Mock())
   @patch('naclports.installed_package.RemoveFile')
   @patch('naclports.installed_package.InstalledPackageIterator',
       Mock(return_value=[]))

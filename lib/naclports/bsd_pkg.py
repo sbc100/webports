@@ -15,7 +15,6 @@ import collections
 import hashlib
 import os
 import shutil
-import subprocess
 import tarfile
 
 from naclports import binary_package, package, paths, util
@@ -113,8 +112,8 @@ def AddPackageDep(dep_dict, dep):
   dep_dict['origin'] = dep
 
   if os.path.isdir(dep):
-    dep_dict['version'] = package.Package(info_file =
-                                          os.path.join(dep, 'pkg_info')).VERSION
+    pkg = package.Package(info_file=os.path.join(dep, 'pkg_info'))
+    dep_dict['version'] = pkg.VERSION
     return
 
   for subdir in DEFAULT_LOCATIONS:
@@ -153,7 +152,7 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):
   util.Log('Creating pkg package: %s' % outfile)
   manifest = collections.OrderedDict()
   manifest['name'] = name
-  manifest['version'] =  version
+  manifest['version'] = version
   manifest['arch'] = 'nacl:0:%s' % arch
 
   # The following fields are required by 'pkg' but we don't have

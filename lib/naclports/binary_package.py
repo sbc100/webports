@@ -168,7 +168,7 @@ class BinaryPackage(package.Package):
 
   def _Install(self, force):
     if self.TOOLCHAIN_INSTALL != '0':
-        self._InstallFiles(force)
+      self._InstallFiles(force)
     self.WriteStamp()
 
   def _InstallFiles(self, force):
@@ -202,7 +202,7 @@ class BinaryPackage(package.Package):
         if not force:
           for name in names:
             full_name = os.path.join(dest, name)
-            if os.path.exists(full_name) :
+            if os.path.exists(full_name):
               raise error.Error('file already exists: %s' % full_name)
 
         tar.extractall(dest_tmp)
