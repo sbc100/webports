@@ -4,6 +4,10 @@
  * found in the LICENSE file.
  */
 
+/* globals zip */
+
+'use strict';
+
 var PAK_FILE = 'id1/pak0.pak';
 
 function updateStatus(message) {
@@ -66,7 +70,7 @@ function extractZipFile(file, filesystem, oncomplete) {
     function() {
       updateStatus('Error reading zip file');
     }
-  )
+  );
 }
 
 function uploadDidChange(event) {
@@ -91,11 +95,11 @@ function uploadDidChange(event) {
 function loadFromLocalStorage() {
   function loadFailure() {
     updateStatus('Quake data not found in local html5 filesystem.');
-    updateStatus('Please locate a quake level set (for example the '
-      + '<a href="http://www.libsdl.org/projects/quake/data/quakesw-1.0.6.zip">'
-      + 'shareware levels</a>) and either extract them alongside the nmf file,'
-      + ' or use the upload button below to unzip them in the local html5'
-      + ' filesystem.');
+    updateStatus('Please locate a quake level set (for example the ' +
+      '<a href="http://www.libsdl.org/projects/quake/data/quakesw-1.0.6.zip">' +
+      'shareware levels</a>) and either extract them alongside the nmf file,' +
+      ' or use the upload button below to unzip them in the local html5' +
+      ' filesystem.');
     // Create an html5 file input elemnt in so the user can upload the game
     // data as a zip file.
     document.getElementById('quake').innerHTML =

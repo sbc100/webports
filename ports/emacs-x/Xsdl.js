@@ -4,6 +4,10 @@
  * found in the LICENSE file.
  */
 
+/* globals NaClTerm, NaClProcessManager */
+
+'use strict';
+
 NaClTerm.nmf = 'Xsdl.nmf';
 NaClTerm.argv = [
   '-screen', '1024x768x32', '-ac', '-br', '-noreset', ':42'

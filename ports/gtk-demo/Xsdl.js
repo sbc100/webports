@@ -4,6 +4,10 @@
  * found in the LICENSE file.
  */
 
+/* globals NaClTerm, NaClProcessManager */
+
+'use strict';
+
 NaClTerm.nmf = 'Xsdl.nmf';
 NaClTerm.argv = [
   '-screen', '1024x768x32', '-ac', '-br', '-noreset', ':42'
@@ -31,7 +35,7 @@ function startDemo() {
       window.close();
     });
   });
-  window.setTimeout(function(){document.title = 'Gtk+ Demo'}, 15000);
+  window.setTimeout(function() { document.title = 'Gtk+ Demo'; }, 15000);
 }
 
 function startWindowManager() {
@@ -45,4 +49,4 @@ function startWindowManager() {
 }
 
 startDemo();
-window.setTimeout(function() {startWindowManager()}, 5000);
+window.setTimeout(startWindowManager, 5000);

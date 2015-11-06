@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals TEST_F, chrometest, DevEnvTest */
+
 'use strict';
 
 // Run the command "bash -c 'exit 42'" and check the exit code.

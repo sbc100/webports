@@ -4,10 +4,12 @@
  * found in the LICENSE file.
  */
 
+/* globals TEST_F, ASSERT_EQ, chrometest, NaClProcessManager */
+
 'use strict';
 
 // TODO(sbc): Remove this once html5f becomes the default for nacl-spawn
-NaClProcessManager.fsroot = '/'
+NaClProcessManager.fsroot = '/';
 
 function run(nmf, cmd) {
   var mgr = new NaClProcessManager();

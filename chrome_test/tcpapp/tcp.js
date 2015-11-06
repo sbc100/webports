@@ -63,14 +63,14 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
       var response = {
         name: msg.name + '_reply',
         data: data || null
-      }
+      };
       port.postMessage(response);
     }
     function reject(err) {
       var response = {
         name: msg.name + '_error',
         error: err || null
-      }
+      };
       port.postMessage(response);
     }
 

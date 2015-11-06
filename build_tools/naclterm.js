@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals lib, NaClProcessManager, hterm */
+
 'use strict';
 
 lib.rtdep('lib.f',
@@ -44,7 +46,7 @@ function NaClTerm(argv) {
   mgr.setErrorListener(this.handleError_.bind(this));
   mgr.setRootProgressListener(this.handleRootProgress_.bind(this));
   mgr.setRootLoadListener(this.handleRootLoad_.bind(this));
-};
+}
 
 /**
  * Flag for cyan coloring in the terminal.
@@ -73,7 +75,7 @@ NaClTerm.prototype.run = function() {
   this.io.onTerminalResize = this.onTerminalResize_.bind(this);
 
   this.print(NaClTerm.ANSI_CYAN);
-}
+};
 
 /**
  * Static initializer called from index.html.
@@ -119,7 +121,7 @@ NaClTerm.prototype.handleStdout_ = function(msg) {
   } else {
     this.print(msg);
   }
-}
+};
 
 /**
  * Handle error event from NaCl.
@@ -129,7 +131,7 @@ NaClTerm.prototype.handleStdout_ = function(msg) {
  */
 NaClTerm.prototype.handleError_ = function(cmd, err) {
   this.print(cmd + ': ' + err + '\n');
-}
+};
 
 /**
  * Notify the user when we are done loading a URL.
@@ -137,14 +139,14 @@ NaClTerm.prototype.handleError_ = function(cmd, err) {
  */
 NaClTerm.prototype.doneLoadingUrl_ = function() {
   var width = this.width;
-  this.print('\r' + Array(width+1).join(' '));
+  this.print('\r' + new Array(width+1).join(' '));
   var message = '\rLoaded ' + this.lastUrl;
   if (this.lastTotal) {
-    var kbsize = Math.round(this.lastTotal/1024)
+    var kbsize = Math.round(this.lastTotal/1024);
     message += ' ['+ kbsize + ' KiB]';
   }
-  this.print(message.slice(0, width) + '\n')
-}
+  this.print(message.slice(0, width) + '\n');
+};
 
 /**
  * Handle load progress event from NaCl for the root process.
@@ -160,7 +162,7 @@ NaClTerm.prototype.handleRootProgress_ = function(
     url = url.substring(url.lastIndexOf('/') + 1);
 
   if (this.lastUrl && this.lastUrl !== url)
-    this.doneLoadingUrl_()
+    this.doneLoadingUrl_();
 
   if (!url)
     return;
@@ -177,7 +179,7 @@ NaClTerm.prototype.handleRootProgress_ = function(
   }
 
   this.print('\r' + message.slice(-this.width));
-}
+};
 
 /**
  * Handle load end event from NaCl for the root process.
@@ -197,7 +199,7 @@ NaClTerm.prototype.handleRootLoad_ = function() {
   this.loaded = true;
   this.print(this.bufferedOutput);
   this.bufferedOutput = '';
-}
+};
 
 /**
  * Clean up once the root process exits.
@@ -206,7 +208,7 @@ NaClTerm.prototype.handleRootLoad_ = function() {
  * @param {number} status The exit code of the process.
  */
 NaClTerm.prototype.handleExit_ = function(pid, status) {
-  this.print(NaClTerm.ANSI_CYAN)
+  this.print(NaClTerm.ANSI_CYAN);
 
   // The root process finished.
   if (status === -1) {
@@ -222,7 +224,7 @@ NaClTerm.prototype.handleExit_ = function(pid, status) {
   if (this.argv.onExit) {
     this.argv.onExit(status);
   }
-}
+};
 
 /**
  * Spawn the root process (usually bash).
@@ -260,7 +262,7 @@ NaClTerm.prototype.spawnRootProcess_ = function() {
   }
 
   self.started = true;
-}
+};
 
 /**
  * Handle hterm terminal resize events.
@@ -273,7 +275,7 @@ NaClTerm.prototype.onTerminalResize_ = function(width, height) {
   if (!this.started) {
     this.spawnRootProcess_();
   }
-}
+};
 
 /**
  * Handle hterm keystroke events.
@@ -292,4 +294,4 @@ NaClTerm.prototype.onVTKeystroke_ = function(str) {
   } catch (e) {
     this.print(e.message);
   }
-}
+};

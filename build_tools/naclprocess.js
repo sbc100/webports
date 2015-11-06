@@ -4,6 +4,9 @@
  * found in the LICENSE file.
  */
 
+/* jshint evil: true */
+/* globals PipeServer */
+
 'use strict';
 
 // TODO(gdeepti): extend to multiple mounts.
@@ -288,7 +291,7 @@ function getNaClArch(callback) {
   setTimeout(function() {
     callback(getNaClArch.naclArch_);
   }, 0);
-};
+}
 
 /**
  * Handles a stdout event.
@@ -403,17 +406,18 @@ NaClProcessManager.prototype.syncMountStatus_ = function() {
  */
 NaClProcessManager.prototype.adjustNmfEntry_ = function(entry) {
   for (var arch in entry) {
+    var path;
     if (arch === 'portable') {
       if (entry[arch]['pnacl-translate'] === undefined ||
           entry[arch]['pnacl-translate']['url'] === undefined) {
         return;
       }
-      var path = entry[arch]['pnacl-translate']['url'];
+      path = entry[arch]['pnacl-translate']['url'];
     } else {
       if (entry[arch]['url'] === undefined) {
         return;
       }
-      var path = entry[arch]['url'];
+      path = entry[arch]['url'];
     }
 
     // Convert 'path' from the NaCl VFS into an HTML5 filesystem: URL
@@ -478,11 +482,11 @@ NaClProcessManager.prototype.handleMessage_ = function(e) {
   // TODO(channingh): Once pinned applications support "result" instead of
   // "pid", change calls to reply() to set "result."
   function reply(contents) {
-    var reply = {};
-    reply[msg['id']] = contents;
+    var message = {};
+    message[msg['id']] = contents;
     // Enable to debug message stream (disabled for speed).
     // console.log(src.pid + '> reply: ' + JSON.stringify(reply));
-    src.postMessage(reply);
+    src.postMessage(message);
   }
 
   if (msg['command'] && handlers[msg['command']]) {
@@ -811,7 +815,7 @@ NaClProcessManager.prototype.createProcessGroup_ = function(pid, sid) {
   this.processGroups[pid] = {
     sid: sid,
     processes: {}
-  }
+  };
   this.processGroups[pid].processes[pid] = true;
 };
 
@@ -860,12 +864,12 @@ NaClProcessManager.prototype.exit = function(code, element) {
   // Reply to processes waiting on the exited process.
   var waitersToCheck = [pid, -1, -pgid];
   var reaped = false;
-  for (var i = 0; i < waitersToCheck.length; i++) {
-    var currPid = waitersToCheck[i];
-    if (this.waiters[currPid] === undefined) {
-      continue;
+  var waiters = this.waiters;
+  waitersToCheck.forEach(function(currPid) {
+    if (waiters[currPid] === undefined) {
+      return;
     }
-    var currPidWaiters = this.waiters[currPid];
+    var currPidWaiters = waiters[currPid];
     for (var j = 0; j < currPidWaiters.length; j++) {
       var waiter = currPidWaiters[j];
       if (waiter.srcPid === ppid) {
@@ -873,13 +877,13 @@ NaClProcessManager.prototype.exit = function(code, element) {
         reaped = true;
       }
     }
-    this.waiters[currPid] = currPidWaiters.filter(function(waiter) {
+    waiters[currPid] = currPidWaiters.filter(function(waiter) {
       return waiter.srcPid !== ppid;
     });
-    if (this.waiters[currPid].length === 0) {
-      delete this.waiters[currPid];
+    if (waiters[currPid].length === 0) {
+      delete waiters[currPid];
     }
-  }
+  });
   if (reaped) {
     this.deleteProcessEntry_(pid);
   } else {
@@ -942,8 +946,9 @@ NaClProcessManager.prototype.checkUrlNaClManifestType = function(
   var request = new XMLHttpRequest();
   request.open('GET', url, true);
   request.onload = function() {
+    var manifest;
     try {
-      var manifest = JSON.parse(request.responseText);
+      manifest = JSON.parse(request.responseText);
     } catch(e) {
       errorCallback('NaCl Manifest is not valid JSON at ' + url);
       return;
@@ -1136,8 +1141,8 @@ NaClProcessManager.prototype.spawn = function(
       argv.forEach(function(arg) {
         var argname = 'arg' + argn;
         addParam(argname, arg);
-        argn = argn + 1
-      })
+        argn = argn + 1;
+      });
     }
 
     self.pipeServer.addProcessPipes(fg.pid, params);
@@ -1262,7 +1267,7 @@ NaClProcessManager.prototype.waitpid = function(pid, options, reply, srcPid) {
     }
   }
 
-  if ((options & NaClProcessManager.WNOHANG) != 0) {
+  if ((options & NaClProcessManager.WNOHANG) !== 0) {
     reply(0, 0);
     return;
   }
@@ -1366,7 +1371,7 @@ GraphicalPopup.HTML_FILE = 'graphical.html';
  */
 GraphicalPopup.focusCurrentWindow = function() {
   chrome.app.window.current().focus();
-}
+};
 
 /**
  * This callback is called when the popup is closed.
@@ -1382,7 +1387,7 @@ GraphicalPopup.prototype.setClosedListener = function(listener) {
     throw new Error("Cannot set closed listener after creating window.");
   }
   this.onClosed = listener;
-}
+};
 
 /**
  * Create the window.

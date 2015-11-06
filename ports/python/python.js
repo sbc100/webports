@@ -4,4 +4,4 @@
  * found in the LICENSE file.
  */
 
-NaClTerm.nmf = 'python.nmf'
+NaClTerm.nmf = 'python.nmf';

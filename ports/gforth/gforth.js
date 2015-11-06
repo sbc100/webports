@@ -4,9 +4,11 @@
  * found in the LICENSE file.
  */
 
+/* globals NaClTerm, lib */
+
 'use strict';
 
-NaClTerm.nmf = 'gforth.nmf'
+NaClTerm.nmf = 'gforth.nmf';
 
 function onFailure() {
   console.log('Failed to allocate space!\n');

@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals TEST_F, ASSERT_EQ, ASSERT_GT, chrometest, DevEnvTest */
+
 'use strict';
 
 // Install several packages.

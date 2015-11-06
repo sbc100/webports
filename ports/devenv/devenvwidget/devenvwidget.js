@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+'use strict';
+
 /*
  * This plugin allows clients to include a DevEnvWidget in a web page, which
  * uses GCC in the NaCl Development Environment extension to compile and run
@@ -231,7 +233,7 @@
           self.port.onMessage.removeListener(handleMessage);
           reject(new Error(response.error));
         }
-      }
+      };
       self.port.postMessage(msg);
       self.port.onMessage.addListener(handleMessage);
     });

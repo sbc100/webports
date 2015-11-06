@@ -4,8 +4,12 @@
  * found in the LICENSE file.
  */
 
-NaClTerm.nmf = 'lua.nmf'
-NaClTerm.env = ['NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt']
+/* globals NaClTerm, lib */
+
+'use strict';
+
+NaClTerm.nmf = 'lua.nmf';
+NaClTerm.env = ['NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt'];
 
 function log(message) {
   document.getElementById('log').textContent = message;
@@ -16,7 +20,7 @@ function fsErrorHandler(error) {
 }
 
 function uploadFile(file) {
-  fs.root.getFile(file.name, {create: true, exclusive: true},
+  window.fs.root.getFile(file.name, {create: true, exclusive: true},
   function(fileEntry) {
     fileEntry.createWriter(function(fileWriter) {
     // Note: write() can take a File or Blob object.
@@ -27,9 +31,9 @@ function uploadFile(file) {
 }
 
 function uploadFiles(evt) {
-  var files = this.files;
-  for (var i = 0, file; file = files[i]; ++i) {
-    uploadFile(file)
+  var files = evt.srcElement.files;
+  for (var i = 0; i < files.length; i++) {
+    uploadFile(files[i]);
   }
 }
 
@@ -37,7 +41,7 @@ function onInitFS(fs) {
   var upload = document.getElementById('upload');
   if (upload !== null) {
     upload.addEventListener('change', uploadFiles, false);
-    window.fs = fs
+    window.fs = fs;
   }
   NaClTerm.init();
 }
@@ -45,7 +49,7 @@ function onInitFS(fs) {
 function onInit() {
   navigator.webkitPersistentStorage.requestQuota(1024 * 1024,
     function(bytes) {
-      window.webkitRequestFileSystem(window.PERSISTENT, bytes, onInitFS)
+      window.webkitRequestFileSystem(window.PERSISTENT, bytes, onInitFS);
     },
     function() {
       log("Failed to allocate space!\n");

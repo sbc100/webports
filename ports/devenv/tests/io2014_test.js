@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals TEST_F, ASSERT_EQ, ASSERT_TRUE, chrometest, DevEnvTest */
+
 'use strict';
 
 // Tests of the Google I/O 2014 tutorial at:
@@ -77,12 +79,14 @@ TEST_F(DevEnvTest, 'testDemo', function() {
         'cd work/voronoi && git commit -am "fixed build error"');
   }).then(function() {
     var sysArch = self.params['SYS_ARCH'];
+    var libDir;
+    var suffix;
     if (sysArch === 'i686') {
-      var libDir = 'lib32';
-      var suffix = 'x86_32';
+      libDir = 'lib32';
+      suffix = 'x86_32';
     } else if (sysArch === 'x86_64') {
-      var libDir = 'lib64';
-      var suffix = 'x86_64';
+      libDir = 'lib64';
+      suffix = 'x86_64';
     } else {
       ASSERT_TRUE(false, 'unknown arch: ' + sysArch);
     }

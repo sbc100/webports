@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals ASSERT_EQ, EXPECT_EQ, EXPECT_TRUE, chrometest */
+
 'use strict';
 
 function DevEnvTest() {
@@ -15,7 +17,7 @@ function DevEnvTest() {
   // Buffer incoming TCP messages.
   this.tcpBuffer = {};
   this.tcpDisconnected = {};
-};
+}
 
 DevEnvTest.prototype = new chrometest.Test();
 DevEnvTest.prototype.constructor = DevEnvTest;

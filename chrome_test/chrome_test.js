@@ -87,7 +87,7 @@ chrometest.resetExtension = function() {
     port.disconnect();
     return msg.count;
   });
-}
+};
 
 /**
  * Get a list of all loaded extensions.
@@ -232,7 +232,7 @@ chrometest.httpGet = function(url) {
           reject(r.status);
         }
       }
-    }
+    };
     r.send();
   });
 };
@@ -280,7 +280,7 @@ chrometest.reportTestCount_ = function(testCount) {
  */
 chrometest.beginTest_ = function(name) {
   return chrometest.resetExtension().then(function(count) {
-    if (count != 0) {
+    if (count !== 0) {
       throw new Error(
           'Test extension connections from the last test remain active!');
     }
@@ -307,12 +307,14 @@ chrometest.endTest_ = function() {
     var duration = endTime.getTime() - chrometest.startTime_.getTime();
     duration = chrometest.formatDuration(duration);
     var name = chrometest.currentTestName_;
+    var resultMsg;
+    var result;
     if (chrometest.passed_) {
-      var resultMsg = '      OK';
-      var result = 1;
+      resultMsg = '      OK';
+      result = 1;
     } else {
-      var resultMsg = ' FAILED ';
-      var result = 0;
+      resultMsg = ' FAILED ';
+      result = 0;
     }
     console.log('[ ' + resultMsg + ' ] ' + name + ' (' + duration + ')');
     chrometest.startTime_ = null;
@@ -436,20 +438,22 @@ chrometest.wildcardMatch = function(filter, s) {
  */
 chrometest.filterMatch = function(filter, s) {
   var parts = filter.split('-');
+  var positive;
+  var negative;
   if (parts.length == 1) {
-    var positive = parts[0].split(':');
-    var negative = [];
+    positive = parts[0].split(':');
+    negative = [];
   } else if (parts.length == 2) {
-    var positive = parts[0].split(':');
-    var negative = parts[1].split(':');
+    positive = parts[0].split(':');
+    negative = parts[1].split(':');
   } else {
     // Treat ill-formated filters as non-matches.
     return false;
   }
-  if (positive.length == 1 && positive[0] == '') {
+  if (positive.length == 1 && positive[0] === '') {
     positive = ['*'];
   }
-  if (negative.length == 1 && negative[0] == '') {
+  if (negative.length == 1 && negative[0] === '') {
     negative = [];
   }
   for (var i = 0; i < positive.length; i++) {
@@ -713,16 +717,16 @@ chrometest.Test.prototype.tearDown = function() {
 
 /**
  * Register a test case using a fixture class.
- * @param {string} fixtureClass The test fixture class object.
+ * @param {string} FixtureClass The test fixture class object.
  * @param {string} testName The name of the test.
  * @param {function()} testFunc Called to run the test, may return
  *                              a Promise.
  * @param {string} opt_caseName Optional name for the case, otherwise the
- *     fixtureClass class name is used.
+ *     FixtureClass class name is used.
  */
-function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
-  if (opt_caseName == undefined) {
-    opt_caseName = fixtureClass.name;
+function TEST_F(FixtureClass, testName, testFunc, opt_caseName) {
+  if (opt_caseName === undefined) {
+    opt_caseName = FixtureClass.name;
   }
   var fullName = opt_caseName + '.' + testName;
   chrometest.tests_.push({
@@ -731,7 +735,7 @@ function TEST_F(fixtureClass, testName, testFunc, opt_caseName) {
       return Promise.resolve().then(function() {
         return chrometest.beginTest_(fullName);
       }).then(function() {
-        chrometest.currentTest_ = new fixtureClass();
+        chrometest.currentTest_ = new FixtureClass();
         return Promise.resolve().then(function() {
           return chrometest.currentTest_.setUp();
         }).then(function() {

@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+'use strict';
+
 function onLaunched(launchData) {
   chrome.app.window.create('index.html', {
     width: 640,

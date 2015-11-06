@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals g_mount */
+
 'use strict';
 
 // TODO(gdeepti): Clean up global variables.
@@ -44,7 +46,7 @@ function grabFocus() {
      }
     element.setAttribute('tabIndex', '-1');
     return true;
-  })
+  });
 }
 
 function releaseFocus() {
@@ -59,7 +61,7 @@ function releaseFocus() {
       element.removeAttribute('tabIndex');
     }
     return true;
-  })
+  });
   mounterClient.terminal.focus();
 }
 
@@ -67,14 +69,14 @@ function sizeBackground() {
   mounterBackground.style.height = intToPixels(window.innerHeight);
   var bgTop = 0;
   if (!isVisible)
-    bgTop = 10 - window.innerHeight
+    bgTop = 10 - window.innerHeight;
   mounterBackground.style.top = intToPixels(bgTop);
 }
 
 function changeVisibility(visible) {
   isVisible = visible;
 
-  sizeBackground()
+  sizeBackground();
   if (!mounterClient)
     return;
 
@@ -99,12 +101,12 @@ function mounterClicked(event) {
   event.stopPropagation();
 }
 
-function initMounterclient(mount, chooseFolder,
+function MounterClient(mount, chooseFolder,
     mountHandler, unmountHandler, terminal) {
   this.mount = mount;
   this.onChooseFolder = chooseFolder;
   this.onMount = mountHandler;
-  this.onUnmount = unmountHandler
+  this.onUnmount = unmountHandler;
   this.terminal = terminal;
 }
 
@@ -123,7 +125,7 @@ function populateMountControl(mountControl) {
   mountControl.selectButton.disabled = g_mount.mounted;
   mountControl.mountButton.disabled =
       (g_mount.mounted ||
-      (g_mount.entry == null));
+      (g_mount.entry === null));
   mountControl.unmountButton.disabled = !g_mount.mounted;
 }
 
@@ -206,7 +208,7 @@ function addMountControl(mount, init) {
   init(function() {
     populateMountControl(mountControl);
   });
-  mounter.appendChild(mountControl);
+  window.mounter.appendChild(mountControl);
 
   return mountControl;
 }
@@ -221,7 +223,5 @@ function initMounter(makeVisible, aMounterClient, init) {
   addMountControl(g_mount, init);
   changeVisibility(makeVisible);
 
-  window.onresize = function() {
-    sizeBackground();
-  }
+  window.onresize = sizeBackground;
 }

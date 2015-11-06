@@ -4,11 +4,13 @@
  * found in the LICENSE file.
  */
 
+/* globals NaClTerm, lib */
+
 'use strict';
 
-NaClTerm.nmf = 'civetweb.nmf'
+NaClTerm.nmf = 'civetweb.nmf';
 
-lib.rtdep('lib.f')
+lib.rtdep('lib.f');
 
 window.onload = function() {
   lib.init(function() {

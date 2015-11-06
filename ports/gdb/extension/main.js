@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals lib, hterm */
+
 'use strict';
 
 // The devtools page for the debugger.
@@ -44,7 +46,7 @@ GdbTerm.prototype.onTerminalResize_ = function(width, height) {
     moduleList.firstChild.selected = true;
     updateSelection();
   }
-}
+};
 
 /**
  * Handle a keystroke from the user.
@@ -55,7 +57,7 @@ GdbTerm.prototype.onVTKeystroke_ = function(str) {
     'name': 'input',
     'msg': {'gdb': str},
   });
-}
+};
 
 /**
  * Setup handlers after terminal start.
@@ -63,7 +65,7 @@ GdbTerm.prototype.onVTKeystroke_ = function(str) {
 GdbTerm.prototype.run = function() {
   this.io_.onVTKeystroke = this.onVTKeystroke_.bind(this);
   this.io_.onTerminalResize = this.onTerminalResize_.bind(this);
-}
+};
 
 
 /**
@@ -316,7 +318,7 @@ function handleChange(msg) {
       !settings.onFaultAttach;
   document.getElementById('showGdb').checked = settings.showGdb;
 
-  function Visible(processId) {
+  function isVisible(processId) {
     if (!(processId in modules)) {
       return false;
     }
@@ -325,14 +327,14 @@ function handleChange(msg) {
 
   for (var i = 0; i < moduleList.childNodes.length; i++) {
     var child = moduleList.childNodes[i];
-    if (!Visible(child.id)) {
+    if (!isVisible(child.id)) {
       moduleList.removeChild(child);
       --i;
     }
   }
   for (var processId in modules) {
     var module = modules[processId];
-    if (!Visible(processId))
+    if (!isVisible(processId))
       continue;
     var item = document.getElementById(processId);
     if (item === null) {

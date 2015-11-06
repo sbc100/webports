@@ -292,7 +292,7 @@ function handleConnect(port) {
 
   // Announce the new module.
   notifyListeners('join');
-};
+}
 
 /**
  * Listen for internal connection events (from main.js).

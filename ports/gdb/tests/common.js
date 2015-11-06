@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals chrometest, ASSERT_NE, ASSERT_FALSE */
+
 'use strict';
 
 /**
@@ -77,7 +79,7 @@ function moduleMessageWaiter(module) {
   }, module);
   module.addEventListener('message', handleMessage, true);
   return waiter;
-};
+}
 
 
 /**
@@ -131,7 +133,7 @@ TestModuleTest.prototype.tearDown = function() {
   // Wait for the test module to exit.
   return waitForExtraModuleCount(0, self.initialProcesses).then(function() {
     // Remove node.
-    if (self.object != null) {
+    if (self.object !== null) {
       var object = self.object.detach();
       self.object = null;
       self.rawObject = null;

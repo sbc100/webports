@@ -4,6 +4,10 @@
  * found in the LICENSE file.
  */
 
+/* globals NaClProcessManager */
+
+'use strict';
+
 NaClProcessManager.fsroot = '/devenv';
 
 // TODO(sbc): This should be handled by nacl_io or perhaps by NaClProcessManager
@@ -21,10 +25,10 @@ function makeRootDir() {
       );
     }
 
-    window.requestFileSystem  = window.requestFileSystem
-        || window.webkitRequestFileSystem;
+    window.requestFileSystem  = (window.requestFileSystem ||
+        window.webkitRequestFileSystem);
     window.requestFileSystem(
-        PERSISTENT,
+        window.PERSISTENT,
         0,
         function(fs) { createDir(fs.root, NaClProcessManager.fsroot); },
         function() {

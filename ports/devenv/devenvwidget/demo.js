@@ -4,6 +4,10 @@
  * found in the LICENSE file.
  */
 
+/* globals DevEnvWidget */
+
+'use strict';
+
 // This is an example use of devenvwidget.js.
 function $(i) {
   return document.querySelector(i);

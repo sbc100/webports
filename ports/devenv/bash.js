@@ -4,6 +4,12 @@
  * found in the LICENSE file.
  */
 
+/* globals g_mount, lib, hterm, NaClTerm, makeRootDir, initMounter */
+/* globals mounter: true, mounterHeader: true, mounterBackground: true */
+/* globals mounterThumb: true, MounterClient */
+
+'use strict';
+
 function addMount(mountPoint, entry, localPath, mounted) {
   g_mount.mountPoint = mountPoint;
   g_mount.entry = entry;
@@ -61,7 +67,7 @@ function handleMount(mount, callback) {
 }
 
 function handleUnmount(mount, callback) {
-  mount.operationId = 'unmount'
+  mount.operationId = 'unmount';
   mount.available = false;
   var message = {};
   message.unmount = mount;
@@ -72,7 +78,7 @@ function handleUnmount(mount, callback) {
 
 function initMountSystem() {
   var terminal = document.getElementById('terminal');
-  var mounterClient = new initMounterclient(g_mount, handleChooseFolder,
+  var mounterClient = new MounterClient(g_mount, handleChooseFolder,
       handleMount, handleUnmount, terminal);
   addMount('/mnt/local/', null, '', false);
   restoreMount(g_mount, function() {

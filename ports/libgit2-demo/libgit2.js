@@ -8,11 +8,11 @@
 function runGitCmd(message, arg1, arg2) {
   var dir = document.getElementById('directory').value;
   if (arg2 && arg1)
-    embed.postMessage([message, dir, arg1, arg2]);
+    window.embed.postMessage([message, dir, arg1, arg2]);
   else if (arg1)
-    embed.postMessage([message, dir, arg1]);
+    window.embed.postMessage([message, dir, arg1]);
   else
-    embed.postMessage([message, dir]);
+    window.embed.postMessage([message, dir]);
 }
 
 function clone() {
@@ -56,7 +56,7 @@ function handleMessage(message) {
 
 function onLoad() {
   window.embed = document.getElementById('nacl_module');
-  embed.addEventListener('message', handleMessage, true);
+  window.embed.addEventListener('message', handleMessage, true);
   document.getElementById('init').addEventListener('click', init);
   document.getElementById('clone').addEventListener('click', clone);
   document.getElementById('status').addEventListener('click', status);

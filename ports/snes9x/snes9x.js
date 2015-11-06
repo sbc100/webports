@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+'use strict';
+
 function domContentLoaded() {
   document.getElementById('romfile').addEventListener(
       'change', handleFileSelect, false);
@@ -15,16 +17,14 @@ function handleFileSelect(evt) {
   var result = null;
 
   console.log('reader.readAsArrayBuffer');
-  reader.onloadend = onReadSuccess;
+  reader.onloadend = onLoadEnd;
   reader.onerror = errorHandler;
   reader.readAsArrayBuffer(file);
 
-  function onReadSuccess() {
-    result = this.result;
-
+  function onLoadEnd(evt) {
     console.log('window.webkitRequestFileSystem');
     window.webkitRequestFileSystem(
-        window.TEMPORARY, result.size, onRequestQuotaSuccess, errorHandler);
+        window.TEMPORARY, evt.result.size, onRequestQuotaSuccess, errorHandler);
   }
 
   function onRequestQuotaSuccess(fs) {

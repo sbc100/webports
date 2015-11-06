@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals TEST, EXPECT_EQ, ASSERT_EQ, EXPECT_TRUE */
+
 'use strict';
 
 TEST('UserAgentTest', 'testInTestMode', function() {

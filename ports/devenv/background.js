@@ -4,6 +4,8 @@
  * found in the LICENSE file.
  */
 
+/* globals NaClProcessManager, makeRootDir */
+
 'use strict';
 
 function newWindow() {
@@ -94,7 +96,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
          * enabling the repo.
          * Also, disable /usr/etc/pkg/repos/NaCl.conf.
          */
-        console.log('set_local_repo')
+        console.log('set_local_repo');
         var local_repo_file = '/usr/etc/pkg/repos/Local.conf';
         files.readText(local_repo_file).then(function(data) {
           data = data.replace('http://localhost:5103', msg.data);
@@ -267,7 +269,7 @@ FileManager.prototype.writeText = function(fileName, content) {
     }, reject);
 
     function onCreateWriter(writer) {
-      var blob = new Blob([content], {type:'text/plain'})
+      var blob = new Blob([content], {type:'text/plain'});
       // Discard arguments.
       writer.onwriteend = function() {
         // truncate done, write data
@@ -275,7 +277,7 @@ FileManager.prototype.writeText = function(fileName, content) {
           writer.write(blob);
         else
           resolve();
-      }
+      };
       writer.onerror = reject;
       writer.truncate(0);
     }

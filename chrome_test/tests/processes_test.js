@@ -4,8 +4,9 @@
  * found in the LICENSE file.
  */
 
-'use strict';
+/* globals TEST_F, TEST, EXPECT_EQ, EXPECT_TRUE, EXPECT_GE, chrometest */
 
+'use strict';
 
 function ProcessesTest() {
   this.processes = null;
@@ -60,7 +61,7 @@ TEST_F(ProcessesTest, 'testExtensionTitles', function() {
     var process = this.processes[id];
     if (process.type == 'extension') {
       if (process.title == 'Extension: Chrome Testing Extension') {
-        hasChromeTest = true
+        hasChromeTest = true;
       } else if (process.title == 'Extension: Ping Test Extension') {
         hasPingTest = true;
       }

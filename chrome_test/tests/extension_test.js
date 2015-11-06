@@ -4,8 +4,9 @@
  * found in the LICENSE file.
  */
 
-'use strict';
+/* globals TEST, EXPECT_EQ, ASSERT_EQ, chrometest */
 
+'use strict';
 
 TEST('ExtensionTest', 'testGetAllExtensions', function() {
   return chrometest.getAllExtensions().then(function(extensions) {

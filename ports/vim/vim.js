@@ -4,12 +4,14 @@
  * found in the LICENSE file.
  */
 
+/* globals NaClTerm, lib */
+
 'use strict';
 
-NaClTerm.nmf = 'vim.nmf'
+NaClTerm.nmf = 'vim.nmf';
 
 function log(message) {
-  console.log(message)
+  console.log(message);
 }
 
 function fsErrorHandler(error) {
@@ -23,9 +25,9 @@ function runVim() {
 
 function runVimWithFile(file) {
   log('runVimWithFile: ' + file.name);
-  tempFS.root.getFile(file.name, {create: true},
+  window.tempFS.root.getFile(file.name, {create: true},
     function(fileEntry) {
-      window.tmpFileEntry = fileEntry
+      window.tmpFileEntry = fileEntry;
       fileEntry.createWriter(function(fileWriter) {
         // Note: write() can take a File or Blob object.
         fileWriter.write(file);
@@ -50,7 +52,7 @@ function uploadDidChange(event) {
 
 function onInitFS(fs) {
   log('onInitFS');
-  window.tempFS = fs
+  window.tempFS = fs;
 
   // Once the temp filesystem is initialised we launch vim.
   // For packaged apps the fileEntryToLoad attribute will be set if the
@@ -83,7 +85,7 @@ function onInitFS(fs) {
 function onInit() {
   navigator.webkitPersistentStorage.requestQuota(1024 * 1024,
     function(bytes) {
-      window.webkitRequestFileSystem(window.TEMPORARAY, bytes, onInitFS)
+      window.webkitRequestFileSystem(window.TEMPORARAY, bytes, onInitFS);
     },
     function() {
       log('Failed to allocate space!\n');

@@ -4,6 +4,10 @@
  * found in the LICENSE file.
  */
 
+/* globals ASSERT_EQ, ASSERT_LE, ASSERT_GE, EXPECT_EQ, TEST_F, TEST */
+/* globals chrometest, TestModuleTest, waitForExtraModuleCount */
+/* globals waitIgnoringTerminal, ASSERT_TRUE, ASSERT_FALSE */
+
 'use strict';
 
 function DebugExtensionTest() {

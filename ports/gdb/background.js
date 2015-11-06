@@ -361,7 +361,7 @@ DebugConnection_.prototype.createGdb_ = function() {
   argv.forEach(function(arg) {
     var argname = 'arg' + argn;
     addParam(argname, arg);
-    argn = argn + 1
+    argn = argn + 1;
   });
 
   document.body.appendChild(gdb);

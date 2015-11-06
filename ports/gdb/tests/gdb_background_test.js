@@ -4,6 +4,10 @@
  * found in the LICENSE file.
  */
 
+/* globals ASSERT_EQ, ASSERT_LE, ASSERT_GE, EXPECT_EQ, TEST_F, TEST */
+/* globals chrometest, TestModuleTest, waitForExtraModuleCount */
+/* globals waitIgnoringTerminal */
+
 'use strict';
 
 function GdbExtensionTestModuleTest() {
@@ -125,7 +129,7 @@ GdbExtensionTestModuleTest.prototype.waitForGdbPrompt = function(min, max) {
 GdbExtensionTestModuleTest.prototype.waitForGdbReply = function(lines) {
   var self = this;
   function checkLine() {
-    if (lines.length == 0) {
+    if (lines.length === 0) {
       return;
     }
     return Promise.resolve().then(function() {

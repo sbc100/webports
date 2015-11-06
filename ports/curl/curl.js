@@ -4,4 +4,4 @@
  * found in the LICENSE file.
  */
 
-NaClTerm.nmf = 'curl.nmf'
+NaClTerm.nmf = 'curl.nmf';
