@@ -111,6 +111,18 @@ diff --git a/lib/glthread/lock.h b/lib/glthread/lock.h
  #  pragma weak pthread_once
  #  pragma weak pthread_cond_init
  #  pragma weak pthread_cond_wait
+diff --git a/lib/open.c b/lib/open.c
+--- a/lib/open.c
++++ b/lib/open.c
+@@ -173,7 +173,7 @@ open (const char *filename, int flags, ...)
+ #endif
+ 
+ #if REPLACE_FCHDIR
+-  if (!REPLACE_OPEN_DIRECTORY && 0 <= fd)
++  if (0 <= fd)
+     fd = _gl_register_fd (fd, filename);
+ #endif
+ 
 diff --git a/lib/openat.c b/lib/openat.c
 --- a/lib/openat.c
 +++ b/lib/openat.c
@@ -142,6 +154,37 @@ diff --git a/lib/regex_internal.c b/lib/regex_internal.c
      return;
    --set->nelem;
    for (; idx < set->nelem; idx++)
+diff --git a/lib/sys_stat.in.h b/lib/sys_stat.in.h
+--- a/lib/sys_stat.in.h
++++ b/lib/sys_stat.in.h
+@@ -43,7 +43,9 @@
+ #include <time.h>
+ 
+ /* The include_next requires a split double-inclusion guard.  */
++#define fstatat not_fstatat
+ #@INCLUDE_NEXT@ @NEXT_SYS_STAT_H@
++#undef fstatat
+ 
+ #ifndef _@GUARD_PREFIX@_SYS_STAT_H
+ #define _@GUARD_PREFIX@_SYS_STAT_H
+diff --git a/lib/unistd--.h b/lib/unistd--.h
+--- a/lib/unistd--.h
++++ b/lib/unistd--.h
+@@ -20,8 +20,14 @@
+ #include <unistd.h>
+ #include "unistd-safer.h"
+ 
++#ifndef __native_client__
++/*
++ * TODO(crbug.com/555102): dup_safer relies on the F_DUPFD fcntl which is not
++ * yet supported in nacl_io.
++ */
+ #undef dup
+ #define dup dup_safer
++#endif
+ 
+ #undef pipe
+ #define pipe pipe_safer
 diff --git a/src/Makefile.in b/src/Makefile.in
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
