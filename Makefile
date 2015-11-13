@@ -12,9 +12,11 @@
 # at out/sentinels/*
 
 PYLINT = build_tools/python_wrapper -m pylint
-JSHINT = nodejs node_modules/.bin/jshint
-COVERAGE = bin/coverage
-COVERAGE_ARGS = --fail-under=60
+NODE ?= nodejs
+JSHINT := $(NODE) node_modules/.bin/jshint
+JSLINT := $(NODE) node_modules/.bin/jslint
+COVERAGE := bin/coverage
+COVERAGE_ARGS := --fail-under=60
 COVERAGE_VER := $(shell $(COVERAGE) --version 2>/dev/null)
 
 ifeq ($(V),1)
@@ -65,13 +67,16 @@ check: test
 
 JS_FILES := $(shell git ls-files "*.js")
 
-lint: pylint jshint
+lint: pylint jshint jslint
 
 pylint:
 	$(PYLINT) --rcfile=.pylintrc lib/naclports lib/naclports/tests/*.py
 
 jshint:
 	$(JSHINT) $(JS_FILES)
+
+jslint:
+	$(JSLINT) build_tools/naclprocess.js build_tools/naclterm.js
 
 test:
 	$(COVERAGE) run --include=lib/naclports/*,build_tools/* -m nose \
@@ -84,4 +89,4 @@ test:
 	bin/naclports install $* $(BUILD_FLAGS)
 
 .PHONY: all run clean sdklibs sdklibs_list reallyclean check test
-.PHONY: lint pylint jshint
+.PHONY: lint pylint jshint jslint

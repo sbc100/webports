@@ -32,7 +32,8 @@ function uploadFile(file) {
 
 function uploadFiles(evt) {
   var files = evt.srcElement.files;
-  for (var i = 0; i < files.length; i++) {
+  var i;
+  for (i = 0; i < files.length; i++) {
     uploadFile(files[i]);
   }
 }

@@ -52,10 +52,11 @@ function saveFile(saveFileEntry) {
 function launchVim(fileEntry) {
   function onWindowCreated(win) {
     win.contentWindow.fileEntryToLoad = fileEntry;
-    if (fileEntry)
+    if (fileEntry) {
       console.log('Lauching vim with item: ' + fileEntry);
-    else
+    } else {
       console.log('Lauching vim without items');
+    }
 
     function onWindowClosed() {
       console.log('onWindowClosed');
@@ -78,8 +79,9 @@ function launchVim(fileEntry) {
 
 function onLaunchedListener(launchData) {
   var fileEntry;
-  if (launchData.items)
+  if (launchData.items) {
     fileEntry = launchData.items[0].entry;
+  }
   launchVim(fileEntry);
 }
 

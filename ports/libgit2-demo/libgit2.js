@@ -7,12 +7,13 @@
 'use strict';
 function runGitCmd(message, arg1, arg2) {
   var dir = document.getElementById('directory').value;
-  if (arg2 && arg1)
+  if (arg2 && arg1) {
     window.embed.postMessage([message, dir, arg1, arg2]);
-  else if (arg1)
+  } else if (arg1) {
     window.embed.postMessage([message, dir, arg1]);
-  else
+  } else {
     window.embed.postMessage([message, dir]);
+  }
 }
 
 function clone() {

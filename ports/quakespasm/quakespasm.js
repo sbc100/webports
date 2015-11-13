@@ -24,8 +24,9 @@ function runQuake(pwd) {
   embed.height = 600;
   embed.type = 'application/x-nacl';
   embed.src = 'quakespasm.nmf';
-  if (pwd)
+  if (pwd) {
     embed.setAttribute('PWD', pwd);
+  }
   document.getElementById('quake').appendChild(embed);
 }
 

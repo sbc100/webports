@@ -23,7 +23,8 @@
  */
 function rspChecksum_(cmd) {
   var checksum = 0;
-  for (var i = 0; i < cmd.length; i++) {
+  var i;
+  for (i = 0; i < cmd.length; i++) {
     checksum = (checksum + cmd.charCodeAt(i)) & 0xff;
   }
   var checksumStr = '0' + checksum.toString(16);
@@ -39,7 +40,8 @@ function rspChecksum_(cmd) {
 function stringToArrayBuffer_(str) {
   var buf = new ArrayBuffer(str.length);
   var view = new Uint8Array(buf);
-  for (var i = 0; i < str.length; i++) {
+  var i;
+  for (i = 0; i < str.length; i++) {
     view[i] = str.charCodeAt(i);
   }
   return buf;
@@ -71,7 +73,8 @@ function rspMessage_(cmd) {
 function rspDecode_(msg) {
   var view = new Uint8Array(msg);
   var result = '';
-  for (var i = 0; i < msg.byteLength; i++) {
+  var i;
+  for (i = 0; i < msg.byteLength; i++) {
     result += String.fromCharCode(view[i]);
   }
   return result;
