@@ -442,6 +442,17 @@ diff --git a/libpkg/fetch.c b/libpkg/fetch.c
  		if (line[linelen -1 ] == '\n')
  			line[linelen -1 ] = '\0';
  
+diff --git a/libpkg/pkg.h.in b/libpkg/pkg.h.in
+--- a/libpkg/pkg.h.in
++++ b/libpkg/pkg.h.in
+@@ -42,6 +42,7 @@ extern "C" {
+ #include <sys/cdefs.h>
+ #include <stdarg.h>
+ #include <stdbool.h>
++#include <stdint.h>
+ #include <sys/sbuf.h>
+ #include <openssl/pem.h>
+ #include <sysexits.h>
 diff --git a/libpkg/pkg_add.c b/libpkg/pkg_add.c
 --- a/libpkg/pkg_add.c
 +++ b/libpkg/pkg_add.c
@@ -1471,6 +1482,17 @@ diff --git a/libpkg/plugins.c b/libpkg/plugins.c
  
  const pkg_object *
  pkg_plugin_conf(struct pkg_plugin *p)
+diff --git a/libpkg/private/pkg.h b/libpkg/private/pkg.h
+--- a/libpkg/private/pkg.h
++++ b/libpkg/private/pkg.h
+@@ -40,6 +40,7 @@
+ #include <archive.h>
+ #include <sqlite3.h>
+ #include <stdbool.h>
++#include <stdint.h>
+ #include <uthash.h>
+ #include <utlist.h>
+ #include <ucl.h>
 diff --git a/libpkg/private/utils.h b/libpkg/private/utils.h
 --- a/libpkg/private/utils.h
 +++ b/libpkg/private/utils.h

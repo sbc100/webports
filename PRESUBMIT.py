@@ -18,6 +18,7 @@ _EXCLUDED_PATHS = (
     # newlib and as such do not contain our copyright header.
     r"^ports[\/\\]glibc-compat[\/\\]include[\/\\]err\.h",
     r"^ports[\/\\]glibc-compat[\/\\]include[\/\\]fts\.h",
+    r"^ports[\/\\]glibc-compat[\/\\]include[\/\\]sys[\/\\]socket\.h",
     r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]err\.c",
     r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]libc-symbols\.h",
     r"^ports[\/\\]glibc-compat[\/\\]src[\/\\]dirfd.c",

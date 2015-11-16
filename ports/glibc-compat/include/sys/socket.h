@@ -38,7 +38,7 @@
 #define	_SYS_SOCKET_H_
 
 #include <sys/types.h>
-#include <sys/_types.h>
+#include <stdint.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
