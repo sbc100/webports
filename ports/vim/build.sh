@@ -6,7 +6,7 @@ BUILD_DIR=${SRC_DIR}
 EXTRA_CONFIGURE_ARGS+="--enable-gui=no --with-tlib=ncurses"
 EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 EXECUTABLES=src/vim${NACL_EXEEXT}
-export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
+EnableCliMain
 
 ConfigureStep() {
   # These settings are required by vim's configure when cross compiling.
