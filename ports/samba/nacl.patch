@@ -129,6 +129,87 @@ diff --git a/lib/replace/wscript b/lib/replace/wscript
                      struct stat st;
                      char tpl[20]="/tmp/test.XXXXXX";
                      char tpl2[20]="/tmp/test.XXXXXX";
+diff --git a/lib/socket/interfaces.c b/lib/socket/interfaces.c
+--- a/lib/socket/interfaces.c
++++ b/lib/socket/interfaces.c
+@@ -25,6 +25,11 @@
+ #include "interfaces.h"
+ #include "lib/util/tsort.h"
+ 
++#if FAKE_GET_INTERFACES
++# include <sys/socket.h>
++# include <netinet/in.h>
++#endif
++
+ /****************************************************************************
+  Create a struct sockaddr_storage with the netmask bits set to 1.
+ ****************************************************************************/
+@@ -138,9 +143,53 @@ static int _get_interfaces(TALLOC_CTX *mem_ctx, struct iface_struct **pifaces)
+ 	int total = 0;
+ 	size_t copy_size;
+ 
++#if FAKE_GET_INTERFACES
++	// Under NaCl the API's to get network interfaces do not work. This code
++	// path provides a fake response because if nothing is returned libsmbclient
++	// will abort startup.
++	//
++	// The actual values returned here are never used as far as I can tell
++	// and name resolution/NBT is done in javascript prior to calling libsmbclient
++	// for the purposes of the Chrome Samba app.
++	iflist = talloc_array(mem_ctx, struct iface_struct, 1);
++	if (iflist == NULL) {
++		errno = ENOMEM;
++		return -1;
++	}
++
++	iflist->ifa_next = NULL;
++	iflist->ifa_name = talloc_strdup(mem_ctx, "fake");
++	// This is what my real interface returned. It might only be necessary to
++	// be IFF_BROADCAST and IFF_UP?
++	iflist->ifa_flags = 0x00011043;
++
++	// IP Address
++	struct sockaddr_in* addr = talloc(mem_ctx, struct sockaddr_in);
++	addr->sin_family = AF_INET;
++	addr->sin_port = 0;
++	inet_aton("192.168.2.3", &addr->sin_addr.s_addr);
++	iflist->ifa_addr = addr;
++
++	// Net mask
++	addr = talloc(mem_ctx, struct sockaddr_in);
++	addr->sin_family = AF_INET;
++	addr->sin_port = 0;
++	inet_aton("255.255.255.0", &addr->sin_addr.s_addr);
++	iflist->ifa_netmask = addr;
++
++	// Broadcast address.
++	addr = talloc(mem_ctx, struct sockaddr_in);
++	addr->sin_family = AF_INET;
++	addr->sin_port = 0;
++	inet_aton("192.168.2.255", &addr->sin_addr.s_addr);
++	iflist->ifa_broadaddr = addr;
++
++	iflist->ifa_data = NULL;
++#else
+ 	if (getifaddrs(&iflist) < 0) {
+ 		return -1;
+ 	}
++#endif
+ 
+ 	count = 0;
+ 	for (ifptr = iflist; ifptr != NULL; ifptr = ifptr->ifa_next) {
+@@ -223,7 +272,11 @@ static int _get_interfaces(TALLOC_CTX *mem_ctx, struct iface_struct **pifaces)
+ 		total++;
+ 	}
+ 
++// Since the iflist was allocated by talloc in the FAKE_GET_INTERFACES case it
++// doesn't need to be deleted.
++#if !FAKE_GET_INTERFACES
+ 	freeifaddrs(iflist);
++#endif
+ 
+ 	*pifaces = ifaces;
+ 	return total;
 diff --git a/source3/wscript b/source3/wscript
 --- a/source3/wscript
 +++ b/source3/wscript
