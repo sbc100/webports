@@ -12,3 +12,15 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
    endif()
    
    set(CMAKE_REQUIRED_FLAGS "")
+diff --git a/cmake/EigenTesting.cmake b/cmake/EigenTesting.cmake
+--- a/cmake/EigenTesting.cmake
++++ b/cmake/EigenTesting.cmake
+@@ -324,7 +324,7 @@ macro(ei_get_compilerver VAR)
+     # on all other system we rely on ${CMAKE_CXX_COMPILER}
+     # supporting a "--version" or "/version" flag
+     
+-    if(WIN32 AND ${CMAKE_CXX_COMPILER_ID} EQUAL "Intel")
++    if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" EQUAL "Intel")
+       set(EIGEN_CXX_FLAG_VERSION "/version")
+     else()
+       set(EIGEN_CXX_FLAG_VERSION "--version")
