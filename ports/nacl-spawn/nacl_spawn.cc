@@ -382,6 +382,7 @@ static int spawnve_impl(int mode,
                         const char* path,
                         char* const argv[],
                         char* const envp[]) {
+  NSPAWN_LOG("spawnve_impl: mode=%x path=%s", mode, path);
   if (NULL == path || NULL == argv[0]) {
     errno = EINVAL;
     return -1;
@@ -404,10 +405,7 @@ static int spawnve_impl(int mode,
       vfork_pid = spawnve_impl(P_NOWAIT, path, argv, envp);
       longjmp(nacl_spawn_vfork_env, 1);
     }
-    // TODO(bradnelson): Add this by allowing javascript to replace the
-    // existing module with a new one.
-    errno = ENOSYS;
-    return -1;
+    // The normal case
   } else {
     errno = EINVAL;
     return -1;
@@ -418,6 +416,9 @@ static int spawnve_impl(int mode,
 
   struct PP_Var req_var = nspawn_dict_create();
   nspawn_dict_setstring(req_var, "command", "nacl_spawn");
+  if (mode == P_OVERLAY) {
+    nspawn_dict_setstring(req_var, "mode", "overlay");
+  }
 
   struct PP_Var args_var = nspawn_array_create();
   for (int i = 0; argv[i]; i++)
@@ -440,7 +441,16 @@ static int spawnve_impl(int mode,
     return -1;
   }
 
-  return nspawn_dict_getint_release(nspawn_send_request(req_var), "pid");
+  int pid = nspawn_dict_getint_release(nspawn_send_request(req_var), "pid");
+  if (mode == P_OVERLAY) {
+    // In P_OVERLAY mode, then the request cause us to be killed (removed
+    // from the DOM), and replaced by that child.  In this case the reply
+    // will never arrive.
+    NSPAWN_LOG("spawnve_impl: should never get here");
+    abort();
+  }
+  NSPAWN_LOG("new process pid=%d\n", pid);
+  return pid;
 }
 
 // Spawn a new NaCl process. This is an alias for
@@ -755,40 +765,48 @@ void nacl_spawn_vfork_exit(int status) {
   va_end(vl);
 
 int execve(const char *filename, char *const argv[], char *const envp[]) {
+  NSPAWN_LOG("execve: %s", filename);
   return spawnve_impl(P_OVERLAY, filename, argv, envp);
 }
 
 int execv(const char *path, char *const argv[]) {
+  NSPAWN_LOG("execv: %s", path);
   return spawnve_impl(P_OVERLAY, path, argv, environ);
 }
 
 int execvp(const char *file, char *const argv[]) {
+  NSPAWN_LOG("execvp: %s", file);
   // TODO(bradnelson): Limit path resolution to 'p' variants.
   return spawnve_impl(P_OVERLAY, file, argv, environ);
 }
 
 int execvpe(const char *file, char *const argv[], char *const envp[]) {
+  NSPAWN_LOG("execvpe: %s", file);
   // TODO(bradnelson): Limit path resolution to 'p' variants.
   return spawnve_impl(P_OVERLAY, file, argv, envp);
 }
 
 int execl(const char *path, const char *arg, ...) {
+  NSPAWN_LOG("execl: %s", path);
   VARG_TO_ARGV;
   return spawnve_impl(P_OVERLAY, path, argv, environ);
 }
 
 int execlp(const char *file, const char *arg, ...) {
+  NSPAWN_LOG("execlp: %s", file);
   VARG_TO_ARGV;
   // TODO(bradnelson): Limit path resolution to 'p' variants.
   return spawnve_impl(P_OVERLAY, file, argv, environ);
 }
 
 int execle(const char *path, const char *arg, ...) {  /* char* const envp[] */
+  NSPAWN_LOG("execle: %s", path);
   VARG_TO_ARGV_ENVP;
   return spawnve_impl(P_OVERLAY, path, argv, envp);
 }
 
 int execlpe(const char *path, const char *arg, ...) {  /* char* const envp[] */
+  NSPAWN_LOG("execlpe: %s", path);
   VARG_TO_ARGV_ENVP;
   // TODO(bradnelson): Limit path resolution to 'p' variants.
   return spawnve_impl(P_OVERLAY, path, argv, envp);

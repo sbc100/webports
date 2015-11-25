@@ -22,6 +22,10 @@ if [[ ${TOOLCHAIN} == emscripten ]]; then
   NACLPORTS_CPPFLAGS+=" -I${EMSCRIPTEN}//system/lib/libcxxabi/include"
 fi
 
+if [[ ${NACL_DEBUG} == 1 ]]; then
+  NACLPORTS_CPPFLAGS+=" -DNSPAWN_LOGGING=1"
+fi
+
 EnableGlibcCompat
 
 ConfigureStep() {

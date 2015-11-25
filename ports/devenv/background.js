@@ -62,7 +62,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
       case 'nacl_spawn':
         var handleSuccess = function(naclType) {
           manager.spawn(
-              msg.nmf, msg.argv, msg.envs, msg.cwd, naclType, null,
+              msg.nmf, msg.argv, msg.envs, msg.cwd, naclType, null, -1,
               function(pid) {
             port.postMessage({name: 'nacl_spawn_reply', pid: pid});
           });

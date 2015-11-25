@@ -66,6 +66,22 @@ TEST(Spawn, spawnve) {
   EXPECT_EQ(111, WEXITSTATUS(status));
 }
 
+TEST(Spawn, execv) {
+  int status;
+  // Spawn a child process that will then call execv and verify the PID of
+  // the child matches the PID of the grandchild.
+  char *argv[3];
+  argv[0] = argv0;
+  argv[1] = const_cast<char*>("execv_test");
+  argv[2] = NULL;
+  pid_t pid = spawnv(P_NOWAIT, argv0, argv);
+  ASSERT_GE(pid, 0);
+  pid_t npid = waitpid(pid, &status, 0);
+  EXPECT_EQ(pid, npid);
+  EXPECT_TRUE(WIFEXITED(status));
+  EXPECT_EQ(0, WEXITSTATUS(status));
+}
+
 #define VFORK_SETUP_SPAWN \
   int status; \
   pid_t pid = vfork(); \
@@ -221,19 +237,19 @@ TEST(Pipes, Echo) {
   const char test_message[] = "test message";
 
   // Write to pipe_a.
-  int len = write(pipe_a[1], test_message, strlen(test_message));
-  EXPECT_EQ(strlen(test_message), len);
+  ssize_t len = write(pipe_a[1], test_message, strlen(test_message));
+  EXPECT_EQ(static_cast<ssize_t>(strlen(test_message)), len);
   char buffer[100];
   // Wait for an echo back on pipe_b.
-  int total = 0;
+  size_t total = 0;
   while (total < strlen(test_message)) {
     len = read(pipe_b[0], buffer + total, sizeof(buffer));
     ASSERT_GE(len, 0);
     if (len == 0) break;
     total += len;
   }
-  EXPECT_EQ(strlen(test_message), len);
-  EXPECT_TRUE(memcmp(buffer, test_message, len) == 0);
+  EXPECT_EQ(strlen(test_message), total);
+  EXPECT_TRUE(memcmp(buffer, test_message, total) == 0);
 
   EXPECT_EQ(0, close(pipe_a[1]));
   EXPECT_EQ(0, close(pipe_b[0]));
@@ -259,14 +275,14 @@ TEST(Pipes, StdoutEcho) {
   EXPECT_EQ(0, close(pipes[1]));
   char check_msg[] = "test";
   char buffer[100];
-  int total = 0, len;
+  size_t total = 0;
   while (total < strlen(check_msg)) {
-    len = read(pipes[0], buffer+total, sizeof(buffer));
+    ssize_t len = read(pipes[0], buffer+total, sizeof(buffer));
     ASSERT_GE(len, 0);
     if (len == 0) break;
     total += len;
   }
-  ASSERT_EQ(0, memcmp(buffer, check_msg, len));
+  ASSERT_EQ(0, memcmp(buffer, check_msg, total));
   EXPECT_EQ(0, close(pipes[0]));
 }
 
@@ -299,21 +315,21 @@ TEST(Pipes, PipeFastClose) {
   const char test_message[] = "test message";
 
   // Write to pipe_a.
-  int len = write(pipe_a[1], test_message, strlen(test_message));
-  EXPECT_EQ(strlen(test_message), len);
+  ssize_t wrote = write(pipe_a[1], test_message, strlen(test_message));
+  EXPECT_EQ(static_cast<ssize_t>(strlen(test_message)), wrote);
   EXPECT_EQ(0, close(pipe_a[1]));
 
   char buffer[100];
   // Wait for an echo back on pipe_b.
-  int total = 0;
+  size_t total = 0;
   while (total < strlen(test_message)) {
-    len = read(pipe_b[0], buffer + total, sizeof(buffer));
+    ssize_t len = read(pipe_b[0], buffer + total, sizeof(buffer));
     ASSERT_GE(len, 0);
     if (len == 0) break;
     total += len;
   }
-  EXPECT_EQ(strlen(test_message), len);
-  EXPECT_TRUE(memcmp(buffer, test_message, len) == 0);
+  EXPECT_EQ(strlen(test_message), total);
+  EXPECT_TRUE(memcmp(buffer, test_message, total) == 0);
 
   EXPECT_EQ(0, close(pipe_b[0]));
 }
@@ -365,19 +381,19 @@ TEST(Pipes, EchoChain) {
   const char test_message[] = "test message";
 
   // Write to pipe_a.
-  int len = write(pipe_a[1], test_message, strlen(test_message));
-  EXPECT_EQ(strlen(test_message), len);
+  ssize_t wrote = write(pipe_a[1], test_message, strlen(test_message));
+  EXPECT_EQ(static_cast<ssize_t>(strlen(test_message)), wrote);
   char buffer[100];
   // Wait for an echo back on pipe_c.
-  int total = 0;
+  size_t total = 0;
   while (total < strlen(test_message)) {
-    len = read(pipe_c[0], buffer + total, sizeof(buffer));
+    ssize_t len = read(pipe_c[0], buffer + total, sizeof(buffer));
     ASSERT_GE(len, 0);
     if (len == 0) break;
     total += len;
   }
-  EXPECT_EQ(strlen(test_message), len);
-  EXPECT_TRUE(memcmp(buffer, test_message, len) == 0);
+  EXPECT_EQ(strlen(test_message), total);
+  EXPECT_TRUE(memcmp(buffer, test_message, total) == 0);
 
   EXPECT_EQ(0, close(pipe_a[1]));
   EXPECT_EQ(0, close(pipe_c[0]));
@@ -389,7 +405,7 @@ TEST(Pipes, NullFeof) {
   ASSERT_EQ(0, close(p[1]));
   ASSERT_EQ(0, dup2(p[0], 0));
   while (!feof(stdin)) {
-    int ch = fgetc(stdin);
+    fgetc(stdin);
   }
 }
 
@@ -455,19 +471,41 @@ TEST(Pipes, CloseExec) {
 }
 
 int main(int argc, char **argv) {
-  if (argc == 4 && strcmp(argv[1], "return") == 0) {
-    return return_child(argc, argv);
-  } else if (argc == 4 && strcmp(argv[1], "_exit") == 0) {
-    return exit_child(argc, argv);
-  } else if (argc == 2 && strcmp(argv[1], "pipes") == 0) {
-    return pipes_child(argc, argv);
-  } else if (argc == 4 && strcmp(argv[1], "cloexec_check") == 0) {
-    return cloexec_check_child(argc, argv);
-  } else if (argc == 2 && strcmp(argv[1], "echo") == 0) {
-    char msg[] = "test";
-    write(1, msg, sizeof(msg));
-    return 0;
+  if (argc > 1) {
+    const char* child_command = argv[1];
+    if (argc == 4 && strcmp(child_command, "return") == 0) {
+      return return_child(argc, argv);
+    } else if (argc == 4 && strcmp(child_command, "_exit") == 0) {
+      return exit_child(argc, argv);
+    } else if (argc == 2 && strcmp(child_command, "pipes") == 0) {
+      return pipes_child(argc, argv);
+    } else if (argc == 4 && strcmp(child_command, "cloexec_check") == 0) {
+      return cloexec_check_child(argc, argv);
+    } else if (argc == 2 && strcmp(child_command, "echo") == 0) {
+      char msg[] = "test";
+      write(1, msg, sizeof(msg));
+      return 0;
+    } else if (strcmp(child_command, "execv_test") == 0) {
+      char pid_string[128];
+      sprintf(pid_string, "%d", getpid());
+      char *args[4];
+      args[0] = argv[0];
+      args[1] = const_cast<char*>("check_pid");
+      args[2] = pid_string;
+      args[3] = NULL;
+      printf("calling execv (pid=%d)\n", getpid());
+      execv(args[0], args);
+    } else if (strcmp(child_command, "check_pid") == 0) {
+      printf("check_pid '%d' '%s'\n", getpid(), argv[2]);
+      if (getpid() != atoi(argv[2])) {
+        return 1;
+      }
+      return 0;
+    }
+    printf("unknown child_command: %s\n", child_command);
+    return 1;
   }
+
   // Preserve argv[0] for use in some tests.
   argv0 = argv[0];
   testing::InitGoogleTest(&argc, argv);

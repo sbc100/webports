@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 EnableCliMain
-NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
+NACLPORTS_CPPFLAGS+=" -Wall -Werror -Dpipe=nacl_spawn_pipe"
 
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
              jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"
@@ -19,14 +19,14 @@ BuildStep() {
 
   # Build jseval module.
   MakeDir ${BUILD_DIR}/jseval
-  LogExecute ${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} -O2 \
+  LogExecute ${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} \
       ${START_DIR}/jseval.c \
       -o ${BUILD_DIR}/jseval/jseval_${NACL_ARCH}${NACL_EXEEXT} \
       ${LIBS}
 
   # Build test module.
   MakeDir ${BUILD_DIR}/tests
-  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} -g \
+  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} \
       ${START_DIR}/tests/devenv_small_test.cc \
       -o ${BUILD_DIR}/tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
       -lgtest ${LIBS}

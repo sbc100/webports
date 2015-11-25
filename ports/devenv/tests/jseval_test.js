@@ -17,7 +17,7 @@ function run(nmf, cmd) {
   mgr.onTerminalResize(80, 24);
   return new Promise(function(resolve, reject) {
     mgr.spawn(
-        nmf, cmd, [], '/tmp', 'pnacl', null,
+        nmf, cmd, [], '/tmp', 'pnacl', null, -1,
         function(pid) {
           mgr.waitpid(pid, 0, function(pid, code) { resolve(code); });
         });

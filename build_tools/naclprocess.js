@@ -163,6 +163,8 @@ function NaClProcessManager() {
   self.onRootProgress = null;
   self.onRootLoad = null;
 
+  self.debug = false;
+
   // The process which gets the input from the user.
   self.foregroundProcess = null;
 
@@ -490,6 +492,12 @@ NaClProcessManager.prototype.broadcastMessage = function (message, callback) {
   });
 };
 
+NaClProcessManager.prototype.log = function (msg) {
+  if (this.debug) {
+    console.log(msg);
+  }
+};
+
 /**
  * Sync Mount status every time a mount/unmount message
  * is recieved from a process.
@@ -601,7 +609,9 @@ NaClProcessManager.prototype.handleMessage_ = function (e) {
     message[msg.id] = contents;
     // Enable to debug message stream (disabled for speed).
     // console.log(src.pid + '> reply: ' + JSON.stringify(reply));
-    src.postMessage(message);
+    if (src.postMessage) {
+      src.postMessage(message);
+    }
   }
 
   if (msg.command && handlers[msg.command]) {
@@ -617,7 +627,7 @@ NaClProcessManager.prototype.handleMessage_ = function (e) {
     this.processes[src.pid].mounted = false;
     this.syncMountStatus_();
   } else if (msg.mount_status === 'fail' || msg.unmount_status === 'fail') {
-    console.log('mounter_status: ' + JSON.stringify(msg));
+    this.log('mounter_status: ' + JSON.stringify(msg));
   } else if (typeof msg === 'string' &&
              msg.indexOf(NaClProcessManager.prefix) === 0) {
     var out = msg.substring(NaClProcessManager.prefix.length);
@@ -648,6 +658,11 @@ NaClProcessManager.prototype.handleMessageSpawn_ = function (msg, reply, src) {
   var cwd = msg.cwd;
   var executable = args[0];
   var nmf = msg.nmf;
+  var pid = -1;
+  self.log('handleMessageSpawn mode=' + msg.mode);
+  if (msg.mode === 'overlay') {
+    pid = src.pid;
+  }
   if (nmf) {
     if (nmf.files) {
       Object.keys(nmf.files).forEach(function (key) {
@@ -658,8 +673,8 @@ NaClProcessManager.prototype.handleMessageSpawn_ = function (msg, reply, src) {
     var blob = new Blob([JSON.stringify(nmf)], {type: 'text/plain'});
     var nmfUrl = window.URL.createObjectURL(blob);
     var naclType = self.checkNaClManifestType(nmf) || 'nacl';
-    self.spawn(nmfUrl, args, envs, cwd, naclType, src, function (pid) {
-      reply({pid: pid});
+    self.spawn(nmfUrl, args, envs, cwd, naclType, src, pid, function(new_pid) {
+      reply({pid: new_pid});
     });
   } else {
     if (NaClProcessManager.nmfWhitelist !== undefined &&
@@ -673,8 +688,8 @@ NaClProcessManager.prototype.handleMessageSpawn_ = function (msg, reply, src) {
     }
     nmf = executable + '.nmf';
     self.checkUrlNaClManifestType(nmf, function (naclType) {
-      self.spawn(nmf, args, envs, cwd, naclType, src, function (pid) {
-        reply({pid: pid});
+      self.spawn(nmf, args, envs, cwd, naclType, src, pid, function (new_pid) {
+        reply({pid: new_pid});
       });
     }, function (msg) {
       console.log('nacl_spawn(error): ' + msg);
@@ -835,9 +850,9 @@ NaClProcessManager.prototype.handleMessageDeadPid_ = function (msg, reply,
   // TODO(bradnelson): Avoid needing to frivolously manipulate the DOM to
   // generate a dead pid by separating the process data structure manipulation
   // parts of spawn + exit from the DOM / module ones.
-  self.spawn(null, [], [], '/', 'pnacl', src, function (pid, element) {
+  self.spawn(null, [], [], '/', 'pnacl', src, -1, function (new_pid, element) {
     self.exit(msg.status, element);
-    reply({pid: pid});
+    reply({pid: new_pid});
   });
 };
 
@@ -1009,6 +1024,8 @@ NaClProcessManager.prototype.exit = function (code, element) {
     this.processes[pid].exitCode = code;
   }
 
+  this.log('proccess exit: ' + pid);
+
   // Mark as terminated.
   element.pid = -1;
 
@@ -1031,6 +1048,9 @@ NaClProcessManager.prototype.exit = function (code, element) {
     }
 
     this.foregroundProcess = nextForegroundProcess;
+    if (this.foregroundProcess) {
+      this.log('foreground PID -> ' + this.foregroundProcess.pid);
+    }
   }
 };
 
@@ -1110,7 +1130,7 @@ NaClProcessManager.prototype.checkUrlNaClManifestType = function (
  * @param {spawnCallback} callback.
  */
 NaClProcessManager.prototype.spawn = function (
-   nmf, argv, envs, cwd, naclType, parent, callback) {
+    nmf, argv, envs, cwd, naclType, parent, pid, callback) {
   var self = this;
 
   getNaClArch(function (arch) {
@@ -1138,14 +1158,44 @@ NaClProcessManager.prototype.spawn = function (
     var fg = document.createElement('object');
     self.foregroundProcess = fg;
 
-    fg.pid = self.pid;
-    self.pid += 1;
+    var ppid;
+    if (pid === -1) {
+      // Create new process
+      pid = self.pid;
+      self.pid += 1;
+      self.log("creating new process: " + pid);
 
+      var pgid = parent ? self.processes[parent.pid].pgid : pid;
+      ppid = parent ? parent.pid : NaClProcessManager.INIT_PID;
+      self.processes[pid] = {
+        domElement: fg,
+        exitCode: null,
+        pgid: pgid,
+        ppid: ppid,
+        mounted: false,
+      };
+      if (!parent) {
+        self.createProcessGroup(pid, pid);
+      }
+      self.processGroups[pgid].processes[pid] = true;
+      fg.parent = parent;
+    } else {
+      // Replace existing process
+      self.log("replacing existing pid: " + pid);
+      var proc = self.processes[pid];
+      // Remove existing DOM element
+      fg.parent = proc.domElement.parent;
+      ppid = proc.ppid;
+      proc.domElement.parentNode.removeChild(proc.domElement);
+      proc.domElement = fg;
+      proc.mounted = false;
+    }
+
+    fg.pid = pid;
     fg.width = 0;
     fg.height = 0;
     fg.data = nmf;
     fg.type = mimetype;
-    fg.parent = parent;
     fg.commandName = argv[0];
 
     if (nmf !== null) {
@@ -1156,20 +1206,6 @@ NaClProcessManager.prototype.spawn = function (
       fg.addEventListener('message', self.handleMessage_.bind(self));
       fg.addEventListener('progress', self.handleProgress_.bind(self));
     }
-
-    var pgid = parent ? self.processes[parent.pid].pgid : fg.pid;
-    var ppid = parent ? parent.pid : NaClProcessManager.INIT_PID;
-    self.processes[fg.pid] = {
-      domElement: fg,
-      exitCode: null,
-      pgid: pgid,
-      ppid: ppid,
-      mounted: false,
-    };
-    if (!parent) {
-      self.createProcessGroup(fg.pid, fg.pid);
-    }
-    self.processGroups[pgid].processes[fg.pid] = true;
 
     var params = {};
     // Default environment variables (can be overridden by envs)

@@ -241,7 +241,7 @@ NaClTerm.prototype.spawnRootProcess_ = function () {
     var handleSuccess = function (naclType) {
       self.print('Loading NaCl module.\n');
       self.processManager.spawn(
-          NaClTerm.nmf, argv, env, cwd, naclType, null, function (rootPid) {
+          NaClTerm.nmf, argv, env, cwd, naclType, null, -1, function(rootPid) {
         // Warn if we close while still running.
         window.onbeforeunload = function () {
           return 'Processes still running!';

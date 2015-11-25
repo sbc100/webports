@@ -17,6 +17,15 @@
 #include "ppapi/c/ppb_var.h"
 #include "ppapi/c/ppb_var_array.h"
 #include "ppapi/c/ppb_var_dictionary.h"
+#include "nacl_io/log.h"
+
+#ifdef NSPAWN_LOGGING
+#define NSPAWN_LOG_PREFIX "nspawn: "
+#define NSPAWN_LOG(format, ...) \
+  nacl_io_log(NSPAWN_LOG_PREFIX format "\n", ##__VA_ARGS__)
+#else
+#define NSPAWN_LOG(format, ...)
+#endif
 
 __BEGIN_DECLS
 
