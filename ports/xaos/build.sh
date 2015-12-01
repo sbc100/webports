@@ -5,6 +5,16 @@
 EXECUTABLES=bin/xaos
 NACL_CPPFLAGS+=" -D__NO_MATH_INLINES=1"
 
+# xaos does not work with a build dir which is separate from the src dir
+BUILD_DIR=${SRC_DIR}
+
+NACLPORTS_LDFLAGS+=" -Wl,--undefined=PPP_GetInterface \
+                -Wl,--undefined=PPP_ShutdownModule \
+                -Wl,--undefined=PPP_InitializeModule \
+                -Wl,--undefined=original_main"
+
+NACLPORTS_LIBS="-lppapi -lpthread -l${NACL_CXX_LIB} -lm"
+
 PatchStep() {
   DefaultPatchStep
   echo "copy nacl driver"
@@ -12,28 +22,13 @@ PatchStep() {
 }
 
 ConfigureStep() {
-  # xaos does not work with a build dir which is separate from the
-  # src dir - so we copy src -> build
-  ChangeDir ${SRC_DIR}
-  Remove ${BUILD_DIR}
-  local tmp=${SRC_DIR}.tmp
-  Remove ${tmp}
-  cp -r ${SRC_DIR} ${tmp}
-  mv ${tmp} ${BUILD_DIR}
+  # xaos takes care of defining NDEBUG itself
+  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS/-DNDEBUG/}"
 
-  ChangeDir ${BUILD_DIR}
   echo "running autoconf"
   LogExecute rm ./configure
   LogExecute autoconf
 
-  # xaos takes case of defining NDEBUG itself
-  NACLPORTS_CFLAGS="${NACLPORTS_CFLAGS/-DNDEBUG/}"
-  NACLPORTS_LDFLAGS+=" -Wl,--undefined=PPP_GetInterface \
-                  -Wl,--undefined=PPP_ShutdownModule \
-                  -Wl,--undefined=PPP_InitializeModule \
-                  -Wl,--undefined=original_main"
-
-  export LIBS="-lppapi -lpthread -l${NACL_CXX_LIB} -lm"
   SetupCrossEnvironment
   LogExecute ./configure --with-png=no --with-long-double=no \
       --host=nacl --with-x11-driver=no --with-sffe=no
@@ -44,11 +39,17 @@ BuildStep() {
   DefaultBuildStep
 }
 
-InstallStep(){
+InstallStep() {
+  return
+}
+
+PublishStep() {
   MakeDir ${PUBLISH_DIR}
-  install ${START_DIR}/xaos.html ${PUBLISH_DIR}
-  install ${START_DIR}/xaos.nmf ${PUBLISH_DIR}
-  # Not used yet
-  install ${BUILD_DIR}/help/xaos.hlp ${PUBLISH_DIR}
-  install ${BUILD_DIR}/bin/xaos ${PUBLISH_DIR}/xaos_${NACL_ARCH}${NACL_EXEEXT}
+  LogExecute install ${START_DIR}/xaos.html ${PUBLISH_DIR}
+  LogExecute install ${BUILD_DIR}/bin/xaos \
+      ${PUBLISH_DIR}/xaos_${NACL_ARCH}${NACL_EXEEXT}
+  LogExecute install ${BUILD_DIR}/help/xaos.hlp ${PUBLISH_DIR}
+  ChangeDir ${PUBLISH_DIR}
+  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
+      xaos*${NACL_EXEEXT} -s . -o xaos.nmf
 }

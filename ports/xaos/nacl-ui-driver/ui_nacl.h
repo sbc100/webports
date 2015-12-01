@@ -30,13 +30,15 @@ struct PpapiEvent {
 /* get next ppapi event to process, may block if wait == 1 */
 struct PpapiEvent* GetEvent(int wait);
 
-/* these headers need an sdk update before they can be used */
-#if 0
-#include <nacl/nacl_check.h>
-#include <nacl/nacl_log.h>
-#else
-#define CHECK(cond) do { if (!(cond)) {puts("ABORT: " #cond "\n"); abort();}} while(0)
-#define NaClLog(lev, ...)  fprintf(stderr, __VA_ARGS__)
-#endif
+#define CHECK(cond) do { \
+  if (!(cond)) { fputs("ABORT: " #cond "\n", stderr); abort(); } \
+} while(0)
+
+#define LOG_TRACE 3
+#define LOG_INFO  2
+#define LOG_ERROR 1
+#define LOG_FATAL 0
+
+void NaClLog(int level, char* fmt, ...);
 
 #endif /* UI_NACL_H */

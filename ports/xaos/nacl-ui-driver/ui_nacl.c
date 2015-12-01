@@ -5,11 +5,13 @@
  */
 
 #include "aconfig.h"
+#include "fconfig.h"
 
 #include "ui_nacl.h"
 
 /*includes */
 #include <ui.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +25,21 @@ char* getcwd(char* buf, size_t size) {
 int kill() {
   NaClLog(LOG_INFO, "kill\n");
   return -1;
+}
+
+#ifdef NDEBUG
+static int log_level = LOG_INFO;
+#else
+static int log_level = LOG_TRACE;
+#endif
+
+void NaClLog(int level, char* fmt, ...) {
+  if (level > log_level)
+    return;
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
 }
 
 struct {
@@ -42,20 +59,19 @@ static void nacl_print(int x, int y, CONST char* text) {
 
 static void nacl_flush(void) {
   void* data = VideoBuffers.buffers[VideoBuffers.current_buffer];
-  NaClLog(LOG_INFO, "nacl_flush %d %p\n", VideoBuffers.current_buffer, data);
+  NaClLog(LOG_TRACE, "nacl_flush %d\n", VideoBuffers.current_buffer);
   if (!data)
     return;
-  CHECK(data != NULL);
   CopyImageDataToVideo(data);
 }
 
 static void nacl_display() {
-  NaClLog(LOG_INFO, "nacl_display\n");
+  NaClLog(LOG_TRACE, "nacl_display\n");
   nacl_flush();
 }
 
 static void nacl_flip_buffers() {
-  NaClLog(LOG_INFO, "nacl_flip_buffers\n");
+  NaClLog(LOG_TRACE, "nacl_flip_buffers\n");
   VideoBuffers.current_buffer ^= 1;
 }
 

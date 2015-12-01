@@ -108,6 +108,14 @@ void CopyImageDataToVideo(void* data) {
   pthread_mutex_lock(&Video.flush_mutex);
   Video.dirty = 1;
   memcpy(Video.image_data, data, Video.width * Video.height * BYTES_PER_PIXEL);
+
+  /* Set alpha to 0xff.  xaos generates zeros here */
+  int* pixels = (int*)Video.image_data;
+  int i;
+  for (i = 0; i < Video.width * Video.height; i++) {
+    pixels[i] |= 0xff000000;
+  }
+
   /* do not let anybody write into video buffer while flush in progress*/
   pthread_mutex_unlock(&Video.flush_mutex);
 }
@@ -120,6 +128,7 @@ void ScreenUpdateCallbackFun(void* user_data, int32_t result) {
     return;
   }
 
+  NaClLog(LOG_TRACE, "ScreenUpdateCallbackFun\n");
   pthread_mutex_lock(&Video.flush_mutex);
   struct PP_Point top_left = PP_MakePoint(0, 0);
   Global.if_graphics_2d->PaintImageData(Video.device, Video.image, &top_left,
@@ -139,7 +148,8 @@ static void InitEvents() {
 
 static void InitScreenRefresh(PP_Instance instance,
                               const struct PP_Size* size) {
-  NaClLog(LOG_INFO, "initialize screen refresh\n");
+  NaClLog(LOG_INFO, "initialize screen refresh %dx%d\n", size->width,
+      size->height);
   /* NOTE: these limits are not tight but there seem to be some
      not so well documented limitations inside xaos */
   CHECK(size->width <= 640);
@@ -149,7 +159,7 @@ static void InitScreenRefresh(PP_Instance instance,
   Video.height = size->height;
 
   NaClLog(LOG_INFO, "create PPAPI graphics device\n");
-  Video.device = Global.if_graphics_2d->Create(instance, size, PP_FALSE);
+  Video.device = Global.if_graphics_2d->Create(instance, size, PP_TRUE);
   CHECK(Video.device != 0);
   NaClLog(LOG_INFO, "create PPAPI image");
   CHECK(Global.if_instance->BindGraphics(Global.instance, Video.device));
@@ -232,7 +242,7 @@ static void DidChangeFocus(PP_Instance instance, PP_Bool has_focus) {
 }
 
 static PP_Bool HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
-  NaClLog(LOG_INFO, "HandleInputEvent\n");
+  NaClLog(LOG_TRACE, "HandleInputEvent\n");
   if (!Global.if_mouse_input_event->IsMouseInputEvent(input_event)) {
     return PP_FALSE;
   }
@@ -252,6 +262,7 @@ static PP_Bool HandleInputEvent(PP_Instance instance, PP_Resource input_event) {
   if (EventQueue.num >= kMaxEvents) {
     NaClLog(LOG_ERROR, "dropping events because of overflow\n");
   } else {
+    NaClLog(LOG_TRACE, "queue input event\n");
     int head = (EventQueue.tail + EventQueue.num) % kMaxEvents;
     EventQueue.queue[head] = event;
     ++EventQueue.num;
