@@ -15,7 +15,7 @@
 #include_next <gnu/stubs.h>
 
 #undef __stub_fcntl
-#undef __stub_fcntl
+#undef __stub_fchown
 #undef __stub_pipe
 #undef __stub_select
 #undef __stub_socket
