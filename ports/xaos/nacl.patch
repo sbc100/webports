@@ -63,30 +63,18 @@ diff --git a/src/include/config/config.autoconf b/src/include/config/config.auto
  #ifdef __BEOS__
  #define MAIN_FUNCTION be_main
  #ifdef __POWERPC__
-diff --git a/src/include/ui.h b/src/include/ui.h
---- a/src/include/ui.h
-+++ b/src/include/ui.h
-@@ -116,7 +116,7 @@ extern "C" {
- 	CONST struct gui_driver *gui_driver;
-     };
- 
--    struct uih_context *globaluih;
-+    extern struct uih_context *globaluih;
- 
- #ifdef USE_LOCALEPATH
-     extern char *localepath;
 diff --git a/src/ui/drivers.c b/src/ui/drivers.c
 --- a/src/ui/drivers.c
 +++ b/src/ui/drivers.c
-@@ -27,6 +27,7 @@ extern CONST struct ui_driver svga_driver, x11_driver, dog_driver,
-     osx_fullscreen_driver, os2vio_driver, cocoa_driver,
+@@ -27,6 +27,7 @@ extern const struct ui_driver svga_driver, x11_driver, dog_driver,
+     osx_fullscreen_driver, os2vio_driver, cocoa_driver, qt_driver,
      cocoa_fullscreen_driver, be_driver, be_direct_driver, be_screen_driver,
      aalib_driver, gtk_driver, ggi_driver, win32_driver, dxw_driver,
 +    nacl_driver,
      dxf_driver, DGA_driver;
- CONST struct ui_driver *CONST drivers[] = {
+ const struct ui_driver *const drivers[] = {
  #ifdef WIN32_DRIVER
-@@ -36,6 +37,9 @@ CONST struct ui_driver *CONST drivers[] = {
+@@ -36,6 +37,9 @@ const struct ui_driver *const drivers[] = {
      &dxw_driver,
      &dxf_driver,
  #endif
@@ -96,22 +84,10 @@ diff --git a/src/ui/drivers.c b/src/ui/drivers.c
  #ifdef SVGA_DRIVER
      &svga_driver,
  #endif
-diff --git a/src/ui/ui.c b/src/ui/ui.c
---- a/src/ui/ui.c
-+++ b/src/ui/ui.c
-@@ -146,6 +146,8 @@ char *sffeform = NULL;
- char *sffeinit = NULL;
- #endif
- 
-+struct uih_context *globaluih;
-+
- CONST struct params global_params[] = {
-     {"-delay", P_NUMBER, &delaytime,
-      "Delay screen updates (milliseconds)"},
 diff --git a/src/util/timers.c b/src/util/timers.c
 --- a/src/util/timers.c
 +++ b/src/util/timers.c
-@@ -218,6 +218,7 @@ static int plan9_msec(void)
+@@ -220,6 +220,7 @@ static int plan9_msec(void)
  #ifndef HAVE_FTIME
  #ifndef _plan9_
  #ifndef _MAC
@@ -119,7 +95,7 @@ diff --git a/src/util/timers.c b/src/util/timers.c
  #error I am unable to get time in milisecond. Please edit timers.c and make tl_update_time and tl_lookup_timer to work for your architecture and send me then back(to hubicka@paru.cas.cz). You will need also define timers.h and change type of lasttime.
  #endif
  #endif
-@@ -225,6 +226,7 @@ static int plan9_msec(void)
+@@ -227,6 +228,7 @@ static int plan9_msec(void)
  #endif
  #endif
  #endif
