@@ -131,9 +131,7 @@ fi
 if [ "${OS}" = "mac" ]; then
   SHARDS=2
 elif [ "${OS}" = "linux" ]; then
-  if [ "${TOOLCHAIN}" = "bionic" ]; then
-    SHARDS=1
-  elif [ "${TOOLCHAIN}" = "emscripten" ]; then
+  if [ "${TOOLCHAIN}" = "emscripten" ]; then
     SHARDS=1
   else
     SHARDS=6
@@ -152,9 +150,6 @@ fi
 if [ -z "${TEST_BUILDBOT:-}" -o ! -d ${NACL_SDK_ROOT} ]; then
   echo "@@@BUILD_STEP Install Latest SDK@@@"
   ARGS=""
-  if [ ${TOOLCHAIN:-} = bionic ]; then
-    ARGS+=" --bionic"
-  fi
   if [ "${PINNED_SDK_VERSION:-}" != "" -a "${NIGHTLY}" != "1" ]; then
     ARGS+=" -v ${PINNED_SDK_VERSION}"
   fi

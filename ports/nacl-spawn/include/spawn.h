@@ -9,21 +9,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#ifdef __BIONIC__
-// TODO(sbc): remove this once bionic toolchain gets a copy of
-// spawn.h.
-#include <bsd_spawn.h>
-#else
 #include_next <spawn.h>
-#endif
-
-// Allow multi-threaded vfork on some platforms.
-#if defined(__BIONIC__)
-// Thread local variables are not currently supported with bionic.
-#define NACL_SPAWN_TLS
-#else
-#define NACL_SPAWN_TLS __thread
-#endif
 
 /*
  * Include guards are here so that this header can forward to the next one in
@@ -89,7 +75,7 @@ void jseval(const char* cmd, char** data, size_t* len);
 void nacl_spawn_vfork_before(void);
 pid_t nacl_spawn_vfork_after(int jmping);
 
-extern NACL_SPAWN_TLS jmp_buf nacl_spawn_vfork_env;
+extern __thread jmp_buf nacl_spawn_vfork_env;
 #define vfork() (nacl_spawn_vfork_before(), \
     nacl_spawn_vfork_after(setjmp(nacl_spawn_vfork_env)))
 

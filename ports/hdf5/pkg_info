@@ -6,5 +6,4 @@ LICENSE=CUSTOM:COPYING
 # https://code.google.com/p/nativeclient/issues/detail?id=4124
 DISABLED_TOOLCHAIN=(emscripten)
 DEPENDS=(glibc-compat)
-DISABLED_LIBC=(bionic)
 SHA1=965d954d596cfa694f3260856a6406ea69e46e68

@@ -11,5 +11,5 @@ SHA1=b6c947b09adf780fe02065d0c48bfd7b4bdddfa3
 # TODO(gdeepti): Enable gcc-avr for pnacl, newlib-clang
 # ICE in glibc/arm toolchain:
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
-DISABLED_TOOLCHAIN=(bionic clang-newlib emscripten pnacl glibc/arm)
+DISABLED_TOOLCHAIN=(clang-newlib emscripten pnacl glibc/arm)
 DISABLED_ARCH=(arm)

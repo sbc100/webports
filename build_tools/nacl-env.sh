@@ -9,7 +9,7 @@
 # environment variables:
 #
 # $NACL_ARCH - i386, x86_64, arm or pnacl.  Default: x86_64
-# $TOOLCHAIN - bionic, clang-newlib, glibc or pnacl.  Default: pnacl
+# $TOOLCHAIN - clang-newlib, glibc or pnacl.  Default: pnacl
 #
 # To import these variables into your environment do:
 # $ . nacl-env.sh
@@ -59,9 +59,7 @@ if [ "$(uname -m)" = "i686" ]; then
   HOST_IS_32BIT=1
 fi
 
-if [ "${TOOLCHAIN}" = "bionic" ]; then
-  DEFAULT_ARCH=arm
-elif [ "${TOOLCHAIN}" = "pnacl" ]; then
+if [ "${TOOLCHAIN}" = "pnacl" ]; then
   DEFAULT_ARCH=pnacl
 elif [ "${TOOLCHAIN}" = "emscripten" ]; then
   DEFAULT_ARCH=emscripten
@@ -88,8 +86,7 @@ if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
 fi
 
 # Check TOOLCHAIN
-if [ ${TOOLCHAIN} != "pnacl" -a \
-     ${TOOLCHAIN} != "glibc" -a ${TOOLCHAIN} != "bionic" -a \
+if [ ${TOOLCHAIN} != "pnacl" -a ${TOOLCHAIN} != "glibc" -a \
      ${TOOLCHAIN} != "clang-newlib" -a ${TOOLCHAIN} != "emscripten" ]; then
   echo "Unknown value for TOOLCHAIN: '${TOOLCHAIN}'" 1>&2
   exit -1
@@ -124,12 +121,6 @@ elif [ "${TOOLCHAIN}" = "emscripten" ]; then
     exit -1
   fi
   NACL_LIBC=emscripten
-elif [ "${TOOLCHAIN}" = "bionic" ]; then
-  if [ "${NACL_ARCH}" != "arm" ]; then
-    echo "Bionic toolchain only supports ARM" 1>&2
-    exit -1
-  fi
-  NACL_LIBC=bionic
 else
   NACL_LIBC=newlib
 fi

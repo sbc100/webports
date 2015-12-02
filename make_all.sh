@@ -28,13 +28,6 @@ NACL_ARCH=i686       TOOLCHAIN=glibc        make ${TARGETS}
 NACL_ARCH=arm        TOOLCHAIN=clang-newlib make ${TARGETS}
 NACL_ARCH=arm        TOOLCHAIN=glibc        make ${TARGETS}
 
-
-# Bionic
-BIONIC_TOOLCHAIN="${NACL_SDK_ROOT}/toolchain/*_arm_bionic"
-if [ -n "$(shopt -s nullglob; echo ${BIONIC_TOOLCHAIN})" ]; then
-  NACL_ARCH=arm      TOOLCHAIN=bionic       make ${TARGETS}
-fi
-
 # PNaCl
 NACL_ARCH=pnacl      TOOLCHAIN=pnacl        make ${TARGETS}
 

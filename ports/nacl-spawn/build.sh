@@ -73,7 +73,4 @@ InstallStep() {
   MakeDir ${DESTDIR_INCLUDE}
   LogExecute cp -f ${START_DIR}/include/spawn.h ${DESTDIR_INCLUDE}/
   LogExecute cp -f ${START_DIR}/include/nacl_main.h ${DESTDIR_INCLUDE}/
-  if [[ ${TOOLCHAIN} == bionic ]]; then
-    LogExecute cp -f ${START_DIR}/include/bsd_spawn.h ${DESTDIR_INCLUDE}/
-  fi
 }

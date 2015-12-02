@@ -10,54 +10,54 @@ script.
 | **Name** | **Version** | **Upstream Archive** | **NaCl Patch** | **Libc** | **Arch** | **Builds on** |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | [agg]                     | 2.5             | [agg-2.5.tar.gz][agg_upstream]                | [1 KiB][agg_patch]   |  |  |  |
-| [apr]                     | 1.5.0           | [apr-1.5.0.tar.bz2][apr_upstream]             | [5 KiB][apr_patch]   | not bionic |  |  |
-| [apr-util]                | 1.5.3           | [apr-util-1.5.3.tar.bz2][apr-util_upstream]   |                      | not bionic |  |  |
+| [apr]                     | 1.5.0           | [apr-1.5.0.tar.bz2][apr_upstream]             | [5 KiB][apr_patch]   |  |  |  |
+| [apr-util]                | 1.5.3           | [apr-util-1.5.3.tar.bz2][apr-util_upstream]   |                      |  |  |  |
 | [atk]                     | 2.16.0          | [atk-2.16.0.tar.xz][atk_upstream]             |                      |  |  |  |
 | [avrdude]                 | 6.1             | [avrdude-6.1.tar.gz][avrdude_upstream]        | [6 KiB][avrdude_patch] | glibc-only |  | linux-only |
 | [babl]                    | 0.1.12          | [babl-0.1.12.tar.bz2][babl_upstream]          |                      | glibc-only |  |  |
-| [bash]                    | 4.3             | [bash-4.3.tar.gz][bash_upstream]              | [8 KiB][bash_patch]  | not bionic |  |  |
-| [bdftopcf]                | 1.0.3           | [bdftopcf-1.0.3.tar.bz2][bdftopcf_upstream]   |                      | not bionic |  |  |
+| [bash]                    | 4.3             | [bash-4.3.tar.gz][bash_upstream]              | [7 KiB][bash_patch]  |  |  |  |
+| [bdftopcf]                | 1.0.3           | [bdftopcf-1.0.3.tar.bz2][bdftopcf_upstream]   |                      |  |  |  |
 | [bigreqsproto]            | 1.1.2           | [bigreqsproto-1.1.2.tar.bz2][bigreqsproto_upstream] |                      |  |  |  |
-| [binutils]                | 7dc2f2590       | [None][binutils_upstream]                     | [3 KiB][binutils_patch] | not bionic | not pnacl |  |
-| [binutils-2.25]           | 2.25            | [binutils-2.25.tar.bz2][binutils-2.25_upstream] | [2 KiB][binutils-2.25_patch] | not bionic | not pnacl | linux-only |
-| [bison]                   | 3.0.4           | [bison-3.0.4.tar.xz][bison_upstream]          | [3 KiB][bison_patch] | not bionic |  |  |
-| [blackbox]                | 0.70.1          | [blackbox-0.70.1.tar.bz2][blackbox_upstream]  | [10 KiB][blackbox_patch] |  |  |  |
+| [binutils]                | 7dc2f2590       | [None][binutils_upstream]                     | [2 KiB][binutils_patch] |  | not pnacl |  |
+| [binutils-2.25]           | 2.25            | [binutils-2.25.tar.bz2][binutils-2.25_upstream] | [2 KiB][binutils-2.25_patch] |  | not pnacl | linux-only |
+| [bison]                   | 3.0.4           | [bison-3.0.4.tar.xz][bison_upstream]          | [3 KiB][bison_patch] |  |  |  |
+| [blackbox]                | 0.70.1          | [blackbox-0.70.1.tar.bz2][blackbox_upstream]  | [8 KiB][blackbox_patch] |  |  |  |
 | [blis]                    | 0.1.5           | [blis-0.1.5.tar.gz][blis_upstream]            | [951 B][blis_patch]  |  |  |  |
-| [bochs]                   | 2.6.2           | [bochs-2.6.2.tar.gz][bochs_upstream]          | [2 KiB][bochs_patch] | not bionic |  | linux-only |
+| [bochs]                   | 2.6.2           | [bochs-2.6.2.tar.gz][bochs_upstream]          | [2 KiB][bochs_patch] |  |  | linux-only |
 | [boost]                   | 1.55.0          | [boost_1_55_0.tar.bz2][boost_upstream]        | [5 KiB][boost_patch] |  |  | linux-only |
-| [boringssl]               | git             | [None][boringssl_upstream]                    | [16 KiB][boringssl_patch] | not newlib |  |  |
+| [boringssl]               | git             | [None][boringssl_upstream]                    | [10 KiB][boringssl_patch] |  |  |  |
 | [box2d]                   | 2.2.1           | [Box2D_v2.2.1.zip][box2d_upstream]            | [693 B][box2d_patch] |  |  |  |
-| [bullet]                  | 2.81-rev2613    | [bullet-2.81-rev2613.zip][bullet_upstream]    | [7 KiB][bullet_patch] | not bionic |  |  |
+| [bullet]                  | 2.81-rev2613    | [bullet-2.81-rev2613.zip][bullet_upstream]    | [7 KiB][bullet_patch] |  |  |  |
 | [busybox]                 | 1.22.0          | [busybox-1.22.0.tar.bz2][busybox_upstream]    |                      | glibc-only |  | linux-only |
 | [bzip2]                   | 1.0.6           | [bzip2-1.0.6.tar.gz][bzip2_upstream]          | [420 B][bzip2_patch] |  |  |  |
-| [cairo]                   | 1.12.14         | [cairo-1.12.14.tar.xz][cairo_upstream]        | [5 KiB][cairo_patch] | not bionic |  |  |
-| [cfitsio]                 | 3260            | [cfitsio3260.tar.gz][cfitsio_upstream]        | [1 KiB][cfitsio_patch] | not bionic |  |  |
-| [civetweb]                | 1.5             | [civetweb-1.5.tar.gz][civetweb_upstream]      | [2 KiB][civetweb_patch] | not bionic |  |  |
-| [clapack]                 | 3.2.1           | [clapack.tgz][clapack_upstream]               | [4 KiB][clapack_patch] | not bionic |  |  |
+| [cairo]                   | 1.12.14         | [cairo-1.12.14.tar.xz][cairo_upstream]        | [5 KiB][cairo_patch] |  |  |  |
+| [cfitsio]                 | 3260            | [cfitsio3260.tar.gz][cfitsio_upstream]        | [1 KiB][cfitsio_patch] |  |  |  |
+| [civetweb]                | 1.5             | [civetweb-1.5.tar.gz][civetweb_upstream]      | [2 KiB][civetweb_patch] |  |  |  |
+| [clapack]                 | 3.2.1           | [clapack.tgz][clapack_upstream]               | [4 KiB][clapack_patch] |  |  |  |
 | [clipper]                 | 6.2.1           | [clipper_ver6.2.1.zip][clipper_upstream]      | [1 KiB][clipper_patch] |  |  |  |
 | [compositeproto]          | 0.4.2           | [compositeproto-0.4.2.tar.bz2][compositeproto_upstream] |                      |  |  |  |
-| [coreutils]               | 8.24            | [coreutils-8.24.tar.xz][coreutils_upstream]   | [7 KiB][coreutils_patch] | not bionic |  |  |
-| [cups]                    | 2.1.0           | [cups-2.1.0-source.tar.bz2][cups_upstream]    | [1 KiB][cups_patch]  | not bionic |  | linux-only |
-| [curl]                    | 7.44.0          | [curl-7.44.0.tar.bz2][curl_upstream]          | [1 KiB][curl_patch]  |  |  |  |
-| [cython]                  | 0.19.1          | [Cython-0.19.1.tar.gz][cython_upstream]       |                      | not bionic |  | linux-only |
+| [coreutils]               | 8.24            | [coreutils-8.24.tar.xz][coreutils_upstream]   | [7 KiB][coreutils_patch] |  |  |  |
+| [cups]                    | 2.1.0           | [cups-2.1.0-source.tar.bz2][cups_upstream]    | [1 KiB][cups_patch]  |  |  | linux-only |
+| [curl]                    | 7.44.0          | [curl-7.44.0.tar.bz2][curl_upstream]          | [912 B][curl_patch]  |  |  |  |
+| [cython]                  | 0.19.1          | [Cython-0.19.1.tar.gz][cython_upstream]       |                      |  |  | linux-only |
 | [damageproto]             | 1.2.1           | [damageproto-1.2.1.tar.bz2][damageproto_upstream] |                      |  |  |  |
 | [darksky-catalog]         | 0.1.3           | [darksky_catalog-0.1.3.tar.gz][darksky-catalog_upstream] |                      |  |  |  |
 | [devil]                   | 1.7.8           | [DevIL-1.7.8.tar.gz][devil_upstream]          | [4 KiB][devil_patch] |  |  |  |
 | [distribute]              | 0.6.28          | [distribute-0.6.28.tar.gz][distribute_upstream] |                      |  |  |  |
 | [dosbox]                  | 0.74            | [dosbox-0.74.tar.gz][dosbox_upstream]         | [5 KiB][dosbox_patch] |  |  |  |
 | [drod]                    | 213fa47         | [drod-213fa47.tar.gz][drod_upstream]          | [722 B][drod_patch]  |  |  |  |
-| [eigen3]                  | 3.2.4           | [eigen-3.2.4.tar.bz2][eigen3_upstream]        | [383 B][eigen3_patch] |  |  |  |
+| [eigen3]                  | 3.2.7           | [eigen-3.2.7.tar.bz2][eigen3_upstream]        | [900 B][eigen3_patch] |  |  |  |
 | [emacs]                   | 24.3            | [emacs-24.3.tar.gz][emacs_upstream]           | [32 KiB][emacs_patch] |  |  | linux-only |
-| [emacs-x]                 | 24.3            | [emacs-24.3.tar.gz][emacs-x_upstream]         |                      | not bionic |  | linux-only |
-| [expat]                   | 2.0.1           | [expat-2.0.1.tar.gz][expat_upstream]          | [569 B][expat_patch] | not bionic |  |  |
+| [emacs-x]                 | 24.3            | [emacs-24.3.tar.gz][emacs-x_upstream]         |                      |  |  | linux-only |
+| [expat]                   | 2.0.1           | [expat-2.0.1.tar.gz][expat_upstream]          | [569 B][expat_patch] |  |  |  |
 | [faac]                    | 1.28            | [faac-1.28.tar.gz][faac_upstream]             | [1 KiB][faac_patch]  |  |  |  |
 | [faad2]                   | 2.7             | [faad2-2.7.tar.gz][faad2_upstream]            | [500 B][faad2_patch] |  |  |  |
 | [ffmpeg]                  | 2.6.1           | [ffmpeg-2.6.1.tar.bz2][ffmpeg_upstream]       | [1 KiB][ffmpeg_patch] |  | not arm |  |
 | [fftw]                    | 3.3.4           | [fftw-3.3.4.tar.gz][fftw_upstream]            | [2 KiB][fftw_patch]  |  |  |  |
 | [fftw-float]              | 3.3.4           | [fftw-3.3.4.tar.gz][fftw-float_upstream]      | [2 KiB][fftw-float_patch] |  |  |  |
-| [findutils]               | 4.4.2           | [findutils-4.4.2.tar.gz][findutils_upstream]  | [40 KiB][findutils_patch] | not bionic |  |  |
+| [findutils]               | 4.4.2           | [findutils-4.4.2.tar.gz][findutils_upstream]  | [41 KiB][findutils_patch] |  |  |  |
 | [fixesproto]              | 5.0             | [fixesproto-5.0.tar.bz2][fixesproto_upstream] |                      |  |  |  |
-| [flac]                    | 1.2.1           | [flac-1.2.1.tar.gz][flac_upstream]            | [858 B][flac_patch]  | not bionic |  | linux-only |
+| [flac]                    | 1.2.1           | [flac-1.2.1.tar.gz][flac_upstream]            | [858 B][flac_patch]  |  |  | linux-only |
 | [font-adobe-100dpi]       | 1.0.3           | [font-adobe-100dpi-1.0.3.tar.bz2][font-adobe-100dpi_upstream] |                      |  |  | linux-only |
 | [font-adobe-75dpi]        | 1.0.3           | [font-adobe-75dpi-1.0.3.tar.bz2][font-adobe-75dpi_upstream] |                      |  |  | linux-only |
 | [font-adobe-utopia-100dpi] | 1.0.4           | [font-adobe-utopia-100dpi-1.0.4.tar.bz2][font-adobe-utopia-100dpi_upstream] |                      |  |  | linux-only |
@@ -93,76 +93,76 @@ script.
 | [font-util]               | 1.3.0           | [font-util-1.3.0.tar.bz2][font-util_upstream] |                      |  |  |  |
 | [font-winitzki-cyrillic]  | 1.0.3           | [font-winitzki-cyrillic-1.0.3.tar.bz2][font-winitzki-cyrillic_upstream] |                      |  |  | linux-only |
 | [font-xfree86-type1]      | 1.0.4           | [font-xfree86-type1-1.0.4.tar.bz2][font-xfree86-type1_upstream] |                      |  |  | linux-only |
-| [fontconfig]              | 2.11.1          | [fontconfig-2.11.1.tar.bz2][fontconfig_upstream] | [1 KiB][fontconfig_patch] | not bionic |  |  |
+| [fontconfig]              | 2.11.1          | [fontconfig-2.11.1.tar.bz2][fontconfig_upstream] | [1 KiB][fontconfig_patch] |  |  |  |
 | [fontsproto]              | 2.1.2           | [fontsproto-2.1.2.tar.bz2][fontsproto_upstream] |                      |  |  |  |
-| [freealut]                | 1.1.0           | [freealut-1.1.0.tar.gz][freealut_upstream]    | [888 B][freealut_patch] | not bionic |  |  |
+| [freealut]                | 1.1.0           | [freealut-1.1.0.tar.gz][freealut_upstream]    | [888 B][freealut_patch] |  |  |  |
 | [freeimage]               | 3.17.0          | [FreeImage3170.zip][freeimage_upstream]       | [1 KiB][freeimage_patch] |  |  |  |
 | [freetype]                | 2.5.5           | [freetype-2.5.5.tar.bz2][freetype_upstream]   |                      |  |  |  |
 | [fuseiso]                 | 20070708        | [fuseiso-20070708.tar.bz2][fuseiso_upstream]  | [22 KiB][fuseiso_patch] |  |  |  |
-| [fvwm]                    | 2.6.5           | [fvwm-2.6.5.tar.bz2][fvwm_upstream]           | [7 KiB][fvwm_patch]  | not bionic |  |  |
+| [fvwm]                    | 2.6.5           | [fvwm-2.6.5.tar.bz2][fvwm_upstream]           | [7 KiB][fvwm_patch]  |  |  |  |
 | [gawk]                    | 4.1.1           | [gawk-4.1.1.tar.gz][gawk_upstream]            | [1 KiB][gawk_patch]  |  |  |  |
 | [gc]                      | 6.8             | [gc6.8.tar.gz][gc_upstream]                   | [21 KiB][gc_patch]   |  |  |  |
-| [gcc]                     | 396037926       | [None][gcc_upstream]                          | [6 KiB][gcc_patch]   | glibc-only |  |  |
-| [gcc-avr]                 | 5.1.0           | [gcc-5.1.0.tar.bz2][gcc-avr_upstream]         | [11 KiB][gcc-avr_patch] |  | not arm | linux-only |
-| [gdb]                     | 7.7             | [None][gdb_upstream]                          | [8 KiB][gdb_patch]   | not bionic |  | linux-only |
+| [gcc]                     | 396037926       | [None][gcc_upstream]                          | [4 KiB][gcc_patch]   | glibc-only |  |  |
+| [gcc-avr]                 | 5.1.0           | [gcc-5.1.0.tar.bz2][gcc-avr_upstream]         | [7 KiB][gcc-avr_patch] |  | not arm | linux-only |
+| [gdb]                     | 7.7             | [None][gdb_upstream]                          | [7 KiB][gdb_patch]   |  |  | linux-only |
 | [gdk-pixbuf]              | 2.30.8          | [gdk-pixbuf-2.30.8.tar.xz][gdk-pixbuf_upstream] |                      |  |  |  |
-| [gegl]                    | 0.2.0           | [gegl-0.2.0.tar.bz2][gegl_upstream]           |                      | not bionic |  |  |
-| [gettext]                 | 0.19.2          | [gettext-0.19.2.tar.xz][gettext_upstream]     | [4 KiB][gettext_patch] | not bionic |  |  |
-| [gforth]                  | 0.7.2           | [gforth-0.7.2.tar.gz][gforth_upstream]        | [9 KiB][gforth_patch] | not bionic |  |  |
+| [gegl]                    | 0.2.0           | [gegl-0.2.0.tar.bz2][gegl_upstream]           |                      |  |  |  |
+| [gettext]                 | 0.19.2          | [gettext-0.19.2.tar.xz][gettext_upstream]     | [4 KiB][gettext_patch] |  |  |  |
+| [gforth]                  | 0.7.2           | [gforth-0.7.2.tar.gz][gforth_upstream]        | [9 KiB][gforth_patch] |  |  |  |
 | [giflib]                  | 4.2.1           | [giflib-4.2.1.tar.bz2][giflib_upstream]       |                      |  |  |  |
-| [gimp]                    | 2.8.14          | [gimp-2.8.14.tar.bz2][gimp_upstream]          | [937 B][gimp_patch]  | not bionic |  |  |
-| [git]                     | 2.3.0           | [git-2.3.0.tar.gz][git_upstream]              | [34 KiB][git_patch]  | not bionic |  |  |
+| [gimp]                    | 2.8.14          | [gimp-2.8.14.tar.bz2][gimp_upstream]          | [937 B][gimp_patch]  |  |  |  |
+| [git]                     | 2.3.0           | [git-2.3.0.tar.gz][git_upstream]              | [18 KiB][git_patch]  |  |  |  |
 | [glib]                    | 2.45.2          | [glib-2.45.2.tar.xz][glib_upstream]           | [3 KiB][glib_patch]  |  |  | linux-only |
 | [glproto]                 | 1.4.15          | [glproto-1.4.15.tar.bz2][glproto_upstream]    |                      |  |  |  |
 | [gmock]                   | 1.5.0           | [gmock-1.5.0.tar.gz][gmock_upstream]          | [657 B][gmock_patch] |  |  |  |
 | [gmp]                     | 5.0.2           | [gmp-5.0.2.tar.bz2][gmp_upstream]             |                      |  |  |  |
-| [google-api-python-client] | 1.2             | [google-api-python-client-1.2.tar.gz][google-api-python-client_upstream] |                      | not bionic |  |  |
-| [grep]                    | 2.21            | [grep-2.21.tar.xz][grep_upstream]             | [4 KiB][grep_patch]  | not bionic |  |  |
+| [google-api-python-client] | 1.2             | [google-api-python-client-1.2.tar.gz][google-api-python-client_upstream] |                      |  |  |  |
+| [grep]                    | 2.21            | [grep-2.21.tar.xz][grep_upstream]             | [5 KiB][grep_patch]  |  |  |  |
 | [gsl]                     | 1.16            | [gsl-1.16.tar.gz][gsl_upstream]               |                      |  |  |  |
 | [gtest]                   | 1.7.0           | [gtest-1.7.0.zip][gtest_upstream]             | [6 KiB][gtest_patch] |  |  |  |
 | [gtk+]                    | 2.24.28         | [gtk+-2.24.28.tar.xz][gtk+_upstream]          | [1 KiB][gtk+_patch]  | glibc-only |  |  |
-| [gzip]                    | 1.6             | [gzip-1.6.tar.gz][gzip_upstream]              | [8 KiB][gzip_patch]  | not bionic |  |  |
+| [gzip]                    | 1.6             | [gzip-1.6.tar.gz][gzip_upstream]              | [8 KiB][gzip_patch]  |  |  |  |
 | [h5py]                    | 2.2.1           | [h5py-2.2.1.tar.gz][h5py_upstream]            |                      |  |  |  |
-| [harfbuzz]                | 0.9.41          | [harfbuzz-0.9.41.tar.bz2][harfbuzz_upstream]  | [263 B][harfbuzz_patch] | not bionic |  |  |
-| [hdf5]                    | 1.8.12          | [hdf5-1.8.12.tar.gz][hdf5_upstream]           | [7 KiB][hdf5_patch]  | not bionic |  |  |
+| [harfbuzz]                | 0.9.41          | [harfbuzz-0.9.41.tar.bz2][harfbuzz_upstream]  |                      |  |  |  |
+| [hdf5]                    | 1.8.12          | [hdf5-1.8.12.tar.gz][hdf5_upstream]           | [7 KiB][hdf5_patch]  |  |  |  |
 | [hello]                   | 2.10            | [hello-2.10.tar.gz][hello_upstream]           |                      |  |  |  |
-| [httplib2]                | 0.9             | [httplib2-0.9.tar.gz][httplib2_upstream]      |                      | not bionic |  |  |
-| [icu]                     | 53.1            | [icu4c-53_1-src.tgz][icu_upstream]            | [2 KiB][icu_patch]   | not bionic |  |  |
+| [httplib2]                | 0.9             | [httplib2-0.9.tar.gz][httplib2_upstream]      |                      |  |  |  |
+| [icu]                     | 53.1            | [icu4c-53_1-src.tgz][icu_upstream]            | [2 KiB][icu_patch]   |  |  |  |
 | [id3lib]                  | 3.8.3           | [id3lib-3.8.3.tar.gz][id3lib_upstream]        | [2 KiB][id3lib_patch] |  |  |  |
-| [imagemagick]             | 6.9.0-2         | [ImageMagick-6.9.0-2.tar.bz2][imagemagick_upstream] |                      | not bionic |  |  |
+| [imagemagick]             | 6.9.0-2         | [ImageMagick-6.9.0-2.tar.bz2][imagemagick_upstream] |                      |  |  |  |
 | [inputproto]              | 2.2             | [inputproto-2.2.tar.bz2][inputproto_upstream] |                      |  |  |  |
 | [ipython]                 | 2.1.0           | [ipython-2.1.0.tar.gz][ipython_upstream]      | [2 KiB][ipython_patch] |  |  |  |
 | [jinja2]                  | 2.7.2           | [Jinja2-2.7.2.tar.gz][jinja2_upstream]        |                      |  |  |  |
 | [jpeg6b]                  | 6b              | [jpegsrc.v6b.tar.gz][jpeg6b_upstream]         | [315 B][jpeg6b_patch] |  |  |  |
 | [jpeg8d]                  | 8d              | [jpegsrc.v8d.tar.gz][jpeg8d_upstream]         |                      |  |  |  |
-| [json-glib]               | 1.0.4           | [json-glib-1.0.4.tar.xz][json-glib_upstream]  |                      | not bionic |  |  |
+| [json-glib]               | 1.0.4           | [json-glib-1.0.4.tar.xz][json-glib_upstream]  |                      |  |  |  |
 | [jsoncpp]                 | 1.6.1           | [jsoncpp-1.6.1.tar.gz][jsoncpp_upstream]      | [1 KiB][jsoncpp_patch] |  |  |  |
 | [kbproto]                 | 1.0.6           | [kbproto-1.0.6.tar.bz2][kbproto_upstream]     |                      |  |  |  |
 | [lame]                    | 3.99.5          | [lame-3.99.5.tar.gz][lame_upstream]           |                      |  |  |  |
 | [lcms]                    | 2.4             | [lcms2-2.4.tar.gz][lcms_upstream]             |                      |  |  |  |
-| [less]                    | 451             | [less-451.tar.gz][less_upstream]              | [946 B][less_patch]  | not bionic |  |  |
+| [less]                    | 451             | [less-451.tar.gz][less_upstream]              | [315 B][less_patch]  |  |  |  |
 | [leveldb]                 | 1.17.0          | [None][leveldb_upstream]                      | [4 KiB][leveldb_patch] |  |  |  |
-| [libarchive]              | 3.1.2           | [libarchive-3.1.2.tar.gz][libarchive_upstream] | [634 B][libarchive_patch] | not bionic |  |  |
-| [libarchive-dev]          | 0.1             | [None][libarchive-dev_upstream]               | [3 KiB][libarchive-dev_patch] | not bionic |  |  |
+| [libarchive]              | 3.1.2           | [libarchive-3.1.2.tar.gz][libarchive_upstream] | [634 B][libarchive_patch] |  |  |  |
+| [libarchive-dev]          | 0.1             | [None][libarchive-dev_upstream]               | [3 KiB][libarchive-dev_patch] |  |  |  |
 | [libatomic-ops]           | 7.4.0           | [libatomic_ops-7.4.0.tar.gz][libatomic-ops_upstream] |                      |  | not pnacl |  |
 | [libav]                   | 9.6             | [libav-9.6.tar.xz][libav_upstream]            | [1 KiB][libav_patch] |  | not arm |  |
 | [libbsd]                  | 0.7.0           | [libbsd-0.7.0.tar.xz][libbsd_upstream]        | [4 KiB][libbsd_patch] |  |  |  |
 | [libebml]                 | 1.3.1           | [libebml-1.3.1.tar.bz2][libebml_upstream]     | [268 B][libebml_patch] |  |  |  |
-| [libelf]                  | 0.8.13          | [libelf-0.8.13.tar.gz][libelf_upstream]       |                      | not bionic |  |  |
+| [libelf]                  | 0.8.13          | [libelf-0.8.13.tar.gz][libelf_upstream]       |                      |  |  |  |
 | [libffi]                  | 3.2.1           | [libffi-3.2.1.tar.gz][libffi_upstream]        | [1 KiB][libffi_patch] |  |  |  |
 | [libfontenc]              | 1.1.1           | [libfontenc-1.1.1.tar.bz2][libfontenc_upstream] |                      |  |  |  |
-| [libgit2]                 | 0.21.2          | [libgit2-0.21.2.tar.gz][libgit2_upstream]     | [31 KiB][libgit2_patch] | not bionic |  |  |
-| [libhangul]               | 0.1.0           | [libhangul-0.1.0.tar.gz][libhangul_upstream]  | [230 B][libhangul_patch] | not bionic |  |  |
+| [libgit2]                 | 0.21.2          | [libgit2-0.21.2.tar.gz][libgit2_upstream]     | [31 KiB][libgit2_patch] |  |  |  |
+| [libhangul]               | 0.1.0           | [libhangul-0.1.0.tar.gz][libhangul_upstream]  | [230 B][libhangul_patch] |  |  |  |
 | [libice]                  | 1.0.8           | [libICE-1.0.8.tar.bz2][libice_upstream]       | [316 B][libice_patch] |  |  |  |
-| [libiconv]                | 1.14            | [libiconv-1.14.tar.gz][libiconv_upstream]     | [530 B][libiconv_patch] | not bionic |  | linux-only |
+| [libiconv]                | 1.14            | [libiconv-1.14.tar.gz][libiconv_upstream]     | [530 B][libiconv_patch] |  |  | linux-only |
 | [libmatroska]             | 1.4.2           | [libmatroska-1.4.2.tar.bz2][libmatroska_upstream] |                      |  |  |  |
 | [libmikmod]               | 3.1.11          | [libmikmod-3.1.11.tar.gz][libmikmod_upstream] |                      |  |  |  |
 | [libmng]                  | 1.0.10          | [libmng-1.0.10.tar.gz][libmng_upstream]       | [301 B][libmng_patch] |  |  |  |
-| [libmodplug]              | 0.8.7           | [libmodplug-0.8.7.tar.gz][libmodplug_upstream] |                      | not bionic |  |  |
+| [libmodplug]              | 0.8.7           | [libmodplug-0.8.7.tar.gz][libmodplug_upstream] |                      |  |  |  |
 | [libogg]                  | 1.3.0           | [libogg-1.3.0.tar.gz][libogg_upstream]        |                      |  |  |  |
 | [liboggz]                 | 1.1.1           | [liboggz-1.1.1.tar.gz][liboggz_upstream]      | [727 B][liboggz_patch] |  |  |  |
 | [libpciaccess]            | 0.13.1          | [libpciaccess-0.13.1.tar.bz2][libpciaccess_upstream] |                      |  |  |  |
-| [libpng]                  | 1.6.12          | [libpng-1.6.12.tar.gz][libpng_upstream]       |                      |  |  |  |
+| [libpng]                  | 1.6.12          | [libpng-1.6.12.tar.gz][libpng_upstream]       | [325 B][libpng_patch] |  |  |  |
 | [libpng12]                | 1.2.51          | [libpng-1.2.51.tar.gz][libpng12_upstream]     |                      |  |  |  |
 | [libsm]                   | 1.2.1           | [libSM-1.2.1.tar.bz2][libsm_upstream]         |                      |  |  |  |
 | [libsodium]               | 1.0.3           | [libsodium-1.0.3.tar.gz][libsodium_upstream]  |                      |  |  |  |
@@ -173,86 +173,87 @@ script.
 | [libtomcrypt]             | 1.17            | [crypt-1.17.tar.bz2][libtomcrypt_upstream]    | [2 KiB][libtomcrypt_patch] |  |  |  |
 | [libtommath]              | 0.41            | [ltm-0.41.tar.bz2][libtommath_upstream]       | [2 KiB][libtommath_patch] |  |  |  |
 | [libtool]                 | 2.4             | [libtool-2.4.tar.xz][libtool_upstream]        |                      |  |  |  |
-| [libunistring]            | 0.9.3           | [libunistring-0.9.3.tar.gz][libunistring_upstream] |                      | not bionic |  |  |
+| [libunistring]            | 0.9.3           | [libunistring-0.9.3.tar.gz][libunistring_upstream] |                      |  |  |  |
 | [libuuid]                 | 1.0.3           | [libuuid-1.0.3.tar.gz][libuuid_upstream]      | [228 B][libuuid_patch] |  |  |  |
 | [libvorbis]               | 1.3.3           | [libvorbis-1.3.3.tar.gz][libvorbis_upstream]  |                      |  |  |  |
-| [libwebp]                 | 0.4.2           | [libwebp-0.4.2.tar.gz][libwebp_upstream]      | [438 B][libwebp_patch] |  |  |  |
+| [libvpx]                  | 1.4.0           | [libvpx-1.4.0.tar.bz2][libvpx_upstream]       |                      |  |  |  |
+| [libwebp]                 | 0.4.3           | [libwebp-0.4.3.tar.gz][libwebp_upstream]      |                      |  |  |  |
 | [libx11]                  | 1.5.0           | [libX11-1.5.0.tar.bz2][libx11_upstream]       | [3 KiB][libx11_patch] |  |  | linux-only |
 | [libxau]                  | 1.0.7           | [libXau-1.0.7.tar.bz2][libxau_upstream]       |                      |  |  |  |
 | [libxaw]                  | 1.0.11          | [libXaw-1.0.11.tar.bz2][libxaw_upstream]      | [2 KiB][libxaw_patch] |  |  |  |
 | [libxcb]                  | 1.8.1           | [libxcb-1.8.1.tar.bz2][libxcb_upstream]       | [1 KiB][libxcb_patch] |  |  |  |
 | [libxext]                 | 1.3.1           | [libXext-1.3.1.tar.bz2][libxext_upstream]     |                      |  |  |  |
-| [libxfont]                | 1.4.5           | [libXfont-1.4.5.tar.bz2][libxfont_upstream]   |                      | not bionic |  |  |
+| [libxfont]                | 1.4.5           | [libXfont-1.4.5.tar.bz2][libxfont_upstream]   |                      |  |  |  |
 | [libxi]                   | 1.6.1           | [libXi-1.6.1.tar.bz2][libxi_upstream]         |                      |  |  |  |
 | [libxinerama]             | 1.1.2           | [libXinerama-1.1.2.tar.bz2][libxinerama_upstream] |                      |  |  |  |
 | [libxkbfile]              | 1.0.8           | [libxkbfile-1.0.8.tar.bz2][libxkbfile_upstream] | [355 B][libxkbfile_patch] |  |  |  |
 | [libxml2]                 | 2.7.8           | [libxml2-2.7.8.tar.gz][libxml2_upstream]      | [367 B][libxml2_patch] |  |  |  |
 | [libxmu]                  | 1.1.1           | [libXmu-1.1.1.tar.bz2][libxmu_upstream]       | [451 B][libxmu_patch] |  |  |  |
-| [libxpm]                  | 3.5.10          | [libXpm-3.5.10.tar.bz2][libxpm_upstream]      |                      | not bionic |  |  |
+| [libxpm]                  | 3.5.10          | [libXpm-3.5.10.tar.bz2][libxpm_upstream]      |                      |  |  |  |
 | [libxrender]              | 0.9.7           | [libXrender-0.9.7.tar.bz2][libxrender_upstream] |                      |  |  |  |
 | [libxt]                   | 1.1.3           | [libXt-1.1.3.tar.bz2][libxt_upstream]         | [1 KiB][libxt_patch] |  |  |  |
 | [libxtst]                 | 1.2.1           | [libXtst-1.2.1.tar.bz2][libxtst_upstream]     |                      |  |  |  |
 | [libyuv]                  | 632c50f         | [None][libyuv_upstream]                       | [867 B][libyuv_patch] |  |  |  |
-| [lua]                     | 5.3.0           | [lua-5.3.0.tar.gz][lua_upstream]              | [1 KiB][lua_patch]   | not bionic |  |  |
-| [m4]                      | 1.4.17          | [m4-1.4.17.tar.xz][m4_upstream]               | [5 KiB][m4_patch]    | not bionic |  |  |
-| [make]                    | 3.82            | [make-3.82.tar.gz][make_upstream]             | [2 KiB][make_patch]  | not bionic |  |  |
+| [lua]                     | 5.3.0           | [lua-5.3.0.tar.gz][lua_upstream]              | [1 KiB][lua_patch]   |  |  |  |
+| [m4]                      | 1.4.17          | [m4-1.4.17.tar.xz][m4_upstream]               | [5 KiB][m4_patch]    |  |  |  |
+| [make]                    | 3.82            | [make-3.82.tar.gz][make_upstream]             | [1 KiB][make_patch]  |  |  |  |
 | [markupsafe]              | 0.19            | [MarkupSafe-0.19.tar.gz][markupsafe_upstream] |                      |  |  |  |
 | [matplotlib]              | 1.3.1           | [matplotlib-1.3.1.tar.gz][matplotlib_upstream] | [5 KiB][matplotlib_patch] |  |  |  |
 | [mesa]                    | 7.6             | [MesaLib-7.6.tar.gz][mesa_upstream]           | [7 KiB][mesa_patch]  |  |  |  |
 | [metakit]                 | 2.4.9.7         | [metakit-2.4.9.7.tar.gz][metakit_upstream]    | [3 KiB][metakit_patch] |  |  | linux-only |
 | [mongoose]                | 3.8             | [mongoose-3.8.tgz][mongoose_upstream]         | [2 KiB][mongoose_patch] | glibc-only |  |  |
-| [mp4v2]                   | 2.0.0           | [mp4v2-2.0.0.tar.bz2][mp4v2_upstream]         |                      | not bionic |  |  |
-| [mpc]                     | 1.0.1           | [mpc-1.0.1.tar.gz][mpc_upstream]              |                      | not bionic |  |  |
-| [mpfr]                    | 3.1.2           | [mpfr-3.1.2.tar.bz2][mpfr_upstream]           |                      | not bionic |  |  |
+| [mp4v2]                   | 2.0.0           | [mp4v2-2.0.0.tar.bz2][mp4v2_upstream]         |                      |  |  |  |
+| [mpc]                     | 1.0.1           | [mpc-1.0.1.tar.gz][mpc_upstream]              |                      |  |  |  |
+| [mpfr]                    | 3.1.2           | [mpfr-3.1.2.tar.bz2][mpfr_upstream]           |                      |  |  |  |
 | [mpg123]                  | 1.20.0          | [mpg123-1.20.0.tar.bz2][mpg123_upstream]      |                      |  |  |  |
-| [nano]                    | 2.2.6           | [nano-2.2.6.tar.gz][nano_upstream]            | [1 KiB][nano_patch]  | not bionic |  |  |
+| [nano]                    | 2.2.6           | [nano-2.2.6.tar.gz][nano_upstream]            | [1 KiB][nano_patch]  |  |  |  |
 | [ncurses]                 | 5.9             | [ncurses-5.9.tar.gz][ncurses_upstream]        | [5 KiB][ncurses_patch] |  |  |  |
-| [netcat]                  | 0.7.1           | [netcat-0.7.1.tar.bz2][netcat_upstream]       | [3 KiB][netcat_patch] |  |  |  |
-| [nethack]                 | 3.4.3           | [nethack-343-src.tgz][nethack_upstream]       | [9 KiB][nethack_patch] | not bionic |  |  |
+| [netcat]                  | 0.7.1           | [netcat-0.7.1.tar.bz2][netcat_upstream]       | [2 KiB][netcat_patch] |  |  |  |
+| [nethack]                 | 3.4.3           | [nethack-343-src.tgz][nethack_upstream]       | [9 KiB][nethack_patch] |  |  |  |
 | [nettle]                  | 2.7             | [nettle-2.7.tar.gz][nettle_upstream]          | [640 B][nettle_patch] |  |  |  |
-| [ninja]                   | 1.5.3           | [ninja-v1.5.3.tar.gz][ninja_upstream]         | [13 KiB][ninja_patch] |  |  |  |
+| [ninja]                   | 1.5.3           | [ninja-v1.5.3.tar.gz][ninja_upstream]         | [12 KiB][ninja_patch] |  |  |  |
 | [nose]                    | 1.3.0           | [nose-1.3.0.tar.gz][nose_upstream]            |                      |  |  |  |
-| [numpy]                   | 1.8.0           | [numpy-1.8.0.tar.gz][numpy_upstream]          | [6 KiB][numpy_patch] | not bionic |  | linux-only |
-| [openal-soft]             | 1.16.0          | [openal-soft-1.16.0.tar.bz2][openal-soft_upstream] | [18 KiB][openal-soft_patch] | not bionic |  |  |
+| [numpy]                   | 1.8.0           | [numpy-1.8.0.tar.gz][numpy_upstream]          | [6 KiB][numpy_patch] |  |  | linux-only |
+| [openal-soft]             | 1.16.0          | [openal-soft-1.16.0.tar.bz2][openal-soft_upstream] | [18 KiB][openal-soft_patch] |  |  |  |
 | [opencv]                  | 2.4.9           | [opencv-2.4.9.tar.gz][opencv_upstream]        | [9 KiB][opencv_patch] |  | not arm |  |
 | [openjpeg]                | 2.1.0           | [openjpeg-2.1.0.tar.gz][openjpeg_upstream]    |                      |  |  |  |
 | [openscenegraph]          | 2.9.7           | [OpenSceneGraph-2.9.7.zip][openscenegraph_upstream] | [40 KiB][openscenegraph_patch] |  | not arm |  |
 | [openssh]                 | 5.9p1           | [openssh-5.9p1.tar.gz][openssh_upstream]      | [3 KiB][openssh_patch] | glibc-only |  |  |
 | [openssl]                 | 1.0.2d          | [openssl-1.0.2d.tar.gz][openssl_upstream]     | [3 KiB][openssl_patch] |  |  |  |
 | [pandas]                  | 0.13.1          | [pandas-0.13.1.tar.gz][pandas_upstream]       | [26 KiB][pandas_patch] | newlib-only |  |  |
-| [pango]                   | 1.36.8          | [pango-1.36.8.tar.xz][pango_upstream]         | [261 B][pango_patch] |  |  |  |
-| [pcre]                    | 8.36            | [pcre-8.36.tar.bz2][pcre_upstream]            | [546 B][pcre_patch]  | not bionic |  |  |
-| [perl]                    | 5.20.2          | [perl-5.20.2.tar.gz][perl_upstream]           | [12 KiB][perl_patch] |  |  | linux-only |
-| [physfs]                  | 2.0.3           | [physfs-2.0.3.tar.bz2][physfs_upstream]       | [1 KiB][physfs_patch] | not bionic |  |  |
-| [pixman]                  | 0.32.4          | [pixman-0.32.4.tar.gz][pixman_upstream]       | [633 B][pixman_patch] | not bionic |  |  |
-| [pkg]                     | 1.6.1           | [pkg-1.6.1.tar.gz][pkg_upstream]              | [58 KiB][pkg_patch]  | not bionic |  |  |
+| [pango]                   | 1.36.8          | [pango-1.36.8.tar.xz][pango_upstream]         |                      |  |  |  |
+| [pcre]                    | 8.36            | [pcre-8.36.tar.bz2][pcre_upstream]            | [546 B][pcre_patch]  |  |  |  |
+| [perl]                    | 5.20.2          | [perl-5.20.2.tar.gz][perl_upstream]           | [10 KiB][perl_patch] |  |  | linux-only |
+| [physfs]                  | 2.0.3           | [physfs-2.0.3.tar.bz2][physfs_upstream]       | [1 KiB][physfs_patch] |  |  |  |
+| [pixman]                  | 0.32.4          | [pixman-0.32.4.tar.gz][pixman_upstream]       | [633 B][pixman_patch] |  |  |  |
+| [pkg]                     | 1.6.1           | [pkg-1.6.1.tar.gz][pkg_upstream]              | [58 KiB][pkg_patch]  |  |  |  |
 | [pnacl]                   | 0.0.1           | [None][pnacl_upstream]                        | [1 KiB][pnacl_patch] |  |  |  |
 | [pnacl-binutils-src]      | 0.0.1           | [None][pnacl-binutils-src_upstream]           |                      |  |  |  |
 | [pnacl-clang-src]         | 0.0.1           | [None][pnacl-clang-src_upstream]              |                      |  |  |  |
 | [pnacl-llvm-src]          | 0.0.1           | [None][pnacl-llvm-src_upstream]               |                      |  |  |  |
 | [poly2tri]                | 26242d0aa7b8    | [26242d0aa7b8.tar.gz][poly2tri_upstream]      |                      |  |  |  |
-| [protobuf]                | 3.0.0-alpha-2   | [protobuf-cpp-3.0.0-alpha-2.tar.gz][protobuf_upstream] | [12 KiB][protobuf_patch] | not bionic |  |  |
+| [protobuf]                | 3.0.0-alpha-2   | [protobuf-cpp-3.0.0-alpha-2.tar.gz][protobuf_upstream] | [12 KiB][protobuf_patch] |  |  |  |
 | [protobuf-c]              | 1.0.2           | [protobuf-c-1.0.2.tar.gz][protobuf-c_upstream] |                      |  |  |  |
 | [pyparsing]               | 2.0.1           | [pyparsing-2.0.1.tar.gz][pyparsing_upstream]  |                      |  |  |  |
 | [pyppapi]                 | 0.4             | [pyppapi-0.4.tar.gz][pyppapi_upstream]        |                      |  |  |  |
-| [python]                  | 2.7.10          | [Python-2.7.10.tgz][python_upstream]          | [29 KiB][python_patch] | not bionic |  |  |
-| [python-dateutil]         | 2.2             | [python-dateutil-2.2.tar.gz][python-dateutil_upstream] |                      | not bionic |  |  |
-| [python-gflags]           | 2.0             | [python-gflags-2.0.tar.gz][python-gflags_upstream] |                      | not bionic |  |  |
+| [python]                  | 2.7.10          | [Python-2.7.10.tgz][python_upstream]          | [29 KiB][python_patch] |  |  |  |
+| [python-dateutil]         | 2.2             | [python-dateutil-2.2.tar.gz][python-dateutil_upstream] |                      |  |  |  |
+| [python-gflags]           | 2.0             | [python-gflags-2.0.tar.gz][python-gflags_upstream] |                      |  |  |  |
 | [python-host]             | 2.7.10          | [Python-2.7.10.tgz][python-host_upstream]     | [3 KiB][python-host_patch] |  |  |  |
 | [python-static]           | 2.7.10          | [Python-2.7.10.tgz][python-static_upstream]   | [30 KiB][python-static_patch] |  |  |  |
-| [python3]                 | 3.4.2           | [Python-3.4.2.tar.xz][python3_upstream]       | [14 KiB][python3_patch] | not bionic |  | linux-only |
+| [python3]                 | 3.4.2           | [Python-3.4.2.tar.xz][python3_upstream]       | [14 KiB][python3_patch] |  |  | linux-only |
 | [pytz]                    | 2014.2          | [pytz-2014.2.tar.gz][pytz_upstream]           |                      | newlib-only |  |  |
-| [pyzmq]                   | 13.1.0          | [pyzmq-13.1.0.tar.gz][pyzmq_upstream]         | [168 KiB][pyzmq_patch] | not bionic |  |  |
+| [pyzmq]                   | 13.1.0          | [pyzmq-13.1.0.tar.gz][pyzmq_upstream]         | [168 KiB][pyzmq_patch] |  |  |  |
 | [quakespasm]              | 0.85.9          | [quakespasm-0.85.9.tgz][quakespasm_upstream]  | [6 KiB][quakespasm_patch] |  |  |  |
 | [randrproto]              | 1.3.2           | [randrproto-1.3.2.tar.bz2][randrproto_upstream] |                      |  |  |  |
 | [readline]                | 6.3             | [readline-6.3.tar.gz][readline_upstream]      | [838 B][readline_patch] |  |  |  |
 | [recordproto]             | 1.14.2          | [recordproto-1.14.2.tar.bz2][recordproto_upstream] |                      |  |  |  |
 | [regal]                   | 5e14ae7         | [Regal-5e14ae7.tar.gz][regal_upstream]        | [18 KiB][regal_patch] |  |  |  |
 | [renderproto]             | 0.11.1          | [renderproto-0.11.1.tar.bz2][renderproto_upstream] |                      |  |  |  |
-| [requests]                | 2.3.0           | [requests-2.3.0.tar.gz][requests_upstream]    |                      | not bionic |  |  |
+| [requests]                | 2.3.0           | [requests-2.3.0.tar.gz][requests_upstream]    |                      |  |  |  |
 | [resourceproto]           | 1.2.0           | [resourceproto-1.2.0.tar.bz2][resourceproto_upstream] |                      |  |  |  |
-| [ruby]                    | 2.0.0-p247      | [ruby-2.0.0-p247.tar.gz][ruby_upstream]       | [14 KiB][ruby_patch] | not bionic |  |  |
-| [samba]                   | 4.1.16          | [samba-4.1.16.tar.gz][samba_upstream]         | [13 KiB][samba_patch] | glibc-only | not i686 or arm | linux-only |
+| [ruby]                    | 2.0.0-p247      | [ruby-2.0.0-p247.tar.gz][ruby_upstream]       | [14 KiB][ruby_patch] |  |  |  |
+| [samba]                   | 4.1.16          | [samba-4.1.16.tar.gz][samba_upstream]         | [16 KiB][samba_patch] | glibc-only | not i686 or arm | linux-only |
 | [scrnsaverproto]          | 1.2.2           | [scrnsaverproto-1.2.2.tar.bz2][scrnsaverproto_upstream] |                      |  |  |  |
 | [scummvm]                 | 1.7.0           | [scummvm-1.7.0.tar.gz][scummvm_upstream]      | [11 KiB][scummvm_patch] |  |  |  |
 | [sdl]                     | 1.2.15          | [None][sdl_upstream]                          |                      |  |  |  |
@@ -263,54 +264,54 @@ script.
 | [sdl-ttf]                 | 2.0.10          | [SDL_ttf-2.0.10.tar.gz][sdl-ttf_upstream]     | [345 B][sdl-ttf_patch] |  |  |  |
 | [sdl2]                    | 2.0.3           | [None][sdl2_upstream]                         | [635 B][sdl2_patch]  |  |  |  |
 | [sdl2-gfx]                | 1.0.0           | [SDL2_gfx-1.0.0.tar.gz][sdl2-gfx_upstream]    |                      |  |  |  |
-| [sdl2-image]              | 2.0.0           | [SDL2_image-2.0.0.tar.gz][sdl2-image_upstream] |                      | not bionic |  |  |
-| [sdl2-tests]              | 2.0.3           | [None][sdl2-tests_upstream]                   | [889 B][sdl2-tests_patch] | not bionic |  |  |
+| [sdl2-image]              | 2.0.0           | [SDL2_image-2.0.0.tar.gz][sdl2-image_upstream] |                      |  |  |  |
+| [sdl2-tests]              | 2.0.3           | [None][sdl2-tests_upstream]                   | [889 B][sdl2-tests_patch] |  |  |  |
 | [sdl2-ttf]                | 2.0.12          | [SDL2_ttf-2.0.12.tar.gz][sdl2-ttf_upstream]   | [537 B][sdl2-ttf_patch] |  |  |  |
 | [sdlquake]                | 1.0.9           | [sdlquake-1.0.9.tar.gz][sdlquake_upstream]    | [5 KiB][sdlquake_patch] |  |  |  |
 | [setuptools]              | 2.0.1           | [setuptools-2.0.1.tar.gz][setuptools_upstream] |                      |  |  |  |
-| [six]                     | 1.5.2           | [six-1.5.2.tar.gz][six_upstream]              |                      | not bionic |  |  |
+| [six]                     | 1.5.2           | [six-1.5.2.tar.gz][six_upstream]              |                      |  |  |  |
 | [snes9x]                  | 1.53            | [snes9x-1.53-src.tar.bz2][snes9x_upstream]    | [35 KiB][snes9x_patch] |  |  |  |
 | [speex]                   | 1.2rc1          | [speex-1.2rc1.tar.gz][speex_upstream]         |                      |  |  |  |
-| [sqlite]                  | 3071601         | [sqlite-autoconf-3071601.tar.gz][sqlite_upstream] | [1 KiB][sqlite_patch] | not bionic |  |  |
-| [subversion]              | 1.8.11          | [subversion-1.8.11.tar.bz2][subversion_upstream] | [894 B][subversion_patch] | not bionic |  |  |
+| [sqlite]                  | 3071601         | [sqlite-autoconf-3071601.tar.gz][sqlite_upstream] | [1 KiB][sqlite_patch] |  |  |  |
+| [subversion]              | 1.8.11          | [subversion-1.8.11.tar.bz2][subversion_upstream] | [894 B][subversion_patch] |  |  |  |
 | [sympy]                   | 0.7.4.1         | [sympy-0.7.4.1.tar.gz][sympy_upstream]        |                      |  |  |  |
-| [tar]                     | 1.28            | [tar-1.28.tar.bz2][tar_upstream]              | [1 KiB][tar_patch]   | not bionic |  |  |
-| [tcl]                     | 8.6.1           | [tcl8.6.1-src.tar.gz][tcl_upstream]           | [2 KiB][tcl_patch]   | not bionic |  |  |
+| [tar]                     | 1.28            | [tar-1.28.tar.bz2][tar_upstream]              | [1 KiB][tar_patch]   |  |  |  |
+| [tcl]                     | 8.6.1           | [tcl8.6.1-src.tar.gz][tcl_upstream]           | [2 KiB][tcl_patch]   |  |  |  |
 | [texinfo]                 | 6.0             | [texinfo-6.0.tar.gz][texinfo_upstream]        |                      |  |  |  |
-| [texlive]                 | 2015            | [texlive-20150521-source.tar.xz][texlive_upstream] | [40 KiB][texlive_patch] | not bionic | not arm or pnacl | linux-only |
+| [texlive]                 | 2015            | [texlive-20150521-source.tar.xz][texlive_upstream] | [31 KiB][texlive_patch] |  | not arm or pnacl | linux-only |
 | [thingking]               | 1.0.2           | [thingking-1.0.2.tar.gz][thingking_upstream]  | [413 B][thingking_patch] |  |  |  |
-| [thttpd]                  | 2.25b           | [thttpd-2.25b.tar.gz][thttpd_upstream]        | [28 KiB][thttpd_patch] | glibc-only |  |  |
+| [thttpd]                  | 2.25b           | [thttpd-2.25b.tar.gz][thttpd_upstream]        | [27 KiB][thttpd_patch] | glibc-only |  |  |
 | [tiff]                    | 4.0.3           | [tiff-4.0.3.tar.gz][tiff_upstream]            |                      |  |  |  |
 | [tinyxml]                 | 2.6.2           | [tinyxml_2_6_2.tar.gz][tinyxml_upstream]      | [2 KiB][tinyxml_patch] |  |  |  |
 | [tk]                      | 8.6.1           | [tk8.6.1-src.tar.gz][tk_upstream]             | [441 B][tk_patch]    |  |  |  |
-| [toybox]                  | 0.4.7           | [toybox-0.4.7.tar.bz2][toybox_upstream]       | [20 KiB][toybox_patch] | not bionic |  | linux-only |
-| [tree]                    | 1.7.0           | [tree-1.7.0.tgz][tree_upstream]               | [290 B][tree_patch]  | not bionic |  |  |
-| [twm]                     | X11R6-xc-fix13  | [twm-X11R6-xc-fix13.tar.gz][twm_upstream]     |                      | not bionic |  |  |
+| [toybox]                  | 0.4.7           | [toybox-0.4.7.tar.bz2][toybox_upstream]       | [20 KiB][toybox_patch] |  |  | linux-only |
+| [tree]                    | 1.7.0           | [tree-1.7.0.tgz][tree_upstream]               | [290 B][tree_patch]  |  |  |  |
+| [twm]                     | X11R6-xc-fix13  | [twm-X11R6-xc-fix13.tar.gz][twm_upstream]     |                      |  |  |  |
 | [unzip]                   | 6.0             | [unzip60.zip][unzip_upstream]                 | [2 KiB][unzip_patch] |  |  |  |
 | [videoproto]              | 2.3.1           | [videoproto-2.3.1.tar.bz2][videoproto_upstream] |                      |  |  |  |
-| [vim]                     | 7.4             | [vim-7.4.tar.bz2][vim_upstream]               | [3 KiB][vim_patch]   | not bionic |  | linux-only |
+| [vim]                     | 7.4             | [vim-7.4.tar.bz2][vim_upstream]               | [3 KiB][vim_patch]   |  |  | linux-only |
 | [wireshark]               | 1.10.11         | [wireshark-1.10.11.tar.bz2][wireshark_upstream] | [7 KiB][wireshark_patch] | newlib-only |  |  |
-| [x264]                    | snapshot-20140829-2245-stable | [x264-snapshot-20140829-2245-stable.tar.bz2][x264_upstream] | [1 KiB][x264_patch]  | not bionic |  |  |
-| [xaos]                    | 3.5             | [xaos-3.5.tar.gz][xaos_upstream]              | [3 KiB][xaos_patch]  |  |  |  |
+| [x264]                    | snapshot-20140829-2245-stable | [x264-snapshot-20140829-2245-stable.tar.bz2][x264_upstream] | [1 KiB][x264_patch]  |  |  |  |
+| [xaos]                    | 3.6             | [xaos-3.6.tar.gz][xaos_upstream]              | [2 KiB][xaos_patch]  |  |  |  |
 | [xbitmaps]                | 1.1.1           | [xbitmaps-1.1.1.tar.bz2][xbitmaps_upstream]   |                      |  |  |  |
 | [xcb-proto]               | 1.7.1           | [xcb-proto-1.7.1.tar.bz2][xcb-proto_upstream] |                      |  |  |  |
 | [xcb-util]                | 0.3.9           | [xcb-util-0.3.9.tar.bz2][xcb-util_upstream]   |                      |  |  |  |
 | [xcmiscproto]             | 1.2.2           | [xcmiscproto-1.2.2.tar.bz2][xcmiscproto_upstream] |                      |  |  |  |
 | [xextproto]               | 7.2.1           | [xextproto-7.2.1.tar.bz2][xextproto_upstream] |                      |  |  |  |
-| [xeyes]                   | 1.0.1           | [xeyes-1.0.1.tar.bz2][xeyes_upstream]         |                      | not bionic |  |  |
+| [xeyes]                   | 1.0.1           | [xeyes-1.0.1.tar.bz2][xeyes_upstream]         |                      |  |  |  |
 | [xineramaproto]           | 1.2.1           | [xineramaproto-1.2.1.tar.bz2][xineramaproto_upstream] |                      |  |  |  |
-| [xkbcomp]                 | 1.2.4           | [xkbcomp-1.2.4.tar.bz2][xkbcomp_upstream]     | [595 B][xkbcomp_patch] | not bionic |  | linux-only |
-| [xkeyboard-config]        | 2.6             | [xkeyboard-config-2.6.tar.bz2][xkeyboard-config_upstream] | [10 KiB][xkeyboard-config_patch] | not bionic |  | linux-only |
+| [xkbcomp]                 | 1.2.4           | [xkbcomp-1.2.4.tar.bz2][xkbcomp_upstream]     | [595 B][xkbcomp_patch] |  |  | linux-only |
+| [xkeyboard-config]        | 2.6             | [xkeyboard-config-2.6.tar.bz2][xkeyboard-config_upstream] | [10 KiB][xkeyboard-config_patch] |  |  | linux-only |
 | [xorg-server]             | 1.12.2          | [xorg-server-1.12.2.tar.bz2][xorg-server_upstream] | [9 KiB][xorg-server_patch] |  |  | linux-only |
 | [xproto]                  | 7.0.23          | [xproto-7.0.23.tar.bz2][xproto_upstream]      | [902 B][xproto_patch] |  |  |  |
 | [xtrans]                  | 1.2.7           | [xtrans-1.2.7.tar.bz2][xtrans_upstream]       | [2 KiB][xtrans_patch] |  |  |  |
-| [xz]                      | 5.2.0           | [xz-5.2.0.tar.xz][xz_upstream]                |                      | not bionic |  |  |
-| [yajl]                    | 2.0.4           | [yajl-2.0.4.zip][yajl_upstream]               | [2 KiB][yajl_patch]  | not bionic |  |  |
-| [yt]                      | 3.0             | [yt-3.0.tar.gz][yt_upstream]                  |                      | not bionic |  | linux-only |
-| [zeromq]                  | 4.0.3           | [zeromq-4.0.3.tar.gz][zeromq_upstream]        | [4 KiB][zeromq_patch] | not bionic |  |  |
+| [xz]                      | 5.2.0           | [xz-5.2.0.tar.xz][xz_upstream]                |                      |  |  |  |
+| [yajl]                    | 2.0.4           | [yajl-2.0.4.zip][yajl_upstream]               | [2 KiB][yajl_patch]  |  |  |  |
+| [yt]                      | 3.0             | [yt-3.0.tar.gz][yt_upstream]                  |                      |  |  | linux-only |
+| [zeromq]                  | 4.0.3           | [zeromq-4.0.3.tar.gz][zeromq_upstream]        | [4 KiB][zeromq_patch] |  |  |  |
 | [zlib]                    | 1.2.8           | [zlib-1.2.8.tar.gz][zlib_upstream]            | [592 B][zlib_patch]  |  |  |  |
 
-_Total = 318_
+_Total = 319_
 
 # Local Ports (not based on upstream sources) =
 
@@ -350,7 +351,6 @@ _Total = 18_
 [gmock_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/gmock/nacl.patch
 [gmock_upstream]: http://googlemock.googlecode.com/files/gmock-1.5.0.tar.gz
 [pango]: https://chromium.googlesource.com/external/naclports/+/master/ports/pango
-[pango_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/pango/nacl.patch
 [pango_upstream]: http://ftp.gnome.org/pub/GNOME/sources/pango/1.36/pango-1.36.8.tar.xz
 [opencv]: https://chromium.googlesource.com/external/naclports/+/master/ports/opencv
 [opencv_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/opencv/nacl.patch
@@ -358,6 +358,8 @@ _Total = 18_
 [mingn]: https://chromium.googlesource.com/external/naclports/+/master/ports/mingn
 [font-sun-misc]: https://chromium.googlesource.com/external/naclports/+/master/ports/font-sun-misc
 [font-sun-misc_upstream]: http://www.x.org/releases/X11R7.7/src/everything/font-sun-misc-1.0.3.tar.bz2
+[libvpx]: https://chromium.googlesource.com/external/naclports/+/master/ports/libvpx
+[libvpx_upstream]: https://storage.googleapis.com/downloads.webmproject.org/releases/webm/libvpx-1.4.0.tar.bz2
 [devil]: https://chromium.googlesource.com/external/naclports/+/master/ports/devil
 [devil_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/devil/nacl.patch
 [devil_upstream]: http://downloads.sf.net/openil/DevIL-1.7.8.tar.gz
@@ -585,7 +587,7 @@ _Total = 18_
 [libxi_upstream]: http://www.x.org/releases/X11R7.7/src/everything/libXi-1.6.1.tar.bz2
 [xaos]: https://chromium.googlesource.com/external/naclports/+/master/ports/xaos
 [xaos_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/xaos/nacl.patch
-[xaos_upstream]: http://downloads.sf.net/xaos/xaos-3.5.tar.gz
+[xaos_upstream]: http://downloads.sf.net/xaos/xaos-3.6.tar.gz
 [gtest]: https://chromium.googlesource.com/external/naclports/+/master/ports/gtest
 [gtest_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/gtest/nacl.patch
 [gtest_upstream]: http://googletest.googlecode.com/files/gtest-1.7.0.zip
@@ -651,7 +653,7 @@ _Total = 18_
 [libatomic-ops_upstream]: http://www.hpl.hp.com/research/linux/atomic_ops/download/libatomic_ops-7.4.0.tar.gz
 [eigen3]: https://chromium.googlesource.com/external/naclports/+/master/ports/eigen3
 [eigen3_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/eigen3/nacl.patch
-[eigen3_upstream]: http://bitbucket.org/eigen/eigen/get/3.2.4.tar.bz2
+[eigen3_upstream]: http://bitbucket.org/eigen/eigen/get/3.2.7.tar.bz2
 [gcc-avr]: https://chromium.googlesource.com/external/naclports/+/master/ports/gcc-avr
 [gcc-avr_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/gcc-avr/nacl.patch
 [gcc-avr_upstream]: http://ftp.gnu.org/gnu/gcc/gcc-5.1.0/gcc-5.1.0.tar.bz2
@@ -885,7 +887,6 @@ _Total = 18_
 [xextproto]: https://chromium.googlesource.com/external/naclports/+/master/ports/xextproto
 [xextproto_upstream]: http://www.x.org/releases/X11R7.7/src/everything/xextproto-7.2.1.tar.bz2
 [harfbuzz]: https://chromium.googlesource.com/external/naclports/+/master/ports/harfbuzz
-[harfbuzz_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/harfbuzz/nacl.patch
 [harfbuzz_upstream]: http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-0.9.41.tar.bz2
 [mpg123]: https://chromium.googlesource.com/external/naclports/+/master/ports/mpg123
 [mpg123_upstream]: http://www.mpg123.de/download/mpg123-1.20.0.tar.bz2
@@ -918,7 +919,7 @@ _Total = 18_
 [sdl2_upstream]: https://github.com/sbc100/SDL-mirror.git@b406d6b
 [boringssl]: https://chromium.googlesource.com/external/naclports/+/master/ports/boringssl
 [boringssl_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/boringssl/nacl.patch
-[boringssl_upstream]: https://boringssl.googlesource.com/boringssl.git@3b73c18
+[boringssl_upstream]: https://boringssl.googlesource.com/boringssl.git@e8fe07f
 [gcc]: https://chromium.googlesource.com/external/naclports/+/master/ports/gcc
 [gcc_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/gcc/nacl.patch
 [gcc_upstream]: https://chromium.googlesource.com/native_client/nacl-gcc.git@396037926
@@ -982,6 +983,7 @@ _Total = 18_
 [python-static_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/python-static/nacl.patch
 [python-static_upstream]: http://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz
 [libpng]: https://chromium.googlesource.com/external/naclports/+/master/ports/libpng
+[libpng_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/libpng/nacl.patch
 [libpng_upstream]: http://download.sf.net/libpng/libpng-1.6.12.tar.gz
 [font-jis-misc]: https://chromium.googlesource.com/external/naclports/+/master/ports/font-jis-misc
 [font-jis-misc_upstream]: http://www.x.org/releases/X11R7.7/src/everything/font-jis-misc-1.0.3.tar.bz2
@@ -1031,8 +1033,7 @@ _Total = 18_
 [libsodium]: https://chromium.googlesource.com/external/naclports/+/master/ports/libsodium
 [libsodium_upstream]: https://github.com/jedisct1/libsodium/releases/download/1.0.3/libsodium-1.0.3.tar.gz
 [libwebp]: https://chromium.googlesource.com/external/naclports/+/master/ports/libwebp
-[libwebp_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/libwebp/nacl.patch
-[libwebp_upstream]: http://downloads.webmproject.org/releases/webp/libwebp-0.4.2.tar.gz
+[libwebp_upstream]: http://downloads.webmproject.org/releases/webp/libwebp-0.4.3.tar.gz
 [fuseiso]: https://chromium.googlesource.com/external/naclports/+/master/ports/fuseiso
 [fuseiso_patch]: https://chromium.googlesource.com/external/naclports/+/master/ports/fuseiso/nacl.patch
 [fuseiso_upstream]: http://download.sf.net/project/fuseiso/fuseiso/20070708/fuseiso-20070708.tar.bz2

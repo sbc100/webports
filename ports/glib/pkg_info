@@ -7,4 +7,4 @@ DEPENDS=(libffi zlib gettext)
 # detect this on mac.
 BUILD_OS=linux
 SHA1=495f7cc9281847ecfbbaf9d3edd9eb2a2123350e
-DISABLED_TOOLCHAIN=(emscripten bionic)
+DISABLED_TOOLCHAIN=(emscripten)

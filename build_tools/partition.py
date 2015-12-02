@@ -58,7 +58,7 @@ import urllib2
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
-TOOLCHAINS = ('bionic', 'clang-newlib', 'glibc', 'pnacl')
+TOOLCHAINS = ('clang-newlib', 'glibc', 'pnacl')
 
 sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 

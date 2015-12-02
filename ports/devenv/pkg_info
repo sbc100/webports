@@ -4,5 +4,3 @@ VERSION=0.1
 BUILD_OS=linux
 DEPENDS=(bash unzip geturl pkg)
 DISABLED_TOOLCHAIN=(emscripten)
-# Disabled for bionic due to bash.
-DISABLED_LIBC=(bionic)

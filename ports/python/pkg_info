@@ -6,6 +6,5 @@ LICENSE=CUSTOM:LICENSE
 DEPENDS=(glibc-compat readline zlib libtar nacl-spawn openssl bzip2 python-host)
 CONFLICTS=(python-static)
 # incomplete lconv struct
-DISABLED_LIBC=(bionic)
 SHA1=49089f1f6ab445dc8ace97beeb276095c4c8039b
 DISABLED_TOOLCHAIN=(emscripten)

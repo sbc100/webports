@@ -372,9 +372,9 @@ static void unstash_file_descriptors(void) {
   }
 }
 
-NACL_SPAWN_TLS jmp_buf nacl_spawn_vfork_env;
-static NACL_SPAWN_TLS pid_t vfork_pid = -1;
-static NACL_SPAWN_TLS int vforking = 0;
+__thread jmp_buf nacl_spawn_vfork_env;
+static __thread pid_t vfork_pid = -1;
+static __thread int vforking = 0;
 
 // Shared spawnve implementation. Declared static so that shared library
 // overrides doesn't break calls meant to be internal to this implementation.

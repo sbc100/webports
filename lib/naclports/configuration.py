@@ -7,15 +7,15 @@ import platform
 
 from naclports import error, util
 
-VALID_TOOLCHAINS = ['glibc', 'bionic', 'pnacl', 'clang-newlib', 'emscripten']
-VALID_LIBC = ['newlib', 'glibc', 'bionic']
+VALID_TOOLCHAINS = ['glibc', 'pnacl', 'clang-newlib', 'emscripten']
+VALID_LIBC = ['newlib', 'glibc']
 
 
 class Configuration(object):
   """Class representing the build configuration for naclports packages.
 
   This consists of the following attributes:
-    toolchain   - clang-newlib, glibc, bionic, pnacl
+    toolchain   - clang-newlib, glibc, pnacl
     arch        - x86_64, x86_32, arm, pnacl
     debug       - True/False
     config_name - 'debug' or 'release'
@@ -55,8 +55,6 @@ class Configuration(object):
         arch = 'pnacl'
       elif self.toolchain == 'emscripten':
         arch = 'emscripten'
-      elif self.toolchain == 'bionic':
-        arch = 'arm'
       elif platform.machine() == 'i686':
         arch = 'i686'
       else:

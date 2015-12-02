@@ -150,23 +150,6 @@ diff --git a/src/disk_interface_test.cc b/src/disk_interface_test.cc
  #endif
    disk_.quiet_ = false;
  }
-diff --git a/src/line_printer.cc b/src/line_printer.cc
---- a/src/line_printer.cc
-+++ b/src/line_printer.cc
-@@ -93,10 +93,13 @@ void LinePrinter::Print(string to_print, LineType type) {
- #else
-     // Limit output to width of the terminal if provided so we don't cause
-     // line-wrapping.
-+    // TODO(bradnelson): Drop when bionic includes winsize.
-+# if !defined(__native_client__) || !defined(__BIONIC__)
-     winsize size;
-     if ((ioctl(0, TIOCGWINSZ, &size) == 0) && size.ws_col) {
-       to_print = ElideMiddle(to_print, size.ws_col);
-     }
-+#endif
-     printf("%s", to_print.c_str());
-     printf("\x1B[K");  // Clear to end of line.
-     fflush(stdout);
 diff --git a/src/manifest_parser_perftest.cc b/src/manifest_parser_perftest.cc
 --- a/src/manifest_parser_perftest.cc
 +++ b/src/manifest_parser_perftest.cc

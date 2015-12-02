@@ -89,7 +89,7 @@ if [[ ${TOOLCHAIN} = pnacl ]]; then
 fi
 
 # The new arm-nacl-gcc glibc toolchain supports color diagnostics, but older
-# x86 and bionic versions do not.
+# x86 versions do not.
 if [ "${TOOLCHAIN}" = "glibc" -a "${NACL_ARCH}" = "arm" ]; then
   NACLPORTS_CPPFLAGS+=" -fdiagnostics-color=auto"
   NACLPORTS_LDFLAGS+=" -fdiagnostics-color=auto"
@@ -110,7 +110,7 @@ else
 fi
 
 # Set NACL_SHARED when we want to build shared libraries.
-if [ "${NACL_LIBC}" = "glibc" -o "${NACL_LIBC}" = "bionic" ]; then
+if [ "${NACL_LIBC}" = "glibc" ]; then
   NACL_SHARED=1
 else
   NACL_SHARED=0
@@ -254,11 +254,6 @@ SKIP_SEL_LDR_TESTS=0
 
 # Skip sel_ldr tests on ARM, except on linux where we have qemu-arm available.
 if [ "${NACL_ARCH}" = "arm" -a "${OS_NAME}" != "Linux" ]; then
-  SKIP_SEL_LDR_TESTS=1
-fi
-
-# sel_ldr.py doesn't know how to run bionic-built nexes
-if [ "${TOOLCHAIN}" = "bionic" ]; then
   SKIP_SEL_LDR_TESTS=1
 fi
 

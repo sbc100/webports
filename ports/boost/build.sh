@@ -43,11 +43,6 @@ if [ "${NACL_LIBC}" != "glibc" ] ; then
 
 fi
 
-if [ "${NACL_LIBC}" = "bionic" ] ; then
-  # No statvfs on bionic
-  BUILD_ARGS+=" --without-filesystem"
-fi
-
 if [ "${NACL_ARCH}" = "arm" -o "${NACL_ARCH}" = "pnacl" ]; then
   # The ARM toolchains are not currently built with full C++ threading support
   # (_GLIBCXX_HAS_GTHREADS is not defined)

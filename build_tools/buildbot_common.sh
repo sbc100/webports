@@ -76,8 +76,6 @@ InstallPackageMultiArch() {
     arch_list="pnacl"
   elif [ "${TOOLCHAIN}" = "emscripten" ]; then
     arch_list="emscripten"
-  elif [ "${TOOLCHAIN}" = "bionic" ]; then
-    arch_list="arm"
   else
     arch_list="i686 x86_64 arm"
   fi
@@ -109,8 +107,6 @@ CleanToolchain() {
     arch_list="pnacl"
   elif [ "${TC}" = "emscripten" ]; then
     arch_list="emscripten"
-  elif [ "${TC}" = "bionic" ]; then
-    arch_list="arm"
   elif [ "${TC}" = "glibc" ]; then
     arch_list="i686 x86_64"
   else

@@ -35,7 +35,3 @@ if [[ ${NACL_LIBC} == newlib ]]; then
   EXTRA_CONFIGURE_ARGS+=" --enable-load=no"
   export tcl_cv_strtoul_unbroken=ok
 fi
-
-if [[ ${NACL_LIBC} == bionic ]]; then
-  NACLPORTS_CPPFLAGS+=" -DHAVE_STRLCPY=1"
-fi

@@ -46,7 +46,6 @@ class TestConfiguration(common.NaclportsTest):
     self.assertEqual(Configuration(toolchain='pnacl').libc, 'newlib')
     self.assertEqual(Configuration(toolchain='clang-newlib').libc, 'newlib')
     self.assertEqual(Configuration(toolchain='glibc').libc, 'glibc')
-    self.assertEqual(Configuration(toolchain='bionic').libc, 'bionic')
 
   def testConfigStringForm(self):
     config = Configuration('arm', 'glibc', True)

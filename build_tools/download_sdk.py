@@ -190,14 +190,9 @@ def main(argv):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('-v', '--version', default='latest',
       help='which version of the SDK to download')
-  parser.add_argument('--bionic', action='store_true',
-      help='download bionic version of the SDK (linux only).')
   options = parser.parse_args(argv)
 
-  if options.bionic:
-    flavor = 'naclsdk_bionic'
-  else:
-    flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
+  flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
   url = DetermineSDKURL(flavor, base_url=GS_URL_BASE, version=options.version)
 
