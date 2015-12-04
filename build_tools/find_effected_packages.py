@@ -45,6 +45,7 @@ def main(args):
 IGNORE_FILES = [
     'build_tools/find_effected_packages.py',
     'build_tools/partition*.txt',
+    'AUTHORS',
     '*/test_*.py',
 ]
 
