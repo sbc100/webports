@@ -43,6 +43,9 @@ install:
 	rm -f $(INSTALL_DIR)/*_unstripped*$(EXEEXT)
 	cp $(OUTDIR)/$(TARGET).nmf $(INSTALL_DIR)
 	cp index.html $(INSTALL_DIR)
+ifeq ($(TOOLCHAIN),glibc)
+	cp -r $(OUTDIR)/lib* $(INSTALL_DIR)
+endif
 ifeq ($(TOOLCHAIN),pnacl)
 	sed -i.bak 's/x-nacl/x-pnacl/g' $(INSTALL_DIR)/index.html
 endif
