@@ -22,7 +22,7 @@ InstallStep() {
 PublishStep() {
   MakeDir ${PUBLISH_DIR}
 
-  LogExecute mv src/nano${NACL_EXEEXT} \
+  LogExecute cp src/nano${NACL_EXEEXT} \
     "${PUBLISH_DIR}/nano_${NACL_ARCH}${NACL_EXEEXT}"
 
   rm -rf ${PUBLISH_DIR}/nanotar
