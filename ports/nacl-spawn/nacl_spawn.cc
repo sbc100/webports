@@ -98,7 +98,8 @@ static void AddNmfToRequestForShared(
     // loader always uses "main.nexe" as the main binary.
     if (strcmp(prog_base, base) == 0)
       base = "main.nexe";
-    if (strcmp(base, "runnable-ld.so") == 0) {
+    if (strcmp(base, "runnable-ld.so") == 0 ||
+        strcmp(base, "elf_loader_arm.nexe") == 0) {
       AddFileToNmf("program", arch, abspath, nmf_var);
     } else {
       AddFileToNmf(base, arch, abspath, files_var);

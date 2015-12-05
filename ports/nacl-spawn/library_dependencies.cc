@@ -132,9 +132,18 @@ bool nspawn_find_arch_and_library_deps(const std::string& filename,
   // If we find any, also add runnable-ld.so, which we will also need.
   if (!dependencies->empty()) {
     std::string needed_path;
+#if defined(__arm__)
+    if (nspawn_find_in_paths("elf_loader_arm.nexe", paths, &needed_path)) {
+      dependencies->push_back(needed_path);
+    }
+    if (nspawn_find_in_paths("ld-nacl-arm.so.1", paths, &needed_path)) {
+      dependencies->push_back(needed_path);
+    }
+#else
     if (nspawn_find_in_paths("runnable-ld.so", paths, &needed_path)) {
       dependencies->push_back(needed_path);
     }
+#endif
   }
 
   return true;
