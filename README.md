@@ -1,7 +1,7 @@
-naclports
-=========
+webports
+========
 
-naclports is collection of open source libraries and applications that
+webports is collection of open source libraries and applications that
 have been ported to Native Client, along with set to tools for building
 and maintaining them.
 
@@ -19,15 +19,15 @@ Most also contain the follow optional files:
 - `nacl.patch`: an optional patch file.
 
 The tools for building packages live in `bin`. The binary tool is simple
-called `naclports`. To build and install a package into the toolchain
-run `naclports install <package_dir>`. This script will download, patch,
+called `webports`. To build and install a package into the toolchain
+run `webports install <package_dir>`. This script will download, patch,
 build and install the application or library. By default it will first
 install any dependencies that that the package has.
 
 Links
 -----
 
-- Git: <https://chromium.googlesource.com/external/naclports.git>
+- Git: <https://chromium.googlesource.com/webports.git>
 - Bugs: <https://bugs.chromium.org/p/naclports/issues/list>
 - Continuous builder: <http://build.chromium.org/p/client.nacl.ports/>
 - Continuous build artifacts: <http://gsdview.appspot.com/naclports/builds/>
@@ -35,7 +35,7 @@ Links
 Prerequistes
 ------------
 
-The minimum requirements for using naclports are:
+The minimum requirements for using webports are:
 
 - python 2.7
 - gclient (from depot\_tools)
@@ -83,24 +83,23 @@ On older Debian/Ubuntu systems these packages were known as:
 How to Checkout
 ---------------
 
-Although the code is stored in git naclports uses `gclient` to manage
+Although the code is stored in git webports uses `gclient` to manage
 the checkout of dependencies. You will need to install `depot_tools` in
 order to gclient.
 
-Use the following steps to correctly checkout naclports:
+Use the following steps to correctly checkout webports:
 
 1. Create a directory:
 
 ```
-$ mkdir naclports
-$ cd naclports
+$ mkdir webports
+$ cd webports
 ```
 
 2. Create a .gclient Configuration:
 
 ```
-$ gclient config --name=src \
-     https://chromium.googlesource.com/external/naclports.git
+$ gclient config --name=src https://chromium.googlesource.com/webports.git
 ```
 
 3. Sync to the dependencies:
@@ -121,7 +120,7 @@ packages. For example, `make libvorbis` will build `libvorbis` and
 `libogg`. `make all` will build all the packages.
 
 There are 4 possible architectures that NaCl modules can be compiled
-for: i686, x86\_64, arm, pnacl. The naclports build system will only
+for: i686, x86\_64, arm, pnacl. The webports build system will only
 build just one at at time. You can control which one by setting the
 `NACL_ARCH` environment variable. e.g.:
 
@@ -163,12 +162,12 @@ these licenses before using these packages in your projects.
 
 **Note to Windows users**: These scripts are written in bash and must be
 launched from a Cygwin shell. While many of the scripts should work
-under Cygwin, naclports is only tested on Linux and Mac so YMMV.
+under Cygwin, webports is only tested on Linux and Mac so YMMV.
 
 Binary Packages
 ---------------
 
-By default naclports will attempt to install binary packages rather than
+By default webports will attempt to install binary packages rather than
 building them from source. The binary packages are produced by the
 buildbots and stored in Google cloud storage. The index of current
 binary packages is stored in `lib/prebuilt.txt` and this is currently

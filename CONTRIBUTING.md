@@ -1,6 +1,6 @@
-# Contibuting to naclports #
+# Contibuting to webports #
 
-The naclports project welcomes contributions.  The most common forms of
+The webports project welcomes contributions.  The most common forms of
 contribution are new ports, or updates to existing ports.
 
 Before we can use use your code, you must sign the [Google Individual
@@ -95,7 +95,7 @@ one. This is to avoid deleting a repository that might contain unsaved changed.
 
 ## Coding Style ##
 
-For code that is authored in the naclports repository (as opposed to patches)
+For code that is authored in the webports repository (as opposed to patches)
 we follow the Chromium style guide:
 http://www.chromium.org/developers/coding-style.
 
@@ -113,7 +113,7 @@ $ bin/yapf -i <path/to/my/file.py>
 
 ### Shell scripts ###
 
-When modifying any shell scripts in naclports it is recommended that you
+When modifying any shell scripts in webports it is recommended that you
 run `shellcheck` to catch common errors.  The recommended command line
 for this is:
 
