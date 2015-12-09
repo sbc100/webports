@@ -1,7 +1,7 @@
 # This file is used by git-cl (or gcl) to get repository specific information.
 CODE_REVIEW_SERVER: codereview.chromium.org
 CC_LIST: native-client-reviews@googlegroups.com
-VIEW_VC: https://chromium.googlesource.com/external/naclports/+/
+VIEW_VC: https://chromium.googlesource.com/webports/+/
 TRY_ON_UPLOAD: False
 TRYSERVER_PROJECT: naclports
 PROJECT: naclports
