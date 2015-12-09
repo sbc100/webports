@@ -20,7 +20,7 @@ sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 import naclports
 import naclports.source_package
 
-SRC_URL = 'https://chromium.googlesource.com/external/naclports/+/master'
+SRC_URL = 'https://chromium.googlesource.com/webports/+/master'
 
 header = '''\
 # List of available NaCl ports
