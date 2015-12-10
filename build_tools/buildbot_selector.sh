@@ -88,10 +88,10 @@ BUILDBOT_BUILDERNAME=${BUILDBOT_BUILDERNAME#periodic-}
 PYTHON=${SCRIPT_DIR}/python_wrapper
 
 # Decode buildername.
-readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
+readonly BNAME_REGEX="(nightly-|webports-)?(.+)-(.+)-(.+)"
 if [[ ${BUILDBOT_BUILDERNAME} =~ ${BNAME_REGEX} ]]; then
   readonly PREFIX=${BASH_REMATCH[1]}
-  if [ "${PREFIX}" = "naclports-" ]; then
+  if [ "${PREFIX}" = "webports-" ]; then
     readonly TRYBOT=1
     readonly NIGHTLY=0
   elif [ "${PREFIX}" = "nightly-" ]; then
@@ -138,6 +138,7 @@ elif [ "${OS}" = "linux" ]; then
   fi
 else
   echo "Unspecified sharding for OS: ${OS}" 1>&2
+  exit 1
 fi
 
 # Optional Clobber (if checked in the buildbot ui).
