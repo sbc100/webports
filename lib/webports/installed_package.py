@@ -4,7 +4,7 @@
 
 import os
 
-from naclports import package, configuration, util, error
+from webports import package, configuration, util, error
 
 
 def RemoveEmptyDirs(dirname):

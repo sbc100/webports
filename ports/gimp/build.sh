@@ -17,10 +17,10 @@ PublishStep() {
   MakeDir ${APP_DIR}
   ChangeDir ${APP_DIR}
   local exe="${APP_DIR}/gimp${NACL_EXEEXT}"
-  LogExecute cp ${INSTALL_DIR}/naclports-dummydir/bin/gimp-2.8${NACL_EXEEXT} \
+  LogExecute cp ${INSTALL_DIR}/webports-dummydir/bin/gimp-2.8${NACL_EXEEXT} \
    ${exe}
   LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-          ${exe} -s . -L ${INSTALL_DIR}/naclports-dummydir/lib \
+          ${exe} -s . -L ${INSTALL_DIR}/webports-dummydir/lib \
           -o gimp.nmf
   LogExecute python ${TOOLS_DIR}/create_term.py -n gimp gimp.nmf
   InstallNaClTerm ${APP_DIR}
@@ -33,11 +33,11 @@ PublishStep() {
   ChangeDir ${TAR_ROOT}
   LogExecute tar -xvf gtk-demo.tar
   LogExecute rm -f gtk-demo.tar
-  LogExecute cp -rf ${INSTALL_DIR}/naclports-dummydir/etc/*\
-   ./naclports-dummydir/etc
-  LogExecute cp -rf ${INSTALL_DIR}/naclports-dummydir/share/*\
-   ./naclports-dummydir/share
-  LogExecute rm -Rf ./naclports-dummydir/share/man
+  LogExecute cp -rf ${INSTALL_DIR}/webports-dummydir/etc/*\
+   ./webports-dummydir/etc
+  LogExecute cp -rf ${INSTALL_DIR}/webports-dummydir/share/*\
+   ./webports-dummydir/share
+  LogExecute rm -Rf ./webports-dummydir/share/man
 
   LogExecute tar -cvf gimp.tar *
   LogExecute cp gimp.tar ${APP_DIR}/gimp.tar

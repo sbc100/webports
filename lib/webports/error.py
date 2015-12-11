@@ -4,7 +4,7 @@
 
 
 class Error(Exception):
-  """General error used for all naclports-specific errors."""
+  """General error used for all webports-specific errors."""
   pass
 
 

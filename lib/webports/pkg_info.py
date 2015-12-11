@@ -5,7 +5,7 @@
 import shlex
 import string
 
-from naclports.error import PkgFormatError
+from webports.error import PkgFormatError
 
 VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
               'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH', 'CONFLICTS',

@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 """Manage partitioning of port builds.
 
-Download historical data from the naclports builders, and use it to
+Download historical data from the webports builders, and use it to
 partition all of the projects onto the builder shards so each shard builds in
 about the same amount of time.
 
@@ -62,18 +62,18 @@ TOOLCHAINS = ('clang-newlib', 'glibc', 'pnacl')
 
 sys.path.append(os.path.join(ROOT_DIR, 'lib'))
 
-import naclports
-import naclports.source_package
-from naclports.util import LogVerbose
+import webports
+import webports.source_package
+from webports.util import LogVerbose
 
 
-class Error(naclports.Error):
+class Error(webports.Error):
   pass
 
 
 def GetBuildOrder(projects):
   rtn = []
-  packages = [naclports.source_package.CreatePackage(p) for p in projects]
+  packages = [webports.source_package.CreatePackage(p) for p in projects]
   for package in packages:
     for dep in package.DEPENDS:
       for ordered_dep in GetBuildOrder([dep]):
@@ -261,7 +261,7 @@ def LoadCanned(parts):
 
 
 def FixupCanned(partitions):
-  all_projects = [p for p in naclports.source_package.SourcePackageIterator()]
+  all_projects = [p for p in webports.source_package.SourcePackageIterator()]
   all_names = [p.NAME for p in all_projects if not p.DISABLED]
   disabled_names = [p.NAME for p in all_projects if p.DISABLED]
 
@@ -330,7 +330,7 @@ def main(args):
   parser.add_argument('--build-number', help='Builder number to look at for '
                       'historical data on build times.', type=int, default=-1)
   options = parser.parse_args(args)
-  naclports.SetVerbose(options.verbose)
+  webports.SetVerbose(options.verbose)
 
   if options.check:
     for num_bots in xrange(1, 6):

@@ -154,7 +154,7 @@ out/build/<PACKAGE_NAME>
 ```
 
 By default all builds are in release configuration. If you want to build
-debug packages set `NACL_DEBUG=1` or pass `--debug` to the naclports
+debug packages set `NACL_DEBUG=1` or pass `--debug` to the webports
 script.
 
 **Note**: Each package has its own license. Please read and understand
@@ -177,7 +177,7 @@ If the package version does not match the package will always be built
 from source.
 
 If you want to force a package to be built from source you can pass
-`--from-source` to the naclports script.
+`--from-source` to the webports script.
 
 Emscripten Support
 ------------------

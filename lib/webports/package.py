@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from naclports.error import Error
-from naclports import configuration, pkg_info, util
+from webports.error import Error
+from webports import configuration, pkg_info, util
 
 EXTRA_KEYS = ['BUILD_CONFIG', 'BUILD_ARCH', 'BUILD_TOOLCHAIN',
               'BUILD_SDK_VERSION', 'BUILD_NACLPORTS_REVISION']

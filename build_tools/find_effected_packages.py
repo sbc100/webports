@@ -17,8 +17,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 
-import naclports
-import naclports.source_package
+import webports
+import webports.source_package
 
 def main(args):
   parser = argparse.ArgumentParser(description=__doc__)
@@ -27,7 +27,7 @@ def main(args):
                       help='include dependencies of effected packages.')
   parser.add_argument('files', nargs='+', help='Changes files.')
   options = parser.parse_args(args)
-  naclports.SetVerbose(options.verbose)
+  webports.SetVerbose(options.verbose)
 
   if options.deps:
     package_filter = sys.stdin.read().split()
@@ -55,7 +55,7 @@ def find_effected_packages(files, include_deps, package_filter):
 
   def AddPackage(package):
     if package_filter and package.NAME not in package_filter:
-      naclports.LogVerbose('Filtered out package: %s' % package.NAME)
+      webports.LogVerbose('Filtered out package: %s' % package.NAME)
       return
     if package.NAME not in packages:
       if include_deps:
@@ -68,13 +68,13 @@ def find_effected_packages(files, include_deps, package_filter):
   for filename in files:
     parts = filename.split(os.path.sep)
     if parts[0] != 'ports':
-      naclports.LogVerbose('effected file outside of ports tree: %s' % filename)
+      webports.LogVerbose('effected file outside of ports tree: %s' % filename)
       if any(fnmatch.fnmatch(filename, ignore) for ignore in IGNORE_FILES):
         continue
       return ['all']
 
     package_name = parts[1]
-    pkg = naclports.source_package.CreatePackage(package_name)
+    pkg = webports.source_package.CreatePackage(package_name)
     AddPackage(pkg)
 
   while to_resolve:
@@ -90,6 +90,6 @@ def find_effected_packages(files, include_deps, package_filter):
 if __name__ == '__main__':
   try:
     sys.exit(main(sys.argv[1:]))
-  except naclports.Error as e:
+  except webports.Error as e:
     sys.stderr.write('%s\n' % e)
     sys.exit(-1)

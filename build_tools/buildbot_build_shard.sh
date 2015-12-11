@@ -5,7 +5,7 @@
 
 ######################################################################
 # Notes on directory layout:
-# makefile location (base_dir):  naclports/src
+# makefile location (base_dir):  webports/src
 # toolchain injection point:     specified externally via NACL_SDK_ROOT.
 ######################################################################
 

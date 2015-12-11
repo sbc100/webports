@@ -12,7 +12,7 @@
 # it, depending on your system -- see the GNU readline instructions.
 # It's okay for this to be a shared library, too.
 
-# NOTE this has been commented out in naclports to ensure no
+# NOTE this has been commented out in webports to ensure no
 # GPL dependencies are used in the python-static build
 #readline readline.c -lreadline -ltermcap
 

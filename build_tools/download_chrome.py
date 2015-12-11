@@ -15,11 +15,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, os.path.join(SRC_DIR, 'lib'))
 
-import naclports
+import webports
 
 GS_URL = 'http://storage.googleapis.com'
 CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%s/%s'
-CHROME_DOWNLOAD_DIR = os.path.join(naclports.paths.OUT_DIR, 'downloaded_chrome')
+CHROME_DOWNLOAD_DIR = os.path.join(webports.paths.OUT_DIR, 'downloaded_chrome')
 
 def ChromeDir(arch):
   """Get the directory to download chrome to."""
@@ -34,7 +34,7 @@ def ChromeArchiveRoot():
   elif sys.platform.startswith('linux'):
     return 'chrome-linux'
   else:
-    raise naclports.error.Error('Unknown platform: %s' % sys.platform)
+    raise webports.error.Error('Unknown platform: %s' % sys.platform)
 
 
 def ChromeUrl(arch, revision):
@@ -94,20 +94,20 @@ def DoDownload(url, destination):
   os.makedirs(destination)
 
   logging.info('Downloading chrome from %s to %s...' % (url, destination))
-  chrome_zip = os.path.join(naclports.paths.CACHE_ROOT, os.path.basename(url))
-  naclports.util.Makedirs(os.path.dirname(chrome_zip))
+  chrome_zip = os.path.join(webports.paths.CACHE_ROOT, os.path.basename(url))
+  webports.util.Makedirs(os.path.dirname(chrome_zip))
   try:
-    naclports.util.DownloadFile(chrome_zip, url)
-  except naclports.error.Error as e:
+    webports.util.DownloadFile(chrome_zip, url)
+  except webports.error.Error as e:
     logging.error('Unable to download chrome: %s' % str(e))
     sys.exit(1)
 
   pnacl_url = os.path.join(os.path.dirname(url), 'pnacl.zip')
-  pnacl_zip = os.path.join(naclports.paths.CACHE_ROOT, 'pnacl.zip')
+  pnacl_zip = os.path.join(webports.paths.CACHE_ROOT, 'pnacl.zip')
   logging.info('Downloading pnacl component from %s ...' % url)
   try:
-    naclports.util.DownloadFile(pnacl_zip, pnacl_url)
-  except naclports.error.Error as e:
+    webports.util.DownloadFile(pnacl_zip, pnacl_url)
+  except webports.error.Error as e:
     logging.error('Unable to download chrome: %s' % str(e))
     sys.exit(1)
 
@@ -175,7 +175,7 @@ def main(argv):
   except KeyboardInterrupt:
     sys.stderr.write('interrupted\n')
     return 1
-  except naclports.error.Error as e:
+  except webports.error.Error as e:
     if os.environ.get('DEBUG'):
       raise
     sys.stderr.write(str(e) + '\n')

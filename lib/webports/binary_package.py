@@ -8,10 +8,10 @@ import shutil
 import stat
 import tarfile
 
-from naclports import configuration, package, util, error
+from webports import configuration, package, util, error
 
 PAYLOAD_DIR = 'payload'
-INSTALL_PREFIX = '/naclports-dummydir'
+INSTALL_PREFIX = '/webports-dummydir'
 
 def MakeDirIfNeeded(filename):
   dirname = os.path.dirname(filename)

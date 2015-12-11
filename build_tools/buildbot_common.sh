@@ -26,7 +26,7 @@ fi
 BuildSuccess() {
   local target=$1
   local arch=$2
-  echo "naclports: Build SUCCEEDED ${target} (${arch}/${TOOLCHAIN})"
+  echo "webports: Build SUCCEEDED ${target} (${arch}/${TOOLCHAIN})"
 }
 
 #
@@ -37,7 +37,7 @@ BuildSuccess() {
 BuildFailure() {
   local target=$1
   local arch=$2
-  MESSAGE="naclports: Build FAILED for ${target} (${arch}/${TOOLCHAIN})"
+  MESSAGE="webports: Build FAILED for ${target} (${arch}/${TOOLCHAIN})"
   echo ${MESSAGE}
   echo "@@@STEP_FAILURE@@@"
   MESSAGES="${MESSAGES}\n${MESSAGE}"
@@ -62,7 +62,7 @@ export FORCE_MIRROR="yes"
 BuildPackage() {
   local package=$1
   shift
-  if RunCmd bin/naclports ${NACLPORTS_ARGS} "$@" install ${package}; then
+  if RunCmd bin/webports ${NACLPORTS_ARGS} "$@" install ${package}; then
     BuildSuccess ${PACKAGE} ${NACL_ARCH}
   else
     BuildFailure ${PACKAGE} ${NACL_ARCH}
@@ -81,14 +81,14 @@ InstallPackageMultiArch() {
   fi
 
   for arch in ${arch_list}; do
-    if ! RunCmd bin/naclports -a ${arch} uninstall --all ; then
+    if ! RunCmd bin/webports -a ${arch} uninstall --all ; then
       BuildFailure $1 ${arch}
       return
     fi
   done
 
   for arch in ${arch_list}; do
-    if ! RunCmd bin/naclports -a ${arch} ${NACLPORTS_ARGS} install $1 ; then
+    if ! RunCmd bin/webports -a ${arch} ${NACLPORTS_ARGS} install $1 ; then
       # Early exit if one of the architecures fails. This mean the
       # failure is always at the end of the build step.
       BuildFailure $1 ${arch}
@@ -114,7 +114,7 @@ CleanToolchain() {
   fi
 
   for ARCH in ${arch_list}; do
-    if ! RunCmd bin/naclports -a ${ARCH} -t ${TC} clean --all; then
+    if ! RunCmd bin/webports -a ${ARCH} -t ${TC} clean --all; then
       TOOLCHAIN=${TC} BuildFailure clean ${ARCH}
     fi
   done

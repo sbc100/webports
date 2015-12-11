@@ -3,9 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Generate repos for completed naclports builds.
+"""Generate repos for completed webports builds.
 
-Scan the GSD bucket associated with naclports for builds which have
+Scan the GSD bucket associated with webports for builds which have
 been around for move than a few hours and which lack pkg repository
 metadata. Run build_repo.sh on each of them.
 """

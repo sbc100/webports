@@ -5,7 +5,7 @@
 from mock import call, patch, Mock
 
 import common
-from naclports import installed_package
+from webports import installed_package
 
 test_info = '''\
 NAME=foo
@@ -26,9 +26,9 @@ def CreateMockInstalledPackage():
 
 class TestInstalledPackage(common.NaclportsTest):
 
-  @patch('naclports.util.Log', Mock())
-  @patch('naclports.installed_package.RemoveFile')
-  @patch('naclports.installed_package.InstalledPackageIterator',
+  @patch('webports.util.Log', Mock())
+  @patch('webports.installed_package.RemoveFile')
+  @patch('webports.installed_package.InstalledPackageIterator',
       Mock(return_value=[]))
   @patch('os.path.lexists', Mock(return_value=True))
   @patch('os.path.exists', Mock(return_value=True))

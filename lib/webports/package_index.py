@@ -4,8 +4,8 @@
 
 import os
 
-from naclports import configuration, binary_package, package, util, paths
-from naclports import pkg_info, error
+from webports import configuration, binary_package, package, util, paths
+from webports import pkg_info, error
 
 DEFAULT_INDEX = os.path.join(paths.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
 EXTRA_KEYS = package.EXTRA_KEYS + ['BIN_URL', 'BIN_SIZE', 'BIN_SHA1']

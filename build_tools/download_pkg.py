@@ -19,11 +19,11 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 
-import naclports
+import webports
 
 from scan_packages import FindGsutil, ParseGsUtilOutput, \
   FormatSize, CheckHash, GetHash
-from naclports.util import Log, LogVerbose
+from webports.util import Log, LogVerbose
 
 
 def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
@@ -40,7 +40,7 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
   """
   files_to_download = []
   filenames = []
-  download_dir = os.path.join(naclports.package_index.PREBUILT_ROOT,
+  download_dir = os.path.join(webports.package_index.PREBUILT_ROOT,
                               'pkg', pkg_dir)
   if not os.path.exists(download_dir):
     os.makedirs(download_dir)
@@ -48,7 +48,7 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
   for file_info in files:
     basename = os.path.basename(file_info.url)
     file_info.name = os.path.join(download_dir, basename)
-    file_info.rel_name = file_info.name[len(naclports.paths.NACLPORTS_ROOT)+1:]
+    file_info.rel_name = file_info.name[len(webports.paths.NACLPORTS_ROOT)+1:]
     filenames.append((file_info.name, file_info.url))
     if os.path.exists(file_info.name):
       if not check_hashes or CheckHash(file_info.name, file_info.md5):
@@ -58,7 +58,7 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
 
   def Check(file_info):
     if check_hashes and not CheckHash(file_info.name, file_info.md5):
-      raise naclports.Error(
+      raise webports.Error(
           'Checksum failed: %s\nExpected=%s\nActual=%s' %
           (file_info.rel_name, file_info.md5, GetHash(file_info.name)))
 
@@ -83,7 +83,7 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
           Check(file_info)
     else:
       for file_info in files_to_download:
-        naclports.DownloadFile(file_info.name, file_info.url)
+        webports.DownloadFile(file_info.name, file_info.url)
         Check(file_info)
 
   return filenames
@@ -92,7 +92,7 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
 def main(args):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('revision', metavar='REVISION',
-                      help='naclports revision to to scan for.')
+                      help='webports revision to to scan for.')
   parser.add_argument('-v', '--verbose', action='store_true',
                       help='Output extra information.')
   parser.add_argument('-p', '--parallel', action='store_true',
@@ -103,12 +103,12 @@ def main(args):
                       help='Assume on-disk files are up-to-date (for testing).')
   args = parser.parse_args(args)
   if args.verbose:
-    naclports.SetVerbose(True)
+    webports.SetVerbose(True)
 
-  sdk_version = naclports.util.GetSDKVersion()
+  sdk_version = webports.util.GetSDKVersion()
   Log('Scanning packages built for pepper_%s at revsion %s' %
       (sdk_version, args.revision))
-  base_path = '%s/builds/pepper_%s/%s/publish' % (naclports.GS_BUCKET,
+  base_path = '%s/builds/pepper_%s/%s/publish' % (webports.GS_BUCKET,
                                                    sdk_version, args.revision)
   gs_base_url = 'gs://' + base_path
   cmd = FindGsutil() + ['ls', gs_base_url]
@@ -116,11 +116,11 @@ def main(args):
   try:
     all_published = subprocess.check_output(cmd)
   except subprocess.CalledProcessError as e:
-    raise naclports.Error("Command '%s' failed: %s" % (cmd, e))
+    raise webports.Error("Command '%s' failed: %s" % (cmd, e))
 
   pkg_dir = re.findall(r'pkg_[\w-]+', all_published)
   for pkg in pkg_dir:
-    listing_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib',
+    listing_file = os.path.join(webports.NACLPORTS_ROOT, 'lib',
                                 pkg + '_' + 'listing.txt')
     if args.cache_listing and os.path.exists(listing_file):
       Log('Using pre-cached gs listing: %s' % listing_file)
@@ -134,7 +134,7 @@ def main(args):
       try:
         listing = subprocess.check_output(cmd)
       except subprocess.CalledProcessError as e:
-        raise naclports.Error("Command '%s' failed: %s" % (cmd, e))
+        raise webports.Error("Command '%s' failed: %s" % (cmd, e))
       if args.cache_listing:
         with open(listing_file, 'w') as f:
           f.write(listing)
@@ -148,6 +148,6 @@ def main(args):
 if __name__ == '__main__':
   try:
     sys.exit(main(sys.argv[1:]))
-  except naclports.Error as e:
+  except webports.Error as e:
     sys.stderr.write('%s\n' % e)
     sys.exit(-1)

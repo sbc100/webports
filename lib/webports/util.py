@@ -19,13 +19,13 @@ try:
 except ImportError:
   termcolor = None
 
-from naclports import error, paths
+from webports import error, paths
 
 GS_URL = 'http://storage.googleapis.com/'
 GS_BUCKET = 'naclports'
 GS_MIRROR_URL = '%s%s/mirror' % (GS_URL, GS_BUCKET)
 
-# Require the latest version of the NaCl SDK. naclports is built
+# Require the latest version of the NaCl SDK. webports is built
 # and tested against the pepper_canary release. To build aginst older
 # versions of the SDK use the one of the pepper_XX branches (or use
 # --skip-sdk-version-check).
@@ -316,7 +316,7 @@ def GetToolchainRoot(config):
 
 @Memoize
 def GetInstallRoot(config):
-  """Returns the naclports install location given NaCl configuration."""
+  """Returns the install location given a build configuration."""
   tc_dir = GetToolchainRoot(config)
 
   if config.toolchain == 'emscripten':
@@ -387,9 +387,9 @@ def CheckSDKRoot():
 
   if not CheckSDKVersion(MIN_SDK_VERSION):
     raise error.Error(
-        'This version of naclports requires at least version %s of\n'
+        'This version of webports requires at least version %s of\n'
         'the NaCl SDK. The version in $NACL_SDK_ROOT is %s. If you want\n'
-        'to use naclports with an older version of the SDK please checkout\n'
+        'to use webports with an older version of the SDK please checkout\n'
         'one of the pepper_XX branches (or run with\n'
         '--skip-sdk-version-check).' % (MIN_SDK_VERSION, GetSDKVersion()))
 
@@ -430,7 +430,7 @@ def RemoveTree(directory):
 
 
 def RelPath(filename):
-  """Return a pathname relative to the root the naclports src tree.
+  """Return a pathname relative to the root the webports src tree.
 
   This is used mostly to make output more readable when printing filenames."""
   return os.path.relpath(filename, paths.NACLPORTS_ROOT)
@@ -456,14 +456,14 @@ class DirLock(object):
   def __init__(self, lock_dir):
     if not os.path.exists(lock_dir):
       Makedirs(lock_dir)
-    self.file_name = os.path.join(lock_dir, 'naclports.lock')
+    self.file_name = os.path.join(lock_dir, 'webports.lock')
     self.fd = open(self.file_name, 'w')
 
   def __enter__(self):
     try:
       fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except Exception:
-      raise error.Error("Unable to acquire lock (%s): Is naclports already "
+      raise error.Error("Unable to acquire lock (%s): Is webports already "
                         "running?" % self.file_name)
 
   def __exit__(self, exc_type, exc_val, exc_tb):

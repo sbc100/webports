@@ -87,7 +87,7 @@ To make changes to a package's patch file the recommended workflow is:
 
 1. Directly modify the sources in ``out/build/<pkg_name>``.
 2. Build the package and verify the changes.
-3. Use ``naclports updatepatch <pkg_name>`` to (re)generate the patch file.
+3. Use ``webports updatepatch <pkg_name>`` to (re)generate the patch file.
 
 Whenever the upstream archive or patch file changes and you try to build the
 package you will be prompted to remove the existing repository and start a new

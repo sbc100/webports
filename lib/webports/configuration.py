@@ -5,14 +5,14 @@
 import os
 import platform
 
-from naclports import error, util
+from webports import error, util
 
 VALID_TOOLCHAINS = ['glibc', 'pnacl', 'clang-newlib', 'emscripten']
 VALID_LIBC = ['newlib', 'glibc']
 
 
 class Configuration(object):
-  """Class representing the build configuration for naclports packages.
+  """Class representing the build configuration for webports packages.
 
   This consists of the following attributes:
     toolchain   - clang-newlib, glibc, pnacl

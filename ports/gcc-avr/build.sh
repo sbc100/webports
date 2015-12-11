@@ -70,7 +70,7 @@ AvrLibcDownload() {
 AvrLibcExtractAndInstall() {
   # Return is avr-libc is already installed.
   if [ -d ${WORK_DIR}/avr_libc_install ]; then
-    cp -r ${WORK_DIR}/avr_libc_install/* ${INSTALL_DIR}/naclports-dummydir
+    cp -r ${WORK_DIR}/avr_libc_install/* ${INSTALL_DIR}/webports-dummydir
     return
   fi
 
@@ -90,7 +90,7 @@ AvrLibcExtractAndInstall() {
   LogExecute make install
 
   # avr-libc needs to be in the same directory as the gcc-avr install
-  cp -r ${WORK_DIR}/avr_libc_install/* ${INSTALL_DIR}/naclports-dummydir
+  cp -r ${WORK_DIR}/avr_libc_install/* ${INSTALL_DIR}/webports-dummydir
 }
 
 InstallStep() {

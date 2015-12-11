@@ -51,7 +51,7 @@ PublishStep() {
   LogExecute cp ${BUILD_DIR}/${EXECUTABLE} gforth_${NACL_ARCH}${NACL_EXEEXT}
 
   # TODO(bradnelson): Make this nicer.
-  local TAR_DIR=${PUBLISH_DIR}/naclports-dummydir
+  local TAR_DIR=${PUBLISH_DIR}/webports-dummydir
   MakeDir ${TAR_DIR}
 
   cp -r ${HOST_INSTALL_DIR}/* ${TAR_DIR}/
@@ -60,7 +60,7 @@ PublishStep() {
   rm -rf ${TAR_DIR}/share/man
   rm -rf ${TAR_DIR}/include
   rm -f ${TAR_DIR}/lib/gforth/0.7.2/gforth-ditc
-  tar cf ${PUBLISH_DIR}/gforth.tar naclports-dummydir
+  tar cf ${PUBLISH_DIR}/gforth.tar webports-dummydir
   rm -rf ${TAR_DIR}
   shasum ${PUBLISH_DIR}/gforth.tar > ${PUBLISH_DIR}/gforth.tar.hash
 

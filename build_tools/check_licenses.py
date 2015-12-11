@@ -20,8 +20,8 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 
-import naclports
-import naclports.source_package
+import webports
+import webports.source_package
 
 VALID_LICENSES = ['GPL', 'GPL2', 'GPL3', 'LGPL', 'LGPL2', 'LGPL3', 'ISC', 'MPL',
                   'BSD', 'MIT', 'ZLIB', 'CUSTOM', 'APACHE']
@@ -63,11 +63,11 @@ def main(args):
                       help='Output extra information.')
   options = parser.parse_args(args)
   if options.verbose:
-    naclports.SetVerbose(True)
+    webports.SetVerbose(True)
   rtn = False
 
   count = 0
-  for package in naclports.source_package.SourcePackageIterator():
+  for package in webports.source_package.SourcePackageIterator():
     rtn |= CheckLicense(package)
     count += 1
 

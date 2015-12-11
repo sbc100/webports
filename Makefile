@@ -52,13 +52,13 @@ export NACL_ARCH
 export TOOLCHAIN
 
 all:
-	bin/naclports --all install $(BUILD_FLAGS)
+	bin/webports --all install $(BUILD_FLAGS)
 
 run:
 	./build_tools/httpd.py
 
 clean:
-	bin/naclports --all clean
+	bin/webports --all clean
 
 reallyclean: clean
 	rm -rf $(NACL_OUT)
@@ -70,7 +70,7 @@ JS_FILES := $(shell git ls-files "*.js")
 lint: pylint jshint jslint
 
 pylint:
-	$(PYLINT) --rcfile=.pylintrc lib/naclports lib/naclports/tests/*.py
+	$(PYLINT) --rcfile=.pylintrc lib/webports lib/webports/tests/*.py
 
 jshint:
 	$(JSHINT) $(JS_FILES)
@@ -79,14 +79,14 @@ jslint:
 	$(JSLINT) build_tools/naclprocess.js build_tools/naclterm.js
 
 test:
-	$(COVERAGE) run --include=lib/naclports/*,build_tools/* -m nose \
+	$(COVERAGE) run --include=lib/webports/*,build_tools/* -m nose \
 		--rednose build_tools lib
 	@rm -rf out/coverage_html
 	$(COVERAGE) html
 	$(COVERAGE) report $(COVERAGE_ARGS)
 
 %:
-	bin/naclports install $* $(BUILD_FLAGS)
+	bin/webports install $* $(BUILD_FLAGS)
 
 .PHONY: all run clean sdklibs sdklibs_list reallyclean check test
 .PHONY: lint pylint jshint jslint

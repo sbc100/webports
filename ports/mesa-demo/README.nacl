@@ -7,5 +7,5 @@ Note that Mesa OpenGL provides software rendering and rasterization only.  The
 only way to get hardware accelerated 3D graphics is through Pepper 3D and
 OpenGL ES 2.0.
 
-The Mesa OpenGL library for NaCl is available in the naclports project:
-    http://code.google.com/p/naclports/
+The Mesa OpenGL library for NaCl is available in the webports project:
+    https://chromium.googlesource.com/webports/

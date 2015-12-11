@@ -132,7 +132,7 @@ diff --git a/src/Makefile.in b/src/Makefile.in
 -AUTOHEADER = @AUTOHEADER@
 -AUTOMAKE = @AUTOMAKE@
 -AWK = @AWK@
-+prefix          = /naclports-dummydir
++prefix          = /webports-dummydir
 +exec_prefix     = ${prefix}
 +bindir          = ${exec_prefix}/bin
 +libdir          = ${exec_prefix}/lib

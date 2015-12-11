@@ -6,7 +6,7 @@ from mock import Mock, patch, call
 import textwrap
 
 import common
-from naclports import binary_package
+from webports import binary_package
 
 
 # pylint: disable=no-self-use
@@ -29,9 +29,9 @@ class TestBinaryPackage(common.NaclportsTest):
       binary_package.RelocateFile('testfile', 'newroot')
       open_mock.assert_not_called()
 
-  @patch('naclports.binary_package.BinaryPackage.VerifyArchiveFormat', Mock())
-  @patch('naclports.binary_package.BinaryPackage.GetPkgInfo')
-  @patch('naclports.util.GetInstallStamp',
+  @patch('webports.binary_package.BinaryPackage.VerifyArchiveFormat', Mock())
+  @patch('webports.binary_package.BinaryPackage.GetPkgInfo')
+  @patch('webports.util.GetInstallStamp',
          Mock(return_value='stamp_dir/stamp_file'))
   def testWriteStamp(self, mock_get_info):
     fake_binary_pkg_info = textwrap.dedent('''\

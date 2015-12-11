@@ -26,21 +26,21 @@ class NaclportsTest(unittest.TestCase):
 
   def setUp(self):
     AddPatch(self, patch.dict('os.environ', {'NACL_SDK_ROOT': '/sdk/root'}))
-    AddPatch(self, patch('naclports.util.GetPlatform',
+    AddPatch(self, patch('webports.util.GetPlatform',
                          Mock(return_value='linux')))
-    AddPatch(self, patch('naclports.util.GetInstallRoot',
+    AddPatch(self, patch('webports.util.GetInstallRoot',
                          Mock(return_value='/package/install/path')))
-    AddPatch(self, patch('naclports.util.GetSDKRoot',
+    AddPatch(self, patch('webports.util.GetSDKRoot',
                          Mock(return_value='/sdk/root')))
 
     mock_lock = Mock()
     mock_lock.__enter__ = lambda s: s
     mock_lock.__exit__ = Mock(return_value=False)
-    AddPatch(self, patch('naclports.util.InstallLock',
+    AddPatch(self, patch('webports.util.InstallLock',
                          Mock(return_value=mock_lock)))
 
     mock_lock = Mock()
     mock_lock.__enter__ = lambda s: s
     mock_lock.__exit__ = Mock(return_value=False)
-    AddPatch(self, patch('naclports.util.BuildLock',
+    AddPatch(self, patch('webports.util.BuildLock',
                          Mock(return_value=mock_lock)))

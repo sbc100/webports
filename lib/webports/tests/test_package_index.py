@@ -7,9 +7,9 @@ import os
 import tempfile
 
 import common
-from naclports import error
-from naclports import package_index
-from naclports.configuration import Configuration
+from webports import error
+from webports import package_index
+from webports.configuration import Configuration
 
 test_index = '''\
 NAME=agg-demo
@@ -76,7 +76,7 @@ class TestPackageIndex(common.NaclportsTest):
         'NAME': 'dummy',
         'BUILD_SDK_VERSION': 123
     }
-    with patch('naclports.util.GetSDKVersion') as mock_version:
+    with patch('webports.util.GetSDKVersion') as mock_version:
       # Setting the mock SDK version to 123 should mean that the
       # index contains the 'foo' package and it is installable'
       mock_version.return_value = 123
@@ -92,22 +92,22 @@ class TestPackageIndex(common.NaclportsTest):
       self.assertFalse(index.Contains('foo', config_debug))
       self.assertFalse(index.Contains('bar', config_release))
 
-  @patch('naclports.util.Log', Mock())
-  @patch('naclports.package_index.PREBUILT_ROOT', os.getcwd())
-  @patch('naclports.util.VerifyHash', Mock())
-  @patch('naclports.util.DownloadFile')
+  @patch('webports.util.Log', Mock())
+  @patch('webports.package_index.PREBUILT_ROOT', os.getcwd())
+  @patch('webports.util.VerifyHash', Mock())
+  @patch('webports.util.DownloadFile')
   def testDownload(self, download_file_mock):
     index = package_index.PackageIndex('dummy_file', test_index)
     arm_config = Configuration('arm', 'glibc', False)
     index.Download('agg-demo', arm_config)
     self.assertEqual(download_file_mock.call_count, 1)
 
-  @patch('naclports.util.HashFile', Mock(return_value='sha1'))
+  @patch('webports.util.HashFile', Mock(return_value='sha1'))
   @patch('os.path.getsize', Mock(return_value=100))
   def testWriteIndex(self):
-    temp_file = tempfile.mkstemp('naclports_test')[1]
+    temp_file = tempfile.mkstemp('webports_test')[1]
     self.addCleanup(os.remove, temp_file)
 
-    with patch('naclports.package_index.ExtractPkgInfo',
+    with patch('webports.package_index.ExtractPkgInfo',
                Mock(return_value=test_info)):
       package_index.WriteIndex(temp_file, (('pkg1', 'url1'), ('pkg2', 'url2')))

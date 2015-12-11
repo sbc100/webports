@@ -21,11 +21,11 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 
-import naclports
-import naclports.package
-import naclports.package_index
+import webports
+import webports.package
+import webports.package_index
 
-from naclports.util import Log, LogVerbose
+from webports.util import Log, LogVerbose
 
 
 def FormatSize(num_bytes):
@@ -83,7 +83,7 @@ def ParseGsUtilOutput(output):
         continue
       gsurl = line.strip()[:-1]
       filename = gsurl[len('gs://'):]
-      url = naclports.GS_URL + filename
+      url = webports.GS_URL + filename
       info = FileInfo(name=line.strip(), url=url, gsurl=gsurl)
     else:
       line = line.strip()
@@ -121,7 +121,7 @@ def DownloadFiles(files, check_hashes=True, parallel=False):
   """
   files_to_download = []
   filenames = []
-  download_dir = naclports.package_index.PREBUILT_ROOT
+  download_dir = webports.package_index.PREBUILT_ROOT
   if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 
@@ -137,7 +137,7 @@ def DownloadFiles(files, check_hashes=True, parallel=False):
 
   def Check(file_info):
     if check_hashes and not CheckHash(file_info.name, file_info.md5):
-      raise naclports.Error(
+      raise webports.Error(
           'Checksum failed: %s\nExpected=%s\nActual=%s' %
           (file_info.name, file_info.md5, GetHash(file_info.name)))
 
@@ -162,7 +162,7 @@ def DownloadFiles(files, check_hashes=True, parallel=False):
           Check(file_info)
     else:
       for file_info in files_to_download:
-        naclports.DownloadFile(file_info.name, file_info.url)
+        webports.DownloadFile(file_info.name, file_info.url)
         Check(file_info)
 
   return filenames
@@ -172,14 +172,14 @@ def FindGsutil():
   # Ideally we would use the gsutil that comes with depot_tools since users
   # are much more likely to have that in thier PATH.  However I found this
   # depot_tools version to be a lot slower.
-  # return [sys.executable, naclports.util.FindInPath('gsutil.py')]
+  # return [sys.executable, webports.util.FindInPath('gsutil.py')]
   return ['gsutil']
 
 
 def main(args):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('revision', metavar='REVISION',
-                      help='naclports revision to to scan for.')
+                      help='webports revision to to scan for.')
   parser.add_argument('-v', '--verbose', action='store_true',
                       help='Output extra information.')
   parser.add_argument('-p', '--parallel', action='store_true',
@@ -190,15 +190,15 @@ def main(args):
                       help='Assume on-disk files are up-to-date (for testing).')
   args = parser.parse_args(args)
   if args.verbose:
-    naclports.SetVerbose(True)
+    webports.SetVerbose(True)
 
-  sdk_version = naclports.util.GetSDKVersion()
+  sdk_version = webports.util.GetSDKVersion()
   Log('Scanning packages built for pepper_%s at revsion %s' %
       (sdk_version, args.revision))
-  base_path = '%s/builds/pepper_%s/%s/packages' % (naclports.GS_BUCKET,
+  base_path = '%s/builds/pepper_%s/%s/packages' % (webports.GS_BUCKET,
                                                    sdk_version, args.revision)
   gs_url = 'gs://' + base_path + '/*'
-  listing_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'listing.txt')
+  listing_file = os.path.join(webports.NACLPORTS_ROOT, 'lib', 'listing.txt')
 
   if args.cache_listing and os.path.exists(listing_file):
     Log('Using pre-cached gs listing: %s' % listing_file)
@@ -211,7 +211,7 @@ def main(args):
     try:
       listing = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
-      raise naclports.Error("Command '%s' failed: %s" % (cmd, e))
+      raise webports.Error("Command '%s' failed: %s" % (cmd, e))
     if args.cache_listing:
       with open(listing_file, 'w') as f:
         f.write(listing)
@@ -222,9 +222,9 @@ def main(args):
                                   FormatSize(sum(f.size for f in all_files))))
 
   binaries = DownloadFiles(all_files, not args.skip_md5, args.parallel)
-  index_file = os.path.join(naclports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
+  index_file = os.path.join(webports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
   Log('Generating %s' % index_file)
-  naclports.package_index.WriteIndex(index_file, binaries)
+  webports.package_index.WriteIndex(index_file, binaries)
   Log('Done')
   return 0
 
@@ -232,6 +232,6 @@ def main(args):
 if __name__ == '__main__':
   try:
     sys.exit(main(sys.argv[1:]))
-  except naclports.Error as e:
+  except webports.Error as e:
     sys.stderr.write('%s\n' % e)
     sys.exit(-1)

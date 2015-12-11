@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from naclports import pkg_info
-from naclports import error
+from webports import pkg_info
+from webports import error
 
 import common
 

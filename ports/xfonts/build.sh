@@ -24,15 +24,15 @@ InstallStep() {
   # Generate Fontconfig files
   if [ ${TOOLCHAIN} != "pnacl" ]; then
     local CACHE_OUT_DIR="${PUBLISH_DIR}/${NACL_ARCH}"
-    MakeDir ${CACHE_OUT_DIR}/naclports-dummydir/var/cache/fontconfig/
+    MakeDir ${CACHE_OUT_DIR}/webports-dummydir/var/cache/fontconfig/
     ChangeDir ${CACHE_OUT_DIR}
     LogExecute ${NACL_SDK_ROOT}/tools/sel_ldr.py --\
      ${NACL_PREFIX}/bin/fc-cache${NACL_EXEEXT} -sfv ./share/fonts\
       -y ${CACHE_OUT_DIR}
-    LogExecute tar -cf xorg-fonts-cache-${NACL_ARCH}.tar naclports-dummydir/
+    LogExecute tar -cf xorg-fonts-cache-${NACL_ARCH}.tar webports-dummydir/
     LogExecute shasum xorg-fonts-cache-${NACL_ARCH}.tar >\
      xorg-fonts-cache-${NACL_ARCH}.tar.hash
-    LogExecute rm -rf naclports-dummydir
+    LogExecute rm -rf webports-dummydir
   fi
 
   LogExecute rm -rf share

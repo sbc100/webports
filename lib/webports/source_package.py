@@ -12,16 +12,16 @@ import tempfile
 import time
 import urlparse
 
-from naclports import binary_package
-from naclports import configuration
-from naclports import package
-from naclports import package_index
-from naclports import installed_package
-from naclports import util
-from naclports import paths
-from naclports import bsd_pkg
-from naclports.util import Log, Trace, LogVerbose
-from naclports.error import Error, DisabledError, PkgFormatError
+from webports import binary_package
+from webports import configuration
+from webports import package
+from webports import package_index
+from webports import installed_package
+from webports import util
+from webports import paths
+from webports import bsd_pkg
+from webports.util import Log, Trace, LogVerbose
+from webports.error import Error, DisabledError, PkgFormatError
 
 
 class PkgConflictError(Error):
@@ -104,7 +104,7 @@ def InitGitRepo(directory):
   This function works for unpacked tar files as well as cloned git
   repositories.  It sets up an 'upstream' branch pointing and the
   pristine upstream sources and a 'master' branch will contain changes
-  specific to naclports (normally the result of applying nacl.patch).
+  specific to webports (normally the result of applying nacl.patch).
 
   Args:
     directory: Directory containing unpacked package sources.
@@ -160,7 +160,7 @@ def StampContentsMatch(stamp_file, stamp_contents):
 
 
 class SourcePackage(package.Package):
-  """Representation of a single naclports source package.
+  """Representation of a single webports source package.
 
   Package objects correspond to folders on disk which
   contain a 'pkg_info' file.
@@ -508,7 +508,7 @@ class SourcePackage(package.Package):
       with open(self.GetPatchFile()) as f:
         self.RunCmd(cmd, stdin=f)
       self.RunCmd(['git', 'add', '.'])
-      self.RunCmd(['git', 'commit', '-m', 'Apply naclports patch'])
+      self.RunCmd(['git', 'commit', '-m', 'Apply webports patch'])
 
     WriteStamp(stamp_file, '')
 
@@ -769,7 +769,7 @@ class SourcePackage(package.Package):
 
 
 def SourcePackageIterator():
-  """Iterator which yields a Package object for each naclports package."""
+  """Iterator which yields a Package object for each webports package."""
   ports_root = os.path.join(paths.NACLPORTS_ROOT, 'ports')
   for root, _, files in os.walk(ports_root):
     if 'pkg_info' in files:

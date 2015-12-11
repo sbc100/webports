@@ -4,8 +4,8 @@
 
 import unittest
 
-from naclports import error
-from naclports import package
+from webports import error
+from webports import package
 
 test_info = '''\
 NAME=foo

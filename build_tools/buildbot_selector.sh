@@ -13,7 +13,7 @@
 set -o errexit
 set -o nounset
 
-# Use this variable to pin the naclports buildbots to a specific
+# Use this variable to pin the webports buildbots to a specific
 # SDK version.  This does not apply to the nightly builders, and
 # should be left unset unless there is ongoing issue with the lastest
 # SDK build.
@@ -43,7 +43,7 @@ unset BOTO_CONFIG
 RESULT=0
 
 # TODO: Eliminate this dependency if possible.
-# This is required on OSX so that the naclports version of pkg-config can be
+# This is required on OSX so that the webports version of pkg-config can be
 # found.
 export PATH=${PATH}:/opt/local/bin
 
@@ -177,7 +177,7 @@ InstallEmscripten() {
 }
 
 Unittests() {
-  echo "@@@BUILD_STEP naclports unittests@@@"
+  echo "@@@BUILD_STEP webports unittests@@@"
   CMD="make -C $(dirname ${SCRIPT_DIR}) check"
   echo "Running ${CMD}"
   if ! ${CMD}; then

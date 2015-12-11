@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 #
-# This script builds all naclports in all possible configurations.
+# This script builds all ports in all possible configurations.
 # If you want to be sure your change won't break anythign this is
 # a good place to start.
 

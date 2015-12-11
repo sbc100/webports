@@ -25,7 +25,6 @@ sys.path.insert(0, os.path.join(SRC_DIR, 'lib'))
 
 import httpd
 import download_chrome
-import naclports
 
 # Pinned chrome revision. Update this to pull in a new chrome.
 # Try to select a version that exists on all platforms.

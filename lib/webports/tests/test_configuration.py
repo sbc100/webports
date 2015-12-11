@@ -5,8 +5,8 @@
 from mock import patch, Mock
 
 import common
-from naclports import error
-from naclports.configuration import Configuration
+from webports import error
+from webports.configuration import Configuration
 
 
 class TestConfiguration(common.NaclportsTest):

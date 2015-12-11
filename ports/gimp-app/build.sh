@@ -26,7 +26,7 @@ InstallStep() {
   LogExecute rm -f *.tar
   # make gimp fit the x screen in single-window-mode on startup
   LogExecute cp -f ${START_DIR}/sessionrc\
-   ./naclports-dummydir/etc/gimp/2.0/sessionrc
+   ./webports-dummydir/etc/gimp/2.0/sessionrc
   ChangeDir ${PUBLISH_DIR}/root
   LogExecute tar -cvf ${ASSEMBLY_DIR}/gimp.tar *
   LogExecute rm -Rf ${PUBLISH_DIR}/root

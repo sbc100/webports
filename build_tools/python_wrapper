@@ -14,7 +14,7 @@ export PYTHONUSERBASE="$(dirname $SCRIPT_DIR)/out/pip"
 
 if [ ! -d "${PYTHONUSERBASE}" ]; then
   echo "error: pip installation not found (${PYTHONUSERBASE})"
-  echo "Did you use gclient to fetch the naclports repo?"
+  echo "Did you use gclient to fetch the webports repo?"
   echo "(See top level README to details)"
   exit 1
 fi

@@ -8,22 +8,22 @@ import tempfile
 import unittest
 
 import common
-from naclports.configuration import Configuration
-from naclports import util
-from naclports import error
+from webports.configuration import Configuration
+from webports import util
+from webports import error
 
 
 class TestUtil(unittest.TestCase):
 
   def setUp(self):
-    common.AddPatch(self, patch('naclports.util.GetSDKRoot',
+    common.AddPatch(self, patch('webports.util.GetSDKRoot',
                                 Mock(return_value='/sdk/root')))
-    common.AddPatch(self, patch('naclports.util.GetEmscriptenRoot',
+    common.AddPatch(self, patch('webports.util.GetEmscriptenRoot',
                                 Mock(return_value='/emscripten/root')))
-    common.AddPatch(self, patch('naclports.util.GetPlatform',
+    common.AddPatch(self, patch('webports.util.GetPlatform',
                                 Mock(return_value='linux')))
 
-  @patch('naclports.util.HashFile', Mock(return_value='sha1'))
+  @patch('webports.util.HashFile', Mock(return_value='sha1'))
   def testVerifyHash(self):
     util.VerifyHash('foo', 'sha1')
     with self.assertRaises(util.HashVerificationError):
@@ -46,7 +46,7 @@ class TestUtil(unittest.TestCase):
       self.assertFalse(util.CheckStamp('foo.stamp', ''))
 
   def testCheckStamp_Contents(self):
-    temp_fd, temp_name = tempfile.mkstemp('naclports_test')
+    temp_fd, temp_name = tempfile.mkstemp('webports_test')
     self.addCleanup(os.remove, temp_name)
 
     stamp_contents = 'stamp file contents'
@@ -75,7 +75,7 @@ class TestUtil(unittest.TestCase):
         util.GetInstallRoot(Configuration(toolchain='clang-newlib')), expected)
 
   def testHashFile(self):
-    temp_name = tempfile.mkstemp('naclports_test')[1]
+    temp_name = tempfile.mkstemp('webports_test')[1]
     self.addCleanup(os.remove, temp_name)
 
     with self.assertRaises(IOError):
@@ -84,7 +84,7 @@ class TestUtil(unittest.TestCase):
     sha1_empty_string = 'da39a3ee5e6b4b0d3255bfef95601890afd80709'
     self.assertEqual(util.HashFile(temp_name), sha1_empty_string)
 
-  @patch('naclports.paths.NACLPORTS_ROOT', '/foo')
+  @patch('webports.paths.NACLPORTS_ROOT', '/foo')
   def testRelPath(self):
     self.assertEqual('bar', util.RelPath('/foo/bar'))
     self.assertEqual('../baz/bar', util.RelPath('/baz/bar'))
@@ -98,14 +98,14 @@ class TestCheckSDKRoot(TestUtil):
 
   @patch('os.path.exists', Mock())
   @patch('os.path.isdir', Mock())
-  @patch('naclports.util.GetSDKVersion', Mock(return_value=10))
+  @patch('webports.util.GetSDKVersion', Mock(return_value=10))
   def testSDKVersionCheck(self):
-    with patch('naclports.util.MIN_SDK_VERSION', 9):
+    with patch('webports.util.MIN_SDK_VERSION', 9):
       util.CheckSDKRoot()
 
-    with patch('naclports.util.MIN_SDK_VERSION', 10):
+    with patch('webports.util.MIN_SDK_VERSION', 10):
       util.CheckSDKRoot()
 
-    with patch('naclports.util.MIN_SDK_VERSION', 11):
+    with patch('webports.util.MIN_SDK_VERSION', 11):
       with self.assertRaisesRegexp(error.Error, 'requires at least version 11'):
         util.CheckSDKRoot()

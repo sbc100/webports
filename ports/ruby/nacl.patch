@@ -305,7 +305,7 @@ diff --git a/nacl/GNUmakefile.in b/nacl/GNUmakefile.in
  NACL_TOOLCHAIN_DIR=$(NACL_SDK_ROOT)/toolchain/$(NACL_TOOLCHAIN)
 +
 +# Don't override CC/LD/etc if they are already set to absolute
-+# paths (this is the case when building in the naclports tree).
++# paths (this is the case when building in the webports tree).
 +ifeq ($(dir $(CC)),./)
  CC:=$(NACL_TOOLCHAIN_DIR)/bin/$(CC)
 +endif

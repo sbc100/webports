@@ -17,8 +17,8 @@ OUTPUT_FILE = os.path.join(NACLPORTS_ROOT, 'docs', 'port_list.md')
 
 sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 
-import naclports
-import naclports.source_package
+import webports
+import webports.source_package
 
 SRC_URL = 'https://chromium.googlesource.com/webports/+/master'
 
@@ -80,7 +80,7 @@ def MakePage():
   page = header
 
   total = 0
-  for package in sorted(naclports.source_package.SourcePackageIterator()):
+  for package in sorted(webports.source_package.SourcePackageIterator()):
     if package.URL:
       page += MakeTableRow(package)
     total += 1
@@ -89,7 +89,7 @@ def MakePage():
 
   page += '# Local Ports (not based on upstream sources) =\n\n'
   total = 0
-  for package in naclports.source_package.SourcePackageIterator():
+  for package in webports.source_package.SourcePackageIterator():
     if package.URL:
       continue
     page += '- [%s][%s]\n' % (package.NAME, package.NAME)
@@ -97,7 +97,7 @@ def MakePage():
   page += '\n_Total = %d_\n\n' % total
 
   # Generate up to tree links for each package at the base of the page
-  for package in naclports.source_package.SourcePackageIterator():
+  for package in webports.source_package.SourcePackageIterator():
     relative_path = os.path.relpath(package.root, NACLPORTS_ROOT)
     page += '[%s]: %s/%s\n' % (package.NAME, SRC_URL, relative_path)
 

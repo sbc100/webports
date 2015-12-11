@@ -6,7 +6,7 @@ diff --git a/IPython/core/prompts.py b/IPython/core/prompts.py
  # prompt strings.
  USER           = py3compat.str_to_unicode(os.environ.get("USER",''))
 -HOSTNAME       = py3compat.str_to_unicode(socket.gethostname())
-+# NACLPORTS NOTE: sockets module is not present in naclports,
++# WEBPORTS NOTE: sockets module is not present in webports,
 +# so we sent HOSTNAME to empty
 +HOSTNAME       = '' #py3compat.str_to_unicode(socket.gethostname())
  HOSTNAME_SHORT = HOSTNAME.split(".")[0]
@@ -49,7 +49,7 @@ diff --git a/IPython/kernel/__init__.py b/IPython/kernel/__init__.py
 -from .manager import KernelManager
 -from .blocking import BlockingKernelClient
 -from .multikernelmanager import MultiKernelManager
-+# NACLPORTS NOTE:
++# WEBPORTS NOTE:
 +# This file is left empty because this package
 +# is only needed for IPython/kernel/zmq/pylab/backend_inline.py
 +# which in turn does not require the rest of the package to load.
@@ -70,7 +70,7 @@ diff --git a/IPython/kernel/zmq/__init__.py b/IPython/kernel/zmq/__init__.py
 -
 -from .session import Session
 -
-+# NACLPORTS NOTE:
++# WEBPORTS NOTE:
 +# This file is left empty because this package
 +# is only needed for IPython/kernel/zmq/pylab/backend_inline.py
 +# which in turn does not require the rest of the package to load.

@@ -17,8 +17,8 @@ import os
 import shutil
 import tarfile
 
-from naclports import binary_package, package, paths, util
-from naclports.error import Error
+from webports import binary_package, package, paths, util
+from webports.error import Error
 
 INSTALL_PREFIX = 'usr'
 

@@ -22,8 +22,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 
-import naclports
-import naclports.source_package
+import webports
+import webports.source_package
 
 HISTORY_SIZE = 500
 
@@ -62,7 +62,7 @@ def DetermineSDKURL(flavor, base_url, version):
     The URL of the SDK archive
   """
   # gsutil.py ships with depot_tools, which should be in PATH
-  gsutil = [sys.executable, naclports.util.FindInPath('gsutil.py')]
+  gsutil = [sys.executable, webports.util.FindInPath('gsutil.py')]
   path = flavor + '.tar.bz2'
 
   def GSList(path):
@@ -73,13 +73,13 @@ def DetermineSDKURL(flavor, base_url, version):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     p_stdout = p.communicate()[0]
     if p.returncode:
-      raise naclports.Error('gsutil command failed: %s' % str(cmd))
+      raise webports.Error('gsutil command failed: %s' % str(cmd))
 
     elements = p_stdout.splitlines()
     return [os.path.basename(os.path.normpath(elem)) for elem in elements]
 
   if version == 'latest':
-    naclports.Log('Looking for latest SDK build...')
+    webports.Log('Looking for latest SDK build...')
     # List the top level of the nacl_sdk folder
     versions = GSList('')
     # Find all trunk revision
@@ -95,7 +95,7 @@ def DetermineSDKURL(flavor, base_url, version):
         version = version_dir.rsplit('.', 1)[1]
         break
     else:
-      raise naclports.Error('No SDK build (%s) found in last %d trunk builds' %
+      raise webports.Error('No SDK build (%s) found in last %d trunk builds' %
                             (path, HISTORY_SIZE))
 
   return '%strunk.%s/%s' % (GSTORE, version, path)
@@ -105,17 +105,17 @@ def Untar(bz2_filename):
   if sys.platform == 'win32':
     tar_file = None
     try:
-      naclports.Log('Unpacking tarball...')
+      webports.Log('Unpacking tarball...')
       tar_file = cygtar.CygTar(bz2_filename, 'r:bz2')
       tar_file.Extract()
     except Exception, err:
-      raise naclports.Error('Error unpacking %s' % str(err))
+      raise webports.Error('Error unpacking %s' % str(err))
     finally:
       if tar_file:
         tar_file.Close()
   else:
     if subprocess.call(['tar', 'jxf', bz2_filename]):
-      raise naclports.Error('Error unpacking')
+      raise webports.Error('Error unpacking')
 
 
 def FindCygwin():
@@ -124,7 +124,7 @@ def FindCygwin():
   elif os.path.exists(r'C:\cygwin'):
     return r'C:\cygwin'
   else:
-    raise naclports.Error(r'failed to find cygwin in \cygwin or c:\cygwin')
+    raise webports.Error(r'failed to find cygwin in \cygwin or c:\cygwin')
 
 
 def DownloadAndInstallSDK(url, target_dir):
@@ -137,7 +137,7 @@ def DownloadAndInstallSDK(url, target_dir):
     cygbin = os.path.join(FindCygwin(), 'bin')
 
   # Download it.
-  naclports.DownloadFile(bz2_filename, url)
+  webports.DownloadFile(bz2_filename, url)
 
   # Extract toolchain.
   old_cwd = os.getcwd()
@@ -156,7 +156,7 @@ def DownloadAndInstallSDK(url, target_dir):
 
   # Drop old versions.
   if os.path.exists(target_dir):
-    naclports.Log('Cleaning up old SDK...')
+    webports.Log('Cleaning up old SDK...')
     if sys.platform in ['win32', 'cygwin']:
       cmd = [os.path.join(cygbin, 'bin', 'rm.exe'), '-rf']
     else:
@@ -165,7 +165,7 @@ def DownloadAndInstallSDK(url, target_dir):
     returncode = subprocess.call(cmd)
     assert returncode == 0
 
-  naclports.Log('Renaming toolchain "%s" -> "%s"' % (actual_dir, target_dir))
+  webports.Log('Renaming toolchain "%s" -> "%s"' % (actual_dir, target_dir))
   os.rename(actual_dir, target_dir)
 
   if sys.platform in ['win32', 'cygwin']:
@@ -174,7 +174,7 @@ def DownloadAndInstallSDK(url, target_dir):
   # Clean up: remove the sdk bz2.
   os.remove(bz2_filename)
 
-  naclports.Log('Install complete.')
+  webports.Log('Install complete.')
 
 
 PLATFORM_COLLAPSE = {
@@ -201,10 +201,10 @@ def main(argv):
     with open(stamp_file) as f:
       installed_url = f.read().strip()
       if installed_url == url:
-        naclports.Log('SDK already installed: %s' % url)
+        webports.Log('SDK already installed: %s' % url)
         return 0
       else:
-        naclports.Log('Ignoring currently installed SDK: %s' % installed_url)
+        webports.Log('Ignoring currently installed SDK: %s' % installed_url)
 
   DownloadAndInstallSDK(url, TARGET_DIR)
   with open(stamp_file, 'w') as f:
@@ -215,7 +215,7 @@ def main(argv):
 if __name__ == '__main__':
   try:
     rtn = main(sys.argv[1:])
-  except naclports.Error as e:
+  except webports.Error as e:
     sys.stderr.write("error: %s\n" % str(e))
     rtn = 1
   sys.exit(rtn)

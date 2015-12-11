@@ -10,28 +10,28 @@ import shutil
 import os
 
 import common
-from naclports import source_package
-from naclports import error
-from naclports import paths
-from naclports.configuration import Configuration
+from webports import source_package
+from webports import error
+from webports import paths
+from webports.configuration import Configuration
 
 
 class TestSourcePackage(common.NaclportsTest):
 
   def setUp(self):
     super(TestSourcePackage, self).setUp()
-    self.tempdir = tempfile.mkdtemp(prefix='naclports_test_')
+    self.tempdir = tempfile.mkdtemp(prefix='webports_test_')
     self.addCleanup(shutil.rmtree, self.tempdir)
     self.temp_ports = os.path.join(self.tempdir, 'ports')
 
-    self.AddPatch(patch('naclports.paths.NACLPORTS_ROOT', self.tempdir))
-    self.AddPatch(patch('naclports.paths.BUILD_ROOT',
+    self.AddPatch(patch('webports.paths.NACLPORTS_ROOT', self.tempdir))
+    self.AddPatch(patch('webports.paths.BUILD_ROOT',
                         os.path.join(self.tempdir, 'build_root')))
-    self.AddPatch(patch('naclports.paths.CACHE_ROOT',
+    self.AddPatch(patch('webports.paths.CACHE_ROOT',
                         os.path.join(self.tempdir, 'cache')))
-    self.AddPatch(patch('naclports.paths.OUT_DIR',
+    self.AddPatch(patch('webports.paths.OUT_DIR',
                         os.path.join(self.tempdir, 'out_dir')))
-    self.AddPatch(patch('naclports.paths.STAMP_DIR',
+    self.AddPatch(patch('webports.paths.STAMP_DIR',
                         os.path.join(self.tempdir, 'stamp_dir')))
 
   def CreateTestPackage(self, name, extra_info=''):
@@ -83,9 +83,9 @@ class TestSourcePackage(common.NaclportsTest):
     pkg.PackageFile = Mock(return_value=invalid_binary)
     self.assertFalse(pkg.IsBuilt())
 
-  @patch('naclports.source_package.SourcePackage.RunBuildSh',
+  @patch('webports.source_package.SourcePackage.RunBuildSh',
          Mock(return_value=True))
-  @patch('naclports.source_package.Log', Mock())
+  @patch('webports.source_package.Log', Mock())
   def testBuildPackage(self):
     root = self.CreateTestPackage('foo')
     pkg = source_package.SourcePackage(root)
@@ -111,7 +111,7 @@ class TestSourcePackage(common.NaclportsTest):
     self.assertEqual(os.path.basename(location), '%s-%s' %
                      (pkg.NAME, pkg.VERSION))
 
-  @patch('naclports.util.Log', Mock())
+  @patch('webports.util.Log', Mock())
   def testExtract(self):
     root = self.CreateTestPackage('foo', 'URL=someurl.tar.gz\nSHA1=123')
     pkg = source_package.SourcePackage(root)
@@ -119,7 +119,7 @@ class TestSourcePackage(common.NaclportsTest):
     def fake_extract(archive, dest):
       os.mkdir(os.path.join(dest, '%s-%s' % (pkg.NAME, pkg.VERSION)))
 
-    with patch('naclports.source_package.ExtractArchive', fake_extract):
+    with patch('webports.source_package.ExtractArchive', fake_extract):
       pkg.Extract()
 
   def testCreatePackageInvalid(self):
@@ -141,11 +141,11 @@ class TestSourcePackage(common.NaclportsTest):
     pkg = source_package.SourcePackage(root)
 
     # with no other packages installed
-    with patch('naclports.util.IsInstalled', Mock(return_value=False)):
+    with patch('webports.util.IsInstalled', Mock(return_value=False)):
       pkg.CheckInstallable()
 
     # with all possible packages installed
-    with patch('naclports.util.IsInstalled') as is_installed:
+    with patch('webports.util.IsInstalled') as is_installed:
       is_installed.return_value = True
       with self.assertRaises(source_package.PkgConflictError):
         pkg.CheckInstallable()
@@ -221,7 +221,7 @@ class TestSourcePackage(common.NaclportsTest):
                                  'can only be built on solaris$'):
       pkg.CheckBuildable()
 
-  @patch('naclports.util.GetSDKVersion', Mock(return_value=123))
+  @patch('webports.util.GetSDKVersion', Mock(return_value=123))
   def testMinSDKVersion(self):
     self.CreateTestPackage('foo', 'MIN_SDK_VERSION=123')
     pkg = source_package.CreatePackage('foo')
@@ -237,7 +237,7 @@ class TestSourcePackage(common.NaclportsTest):
                                  'requires SDK version 124 or above'):
       pkg.CheckBuildable()
 
-  @patch('naclports.util.GetSDKVersion', Mock(return_value=1234))
+  @patch('webports.util.GetSDKVersion', Mock(return_value=1234))
   def testInstalledInfoContents(self):
     root = self.CreateTestPackage('foo')
     pkg = source_package.SourcePackage(root)
@@ -266,8 +266,8 @@ class TestSourcePackage(common.NaclportsTest):
     # InitGitRepo should work on existing git repositories too.
     source_package.InitGitRepo(self.tempdir)
 
-  @patch('naclports.util.DownloadFile')
-  @patch('naclports.util.VerifyHash')
+  @patch('webports.util.DownloadFile')
+  @patch('webports.util.VerifyHash')
   def testDownload(self, mock_verify, mock_download):
     self.CreateTestPackage('foo', 'URL=foo/bar.tar.gz\nSHA1=X123')
     pkg = source_package.CreatePackage('foo')
@@ -276,7 +276,7 @@ class TestSourcePackage(common.NaclportsTest):
     mock_download.assert_called_once_with(expected_filename, mock.ANY)
     mock_verify.assert_called_once_with(expected_filename, 'X123')
 
-  @patch('naclports.util.DownloadFile')
+  @patch('webports.util.DownloadFile')
   def testDownloadMissingSHA1(self, mock_download):
     self.CreateTestPackage('foo', 'URL=foo/bar')
     pkg = source_package.CreatePackage('foo')

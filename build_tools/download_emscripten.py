@@ -18,8 +18,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 NACLPORTS_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 
-import naclports
-import naclports.source_package
+import webports
+import webports.source_package
 
 MIRROR_URL = 'http://storage.googleapis.com/naclports/prebuilt/emscripten'
 
@@ -37,20 +37,20 @@ TARGET_DIR = os.path.join(OUT_DIR, 'emscripten_sdk')
 
 def DownloadToCache(url, sha1):
   filename = os.path.basename(url)
-  download_dir = naclports.paths.CACHE_ROOT
+  download_dir = webports.paths.CACHE_ROOT
   if not os.path.exists(download_dir):
     os.makedirs(download_dir)
   full_name = os.path.join(download_dir, filename)
   if os.path.exists(full_name):
     try:
-      naclports.util.VerifyHash(full_name, sha1)
-      naclports.Log("Verified cached file: %s" % filename)
+      webports.util.VerifyHash(full_name, sha1)
+      webports.Log("Verified cached file: %s" % filename)
       return full_name
-    except naclports.util.HashVerificationError:
-      naclports.Log("Hash mistmatch on cached download: %s" % filename)
+    except webports.util.HashVerificationError:
+      webports.Log("Hash mistmatch on cached download: %s" % filename)
 
-  naclports.DownloadFile(full_name, url)
-  naclports.util.VerifyHash(full_name, sha1)
+  webports.DownloadFile(full_name, url)
+  webports.util.VerifyHash(full_name, sha1)
   return full_name
 
 
@@ -64,15 +64,15 @@ def DownloadAndExtract(url, sha1, target_dir, link_name=None):
 
   # Remove previously extracted archive
   if os.path.exists(target_dir):
-    naclports.Log('Cleaning up existing %s...' % target_dir)
+    webports.Log('Cleaning up existing %s...' % target_dir)
     cmd = ['rm', '-rf']
     cmd.append(target_dir)
     subprocess.check_call(cmd)
 
   # Extract archive
-  naclports.Log('Exctacting %s...' % os.path.basename(tar_file))
+  webports.Log('Exctacting %s...' % os.path.basename(tar_file))
   if subprocess.call(['tar', 'xf', tar_file]):
-    raise naclports.Error('Error unpacking Emscripten SDK')
+    raise webports.Error('Error unpacking Emscripten SDK')
 
   if link_name:
     if os.path.exists(link_name):
@@ -99,20 +99,20 @@ def BuildOptimizer():
 
 def main(argv):
   if sys.platform in ['win32', 'cygwin']:
-    naclports.Error('Emscripten support is currently not available on Windows.')
+    webports.Error('Emscripten support is currently not available on Windows.')
     return 1
 
   DownloadAndExtract(EMSDK_URL, EMSDK_SHA1, 'emsdk')
   DownloadAndExtract(NODEJS_URL, NODEJS_SHA1, 'node-v0.12.1-linux-x64', 'node')
   BuildOptimizer()
 
-  naclports.Log('Emscripten SDK Install complete')
+  webports.Log('Emscripten SDK Install complete')
   return 0
 
 
 if __name__ == '__main__':
   try:
     rtn = main(sys.argv[1:])
-  except naclports.Error as e:
+  except webports.Error as e:
     sys.stderr.write('error: %s\n' % str(e))
     rtn = 1

@@ -10,7 +10,7 @@ EnableGlibcCompat
 
 InstallStep() {
   DefaultInstallStep
-  local pkgconfig_file=${INSTALL_DIR}/naclports-dummydir/lib/pkgconfig/x11.pc
+  local pkgconfig_file=${INSTALL_DIR}/webports-dummydir/lib/pkgconfig/x11.pc
   if [ "${NACL_LIBC}" = "newlib" ]; then
     if ! grep -Eq "lglibc-compat" $pkgconfig_file; then
       sed -i.bak 's/-lX11/-lX11 -lglibc-compat/' $pkgconfig_file

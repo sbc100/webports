@@ -7,7 +7,7 @@ from mock import Mock, patch
 import StringIO
 import unittest
 
-import naclports
+import webports
 import patch_configure
 import scan_packages
 import update_mirror
@@ -41,7 +41,7 @@ class TestScanPackages(unittest.TestCase):
     with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
       scan_packages.CheckHash('foo', '1234')
 
-  @patch('naclports.package_index.PREBUILT_ROOT', 'dummydir')
+  @patch('webports.package_index.PREBUILT_ROOT', 'dummydir')
   @patch('scan_packages.Log', Mock())
   @patch('scan_packages.CheckHash')
   @patch('os.path.exists', Mock(return_value=True))
@@ -55,9 +55,9 @@ class TestScanPackages(unittest.TestCase):
 
 class TestUpdateMirror(unittest.TestCase):
 
-  @patch('naclports.util.FindInPath', Mock())
+  @patch('webports.util.FindInPath', Mock())
   def testCheckMirror_CheckOnly(self):
-    pkg = naclports.source_package.CreatePackage('zlib')
+    pkg = webports.source_package.CreatePackage('zlib')
     pkg.GetArchiveFilename = Mock(return_value='file.tar.gz')
     options = Mock()
     options.check = True
@@ -66,11 +66,11 @@ class TestUpdateMirror(unittest.TestCase):
     with self.assertRaises(SystemExit):
       update_mirror.CheckMirror(options, pkg, [])
 
-  @patch('naclports.util.FindInPath', Mock())
+  @patch('webports.util.FindInPath', Mock())
   @patch('update_mirror.GsUpload')
   def testCheckMirror_WithDownload(self, upload_mock):
     mock_download = Mock()
-    pkg = naclports.source_package.CreatePackage('zlib')
+    pkg = webports.source_package.CreatePackage('zlib')
     pkg.Download = mock_download
 
     pkg.GetArchiveFilename = Mock(return_value='file.tar.gz')
@@ -92,8 +92,8 @@ class TestUpdateMirror(unittest.TestCase):
                                mock.call(mock_options, 'b', mirror_listing),
                                mock.call(mock_options, 'c', mirror_listing)])
 
-  @patch('naclports.source_package.SourcePackageIterator')
-  @patch('naclports.util.FindInPath', Mock())
+  @patch('webports.source_package.SourcePackageIterator')
+  @patch('webports.util.FindInPath', Mock())
   @patch('update_mirror.GetMirrorListing', Mock(return_value=['foo']))
   @patch('update_mirror.CheckPackages')
   def testMain(self, check_packages, source_package_iter):

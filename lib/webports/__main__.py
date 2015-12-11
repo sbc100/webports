@@ -1,9 +1,9 @@
 # Copyright (c) 2013 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Tool for manipulating naclports packages in python.
+"""Tool for manipulating webports packages in python.
 
-This tool can be used to for working with naclports packages.
+This tool can be used to for working with webports packages.
 It can also be incorporated into other tools that need to
 work with packages (e.g. 'update_mirror.py' uses it to iterate
 through all packages and mirror them on Google Cloud Storage).
@@ -23,12 +23,12 @@ import argparse
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from naclports import configuration, error, source_package, util, paths
-from naclports import installed_package
+from webports import configuration, error, source_package, util, paths
+from webports import installed_package
 
 
 def PrintError(msg):
-  sys.stderr.write('naclports: %s\n' % util.Color(str(msg), 'red'))
+  sys.stderr.write('webports: %s\n' % util.Color(str(msg), 'red'))
 
 
 def CmdList(config, options, args):
@@ -91,7 +91,7 @@ def CmdPkgUscan(package, options):
                package.NAME)
     return 0
 
-  temp_fd, temp_file = tempfile.mkstemp('naclports_watchfile')
+  temp_fd, temp_file = tempfile.mkstemp('webports_watchfile')
   try:
     with os.fdopen(temp_fd, 'w') as f:
       uscan_url = package.URL.replace(package.VERSION, '(.+)')
@@ -139,7 +139,7 @@ def CmdPkgCheck(package, options):
   # The fact that we got this far means the pkg_info is basically valid.
   # This final check verifies the dependencies are valid.
   # Cache the list of all packages names since this function could be called
-  # a lot in the case of "naclports check --all".
+  # a lot in the case of "webports check --all".
   packages = source_package.SourcePackageIterator()
   if not CmdPkgCheck.all_package_names:
     CmdPkgCheck.all_package_names = [os.path.basename(p.root) for p in packages]
@@ -201,7 +201,7 @@ def CmdPkgExtract(package, options):
 
 
 def CmdPkgPatch(package, options):
-  """Apply naclports patch for package(s)"""
+  """Apply webports patch for package(s)"""
   package.Patch()
 
 
@@ -251,7 +251,7 @@ def RunMain(args):
   for name, function in all_commands.iteritems():
     epilog += '  %-12s - %s\n' % (name, function.__doc__)
 
-  parser = argparse.ArgumentParser(prog='naclports', description=__doc__,
+  parser = argparse.ArgumentParser(prog='webports', description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter, epilog=epilog)
   parser.add_argument('-v', '--verbose', dest='verbosity', action='count',
                       default=0, help='Output extra information.')
@@ -340,7 +340,7 @@ def RunMain(args):
       pkg_commands[args.command](package, args)
     except error.DisabledError as e:
       if args.ignore_disabled:
-        util.Log('naclports: %s' % e)
+        util.Log('webports: %s' % e)
       else:
         raise e
 
