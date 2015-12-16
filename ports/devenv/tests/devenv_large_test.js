@@ -91,8 +91,7 @@ TEST_F(DevEnvFileTest, 'testGit', function() {
   }).then(function() {
     return self.checkCommandReLines(
         'cd foo && git init', 0,
-        ['warning: templates not found ' +
-         '/.*-dummydir/share/git-core/templates',
+        [/^warning: templates not found \/.*\/share\/git-core\/templates/,
          'Initialized empty Git repository in /home/user/foo/.git/']);
   }).then(function() {
     return self.checkCommand('mkdir foo/bar', 0, '');
