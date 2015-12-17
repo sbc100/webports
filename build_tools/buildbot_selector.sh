@@ -52,11 +52,24 @@ if [ "${TEST_BUILDBOT:-}" = "1" -a -z "${BUILDBOT_BUILDERNAME:-}" ]; then
 fi
 
 BuildShard() {
+  # Select shard count
+  if [ "${OS}" = "mac" ]; then
+    SHARDS=2
+  elif [ "${OS}" = "linux" ]; then
+  if [ "${TOOLCHAIN}" = "emscripten" ]; then
+      SHARDS=1
+    else
+      SHARDS=6
+    fi
+  else
+    echo "Unspecified sharding for OS: ${OS}" 1>&2
+    exit 1
+  fi
+
+  echo "@@@BUILD_STEP setup@@@"
   export TOOLCHAIN
   export SHARD
   export SHARDS
-
-  echo "@@@BUILD_STEP setup@@@"
   if ! ./build_tools/buildbot_build_shard.sh ; then
     RESULT=1
   fi
@@ -119,26 +132,12 @@ if [ "${OS}" = "win" ]; then
   PYTHON=python.bat
 fi
 
-# Convert toolchain contains in the bot name to valid TOOLCHAIN value
+# Convert toolchain contained in the bot name to valid TOOLCHAIN value
 # as expected by the SDK tools.
 if [ "${BOT_TYPE}" = "clang" ]; then
   TOOLCHAIN=clang-newlib
-else
+elif [ "${BOT_TYPE}" != "toolchain" ]; then
   TOOLCHAIN=${BOT_TYPE}
-fi
-
-# Select shard count
-if [ "${OS}" = "mac" ]; then
-  SHARDS=2
-elif [ "${OS}" = "linux" ]; then
-  if [ "${TOOLCHAIN}" = "emscripten" ]; then
-    SHARDS=1
-  else
-    SHARDS=6
-  fi
-else
-  echo "Unspecified sharding for OS: ${OS}" 1>&2
-  exit 1
 fi
 
 # Optional Clobber (if checked in the buildbot ui).
@@ -204,7 +203,7 @@ PlumbingTests() {
   fi
 }
 
-if [ -z "${TEST_BUILDBOT:-}" -a ${TOOLCHAIN:-} = emscripten ]; then
+if [[ ${TOOLCHAIN:-} == emscripten || ${BOT_TYPE} == toolchain ]]; then
   InstallEmscripten
 fi
 
@@ -220,8 +219,13 @@ export PEPPER_DIR=pepper_${PEPPER_VERSION}
 export NACLPORTS_ANNOTATE=1
 . ${SCRIPT_DIR}/buildbot_common.sh
 
-CleanCurrentToolchain
-BuildShard
+
+if [[ ${BOT_TYPE} == toolchain ]]; then
+  ./build_tools/buildbot_build_toolchain.sh
+else
+  CleanCurrentToolchain
+  BuildShard
+fi
 
 # Publish resulting builds to Google Storage, but only on the
 # linux bots.

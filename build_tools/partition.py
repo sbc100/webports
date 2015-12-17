@@ -66,6 +66,9 @@ import webports
 import webports.source_package
 from webports.util import LogVerbose
 
+# Packages that the partitioned builders should never build.  The 'pnacl'
+# toolchain package takes so long it has a dedicated builder.
+EXCLUDED_PACKAGES = ['pnacl']
 
 class Error(webports.Error):
   pass
@@ -273,7 +276,7 @@ def FixupCanned(partitions):
       covered.add(item)
 
   for item in all_names:
-    if item not in covered:
+    if item not in covered and item not in EXCLUDED_PACKAGES:
       partitions[-1].append(item)
 
   # Order by dependencies.

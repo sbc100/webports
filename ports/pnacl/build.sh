@@ -35,7 +35,7 @@ BuildStep() {
   export HOST_OS=NativeClient
   export KEEP_SYMBOLS=1
 
-  export GOLD_LDADD="--with-gold-ldadd="
+  GOLD_LDADD="--with-gold-ldadd="
   GOLD_LDADD+=" -Wl,--undefined=LLVMgold_onload"
   GOLD_LDADD+=" -L%(abs_llvm_le32_nacl)s/lib"
   # TODO(bradnelson): Apply llvm-config to pick this list.
@@ -58,13 +58,12 @@ BuildStep() {
   GOLD_LDADD+=" -lLLVMObject -lLLVMCore -lLLVMSupport"
   GOLD_LDADD+=" -Wl,--end-group"
 
-  export EXTRA_CONFIGURE=""
-  EXTRA_CONFIGURE+=" --extra-configure-arg=ac_cv_func_vfork_works=no"
+  EXTRA_CONFIGURE="--extra-configure-arg=ac_cv_func_vfork_works=no"
   EXTRA_CONFIGURE+=" --extra-configure-arg=--disable-compiler-version-checks"
   EXTRA_CONFIGURE+=" --extra-configure-arg=--enable-libcpp"
 
-  export EXTRA_CC_ARGS=""
   # Some code in llvm uses intrisics not supported in the pnacl stable abi.
+  EXTRA_CC_ARGS="-fgnu-inline-asm"
   EXTRA_CC_ARGS+=" --pnacl-disable-abi-check"
   LINUX_PNACL=${NACL_SDK_ROOT}/toolchain/linux_pnacl
   USR_LOCAL=${LINUX_PNACL}/le32-nacl/usr
@@ -85,6 +84,9 @@ BuildStep() {
   EXTRA_CC_ARGS+=" -lnacl_io -lppapi_cpp -lppapi"
   EXTRA_CC_ARGS+=" -l${NACL_CXX_LIB} -lm -lglibc-compat"
 
+  export GOLD_LDADD
+  export EXTRA_CONFIGURE
+  export EXTRA_CC_ARGS
   LogExecute ${SRC_DIR}/toolchain_build/toolchain_build_pnacl.py -v \
     --no-use-cached-results \
     --no-use-remote-cache \
