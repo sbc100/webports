@@ -11,7 +11,7 @@
   "externally_connectable": {
     "ids": ["*"],
     "matches": [
-      "*://naclports.storage.googleapis.com/*",
+      "*://webports.storage.googleapis.com/*",
       "*://nacltools.storage.googleapis.com/*",
       "*://*.chrome.com/*",
       "*://localhost/*",

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-MIRROR_URL=http://storage.googleapis.com/naclports/mirror
+MIRROR_URL=http://storage.googleapis.com/webports/mirror
 
 # Beneath a Steel Sky (floppy version)
 readonly BASS_FLOPPY_URL=${MIRROR_URL}/scummvm_games/bass/BASS-Floppy-1.3.zip

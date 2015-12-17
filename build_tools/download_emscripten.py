@@ -20,8 +20,10 @@ sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 
 import webports
 import webports.source_package
+import webports.util
 
-MIRROR_URL = 'http://storage.googleapis.com/naclports/prebuilt/emscripten'
+MIRROR_URL = '%s%s/prebuilt/emscripten' % (webports.util.GS_URL,
+    webports.util.GS_BUCKET)
 
 EMSDK_SHA1 = '89c962d5f06c874f63b06917913e2071d45e3c2e'
 EMSDK_URL = MIRROR_URL + '/emsdk-20150817.tar.gz'
@@ -116,3 +118,4 @@ if __name__ == '__main__':
   except webports.Error as e:
     sys.stderr.write('error: %s\n' % str(e))
     rtn = 1
+  sys.exit(rtn)

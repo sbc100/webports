@@ -11,7 +11,7 @@ readonly BASE_DIR="$(dirname ${SCRIPT_DIR})"
 readonly PYTHON=${SCRIPT_DIR}/python_wrapper
 cd ${BASE_DIR}
 
-UPLOAD_PATH=naclports/builds/${PEPPER_DIR}/
+UPLOAD_PATH=webports/builds/${PEPPER_DIR}/
 if [ -d .git ]; then
   UPLOAD_PATH+=$(git describe)
 else

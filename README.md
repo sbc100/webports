@@ -30,7 +30,7 @@ Links
 - Git: <https://chromium.googlesource.com/webports.git>
 - Bugs: <https://bugs.chromium.org/p/naclports/issues/list>
 - Continuous builder: <http://build.chromium.org/p/client.nacl.ports/>
-- Continuous build artifacts: <http://gsdview.appspot.com/naclports/builds/>
+- Continuous build artifacts: <http://gsdview.appspot.com/webports/builds/>
 
 Prerequistes
 ------------

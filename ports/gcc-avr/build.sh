@@ -5,7 +5,7 @@
 HOST_BUILD_DIR=${WORK_DIR}/build_host
 HOST_BIN_INSTALL_DIR=${NACL_PACKAGES_BUILD}/binutils-2.25/install_host
 
-AVR_LIBC_URL=http://storage.googleapis.com/naclports/mirror/avr-libc-1.8.1.tar.bz2
+AVR_LIBC_URL=http://storage.googleapis.com/webports/mirror/avr-libc-1.8.1.tar.bz2
 AVR_LIBC_SHA=b56fe21b30341869aa768689b0f6a07d896b17fa
 AVR_LIBC_VERSION=avr-libc-1.8.1
 

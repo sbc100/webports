@@ -504,7 +504,7 @@ _Total = 18_
 [libice_upstream]: http://www.x.org/releases/X11R7.7/src/everything/libICE-1.0.8.tar.bz2
 [nethack]: https://chromium.googlesource.com/webports/+/master/ports/nethack
 [nethack_patch]: https://chromium.googlesource.com/webports/+/master/ports/nethack/nacl.patch
-[nethack_upstream]: http://storage.googleapis.com/naclports/mirror/nethack-343-src.tgz
+[nethack_upstream]: http://storage.googleapis.com/webports/mirror/nethack-343-src.tgz
 [damageproto]: https://chromium.googlesource.com/webports/+/master/ports/damageproto
 [damageproto_upstream]: http://www.x.org/releases/X11R7.7/src/everything/damageproto-1.2.1.tar.bz2
 [xtrans]: https://chromium.googlesource.com/webports/+/master/ports/xtrans

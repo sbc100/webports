@@ -22,7 +22,7 @@ except ImportError:
 from webports import error, paths
 
 GS_URL = 'http://storage.googleapis.com/'
-GS_BUCKET = 'naclports'
+GS_BUCKET = 'webports'
 GS_MIRROR_URL = '%s%s/mirror' % (GS_URL, GS_BUCKET)
 
 # Require the latest version of the NaCl SDK. webports is built

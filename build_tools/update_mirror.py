@@ -26,7 +26,7 @@ sys.path.append(os.path.join(NACLPORTS_ROOT, 'lib'))
 import webports
 import webports.source_package
 
-MIRROR_GS = 'gs://naclports/mirror'
+MIRROR_GS = 'gs://webports/mirror'
 
 
 def GsUpload(options, filename, url):

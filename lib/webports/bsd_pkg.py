@@ -161,7 +161,7 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):
   manifest['comment'] = 'comment not available'
   manifest['desc'] = 'desc not available'
   manifest['maintainer'] = 'native-client-discuss@googlegroups.com'
-  manifest['www'] = 'https://code.google.com/p/naclports/'
+  manifest['www'] = 'https://chromium.googlesource.com/webports'
   manifest['prefix'] = INSTALL_PREFIX
 
   if depends:

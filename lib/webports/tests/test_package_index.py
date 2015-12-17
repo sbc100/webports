@@ -21,7 +21,7 @@ BUILD_ARCH=arm
 BUILD_TOOLCHAIN=glibc
 BUILD_SDK_VERSION=38
 BUILD_NACLPORTS_REVISION=98765
-BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_arm_glibc.tar.bz2
+BIN_URL=http://storage.googleapis.com/webports/builds/pepper_38/1414/packages/agg-demo_0.1_arm_glibc.tar.bz2
 BIN_SIZE=10240
 BIN_SHA1=f300618f52188a291804dd60d6a5e04361c0ffe6
 
@@ -34,7 +34,7 @@ BUILD_ARCH=i686
 BUILD_TOOLCHAIN=glibc
 BUILD_SDK_VERSION=38
 BUILD_NACLPORTS_REVISION=98765
-BIN_URL=http://storage.googleapis.com/naclports/builds/pepper_38/1414/packages/agg-demo_0.1_i686_glibc.tar.bz2
+BIN_URL=http://storage.googleapis.com/webports/builds/pepper_38/1414/packages/agg-demo_0.1_i686_glibc.tar.bz2
 BIN_SIZE=10240
 BIN_SHA1=0cb0d2d1380831b38c2b8461528836aa7992435f
 '''

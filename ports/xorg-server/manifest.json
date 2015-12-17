@@ -16,7 +16,7 @@
   "permissions": [
     "storage",
     "unlimitedStorage",
-    "*://naclports.storage.googleapis.com/*",
+    "*://webports.storage.googleapis.com/*",
     {
       "socket": [
         "tcp-listen:*:*",

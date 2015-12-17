@@ -57,7 +57,7 @@ def ParseGsUtilOutput(output):
   """
   # gsutil stat outputs the name of each file starting in column zero followed
   # by zero or more fields indended with tab characters.
-  # gs://naclports/builds/pepper_44/..../agg-demo_0.1_x86-64_newlib.tar.bz2:
+  # gs://webports/builds/pepper_44/..../agg-demo_0.1_x86-64_newlib.tar.bz2:
   #  Creation time:    Wed, 13 May 2015 18:52:05 GMT
   #  Content-Length:   342
   #  Content-Type:     application/x-tar

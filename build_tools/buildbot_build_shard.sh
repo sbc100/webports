@@ -15,10 +15,10 @@ source ${SCRIPT_DIR}/buildbot_common.sh
 set -o nounset
 set -o errexit
 
-readonly BNAME_REGEX="(nightly-|naclports-)?(.+)-(.+)-(.+)"
+readonly BNAME_REGEX="(nightly-|webports-)?(.+)-(.+)-(.+)"
 if [[ ${BUILDBOT_BUILDERNAME} =~ ${BNAME_REGEX} ]]; then
   readonly PREFIX=${BASH_REMATCH[1]}
-  if [ "${PREFIX}" = "naclports-" ]; then
+  if [ "${PREFIX}" = "webports-" ]; then
     readonly TRYBOT=1
   else
     readonly TRYBOT=0

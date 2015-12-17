@@ -16,9 +16,6 @@ ifeq ($(TOOLCHAIN),pnacl)
 CFLAGS += -fcommon -Wno-dangling-else
 endif
 
-SDL_ROOT ?= /home/dmichael/naclports/src/packages/repository/SDL-1.2.14
-NACL_TOOLCHAIN_ROOT ?= $(NACL_SDK_ROOT)/toolchain/linux_x86
-
 X86_SRCS := snd_mixa.S sys_dosa.S d_draw.S d_draw16.S d_parta.S d_polysa.S \
             d_scana.S d_spr8.S d_varsa.S math.S r_aclipa.S r_aliasa.S \
             r_drawa.S r_edgea.S surf16.S surf8.S worlda.S

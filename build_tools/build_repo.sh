@@ -35,7 +35,7 @@ RunPkg() {
 
 BuildRepo() {
   local revision=$1
-  local gs_url="gs://naclports/builds/${SDK_VERSION}/${revision}/publish"
+  local gs_url="gs://webports/builds/${SDK_VERSION}/${revision}/publish"
   ${SCRIPT_DIR}/download_pkg.py ${revision}
   cd ${NACLPORTS_ROOT}
   local repo_dir=out/packages/prebuilt/repo

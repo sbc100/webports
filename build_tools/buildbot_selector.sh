@@ -35,7 +35,7 @@ fi
 
 # The bots set the BOTO_CONFIG environment variable to a different .boto file
 # (currently /b/build/site-config/.boto). override this to the gsutil default
-# which has access to gs://naclports.
+# which has access to gs://webports.
 # gsutil also looks for AWS_CREDENTIAL_FILE, so clear that too.
 unset AWS_CREDENTIAL_FILE
 unset BOTO_CONFIG

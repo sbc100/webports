@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-TLNET_URL=http://storage.googleapis.com/naclports/mirror/texlive-20150523
+TLNET_URL=http://storage.googleapis.com/webports/mirror/texlive-20150523
 
 SCHEME="small"
 

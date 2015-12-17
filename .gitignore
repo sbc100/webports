@@ -3,7 +3,7 @@
 /native_client/
 /node_modules/
 
-naclports.lock
+webports.lock
 *.pyc
 *~
 /out

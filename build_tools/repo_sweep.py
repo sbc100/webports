@@ -21,7 +21,7 @@ AGE_LIMIT = 8 * 60 * 60  # 8 hours
 
 
 def GetPepperVersions():
-  output = subprocess.check_output(['gsutil', 'ls', 'gs://naclports/builds'])
+  output = subprocess.check_output(['gsutil', 'ls', 'gs://webports/builds'])
   names = [i.split('/')[-2] for i in output.splitlines()]
   picked = [i for i in names if int(i.split('_')[1]) >= 48]
   return picked
@@ -29,7 +29,7 @@ def GetPepperVersions():
 
 def GetVersionRevisions(version):
   output = subprocess.check_output(
-      ['gsutil', 'ls', 'gs://naclports/builds/%s' % version])
+      ['gsutil', 'ls', 'gs://webports/builds/%s' % version])
   return [i.split('/')[-2] for i in output.splitlines()]
 
 
@@ -37,7 +37,7 @@ def GetExistingVersionRevisions(version):
   try:
     output = subprocess.check_output(
         ['gsutil', 'ls',
-         'gs://naclports/builds/%s/*/publish/pkg_pnacl/meta.*' % version],
+         'gs://webports/builds/%s/*/publish/pkg_pnacl/meta.*' % version],
         stderr=open(os.devnull, 'w'))
     return set([i.split('/')[-4] for i in output.splitlines()])
   except subprocess.CalledProcessError:
@@ -65,7 +65,7 @@ def GetAge(version, revision):
   try:
     output = subprocess.check_output(
         ['gsutil', 'ls', '-l',
-          'gs://naclports/builds/%s/%s/packages/devenv_*_pnacl.*' %
+          'gs://webports/builds/%s/%s/packages/devenv_*_pnacl.*' %
           (version, revision)],
         stderr=open(os.devnull, 'w'))
     stamp = output.splitlines()[0].split()[1]
