@@ -15,6 +15,12 @@ for x in $*; do
   if [[ ${x} = */compile_et_134.o ]]; then
     is_host=1
   fi
+  if [[ ${x} = */print_version_130.o ]]; then
+    is_host=1
+  fi
+  if [[ ${x} = */version_130.o ]]; then
+    is_host=1
+  fi
 done
 
 

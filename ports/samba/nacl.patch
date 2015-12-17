@@ -104,6 +104,19 @@ diff --git a/lib/ldb-samba/wscript_build b/lib/ldb-samba/wscript_build
                    private_library=True
                    )
  
+diff --git a/lib/replace/replace.h b/lib/replace/replace.h
+--- a/lib/replace/replace.h
++++ b/lib/replace/replace.h
+@@ -904,4 +904,9 @@ void rep_setproctitle(const char *fmt, ...) PRINTF_ATTRIBUTE(1, 2);
+ #include <sys/atomic.h>
+ #endif
+ 
++/* This is needed for the NaCl port for ARM with glibc */
++#ifndef FIONREAD
++#define FIONREAD 0x541B
++#endif
++
+ #endif /* _LIBREPLACE_REPLACE_H */
 diff --git a/lib/replace/system/wait.h b/lib/replace/system/wait.h
 --- a/lib/replace/system/wait.h
 +++ b/lib/replace/system/wait.h
@@ -330,6 +343,19 @@ diff --git a/source3/wscript b/source3/wscript
                          local_include=False)
  
          if conf.CONFIG_SET('HAVE_QUOTACTL_LINUX') or \
+diff --git a/source4/heimdal/lib/hcrypto/rand-timer.c b/source4/heimdal/lib/hcrypto/rand-timer.c
+--- a/source4/heimdal/lib/hcrypto/rand-timer.c
++++ b/source4/heimdal/lib/hcrypto/rand-timer.c
+@@ -134,7 +134,8 @@ timer_bytes(unsigned char *outdata, int size)
+     pid = fork();
+     if(pid == -1){
+ 	signal(SIGCHLD, ochld != SIG_ERR ? ochld : SIG_DFL);
+-	des_not_rand_data(data, size);
++	// This is commented out for NaCl build. This function does not exist.
++	//des_not_rand_data(data, size);
+ 	return;
+     }
+     if(pid == 0)
 diff --git a/source4/libnet/wscript_build b/source4/libnet/wscript_build
 --- a/source4/libnet/wscript_build
 +++ b/source4/libnet/wscript_build

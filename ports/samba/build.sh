@@ -11,6 +11,8 @@ EnableGlibcCompat
 ConfigureStep() {
   conf_build=$(/bin/sh "${SCRIPT_DIR}/config.guess")
   NACLPORTS_CPPFLAGS+=" -DFAKE_GET_INTERFACES=1"
+  NACLPORTS_CPPFLAGS="${NACLPORTS_CPPFLAGS/-fdiagnostics-color=auto/}"
+  NACLPORTS_LDFLAGS="${NACLPORTS_CPPFLAGS/-fdiagnostics-color=auto/}"
   SetupCrossEnvironment
 
   local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
