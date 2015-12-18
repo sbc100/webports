@@ -116,6 +116,7 @@ CleanToolchain() {
   for ARCH in ${arch_list}; do
     if ! RunCmd bin/webports -a ${ARCH} -t ${TC} clean --all; then
       TOOLCHAIN=${TC} BuildFailure clean ${ARCH}
+      exit 1
     fi
   done
 }
