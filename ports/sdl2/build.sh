@@ -21,17 +21,9 @@ ConfigureStep() {
   AutogenStep
   SetupCrossEnvironment
 
-  local conf_host=${NACL_CROSS_PREFIX}
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
-    # does not know about "pnacl".  It only knows about "le32-nacl".
-    # Unfortunately, most of the config.subs here are so old that
-    # it doesn't know about that "le32" either.  So we just say "nacl".
-    conf_host="nacl-pnacl"
-  fi
-
   LogExecute ${SRC_DIR}/configure \
-    --host=${conf_host} \
+    --host=${CONF_HOST} \
+    --build=${CONF_BUILD} \
     --prefix=${PREFIX} \
     --disable-assembly \
     --disable-pthread-sem

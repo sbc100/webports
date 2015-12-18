@@ -179,6 +179,18 @@ if [ -z "${OS_JOBS:-}" ]; then
   fi
 fi
 
+CONF_BUILD=$(/bin/sh "${SCRIPT_DIR}/config.guess")
+CONF_HOST=${NACL_CROSS_PREFIX}
+# TODO(gdeepti): Investigate whether emscripten accurately fits this case for
+# long term usage.
+if [[ ${NACL_ARCH} == pnacl ]]; then
+  # The PNaCl tools use "pnacl-" as the prefix, but config.sub
+  # does not know about "pnacl".  It only knows about "le32-nacl".
+  # Unfortunately, most of the config.subs here are so old that
+  # it doesn't know about that "le32" either.  So we just say "nacl".
+  CONF_HOST="nacl"
+fi
+
 GomaTest() {
   # test the goma compiler
   if [ "${NACL_GOMA_FORCE:-}" = 1 ]; then
@@ -981,8 +993,6 @@ DefaultConfigureStep() {
 
 
 ConfigureStep_Autoconf() {
-  conf_build=$(/bin/sh "${SCRIPT_DIR}/config.guess")
-
   SetupCrossEnvironment
 
   # Without this autoconf builds will use the same CFLAGS/LDFLAGS for host
@@ -991,17 +1001,6 @@ ConfigureStep_Autoconf() {
   # (e.g. -fdiagnostics-color=auto).
   export CFLAGS_FOR_BUILD=""
   export LDFLAGS_FOR_BUILD=""
-
-  local conf_host=${NACL_CROSS_PREFIX}
-  # TODO(gdeepti): Investigate whether emscripten accurately fits this case for
-  # long term usage.
-  if [[ ${TOOLCHAIN} == pnacl ]]; then
-    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
-    # does not know about "pnacl".  It only knows about "le32-nacl".
-    # Unfortunately, most of the config.subs here are so old that
-    # it doesn't know about that "le32" either.  So we just say "nacl".
-    conf_host="nacl"
-  fi
 
   # Inject a shim that speed up pnacl invocations for configure.
   if [ "${NACL_ARCH}" = "pnacl" ]; then
@@ -1020,8 +1019,8 @@ ConfigureStep_Autoconf() {
   # it has the correct LLVM bimfmt support. What is more, autoconf will
   # generate a warning if only --host is specified.
   LogExecute "${NACL_CONFIGURE_PATH}" \
-    --build=${conf_build} \
-    --host=${conf_host} \
+    --build=${CONF_BUILD} \
+    --host=${CONF_HOST} \
     --prefix=${PREFIX} \
     --with-http=no \
     --with-html=no \

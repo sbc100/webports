@@ -9,21 +9,10 @@ BUILD_DIR=${SRC_DIR}
 EnableGlibcCompat
 
 ConfigureStep() {
-  conf_build=$(/bin/sh "${SCRIPT_DIR}/config.guess")
   NACLPORTS_CPPFLAGS+=" -DFAKE_GET_INTERFACES=1"
   NACLPORTS_CPPFLAGS="${NACLPORTS_CPPFLAGS/-fdiagnostics-color=auto/}"
   NACLPORTS_LDFLAGS="${NACLPORTS_CPPFLAGS/-fdiagnostics-color=auto/}"
   SetupCrossEnvironment
-
-  local CONFIGURE=${NACL_CONFIGURE_PATH:-${SRC_DIR}/configure}
-  local conf_host=${NACL_CROSS_PREFIX}
-  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "emscripten" ]; then
-    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
-    # does not know about "pnacl".  It only knows about "le32-nacl".
-    # Unfortunately, most of the config.subs here are so old that
-    # it doesn't know about that "le32" either.  So we just say "nacl".
-    conf_host="nacl"
-  fi
 
   # Inject a shim that speed up pnacl invocations for configure.
   if [ "${NACL_ARCH}" = "pnacl" ]; then
@@ -38,8 +27,8 @@ ConfigureStep() {
   # For example a trivial PNaCl binary can sometimes run on the linux host if
   # it has the correct LLVM bimfmt support. What is more, autoconf will
   # generate a warning if only --host is specified.
-  LogExecute "${CONFIGURE}" \
-    --build=${conf_build} \
+  LogExecute "${SRC_DIR}/configure" \
+    --build=${CONF_BUILD} \
     --hostcc=gcc \
     --cross-compile \
     --cross-answers=${START_DIR}/answers \

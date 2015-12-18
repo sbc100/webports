@@ -3,24 +3,19 @@
 # found in the LICENSE file.
 
 ConfigureStep() {
+  Banner "Autogen ${PACKAGE_NAME}"
   pushd ${SRC_DIR}/test
-  ./autogen.sh
+  LogExecute ./autogen.sh
   popd
 
   Banner "Configuring ${PACKAGE_NAME}"
   SetupCrossEnvironment
 
-  local conf_host=${NACL_CROSS_PREFIX}
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    # The PNaCl tools use "pnacl-" as the prefix, but config.sub
-    # does not know about "pnacl".  It only knows about "le32-nacl".
-    # Unfortunately, most of the config.subs here are so old that
-    # it doesn't know about that "le32" either.  So we just say "nacl".
-    conf_host="nacl"
-  fi
-
-  LIBS="$LDFLAGS" LogExecute ${SRC_DIR}/test/configure \
-    --host=${conf_host} --prefix=${PREFIX}
+  LIBS="$LDFLAGS"
+  LogExecute ${SRC_DIR}/test/configure \
+    --host=${CONF_HOST} \
+    --build=${CONF_BUILD} \
+    --prefix=${PREFIX}
 }
 
 InstallStep() {
