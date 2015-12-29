@@ -9,6 +9,7 @@ source ${SCRIPT_DIR}/buildbot_common.sh
 TOOLCHAIN_PACKAGES="pnacl"
 
 for TOOLCHAIN in glibc clang-newlib pnacl emscripten; do
+  CleanCurrentToolchain
   for pkg in ${TOOLCHAIN_PACKAGES}; do
     InstallPackageMultiArch ${pkg}
   done
