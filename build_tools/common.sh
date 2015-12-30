@@ -1555,50 +1555,57 @@ RunDownloadStep()   { RunStep DownloadStep; }
 RunPatchStep()      { RunStep PatchStep; }
 
 
-RunConfigureStep()  {
+RunConfigureStep() {
   SetOptFlags
   RunStep ConfigureStep "Configuring" "${BUILD_DIR}"
 }
 
 
-RunBuildStep()      {
+RunBuildStep() {
   RunStep BuildStep "Building" "${BUILD_DIR}"
   FixupExecutablesList
 }
 
 
-RunPostBuildStep()  {
+RunPostBuildStep() {
   RunStep PostBuildStep "PostBuild" "${BUILD_DIR}"
 }
 
 
-RunTestStep()       {
-  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
+RunTestStep() {
+  if [[ ${SKIP_SEL_LDR_TESTS} == 1 ]]; then
+    Banner "sel_ldr based tested disavled on this platform"
     return
   fi
-  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
+  if [[ ${NACLPORTS_QUICKBUILD} == 1 ]]; then
+    Banner "Tests disabled (\$NACLPORTS_QUICKBUILD is set)"
+    return
+  fi
+  if [[ ${TESTS_DISABLED:-} == 1 && -n ${BUILDBOT_BUILDERNAME:-} ]]; then
+    Banner "Tests for ${PACKAGE_NAME} are currently disabled on the bots"
     return
   fi
   RunStep TestStep "Testing" "${BUILD_DIR}"
 }
 
 
-RunPostInstallTestStep()       {
-  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
+RunPostInstallTestStep() {
+  if [[ ${NACLPORTS_QUICKBUILD} == 1 ]]; then
+    Banner "Post-install tests disabled (\$NACLPORTS_QUICKBUILD is set)"
     return
   fi
   RunStep PostInstallTestStep "Testing (post-install)"
 }
 
 
-RunInstallStep()    {
+RunInstallStep() {
   Remove "${INSTALL_DIR}"
   MakeDir "${INSTALL_DIR}"
   RunStep InstallStep "Installing" "${BUILD_DIR}"
 }
 
 
-RunPublishStep()    {
+RunPublishStep() {
   RunStep PublishStep "Publishing" "${BUILD_DIR}"
 }
 

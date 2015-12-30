@@ -21,6 +21,11 @@ EXECUTABLES="
 EXTRA_CMAKE_ARGS="-DEIGEN_BUILD_PKGCONFIG=OFF -DEIGEN_SPLIT_LARGE_TESTS=OFF"
 MAKE_TARGETS="$CTEST_EXECUTABLES"
 
+# Eigen tests are flakey on the bots:
+# https://bugs.chromium.org/p/naclports/issues/detail?id=223
+# TODO(sbc): re-enable if we can de-flake the tests
+TESTS_DISABLED=1
+
 TestStep() {
   # Eigen has ~600 tests, we only build a few
   ChangeDir ${BUILD_DIR}
