@@ -6,10 +6,14 @@
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 source ${SCRIPT_DIR}/buildbot_common.sh
 
+TOOLCHAINS="glibc clang-newlib pnacl emscripten"
 TOOLCHAIN_PACKAGES="pnacl"
 
-for TOOLCHAIN in glibc clang-newlib pnacl emscripten; do
+for TOOLCHAIN in ${TOOLCHAINS}; do
   CleanCurrentToolchain
+done
+
+for TOOLCHAIN in ${TOOLCHAINS}; do
   for pkg in ${TOOLCHAIN_PACKAGES}; do
     InstallPackageMultiArch ${pkg}
   done
