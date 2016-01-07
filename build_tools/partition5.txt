@@ -1,4 +1,5 @@
 builder 0 (total: 11914)
+  gtest
   zlib
   libtar
   gmp
@@ -86,6 +87,7 @@ builder 0 (total: 11914)
   pytz
   pandas
 builder 1 (total: 12131)
+  gtest
   fftw-float
   python-host
   numpy
@@ -174,6 +176,7 @@ builder 1 (total: 12131)
   matplotlib
   ipython-ppapi
 builder 2 (total: 11877)
+  gtest
   fftw
   eigen3
   icu
@@ -288,6 +291,7 @@ builder 2 (total: 11877)
   alut-demo
   wireshark
 builder 3 (total: 12248)
+  gtest
   kbproto
   xextproto
   corelibs
@@ -406,6 +410,7 @@ builder 3 (total: 12248)
   emacs-x
   gtk-demo
 builder 4 (total: 11864)
+  gtest
   corelibs
   glibc-compat
   zlib

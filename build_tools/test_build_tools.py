@@ -118,8 +118,8 @@ class TestFindEffectedPackages(unittest.TestCase):
      # list.
      self.assertEqual(
          find_effected_packages(['ports/hello', 'ports/ruby'], True, None),
-         ['hello', 'corelibs', 'glibc-compat', 'ncurses', 'readline', 'zlib',
-          'ruby', 'libtar', 'nacl-spawn', 'ruby-ppapi'])
+         ['hello', 'corelibs', 'gtest', 'glibc-compat', 'ncurses', 'readline',
+          'zlib', 'ruby', 'libtar', 'nacl-spawn', 'ruby-ppapi'])
 
    def test_filter(self):
      effected = find_effected_packages(['ports/corelibs'], True,

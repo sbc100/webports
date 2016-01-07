@@ -12,6 +12,7 @@ LIBRARIES = libcli_main.a libnacl_spawn.a
 
 CFLAGS += -std=gnu99
 CPPFLAGS += -Wall -Werror -Iinclude
+CPPFLAGS += -I$(GTEST_DIR)/include
 LDFLAGS += -lnacl_io
 
 ifeq ($(NACL_SHARED),1)
@@ -48,13 +49,16 @@ libnacl_spawn.a: $(NACL_SPAWN_OBJS)
 %.o: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+%.o: $(GTEST_DIR)/src/%.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ -I$(GTEST_DIR)
+
 # Targets for tests
 
 LIBS=-Xlinker -uPSUserMainGet -lcli_main -lnacl_spawn
-LIBS+=-lgtest -lppapi_simple_cpp -lnacl_io -lppapi_cpp -lppapi
+LIBS+=-lppapi_simple_cpp -lnacl_io -lppapi_cpp -lppapi
 
-test/unittests: nacl_spawn_test.o $(LIBRARIES)
-	$(CXX) -L. $(LDFLAGS) $< -o $@ $(LIBS)
+test/unittests: nacl_spawn_test.o $(LIBRARIES) gtest-all.o
+	$(CXX) -L. $(LDFLAGS) $< gtest-all.o -o $@ $(LIBS)
 
 
 ifeq ($(TOOLCHAIN),glibc)

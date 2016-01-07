@@ -53,11 +53,15 @@ TestStep() {
     EXT=${NACL_EXEEXT}
   fi
 
-  INCLUDES="-I${SRC_DIR}"
+  INCLUDES="-I${SRC_DIR} -I${GTEST_SRC}/include"
+  LogExecute ${NACLCXX} ${INCLUDES} ${NACLPORTS_CPPFLAGS} -I${GTEST_SRC} \
+    ${NACLPORTS_CFLAGS} -o gtest-all.o -c ${GTEST_SRC}/src/gtest-all.cc
+
   LogExecute ${NACLCXX} ${INCLUDES} ${NACLPORTS_CPPFLAGS} \
-    ${NACLPORTS_CFLAGS} ${NACLPORTS_LDFLAGS} \
-    -DPPAPI -o naclport_test/test${EXT} \
-    ${START_DIR}/test.cc sqlite3.o ${NACLPORTS_LIBS} -lgtest
+    ${NACLPORTS_CFLAGS} -o test.o -c ${START_DIR}/test.cc
+
+  LogExecute ${NACLCXX} ${NACLPORTS_LDFLAGS} \
+    -o naclport_test/test${EXT} test.o gtest-all.o sqlite3.o ${NACLPORTS_LIBS}
 
   [[ ${NACL_ARCH} == "pnacl" ]] && ${PNACLFINALIZE} \
     -o naclport_test/test${NACL_EXEEXT} naclport_test/test${EXT}

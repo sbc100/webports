@@ -12,6 +12,7 @@ ConfigureStep() {
   LogExecute rm -rf out
 }
 
+
 BuildStep() {
   if [ "${TOOLCHAIN}" = "emscripten" ]; then
     return
@@ -25,6 +26,7 @@ BuildStep() {
   export LDFLAGS=${NACLPORTS_LDFLAGS}
   export CPPFLAGS=${NACLPORTS_CPPFLAGS}
   export CFLAGS=${NACLPORTS_CFLAGS}
+  export GTEST_DIR=${NACL_PREFIX}/src/gtest
   DefaultBuildStep
 }
 

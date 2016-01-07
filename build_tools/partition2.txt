@@ -1,4 +1,5 @@
 builder 0 (total: 26264)
+  gtest
   zlib
   libtar
   gmp

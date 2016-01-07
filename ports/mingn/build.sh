@@ -61,11 +61,7 @@ EOF
 
   # Copy SDK libs
   LogExecute cp -r ${NACL_SDK_LIBDIR}/*.a lib/
-  LogExecute rm -fr lib/libgtest.*a
-  LogExecute rm -fr lib/libgmock.*a
 
   # Copy in SDK includes.
   LogExecute cp -r ${NACL_SDK_ROOT}/include ./
-  LogExecute rm -fr include/gtest
-  LogExecute rm -fr include/gmock
 }

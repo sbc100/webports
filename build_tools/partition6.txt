@@ -1,4 +1,5 @@
 builder 0 (total: 9644)
+  gtest
   zlib
   libtar
   gmp
@@ -59,6 +60,7 @@ builder 0 (total: 9644)
   physfs
   blis
 builder 1 (total: 9650)
+  gtest
   fftw-float
   corelibs
   glibc-compat
@@ -123,6 +125,7 @@ builder 1 (total: 9650)
   markupsafe
   jinja2
 builder 2 (total: 9714)
+  gtest
   fftw
   leveldb
   icu
@@ -198,6 +201,7 @@ builder 2 (total: 9714)
   sdl2
   sdl2-image
 builder 3 (total: 11352)
+  gtest
   kbproto
   xextproto
   corelibs
@@ -315,6 +319,7 @@ builder 3 (total: 11352)
   emacs-x
   gtk-demo
 builder 4 (total: 9669)
+  gtest
   corelibs
   glibc-compat
   zlib
@@ -390,6 +395,7 @@ builder 4 (total: 9669)
   pandas
   wireshark
 builder 5 (total: 9645)
+  gtest
   yajl
   eigen3
   zlib

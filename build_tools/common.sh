@@ -46,6 +46,8 @@ readonly NACLPORTS_INCLUDE=${NACL_PREFIX}/include
 readonly NACLPORTS_LIBDIR=${NACL_PREFIX}/lib
 readonly NACLPORTS_BIN=${NACL_PREFIX}/bin
 
+readonly GTEST_SRC=$NACL_PREFIX/src/gtest
+
 # The prefix used when configuring packages.  Since we want to build re-usable
 # re-locatable binary packages, we use a dummy value here and then modify
 # at install time certain parts of package (e.g. pkgconfig .pc files) that

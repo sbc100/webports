@@ -1,4 +1,5 @@
 builder 0 (total: 13652)
+  gtest
   zlib
   libtar
   gmp
@@ -93,6 +94,7 @@ builder 0 (total: 13652)
   pytz
   pandas
 builder 1 (total: 13640)
+  gtest
   fftw-float
   yajl
   leveldb
@@ -188,6 +190,7 @@ builder 1 (total: 13640)
   markupsafe
   jinja2
 builder 2 (total: 13636)
+  gtest
   fftw
   corelibs
   glibc-compat
@@ -260,6 +263,7 @@ builder 2 (total: 13636)
   wireshark
   blis
 builder 3 (total: 13637)
+  gtest
   kbproto
   xextproto
   corelibs

@@ -17,7 +17,5 @@ InstallStep() {
 
     # Copy SDK libs
     LogExecute cp -r ${NACL_SDK_LIBDIR}/lib*.so* lib/
-    LogExecute rm -fr lib/libgtest.*so*
-    LogExecute rm -fr lib/libgmock.*so*
   fi
 }

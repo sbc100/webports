@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-EXECUTABLES="
+CTEST_EXECUTABLES="
 gtest_break_on_failure_unittest_
 gtest_catch_exceptions_ex_test_
 gtest_catch_exceptions_no_ex_test_
@@ -18,9 +18,6 @@ gtest_uninitialized_test_
 gtest_xml_outfile1_test_
 gtest_xml_outfile2_test_
 gtest_xml_output_unittest_
-"
-
-CTEST_EXECUTABLES="
 gtest_main_unittest
 gtest_unittest
 gtest_no_test_unittest
@@ -51,26 +48,48 @@ gtest-unittest-api_test
 gtest_use_own_tuple_test
 "
 
+if [[ -e "$NACL_SDK_ROOT/include/gtest" ]]; then
+  echo "The current NaCl SDK includes its own version of gtest"
+  if [[ -z ${BUILDBOT_BUILDERNAME:-} ]]; then
+    # normal use case: prompt the user to move the pre-installed gtest headers
+    echo "Please remove or rename '$NACL_SDK_ROOT/include/gtest' to continue"
+    exit 1
+  else
+    # on the buildbot simply move the headers
+    mv $NACL_SDK_ROOT/include/gtest $NACL_SDK_ROOT/include/gtest-old
+  fi
+fi
+
 ConfigureStep() {
   Remove ${SRC_DIR}/configure
   EXTRA_CMAKE_ARGS="-Dgtest_build_tests=1"
   for exe in $CTEST_EXECUTABLES; do
     Remove $exe
   done
+  #Remove ./*_
   DefaultConfigureStep
 }
 
-InstallStep() {
-  MakeDir ${DESTDIR_LIB}
-  MakeDir ${DESTDIR_INCLUDE}
+BuildStep() {
+  return
+}
 
-  LogExecute install -m 644 libgtest*.a ${DESTDIR_LIB}/
+InstallStep() {
+  local srcdir=${DESTDIR}/${PREFIX}/src
+  MakeDir ${srcdir}/gtest/include
 
   LogExecute cp -r --no-preserve=mode ${SRC_DIR}/include/gtest \
-    ${DESTDIR_INCLUDE}/gtest
+    ${srcdir}/gtest/include/gtest
+
+  LogExecute cp -r --no-preserve=mode ${SRC_DIR}/src ${srcdir}/gtest
 }
 
 TestStep() {
+  if [[ -z ${GTEST_TEST:-} ]]; then
+    Banner "Skipping tests (set GTEST_TEST to enable)"
+    return
+  fi
+  DefaultBuildStep
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     return
   fi
@@ -78,17 +97,5 @@ TestStep() {
     mv $exe $exe$NACL_EXEEXT
     WriteLauncherScript $exe $exe$NACL_EXEEXT
   done
-  # Disable running of tests until they are all passing
-  # TODO(sbc): Fix the broken tests:
-  # 80% tests passed, 8 tests failed out of 41
-  # The following tests FAILED:
-  #   29 - gtest_break_on_failure_unittest (Failed)
-  #   31 - gtest_color_test (Failed)
-  #   32 - gtest_env_var_test (Failed)
-  #   33 - gtest_filter_unittest (Failed)
-  #   36 - gtest_output_test (Failed)
-  #   37 - gtest_shuffle_test (Failed)
-  #   38 - gtest_throw_on_failure_test (Failed)
-  #   41 - gtest_xml_output_unittest (Failed)
-  #LogExecute make test
+  LogExecute make TZ=gmt test
 }

@@ -40,6 +40,7 @@ BuildStep() {
   SetupCrossEnvironment
   export TOOLCHAIN
   export NACL_SHARED
+  export GTEST_DIR=${NACL_PREFIX}/src/gtest
   DefaultBuildStep
 }
 

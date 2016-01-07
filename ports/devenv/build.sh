@@ -4,6 +4,7 @@
 
 EnableCliMain
 NACLPORTS_CPPFLAGS+=" -Wall -Werror -Dpipe=nacl_spawn_pipe"
+NACLPORTS_CPPFLAGS+=" -isystem ${GTEST_SRC}/include"
 
 EXECUTABLES="tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
              jseval/jseval_${NACL_ARCH}${NACL_EXEEXT}"
@@ -25,11 +26,13 @@ BuildStep() {
       ${LIBS}
 
   # Build test module.
-  MakeDir ${BUILD_DIR}/tests
-  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} ${LDFLAGS} \
-      ${START_DIR}/tests/devenv_small_test.cc \
-      -o ${BUILD_DIR}/tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
-      -lgtest ${LIBS}
+  MakeDir tests
+  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} -o tests/devenv_small_test.o \
+      -c ${START_DIR}/tests/devenv_small_test.cc
+  LogExecute ${CXX} ${CPPFLAGS} ${CXXFLAGS} -o tests/gtest-all.o \
+      -c ${GTEST_SRC}/src/gtest-all.cc -I${GTEST_SRC}
+  LogExecute ${CXX} ${LDFLAGS} tests/devenv_small_test.o tests/gtest-all.o \
+      -o tests/devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} ${LIBS}
 }
 
 InstallStep() {
@@ -161,16 +164,9 @@ PublishStep() {
   LogExecute cp -r ${START_DIR}/devenvwidget/* ${WIDGET_DIR}
 
   # Install tests.
-  MakeDir ${PUBLISH_DIR}/tests
-  LogExecute cp -r ${BUILD_DIR}/tests/* ${PUBLISH_DIR}/tests
-  cd ${PUBLISH_DIR}/tests
-  if [[ ${NACL_ARCH} == pnacl ]]; then
-    LogExecute ${PNACLFINALIZE} devenv_small_test_${NACL_ARCH}${NACL_EXEEXT}
-  fi
-  LogExecute python ${NACL_SDK_ROOT}/tools/create_nmf.py \
-      devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
-      -s . \
-      -o devenv_small_test.nmf
+  MakeDir tests
+  ChangeDir tests
+  LogExecute cp -r ${BUILD_DIR}/tests/*${NACL_EXEEXT} .
   LogExecute mv devenv_small_test_${NACL_ARCH}${NACL_EXEEXT} \
       devenv_small_test_${NACL_ARCH}
 

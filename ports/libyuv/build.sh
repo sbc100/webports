@@ -18,6 +18,7 @@ if [ "${NACL_ARCH}" = "x86_64" ]; then
 fi
 
 EXTRA_CMAKE_ARGS="-DTEST=ON"
+EXTRA_CMAKE_ARGS+=" -DGTEST_SRC_DIR=${GTEST_SRC}"
 
 TestStep() {
   # TODO(sbc): re-enable i686 testing once we fix this gtest-releated issue:
