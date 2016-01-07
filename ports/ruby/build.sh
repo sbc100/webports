@@ -49,14 +49,6 @@ ConfigureStep() {
     ${EXTRA_CONFIGURE_ARGS}
 }
 
-BuildStep() {
-  DefaultBuildStep
-  if [ $NACL_ARCH == "pnacl" ]; then
-    # Just write the x86-64 version out for now.
-    TranslateAndWriteLauncherScript ruby.pexe x86-64 ruby.x86-64.nexe ruby
-  fi
-}
-
 InstallStep() {
   DESTDIR=${DESTDIR}/${PREFIX}
   DefaultInstallStep

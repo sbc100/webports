@@ -35,14 +35,6 @@ PublishStep() {
     EXECUTABLE_DIR=.
   fi
 
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    # Just set up the x86-64 version for now.
-    local pexe="${EXECUTABLE_DIR}/curl${NACL_EXEEXT}"
-    (cd src;
-     TranslateAndWriteLauncherScript ${pexe} x86-64 curl.x86-64.nexe curl
-    )
-  fi
-
   MakeDir ${PUBLISH_DIR}
 
   local exe=${PUBLISH_DIR}/curl_${NACL_ARCH}${NACL_EXEEXT}

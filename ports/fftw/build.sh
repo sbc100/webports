@@ -30,16 +30,15 @@ ConfigureStep() {
 }
 
 TestStep() {
+  LogExecute make check EXEEXT=
+
   if [ ${NACL_ARCH} = "pnacl" ]; then
-    for arch in x86-32 x86-64; do
+    for arch in x86-32 arm; do
       for exe in ${EXECUTABLES}; do
         local exe_noext=${exe%.*}
-        WriteLauncherScriptPNaCl ${exe_noext} \
-            $(basename ${exe_noext}.${arch}.nexe) ${arch}
+        WriteLauncherScript ${exe_noext} $(basename ${exe_noext}.${arch}.nexe)
       done
-      make check EXEEXT=
+      LogExecute make check EXEEXT=
     done
-  else
-    make check EXEEXT=
   fi
 }

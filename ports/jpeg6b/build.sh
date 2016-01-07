@@ -33,7 +33,7 @@ TestStep() {
     for arch in x86-32 x86-64; do
       for exe in ${EXECUTABLES}; do
         local exe_noext=${exe%.*}
-        WriteLauncherScriptPNaCl ${exe_noext} ${exe_noext}.${arch}.nexe ${arch}
+        WriteLauncherScript ${exe_noext} ${exe_noext}.${arch}.nexe
       done
       make test
     done

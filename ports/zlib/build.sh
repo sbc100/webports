@@ -52,25 +52,13 @@ RunExample() {
 }
 
 TestStep() {
- if [ "${NACL_ARCH}" = "pnacl" ]; then
-    local minigzip_pexe="minigzip${NACL_EXEEXT}"
-    local example_pexe="example${NACL_EXEEXT}"
-    local minigzip_script="minigzip"
-    local example_script="example"
-    TranslateAndWriteLauncherScript "${minigzip_pexe}" x86-32 \
-      minigzip.x86-32.nexe "${minigzip_script}"
+  RunExample
+  RunMinigzip
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    # Run the minigzip tests again but with x86-32 and arm translations
+    WriteLauncherScript minigzip minigzip.x86-32.nexe
     RunMinigzip
-    TranslateAndWriteLauncherScript "${minigzip_pexe}" x86-64 \
-      minigzip.x86-64.nexe "${minigzip_script}"
+    WriteLauncherScript minigzip minigzip.arm.nexe
     RunMinigzip
-    TranslateAndWriteLauncherScript "${example_pexe}" x86-32 \
-      example.x86-32.nexe "${example_script}"
-    RunExample
-    TranslateAndWriteLauncherScript "${example_pexe}" x86-64 \
-      example.x86-64.nexe "${example_script}"
-    RunExample
-  else
-    RunMinigzip
-    RunExample
   fi
 }

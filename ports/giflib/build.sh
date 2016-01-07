@@ -6,25 +6,24 @@ EXTRA_CONFIGURE_ARGS="--enable-x11=no"
 EXECUTABLES="util/rgb2gif${NACL_EXEEXT}"
 
 RunTest() {
-  util/rgb2gif -s 320 200  < ${SRC_DIR}/tests/porsche.rgb > porsche.gif
+  echo "Running util/rgb2gif on porsche.rgb"
+  util/rgb2gif -s 320 200 < ${SRC_DIR}/tests/porsche.rgb > porsche.gif
   # TODO(sbc): do some basic checks on the resulting porsche.gif
 }
 
 TestStep() {
-  if [ "${NACL_LIBC}" = "glibc" ]; then
+  if [[ ${NACL_LIBC} == glibc ]]; then
     # TODO(sbc): find out why glibc version of rgb2gif is crashing
     return
   fi
 
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
-    local pexe=rgb2gif${NACL_EXEEXT}
-    (cd util;
-     TranslateAndWriteLauncherScript ${pexe} x86-32 rgb2gif.x86-32.nexe rgb2gif)
+  RunTest
+
+  if [[ ${NACL_ARCH} == pnacl ]]; then
+    # Re-run tests with arm and x86-32 translations
+    WriteLauncherScript util/rgb2gif rgb2gif.x86-32.nexe
     RunTest
-    (cd util;
-     TranslateAndWriteLauncherScript ${pexe} x86-64 rgb2gif.x86-64.nexe rgb2gif)
-    RunTest
-  else
+    WriteLauncherScript util/rgb2gif rgb2gif.arm.nexe
     RunTest
   fi
 }

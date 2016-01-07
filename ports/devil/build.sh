@@ -11,20 +11,13 @@ TestStep() {
 
   if [ ${NACL_ARCH} == "pnacl" ]; then
     # Run once for each architecture.
-    local pexe=test/testil
-    local script=${pexe}.sh
 
-    TranslateAndWriteLauncherScript ${pexe} x86-32 ${pexe}.x86-32.nexe ${script}
+    WriteLauncherScript test/testil testil.x86-32.nexe
     (cd test && make check)
 
-    TranslateAndWriteLauncherScript ${pexe} x86-64 ${pexe}.x86-64.nexe ${script}
+    WriteLauncherScript test/testil testil.x86-64.nexe
     (cd test && make check)
   else
-    local nexe=test/testil
-    local script=${nexe}.sh
-
-    WriteLauncherScript ${script} ${nexe}
-
     (cd test && make check)
   fi
 }

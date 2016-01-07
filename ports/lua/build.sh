@@ -48,14 +48,6 @@ BuildStep() {
 }
 
 TestStep() {
-  if [[ ${NACL_ARCH} == pnacl ]]; then
-    ChangeDir src
-    # Just do the x86-64 version for now.
-    TranslateAndWriteLauncherScript lua.pexe x86-64 lua.x86-64.nexe lua
-    TranslateAndWriteLauncherScript luac.pexe x86-64 luac.x86-64.nexe luac
-    ChangeDir ..
-  fi
-
   # First, run the 'make test' target.  This currently just runs
   # lua -v.
   LogExecute make PLAT=${PLAT} test

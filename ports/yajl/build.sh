@@ -7,13 +7,13 @@ EXTRA_CMAKE_ARGS="-DBUILD_SHARED=${NACL_SHARED}"
 
 TestStep() {
   local script=${BUILD_DIR}/test/yajl_test.sh
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    local pexe=test/yajl_test
-    TranslateAndWriteLauncherScript ${pexe} x86-32 ${pexe}.x86-32.nexe "${script}"
+  (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
+
+  if [[ ${NACL_ARCH} == pnacl ]]; then
+    # Re-run the tests with the x86-32 and arm translated binaries
+    WriteLauncherScript ${script} yajl_test.x86-32.nexe
     (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
-    TranslateAndWriteLauncherScript ${pexe} x86-64 ${pexe}.x86-64.nexe "${script}"
-    (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
-  else
+    WriteLauncherScript ${script} yajl_test.arm.nexe
     (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
   fi
 }

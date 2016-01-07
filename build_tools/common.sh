@@ -1202,7 +1202,6 @@ DefaultPostBuildStep() {
         TranslatePexe "${pexe}"
       done
     fi
-    return
   fi
 
   for nexe in ${EXECUTABLES}; do
@@ -1210,11 +1209,18 @@ DefaultPostBuildStep() {
     # Create a script which will run the executable in sel_ldr.  The name
     # of the script is the same as the name of the executable, either without
     # any extension or with the .sh extension.
+
+    local script_name="${nexe}.sh"
     if [[ ${nexe} == *${NACL_EXEEXT} && ! -d ${nexe%%${NACL_EXEEXT}} ]]; then
-      WriteLauncherScript "${nexe%%${NACL_EXEEXT}}" "$(basename ${nexe})"
-    else
-      WriteLauncherScript "${nexe}.sh" "$(basename ${nexe})"
+      script_name="${nexe%%${NACL_EXEEXT}}"
     fi
+
+    nexe="$(basename ${nexe})"
+    if [[ ${NACL_ARCH} == pnacl ]]; then
+      local basename="${nexe%.*}"
+      nexe=${basename}.x86-64.nexe
+    fi
+    WriteLauncherScript "${script_name}" "${nexe}"
   done
 
   VerifySharedLibraryOrder
@@ -1351,29 +1357,7 @@ TranslateAndWriteLauncherScript() {
   if [ "${PEXE_FINAL}" -nt "${NEXE}" ]; then
     "${TRANSLATOR}" "${PEXE_FINAL}" -arch "${ARCH}" -o "${NEXE}"
   fi
-  WriteLauncherScriptPNaCl "${SCRIPT}" $(basename "${NEXE}") "${ARCH}"
-}
-
-
-#
-# Write a wrapper script that will run a nexe under sel_ldr, for PNaCl
-# $1 - Script name
-# $2 - Nexe name
-# $3 - sel_ldr architecture
-#
-WriteLauncherScriptPNaCl() {
-  local script_name=$1
-  local nexe_name=$2
-  local arch=$3
-  cat > "${script_name}" <<HERE
-#!/bin/bash
-SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
-NACL_SDK_ROOT="${NACL_SDK_ROOT}"
-
-"\${NACL_SDK_ROOT}/tools/sel_ldr.py" -p -- "\${SCRIPT_DIR}/${nexe_name}" "\$@"
-HERE
-  chmod 750 "${script_name}"
-  echo "Wrote script ${PWD}/${script_name}"
+  WriteLauncherScript "${SCRIPT}" $(basename "${NEXE}")
 }
 
 
