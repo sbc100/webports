@@ -78,10 +78,8 @@ InstallStep() {
   local srcdir=${DESTDIR}/${PREFIX}/src
   MakeDir ${srcdir}/gtest/include
 
-  LogExecute cp -r --no-preserve=mode ${SRC_DIR}/include/gtest \
-    ${srcdir}/gtest/include/gtest
-
-  LogExecute cp -r --no-preserve=mode ${SRC_DIR}/src ${srcdir}/gtest
+  LogExecute cp -r ${SRC_DIR}/include/gtest ${srcdir}/gtest/include/gtest
+  LogExecute cp -r ${SRC_DIR}/src ${srcdir}/gtest
 }
 
 TestStep() {
