@@ -6,4 +6,4 @@ DEPENDS=(glibc-compat)
 SHA1=b6ed421edf577816f6e641e1846dc0bff337676c
 # glibc/arm: FIONREAD missing:
 # https://code.google.com/p/nativeclient/issues/detail?id=4233
-DISABLED_TOOLCHAIN=(emscripten glibc/arm)
+DISABLED_TOOLCHAIN=(glibc/arm)

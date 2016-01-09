@@ -5,4 +5,3 @@ URL=http://www.x.org/releases/X11R7.7/src/everything/libSM-1.2.1.tar.bz2
 LICENSE=GPL
 DEPENDS=(glibc-compat libice)
 SHA1=8d354a165e330022ffd3606aba562b8c8154213d
-DISABLED_TOOLCHAIN=(emscripten)

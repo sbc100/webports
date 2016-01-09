@@ -61,12 +61,15 @@ if [[ -e "$NACL_SDK_ROOT/include/gtest" ]]; then
 fi
 
 ConfigureStep() {
+  if [[ -z ${GTEST_TEST:-} ]]; then
+    Banner "Skipping configure step (set GTEST_TEST to enable)"
+    return
+  fi
   Remove ${SRC_DIR}/configure
   EXTRA_CMAKE_ARGS="-Dgtest_build_tests=1"
   for exe in $CTEST_EXECUTABLES; do
     Remove $exe
   done
-  #Remove ./*_
   DefaultConfigureStep
 }
 

@@ -7,4 +7,3 @@ LICENSE=CUSTOM:LICENSE.txt
 # https://code.google.com/p/nativeclient/issues/detail?id=3205
 DISABLED_ARCH=(arm)
 SHA1=5b374ef8459e95fc1b9eeebafedfb9d58a6b2290
-DISABLED_TOOLCHAIN=(emscripten)
