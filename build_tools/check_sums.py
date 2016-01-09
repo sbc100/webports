@@ -29,9 +29,6 @@ def main(args):
 
   for package in webports.source_package.SourcePackageIterator():
     package.Download()
-    if not package.Verify():
-      return 1
-
     count += 1
 
   webports.Log("Verfied checksums for %d packages" % count)

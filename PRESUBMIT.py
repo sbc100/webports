@@ -68,6 +68,22 @@ def CheckDeps(input_api, output_api):
                           input_api,
                           output_api)
 
+
+def CheckPortList(input_api, output_api):
+  rtn = RunPythonCommand(['build_tools/generate_port_list.py', '-o', 'tmp.md'],
+                         input_api,
+                         output_api)
+  if rtn:
+    return rtn
+  if open('tmp.md').read() != open('docs/port_list.md').read():
+    subprocess.call(['diff', '-u', 'tmp.md', 'docs/port_list.md'])
+    message = 'docs/port_list.md is out-of-date.'
+    message += ' Run build_tools/generate_port_list.py to update.'
+    return [output_api.PresubmitError(message)]
+  os.remove('tmp.md')
+  return []
+
+
 def CheckMirror(input_api, output_api):
   return RunPythonCommand(['build_tools/update_mirror.py', '--check'],
                           input_api,
@@ -107,6 +123,7 @@ def CheckAuthorizedAuthor(input_api, output_api):
 
 def CheckChangeOnUpload(input_api, output_api):
   report = []
+  report.extend(CheckPortList(input_api, output_api))
   report.extend(CheckAuthorizedAuthor(input_api, output_api))
   report.extend(RunPylint(input_api, output_api))
   report.extend(RunUnittests(input_api, output_api))

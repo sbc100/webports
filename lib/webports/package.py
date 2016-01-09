@@ -74,9 +74,6 @@ class Package(object):
     if self.DISABLED_ARCH and self.ARCH is not None:
       raise Error('%s: contains both ARCH and DISABLED_ARCH' % self.info)
 
-    if self.DISABLED_LIBC and self.LIBC is not None:
-      raise Error('%s: contains both LIBC and DISABLED_LIBC' % self.info)
-
   def __cmp__(self, other):
     return cmp((self.NAME, self.VERSION, self.config),
                (other.NAME, other.VERSION, other.config))

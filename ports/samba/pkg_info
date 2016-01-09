@@ -3,7 +3,7 @@ VERSION=4.1.16
 URL=http://ftp.samba.org/pub/samba/samba-4.1.16.tar.gz
 LICENSE=GPL
 DEPENDS=(nacl-spawn glibc-compat)
-LIBC=glibc
+DISABLED_LIBC=(newlib)
 DISABLED_ARCH=(i686)
 # Build broken on mac.
 BUILD_OS=linux

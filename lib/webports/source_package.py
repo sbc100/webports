@@ -530,10 +530,6 @@ class SourcePackage(package.Package):
     if self.DISABLED:
       raise DisabledError('%s: package is disabled' % self.NAME)
 
-    if self.LIBC is not None and self.LIBC != self.config.libc:
-      raise DisabledError('%s: cannot be built with %s' %
-                          (self.NAME, self.config.libc))
-
     if self.config.libc in self.DISABLED_LIBC:
       raise DisabledError('%s: cannot be built with %s' %
                           (self.NAME, self.config.libc))
@@ -771,7 +767,11 @@ class SourcePackage(package.Package):
 def SourcePackageIterator():
   """Iterator which yields a Package object for each webports package."""
   ports_root = os.path.join(paths.NACLPORTS_ROOT, 'ports')
-  for root, _, files in os.walk(ports_root):
+  for root, dirs, files in os.walk(ports_root):
+    # Sort files and dirs so that the iterator reports packages in a
+    # consistent order.
+    dirs.sort()
+    files.sort()
     if 'pkg_info' in files:
       yield SourcePackage(root)
 

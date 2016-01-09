@@ -8,7 +8,7 @@ import string
 from webports.error import PkgFormatError
 
 VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
-              'MIN_SDK_VERSION', 'LIBC', 'DISABLED_LIBC', 'ARCH', 'CONFLICTS',
+              'MIN_SDK_VERSION', 'DISABLED_LIBC', 'ARCH', 'CONFLICTS',
               'DISABLED_ARCH', 'URL_FILENAME', 'BUILD_OS', 'SHA1', 'DISABLED',
               'DISABLED_TOOLCHAIN', 'TOOLCHAIN_INSTALL', 'PATCH_NAME']
 REQUIRED_KEYS = ['NAME', 'VERSION']

@@ -21,7 +21,7 @@ class TestPackage(unittest.TestCase):
 
   def testInvalidLibcDisabled(self):
     pkg = package.Package()
-    # clang-newlib is TOOLCHAIN, not a LIBC
+    # clang-newlib is a toolchain, not a libc
     with self.assertRaisesRegexp(error.Error, 'invalid libc: clang-newlib'):
       pkg.ParseInfo(test_info + 'DISABLED_LIBC=(clang-newlib)')
 
