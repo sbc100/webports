@@ -47,6 +47,8 @@ IGNORE_FILES = [
     'build_tools/partition*.txt',
     'AUTHORS',
     '*/test_*.py',
+    'docs/*.md',
+    '*.md',
 ]
 
 def find_effected_packages(files, include_deps, package_filter):
