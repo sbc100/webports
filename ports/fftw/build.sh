@@ -31,14 +31,4 @@ ConfigureStep() {
 
 TestStep() {
   LogExecute make check EXEEXT=
-
-  if [ ${NACL_ARCH} = "pnacl" ]; then
-    for arch in x86-32 arm; do
-      for exe in ${EXECUTABLES}; do
-        local exe_noext=${exe%.*}
-        WriteLauncherScript ${exe_noext} $(basename ${exe_noext}.${arch}.nexe)
-      done
-      LogExecute make check EXEEXT=
-    done
-  fi
 }

@@ -263,10 +263,16 @@ DESTDIR_INCLUDE=${DESTDIR}/${PREFIX}/include
 PUBLISH_DIR="${NACL_PACKAGES_PUBLISH}/${PACKAGE_NAME}/${TOOLCHAIN}"
 PUBLISH_CREATE_NMF_ARGS="-L ${DESTDIR_LIB}"
 
+if [[ ${OS_NAME} == Linux ]]; then
+  SEL_LDR_SUPPORTS_ARM=1
+else
+  SEL_LDR_SUPPORTS_ARM=0
+fi
+
 SKIP_SEL_LDR_TESTS=0
 
 # Skip sel_ldr tests on ARM, except on linux where we have qemu-arm available.
-if [ "${NACL_ARCH}" = "arm" -a "${OS_NAME}" != "Linux" ]; then
+if [[ ${NACL_ARCH} == arm && ${SEL_LDR_SUPPORTS_ARM} == 0 ]]; then
   SKIP_SEL_LDR_TESTS=1
 fi
 

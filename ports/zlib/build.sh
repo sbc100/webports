@@ -54,11 +54,13 @@ RunExample() {
 TestStep() {
   RunExample
   RunMinigzip
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [[ ${NACL_ARCH} == pnacl ]]; then
     # Run the minigzip tests again but with x86-32 and arm translations
     WriteLauncherScript minigzip minigzip.x86-32.nexe
     RunMinigzip
-    WriteLauncherScript minigzip minigzip.arm.nexe
-    RunMinigzip
+    if [[ ${SEL_LDR_SUPPORTS_ARM} == 1 ]]; then
+      WriteLauncherScript minigzip minigzip.arm.nexe
+      RunMinigzip
+    fi
   fi
 }
