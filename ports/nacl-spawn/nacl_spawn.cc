@@ -240,13 +240,10 @@ static bool UseBuiltInFallback(std::string* prog, struct PP_Var req_var) {
   return false;
 }
 
-// Check if a file is a pnacl type file.
-// If the file can't be read, return false.
-static bool IsPNaClType(const std::string& filename) {
-  // Open script.
+static bool CheckFileMagic(const std::string& filename,
+    const std::string& magic) {
   int fh = open(filename.c_str(), O_RDONLY);
   if (fh < 0) {
-    // Default to nacl type if the file can't be read.
     return false;
   }
   // Read first 4 bytes.
@@ -254,7 +251,17 @@ static bool IsPNaClType(const std::string& filename) {
   ssize_t len = read(fh, buffer, sizeof buffer);
   close(fh);
   // Decide based on the header.
-  return len == 4 && memcmp(buffer, "PEXE", sizeof buffer) == 0;
+  return len == 4 && memcmp(buffer, magic.c_str(), sizeof buffer) == 0;
+}
+
+// Check if a file contains finalised PNaCl bitcode
+static bool IsPNaClType(const std::string& filename) {
+  return CheckFileMagic(filename, "PEXE");
+}
+
+// Check if a file contains LLVM bitcode
+static bool IsBitcode(const std::string& filename) {
+  return CheckFileMagic(filename, "BC\xc0\xde");
 }
 
 // Adds a NMF to the request if |prog| is stored in HTML5 filesystem.
@@ -276,10 +283,21 @@ static bool AddNmfToRequest(std::string prog, struct PP_Var req_var) {
     return true;
   }
 
+  bool debug = getenv("LD_DEBUG") != NULL;
+
   // Check for pnacl.
   if (IsPNaClType(prog)) {
+    if (debug) {
+      fprintf(stderr, "%s: loading PNaCl bitcode: %s\n",
+          LOADER_NAME, prog.c_str());
+    }
     AddNmfToRequestForPNaCl(prog, req_var);
     return true;
+  }
+
+  if (IsBitcode(prog)) {
+    fprintf(stderr, "%s: cannot execute unfinalized bitcode\n", prog.c_str());
+    return false;
   }
 
   std::string arch;

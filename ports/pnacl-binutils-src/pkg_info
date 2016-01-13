@@ -3,4 +3,3 @@ VERSION=0.0.1
 ARCHIVE_ROOT=binutils
 URL=https://chromium.googlesource.com/native_client/nacl-binutils.git@d9b81d6377ffd6e28e5649246c1f450d6e2a9083
 LICENSE=BSD
-ARCH=pnacl

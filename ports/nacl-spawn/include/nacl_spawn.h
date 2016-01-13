@@ -27,6 +27,8 @@
 #define NSPAWN_LOG(format, ...)
 #endif
 
+#define LOADER_NAME "nacl_spawn"
+
 __BEGIN_DECLS
 
 void nspawn_var_release(struct PP_Var var);

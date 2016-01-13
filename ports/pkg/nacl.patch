@@ -1496,7 +1496,7 @@ diff --git a/libpkg/private/pkg.h b/libpkg/private/pkg.h
 diff --git a/libpkg/private/utils.h b/libpkg/private/utils.h
 --- a/libpkg/private/utils.h
 +++ b/libpkg/private/utils.h
-@@ -39,6 +39,10 @@
+@@ -39,11 +39,16 @@
  #include <openssl/pem.h>
  #include <openssl/rsa.h>
  
@@ -1507,6 +1507,14 @@ diff --git a/libpkg/private/utils.h b/libpkg/private/utils.h
  #define STARTS_WITH(string, needle) (strncasecmp(string, needle, strlen(needle)) == 0)
  
  #define ERROR_SQLITE(db, query) do { \
+-	pkg_emit_error("sqlite error while executing %s in file %s:%d: %s", (query), \
+-	__FILE__, __LINE__, sqlite3_errmsg(db));									 \
++	pkg_emit_error("sqlite error executing %s on %s at %s:%d: %s", (query), \
++	sqlite3_db_filename(db, "main"), bsd_basename(__FILE__), __LINE__, \
++	sqlite3_errmsg(db)); \
+ } while(0)
+ 
+ KHASH_MAP_INIT_INT(hardlinks, int)
 diff --git a/libpkg/repo/binary/fetch.c b/libpkg/repo/binary/fetch.c
 --- a/libpkg/repo/binary/fetch.c
 +++ b/libpkg/repo/binary/fetch.c

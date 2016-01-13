@@ -3,4 +3,3 @@ VERSION=0.0.1
 ARCHIVE_ROOT=llvm
 URL=https://chromium.googlesource.com/native_client/pnacl-llvm.git@caf6bbe98a0b7dd7dfd71dbb72b77bf71c4ff0d8
 LICENSE=BSD
-ARCH=pnacl

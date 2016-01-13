@@ -33,7 +33,7 @@ ElfReader::ElfReader(const char* filename)
     : filename_(filename), is_valid_(false), is_static_(false) {
   ScopedFile fp(fopen(filename, "rb"));
   if (!fp.get()) {
-    PrintError("failed to open file");
+    PrintError("failed to open file: %s", strerror(errno));
     return;
   }
 
@@ -247,10 +247,7 @@ void ElfReader::PrintError(const char* fmt, ...) {
   if (written >= kBufSize)
     buf[kBufSize-1] = '\0';
 
-  if (errno)
-    fprintf(stderr, "%s: %s: %s\n", filename_, buf, strerror(errno));
-  else
-    fprintf(stderr, "%s: %s\n", filename_, buf);
+  fprintf(stderr, "%s: %s\n", filename_, buf);
 }
 
 #if defined(DEFINE_ELF_READER_MAIN)

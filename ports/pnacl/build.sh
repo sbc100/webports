@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXECUTABLES="arm-nacl-readelf le32-nacl-strings clang clang++"
+
 PatchStep() {
   DefaultPatchStep
   MakeDir ${SRC_DIR}/toolchain_build/src
@@ -67,22 +69,15 @@ BuildStep() {
   EXTRA_CC_ARGS+=" --pnacl-disable-abi-check"
   LINUX_PNACL=${NACL_SDK_ROOT}/toolchain/linux_pnacl
   USR_LOCAL=${LINUX_PNACL}/le32-nacl/usr
-  EXTRA_CC_ARGS+=" -Dmain=nacl_main"
-  EXTRA_CC_ARGS+=" -include nacl_main.h"
   EXTRA_CC_ARGS+=" -include spawn.h"
   EXTRA_CC_ARGS+=" -I${USR_LOCAL}/include/glibc-compat"
   EXTRA_CC_ARGS+=" -I${NACL_SDK_ROOT}/include"
   EXTRA_CC_ARGS+=" -I${USR_LOCAL}/include"
   EXTRA_CC_ARGS+=" -L${NACL_SDK_ROOT}/lib/pnacl/Release"
   EXTRA_CC_ARGS+=" -L${USR_LOCAL}/lib"
-  EXTRA_CC_ARGS+=" -Wl,--undefined=PSUserCreateInstance"
-  EXTRA_CC_ARGS+=" -Wl,--undefined=nacl_main"
-  EXTRA_CC_ARGS+=" -Wl,--undefined=waitpid"
-  EXTRA_CC_ARGS+=" -Wl,--undefined=spawnve"
   EXTRA_CC_ARGS+=" -pthread"
-  EXTRA_CC_ARGS+=" ${NACL_CLI_MAIN_LIB} -lppapi_simple"
-  EXTRA_CC_ARGS+=" -lnacl_io -lppapi_cpp -lppapi"
-  EXTRA_CC_ARGS+=" -l${NACL_CXX_LIB} -lm -lglibc-compat"
+  EXTRA_CC_ARGS+=" ${NACL_CLI_MAIN_LDFLAGS}"
+  EXTRA_CC_ARGS+=" -lglibc-compat ${NACL_CLI_MAIN_LIB_CPP}"
 
   export GOLD_LDADD
   export EXTRA_CONFIGURE
@@ -96,10 +91,10 @@ BuildStep() {
     ${EXTRA_CONFIGURE} \
     "--binutils-pnacl-extra-configure=${GOLD_LDADD}"
 
-  rm -rf ${BUILD_DIR}/*
+  Remove ${BUILD_DIR}
+  MakeDir ${BUILD_DIR}
   LogExecute cp \
-    ${SRC_DIR}/toolchain_build/out/llvm_le32_nacl_install/bin/* \
-    ${BUILD_DIR}/
+    ${SRC_DIR}/toolchain_build/out/llvm_le32_nacl_install/bin/* ${BUILD_DIR}/
   LogExecute cp \
     ${SRC_DIR}/toolchain_build/out/binutils_pnacl_le32_nacl_install/bin/* \
     ${BUILD_DIR}/
@@ -109,54 +104,29 @@ BuildStep() {
   LogExecute cp ${SRC_DIR}/pnacl/driver/*.py ${BUILD_DIR}/driver/
 }
 
-InstallArch() {
-  local arch=$1
-
-  local ASSEMBLY_DIR=${PUBLISH_DIR}/${arch}
+InstallStep() {
+  local ASSEMBLY_DIR=${DESTDIR}/${PREFIX}/pnacl
   Remove ${ASSEMBLY_DIR}/
   MakeDir ${ASSEMBLY_DIR}/
-  ChangeDir ${ASSEMBLY_DIR}/
 
-  LogExecute cp -r ${NACL_SDK_ROOT}/examples ${ASSEMBLY_DIR}/
-  LogExecute cp -r ${NACL_SDK_ROOT}/getting_started ${ASSEMBLY_DIR}/
-  LogExecute cp -r ${NACL_SDK_ROOT}/include ${ASSEMBLY_DIR}/
-  LogExecute cp -r ${NACL_SDK_ROOT}/src ${ASSEMBLY_DIR}/
-
-  for f in AUTHORS COPYING LICENSE NOTICE README README.Makefiles; do
-    LogExecute cp ${NACL_SDK_ROOT}/${f} ${ASSEMBLY_DIR}/
-  done
-
-  MakeDir ${ASSEMBLY_DIR}/lib
-  LogExecute cp -r ${NACL_SDK_ROOT}/lib/pnacl ${ASSEMBLY_DIR}/lib/
-
-  LogExecute cp -r ${NACL_SDK_ROOT}/tools ${ASSEMBLY_DIR}/
-
-  MakeDir ${ASSEMBLY_DIR}/toolchain
-  LogExecute cp -r ${NACL_SDK_ROOT}/toolchain/linux_pnacl \
-    ${ASSEMBLY_DIR}/toolchain
+  LogExecute cp -r ${NACL_SDK_ROOT}/toolchain/linux_pnacl/* ${ASSEMBLY_DIR}
 
   # Drop pyc files.
   LogExecute find ${ASSEMBLY_DIR} -name "*.pyc" -exec rm {} \;
 
   # TODO(bradnelson): Drop this once shell script fix is done.
-  LogExecute cp \
-    ${BUILD_DIR}/driver/*.py \
-    ${ASSEMBLY_DIR}/toolchain/linux_pnacl/bin/pydir/
+  LogExecute cp ${BUILD_DIR}/driver/*.py ${ASSEMBLY_DIR}/bin/pydir/
 
   # Swap in nacl executables.
+  Remove ${ASSEMBLY_DIR}/lib/*.so
   for f in $(find ${ASSEMBLY_DIR} -executable -type f); do
     if [ "$(file ${f} | grep ELF)" != "" ]; then
-      LogExecute rm -f ${f}
       local pexe="${BUILD_DIR}/$(basename ${f})"
       if [ -f "${pexe}" ]; then
-        echo hi
-        LogExecute "${TRANSLATOR}" \
-          -O2 -arch "${arch}" --allow-llvm-bitcode-input \
-          -ffunction-sections --gc-sections \
-          "${pexe}" \
-          -o "${f}"
+        LogExecute ${PNACLFINALIZE} ${pexe} -o ${f}
       else
         echo "Warning: dropping ${f} without a nacl replacement."
+        LogExecute rm -f ${f}
       fi
     elif [ "$(head -n 1 ${f} | grep /bin/sh)" != "" ]; then
       # TODO(bradnelson): Drop this once shell script fix is done.
@@ -164,13 +134,13 @@ InstallArch() {
       LogExecute chmod a+x ${f}
     fi
   done
-
-  LogExecute zip -rq ${PUBLISH_DIR}/${arch}.zip .
 }
 
-InstallStep() {
-  local ARCH_LIST="arm i686 x86_64"
-  for arch in ${ARCH_LIST}; do
-    InstallArch ${arch}
-  done
+PostInstallTestStep() {
+  # Verify that binaries at least load under sel_ldr
+  LogExecute ./le32-nacl-strings.sh --version
+  LogExecute ./arm-nacl-readelf.sh --version
+  # TODO(sbc): Currently this fails because the wrong main symbol is found
+  # by the linker (the libppapi one rather than the libppapi_simple one).
+  #LogExecute ./clang.sh --version
 }

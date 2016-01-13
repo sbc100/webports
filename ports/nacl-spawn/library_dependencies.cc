@@ -14,9 +14,8 @@
 #include <set>
 
 #include "elf_reader.h"
+#include "nacl_spawn.h"
 #include "path_util.h"
-
-#define PROGRAM_NAME "nacl_spawn"
 
 static bool s_debug;
 
@@ -30,7 +29,7 @@ static void get_library_paths(std::vector<std::string>* paths) {
   paths->push_back("/usr/lib");
   if (s_debug) {
     for (size_t i = 0; i < paths->size(); i++)
-      fprintf(stderr, "%s: searching: %s\n", PROGRAM_NAME,
+      fprintf(stderr, "%s: searching: %s\n", LOADER_NAME,
           paths->at(i).c_str());
   }
 }
@@ -46,7 +45,7 @@ static bool find_arch_and_library_deps(
   }
 
   if (s_debug) {
-    fprintf(stderr, "%s: resolving deps for: %s\n", PROGRAM_NAME,
+    fprintf(stderr, "%s: resolving deps for: %s\n", LOADER_NAME,
         filename.c_str());
   }
 
@@ -70,12 +69,13 @@ static bool find_arch_and_library_deps(
     } else if (machine == EM_ARM) {
       *arch = "arm";
     } else {
-      fprintf(stderr, "%s: unknown arch (%d): %s\n", PROGRAM_NAME, machine,
+      fprintf(stderr, "%s: unknown arch (%d): %s\n", LOADER_NAME, machine,
           filename.c_str());
       return false;
     }
-    if (s_debug)
-      fprintf(stderr, "%s: arch=%s\n", PROGRAM_NAME, arch->c_str());
+    if (s_debug) {
+      fprintf(stderr, "%s: arch=%s\n", LOADER_NAME, arch->c_str());
+    }
   }
 
   if (elf_reader.is_static()) {
@@ -85,7 +85,7 @@ static bool find_arch_and_library_deps(
       dependencies->clear();
       return true;
     } else {
-      fprintf(stderr, "%s: unexpected static binary: %s\n", PROGRAM_NAME,
+      fprintf(stderr, "%s: unexpected static binary: %s\n", LOADER_NAME,
           filename.c_str());
       errno = ENOEXEC;
       return false;
@@ -107,7 +107,7 @@ static bool find_arch_and_library_deps(
       if (!find_arch_and_library_deps(needed_path, paths, NULL, dependencies))
         return false;
     } else {
-      fprintf(stderr, "%s: library not found: %s\n", PROGRAM_NAME,
+      fprintf(stderr, "%s: library not found: %s\n", LOADER_NAME,
           needed_name.c_str());
       errno = ENOENT;
       return false;
