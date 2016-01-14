@@ -1,7 +1,61 @@
 diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchain_build_pnacl.py
 --- a/toolchain_build/toolchain_build_pnacl.py
 +++ b/toolchain_build/toolchain_build_pnacl.py
-@@ -532,10 +532,12 @@ def HostTools(host, options):
+@@ -151,30 +151,33 @@ def ProgramPath(program):
+ # Return a tuple (C compiler, C++ compiler) of the compilers to compile the host
+ # toolchains
+ def CompilersForHost(host):
+-  compiler = {
++  rtn = {
+       # For now we only do native builds for linux and mac
+       # treat 32-bit linux like a native build
+-      'i686-linux': (CHROME_CLANG, CHROME_CLANGXX, 'ar', 'ranlib'),
+-      'x86_64-linux': (CHROME_CLANG, CHROME_CLANGXX, 'ar', 'ranlib'),
+-      'x86_64-apple-darwin': (CHROME_CLANG, CHROME_CLANGXX, 'ar', 'ranlib'),
++      'i686-linux': [CHROME_CLANG, CHROME_CLANGXX, 'ar', 'ranlib'],
++      'x86_64-linux': [CHROME_CLANG, CHROME_CLANGXX, 'ar', 'ranlib'],
++      'x86_64-apple-darwin': [CHROME_CLANG, CHROME_CLANGXX, 'ar', 'ranlib'],
+       # Windows build should work for native and cross
+-      'i686-w64-mingw32': (
+-          'i686-w64-mingw32-gcc', 'i686-w64-mingw32-g++', 'ar', 'ranlib'),
++      'i686-w64-mingw32': [
++          'i686-w64-mingw32-gcc', 'i686-w64-mingw32-g++', 'ar', 'ranlib'],
+       # TODO: add arm-hosted support
+-      'i686-pc-cygwin': ('gcc', 'g++', 'ar', 'ranlib'),
+-  }
+-  if host == 'le32-nacl':
+-    nacl_sdk = os.environ.get('NACL_SDK_ROOT')
+-    assert nacl_sdk, 'NACL_SDK_ROOT not set'
+-    pnacl_bin_dir = os.path.join(nacl_sdk, 'toolchain/linux_pnacl/bin')
+-    glibc_bin_dir = os.path.join(nacl_sdk, 'toolchain/linux_x86_glibc/bin')
+-    compiler.update({
+-        'le32-nacl': (os.path.join(pnacl_bin_dir, 'pnacl-clang'),
+-                      os.path.join(pnacl_bin_dir, 'pnacl-clang++'),
+-                      os.path.join(pnacl_bin_dir, 'pnacl-ar'),
+-                      os.path.join(pnacl_bin_dir, 'pnacl-ranlib')),
+-    })
+-  return compiler[host]
++      'i686-pc-cygwin': ['gcc', 'g++', 'ar', 'ranlib'],
++      # In practice these don't get used since when naclports builds the
++      # pnacl toolchain it explictly sets CC/CXX/etc
++      'le32-nacl': ['pnacl-clang', 'pnacl-clang++', 'pnacl-ar', 'pnacl-ranlib'],
++  }[host]
++
++  # Allow caller to override host toolchain
++  if 'CC' in os.environ:
++    rtn[0] = os.environ['CC']
++  if 'CXX' in os.environ:
++    rtn[1] = os.environ['CXX']
++  if 'AR' in os.environ:
++    rtn[2] = os.environ['AR']
++  if 'RANLIB' in os.environ:
++    rtn[3] = os.environ['RANLIB']
++
++  return rtn
+ 
+ 
+ def GSDJoin(*args):
+@@ -532,10 +535,12 @@ def HostTools(host, options):
    #            too many arguments for format.
    binutils_do_werror = not TripleIsWindows(host)
    extra_gold_deps = []
@@ -14,7 +68,7 @@ diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchai
  
    # Binutils still has some warnings when building with clang
    if not options.gcc:
-@@ -574,7 +576,7 @@ def HostTools(host, options):
+@@ -574,7 +579,7 @@ def HostTools(host, options):
                    '--without-gas'
                    ]),
                command.Command(MakeCommand(host)),
@@ -23,7 +77,7 @@ diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchai
                [command.RemoveDirectory(os.path.join('%(output)s', dir))
                 for dir in ('lib', 'lib32')] +
                # Since it has dual use, just create links for both sets of names
-@@ -624,7 +626,8 @@ def HostTools(host, options):
+@@ -624,7 +629,8 @@ def HostTools(host, options):
    # TODO(jfb) Windows currently uses MinGW's GCC 4.8.1 which generates warnings
    #           on upstream LLVM code. Turn on -Werror once these are fixed.
    #           The same applies for the default GCC on current Ubuntu.

@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 EXECUTABLES="arm-nacl-readelf le32-nacl-strings clang clang++"
+EnableGlibcCompat
+EnableCliMain
 
 PatchStep() {
   DefaultPatchStep
@@ -73,15 +75,25 @@ BuildStep() {
   EXTRA_CC_ARGS+=" -I${USR_LOCAL}/include/glibc-compat"
   EXTRA_CC_ARGS+=" -I${NACL_SDK_ROOT}/include"
   EXTRA_CC_ARGS+=" -I${USR_LOCAL}/include"
-  EXTRA_CC_ARGS+=" -L${NACL_SDK_ROOT}/lib/pnacl/Release"
-  EXTRA_CC_ARGS+=" -L${USR_LOCAL}/lib"
-  EXTRA_CC_ARGS+=" -pthread"
-  EXTRA_CC_ARGS+=" ${NACL_CLI_MAIN_LDFLAGS}"
-  EXTRA_CC_ARGS+=" -lglibc-compat ${NACL_CLI_MAIN_LIB_CPP}"
 
-  export GOLD_LDADD
-  export EXTRA_CONFIGURE
-  export EXTRA_CC_ARGS
+  # export EXTRA_LIBS so that compiler_wapper.py can access it
+  export EXTRA_LIBS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
+  echo "EXTRA_LIBS=${EXTRA_LIBS}"
+
+  # Inject a shim that speed up pnacl invocations for configure.
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    local PNACL_CONF_SHIM="${TOOLS_DIR}/pnacl-configure-shim.py"
+    NACLCC="${PNACL_CONF_SHIM} ${NACLCC}"
+    NACLCXX="${PNACL_CONF_SHIM} ${NACLCXX}"
+  fi
+
+  NACLCC="${START_DIR}/compiler_wrapper.py ${NACLCC}"
+  NACLCXX="${START_DIR}/compiler_wrapper.py ${NACLCXX}"
+
+  export CC=${NACLCC}
+  export CXX=${NACLCXX}
+  export AR=${NACLAR}
+  export RANLIB=${NACLRANLIB}
   LogExecute ${SRC_DIR}/toolchain_build/toolchain_build_pnacl.py -v \
     --no-use-cached-results \
     --no-use-remote-cache \
@@ -140,7 +152,5 @@ PostInstallTestStep() {
   # Verify that binaries at least load under sel_ldr
   LogExecute ./le32-nacl-strings.sh --version
   LogExecute ./arm-nacl-readelf.sh --version
-  # TODO(sbc): Currently this fails because the wrong main symbol is found
-  # by the linker (the libppapi one rather than the libppapi_simple one).
-  #LogExecute ./clang.sh --version
+  LogExecute ./clang.sh --version
 }
