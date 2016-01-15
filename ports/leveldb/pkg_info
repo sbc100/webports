@@ -1,8 +1,6 @@
 NAME=leveldb
-VERSION=1.17.0
-#ARCHIVE_ROOT=leveldb-e353fbc7ea81
-#URL=https://leveldb.googlecode.com/archive/e353fbc7ea81.tar.gz
-URL=https://code.google.com/p/leveldb.git@e353fbc
+VERSION=1.17
+URL=https://github.com/google/leveldb/archive/v1.17/leveldb-1.17.tar.gz
 LICENSE=BSD
-SHA1=17a85c7a37b4756264bceed94eb5b65ff624b13f
+SHA1=a2deb0a8d46ae4f68c1dfe53b02276af7431f992
 DISABLED_TOOLCHAIN=(emscripten)
