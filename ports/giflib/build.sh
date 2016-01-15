@@ -23,8 +23,10 @@ TestStep() {
     # Re-run tests with arm and x86-32 translations
     WriteLauncherScript util/rgb2gif rgb2gif.x86-32.nexe
     RunTest
-    WriteLauncherScript util/rgb2gif rgb2gif.arm.nexe
-    RunTest
+    if [[ ${SEL_LDR_SUPPORTS_ARM} == 1 ]]; then
+      WriteLauncherScript util/rgb2gif rgb2gif.arm.nexe
+      RunTest
+    fi
   fi
 }
 

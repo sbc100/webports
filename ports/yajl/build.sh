@@ -13,8 +13,10 @@ TestStep() {
     # Re-run the tests with the x86-32 and arm translated binaries
     WriteLauncherScript ${script} yajl_test.x86-32.nexe
     (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
-    WriteLauncherScript ${script} yajl_test.arm.nexe
-    (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
+    if [[ ${SEL_LDR_SUPPORTS_ARM} == 1 ]]; then
+      WriteLauncherScript ${script} yajl_test.arm.nexe
+      (cd "${SRC_DIR}/test" && ./run_tests.sh "${script}")
+    fi
   fi
 }
 
