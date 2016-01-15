@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-EXECUTABLES="arm-nacl-readelf le32-nacl-strings clang clang++"
+EXECUTABLES="bin/arm-nacl-readelf bin/le32-nacl-strings bin/clang bin/clang++"
 EnableGlibcCompat
 EnableCliMain
 
@@ -26,6 +26,9 @@ PatchStep() {
 ConfigureStep() {
   return
 }
+
+OUT_DIR=${BUILD_DIR}/out
+OUT_BIN=${BUILD_DIR}/bin
 
 BuildStep() {
   PNACL_DIR=${NACL_SDK_ROOT}/toolchain/linux_pnacl
@@ -67,8 +70,10 @@ BuildStep() {
   EXTRA_CONFIGURE+=" --extra-configure-arg=--enable-libcpp"
 
   # Some code in llvm uses intrisics not supported in the pnacl stable abi.
-  EXTRA_CC_ARGS="-fgnu-inline-asm"
-  EXTRA_CC_ARGS+=" --pnacl-disable-abi-check"
+  if [[ ${TOOLCHAIN} == pnacl ]]; then
+    EXTRA_CC_ARGS="-fgnu-inline-asm"
+    EXTRA_CC_ARGS+=" --pnacl-disable-abi-check"
+  fi
   LINUX_PNACL=${NACL_SDK_ROOT}/toolchain/linux_pnacl
   USR_LOCAL=${LINUX_PNACL}/le32-nacl/usr
   EXTRA_CC_ARGS+=" -include spawn.h"
@@ -79,6 +84,10 @@ BuildStep() {
   # export EXTRA_LIBS so that compiler_wapper.py can access it
   export EXTRA_LIBS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
   echo "EXTRA_LIBS=${EXTRA_LIBS}"
+
+  # Without this configure will detect vfork as missing and define
+  # vfork to fork which clobbers that define in "spawn.h".
+  export ac_cv_func_vfork_works=yes
 
   # Inject a shim that speed up pnacl invocations for configure.
   if [ "${NACL_ARCH}" = "pnacl" ]; then
@@ -99,50 +108,53 @@ BuildStep() {
     --no-use-remote-cache \
     --no-annotator \
     --pnacl-in-pnacl \
+    --output=${OUT_DIR} \
     "--extra-cc-args=${EXTRA_CC_ARGS}" \
     ${EXTRA_CONFIGURE} \
     "--binutils-pnacl-extra-configure=${GOLD_LDADD}"
 
-  Remove ${BUILD_DIR}
-  MakeDir ${BUILD_DIR}
-  LogExecute cp \
-    ${SRC_DIR}/toolchain_build/out/llvm_le32_nacl_install/bin/* ${BUILD_DIR}/
-  LogExecute cp \
-    ${SRC_DIR}/toolchain_build/out/binutils_pnacl_le32_nacl_install/bin/* \
-    ${BUILD_DIR}/
+  Remove ${OUT_BIN}
+  MakeDir ${OUT_BIN}
+  LogExecute cp ${OUT_DIR}/llvm_le32_nacl_install/bin/* ${OUT_BIN}
+  LogExecute cp ${OUT_DIR}/binutils_pnacl_le32_nacl_install/bin/* \
+    ${OUT_BIN}
   # TODO(bradnelson): Drop this once shell script fix is done.
-  MakeDir ${BUILD_DIR}/driver
-  LogExecute cp ${SRC_DIR}/pnacl/driver/redirect.sh ${BUILD_DIR}/driver/
-  LogExecute cp ${SRC_DIR}/pnacl/driver/*.py ${BUILD_DIR}/driver/
+  MakeDir ${OUT_BIN}/driver
+  LogExecute cp ${SRC_DIR}/pnacl/driver/redirect.sh ${OUT_BIN}/driver/
+  LogExecute cp ${SRC_DIR}/pnacl/driver/*.py ${OUT_BIN}/driver/
 }
 
 InstallStep() {
-  local ASSEMBLY_DIR=${DESTDIR}/${PREFIX}/pnacl
-  Remove ${ASSEMBLY_DIR}/
-  MakeDir ${ASSEMBLY_DIR}/
+  local INSTALL_DIR=${DESTDIR}/${PREFIX}/pnacl
+  Remove ${INSTALL_DIR}/
+  MakeDir ${INSTALL_DIR}/
 
-  LogExecute cp -r ${NACL_SDK_ROOT}/toolchain/linux_pnacl/* ${ASSEMBLY_DIR}
+  LogExecute cp -r ${NACL_SDK_ROOT}/toolchain/linux_pnacl/* ${INSTALL_DIR}
 
   # Drop pyc files.
-  LogExecute find ${ASSEMBLY_DIR} -name "*.pyc" -exec rm {} \;
+  LogExecute find ${INSTALL_DIR} -name "*.pyc" -exec rm {} \;
+
+  LogExecute rm -r ${INSTALL_DIR}/mipsel-nacl
+  LogExecute rm -r ${INSTALL_DIR}/translator
 
   # TODO(bradnelson): Drop this once shell script fix is done.
-  LogExecute cp ${BUILD_DIR}/driver/*.py ${ASSEMBLY_DIR}/bin/pydir/
+  LogExecute cp ${OUT_BIN}/driver/*.py ${INSTALL_DIR}/bin/pydir/
 
   # Swap in nacl executables.
-  Remove ${ASSEMBLY_DIR}/lib/*.so
-  for f in $(find ${ASSEMBLY_DIR} -executable -type f); do
+  Remove ${INSTALL_DIR}/lib/*.so
+  for f in $(find ${INSTALL_DIR} -executable -type f); do
     if [ "$(file ${f} | grep ELF)" != "" ]; then
-      local pexe="${BUILD_DIR}/$(basename ${f})"
+      local pexe="${OUT_BIN}/$(basename ${f})"
       if [ -f "${pexe}" ]; then
-        LogExecute ${PNACLFINALIZE} ${pexe} -o ${f}
+        echo "Finalizing ${pexe}"
+        ${PNACLFINALIZE} ${pexe} -o ${f}
       else
         echo "Warning: dropping ${f} without a nacl replacement."
         LogExecute rm -f ${f}
       fi
     elif [ "$(head -n 1 ${f} | grep /bin/sh)" != "" ]; then
       # TODO(bradnelson): Drop this once shell script fix is done.
-      LogExecute cp -f ${BUILD_DIR}/driver/redirect.sh ${f}
+      LogExecute cp -f ${OUT_BIN}/driver/redirect.sh ${f}
       LogExecute chmod a+x ${f}
     fi
   done
@@ -150,7 +162,7 @@ InstallStep() {
 
 PostInstallTestStep() {
   # Verify that binaries at least load under sel_ldr
-  LogExecute ./le32-nacl-strings.sh --version
-  LogExecute ./arm-nacl-readelf.sh --version
-  LogExecute ./clang.sh --version
+  LogExecute ./bin/le32-nacl-strings.sh --version
+  LogExecute ./bin/arm-nacl-readelf.sh --version
+  LogExecute ./bin/clang.sh --version
 }

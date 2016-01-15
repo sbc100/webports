@@ -1410,7 +1410,7 @@ TranslatePexe() {
   fi
 
   local dirname=$(dirname "${pexe}")
-  ls -l "${dirname}"/*.nexe "${pexe}"
+  ls -l ${pexe} ${basename}*.nexe
 }
 
 
