@@ -31,6 +31,7 @@ EXECUTABLES="\
 
 BUILD_DIR=${SRC_DIR}
 
+
 BuildStep() {
   export TARGET_OS=NaCl
   export AR=${NACLAR}
