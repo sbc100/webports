@@ -2,14 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-EXECUTABLES="src/pkg${NACL_EXEEXT}"
+EXECUTABLES="src/pkg-static${NACL_EXEEXT}"
 NACLPORTS_LIBS+=" -lbsd -pthread"
 
 EXTRA_CONFIGURE_ARGS+=" --prefix=/usr --exec-prefix=/usr"
 
-if [ "${NACL_SHARED}" = "1" ]; then
+if [[ ${NACL_SHARED} == 1 ]]; then
+  EXECUTABLES+=" src/pkg${NACL_EXEEXT}"
   NACLPORTS_LIBS+=" -lresolv -ldl -lrt"
-  EXECUTABLES+=" src/pkg-static${NACL_EXEEXT}"
   EXTRA_CONFIGURE_ARGS+=" --enable-shared=yes --with-staticonly=no"
   NACLPORTS_CPPFLAGS+=" -D_GNU_SOURCE"
 else
@@ -50,28 +50,18 @@ BuildHost() {
 BuildStep() {
   (BuildHost)
   DefaultBuildStep
-  if [ "${NACL_SHARED}" = "0" ]; then
-    LogExecute mv src/pkg-static${NACL_EXEEXT} src/pkg${NACL_EXEEXT}
-  fi
 }
 
 TestStep() {
-  if [[ ${TOOLCHAIN} = pnacl ]]; then
-    return
-  fi
-  if [[ ${NACL_SHARED} = 1 ]]; then
-    LogExecute ${BUILD_DIR}/src/pkg-static -v
-  else
-    LogExecute ${BUILD_DIR}/src/pkg -v
-  fi
+  LogExecute ${BUILD_DIR}/src/pkg-static -v
 }
 
 InstallStep() {
   DefaultInstallStep
   LogExecute mv ${DESTDIR}/usr ${DESTDIR}/${PREFIX}
-  if [ "${NACL_SHARED}" = "0" ]; then
-      LogExecute mv ${DESTDIR}/${PREFIX}/sbin/pkg-static${NACL_EXEEXT}\
-         ${DESTDIR}/${PREFIX}/sbin/pkg${NACL_EXEEXT}
+  if [[ ${NACL_SHARED} == 0 ]]; then
+    LogExecute mv ${DESTDIR}/${PREFIX}/sbin/pkg-static${NACL_EXEEXT} \
+        ${DESTDIR}/${PREFIX}/sbin/pkg${NACL_EXEEXT}
   fi
 }
 
