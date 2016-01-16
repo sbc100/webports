@@ -16,7 +16,7 @@ MAKE_TARGETS="${EXECUTABLE}"
 EnableCliMain
 
 BuildHostGforth() {
-  if [[ -f "${HOST_INSTALL_DIR}/bin/gforth-ditc" ]]; then
+  if [[ -f "${HOST_INSTALL_DIR}/bin/gforth" ]]; then
     return
   fi
   Banner "Building ${PACKAGE_NAME} for host"
@@ -33,6 +33,13 @@ ConfigureStep() {
   BuildHostGforth
   Banner "Building ${PACKAGE_NAME} for NaCl"
   export PATH="${HOST_INSTALL_DIR}/bin:${PATH}"
+  host_gforth=$(which gforth)
+  if [[ -z $host_gforth ]]; then
+    echo "Failed to find host version of gforth"
+    exit 1
+  else
+    echo "Host gforth found at: $(which gforth)"
+  fi
   export skipcode=no
   EnableGlibcCompat
   ChangeDir ${BUILD_DIR}
