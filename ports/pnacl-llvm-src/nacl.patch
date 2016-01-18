@@ -1,0 +1,12 @@
+diff --git a/lib/Support/Host.cpp b/lib/Support/Host.cpp
+--- a/lib/Support/Host.cpp
++++ b/lib/Support/Host.cpp
+@@ -168,7 +168,7 @@ static bool GetX86CpuIDAndInfoEx(unsigned value, unsigned subleaf,
+ }
+ 
+ static bool OSHasAVXSupport() {
+-#if defined(__GNUC__)
++#if defined(__GNUC__) && !defined(__native_client__)
+   // Check xgetbv; this uses a .byte sequence instead of the instruction
+   // directly because older assemblers do not include support for xgetbv and
+   // there is no easy way to conditionally compile based on the assembler used.

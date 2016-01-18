@@ -80,6 +80,7 @@ InstallPackageMultiArch() {
     arch_list="i686 x86_64 arm"
   fi
 
+  export TOOLCHAIN
   for arch in ${arch_list}; do
     if ! RunCmd bin/webports -a ${arch} uninstall --all ; then
       BuildFailure $1 ${arch}

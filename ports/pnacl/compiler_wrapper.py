@@ -17,7 +17,8 @@ import sys
 cmd = sys.argv[1:]
 
 # Add extra libs when linking
-if '-c' not in cmd:
+is_linking = '-c' not in cmd and '-E' not in cmd
+if is_linking:
   cmd += os.environ['EXTRA_LIBS'].split()
 
 sys.exit(subprocess.call(cmd))

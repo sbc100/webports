@@ -65,8 +65,7 @@ BuildStep() {
   GOLD_LDADD+=" -lLLVMObject -lLLVMCore -lLLVMSupport"
   GOLD_LDADD+=" -Wl,--end-group"
 
-  EXTRA_CONFIGURE="--extra-configure-arg=ac_cv_func_vfork_works=no"
-  EXTRA_CONFIGURE+=" --extra-configure-arg=--disable-compiler-version-checks"
+  EXTRA_CONFIGURE="--extra-configure-arg=--disable-compiler-version-checks"
   EXTRA_CONFIGURE+=" --extra-configure-arg=--enable-libcpp"
 
   # Some code in llvm uses intrisics not supported in the pnacl stable abi.
@@ -74,12 +73,14 @@ BuildStep() {
     EXTRA_CC_ARGS="-fgnu-inline-asm"
     EXTRA_CC_ARGS+=" --pnacl-disable-abi-check"
   fi
+  if [[ ${TOOLCHAIN} != glibc ]]; then
+    EXTRA_CC_ARGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
+  fi
+
   LINUX_PNACL=${NACL_SDK_ROOT}/toolchain/linux_pnacl
-  USR_LOCAL=${LINUX_PNACL}/le32-nacl/usr
   EXTRA_CC_ARGS+=" -include spawn.h"
-  EXTRA_CC_ARGS+=" -I${USR_LOCAL}/include/glibc-compat"
   EXTRA_CC_ARGS+=" -I${NACL_SDK_ROOT}/include"
-  EXTRA_CC_ARGS+=" -I${USR_LOCAL}/include"
+  EXTRA_CC_ARGS+=" -I${NACLPORTS_INCLUDE}"
 
   # export EXTRA_LIBS so that compiler_wapper.py can access it
   export EXTRA_LIBS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
@@ -134,8 +135,9 @@ InstallStep() {
   # Drop pyc files.
   LogExecute find ${INSTALL_DIR} -name "*.pyc" -exec rm {} \;
 
-  LogExecute rm -r ${INSTALL_DIR}/mipsel-nacl
-  LogExecute rm -r ${INSTALL_DIR}/translator
+  LogExecute rm -rf ${INSTALL_DIR}/mipsel-nacl
+  LogExecute rm -rf ${INSTALL_DIR}/translator
+  LogExecute rm -rf ${INSTALL_DIR}/*-nacl/usr
 
   # TODO(bradnelson): Drop this once shell script fix is done.
   LogExecute cp ${OUT_BIN}/driver/*.py ${INSTALL_DIR}/bin/pydir/
@@ -144,10 +146,17 @@ InstallStep() {
   Remove ${INSTALL_DIR}/lib/*.so
   for f in $(find ${INSTALL_DIR} -executable -type f); do
     if [ "$(file ${f} | grep ELF)" != "" ]; then
-      local pexe="${OUT_BIN}/$(basename ${f})"
-      if [ -f "${pexe}" ]; then
-        echo "Finalizing ${pexe}"
-        ${PNACLFINALIZE} ${pexe} -o ${f}
+      local exe="${OUT_BIN}/$(basename ${f})"
+      if [[ -f ${exe} ]]; then
+        if [[ ${TOOLCHAIN} == pnacl ]]; then
+          echo "Finalizing ${exe}"
+          ${PNACLFINALIZE} ${exe} -o ${f}
+        else
+          echo "Copying ${exe}"
+          cp ${exe} ${f}
+        fi
+      elif [[ $f == *-clang* ]]; then
+        LogExecute ln -sf ${f} $(basename ${f})
       else
         echo "Warning: dropping ${f} without a nacl replacement."
         LogExecute rm -f ${f}
