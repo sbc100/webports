@@ -6,4 +6,4 @@ LICENSE=BSD
 DEPENDS=(glibc-compat nacl-spawn pnacl-clang-src pnacl-binutils-src pnacl-llvm-src)
 # x86 glibc toolchain is too old to build clang
 # arm glibc fails with unrecognized command line option ‘-stdlib=libc++’
-DISABLED_TOOLCHAIN=(glibc)
+DISABLED_TOOLCHAIN=(glibc emscripten)
