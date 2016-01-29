@@ -365,6 +365,10 @@ class SourcePackage(package.Package):
             self.CreatePkgFile()
           finally:
             util.log_level = old_log_level
+      except KeyboardInterrupt:
+        # Treat KeyboardInterrupt as special, and not an actual failure.  This
+        # avoid log spew to stdout when they user interupts a quit build.
+        raise
       except:
         if log_filename:
           with open(log_filename) as log_file:
