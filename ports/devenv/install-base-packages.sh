@@ -54,11 +54,12 @@ InstallBasePackages() {
 
   pkg install -y $core_packages
 
-  # Some programs (noteabley make) expect /bin/sh to exist and use
+  # Some programs (noteabley make) expect /bin/sh and /bin/bash to exist and use
   # this to run command (even if SHELL is set)
   # TODO(sbc): This should be a symlink, or at least install via a post
   # install script.
   cp /usr/bin/bash /bin/sh
+  cp /usr/bin/bash /bin/bash
 
   echo "===> Installing extra packages"
   local extra_packages="
