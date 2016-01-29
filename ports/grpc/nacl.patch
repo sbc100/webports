@@ -1,0 +1,245 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -64,19 +64,19 @@ HAS_CC = $(shell which cc > /dev/null 2> /dev/null && echo true || echo false)
+ HAS_CLANG = $(shell which clang > /dev/null 2> /dev/null && echo true || echo false)
+ 
+ ifeq ($(HAS_CC),true)
+-DEFAULT_CC = cc
+-DEFAULT_CXX = c++
++DEFAULT_CC ?= cc
++DEFAULT_CXX ?= c++
+ else
+ ifeq ($(HAS_GCC),true)
+-DEFAULT_CC = gcc
+-DEFAULT_CXX = g++
++DEFAULT_CC ?= gcc
++DEFAULT_CXX ?= g++
+ else
+ ifeq ($(HAS_CLANG),true)
+-DEFAULT_CC = clang
+-DEFAULT_CXX = clang++
++DEFAULT_CC ?= clang
++DEFAULT_CXX ?= clang++
+ else
+-DEFAULT_CC = no_c_compiler
+-DEFAULT_CXX = no_c++_compiler
++DEFAULT_CC ?= no_c_compiler
++DEFAULT_CXX ?= no_c++_compiler
+ endif
+ endif
+ endif
+@@ -293,9 +293,15 @@ ifdef EXTRA_DEFINES
+ DEFINES += $(EXTRA_DEFINES)
+ endif
+ 
+-CFLAGS += -std=c99 -Wsign-conversion -Wconversion -Wshadow
++ifeq ($(SYSTEM),nacl)
++BUILD_SHARED = false
++CFLAGS += -std=gnu99 -Wno-sign-compare
++else
++BUILD_SHARED = true
++CFLAGS += -std=c99 -Wshadow -Wsign-conversion -Wconversion
++endif
+ ifeq ($(HAS_CXX11),true)
+-CXXFLAGS += -std=c++11
++CXXFLAGS += -std=gnu++11
+ else
+ CXXFLAGS += -std=c++0x
+ endif
+@@ -1078,6 +1084,7 @@ static_c: pc_c pc_c_unsecure cache.mk pc_gpr pc_c_zookeeper $(LIBDIR)/$(CONFIG)/
+ 
+ static_cxx: pc_cxx pc_cxx_unsecure pc_gpr cache.mk  $(LIBDIR)/$(CONFIG)/libgrpc++.a $(LIBDIR)/$(CONFIG)/libgrpc++_unsecure.a
+ 
++ifeq ($(BUILD_SHARED),true)
+ shared: shared_c shared_cxx
+ 
+ shared_c: pc_c pc_c_unsecure pc_gpr cache.mk pc_c_zookeeper $(LIBDIR)/$(CONFIG)/libgpr.$(SHARED_EXT) $(LIBDIR)/$(CONFIG)/libgrpc.$(SHARED_EXT) $(LIBDIR)/$(CONFIG)/libgrpc_unsecure.$(SHARED_EXT) shared_zookeeper_libs
+@@ -1085,6 +1092,12 @@ shared_c: pc_c pc_c_unsecure pc_gpr cache.mk pc_c_zookeeper $(LIBDIR)/$(CONFIG)/
+ shared_cxx: pc_cxx pc_cxx_unsecure cache.mk $(LIBDIR)/$(CONFIG)/libgrpc++.$(SHARED_EXT) $(LIBDIR)/$(CONFIG)/libgrpc++_unsecure.$(SHARED_EXT)
+ 
+ shared_csharp: shared_c  $(LIBDIR)/$(CONFIG)/libgrpc_csharp_ext.$(SHARED_EXT)
++
++grpc_csharp_ext: shared_csharp
++else
++shared:
++endif
++
+ ifeq ($(HAS_ZOOKEEPER),true)
+ static_zookeeper_libs: $(LIBDIR)/$(CONFIG)/libgrpc_zookeeper.a
+ shared_zookeeper_libs: $(LIBDIR)/$(CONFIG)/libgrpc_zookeeper.$(SHARED_EXT)
+@@ -1096,7 +1109,6 @@ shared_zookeeper_libs:
+ 
+ endif
+ 
+-grpc_csharp_ext: shared_csharp
+ 
+ plugins: $(PROTOC_PLUGINS)
+ 
+@@ -1644,11 +1656,16 @@ buildbenchmarks: privatelibs $(BINDIR)/$(CONFIG)/low_level_ping_pong_benchmark $
+ 
+ benchmarks: buildbenchmarks
+ 
++ifneq ($(SYSTEM),nacl)
+ strip: strip-static strip-shared
+ 
+ strip-static: strip-static_c strip-static_cxx
+ 
++ifeq ($(BUILD_SHARED),true)
+ strip-shared: strip-shared_c strip-shared_cxx
++else
++strip-shared:
++endif
+ 
+ 
+ # TODO(nnoble): the strip target is stripping in-place, instead
+@@ -1677,6 +1694,7 @@ ifeq ($(CONFIG),opt)
+ 	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc++_unsecure.a
+ endif
+ 
++ifeq ($(BUILD_SHARED),true)
+ strip-shared_c: shared_c
+ ifeq ($(CONFIG),opt)
+ 	$(E) "[STRIP]   Stripping libgpr.so"
+@@ -1704,6 +1722,8 @@ ifeq ($(CONFIG),opt)
+ 	$(E) "[STRIP]   Stripping libgrpc_csharp_ext.so"
+ 	$(Q) $(STRIP) $(LIBDIR)/$(CONFIG)/libgrpc_csharp_ext.$(SHARED_EXT)
+ endif
++endif
++endif
+ 
+ cache.mk::
+ 	$(E) "[MAKE]    Generating $@"
+@@ -2002,6 +2022,7 @@ install-static_cxx: static_cxx strip-static_cxx install-pkg-config_cxx
+ 
+ 
+ 
++ifeq ($(BUILD_SHARED),true)
+ install-shared_c: shared_c strip-shared_c install-pkg-config_c
+ ifeq ($(SYSTEM),MINGW32)
+ 	$(E) "[INSTALL] Installing gpr.$(SHARED_EXT)"
+@@ -2128,7 +2149,7 @@ ifneq ($(SYSTEM),Darwin)
+ 	$(Q) ldconfig || true
+ endif
+ endif
+-
++endif
+ 
+ install-plugins: $(PROTOC_PLUGINS)
+ ifeq ($(SYSTEM),MINGW32)
+@@ -2544,7 +2565,7 @@ ifeq ($(SYSTEM),Darwin)
+ endif
+ 
+ 
+-
++ifeq ($(BUILD_SHARED),true)
+ ifeq ($(SYSTEM),MINGW32)
+ $(LIBDIR)/$(CONFIG)/grpc.$(SHARED_EXT): $(LIBGRPC_OBJS)  $(ZLIB_DEP) $(LIBDIR)/$(CONFIG)/gpr.$(SHARED_EXT) $(OPENSSL_DEP)
+ 	$(E) "[LD]      Linking $@"
+@@ -2562,6 +2583,7 @@ else
+ 	$(Q) ln -sf libgrpc.$(SHARED_EXT) $(LIBDIR)/$(CONFIG)/libgrpc.so
+ endif
+ endif
++endif
+ 
+ endif
+ 
+@@ -2867,7 +2889,7 @@ ifeq ($(SYSTEM),Darwin)
+ endif
+ 
+ 
+-
++ifeq ($(BUILD_SHARED),true)
+ ifeq ($(SYSTEM),MINGW32)
+ $(LIBDIR)/$(CONFIG)/grpc_zookeeper.$(SHARED_EXT): $(LIBGRPC_ZOOKEEPER_OBJS)  $(ZLIB_DEP) $(LIBDIR)/$(CONFIG)/gpr.$(SHARED_EXT) $(LIBDIR)/$(CONFIG)/grpc.$(SHARED_EXT)
+ 	$(E) "[LD]      Linking $@"
+@@ -2885,6 +2907,7 @@ else
+ 	$(Q) ln -sf libgrpc_zookeeper.$(SHARED_EXT) $(LIBDIR)/$(CONFIG)/libgrpc_zookeeper.so
+ endif
+ endif
++endif
+ 
+ ifneq ($(NO_DEPS),true)
+ -include $(LIBGRPC_ZOOKEEPER_OBJS:.o=.dep)
+diff --git a/include/grpc/support/port_platform.h b/include/grpc/support/port_platform.h
+--- a/include/grpc/support/port_platform.h
++++ b/include/grpc/support/port_platform.h
+@@ -242,6 +242,37 @@
+ #else /* _LP64 */
+ #define GPR_ARCH_32 1
+ #endif /* _LP64 */
++#elif defined(__native_client__)
++#define GPR_PLATFORM_STRING "nacl"
++#ifndef _BSD_SOURCE
++#define _BSD_SOURCE
++#endif
++#ifndef _DEFAULT_SOURCE
++#define _DEFAULT_SOURCE
++#endif
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#define GPR_CPU_POSIX 1
++#define GPR_GCC_ATOMIC 1
++#define GPR_GCC_TLS 1
++#define GPR_POSIX_LOG 1
++#define GPR_POSIX_MULTIPOLL_WITH_POLL 1
++#define GPR_POSIX_WAKEUP_FD 1
++#define GPR_POSIX_NO_SPECIAL_WAKEUP_FD 1
++#define GPR_POSIX_SOCKET 1
++#define GPR_POSIX_SOCKETADDR 1
++#define GPR_POSIX_SOCKETUTILS 1
++#define GPR_POSIX_ENV 1
++#define GPR_POSIX_FILE 1
++#define GPR_POSIX_STRING 1
++#define GPR_POSIX_SYNC 1
++#define GPR_POSIX_TIME 1
++#ifdef _LP64
++#define GPR_ARCH_64 1
++#else /* _LP64 */
++#define GPR_ARCH_32 1
++#endif /* _LP64 */
+ #else
+ #error Could not auto-detect platform
+ #endif
+diff --git a/src/core/iomgr/tcp_posix.c b/src/core/iomgr/tcp_posix.c
+--- a/src/core/iomgr/tcp_posix.c
++++ b/src/core/iomgr/tcp_posix.c
+@@ -42,6 +42,7 @@
+ #include <string.h>
+ #include <sys/types.h>
+ #include <sys/socket.h>
++#include <sys/uio.h>
+ #include <unistd.h>
+ 
+ #include <grpc/support/alloc.h>
+diff --git a/src/core/iomgr/udp_server.c b/src/core/iomgr/udp_server.c
+--- a/src/core/iomgr/udp_server.c
++++ b/src/core/iomgr/udp_server.c
+@@ -217,8 +217,10 @@ static int prepare_socket(int fd, const struct sockaddr *addr,
+                           size_t addr_len) {
+   struct sockaddr_storage sockname_temp;
+   socklen_t sockname_len;
++#if !defined(__native_client__)
+   int get_local_ip;
+   int rc;
++#endif
+ 
+   if (fd < 0) {
+     goto error;
+@@ -229,6 +231,7 @@ static int prepare_socket(int fd, const struct sockaddr *addr,
+             strerror(errno));
+   }
+ 
++#if !defined(__native_client__)
+   get_local_ip = 1;
+   rc = setsockopt(fd, IPPROTO_IP, IP_PKTINFO, &get_local_ip,
+                   sizeof(get_local_ip));
+@@ -238,6 +241,7 @@ static int prepare_socket(int fd, const struct sockaddr *addr,
+                     sizeof(get_local_ip));
+ #endif
+   }
++#endif
+ 
+   GPR_ASSERT(addr_len < ~(socklen_t)0);
+   if (bind(fd, addr, (socklen_t)addr_len) < 0) {
