@@ -11,8 +11,8 @@ set -e
 "${SCRIPT_DIR}/patch_configure.py" "${CONFIGURE_SCRIPT}"
 
 if [ -z "${NACL_CROSS_PREFIX}" ]; then
-  NACL_ENV_IMPORT=1
-  . "${SCRIPT_DIR}/nacl-env.sh"
+  WEBPORTS_ENV_IMPORT=1
+  . "${SCRIPT_DIR}/webports-env.sh"
 fi
 
 # TODO(sbc): this code is currently duplicated in common.sh.

@@ -12,16 +12,16 @@
 # $TOOLCHAIN - clang-newlib, glibc or pnacl.  Default: pnacl
 #
 # To import these variables into your environment do:
-# $ . nacl-env.sh
+# $ . webports-env.sh
 #
 # Alternatively you can see just the essential environment
 # variables by passing --print.  This can by used within
 # a script using:
-# eval `./nacl-env.sh --print`
+# eval `./webports-env.sh --print`
 #
 # Finally you can run a command within the NaCl environment
 # by passing the command line. e.g:
-# ./nacl-env.sh make
+# ./webports-env.sh make
 
 
 if [ -z "${NACL_SDK_ROOT:-}" ]; then
@@ -156,8 +156,7 @@ InitializeNaClGccToolchain() {
   fi
 
   local TOOLCHAIN_DIR=${OS_SUBDIR}_${TOOLCHAIN_ARCH}_${NACL_LIBC}
-
-  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${NACL_SDK_ROOT}/toolchain/${TOOLCHAIN_DIR}}
+  readonly NACL_TOOLCHAIN_ROOT=${NACL_SDK_ROOT}/toolchain/${TOOLCHAIN_DIR}
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
   if [ ! -d "${NACL_TOOLCHAIN_ROOT}" ]; then
@@ -223,7 +222,7 @@ InitializeEmscriptenToolchain() {
 InitializePNaClToolchain() {
   local TC_ROOT=${NACL_SDK_ROOT}/toolchain/${OS_SUBDIR}_pnacl
 
-  readonly NACL_TOOLCHAIN_ROOT=${NACL_TOOLCHAIN_ROOT:-${TC_ROOT}}
+  readonly NACL_TOOLCHAIN_ROOT=${TC_ROOT}
   readonly NACL_BIN_PATH=${NACL_TOOLCHAIN_ROOT}/bin
 
   NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-clang
@@ -328,7 +327,7 @@ else
   readonly NACL_PREFIX=${NACL_TOOLCHAIN_ROOT}/${NACL_CROSS_PREFIX}/usr
 fi
 
-if [ -z "${NACL_ENV_IMPORT:-}" ]; then
+if [ -z "${WEBPORTS_ENV_IMPORT:-}" ]; then
   if [ $# -gt 0 ]; then
     if [ "$1" = '--print' ]; then
       echo "export EXEEXT=${NACL_EXEEXT}"

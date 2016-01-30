@@ -25,8 +25,8 @@ readonly NACL_PACKAGES=${NACL_SRC}
 
 NACL_DEBUG=${NACL_DEBUG:-0}
 
-NACL_ENV_IMPORT=1
-. "${TOOLS_DIR}/nacl-env.sh"
+WEBPORTS_ENV_IMPORT=1
+. "${TOOLS_DIR}/webports-env.sh"
 
 # export tool names for direct use in patches.
 export NACLCC
