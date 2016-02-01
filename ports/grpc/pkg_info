@@ -1,6 +1,6 @@
 NAME=grpc
 VERSION=0.12.0
-DEPENDS=(protobuf openssl zlib)
+DEPENDS=(protobuf openssl zlib gflags)
 LICENSE=CUSTOM:README
 URL=https://github.com/grpc/grpc.git@9fad88fe
 # Disabled for older glibc compilers due to lack of full C++11 support.
