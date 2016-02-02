@@ -1031,7 +1031,6 @@ ConfigureStep_Autoconf() {
     --host=${CONF_HOST} \
     --prefix=${PREFIX} \
     --with-http=no \
-    --with-html=no \
     --with-ftp=no \
     --${NACL_OPTION}-mmx \
     --${NACL_OPTION}-sse \
