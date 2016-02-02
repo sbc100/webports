@@ -11,17 +11,15 @@
 # $NACL_ARCH - i386, x86_64, arm or pnacl.  Default: x86_64
 # $TOOLCHAIN - clang-newlib, glibc or pnacl.  Default: pnacl
 #
-# To import these variables into your environment do:
-# $ . webports-env.sh
+# You can run a command within the NaCl environment
+# by passing the command line. e.g:
+# ./webports-env.sh ./configure --host=nacl
+# ./webports-env.sh make
 #
 # Alternatively you can see just the essential environment
 # variables by passing --print.  This can by used within
 # a script using:
 # eval `./webports-env.sh --print`
-#
-# Finally you can run a command within the NaCl environment
-# by passing the command line. e.g:
-# ./webports-env.sh make
 
 
 if [ -z "${NACL_SDK_ROOT:-}" ]; then
