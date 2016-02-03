@@ -29,7 +29,11 @@ BuildHostGforth() {
 
 ConfigureStep() {
   ChangeDir ${SRC_DIR}
-  ./autogen.sh
+  LogExecute ./autogen.sh
+  if ! grep '# NOTE: Disabling this, as it prevents sharing' configure; then
+    echo "Autoconf failed to properly update configure"
+    exit 1
+  fi
   BuildHostGforth
   Banner "Building ${PACKAGE_NAME} for NaCl"
   export PATH="${HOST_INSTALL_DIR}/bin:${PATH}"
