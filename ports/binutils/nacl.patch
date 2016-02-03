@@ -19,42 +19,9 @@ diff --git a/bfd/elf32-i386.c b/bfd/elf32-i386.c
  
  	      /* GD->IE transition.  */
  	      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
-diff --git a/binutils/Makefile.in b/binutils/Makefile.in
---- a/binutils/Makefile.in
-+++ b/binutils/Makefile.in
-@@ -332,7 +332,7 @@ LIBICONV = @LIBICONV@
- LIBINTL = @LIBINTL@
- LIBINTL_DEP = @LIBINTL_DEP@
- LIBOBJS = @LIBOBJS@
--LIBS = @LIBS@
-+LIBS = @LIBS@ $(EXTRA_LIBS)
- LIBTOOL = @LIBTOOL@
- LIPO = @LIPO@
- LN_S = @LN_S@
-diff --git a/gas/Makefile.in b/gas/Makefile.in
---- a/gas/Makefile.in
-+++ b/gas/Makefile.in
-@@ -197,7 +197,7 @@ LIBINTL = @LIBINTL@
- LIBINTL_DEP = @LIBINTL_DEP@
- LIBM = @LIBM@
- LIBOBJS = @LIBOBJS@
--LIBS = @LIBS@
-+LIBS = @LIBS@ $(EXTRA_LIBS)
- LIBTOOL = @LIBTOOL@
- LIPO = @LIPO@
- LN_S = @LN_S@
 diff --git a/ld/Makefile.in b/ld/Makefile.in
 --- a/ld/Makefile.in
 +++ b/ld/Makefile.in
-@@ -890,7 +890,7 @@ ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmai
- 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C)
- 
- ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
--ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
-+ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(EXTRA_LIBS)
- 
- # A test program for C++ constructors and destructors.
- # This test is now in the testsuite.
 @@ -1072,7 +1072,10 @@ deffilep.h: deffilep.c
  	else :; fi
  ld-new$(EXEEXT): $(ld_new_OBJECTS) $(ld_new_DEPENDENCIES) 
