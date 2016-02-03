@@ -1,9 +1,9 @@
 diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchain_build_pnacl.py
 --- a/toolchain_build/toolchain_build_pnacl.py
 +++ b/toolchain_build/toolchain_build_pnacl.py
-@@ -151,30 +151,33 @@ def ProgramPath(program):
- # Return a tuple (C compiler, C++ compiler) of the compilers to compile the host
- # toolchains
+@@ -191,29 +191,31 @@ binaries themselves should be considered inputs for memoization.
+ # Return a tuple (C compiler, C++ compiler, ar, ranlib) of the compilers and
+ # tools to compile the host toolchains.
  def CompilersForHost(host):
 -  compiler = {
 +  rtn = {
@@ -27,7 +27,6 @@ diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchai
 -    nacl_sdk = os.environ.get('NACL_SDK_ROOT')
 -    assert nacl_sdk, 'NACL_SDK_ROOT not set'
 -    pnacl_bin_dir = os.path.join(nacl_sdk, 'toolchain/linux_pnacl/bin')
--    glibc_bin_dir = os.path.join(nacl_sdk, 'toolchain/linux_x86_glibc/bin')
 -    compiler.update({
 -        'le32-nacl': (os.path.join(pnacl_bin_dir, 'pnacl-clang'),
 -                      os.path.join(pnacl_bin_dir, 'pnacl-clang++'),
@@ -36,8 +35,6 @@ diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchai
 -    })
 -  return compiler[host]
 +      'i686-pc-cygwin': ['gcc', 'g++', 'ar', 'ranlib'],
-+      # In practice these don't get used since when naclports builds the
-+      # pnacl toolchain it explictly sets CC/CXX/etc
 +      'le32-nacl': ['pnacl-clang', 'pnacl-clang++', 'pnacl-ar', 'pnacl-ranlib'],
 +  }[host]
 +
@@ -53,11 +50,11 @@ diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchai
 +
 +  return rtn
  
- 
- def GSDJoin(*args):
-@@ -532,10 +535,12 @@ def HostTools(host, options):
-   #            too many arguments for format.
-   binutils_do_werror = not TripleIsWindows(host)
+ def AflFuzzCompilers(afl_fuzz_dir):
+   """Returns the AFL (clang) compiler executables, assuming afl_fuzz_dir
+@@ -677,10 +679,12 @@ def HostTools(host, options):
+   #            [-Werror,-Wshift-negative-value]
+   binutils_do_werror = False
    extra_gold_deps = []
 +  install_step = 'install-strip'
    if host == 'le32-nacl':
@@ -66,24 +63,42 @@ diff --git a/toolchain_build/toolchain_build_pnacl.py b/toolchain_build/toolchai
      extra_gold_deps = [H('llvm')]
 +    install_step = 'install'
  
-   # Binutils still has some warnings when building with clang
-   if not options.gcc:
-@@ -574,7 +579,7 @@ def HostTools(host, options):
+   # The binutils git checkout includes all the directories in the
+   # upstream binutils-gdb.git repository, but some of these
+@@ -730,7 +734,7 @@ def HostTools(host, options):
                    '--without-gas'
-                   ]),
+                   ])] + DummyDirCommands(binutils_dummy_dirs) + [
                command.Command(MakeCommand(host)),
 -              command.Command(MAKE_DESTDIR_CMD + ['install-strip'])] +
 +              command.Command(MAKE_DESTDIR_CMD + [install_step])] +
                [command.RemoveDirectory(os.path.join('%(output)s', dir))
                 for dir in ('lib', 'lib32')] +
                # Since it has dual use, just create links for both sets of names
-@@ -624,7 +629,8 @@ def HostTools(host, options):
-   # TODO(jfb) Windows currently uses MinGW's GCC 4.8.1 which generates warnings
-   #           on upstream LLVM code. Turn on -Werror once these are fixed.
-   #           The same applies for the default GCC on current Ubuntu.
--  llvm_do_werror = not (TripleIsWindows(host) or options.gcc)
-+  llvm_do_werror = not (TripleIsWindows(host) or options.gcc or
-+                        host == 'le32-nacl')
- 
-   llvm_cmake = {
-       H('llvm'): {
+@@ -1033,6 +1037,9 @@ def HostToolsDirectToNacl(host, options):
+   binutils_flags, binutils_inputs, binutils_deps = ConfigureBinutilsCommon(
+       host, options, False)
+   redirect_inputs.update(binutils_inputs)
++  install_step = 'install-strip'
++  if host == 'le32-nacl':
++    install_step = 'install'
+   tools.update({
+       H('binutils_x86'): {
+           'type': 'build',
+@@ -1049,7 +1056,7 @@ def HostToolsDirectToNacl(host, options):
+                    '--enable-targets=x86_64-nacl,i686-nacl',
+                    '--disable-werror']),
+               command.Command(MakeCommand(host)),
+-              command.Command(MAKE_DESTDIR_CMD + ['install-strip'])] +
++              command.Command(MAKE_DESTDIR_CMD + [install_step])] +
+               # Remove the share dir from this binutils build and leave the one
+               # from the newer version used for bitcode linking. Always remove
+               # the lib dirs, which have unneeded host libs.
+@@ -1311,7 +1318,7 @@ def main():
+     packages.update(HostTools(host, args))
+     if not args.pnacl_in_pnacl:
+       packages.update(HostLibs(host, args))
+-      packages.update(HostToolsDirectToNacl(host, args))
++    packages.update(HostToolsDirectToNacl(host, args))
+   if not args.pnacl_in_pnacl:
+     packages.update(TargetLibCompiler(pynacl.platform.PlatformTriple(), args))
+   # Don't build the target libs on Windows because of pathname issues.

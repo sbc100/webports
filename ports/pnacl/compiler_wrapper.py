@@ -16,9 +16,16 @@ import sys
 
 cmd = sys.argv[1:]
 
-# Add extra libs when linking
+is_configuring = 'conftest.c' in cmd or 'conftest.pexe' in cmd
 is_linking = '-c' not in cmd and '-E' not in cmd
-if is_linking:
-  cmd += os.environ['EXTRA_LIBS'].split()
+is_shared = '-shared' in cmd
+
+# Add extra libs when linking executables
+if is_linking and not is_shared:
+  cmd += os.environ['WEBPORTS_EXTRA_LIBS'].split()
+
+if is_configuring:
+  cmd.remove('-include')
+  cmd.remove('spawn.h')
 
 sys.exit(subprocess.call(cmd))
