@@ -204,10 +204,6 @@ TestStep() {
   LogExecute toolchain/bin/x86_64-nacl-as --version
   LogExecute toolchain/bin/clang --version
 
-  # The end-to-end tests doesn't currently work for PNaCl
-  if [[ $TOOLCHAIN == pnacl ]]; then
-    return
-  fi
   TestNaClClang
 }
 
@@ -215,6 +211,11 @@ TestNaClClang() {
   # Try compiling and running a simple hello world program.  We have to
   # use explicit compile, assemble and link commands since sel_ldr doesn't
   # provide fork().
+
+  # currently x86_64 only
+  if [[ $NACL_ARCH != x86_64 ]]; then
+    return
+  fi
 
   compile_command="toolchain/bin/x86_64-nacl-clang -cc1 -triple x86_64--nacl
   -S -disable-free -main-file-name ${START_DIR}/hello.c -mrelocation-model
