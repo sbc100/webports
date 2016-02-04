@@ -183,15 +183,23 @@ static void handle_reply(struct PP_Var key, struct PP_Var value,
 
 struct PP_Var nspawn_send_request(struct PP_Var req_var) {
   /*
-   * naclprocess.js is required in order send requests to JavasCript.
+   * naclprocess.js is required in order send requests to JavaScript.
    * If NACL_PROCESS is not set in the environment then we assume it is
    * not present and exit early. Without this check we would block forever
    * waiting for a response for the JavaScript side.
+   *
+   * Only check this once per process, as some programs (emacs)
+   * engage in manipulation of the environment that may not be safely
+   * read at all times.
    */
-  const char* naclprocess = getenv("NACL_PROCESS");
-  if (naclprocess == NULL) {
-    fprintf(stderr, "nspawn_send_request called without NACL_PROCESS set\n");
-    return PP_MakeNull();
+  static int checked_for_nacl_process = 0;
+  if (!checked_for_nacl_process) {
+    const char* naclprocess = getenv("NACL_PROCESS");
+    if (naclprocess == NULL) {
+      fprintf(stderr, "nspawn_send_request called without NACL_PROCESS set\n");
+      return PP_MakeNull();
+    }
+    checked_for_nacl_process = 1;
   }
 
   int64_t id = get_request_id();
