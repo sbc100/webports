@@ -187,12 +187,12 @@ InstallStep() {
   MakeDir ${INSTALL_DIR}/
 
   LogExecute cp -r toolchain/* ${INSTALL_DIR}
-  for f in $(find ${INSTALL_DIR} -type l -name *-clang*${NACL_EXEEXT}); do
+  for f in $(find ${INSTALL_DIR} -type l -name "*-clang*${NACL_EXEEXT}"); do
     # link to clang binary
     Remove $f ${f%.*}
     LogExecute ln -s clang ${f%.*}
   done
-  for f in $(find ${INSTALL_DIR} -executable -type f -name *${NACL_EXEEXT}); do
+  for f in $(find ${INSTALL_DIR} -type f -name "*${NACL_EXEEXT}"); do
     LogExecute mv $f ${f%.*}
   done
 }
