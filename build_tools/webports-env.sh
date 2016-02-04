@@ -29,7 +29,7 @@ if [ -z "${NACL_SDK_ROOT:-}" ]; then
   echo "the Native Client SDK (the directory containing toolchain/)."
   echo "NOTE: set this to an absolute path."
   echo "-------------------------------------------------------------------"
-  exit -1
+  exit 1
 fi
 
 # Pick platform directory for compiler.
@@ -80,14 +80,14 @@ if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
      ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" -a \
      ${NACL_ARCH} != "emscripten" ]; then
   echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
-  exit -1
+  exit 1
 fi
 
 # Check TOOLCHAIN
 if [ ${TOOLCHAIN} != "pnacl" -a ${TOOLCHAIN} != "glibc" -a \
      ${TOOLCHAIN} != "clang-newlib" -a ${TOOLCHAIN} != "emscripten" ]; then
   echo "Unknown value for TOOLCHAIN: '${TOOLCHAIN}'" 1>&2
-  exit -1
+  exit 1
 fi
 
 if [ "${NACL_ARCH}" = "emscripten" -a -z "${EMSCRIPTEN:-}" ]; then
@@ -97,26 +97,26 @@ if [ "${NACL_ARCH}" = "emscripten" -a -z "${EMSCRIPTEN:-}" ]; then
   echo "the emscripten repository."
   echo "NOTE: set this to an absolute path."
   echo "-------------------------------------------------------------------"
-  exit -1
+  exit 1
 fi
 
 if [ "${TOOLCHAIN}" = "pnacl" ]; then
   if [ "${NACL_ARCH}" != "pnacl" ]; then
     echo "PNaCl does not support the selected architecture: ${NACL_ARCH}" 1>&2
-    exit -1
+    exit 1
   fi
 fi
 
 if [ "${TOOLCHAIN}" = "glibc" ]; then
   if [ "${NACL_ARCH}" = "pnacl" ]; then
     echo "PNaCl is not supported by the glibc toolchain" 1>&2
-    exit -1
+    exit 1
   fi
   NACL_LIBC=glibc
 elif [ "${TOOLCHAIN}" = "emscripten" ]; then
   if [ "${NACL_ARCH}" != "emscripten" ]; then
     echo "emscripten does not support this architecture: ${NACL_ARCH}" 1>&2
-    exit -1
+    exit 1
   fi
   NACL_LIBC=emscripten
 else
@@ -159,7 +159,7 @@ InitializeNaClGccToolchain() {
 
   if [ ! -d "${NACL_TOOLCHAIN_ROOT}" ]; then
     echo "Toolchain not found: ${NACL_TOOLCHAIN_ROOT}"
-    exit -1
+    exit 1
   fi
 
   NACLCC=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-gcc

@@ -597,7 +597,7 @@ Fetch() {
 
   if [ ! -s "${FILENAME}" ]; then
     echo "ERROR: failed to download ${FILENAME}"
-    exit -1
+    exit 1
   fi
 }
 
@@ -635,7 +635,7 @@ ChangeDir() {
     cd "${NAME}"
   else
     echo "ChangeDir called with bad path."
-    exit -1
+    exit 1
   fi
 }
 
@@ -646,7 +646,7 @@ Remove() {
       rm -rf "${filename}"
     else
       echo "Remove called with bad path: ${filename}"
-      exit -1
+      exit 1
     fi
   done
 }
@@ -658,7 +658,7 @@ MakeDir() {
     mkdir -p "${NAME}"
   else
     echo "MakeDir called with bad path."
-    exit -1
+    exit 1
   fi
 }
 
