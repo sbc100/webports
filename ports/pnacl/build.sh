@@ -164,7 +164,7 @@ CreateHybridToolchain() {
   done
 
   # Now create launcher scripts for each executable
-  for f in toolchain/bin/*${NACL_EXEEXT}; do
+  for f in $(find toolchain -name *${NACL_EXEEXT}); do
     script=${f%.*}
     if [[ ${TOOLCHAIN} == pnacl ]]; then
       TranslateAndWriteLauncherScript "${f}" x86-64 "${script}.nexe" "${script}"
