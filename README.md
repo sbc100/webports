@@ -38,6 +38,7 @@ Prerequistes
 The minimum requirements for using webports are:
 
 - python 2.7
+- python-dev
 - gclient (from depot\_tools)
 - Native Client SDK
 
@@ -80,12 +81,19 @@ On older Debian/Ubuntu systems these packages were known as:
 - lib32z1-dev
 - libssl1.0.0:i386
 
+The following 32-bit packages are also needed in order to run some
+of the 32-bit binaries in the NaCl SDK:
+
+- libstdc++6:i386
+- libglib2.0-0:i386
+
 How to Checkout
 ---------------
 
 Although the code is stored in git webports uses `gclient` to manage
-the checkout of dependencies. You will need to install `depot_tools` in
-order to gclient.
+the checkout of dependencies. You will need to
+[install depot\_tools](https://www.chromium.org/developers/how-tos/install-depot-tools)
+in order to use gclient.
 
 Use the following steps to correctly checkout webports:
 
@@ -125,6 +133,7 @@ build just one at at time. You can control which one by setting the
 `NACL_ARCH` environment variable. e.g.:
 
 ```
+$ cd src
 $ NACL_ARCH=arm make openssl
 ```
 
@@ -177,7 +186,8 @@ If the package version does not match the package will always be built
 from source.
 
 If you want to force a package to be built from source you can pass
-`--from-source` to the webports script.
+`--from-source` to the webports script, or specify `FROM_SOURCE=1`
+on the make command line.
 
 Emscripten Support
 ------------------
