@@ -107,12 +107,23 @@ $ cd webports
 2. Create a .gclient Configuration:
 
 ```
-$ gclient config --name=src https://chromium.googlesource.com/webports.git
+$ gclient config --unmanaged --name=src \
+    https://chromium.googlesource.com/webports.git
 ```
 
-3. Sync to the dependencies:
+3. Sync the code and dependencies:
 
 ```
+$ gclient sync --with_branch_heads
+```
+
+4. Optionally Checkout the relevant branch.  The master branch is designed
+to be used with pepper_canary.  For older SDK versions switch the corresponding
+pepper_XX branch, e.g:
+
+```
+$ cd src
+$ git checkout -b pepper_49 origin/pepper_49
 $ gclient sync
 ```
 
