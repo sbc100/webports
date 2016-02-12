@@ -85,12 +85,11 @@ class Package(object):
     return '<Package %s %s %s>' % (self.NAME, self.VERSION, self.config)
 
   def InfoString(self):
-    return "'%s' [%s]" % (self.NAME, self.config)
+    return "'%s' [%s]" % ((util.Color(self.NAME, 'yellow'),
+                           util.Color(self.config, 'blue')))
 
-  def LogStatus(self, message, suffix=''):
-    util.LogHeading(message, " '%s' [%s] %s" %
-                    (util.Color(self.NAME, 'yellow'),
-                     util.Color(self.config, 'blue'), suffix))
+  def LogStatus(self, message):
+    util.LogHeading(message, " " + self.InfoString())
 
   def CheckDeps(self, valid_packages):
     for package in self.DEPENDS:

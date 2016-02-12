@@ -395,7 +395,7 @@ class SourcePackage(package.Package):
                           cwd=self.root,
                           env=env)
     if rtn != 0:
-      raise Error("Building %s: failed." % (self.NAME))
+      raise Error('Build failed: %s' % self.InfoString())
 
   def Download(self, force_mirror=None):
     """Download upstream sources and verify integrity."""
