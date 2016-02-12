@@ -22,7 +22,7 @@ test_dir = os.path.join(SCRIPT_DIR, 'tests')
 test_out_dir = os.path.join(GDB_OUT_DIR, 'tests')
 
 if __name__ == '__main__':
-  chrome_test.Main([
+  chrome_test.main([
       '-C', test_dir,
       '-C', test_out_dir,
       '-t', '60',

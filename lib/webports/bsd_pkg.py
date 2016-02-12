@@ -22,7 +22,8 @@ from webports.error import Error
 
 INSTALL_PREFIX = 'usr'
 
-def WriteUCL(outfile, ucl_dict):
+
+def write_ucl(outfile, ucl_dict):
   """Write a dictionary to file in UCL format"""
 
   # See: https://github.com/vstakhov/libucl
@@ -47,12 +48,12 @@ def WriteUCL(outfile, ucl_dict):
     f.write('}\n')
 
 
-def ParseDir(payload_dir, file_dict, prefix):
+def parse_dir(payload_dir, file_dict, prefix):
   for filename in os.listdir(payload_dir):
     if not filename.startswith('+'):
       fullname = os.path.join(payload_dir, filename)
       if os.path.isdir(fullname):
-        ParseDir(fullname, file_dict, prefix + filename + '/')
+        parse_dir(fullname, file_dict, prefix + filename + '/')
       elif os.path.islink(fullname):
         continue
       else:
@@ -65,7 +66,7 @@ def ParseDir(payload_dir, file_dict, prefix):
           file_dict[prefix + filename] = hashlib.sha256(f.read()).hexdigest()
 
 
-def AddFilesInDir(content_dir, tar, prefix):
+def add_files_in_dir(content_dir, tar, prefix):
   for filename in os.listdir(content_dir):
     fullname = os.path.join(content_dir, filename)
     arcname = fullname.replace(prefix, '')
@@ -75,8 +76,8 @@ def AddFilesInDir(content_dir, tar, prefix):
     if os.path.islink(fullname):
       link_target = os.path.realpath(fullname)
       if os.path.isabs(link_target):
-        link_target = link_target.replace(binary_package.INSTALL_PREFIX, prefix
-            + '/' + INSTALL_PREFIX)
+        link_target = link_target.replace(binary_package.INSTALL_PREFIX,
+                                          prefix + '/' + INSTALL_PREFIX)
       if not os.path.exists(link_target):
         raise Exception('Package contains dangling link: %s' % fullname)
       if os.path.isdir(link_target):
@@ -85,7 +86,7 @@ def AddFilesInDir(content_dir, tar, prefix):
       shutil.copyfile(link_target, fullname)
 
     if os.path.isdir(fullname):
-      AddFilesInDir(fullname, tar, prefix)
+      add_files_in_dir(fullname, tar, prefix)
     elif os.path.islink(fullname):
       info = tar.gettarinfo(fullname)
       info.name = arcname
@@ -108,7 +109,7 @@ def AddFilesInDir(content_dir, tar, prefix):
 DEFAULT_LOCATIONS = ('ports', 'ports/python_modules')
 
 
-def AddPackageDep(dep_dict, dep):
+def add_package_dep(dep_dict, dep):
   dep_dict['origin'] = dep
 
   if os.path.isdir(dep):
@@ -117,8 +118,7 @@ def AddPackageDep(dep_dict, dep):
     return
 
   for subdir in DEFAULT_LOCATIONS:
-    pkg_info_file = os.path.join(paths.NACLPORTS_ROOT,
-                                 subdir, dep, 'pkg_info')
+    pkg_info_file = os.path.join(paths.NACLPORTS_ROOT, subdir, dep, 'pkg_info')
 
     if os.path.exists(pkg_info_file):
       dep_dict['version'] = package.Package(info_file=pkg_info_file).VERSION
@@ -126,30 +126,30 @@ def AddPackageDep(dep_dict, dep):
 
   raise Error("Package not found: %s" % dep)
 
-
 # These packages are are built-time only depednecies and we won't want
 # encode them into the pkg file deps.
 BUILD_ONLY_DEPS = [
-  'glibc-compat',
-  'libtar',
-  'python-host',
-  'gmp',
-  'mpfr',
-  'mpc',
+    'glibc-compat',
+    'libtar',
+    'python-host',
+    'gmp',
+    'mpfr',
+    'mpc',
 ]
 
-def CreateDependencies(depends_dict, depends):
+
+def create_dependencies(depends_dict, depends):
   for dep in depends:
     if dep in BUILD_ONLY_DEPS:
       continue
     dep_dict = collections.OrderedDict()
-    AddPackageDep(dep_dict, dep)
+    add_package_dep(dep_dict, dep)
     depends_dict[dep] = dep_dict
 
 
-def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):
+def create_pkg_file(name, version, arch, payload_dir, outfile, depends):
   """Create an archive file in FreeBSD's pkg file format"""
-  util.Log('Creating pkg package: %s' % outfile)
+  util.log('Creating pkg package: %s' % outfile)
   manifest = collections.OrderedDict()
   manifest['name'] = name
   manifest['version'] = version
@@ -166,7 +166,7 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):
 
   if depends:
     depends_dict = collections.OrderedDict()
-    CreateDependencies(depends_dict, depends)
+    create_dependencies(depends_dict, depends)
     manifest['deps'] = depends_dict
 
   temp_dir = os.path.splitext(outfile)[0] + '.tmp'
@@ -176,11 +176,11 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):
 
   content_dir = os.path.join(temp_dir, INSTALL_PREFIX)
   shutil.copytree(payload_dir, content_dir, symlinks=True)
-  WriteUCL(os.path.join(temp_dir, '+COMPACT_MANIFEST'), manifest)
+  write_ucl(os.path.join(temp_dir, '+COMPACT_MANIFEST'), manifest)
   file_dict = collections.OrderedDict()
-  ParseDir(temp_dir, file_dict, '/')
+  parse_dir(temp_dir, file_dict, '/')
   manifest['files'] = file_dict
-  WriteUCL(os.path.join(temp_dir, '+MANIFEST'), manifest)
+  write_ucl(os.path.join(temp_dir, '+MANIFEST'), manifest)
 
   with tarfile.open(outfile, 'w:bz2') as tar:
     for filename in os.listdir(temp_dir):
@@ -191,5 +191,5 @@ def CreatePkgFile(name, version, arch, payload_dir, outfile, depends):
     for filename in os.listdir(temp_dir):
       if not filename.startswith('+'):
         fullname = os.path.join(temp_dir, filename)
-        AddFilesInDir(fullname, tar, temp_dir)
+        add_files_in_dir(fullname, tar, temp_dir)
   shutil.rmtree(temp_dir)

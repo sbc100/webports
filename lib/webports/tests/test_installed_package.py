@@ -18,26 +18,26 @@ BUILD_NACLPORTS_REVISION=98765
 '''
 
 
-def CreateMockInstalledPackage():
-  file_mock = common.MockFileObject(test_info)
+def create_mock_installed_package():
+  file_mock = common.mock_file_object(test_info)
   with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
     return installed_package.InstalledPackage('dummy_file')
 
 
 class TestInstalledPackage(common.NaclportsTest):
 
-  @patch('webports.util.Log', Mock())
-  @patch('webports.installed_package.RemoveFile')
-  @patch('webports.installed_package.InstalledPackageIterator',
-      Mock(return_value=[]))
+  @patch('webports.util.log', Mock())
+  @patch('webports.installed_package.remove_file')
+  @patch('webports.installed_package.installed_package_iterator',
+         Mock(return_value=[]))
   @patch('os.path.lexists', Mock(return_value=True))
   @patch('os.path.exists', Mock(return_value=True))
-  def testUninstall(self, remove_patch):  # pylint: disable=no-self-use
-    pkg = CreateMockInstalledPackage()
-    pkg.Files = Mock(return_value=['f1', 'f2'])
-    pkg.Uninstall()
+  def test_uninstall(self, remove_patch):  # pylint: disable=no-self-use
+    pkg = create_mock_installed_package()
+    pkg.files = Mock(return_value=['f1', 'f2'])
+    pkg.uninstall()
 
-    # Assert that exactly 4 files we removed using RemoveFile
+    # Assert that exactly 4 files we removed using remove_file
     calls = [call('/package/install/path/var/lib/npkg/foo.info'),
              call('/package/install/path/f1'),
              call('/package/install/path/f2'),

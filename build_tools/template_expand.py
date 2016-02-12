@@ -6,7 +6,7 @@
 import sys
 
 
-def Main(argv):
+def main(argv):
   # Check the number of arguments.
   if len(argv) < 2:
     sys.stderr.write('Usage: %s <template> [KEY=VALUE]*\n' % argv[0])
@@ -25,4 +25,4 @@ def Main(argv):
 
 
 if __name__ == '__main__':
-  sys.exit(Main(sys.argv))
+  sys.exit(main(sys.argv))

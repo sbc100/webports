@@ -14,7 +14,7 @@ VALID_KEYS = ['NAME', 'VERSION', 'URL', 'ARCHIVE_ROOT', 'LICENSE', 'DEPENDS',
 REQUIRED_KEYS = ['NAME', 'VERSION']
 
 
-def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
+def parse_pkg_info(contents, filename, valid_keys=None, required_keys=None):
   """Parse a string contains the contents of a pkg_info file.
 
   Args:
@@ -36,7 +36,7 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
   if required_keys is None:
     required_keys = REQUIRED_KEYS
 
-  def ParsePkgInfoLine(line, line_no):
+  def parse_pkg_info_line(line, line_no):
     if '=' not in line:
       raise PkgFormatError('Invalid info line %s:%d' % (filename, line_no))
     key, value = line.split('=', 1)
@@ -54,7 +54,7 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
       value = shlex.split(value)[0]
     return (key, value)
 
-  def ExpandVars(value, substitutions):
+  def expand_vars(value, substitutions):
     if isinstance(value, str):
       return string.Template(value).substitute(substitutions)
     else:
@@ -63,11 +63,11 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
   for i, line in enumerate(contents.splitlines()):
     if not line or line[0] == '#':
       continue
-    key, raw_value = ParsePkgInfoLine(line, i + 1)
+    key, raw_value = parse_pkg_info_line(line, i + 1)
     if key in rtn:
       raise PkgFormatError('Error parsing %s:%d: duplicate key (%s)' %
                            (filename, i + 1, key))
-    rtn[key] = ExpandVars(raw_value, rtn)
+    rtn[key] = expand_vars(raw_value, rtn)
 
   for required_key in required_keys:
     if required_key not in rtn:
@@ -77,7 +77,7 @@ def ParsePkgInfo(contents, filename, valid_keys=None, required_keys=None):
   return rtn
 
 
-def ParsePkgInfoFile(filename, valid_keys=None, required_keys=None):
+def parse_pkg_info_file(filename, valid_keys=None, required_keys=None):
   """Parse pkg_info from a file on disk."""
   with open(filename) as f:
-    return ParsePkgInfo(f.read(), filename, valid_keys, required_keys)
+    return parse_pkg_info(f.read(), filename, valid_keys, required_keys)

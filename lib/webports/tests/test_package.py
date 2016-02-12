@@ -13,32 +13,32 @@ VERSION=0.1
 '''
 
 
-class TestPackage(unittest.TestCase):
+class test_package(unittest.TestCase):
 
-  def testValidLibcDisabled(self):  # pylint: disable=no-self-use
+  def test_valid_libc_disabled(self):  # pylint: disable=no-self-use
     pkg = package.Package()
-    pkg.ParseInfo(test_info + 'DISABLED_LIBC=(newlib glibc)')
+    pkg.parse_info(test_info + 'DISABLED_LIBC=(newlib glibc)')
 
-  def testInvalidLibcDisabled(self):
+  def test_invalid_libc_disabled(self):
     pkg = package.Package()
     # clang-newlib is a toolchain, not a libc
     with self.assertRaisesRegexp(error.Error, 'invalid libc: clang-newlib'):
-      pkg.ParseInfo(test_info + 'DISABLED_LIBC=(clang-newlib)')
+      pkg.parse_info(test_info + 'DISABLED_LIBC=(clang-newlib)')
 
-  def testValidToolchainDisabled(self):  # pylint: disable=no-self-use
+  def test_valid_toolchain_disabled(self):  # pylint: disable=no-self-use
     pkg = package.Package()
-    pkg.ParseInfo(test_info + 'DISABLED_TOOLCHAIN=(pnacl glibc clang-newlib)')
+    pkg.parse_info(test_info + 'DISABLED_TOOLCHAIN=(pnacl glibc clang-newlib)')
 
-  def testInvalidToolchainDisabled(self):
+  def test_invalid_toolchain_disabled(self):
     pkg = package.Package()
     with self.assertRaisesRegexp(error.Error, 'invalid toolchain: foo'):
-      pkg.ParseInfo(test_info + 'DISABLED_TOOLCHAIN=(foo)')
+      pkg.parse_info(test_info + 'DISABLED_TOOLCHAIN=(foo)')
 
-  def testValidArchDisabled(self):  # pylint: disable=no-self-use
+  def test_valid_arch_disabled(self):  # pylint: disable=no-self-use
     pkg = package.Package()
-    pkg.ParseInfo(test_info + 'DISABLED_ARCH=(arm i686 x86_64)')
+    pkg.parse_info(test_info + 'DISABLED_ARCH=(arm i686 x86_64)')
 
-  def testInvalidArchDisabled(self):
+  def test_invalid_arch_disabled(self):
     pkg = package.Package()
     with self.assertRaisesRegexp(error.Error, 'invalid architecture: foo'):
-      pkg.ParseInfo(test_info + 'DISABLED_ARCH=(foo)')
+      pkg.parse_info(test_info + 'DISABLED_ARCH=(foo)')

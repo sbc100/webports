@@ -21,12 +21,12 @@ GS_URL = 'http://storage.googleapis.com'
 CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%s/%s'
 CHROME_DOWNLOAD_DIR = os.path.join(webports.paths.OUT_DIR, 'downloaded_chrome')
 
-def ChromeDir(arch):
+def chrome_dir(arch):
   """Get the directory to download chrome to."""
   return os.path.join(CHROME_DOWNLOAD_DIR, arch)
 
 
-def ChromeArchiveRoot():
+def chrome_archive_root():
   if sys.platform == 'win32':
     return 'chrome-win32'
   elif sys.platform == 'darwin':
@@ -37,7 +37,7 @@ def ChromeArchiveRoot():
     raise webports.error.Error('Unknown platform: %s' % sys.platform)
 
 
-def ChromeUrl(arch, revision):
+def chrome_url(arch, revision):
   """Get the URL to download chrome from.
 
   Args:
@@ -67,7 +67,7 @@ def ChromeUrl(arch, revision):
   return CHROME_URL_FORMAT % (target, revision, filename)
 
 
-def DoDownload(url, destination):
+def do_download(url, destination):
   """Download chrome.
 
   Download chrome to a particular destination, leaving a stamp containing the
@@ -95,9 +95,9 @@ def DoDownload(url, destination):
 
   logging.info('Downloading chrome from %s to %s...' % (url, destination))
   chrome_zip = os.path.join(webports.paths.CACHE_ROOT, os.path.basename(url))
-  webports.util.Makedirs(os.path.dirname(chrome_zip))
+  webports.util.makedirs(os.path.dirname(chrome_zip))
   try:
-    webports.util.DownloadFile(chrome_zip, url)
+    webports.util.download_file(chrome_zip, url)
   except webports.error.Error as e:
     logging.error('Unable to download chrome: %s' % str(e))
     sys.exit(1)
@@ -106,7 +106,7 @@ def DoDownload(url, destination):
   pnacl_zip = os.path.join(webports.paths.CACHE_ROOT, 'pnacl.zip')
   logging.info('Downloading pnacl component from %s ...' % url)
   try:
-    webports.util.DownloadFile(pnacl_zip, pnacl_url)
+    webports.util.download_file(pnacl_zip, pnacl_url)
   except webports.error.Error as e:
     logging.error('Unable to download chrome: %s' % str(e))
     sys.exit(1)
@@ -139,7 +139,7 @@ def DoDownload(url, destination):
   with zipfile.ZipFile(pnacl_zip) as zip_archive:
     zip_archive.extractall(destination)
 
-  chrome_root = os.path.join(destination, ChromeArchiveRoot())
+  chrome_root = os.path.join(destination, chrome_archive_root())
   pnacl_root = os.path.join(destination, 'pnacl', 'pnacl')
   logging.info('Renaming pnacl directory %s -> %s' % (pnacl_root, chrome_root))
   os.rename(pnacl_root, os.path.join(chrome_root, 'pnacl'))
@@ -150,13 +150,13 @@ def DoDownload(url, destination):
   logging.info('Done.')
 
 
-def DownloadChrome(arch, revision):
-  target_dir = ChromeDir(arch)
-  DoDownload(ChromeUrl(arch, revision), target_dir)
-  return os.path.join(target_dir, ChromeArchiveRoot())
+def download_chrome(arch, revision):
+  target_dir = chrome_dir(arch)
+  do_download(chrome_url(arch, revision), target_dir)
+  return os.path.join(target_dir, chrome_archive_root())
 
 
-def RunMain(argv):
+def run_main(argv):
   parser = argparse.ArgumentParser(prog='download_chrome', description=__doc__)
   parser.add_argument('-a', '--arch', default='x86_64',
                       choices=['x86_64', 'i686'],
@@ -164,14 +164,14 @@ def RunMain(argv):
   logging.basicConfig(format='%(message)s', level=logging.INFO)
   parser.add_argument('revision')
   options = parser.parse_args(argv)
-  dirname = DownloadChrome(options.arch, options.revision)
+  dirname = download_chrome(options.arch, options.revision)
   logging.info('Chrome %s downloaded to: %s' % (options.revision, dirname))
   return 0
 
 
 def main(argv):
   try:
-    return RunMain(argv)
+    return run_main(argv)
   except KeyboardInterrupt:
     sys.stderr.write('interrupted\n')
     return 1

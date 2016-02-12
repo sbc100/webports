@@ -10,32 +10,32 @@ import common
 
 class TestParsePkgInfo(common.NaclportsTest):
 
-  def testInvalidLine(self):
+  def test_invalid_line(self):
     expected_error = 'Invalid info line dummy_file:1'
     with self.assertRaisesRegexp(error.Error, expected_error):
-      pkg_info.ParsePkgInfo('line without equals sign', 'dummy_file')
+      pkg_info.parse_pkg_info('line without equals sign', 'dummy_file')
 
-  def testBalnkLine(self):
-    result = pkg_info.ParsePkgInfo('NAME=foo\n\nVERSION=bar', 'dummy_file')
+  def test_blank_line(self):
+    result = pkg_info.parse_pkg_info('NAME=foo\n\nVERSION=bar', 'dummy_file')
     self.assertEqual(result, {'NAME': 'foo', 'VERSION': 'bar'})
 
-  def testComments(self):
-    result = pkg_info.ParsePkgInfo('NAME=foo # tail\n# line\nVERSION=bar',
-                                   'dummy_file')
+  def test_comments(self):
+    result = pkg_info.parse_pkg_info('NAME=foo # tail\n# line\nVERSION=bar',
+                                     'dummy_file')
     self.assertEqual(result, {'NAME': 'foo', 'VERSION': 'bar'})
 
-  def testValidKeys(self):
+  def test_valid_keys(self):
     expected_error = "Invalid key 'BAR' in info file dummy_file:2"
     contents = 'FOO=bar\nBAR=baz\n'
     valid = ['FOO']
     required = []
     with self.assertRaisesRegexp(error.Error, expected_error):
-      pkg_info.ParsePkgInfo(contents, 'dummy_file', valid, required)
+      pkg_info.parse_pkg_info(contents, 'dummy_file', valid, required)
 
-  def testRequiredKeys(self):
+  def test_required_keys(self):
     expected_error = "Required key 'BAR' missing from info file: 'dummy_file'"
     contents = 'FOO=bar\n'
     valid = ['FOO']
     required = ['BAR']
     with self.assertRaisesRegexp(error.Error, expected_error):
-      pkg_info.ParsePkgInfo(contents, 'dummy_file', valid, required)
+      pkg_info.parse_pkg_info(contents, 'dummy_file', valid, required)

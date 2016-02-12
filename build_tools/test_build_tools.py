@@ -14,7 +14,7 @@ import update_mirror
 from find_effected_packages import find_effected_packages
 
 
-def MockFileObject(contents):
+def mock_file_object(contents):
   file_mock = Mock(name="file_mock", spec=file)
   file_mock.read.return_value = contents
   file_mock.__enter__ = lambda s: s
@@ -25,7 +25,7 @@ def MockFileObject(contents):
 class TestPatchConfigure(unittest.TestCase):
 
   @patch('sys.stderr', new_callable=StringIO.StringIO)
-  def testMissingFile(self, stderr):
+  def test_missing_file(self, stderr):
     rtn = patch_configure.main(['non-existent/configure-script'])
     self.assertEqual(rtn, 1)
     expected = '^configure script not found: non-existent/configure-script$'
@@ -34,69 +34,69 @@ class TestPatchConfigure(unittest.TestCase):
 
 class TestScanPackages(unittest.TestCase):
 
-  def testCheckHash(self):  # pylint: disable=no-self-use
-    file_mock = MockFileObject('1234\n')
+  def test_check_hash(self):  # pylint: disable=no-self-use
+    file_mock = mock_file_object('1234\n')
     md5 = Mock()
     md5.hexdigest.return_value('4321')
     with patch('__builtin__.open', Mock(return_value=file_mock), create=True):
-      scan_packages.CheckHash('foo', '1234')
+      scan_packages.check_hash('foo', '1234')
 
   @patch('webports.package_index.PREBUILT_ROOT', 'dummydir')
-  @patch('scan_packages.Log', Mock())
-  @patch('scan_packages.CheckHash')
+  @patch('scan_packages.log', Mock())
+  @patch('scan_packages.check_hash')
   @patch('os.path.exists', Mock(return_value=True))
-  def testDownloadFiles(self, check_hash_mock):  # pylint: disable=no-self-use
+  def test_download_files(self, check_hash_mock):  # pylint: disable=no-self-use
     check_hash_mock.return_value = True
     file_info = scan_packages.FileInfo(name='foo', size=10, gsurl='gs://test',
                                        url='http://host/base', md5='hashval')
-    scan_packages.DownloadFiles([file_info])
+    scan_packages.download_files([file_info])
     check_hash_mock.assert_called_once_with('dummydir/base', 'hashval')
 
 
 class TestUpdateMirror(unittest.TestCase):
 
-  @patch('webports.util.FindInPath', Mock())
-  def testCheckMirror_CheckOnly(self):
-    pkg = webports.source_package.CreatePackage('zlib')
-    pkg.GetArchiveFilename = Mock(return_value='file.tar.gz')
+  @patch('webports.util.find_in_path', Mock())
+  def test_check_mirror_check_only(self):
+    pkg = webports.source_package.create_package('zlib')
+    pkg.get_archive_filename = Mock(return_value='file.tar.gz')
     options = Mock()
     options.check = True
-    update_mirror.CheckMirror(options, pkg, ['file.tar.gz'])
+    update_mirror.check_mirror(options, pkg, ['file.tar.gz'])
 
     with self.assertRaises(SystemExit):
-      update_mirror.CheckMirror(options, pkg, [])
+      update_mirror.check_mirror(options, pkg, [])
 
-  @patch('webports.util.FindInPath', Mock())
-  @patch('update_mirror.GsUpload')
-  def testCheckMirror_WithDownload(self, upload_mock):
+  @patch('webports.util.find_in_path', Mock())
+  @patch('update_mirror.gs_upload')
+  def test_check_mirror_with_download(self, upload_mock):
     mock_download = Mock()
-    pkg = webports.source_package.CreatePackage('zlib')
-    pkg.Download = mock_download
+    pkg = webports.source_package.create_package('zlib')
+    pkg.download = mock_download
 
-    pkg.GetArchiveFilename = Mock(return_value='file.tar.gz')
+    pkg.get_archive_filename = Mock(return_value='file.tar.gz')
     options = Mock()
     options.check = False
-    update_mirror.CheckMirror(options, pkg, ['file.tar.gz'])
-    update_mirror.CheckMirror(options, pkg, [])
+    update_mirror.check_mirror(options, pkg, ['file.tar.gz'])
+    update_mirror.check_mirror(options, pkg, [])
 
     upload_mock.assert_called_once_with(
-        options, pkg.DownloadLocation(),
+        options, pkg.download_location(),
         update_mirror.MIRROR_GS + '/file.tar.gz')
 
-  @patch('update_mirror.CheckMirror')
-  def testCheckPackages(self, check_mirror):
+  @patch('update_mirror.check_mirror')
+  def test_check_packages(self, check_mirror):
     mirror_listing = ['foo']
     mock_options = Mock()
-    update_mirror.CheckPackages(mock_options, ['a', 'b', 'c'], mirror_listing)
+    update_mirror.check_packages(mock_options, ['a', 'b', 'c'], mirror_listing)
     check_mirror.assert_calls([mock.call(mock_options, 'a', mirror_listing),
                                mock.call(mock_options, 'b', mirror_listing),
                                mock.call(mock_options, 'c', mirror_listing)])
 
-  @patch('webports.source_package.SourcePackageIterator')
-  @patch('webports.util.FindInPath', Mock())
-  @patch('update_mirror.GetMirrorListing', Mock(return_value=['foo']))
-  @patch('update_mirror.CheckPackages')
-  def testMain(self, check_packages, source_package_iter):
+  @patch('webports.source_package.source_package_iterator')
+  @patch('webports.util.find_in_path', Mock())
+  @patch('update_mirror.get_mirror_listing', Mock(return_value=['foo']))
+  @patch('update_mirror.check_packages')
+  def test_main(self, check_packages, source_package_iter):
     mock_iter = Mock()
     source_package_iter.return_value = mock_iter
 

@@ -21,12 +21,12 @@ sys.path.append(os.path.join(os.path.dirname(SCRIPT_DIR), 'lib'))
 
 import webports
 
-from scan_packages import FindGsutil, ParseGsUtilOutput, \
-  FormatSize, CheckHash, GetHash
-from webports.util import Log, LogVerbose
+from scan_packages import find_gsutil, parse_gs_util_output, \
+  format_size, check_hash, get_hash
+from webports.util import log, log_verbose
 
 
-def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
+def download_files(pkg_dir, files, check_hashes=True, parallel=False):
   """Download one of more files to the local disk.
 
   Args:
@@ -51,25 +51,25 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
     file_info.rel_name = file_info.name[len(webports.paths.NACLPORTS_ROOT)+1:]
     filenames.append((file_info.name, file_info.url))
     if os.path.exists(file_info.name):
-      if not check_hashes or CheckHash(file_info.name, file_info.md5):
-        Log('Up-to-date: %s' % file_info.rel_name)
+      if not check_hashes or check_hash(file_info.name, file_info.md5):
+        log('Up-to-date: %s' % file_info.rel_name)
         continue
     files_to_download.append(file_info)
 
-  def Check(file_info):
-    if check_hashes and not CheckHash(file_info.name, file_info.md5):
+  def check(file_info):
+    if check_hashes and not check_hash(file_info.name, file_info.md5):
       raise webports.Error(
           'Checksum failed: %s\nExpected=%s\nActual=%s' %
-          (file_info.rel_name, file_info.md5, GetHash(file_info.name)))
+          (file_info.rel_name, file_info.md5, get_hash(file_info.name)))
 
   if not files_to_download:
-    Log('All files up-to-date')
+    log('All files up-to-date')
   else:
     total_size = sum(f.size for f in files_to_download)
-    Log('Need to download %d/%d files [%s]' %
-        (len(files_to_download), len(files), FormatSize(total_size)))
+    log('Need to download %d/%d files [%s]' %
+        (len(files_to_download), len(files), format_size(total_size)))
 
-    gsutil = FindGsutil()
+    gsutil = find_gsutil()
     if parallel:
       remaining_files = files_to_download
       num_files = 20
@@ -77,14 +77,14 @@ def DownloadFiles(pkg_dir, files, check_hashes=True, parallel=False):
         files = remaining_files[:num_files]
         remaining_files = remaining_files[num_files:]
         cmd = gsutil + ['-m', 'cp'] + [f.gsurl for f in files] + [download_dir]
-        LogVerbose(cmd)
+        log_verbose(cmd)
         subprocess.check_call(cmd)
         for file_info in files:
-          Check(file_info)
+          check(file_info)
     else:
       for file_info in files_to_download:
-        webports.DownloadFile(file_info.name, file_info.url)
-        Check(file_info)
+        webports.download_file(file_info.name, file_info.url)
+        check(file_info)
 
   return filenames
 
@@ -103,16 +103,16 @@ def main(args):
                       help='Assume on-disk files are up-to-date (for testing).')
   args = parser.parse_args(args)
   if args.verbose:
-    webports.SetVerbose(True)
+    webports.set_verbose(True)
 
-  sdk_version = webports.util.GetSDKVersion()
-  Log('Scanning packages built for pepper_%s at revsion %s' %
+  sdk_version = webports.util.get_sdk_version()
+  log('Scanning packages built for pepper_%s at revsion %s' %
       (sdk_version, args.revision))
   base_path = '%s/builds/pepper_%s/%s/publish' % (webports.GS_BUCKET,
                                                    sdk_version, args.revision)
   gs_base_url = 'gs://' + base_path
-  cmd = FindGsutil() + ['ls', gs_base_url]
-  LogVerbose('Running: %s' % str(cmd))
+  cmd = find_gsutil() + ['ls', gs_base_url]
+  log_verbose('Running: %s' % str(cmd))
   try:
     all_published = subprocess.check_output(cmd)
   except subprocess.CalledProcessError as e:
@@ -123,14 +123,14 @@ def main(args):
     listing_file = os.path.join(webports.NACLPORTS_ROOT, 'lib',
                                 pkg + '_' + 'listing.txt')
     if args.cache_listing and os.path.exists(listing_file):
-      Log('Using pre-cached gs listing: %s' % listing_file)
+      log('Using pre-cached gs listing: %s' % listing_file)
       with open(listing_file) as f:
         listing = f.read()
     else:
       gs_url = gs_base_url + '/' + pkg + '/*'
-      Log('Searching for packages at: %s' % gs_url)
-      cmd = FindGsutil() + ['stat', gs_url]
-      LogVerbose('Running: %s' % str(cmd))
+      log('Searching for packages at: %s' % gs_url)
+      cmd = find_gsutil() + ['stat', gs_url]
+      log_verbose('Running: %s' % str(cmd))
       try:
         listing = subprocess.check_output(cmd)
       except subprocess.CalledProcessError as e:
@@ -138,11 +138,11 @@ def main(args):
       if args.cache_listing:
         with open(listing_file, 'w') as f:
           f.write(listing)
-    all_files = ParseGsUtilOutput(listing)
-    Log('Found %d packages [%s] for %s' % (len(all_files),
-        FormatSize(sum(f.size for f in all_files)), pkg))
-    DownloadFiles(pkg, all_files, not args.skip_md5, args.parallel)
-  Log('Done')
+    all_files = parse_gs_util_output(listing)
+    log('Found %d packages [%s] for %s' % (len(all_files),
+        format_size(sum(f.size for f in all_files)), pkg))
+    download_files(pkg, all_files, not args.skip_md5, args.parallel)
+  log('Done')
   return 0
 
 if __name__ == '__main__':

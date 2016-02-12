@@ -33,7 +33,7 @@ class QuittableHTTPServer(SocketServer.ThreadingMixIn,
   pass
 
 
-def KeyValuePair(string, sep='='):
+def key_value_pair(string, sep='='):
   """"Safely" split a string at |sep| into a [key, value] pair.
 
   If |sep| does not exist in |string|, then the entire |string| is the key and
@@ -56,7 +56,7 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
   def do_GET(self):
     (_, _, _, query, _) = urlparse.urlsplit(self.path)
-    url_params = dict([KeyValuePair(key_value)
+    url_params = dict([key_value_pair(key_value)
                        for key_value in query.split('&')])
     if 'quit' in url_params and '1' in url_params['quit']:
       self.send_response(200, 'OK')
@@ -135,7 +135,7 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     return f
 
 
-def Run(server_address,
+def run(server_address,
         server_class=QuittableHTTPServer,
         handler_class=QuittableHTTPHandler):
   httpd = server_class(server_address, handler_class)
@@ -153,7 +153,7 @@ def main(args):
     port = int(args[0])
   else:
     port = SERVER_PORT
-  Run((SERVER_HOST, port))
+  run((SERVER_HOST, port))
   return 0
 
 

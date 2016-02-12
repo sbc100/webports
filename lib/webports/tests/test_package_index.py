@@ -52,62 +52,62 @@ BUILD_NACLPORTS_REVISION=98765
 
 class TestPackageIndex(common.NaclportsTest):
 
-  def testParsingInvalid(self):
+  def test_parsing_invalid(self):
     contents = 'FOO=bar\nBAR=baz\n'
     expected_error = "Invalid key 'FOO' in info file dummy_file:1"
     with self.assertRaisesRegexp(error.Error, expected_error):
       package_index.PackageIndex('dummy_file', contents)
 
-  def testParsingValid(self):
+  def test_parsing_valid(self):
     index = package_index.PackageIndex('dummy_file', test_index)
     arm_config = Configuration('arm', 'glibc', False)
     i686_config = Configuration('i686', 'glibc', False)
     self.assertEqual(len(index.packages), 2)
-    self.assertTrue(index.Contains('agg-demo', arm_config))
-    self.assertTrue(index.Contains('agg-demo', i686_config))
+    self.assertTrue(index.contains('agg-demo', arm_config))
+    self.assertTrue(index.contains('agg-demo', i686_config))
 
-  def testContains(self):
+  def test_contains(self):
     # Create an empty package index and add a single entry to it
     index = package_index.PackageIndex('dummy_file', '')
     config_debug = Configuration('arm', 'glibc', True)
     config_release = Configuration('arm', 'glibc', False)
-    self.assertFalse(index.Contains('foo', config_release))
+    self.assertFalse(index.contains('foo', config_release))
     index.packages[('foo', config_release)] = {
         'NAME': 'dummy',
         'BUILD_SDK_VERSION': 123
     }
-    with patch('webports.util.GetSDKVersion') as mock_version:
+    with patch('webports.util.get_sdk_version') as mock_version:
       # Setting the mock SDK version to 123 should mean that the
       # index contains the 'foo' package and it is installable'
       mock_version.return_value = 123
-      self.assertTrue(index.Contains('foo', config_release))
-      self.assertTrue(index.Installable('foo', config_release))
+      self.assertTrue(index.contains('foo', config_release))
+      self.assertTrue(index.installable('foo', config_release))
 
       # Setting the mock SDK version to some other version should
       # mean the index contains that package but it is not installable.
       mock_version.return_value = 124
-      self.assertTrue(index.Contains('foo', config_release))
-      self.assertFalse(index.Installable('foo', config_release))
+      self.assertTrue(index.contains('foo', config_release))
+      self.assertFalse(index.installable('foo', config_release))
 
-      self.assertFalse(index.Contains('foo', config_debug))
-      self.assertFalse(index.Contains('bar', config_release))
+      self.assertFalse(index.contains('foo', config_debug))
+      self.assertFalse(index.contains('bar', config_release))
 
-  @patch('webports.util.Log', Mock())
+  @patch('webports.util.log', Mock())
   @patch('webports.package_index.PREBUILT_ROOT', os.getcwd())
-  @patch('webports.util.VerifyHash', Mock())
-  @patch('webports.util.DownloadFile')
-  def testDownload(self, download_file_mock):
+  @patch('webports.util.verify_hash', Mock())
+  @patch('webports.util.download_file')
+  def test_download(self, download_file_mock):
     index = package_index.PackageIndex('dummy_file', test_index)
     arm_config = Configuration('arm', 'glibc', False)
-    index.Download('agg-demo', arm_config)
+    index.download('agg-demo', arm_config)
     self.assertEqual(download_file_mock.call_count, 1)
 
-  @patch('webports.util.HashFile', Mock(return_value='sha1'))
+  @patch('webports.util.hash_file', Mock(return_value='sha1'))
   @patch('os.path.getsize', Mock(return_value=100))
-  def testWriteIndex(self):
+  def test_write_index(self):
     temp_file = tempfile.mkstemp('webports_test')[1]
     self.addCleanup(os.remove, temp_file)
 
-    with patch('webports.package_index.ExtractPkgInfo',
+    with patch('webports.package_index.extract_pkg_info',
                Mock(return_value=test_info)):
-      package_index.WriteIndex(temp_file, (('pkg1', 'url1'), ('pkg2', 'url2')))
+      package_index.write_index(temp_file, (('pkg1', 'url1'), ('pkg2', 'url2')))

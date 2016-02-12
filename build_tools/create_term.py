@@ -63,7 +63,7 @@ FORMAT = '%(filename)s: %(message)s'
 logging.basicConfig(format=FORMAT)
 
 
-def CreateTerm(filename, name=None, style=None, include=None):
+def create_term(filename, name=None, style=None, include=None):
   if not name:
     basename = os.path.basename(filename)
     name, _ = os.path.splitext(basename)
@@ -110,7 +110,7 @@ def main(args):
   if not options.verbose:
     logging.disable(logging.INFO)
 
-  CreateTerm(options.nmf, options.name, options.style, options.include)
+  create_term(options.nmf, options.name, options.style, options.include)
   return 0
 
 

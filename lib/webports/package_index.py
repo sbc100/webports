@@ -12,13 +12,13 @@ EXTRA_KEYS = package.EXTRA_KEYS + ['BIN_URL', 'BIN_SIZE', 'BIN_SHA1']
 PREBUILT_ROOT = os.path.join(paths.PACKAGES_ROOT, 'prebuilt')
 
 
-def ExtractPkgInfo(filename):
+def extract_pkg_info(filename):
   """Return the pkg_info contents from a binary package."""
   pkg = binary_package.BinaryPackage(filename)
-  return pkg.GetPkgInfo()
+  return pkg.get_pkg_info()
 
 
-def WriteIndex(index_filename, binaries):
+def write_index(index_filename, binaries):
   """Create a package index file from set of binaries on disk.
 
   Args:
@@ -33,29 +33,29 @@ def WriteIndex(index_filename, binaries):
   tmp_name = index_filename + '.tmp'
   with open(tmp_name, 'w') as output_file:
     for i, (filename, url) in enumerate(binaries):
-      sha1 = util.HashFile(filename)
+      sha1 = util.hash_file(filename)
       if i != 0:
         output_file.write('\n')
-      output_file.write(ExtractPkgInfo(filename))
+      output_file.write(extract_pkg_info(filename))
       output_file.write('BIN_URL=%s\n' % url)
       output_file.write('BIN_SIZE=%s\n' % os.path.getsize(filename))
       output_file.write('BIN_SHA1=%s\n' % sha1)
 
   os.rename(tmp_name, index_filename)
 
-  return IndexFromFile(index_filename)
+  return index_from_file(index_filename)
 
 
-def IndexFromFile(filename):
+def index_from_file(filename):
   with open(filename) as f:
     contents = f.read()
   return PackageIndex(filename, contents)
 
 
-def GetCurrentIndex():
+def get_current_index():
   if not os.path.exists(DEFAULT_INDEX):
     return PackageIndex('', '')
-  return IndexFromFile(DEFAULT_INDEX)
+  return index_from_file(DEFAULT_INDEX)
 
 
 class PackageIndex(object):
@@ -70,49 +70,49 @@ class PackageIndex(object):
   def __init__(self, filename, index_data):
     self.filename = filename
     self.packages = {}
-    self.ParseIndex(index_data)
+    self.parse_index(index_data)
 
-  def Contains(self, package_name, config):
+  def contains(self, package_name, config):
     """Returns True if the index contains the given package in the given
     configuration, False otherwise."""
     return (package_name, config) in self.packages
 
-  def Installable(self, package_name, config):
+  def installable(self, package_name, config):
     """Returns True if the index contains the given package and it is
     installable in the currently configured SDK."""
     info = self.packages.get((package_name, config))
     if not info:
       return False
-    version = util.GetSDKVersion()
+    version = util.get_sdk_version()
     if info['BUILD_SDK_VERSION'] != version:
-      util.LogVerbose('Prebuilt package was built with different SDK version: '
-                      '%s vs %s' % (info['BUILD_SDK_VERSION'], version))
+      util.log_verbose('Prebuilt package was built with different SDK version: '
+                       '%s vs %s' % (info['BUILD_SDK_VERSION'], version))
       return False
     return True
 
-  def Download(self, package_name, config):
+  def download(self, package_name, config):
     if not os.path.exists(PREBUILT_ROOT):
-      util.Makedirs(PREBUILT_ROOT)
+      util.makedirs(PREBUILT_ROOT)
     info = self.packages[(package_name, config)]
     filename = os.path.join(PREBUILT_ROOT, os.path.basename(info['BIN_URL']))
     if os.path.exists(filename):
       try:
-        util.VerifyHash(filename, info['BIN_SHA1'])
+        util.verify_hash(filename, info['BIN_SHA1'])
         return filename
       except util.HashVerificationError:
         pass
-    util.Log('Downloading prebuilt binary ...')
-    util.DownloadFile(filename, info['BIN_URL'])
-    util.VerifyHash(filename, info['BIN_SHA1'])
+    util.log('Downloading prebuilt binary ...')
+    util.download_file(filename, info['BIN_URL'])
+    util.verify_hash(filename, info['BIN_SHA1'])
     return filename
 
-  def ParseIndex(self, index_data):
+  def parse_index(self, index_data):
     if not index_data:
       return
 
     for info_files in index_data.split('\n\n'):
-      info = pkg_info.ParsePkgInfo(info_files, self.filename, self.valid_keys,
-                                   self.required_keys)
+      info = pkg_info.parse_pkg_info(info_files, self.filename, self.valid_keys,
+                                     self.required_keys)
       debug = info['BUILD_CONFIG'] == 'debug'
       config = configuration.Configuration(info['BUILD_ARCH'],
                                            info['BUILD_TOOLCHAIN'], debug)

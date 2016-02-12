@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 
-def Check(filename):
+def check(filename):
   lines = subprocess.check_output(
       [os.environ.get('OBJDUMP', 'objdump'), '-p', filename]).splitlines()
   needed = [i for i in lines if 'NEEDED' in i]
@@ -33,4 +33,4 @@ def Check(filename):
 
 
 if __name__ == '__main__':
-  sys.exit(Check(sys.argv[1]))
+  sys.exit(check(sys.argv[1]))

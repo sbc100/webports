@@ -55,19 +55,19 @@ log_level = LOG_INFO
 color_mode = 'auto'
 
 
-def Color(message, color):
-  if termcolor and Color.enabled:
+def colorize(message, color):
+  if termcolor and colorize.enabled:
     return termcolor.colored(message, color)
   else:
     return message
 
 
-def CheckStdoutForColorSupport():
+def check_stdout_for_color_support():
   if color_mode == 'auto':
-    Color.enabled = sys.stdout.isatty()
+    colorize.enabled = sys.stdout.isatty()
 
 
-def IsElfFile(filename):
+def is_elf_file(filename):
   if os.path.islink(filename):
     return False
   with open(filename) as f:
@@ -75,7 +75,7 @@ def IsElfFile(filename):
   return header == ELF_MAGIC
 
 
-def IsPexeFile(filename):
+def is_pexe_file(filename):
   if os.path.islink(filename):
     return False
   with open(filename) as f:
@@ -83,7 +83,7 @@ def IsPexeFile(filename):
   return header == PEXE_MAGIC
 
 
-def Memoize(f):
+def memoize(f):
   """Memoization decorator for functions taking one or more arguments."""
 
   class Memo(dict):
@@ -102,19 +102,19 @@ def Memoize(f):
   return Memo(f)
 
 
-def SetVerbose(enabled):
+def set_verbose(enabled):
   if enabled:
-    SetLogLevel(LOG_VERBOSE)
+    set_log_level(LOG_VERBOSE)
   else:
-    SetLogLevel(LOG_INFO)
+    set_log_level(LOG_INFO)
 
 
-def SetLogLevel(verbosity):
+def set_log_level(verbosity):
   global log_level
   log_level = verbosity
 
 
-def Log(message, verbosity=LOG_INFO):
+def log(message, verbosity=LOG_INFO):
   """Log a message to the console (stdout)."""
   if log_level < verbosity:
     return
@@ -122,33 +122,33 @@ def Log(message, verbosity=LOG_INFO):
   sys.stdout.flush()
 
 
-def LogHeading(message, suffix=''):
+def log_heading(message, suffix=''):
   """Log a colored/highlighted message with optional suffix."""
-  if Color.enabled:
-    Log(Color(message, 'green') + suffix)
+  if colorize.enabled:
+    log(colorize(message, 'green') + suffix)
   else:
     if log_level > LOG_WARN:
       # When running in verbose mode make sure heading standout
-      Log('###################################################################')
-      Log(message + suffix)
-      Log('###################################################################')
+      log('###################################################################')
+      log(message + suffix)
+      log('###################################################################')
     else:
-      Log(message + suffix)
+      log(message + suffix)
 
 
-def Warn(message):
-  Log('warning: ' + message, LOG_WARN)
+def warn(message):
+  log('warning: ' + message, LOG_WARN)
 
 
-def Trace(message):
-  Log(message, LOG_TRACE)
+def trace(message):
+  log(message, LOG_TRACE)
 
 
-def LogVerbose(message):
-  Log(message, LOG_VERBOSE)
+def log_verbose(message):
+  log(message, LOG_VERBOSE)
 
 
-def FindInPath(command_name):
+def find_in_path(command_name):
   """Search user's PATH for a given executable.
 
   Returns:
@@ -167,7 +167,7 @@ def FindInPath(command_name):
   raise error.Error('command not found: %s' % command_name)
 
 
-def DownloadFile(filename, url):
+def download_file(filename, url):
   """Download a file from a given URL.
 
   Args:
@@ -176,7 +176,7 @@ def DownloadFile(filename, url):
   """
   temp_filename = filename + '.partial'
   # Ensure curl is in user's PATH
-  FindInPath('curl')
+  find_in_path('curl')
   curl_cmd = ['curl', '--fail', '--location', '--stderr', '-', '-o',
               temp_filename]
   if hasattr(sys.stdout, 'fileno') and os.isatty(sys.stdout.fileno()):
@@ -190,9 +190,9 @@ def DownloadFile(filename, url):
   curl_cmd.append(url)
 
   if log_level > LOG_WARN:
-    Log('Downloading: %s [%s]' % (url, filename))
+    log('Downloading: %s [%s]' % (url, filename))
   else:
-    Log('Downloading: %s' % url.replace(GS_URL, ''))
+    log('Downloading: %s' % url.replace(GS_URL, ''))
   try:
     subprocess.check_call(curl_cmd)
   except subprocess.CalledProcessError as e:
@@ -201,7 +201,7 @@ def DownloadFile(filename, url):
   os.rename(temp_filename, filename)
 
 
-def CheckStamp(filename, contents=None):
+def check_stamp(filename, contents=None):
   """Check that a given stamp file is up-to-date.
 
   Returns: False is the file does not exists or is older that that given
@@ -218,8 +218,8 @@ def CheckStamp(filename, contents=None):
   return True
 
 
-@Memoize
-def GetSDKRoot():
+@memoize
+def get_sdk_root():
   """Returns the root of the currently configured Native Client SDK."""
   root = os.environ.get('NACL_SDK_ROOT')
   if root is None:
@@ -233,8 +233,8 @@ def GetSDKRoot():
   return root
 
 
-@Memoize
-def GetEmscriptenRoot():
+@memoize
+def get_emscripten_root():
   emscripten = os.environ.get('EMSCRIPTEN')
   if emscripten is None:
     local_root = os.path.join(paths.OUT_DIR, 'emsdk', 'emscripten')
@@ -250,74 +250,75 @@ def GetEmscriptenRoot():
   return emscripten
 
 
-def SetupEmscripten():
+def setup_emscripten():
   if 'EMSCRIPTEN' in os.environ:
     return
 
-  local_root = GetEmscriptenRoot()
+  local_root = get_emscripten_root()
   os.environ['EMSCRIPTEN'] = local_root
-  os.environ['EM_CONFIG'] = os.path.join(os.path.dirname(local_root),
-                                         '.emscripten')
+  os.environ['EM_CONFIG'] = os.path.join(
+      os.path.dirname(local_root), '.emscripten')
   try:
-    FindInPath('node')
+    find_in_path('node')
   except error.Error:
     node_bin = os.path.join(paths.OUT_DIR, 'node', 'bin')
     if not os.path.isdir(node_bin):
-      raise error.Error('node not found in path and default path not found: %s'
-                        % node_bin)
+      raise error.Error(
+          'node not found in path and default path not found: %s' % node_bin)
 
     os.environ['PATH'] += ':' + node_bin
-    FindInPath('node')
+    find_in_path('node')
 
 
-@Memoize
-def GetSDKVersion():
+@memoize
+def get_sdk_version():
   """Returns the version (as a string) of the current SDK."""
-  getos = os.path.join(GetSDKRoot(), 'tools', 'getos.py')
+  getos = os.path.join(get_sdk_root(), 'tools', 'getos.py')
   version = subprocess.check_output([getos, '--sdk-version']).strip()
   return version
 
 
-def CheckSDKVersion(version):
+def check_sdk_version(version):
   """Returns True if the currently configured SDK is 'version' or above."""
-  return int(GetSDKVersion()) >= int(version)
+  return int(get_sdk_version()) >= int(version)
 
 
-@Memoize
-def GetSDKRevision():
+@memoize
+def get_sdk_revision():
   """Returns the revision of the currently configured Native Client SDK."""
-  getos = os.path.join(GetSDKRoot(), 'tools', 'getos.py')
+  getos = os.path.join(get_sdk_root(), 'tools', 'getos.py')
   version = subprocess.check_output([getos, '--sdk-revision']).strip()
   return int(version)
 
 
-@Memoize
-def GetPlatform():
+@memoize
+def get_platform():
   """Returns the current platform name according getos.py."""
-  getos = os.path.join(GetSDKRoot(), 'tools', 'getos.py')
+  getos = os.path.join(get_sdk_root(), 'tools', 'getos.py')
   platform = subprocess.check_output([getos]).strip()
   return platform
 
-@Memoize
-def GetToolchainRoot(config):
+
+@memoize
+def get_toolchain_root(config):
   """Returns the toolchain folder for a given NaCl toolchain."""
   if config.toolchain == 'emscripten':
-    return GetEmscriptenRoot()
+    return get_emscripten_root()
 
-  platform = GetPlatform()
+  platform = get_platform()
   if config.toolchain in ('pnacl', 'clang-newlib'):
     tc_dir = os.path.join('%s_pnacl' % platform)
   else:
     tc_arch = {'arm': 'arm', 'i686': 'x86', 'x86_64': 'x86'}[config.arch]
     tc_dir = '%s_%s_%s' % (platform, tc_arch, config.libc)
 
-  return os.path.join(GetSDKRoot(), 'toolchain', tc_dir)
+  return os.path.join(get_sdk_root(), 'toolchain', tc_dir)
 
 
-@Memoize
-def GetInstallRoot(config):
+@memoize
+def get_install_root(config):
   """Returns the install location given a build configuration."""
-  tc_dir = GetToolchainRoot(config)
+  tc_dir = get_toolchain_root(config)
 
   if config.toolchain == 'emscripten':
     return os.path.join(tc_dir, 'system', 'local')
@@ -329,16 +330,16 @@ def GetInstallRoot(config):
   return os.path.join(tc_dir, 'usr')
 
 
-@Memoize
-def GetInstallStampRoot(config):
+@memoize
+def get_install_stamp_root(config):
   """Returns the installation metadata folder for the give configuration."""
-  tc_root = GetInstallRoot(config)
+  tc_root = get_install_root(config)
   return os.path.join(tc_root, 'var', 'lib', 'npkg')
 
 
-@Memoize
-def GetStrip(config):
-  tc_dir = GetToolchainRoot(config)
+@memoize
+def get_strip(config):
+  tc_dir = get_toolchain_root(config)
   if config.toolchain == 'pnacl':
     strip = os.path.join(tc_dir, 'bin', 'pnacl-strip')
   else:
@@ -347,35 +348,35 @@ def GetStrip(config):
   return strip
 
 
-def GetInstallStamp(package_name, config):
+def get_install_stamp(package_name, config):
   """Returns the filename of the install stamp for for a given package.
 
   This file is written at install time and contains metadata
   about the installed package.
   """
-  root = GetInstallStampRoot(config)
+  root = get_install_stamp_root(config)
   return os.path.join(root, package_name + '.info')
 
 
-def GetListFile(package_name, config):
+def get_list_file(package_name, config):
   """Returns the filename of the list of installed files for a given package.
 
   This file is written at install time.
   """
-  root = GetInstallStampRoot(config)
+  root = get_install_stamp_root(config)
   return os.path.join(root, package_name + '.list')
 
 
-def IsInstalled(package_name, config, stamp_content=None):
+def is_installed(package_name, config, stamp_content=None):
   """Returns True if the given package is installed."""
-  stamp = GetInstallStamp(package_name, config)
-  result = CheckStamp(stamp, stamp_content)
+  stamp = get_install_stamp(package_name, config)
+  result = check_stamp(stamp, stamp_content)
   return result
 
 
-def CheckSDKRoot():
+def check_sdk_root():
   """Check validity of NACL_SDK_ROOT."""
-  root = GetSDKRoot()
+  root = get_sdk_root()
 
   if not os.path.isdir(root):
     raise error.Error('$NACL_SDK_ROOT does not exist: %s' % root)
@@ -385,16 +386,16 @@ def CheckSDKRoot():
     raise error.Error("$NACL_SDK_ROOT (%s) doesn't look right. "
                       "Couldn't find landmark file (%s)" % (root, landmark))
 
-  if not CheckSDKVersion(MIN_SDK_VERSION):
+  if not check_sdk_version(MIN_SDK_VERSION):
     raise error.Error(
         'This version of webports requires at least version %s of\n'
         'the NaCl SDK. The version in $NACL_SDK_ROOT is %s. If you want\n'
         'to use webports with an older version of the SDK please checkout\n'
         'one of the pepper_XX branches (or run with\n'
-        '--skip-sdk-version-check).' % (MIN_SDK_VERSION, GetSDKVersion()))
+        '--skip-sdk-version-check).' % (MIN_SDK_VERSION, get_sdk_version()))
 
 
-def HashFile(filename):
+def hash_file(filename):
   """Return the SHA1 (in hex format) of the contents of the given file."""
   block_size = 100 * 1024
   sha1 = hashlib.sha1()
@@ -411,16 +412,16 @@ class HashVerificationError(error.Error):
   pass
 
 
-def VerifyHash(filename, sha1):
+def verify_hash(filename, sha1):
   """Return True if the sha1 of the given file match the sha1 passed in."""
-  file_sha1 = HashFile(filename)
+  file_sha1 = hash_file(filename)
   if sha1 != file_sha1:
     raise HashVerificationError(
         'verification failed: %s\nExpected: %s\nActual: %s' %
         (filename, sha1, file_sha1))
 
 
-def RemoveTree(directory):
+def remove_tree(directory):
   """Recursively remove a directory and its contents."""
   if not os.path.exists(directory):
     return
@@ -429,20 +430,20 @@ def RemoveTree(directory):
   shutil.rmtree(directory)
 
 
-def RelPath(filename):
+def rel_path(filename):
   """Return a pathname relative to the root the webports src tree.
 
   This is used mostly to make output more readable when printing filenames."""
   return os.path.relpath(filename, paths.NACLPORTS_ROOT)
 
 
-def Makedirs(directory):
+def makedirs(directory):
   if os.path.isdir(directory):
     return
   if os.path.exists(directory):
     raise error.Error('mkdir: File exists and is not a directory: %s' %
                       directory)
-  Trace("mkdir: %s" % directory)
+  trace("mkdir: %s" % directory)
   os.makedirs(directory)
 
 
@@ -455,7 +456,7 @@ class DirLock(object):
 
   def __init__(self, lock_dir):
     if not os.path.exists(lock_dir):
-      Makedirs(lock_dir)
+      makedirs(lock_dir)
     self.file_name = os.path.join(lock_dir, 'webports.lock')
     self.fd = open(self.file_name, 'w')
 
@@ -482,8 +483,8 @@ class InstallLock(DirLock):
   """Lock used when installing/uninstalling package"""
 
   def __init__(self, config):
-    root = GetInstallRoot(config)
+    root = get_install_root(config)
     super(InstallLock, self).__init__(root)
 
 
-CheckStdoutForColorSupport()
+check_stdout_for_color_support()

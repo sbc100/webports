@@ -27,7 +27,7 @@ def main(args):
                       help='include dependencies of effected packages.')
   parser.add_argument('files', nargs='+', help='Changes files.')
   options = parser.parse_args(args)
-  webports.SetVerbose(options.verbose)
+  webports.set_verbose(options.verbose)
 
   if options.deps:
     package_filter = sys.stdin.read().split()
@@ -55,13 +55,13 @@ def find_effected_packages(files, include_deps, package_filter):
   packages = []
   to_resolve = []
 
-  def AddPackage(package):
+  def add_package(package):
     if package_filter and package.NAME not in package_filter:
-      webports.LogVerbose('Filtered out package: %s' % package.NAME)
+      webports.log_verbose('Filtered out package: %s' % package.NAME)
       return
     if package.NAME not in packages:
       if include_deps:
-        for dep in package.TransitiveDependencies():
+        for dep in package.transitive_dependencies():
           if dep.NAME not in packages:
             packages.append(dep.NAME)
       packages.append(package.NAME)
@@ -70,19 +70,19 @@ def find_effected_packages(files, include_deps, package_filter):
   for filename in files:
     parts = filename.split(os.path.sep)
     if parts[0] != 'ports':
-      webports.LogVerbose('effected file outside of ports tree: %s' % filename)
+      webports.log_verbose('effected file outside of ports tree: %s' % filename)
       if any(fnmatch.fnmatch(filename, ignore) for ignore in IGNORE_FILES):
         continue
       return ['all']
 
     package_name = parts[1]
-    pkg = webports.source_package.CreatePackage(package_name)
-    AddPackage(pkg)
+    pkg = webports.source_package.create_package(package_name)
+    add_package(pkg)
 
   while to_resolve:
     pkg = to_resolve.pop()
-    for r in pkg.ReverseDependencies():
-      AddPackage(r)
+    for r in pkg.reverse_dependencies():
+      add_package(r)
 
   if package_filter:
     packages = [p for p in packages if p in package_filter]

@@ -20,20 +20,20 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 AGE_LIMIT = 8 * 60 * 60  # 8 hours
 
 
-def GetPepperVersions():
+def get_pepper_versions():
   output = subprocess.check_output(['gsutil', 'ls', 'gs://webports/builds'])
   names = [i.split('/')[-2] for i in output.splitlines()]
   picked = [i for i in names if int(i.split('_')[1]) >= 48]
   return picked
 
 
-def GetVersionRevisions(version):
+def get_version_revisions(version):
   output = subprocess.check_output(
       ['gsutil', 'ls', 'gs://webports/builds/%s' % version])
   return [i.split('/')[-2] for i in output.splitlines()]
 
 
-def GetExistingVersionRevisions(version):
+def get_existing_version_revisions(version):
   try:
     output = subprocess.check_output(
         ['gsutil', 'ls',
@@ -44,24 +44,24 @@ def GetExistingVersionRevisions(version):
     return set()
 
 
-def GetExistingRevisions():
+def get_existing_revisions():
   revisions = []
-  for version in GetPepperVersions():
-    for revision in GetExistingVersionRevisions(version):
+  for version in get_pepper_versions():
+    for revision in get_existing_version_revisions(version):
       revisions.append((version, revision))
   return revisions
 
 
-def GetAllMissingRevisions():
+def get_all_missing_revisions():
   picked = []
-  for version in GetPepperVersions():
-    revisions = GetVersionRevisions(version)
-    existing = GetExistingVersionRevisions(version)
+  for version in get_pepper_versions():
+    revisions = get_version_revisions(version)
+    existing = get_existing_version_revisions(version)
     picked.extend((version, i) for i in revisions if i not in existing)
   return picked
 
 
-def GetAge(version, revision):
+def get_age(version, revision):
   try:
     output = subprocess.check_output(
         ['gsutil', 'ls', '-l',
@@ -75,8 +75,8 @@ def GetAge(version, revision):
     return None
 
 
-def BuildRepo(version, revision):
-  age = GetAge(version, revision)
+def build_repo(version, revision):
+  age = get_age(version, revision)
   if age is None:
     print 'Skipping %s/%s as it is a bad version' % (version, revision)
     return
@@ -92,9 +92,9 @@ def BuildRepo(version, revision):
 
 
 def main():
-  missing = GetAllMissingRevisions()
+  missing = get_all_missing_revisions()
   for version, revision in missing:
-    BuildRepo(version, revision)
+    build_repo(version, revision)
   return 0
 
 

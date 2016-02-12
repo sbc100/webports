@@ -15,25 +15,25 @@ class TestBinaryPackage(common.NaclportsTest):
   @patch('os.rename')
   @patch('os.makedirs')
   @patch('os.path.isdir', Mock(return_value=False))
-  def testInstallFile(self, makedirs_mock, rename_mock):
-    mock_file = common.MockFileObject()
+  def test_install_file(self, makedirs_mock, rename_mock):
+    mock_file = common.mock_file_object()
     with patch('__builtin__.open', Mock(return_value=mock_file)):
-      binary_package.InstallFile('fname', 'location1', 'location2')
+      binary_package.install_file('fname', 'location1', 'location2')
       makedirs_mock.assert_called_once_with('location2')
       rename_mock.assert_has_calls([call('location1/fname', 'location2/fname')])
 
-  def testRelocateFile(self):
+  def test_relocate_file(self):
     # Only certain files should be relocated. A file called 'testfile'
     # for example, should not be touched.
     with patch('__builtin__.open', Mock(), create=True) as open_mock:
-      binary_package.RelocateFile('testfile', 'newroot')
+      binary_package.relocate_file('testfile', 'newroot')
       open_mock.assert_not_called()
 
-  @patch('webports.binary_package.BinaryPackage.VerifyArchiveFormat', Mock())
-  @patch('webports.binary_package.BinaryPackage.GetPkgInfo')
-  @patch('webports.util.GetInstallStamp',
+  @patch('webports.binary_package.BinaryPackage.verify_archive_format', Mock())
+  @patch('webports.binary_package.BinaryPackage.get_pkg_info')
+  @patch('webports.util.get_install_stamp',
          Mock(return_value='stamp_dir/stamp_file'))
-  def testWriteStamp(self, mock_get_info):
+  def test_write_stamp(self, mock_get_info):
     fake_binary_pkg_info = textwrap.dedent('''\
       NAME=foo
       VERSION=1.0
@@ -45,8 +45,8 @@ class TestBinaryPackage(common.NaclportsTest):
       ''')
     mock_get_info.return_value = fake_binary_pkg_info
     pkg = binary_package.BinaryPackage('foo')
-    mock_stamp_file = common.MockFileObject()
+    mock_stamp_file = common.mock_file_object()
     with patch('__builtin__.open', Mock(return_value=mock_stamp_file),
                create=True):
-      pkg.WriteStamp()
+      pkg.write_stamp()
     mock_stamp_file.write.assert_called_once_with(fake_binary_pkg_info)

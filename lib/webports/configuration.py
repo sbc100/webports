@@ -30,7 +30,7 @@ class Configuration(object):
     self.libc = None
     self.config_name = None
 
-    self.SetConfig(debug)
+    self.set_config(debug)
 
     if arch is None:
       arch = os.environ.get('NACL_ARCH')
@@ -64,9 +64,9 @@ class Configuration(object):
     if self.arch not in util.arch_to_pkgarch:
       raise error.Error("Invalid arch: %s" % arch)
 
-    self.SetLibc()
+    self.set_libc()
 
-  def SetConfig(self, debug):
+  def set_config(self, debug):
     if debug is None:
       if os.environ.get('NACL_DEBUG') == '1':
         debug = True
@@ -78,7 +78,7 @@ class Configuration(object):
     else:
       self.config_name = 'release'
 
-  def SetLibc(self):
+  def set_libc(self):
     if self.toolchain in ('pnacl', 'clang-newlib'):
       self.libc = 'newlib'
     elif self.toolchain == 'emscripten':

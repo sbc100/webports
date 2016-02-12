@@ -24,14 +24,14 @@ def main(args):
                       help='Output extra information.')
   options = parser.parse_args(args)
   if options.verbose:
-    webports.SetVerbose(True)
+    webports.set_verbose(True)
   count = 0
 
-  for package in webports.source_package.SourcePackageIterator():
-    package.Download()
+  for package in webports.source_package.source_package_iterator():
+    package.download()
     count += 1
 
-  webports.Log("Verfied checksums for %d packages" % count)
+  webports.log("Verfied checksums for %d packages" % count)
   return 0
 
 

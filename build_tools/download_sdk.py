@@ -50,7 +50,7 @@ GS_URL_BASE = 'gs://nativeclient-mirror/nacl/nacl_sdk/'
 GSTORE = 'http://storage.googleapis.com/nativeclient-mirror/nacl/nacl_sdk/'
 
 
-def DetermineSDKURL(flavor, base_url, version):
+def determine_sdk_url(flavor, base_url, version):
   """Download one Native Client toolchain and extract it.
 
   Arguments:
@@ -62,10 +62,10 @@ def DetermineSDKURL(flavor, base_url, version):
     The URL of the SDK archive
   """
   # gsutil.py ships with depot_tools, which should be in PATH
-  gsutil = [sys.executable, webports.util.FindInPath('gsutil.py')]
+  gsutil = [sys.executable, webports.util.find_in_path('gsutil.py')]
   path = flavor + '.tar.bz2'
 
-  def GSList(path):
+  def gs_list(path):
     """Run gsutil 'ls' on a path and return just the basenames of the
     elements within.
     """
@@ -79,9 +79,9 @@ def DetermineSDKURL(flavor, base_url, version):
     return [os.path.basename(os.path.normpath(elem)) for elem in elements]
 
   if version == 'latest':
-    webports.Log('Looking for latest SDK build...')
+    webports.log('Looking for latest SDK build...')
     # List the top level of the nacl_sdk folder
-    versions = GSList('')
+    versions = gs_list('')
     # Find all trunk revision
     versions = [v for v in versions if v.startswith('trunk')]
 
@@ -90,7 +90,7 @@ def DetermineSDKURL(flavor, base_url, version):
     # forever.
     versions = list(reversed(sorted(versions)))
     for version_dir in versions[:HISTORY_SIZE]:
-      contents = GSList(version_dir)
+      contents = gs_list(version_dir)
       if path in contents:
         version = version_dir.rsplit('.', 1)[1]
         break
@@ -101,13 +101,13 @@ def DetermineSDKURL(flavor, base_url, version):
   return '%strunk.%s/%s' % (GSTORE, version, path)
 
 
-def Untar(bz2_filename):
+def untar(bz2_filename):
   if sys.platform == 'win32':
     tar_file = None
     try:
-      webports.Log('Unpacking tarball...')
+      webports.log('Unpacking tarball...')
       tar_file = cygtar.CygTar(bz2_filename, 'r:bz2')
-      tar_file.Extract()
+      tar_file.extract()
     except Exception, err:
       raise webports.Error('Error unpacking %s' % str(err))
     finally:
@@ -118,7 +118,7 @@ def Untar(bz2_filename):
       raise webports.Error('Error unpacking')
 
 
-def FindCygwin():
+def find_cygwin():
   if os.path.exists(r'\cygwin'):
     return r'\cygwin'
   elif os.path.exists(r'C:\cygwin'):
@@ -127,22 +127,22 @@ def FindCygwin():
     raise webports.Error(r'failed to find cygwin in \cygwin or c:\cygwin')
 
 
-def DownloadAndInstallSDK(url, target_dir):
+def download_and_install_sdk(url, target_dir):
   bz2_dir = OUT_DIR
   if not os.path.exists(bz2_dir):
     os.makedirs(bz2_dir)
   bz2_filename = os.path.join(bz2_dir, url.split('/')[-1])
 
   if sys.platform in ['win32', 'cygwin']:
-    cygbin = os.path.join(FindCygwin(), 'bin')
+    cygbin = os.path.join(find_cygwin(), 'bin')
 
   # Download it.
-  webports.DownloadFile(bz2_filename, url)
+  webports.download_file(bz2_filename, url)
 
   # Extract toolchain.
   old_cwd = os.getcwd()
   os.chdir(bz2_dir)
-  Untar(bz2_filename)
+  untar(bz2_filename)
   os.chdir(old_cwd)
 
   # Calculate pepper_dir by taking common prefix of tar
@@ -156,7 +156,7 @@ def DownloadAndInstallSDK(url, target_dir):
 
   # Drop old versions.
   if os.path.exists(target_dir):
-    webports.Log('Cleaning up old SDK...')
+    webports.log('Cleaning up old SDK...')
     if sys.platform in ['win32', 'cygwin']:
       cmd = [os.path.join(cygbin, 'bin', 'rm.exe'), '-rf']
     else:
@@ -165,7 +165,7 @@ def DownloadAndInstallSDK(url, target_dir):
     returncode = subprocess.call(cmd)
     assert returncode == 0
 
-  webports.Log('Renaming toolchain "%s" -> "%s"' % (actual_dir, target_dir))
+  webports.log('Renaming toolchain "%s" -> "%s"' % (actual_dir, target_dir))
   os.rename(actual_dir, target_dir)
 
   if sys.platform in ['win32', 'cygwin']:
@@ -174,7 +174,7 @@ def DownloadAndInstallSDK(url, target_dir):
   # Clean up: remove the sdk bz2.
   os.remove(bz2_filename)
 
-  webports.Log('Install complete.')
+  webports.log('Install complete.')
 
 
 PLATFORM_COLLAPSE = {
@@ -194,19 +194,19 @@ def main(argv):
 
   flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]
 
-  url = DetermineSDKURL(flavor, base_url=GS_URL_BASE, version=options.version)
+  url = determine_sdk_url(flavor, base_url=GS_URL_BASE, version=options.version)
 
   stamp_file = os.path.join(TARGET_DIR, 'stamp')
   if os.path.exists(stamp_file):
     with open(stamp_file) as f:
       installed_url = f.read().strip()
       if installed_url == url:
-        webports.Log('SDK already installed: %s' % url)
+        webports.log('SDK already installed: %s' % url)
         return 0
       else:
-        webports.Log('Ignoring currently installed SDK: %s' % installed_url)
+        webports.log('Ignoring currently installed SDK: %s' % installed_url)
 
-  DownloadAndInstallSDK(url, TARGET_DIR)
+  download_and_install_sdk(url, TARGET_DIR)
   with open(stamp_file, 'w') as f:
     f.write(url + '\n')
   return 0

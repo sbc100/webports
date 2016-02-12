@@ -27,18 +27,18 @@ from webports import configuration, error, source_package, util, paths
 from webports import installed_package
 
 
-def PrintError(msg):
-  sys.stderr.write('webports: %s\n' % util.Color(str(msg), 'red'))
+def print_error(msg):
+  sys.stderr.write('webports: %s\n' % util.colorize(str(msg), 'red'))
 
 
-def CmdList(config, options, args):
+def cmd_list(config, options, args):
   """List installed packages"""
   if len(args):
     raise error.Error('list command takes no arguments')
   if options.all:
-    iterator = source_package.SourcePackageIterator()
+    iterator = source_package.source_package_iterator()
   else:
-    iterator = installed_package.InstalledPackageIterator(config)
+    iterator = installed_package.installed_package_iterator(config)
   for package in iterator:
     if options.verbosity:
       sys.stdout.write('%-15s %s\n' % (package.NAME, package.VERSION))
@@ -47,28 +47,28 @@ def CmdList(config, options, args):
   return 0
 
 
-def CmdInfo(config, options, args):
+def cmd_info(config, options, args):
   """Print infomation on installed package(s)"""
   if len(args) != 1:
     raise error.Error('info command takes a single package name')
   package_name = args[0]
-  pkg = installed_package.CreateInstalledPackage(package_name, config)
-  info_file = pkg.GetInstallStamp()
+  pkg = installed_package.create_installed_package(package_name, config)
+  info_file = pkg.get_install_stamp()
   print('Install receipt: %s' % info_file)
   with open(info_file) as f:
     sys.stdout.write(f.read())
 
 
-def CmdPkgListDeps(package, options):
+def cmd_pkg_list_deps(package, options):
   """Print complete list of package dependencies."""
-  for pkg in package.TransitiveDependencies():
+  for pkg in package.transitive_dependencies():
     print(pkg.NAME)
 
 
-def CmdPkgContents(package, options):
+def cmd_pkg_contents(package, options):
   """List contents of an installed package"""
-  install_root = util.GetInstallRoot(package.config)
-  for filename in package.Files():
+  install_root = util.get_install_root(package.config)
+  for filename in package.files():
     if util.log_level > util.LOG_INFO:
       filename = os.path.join(install_root, filename)
     if options.all:
@@ -76,19 +76,19 @@ def CmdPkgContents(package, options):
     sys.stdout.write(filename + '\n')
 
 
-def CmdPkgDownload(package, options):
+def cmd_pkg_download(package, options):
   """Download sources for given package(s)"""
-  package.Download()
+  package.download()
 
 
-def CmdPkgUscan(package, options):
+def cmd_pkg_uscan(package, options):
   """Use Debian's 'uscan' to check for upstream versions."""
   if not package.URL:
     return 0
 
   if package.VERSION not in package.URL:
-    PrintError('%s: uscan only works if VERSION is embedded in URL' %
-               package.NAME)
+    print_error('%s: uscan only works if VERSION is embedded in URL' %
+                package.NAME)
     return 0
 
   temp_fd, temp_file = tempfile.mkstemp('webports_watchfile')
@@ -96,13 +96,13 @@ def CmdPkgUscan(package, options):
     with os.fdopen(temp_fd, 'w') as f:
       uscan_url = package.URL.replace(package.VERSION, '(.+)')
       uscan_url = uscan_url.replace('download.sf.net', 'sf.net')
-      util.LogVerbose('uscan pattern: %s' % uscan_url)
+      util.log_verbose('uscan pattern: %s' % uscan_url)
       f.write("version = 3\n")
       f.write("%s\n" % uscan_url)
 
     cmd = ['uscan', '--upstream-version', package.VERSION, '--package',
            package.NAME, '--watchfile', temp_file]
-    util.LogVerbose(' '.join(cmd))
+    util.log_verbose(' '.join(cmd))
     rtn = subprocess.call(cmd)
   finally:
     os.remove(temp_file)
@@ -110,137 +110,139 @@ def CmdPkgUscan(package, options):
   return rtn
 
 
-def CmdCheck(config, options, args):
+def cmd_check(config, options, args):
   """Verify the dependecies of all install packages are also installed."""
   if len(args):
     raise error.Error('check command takes no arguments')
 
-  installed_packages = installed_package.InstalledPackageIterator(config)
+  installed_packages = installed_package.installed_package_iterator(config)
   installed_map = {pkg.NAME: pkg for pkg in installed_packages}
 
   checked = set()
-  def CheckDeps(pkg_name, required_by):
+
+  def check_deps(pkg_name, required_by):
     if pkg_name in checked:
       return
     checked.add(pkg_name)
     pkg = installed_map.get(pkg_name)
     if not pkg:
       raise error.Error("missing package '%s' required by '%s'" % (pkg_name,
-          required_by))
+                                                                   required_by))
     for dep in pkg.DEPENDS:
-      CheckDeps(dep, pkg.NAME)
+      check_deps(dep, pkg.NAME)
 
   for pkg in installed_map.itervalues():
-    CheckDeps(pkg.NAME, None)
+    check_deps(pkg.NAME, None)
 
 
-def CmdPkgCheck(package, options):
+def cmd_pkg_check(package, options):
   """Verify dependency information for given package(s)"""
   # The fact that we got this far means the pkg_info is basically valid.
   # This final check verifies the dependencies are valid.
   # Cache the list of all packages names since this function could be called
   # a lot in the case of "webports check --all".
-  packages = source_package.SourcePackageIterator()
-  if not CmdPkgCheck.all_package_names:
-    CmdPkgCheck.all_package_names = [os.path.basename(p.root) for p in packages]
-  util.Log("Checking deps for %s .." % package.NAME)
-  package.CheckDeps(CmdPkgCheck.all_package_names)
+  packages = source_package.source_package_iterator()
+  if cmd_pkg_check.all_pkg_names is None:
+    cmd_pkg_check.all_pkg_names = [os.path.basename(p.root) for p in packages]
+  util.log("Checking deps for %s .." % package.NAME)
+  package.check_deps(cmd_pkg_check.all_package_names)
 
 
-CmdPkgCheck.all_package_names = None
+cmd_pkg_check.all_pkg_names = None
 
 
-def CmdPkgBuild(package, options):
+def cmd_pkg_build(package, options):
   """Build package(s)"""
-  package.Build(options.build_deps, force=options.force)
+  package.build(options.build_deps, force=options.force)
 
 
-def PerformUninstall(package):
-  for dep in package.ReverseDependencies():
-    PerformUninstall(dep)
-  package.Uninstall()
+def perform_uninstall(package):
+  for dep in package.reverse_dependencies():
+    perform_uninstall(dep)
+  package.uninstall()
 
 
-def CmdPkgInstall(package, options):
+def cmd_pkg_install(package, options):
   """Install package(s)"""
   if options.all:
-    for conflict in package.TransitiveConflicts():
-      if conflict.IsInstalled():
-        PerformUninstall(conflict)
+    for conflict in package.transitive_conflicts():
+      if conflict.is_installed():
+        perform_uninstall(conflict)
 
-  package.Install(options.build_deps, force=options.force,
+  package.install(options.build_deps, force=options.force,
                   from_source=options.from_source)
 
 
-def CmdPkgUninstall(package, options):
+def cmd_pkg_uninstall(package, options):
   """Uninstall package(s)"""
-  for dep in package.ReverseDependencies():
+  for dep in package.reverse_dependencies():
     if options.force or options.all:
-      PerformUninstall(dep)
+      perform_uninstall(dep)
     else:
       raise error.Error("unable to uninstall '%s'. another package is "
-          "installed which depends on it: '%s'" % (package.NAME, dep.NAME))
+                        "installed which depends on it: '%s'" %
+                        (package.NAME, dep.NAME))
 
-  package.Uninstall()
+  package.uninstall()
 
 
-def CmdPkgClean(package, options):
+def cmd_pkg_clean(package, options):
   """Clean package build artifacts."""
-  package.Clean()
+  package.clean()
 
 
-def CmdPkgUpdatePatch(package, options):
+def cmd_pkg_update_patch(package, options):
   """Update patch file for package(s)"""
-  package.UpdatePatch()
+  package.update_patch()
 
 
-def CmdPkgExtract(package, options):
+def cmd_pkg_extract(package, options):
   """Extact source archive for package(s)"""
-  package.Download()
-  package.Extract()
+  package.download()
+  package.extract()
 
 
-def CmdPkgPatch(package, options):
+def cmd_pkg_patch(package, options):
   """Apply webports patch for package(s)"""
-  package.Patch()
+  package.patch()
 
 
-def CleanAll(config):
+def clean_all(config):
   """Remove all build directories and all pre-built packages as well
   as all installed packages for the given configuration."""
 
   def rmtree(path):
-    util.Log('removing %s' % path)
-    util.RemoveTree(path)
+    util.log('removing %s' % path)
+    util.remove_tree(path)
 
   rmtree(paths.STAMP_DIR)
   rmtree(paths.BUILD_ROOT)
   rmtree(paths.PUBLISH_ROOT)
   rmtree(paths.PACKAGES_ROOT)
-  rmtree(util.GetInstallStampRoot(config))
-  rmtree(util.GetInstallRoot(config))
+  rmtree(util.get_install_stamp_root(config))
+  rmtree(util.get_install_root(config))
 
 
-def RunMain(args):
+def run_main(args):
   base_commands = {
-      'list': CmdList,
-      'info': CmdInfo,
-      'check': CmdCheck,
+      'list': cmd_list,
+      'info': cmd_info,
+      'check': cmd_check,
   }
 
   pkg_commands = {
-      'download': CmdPkgDownload,
-      'uscan': CmdPkgUscan,
-      'check': CmdPkgCheck,
-      'build': CmdPkgBuild,
-      'install': CmdPkgInstall,
-      'clean': CmdPkgClean,
-      'uninstall': CmdPkgUninstall,
-      'contents': CmdPkgContents,
-      'depends': CmdPkgListDeps,
-      'updatepatch': CmdPkgUpdatePatch,
-      'extract': CmdPkgExtract,
-      'patch': CmdPkgPatch
+      'download': cmd_pkg_download,
+      'uscan': cmd_pkg_uscan,
+      'check': cmd_pkg_check,
+      'build': cmd_pkg_build,
+      'install': cmd_pkg_install,
+      'clean': cmd_pkg_clean,
+      'uninstall': cmd_pkg_uninstall,
+      'contents': cmd_pkg_contents,
+      'depends': cmd_pkg_list_deps,
+      'updatepatch': cmd_pkg_update_patch,
+      'extract': cmd_pkg_extract,
+      'patch': cmd_pkg_patch
   }
 
   installed_pkg_commands = ['contents', 'uninstall']
@@ -298,7 +300,7 @@ def RunMain(args):
   if not args.verbosity and os.environ.get('VERBOSE') == '1':
     args.verbosity = 1
 
-  util.SetLogLevel(util.LOG_INFO + args.verbosity)
+  util.set_log_level(util.LOG_INFO + args.verbosity)
 
   if args.verbose_build:
     os.environ['VERBOSE'] = '1'
@@ -311,13 +313,13 @@ def RunMain(args):
   if args.skip_sdk_version_check:
     util.MIN_SDK_VERSION = -1
 
-  util.CheckSDKRoot()
+  util.check_sdk_root()
   config = configuration.Configuration(args.arch, args.toolchain, args.debug)
   util.color_mode = args.color
   if args.color == 'never':
-    util.Color.enabled = False
+    util.colorize.enabled = False
   elif args.color == 'always':
-    util.Color.enabled = True
+    util.colorize.enabled = True
 
   if args.command in base_commands:
     base_commands[args.command](config, args, args.pkg)
@@ -335,45 +337,45 @@ def RunMain(args):
   else:
     package_names = [os.getcwd()]
 
-  def DoCmd(package):
+  def do_cmd(package):
     try:
       pkg_commands[args.command](package, args)
     except error.DisabledError as e:
       if args.ignore_disabled:
-        util.Log('webports: %s' % e)
+        util.log('webports: %s' % e)
       else:
         raise e
 
   if args.all:
     args.ignore_disabled = True
     if args.command == 'clean':
-      CleanAll(config)
+      clean_all(config)
     else:
       if args.command in installed_pkg_commands:
-        package_iterator = installed_package.InstalledPackageIterator(config)
+        package_iterator = installed_package.installed_package_iterator(config)
       else:
-        package_iterator = source_package.SourcePackageIterator()
+        package_iterator = source_package.source_package_iterator()
       for p in package_iterator:
-        DoCmd(p)
+        do_cmd(p)
   else:
     for package_name in package_names:
       if args.command in installed_pkg_commands:
-        p = installed_package.CreateInstalledPackage(package_name, config)
+        p = installed_package.create_installed_package(package_name, config)
       else:
-        p = source_package.CreatePackage(package_name, config)
-      DoCmd(p)
+        p = source_package.create_package(package_name, config)
+      do_cmd(p)
 
 
 def main(args):
   try:
-    RunMain(args)
+    run_main(args)
   except KeyboardInterrupt:
-    PrintError('interrupted')
+    print_error('interrupted')
     return 1
   except error.Error as e:
     if os.environ.get('DEBUG'):
       raise
-    PrintError(str(e))
+    print_error(str(e))
     return 1
 
   return 0

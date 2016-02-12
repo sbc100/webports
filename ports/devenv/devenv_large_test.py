@@ -19,7 +19,7 @@ import chrome_test
 app = os.path.join(DEVENV_OUT_DIR, 'app')
 test_dir = os.path.join(SCRIPT_DIR, 'tests')
 
-chrome_test.Main([
+chrome_test.main([
     '-C', test_dir,
     '-p', 'TOOLCHAIN=' + TOOLCHAIN,
     '-t', '210',

@@ -29,11 +29,11 @@ VALID_LICENSES = ['GPL', 'GPL2', 'GPL3', 'LGPL', 'LGPL2', 'LGPL3', 'ISC', 'MPL',
 options = None
 
 
-def CheckLicense(package):
+def check_license(package):
   if not package.LICENSE:
     print('%-27s: missing license field' % package.NAME)
-    package.Download()
-    package.Extract()
+    package.download()
+    package.extract()
     return 1
 
   rtn = 0
@@ -46,9 +46,9 @@ def CheckLicense(package):
       print('%s: Invalid license: %s' % (package.root, license_info[0]))
       rtn = 1
     if len(license_info) > 1:
-      package.Download()
-      package.Extract()
-      filename = os.path.join(package.GetBuildLocation(), license_info[1])
+      package.download()
+      package.extract()
+      filename = os.path.join(package.get_build_location(), license_info[1])
       if not os.path.exists(filename):
         print('Missing license file: %s' % filename)
         rtn = 1
@@ -63,12 +63,12 @@ def main(args):
                       help='Output extra information.')
   options = parser.parse_args(args)
   if options.verbose:
-    webports.SetVerbose(True)
+    webports.set_verbose(True)
   rtn = False
 
   count = 0
-  for package in webports.source_package.SourcePackageIterator():
-    rtn |= CheckLicense(package)
+  for package in webports.source_package.source_package_iterator():
+    rtn |= check_license(package)
     count += 1
 
   if not rtn:

@@ -44,7 +44,7 @@ LOG_LEVEL_MAP = {
 }
 
 
-def ChromeRunPath(chrome_dir, arch):
+def chrome_run_path(chrome_dir, arch):
   """Get the path to the chrome exectuable.
 
   Args:
@@ -66,7 +66,7 @@ def ChromeRunPath(chrome_dir, arch):
 
 
 
-def KillSubprocessAndChildren(proc):
+def kill_subprocess_and_children(proc):
   """Kill a subprocess and all children.
 
   While this is trivial on Posix platforms, on Windows this requires some
@@ -87,7 +87,7 @@ def KillSubprocessAndChildren(proc):
     os.kill(-proc.pid, 9)
 
 
-def CommunicateWithTimeout(proc, timeout):
+def communicate_with_timeout(proc, timeout):
   """Wait for a subprocess.Popen to end, capturing output, with a timeout.
 
   Args:
@@ -101,10 +101,10 @@ def CommunicateWithTimeout(proc, timeout):
 
   result = []
 
-  def Target():
+  def target():
     result.append(list(proc.communicate()))
 
-  thread = threading.Thread(target=Target)
+  thread = threading.Thread(target=target)
   thread.start()
   try:
     thread.join(timeout)
@@ -113,7 +113,7 @@ def CommunicateWithTimeout(proc, timeout):
                     timeout)
       # This will kill the process which should force communicate to return with
       # any partial output.
-      KillSubprocessAndChildren(proc)
+      kill_subprocess_and_children(proc)
       # Thus result should ALWAYS contain something after this join.
       thread.join()
       logging.error('Killed test due to timeout of %.1f seconds!' % timeout)
@@ -129,7 +129,7 @@ def CommunicateWithTimeout(proc, timeout):
   finally:
     # In case something else goes wrong, be sure to bring down the child.
     if thread.is_alive():
-      KillSubprocessAndChildren(proc)
+      kill_subprocess_and_children(proc)
   assert len(result) == 1
   return tuple(result[0]) + (returncode,)
 
@@ -148,17 +148,17 @@ class ChromeTestServer(httpd.QuittableHTTPServer):
     self.filter_string = '*'
     httpd.QuittableHTTPServer.__init__(self, server_address, handler)
 
-  def AddRoot(self, path):
+  def add_root(self, path):
     self.roots.append(os.path.abspath(path))
 
-  def SetFilterString(self, filter_string):
+  def set_filter_string(self, filter_string):
     self.filter_string = filter_string
 
 
 class ChromeTestHandler(httpd.QuittableHTTPHandler):
   """An HTTP request handler that gathers test results."""
 
-  def SendEmptyReply(self):
+  def send_empty_reply(self):
     self.send_response(200, 'OK')
     self.send_header('Content-type', 'text/html')
     self.send_header('Content-length', '0')
@@ -203,7 +203,7 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
         if message[-1] == '\n':
           message = message[:-1]
         logging.log(level, message)
-        self.SendEmptyReply()
+        self.send_empty_reply()
         return
       # Allow the tests to request the current test filter string.
       elif ('filter' in params and len(params['filter']) == 1 and
@@ -226,7 +226,7 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
           self.server.tests.add(name)
           print '[ RUN      ] %s' % name
         self.server.last_test = name
-        self.SendEmptyReply()
+        self.send_empty_reply()
         return
       # Allow the tests to post (pass/fail) results.
       elif ('result' in params and len(params['result']) == 1 and
@@ -246,13 +246,13 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
           print '[  FAILED  ] %s (%s)' % (name, duration)
         self.server.last_test = None
         self.server.test_results += 1
-        self.SendEmptyReply()
+        self.send_empty_reply()
         return
       # Allow the test set to announce the number of tests it will run.
       elif 'test_count' in params and len(params['test_count']) == 1:
         assert self.server.expected_test_count is None
         self.server.expected_test_count = int(params['test_count'][0])
-        self.SendEmptyReply()
+        self.send_empty_reply()
         return
     # Fall back to a providing normal HTTP access.
     httpd.QuittableHTTPHandler.do_GET(self)
@@ -262,7 +262,7 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
       httpd.QuittableHTTPHandler.log_message(self, fmt, *args)
 
 
-def Hex2Alpha(ch):
+def hex_to_alpha(ch):
   """Convert a hexadecimal digit from 0-9 / a-f to a-p.
 
   Args:
@@ -276,7 +276,7 @@ def Hex2Alpha(ch):
     return chr(ord(ch) + 10)
 
 
-def ChromeAppIdFromPath(path):
+def chrome_app_id_from_path(path):
   """Converts a path to the corresponding chrome app id.
 
   A stable but semi-undocumented property of unpacked chrome extensions is
@@ -291,10 +291,10 @@ def ChromeAppIdFromPath(path):
   """
   hasher = hashlib.sha256(os.path.realpath(path))
   hexhash = hasher.hexdigest()[:32]
-  return ''.join([Hex2Alpha(ch) for ch in hexhash])
+  return ''.join([hex_to_alpha(ch) for ch in hexhash])
 
 
-def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
+def run_chrome(chrome_path, timeout, filter_string, roots, use_xvfb,
               unlimited_storage, enable_nacl, enable_nacl_debug,
               load_extensions, load_apps, start_path):
   """Run Chrome with a timeout and several options.
@@ -323,14 +323,14 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
 
   # Add in the chrome_test extension and compute its id.
   load_extensions += [TESTING_EXTENSION, TESTING_TCP_APP]
-  testing_id = ChromeAppIdFromPath(TESTING_EXTENSION)
+  testing_id = chrome_app_id_from_path(TESTING_EXTENSION)
 
   s = ChromeTestServer(('', 0), ChromeTestHandler)
   for root in roots:
-    s.AddRoot(root)
-  s.SetFilterString(filter_string)
+    s.add_root(root)
+  s.set_filter_string(filter_string)
 
-  def Target():
+  def target():
     s.serve_forever(poll_interval=0.1)
 
   base_url = 'http://%s:%d' % (s.server_address[0], s.server_address[1])
@@ -345,7 +345,7 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
     work_dir = os.path.abspath(work_dir)
     logging.info('Created work area in %s' % work_dir)
     try:
-      thread = threading.Thread(target=Target)
+      thread = threading.Thread(target=target)
       thread.start()
 
       cmd = []
@@ -376,16 +376,16 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
         cmd += ['--load-and-launch-app=' + ','.join(load_apps)]
       cmd += [start_url]
 
-      def ProcessGroup():
+      def process_group():
         if sys.platform != 'win32':
           # On non-windows platforms, start a new process group so that we can
           # be certain we bring down Chrome on a timeout.
           os.setpgid(0, 0)
 
       p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT, preexec_fn=ProcessGroup)
+                           stderr=subprocess.STDOUT, preexec_fn=process_group)
       logging.info('Started chrome with command line: %s' % (' '.join(cmd)))
-      stdout, _, returncode = CommunicateWithTimeout(p, timeout=timeout)
+      stdout, _, returncode = communicate_with_timeout(p, timeout=timeout)
       if logging.getLogger().isEnabledFor(logging.DEBUG):
         sys.stdout.write('\n[[[ STDOUT ]]]\n')
         sys.stdout.write('-' * 70 + '\n')
@@ -427,7 +427,7 @@ def RunChrome(chrome_path, timeout, filter_string, roots, use_xvfb,
     print '[ Success! ] Ran %d tests.' % len(s.tests)
 
 
-def Main(argv):
+def main(argv):
   """Main method to invoke in test harness programs.
   Args:
     argv: Command line options controlling what to run.
@@ -502,9 +502,9 @@ def Main(argv):
                     'missing: %s' % os.environ['CHROME_DEVEL_SANDBOX'])
       sys.exit(1)
 
-  chrome_dir = download_chrome.DownloadChrome(options.arch, CHROME_REVISION)
-  RunChrome(
-      chrome_path=ChromeRunPath(chrome_dir, options.arch),
+  chrome_dir = download_chrome.download_chrome(options.arch, CHROME_REVISION)
+  run_chrome(
+      chrome_path=chrome_run_path(chrome_dir, options.arch),
       timeout=options.timeout,
       filter_string=options.filter,
       roots=options.chdir,

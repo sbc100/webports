@@ -13,13 +13,14 @@ from webports import configuration, package, util, error
 PAYLOAD_DIR = 'payload'
 INSTALL_PREFIX = '/webports-dummydir'
 
-def MakeDirIfNeeded(filename):
+
+def make_dir_if_needed(filename):
   dirname = os.path.dirname(filename)
   if not os.path.isdir(dirname):
-    util.Makedirs(dirname)
+    util.makedirs(dirname)
 
 
-def FilterOutExecutables(filenames, root):
+def filter_out_executables(filenames, root):
   """Filter out ELF binaries in the bin directory.
 
   We don't want NaCl exectuables installed in the toolchain's bin directory
@@ -30,14 +31,14 @@ def FilterOutExecutables(filenames, root):
   for name in filenames:
     full_name = os.path.join(root, name)
     if os.path.split(name)[0] == 'bin':
-      if not os.path.splitext(name)[1] and util.IsElfFile(full_name):
+      if not os.path.splitext(name)[1] and util.is_elf_file(full_name):
         continue
     rtn.append(name)
 
   return rtn
 
 
-def InstallFile(filename, old_root, new_root):
+def install_file(filename, old_root, new_root):
   """Install a single file by moving it into a new location.
 
   Args:
@@ -47,24 +48,23 @@ def InstallFile(filename, old_root, new_root):
   """
   oldname = os.path.join(old_root, filename)
 
-  util.LogVerbose('install: %s' % filename)
+  util.log_verbose('install: %s' % filename)
 
   newname = os.path.join(new_root, filename)
   dirname = os.path.dirname(newname)
   if not os.path.isdir(dirname):
-    util.Makedirs(dirname)
+    util.makedirs(dirname)
   os.rename(oldname, newname)
 
   # When install binaries ELF files into the toolchain direcoties, remove
   # the X bit so that they do not found when searching the PATH.
-  if util.IsElfFile(newname) or util.IsPexeFile(newname):
+  if util.is_elf_file(newname) or util.is_pexe_file(newname):
     mode = os.stat(newname).st_mode
     mode = mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     os.chmod(newname, mode)
 
 
-
-def RelocateFile(filename, dest):
+def relocate_file(filename, dest):
   """Perform in-place mutations on file contents to handle new location.
 
   There are a few file types that have absolute pathnames embedded
@@ -117,19 +117,19 @@ class BinaryPackage(package.Package):
   extra_keys = package.EXTRA_KEYS
 
   def __init__(self, filename):
-    util.Trace('BinaryPackage: %s' % filename)
+    util.trace('BinaryPackage: %s' % filename)
     super(BinaryPackage, self).__init__()
     self.filename = filename
     self.info = filename
-    self.VerifyArchiveFormat()
+    self.verify_archive_format()
 
-    info = self.GetPkgInfo()
-    self.ParseInfo(info)
+    info = self.get_pkg_info()
+    self.parse_info(info)
     self.config = configuration.Configuration(self.BUILD_ARCH,
                                               self.BUILD_TOOLCHAIN,
                                               self.BUILD_CONFIG == 'debug')
 
-  def VerifyArchiveFormat(self):
+  def verify_archive_format(self):
     if not os.path.exists(self.filename):
       raise error.Error('package archive not found: %s' % self.filename)
     basename, extension = os.path.splitext(os.path.basename(self.filename))
@@ -143,16 +143,16 @@ class BinaryPackage(package.Package):
     except tarfile.TarError as e:
       raise error.PkgFormatError(e)
 
-  def IsInstallable(self):
+  def is_installable(self):
     """Determine if a binary package can be installed in the
     currently configured SDK.
 
     Currently only packages built with the same SDK major version
     are installable.
     """
-    return self.BUILD_SDK_VERSION == util.GetSDKVersion()
+    return self.BUILD_SDK_VERSION == util.get_sdk_version()
 
-  def GetPkgInfo(self):
+  def get_pkg_info(self):
     """Extract the contents of the pkg_info file from the binary package."""
     with tarfile.open(self.filename) as tar:
       for member in tar:
@@ -160,29 +160,29 @@ class BinaryPackage(package.Package):
           raise error.PkgFormatError('pkg_info not first member in archive')
         return tar.extractfile(member).read()
 
-  def Install(self, force):
+  def install(self, force):
     """Install binary package into toolchain directory."""
-    util.Trace('Installing %s' % self.filename)
+    util.trace('Installing %s' % self.filename)
     with util.InstallLock(self.config):
-      self._Install(force)
+      self._install(force)
 
-  def _Install(self, force):
+  def _install(self, force):
     if self.TOOLCHAIN_INSTALL != '0':
-      self._InstallFiles(force)
-    self.WriteStamp()
+      self._install_files(force)
+    self.write_stamp()
 
-  def _InstallFiles(self, force):
-    dest = util.GetInstallRoot(self.config)
+  def _install_files(self, force):
+    dest = util.get_install_root(self.config)
     dest_tmp = os.path.join(dest, 'install_tmp')
     if os.path.exists(dest_tmp):
       shutil.rmtree(dest_tmp)
 
-    if self.IsAnyVersionInstalled():
-      raise error.Error('package already installed: %s' % self.InfoString())
+    if self.is_any_version_installed():
+      raise error.Error('package already installed: %s' % self.info_string())
 
-    self.LogStatus('Installing')
-    util.LogVerbose('installing from: %s' % self.filename)
-    util.Makedirs(dest_tmp)
+    self.log_status('Installing')
+    util.log_verbose('installing from: %s' % self.filename)
+    util.makedirs(dest_tmp)
 
     names = []
     try:
@@ -208,31 +208,31 @@ class BinaryPackage(package.Package):
         tar.extractall(dest_tmp)
         payload_tree = os.path.join(dest_tmp, PAYLOAD_DIR)
 
-        names = FilterOutExecutables(names, payload_tree)
+        names = filter_out_executables(names, payload_tree)
 
         for name in names:
-          InstallFile(name, payload_tree, dest)
+          install_file(name, payload_tree, dest)
     finally:
       shutil.rmtree(dest_tmp)
 
     for name in names:
-      RelocateFile(name, dest)
+      relocate_file(name, dest)
 
-    self.WriteFileList(names)
+    self.write_file_list(names)
 
-  def WriteStamp(self):
+  def write_stamp(self):
     """Write stamp file containing pkg_info."""
-    filename = util.GetInstallStamp(self.NAME, self.config)
-    MakeDirIfNeeded(filename)
-    util.LogVerbose('stamp: %s' % filename)
-    pkg_info = self.GetPkgInfo()
+    filename = util.get_install_stamp(self.NAME, self.config)
+    make_dir_if_needed(filename)
+    util.log_verbose('stamp: %s' % filename)
+    pkg_info = self.get_pkg_info()
     with open(filename, 'w') as f:
       f.write(pkg_info)
 
-  def WriteFileList(self, file_names):
+  def write_file_list(self, file_names):
     """Write the file list for this package."""
-    filename = self.GetListFile()
-    MakeDirIfNeeded(filename)
+    filename = self.get_list_file()
+    make_dir_if_needed(filename)
     with open(filename, 'w') as f:
       for name in file_names:
         f.write(name + '\n')

@@ -24,17 +24,17 @@ def main(args):
                       help='Output extra information.')
   options = parser.parse_args(args)
   if options.verbose:
-    webports.SetVerbose(True)
+    webports.set_verbose(True)
   count = 0
 
   package_names = [os.path.basename(p.root)
-                   for p in webports.source_package.SourcePackageIterator()]
+                   for p in webports.source_package.source_package_iterator()]
 
-  for package in webports.source_package.SourcePackageIterator():
-    if not package.CheckDeps(package_names):
+  for package in webports.source_package.source_package_iterator():
+    if not package.check_deps(package_names):
       return 1
     count += 1
-  webports.Log("Verfied dependencies for %d packages" % count)
+  webports.log("Verfied dependencies for %d packages" % count)
   return 0
 
 

@@ -28,7 +28,7 @@ class Error(Exception):
   pass
 
 
-def VerifyHash(filename, sha1sum):
+def verify_hash(filename, sha1sum):
   try:
     # open file in binary mode & sha1 hash it
     h = hashlib.sha1()
@@ -49,7 +49,7 @@ def VerifyHash(filename, sha1sum):
     raise Error("sha1 checksum failed on file: " + filename)
 
 
-def VerifyLine(line, verbose):
+def verify_line(line, verbose):
   # split the hash *filename into a pair
   parts = line.split()
   if len(parts) != 2:
@@ -63,17 +63,17 @@ def VerifyLine(line, verbose):
 
   # remove leading '*' and any newlines from filename
   filename = name[1:]
-  VerifyHash(filename, sha1sum)
+  verify_hash(filename, sha1sum)
   if verbose:
     print("sha1check.py: %s verified" % filename)
 
   return filename
 
 
-def VerifyFile(file_input, verbose):
+def verify_file(file_input, verbose):
   rtn = []
   for line in file_input:
-    rtn.append(VerifyLine(line, verbose))
+    rtn.append(verify_line(line, verbose))
 
   if not rtn:
     raise Error("No file hashes given on input")
@@ -83,7 +83,7 @@ def VerifyFile(file_input, verbose):
 
 def main():
   try:
-    VerifyFile(sys.stdin, True)
+    verify_file(sys.stdin, True)
   except Error as e:
     sys.stdout.write('sha1check.py: %s\n' % str(e))
     return 1

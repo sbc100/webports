@@ -20,7 +20,7 @@ from webports import installed_package
 from webports import util
 from webports import paths
 from webports import bsd_pkg
-from webports.util import Log, Trace, LogVerbose
+from webports.util import log, trace, log_verbose
 from webports.error import Error, DisabledError, PkgFormatError
 
 
@@ -29,7 +29,7 @@ class PkgConflictError(Error):
 
 
 @contextlib.contextmanager
-def RedirectStdoutStderr(filename):
+def redirect_stdout_stderr(filename):
   """Context manager that replaces stdout and stderr streams."""
   if filename is None:
     yield
@@ -40,16 +40,16 @@ def RedirectStdoutStderr(filename):
     old_stderr = sys.stderr
     sys.stdout = stream
     sys.stderr = stream
-    util.CheckStdoutForColorSupport()
+    util.check_stdout_for_color_support()
     try:
       yield
     finally:
       sys.stdout = old_stdout
       sys.stderr = old_stderr
-      util.CheckStdoutForColorSupport()
+      util.check_stdout_for_color_support()
 
 
-def FormatTimeDelta(delta):
+def format_time_delta(delta):
   """Converts a duration in seconds to a human readable string.
 
   Args:
@@ -68,7 +68,7 @@ def FormatTimeDelta(delta):
   return rtn
 
 
-def ExtractArchive(archive, destination):
+def extract_archive(archive, destination):
   ext = os.path.splitext(archive)[1]
   if ext in ('.gz', '.tgz', '.bz2', '.xz'):
     cmd = ['tar', 'xf', archive, '-C', destination]
@@ -76,29 +76,27 @@ def ExtractArchive(archive, destination):
     cmd = ['unzip', '-q', '-d', destination, archive]
   else:
     raise Error('unhandled extension: %s' % ext)
-  LogVerbose(cmd)
+  log_verbose(cmd)
   subprocess.check_call(cmd)
 
 
-def RunGitCmd(directory, cmd, error_ok=False):
+def run_git_cmd(directory, cmd, error_ok=False):
   cmd = ['git'] + cmd
-  LogVerbose('%s' % ' '.join(cmd))
-  p = subprocess.Popen(cmd,
-                       cwd=directory,
-                       stderr=subprocess.PIPE,
+  log_verbose('%s' % ' '.join(cmd))
+  p = subprocess.Popen(cmd, cwd=directory, stderr=subprocess.PIPE,
                        stdout=subprocess.PIPE)
   stdout, stderr = p.communicate()
   if not error_ok and p.returncode != 0:
     if stdout:
-      Log(stdout)
+      log(stdout)
     if stderr:
-      Log(stderr)
+      log(stderr)
     raise Error('git command failed: %s' % cmd)
-  Trace('git exited with %d' % p.returncode)
+  trace('git exited with %d' % p.returncode)
   return p.returncode
 
 
-def InitGitRepo(directory):
+def init_git_repo(directory):
   """Initialize the source git repository for a given package directory.
 
   This function works for unpacked tar files as well as cloned git
@@ -116,42 +114,42 @@ def InitGitRepo(directory):
     return
 
   if os.path.exists(git_dir):
-    Log('Init existing git repo: %s' % directory)
-    RunGitCmd(directory, ['checkout', '-b', 'placeholder'])
-    RunGitCmd(directory, ['branch', '-D', 'upstream'], error_ok=True)
-    RunGitCmd(directory, ['branch', '-D', 'master'], error_ok=True)
-    RunGitCmd(directory, ['checkout', '-b', 'upstream'])
-    RunGitCmd(directory, ['checkout', '-b', 'master'])
-    RunGitCmd(directory, ['branch', '-D', 'placeholder'])
+    log('Init existing git repo: %s' % directory)
+    run_git_cmd(directory, ['checkout', '-b', 'placeholder'])
+    run_git_cmd(directory, ['branch', '-D', 'upstream'], error_ok=True)
+    run_git_cmd(directory, ['branch', '-D', 'master'], error_ok=True)
+    run_git_cmd(directory, ['checkout', '-b', 'upstream'])
+    run_git_cmd(directory, ['checkout', '-b', 'master'])
+    run_git_cmd(directory, ['branch', '-D', 'placeholder'])
   else:
-    Log('Init new git repo: %s' % directory)
-    RunGitCmd(directory, ['init'])
+    log('Init new git repo: %s' % directory)
+    run_git_cmd(directory, ['init'])
     try:
       # Setup a bogus identity on the buildbots.
       if os.environ.get('BUILDBOT_BUILDERNAME'):
-        RunGitCmd(directory, ['config', 'user.name', 'Naclports'])
-        RunGitCmd(directory, ['config', 'user.email', 'nobody@example.com'])
-      RunGitCmd(directory, ['add', '-f', '.'])
-      RunGitCmd(directory, ['commit', '-m', 'Upstream version'])
-      RunGitCmd(directory, ['checkout', '-b', 'upstream'])
-      RunGitCmd(directory, ['checkout', 'master'])
+        run_git_cmd(directory, ['config', 'user.name', 'Naclports'])
+        run_git_cmd(directory, ['config', 'user.email', 'nobody@example.com'])
+      run_git_cmd(directory, ['add', '-f', '.'])
+      run_git_cmd(directory, ['commit', '-m', 'Upstream version'])
+      run_git_cmd(directory, ['checkout', '-b', 'upstream'])
+      run_git_cmd(directory, ['checkout', 'master'])
     except:  # pylint: disable=bare-except
       # If git setup fails or is interrupted then remove the partially
       # initialized repository.
-      util.RemoveTree(os.path.join(git_dir))
+      util.remove_tree(os.path.join(git_dir))
 
 
-def WriteStamp(stamp_file, stamp_contents):
+def write_stamp(stamp_file, stamp_contents):
   """Write a stamp file to disk with the given file contents."""
   stamp_dir = os.path.dirname(stamp_file)
-  util.Makedirs(stamp_dir)
+  util.makedirs(stamp_dir)
 
   with open(stamp_file, 'w') as f:
     f.write(stamp_contents)
-  Log('Wrote stamp: %s' % stamp_file)
+  log('Wrote stamp: %s' % stamp_file)
 
 
-def StampContentsMatch(stamp_file, stamp_contents):
+def stamp_contents_match(stamp_file, stamp_contents):
   """Return True is stamp_file exists and contains the given contents."""
   if not os.path.exists(stamp_file):
     return False
@@ -181,7 +179,7 @@ class SourcePackage(package.Package):
     if self.NAME != os.path.basename(self.root):
       raise Error('%s: package NAME must match directory name' % self.info)
 
-  def GetInstallLocation(self):
+  def get_install_location(self):
     install_dir = 'install_%s' % util.arch_to_pkgarch[self.config.arch]
     if self.config.arch != self.config.toolchain:
       install_dir += '_' + self.config.toolchain
@@ -189,42 +187,42 @@ class SourcePackage(package.Package):
       install_dir += '_debug'
     return os.path.join(paths.BUILD_ROOT, self.NAME, install_dir, 'payload')
 
-  def GetBuildLocation(self):
+  def get_build_location(self):
     package_dir = self.ARCHIVE_ROOT or '%s-%s' % (self.NAME, self.VERSION)
     return os.path.join(paths.BUILD_ROOT, self.NAME, package_dir)
 
-  def GetPatchFile(self):
+  def get_patch_file(self):
     patch_name = self.PATCH_NAME or 'nacl.patch'
     return os.path.join(self.root, patch_name)
 
-  def GetArchiveFilename(self):
+  def get_archive_filename(self):
     if self.URL_FILENAME:
       return self.URL_FILENAME
 
-    if self.IsGitUpstream() or self.URL is None:
+    if self.is_git_upstream() or self.URL is None:
       return None
 
     return os.path.basename(urlparse.urlparse(self.URL)[2])
 
-  def DownloadLocation(self):
-    archive = self.GetArchiveFilename()
+  def download_location(self):
+    archive = self.get_archive_filename()
     if not archive:
       return
     return os.path.join(paths.CACHE_ROOT, archive)
 
-  def IsInstalled(self):
-    return util.IsInstalled(self.NAME, self.config,
-                            self.InstalledInfoContents())
+  def is_installed(self):
+    return util.is_installed(self.NAME, self.config,
+                             self.installed_info_contents())
 
-  def IsGitUpstream(self):
+  def is_git_upstream(self):
     return self.URL and self.URL.split('@')[0].endswith('.git')
 
-  def InstallDeps(self, force, from_source=False):
-    for dep in self.Dependencies():
-      if not dep.IsAnyVersionInstalled() or force == 'all':
-        dep.Install(True, force, from_source)
+  def install_deps(self, force, from_source=False):
+    for dep in self.dependencies():
+      if not dep.is_any_version_installed() or force == 'all':
+        dep.install(True, force, from_source)
 
-  def PackageFile(self):
+  def package_file(self):
     fullname = [os.path.join(paths.PACKAGES_ROOT, self.NAME)]
     fullname.append(self.VERSION)
     fullname.append(util.arch_to_pkgarch[self.config.arch])
@@ -235,7 +233,7 @@ class SourcePackage(package.Package):
       fullname.append('debug')
     return '_'.join(fullname) + '.tar.bz2'
 
-  def InstalledInfoContents(self):
+  def installed_info_contents(self):
     """Generate content of the .info file to install based on source
     pkg_info file and current build configuration."""
     with open(self.info) as f:
@@ -243,11 +241,11 @@ class SourcePackage(package.Package):
     info_content += 'BUILD_CONFIG=%s\n' % self.config.config_name
     info_content += 'BUILD_ARCH=%s\n' % self.config.arch
     info_content += 'BUILD_TOOLCHAIN=%s\n' % self.config.toolchain
-    info_content += 'BUILD_SDK_VERSION=%s\n' % util.GetSDKVersion()
+    info_content += 'BUILD_SDK_VERSION=%s\n' % util.get_sdk_version()
     return info_content
 
-  def IsBuilt(self):
-    package_file = self.PackageFile()
+  def is_built(self):
+    package_file = self.package_file()
     if not os.path.exists(package_file):
       return False
     try:
@@ -256,91 +254,90 @@ class SourcePackage(package.Package):
       # If the package is malformed in some way or in some old format
       # then treat it as not built.
       return False
-    return pkg.IsInstallable()
+    return pkg.is_installable()
 
-  def Install(self, build_deps, force=None, from_source=False):
-    self.CheckInstallable()
+  def install(self, build_deps, force=None, from_source=False):
+    self.check_installable()
 
-    if force is None and self.IsInstalled():
-      self.LogStatus('Already installed')
+    if force is None and self.is_installed():
+      self.log_status('Already installed')
       return
 
     if build_deps:
-      self.InstallDeps(force, from_source)
+      self.install_deps(force, from_source)
 
     if force:
       from_source = True
 
-    package_file = self.PackageFile()
-    if not self.IsBuilt() and not from_source:
-      index = package_index.GetCurrentIndex()
-      if index.Installable(self.NAME, self.config):
-        package_file = index.Download(self.NAME, self.config)
+    package_file = self.package_file()
+    if not self.is_built() and not from_source:
+      index = package_index.get_current_index()
+      if index.installable(self.NAME, self.config):
+        package_file = index.download(self.NAME, self.config)
       else:
         from_source = True
 
     if from_source:
-      self.Build(build_deps, force)
+      self.build(build_deps, force)
 
-    if self.IsAnyVersionInstalled():
-      installed_pkg = self.GetInstalledPackage()
-      installed_pkg.LogStatus('Uninstalling existing')
-      installed_pkg.DoUninstall(force=True)
+    if self.is_any_version_installed():
+      installed_pkg = self.get_installed_package()
+      installed_pkg.log_status('Uninstalling existing')
+      installed_pkg.do_uninstall(force=True)
 
-    binary_package.BinaryPackage(package_file).Install(force)
+    binary_package.BinaryPackage(package_file).install(force)
 
-  def GetInstalledPackage(self):
-    return installed_package.CreateInstalledPackage(self.NAME, self.config)
+  def get_installed_package(self):
+    return installed_package.create_installed_package(self.NAME, self.config)
 
-  def CreatePkgFile(self):
+  def create_pkg_file(self):
     """Create and pkg file for use with the FreeBSD pkg tool.
 
     Create a package from the result of the package's InstallStep.
     """
-    install_dir = self.GetInstallLocation()
+    install_dir = self.get_install_location()
     if not os.path.exists(install_dir):
-      Log('Skiping pkg creation. Install dir not found: %s' % install_dir)
+      log('Skiping pkg creation. Install dir not found: %s' % install_dir)
       return
 
     # Strip all elf or pexe files in the install directory (except .o files
     # since we don't want to strip, for example, crt1.o)
     if not self.config.debug and self.config.toolchain != 'emscripten':
-      strip = util.GetStrip(self.config)
+      strip = util.get_strip(self.config)
       for root, _, files in os.walk(install_dir):
         for filename in files:
           fullname = os.path.join(root, filename)
-          if (os.path.isfile(fullname) and util.IsElfFile(fullname)
-              and os.path.splitext(fullname)[1] != '.o'):
-            Log('stripping: %s %s' % (strip, fullname))
+          if (os.path.isfile(fullname) and util.is_elf_file(fullname) and
+              os.path.splitext(fullname)[1] != '.o'):
+            log('stripping: %s %s' % (strip, fullname))
             subprocess.check_call([strip, fullname])
 
     abi = 'pkg_' + self.config.toolchain
     if self.config.arch != self.config.toolchain:
       abi += "_" + util.arch_to_pkgarch[self.config.arch]
     abi_dir = os.path.join(paths.PUBLISH_ROOT, abi)
-    pkg_file = os.path.join(abi_dir, '%s-%s.tbz' % (self.NAME,
-      self.VERSION))
-    util.Makedirs(abi_dir)
+    pkg_file = os.path.join(abi_dir, '%s-%s.tbz' % (self.NAME, self.VERSION))
+    util.makedirs(abi_dir)
     deps = self.DEPENDS
     if self.config.toolchain != 'glibc':
       deps = []
-    bsd_pkg.CreatePkgFile(self.NAME, self.VERSION, self.config.arch,
-        self.GetInstallLocation(), pkg_file, deps)
+    bsd_pkg.create_pkg_file(self.NAME, self.VERSION, self.config.arch,
+                            self.get_install_location(), pkg_file, deps)
 
-  def Build(self, build_deps, force=None):
-    self.CheckBuildable()
+  def build(self, build_deps, force=None):
+    self.check_buildable()
 
     if build_deps:
-      self.InstallDeps(force)
+      self.install_deps(force)
 
-    if not force and self.IsBuilt():
-      self.LogStatus('Already built')
+    if not force and self.is_built():
+      self.log_status('Already built')
       return
 
     log_root = os.path.join(paths.OUT_DIR, 'logs')
-    util.Makedirs(log_root)
+    util.makedirs(log_root)
 
-    self.LogStatus('Building')
+    self.log_status('Building')
 
     if util.log_level > util.LOG_INFO:
       log_filename = None
@@ -354,15 +351,15 @@ class SourcePackage(package.Package):
     start = time.time()
     with util.DirLock(self.root):
       try:
-        with RedirectStdoutStderr(log_filename):
+        with redirect_stdout_stderr(log_filename):
           old_log_level = util.log_level
           util.log_level = util.LOG_VERBOSE
           try:
-            self.Download()
-            self.Extract()
-            self.Patch()
-            self.RunBuildSh()
-            self.CreatePkgFile()
+            self.download()
+            self.extract()
+            self.patch()
+            self.run_build_sh()
+            self.create_pkg_file()
           finally:
             util.log_level = old_log_level
       except KeyboardInterrupt:
@@ -375,162 +372,157 @@ class SourcePackage(package.Package):
             sys.stdout.write(log_file.read())
         raise
 
-    duration = FormatTimeDelta(time.time() - start)
-    util.LogHeading('Build complete', ' [took %s]' % duration)
+    duration = format_time_delta(time.time() - start)
+    util.log_heading('Build complete', ' [took %s]' % duration)
 
-  def RunBuildSh(self):
+  def run_build_sh(self):
     build_port = os.path.join(paths.TOOLS_DIR, 'build_port.sh')
     cmd = [build_port]
 
     if self.config.toolchain == 'emscripten':
-      util.SetupEmscripten()
+      util.setup_emscripten()
     env = os.environ.copy()
     env['TOOLCHAIN'] = self.config.toolchain
     env['NACL_ARCH'] = self.config.arch
     env['NACL_DEBUG'] = self.config.debug and '1' or '0'
-    env['NACL_SDK_ROOT'] = util.GetSDKRoot()
-    rtn = subprocess.call(cmd,
-                          stdout=sys.stdout,
-                          stderr=sys.stderr,
-                          cwd=self.root,
-                          env=env)
+    env['NACL_SDK_ROOT'] = util.get_sdk_root()
+    rtn = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr,
+                          cwd=self.root, env=env)
     if rtn != 0:
       raise Error('Build failed: %s' % self.InfoString())
 
-  def Download(self, force_mirror=None):
+  def download(self, force_mirror=None):
     """Download upstream sources and verify integrity."""
-    if self.IsGitUpstream():
-      self.GitCloneToMirror()
+    if self.is_git_upstream():
+      self.git_clone_to_mirror()
       return
 
-    archive = self.DownloadLocation()
+    archive = self.download_location()
     if not archive:
       return
 
     if force_mirror is None:
       force_mirror = os.environ.get('FORCE_MIRROR', False)
-    self.DownloadArchive(force_mirror=force_mirror)
+    self.download_archive(force_mirror=force_mirror)
 
     if self.SHA1 is None:
       raise PkgFormatError('missing SHA1 attribute: %s' % self.info)
 
-    util.VerifyHash(archive, self.SHA1)
-    Log('verified: %s' % util.RelPath(archive))
+    util.verify_hash(archive, self.SHA1)
+    log('verified: %s' % util.rel_path(archive))
 
-  def Clean(self):
-    pkg = self.PackageFile()
-    Log('removing %s' % pkg)
+  def clean(self):
+    pkg = self.package_file()
+    log('removing %s' % pkg)
     if os.path.exists(pkg):
       os.remove(pkg)
 
     stamp_dir = os.path.join(paths.STAMP_DIR, self.NAME)
-    Log('removing %s' % stamp_dir)
-    util.RemoveTree(stamp_dir)
+    log('removing %s' % stamp_dir)
+    util.remove_tree(stamp_dir)
 
-  def Extract(self):
+  def extract(self):
     """Extract the package archive into its build location.
 
     This method assumes the package has already been downloaded.
     """
-    if self.IsGitUpstream():
-      self.GitClone()
+    if self.is_git_upstream():
+      self.git_clone()
       return
 
-    archive = self.DownloadLocation()
+    archive = self.download_location()
     if not archive:
-      self.Log('Skipping extract; No upstream archive')
+      self.log('Skipping extract; No upstream archive')
       return
 
-    dest = self.GetBuildLocation()
+    dest = self.get_build_location()
     output_path, new_foldername = os.path.split(dest)
-    util.Makedirs(output_path)
+    util.makedirs(output_path)
 
     # Check existing stamp file contents
-    stamp_file = self.GetExtractStamp()
-    stamp_contents = self.GetExtractStampContent()
+    stamp_file = self.get_extract_stamp()
+    stamp_contents = self.get_extract_stamp_content()
     if os.path.exists(dest):
-      if StampContentsMatch(stamp_file, stamp_contents):
-        Log('Already up-to-date: %s' % util.RelPath(dest))
+      if stamp_contents_match(stamp_file, stamp_contents):
+        log('Already up-to-date: %s' % util.rel_path(dest))
         return
 
       raise Error("Upstream archive or patch has changed.\n" +
                   "Please remove existing checkout and try again: '%s'" % dest)
 
-    util.LogHeading('Extracting')
-    util.Makedirs(paths.OUT_DIR)
+    util.log_heading('Extracting')
+    util.makedirs(paths.OUT_DIR)
     tmp_output_path = tempfile.mkdtemp(dir=paths.OUT_DIR)
     try:
-      ExtractArchive(archive, tmp_output_path)
+      extract_archive(archive, tmp_output_path)
       src = os.path.join(tmp_output_path, new_foldername)
       if not os.path.isdir(src):
         raise Error('Archive contents not found: %s' % src)
-      LogVerbose("renaming '%s' -> '%s'" % (src, dest))
+      log_verbose("renaming '%s' -> '%s'" % (src, dest))
       os.rename(src, dest)
     finally:
-      util.RemoveTree(tmp_output_path)
+      util.remove_tree(tmp_output_path)
 
-    self.RemoveStamps()
-    WriteStamp(stamp_file, stamp_contents)
+    self.remove_stamps()
+    write_stamp(stamp_file, stamp_contents)
 
-  def RunCmd(self, cmd, **args):
+  def run_cmd(self, cmd, **args):
     try:
-      subprocess.check_call(cmd,
-                            stdout=sys.stdout,
-                            stderr=sys.stderr,
-                            cwd=self.GetBuildLocation(), **args)
+      subprocess.check_call(cmd, stdout=sys.stdout, stderr=sys.stderr,
+                            cwd=self.get_build_location(), **args)
     except subprocess.CalledProcessError as e:
       raise Error(e)
 
-  def Log(self, message):
-    Log('%s: %s' % (message, self.InfoString()))
+  def log(self, message):
+    log('%s: %s' % (message, self.info_string()))
 
-  def GetStampDir(self):
+  def get_stamp_dir(self):
     return os.path.join(paths.STAMP_DIR, self.NAME)
 
-  def RemoveStamps(self):
-    util.RemoveTree(self.GetStampDir())
+  def remove_stamps(self):
+    util.remove_tree(self.get_stamp_dir())
 
-  def Patch(self):
-    stamp_file = os.path.join(self.GetStampDir(), 'nacl_patch')
-    src_dir = self.GetBuildLocation()
+  def patch(self):
+    stamp_file = os.path.join(self.get_stamp_dir(), 'nacl_patch')
+    src_dir = self.get_build_location()
     if self.URL is None:
       return
 
     if os.path.exists(stamp_file):
-      self.Log('Skipping patch step (cleaning source tree)')
+      self.log('Skipping patch step (cleaning source tree)')
       cmd = ['git', 'clean', '-f', '-d']
       if not util.log_level > util.LOG_INFO:
         cmd.append('-q')
-      self.RunCmd(cmd)
+      self.run_cmd(cmd)
       return
 
-    util.LogHeading('Patching')
-    InitGitRepo(src_dir)
-    if os.path.exists(self.GetPatchFile()):
-      LogVerbose('applying patch to: %s' % src_dir)
+    util.log_heading('Patching')
+    init_git_repo(src_dir)
+    if os.path.exists(self.get_patch_file()):
+      log_verbose('applying patch to: %s' % src_dir)
       cmd = ['patch', '-p1', '-g0', '--no-backup-if-mismatch']
-      with open(self.GetPatchFile()) as f:
-        self.RunCmd(cmd, stdin=f)
-      self.RunCmd(['git', 'add', '.'])
-      self.RunCmd(['git', 'commit', '-m', 'Apply webports patch'])
+      with open(self.get_patch_file()) as f:
+        self.run_cmd(cmd, stdin=f)
+      self.run_cmd(['git', 'add', '.'])
+      self.run_cmd(['git', 'commit', '-m', 'Apply webports patch'])
 
-    WriteStamp(stamp_file, '')
+    write_stamp(stamp_file, '')
 
-  def GetExtractStamp(self):
-    return os.path.join(self.GetStampDir(), 'extract')
+  def get_extract_stamp(self):
+    return os.path.join(self.get_stamp_dir(), 'extract')
 
-  def GetExtractStampContent(self):
-    patch_file = self.GetPatchFile()
+  def get_extract_stamp_content(self):
+    patch_file = self.get_patch_file()
     if os.path.exists(patch_file):
-      patch_sha = util.HashFile(self.GetPatchFile())
+      patch_sha = util.hash_file(self.get_patch_file())
       return 'ARCHIVE_SHA1=%s PATCH_SHA1=%s\n' % (self.SHA1, patch_sha)
     else:
       return 'ARCHIVE_SHA1=%s\n' % self.SHA1
 
-  def GetMirrorURL(self):
-    return util.GS_MIRROR_URL + '/' + self.GetArchiveFilename()
+  def get_mirror_url(self):
+    return util.GS_MIRROR_URL + '/' + self.get_archive_filename()
 
-  def CheckInstallable(self):
+  def check_installable(self):
     if self.DISABLED:
       raise DisabledError('%s: package is disabled' % self.NAME)
 
@@ -555,7 +547,7 @@ class SourcePackage(package.Package):
                           (self.NAME, self.config.arch))
 
     if self.MIN_SDK_VERSION is not None:
-      if not util.CheckSDKVersion(self.MIN_SDK_VERSION):
+      if not util.check_sdk_version(self.MIN_SDK_VERSION):
         raise DisabledError('%s: requires SDK version %s or above' %
                             (self.NAME, self.MIN_SDK_VERSION))
 
@@ -565,58 +557,58 @@ class SourcePackage(package.Package):
                             (self.NAME, self.config.arch))
 
     for conflicting_package in self.CONFLICTS:
-      if util.IsInstalled(conflicting_package, self.config):
+      if util.is_installed(conflicting_package, self.config):
         raise PkgConflictError("%s: conflicts with installed package: %s" %
                                (self.NAME, conflicting_package))
 
-    for dep in self.Dependencies():
+    for dep in self.dependencies():
       try:
-        dep.CheckInstallable()
+        dep.check_installable()
       except DisabledError as e:
         raise DisabledError('%s depends on %s; %s' % (self.NAME, dep.NAME, e))
 
-  def Conflicts(self):
+  def conflicts(self):
     """Yields the set of SourcePackages that directly conflict with this one"""
     for dep_name in self.CONFLICTS:
-      yield CreatePackage(dep_name, self.config)
+      yield create_package(dep_name, self.config)
 
-  def TransitiveConflicts(self):
-    rtn = set(self.Conflicts())
-    for dep in self.TransitiveDependencies():
-      rtn |= set(dep.Conflicts())
+  def transitive_conflicts(self):
+    rtn = set(self.conflicts())
+    for dep in self.transitive_dependencies():
+      rtn |= set(dep.conflicts())
     return rtn
 
-  def Dependencies(self):
+  def dependencies(self):
     """Yields the set of SourcePackages that this package directly depends on"""
     for dep_name in self.DEPENDS:
-      yield CreatePackage(dep_name, self.config)
+      yield create_package(dep_name, self.config)
 
-  def ReverseDependencies(self):
+  def reverse_dependencies(self):
     """Yields the set of packages that depend directly on this one"""
-    for pkg in SourcePackageIterator():
+    for pkg in source_package_iterator():
       if self.NAME in pkg.DEPENDS:
         yield pkg
 
-  def TransitiveDependencies(self):
+  def transitive_dependencies(self):
     """Yields the set of packages that this package transitively depends on"""
     deps = []
-    for dep in self.Dependencies():
-      for d in dep.TransitiveDependencies():
+    for dep in self.dependencies():
+      for d in dep.transitive_dependencies():
         if d not in deps:
           deps.append(d)
       if dep not in deps:
         deps.append(dep)
     return deps
 
-  def CheckBuildable(self):
-    self.CheckInstallable()
+  def check_buildable(self):
+    self.check_installable()
 
     if self.BUILD_OS is not None:
-      if util.GetPlatform() != self.BUILD_OS:
+      if util.get_platform() != self.BUILD_OS:
         raise DisabledError('%s: can only be built on %s' %
                             (self.NAME, self.BUILD_OS))
 
-  def GitCloneToMirror(self):
+  def git_clone_to_mirror(self):
     """Clone the upstream git repo into a local mirror. """
     git_url, git_commit = self.URL.split('@', 2)
 
@@ -626,86 +618,85 @@ class SourcePackage(package.Package):
     git_mirror = git_mirror.replace('/', '_')
     mirror_dir = os.path.join(paths.CACHE_ROOT, git_mirror)
     if os.path.exists(mirror_dir):
-      if RunGitCmd(mirror_dir, ['rev-parse', git_commit + '^{commit}'],
-                   error_ok=True) != 0:
-        Log('Updating git mirror: %s' % util.RelPath(mirror_dir))
-        RunGitCmd(mirror_dir, ['remote', 'update', '--prune'])
+      if run_git_cmd(mirror_dir, ['rev-parse', git_commit + '^{commit}'],
+                     error_ok=True) != 0:
+        log('Updating git mirror: %s' % util.rel_path(mirror_dir))
+        run_git_cmd(mirror_dir, ['remote', 'update', '--prune'])
     else:
-      Log('Mirroring upstream git repo: %s' % self.URL)
-      RunGitCmd(paths.CACHE_ROOT, ['clone', '--mirror', git_url, git_mirror])
-    Log('git mirror up-to-date: %s' % util.RelPath(mirror_dir))
+      log('Mirroring upstream git repo: %s' % self.URL)
+      run_git_cmd(paths.CACHE_ROOT, ['clone', '--mirror', git_url, git_mirror])
+    log('git mirror up-to-date: %s' % util.rel_path(mirror_dir))
     return mirror_dir, git_commit
 
-  def GitClone(self):
+  def git_clone(self):
     """Create a clone of the upstream repo in the build directory.
 
     This operation will only require a network connection if the
     local git mirror is out-of-date."""
-    stamp_file = self.GetExtractStamp()
+    stamp_file = self.get_extract_stamp()
     stamp_content = 'GITURL=%s' % self.URL
-    patch_file = self.GetPatchFile()
+    patch_file = self.get_patch_file()
     if os.path.exists(patch_file):
-      patch_checksum = util.HashFile(patch_file)
+      patch_checksum = util.hash_file(patch_file)
       stamp_content += ' PATCH=%s' % patch_checksum
 
     stamp_content += '\n'
 
-    dest = self.GetBuildLocation()
-    if os.path.exists(self.GetBuildLocation()):
-      if StampContentsMatch(stamp_file, stamp_content):
+    dest = self.get_build_location()
+    if os.path.exists(self.get_build_location()):
+      if stamp_contents_match(stamp_file, stamp_content):
         return
 
       raise Error('Upstream archive or patch has changed.\n' +
                   "Please remove existing checkout and try again: '%s'" % dest)
 
-    util.LogHeading('Cloning')
+    util.log_heading('Cloning')
     # Ensure local mirror is up-to-date
-    git_mirror, git_commit = self.GitCloneToMirror()
+    git_mirror, git_commit = self.git_clone_to_mirror()
     # Clone from the local mirror.
-    RunGitCmd(None, ['clone', git_mirror, dest])
-    RunGitCmd(dest, ['reset', '--hard', git_commit])
+    run_git_cmd(None, ['clone', git_mirror, dest])
+    run_git_cmd(dest, ['reset', '--hard', git_commit])
 
     # Set the origing to the original URL so it is possible to push directly
     # from the build tree.
-    RunGitCmd(dest, ['remote', 'set-url', 'origin', self.URL.split('@')[0]])
+    run_git_cmd(dest, ['remote', 'set-url', 'origin', self.URL.split('@')[0]])
 
-    self.RemoveStamps()
-    WriteStamp(stamp_file, stamp_content)
+    self.remove_stamps()
+    write_stamp(stamp_file, stamp_content)
 
-  def DownloadArchive(self, force_mirror):
+  def download_archive(self, force_mirror):
     """Download the archive to the local cache directory.
 
     Args:
       force_mirror: force downloading from mirror only.
     """
-    filename = self.DownloadLocation()
+    filename = self.download_location()
     if not filename or os.path.exists(filename):
       return
-    util.Makedirs(os.path.dirname(filename))
+    util.makedirs(os.path.dirname(filename))
 
     # Always try the mirror URL first
-    mirror_url = self.GetMirrorURL()
+    mirror_url = self.get_mirror_url()
     try:
-      util.DownloadFile(filename, mirror_url)
+      util.download_file(filename, mirror_url)
     except Error as e:
       if not force_mirror:
         # Fall back to the original upstream URL
-        util.DownloadFile(filename, self.URL)
+        util.download_file(filename, self.URL)
       else:
         raise e
 
-  def UpdatePatch(self):
+  def update_patch(self):
     if self.URL is None:
       return
 
-    git_dir = self.GetBuildLocation()
+    git_dir = self.get_build_location()
     if not os.path.exists(git_dir):
       raise Error('Source directory not found: %s' % git_dir)
 
     try:
       diff = subprocess.check_output(['git', 'diff', 'upstream',
-                                      '--no-ext-diff'],
-                                     cwd=git_dir)
+                                      '--no-ext-diff'], cwd=git_dir)
     except subprocess.CalledProcessError as e:
       raise Error('error running git in %s: %s' % (git_dir, str(e)))
 
@@ -742,33 +733,33 @@ class SourcePackage(package.Package):
     diff = new_diff
 
     # Write back out the diff.
-    patch_path = self.GetPatchFile()
+    patch_path = self.get_patch_file()
     preexisting = os.path.exists(patch_path)
 
     if not diff:
       if preexisting:
-        Log('removing patch file: %s' % util.RelPath(patch_path))
+        log('removing patch file: %s' % util.rel_path(patch_path))
         os.remove(patch_path)
       else:
-        Log('no patch required: %s' % util.RelPath(git_dir))
+        log('no patch required: %s' % util.rel_path(git_dir))
       return
 
     if preexisting:
       with open(patch_path) as f:
         if diff == f.read():
-          Log('patch unchanged: %s' % util.RelPath(patch_path))
+          log('patch unchanged: %s' % util.rel_path(patch_path))
           return
 
     with open(patch_path, 'w') as f:
       f.write(diff)
 
     if preexisting:
-      Log('created patch: %s' % util.RelPath(patch_path))
+      log('created patch: %s' % util.rel_path(patch_path))
     else:
-      Log('updated patch: %s' % util.RelPath(patch_path))
+      log('updated patch: %s' % util.rel_path(patch_path))
 
 
-def SourcePackageIterator():
+def source_package_iterator():
   """Iterator which yields a Package object for each webports package."""
   ports_root = os.path.join(paths.NACLPORTS_ROOT, 'ports')
   for root, dirs, files in os.walk(ports_root):
@@ -783,7 +774,7 @@ def SourcePackageIterator():
 DEFAULT_LOCATIONS = ('ports', 'ports/python_modules')
 
 
-def CreatePackage(package_name, config=None):
+def create_package(package_name, config=None):
   """Create a Package object given a package name or path.
 
   Returns:

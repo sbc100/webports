@@ -29,17 +29,17 @@ import webports.source_package
 MIRROR_GS = 'gs://webports/mirror'
 
 
-def GsUpload(options, filename, url):
+def gs_upload(options, filename, url):
   """Upload a file to Google cloud storage using gsutil"""
-  webports.Log("Uploading to mirror: %s" % url)
+  webports.log("Uploading to mirror: %s" % url)
   cmd = options.gsutil + ['cp', '-a', 'public-read', filename, url]
   if options.dry_run:
-    webports.Log(cmd)
+    webports.log(cmd)
   else:
     subprocess.check_call(cmd)
 
 
-def GetMirrorListing(options, url):
+def get_mirror_listing(options, url):
   """Get filename listing for a Google cloud storage URL"""
   listing = subprocess.check_output(options.gsutil + ['ls', url])
   listing = listing.splitlines()
@@ -47,10 +47,10 @@ def GetMirrorListing(options, url):
   return listing
 
 
-def CheckMirror(options, package, mirror_listing):
+def check_mirror(options, package, mirror_listing):
   """Check that is package has is archive mirrors on Google cloud storage"""
-  webports.LogVerbose('Checking %s' % package.NAME)
-  basename = package.GetArchiveFilename()
+  webports.log_verbose('Checking %s' % package.NAME)
+  basename = package.get_archive_filename()
   if not basename:
     return
 
@@ -59,24 +59,24 @@ def CheckMirror(options, package, mirror_listing):
     return
 
   if options.check:
-    webports.Log('update_mirror: Archive missing from mirror: %s' % basename)
+    webports.log('update_mirror: Archive missing from mirror: %s' % basename)
     sys.exit(1)
 
   # Download upstream URL
-  package.Download(force_mirror=False)
+  package.download(force_mirror=False)
 
   url = '%s/%s' % (MIRROR_GS, basename)
-  GsUpload(options, package.DownloadLocation(), url)
+  gs_upload(options, package.download_location(), url)
 
 
-def CheckPackages(options, source_packages, mirror_listing):
+def check_packages(options, source_packages, mirror_listing):
   count = 0
   for package in source_packages:
-    CheckMirror(options, package, mirror_listing)
+    check_mirror(options, package, mirror_listing)
     count += 1
 
   if options.check:
-    webports.Log("Verfied mirroring for %d packages" % count)
+    webports.log("Verfied mirroring for %d packages" % count)
 
   return 0
 
@@ -90,15 +90,15 @@ def main(args):
   parser.add_argument('-v', '--verbose', action='store_true',
                       help='Enable verbose output.')
   options = parser.parse_args(args)
-  webports.SetVerbose(options.verbose)
+  webports.set_verbose(options.verbose)
 
   # gsutil.py should be in PATH since its part of depot_tools.
-  options.gsutil = [sys.executable, webports.util.FindInPath('gsutil.py')]
+  options.gsutil = [sys.executable, webports.util.find_in_path('gsutil.py')]
 
-  listing = GetMirrorListing(options, MIRROR_GS)
-  source_packages = webports.source_package.SourcePackageIterator()
+  listing = get_mirror_listing(options, MIRROR_GS)
+  source_packages = webports.source_package.source_package_iterator()
 
-  return CheckPackages(options, source_packages, listing)
+  return check_packages(options, source_packages, listing)
 
 
 if __name__ == '__main__':

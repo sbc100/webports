@@ -22,9 +22,9 @@ class Package(object):
     self.info = info_file
     if self.info:
       with open(self.info) as f:
-        self.ParseInfo(f.read())
+        self.parse_info(f.read())
 
-  def ParseInfo(self, info_string):
+  def parse_info(self, info_string):
     valid_keys = pkg_info.VALID_KEYS + self.extra_keys
     required_keys = pkg_info.REQUIRED_KEYS + self.extra_keys
 
@@ -35,16 +35,16 @@ class Package(object):
         setattr(self, key, None)
 
     # Parse pkg_info file
-    info = pkg_info.ParsePkgInfo(info_string, self.info, valid_keys,
-                                 required_keys)
+    info = pkg_info.parse_pkg_info(info_string, self.info, valid_keys,
+                                   required_keys)
 
     # Set attributres based on pkg_info setttings.
     for key, value in info.items():
       setattr(self, key, value)
 
-    self.Validate()
+    self.validate()
 
-  def Validate(self):
+  def validate(self):
     for libc in self.DISABLED_LIBC:
       if libc not in configuration.VALID_LIBC:
         raise Error('%s: invalid libc: %s' % (self.info, libc))
@@ -84,34 +84,33 @@ class Package(object):
   def __str__(self):
     return '<Package %s %s %s>' % (self.NAME, self.VERSION, self.config)
 
-  def InfoString(self):
-    return "'%s' [%s]" % ((util.Color(self.NAME, 'yellow'),
-                           util.Color(self.config, 'blue')))
+  def info_string(self):
+    return "'%s' [%s]" % ((util.colorize(self.NAME, 'yellow'),
+                           util.colorize(self.config, 'blue')))
 
-  def LogStatus(self, message):
-    util.LogHeading(message, " " + self.InfoString())
+  def log_status(self, message, suffix=''):
+    util.log_heading(message, " " + self.info_string())
 
-  def CheckDeps(self, valid_packages):
+  def check_deps(self, valid_packages):
     for package in self.DEPENDS:
       if package not in valid_packages:
-        util.Log('%s: Invalid dependency: %s' % (self.info, package))
+        util.log('%s: Invalid dependency: %s' % (self.info, package))
         return False
 
     for package in self.CONFLICTS:
       if package not in valid_packages:
-        util.Log('%s: Invalid conflict: %s' % (self.info, package))
+        util.log('%s: Invalid conflict: %s' % (self.info, package))
         return False
 
     return True
 
-  def IsAnyVersionInstalled(self):
-    return util.IsInstalled(self.NAME, self.config)
+  def is_any_version_installed(self):
+    return util.is_installed(self.NAME, self.config)
 
-  def GetInstallStamp(self):
+  def get_install_stamp(self):
     """Returns the name of install stamp for this package."""
-    return util.GetInstallStamp(self.NAME, self.config)
+    return util.get_install_stamp(self.NAME, self.config)
 
-  def GetListFile(self):
+  def get_list_file(self):
     """Returns the name of the installed file list for this package."""
-    return util.GetListFile(self.NAME, self.config)
-
+    return util.get_list_file(self.NAME, self.config)

@@ -25,10 +25,10 @@ import webports
 import webports.package
 import webports.package_index
 
-from webports.util import Log, LogVerbose
+from webports.util import log, log_verbose
 
 
-def FormatSize(num_bytes):
+def format_size(num_bytes):
   """Create a human readable string from a byte count."""
   for x in ('bytes', 'KB', 'MB', 'GB', 'TB'):
     if num_bytes < 1024.0:
@@ -49,7 +49,7 @@ class FileInfo(object):
     return '<FileInfo %s [%s]>' % (self.name, self.size)
 
 
-def ParseGsUtilOutput(output):
+def parse_gs_util_output(output):
   """Parse the output of gsutil -L.
 
   Returns:
@@ -97,17 +97,17 @@ def ParseGsUtilOutput(output):
   return result
 
 
-def GetHash(filename):
+def get_hash(filename):
   with open(filename) as f:
     return hashlib.md5(f.read()).hexdigest()
 
 
-def CheckHash(filename, md5sum):
+def check_hash(filename, md5sum):
   """Return True is filename has the given md5sum, False otherwise."""
-  return md5sum == GetHash(filename)
+  return md5sum == get_hash(filename)
 
 
-def DownloadFiles(files, check_hashes=True, parallel=False):
+def download_files(files, check_hashes=True, parallel=False):
   """Download one of more files to the local disk.
 
   Args:
@@ -130,25 +130,25 @@ def DownloadFiles(files, check_hashes=True, parallel=False):
     file_info.name = os.path.join(download_dir, basename)
     filenames.append((file_info.name, file_info.url))
     if os.path.exists(file_info.name):
-      if not check_hashes or CheckHash(file_info.name, file_info.md5):
-        Log('Up-to-date: %s' % file_info.name)
+      if not check_hashes or check_hash(file_info.name, file_info.md5):
+        log('Up-to-date: %s' % file_info.name)
         continue
     files_to_download.append(file_info)
 
-  def Check(file_info):
-    if check_hashes and not CheckHash(file_info.name, file_info.md5):
+  def check(file_info):
+    if check_hashes and not check_hash(file_info.name, file_info.md5):
       raise webports.Error(
           'Checksum failed: %s\nExpected=%s\nActual=%s' %
-          (file_info.name, file_info.md5, GetHash(file_info.name)))
+          (file_info.name, file_info.md5, get_hash(file_info.name)))
 
   if not files_to_download:
-    Log('All files up-to-date')
+    log('All files up-to-date')
   else:
     total_size = sum(f.size for f in files_to_download)
-    Log('Need to download %d/%d files [%s]' %
-        (len(files_to_download), len(files), FormatSize(total_size)))
+    log('Need to download %d/%d files [%s]' %
+        (len(files_to_download), len(files), format_size(total_size)))
 
-    gsutil = FindGsutil()
+    gsutil = find_gsutil()
     if parallel:
       remaining_files = files_to_download
       num_files = 20
@@ -156,23 +156,23 @@ def DownloadFiles(files, check_hashes=True, parallel=False):
         files = remaining_files[:num_files]
         remaining_files = remaining_files[num_files:]
         cmd = gsutil + ['-m', 'cp'] + [f.gsurl for f in files] + [download_dir]
-        LogVerbose(cmd)
+        log_verbose(cmd)
         subprocess.check_call(cmd)
         for file_info in files:
-          Check(file_info)
+          check(file_info)
     else:
       for file_info in files_to_download:
-        webports.DownloadFile(file_info.name, file_info.url)
-        Check(file_info)
+        webports.download_file(file_info.name, file_info.url)
+        check(file_info)
 
   return filenames
 
 
-def FindGsutil():
+def find_gsutil():
   # Ideally we would use the gsutil that comes with depot_tools since users
   # are much more likely to have that in thier PATH.  However I found this
   # depot_tools version to be a lot slower.
-  # return [sys.executable, webports.util.FindInPath('gsutil.py')]
+  # return [sys.executable, webports.util.find_in_path('gsutil.py')]
   return ['gsutil']
 
 
@@ -190,10 +190,10 @@ def main(args):
                       help='Assume on-disk files are up-to-date (for testing).')
   args = parser.parse_args(args)
   if args.verbose:
-    webports.SetVerbose(True)
+    webports.set_verbose(True)
 
-  sdk_version = webports.util.GetSDKVersion()
-  Log('Scanning packages built for pepper_%s at revsion %s' %
+  sdk_version = webports.util.get_sdk_version()
+  log('Scanning packages built for pepper_%s at revsion %s' %
       (sdk_version, args.revision))
   base_path = '%s/builds/pepper_%s/%s/packages' % (webports.GS_BUCKET,
                                                    sdk_version, args.revision)
@@ -201,13 +201,13 @@ def main(args):
   listing_file = os.path.join(webports.NACLPORTS_ROOT, 'lib', 'listing.txt')
 
   if args.cache_listing and os.path.exists(listing_file):
-    Log('Using pre-cached gs listing: %s' % listing_file)
+    log('Using pre-cached gs listing: %s' % listing_file)
     with open(listing_file) as f:
       listing = f.read()
   else:
-    Log('Searching for packages at: %s' % gs_url)
-    cmd = FindGsutil() + ['stat', gs_url]
-    LogVerbose('Running: %s' % str(cmd))
+    log('Searching for packages at: %s' % gs_url)
+    cmd = find_gsutil() + ['stat', gs_url]
+    log_verbose('Running: %s' % str(cmd))
     try:
       listing = subprocess.check_output(cmd)
     except subprocess.CalledProcessError as e:
@@ -216,16 +216,16 @@ def main(args):
       with open(listing_file, 'w') as f:
         f.write(listing)
 
-  all_files = ParseGsUtilOutput(listing)
+  all_files = parse_gs_util_output(listing)
 
-  Log('Found %d packages [%s]' % (len(all_files),
-                                  FormatSize(sum(f.size for f in all_files))))
+  log('Found %d packages [%s]' % (len(all_files),
+                                  format_size(sum(f.size for f in all_files))))
 
-  binaries = DownloadFiles(all_files, not args.skip_md5, args.parallel)
+  binaries = download_files(all_files, not args.skip_md5, args.parallel)
   index_file = os.path.join(webports.NACLPORTS_ROOT, 'lib', 'prebuilt.txt')
-  Log('Generating %s' % index_file)
-  webports.package_index.WriteIndex(index_file, binaries)
-  Log('Done')
+  log('Generating %s' % index_file)
+  webports.package_index.write_index(index_file, binaries)
+  log('Done')
   return 0
 
 
