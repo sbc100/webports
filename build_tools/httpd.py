@@ -135,8 +135,7 @@ class QuittableHTTPHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     return f
 
 
-def run(server_address,
-        server_class=QuittableHTTPServer,
+def run(server_address, server_class=QuittableHTTPServer,
         handler_class=QuittableHTTPHandler):
   httpd = server_class(server_address, handler_class)
   logging.info("Starting local server on port %d", server_address[1])

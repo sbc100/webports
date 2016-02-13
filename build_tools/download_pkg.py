@@ -40,15 +40,15 @@ def download_files(pkg_dir, files, check_hashes=True, parallel=False):
   """
   files_to_download = []
   filenames = []
-  download_dir = os.path.join(webports.package_index.PREBUILT_ROOT,
-                              'pkg', pkg_dir)
+  download_dir = os.path.join(webports.package_index.PREBUILT_ROOT, 'pkg',
+                              pkg_dir)
   if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 
   for file_info in files:
     basename = os.path.basename(file_info.url)
     file_info.name = os.path.join(download_dir, basename)
-    file_info.rel_name = file_info.name[len(webports.paths.NACLPORTS_ROOT)+1:]
+    file_info.rel_name = file_info.name[len(webports.paths.NACLPORTS_ROOT) + 1:]
     filenames.append((file_info.name, file_info.url))
     if os.path.exists(file_info.name):
       if not check_hashes or check_hash(file_info.name, file_info.md5):
@@ -109,7 +109,7 @@ def main(args):
   log('Scanning packages built for pepper_%s at revsion %s' %
       (sdk_version, args.revision))
   base_path = '%s/builds/pepper_%s/%s/publish' % (webports.GS_BUCKET,
-                                                   sdk_version, args.revision)
+                                                  sdk_version, args.revision)
   gs_base_url = 'gs://' + base_path
   cmd = find_gsutil() + ['ls', gs_base_url]
   log_verbose('Running: %s' % str(cmd))
@@ -139,11 +139,12 @@ def main(args):
         with open(listing_file, 'w') as f:
           f.write(listing)
     all_files = parse_gs_util_output(listing)
-    log('Found %d packages [%s] for %s' % (len(all_files),
-        format_size(sum(f.size for f in all_files)), pkg))
+    log('Found %d packages [%s] for %s' %
+        (len(all_files), format_size(sum(f.size for f in all_files)), pkg))
     download_files(pkg, all_files, not args.skip_md5, args.parallel)
   log('Done')
   return 0
+
 
 if __name__ == '__main__':
   try:

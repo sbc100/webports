@@ -695,8 +695,8 @@ class SourcePackage(package.Package):
       raise Error('Source directory not found: %s' % git_dir)
 
     try:
-      diff = subprocess.check_output(['git', 'diff', 'upstream',
-                                      '--no-ext-diff'], cwd=git_dir)
+      diff = subprocess.check_output(
+          ['git', 'diff', 'upstream', '--no-ext-diff'], cwd=git_dir)
     except subprocess.CalledProcessError as e:
       raise Error('error running git in %s: %s' % (git_dir, str(e)))
 

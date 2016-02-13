@@ -48,7 +48,9 @@ import subprocess
 import urlparse
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 
+
 class GetHandler(SimpleHTTPRequestHandler):
+
   def do_GET(self):
     if self.handle_git('GET'):
       return
@@ -94,12 +96,12 @@ class GetHandler(SimpleHTTPRequestHandler):
     env['REMOTE_USER'] = 'git-user'
 
     if self.headers.typeheader is None:
-        env['CONTENT_TYPE'] = self.headers.type
+      env['CONTENT_TYPE'] = self.headers.type
     else:
-        env['CONTENT_TYPE'] = self.headers.typeheader
+      env['CONTENT_TYPE'] = self.headers.typeheader
     length = self.headers.getheader('content-length')
     if length:
-        env['CONTENT_LENGTH'] = length
+      env['CONTENT_LENGTH'] = length
 
     nbytes = 0
     if length is not None:
@@ -109,30 +111,28 @@ class GetHandler(SimpleHTTPRequestHandler):
     self.send_header('Access-Control-Allow-Origin', '*')
 
     # from CGIHTTPServer.CGIHTTPRequestHandler
-    p = subprocess.Popen(['git', 'http-backend'],
-                         stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
+    p = subprocess.Popen(['git', 'http-backend'], stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          env=env)
     if method == "POST" and nbytes > 0:
-        data = self.rfile.read(nbytes)
+      data = self.rfile.read(nbytes)
     else:
-        data = None
+      data = None
     # throw away additional data [see bug #427345]
     while select.select([self.rfile._sock], [], [], 0)[0]:
-        if not self.rfile._sock.recv(1):
-            break
+      if not self.rfile._sock.recv(1):
+        break
     stdout, stderr = p.communicate(data)
     self.wfile.write(stdout)
     if stderr:
-        self.log_error('%s', stderr)
+      self.log_error('%s', stderr)
     p.stderr.close()
     p.stdout.close()
     status = p.returncode
     if status:
-        self.log_error("CGI script exit status %#x", status)
+      self.log_error("CGI script exit status %#x", status)
     else:
-        self.log_message("CGI script exited OK")
+      self.log_message("CGI script exited OK")
     return True
 
 

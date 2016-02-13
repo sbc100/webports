@@ -96,7 +96,7 @@ def determine_sdk_url(flavor, base_url, version):
         break
     else:
       raise webports.Error('No SDK build (%s) found in last %d trunk builds' %
-                            (path, HISTORY_SIZE))
+                           (path, HISTORY_SIZE))
 
   return '%strunk.%s/%s' % (GSTORE, version, path)
 
@@ -189,7 +189,7 @@ PLATFORM_COLLAPSE = {
 def main(argv):
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('-v', '--version', default='latest',
-      help='which version of the SDK to download')
+                      help='which version of the SDK to download')
   options = parser.parse_args(argv)
 
   flavor = 'naclsdk_' + PLATFORM_COLLAPSE[sys.platform]

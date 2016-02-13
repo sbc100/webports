@@ -16,7 +16,6 @@ GDB_OUT_DIR = os.path.join(SRC_DIR, 'out/publish/gdb', LIBC)
 
 import chrome_test
 
-
 gdb_app = os.path.join(GDB_OUT_DIR, 'gdb_app')
 debug_extension = os.path.join(GDB_OUT_DIR, 'debug_extension')
 test_dir = os.path.join(SCRIPT_DIR, 'tests')

@@ -65,7 +65,6 @@ def chrome_run_path(chrome_dir, arch):
   return os.path.join(chrome_dir, path)
 
 
-
 def kill_subprocess_and_children(proc):
   """Kill a subprocess and all children.
 
@@ -216,8 +215,8 @@ class ChromeTestHandler(httpd.QuittableHTTPHandler):
         return
       # Allow the tests to declare their name on start.
       elif ('start' in params and len(params['start']) == 1 and
-          params['start'][0] == '1' and
-          'name' in params and len(params['name']) == 1):
+            params['start'][0] == '1' and 'name' in params and
+            len(params['name']) == 1):
         name = params['name'][0]
         if name in self.server.tests:
           result = 1
@@ -295,8 +294,8 @@ def chrome_app_id_from_path(path):
 
 
 def run_chrome(chrome_path, timeout, filter_string, roots, use_xvfb,
-              unlimited_storage, enable_nacl, enable_nacl_debug,
-              load_extensions, load_apps, start_path):
+               unlimited_storage, enable_nacl, enable_nacl_debug,
+               load_extensions, load_apps, start_path):
   """Run Chrome with a timeout and several options.
 
   Args:
@@ -407,8 +406,7 @@ def run_chrome(chrome_path, timeout, filter_string, roots, use_xvfb,
 
   if returncode == RETURNCODE_KILL:
     print '[ TIMEOUT   ] Timed out, ran %d tests, %d failed.' % (
-        len(s.tests), len(s.failed_tests)
-    )
+        len(s.tests), len(s.failed_tests))
     sys.exit(1)
   elif s.expected_test_count is None:
     print('[ XXXXXXXX ] Expected test count never emitted.')
@@ -416,8 +414,7 @@ def run_chrome(chrome_path, timeout, filter_string, roots, use_xvfb,
   elif s.test_results != s.expected_test_count:
     print('[ XXXXXXXX ] '
           'Expected %d tests, but only %d had results, with %d failures.' % (
-              s.expected_test_count, s.test_results, len(s.failed_tests)
-          ))
+              s.expected_test_count, s.test_results, len(s.failed_tests)))
     sys.exit(1)
   elif s.result != 0:
     print '[ Failures ] Ran %d tests, %d failed.' % (len(s.tests),
@@ -440,8 +437,7 @@ def main(argv):
   parser.add_argument('-x', '--xvfb', action='store_true',
                       help='Run Chrome thru xvfb on Linux.')
   parser.add_argument('-a', '--arch', default='x86_64',
-                      choices=['x86_64', 'i686'],
-                      help='Chrome architecture.')
+                      choices=['x86_64', 'i686'], help='Chrome architecture.')
   parser.add_argument('-v', '--verbose', default=0, action='count',
                       help='Emit verbose output, use twice for more.')
   parser.add_argument('-t', '--timeout', default=30, type=float,
@@ -503,16 +499,13 @@ def main(argv):
       sys.exit(1)
 
   chrome_dir = download_chrome.download_chrome(options.arch, CHROME_REVISION)
-  run_chrome(
-      chrome_path=chrome_run_path(chrome_dir, options.arch),
-      timeout=options.timeout,
-      filter_string=options.filter,
-      roots=options.chdir,
-      use_xvfb=options.xvfb,
-      unlimited_storage=options.unlimited_storage,
-      enable_nacl=options.enable_nacl,
-      enable_nacl_debug=options.enable_nacl_debug,
-      load_extensions=options.load_extension,
-      load_apps=options.load_and_launch_app,
-      start_path=options.start_path)
+  run_chrome(chrome_path=chrome_run_path(chrome_dir, options.arch),
+             timeout=options.timeout, filter_string=options.filter,
+             roots=options.chdir, use_xvfb=options.xvfb,
+             unlimited_storage=options.unlimited_storage,
+             enable_nacl=options.enable_nacl,
+             enable_nacl_debug=options.enable_nacl_debug,
+             load_extensions=options.load_extension,
+             load_apps=options.load_and_launch_app,
+             start_path=options.start_path)
   sys.exit(0)

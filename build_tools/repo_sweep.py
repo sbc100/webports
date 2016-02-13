@@ -65,9 +65,8 @@ def get_age(version, revision):
   try:
     output = subprocess.check_output(
         ['gsutil', 'ls', '-l',
-          'gs://webports/builds/%s/%s/packages/devenv_*_pnacl.*' %
-          (version, revision)],
-        stderr=open(os.devnull, 'w'))
+         'gs://webports/builds/%s/%s/packages/devenv_*_pnacl.*' %
+         (version, revision)], stderr=open(os.devnull, 'w'))
     stamp = output.splitlines()[0].split()[1]
     tm = datetime.datetime.strptime(stamp, '%Y-%m-%dT%H:%M:%SZ')
     return (datetime.datetime.utcnow() - tm).total_seconds()
@@ -81,8 +80,8 @@ def build_repo(version, revision):
     print 'Skipping %s/%s as it is a bad version' % (version, revision)
     return
   if age < AGE_LIMIT:
-    print 'Skipping %s/%s as it is only %.1f hours old' % (
-        version, revision, age / 60 / 60)
+    print 'Skipping %s/%s as it is only %.1f hours old' % (version, revision,
+                                                           age / 60 / 60)
     return
   env = os.environ.copy()
   env['SDK_VERSION'] = version

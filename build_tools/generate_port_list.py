@@ -62,8 +62,7 @@ def make_table_row(pkg):
     host = host + '-only'
   else:
     host = ''
-  cols = (package_url, pkg.VERSION, url, patch, disabled_libc,
-          disabled_arch)
+  cols = (package_url, pkg.VERSION, url, patch, disabled_libc, disabled_arch)
   return '| %-25s | %-15s | %-45s | %-20s | %s | %s |\n' % cols
 
 
@@ -99,7 +98,6 @@ def make_page():
 
     if package.URL:
       page += '[%s_upstream]: %s\n' % (package.NAME, package.URL)
-
 
   return page
 

@@ -21,6 +21,7 @@ GS_URL = 'http://storage.googleapis.com'
 CHROME_URL_FORMAT = GS_URL + '/chromium-browser-continuous/%s/%s/%s'
 CHROME_DOWNLOAD_DIR = os.path.join(webports.paths.OUT_DIR, 'downloaded_chrome')
 
+
 def chrome_dir(arch):
   """Get the directory to download chrome to."""
   return os.path.join(CHROME_DOWNLOAD_DIR, arch)
@@ -159,8 +160,7 @@ def download_chrome(arch, revision):
 def run_main(argv):
   parser = argparse.ArgumentParser(prog='download_chrome', description=__doc__)
   parser.add_argument('-a', '--arch', default='x86_64',
-                      choices=['x86_64', 'i686'],
-                      help='Chrome architecture.')
+                      choices=['x86_64', 'i686'], help='Chrome architecture.')
   logging.basicConfig(format='%(message)s', level=logging.INFO)
   parser.add_argument('revision')
   options = parser.parse_args(argv)
