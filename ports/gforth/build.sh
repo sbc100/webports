@@ -31,8 +31,9 @@ ConfigureStep() {
   ChangeDir ${SRC_DIR}
   LogExecute ./autogen.sh
   if ! grep '# NOTE: Disabling this, as it prevents sharing' configure; then
-    echo "Autoconf failed to properly update configure"
-    exit 1
+    echo "Autoconf failed to properly update configure, delete and retry."
+    Remove ./configure
+    LogExecute ./autogen.sh
   fi
   BuildHostGforth
   Banner "Building ${PACKAGE_NAME} for NaCl"
