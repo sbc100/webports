@@ -389,7 +389,7 @@ class SourcePackage(package.Package):
     rtn = subprocess.call(cmd, stdout=sys.stdout, stderr=sys.stderr,
                           cwd=self.root, env=env)
     if rtn != 0:
-      raise Error('Build failed: %s' % self.InfoString())
+      raise Error('Build failed: %s' % self.info_string())
 
   def download(self, force_mirror=None):
     """Download upstream sources and verify integrity."""
