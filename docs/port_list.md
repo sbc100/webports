@@ -1006,7 +1006,7 @@ _Total = 18_
 [scummvm_patch]: https://chromium.googlesource.com/webports/+/master/ports/scummvm/nacl.patch
 [scummvm_upstream]: http://downloads.sf.net/scummvm/scummvm/1.7.0/scummvm-1.7.0.tar.gz
 [sdl]: https://chromium.googlesource.com/webports/+/master/ports/sdl
-[sdl_upstream]: https://github.com/sbc100/SDL-mirror.git@1c6f2d0
+[sdl_upstream]: https://github.com/sbc100/SDL-mirror.git@29215ee
 [sdl-image]: https://chromium.googlesource.com/webports/+/master/ports/sdl-image
 [sdl-image_upstream]: http://www.libsdl.org/projects/SDL_image/release/SDL_image-1.2.12.tar.gz
 [sdl-mixer]: https://chromium.googlesource.com/webports/+/master/ports/sdl-mixer
