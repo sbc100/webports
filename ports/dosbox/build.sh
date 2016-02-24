@@ -14,19 +14,7 @@ ConfigureStep() {
       --disable-shared \
       --with-sdl-exec-prefix=${NACL_TOOLCHAIN_ROOT}"
 
-  # TODO(clchiou): Sadly we cannot export LIBS and LDFLAGS to configure, which
-  # would fail due to multiple definitions of main and missing pp::CreateModule.
-  # So we patch auto-generated Makefile after running configure.
-  export PPAPI_LIBS=""
-  export LIBS="-lnacl_io"
   LogExecute ${SRC_DIR}/configure ${CONFIG_FLAGS}
-
-  SED_PREPEND_LIBS="s|^LIBS = \(.*$\)|LIBS = ${PPAPI_LIBS} \1|"
-  SED_REPLACE_LDFLAGS="s|^LDFLAGS = .*$|LDFLAGS = ${NACLPORTS_LDFLAGS}|"
-
-  find . -name Makefile -exec cp {} {}.bak \; \
-      -exec sed -i.bak "${SED_PREPEND_LIBS}" {} \; \
-      -exec sed -i.bak "${SED_REPLACE_LDFLAGS}" {} \;
 }
 
 InstallStep(){

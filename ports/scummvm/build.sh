@@ -20,9 +20,6 @@ SCUMMVM_EXAMPLE_DIR=${NACL_SRC}/ports/scummvm
 ConfigureStep() {
   # NOTE: We can't use the DefaultConfigureStep, because the scummvm
   # configure script is hand-rolled, and won't accept additional arguments.
-  # export the nacl tools
-  # without this setting *make* will not show the full command lines
-  export VERBOSE_BUILD=1
   SetupCrossEnvironment
 
   local conf_host=${NACL_CROSS_PREFIX}
