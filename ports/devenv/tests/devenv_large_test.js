@@ -15,8 +15,6 @@ TEST_F(DevEnvTest, 'testPackageInstall', function() {
   return Promise.resolve().then(function() {
     return self.installPackage('coreutils');
   }).then(function() {
-    return self.installPackage('zlib');
-  }).then(function() {
     return self.installPackage('curl');
   }).then(function() {
     return self.installPackage('make');

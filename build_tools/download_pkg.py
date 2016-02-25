@@ -47,6 +47,10 @@ def download_files(pkg_dir, files, check_hashes=True, parallel=False):
 
   for file_info in files:
     basename = os.path.basename(file_info.url)
+    # TODO(bradnelson): The pnacl package is >2GB, which confuses pkg.
+    #                   Figure out why and re-enable this.
+    if basename == 'pnacl-0.0.1.tbz':
+      continue
     file_info.name = os.path.join(download_dir, basename)
     file_info.rel_name = file_info.name[len(webports.paths.NACLPORTS_ROOT) + 1:]
     filenames.append((file_info.name, file_info.url))
