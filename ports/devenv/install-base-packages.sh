@@ -58,7 +58,9 @@ InstallBasePackages() {
   # this to run command (even if SHELL is set)
   # TODO(sbc): This should be a symlink, or at least install via a post
   # install script.
+  rm -f /bin/sh
   cp /usr/bin/bash /bin/sh
+  rm -f /bin/bash
   cp /usr/bin/bash /bin/bash
 
   echo "===> Installing extra packages"
