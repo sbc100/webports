@@ -139,6 +139,7 @@ builder 2 (total: 9714)
   libvpx
   ffmpeg
   jpeg8d
+  gflags
   libyuv
   zlib
   libtar

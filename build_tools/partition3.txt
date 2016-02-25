@@ -147,6 +147,7 @@ builder 1 (total: 17316)
   gmp
   libtomcrypt
   jpeg8d
+  gflags
   libyuv
   imagemagick
   texinfo

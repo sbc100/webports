@@ -13,10 +13,6 @@ fi
 
 EnableGlibcCompat
 
-if [[ ${NACL_ARCH} == x86_64 ]]; then
-  NACLPORTS_CPPFLAGS+=" -DLIBYUV_DISABLE_X86=1"
-fi
-
 EXTRA_CMAKE_ARGS="-DTEST=ON"
 EXTRA_CMAKE_ARGS+=" -DGTEST_SRC_DIR=${GTEST_SRC}"
 
@@ -28,7 +24,11 @@ TestStep() {
   elif [[ ${NACL_ARCH} == x86_64 && ${TOOLCHAIN} == glibc ]]; then
     filter="--gtest_filter=-libyuvTest.ARGBRect_Unaligned"
   elif [[ ${NACL_ARCH} == pnacl ]]; then
-    filter="--gtest_filter=-libyuvTest.MJPGToI420:libyuvTest.MJPGToARGB"
+    filter="--gtest_filter="
+    filter+="-libyuvTest.MJPGToI420"
+    filter+=":libyuvTest.MJPGToARGB"
+    filter+=":LibYUVConvertTest.MJPGToI420"
+    filter+=":LibYUVConvertTest.MJPGToARGB"
   else
     filter=
   fi

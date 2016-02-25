@@ -441,6 +441,7 @@ builder 4 (total: 11864)
   ffmpeg
   libtomcrypt
   jpeg8d
+  gflags
   libyuv
   imagemagick
   texinfo

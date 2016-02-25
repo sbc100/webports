@@ -222,6 +222,7 @@ builder 2 (total: 13636)
   gmp
   libtomcrypt
   jpeg8d
+  gflags
   libyuv
   imagemagick
   libunistring

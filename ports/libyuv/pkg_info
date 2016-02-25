@@ -1,6 +1,7 @@
 NAME=libyuv
-VERSION=632c50f
-URL=https://chromium.googlesource.com/external/libyuv.git@632c50f
-DEPENDS=(glibc-compat jpeg8d)
+VERSION=69c38c5
+URL=https://chromium.googlesource.com/libyuv/libyuv.git@69c38c5
+DEPENDS=(glibc-compat jpeg8d gflags)
 DISABLED_TOOLCHAIN=(emscripten)
+DISABLED_LIBC=(glibc)
 LICENSE=BSD

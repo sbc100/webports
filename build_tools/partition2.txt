@@ -84,6 +84,7 @@ builder 0 (total: 26264)
   grep
   findutils
   devenv-latest
+  gflags
   libyuv
   texinfo
   libunistring
