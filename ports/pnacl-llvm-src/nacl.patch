@@ -125,20 +125,6 @@ diff --git a/lib/Support/Unix/Path.inc b/lib/Support/Unix/Path.inc
    // @LOCALMOD-END
    const char *pwd = ::getenv("PWD");
    llvm::sys::fs::file_status PWDStatus, DotStatus;
-diff --git a/lib/Support/Unix/Process.inc b/lib/Support/Unix/Process.inc
---- a/lib/Support/Unix/Process.inc
-+++ b/lib/Support/Unix/Process.inc
-@@ -61,7 +61,9 @@ using namespace llvm;
- using namespace sys;
- 
- static std::pair<TimeValue, TimeValue> getRUsageTimes() {
--#if defined(HAVE_GETRUSAGE)
-+// @LOCALMOD-BEGIN
-+#if defined(HAVE_GETRUSAGE) && !defined(__native_client__)
-+// @LOCALMOD-END
-   struct rusage RU;
-   ::getrusage(RUSAGE_SELF, &RU);
-   return std::make_pair(
 diff --git a/lib/Support/Unix/Program.inc b/lib/Support/Unix/Program.inc
 --- a/lib/Support/Unix/Program.inc
 +++ b/lib/Support/Unix/Program.inc
