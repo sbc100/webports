@@ -1,9 +1,9 @@
 NAME=python-static
-VERSION=2.7.10
-ARCHIVE_ROOT=Python-2.7.10
-URL=http://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz
+VERSION=2.7.11
+ARCHIVE_ROOT=Python-2.7.11
+URL=http://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
 LICENSE=CUSTOM:LICENSE
 DEPENDS=(readline zlib glibc-compat pyppapi openssl bzip2 libpng freetype nacl-spawn python-host)
 CONFLICTS=(python)
-SHA1=49089f1f6ab445dc8ace97beeb276095c4c8039b
+SHA1=62a0b1b703d42999cc4aa9ee3c55eb7efe35802a
 DISABLED_TOOLCHAIN=(emscripten)
