@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+EXECUTABLES="subversion/svn/svn${NACL_EXEEXT}"
+
 # subversion's build system seem to have a bug with out-of-tree builds
 # and parallel building that was causing occational flakes on the buildbots.
 # The mkdir-init target appears to be required before any object file can be
@@ -15,3 +17,7 @@ EXTRA_CONFIGURE_ARGS+=" --enable-all-static"
 
 EnableCliMain
 EnableGlibcCompat
+
+TestStep() {
+  LogExecute subversion/svn/svn --version
+}

@@ -1,15 +1,6 @@
 diff --git a/Makefile.in b/Makefile.in
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -18,7 +18,7 @@ APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
- INCDIR=./include
- OSDIR=$(top_srcdir)/include/arch/@OSDIR@
- DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
--INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR) -I$(top_srcdir)/include/arch/@DEFAULT_OSDIR@ -I$(top_srcdir)/include -I$(top_srcdir)/include/private
-+INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR) -I$(top_srcdir)/include/arch/@DEFAULT_OSDIR@ -I$(top_srcdir)/include -I$(top_srcdir)/include/private -Iinclude/private
- 
- #
- # Macros for target determination
 @@ -45,8 +45,8 @@ LT_VERSION = @LT_VERSION@
  @INCLUDE_OUTPUTS@
  
@@ -21,26 +12,22 @@ diff --git a/Makefile.in b/Makefile.in
  	include/private/apr_escape_test_char.h
  DISTCLEAN_TARGETS = config.cache config.log config.status \
  	include/apr.h include/arch/unix/apr_private.h \
-@@ -129,12 +129,18 @@ check: $(TARGET_LIB)
- etags:
- 	etags `find . -name '*.[ch]'`
- 
--OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
--tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
--	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
-+tools/gen_test_char.o: tools/gen_test_char.c
-+	mkdir -p tools
+@@ -132,14 +132,14 @@ etags:
+ OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
+ tools/gen_test_char.lo: tools/gen_test_char.c
+ 	$(APR_MKDIR) tools
+-	$(LT_COMPILE)
 +	gcc -c $< -o $@
  
--include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
--	tools/gen_test_char@EXEEXT@ > $@
-+
-+OBJECTS_gen_test_char = tools/gen_test_char.o
+-tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
+-	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
 +tools/gen_test_char: $(OBJECTS_gen_test_char)
 +	gcc $(OBJECTS_gen_test_char) -o $@
-+
+ 
+-include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
 +include/private/apr_escape_test_char.h: tools/gen_test_char
-+	mkdir -p include/private
+ 	$(APR_MKDIR) include/private
+-	tools/gen_test_char@EXEEXT@ > $@
 +	tools/gen_test_char > $@
  
  LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
@@ -48,7 +35,36 @@ diff --git a/Makefile.in b/Makefile.in
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
-@@ -20959,7 +20959,8 @@ if ${ac_cv_file__dev_zero+:} false; then :
+@@ -11762,7 +11762,8 @@ irix5* | irix6* | nonstopux*)
+   ;;
+ 
+ # This must be glibc/ELF.
+-linux* | k*bsd*-gnu | kopensolaris*-gnu)
++# Patched by naclports using patch_configure.py
++linux* | k*bsd*-gnu | kopensolaris*-gnu | nacl*)
+   lt_cv_deplibs_check_method=pass_all
+   ;;
+ 
+@@ -16957,6 +16958,18 @@ uts4*)
+   shlibpath_var=LD_LIBRARY_PATH
+   ;;
+ 
++nacl)
++  # Patched by naclports using patch_configure.py
++  if libc_so=`$CC -print-file-name=libc.so` && [ "$libc_so" != libc.so ]; then
++    dynamic_linker="GNU/NaCl ld.so"
++    version_type=linux
++    library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}${major} ${libname}${shared_ext}'
++    soname_spec='${libname}${release}${shared_ext}$major'
++  else
++    dynamic_linker=no
++  fi
++  ;;
++
+ *)
+   dynamic_linker=no
+   ;;
+@@ -20988,7 +21001,8 @@ if ${ac_cv_file__dev_zero+:} false; then :
    $as_echo_n "(cached) " >&6
  else
    test "$cross_compiling" = yes &&
@@ -58,7 +74,7 @@ diff --git a/configure b/configure
  if test -r "/dev/zero"; then
    ac_cv_file__dev_zero=yes
  else
-@@ -23051,7 +23052,8 @@ if ${ac_cv_func_setpgrp_void+:} false; then :
+@@ -23114,7 +23128,8 @@ if ${ac_cv_func_setpgrp_void+:} false; then :
    $as_echo_n "(cached) " >&6
  else
    if test "$cross_compiling" = yes; then :
@@ -68,7 +84,7 @@ diff --git a/configure b/configure
  else
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
-@@ -24262,7 +24264,7 @@ if ${ac_cv_sizeof_struct_iovec+:} false; then :
+@@ -24342,7 +24357,7 @@ if ${ac_cv_sizeof_struct_iovec+:} false; then :
    $as_echo_n "(cached) " >&6
  else
    if test "$cross_compiling" = yes; then :
@@ -77,7 +93,7 @@ diff --git a/configure b/configure
  else
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
-@@ -27355,10 +27357,11 @@ if ${apr_cv_tcp_nodelay_with_cork+:} false; then :
+@@ -27435,10 +27450,11 @@ if ${apr_cv_tcp_nodelay_with_cork+:} false; then :
    $as_echo_n "(cached) " >&6
  else
    if test "$cross_compiling" = yes; then :
@@ -93,6 +109,25 @@ diff --git a/configure b/configure
  else
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
+diff --git a/file_io/unix/open.c b/file_io/unix/open.c
+--- a/file_io/unix/open.c
++++ b/file_io/unix/open.c
+@@ -178,6 +178,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
+     if (fd < 0) {
+        return errno;
+     }
++#ifndef __native_client__
+     if (!(flag & APR_FOPEN_NOCLEANUP)) {
+ #ifdef O_CLOEXEC
+         static int has_o_cloexec = 0;
+@@ -204,6 +205,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
+ #endif
+         }
+     }
++#endif
+ 
+     (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+     (*new)->pool = pool;
 diff --git a/file_io/unix/pipe.c b/file_io/unix/pipe.c
 --- a/file_io/unix/pipe.c
 +++ b/file_io/unix/pipe.c

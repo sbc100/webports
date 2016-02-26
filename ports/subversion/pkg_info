@@ -1,7 +1,7 @@
 NAME=subversion
-VERSION=1.8.11
-URL=http://apache.mirrors.pair.com/subversion/subversion-1.8.11.tar.bz2
+VERSION=1.9.3
+URL=http://apache.mirrors.pair.com/subversion/subversion-1.9.3.tar.bz2
 LICENSE=APACHE
 DEPENDS=(apr apr-util sqlite zlib nacl-spawn)
-SHA1=161edaee328f4fdcfd2a7c10ecd3fbcd51c61275
+SHA1=27e8df191c92095f48314a415194ec37c682cbcf
 DISABLED_TOOLCHAIN=(emscripten)

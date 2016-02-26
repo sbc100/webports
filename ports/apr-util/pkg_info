@@ -1,7 +1,7 @@
 NAME=apr-util
-VERSION=1.5.3
-URL=http://apache.mirrors.pair.com/apr/apr-util-1.5.3.tar.bz2
+VERSION=1.5.4
+URL=http://apache.mirrors.pair.com/apr/apr-util-1.5.4.tar.bz2
 LICENSE=APACHE
 DEPENDS=(apr expat)
-SHA1=de0184ee03dfdc6dec4d013970d1862251e86925
+SHA1=b00038b5081472ed094ced28bcbf2b5bb56c589d
 DISABLED_TOOLCHAIN=(emscripten)
