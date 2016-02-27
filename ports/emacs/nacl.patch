@@ -660,6 +660,15 @@ diff --git a/src/emacs.c b/src/emacs.c
  #if GC_MARK_STACK
    Lisp_Object dummy;
  #endif
+@@ -1877,7 +1898,7 @@ shut_down_emacs (int sig, Lisp_Object stuff)
+   Vinhibit_redisplay = Qt;
+ 
+   /* If we are controlling the terminal, reset terminal modes.  */
+-#ifndef DOS_NT
++#if !defined(DOS_NT) && !defined(NACL_EMACS)
+   {
+     pid_t pgrp = EMACS_GETPGRP (0);
+     pid_t tpgrp = tcgetpgrp (0);
 @@ -2113,7 +2134,7 @@ decode_env_path (const char *evarname, const char *defalt)
      path = getenv (evarname);
    else
@@ -911,7 +920,46 @@ diff --git a/src/sysdep.c b/src/sysdep.c
  #ifdef BSD_SYSTEM
  #include <sys/param.h>
  #include <sys/sysctl.h>
-@@ -2438,7 +2443,7 @@ cfmakeraw (struct termios *termios_p)
+@@ -353,6 +358,7 @@ child_setup_tty (int out)
+   emacs_get_tty (out, &s);
+   s.main.c_oflag |= OPOST;	/* Enable output postprocessing */
+   s.main.c_oflag &= ~ONLCR;	/* Disable map of NL to CR-NL on output */
++
+ #ifdef NLDLY
+   /* http://lists.gnu.org/archive/html/emacs-devel/2008-05/msg00406.html
+      Some versions of GNU Hurd do not have FFDLY?  */
+@@ -906,6 +912,15 @@ init_sys_modes (struct tty_display_info *tty_out)
+     tty.main.c_iflag &= ~IXON;	/* Disable start/stop output control */
+   tty.main.c_oflag &= ~ONLCR;	/* Disable map of NL to CR-NL
+                                    on output */
++
++#ifdef NACL_EMACS
++  // The NaCl platform is not honoring the ONLCR bit being disbled.
++  // They are planning to fix it, but until then, we can send the term
++  // code to fix disable AutoCRLF.
++  puts("\x1b[20l");
++#endif // NACL_EMACS
++  
++  
+   tty.main.c_oflag &= ~TAB3;	/* Disable tab expansion */
+ #ifdef CS8
+   if (tty_out->meta_key)
+@@ -1228,6 +1243,14 @@ reset_all_sys_modes (void)
+   struct tty_display_info *tty;
+   for (tty = tty_list; tty; tty = tty->next)
+     reset_sys_modes (tty);
++
++#ifdef NACL_EMACS
++  // The NaCl platform is not honoring the ONLCR bit being disbled.
++  // They are planning to fix it, but until then, we can send the term
++  // code to reset AutoCRLF to it's previous state.
++  puts("\x1b[20h");
++#endif // NACL_EMACS
++  
+ }
+ 
+ /* Prepare the terminal for closing it; move the cursor to the
+@@ -2438,7 +2461,7 @@ cfmakeraw (struct termios *termios_p)
  }
  #endif /* !defined (HAVE_CFMAKERAW */
  
