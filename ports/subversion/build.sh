@@ -19,5 +19,12 @@ EnableCliMain
 EnableGlibcCompat
 
 TestStep() {
+  if [[ ${OS_NAME} == Darwin ]]; then
+    # Tests disabled on mac.  Running svn under sel_ldr on mac produces the
+    # following error:
+    # svn: E200001: APR: Can't create a character converter from 'UTF-8' to
+    # native encoding
+    return
+  fi
   LogExecute subversion/svn/svn --version
 }
