@@ -1194,19 +1194,20 @@ Validate() {
 # for running them in sel_ldr.
 #
 DefaultPostBuildStep() {
-  if [ -z "${EXECUTABLES}" ]; then
+  if [[ -z ${EXECUTABLES} ]]; then
     return
   fi
 
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [[ ${NACL_ARCH} == pnacl ]]; then
     for pexe in ${EXECUTABLES}; do
       FinalizePexe "${pexe}"
     done
-    if [ "${TRANSLATE_PEXES:-}" != "no" ]; then
-      for pexe in ${EXECUTABLES}; do
-        TranslatePexe "${pexe}"
-      done
+    if [[ ${TRANSLATE_PEXES:-} == no ]]; then
+      return
     fi
+    for pexe in ${EXECUTABLES}; do
+      TranslatePexe "${pexe}"
+    done
   fi
 
   for nexe in ${EXECUTABLES}; do
@@ -1233,8 +1234,8 @@ DefaultPostBuildStep() {
 
 
 #
-# Run an executable with under sel_ldr.
-# $1 - Executable (.nexe) name
+# Run an executable (under sel_ldr or node.js).
+# $1 - Executable (.nexe or .pexe) name
 #
 RunSelLdrCommand() {
   if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
@@ -1264,11 +1265,11 @@ RunSelLdrCommand() {
       nexe=${dirname}/.libs/${basename}
     fi
 
-    local SCRIPT=${nexe}.sh
-    WriteLauncherScript "${SCRIPT}" ${basename}
+    local script=${nexe}.sh
+    WriteLauncherScript "${script}" ${basename}
     shift
-    echo "[sel_ldr] ${SCRIPT} $*"
-    "./${SCRIPT}" "$@"
+    echo "[sel_ldr] ${script} $*"
+    "./${script}" "$@"
   fi
 }
 
@@ -1281,11 +1282,17 @@ RunSelLdrCommand() {
 WriteLauncherScript() {
   local script=$1
   local binary=$2
-  if [ "${SKIP_SEL_LDR_TESTS}" = "1" ]; then
+  if [[ ${SKIP_SEL_LDR_TESTS} == 1 ]]; then
     return
   fi
 
-  if [ "${TOOLCHAIN}" = "emscripten" ]; then
+  local abs_binary="$(dirname $script)/${binary}"
+  if [[ ! -f ${abs_binary} ]]; then
+    echo "binary not found: ${abs_binary}"
+    exit 1
+  fi
+
+  if [[ ${TOOLCHAIN} == emscripten ]]; then
     local node=node
     if ! which node > /dev/null ; then
       node=nodejs
@@ -1307,13 +1314,13 @@ HERE
     return
   fi
 
-  if [ "${OS_NAME}" = "Cygwin" ]; then
+  if [[ ${OS_NAME} == Cygwin ]]; then
     local LOGFILE=nul
   else
     local LOGFILE=/dev/null
   fi
 
-  if [ "${NACL_LIBC}" = "glibc" ]; then
+  if [[ ${NACL_LIBC} == glibc ]]; then
     cat > "$script" <<HERE
 #!/bin/bash
 SCRIPT_DIR=\$(dirname "\${BASH_SOURCE[0]}")
@@ -1348,26 +1355,44 @@ HERE
 }
 
 
+#
+# Finalize and translate a .pnexe file and create a launch script
+# (PNaCl specific)
+# $1 - pnexe file
+# $2 - architecture
+# $3 - nexe file
+# $4 - script name
+#
 TranslateAndWriteLauncherScript() {
-  local PEXE=$1
-  local PEXE_FINAL=$1_final.pexe
-  local ARCH=$2
-  local NEXE=$3
-  local SCRIPT=$4
-  # Finalize the pexe to make sure it is finalizeable.
-  if [ "${PEXE}" -nt "${PEXE_FINAL}" ]; then
-    "${PNACLFINALIZE}" "${PEXE}" -o "${PEXE_FINAL}"
+  local pexe=$1
+  local arch=$2
+  local nexe=$3
+  local script=$4
+  if [[ ! -f ${pexe} ]]; then
+    echo "pexe not found: ${pexe}"
+    exit 1
   fi
-  # Translate to the appropriate version.
-  if [ "${PEXE_FINAL}" -nt "${NEXE}" ]; then
-    "${TRANSLATOR}" "${PEXE_FINAL}" -arch "${ARCH}" -o "${NEXE}"
+  if [[ ${pexe} -nt ${nexe} ]]; then
+    echo "Finalizing -> ${pexe}"
+    "${PNACLFINALIZE}" "${pexe}"
+    echo "Translating -> ${nexe}"
+    "${TRANSLATOR}" "${pexe}" -arch "${arch}" -o "${nexe}"
+  else
+    echo "Skipping finalization and translation: ${pexe} -> ${nexe}"
   fi
-  WriteLauncherScript "${SCRIPT}" $(basename "${NEXE}")
+  WriteLauncherScript "${script}" $(basename "${nexe}")
 }
 
 
+#
+# Finalize a pexe file in place
+#
 FinalizePexe() {
   local pexe=$1
+  if [[ ! -f ${pexe} ]]; then
+    echo "pexe not found: ${pexe}"
+    exit 1
+  fi
   Banner "Finalizing ${pexe}"
   "${PNACLFINALIZE}" "${pexe}"
 }
@@ -1382,7 +1407,7 @@ TranslatePexe() {
   local pexe=$1
   local basename="${pexe%.*}"
   local arches="arm x86-32 x86-64"
-  if [ "${NACLPORTS_QUICKBUILD}" = "1" ]; then
+  if [[ ${NACLPORTS_QUICKBUILD} == 1 ]]; then
     arches="x86-64"
   fi
 
@@ -1398,7 +1423,7 @@ TranslatePexe() {
 
   # Now the same spiel with -O2
 
-  if [ "${NACLPORTS_QUICKBUILD}" != "1" ]; then
+  if [[ ${NACLPORTS_QUICKBUILD} != 1 ]]; then
     for a in ${arches} ; do
       echo "translating pexe -O2 [${a}]"
       nexe=${basename}.opt.${a}.nexe
