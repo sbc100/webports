@@ -21,7 +21,13 @@ BuildHostProtoc() {
   if [ ! -f "${HOST_BUILD_DIR}/src/protoc" ]; then
     MakeDir "${HOST_BUILD_DIR}"
     ChangeDir "${HOST_BUILD_DIR}"
-    LogExecute "${SRC_DIR}/configure"
+    # The mac buildbots fail without -std=c++11
+    if [[ ${OS_NAME} == Darwin ]]; then
+      HOST_CXXFLAGS="-std=c++11"
+    else
+      HOST_CXXFLAGS=""
+    fi
+    CXXFLAGS=${HOST_CXXFLAGS} LogExecute "${SRC_DIR}/configure"
     LogExecute make -C src -j${OS_JOBS} protoc
     ChangeDir ${BUILD_DIR}
   fi
