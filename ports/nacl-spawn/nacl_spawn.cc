@@ -354,7 +354,8 @@ static int CloneFileDescriptors(struct PP_Var envs_var) {
       char entry[100];
       snprintf(entry, sizeof entry,
           "NACL_SPAWN_FD_SETUP_%d=pipe:%d:%d:%d", count++, fd,
-          static_cast<int>(st.st_ino), st.st_rdev == O_WRONLY);
+          static_cast<int>(st.st_ino),
+          (st.st_rdev & O_WRONLY) == O_WRONLY);
       nspawn_array_appendstring(envs_var, entry);
     } else if (S_ISLNK(st.st_mode)) {
       // Unsupported.
@@ -686,9 +687,8 @@ void jseval(const char* cmd, char** data, size_t* len) {
   nspawn_var_release(result_dict_var);
 }
 
-// Create a javascript pipe. pipefd[0] will be the read end of the pipe
-// and pipefd[1] the write end of the pipe.
-int nacl_spawn_pipe(int pipefd[2]) {
+// Same as above with flags.
+int nacl_spawn_pipe2(int pipefd[2], int flags) {
   if (pipefd == NULL) {
     errno = EFAULT;
     return -1;
@@ -705,8 +705,13 @@ int nacl_spawn_pipe(int pipefd[2]) {
   int write_fd;
   char path[100];
   sprintf(path, "/apipe/%d", id);
-  read_fd = open(path, O_RDONLY);
-  write_fd = open(path, O_WRONLY);
+  // The only flag supported is O_NONBLOCK.
+  // TODO(bradnelson): Drop this once nacl_io does the right thing:
+  // https://bugs.chromium.org/p/webports/issues/detail?id=247
+  // https://bugs.chromium.org/p/webports/issues/detail?id=248
+  assert(flags == 0 || flags == O_NONBLOCK);
+  read_fd = open(path, O_RDONLY | flags);
+  write_fd = open(path, O_WRONLY | flags);
   if (read_fd < 0 || write_fd < 0) {
     if (read_fd >= 0) {
       close(read_fd);
@@ -720,6 +725,12 @@ int nacl_spawn_pipe(int pipefd[2]) {
   pipefd[1] = write_fd;
 
   return 0;
+}
+
+// Create a javascript pipe. pipefd[0] will be the read end of the pipe
+// and pipefd[1] the write end of the pipe.
+int nacl_spawn_pipe(int pipefd[2]) {
+  return nacl_spawn_pipe2(pipefd, 0);
 }
 
 void nacl_spawn_vfork_before(void) {

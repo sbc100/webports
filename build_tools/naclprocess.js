@@ -1156,7 +1156,6 @@ NaClProcessManager.prototype.spawn = function (
     }
 
     var fg = document.createElement('object');
-    self.foregroundProcess = fg;
 
     var ppid;
     if (pid === -1) {
@@ -1303,7 +1302,14 @@ NaClProcessManager.prototype.spawn = function (
       });
     }
 
-    self.pipeServer.addProcessPipes(fg.pid, params);
+    // Add in process pipes, and only make the foreground process if started
+    // by the current foreground process and not piped somewhere else.
+    var routesStdin = self.pipeServer.addProcessPipes(fg.pid, params);
+    if (!routesStdin &&
+        (self.foregroundProcess === null ||
+         self.foregroundProcess === parent)) {
+      self.foregroundProcess = fg;
+    }
 
     if (params[NaClProcessManager.ENV_SPAWN_MODE] ===
         NaClProcessManager.ENV_SPAWN_POPUP_VALUE) {

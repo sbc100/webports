@@ -44,8 +44,15 @@ static int apipe_read(
   nspawn_dict_setstring(req_var, "command", "nacl_apipe_read");
   nspawn_dict_setint(req_var, "pipe_id", info->fh);
   nspawn_dict_setint(req_var, "count", count);
+  nspawn_dict_setint(req_var, "nonblock",
+                     (info->flags & O_NONBLOCK) == O_NONBLOCK);
 
   struct PP_Var result_var = nspawn_send_request(req_var);
+  int err = nspawn_dict_getint(result_var, "error");
+  if (err != 0) {
+    nspawn_var_release(result_var);
+    return -err;
+  }
   struct PP_Var data = nspawn_dict_get(result_var, "data");
   assert(data.type == PP_VARTYPE_ARRAY_BUFFER);
   uint32_t len;
@@ -103,7 +110,7 @@ static int apipe_release(const char* path, struct fuse_file_info* info) {
   struct PP_Var req_var = nspawn_dict_create();
   nspawn_dict_setstring(req_var, "command", "nacl_apipe_close");
   nspawn_dict_setint(req_var, "pipe_id", info->fh);
-  nspawn_dict_setint(req_var, "writer", info->flags == O_WRONLY);
+  nspawn_dict_setint(req_var, "writer", (info->flags & O_WRONLY) == O_WRONLY);
 
   struct PP_Var result_var = nspawn_send_request(req_var);
   int ret = nspawn_dict_getint(result_var, "result");

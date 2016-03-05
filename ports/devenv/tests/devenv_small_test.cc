@@ -277,7 +277,7 @@ TEST(Pipes, StdoutEcho) {
   char buffer[100];
   size_t total = 0;
   while (total < strlen(check_msg)) {
-    ssize_t len = read(pipes[0], buffer+total, sizeof(buffer));
+    ssize_t len = read(pipes[0], buffer + total, sizeof(buffer));
     ASSERT_GE(len, 0);
     if (len == 0) break;
     total += len;
@@ -397,6 +397,63 @@ TEST(Pipes, EchoChain) {
 
   EXPECT_EQ(0, close(pipe_a[1]));
   EXPECT_EQ(0, close(pipe_c[0]));
+}
+
+// Read non-block from an echo process. Then write, then read.
+TEST(Pipes, EchoNonBlock) {
+  int pipe_a[2];
+  int pipe_b[2];
+  // Create two pipe pairs pipe_a[1] ->  pipe_a[0]
+  //                       pipe_b[1] ->  pipe_b[0]
+  ASSERT_EQ(0, nacl_spawn_pipe2(pipe_a, O_NONBLOCK));
+  ASSERT_EQ(0, nacl_spawn_pipe2(pipe_b, O_NONBLOCK));
+  pid_t pid = vfork();
+  ASSERT_GE(pid, 0);
+  if (!pid) {
+    // Dup two ends of the pipes into stdin + stdout of the echo process.
+    ASSERT_EQ(0, dup2(pipe_a[0], 0));
+    EXPECT_EQ(0, close(pipe_a[0]));
+    EXPECT_EQ(0, close(pipe_a[1]));
+    EXPECT_EQ(1, dup2(pipe_b[1], 1));
+    EXPECT_EQ(0, close(pipe_b[0]));
+    EXPECT_EQ(0, close(pipe_b[1]));
+    execlp(argv0, argv0, "pipes", NULL);
+    // Don't get here.
+    ASSERT_TRUE(false);
+  }
+
+  EXPECT_EQ(0, close(pipe_a[0]));
+  EXPECT_EQ(0, close(pipe_b[1]));
+
+  // Attempt to read from non-blocking pipe.
+  char buffer[100];
+  size_t total = 0;
+  ssize_t len = read(pipe_b[0], buffer + total, sizeof(buffer));
+  EXPECT_EQ(-1, len);
+  EXPECT_EQ(EAGAIN, errno);
+
+  const char test_message[] = "test message";
+
+  // Write to pipe_a.
+  len = write(pipe_a[1], test_message, strlen(test_message));
+  EXPECT_EQ(static_cast<ssize_t>(strlen(test_message)), len);
+  // Wait for an echo back on pipe_b.
+  while (total < strlen(test_message)) {
+    len = read(pipe_b[0], buffer + total, sizeof(buffer));
+    if (len < 0 && errno == EAGAIN) {
+      continue;
+    }
+    ASSERT_GE(len, 0);
+    if (len == 0) {
+      break;
+    }
+    total += len;
+  }
+  EXPECT_EQ(strlen(test_message), total);
+  EXPECT_TRUE(memcmp(buffer, test_message, total) == 0);
+
+  EXPECT_EQ(0, close(pipe_a[1]));
+  EXPECT_EQ(0, close(pipe_b[0]));
 }
 
 TEST(Pipes, NullFeof) {

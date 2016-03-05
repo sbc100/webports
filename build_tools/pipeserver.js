@@ -24,6 +24,12 @@ function PipeServer() {
 PipeServer.prototype.EPIPE = 32;
 
 /**
+ * EAGAIN / EWOULDBLOCK.
+ * @type {number}
+ */
+PipeServer.prototype.EAGAIN = 11;
+
+/**
  * Handle an anonymous pipe creation call.
  */
 PipeServer.prototype.handleMessageAPipe = function(msg, reply, src) {
@@ -63,6 +69,7 @@ PipeServer.prototype.handleMessageAPipeWrite = function(
     var part = data.slice(0, item.count);
     item.reply({
       data: part,
+      error: 0,
     });
     data = data.slice(part.byteLength);
   }
@@ -103,11 +110,13 @@ PipeServer.prototype.handleMessageAPipeRead = function(
     msg, reply, src) {
   var id = msg.pipe_id;
   var count = msg.count;
+  var nonblock = msg.nonblock;
   if (count === 0 ||
       !(id in this.anonymousPipes &&
         src.pid in this.anonymousPipes[id].readers)) {
     reply({
       data: new ArrayBuffer(0),
+      error: 0,
     });
     return;
   }
@@ -118,12 +127,14 @@ PipeServer.prototype.handleMessageAPipeRead = function(
       var part = item.data.slice(0, count);
       reply({
         data: part,
+        error: 0,
       });
       item.data = item.data.slice(part.byteLength);
       pipe.writesPending.unshift(item);
     } else {
       reply({
         data: item.data,
+        error: 0,
       });
       if (!item.replied) {
         item.reply({
@@ -133,14 +144,21 @@ PipeServer.prototype.handleMessageAPipeRead = function(
     }
   } else {
     if (Object.keys(pipe.writers).length > 0) {
-      pipe.readsPending.push({
-        count: count,
-        reply: reply,
-        pid: src.pid,
-      });
+      if (nonblock !== 0) {
+        reply({
+          error: this.EAGAIN,
+        });
+      } else {
+        pipe.readsPending.push({
+          count: count,
+          reply: reply,
+          pid: src.pid,
+        });
+      }
     } else {
       reply({
         data: new ArrayBuffer(0),
+        error: 0,
       });
     }
   }
@@ -165,6 +183,7 @@ PipeServer.prototype.closeAPipe = function(pid, pipeId, writer) {
         var item = pipe.readsPending[i];
         item.reply({
           data: new ArrayBuffer(0),
+          error: 0,
         });
       }
       pipe.readsPending = [];
@@ -194,9 +213,12 @@ PipeServer.prototype.handleMessageAPipeClose = function(
 
 /**
  * Add spawned pipe entries.
+ * @pid {Object} Numeric process for which to add pipes.
  * @params {Object} Dictionary of environment variables passed to process.
+ * @returns {boolean} True if stdin is routed.
  */
 PipeServer.prototype.addProcessPipes = function(pid, params) {
+  var routeStdin = false;
   var fdCount = 0;
   for (;;fdCount++) {
     var entry = 'NACL_SPAWN_FD_SETUP_' + fdCount;
@@ -209,6 +231,9 @@ PipeServer.prototype.addProcessPipes = function(pid, params) {
       var fd = parseInt(m[1]);
       var id = parseInt(m[2]);
       var isWriter = parseInt(m[3]);
+      if (fd === 0) {
+        routeStdin = true;
+      }
       if (id in this.anonymousPipes) {
         var pipe = this.anonymousPipes[id];
         if (isWriter) {
@@ -219,6 +244,7 @@ PipeServer.prototype.addProcessPipes = function(pid, params) {
       }
     }
   }
+  return routeStdin;
 };
 
 

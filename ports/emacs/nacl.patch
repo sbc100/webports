@@ -867,21 +867,46 @@ diff --git a/src/process.c b/src/process.c
  
  static void
  create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
-@@ -1663,9 +1684,13 @@ create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
-       tem = pipe (wait_child_setup);
+@@ -1640,7 +1661,11 @@ create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
+ #endif /* HAVE_PTYS */
+     {
+       int tem;
++#if defined(NACL_EMACS)
++      tem = nacl_spawn_pipe2 (sv, O_NONBLOCK);
++#else
+       tem = pipe (sv);
++#endif
        if (tem < 0)
  	report_file_error ("Creating pipe", Qnil);
-+      message("About to get file descriptor flags");
-       tem = fcntl (wait_child_setup[1], F_GETFD, 0);
-       if (tem >= 0)
-+      {
-+        message("About to set file descriptor flags");
- 	tem = fcntl (wait_child_setup[1], F_SETFD, tem | FD_CLOEXEC);
-+      }
-       if (tem < 0)
- 	{
- 	  emacs_close (wait_child_setup[0]);
-@@ -4633,13 +4658,23 @@ wait_reading_process_output (intmax_t time_limit, int nsecs, int read_kbd,
+       inchannel = sv[0];
+@@ -4473,14 +4498,26 @@ wait_reading_process_output (intmax_t time_limit, int nsecs, int read_kbd,
+ 	  Ctemp = write_mask;
+ 
+ 	  timeout = make_emacs_time (0, 0);
++#if defined (NACL_EMACS)
++	  // NACL doesn't support pselect yet, so use select instead.
++	  // (glibc stubs out pselect in terms of select).
++	  // Select takes a different kind of time, and one fewer argument.
++	  struct timeval timevalue = {0,0};
++	  if ((select (max (max_process_desc, max_input_desc) + 1,
++#else
+ 	  if ((pselect (max (max_process_desc, max_input_desc) + 1,
++#endif
+ 			&Atemp,
+ #ifdef NON_BLOCKING_CONNECT
+ 			(num_pending_connects > 0 ? &Ctemp : NULL),
+ #else
+ 			NULL,
+ #endif
++#if defined (NACL_EMACS)
++			NULL, &timevalue)
++#else
+ 			NULL, &timeout, NULL)
++#endif
+ 	       <= 0))
+ 	    {
+ 	      /* It's okay for us to do this and then continue with
+@@ -4633,13 +4670,23 @@ wait_reading_process_output (intmax_t time_limit, int nsecs, int read_kbd,
            nfds = xg_select
  #elif defined (HAVE_NS)
  	  nfds = ns_select
@@ -905,6 +930,23 @@ diff --git a/src/process.c b/src/process.c
  
  #ifdef HAVE_GNUTLS
            /* GnuTLS buffers data internally.  In lowat mode it leaves
+@@ -6935,7 +6982,15 @@ wait_reading_process_output (intmax_t time_limit, int nsecs, int read_kbd,
+ 	{
+ 	  if (read_kbd || !NILP (wait_for_cell))
+ 	    FD_SET (0, &waitchannels);
+-	  nfds = pselect (1, &waitchannels, NULL, NULL, &timeout, NULL);
++#if defined (NACL_EMACS)
++	  // NACL doesn't support pselect yet, so use select instead.
++	  // (glibc stubs out pselect in terms of select).
++	  // Select takes a different kind of time, and one fewer argument.
++	  struct timeval timevalue = {0,0};
++	  nfds = select(1, &waitchannels, NULL, NULL, &timevalue);
++#else
++	  nfds = pselect(1, &waitchannels, NULL, NULL, &timeout, NULL);
++#endif
+ 	}
+ 
+       xerrno = errno;
 diff --git a/src/sysdep.c b/src/sysdep.c
 --- a/src/sysdep.c
 +++ b/src/sysdep.c

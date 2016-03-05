@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
+NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"
 
 # --with-build-sysroot is necessary to run "fixincl"
 # properly. Without this option, GCC's build system tries to create

@@ -60,6 +60,39 @@ int spawnve(int mode, const char* path, char *const argv[], char *const envp[]);
 void jseval(const char* cmd, char** data, size_t* len);
 
 /*
+ * Create a pipe that can communicate cross-process via JS.
+ *
+ * Args:
+ *   pipefd: Point to place to store a read [0] and write [1] fd.
+ * Returns:
+ *   Zero on success.
+ * TODO(bradnelson): The should work differently, see both:
+ * https://bugs.chromium.org/p/webports/issues/detail?id=247
+ * https://bugs.chromium.org/p/webports/issues/detail?id=248
+ * Only declared when pipe is not defined as doing -Dpipe=nacl_spawn_pipe
+ * is a common (though not universal) way to inject this.
+ * In this case, system headers declaration of pipe don't always match
+ * this definition of pipe.
+ */
+#if !defined(pipe)
+int nacl_spawn_pipe(int pipefd[2]);
+#endif
+
+/*
+ * Create a pipe that can communicate cross-process via JS w/ flags.
+ *
+ * Args:
+ *   pipefd: Point to place to store a read [0] and write [1] fd.
+ *   flags: Flags to create the fd's with (for example O_NONBLOCK).
+ * Returns:
+ *   Zero on success.
+ * TODO(bradnelson): The should work differently, see both:
+ * https://bugs.chromium.org/p/webports/issues/detail?id=247
+ * https://bugs.chromium.org/p/webports/issues/detail?id=248
+ */
+int nacl_spawn_pipe2(int pipefd[2], int flags);
+
+/*
  * Implement vfork as a macro.
  *
  * Returns:
