@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 NACLPORTS_ROOT="$(cd ${SCRIPT_DIR}/.. && pwd)"
 
 PKG=${NACLPORTS_ROOT}/out/build/pkg/build_host/src/pkg
-SDK_VERSION=${SDK_VERSION:-pepper_50}
+SDK_VERSION=${SDK_VERSION:-pepper_51}
 
 WriteMetaFile() {
   echo "version = 1;" > $1
