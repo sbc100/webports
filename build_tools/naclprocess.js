@@ -486,9 +486,10 @@ NaClProcessManager.prototype.isRootProcess = function (process) {
  * a process responds with a mount status update
  */
 NaClProcessManager.prototype.broadcastMessage = function (message, callback) {
-  this.mountUpdateCallback = callback;
-  Object.keys(this.processes).forEach(function (key) {
-    this.processes[key].domElement.postMessage(message);
+  var self = this;
+  self.mountUpdateCallback = callback;
+  Object.keys(self.processes).forEach(function (key) {
+    self.processes[key].domElement.postMessage(message);
   });
 };
 
@@ -503,22 +504,23 @@ NaClProcessManager.prototype.log = function (msg) {
  * is recieved from a process.
  */
 NaClProcessManager.prototype.syncMountStatus_ = function () {
+  var self = this;
   var result = true;
 
   if (g_mount.available) {
-    Object.keys(this.processes).forEach(function (p) {
-      result = (result && this.processes[p].mounted);
+    Object.keys(self.processes).forEach(function (p) {
+      result = (result && self.processes[p].mounted);
     });
   } else {
     result = false;
-    Object.keys(this.processes).forEach(function (p) {
-      result = (result || this.processes[p].mounted);
+    Object.keys(self.processes).forEach(function (p) {
+      result = (result || self.processes[p].mounted);
     });
   }
 
   g_mount.mounted = result;
-  if (this.mountUpdateCallback !== null) {
-    this.mountUpdateCallback();
+  if (self.mountUpdateCallback !== null) {
+    self.mountUpdateCallback();
   }
   return result;
 };
