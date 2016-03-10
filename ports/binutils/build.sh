@@ -5,6 +5,7 @@
 export ac_cv_func_getrlimit=no
 
 EnableCliMain
+export LIBS="${NACLPORTS_LIBS}"
 
 EXTRA_CONFIGURE_ARGS="\
   --enable-targets=x86_64-nacl,arm-nacl,avr \

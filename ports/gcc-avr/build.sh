@@ -9,6 +9,7 @@ AVR_LIBC_URL=http://storage.googleapis.com/webports/mirror/avr-libc-1.8.1.tar.bz
 AVR_LIBC_SHA=b56fe21b30341869aa768689b0f6a07d896b17fa
 AVR_LIBC_VERSION=avr-libc-1.8.1
 
+EnableCliMain
 export EXTRA_LIBS="${NACL_CLI_MAIN_LIB}"
 export PATH="${PATH}:${NACL_PACKAGES_BUILD}/binutils-2.25/install_host/bin"
 NACLPORTS_CPPFLAGS+=" -Dpipe=nacl_spawn_pipe"

@@ -31,5 +31,11 @@ ConfigureStep() {
     --enable-deterministic-archives \
     --without-zlib"
 
+  export LIBS="${NACLPORTS_LIBS}"
   DefaultConfigureStep
+}
+
+BuildStep() {
+  export LIBS="${NACLPORTS_LIBS}"
+  DefaultBuildStep
 }
