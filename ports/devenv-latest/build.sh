@@ -29,10 +29,10 @@ PostInstallTestStep() {
       -p latest=1 \
       -C ${NACL_SRC}/out/publish \
       -x -v -a ${arch}
-    # TODO(bradnelson): Enable this when dependencies are right.
-    #LogExecute python ${START_DIR}/../devenv/io2014_test.py \
-    #  -p latest=1 \
-    #  -C ${NACL_SRC}/out \
-    #  -x -v -a ${arch}
+    # TODO(bradnelson): Re-enable.
+    #LogExecute python ${START_DIR}/../devenv/demo2014_test.py \
+      #-p latest=1 \
+      #-C ${NACL_SRC}/out \
+      #-x -v -a ${arch}
   done
 }

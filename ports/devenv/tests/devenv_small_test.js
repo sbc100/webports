@@ -50,6 +50,23 @@ TEST_F(DevEnvTest, 'testSheeBangSh', function() {
   });
 });
 
+// Confirm that we can run a command, sleep, and kill it.
+TEST_F(DevEnvTest, 'testSleepKill', function() {
+  var self = this;
+  var pid;
+  return Promise.resolve().then(function() {
+    return self.spawnCommand('bash -c "while [[ 1 == 1 ]]; do echo -n; done"');
+  }).then(function(msg) {
+    pid = msg.pid;
+    return chrometest.sleep(300);
+  }).then(function(msg) {
+    self.sigint();
+    return self.waitCommand(pid);
+  }).then(function(msg) {
+    ASSERT_EQ(128 + 9, msg.status, 'Expect kill status');
+  });
+});
+
 // Run a NaCl executable to make sure syscalls are working.
 TEST_F(DevEnvTest, 'testCTests', function() {
   var self = this;

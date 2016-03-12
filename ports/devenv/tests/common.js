@@ -40,7 +40,7 @@ DevEnvTest.prototype.setUp = function() {
   }).then(function() {
     return self.mkdir('/home/user');
   }).then(function() {
-    return self.checkCommand('bash -c exit 0', 0);
+    return self.checkCommand('bash -c exit', 0);
   }).then(function() {
     if (self.params['latest'] === '1')
       return self.setLocalRepo(window.location.origin);
@@ -87,10 +87,14 @@ DevEnvTest.prototype.gatherStdoutUntil = function(name) {
   });
 };
 
-DevEnvTest.prototype.spawnCommand = function(cmd) {
+DevEnvTest.prototype.spawnCommand = function(cmd, env) {
   var self = this;
 
-  var env = ['HOME=/home/user', 'NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt'];
+  if (env === undefined) {
+    env = [];
+  }
+  env.push('HOME=/home/user');
+  env.push('NACL_DATA_MOUNT_FLAGS=manifest=/manifest.txt');
   if (this.params['latest'] === '1') {
     env.push('NACL_DEVENV_LOCAL=1');
   }
@@ -126,12 +130,12 @@ DevEnvTest.prototype.waitCommand = function(pid) {
   });
 };
 
-DevEnvTest.prototype.runCommand = function(cmd) {
+DevEnvTest.prototype.runCommand = function(cmd, env) {
   var self = this;
   var earlyOutput;
   chrometest.info('runCommand: ' + cmd);
   return Promise.resolve().then(function() {
-    return self.spawnCommand(cmd);
+    return self.spawnCommand(cmd, env);
   }).then(function(msg) {
     earlyOutput = msg.output;
     return self.waitCommand(msg.pid);
@@ -142,13 +146,13 @@ DevEnvTest.prototype.runCommand = function(cmd) {
 };
 
 DevEnvTest.prototype.checkCommand = function(
-    cmd, expectedStatus, expectedOutput) {
+    cmd, expectedStatus, expectedOutput, env) {
   if (expectedStatus === undefined) {
     expectedStatus = 0;
   }
   var self = this;
   return Promise.resolve().then(function() {
-    return self.runCommand(cmd);
+    return self.runCommand(cmd, env);
   }).then(function(result) {
     ASSERT_EQ(expectedStatus, result.status, result.output);
     if (expectedOutput !== undefined) {
@@ -170,11 +174,10 @@ DevEnvTest.prototype.installPackage = function(name) {
 };
 
 DevEnvTest.prototype.installDefaultPackages = function(name) {
-  var cmd = 'bash /mnt/http/install-base-packages.sh';
-  chrometest.info(cmd);
-  return this.checkCommand(cmd, 0);
+  var env = ['INSTALL_BASE_PACKAGES=1'];
+  chrometest.info('install base packages');
+  return this.checkCommand('exit', 0, undefined, env);
 };
-
 
 DevEnvTest.prototype.checkCommandReLines = function(
     cmd, expectedStatus, expectedOutput) {

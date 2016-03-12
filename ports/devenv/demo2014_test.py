@@ -2,7 +2,7 @@
 # Copyright (c) 2014 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Test of Google I/O 2014 tutorial."""
+"""Test of 2014 demos."""
 
 import os
 import sys
@@ -22,7 +22,7 @@ test_dir = os.path.join(SCRIPT_DIR, 'tests')
 chrome_test.main([
     '-C', test_dir,
     '-p', 'TOOLCHAIN=' + TOOLCHAIN,
-    '-t', '400',
+    '-t', '2000',
     '--enable-nacl',
     '--load-extension', app,
-    'io2014_test.html'] + sys.argv[1:])
+    'demo2014_test.html'] + sys.argv[1:])

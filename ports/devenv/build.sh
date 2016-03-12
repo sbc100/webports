@@ -190,12 +190,12 @@ PostInstallTestStep() {
     if [[ ${NACL_ARCH} == pnacl ]]; then
       LogExecute python ${START_DIR}/jseval_test.py -x -v -a ${arch}
     fi
-    # Run large and io2014 tests only on the buildbots (against pinned revs).
+    # Run large and demo2014 tests only on the buildbots (against pinned revs).
     if [[ -n ${BUILDBOT_BUILDERNAME:-} ]]; then
       LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
         -x -v -a ${arch}
-      #LogExecute python ${START_DIR}/../devenv/io2014_test.py \
-        #-x -v -a ${arch}
+      LogExecute python ${START_DIR}/../devenv/demo2014_test.py \
+        -x -v -a ${arch}
     fi
   done
 }
