@@ -10,8 +10,8 @@
 set -e
 
 CheckNaClEnabled() {
-  # Skip check on if this isn't newlib.
-  if [[ ${TOOLCHAIN} != newlib ]]; then
+  # Skip check on if this isn't newlib or glibc.
+  if [[ ${TOOLCHAIN} != newlib && ${TOOLCHAIN} != glibc ]]; then
     return
   fi
   TMP_CHECK_FILE="/tmp/.enable_nacl_check.nexe"
@@ -30,7 +30,7 @@ CheckNaClEnabled() {
     echo "  chrome://flags"
     echo "You must then restart your browser."
     echo
-    echo "Eventually this should not be required."
+    echo "Eventually this may not be required."
     echo "Follow this issue: https://crbug.com/477808"
     echo
     echo "*********************** ERROR ***********************"
