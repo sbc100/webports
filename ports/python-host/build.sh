@@ -15,7 +15,8 @@ ConfigureStep() {
   export CC="gcc -m32"
   export CXX="g++ -m32"
   export LD="gcc -m32"
-  LogExecute ${SRC_DIR}/configure --prefix=${NACL_HOST_PYROOT}
+  LogExecute ${SRC_DIR}/configure --prefix=${NACL_HOST_PYROOT} \
+    --without-x --without-tk
 }
 
 BuildStep() {
