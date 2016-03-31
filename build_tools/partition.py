@@ -338,7 +338,7 @@ def main(args):
   webports.set_verbose(options.verbose)
 
   if options.check:
-    for num_bots in xrange(1, 6):
+    for num_bots in xrange(1, 7):
       print('Checking partioning with %d bot(s)' % (num_bots))
       # GetCanned with raise an Error if the canned partition information is
       # bad, which in turn will trigger a non-zero return from this script.
