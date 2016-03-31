@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 BuildStep() {
+  NACLPORTS_CFLAGS+=" -fexceptions"
   DefaultPythonModuleBuildStep
 }
 
