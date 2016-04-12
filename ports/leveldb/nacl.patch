@@ -14,6 +14,24 @@ diff --git a/Makefile b/Makefile
  	for t in $(TESTS); do echo "***** Running $$t"; ./$$t || exit 1; done
  
  clean:
+@@ -108,7 +112,7 @@ clean:
+ 
+ $(LIBRARY): $(LIBOBJECTS)
+ 	rm -f $@
+-	$(AR) -rs $@ $(LIBOBJECTS)
++	$(AR) rs $@ $(LIBOBJECTS)
+ 
+ db_bench: db/db_bench.o $(LIBOBJECTS) $(TESTUTIL)
+ 	$(CXX) $(LDFLAGS) db/db_bench.o $(LIBOBJECTS) $(TESTUTIL) -o $@ $(LIBS)
+@@ -190,7 +194,7 @@ write_batch_test: db/write_batch_test.o $(LIBOBJECTS) $(TESTHARNESS)
+ 
+ $(MEMENVLIBRARY) : $(MEMENVOBJECTS)
+ 	rm -f $@
+-	$(AR) -rs $@ $(MEMENVOBJECTS)
++	$(AR) rs $@ $(MEMENVOBJECTS)
+ 
+ memenv_test : helpers/memenv/memenv_test.o $(MEMENVLIBRARY) $(LIBRARY) $(TESTHARNESS)
+ 	$(CXX) $(LDFLAGS) helpers/memenv/memenv_test.o $(MEMENVLIBRARY) $(LIBRARY) $(TESTHARNESS) -o $@ $(LIBS)
 diff --git a/build_detect_platform b/build_detect_platform
 --- a/build_detect_platform
 +++ b/build_detect_platform

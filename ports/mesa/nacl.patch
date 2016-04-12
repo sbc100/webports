@@ -41,15 +41,17 @@ diff --git a/bin/mklib b/bin/mklib
              fi
  	fi
  
-@@ -271,7 +276,7 @@ case $ARCH in
+@@ -271,8 +276,8 @@ case $ARCH in
          elif [ $STATIC = 1 ] ; then
              LIBNAME="lib${LIBNAME}.a"     # prefix with "lib", suffix with ".a"
              echo "mklib: Making" $ARCH "static library: " ${LIBNAME}
 -            LINK="ar"
+-            OPTS="-ru"
 +            LINK=${AR}  # "ar"
-             OPTS="-ru"
++            OPTS="ru"
              if [ "${ALTOPTS}" ] ; then
                  OPTS=${ALTOPTS}
+             fi
 @@ -285,8 +290,8 @@ case $ARCH in
  		case $OBJ in
  		    *.a)
