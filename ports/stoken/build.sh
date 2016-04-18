@@ -9,3 +9,20 @@ EXECUTABLES=stoken${NACL_EXEEXT}
 
 # Workaround for pthread link order problem (copied from libarchive).
 export LIBS="-lpthread -lm"
+
+TestStep() {
+  if [ "${NACL_SHARED}" = "1" ]; then
+    EXE=.libs/stoken${NACL_EXEEXT}
+    export SEL_LDR_LIB_PATH=${BUILD_DIR}/.libs
+  else
+    EXE=stoken${NACL_EXEEXT}
+  fi
+
+  if [ "${NACL_ARCH}" = "pnacl" ]; then
+    TranslateAndWriteLauncherScript ${EXE} x86-32 stoken.x86-32.nexe stoken
+  else
+    WriteLauncherScript stoken ${EXE}
+  fi
+
+  LogExecute make check
+}
