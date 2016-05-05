@@ -37,6 +37,7 @@ arch_to_pkgarch = {
     'arm': 'arm',
     'pnacl': 'pnacl',
     'emscripten': 'emscripten',
+    'le32': 'le32'
 }
 
 # Inverse of arch_to_pkgarch

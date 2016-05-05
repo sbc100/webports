@@ -29,7 +29,7 @@ NACL_ARCH=arm        TOOLCHAIN=clang-newlib make ${TARGETS}
 NACL_ARCH=arm        TOOLCHAIN=glibc        make ${TARGETS}
 
 # PNaCl
-NACL_ARCH=pnacl      TOOLCHAIN=pnacl        make ${TARGETS}
+NACL_ARCH=le32      TOOLCHAIN=pnacl        make ${TARGETS}
 
 # Emscripten
 if [ -n "${EMSCRIPTEN:-}" ]; then

@@ -1,6 +1,29 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -116,7 +116,9 @@ ffprobe.o cmdutils.o libavcodec/utils.o libavformat/utils.o libavdevice/avdevice
+ 
+ $(PROGS): %$(PROGSSUF)$(EXESUF): %$(PROGSSUF)_g$(EXESUF)
+ 	$(CP) $< $@
+-	$(STRIP) $@
++	-if test "$(NACL_ARCH)" != "le32"; then \
++		$(STRIP) $@; \
++	fi
+ 
+ %$(PROGSSUF)_g$(EXESUF): %.o $(FF_DEP_LIBS)
+ 	$(LD) $(LDFLAGS) $(LDEXEFLAGS) $(LD_O) $(OBJS-$*) $(FF_EXTRALIBS)
 diff --git a/configure b/configure
 --- a/configure
 +++ b/configure
+@@ -2719,7 +2719,7 @@ ln_s="ln -s -f"
+ nm_default="nm -g"
+ objformat="elf"
+ pkg_config_default=pkg-config
+-if ranlib 2>&1 | grep -q "\-D "; then
++if [ $NACL_ARCH != le32 ] && ranlib 2>&1 | grep -q "\-D "; then
+     ranlib_default="ranlib -D"
+ else
+     ranlib_default="ranlib"
 @@ -4761,7 +4761,13 @@ if ! disabled network; then
  fi
  

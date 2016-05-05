@@ -18,7 +18,7 @@ TestStep() {
     EXE=stoken${NACL_EXEEXT}
   fi
 
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "le32" ]; then
     TranslateAndWriteLauncherScript ${EXE} x86-32 stoken.x86-32.nexe stoken
   else
     WriteLauncherScript stoken ${EXE}

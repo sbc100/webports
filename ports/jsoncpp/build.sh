@@ -5,6 +5,7 @@
 # The NaCL SDK includes a version of jsoncpp conflicts with this one.
 # Remove the SDK include path so that these headers don't get used
 # during the build.
+NACLPORTS_CPPFLAGS+=" ${NACL_EXCEPTIONS_FLAG}"
 NACLPORTS_CPPFLAGS=${NACLPORTS_CPPFLAGS/-I${NACL_SDK_ROOT}\/include/}
 
 EXECUTABLES=src/test_lib_json/jsoncpp_test

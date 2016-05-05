@@ -8,7 +8,7 @@
 # The values for these variables are calculated based on the following
 # environment variables:
 #
-# $NACL_ARCH - i386, x86_64, arm or pnacl.  Default: x86_64
+# $NACL_ARCH - i386, x86_64, arm, pnacl or le32.  Default: x86_64
 # $TOOLCHAIN - clang-newlib, glibc or pnacl.  Default: pnacl
 #
 # You can run a command within the NaCl environment
@@ -78,7 +78,7 @@ TOOLCHAIN=${TOOLCHAIN:-pnacl}
 # Check NACL_ARCH
 if [ ${NACL_ARCH} != "i686" -a ${NACL_ARCH} != "x86_64" -a \
      ${NACL_ARCH} != "arm" -a ${NACL_ARCH} != "pnacl" -a \
-     ${NACL_ARCH} != "emscripten" ]; then
+     ${NACL_ARCH} != "emscripten" -a ${NACL_ARCH} != "le32" ]; then
   echo "Unknown value for NACL_ARCH: '${NACL_ARCH}'" 1>&2
   exit 1
 fi
@@ -101,7 +101,7 @@ if [ "${NACL_ARCH}" = "emscripten" -a -z "${EMSCRIPTEN:-}" ]; then
 fi
 
 if [ "${TOOLCHAIN}" = "pnacl" ]; then
-  if [ "${NACL_ARCH}" != "pnacl" ]; then
+  if [ "${NACL_ARCH}" != "pnacl" -a "${NACL_ARCH}" != "le32" ]; then
     echo "PNaCl does not support the selected architecture: ${NACL_ARCH}" 1>&2
     exit 1
   fi
@@ -145,6 +145,8 @@ fi
 export NACL_LIBC
 export NACL_ARCH
 export NACL_CROSS_PREFIX
+
+NACL_EXCEPTIONS_FLAG=""
 
 InitializeNaClGccToolchain() {
   if [ ${NACL_ARCH} = "arm" ]; then
@@ -249,12 +251,16 @@ InitializePNaClToolchain() {
     # until then use the host's strings tool
     # (used only by the cairo package)
     NACLSTRINGS="$(which strings)"
+    if [ ${NACL_ARCH} = "le32" ]; then
+      NACLSTRINGS=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strings
+      NACL_EXCEPTIONS_FLAG="-fcxx-exceptions"
+    fi
     NACLSTRIP=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-strip
     NACL_EXEEXT=".pexe"
-
     # pnacl's translator
-    TRANSLATOR=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-translate
-    PNACLFINALIZE=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-finalize
+    # This should always be pnacl-translate, pnacl-finalize
+    TRANSLATOR=${NACL_BIN_PATH}/${TOOLCHAIN}-translate
+    PNACLFINALIZE=${NACL_BIN_PATH}/${TOOLCHAIN}-finalize
     # pnacl's pexe optimizer
     PNACL_OPT=${NACL_BIN_PATH}/${NACL_CROSS_PREFIX}-opt
 

@@ -1,7 +1,7 @@
 # Copyright (c) 2011 The Native Client Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
+NACLPORTS_CPPFLAGS+=" ${NACL_EXCEPTIONS_FLAG}"
 if [ "${NACL_LIBC}" = "newlib" ]; then
   # TODO(sbc): remove once this is fixed:
   # https://code.google.com/p/nativeclient/issues/detail?id=3790

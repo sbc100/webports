@@ -20,7 +20,7 @@ diff --git a/configure b/configure
 +    *nacl*)
 +        SYS="NACL"
 +        define HAVE_MALLOC_H
-+        if [[ $(basename ${CC}) =~ pnacl-* ]]; then
++        if [[ $(basename ${CC}) =~ pnacl-*  || $(basename ${CC}) =~ le32-nacl-* ]]; then
 +            EXE=.pexe
 +        else
 +            EXE=.nexe
@@ -35,7 +35,7 @@ diff --git a/configure b/configure
      echo "int i[2] = {0x42494745,0}; double f[2] = {0x1.0656e6469616ep+102,0};" > conftest.c
      $CC $CFLAGS conftest.c -c -o conftest.o 2>/dev/null || die "endian test failed"
 +    # there is no pnacl-strings binary.
-+    if [[ ! $(basename ${CC}) =~ pnacl-* ]]; then
++    if [[ ! $(basename ${CC}) =~ pnacl-*  && ! $(basename ${CC}) =~ le32-nacl-* ]]; then
      if (${cross_prefix}strings -a conftest.o | grep -q BIGE) && (${cross_prefix}strings -a conftest.o | grep -q FPendian) ; then
          define WORDS_BIGENDIAN
      elif !(${cross_prefix}strings -a conftest.o | grep -q EGIB && ${cross_prefix}strings -a conftest.o | grep -q naidnePF) ; then

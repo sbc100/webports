@@ -751,7 +751,7 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
  int
  pkg_get_myarch(char *dest, size_t sz)
  {
-@@ -987,3 +993,49 @@ pkg_get_myarch(char *dest, size_t sz)
+@@ -987,3 +993,51 @@ pkg_get_myarch(char *dest, size_t sz)
  }
  #endif
  
@@ -778,6 +778,8 @@ diff --git a/libpkg/pkg_elf.c b/libpkg/pkg_elf.c
 +	const char* cpu_name = "i686";
 +#elif defined __x86_64__
 +	const char* cpu_name = "x86_64";
++#elif defined __le32__
++	const char* cpu_name = "le32";
 +#elif defined __pnacl__
 +	const char* cpu_name = "pnacl";
 +#else

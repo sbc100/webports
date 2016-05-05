@@ -65,7 +65,11 @@ quake_debug${EXEEXT}: $(OBJECTS)
 	$(RUN_CCLD)$(CXX) $(LDFLAGS) $^ -o $@
 
 quake${EXEEXT}: quake_debug${EXEEXT}
+ifneq ($(NACL_ARCH),le32)
 	$(RUN_STRIP)$(STRIP) -o $@ $<
+else
+	cp $< $@
+endif
 
 clean:
 	rm -f build/*.o *.${EXEEXT}

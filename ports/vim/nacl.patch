@@ -10,6 +10,28 @@ diff --git a/src/Makefile b/src/Makefile
  		$(MAKE) -f Makefile
  
  # Build the language specific files if they were unpacked.
+@@ -1926,7 +1926,9 @@ installvimbin: $(VIMTARGET) $(DESTDIR)$(exec_prefix) $(DEST_BIN)
+ 	  rm -f $(DEST_BIN)/$(VIMNAME).rm; \
+ 	fi
+ 	$(INSTALL_PROG) $(VIMTARGET) $(DEST_BIN)
+-	$(STRIP) $(DEST_BIN)/$(VIMTARGET)
++	-if test "$(NACL_ARCH)" != "le32"; then \
++		$(STRIP) $(DEST_BIN)/$(VIMTARGET); \
++	fi
+ 	chmod $(BINMOD) $(DEST_BIN)/$(VIMTARGET)
+ # may create a link to the new executable from /usr/bin/vi
+ 	-$(LINKIT)
+@@ -2063,7 +2065,9 @@ installtools: $(TOOLS) $(DESTDIR)$(exec_prefix) $(DEST_BIN) \
+ 	  rm -f $(DEST_BIN)/xxd.rm; \
+ 	fi
+ 	$(INSTALL_PROG) xxd/xxd$(EXEEXT) $(DEST_BIN)
+-	$(STRIP) $(DEST_BIN)/xxd$(EXEEXT)
++	-if test "$(NACL_ARCH)" != "le32"; then \
++		$(STRIP) $(DEST_BIN)/xxd$(EXEEXT) \
++	fi
+ 	chmod $(BINMOD) $(DEST_BIN)/xxd$(EXEEXT)
+ 	-$(SHELL) ./installman.sh xxd $(DEST_MAN) "" $(INSTALLMANARGS)
+ 
 diff --git a/src/auto/configure b/src/auto/configure
 --- a/src/auto/configure
 +++ b/src/auto/configure

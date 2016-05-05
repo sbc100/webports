@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 BUILD_DIR=${SRC_DIR}
-
+NACLPORTS_CPPFLAGS+=" ${NACL_EXCEPTIONS_FLAG}"
 EnableGlibcCompat
 
 if [ "${TOOLCHAIN}" = "pnacl" -o "${TOOLCHAIN}" = "clang-newlib" ]; then

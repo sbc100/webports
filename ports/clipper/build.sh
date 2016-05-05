@@ -2,6 +2,7 @@
 # # Use of this source code is governed by a BSD-style license that can be
 # # found in the LICENSE file.
 
+NACLPORTS_CPPFLAGS+=" ${NACL_EXCEPTIONS_FLAG}"
 if [ "${NACL_SHARED}" != "1" ]; then
   EXTRA_CMAKE_ARGS="-DBUILD_SHARED_LIBS=OFF"
 fi

@@ -106,7 +106,7 @@ PublishStep() {
   LogExecute cp -fR ${UNZIP_DIR}/* ${APP_DIR}
 
   # Install jseval only for pnacl (as it can't really work otherwise).
-  if [[ ${NACL_ARCH} == pnacl ]]; then
+  if [[ ${NACL_ARCH} == pnacl || ${NACL_ARCH} == le32 ]]; then
     LogExecute ${PNACLFINALIZE} \
         ${BUILD_DIR}/jseval/jseval_${NACL_ARCH}${NACL_EXEEXT} \
         -o ${APP_DIR}/jseval_${NACL_ARCH}${NACL_EXEEXT}
@@ -180,22 +180,27 @@ PostInstallTestStep() {
     echo "Skipping devenv tests on unsupported mac + x86_64 configuration."
   elif [[ ${NACL_ARCH} == arm ]]; then
     echo "Skipping devenv tests on arm for now."
-  elif [[ ${NACL_ARCH} == pnacl ]]; then
+  elif [[ ${NACL_ARCH} == pnacl || ${NACL_ARCH} == le32 ]]; then
     arches="i686 x86_64"
   else
     arches="${NACL_ARCH}"
   fi
   for arch in ${arches}; do
-    LogExecute python ${START_DIR}/devenv_small_test.py -x -v -a ${arch}
-    if [[ ${NACL_ARCH} == pnacl ]]; then
+    LogExecute python ${START_DIR}/devenv_small_test.py -x -v -a ${arch} \
+      -p NACL_BOOT_ARCH=${NACL_ARCH}
+    if [[ ${NACL_ARCH} == pnacl || ${NACL_ARCH} == le32 ]]; then
       LogExecute python ${START_DIR}/jseval_test.py -x -v -a ${arch}
     fi
+
+    # TODO(anmittal): enable test back once pinned rev is updated for new driver
     # Run large and demo2014 tests only on the buildbots (against pinned revs).
-    if [[ -n ${BUILDBOT_BUILDERNAME:-} ]]; then
-      LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
-        -x -v -a ${arch}
-      LogExecute python ${START_DIR}/../devenv/demo2014_test.py \
-        -x -v -a ${arch}
+    if [[ ${NACL_ARCH} != le32 ]]; then
+      if [[ -n ${BUILDBOT_BUILDERNAME:-} ]]; then
+        LogExecute python ${START_DIR}/../devenv/devenv_large_test.py \
+          -x -v -a ${arch}
+        LogExecute python ${START_DIR}/../devenv/demo2014_test.py \
+          -x -v -a ${arch}
+      fi
     fi
   done
 }

@@ -77,8 +77,9 @@ TEST_F(DevEnvTest, 'testCTests', function() {
   }).then(function() {
     return self.checkCommand('unzip devenv_small_test.zip', 0);
   }).then(function() {
+    var NACL_BOOT_ARCH = self.params["NACL_BOOT_ARCH"];
     return self.checkCommand(
         'LD_LIBRARY_PATH=${PWD}/${PACKAGE_LIB_DIR}:$LD_LIBRARY_PATH ' +
-        './devenv_small_test_${NACL_BOOT_ARCH}', 0);
+        './devenv_small_test_' + NACL_BOOT_ARCH, 0);
   });
 });

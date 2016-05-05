@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
+NACLPORTS_CPPFLAGS+=" ${NACL_EXCEPTIONS_FLAG}"
 TestStep() {
   if [ "${NACL_SHARED}" = "1" ]; then
     exe_dir=.libs

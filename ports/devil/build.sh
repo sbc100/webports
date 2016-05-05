@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+NACLPORTS_CPPFLAGS+=" ${NACL_EXCEPTIONS_FLAG}"
 if [ "${NACL_ARCH}" = "pnacl" ]; then
   NACLPORTS_CFLAGS+=" -std=gnu89"
 fi

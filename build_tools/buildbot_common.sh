@@ -73,7 +73,7 @@ InstallPackageMultiArch() {
   echo "@@@BUILD_STEP ${TOOLCHAIN} $1@@@"
 
   if [ "${TOOLCHAIN}" = "pnacl" ]; then
-    arch_list="pnacl"
+    arch_list="le32"
   elif [ "${TOOLCHAIN}" = "emscripten" ]; then
     arch_list="emscripten"
   else
@@ -105,7 +105,7 @@ CleanToolchain() {
   TC=$1
 
   if [ "${TC}" = "pnacl" ]; then
-    arch_list="pnacl"
+    arch_list="le32 pnacl"
   elif [ "${TC}" = "emscripten" ]; then
     arch_list="emscripten"
   elif [ "${TC}" = "glibc" ]; then

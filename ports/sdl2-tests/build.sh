@@ -84,7 +84,7 @@ InstallStep() {
   for NEXE in ${EXECUTABLES}; do
     LogExecute "${NACL_SDK_ROOT}/tools/create_html.py" ${NEXE}
   done
-  if [ ${NACL_ARCH} = "pnacl" ]; then
+  if [ ${NACL_ARCH} = "pnacl" -o ${NACL_ARCH} = "le32" ]; then
     sed -i.bak 's/x-nacl/x-pnacl/' *.html
   fi
 }

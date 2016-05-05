@@ -113,15 +113,18 @@ diff --git a/Quake/Makefile b/Quake/Makefile
  
  # ----------------------------------------------------------------------------
  # objects
-@@ -254,11 +265,11 @@ OBJS := strlcat.o \
+@@ -254,11 +265,13 @@ OBJS := strlcat.o \
  # Linux build rules
  # ------------------------
  
 -quakespasm:	$(OBJS)
 -	$(LINKER) $(OBJS) $(LDFLAGS) $(LIBS) $(SDL_LIBS) -o $@
+-	$(call do_strip,$@)
 +quakespasm$(EXEEXT):	$(OBJS)
 +	$(RUN_CCLD)$(LINKER) $(OBJS) $(LDFLAGS) $(LIBS) $(SDL_LIBS) -o $@
- 	$(call do_strip,$@)
++	-if test $(NACL_ARCH) != le32; then \
++		$(call do_strip,$@); \
++	fi
  
 -release:	quakespasm
 +release:	quakespasm$(EXEEXT)

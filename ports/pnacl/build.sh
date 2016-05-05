@@ -61,7 +61,6 @@ BuildStep() {
   GOLD_LDADD+=" -lLLVMMipsAsmPrinter -lLLVMMCDisassembler -lLLVMLTO"
   GOLD_LDADD+=" -lLLVMMCParser -lLLVMLinker -lLLVMipo -lLLVMObjCARCOpts"
   GOLD_LDADD+=" -lLLVMVectorize -lLLVMScalarOpts -lLLVMInstCombine"
-  GOLD_LDADD+=" -lLLVMJSBackendCodeGen -lLLVMJSBackendDesc -lLLVMJSBackendInfo"
   GOLD_LDADD+=" -lLLVMTransformUtils -lLLVMipa -lLLVMBitWriter"
   GOLD_LDADD+=" -lLLVMBitReader -lLLVMAnalysis -lLLVMTarget -lLLVMMC"
   GOLD_LDADD+=" -lLLVMObject -lLLVMCore -lLLVMSupport"
@@ -80,7 +79,11 @@ BuildStep() {
   # Some code in llvm uses intrisics not supported in the pnacl stable abi.
   if [[ ${TOOLCHAIN} == pnacl ]]; then
     EXTRA_CC_ARGS="-fgnu-inline-asm"
-    EXTRA_CC_ARGS+=" --pnacl-disable-abi-check"
+    if [[ ${NACL_ARCH} == le32 ]]; then
+      GOLD_LDADD+=" -Wl,-plugin-opt=no-abi-verify"
+    else
+      EXTRA_CC_ARGS+=" --pnacl-disable-abi-check"
+    fi
   fi
   if [[ ${TOOLCHAIN} != glibc ]]; then
     EXTRA_CC_ARGS+=" -I${NACLPORTS_INCLUDE}/glibc-compat"
@@ -88,7 +91,7 @@ BuildStep() {
 
   EXTRA_CC_ARGS+=" -include spawn.h"
   EXTRA_CC_ARGS+=" -I${NACL_SDK_ROOT}/include"
-  EXTRA_CC_ARGS+=" -I${NACLPORTS_INCLUDE}"
+  EXTRA_CC_ARGS+=" -isystem${NACLPORTS_INCLUDE}"
 
   # export WEBPORTS_EXTRA_LIBS so that compiler_wapper.py can access it
   export WEBPORTS_EXTRA_LIBS="${NACLPORTS_LDFLAGS} ${NACLPORTS_LIBS}"
@@ -120,7 +123,7 @@ BuildStep() {
     --install=${OUT_INSTALL} \
     "--extra-cc-args=${EXTRA_CC_ARGS}" \
     ${EXTRA_CONFIGURE} \
-    "--binutils-pnacl-extra-configure=${GOLD_LDADD}"
+    "--binutils-extra-configure=${GOLD_LDADD}"
 
   CreateHybridToolchain
 }
@@ -199,7 +202,7 @@ InstallStep() {
 
 TestStep() {
   # Verify that binaries at least load under sel_ldr
-  LogExecute toolchain/bin/le32-nacl-strings --version
+  LogExecute toolchain/bin/le32-nacl-clang --version
   LogExecute toolchain/bin/arm-nacl-readelf --version
   LogExecute toolchain/bin/x86_64-nacl-as --version
   LogExecute toolchain/bin/clang --version

@@ -19,7 +19,7 @@ PostInstallTestStep() {
     echo "Skipping devenv tests on unsupported mac + x86_64 configuration."
   elif [[ ${NACL_ARCH} == arm ]]; then
     echo "Skipping devenv tests on arm for now."
-  elif [[ ${NACL_ARCH} == pnacl ]]; then
+  elif [[ ${NACL_ARCH} == pnacl  || ${NACL_ARCH} == le32 ]]; then
     arches="i686 x86_64"
   else
     arches="${NACL_ARCH}"

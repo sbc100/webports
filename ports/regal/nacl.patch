@@ -1,7 +1,7 @@
 diff --git a/.travis.yml b/.travis.yml
 --- a/.travis.yml
 +++ b/.travis.yml
-@@ -19,10 +19,14 @@ install:
+@@ -19,10 +19,16 @@ install:
   - "if [ \"$SYSTEM\" = linux ]; then sudo apt-get install libxmu-dev libxi-dev; fi"
  env:
   - SYSTEM=linux
@@ -12,12 +12,14 @@ diff --git a/.travis.yml b/.travis.yml
 + - SYSTEM=nacl-i686
   - SYSTEM=nacl-arm
 + - SYSTEM=nacl-pnacl
++ - SYSTEM=nacl-le32
   - MODE=debug SYSTEM=linux
 - - MODE=debug SYSTEM=nacl-i686
   - MODE=debug SYSTEM=nacl-x86_64
 + - MODE=debug SYSTEM=nacl-i686
   - MODE=debug SYSTEM=nacl-arm
 + - MODE=debug SYSTEM=nacl-pnacl
++ - MODE=debug SYSTEM=nacl-le32
 diff --git a/Makefile.glu b/Makefile.glu
 --- a/Makefile.glu
 +++ b/Makefile.glu
@@ -156,7 +158,19 @@ diff --git a/Makefile.regaltest b/Makefile.regaltest
  
  include build/regaltest.inc
  
-@@ -58,15 +58,24 @@ tmp/$(SYSTEM)/regaltest/static/%.o: tests/%.cpp
+@@ -49,7 +49,10 @@ REGALTEST.LIBS       := -Llib/$(SYSTEM) $(LDFLAGS.X11) -lm
+ ifeq ($(filter nacl%,$(SYSTEM)),)
+ REGALTEST.LIBS += -ldl
+ else
+-REGALTEST.LIBS += -lnacl_io -lppapi -lppapi_gles2
++ifneq ($(NACL_ARCH),le32)
++REGALTEST.LIBS += -lnacl_io -lppapi_gles2
++endif
++REGALTEST.LIBS += -lppapi
+ endif
+ 
+ -include $(REGALTEST.DEPS)
+@@ -58,15 +61,24 @@ tmp/$(SYSTEM)/regaltest/static/%.o: tests/%.cpp
  	@mkdir -p $(dir $@)
  	$(LOG_CXX)$(CCACHE) $(CXX) $(REGAL.CFLAGS) $(REGALTEST.CFLAGS) $(CFLAGS) $(CFLAGS.SO) -o $@ -c $<
  
@@ -183,13 +197,15 @@ diff --git a/Makefile.regaltest b/Makefile.regaltest
  endif
  
  ifneq ($(NACL_ARCH),arm)
-@@ -75,7 +84,10 @@ test: bin/$(SYSTEM)/regaltest$(BIN_EXTENSION)
+@@ -75,7 +84,12 @@ test: bin/$(SYSTEM)/regaltest$(BIN_EXTENSION)
  ifeq ($(filter nacl%,$(SYSTEM)),)
  	$^
  else
 -	"$(NACL_SDK_ROOT)/tools/sel_ldr.py" $^
 +ifeq ($(NACL_ARCH),pnacl)
 +	$(LOG_FINALIZE)$(TRANSLATE) -arch x86-64 -o $(^:.pexe=.nexe) $^
++else ifeq ($(NACL_ARCH),le32)
++	$(TRANSLATE) -arch x86-64 -o $(^:.pexe=.nexe) $^
 +endif
 +	"$(NACL_SDK_ROOT)/tools/sel_ldr.py" $(^:.pexe=.nexe)
  endif
@@ -390,6 +406,36 @@ diff --git a/config/Makefile.nacl-i686 b/config/Makefile.nacl-i686
  RANLIB :=
  STRIP  ?=
  
+diff --git a/config/Makefile.nacl-le32 b/config/Makefile.nacl-le32
+new file mode 100644
+--- /dev/null
++++ b/config/Makefile.nacl-le32
+@@ -0,0 +1,25 @@
++NACL_ARCH := le32
++TOOLCHAIN := pnacl
++
++include config/nacl.inc
++
++NACL_TOOLCHAIN := $(NACL_SDK_ROOT)/toolchain/$(NACL_OS)_pnacl
++
++CC        := $(NACL_TOOLCHAIN)/bin/le32-nacl-clang
++CXX       := $(NACL_TOOLCHAIN)/bin/le32-nacl-clang++
++LD        := $(NACL_TOOLCHAIN)/bin/le32-nacl-clang++
++TRANSLATE := $(NACL_TOOLCHAIN)/bin/pnacl-translate
++AR        := $(NACL_TOOLCHAIN)/bin/le32-nacl-ar
++RANLIB    := $(NACL_TOOLCHAIN)/bin/le32-nacl-ranlib
++STRIP     ?=
++
++BIN_EXTENSION = .pexe
++LIBDIR =
++CFLAGS.EXTRA += -Wno-tautological-undefined-compare -Wno-unused-function
++LDFLAGS.EXTRA +=
++LDFLAGS.GL =
++LDFLAGS.GLU = -lRegalGLU
++LDFLAGS.GLUT = -lRegalGLUT
++LDFLAGS.STATIC =
++BIN.SUFFIX =
++LIB.STATIC = lib$(NAME).a
 diff --git a/config/Makefile.nacl-pnacl b/config/Makefile.nacl-pnacl
 --- a/config/Makefile.nacl-pnacl
 +++ b/config/Makefile.nacl-pnacl
@@ -528,7 +574,7 @@ diff --git a/config/nacl.inc b/config/nacl.inc
 diff --git a/nacl-regal.sh b/nacl-regal.sh
 --- a/nacl-regal.sh
 +++ b/nacl-regal.sh
-@@ -10,22 +10,24 @@
+@@ -10,22 +10,28 @@
  #   - Pepper 25 is needed for the ARM build.
  #   - Makefile needs to be specified for branches that have GNUmakefiles
  #   - MODE=debug for debug-mode build
@@ -559,6 +605,10 @@ diff --git a/nacl-regal.sh b/nacl-regal.sh
  echo "Building pnacl"
  make -f Makefile SYSTEM=nacl-pnacl $*
 +make -f Makefile SYSTEM=nacl-pnacl $* test
++
++echo "Building pnacl"
++make -f Makefile SYSTEM=nacl-le32 $*
++make -f Makefile SYSTEM=nacl-le32 $* test
 diff --git a/src/apitrace/common/os_posix.cpp b/src/apitrace/common/os_posix.cpp
 --- a/src/apitrace/common/os_posix.cpp
 +++ b/src/apitrace/common/os_posix.cpp

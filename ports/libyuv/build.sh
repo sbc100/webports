@@ -23,7 +23,7 @@ TestStep() {
     filter="--gtest_filter=-libyuvTest.Psnr:libyuvTest.Ssim"
   elif [[ ${NACL_ARCH} == x86_64 && ${TOOLCHAIN} == glibc ]]; then
     filter="--gtest_filter=-libyuvTest.ARGBRect_Unaligned"
-  elif [[ ${NACL_ARCH} == pnacl ]]; then
+  elif [[ ${NACL_ARCH} == pnacl  || ${NACL_ARCH} == le32 ]]; then
     filter="--gtest_filter="
     filter+="-libyuvTest.MJPGToI420"
     filter+=":libyuvTest.MJPGToARGB"

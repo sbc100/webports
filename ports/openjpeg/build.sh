@@ -15,7 +15,7 @@ if [ "${NACL_SHARED}" != "1" ]; then
   EXTRA_CMAKE_ARGS+=" -DBUILD_SHARED_LIBS=OFF"
 fi
 
-if [ "${NACL_ARCH}" = "pnacl" ]; then
+if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "le32" ]; then
   # The cmake endian test fails on PNaCl as it tries to search
   # for string constants in object files which doesn't work in
   # bitcode files. Instead disable the endian test and just use

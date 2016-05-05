@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 EnableGlibcCompat
-
+NACLPORTS_CPPFLAGS+=" ${NACL_EXCEPTIONS_FLAG}"
 EXTRA_CONFIGURE_ARGS+="
   --disable-tools
   --disable-doc

@@ -70,6 +70,10 @@ if [ "${TOOLCHAIN}" = "clang-newlib" -a "${NACL_ARCH}" = "i686" ]; then
   NACLPORTS_LDFLAGS+=" -L${NACLPORTS_LIBDIR}"
 fi
 
+if [ "${TOOLCHAIN}" = "pnacl" -a "${NACL_ARCH}" = "le32" ]; then
+  NACLPORTS_CPPFLAGS+=" -isystem ${NACLPORTS_INCLUDE}"
+fi
+
 if [ "${TOOLCHAIN}" = "clang-newlib" -o "${TOOLCHAIN}" = "pnacl" -o \
      "${TOOLCHAIN}" = "emscripten" ]; then
   NACLPORTS_CLANG=1
@@ -514,7 +518,7 @@ SetOptFlags() {
   else
     NACLPORTS_CFLAGS+=" -DNDEBUG -O2"
     NACLPORTS_CXXFLAGS+=" -DNDEBUG -O2"
-    if [ "${NACL_ARCH}" = "pnacl" ]; then
+    if [ "${NACL_ARCH}" = "pnacl"  -a "${NACL_ARCH}" == "le32" ]; then
       NACLPORTS_LDFLAGS+=" -DNDEBUG -O2"
     fi
   fi
@@ -758,7 +762,7 @@ InstallNaClTerm() {
 
   LogExecute cp "${TOOLS_DIR}/naclterm.js" "${INSTALL_DIR}"
   LogExecute cp "${TOOLS_DIR}/pipeserver.js" "${INSTALL_DIR}"
-  if [ "${NACL_ARCH}" = "pnacl" ] ; then
+  if [[ "${NACL_ARCH}" = "pnacl" || "${NACL_ARCH}" = "le32" ]] ; then
     sed 's/x-nacl/x-pnacl/' \
         "${TOOLS_DIR}/naclprocess.js" > "${INSTALL_DIR}/naclprocess.js"
   else
@@ -1173,7 +1177,8 @@ DefaultPythonModuleInstallStep() {
 Validate() {
   local binary=$1
 
-  if [[ ${NACL_ARCH} = pnacl || ${NACL_ARCH} = emscripten ]]; then
+  if [[ ${NACL_ARCH} = pnacl || ${NACL_ARCH} = le32
+    || ${NACL_ARCH} = emscripten ]]; then
     if [[ ! -f $binary ]]; then
       echo "error: missing binary: ${binary}"
       exit 1
@@ -1197,11 +1202,12 @@ DefaultPostBuildStep() {
   if [[ -z ${EXECUTABLES} ]]; then
     return
   fi
-
-  if [[ ${NACL_ARCH} == pnacl ]]; then
-    for pexe in ${EXECUTABLES}; do
-      FinalizePexe "${pexe}"
-    done
+  if [[ ${NACL_ARCH} == pnacl  || ${NACL_ARCH} == le32 ]]; then
+    if [[ ${NACL_ARCH} == pnacl ]]; then
+      for pexe in ${EXECUTABLES}; do
+        FinalizePexe "${pexe}"
+      done
+    fi
     if [[ ${TRANSLATE_PEXES:-} == no ]]; then
       return
     fi
@@ -1209,7 +1215,6 @@ DefaultPostBuildStep() {
       TranslatePexe "${pexe}"
     done
   fi
-
   for nexe in ${EXECUTABLES}; do
     Validate "${nexe}"
     # Create a script which will run the executable in sel_ldr.  The name
@@ -1222,7 +1227,7 @@ DefaultPostBuildStep() {
     fi
 
     nexe="$(basename ${nexe})"
-    if [[ ${NACL_ARCH} == pnacl ]]; then
+    if [[ ${NACL_ARCH} == pnacl || ${NACL_ARCH} == le32 ]]; then
       local basename="${nexe%.*}"
       nexe=${basename}.x86-64.nexe
     fi
@@ -1242,7 +1247,7 @@ RunSelLdrCommand() {
     return
   fi
 
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o  "${NACL_ARCH}" = "le32" ]; then
     # For PNaCl we translate to each arch where we have sel_ldr, then run it.
     local PEXE=$1
     local NEXE_32=$1_32.nexe
@@ -1373,8 +1378,12 @@ TranslateAndWriteLauncherScript() {
     exit 1
   fi
   if [[ ${pexe} -nt ${nexe} ]]; then
-    echo "Finalizing -> ${pexe}"
-    "${PNACLFINALIZE}" "${pexe}"
+    if [[ ${NACL_ARCH} != le32 ]]; then
+      echo "Finalizing -> ${pexe}"
+      "${PNACLFINALIZE}" "${pexe}"
+    else
+      echo "Skipping finalizing: ${pexe} -> ${nexe}"
+    fi
     echo "Translating -> ${nexe}"
     "${TRANSLATOR}" "${pexe}" -arch "${arch}" -o "${nexe}"
   else

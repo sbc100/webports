@@ -23,7 +23,7 @@ ConfigureStep() {
   SetupCrossEnvironment
 
   local conf_host=${NACL_CROSS_PREFIX}
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "le32" ]; then
     conf_host="pnacl"
   elif [ "${NACL_ARCH}" = "arm" ]; then
     conf_host="nacl-arm"
@@ -89,7 +89,7 @@ InstallStep() {
 
   cp ${START_DIR}/packaged_app/* ${ASSEMBLY_DIR}
   cp ${SRC_DIR}/*.tar ${ASSEMBLY_DIR}
-  if [ "${NACL_DEBUG}" = "1" ]; then
+  if [ "${NACL_DEBUG}" = "1" -o ${NACL_ARCH} = "le32" ]; then
     cp ${BUILD_DIR}/scummvm \
         ${ASSEMBLY_DIR}/scummvm_${NACL_ARCH}${NACL_EXEEXT}
   else
@@ -102,7 +102,7 @@ InstallStep() {
       -s ${ASSEMBLY_DIR} \
       -o ${ASSEMBLY_DIR}/scummvm.nmf
 
-  if [ "${NACL_ARCH}" = "pnacl" ]; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "le32" ]; then
     sed -i.bak 's/x-nacl/x-pnacl/' ${ASSEMBLY_DIR}/index.html
   fi
 

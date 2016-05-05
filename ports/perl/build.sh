@@ -9,7 +9,7 @@ export BUILD_LD=cc
 # with pnacl, arm's clang-newlib (microperl)
 NACLPORTS_CFLAGS_MICRO=$NACLPORTS_CFLAGS
 NACLPORTS_CFLAGS_MICRO+=" -Wno-return-type "
-NACLPORTS_CFLAGS+=" -I${NACL_SDK_ROOT}/include -I${NACLPORTS_INCLUDE} \
+NACLPORTS_CFLAGS+=" -I${NACL_SDK_ROOT}/include -isystem${NACLPORTS_INCLUDE} \
   -Wno-return-type"
 BUILD_DIR=${SRC_DIR}
 # keeping microperl for now
@@ -22,7 +22,8 @@ ARCH_DIR=${PUBLISH_DIR}/${NACL_ARCH}
 # specifically for systems which do not support it
 # Also, FILE pointer is structured a bit differently
 # Relevant stdio parameters found via sel_ldr on Linux
-if [ "${NACL_LIBC}" = "newlib" -o "${NACL_ARCH}" = "pnacl" ] ; then
+if [ "${NACL_LIBC}" = "newlib" -o "${NACL_ARCH}" = "pnacl" \
+  -o "${NACL_ARCH}" = "le32" ] ; then
   NACLPORTS_LIBS+=" -lm -ltar"
   DYNAMIC_EXT=""
   NACL_GLIBC_DEF="undef"
@@ -54,7 +55,7 @@ else
 fi
 # include Errno in pnacl
 NONXS_EXT=""
-if [ "${NACL_ARCH}" = "pnacl" ] ; then
+if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "le32" ] ; then
   NONXS_EXT="Errno"
 fi
 
@@ -165,7 +166,7 @@ TestStep() {
   export TOOLCHAIN
 
   # skip for pnacl
-  if [ "${NACL_ARCH}" = "pnacl" ] ; then
+  if [ "${NACL_ARCH}" = "pnacl" -o "${NACL_ARCH}" = "le32" ] ; then
     return
   fi
 

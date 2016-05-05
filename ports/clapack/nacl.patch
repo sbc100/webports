@@ -1,16 +1,20 @@
 diff --git a/F2CLIBS/libf2c/Makefile b/F2CLIBS/libf2c/Makefile
 --- a/F2CLIBS/libf2c/Makefile
 +++ b/F2CLIBS/libf2c/Makefile
-@@ -20,7 +20,7 @@ include $(TOPDIR)/make.inc
+@@ -20,8 +20,10 @@ include $(TOPDIR)/make.inc
  # compile, then strip unnecessary symbols
  .c.o:
  	$(CC) -c -DSkip_f2c_Undefs $(CFLAGS) $*.c
 -	ld -r -x -o $*.xxx $*.o
-+	$(LOADER) ${LDEMULATION} -r -o $*.xxx $*.o
- 	mv $*.xxx $*.o
+-	mv $*.xxx $*.o
++	if [ $(NACL_ARCH) != le32 ]; then \
++		$(LOADER) ${LDEMULATION} -r -o $*.xxx $*.o; \
++		mv $*.xxx $*.o;\
++	fi
  ## Under Solaris (and other systems that do not understand ld -x),
  ## omit -x in the ld line above.
-@@ -72,8 +72,8 @@ OFILES = $(MISC) $(POW) $(CX) $(DCX) $(REAL) $(DBL) $(INT) \
+ ## If your system does not have the ld command, comment out
+@@ -72,8 +74,8 @@ OFILES = $(MISC) $(POW) $(CX) $(DCX) $(REAL) $(DBL) $(INT) \
  all: f2c.h signal1.h sysdep1.h libf2c.a clapack_install
  
  libf2c.a: $(OFILES)
@@ -21,7 +25,7 @@ diff --git a/F2CLIBS/libf2c/Makefile b/F2CLIBS/libf2c/Makefile
  
  ## Shared-library variant: the following rule works on Linux
  ## systems.  Details are system-dependent.  Under Linux, -fPIC
-@@ -119,7 +119,7 @@ sysdep1.h: sysdep1.h0
+@@ -119,7 +121,7 @@ sysdep1.h: sysdep1.h0
  
  install: libf2c.a
  	cp libf2c.a $(LIBDIR)
@@ -30,7 +34,7 @@ diff --git a/F2CLIBS/libf2c/Makefile b/F2CLIBS/libf2c/Makefile
  
  clapack_install: libf2c.a
  	mv libf2c.a ..
-@@ -181,9 +181,11 @@ xwsne.o:	fio.h
+@@ -181,9 +183,11 @@ xwsne.o:	fio.h
  xwsne.o:	lio.h
  xwsne.o:	fmt.h
  
