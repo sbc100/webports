@@ -1,7 +1,7 @@
 # UUID                                  	Group Name
 #
 005c54f7b9ae7543621264d2a2c5b7dc4eb4027d	naclports-committers
-ff0f0f95338409aadb04cc3b7e21355d0e3cbabc	naclports-owners
 4d4288efd7d780ff5a35b8cc13fa6ff0f62c06cc	chrome-commit-bot
+ff0f0f95338409aadb04cc3b7e21355d0e3cbabc	naclports-owners
 global:Registered-Users                 	Registered Users
 ldap:eng                                	ldap/eng
