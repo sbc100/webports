@@ -7,8 +7,7 @@
 This script downloads toolchain bz2's and expands them.
 
 On Windows this script also required access to the cygtar python
-module which gets included by the gclient DEPS, and assumes
-that cygwin is installed in /cygwin.
+module, and assumes that cygwin is installed in /cygwin.
 """
 
 import argparse
@@ -41,9 +40,7 @@ OUT_DIR = os.path.join(SRC_DIR, 'out')
 TARGET_DIR = os.path.join(OUT_DIR, 'nacl_sdk')
 
 if sys.platform == 'win32':
-  NACL_BUILD_DIR = os.path.join(SRC_DIR, 'native_client', 'build')
-  sys.path.append(NACL_BUILD_DIR)
-  import cygtar  # pylint: disable=import-error
+  import cygtar
 
 BOT_GSUTIL = '/b/build/scripts/slave/gsutil'
 GS_URL_BASE = 'gs://nativeclient-mirror/nacl/nacl_sdk/'

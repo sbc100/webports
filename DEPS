@@ -11,8 +11,6 @@ deps_os = {
   "win": {
     "src/third_party/cygwin":
       "https://chromium.googlesource.com/chromium/deps/cygwin.git@4fbd5b9",
-    "src/native_client/build":
-      "https://src.chromium.org/native_client/trunk/src/native_client/build"
   },
 }
 
