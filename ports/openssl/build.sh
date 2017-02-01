@@ -45,6 +45,10 @@ HackStepForNewlib() {
   git checkout test/Makefile
   mv test/Makefile test/Makefile.orig
   echo "all clean install: " > test/Makefile
+
+  # Disable docs that we don't need and which can break when the host perl tools
+  # (like pod2man) are too new and throw warnings/errors.
+  sed -i '/^install:/s:install_docs::' Makefile
 }
 
 
