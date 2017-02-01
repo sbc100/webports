@@ -1,5 +1,5 @@
 NAME=zlib
-VERSION=1.2.8
-URL=http://www.zlib.net/zlib-1.2.8.tar.gz
+VERSION=1.2.11
+URL=http://www.zlib.net/zlib-1.2.11.tar.gz
 LICENSE=CUSTOM:README
-SHA1=a4d316c404ff54ca545ea71a27af7dbc29817088
+SHA1=e6d119755acdf9104d7ba236b1242696940ed6dd
