@@ -28,7 +28,7 @@ Links
 -----
 
 - Git: <https://chromium.googlesource.com/webports.git>
-- Bugs: <https://bugs.chromium.org/p/naclports/issues/list>
+- Bugs: <https://bugs.chromium.org/p/webports/issues/list>
 - Continuous builder: <http://build.chromium.org/p/client.nacl.ports/>
 - Continuous build artifacts: <http://gsdview.appspot.com/webports/builds/>
 

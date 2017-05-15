@@ -18,7 +18,7 @@ EXTRA_CMAKE_ARGS+=" -DGTEST_SRC_DIR=${GTEST_SRC}"
 
 TestStep() {
   # TODO(sbc): figure out why these tests fail
-  # https://bugs.chromium.org/p/naclports/issues/detail?id=216
+  # https://bugs.chromium.org/p/webports/issues/detail?id=216
   if [[ ${NACL_ARCH} == i686 && ${TOOLCHAIN} == glibc ]]; then
     filter="--gtest_filter=-libyuvTest.Psnr:libyuvTest.Ssim"
   elif [[ ${NACL_ARCH} == x86_64 && ${TOOLCHAIN} == glibc ]]; then

@@ -24,7 +24,7 @@ diff --git a/src/types.c b/src/types.c
 + * Dummy implementation of libffi functions.  This may be an incomplete
 + * list.  It was intented to be enough to allow glib to be built.
 + * TODO(sbc): Remove this once we fix libffi:
-+ * https://code.google.com/p/naclports/issues/detail?id=183
++ * https://bugs.chromium.org/p/webports/issues/detail?id=183
 + */
 +void ffi_call(ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue) {
 +  abort();

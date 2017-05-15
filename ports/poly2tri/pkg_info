@@ -5,5 +5,5 @@ ARCHIVE_ROOT=poly2tri-26242d0aa7b8
 LICENSE="New BSD License"
 SHA1=588f08f77671b231aeb1ae7dcc77ba43dbf86a07
 # The cmake version seems to fails when using with emcc
-# https://bugs.chromium.org/p/naclports/issues/detail?id=243
+# https://bugs.chromium.org/p/webports/issues/detail?id=243
 DISABLED_TOOLCHAIN=(emscripten)
